@@ -8,7 +8,7 @@
 	content: "Watch";
 }
 .watch-status.do-not-watch:AFTER {
-	content: "Do not watch";
+	content: "Ignore";
 }
 .watch-status .icon {
 	display: none;

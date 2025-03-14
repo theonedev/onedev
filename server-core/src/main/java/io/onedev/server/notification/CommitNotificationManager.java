@@ -68,18 +68,16 @@ public class CommitNotificationManager {
 				Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
 				for (CommitQueryPersonalization personalization: project.getCommitQueryPersonalizations()) {
 					var user = personalization.getUser();
-					if (!user.isDisableWatchNotifications()) {
-						for (String name : personalization.getQuerySubscriptionSupport().getQuerySubscriptions()) {
-							String globalName = NamedQuery.getCommonName(name);
-							if (globalName != null) {
-								fillSubscribedQueryStrings(subscribedQueryStrings, user,
-										NamedQuery.find(project.getNamedCommitQueries(), globalName));
-							}
-							String personalName = NamedQuery.getPersonalName(name);
-							if (personalName != null) {
-								fillSubscribedQueryStrings(subscribedQueryStrings, user,
-										NamedQuery.find(personalization.getQueries(), personalName));
-							}
+					for (String name : personalization.getQuerySubscriptionSupport().getQuerySubscriptions()) {
+						String globalName = NamedQuery.getCommonName(name);
+						if (globalName != null) {
+							fillSubscribedQueryStrings(subscribedQueryStrings, user,
+									NamedQuery.find(project.getNamedCommitQueries(), globalName));
+						}
+						String personalName = NamedQuery.getPersonalName(name);
+						if (personalName != null) {
+							fillSubscribedQueryStrings(subscribedQueryStrings, user,
+									NamedQuery.find(personalization.getQueries(), personalName));
 						}
 					}
 				}

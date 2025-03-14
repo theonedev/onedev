@@ -30,7 +30,7 @@ public abstract class WatchStatusLink extends DropdownLink {
 			@Override
 			protected String load() {
 				WatchStatus status = getWatchStatus();
-				if (status == WatchStatus.DO_NOT_WATCH)
+				if (status == WatchStatus.IGNORE)
 					return "do-not-watch";
 				else if (status == WatchStatus.WATCH)
 					return "watch";

@@ -114,7 +114,7 @@ public abstract class EntityWatchesPanel extends Panel {
 			protected WatchStatus getWatchStatus() {
 				EntityWatch watch = getEntity().getWatch(SecurityUtils.getAuthUser(), false);
 				if (watch != null && !watch.isWatching())
-					return WatchStatus.DO_NOT_WATCH;
+					return WatchStatus.IGNORE;
 				else if (watch != null && watch.isWatching())
 					return WatchStatus.WATCH;
 				else
@@ -123,7 +123,7 @@ public abstract class EntityWatchesPanel extends Panel {
 
 			@Override
 			protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
-				if (watchStatus == WatchStatus.DO_NOT_WATCH) {
+				if (watchStatus == WatchStatus.IGNORE) {
 					EntityWatch watch = getEntity().getWatch(SecurityUtils.getAuthUser(), true);
 					watch.setWatching(false);
 					onSaveWatch(watch);

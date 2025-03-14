@@ -3,7 +3,7 @@ package io.onedev.server.util.watch;
 public enum WatchStatus {
 	DEFAULT("Default"), 
 	WATCH("Watch"), 
-	DO_NOT_WATCH("Do not watch");
+	IGNORE("Ignore");
 	
 	private final String displayName;
 	

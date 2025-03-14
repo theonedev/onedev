@@ -14,7 +14,7 @@ public abstract class QueryWatchSupport<T extends NamedQuery> {
 		if (Boolean.TRUE.equals(watching))
 			return WatchStatus.WATCH;
 		else if (Boolean.FALSE.equals(watching))
-			return WatchStatus.DO_NOT_WATCH;
+			return WatchStatus.IGNORE;
 		else
 			return WatchStatus.DEFAULT;
 	}

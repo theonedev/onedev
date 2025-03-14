@@ -7691,4 +7691,15 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate193(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) 
+					element.element("disableWatchNotifications").detach();
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

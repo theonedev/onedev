@@ -114,6 +114,10 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new WatchedByMeCriteria();
+							case IgnoredByMe:
+								if (!withCurrentUserCriteria)
+									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								return new IgnoredByMeCriteria();
 							case CommentedByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
@@ -181,6 +185,9 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 									break;
 								case WatchedBy:
 									criterias.add(new WatchedByCriteria(getUser(value)));
+									break;
+								case IgnoredBy:
+									criterias.add(new IgnoredByCriteria(getUser(value)));
 									break;
 								case NeedActionOf:
 									criterias.add(new NeedActionOfCriteria(getUser(value)));

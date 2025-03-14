@@ -1,6 +1,6 @@
 package io.onedev.server.search.entity.pullrequest;
 
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.WatchedBy;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IgnoredBy;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -16,13 +16,13 @@ import io.onedev.server.model.User;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
-public class WatchedByCriteria extends Criteria<PullRequest> {
+public class IgnoredByCriteria extends Criteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
 	private final User user;
 	
-	public WatchedByCriteria(User user) {
+	public IgnoredByCriteria(User user) {
 		this.user = user;
 	}
 	
@@ -34,18 +34,18 @@ public class WatchedByCriteria extends Criteria<PullRequest> {
 		watchQuery.where(builder.and(
 				builder.equal(watch.get(PullRequestWatch.PROP_REQUEST), from),
 				builder.equal(watch.get(PullRequestWatch.PROP_USER), user)),
-				builder.equal(watch.get(PullRequestWatch.PROP_WATCHING), true));
+				builder.equal(watch.get(PullRequestWatch.PROP_WATCHING), false));
 		return builder.exists(watchQuery);
 	}
 
 	@Override
 	public boolean matches(PullRequest request) {
-		return request.getWatches().stream().anyMatch(it -> it.isWatching() && it.getUser().equals(user));
+		return request.getWatches().stream().anyMatch(it -> !it.isWatching() && it.getUser().equals(user));
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return PullRequestQuery.getRuleName(WatchedBy) + " " + quote(user.getName());
+		return PullRequestQuery.getRuleName(IgnoredBy) + " " + quote(user.getName());
 	}
 
-}
+} 

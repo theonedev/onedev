@@ -2,19 +2,28 @@ package io.onedev.server.search.entity.issue;
 
 import static io.onedev.server.model.Issue.NAME_COMMENT;
 import static io.onedev.server.model.Issue.NAME_COMMENT_COUNT;
+import static io.onedev.server.model.Issue.NAME_CONFUSED_COUNT;
 import static io.onedev.server.model.Issue.NAME_DESCRIPTION;
 import static io.onedev.server.model.Issue.NAME_ESTIMATED_TIME;
+import static io.onedev.server.model.Issue.NAME_EYES_COUNT;
+import static io.onedev.server.model.Issue.NAME_HEART_COUNT;
 import static io.onedev.server.model.Issue.NAME_LAST_ACTIVITY_DATE;
 import static io.onedev.server.model.Issue.NAME_PROGRESS;
 import static io.onedev.server.model.Issue.NAME_PROJECT;
+import static io.onedev.server.model.Issue.NAME_ROCKET_COUNT;
+import static io.onedev.server.model.Issue.NAME_SMILE_COUNT;
 import static io.onedev.server.model.Issue.NAME_SPENT_TIME;
 import static io.onedev.server.model.Issue.NAME_STATE;
 import static io.onedev.server.model.Issue.NAME_SUBMIT_DATE;
+import static io.onedev.server.model.Issue.NAME_TADA_COUNT;
+import static io.onedev.server.model.Issue.NAME_THUMBS_DOWN_COUNT;
+import static io.onedev.server.model.Issue.NAME_THUMBS_UP_COUNT;
 import static io.onedev.server.model.Issue.NAME_TITLE;
 import static io.onedev.server.model.Issue.NAME_VOTE_COUNT;
 import static io.onedev.server.model.Issue.SORT_FIELDS;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.IgnoredByMe;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.CommentedByMe;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.Confidential;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.Contains;
@@ -38,14 +47,6 @@ import static io.onedev.server.search.entity.issue.IssueQueryParser.IsUntil;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.MentionedMe;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.SubmittedByMe;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.WatchedByMe;
-import static io.onedev.server.model.Issue.NAME_THUMBS_UP_COUNT;
-import static io.onedev.server.model.Issue.NAME_THUMBS_DOWN_COUNT;
-import static io.onedev.server.model.Issue.NAME_SMILE_COUNT;
-import static io.onedev.server.model.Issue.NAME_TADA_COUNT;
-import static io.onedev.server.model.Issue.NAME_CONFUSED_COUNT;
-import static io.onedev.server.model.Issue.NAME_HEART_COUNT;
-import static io.onedev.server.model.Issue.NAME_ROCKET_COUNT;
-import static io.onedev.server.model.Issue.NAME_EYES_COUNT;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -206,6 +207,10 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 								if (!option.withCurrentUserCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new WatchedByMeCriteria();
+							case IgnoredByMe:
+								if (!option.withCurrentUserCriteria())
+									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								return new IgnoredByMeCriteria();
 							case CommentedByMe:
 								if (!option.withCurrentUserCriteria())
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
@@ -268,6 +273,8 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 								criterias.add(new SubmittedByCriteria(getUser(value)));
 							else if (ctx.WatchedBy() != null)
 								criterias.add(new WatchedByCriteria(getUser(value)));
+							else if (ctx.IgnoredBy() != null)
+								criterias.add(new IgnoredByCriteria(getUser(value)));
 							else if (ctx.CommentedBy() != null)
 								criterias.add(new CommentedByCriteria(getUser(value)));
 							else if (ctx.FixedInBuild() != null)

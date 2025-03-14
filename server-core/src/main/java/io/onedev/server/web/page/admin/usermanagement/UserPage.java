@@ -32,8 +32,8 @@ import io.onedev.server.web.page.admin.usermanagement.emailaddresses.UserEmailAd
 import io.onedev.server.web.page.admin.usermanagement.gpgkeys.UserGpgKeysPage;
 import io.onedev.server.web.page.admin.usermanagement.membership.UserMembershipsPage;
 import io.onedev.server.web.page.admin.usermanagement.password.UserPasswordPage;
-import io.onedev.server.web.page.admin.usermanagement.preferences.UserPreferencesPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
+import io.onedev.server.web.page.admin.usermanagement.querywatch.UserQueryWatchesPage;
 import io.onedev.server.web.page.admin.usermanagement.sshkeys.UserSshKeysPage;
 import io.onedev.server.web.page.admin.usermanagement.twofactorauthentication.UserTwoFactorAuthenticationPage;
 import io.onedev.server.web.util.UserAware;
@@ -84,7 +84,7 @@ public abstract class UserPage extends AdministrationPage implements UserAware {
 		tabs.add(new PageTab(Model.of("Access Tokens"), Model.of("token"), UserAccessTokensPage.class, params));
 		if (getUser().isEnforce2FA())
 			tabs.add(new PageTab(Model.of("Two-factor Authentication"), Model.of("shield"), UserTwoFactorAuthenticationPage.class, params));
-		tabs.add(new PageTab(Model.of("Preferences"), Model.of("sliders"), UserPreferencesPage.class, params));
+		tabs.add(new PageTab(Model.of("Query Watches"), Model.of("bell"), UserQueryWatchesPage.class, params));
 		
 		add(new Tabbable("userTabs", tabs));
 	}

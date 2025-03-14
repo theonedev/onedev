@@ -35,10 +35,10 @@ public abstract class SubscriptionStatusLink extends AjaxLink<Void> {
 			classes = "";
 		if (isSubscribed()) {
 			tag.put("class", classes + " subscription-status subscribed");
-			tag.put("title", "Subscribed. Click to unsubscribe");
+			tag.put("title", "Watched. Click to unwatch");
 		} else {
 			tag.put("class", classes + " subscription-status unsubscribed");
-			tag.put("title", "Unsubscribed. Click to subscribe");
+			tag.put("title", "Unwatched. Click to watch");
 		}
 	}
 

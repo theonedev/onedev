@@ -12,6 +12,8 @@ import io.onedev.server.model.User;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.WatchedByMe;
+
 public class WatchedByMeCriteria extends Criteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
@@ -40,7 +42,7 @@ public class WatchedByMeCriteria extends Criteria<PullRequest> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.WatchedByMe);
+		return PullRequestQuery.getRuleName(WatchedByMe);
 	}
 
 }

@@ -45,6 +45,8 @@ import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedBy;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedByMe;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.WatchedBy;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.WatchedByMe;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.IgnoredBy;
+import static io.onedev.server.search.entity.issue.IssueQueryParser.IgnoredByMe;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
@@ -224,7 +226,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								if (operator == Mentioned || operator == SubmittedBy || operator == CommentedBy || operator == WatchedBy)
+								if (operator == Mentioned || operator == SubmittedBy || operator == CommentedBy || operator == WatchedBy || operator == IgnoredBy)
 									return SuggestionUtils.suggestUsers(matchWith);
 								else if (operator == FixedInBuild)
 									return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
@@ -359,7 +361,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (!option.withOrder() && suggestedLiteral.equals(getRuleName(OrderBy))
-				|| !option.withCurrentUserCriteria() && (suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(CommentedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)) || suggestedLiteral.equals(getRuleName(WatchedByMe)))
+				|| !option.withCurrentUserCriteria() && (suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(CommentedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)) || suggestedLiteral.equals(getRuleName(WatchedByMe)) || suggestedLiteral.equals(getRuleName(IgnoredByMe)))
 				|| !option.withCurrentBuildCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentBuild))
 				|| !option.withCurrentPullRequestCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentPullRequest))
 				|| !option.withCurrentCommitCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentCommit))

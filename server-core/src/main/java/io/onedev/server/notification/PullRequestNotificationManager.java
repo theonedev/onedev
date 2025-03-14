@@ -301,7 +301,6 @@ public class PullRequestNotificationManager {
 				Date visitDate = userInfoManager.getPullRequestVisitDate(watch.getUser(), request);
 				Permission permission = new ProjectPermission(request.getProject(), new ReadCode());
 				if (watch.isWatching()
-						&& !watch.getUser().isDisableWatchNotifications()
 						&& (visitDate == null || visitDate.before(event.getDate()))
 						&& (!(event instanceof PullRequestUpdated) || !watch.getUser().equals(request.getSubmitter()))
 						&& !notifiedUsers.contains(watch.getUser())

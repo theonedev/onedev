@@ -194,7 +194,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (!withOrder && suggestedLiteral.equals(getRuleName(OrderBy))
-				|| !withCurrentUserCriteria && (suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(WatchedByMe)) || suggestedLiteral.equals(getRuleName(NeedMyAction)) || suggestedLiteral.equals(getRuleName(CommentedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)) || suggestedLiteral.equals(getRuleName(ToBeReviewedByMe)) || suggestedLiteral.equals(getRuleName(RequestedForChangesByMe)) || suggestedLiteral.equals(getRuleName(ApprovedByMe)) || suggestedLiteral.equals(getRuleName(AssignedToMe)) || suggestedLiteral.equals(getRuleName(ToBeChangedByMe)) || suggestedLiteral.equals(getRuleName(ToBeMergedByMe)))) {
+				|| !withCurrentUserCriteria && (suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(WatchedByMe)) || suggestedLiteral.equals(getRuleName(IgnoredByMe)) || suggestedLiteral.equals(getRuleName(NeedMyAction)) || suggestedLiteral.equals(getRuleName(CommentedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)) || suggestedLiteral.equals(getRuleName(ToBeReviewedByMe)) || suggestedLiteral.equals(getRuleName(RequestedForChangesByMe)) || suggestedLiteral.equals(getRuleName(ApprovedByMe)) || suggestedLiteral.equals(getRuleName(AssignedToMe)) || suggestedLiteral.equals(getRuleName(ToBeChangedByMe)) || suggestedLiteral.equals(getRuleName(ToBeMergedByMe)))) {
 			return null;
 		} else if (suggestedLiteral.equals(",")) {
 			return Optional.of("add another value");

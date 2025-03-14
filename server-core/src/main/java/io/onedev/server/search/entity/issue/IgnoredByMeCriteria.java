@@ -1,6 +1,6 @@
 package io.onedev.server.search.entity.issue;
 
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.WatchedByMe;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.IgnoredByMe;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -14,7 +14,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
-public class WatchedByMeCriteria extends Criteria<Issue> {
+public class IgnoredByMeCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -37,12 +37,12 @@ public class WatchedByMeCriteria extends Criteria<Issue> {
 	}
 	
 	private Criteria<Issue> getCriteria(User user) {
-		return new WatchedByCriteria(user);
+		return new IgnoredByCriteria(user);
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return IssueQuery.getRuleName(WatchedByMe);
+		return IssueQuery.getRuleName(IgnoredByMe);
 	}
 
 }

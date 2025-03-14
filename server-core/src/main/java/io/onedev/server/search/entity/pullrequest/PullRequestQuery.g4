@@ -7,8 +7,8 @@ query
     ;
 
 criteria
-	: operator=(Open|Merged|Discarded|NeedMyAction|AssignedToMe|SubmittedByMe|WatchedByMe|CommentedByMe|ToBeReviewedByMe|ToBeChangedByMe|ToBeMergedByMe|RequestedForChangesByMe|ApprovedByMe|MentionedMe|ReadyToMerge|SomeoneRequestedForChanges|HasPendingReviews|HasUnsuccessfulBuilds|HasUnfinishedBuilds|HasMergeConflicts) #OperatorCriteria
-    | operator=(NeedActionOf|ToBeReviewedBy|ToBeChangedBy|ToBeMergedBy|AssignedTo|ApprovedBy|RequestedForChangesBy|SubmittedBy|WatchedBy|CommentedBy|Mentioned|IncludesCommit|IncludesIssue) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
+	: operator=(Open|Merged|Discarded|NeedMyAction|AssignedToMe|SubmittedByMe|WatchedByMe|IgnoredByMe|CommentedByMe|ToBeReviewedByMe|ToBeChangedByMe|ToBeMergedByMe|RequestedForChangesByMe|ApprovedByMe|MentionedMe|ReadyToMerge|SomeoneRequestedForChanges|HasPendingReviews|HasUnsuccessfulBuilds|HasUnfinishedBuilds|HasMergeConflicts) #OperatorCriteria
+    | operator=(NeedActionOf|ToBeReviewedBy|ToBeChangedBy|ToBeMergedBy|AssignedTo|ApprovedBy|RequestedForChangesBy|SubmittedBy|WatchedBy|IgnoredBy|CommentedBy|Mentioned|IncludesCommit|IncludesIssue) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsUntil|IsSince|Contains) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
     | Reference #ReferenceCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
@@ -74,6 +74,10 @@ WatchedByMe
     : 'watched' WS+ 'by' WS+ 'me'
     ;
 
+IgnoredByMe
+    : 'ignored' WS+ 'by' WS+ 'me'
+    ;
+
 CommentedByMe
 	: 'commented' WS+ 'by' WS+ 'me'
 	;
@@ -136,15 +140,19 @@ ApprovedBy
 
 SubmittedBy
 	: 'submitted' WS+ 'by'
-	;
+    ;
 
 WatchedBy
     : 'watched' WS+ 'by'
     ;
 
+IgnoredBy
+    : 'ignored' WS+ 'by'
+    ;
+
 CommentedBy
 	: 'commented' WS+ 'by'
-	;
+    ;
 
 Mentioned
     : 'mentioned'
@@ -152,11 +160,11 @@ Mentioned
 	    
 IncludesCommit
 	: 'includes' WS+ 'commit'
-	;    
+    ;    
     
 IncludesIssue
 	: 'includes' WS+ 'issue'
-	;    
+    ;    
 	
 OrderBy
     : 'order' WS+ 'by'
@@ -164,7 +172,7 @@ OrderBy
 
 Is
 	: 'is'
-	;
+    ;
 
 IsNot
     : 'is' WS+ 'not'
@@ -172,51 +180,51 @@ IsNot
 
 Contains
 	: 'contains'
-	;
+    ;
 
 IsGreaterThan
 	: 'is' WS+ 'greater' WS+ 'than'
-	;
+    ;
 
 IsLessThan
 	: 'is' WS+ 'less' WS+ 'than'
-	;
+    ;
 
 IsSince
 	: 'is' WS+ 'since'
-	;
+    ;
 
 IsUntil
 	: 'is' WS+ 'until'
-	;
+    ;
 
 And
 	: 'and'
-	;
+    ;
 
 Or
 	: 'or'
-	;
+    ;
 	
 Not
 	: 'not'
-	;
+    ;
 
 Asc
 	: 'asc'
-	;
+    ;
 
 Desc
 	: 'desc'
-	;
+    ;
 
 LParens
 	: '('
-	;
+    ;
 
 RParens
 	: ')'
-	;
+    ;
 
 Quoted
     : '"' ('\\'.|~[\\"])+? '"'
@@ -236,4 +244,4 @@ Fuzzy
 
 Identifier
 	: [a-zA-Z0-9:_/\\+\-;]+
-	;    
+    ;    

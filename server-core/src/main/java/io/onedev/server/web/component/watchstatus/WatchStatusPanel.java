@@ -51,17 +51,17 @@ public abstract class WatchStatusPanel extends Panel {
 			}
 
 		});
-		add(new AjaxLink<Void>("doNotWatch") {
+		add(new AjaxLink<Void>("ignore") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onWatchStatusChange(target, WatchStatus.DO_NOT_WATCH);
+				onWatchStatusChange(target, WatchStatus.IGNORE);
 			}
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				if (getWatchStatus() == WatchStatus.DO_NOT_WATCH)
+				if (getWatchStatus() == WatchStatus.IGNORE)
 					add(AttributeAppender.append("class", "active"));
 			}
 			

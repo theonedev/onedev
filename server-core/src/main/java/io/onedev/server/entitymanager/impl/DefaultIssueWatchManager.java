@@ -61,7 +61,7 @@ public class DefaultIssueWatchManager extends BaseEntityManager<IssueWatch>
 			if (watch != null) {
 				if (watchStatus == WatchStatus.WATCH) 
 					watch.setWatching(true);
-				else if (watchStatus == WatchStatus.DO_NOT_WATCH) 
+				else if (watchStatus == WatchStatus.IGNORE) 
 					watch.setWatching(false);
 				else 
 					delete(watch);

@@ -232,10 +232,10 @@ public class UserResource {
 		queriesAndWatches.buildQuerySubscriptions = user.getBuildQuerySubscriptions();
 		queriesAndWatches.issueQueryWatches = user.getIssueQueryWatches();
 		queriesAndWatches.pullRequestQueryWatches = user.getPullRequestQueryWatches();
-		queriesAndWatches.buildQueries = user.getUserBuildQueries();
-		queriesAndWatches.issueQueries = user.getUserIssueQueries();
-		queriesAndWatches.projectQueries = user.getUserProjectQueries();
-		queriesAndWatches.pullRequestQueries = user.getUserPullRequestQueries();
+		queriesAndWatches.buildQueries = user.getBuildQueries();
+		queriesAndWatches.issueQueries = user.getIssueQueries();
+		queriesAndWatches.projectQueries = user.getProjectQueries();
+		queriesAndWatches.pullRequestQueries = user.getPullRequestQueries();
 		return queriesAndWatches;
     }
 	

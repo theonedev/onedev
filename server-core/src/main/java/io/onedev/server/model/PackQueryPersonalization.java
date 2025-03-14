@@ -1,15 +1,25 @@
 package io.onedev.server.model;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+
+import javax.annotation.Nullable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PackQueryPersonalizationManager;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
-
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 
 @Entity
 @Table(
@@ -62,6 +72,23 @@ public class PackQueryPersonalization extends AbstractEntity implements QueryPer
 	@Override
 	public void setQueries(ArrayList<NamedPackQuery> queries) {
 		this.queries = queries;
+	}
+
+	@Nullable
+	public NamedPackQuery getQuery(String name) {
+		for (NamedPackQuery query: getQueries()) {
+			if (query.getName().equals(name))
+				return query;
+		}
+		return null;
+	}
+
+	public LinkedHashSet<String> getQuerySubscriptions() {
+		return querySubscriptions;
+	}
+
+	public void setQuerySubscriptions(LinkedHashSet<String> querySubscriptions) {
+		this.querySubscriptions = querySubscriptions;
 	}
 
 	@Override

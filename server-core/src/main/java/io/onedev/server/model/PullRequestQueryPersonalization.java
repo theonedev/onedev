@@ -1,15 +1,25 @@
 package io.onedev.server.model;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
+import javax.annotation.Nullable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
-
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 @Entity
 @Table(
@@ -64,8 +74,21 @@ public class PullRequestQueryPersonalization extends AbstractEntity implements Q
 		this.queries = queries;
 	}
 
-	public void setQueryWatches(LinkedHashMap<String, Boolean> projectQueryWatches) {
-		this.queryWatches = projectQueryWatches;
+	@Nullable
+	public NamedPullRequestQuery getQuery(String name) {
+		for (NamedPullRequestQuery query: getQueries()) {
+			if (query.getName().equals(name))
+				return query;
+		}
+		return null;
+	}
+
+	public LinkedHashMap<String, Boolean> getQueryWatches() {
+		return queryWatches;
+	}
+
+	public void setQueryWatches(LinkedHashMap<String, Boolean> queryWatches) {
+		this.queryWatches = queryWatches;
 	}
 
 	@Override

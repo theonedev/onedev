@@ -1825,6 +1825,15 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return null;
 	}
 	
+	@Nullable
+	public NamedCommitQuery getNamedCommitQuery(String name) {
+		for (NamedCommitQuery namedQuery: getNamedCommitQueries()) {
+			if (namedQuery.getName().equals(name))
+				return namedQuery;
+		}
+		return null;
+	}
+	
 	public List<NamedIssueQuery> getNamedIssueQueries() {
 		Project current = this;
 		do {

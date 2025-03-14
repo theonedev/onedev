@@ -290,7 +290,6 @@ public class IssueNotificationManager {
 		for (IssueWatch watch: issue.getWatches()) {
 			Date visitDate = userInfoManager.getIssueVisitDate(watch.getUser(), issue);
 			if (watch.isWatching()
-					&& !watch.getUser().isDisableWatchNotifications()
 					&& (visitDate == null || visitDate.before(event.getDate()))
 					&& !notifiedUsers.contains(watch.getUser())
 					&& !isNotified(notifiedEmailAddresses, watch.getUser())

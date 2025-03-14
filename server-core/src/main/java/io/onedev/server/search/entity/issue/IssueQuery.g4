@@ -7,8 +7,8 @@ query
     ;
 
 criteria
-    : operator=(Confidential|SubmittedByMe|WatchedByMe|CommentedByMe|MentionedMe|FixedInCurrentCommit|FixedInCurrentBuild|FixedInCurrentPullRequest|CurrentIssue) #OperatorCriteria
-    | operator=(SubmittedBy|WatchedBy|CommentedBy|Mentioned|FixedInCommit|FixedInBuild|FixedInPullRequest|HasAny) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
+    : operator=(Confidential|SubmittedByMe|WatchedByMe|IgnoredByMe|CommentedByMe|MentionedMe|FixedInCurrentCommit|FixedInCurrentBuild|FixedInCurrentPullRequest|CurrentIssue) #OperatorCriteria
+    | operator=(SubmittedBy|WatchedBy|IgnoredBy|CommentedBy|Mentioned|FixedInCommit|FixedInBuild|FixedInPullRequest|HasAny) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
     | FixedBetween WS+ revisionCriteria WS+ And WS+ revisionCriteria #FixedBetweenCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsNotMe|IsEmpty|IsNotEmpty|IsCurrent|IsPrevious) #FieldOperatorCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsUntil|IsSince|IsAfter|IsBefore|Contains) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
@@ -43,6 +43,10 @@ SubmittedBy
 
 WatchedBy
     : 'watched' WS+ 'by'
+    ;
+
+IgnoredBy
+    : 'ignored' WS+ 'by'
     ;
 
 CommentedBy
@@ -95,6 +99,10 @@ SubmittedByMe
 
 WatchedByMe
     : 'watched' WS+ 'by' WS+ 'me'
+    ;
+
+IgnoredByMe
+    : 'ignored' WS+ 'by' WS+ 'me'
     ;
 
 CommentedByMe

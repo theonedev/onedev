@@ -72,8 +72,8 @@ import io.onedev.server.web.page.admin.usermanagement.emailaddresses.UserEmailAd
 import io.onedev.server.web.page.admin.usermanagement.gpgkeys.UserGpgKeysPage;
 import io.onedev.server.web.page.admin.usermanagement.membership.UserMembershipsPage;
 import io.onedev.server.web.page.admin.usermanagement.password.UserPasswordPage;
-import io.onedev.server.web.page.admin.usermanagement.preferences.UserPreferencesPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
+import io.onedev.server.web.page.admin.usermanagement.querywatch.UserQueryWatchesPage;
 import io.onedev.server.web.page.admin.usermanagement.sshkeys.UserSshKeysPage;
 import io.onedev.server.web.page.admin.usermanagement.twofactorauthentication.UserTwoFactorAuthenticationPage;
 import io.onedev.server.web.page.builds.BuildListPage;
@@ -87,8 +87,8 @@ import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
 import io.onedev.server.web.page.my.gpgkeys.MyGpgKeysPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
-import io.onedev.server.web.page.my.preferences.MyPreferencesPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
+import io.onedev.server.web.page.my.querywatch.MyQueryWatchesPage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthenticationPage;
 import io.onedev.server.web.page.packs.PackListPage;
@@ -219,7 +219,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~my/gpg-keys", MyGpgKeysPage.class));
 		add(new BasePageMapper("~my/access-tokens", MyAccessTokensPage.class));
 		add(new BasePageMapper("~my/two-factor-authentication", MyTwoFactorAuthenticationPage.class));
-		add(new BasePageMapper("~my/preferences", MyPreferencesPage.class));
+		add(new BasePageMapper("~my/query-watches/#{tab}", MyQueryWatchesPage.class));
 	}
 
 	private void addResources() {
@@ -279,7 +279,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/users/${user}/gpg-keys", UserGpgKeysPage.class));
 		add(new BasePageMapper("~administration/users/${user}/access-tokens", UserAccessTokensPage.class));
 		add(new BasePageMapper("~administration/users/${user}/two-factor-authentication", UserTwoFactorAuthenticationPage.class));
-		add(new BasePageMapper("~administration/users/${user}/preferences", UserPreferencesPage.class));
+		add(new BasePageMapper("~administration/users/${user}/query-watches/#{tab}", UserQueryWatchesPage.class));
 		add(new BasePageMapper("~administration/invitations", InvitationListPage.class));
 		add(new BasePageMapper("~administration/invitations/new", NewInvitationPage.class));
 		

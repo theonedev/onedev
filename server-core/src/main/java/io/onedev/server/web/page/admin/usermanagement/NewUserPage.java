@@ -26,7 +26,6 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 
-import static io.onedev.server.model.User.PROP_DISABLE_WATCH_NOTIFICATIONS;
 import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
 
 public class NewUserPage extends AdministrationPage {
@@ -43,7 +42,7 @@ public class NewUserPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		var editor = BeanContext.edit("editor", bean, Sets.newHashSet(PROP_DISABLE_WATCH_NOTIFICATIONS, PROP_NOTIFY_OWN_EVENTS), true);
+		var editor = BeanContext.edit("editor", bean, Sets.newHashSet(PROP_NOTIFY_OWN_EVENTS), true);
 		
 		Form<?> form = new Form<Void>("form") {
 

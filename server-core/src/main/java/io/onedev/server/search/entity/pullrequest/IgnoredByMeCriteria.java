@@ -1,6 +1,4 @@
-package io.onedev.server.search.entity.issue;
-
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.WatchedByMe;
+package io.onedev.server.search.entity.pullrequest;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -9,17 +7,19 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.model.Issue;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
-public class WatchedByMeCriteria extends Criteria<Issue> {
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IgnoredByMe;
+
+public class IgnoredByMeCriteria extends Criteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
 		var user = User.get();
 		if (user != null) 
 			return getCriteria(user).getPredicate(projectScope, query, from, builder);
@@ -28,21 +28,21 @@ public class WatchedByMeCriteria extends Criteria<Issue> {
 	}
 
 	@Override
-	public boolean matches(Issue issue) {
+	public boolean matches(PullRequest request) {
 		var user = User.get();
 		if (user != null)
-			return getCriteria(user).matches(issue);
+			return getCriteria(user).matches(request);
 		else
 			throw new ExplicitException("Please login to perform this query");
 	}
 	
-	private Criteria<Issue> getCriteria(User user) {
-		return new WatchedByCriteria(user);
+	private Criteria<PullRequest> getCriteria(User user) {
+		return new IgnoredByCriteria(user);
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return IssueQuery.getRuleName(WatchedByMe);
+		return PullRequestQuery.getRuleName(IgnoredByMe);
 	}
 
-}
+} 
