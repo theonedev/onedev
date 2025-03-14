@@ -74,7 +74,7 @@ public class PublishCoberturaReportStepTest {
 						program1Found = true;
 					if (each.getBlobPath().endsWith("Program2.cs"))
 						program2Found = true;
-					if (each.getBlobPath().equals("coverlet/supermario/Movement.cs")) 
+					if (each.getBlobPath().equals("supermario/Movement.cs")) 
 						fileCoverage = each;						
 				}
 			}
@@ -86,7 +86,7 @@ public class PublishCoberturaReportStepTest {
 			assertEquals(36, fileCoverage.getTotalLines());
 			assertEquals(33, fileCoverage.getCoveredLines());
 			
-			var statusesOfFile = result.getStatuses().get("coverlet/supermario/Movement.cs");
+			var statusesOfFile = result.getStatuses().get("supermario/Movement.cs");
 			
 			var expected = new HashMap<Integer, CoverageStatus>();
 			expected.put(37, CoverageStatus.COVERED);

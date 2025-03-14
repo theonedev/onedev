@@ -84,8 +84,11 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 				coveredLines += parseInt(coverageElement.attributeValue("lines-covered"));
 				
 				var sourcePaths = new ArrayList<String>();
-				for (var sourceElement: coverageElement.element("sources").elements()) 
-					sourcePaths.add(sourceElement.getText().trim());
+				var sourcesElement = coverageElement.element("sources");
+				if (sourcesElement != null) {
+					for (var sourceElement: sourcesElement.elements()) 
+						sourcePaths.add(sourceElement.getText().trim());
+				}
 				
 				Map<String, Optional<String>> blobPaths = new HashMap<>();
 				
@@ -104,17 +107,20 @@ public class PublishCoberturaReportStep extends PublishCoverageReportStep {
 						var fileName = classElement.attributeValue("filename");
 						var blobPathOpt = blobPaths.get(fileName);
 						if (blobPathOpt == null) {
-							for (var sourcePath: sourcePaths) {
-								var blobPath = build.getBlobPath(sourcePath + "/" + fileName);
-								if (blobPath != null) {
-									blobPathOpt = Optional.of(blobPath);
-									break;
+							String blobPath;
+							if (sourcePaths.isEmpty()) {
+								blobPath = build.getBlobPath(fileName);
+							} else {
+								blobPath = null;
+								for (var sourcePath: sourcePaths) {
+									blobPath = build.getBlobPath(sourcePath + "/" + fileName);
+									if (blobPath != null) 
+										break;
 								}
 							}
-							if (blobPathOpt == null) {
-								blobPathOpt = Optional.empty();
+							if (blobPath == null) 
 								logger.warning("Unable to find blob path for file: " + fileName);
-							}
+							blobPathOpt = Optional.ofNullable(blobPath);
 							blobPaths.put(fileName, blobPathOpt);
 						}
 						var blobPath = blobPathOpt.orElse(null);

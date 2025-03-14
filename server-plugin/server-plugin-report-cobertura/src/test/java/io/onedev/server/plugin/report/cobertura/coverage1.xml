@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <coverage line-rate="0.7234" branch-rate="0.5" version="1.9" timestamp="1693882608" lines-covered="34" lines-valid="47"
 		  branches-covered="4" branches-valid="8">
-	<sources>
-		<source>coverlet</source>
-	</sources>
 	<packages>
 		<package name="supermario" line-rate="0.7559999999999999" branch-rate="0.5" complexity="18">
 			<classes>
