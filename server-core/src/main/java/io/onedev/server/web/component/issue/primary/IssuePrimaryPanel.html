@@ -6,10 +6,9 @@
 		<div wicket:id="description"></div>        
 		<ul wicket:id="links" class="links list-unstyled mt-4 mb-0 border-top pt-4">
 			<li wicket:id="links" class="mb-4 mb-last-child-0">
-				<div class="head d-flex align-items-center h6 dropdown-aware">
+				<div class="head h6 d-flex align-items-center">
 					<span wicket:id="name" class="flex-shrink-0 mr-2"></span>
-					<a wicket:id="createNew" title="Create new issue" class="mr-1"><wicket:svg href="plus" class="icon icon-sm"/></a>
-					<a wicket:id="linkExisting" title="Link existing issue" class="mr-1"><wicket:svg href="link" class="icon icon-sm"/></a>
+					<a wicket:id="addLink" title="Link issue" class="d-flex align-items-center"><wicket:svg href="plus" class="icon icon-sm"/></a>
 				</div>
 				<ul class="body linked-issues list-unstyled mb-0">
 					<li wicket:id="linkedIssues" class="py-2 border-top d-flex align-items-center"></li>
@@ -21,11 +20,22 @@
 		<span class="d-first-child-none dot mr-2"></span>
 		<a wicket:id="linkIssues" class="text-muted text-hover-primary mr-2">Link Issues</a>
 	</wicket:fragment>
-    <wicket:fragment wicket:id="selectIssueFrag">
-        <form wicket:id="form"> 
-            <input wicket:id="choice" type="hidden" class="form-control"/>
-        </form>
-    </wicket:fragment>
+	<wicket:fragment wicket:id="addLinkFrag">
+		<form wicket:id="form" class="leave-confirm">
+			<div class="modal-header">
+				<h5 wicket:id="title" id="modal-title" class="modal-title"></h5>
+				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+			</div>
+			<div class="modal-body">
+				<ul wicket:id="tabs" class="nav nav-tabs nav-tabs-line nav-tabs-line-short mb-4"></ul>
+				<div wicket:id="tabContent" class="tab-content"></div>
+			</div>
+			<div class="modal-footer">
+				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Ok"></input>
+				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+			</div>
+		</form>
+	</wicket:fragment>
 	<wicket:fragment wicket:id="linkedIssueFrag">
 		<a wicket:id="title"><span wicket:id="label"></span></a>
 		<a wicket:id="unlink" class="action ml-2" title="Unlink this issue"><wicket:svg href="unlink" class="icon icon-sm"/></a>

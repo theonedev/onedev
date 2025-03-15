@@ -1,14 +1,3 @@
-.issue-link-choice {
-    width: 400px !important;
-	border-radius: 0 !important;
-	box-shadow: none !important;
-}
-.issue-primary>.links>li>.head:not(.dropdown-aware-open)>a {
-	display: none;
-}
-.issue-primary>.links>li:hover>.head>a {
-	display: inline-block;
-}
 .issue-primary>.links>li>.body>li>.action {
 	display: none;
 }

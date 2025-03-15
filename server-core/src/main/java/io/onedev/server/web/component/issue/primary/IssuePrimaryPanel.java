@@ -12,12 +12,12 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -25,6 +25,8 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.FormComponent;
+import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -33,6 +35,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
@@ -56,19 +59,21 @@ import io.onedev.server.util.LinkDescriptor;
 import io.onedev.server.util.LinkGroup;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateBadge;
-import io.onedev.server.web.component.issue.choice.IssueAddChoice;
 import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
-import io.onedev.server.web.component.issue.create.CreateIssuePanel;
+import io.onedev.server.web.component.issue.create.NewIssueEditor;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
-import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.tabbable.AjaxActionTab;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.base.BasePage;
@@ -235,38 +240,27 @@ public abstract class IssuePrimaryPanel extends Panel {
 					@Override
 					protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 						List<MenuItem> menuItems = new ArrayList<>();
-						Long lastSpecId = null;
-						for (LinkDescriptor side: addibleLinkDescriptorsModel.getObject()) {
-							var spec = side.getSpec();
+						for (LinkDescriptor descriptor: addibleLinkDescriptorsModel.getObject()) {
+							var spec = descriptor.getSpec();
 							var specId = spec.getId();
-							var opposite = side.isOpposite();
-							if (lastSpecId != null && lastSpecId != specId) 
-								menuItems.add(null);
-							lastSpecId = specId;
-							var linkName = side.getName();
+							var opposite = descriptor.isOpposite();
+							var linkName = spec.getName(opposite);
 							menuItems.add(new MenuItem() {
 								@Override
 								public String getLabel() {
-									return linkName + " (create new)";
+									return linkName;
 								}
 
 								@Override
 								public WebMarkupContainer newLink(String id) {
-									return newLinkNewIssueLink(id, specId, opposite, dropdown);
-								}
-							});
-
-							menuItems.add(new MenuItem() {
-								@Override
-								public String getLabel() {
-									return linkName + " (link existing)";
-								}
-
-								@Override
-								public WebMarkupContainer newLink(String id) {
-									return newLinkExistingIssueLink(id, specId, opposite, dropdown);
-								}
-
+									return new AjaxLink<Void>(id) {
+										@Override
+										public void onClick(AjaxRequestTarget target) {
+											dropdown.close();
+											onLinkIssue(target, specId, opposite, linkName);
+										}
+									};
+								};
 							});
 						}
 						return menuItems;
@@ -308,8 +302,8 @@ public abstract class IssuePrimaryPanel extends Panel {
 				
 				boolean canEditIssueLink = canEditIssueLink(getProject(), spec);
 				
-				String name = spec.getName(opposite);
-				item.add(new Label("name", name));
+				String linkName = spec.getName(opposite);
+				item.add(new Label("name", linkName));
 				
 				RepeatingView linkedIssuesView = new RepeatingView("linkedIssues");
 				for (Issue linkedIssue: group.getIssues()) {
@@ -343,13 +337,169 @@ public abstract class IssuePrimaryPanel extends Panel {
 					applicable = spec.getParsedIssueQuery(getProject()).matches(getIssue());
 				}
 
-				item.add(newLinkNewIssueLink("createNew", specId, opposite, null)
-						.setVisible(applicable && canEditIssueLink));
-				item.add(newLinkExistingIssueLink("linkExisting", specId, opposite, null)
-						.setVisible(applicable && canEditIssueLink));
+				item.add(new AjaxLink<Void>("addLink") {
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						onLinkIssue(target, specId, opposite, linkName);
+					}
+				}.setVisible(applicable && canEditIssueLink));
 			}
 			
 		});
+	}
+
+	private void onLinkIssue(AjaxRequestTarget target, Long specId, boolean opposite, String linkName) {
+		var spec = getLinkSpecManager().load(specId);
+		if (!opposite && !spec.isMultiple() && getIssue().findLinkedIssue(spec, false) != null 
+				|| opposite && !spec.getOpposite().isMultiple() && getIssue().findLinkedIssue(spec, true) != null) {
+			Session.get().error("An issue already linked for " + spec.getName(opposite) + ". Unlink it first");							
+		} else {
+			new ModalPanel(target) {
+
+				private FormComponentPanel<Issue> newCreateNewPanel(String componentId) {
+					var editor = new NewIssueEditor(componentId) {
+						@Override
+						protected Criteria<Issue> getTemplate() {
+							String query;
+							var spec = getLinkSpecManager().load(specId);
+							if (opposite)
+								query = spec.getOpposite().getIssueQuery();
+							else
+								query = spec.getIssueQuery();
+							return IssueQuery.parse(getProject(), query, new IssueQueryParseOption(), false).getCriteria();
+						}
+						
+						@Override
+						protected Project getProject() {
+							return getIssue().getProject();
+						}
+					};
+					editor.setOutputMarkupId(true);														
+					return editor;
+				}
+
+				private FormComponent<Issue> newLinkExistingPanel(String componentId) {
+					return new SelectIssuePanel(componentId) {
+
+						@Override
+						protected IssueChoiceProvider getChoiceProvider() {
+							return new IssueChoiceProvider() {
+								@Override
+								protected Project getProject() {
+									return getIssue().getProject();
+								}
+								
+								@Override
+								protected IssueQuery getBaseQuery() {
+									LinkSpec spec = getLinkSpecManager().load(specId);
+									if (opposite) 
+										return spec.getOpposite().getParsedIssueQuery(getProject());
+									else 
+										return spec.getParsedIssueQuery(getProject());
+								}
+								
+							};						
+						}
+					};
+				}
+
+				private FormComponent<Issue> issuePopulator;
+
+				@Override
+				protected Component newContent(String id) {
+					var frag = new Fragment(id, "addLinkFrag", IssuePrimaryPanel.this);
+					
+					var form = new Form<Void>("form");
+					frag.add(form);
+
+					List<Tab> tabs = new ArrayList<>();
+					
+					tabs.add(new AjaxActionTab(Model.of("Create New")) {
+						@Override
+						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+							issuePopulator = newCreateNewPanel("tabContent");
+							form.replace(issuePopulator);
+							target.add(issuePopulator);
+						}
+					});
+					
+					tabs.add(new AjaxActionTab(Model.of("Select Existing")) {
+						@Override
+						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+							issuePopulator = newLinkExistingPanel("tabContent");
+							form.replace(issuePopulator);
+							target.add(issuePopulator);
+						}
+					});
+					
+					form.add(new Tabbable("tabs", tabs));
+					form.add(issuePopulator = newCreateNewPanel("tabContent"));
+
+					form.add(new Label("title", "Add " + linkName));
+
+					form.add(new AjaxButton("save") {
+						@Override
+						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+							var linkIssue = issuePopulator.getConvertedInput();
+							if (linkIssue.isNew()) {
+								getIssueManager().open(linkIssue);
+								notifyIssueChange(target, linkIssue);
+								var spec = getLinkSpecManager().load(specId);
+								getIssueChangeManager().addLink(spec, getIssue(), linkIssue, opposite);
+								notifyIssueChange(target, getIssue());
+								close();							
+							} else {
+								LinkSpec spec = getLinkSpecManager().load(specId);
+								if (getIssue().getId().equals(linkIssue.getId())) {
+									form.error("Can not link to self");
+									target.add(form);
+								} else if (getIssue().findLinkedIssues(spec, opposite).contains(linkIssue)) { 
+									form.error("Issue already linked");
+									target.add(form);
+								} else {
+									getIssueChangeManager().addLink(spec, getIssue(), linkIssue, opposite);
+									notifyIssueChange(target, getIssue());
+									close();
+								}	
+							}
+						}
+
+						@Override
+						protected void onError(AjaxRequestTarget target, Form<?> form) {
+							target.add(form);
+						}
+					});
+					form.add(new AjaxLink<Void>("close") {
+						@Override
+						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+							super.updateAjaxAttributes(attributes);
+							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
+						}
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							close();
+						}
+					});
+					form.add(new AjaxLink<Void>("cancel") {
+						@Override
+						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+							super.updateAjaxAttributes(attributes);
+							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
+						}
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							close();
+						}
+					});
+					return frag;
+				}
+				
+				@Override
+				protected String getCssClass() {
+					return "modal-lg";
+				}
+			};
+		}
 	}
 	
 	private Component newLinkedIssueContainer(String componentId, Issue linkedIssue, 
@@ -403,137 +553,6 @@ public abstract class IssuePrimaryPanel extends Panel {
 		} else {
 			return new WebMarkupContainer(componentId).setVisible(false);
 		}
-	}
-
-	private boolean checkLinkSingular(Long specId, boolean opposite) {
-		var spec = getLinkSpecManager().load(specId);
-		if (!opposite && !spec.isMultiple() && getIssue().findLinkedIssue(spec, false) != null 
-				|| opposite && !spec.getOpposite().isMultiple() && getIssue().findLinkedIssue(spec, true) != null) {
-			Session.get().error("An issue already linked for " + spec.getName(opposite) + ". Unlink it first");							
-			return false;
-		} else {
-			return true;
-		}
-	}
-
-	private WebMarkupContainer newLinkNewIssueLink(String componentId, Long specId, boolean opposite, @Nullable FloatingPanel dropdown) {
-		return new AjaxLink<Void>(componentId) {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				if (dropdown != null)
-					dropdown.close();
-				if (checkLinkSingular(specId, opposite)) {
-					new ModalPanel(target) {
-
-						@Override
-						protected Component newContent(String id) {
-							return new CreateIssuePanel(id) {
-			
-								@Override
-								protected Criteria<Issue> getTemplate() {
-									String query;
-									var spec = getLinkSpecManager().load(specId);
-									if (opposite)
-										query = spec.getOpposite().getIssueQuery();
-									else
-										query = spec.getIssueQuery();
-									return IssueQuery.parse(getProject(), query, new IssueQueryParseOption(), false).getCriteria();
-								}
-			
-								@Override
-								protected void onSave(AjaxRequestTarget target, Issue issue) {
-									getIssueManager().open(issue);
-									notifyIssueChange(target, issue);
-									var spec = getLinkSpecManager().load(specId);
-									getIssueChangeManager().addLink(spec, getIssue(), issue, opposite);
-									notifyIssueChange(target, getIssue());
-									close();
-								}
-			
-								@Override
-								protected void onCancel(AjaxRequestTarget target) {
-									close();
-								}
-			
-								@Override
-								protected Project getProject() {
-									return getIssue().getProject();
-								}
-			
-							};
-						}
-					};	
-				}
-			}
-		};
-
-	}
-
-	private WebMarkupContainer newLinkExistingIssueLink(String componentId, Long specId, boolean opposite, @Nullable FloatingPanel dropdown) {
-		return new DropdownLink(componentId) {
-
-			@Override
-			protected void onInitialize(FloatingPanel dropdown) {
-				super.onInitialize(dropdown);
-				dropdown.add(AttributeModifier.append("class", "inplace-edit issue-link-choice"));
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				if (checkLinkSingular(specId, opposite))
-					super.onClick(target);
-			}
-
-			@Override
-			protected Component newContent(String id, FloatingPanel dropdown2) {
-				var fragment = new Fragment(id, "selectIssueFrag", IssuePrimaryPanel.this);
-				var form = new Form<Void>("form");
-				fragment.add(form);
-				form.add(new IssueAddChoice("choice", new IssueChoiceProvider() {
-					
-					@Override
-					protected Project getProject() {
-						return getIssue().getProject();
-					}
-					
-					@Override
-					protected IssueQuery getBaseQuery() {
-						LinkSpec spec = getLinkSpecManager().load(specId);
-						if (opposite) 
-							return spec.getOpposite().getParsedIssueQuery(getProject());
-						else 
-							return spec.getParsedIssueQuery(getProject());
-					}
-					
-				}) {
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, Issue selection) {
-						if (dropdown != null) 
-							dropdown.close();
-						dropdown2.close();
-
-						LinkSpec spec = getLinkSpecManager().load(specId);
-						if (getIssue().equals(selection)) {
-							getSession().warn("Can not link to self");
-						} else if (getIssue().findLinkedIssues(spec, opposite).contains(selection)) { 
-							getSession().warn("Issue already linked");
-						} else {
-							getIssueChangeManager().addLink(spec, getIssue(), selection, opposite);
-							notifyIssueChange(target, getIssue());
-						}
-					}
-
-					@Override
-					protected String getPlaceholder() {
-						return "Select issue...";
-					}
-					
-				});
-				return fragment;
-			}
-		};						
 	}
 
 	private Project getProject() {

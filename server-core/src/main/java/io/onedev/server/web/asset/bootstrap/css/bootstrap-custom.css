@@ -2157,6 +2157,12 @@ input[type="radio"], input[type="checkbox"] {
 .nav.nav-tabs.nav-tabs-line.nav-tabs-line-3x .show > .nav-link {
     border-bottom: 3px solid var(--primary);
 }
+.nav.nav-tabs.nav-tabs-line.nav-tabs-line-short {
+	border-bottom: none !important;
+}
+.nav.nav-tabs.nav-tabs-line.nav-tabs-line-short .nav-link {
+	border-bottom-width: 3px !important;
+}
 .card>.card-header.card-header-tabs-line {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
