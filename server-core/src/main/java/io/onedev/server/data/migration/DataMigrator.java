@@ -7702,4 +7702,25 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate194(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var timeTrackingSettingElement = valueElement.element("timeTrackingSetting");
+							if (timeTrackingSettingElement != null) {
+								timeTrackingSettingElement.addElement("useHoursAndMinutesOnly").setText("true");
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

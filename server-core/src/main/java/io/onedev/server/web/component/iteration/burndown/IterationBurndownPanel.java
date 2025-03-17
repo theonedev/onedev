@@ -146,13 +146,13 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 					if (getIndicator().equals(REMAINING_TIME) 
 							|| getIndicator().equals(ESTIMATED_TIME) 
 							|| getIssueSetting().getFieldSpec(getIndicator()) instanceof WorkingPeriodField) {
-						yAxisValueFormatter = ""
+						yAxisValueFormatter = String.format(""
 								+ "function(value) {"
 								+ "  if (value != undefined) "
-								+ "    return onedev.server.util.formatWorkingPeriod(value);"
+								+ "    return onedev.server.util.formatWorkingPeriod(value, %b);"
 								+ "  else "
 								+ "    return '-';"
-								+ "}";
+								+ "}", getIssueSetting().getTimeTrackingSetting().isUseHoursAndMinutesOnly());
 					} else {
 						yAxisValueFormatter = null;
 					}

@@ -16,7 +16,9 @@ import org.apache.commons.lang3.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.util.usage.Usage;
 
 @Editable
@@ -25,6 +27,10 @@ public class TimeTrackingSetting implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private static final Pattern WORKING_PERIOD_PATTERN = Pattern.compile("(\\d+w)?(\\d+d)?(\\d+h)?(\\d+m)?");
+
+	private static final Pattern HOURS_AND_MINUTES_ONLY_WORKING_PERIOD_PATTERN = Pattern.compile("(\\d+h)?(\\d+m)?");
+	
+	private boolean useHoursAndMinutesOnly;
 	
 	private int hoursPerDay = 8;
 
@@ -32,9 +38,25 @@ public class TimeTrackingSetting implements Serializable {
 
 	private String aggregationLink;
 
+	@Editable(order=50, description = "Whether or not to input and display estimated/spent time " +
+			"in hours/minutes only")
+	public boolean isUseHoursAndMinutesOnly() {
+		return useHoursAndMinutesOnly;
+	}
+
+	public void setUseHoursAndMinutesOnly(boolean useHoursAndMinutesOnly) {
+		this.useHoursAndMinutesOnly = useHoursAndMinutesOnly;
+	}
+
+	@SuppressWarnings("unused")
+	private static boolean isUseHoursAndMinutesOnlyDisabled() {
+		return !(Boolean)EditContext.get().getInputValue("useHoursAndMinutesOnly");
+	}
+
 	@Editable(order=100, description = "Specify working hours per day. This will affect " +
 			"parsing and displaying of working periods. For instance <tt>1d</tt> is the " +
 			"same as <tt>8h</tt> if this property is set to <tt>8</tt>")
+	@ShowCondition("isUseHoursAndMinutesOnlyDisabled")
 	@Max(24)
 	@Min(1)
 	public int getHoursPerDay() {
@@ -48,6 +70,7 @@ public class TimeTrackingSetting implements Serializable {
 	@Editable(order=200, description = "Specify working days per week. This will affect " +
 			"parsing and displaying of working periods. For instance <tt>1w</tt> is the " +
 			"same as <tt>5d</tt> if this property is set to <tt>5</tt>")
+	@ShowCondition("isUseHoursAndMinutesOnlyDisabled")
 	@Max(7)
 	@Min(1)
 	public int getDaysPerWeek() {
@@ -101,59 +124,96 @@ public class TimeTrackingSetting implements Serializable {
 		if (period.equals("0"))
 			return 0;
 
-		Matcher matcher = WORKING_PERIOD_PATTERN.matcher(period);
-		if (!matcher.matches())
-			throw new ValidationException("Invalid working period");
-
-		int minutes = 0;
-		if (matcher.group(1) != null) {
-			int weeks = Integer.parseInt(StringUtils.stripEnd(matcher.group(1), "w"));
-			minutes += weeks * daysPerWeek * hoursPerDay * 60;
+		if (useHoursAndMinutesOnly) {
+			Matcher matcher = HOURS_AND_MINUTES_ONLY_WORKING_PERIOD_PATTERN.matcher(period);
+			if (!matcher.matches())
+				throw new ValidationException("Invalid working period");
+	
+			int minutes = 0;	
+			if (matcher.group(1) != null) {
+				int hours = Integer.parseInt(StringUtils.stripEnd(matcher.group(1), "h"));
+				minutes += hours*60;
+			}
+	
+			if (matcher.group(2) != null)
+				minutes += Integer.parseInt(StringUtils.stripEnd(matcher.group(2), "m"));
+	
+			return minutes;	
+		} else {
+			Matcher matcher = WORKING_PERIOD_PATTERN.matcher(period);
+			if (!matcher.matches())
+				throw new ValidationException("Invalid working period");
+	
+			int minutes = 0;
+			if (matcher.group(1) != null) {
+				int weeks = Integer.parseInt(StringUtils.stripEnd(matcher.group(1), "w"));
+				minutes += weeks * daysPerWeek * hoursPerDay * 60;
+			}
+	
+			if (matcher.group(2) != null) {
+				int days = Integer.parseInt(StringUtils.stripEnd(matcher.group(2), "d"));
+				minutes += days * hoursPerDay * 60;
+			}
+	
+			if (matcher.group(3) != null) {
+				int hours = Integer.parseInt(StringUtils.stripEnd(matcher.group(3), "h"));
+				minutes += hours*60;
+			}
+	
+			if (matcher.group(4) != null)
+				minutes += Integer.parseInt(StringUtils.stripEnd(matcher.group(4), "m"));
+	
+			return minutes;	
 		}
-
-		if (matcher.group(2) != null) {
-			int days = Integer.parseInt(StringUtils.stripEnd(matcher.group(2), "d"));
-			minutes += days * hoursPerDay * 60;
-		}
-
-		if (matcher.group(3) != null) {
-			int hours = Integer.parseInt(StringUtils.stripEnd(matcher.group(3), "h"));
-			minutes += hours*60;
-		}
-
-		if (matcher.group(4) != null)
-			minutes += Integer.parseInt(StringUtils.stripEnd(matcher.group(4), "m"));
-
-		return minutes;
 	}
 
 	public String formatWorkingPeriod(int minutes) {
-		int weeks = minutes / (60 * hoursPerDay * daysPerWeek);
-		minutes = minutes % (60 * hoursPerDay * daysPerWeek);
-		int days = minutes / (60 * hoursPerDay);
-		minutes = minutes % (60 * hoursPerDay);
-		int hours = minutes / 60;
-		minutes = minutes % 60;
+		if (useHoursAndMinutesOnly) {
+			int hours = minutes / 60;
+			minutes = minutes % 60;
 
-		StringBuilder builder = new StringBuilder();
-		if (weeks != 0)
-			builder.append(weeks).append("w ");
-		if (days != 0)
-			builder.append(days).append("d ");
-		if (hours != 0)
-			builder.append(hours).append("h ");
-		if (minutes != 0)
-			builder.append(minutes).append("m");
-
-		String formatted = builder.toString().trim();
-		if (formatted.length() == 0)
-			formatted = "0m";
-		return formatted;
+			StringBuilder builder = new StringBuilder();
+			if (hours != 0)
+				builder.append(hours).append("h ");
+			if (minutes != 0)
+				builder.append(minutes).append("m");
+	
+			String formatted = builder.toString().trim();
+			if (formatted.length() == 0)
+				formatted = "0h";
+			return formatted;	
+		} else {
+			int weeks = minutes / (60 * hoursPerDay * daysPerWeek);
+			minutes = minutes % (60 * hoursPerDay * daysPerWeek);
+			int days = minutes / (60 * hoursPerDay);
+			minutes = minutes % (60 * hoursPerDay);
+			int hours = minutes / 60;
+			minutes = minutes % 60;
+	
+			StringBuilder builder = new StringBuilder();
+			if (weeks != 0)
+				builder.append(weeks).append("w ");
+			if (days != 0)
+				builder.append(days).append("d ");
+			if (hours != 0)
+				builder.append(hours).append("h ");
+			if (minutes != 0)
+				builder.append(minutes).append("m");
+	
+			String formatted = builder.toString().trim();
+			if (formatted.length() == 0)
+				formatted = "0h";
+			return formatted;	
+		}
 	}
 	
 	public String getWorkingPeriodHelp() {
-		return String.format("Expects one or more <tt>&lt;number&gt;(w|d|h|m)</tt>. For instance <tt>1w 1d 1h 1m</tt> represents 1 week (%d days), 1 day (%d hours), 1 hour, and 1 minute", 
-				daysPerWeek, hoursPerDay);
+		if (useHoursAndMinutesOnly) {
+			return "Expects one or more <tt>&lt;number&gt;(h|m)</tt>. For instance <tt>1h 1m</tt> represents 1 hour and 1 minute";
+		} else {
+			return String.format("Expects one or more <tt>&lt;number&gt;(w|d|h|m)</tt>. For instance <tt>1w 1d 1h 1m</tt> represents 1 week (%d days), 1 day (%d hours), 1 hour, and 1 minute", 
+					daysPerWeek, hoursPerDay);
+		}
 	}
 	
 }
