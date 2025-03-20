@@ -8,9 +8,8 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Agent;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.criteria.Criteria;
 
-public class OfflineCriteria extends Criteria<Agent> {
+public class OfflineCriteria extends StatusCriteria {
 
 	private static final long serialVersionUID = 1L;
 

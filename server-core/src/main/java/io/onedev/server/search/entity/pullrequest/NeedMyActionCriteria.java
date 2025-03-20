@@ -35,7 +35,7 @@ public class NeedMyActionCriteria extends Criteria<PullRequest> {
 	}
 
 	private Criteria<PullRequest> getCriteria(User user) {
-		return new NeedActionOfCriteria(user);
+		return new NeedUserActionCriteria(user);
 	}
 	
 	@Override

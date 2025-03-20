@@ -25,6 +25,10 @@ public class ForksOfCriteria extends Criteria<Project> {
 		this.forkedFromPath = forkedFromPath;
 	}
 
+	public String getForkedFromPath() {
+		return forkedFromPath;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
 		Subquery<Project> forkedFromQuery = query.subquery(Project.class);

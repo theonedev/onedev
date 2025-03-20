@@ -132,7 +132,10 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 				|| !withCurrentUserCriteria && (suggestedLiteral.equals(getRuleName(CreatedByMe)) || suggestedLiteral.equals(getRuleName(RepliedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)))) {
 			return null;
 		} else if (suggestedLiteral.equals(",")) {
-			return Optional.of("add another value");
+			if (parseExpect.findExpectByLabel("orderOperator") != null)
+				return Optional.of("add another order");
+			else
+				return Optional.of("or match another value");
 		}
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");

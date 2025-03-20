@@ -37,6 +37,10 @@ public class AndCriteria<T> extends Criteria<T> {
 		this.criterias = criterias;
 	}
 
+	public List<Criteria<T>> getCriterias() {
+		return criterias;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<T, T> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();

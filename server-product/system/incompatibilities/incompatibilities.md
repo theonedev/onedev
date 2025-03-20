@@ -1,3 +1,11 @@
+# 11.8.0
+
+### Query Syntax
+
+1. Multiple order by clauses now connects via **,** instead of **and** 
+1. Pull request status criteria of form `"Status" is "<name>"` is removed, use `open`, `merged`, or `discarded` instead
+1. Build status criteria of form `"Status" is "<name>"` is removed, use respective status criteria instead, such as `successful`, `failed`, `running`
+
 # 11.6.12
 
 ### RESTful API

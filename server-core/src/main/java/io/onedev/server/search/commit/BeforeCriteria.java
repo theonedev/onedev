@@ -1,6 +1,7 @@
 package io.onedev.server.search.commit;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +23,10 @@ public class BeforeCriteria extends CommitCriteria {
 	public BeforeCriteria(List<String> values) {
 		Preconditions.checkArgument(!values.isEmpty());
 		this.values = values;
+	}
+	
+	public Date getDate() {
+		return DateUtils.parseRelaxed(values.get(0));
 	}
 	
 	@Override

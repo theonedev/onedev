@@ -1,6 +1,27 @@
 package io.onedev.server.web.component.pack.side;
 
-import com.google.common.collect.Lists;
+import static io.onedev.server.search.commit.Revision.Type.COMMIT;
+import static io.onedev.server.search.entity.issue.IssueQuery.merge;
+
+import java.io.Serializable;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PackLabelManager;
 import io.onedev.server.entitymanager.PackManager;
@@ -29,26 +50,6 @@ import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardP
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.editbean.LabelsBean;
-import org.apache.commons.io.FileUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-
-import java.io.Serializable;
-import java.util.List;
-
-import static io.onedev.server.search.entity.issue.IssueQuery.merge;
 
 public abstract class PackSidePanel extends Panel {
 
@@ -150,10 +151,10 @@ public abstract class PackSidePanel extends Panel {
 				add(new SelectPackToActChoice("changesSince", choiceProvider) {
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Pack selection) {
-						var revisionCriteria = new RevisionCriteria(Lists.newArrayList(
-								new Revision(selection.getBuild().getCommitHash(), Revision.Scope.SINCE),
-								new Revision(getPack().getBuild().getCommitHash(), Revision.Scope.UNTIL)));
-						var commitQuery = new CommitQuery(Lists.newArrayList(revisionCriteria));
+						var revisionCriteria = new RevisionCriteria(List.of(
+								new Revision(COMMIT, selection.getBuild().getCommitHash(), true),
+								new Revision(COMMIT, getPack().getBuild().getCommitHash(), false)));
+						var commitQuery = new CommitQuery(List.of(revisionCriteria));
 						setResponsePage(ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(getPack().getBuild().getProject(), commitQuery.toString(), null));
 					}
 

@@ -1,11 +1,12 @@
 package io.onedev.server.search.commit;
 
+import java.util.List;
+
+import org.eclipse.jgit.revwalk.RevCommit;
+
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Project;
-import org.eclipse.jgit.revwalk.RevCommit;
-
-import java.util.List;
 
 public class AuthorCriteria extends PersonCriteria {
 
@@ -14,7 +15,7 @@ public class AuthorCriteria extends PersonCriteria {
 	public AuthorCriteria(List<String> values) {
 		super(values);
 	}
-	
+
 	@Override
 	public void fill(Project project, RevListOptions options) {
 		fill(project, options.authors());

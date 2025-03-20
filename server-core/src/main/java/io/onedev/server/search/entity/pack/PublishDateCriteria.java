@@ -30,6 +30,14 @@ public class PublishDateCriteria extends Criteria<Pack> {
 		this.value = value;
 	}
 
+	public Date getDate() {
+		return date;
+	}
+
+	public int getOperator() {
+		return operator;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Pack, Pack> from, CriteriaBuilder builder) {
 		Path<Date> attribute = from.get(Pack.PROP_PUBLISH_DATE);

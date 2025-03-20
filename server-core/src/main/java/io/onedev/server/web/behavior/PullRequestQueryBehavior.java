@@ -117,12 +117,6 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 										case PullRequest.NAME_CLOSE_DATE:
 											List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 											return !suggestions.isEmpty() ? suggestions : null;
-										case PullRequest.NAME_STATUS: {
-											List<String> candidates = new ArrayList<>();
-											for (PullRequest.Status status : PullRequest.Status.values())
-												candidates.add(status.toString());
-											return SuggestionUtils.suggest(candidates, matchWith);
-										}
 										case PullRequest.NAME_TARGET_PROJECT:
 										case PullRequest.NAME_SOURCE_PROJECT:
 											if (!matchWith.contains("*"))
@@ -197,7 +191,10 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 				|| !withCurrentUserCriteria && (suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(WatchedByMe)) || suggestedLiteral.equals(getRuleName(IgnoredByMe)) || suggestedLiteral.equals(getRuleName(NeedMyAction)) || suggestedLiteral.equals(getRuleName(CommentedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)) || suggestedLiteral.equals(getRuleName(ToBeReviewedByMe)) || suggestedLiteral.equals(getRuleName(RequestedForChangesByMe)) || suggestedLiteral.equals(getRuleName(ApprovedByMe)) || suggestedLiteral.equals(getRuleName(AssignedToMe)) || suggestedLiteral.equals(getRuleName(ToBeChangedByMe)) || suggestedLiteral.equals(getRuleName(ToBeMergedByMe)))) {
 			return null;
 		} else if (suggestedLiteral.equals(",")) {
-			return Optional.of("add another value");
+			if (parseExpect.findExpectByLabel("orderOperator") != null)
+				return Optional.of("add another order");
+			else
+				return Optional.of("or match another value");
 		} else if (suggestedLiteral.equals("#")) {
 			if (getProject() != null)
 				return Optional.of("find pull request by number");

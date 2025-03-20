@@ -37,7 +37,7 @@ public class WatchedByMeCriteria extends Criteria<Issue> {
 	}
 	
 	private Criteria<Issue> getCriteria(User user) {
-		return new WatchedByCriteria(user);
+		return new WatchedByUserCriteria(user);
 	}
 
 	@Override

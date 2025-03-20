@@ -31,6 +31,14 @@ public class LastActivityDateCriteria extends Criteria<PullRequest> {
 		date = EntityQuery.getDateValue(value);
 	}
 
+	public int getOperator() {
+		return operator;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
 		Path<Date> attribute = PullRequestQuery.getPath(from, PullRequest.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE);

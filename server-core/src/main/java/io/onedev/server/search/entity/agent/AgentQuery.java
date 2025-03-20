@@ -1,5 +1,34 @@
 package io.onedev.server.search.entity.agent;
 
+import static io.onedev.server.model.Agent.NAME_IP_ADDRESS;
+import static io.onedev.server.model.Agent.NAME_NAME;
+import static io.onedev.server.model.Agent.NAME_OS_ARCH;
+import static io.onedev.server.model.Agent.NAME_OS_NAME;
+import static io.onedev.server.model.Agent.NAME_OS_VERSION;
+import static io.onedev.server.model.Agent.QUERY_FIELDS;
+import static io.onedev.server.model.Agent.SORT_FIELDS;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
+import static io.onedev.server.search.entity.agent.AgentQueryParser.HasRunningBuilds;
+import static io.onedev.server.search.entity.agent.AgentQueryParser.Is;
+import static io.onedev.server.search.entity.agent.AgentQueryParser.IsNot;
+import static io.onedev.server.search.entity.agent.AgentQueryParser.Offline;
+import static io.onedev.server.search.entity.agent.AgentQueryParser.Online;
+import static io.onedev.server.search.entity.agent.AgentQueryParser.Paused;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -7,40 +36,36 @@ import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.agent.AgentQueryParser.AndCriteriaContext;
+import io.onedev.server.search.entity.agent.AgentQueryParser.CriteriaContext;
+import io.onedev.server.search.entity.agent.AgentQueryParser.FieldOperatorValueCriteriaContext;
+import io.onedev.server.search.entity.agent.AgentQueryParser.FuzzyCriteriaContext;
+import io.onedev.server.search.entity.agent.AgentQueryParser.NotCriteriaContext;
+import io.onedev.server.search.entity.agent.AgentQueryParser.OperatorCriteriaContext;
+import io.onedev.server.search.entity.agent.AgentQueryParser.OperatorValueCriteriaContext;
+import io.onedev.server.search.entity.agent.AgentQueryParser.OrCriteriaContext;
+import io.onedev.server.search.entity.agent.AgentQueryParser.OrderContext;
+import io.onedev.server.search.entity.agent.AgentQueryParser.ParensCriteriaContext;
+import io.onedev.server.search.entity.agent.AgentQueryParser.QueryContext;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
-import org.antlr.v4.runtime.*;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.onedev.server.model.Agent.*;
-import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
-import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
-import static io.onedev.server.search.entity.agent.AgentQueryParser.*;
 
 public class AgentQuery extends EntityQuery<Agent> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Criteria<Agent> criteria;
-	
-	private final List<EntitySort> sorts;
-	
 	public AgentQuery(@Nullable Criteria<Agent> criteria, List<EntitySort> sorts) {
-		this.criteria = criteria;
-		this.sorts = sorts;
+		super(criteria, sorts);
 	}
 
 	public AgentQuery(@Nullable Criteria<Agent> criteria) {
-		this(criteria, new ArrayList<>());
+		super(criteria, new ArrayList<>());
 	}
-	
+
 	public AgentQuery() {
-		this(null);
+		super(null, new ArrayList<>());
 	}
 	
 	public static AgentQuery parse(@Nullable String queryString, boolean forExecutor) {
@@ -110,7 +135,7 @@ public class AgentQuery extends EntityQuery<Agent> {
 							else
 								throw new RuntimeException("Unexpected criteria: " + ctx.operator.getText());
 						}
-						return new OrCriteria<>(criterias);
+						return Criteria.orCriterias(criterias);
 					}
 					
 					@Override
@@ -151,7 +176,7 @@ public class AgentQuery extends EntityQuery<Agent> {
 								throw new IllegalStateException();
 							}
 						}
-						return operator==IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
+						return operator==IsNot? Criteria.andCriterias(criterias): Criteria.orCriterias(criterias);
 					}
 					
 					@Override
@@ -218,16 +243,6 @@ public class AgentQuery extends EntityQuery<Agent> {
 	
 	public static int getOperator(String operatorName) {
 		return AntlrUtils.getLexerRule(AgentQueryLexer.ruleNames, operatorName);
-	}
-	
-	@Override
-	public Criteria<Agent> getCriteria() {
-		return criteria;
-	}
-
-	@Override
-	public List<EntitySort> getSorts() {
-		return sorts;
 	}
 	
 	public static AgentQuery merge(AgentQuery query1, AgentQuery query2) {

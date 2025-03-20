@@ -13,6 +13,9 @@ onedev.server.datePicker = {
 			enableTime: withTime,
 			allowInput: true
 		});
+		$input.on("clear", function() {
+			$input.trigger("change");
+		});
 	
 		$input.keydown(function(e) {
 			/* 

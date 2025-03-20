@@ -1,6 +1,51 @@
 package io.onedev.server.web.page.project.pullrequests.create;
 
-import com.google.common.collect.Lists;
+import static io.onedev.server.search.commit.Revision.Type.COMMIT;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseAtInterceptPageException;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
@@ -16,8 +61,17 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.model.*;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.CodeCommentStatusChange;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequest.Status;
+import io.onedev.server.model.PullRequestAssignment;
+import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestUpdate;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.pullrequest.MergePreview;
@@ -53,40 +107,6 @@ import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.RestartResponseAtInterceptPageException;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 public class NewPullRequestPage extends ProjectPage implements RevisionAnnotationSupport {
 
@@ -427,9 +447,9 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			protected CommitQuery getBaseQuery() {
 				PullRequest request = NewPullRequestPage.this.getPullRequest();
 				List<Revision> revisions = new ArrayList<>();
-				revisions.add(new Revision(request.getBaseCommitHash(), Revision.Scope.SINCE));
-				revisions.add(new Revision(request.getLatestUpdate().getHeadCommitHash(), Revision.Scope.UNTIL));
-				return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
+				revisions.add(new Revision(COMMIT, request.getBaseCommitHash(), true));
+				revisions.add(new Revision(COMMIT, request.getLatestUpdate().getHeadCommitHash(), false));
+				return new CommitQuery(List.of(new RevisionCriteria(revisions)));
 			}
 
 			@Override

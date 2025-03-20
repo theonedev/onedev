@@ -1,44 +1,15 @@
 package io.onedev.server.web.component.pack.list;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PackManager;
-import io.onedev.server.model.Pack;
-import io.onedev.server.model.Project;
-import io.onedev.server.pack.PackSupport;
-import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.pack.FuzzyCriteria;
-import io.onedev.server.search.entity.pack.PackQuery;
-import io.onedev.server.search.entity.pack.PackQueryLexer;
-import io.onedev.server.search.entity.pack.TypeCriteria;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.WebSession;
-import io.onedev.server.web.behavior.PackQueryBehavior;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
-import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.ActionablePageLink;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.SortEditPanel;
-import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
-import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.component.tabbable.AjaxActionTab;
-import io.onedev.server.web.component.tabbable.Tab;
-import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.page.project.packs.ProjectPacksPage;
-import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
-import io.onedev.server.web.util.Cursor;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
-import io.onedev.server.web.util.QuerySaveSupport;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -71,8 +42,46 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import javax.annotation.Nullable;
-import java.util.*;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PackManager;
+import io.onedev.server.model.Pack;
+import io.onedev.server.model.Project;
+import io.onedev.server.pack.PackSupport;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.pack.FuzzyCriteria;
+import io.onedev.server.search.entity.pack.PackQuery;
+import io.onedev.server.search.entity.pack.PackQueryLexer;
+import io.onedev.server.search.entity.pack.TypeCriteria;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.behavior.PackQueryBehavior;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.ActionablePageLink;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
+import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.sortedit.SortEditPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.component.tabbable.AjaxActionTab;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.page.project.packs.ProjectPacksPage;
+import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
 public abstract class PackListPanel extends Panel {
 	
@@ -381,6 +390,30 @@ public abstract class PackListPanel extends Panel {
 			
 		});
 		
+		add(new DropdownLink("filter") {
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				return new PackFilterPanel(id, new IModel<EntityQuery<Pack>>() {
+					@Override
+					public void detach() {
+					}
+					@Override
+					public EntityQuery<Pack> getObject() {
+						return queryModel.getObject() != null? queryModel.getObject() : new PackQuery();
+					}
+					@Override
+					public void setObject(EntityQuery<Pack> object) {
+						PackListPanel.this.getFeedbackMessages().clear();
+						queryModel.setObject((PackQuery) object);
+						queryStringModel.setObject(object.toString());
+						var target = RequestCycle.get().find(AjaxRequestTarget.class);
+						target.add(queryInput);
+						doQuery(target);	
+					}
+				});
+			}
+		});
+
 		add(new DropdownLink("orderBy") {
 
 			@Override

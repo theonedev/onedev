@@ -37,6 +37,10 @@ public class OrCriteria<T> extends Criteria<T> {
 		this.criterias = criterias;
 	}
 
+	public List<Criteria<T>> getCriterias() {
+		return criterias;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<T, T> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
@@ -158,7 +162,7 @@ public class OrCriteria<T> extends Criteria<T> {
 	
 	@Override
 	public void fill(T object) {
-		if (criterias.size() == 1) 
+		if (criterias.size() > 1) 
 			criterias.iterator().next().fill(object);
 	}
 	

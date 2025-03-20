@@ -30,6 +30,10 @@ public class IterationCriteria extends Criteria<Issue> {
 		this.operator = operator;
 	}
 
+	public String getIterationName() {
+		return iterationName;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		Subquery<IssueSchedule> scheduleQuery = query.subquery(IssueSchedule.class);

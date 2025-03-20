@@ -1,0 +1,41 @@
+<wicket:extend>
+    <div class="form-group">
+        <label class="control-label">State</label>
+        <input wicket:id="state" type="hidden" class="form-control">
+    </div>    
+    <div wicket:id="customFields" class="form-group"></div>
+    <div class="form-group">
+        <label class="control-label">Submitted By</label>
+        <input wicket:id="submittedBy" type="hidden" class="form-control">
+    </div>    
+    <wicket:enclosure>
+        <div class="form-group">
+            <label class="control-label">Iteration</label>
+            <input wicket:id="iteration" type="hidden" class="form-control">
+        </div>        
+    </wicket:enclosure>
+    <div class="form-group">
+        <label class="control-label">Confidential</label>
+        <span class="switch switch-sm switch-primary">
+            <label>
+                <input wicket:id="confidential" type="checkbox">
+            </label>
+        </span>
+    </div>    
+    <div class="form-group">
+        <label class="control-label">Active Since</label>
+        <div class="clearable-wrapper">
+            <input wicket:id="activeSince" type="text" class="form-control">
+        </div>
+    </div>    
+    <div class="form-group">
+        <label class="control-label">Not Active Since</label>
+        <div class="clearable-wrapper">
+            <input wicket:id="notActiveSince" type="text" class="form-control">
+        </div>
+    </div>    
+    <wicket:fragment wicket:id="choiceFieldFrag">
+        <label wicket:id="label" class="control-label"></label>
+        <input wicket:id="choice" type="hidden" class="form-control">
+    </wicket:fragment>   
+</wicket:extend>

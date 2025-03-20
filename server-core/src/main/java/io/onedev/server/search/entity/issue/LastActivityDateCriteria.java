@@ -38,6 +38,14 @@ public class LastActivityDateCriteria extends Criteria<Issue> {
 		this.value = DateUtils.formatDate(date);
 	}
 	
+	public int getOperator() {
+		return operator;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		Path<Date> attribute = IssueQuery.getPath(from, Issue.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE);

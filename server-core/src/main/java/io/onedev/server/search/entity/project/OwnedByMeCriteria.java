@@ -9,25 +9,30 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.criteria.Criteria;
 
-public class OwnedByMeCriteria extends Criteria<Project> {
+public class OwnedByMeCriteria extends OwnedByCriteria {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
 		if (User.get() != null)
-			return new OwnedByCriteria(User.get()).getPredicate(projectScope, query, from, builder);
+			return new OwnedByUserCriteria(User.get()).getPredicate(projectScope, query, from, builder);
 		else
 			throw new ExplicitException("Please login to perform this query");
 	}
 
 	@Override
+	public User getUser() {
+		return SecurityUtils.getUser();
+	}
+
+	@Override
 	public boolean matches(Project project) {
 		if (User.get() != null)
-			return new OwnedByCriteria(User.get()).matches(project);
+			return new OwnedByUserCriteria(User.get()).matches(project);
 		else
 			throw new ExplicitException("Please login to perform this query");
 	}

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import io.onedev.server.search.entity.build.BuildQueryLexer;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -17,9 +16,18 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.search.entity.build.CancelledCriteria;
+import io.onedev.server.search.entity.build.FailedCriteria;
+import io.onedev.server.search.entity.build.PendingCriteria;
+import io.onedev.server.search.entity.build.RunningCriteria;
+import io.onedev.server.search.entity.build.SuccessfulCriteria;
+import io.onedev.server.search.entity.build.TimedOutCriteria;
+import io.onedev.server.search.entity.build.WaitingCriteria;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 
 public class BuildStatsPanel extends Panel {
@@ -68,8 +76,33 @@ public class BuildStatsPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<Map.Entry<Status, Long>> item) {
 				Map.Entry<Status, Long> entry = item.getModelObject();
-				BuildQuery query = new BuildQuery(
-						new io.onedev.server.search.entity.build.StatusCriteria(entry.getKey(), BuildQueryLexer.Is));
+				Criteria<Build> criteria;
+				switch (entry.getKey()) {
+					case SUCCESSFUL:
+						criteria = new SuccessfulCriteria();
+						break;
+					case FAILED:
+						criteria = new FailedCriteria();
+						break;
+					case TIMED_OUT:
+						criteria = new TimedOutCriteria();
+						break;
+					case CANCELLED:
+						criteria = new CancelledCriteria();
+						break;
+					case RUNNING:
+						criteria = new RunningCriteria();
+						break;
+					case PENDING:
+						criteria = new PendingCriteria();
+						break;
+					case WAITING:
+						criteria = new WaitingCriteria();
+						break;
+					default:
+						throw new RuntimeException("Unknown build status: " + entry.getKey());
+				}
+				BuildQuery query = new BuildQuery(criteria);
 				PageParameters params = ProjectBuildsPage.paramsOf(getProject(), query.toString(), 0);
 				Link<Void> statusLink = new BookmarkablePageLink<Void>("link", ProjectBuildsPage.class, params);
 				String statusName = entry.getKey().toString();

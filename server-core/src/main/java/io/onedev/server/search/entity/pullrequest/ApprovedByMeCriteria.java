@@ -9,12 +9,18 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
-public class ApprovedByMeCriteria extends Criteria<PullRequest> {
+public class ApprovedByMeCriteria extends ApprovedByCriteria {
 
 	private static final long serialVersionUID = 1L;
+
+	@Override
+	public User getUser() {
+		return SecurityUtils.getUser();
+	}
 
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
@@ -35,7 +41,7 @@ public class ApprovedByMeCriteria extends Criteria<PullRequest> {
 	}
 	
 	private Criteria<PullRequest> getCriteria(User user) {
-		return new ApprovedByCriteria(user);
+		return new ApprovedByUserCriteria(user);
 	}
 
 	@Override

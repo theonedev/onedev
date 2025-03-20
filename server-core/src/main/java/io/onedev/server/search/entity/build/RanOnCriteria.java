@@ -28,6 +28,10 @@ public class RanOnCriteria extends Criteria<Build> {
 		this.value = value;
 	}
 
+	public String getValue() {
+		return value;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		Join<?, ?> join = from.join(Build.PROP_AGENT, JoinType.INNER);

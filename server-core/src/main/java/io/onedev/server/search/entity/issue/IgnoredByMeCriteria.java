@@ -37,7 +37,7 @@ public class IgnoredByMeCriteria extends Criteria<Issue> {
 	}
 	
 	private Criteria<Issue> getCriteria(User user) {
-		return new IgnoredByCriteria(user);
+		return new IgnoredByUserCriteria(user);
 	}
 
 	@Override

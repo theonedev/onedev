@@ -40,6 +40,10 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 		this.allowMultiple = allowMultiple;
 	}
 
+	public String getValue() {
+		return value;
+	}
+
 	@Override
 	protected Predicate getValuePredicate(From<Issue, Issue> issueFrom, From<IssueField, IssueField> fieldFrom, CriteriaBuilder builder) {
 		if (allowMultiple) {	

@@ -23,6 +23,10 @@ public class TypeCriteria extends Criteria<Pack> {
 		this.operator = operator;
 	}
 
+	public String getValue() {
+		return value;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Pack, Pack> from, CriteriaBuilder builder) {
 		var predicate = builder.equal(from.get(Pack.PROP_TYPE), value);

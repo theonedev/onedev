@@ -16,9 +16,13 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequest.Status;
+import io.onedev.server.search.entity.pullrequest.DiscardedCriteria;
+import io.onedev.server.search.entity.pullrequest.MergedCriteria;
+import io.onedev.server.search.entity.pullrequest.OpenCriteria;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 
 public class PullRequestStatsPanel extends Panel {
@@ -67,8 +71,15 @@ public class PullRequestStatsPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<Map.Entry<Status, Long>> item) {
 				Map.Entry<Status, Long> entry = item.getModelObject();
-				PullRequestQuery query = new PullRequestQuery(
-						new io.onedev.server.search.entity.pullrequest.StatusCriteria(entry.getKey(), PullRequestQueryLexer.Is));
+				Criteria<PullRequest> criteria;
+				if (entry.getKey() == Status.OPEN) {
+					criteria = new OpenCriteria();
+				} else if (entry.getKey() == Status.MERGED) {
+					criteria = new MergedCriteria();
+				} else {
+					criteria = new DiscardedCriteria();
+				}
+				PullRequestQuery query = new PullRequestQuery(criteria);
 				PageParameters params = ProjectPullRequestsPage.paramsOf(getProject(), query.toString(), 0);
 				Link<Void> statusLink = new BookmarkablePageLink<Void>("link", ProjectPullRequestsPage.class, params);
 				String statusName = entry.getKey().toString();

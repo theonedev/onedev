@@ -33,6 +33,10 @@ public class NotUsedSinceCriteria extends Criteria<Agent> {
 		this.value = value;
 	}
 
+	public Date getDate() {
+		return date;
+	}
+	
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Agent, Agent> from, CriteriaBuilder builder) {
 		Path<Date> attribute = getPath(from, PROP_LAST_USED_DATE + "." + PROP_VALUE);

@@ -37,7 +37,7 @@ public class WatchedByMeCriteria extends Criteria<PullRequest> {
 	}
 	
 	private Criteria<PullRequest> getCriteria(User user) {
-		return new WatchedByCriteria(user);
+		return new WatchedByUserCriteria(user);
 	}
 
 	@Override

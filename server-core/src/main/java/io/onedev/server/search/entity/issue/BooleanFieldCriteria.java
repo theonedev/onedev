@@ -24,6 +24,10 @@ public class BooleanFieldCriteria extends FieldCriteria {
 		this.operator = operator;
 	}
 
+	public boolean getValue() {
+		return value;
+	}
+
 	@Override
 	public Predicate getValuePredicate(From<Issue, Issue> issueFrom, From<IssueField, IssueField> fieldFrom, CriteriaBuilder builder) {
 		var predicate = builder.equal(fieldFrom.get(IssueField.PROP_VALUE), String.valueOf(value));

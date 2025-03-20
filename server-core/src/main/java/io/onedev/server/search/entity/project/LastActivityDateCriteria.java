@@ -31,6 +31,14 @@ public class LastActivityDateCriteria extends Criteria<Project> {
 		this.value = value;
 	}
 
+	public Date getDate() {
+		return date;
+	}
+
+	public int getOperator() {
+		return operator;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
 		Path<Date> attribute = ProjectQuery.getPath(from, Project.PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_ACTIVITY);

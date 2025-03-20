@@ -12,9 +12,8 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.User;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.criteria.Criteria;
 
-public class PublishedByUserCriteria extends Criteria<Pack> {
+public class PublishedByUserCriteria extends PublishedByCriteria {
 
 	private static final long serialVersionUID = 1L;
 
@@ -22,6 +21,11 @@ public class PublishedByUserCriteria extends Criteria<Pack> {
 	
 	public PublishedByUserCriteria(User user) {
 		this.user = user;
+	}
+
+	@Override
+	public User getUser() {
+		return user;
 	}
 
 	@Override

@@ -457,7 +457,7 @@ public class SuggestionUtils {
 
 	public static List<InputSuggestion> suggestBlobs(Project project, String matchWith) {
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-		return suggestByPattern(commitInfoManager.getFiles(project.getId()), matchWith);
+		return suggestPathsByPathPattern(commitInfoManager.getFiles(project.getId()), matchWith, false);
 	}
 	
 	public static List<InputSuggestion> suggestJobs(Project project, String matchWith) {
@@ -530,22 +530,12 @@ public class SuggestionUtils {
 		return children;
 	}
 	
-	public static List<InputSuggestion> suggestByPattern(List<String> paths, String pattern) {
+	public static List<InputSuggestion> suggestPathsByPathPattern(List<String> paths, String pattern, boolean includeExts) {
 		pattern = pattern.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 
-		var exts = new TreeSet<String>();
-		for (var path: paths) {
-			var ext = StringUtils.substringAfterLast(Paths.get(path).getFileName().toFile().getName(), ".");
-			if (ext.length() != 0)
-				exts.add(ext);
-		}
-		for (var ext: exts) {
-			var suggestContent = "**/*." + ext;
-			var index = suggestContent.indexOf(pattern);
-			if (index != -1)
-				suggestions.add(new InputSuggestion(suggestContent, -1, "files with ext '" + ext + "'", new LinearRange(index, index + pattern.length())));
-		}
+		if (includeExts)
+			suggestions.addAll(suggestExts(paths, pattern, "**/*."));
 		
 		List<PatternApplied> allApplied = new ArrayList<>();
 		for (String path: paths) {
@@ -554,10 +544,49 @@ public class SuggestionUtils {
 				allApplied.add(applied);
 		}
 		allApplied.sort(comparingInt(o -> o.getMatch().getFrom()));
+		suggestions.addAll(suggestPaths(allApplied));
+		return suggestions;		
+	}
 
+	public static List<InputSuggestion> suggestPathsByStringPattern(List<String> paths, String pattern, boolean includeExts) {
+		pattern = pattern.toLowerCase();
+		List<InputSuggestion> suggestions = new ArrayList<>();
+
+		if (includeExts)
+			suggestions.addAll(suggestExts(paths, pattern, "*."));		
+		List<PatternApplied> allApplied = new ArrayList<>();
+		for (String path: paths) {
+			PatternApplied applied = WildcardUtils.applyStringPattern(pattern, path, false);
+			if (applied != null) 
+				allApplied.add(applied);
+		}
+		allApplied.sort(comparingInt(o -> o.getMatch().getFrom()));
+		suggestions.addAll(suggestPaths(allApplied));
+		return suggestions;		
+	}
+
+	private static List<InputSuggestion> suggestExts(List<String> paths, String pattern, String extPrefix) {
+		var exts = new TreeSet<String>();
+		for (var path: paths) {
+			var ext = StringUtils.substringAfterLast(Paths.get(path).getFileName().toFile().getName(), ".");
+			if (ext.length() != 0)
+				exts.add(ext);
+		}
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		for (var ext: exts) {
+			var suggestContent = extPrefix + ext;
+			var index = suggestContent.indexOf(pattern);
+			if (index != -1)
+				suggestions.add(new InputSuggestion(suggestContent, -1, "files with ext '" + ext + "'", new LinearRange(index, index + pattern.length())));
+		}
+		return suggestions;
+	}
+	
+	private static List<InputSuggestion> suggestPaths(List<PatternApplied> patternApplieds) {
+		List<InputSuggestion> suggestions = new ArrayList<>();
 		Map<String, Set<String>> childrenCache = new HashMap<>();
 		Map<String, LinearRange> suggestedInputs = new LinkedHashMap<>();
-		for (PatternApplied applied: allApplied) {
+		for (PatternApplied applied: patternApplieds) {
 			LinearRange match = applied.getMatch();
 			String suffix = applied.getText().substring(match.getTo());
 			int index = suffix.indexOf('/');
@@ -567,7 +596,7 @@ public class SuggestionUtils {
 				while (true) {
 					Set<String> children = childrenCache.get(suggestedInput);
 					if (children == null) {
-						children = getChildren(allApplied, suggestedInput);
+						children = getChildren(patternApplieds, suggestedInput);
 						childrenCache.put(suggestedInput, children);
 					}
 					Preconditions.checkState(!children.isEmpty());
@@ -600,5 +629,5 @@ public class SuggestionUtils {
 		
 		return suggestions;		
 	}
-	
+		
 }

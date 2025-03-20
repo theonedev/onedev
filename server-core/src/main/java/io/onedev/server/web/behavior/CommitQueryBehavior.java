@@ -75,8 +75,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 							case CommitQueryParser.AUTHOR:
 							case CommitQueryParser.COMMITTER:
 								Map<String, LinearRange> suggestedInputs = new LinkedHashMap<>();
-								CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-								List<NameAndEmail> users = commitInfoManager.getUsers(project.getId());
+								List<NameAndEmail> users = getCommitInfoManager().getUsers(project.getId());
 								for (NameAndEmail user: users) {
 									String content;
 									if (StringUtils.isNotBlank(user.getEmailAddress()))
@@ -101,7 +100,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 								suggestions = SuggestionUtils.suggest(candidates, matchWith);
 								return !suggestions.isEmpty()? suggestions: null;
 							case CommitQueryParser.PATH:
-								return SuggestionUtils.suggestBlobs(projectModel.getObject(), matchWith);
+								return SuggestionUtils.suggestPathsByStringPattern(getCommitInfoManager().getFiles(projectModel.getObject().getId()), matchWith, false);
 							default: 
 								return null;
 						} 
@@ -131,6 +130,10 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 			}
 		} 
 		return null;
+	}
+
+	private CommitInfoManager getCommitInfoManager() {
+		return OneDev.getInstance(CommitInfoManager.class);
 	}
 	
 	@Override

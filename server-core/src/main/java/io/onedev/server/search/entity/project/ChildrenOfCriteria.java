@@ -25,6 +25,10 @@ public class ChildrenOfCriteria extends Criteria<Project> {
 		this.parentPath = parentPath;
 	}
 
+	public String getParentPath() {
+		return parentPath;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
 		Subquery<Project> parentQuery = query.subquery(Project.class);

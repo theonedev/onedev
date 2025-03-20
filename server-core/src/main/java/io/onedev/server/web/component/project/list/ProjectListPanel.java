@@ -62,6 +62,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.project.ChildrenOfCriteria;
@@ -87,7 +88,6 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.SortEditPanel;
 import io.onedev.server.web.component.project.ProjectAvatar;
 import io.onedev.server.web.component.project.childrentree.ProjectChildrenTree;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
@@ -98,6 +98,7 @@ import io.onedev.server.web.component.project.stats.pack.PackStatsPanel;
 import io.onedev.server.web.component.project.stats.pullrequest.PullRequestStatsPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.sortedit.SortEditPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.children.ProjectChildrenPage;
@@ -291,6 +292,30 @@ public class ProjectListPanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
+		add(new DropdownLink("filter") {
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				return new ProjectFilterPanel(id, new IModel<EntityQuery<Project>>() {
+					@Override
+					public void detach() {
+					}
+					@Override
+					public EntityQuery<Project> getObject() {
+						return queryModel.getObject() != null? queryModel.getObject() : new ProjectQuery();
+					}
+					@Override
+					public void setObject(EntityQuery<Project> object) {
+						ProjectListPanel.this.getFeedbackMessages().clear();
+						queryModel.setObject((ProjectQuery) object);
+						queryStringModel.setObject(object.toString());
+						var target = RequestCycle.get().find(AjaxRequestTarget.class);
+						target.add(queryInput);
+						doQuery(target);	
+					}
+				});
+			}
+		});
+
 		add(new DropdownLink("orderBy") {
 
 			@Override

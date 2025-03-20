@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.builds.detail.changes;
 
+import static io.onedev.server.search.commit.Revision.Type.COMMIT;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +12,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
@@ -77,9 +77,9 @@ public class BuildChangesPage extends BuildDetailPage {
 				List<Revision> revisions = new ArrayList<>();
 
 				if (baseCommitHash != null)
-					revisions.add(new Revision(baseCommitHash, Revision.Scope.SINCE));
-				revisions.add(new Revision(getBuild().getCommitHash(), Revision.Scope.UNTIL));
-				return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
+					revisions.add(new Revision(COMMIT, baseCommitHash, true));
+				revisions.add(new Revision(COMMIT, getBuild().getCommitHash(), false));
+				return new CommitQuery(List.of(new RevisionCriteria(revisions)));
 			}
 
 			@Override

@@ -8,9 +8,8 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.criteria.Criteria;
 
-public class UnresolvedCriteria extends Criteria<CodeComment> {
+public class UnresolvedCriteria extends StatusCriteria {
 
 	private static final long serialVersionUID = 1L;
 

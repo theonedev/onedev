@@ -25,6 +25,10 @@ public class JobCriteria extends Criteria<Build> {
 		this.operator = operator;
 	}
 
+	public String getJobName() {
+		return jobName;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Build.PROP_JOB_NAME);

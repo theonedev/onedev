@@ -14,7 +14,7 @@ criteria
     ;
 
 multipleQuoted
-    : Quoted(','Quoted)*
+    : Quoted(WS* Comma WS* Quoted)*
     ;
 
 OnBranch
@@ -59,6 +59,10 @@ RParens
 
 Quoted
     : '"' ('\\'.|~[\\"])+? '"'
+    ;
+
+Comma
+    : ','
     ;
 
 WS

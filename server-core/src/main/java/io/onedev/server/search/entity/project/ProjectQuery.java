@@ -1,55 +1,74 @@
 package io.onedev.server.search.entity.project;
 
+import static io.onedev.server.model.Project.SORT_FIELDS;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.ChildrenOf;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.Contains;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.ForkRoots;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.ForksOf;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.HasOutdatedReplicas;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.Is;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.IsNot;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.IsSince;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.IsUntil;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.Leafs;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.MissingStorage;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.OwnedByMe;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.OwnedByNone;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.Roots;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.WithoutEnoughReplicas;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.project.ProjectQueryParser.AndCriteriaContext;
+import io.onedev.server.search.entity.project.ProjectQueryParser.CriteriaContext;
+import io.onedev.server.search.entity.project.ProjectQueryParser.FieldOperatorValueCriteriaContext;
+import io.onedev.server.search.entity.project.ProjectQueryParser.FuzzyCriteriaContext;
+import io.onedev.server.search.entity.project.ProjectQueryParser.NotCriteriaContext;
+import io.onedev.server.search.entity.project.ProjectQueryParser.OperatorCriteriaContext;
+import io.onedev.server.search.entity.project.ProjectQueryParser.OperatorValueCriteriaContext;
+import io.onedev.server.search.entity.project.ProjectQueryParser.OrCriteriaContext;
+import io.onedev.server.search.entity.project.ProjectQueryParser.OrderContext;
+import io.onedev.server.search.entity.project.ProjectQueryParser.ParensCriteriaContext;
+import io.onedev.server.search.entity.project.ProjectQueryParser.QueryContext;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
-import org.antlr.v4.runtime.*;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.onedev.server.model.Project.SORT_FIELDS;
-import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
-import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
-import static io.onedev.server.search.entity.project.ProjectQueryParser.*;
 
 public class ProjectQuery extends EntityQuery<Project> {
 
 	private static final long serialVersionUID = 1L;
-
-	private final Criteria<Project> criteria;
-	
-	private final List<EntitySort> sorts;
 	
 	public ProjectQuery(@Nullable Criteria<Project> criteria, List<EntitySort> sorts) {
-		this.criteria = criteria;
-		this.sorts = sorts;
+		super(criteria, sorts);
 	}
 
 	public ProjectQuery(@Nullable Criteria<Project> criteria) {
-		this(criteria, new ArrayList<>());
+		super(criteria, new ArrayList<>());
 	}
 	
 	public ProjectQuery() {
-		this(null);
+		super(null, new ArrayList<>());
 	}
 	
-	@Nullable
-	public Criteria<Project> getCriteria() {
-		return criteria;
-	}
-
-	public List<EntitySort> getSorts() {
-		return sorts;
-	}
-
 	public static ProjectQuery parse(@Nullable String queryString) {
 		if (queryString != null) {
 			CharStream is = CharStreams.fromString(queryString); 
@@ -91,7 +110,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 							case OwnedByMe:
 								return new OwnedByMeCriteria();
 							case OwnedByNone:
-								return new OwnedByNoneCriteria();
+								return new NoOwnerCriteria();
 							case WithoutEnoughReplicas:
 								return new WithoutEnoughReplicasCriteria();
 							case HasOutdatedReplicas:
@@ -112,9 +131,9 @@ public class ProjectQuery extends EntityQuery<Project> {
 							else if (ctx.operator.getType() == ForksOf)
 								criterias.add(new ForksOfCriteria(value));
 							else
-								criterias.add(new OwnedByCriteria(getUser(value)));
+								criterias.add(new OwnedByUserCriteria(getUser(value)));
 						}
-						return new OrCriteria<>(criterias);
+						return Criteria.orCriterias(criterias);
 					}
 					
 					@Override
@@ -168,7 +187,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 									throw new ExplicitException("Unexpected operator " + getRuleName(operator));
 							}
 						}
-						return operator==IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
+						return operator==IsNot? Criteria.andCriterias(criterias): Criteria.orCriterias(criterias);
 					}
 					
 					@Override
@@ -270,7 +289,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 	
 	@Override
 	public boolean matches(Project project) {
-		return criteria == null || criteria.matches(project);
+		return getCriteria() == null || getCriteria().matches(project);
 	}
 	
 	public static String getRuleName(int rule) {

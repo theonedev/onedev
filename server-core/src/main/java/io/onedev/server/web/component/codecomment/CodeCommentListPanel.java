@@ -1,44 +1,18 @@
 package io.onedev.server.web.component.codecomment;
 
-import com.google.common.collect.Sets;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.model.*;
-import io.onedev.server.model.support.LastActivity;
-import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
-import io.onedev.server.search.entity.codecomment.FuzzyCriteria;
-import io.onedev.server.search.entity.codecomment.UnresolvedCriteria;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.Provider;
-import io.onedev.server.util.UrlUtils;
-import io.onedev.server.web.UrlManager;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
-import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.SortEditPanel;
-import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
-import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
-import io.onedev.server.web.util.QuerySaveSupport;
-import io.onedev.server.xodus.VisitInfoManager;
+import static io.onedev.server.model.CodeComment.SORT_FIELDS;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -71,11 +45,51 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.google.common.collect.Sets;
 
-import static io.onedev.server.model.CodeComment.SORT_FIELDS;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentStatusChange;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestAssignment;
+import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.LastActivity;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
+import io.onedev.server.search.entity.codecomment.FuzzyCriteria;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.Provider;
+import io.onedev.server.util.UrlUtils;
+import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
+import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.sortedit.SortEditPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.xodus.VisitInfoManager;
 
 public abstract class CodeCommentListPanel extends Panel {
 
@@ -610,6 +624,30 @@ public abstract class CodeCommentListPanel extends Panel {
 
 		});
 		
+		add(new DropdownLink("filter") {
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				return new CodeCommentFilterPanel(id, new IModel<EntityQuery<CodeComment>>() {
+					@Override
+					public void detach() {
+					}
+					@Override
+					public EntityQuery<CodeComment> getObject() {
+						return queryModel.getObject() != null? queryModel.getObject() : new CodeCommentQuery();
+					}
+					@Override
+					public void setObject(EntityQuery<CodeComment> object) {
+						CodeCommentListPanel.this.getFeedbackMessages().clear();
+						queryModel.setObject((CodeCommentQuery) object);
+						queryStringModel.setObject(object.toString());
+						var target = RequestCycle.get().find(AjaxRequestTarget.class);
+						target.add(queryInput);
+						doQuery(target);	
+					}
+				});
+			}
+		});
+
 		add(new DropdownLink("orderBy") {
 
 			@Override
@@ -653,21 +691,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			}
 			
 		});	
-		
-		add(new AjaxLink<Void>("unresolved") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				CodeCommentListPanel.this.getFeedbackMessages().clear();
-				var criteria = new UnresolvedCriteria();
-				queryModel.setObject(new CodeCommentQuery(criteria));
-				queryStringModel.setObject(criteria.toString());
-				target.add(queryInput);
-				doQuery(target);					
-			}
-			
-		}.setVisible(getPage() instanceof PullRequestCodeCommentsPage));
-		
+				
 		queryInput = new TextField<>("input", queryStringModel);
 		queryInput.add(new CodeCommentQueryBehavior(new AbstractReadOnlyModel<Project>() {
 

@@ -135,7 +135,7 @@ public class ProblemReportPage extends BuildReportPage {
 
 				@Override
 				protected List<InputSuggestion> suggest(String matchWith) {
-					return SuggestionUtils.suggestByPattern(keyNames, matchWith);
+					return SuggestionUtils.suggestPathsByPathPattern(keyNames, matchWith, true);
 				}
 
 				@Override

@@ -169,8 +169,12 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 			return null;
 		if (!withCurrentUserCriteria && suggestedLiteral.equals(PackQuery.getRuleName(PackQueryLexer.PublishedByMe))) 
 			return null;
-		if (suggestedLiteral.equals(","))
-			return Optional.of("add another value");
+		if (suggestedLiteral.equals(",")) {
+			if (parseExpect.findExpectByLabel("orderOperator") != null)
+				return Optional.of("add another order");
+			else
+				return Optional.of("or match another value");
+		}
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {

@@ -123,30 +123,16 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 
 	private static final long serialVersionUID = 1L;
 
-	private final Criteria<Issue> criteria;
-
-	private final List<EntitySort> sorts;
-
 	public IssueQuery(@Nullable Criteria<Issue> criteria, List<EntitySort> sorts) {
-		this.criteria = criteria;
-		this.sorts = sorts;
+		super(criteria, sorts);
 	}
 
 	public IssueQuery(@Nullable Criteria<Issue> criteria) {
-		this(criteria, new ArrayList<>());
+		super(criteria, new ArrayList<>());
 	}
 
 	public IssueQuery() {
-		this(null);
-	}
-
-	@Nullable
-	public Criteria<Issue> getCriteria() {
-		return criteria;
-	}
-
-	public List<EntitySort> getSorts() {
-		return sorts;
+		super(null, new ArrayList<>());
 	}
 
 	public static IssueQuery parse(@Nullable Project project, @Nullable String queryString,
@@ -268,15 +254,15 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 						for (var quoted: ctx.criteriaValue.Quoted()) {
 							String value = getValue(quoted.getText());
 							if (ctx.Mentioned() != null)
-								criterias.add(new MentionedCriteria(getUser(value)));
+								criterias.add(new MentionedUserCriteria(getUser(value)));
 							else if (ctx.SubmittedBy() != null)
-								criterias.add(new SubmittedByCriteria(getUser(value)));
+								criterias.add(new SubmittedByUserCriteria(getUser(value)));
 							else if (ctx.WatchedBy() != null)
-								criterias.add(new WatchedByCriteria(getUser(value)));
+								criterias.add(new WatchedByUserCriteria(getUser(value)));
 							else if (ctx.IgnoredBy() != null)
-								criterias.add(new IgnoredByCriteria(getUser(value)));
+								criterias.add(new IgnoredByUserCriteria(getUser(value)));
 							else if (ctx.CommentedBy() != null)
-								criterias.add(new CommentedByCriteria(getUser(value)));
+								criterias.add(new CommentedByUserCriteria(getUser(value)));
 							else if (ctx.FixedInBuild() != null)
 								criterias.add(new FixedInBuildCriteria(project, value));
 							else if (ctx.FixedInPullRequest() != null)
@@ -288,7 +274,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 							else
 								throw new RuntimeException("Unexpected operator: " + ctx.operator.getText());
 						}
-						return new OrCriteria<>(criterias);
+						return Criteria.orCriterias(criterias);
 					}
 
 					@Override
@@ -476,7 +462,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 									throw new ExplicitException("Unexpected operator " + getRuleName(operator));
 							}
 						}
-						return operator==IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
+						return operator==IsNot? Criteria.andCriterias(criterias): Criteria.orCriterias(criterias);
 					}
 
 					@Override
@@ -657,7 +643,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 
 	@Override
 	public boolean matches(Issue issue) {
-		return criteria == null || criteria.matches(issue);
+		return getCriteria() == null || getCriteria().matches(issue);
 	}
 
 	public static String getRuleName(int rule) {
@@ -682,18 +668,18 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 	}
 
 	public Collection<String> getUndefinedStates() {
-		if (criteria != null)
-			return criteria.getUndefinedStates();
+		if (getCriteria() != null)
+			return getCriteria().getUndefinedStates();
 		else
 			return new ArrayList<>();
 	}
 
 	public Collection<String> getUndefinedFields() {
 		Set<String> undefinedFields = new HashSet<>();
-		if (criteria != null) {
-			undefinedFields.addAll(criteria.getUndefinedFields());
+		if (getCriteria() != null) {
+			undefinedFields.addAll(getCriteria().getUndefinedFields());
 		}
-		for (EntitySort sort : sorts) {
+		for (EntitySort sort : getSorts()) {
 			if (!Issue.QUERY_FIELDS.contains(sort.getField())
 					&& getGlobalIssueSetting().getFieldSpec(sort.getField()) == null) {
 				undefinedFields.add(sort.getField());
@@ -703,23 +689,23 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 	}
 
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
-		if (criteria != null)
-			return criteria.getUndefinedFieldValues();
+		if (getCriteria() != null)
+			return getCriteria().getUndefinedFieldValues();
 		else
 			return new HashSet<>();
 	}
 
 	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
-		if (criteria != null)
-			return criteria.fixUndefinedStates(resolutions);
+		if (getCriteria() != null)
+			return getCriteria().fixUndefinedStates(resolutions);
 		else
 			return true;
 	}
 
 	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
-		if (criteria != null && !criteria.fixUndefinedFields(resolutions))
+		if (getCriteria() != null && !getCriteria().fixUndefinedFields(resolutions))
 			return false;
-		for (Iterator<EntitySort> it = sorts.iterator(); it.hasNext(); ) {
+		for (Iterator<EntitySort> it = getSorts().iterator(); it.hasNext(); ) {
 			EntitySort sort = it.next();
 			UndefinedFieldResolution resolution = resolutions.get(sort.getField());
 			if (resolution != null) {
@@ -733,8 +719,8 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 	}
 
 	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
-		if (criteria != null)
-			return criteria.fixUndefinedFieldValues(resolutions);
+		if (getCriteria() != null)
+			return getCriteria().fixUndefinedFieldValues(resolutions);
 		else
 			return true;
 	}

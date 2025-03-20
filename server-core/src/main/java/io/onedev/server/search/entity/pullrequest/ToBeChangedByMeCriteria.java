@@ -35,7 +35,7 @@ public class ToBeChangedByMeCriteria extends Criteria<PullRequest> {
 	}
 	
 	private Criteria<PullRequest> getCriteria(User user) {
-		return new ToBeChangedByCriteria(user);
+		return new ToBeChangedByUserCriteria(user);
 	}
 
 	@Override

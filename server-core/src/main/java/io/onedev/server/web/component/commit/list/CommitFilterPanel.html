@@ -1,0 +1,44 @@
+<wicket:panel>
+    <div class="commit-filter-edit">
+        <div class="mb-3 font-size-sm text-muted">
+            <wicket:svg href="bulb" class="icon"/> 
+            Below are some common criterias. Type in search box above to view the complete list and available combinations.
+        </div>
+        <div class="form-group">
+            <label class="control-label">Branch</label>
+            <input wicket:id="branch" type="hidden" class="form-control">
+        </div>  
+        <div class="form-group">
+            <label class="control-label">Tag</label>
+            <input wicket:id="tag" type="hidden" class="form-control">
+        </div>  
+        <div class="form-group">
+            <label class="control-label">Build</label>
+            <input wicket:id="build" type="hidden" class="form-control">
+        </div>  
+        <div class="form-group">
+            <label class="control-label">Touched File</label>
+            <input wicket:id="file" type="hidden" class="form-control">
+        </div>  
+        <div class="form-group">
+            <label class="control-label">Authored By</label>
+            <input wicket:id="authoredBy" type="hidden" class="form-control">
+        </div>    
+        <div class="form-group">
+            <label class="control-label">Committed By</label>
+            <input wicket:id="committedBy" type="hidden" class="form-control">
+        </div>
+        <div class="form-group">
+            <label class="control-label">Committed After</label>
+            <div class="clearable-wrapper">
+                <input wicket:id="committedAfter" type="text" class="form-control">
+            </div>
+        </div>    
+        <div class="form-group">
+            <label class="control-label">Committed Before</label>
+            <div class="clearable-wrapper">
+                <input wicket:id="committedBefore" type="text" class="form-control">
+            </div>
+        </div>        
+    </div>
+</wicket:panel>

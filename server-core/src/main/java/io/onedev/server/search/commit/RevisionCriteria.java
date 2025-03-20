@@ -1,8 +1,9 @@
 package io.onedev.server.search.commit;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -10,9 +11,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.command.RevListOptions;
-import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.commit.Revision.Scope;
 
 public class RevisionCriteria extends CommitCriteria {
 
@@ -24,38 +23,28 @@ public class RevisionCriteria extends CommitCriteria {
 		Preconditions.checkArgument(!revisions.isEmpty());
 		this.revisions = revisions;
 	}
+
+	public List<Revision> getRevisions() {
+		return revisions;
+	}
 	
 	@Override
 	public void fill(Project project, RevListOptions options) {
-		boolean ranged = false;
 		for (Revision revision: revisions) {
-			if (revision.getScope() == Scope.SINCE) {
-				options.revisions().add("^" + revision.getValue());
-				ranged = true;
-			} else if (revision.getScope() == Scope.UNTIL) {
-				options.revisions().add(revision.getValue());
-				ranged = true;
-			} else if (project.getBranchRef(revision.getValue()) != null) {
-				ranged = true;
-				options.revisions().add(revision.getValue());
+			var commitHash = revision.getRevCommit(project).name();
+			if (revision.isSince()) {
+				options.revisions().add("^" + commitHash);
 			} else {
-				options.revisions().add(revision.getValue());
+				options.revisions().add(commitHash);
 			}
 		}
-		if (options.revisions().size() == 1 && !ranged)
-			options.count(1);
 	}
 
 	@Override
 	public boolean matches(RefUpdated event) {
-		List<Revision> untilRevisions = revisions.stream().filter(it->it.getScope() != Scope.SINCE).collect(Collectors.toList());
+		List<Revision> untilRevisions = revisions.stream().filter(it->!it.isSince()).collect(toList());
 		if (!untilRevisions.isEmpty()) {
-			for (Revision revision: untilRevisions) {
-				RefFacade ref = event.getProject().getRef(revision.getValue());
-				if (ref != null && ref.getName().equals(event.getRefName())) 
-					return true;
-			}
-			return false;
+			return untilRevisions.stream().anyMatch(it->it.matchesRef(event.getProject(), event.getRefName()));
 		} else {
 			return true;
 		}

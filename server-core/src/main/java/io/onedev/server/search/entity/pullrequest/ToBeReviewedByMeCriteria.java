@@ -35,7 +35,7 @@ public class ToBeReviewedByMeCriteria extends Criteria<PullRequest> {
 	}
 	
 	private Criteria<PullRequest> getCriteria(User user) {
-		return new ToBeReviewedByCriteria(user);
+		return new ToBeReviewedByUserCriteria(user);
 	}
 
 	@Override

@@ -161,7 +161,10 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 				&& (suggestedLiteral.equals(getRuleName(WithoutEnoughReplicas)) || suggestedLiteral.equals(getRuleName(HasOutdatedReplicas)))) {
 			return null;
 		} else if (suggestedLiteral.equals(",")) {
-			return Optional.of("add another value");
+			if (parseExpect.findExpectByLabel("orderOperator") != null)
+				return Optional.of("add another order");
+			else
+				return Optional.of("or match another value");
 		}
 		
 		if (childQuery) {

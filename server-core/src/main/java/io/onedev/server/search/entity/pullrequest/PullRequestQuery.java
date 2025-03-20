@@ -1,5 +1,64 @@
 package io.onedev.server.search.entity.pullrequest;
 
+import static io.onedev.server.model.PullRequest.SORT_FIELDS;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ApprovedBy;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ApprovedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.AssignedTo;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.AssignedToMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.CommentedBy;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.CommentedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.Contains;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.Discarded;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.HasMergeConflicts;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.HasPendingReviews;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.HasUnfinishedBuilds;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.HasUnsuccessfulBuilds;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.IgnoredBy;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.IgnoredByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.IncludesCommit;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.IncludesIssue;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.Is;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.IsGreaterThan;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.IsLessThan;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.IsNot;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.IsSince;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.IsUntil;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.Mentioned;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.MentionedMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.Merged;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.NeedActionOf;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.NeedMyAction;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.Open;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ReadyToMerge;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.RequestedForChangesBy;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.RequestedForChangesByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.SomeoneRequestedForChanges;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.SubmittedBy;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.SubmittedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ToBeChangedBy;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ToBeChangedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ToBeMergedBy;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ToBeMergedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ToBeReviewedBy;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ToBeReviewedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.WatchedBy;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.WatchedByMe;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
@@ -7,42 +66,37 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.*;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.AndCriteriaContext;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.CriteriaContext;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.FieldOperatorValueCriteriaContext;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.FuzzyCriteriaContext;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.NotCriteriaContext;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OperatorCriteriaContext;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OperatorValueCriteriaContext;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OrCriteriaContext;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OrderContext;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ParensCriteriaContext;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.QueryContext;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ReferenceCriteriaContext;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
-import org.antlr.v4.runtime.*;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.onedev.server.model.PullRequest.SORT_FIELDS;
-import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
-import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.HasUnsuccessfulBuilds;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.*;
 
 public class PullRequestQuery extends EntityQuery<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Criteria<PullRequest> criteria;
-
-	private final List<EntitySort> sorts;
-
 	public PullRequestQuery(@Nullable Criteria<PullRequest> criteria, List<EntitySort> sorts) {
-		this.criteria = criteria;
-		this.sorts = sorts;
+		super(criteria, sorts);
 	}
 
 	public PullRequestQuery(@Nullable Criteria<PullRequest> criteria) {
-		this(criteria, new ArrayList<>());
+		super(criteria, new ArrayList<>());
 	}
 
 	public PullRequestQuery() {
-		this(null);
+		super(null, new ArrayList<>());
 	}
 
 	public static PullRequestQuery parse(@Nullable Project project, @Nullable String queryString, boolean withCurrentUserCriteria) {
@@ -160,40 +214,40 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 							String value = getValue(quoted.getText());
 							switch (ctx.operator.getType()) {
 								case ToBeReviewedBy:
-									criterias.add(new ToBeReviewedByCriteria(getUser(value)));
+									criterias.add(new ToBeReviewedByUserCriteria(getUser(value)));
 									break;
 								case ToBeChangedBy:
-									criterias.add(new ToBeChangedByCriteria(getUser(value)));
+									criterias.add(new ToBeChangedByUserCriteria(getUser(value)));
 									break;
 								case ToBeMergedBy:
-									criterias.add(new ToBeMergedByCriteria(getUser(value)));
+									criterias.add(new ToBeMergedByUserCriteria(getUser(value)));
 									break;
 								case ApprovedBy:
-									criterias.add(new ApprovedByCriteria(getUser(value)));
+									criterias.add(new ApprovedByUserCriteria(getUser(value)));
 									break;
 								case AssignedTo:
-									criterias.add(new AssignedToCriteria(getUser(value)));
+									criterias.add(new AssignedToUserCriteria(getUser(value)));
 									break;
 								case RequestedForChangesBy:
-									criterias.add(new RequestedForChangesByCriteria(getUser(value)));
+									criterias.add(new RequestedForChangesByUserCriteria(getUser(value)));
 									break;
 								case Mentioned:
-									criterias.add(new MentionedCriteria(getUser(value)));
+									criterias.add(new MentionedUserCriteria(getUser(value)));
 									break;
 								case SubmittedBy:
-									criterias.add(new SubmittedByCriteria(getUser(value)));
+									criterias.add(new SubmittedByUserCriteria(getUser(value)));
 									break;
 								case WatchedBy:
-									criterias.add(new WatchedByCriteria(getUser(value)));
+									criterias.add(new WatchedByUserCriteria(getUser(value)));
 									break;
 								case IgnoredBy:
-									criterias.add(new IgnoredByCriteria(getUser(value)));
+									criterias.add(new IgnoredByUserCriteria(getUser(value)));
 									break;
 								case NeedActionOf:
-									criterias.add(new NeedActionOfCriteria(getUser(value)));
+									criterias.add(new NeedUserActionCriteria(getUser(value)));
 									break;
 								case CommentedBy:
-									criterias.add(new CommentedByCriteria(getUser(value)));
+									criterias.add(new CommentedByUserCriteria(getUser(value)));
 									break;
 								case IncludesCommit:
 									criterias.add(new IncludesCommitCriteria(project, value));
@@ -205,7 +259,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 									throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
 							}
 						} 
-						return new OrCriteria<>(criterias);
+						return Criteria.orCriterias(criterias);
 					}
 
 					@Override
@@ -260,13 +314,6 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 										case PullRequest.NAME_NUMBER:
 											criterias.add(new ReferenceCriteria(project, value, operator));
 											break;
-										case PullRequest.NAME_STATUS:
-											try {
-												criterias.add(new StatusCriteria(PullRequest.Status.valueOf(value.toUpperCase()), operator));
-												break;
-											} catch (IllegalArgumentException e) {
-												throw new ExplicitException("Invalid status: " + value);
-											}
 										case PullRequest.NAME_MERGE_STRATEGY:
 											criterias.add(new MergeStrategyCriteria(MergeStrategy.fromString(value), operator));
 											break;
@@ -355,7 +402,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 									throw new IllegalStateException();
 							}
 						}
-						return operator==IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
+						return operator==IsNot? Criteria.andCriterias(criterias): Criteria.orCriterias(criterias);
 					}
 
 					@Override
@@ -479,16 +526,6 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 
 	public static int getOperator(String operatorName) {
 		return AntlrUtils.getLexerRule(PullRequestQueryLexer.ruleNames, operatorName);
-	}
-
-	@Override
-	public Criteria<PullRequest> getCriteria() {
-		return criteria;
-	}
-
-	@Override
-	public List<EntitySort> getSorts() {
-		return sorts;
 	}
 
 	public static PullRequestQuery merge(PullRequestQuery query1, PullRequestQuery query2) {

@@ -1,64 +1,16 @@
 package io.onedev.server.web.component.build.list;
 
-import com.google.common.collect.Sets;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildParamManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.job.JobManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Build.Status;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.GlobalBuildSetting;
-import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.build.BuildQuery;
-import io.onedev.server.search.entity.build.FuzzyCriteria;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.JobPermission;
-import io.onedev.server.security.permission.RunJob;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.Input;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.WebSession;
-import io.onedev.server.web.behavior.BuildQueryBehavior;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.component.build.ParamValuesLabel;
-import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
-import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
-import io.onedev.server.web.component.floating.AlignPlacement;
-import io.onedev.server.web.component.floating.Alignment;
-import io.onedev.server.web.component.floating.ComponentTarget;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.job.runselector.JobRunSelector;
-import io.onedev.server.web.component.link.ActionablePageLink;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.SortEditPanel;
-import io.onedev.server.web.component.project.selector.ProjectSelector;
-import io.onedev.server.web.component.revision.RevisionSelector;
-import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
-import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.component.stringchoice.StringMultiChoice;
-import io.onedev.server.web.page.builds.BuildListPage;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
-import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
-import io.onedev.server.web.util.Cursor;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
-import io.onedev.server.web.util.QuerySaveSupport;
+import static io.onedev.server.model.Build.SORT_FIELDS;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -95,10 +47,67 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
-import javax.annotation.Nullable;
-import java.util.*;
+import com.google.common.collect.Sets;
 
-import static io.onedev.server.model.Build.SORT_FIELDS;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.job.JobManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.administration.GlobalBuildSetting;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.search.entity.build.FuzzyCriteria;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.JobPermission;
+import io.onedev.server.security.permission.RunJob;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.Input;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.behavior.BuildQueryBehavior;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.build.ParamValuesLabel;
+import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
+import io.onedev.server.web.component.floating.AlignPlacement;
+import io.onedev.server.web.component.floating.Alignment;
+import io.onedev.server.web.component.floating.ComponentTarget;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.job.runselector.JobRunSelector;
+import io.onedev.server.web.component.link.ActionablePageLink;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
+import io.onedev.server.web.component.project.selector.ProjectSelector;
+import io.onedev.server.web.component.revision.RevisionSelector;
+import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.sortedit.SortEditPanel;
+import io.onedev.server.web.component.stringchoice.StringMultiChoice;
+import io.onedev.server.web.page.builds.BuildListPage;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
+import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
 public abstract class BuildListPanel extends Panel {
 	
@@ -801,6 +810,37 @@ public abstract class BuildListPanel extends Panel {
 			
 		});		
 		
+		add(new DropdownLink("filter") {
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				return new BuildFilterPanel(id, new IModel<EntityQuery<Build>>() {
+					@Override
+					public void detach() {
+					}
+					@Override
+					public EntityQuery<Build> getObject() {
+						return queryModel.getObject() != null? queryModel.getObject() : new BuildQuery();
+					}
+					@Override
+					public void setObject(EntityQuery<Build> object) {
+						BuildListPanel.this.getFeedbackMessages().clear();
+						queryModel.setObject((BuildQuery) object);
+						queryStringModel.setObject(object.toString());
+						var target = RequestCycle.get().find(AjaxRequestTarget.class);
+						target.add(queryInput);
+						doQuery(target);	
+					}
+				}) {
+
+					@Override
+					protected Project getProject() {
+						return BuildListPanel.this.getProject();
+					}
+					
+				};
+			}
+		});
+
 		add(new DropdownLink("orderBy") {
 
 			@Override

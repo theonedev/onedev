@@ -91,7 +91,7 @@ public class JobMatch extends Criteria<JobMatchContext> {
 					else
 						criterias.add(new JobCriteria(fieldValue, operator));
 				}
-				return operator == IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
+				return operator == IsNot? Criteria.andCriterias(criterias): Criteria.orCriterias(criterias);
 			}
 			
 			@Override
@@ -121,7 +121,7 @@ public class JobMatch extends Criteria<JobMatchContext> {
 							throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
 					}
 				}
-				return new OrCriteria<>(criterias);
+				return Criteria.orCriterias(criterias);
 			}
 			
 			@Override

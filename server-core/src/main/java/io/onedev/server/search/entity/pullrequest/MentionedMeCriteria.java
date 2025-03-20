@@ -35,7 +35,7 @@ public class MentionedMeCriteria extends Criteria<PullRequest> {
 	}
 	
 	private Criteria<PullRequest> getCriteria(User user) {
-		return new MentionedCriteria(user);
+		return new MentionedUserCriteria(user);
 	}
 
 	@Override

@@ -368,7 +368,10 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 				|| !option.withCurrentIssueCriteria() && suggestedLiteral.equals(getRuleName(CurrentIssue))) {
 			return null;
 		} else if (suggestedLiteral.equals(",")) {
-			return Optional.of("add another value");
+			if (parseExpect.findExpectByLabel("orderOperator") != null)
+				return Optional.of("add another order");
+			else
+				return Optional.of("or match another value");
 		} else if (suggestedLiteral.equals("#")) {
 			if (getProject() != null)
 				return Optional.of("find issue by number");

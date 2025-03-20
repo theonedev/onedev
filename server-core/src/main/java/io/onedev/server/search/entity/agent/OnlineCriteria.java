@@ -13,9 +13,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.criteria.Criteria;
 
-public class OnlineCriteria extends Criteria<Agent> {
+public class OnlineCriteria extends StatusCriteria {
 
 	private static final long serialVersionUID = 1L;
 

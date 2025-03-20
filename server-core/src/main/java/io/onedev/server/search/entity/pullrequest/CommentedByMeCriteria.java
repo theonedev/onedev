@@ -35,7 +35,7 @@ public class CommentedByMeCriteria extends Criteria<PullRequest> {
 	}
 	
 	private Criteria<PullRequest> getCriteria(User user) {
-		return new CommentedByCriteria(user);
+		return new CommentedByUserCriteria(user);
 	}
 
 	@Override

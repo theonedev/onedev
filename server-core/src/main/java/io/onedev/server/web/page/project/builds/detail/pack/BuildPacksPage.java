@@ -5,7 +5,7 @@ import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.search.entity.pack.PackQueryLexer;
-import io.onedev.server.search.entity.pack.PublishedByBuildCriteria;
+import io.onedev.server.search.entity.pack.PublishedViaBuildCriteria;
 import io.onedev.server.search.entity.pack.TypeCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.criteria.AndCriteria;
@@ -63,7 +63,7 @@ public class BuildPacksPage extends BuildDetailPage {
 			@Override
 			protected PackQuery getBaseQuery() {
 				return new PackQuery(new AndCriteria<>(
-						new PublishedByBuildCriteria(getBuild()), 
+						new PublishedViaBuildCriteria(getBuild()), 
 						new TypeCriteria(packType, PackQueryLexer.Is)));
 			}
 			

@@ -98,7 +98,7 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 		if (suggestedLiteral.equals(getLexerRuleName(ruleNames, OnBranch))) 
 			return Optional.of("branch the build commit is merged into");
 		else if (suggestedLiteral.equals(",")) 
-			return Optional.of("add another value");
+			return Optional.of("or match another value");
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {

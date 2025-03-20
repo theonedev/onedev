@@ -1,8 +1,8 @@
 grammar IssueQuery;
 
 query
-    : WS* criteria WS* (WS OrderBy WS+ order (WS+ And WS+ order)* WS*)? EOF
-    | WS* OrderBy WS+ order (WS+ And WS+ order)* WS* EOF
+    : WS* criteria WS* (WS OrderBy WS+ order (WS* orderOperator=Comma WS* order)* WS*)? EOF
+    | WS* OrderBy WS+ order (WS* orderOperator=Comma WS* order)* WS* EOF
     | WS* EOF
     ;
 
@@ -30,7 +30,7 @@ order
 	;
 
 multipleQuoted
-    : Quoted(','Quoted)*
+    : Quoted(WS* Comma WS* Quoted)*
     ;
 
 OrderBy
@@ -240,6 +240,10 @@ Quoted
 Reference
     : ([a-zA-Z0-9_]([a-zA-Z0-9_\-/.]*[a-zA-Z0-9_])?)? '#' [0-9]+ | [A-Z][A-Z]+ '-' [0-9]+
     ;
+
+Comma
+	: ','
+	;
 
 WS
     : ' '

@@ -10,10 +10,10 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.criteria.Criteria;
 
-public class CreatedByMeCriteria extends Criteria<CodeComment> {
+public class CreatedByMeCriteria extends CreatedByCriteria {
 
 	private static final long serialVersionUID = 1L;
 
@@ -25,6 +25,11 @@ public class CreatedByMeCriteria extends Criteria<CodeComment> {
 		} else {
 			throw new ExplicitException("Please login to perform this query");
 		}
+	}
+
+	@Override
+	public User getUser() {
+		return SecurityUtils.getUser();
 	}
 
 	@Override

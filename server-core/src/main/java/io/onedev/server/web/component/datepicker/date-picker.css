@@ -1,0 +1,35 @@
+.flatpickr-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.flatpickr-clear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    font-size: 16px;
+    color: #999;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.flatpickr-clear:hover {
+    color: #666;
+}
+
+/* Dark mode support */
+.dark-mode .flatpickr-clear {
+    color: #777;
+}
+
+.dark-mode .flatpickr-clear:hover {
+    color: #999;
+} 

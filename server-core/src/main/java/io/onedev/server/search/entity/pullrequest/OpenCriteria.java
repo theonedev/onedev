@@ -9,29 +9,29 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.criteria.Criteria;
 
-public class OpenCriteria extends Criteria<PullRequest> {
+public class OpenCriteria extends StatusCriteria {
 
 	private static final long serialVersionUID = 1L;
-
-	private Criteria<PullRequest> getCriteria() {
-		return new StatusCriteria(Status.OPEN, PullRequestQueryLexer.Is);
-	}
 	
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
-		return getCriteria().getPredicate(projectScope, query, from, builder);
+		return builder.equal(from.get(PullRequest.PROP_STATUS), Status.OPEN);
 	}
 
 	@Override
 	public boolean matches(PullRequest request) {
-		return getCriteria().matches(request);
+		return request.isOpen();
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return PullRequestQuery.getRuleName(PullRequestQueryLexer.Open);
+	}
+
+	@Override
+	public Status getStatus() {
+		return Status.OPEN;
 	}
 
 }

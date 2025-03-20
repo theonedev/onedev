@@ -130,11 +130,6 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 												return SuggestionUtils.suggestJobs(project, matchWith);
 											else
 												return null;
-										case Build.NAME_STATUS:
-											List<String> candidates = new ArrayList<>();
-											for (Build.Status status : Build.Status.values())
-												candidates.add(status.toString());
-											return SuggestionUtils.suggest(candidates, matchWith);
 										case Build.NAME_NUMBER:
 											return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 										case Build.NAME_VERSION:
@@ -210,7 +205,10 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 		}
 
 		if (suggestedLiteral.equals(",")) {
-			return Optional.of("add another value");
+			if (parseExpect.findExpectByLabel("orderOperator") != null)
+				return Optional.of("add another order");
+			else
+				return Optional.of("or match another value");
 		} else if (suggestedLiteral.equals("#")) {
 			if (getProject() != null)
 				return Optional.of("find build by number");

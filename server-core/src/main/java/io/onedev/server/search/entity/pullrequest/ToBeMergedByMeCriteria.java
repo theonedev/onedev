@@ -35,7 +35,7 @@ public class ToBeMergedByMeCriteria extends Criteria<PullRequest> {
 	}
 	
 	private Criteria<PullRequest> getCriteria(User user) {
-		return new ToBeMergedByCriteria(user);
+		return new ToBeMergedByUserCriteria(user);
 	}
 
 	@Override

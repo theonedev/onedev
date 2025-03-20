@@ -34,6 +34,10 @@ public class StateCriteria extends Criteria<Issue> {
 		this.operator = operator;
 	}
 
+	public String getValue() {
+		return value;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		if (operator == IssueQueryLexer.IsBefore)

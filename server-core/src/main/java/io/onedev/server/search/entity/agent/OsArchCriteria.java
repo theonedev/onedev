@@ -25,6 +25,10 @@ public class OsArchCriteria extends Criteria<Agent> {
 		this.operator = operator;
 	}
 
+	public String getValue() {
+		return value;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Agent, Agent> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Agent.PROP_OS_ARCH);

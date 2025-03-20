@@ -1,47 +1,82 @@
 package io.onedev.server.search.entity.codecomment;
 
+import static io.onedev.server.model.CodeComment.NAME_CONTENT;
+import static io.onedev.server.model.CodeComment.NAME_CREATE_DATE;
+import static io.onedev.server.model.CodeComment.NAME_LAST_ACTIVITY_DATE;
+import static io.onedev.server.model.CodeComment.NAME_PATH;
+import static io.onedev.server.model.CodeComment.NAME_REPLY;
+import static io.onedev.server.model.CodeComment.NAME_REPLY_COUNT;
+import static io.onedev.server.model.CodeComment.QUERY_FIELDS;
+import static io.onedev.server.model.CodeComment.SORT_FIELDS;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.Contains;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.CreatedBy;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.CreatedByMe;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.Is;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.IsGreaterThan;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.IsLessThan;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.IsNot;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.IsSince;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.IsUntil;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.Mentioned;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.MentionedMe;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.RepliedBy;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.RepliedByMe;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.Resolved;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.Unresolved;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.AndCriteriaContext;
+import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.CriteriaContext;
+import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.FieldOperatorValueCriteriaContext;
+import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.FuzzyCriteriaContext;
+import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.NotCriteriaContext;
+import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OperatorCriteriaContext;
+import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OperatorValueCriteriaContext;
+import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrCriteriaContext;
+import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrderContext;
+import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.ParensCriteriaContext;
+import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.QueryContext;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
-import org.antlr.v4.runtime.*;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import static io.onedev.server.model.CodeComment.*;
-import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
-import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
-import static io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.*;
 
 public class CodeCommentQuery extends EntityQuery<CodeComment> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Criteria<CodeComment> criteria;
-
-	private final List<EntitySort> sorts;
-
 	public CodeCommentQuery(@Nullable Criteria<CodeComment> criteria, List<EntitySort> sorts) {
-		this.criteria = criteria;
-		this.sorts = sorts;
+		super(criteria, sorts);
 	}
 
 	public CodeCommentQuery(@Nullable Criteria<CodeComment> criteria) {
-		this(criteria, new ArrayList<>());
+		super(criteria, new ArrayList<>());
 	}
 
 	public CodeCommentQuery() {
-		this(null);
+		super(null, new ArrayList<>());
 	}
 
 	public static CodeCommentQuery parse(Project project, @Nullable String queryString,
@@ -104,17 +139,17 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						for (var quoted: ctx.criteriaValue.Quoted()) {
 							String value = getValue(quoted.getText());
 							if (operator == Mentioned) {
-								criterias.add(new MentionedCriteria(getUser(value)));
+								criterias.add(new MentionedUserCriteria(getUser(value)));
 							} else if (operator == CreatedBy) {
-								criterias.add(new CreatedByCriteria(getUser(value)));
+								criterias.add(new CreatedByUserCriteria(getUser(value)));
 							} else if (operator == RepliedBy) {
-								criterias.add(new RepliedByCriteria(getUser(value)));
+								criterias.add(new RepliedByUserCriteria(getUser(value)));
 							} else {
 								ProjectScopedCommit commitId = getCommitId(project, value);
 								criterias.add(new OnCommitCriteria(commitId.getProject(), commitId.getCommitId()));
 							}
 						}
-						return new OrCriteria<>(criterias);
+						return Criteria.orCriterias(criterias);
 					}
 
 					@Override
@@ -179,7 +214,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 									throw new IllegalStateException();
 							}
 						}
-						return operator==IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
+						return operator==IsNot? Criteria.andCriterias(criterias): Criteria.orCriterias(criterias);
 					}
 
 					@Override
@@ -270,16 +305,6 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 
 	public static int getOperator(String operatorName) {
 		return AntlrUtils.getLexerRule(CodeCommentQueryLexer.ruleNames, operatorName);
-	}
-
-	@Override
-	public Criteria<CodeComment> getCriteria() {
-		return criteria;
-	}
-
-	@Override
-	public List<EntitySort> getSorts() {
-		return sorts;
 	}
 
 }

@@ -10,10 +10,10 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.criteria.Criteria;
 
-public class SubmittedByMeCriteria extends Criteria<PullRequest> {
+public class SubmittedByMeCriteria extends SubmittedByCriteria {
 
 	private static final long serialVersionUID = 1L;
 
@@ -25,6 +25,11 @@ public class SubmittedByMeCriteria extends Criteria<PullRequest> {
 		} else {
 			throw new ExplicitException("Please login to perform this query");
 		}
+	}
+
+	@Override
+	public User getUser() {
+		return SecurityUtils.getUser();
 	}
 
 	@Override

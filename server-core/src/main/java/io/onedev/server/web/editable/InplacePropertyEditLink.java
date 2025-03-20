@@ -27,7 +27,7 @@ public abstract class InplacePropertyEditLink extends DropdownLink {
 	@Override
 	protected void onInitialize(FloatingPanel dropdown) {
 		super.onInitialize(dropdown);
-		dropdown.add(AttributeAppender.append("class", "inplace-edit inplace-property-edit"));
+		dropdown.add(AttributeAppender.append("class", "inplace-property-edit"));
 	}
 
 	@Override

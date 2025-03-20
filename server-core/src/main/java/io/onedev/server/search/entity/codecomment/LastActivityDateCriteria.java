@@ -20,38 +20,46 @@ public class LastActivityDateCriteria extends Criteria<CodeComment>  {
 
 	private final int operator;
 	
-	private final Date value;
+	private final Date date;
 	
-	private final String rawValue;
+	private final String value;
 	
-	public LastActivityDateCriteria(Date value, String rawValue, int operator) {
+	public LastActivityDateCriteria(Date date, String value, int operator) {
 		this.operator = operator;
+		this.date = date;
 		this.value = value;
-		this.rawValue = rawValue;
+	}
+	
+	public int getOperator() {
+		return operator;
+	}
+
+	public Date getDate() {
+		return date;
 	}
 
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<CodeComment, CodeComment> from, CriteriaBuilder builder) {
 		Path<Date> attribute = CodeCommentQuery.getPath(from, CodeComment.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE);
 		if (operator == CodeCommentQueryLexer.IsUntil)
-			return builder.lessThan(attribute, value);
+			return builder.lessThan(attribute, date);
 		else
-			return builder.greaterThan(attribute, value);
+			return builder.greaterThan(attribute, date);
 	}
 
 	@Override
 	public boolean matches(CodeComment comment) {
 		if (operator == CodeCommentQueryLexer.IsUntil)
-			return comment.getLastActivity().getDate().before(value);
+			return comment.getLastActivity().getDate().before(date);
 		else
-			return comment.getLastActivity().getDate().after(value);
+			return comment.getLastActivity().getDate().after(date);
 	}
 
 	@Override
 	public String toStringWithoutParens() {
 		return quote(CodeComment.NAME_LAST_ACTIVITY_DATE) + " " 
 				+ CodeCommentQuery.getRuleName(operator) + " " 
-				+ quote(rawValue);
+				+ quote(value);
 	}
 
 }

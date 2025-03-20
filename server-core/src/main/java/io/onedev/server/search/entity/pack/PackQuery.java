@@ -53,21 +53,16 @@ public class PackQuery extends EntityQuery<Pack> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Criteria<Pack> criteria;
-	
-	private final List<EntitySort> sorts;
-	
 	public PackQuery(@Nullable Criteria<Pack> criteria, List<EntitySort> sorts) {
-		this.criteria = criteria;
-		this.sorts = sorts;
+		super(criteria, sorts);
 	}
 
 	public PackQuery(@Nullable Criteria<Pack> criteria) {
-		this(criteria, new ArrayList<>());
+		super(criteria, new ArrayList<>());
 	}
 	
 	public PackQuery() {
-		this(null);
+		super(null, new ArrayList<>());
 	}
 	
 	public static PackQuery parse(@Nullable Project project, @Nullable String queryString, boolean withCurrentUserCriteria) {
@@ -118,13 +113,13 @@ public class PackQuery extends EntityQuery<Pack> {
 							if (ctx.PublishedByUser() != null)
 								criterias.add(new PublishedByUserCriteria(getUser(value)));
 							else if (ctx.PublishedByBuild() != null)
-								criterias.add(new PublishedByBuildCriteria(project, value));
+								criterias.add(new PublishedViaBuildCriteria(project, value));
 							else if (ctx.PublishedByProject() != null)
-								criterias.add(new PublishedByProjectCriteria(value));
+								criterias.add(new PublishedViaProjectCriteria(value));
 							else
 								throw new ExplicitException("Unexpected criteria: " + ctx.operator.getText());
-						}
-						return new OrCriteria<>(criterias);
+						}	
+						return Criteria.orCriterias(criterias);
 					}
 					
 					@Override
@@ -170,7 +165,7 @@ public class PackQuery extends EntityQuery<Pack> {
 									throw new IllegalStateException();
 							}
 						} 
-						return operator==IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
+						return operator==IsNot? Criteria.andCriterias(criterias): Criteria.orCriterias(criterias);
 					}
 
 					@Override
@@ -260,16 +255,6 @@ public class PackQuery extends EntityQuery<Pack> {
 	
 	public static int getOperator(String operatorName) {
 		return AntlrUtils.getLexerRule(PackQueryLexer.ruleNames, operatorName);
-	}
-	
-	@Override
-	public Criteria<Pack> getCriteria() {
-		return criteria;
-	}
-
-	@Override
-	public List<EntitySort> getSorts() {
-		return sorts;
 	}
 	
 	public static PackQuery merge(PackQuery query1, PackQuery query2) {

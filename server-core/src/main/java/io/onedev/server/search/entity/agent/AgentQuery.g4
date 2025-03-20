@@ -1,8 +1,8 @@
 grammar AgentQuery;
 
 query
-    : WS* criteria WS* (WS OrderBy WS+ order (WS+ And WS+ order)* WS*)? EOF
-    | WS* OrderBy WS+ order (WS+ And WS+ order)* WS* EOF
+    : WS* criteria WS* (WS OrderBy WS+ order (WS* orderOperator=Comma WS* order)* WS*)? EOF
+    | WS* OrderBy WS+ order (WS* orderOperator=Comma WS* order)* WS* EOF
     | WS* EOF
     ;
 
@@ -22,7 +22,7 @@ order
 	;
 
 multipleQuoted
-    : Quoted(','Quoted)*
+    : Quoted(WS* Comma WS* Quoted)*
     ;
 
 Online
@@ -104,6 +104,10 @@ RParens
 Quoted
     : '"' ('\\'.|~[\\"])+? '"'
     ;
+
+Comma
+	: ','
+	;
 
 WS
     : ' '

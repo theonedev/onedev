@@ -1,28 +1,44 @@
 package io.onedev.server.search.entity;
 
-import com.google.common.base.Splitter;
-import io.onedev.commons.codeassist.FenceAware;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.*;
-import io.onedev.server.entityreference.BuildReference;
-import io.onedev.server.entityreference.IssueReference;
-import io.onedev.server.entityreference.PullRequestReference;
-import io.onedev.server.model.*;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.util.ProjectScopedRevision;
-import io.onedev.server.util.criteria.Criteria;
-
-import javax.annotation.Nullable;
-import javax.persistence.criteria.Path;
-import javax.validation.ValidationException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+import javax.persistence.criteria.Path;
+import javax.validation.ValidationException;
+
+import com.google.common.base.Splitter;
+
+import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.IterationManager;
+import io.onedev.server.entitymanager.LabelSpecManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entityreference.BuildReference;
+import io.onedev.server.entityreference.IssueReference;
+import io.onedev.server.entityreference.PullRequestReference;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.model.LabelSpec;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.ProjectScopedRevision;
+import io.onedev.server.util.criteria.Criteria;
 
 public abstract class EntityQuery<T extends AbstractEntity> implements Serializable {
 
@@ -30,10 +46,31 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	
 	private static final Pattern INSIDE_QUOTE = Pattern.compile("\"([^\"\\\\]|\\\\.)*");
 
-	@Nullable
-	public abstract Criteria<T> getCriteria();
+	private Criteria<T> criteria;
 
-	public abstract List<EntitySort> getSorts();
+	private List<EntitySort> sorts;
+
+	public EntityQuery(@Nullable Criteria<T> criteria, List<EntitySort> sorts) {
+		this.criteria = criteria;
+		this.sorts = sorts;
+	}
+
+	@Nullable
+	public Criteria<T> getCriteria() {
+		return criteria;
+	}
+
+	public void setCriteria(@Nullable Criteria<T> criteria) {
+		this.criteria = criteria;
+	}
+
+	public List<EntitySort> getSorts() {
+		return sorts;
+	}
+
+	public void setSorts(List<EntitySort> sorts) {
+		this.sorts = sorts;
+	}
 	
 	public static String getValue(String token) {
 		return StringUtils.unescape(FenceAware.unfence(token));
@@ -178,7 +215,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			builder.append(getCriteria().toString()).append(" ");
 		if (!getSorts().isEmpty()) {
 			builder.append("order by ");
-			builder.append(getSorts().stream().map(it->it.toString()).collect(Collectors.joining(" and ")));
+			builder.append(getSorts().stream().map(it->it.toString()).collect(Collectors.joining(", ")));
 		}
 		String toStringValue = builder.toString().trim();
 		if (toStringValue.length() == 0)

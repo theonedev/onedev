@@ -630,3 +630,8 @@ disabled look for disabled choices in the results dropdown
       background-position: 100% -21px !important;
   }
 }
+
+.select2-result-label {
+    word-wrap: break-word;
+    word-break: break-all;
+}

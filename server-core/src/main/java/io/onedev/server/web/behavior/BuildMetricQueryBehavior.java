@@ -122,7 +122,7 @@ public class BuildMetricQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (suggestedLiteral.equals(",")) 
-			return Optional.of("add another value");
+			return Optional.of("or match another value");
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {

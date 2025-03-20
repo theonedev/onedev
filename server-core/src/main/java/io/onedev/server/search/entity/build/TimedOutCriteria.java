@@ -9,9 +9,8 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.criteria.Criteria;
 
-public class TimedOutCriteria extends Criteria<Build> {
+public class TimedOutCriteria extends StatusCriteria {
 
 	private static final long serialVersionUID = 1L;
 
@@ -29,6 +28,11 @@ public class TimedOutCriteria extends Criteria<Build> {
 	@Override
 	public String toStringWithoutParens() {
 		return BuildQuery.getRuleName(BuildQueryLexer.TimedOut);
+	}
+
+	@Override
+	public Build.Status getStatus() {
+		return Build.Status.TIMED_OUT;
 	}
 
 }

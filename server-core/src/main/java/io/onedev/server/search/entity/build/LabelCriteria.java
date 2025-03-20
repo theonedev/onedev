@@ -25,6 +25,10 @@ public class LabelCriteria extends Criteria<Build> {
 		this.operator = operator;
 	}
 
+	public LabelSpec getLabelSpec() {
+		return labelSpec;
+	}
+
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		var labelQuery = query.subquery(BuildLabel.class);

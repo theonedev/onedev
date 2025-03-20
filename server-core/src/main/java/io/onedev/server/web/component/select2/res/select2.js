@@ -691,6 +691,9 @@ the specific language governing permissions and limitations under the Apache Lic
             }
 
             if (opts.element.is(":disabled") || opts.element.is("[readonly='readonly']")) this.disable();
+            var $floating = $(this.container).closest(".floating");
+            if ($floating.length != 0) 
+                $(document).trigger("afterElementReplace", $floating.attr("id"));
         },
 
         // abstract

@@ -26,6 +26,10 @@ public abstract class PersonCriteria extends CommitCriteria {
 		this.values = values;
 	}
 
+	public List<String> getValues() {
+		return values;
+	}
+
 	private boolean matches(String value, PersonIdent person) {
 		String formatted = String.format("%s <%s>", person.getName(), person.getEmailAddress());
 		return WildcardUtils.matchString(value, formatted);

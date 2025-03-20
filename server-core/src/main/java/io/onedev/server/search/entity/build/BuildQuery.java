@@ -1,5 +1,56 @@
 package io.onedev.server.search.entity.build;
 
+import static io.onedev.server.model.AbstractEntity.NAME_NUMBER;
+import static io.onedev.server.model.Build.NAME_BRANCH;
+import static io.onedev.server.model.Build.NAME_COMMIT;
+import static io.onedev.server.model.Build.NAME_FINISH_DATE;
+import static io.onedev.server.model.Build.NAME_JOB;
+import static io.onedev.server.model.Build.NAME_LABEL;
+import static io.onedev.server.model.Build.NAME_PENDING_DATE;
+import static io.onedev.server.model.Build.NAME_PROJECT;
+import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
+import static io.onedev.server.model.Build.NAME_RUNNING_DATE;
+import static io.onedev.server.model.Build.NAME_STATUS;
+import static io.onedev.server.model.Build.NAME_SUBMIT_DATE;
+import static io.onedev.server.model.Build.NAME_TAG;
+import static io.onedev.server.model.Build.NAME_VERSION;
+import static io.onedev.server.model.Build.QUERY_FIELDS;
+import static io.onedev.server.model.Build.SORT_FIELDS;
+import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
+import static io.onedev.server.search.entity.build.BuildQueryParser.Cancelled;
+import static io.onedev.server.search.entity.build.BuildQueryParser.CancelledByMe;
+import static io.onedev.server.search.entity.build.BuildQueryParser.Failed;
+import static io.onedev.server.search.entity.build.BuildQueryParser.Finished;
+import static io.onedev.server.search.entity.build.BuildQueryParser.Is;
+import static io.onedev.server.search.entity.build.BuildQueryParser.IsEmpty;
+import static io.onedev.server.search.entity.build.BuildQueryParser.IsGreaterThan;
+import static io.onedev.server.search.entity.build.BuildQueryParser.IsLessThan;
+import static io.onedev.server.search.entity.build.BuildQueryParser.IsNot;
+import static io.onedev.server.search.entity.build.BuildQueryParser.IsNotEmpty;
+import static io.onedev.server.search.entity.build.BuildQueryParser.IsSince;
+import static io.onedev.server.search.entity.build.BuildQueryParser.IsUntil;
+import static io.onedev.server.search.entity.build.BuildQueryParser.Pending;
+import static io.onedev.server.search.entity.build.BuildQueryParser.Running;
+import static io.onedev.server.search.entity.build.BuildQueryParser.SubmittedByMe;
+import static io.onedev.server.search.entity.build.BuildQueryParser.Successful;
+import static io.onedev.server.search.entity.build.BuildQueryParser.TimedOut;
+import static io.onedev.server.search.entity.build.BuildQueryParser.Waiting;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -8,43 +59,39 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.build.BuildQueryParser.AndCriteriaContext;
+import io.onedev.server.search.entity.build.BuildQueryParser.CriteriaContext;
+import io.onedev.server.search.entity.build.BuildQueryParser.FieldOperatorCriteriaContext;
+import io.onedev.server.search.entity.build.BuildQueryParser.FieldOperatorValueCriteriaContext;
+import io.onedev.server.search.entity.build.BuildQueryParser.FuzzyCriteriaContext;
+import io.onedev.server.search.entity.build.BuildQueryParser.NotCriteriaContext;
+import io.onedev.server.search.entity.build.BuildQueryParser.OperatorCriteriaContext;
+import io.onedev.server.search.entity.build.BuildQueryParser.OperatorValueCriteriaContext;
+import io.onedev.server.search.entity.build.BuildQueryParser.OrCriteriaContext;
+import io.onedev.server.search.entity.build.BuildQueryParser.OrderContext;
+import io.onedev.server.search.entity.build.BuildQueryParser.ParensCriteriaContext;
+import io.onedev.server.search.entity.build.BuildQueryParser.QueryContext;
+import io.onedev.server.search.entity.build.BuildQueryParser.ReferenceCriteriaContext;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
-import org.antlr.v4.runtime.*;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import static io.onedev.server.model.AbstractEntity.NAME_NUMBER;
-import static io.onedev.server.model.Build.*;
-import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
-import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
-import static io.onedev.server.search.entity.build.BuildQueryParser.*;
 
 public class BuildQuery extends EntityQuery<Build> {
 
 	private static final long serialVersionUID = 1L;
-
-	private final Criteria<Build> criteria;
-	
-	private final List<EntitySort> sorts;
 	
 	public BuildQuery(@Nullable Criteria<Build> criteria, List<EntitySort> sorts) {
-		this.criteria = criteria;
-		this.sorts = sorts;
+		super(criteria, sorts);
 	}
 
 	public BuildQuery(@Nullable Criteria<Build> criteria) {
-		this(criteria, new ArrayList<>());
+		super(criteria, new ArrayList<>());
 	}
 	
 	public BuildQuery() {
-		this(null);
+		super(null, new ArrayList<>());
 	}
 	
 	public static BuildQuery parse(@Nullable Project project, @Nullable String queryString, 
@@ -128,9 +175,9 @@ public class BuildQuery extends EntityQuery<Build> {
 						for (var quoted: ctx.criteriaValue.Quoted()) {
 							String value = getValue(quoted.getText());
 							if (ctx.SubmittedBy() != null)
-								criterias.add(new SubmittedByCriteria(getUser(value)));
+								criterias.add(new SubmittedByUserCriteria(getUser(value)));
 							else if (ctx.CancelledBy() != null)
-								criterias.add(new CancelledByCriteria(getUser(value)));
+								criterias.add(new CancelledByUserCriteria(getUser(value)));
 							else if (ctx.FixedIssue() != null)
 								criterias.add(new FixedIssueCriteria(project, value));
 							else if (ctx.DependsOn() != null)
@@ -142,7 +189,7 @@ public class BuildQuery extends EntityQuery<Build> {
 							else
 								throw new RuntimeException("Unexpected criteria: " + ctx.operator.getText());
 						}
-						return new OrCriteria<>(criterias);
+						return Criteria.orCriterias(criterias);
 					}
 					
 					@Override
@@ -204,13 +251,6 @@ public class BuildQuery extends EntityQuery<Build> {
 										case NAME_PROJECT:
 											criterias.add(new ProjectCriteria(value, operator));
 											break;
-										case NAME_STATUS:
-											Status status = Status.of(value);
-											if (status != null)
-												criterias.add(new StatusCriteria(status, operator));
-											else
-												throw new ExplicitException("Invalid status: " + value);
-											break;
 										case NAME_COMMIT:
 											ProjectScopedCommit commitId = getCommitId(project, value);
 											criterias.add(new CommitCriteria(commitId.getProject(), commitId.getCommitId(), operator));
@@ -248,7 +288,7 @@ public class BuildQuery extends EntityQuery<Build> {
 									throw new IllegalStateException();
 							}
 						}
-						return operator==IsNot? new AndCriteria<>(criterias): new OrCriteria<>(criterias);
+						return operator==IsNot? Criteria.andCriterias(criterias): Criteria.orCriterias(criterias);
 					}
 					
 					@Override
@@ -354,17 +394,7 @@ public class BuildQuery extends EntityQuery<Build> {
 	public static int getOperator(String operatorName) {
 		return AntlrUtils.getLexerRule(BuildQueryLexer.ruleNames, operatorName);
 	}
-	
-	@Override
-	public Criteria<Build> getCriteria() {
-		return criteria;
-	}
-
-	@Override
-	public List<EntitySort> getSorts() {
-		return sorts;
-	}
-	
+		
 	public static BuildQuery merge(BuildQuery query1, BuildQuery query2) {
 		List<Criteria<Build>> criterias = new ArrayList<>();
 		if (query1.getCriteria() != null)

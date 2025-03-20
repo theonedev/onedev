@@ -1,39 +1,16 @@
 package io.onedev.server.web.component.commit.list;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.command.RevListOptions;
-import io.onedev.server.git.service.GitService;
-import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.search.commit.*;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Constants;
-import io.onedev.server.util.ProjectAndRevision;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.behavior.CommitQueryBehavior;
-import io.onedev.server.web.behavior.RunTaskBehavior;
-import io.onedev.server.web.component.commit.message.CommitMessagePanel;
-import io.onedev.server.web.component.commit.status.CommitStatusLink;
-import io.onedev.server.web.component.commit.status.CommitStatusSupport;
-import io.onedev.server.web.component.contributorpanel.ContributorPanel;
-import io.onedev.server.web.component.gitsignature.SignatureStatusPanel;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
-import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
-import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.util.QuerySaveSupport;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+import java.util.regex.Pattern;
+
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -60,6 +37,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
@@ -70,9 +48,47 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.regex.Pattern;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.command.RevListOptions;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.search.commit.CommitCriteria;
+import io.onedev.server.search.commit.CommitQuery;
+import io.onedev.server.search.commit.FuzzyCriteria;
+import io.onedev.server.search.commit.MessageCriteria;
+import io.onedev.server.search.commit.PathCriteria;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Constants;
+import io.onedev.server.util.ProjectAndRevision;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.behavior.CommitQueryBehavior;
+import io.onedev.server.web.behavior.RunTaskBehavior;
+import io.onedev.server.web.component.commit.message.CommitMessagePanel;
+import io.onedev.server.web.component.commit.status.CommitStatusLink;
+import io.onedev.server.web.component.commit.status.CommitStatusSupport;
+import io.onedev.server.web.component.contributorpanel.ContributorPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.gitsignature.SignatureStatusPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.util.QuerySaveSupport;
 
 public abstract class CommitListPanel extends Panel {
 
@@ -98,7 +114,7 @@ public abstract class CommitListPanel extends Panel {
 					error(e.getMessage());
 					return null;
 				} else {
-					info("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and author(robin)");
+					info("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ author(robin)");
 					parsedQuery = new CommitQuery(Lists.newArrayList(new FuzzyCriteria(Lists.newArrayList(queryString))));
 				}
 			}
@@ -185,10 +201,6 @@ public abstract class CommitListPanel extends Panel {
 		
 	};
 	
-	private GitService getGitService() {
-		return OneDev.getInstance(GitService.class);
-	}
-	
 	private final IModel<Map<String, List<String>>> labelsModel = new LoadableDetachableModel<Map<String, List<String>>>() {
 		
 		@Override
@@ -223,6 +235,8 @@ public abstract class CommitListPanel extends Panel {
 	
 	private Component saveQueryLink;
 	
+	private TextField<String> queryInput;
+
 	private boolean querySubmitted = true;
 	
 	public CommitListPanel(String id, IModel<String> queryModel) {
@@ -326,7 +340,38 @@ public abstract class CommitListPanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
-		TextField<String> queryInput = new TextField<String>("input", queryStringModel);
+		add(new DropdownLink("filter") {
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				return new CommitFilterPanel(id, new IModel<CommitQuery>() {
+					@Override
+					public void detach() {
+					}
+					@Override
+					public CommitQuery getObject() {
+						return queryModel.getObject() != null? queryModel.getObject() : new CommitQuery(new ArrayList<>());
+					}
+					@Override
+					public void setObject(CommitQuery object) {
+						CommitListPanel.this.getFeedbackMessages().clear();
+						queryModel.setObject(object);
+						queryStringModel.setObject(object.toString());
+						var target = RequestCycle.get().find(AjaxRequestTarget.class);
+						target.add(queryInput);
+						doQuery(target);	
+					}
+				}) {
+
+					@Override
+					protected Project getProject() {
+						return CommitListPanel.this.getProject();
+					}
+					
+				};
+			}
+		});
+
+		queryInput = new TextField<String>("input", queryStringModel);
 		queryInput.add(new CommitQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
@@ -761,6 +806,10 @@ public abstract class CommitListPanel extends Panel {
 		String jsonOfCommits = asJSON(commitsModel.getObject().current);
 		String script = String.format("onedev.server.commitList.onDomReady('%s', %s);", body.getMarkupId(), jsonOfCommits);		
 		response.render(OnDomReadyHeaderItem.forScript(script));
+	}
+	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
 	}
 	
 	/*

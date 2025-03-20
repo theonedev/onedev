@@ -16,7 +16,7 @@ criteria
     ;
 
 multipleQuoted
-    : Quoted(','Quoted)*
+    : Quoted(WS* Comma WS* Quoted)*
     ;
 
 BuildIsSuccessful
@@ -74,6 +74,10 @@ RParens
 Quoted
     : '"' ('\\'.|~[\\"])+? '"'
     ;
+
+Comma
+	: ','
+	;
 
 WS
     : ' '

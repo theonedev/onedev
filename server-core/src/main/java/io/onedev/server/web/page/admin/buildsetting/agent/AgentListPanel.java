@@ -1,30 +1,13 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.model.Agent;
-import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.agent.AgentQuery;
-import io.onedev.server.search.entity.agent.FuzzyCriteria;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.behavior.AgentQueryBehavior;
-import io.onedev.server.web.component.AgentStatusBadge;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.SortEditPanel;
-import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
-import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
-import io.onedev.server.web.util.QuerySaveSupport;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -56,8 +39,32 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import javax.annotation.Nullable;
-import java.util.*;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.model.Agent;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.agent.AgentQuery;
+import io.onedev.server.search.entity.agent.FuzzyCriteria;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.behavior.AgentQueryBehavior;
+import io.onedev.server.web.component.AgentStatusBadge;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
+import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.sortedit.SortEditPanel;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
 class AgentListPanel extends Panel {
 	
@@ -190,6 +197,30 @@ class AgentListPanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
+		add(new DropdownLink("filter") {
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				return new AgentFilterPanel(id, new IModel<EntityQuery<Agent>>() {
+					@Override
+					public void detach() {
+					}
+					@Override
+					public EntityQuery<Agent> getObject() {
+						return queryModel.getObject() != null? queryModel.getObject() : new AgentQuery();
+					}
+					@Override
+					public void setObject(EntityQuery<Agent> object) {
+						AgentListPanel.this.getFeedbackMessages().clear();
+						queryModel.setObject((AgentQuery) object);
+						queryStringModel.setObject(object.toString());
+						var target = RequestCycle.get().find(AjaxRequestTarget.class);
+						target.add(queryInput);
+						doQuery(target);	
+					}
+				});
+			}
+		});
+
 		add(new DropdownLink("orderBy") {
 
 			@Override
