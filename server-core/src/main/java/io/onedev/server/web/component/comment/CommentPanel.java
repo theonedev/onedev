@@ -208,7 +208,7 @@ public abstract class CommentPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getAuthUser() != null && getComment() != null);
+				setVisible(isQuoteEnabled() && SecurityUtils.getAuthUser() != null && getComment() != null);
 			}
 			
 		});
@@ -234,19 +234,23 @@ public abstract class CommentPanel extends Panel {
 			
 		});
 
-		viewer.add(new ReactionListPanel("reactions") {
-			
+		if (getReactionSupport() != null) {
+			viewer.add(new ReactionListPanel("reactions") {
+				
 			@Override
-			protected Collection<? extends EntityReaction> getReactions() {
-				return CommentPanel.this.getReactions();
-			}
+				protected Collection<? extends EntityReaction> getReactions() {
+					return getReactionSupport().getReactions();
+				}
 
-			@Override
-			protected void onToggleEmoji(AjaxRequestTarget target, String emoji) {
-				CommentPanel.this.onToggleEmoji(target, emoji);
-			}
-			
-		});
+				@Override
+				protected void onToggleEmoji(AjaxRequestTarget target, String emoji) {
+					getReactionSupport().onToggleEmoji(target, emoji);
+				}
+				
+			});
+		} else {
+			viewer.add(new WebMarkupContainer("reactions"));
+		}
 		
 		viewer.add(newMoreActions("moreActions"));
 		
@@ -297,8 +301,11 @@ public abstract class CommentPanel extends Panel {
 		return new WebMarkupContainer("moreActions").setVisible(false);
 	}
 	
-	protected abstract Collection<? extends EntityReaction> getReactions();
+	@Nullable
+	protected abstract ReactionSupport getReactionSupport();
 	
-	protected abstract void onToggleEmoji(AjaxRequestTarget target, String emoji);
-	
+	protected boolean isQuoteEnabled() {
+		return true;
+	}
+
 }

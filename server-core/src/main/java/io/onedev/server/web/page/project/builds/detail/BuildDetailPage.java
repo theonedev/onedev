@@ -1,61 +1,13 @@
 package io.onedev.server.web.page.project.builds.detail;
 
-import com.google.common.collect.Sets;
-import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.JobDependency;
-import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.buildspecmodel.inputspec.InputContext;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.project.build.BuildUpdated;
-import io.onedev.server.job.JobAuthorizationContext;
-import io.onedev.server.job.JobAuthorizationContextAware;
-import io.onedev.server.job.JobContext;
-import io.onedev.server.job.JobManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Build.Status;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.pack.PackSupport;
-import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.search.entity.build.BuildQuery;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.terminal.TerminalManager;
-import io.onedev.server.util.ProjectScope;
-import io.onedev.server.web.WebSession;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
-import io.onedev.server.web.component.build.side.BuildSidePanel;
-import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.entity.nav.EntityNavPanel;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.job.joblist.JobListPanel;
-import io.onedev.server.web.component.link.BuildSpecLink;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.component.modal.message.MessageModal;
-import io.onedev.server.web.component.sideinfo.SideInfoLink;
-import io.onedev.server.web.component.sideinfo.SideInfoPanel;
-import io.onedev.server.web.component.tabbable.Tab;
-import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
-import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
-import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
-import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
-import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
-import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
-import io.onedev.server.web.page.project.builds.detail.pack.BuildPacksPage;
-import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.util.BuildAware;
-import io.onedev.server.web.util.ConfirmClickModifier;
-import io.onedev.server.web.util.Cursor;
-import io.onedev.server.web.util.CursorSupport;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+
+import javax.persistence.EntityNotFoundException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -79,12 +31,63 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import javax.persistence.EntityNotFoundException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import com.google.common.collect.Sets;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.JobDependency;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.job.JobAuthorizationContext;
+import io.onedev.server.job.JobAuthorizationContextAware;
+import io.onedev.server.job.JobContext;
+import io.onedev.server.job.JobManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.pack.PackSupport;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.terminal.TerminalManager;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.build.side.BuildSidePanel;
+import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.comment.CommentPanel;
+import io.onedev.server.web.component.comment.ReactionSupport;
+import io.onedev.server.web.component.entity.nav.EntityNavPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.job.joblist.JobListPanel;
+import io.onedev.server.web.component.link.BuildSpecLink;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.markdown.ContentVersionSupport;
+import io.onedev.server.web.component.modal.message.MessageModal;
+import io.onedev.server.web.component.sideinfo.SideInfoLink;
+import io.onedev.server.web.component.sideinfo.SideInfoPanel;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
+import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
+import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
+import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
+import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
+import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.pack.BuildPacksPage;
+import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.util.BuildAware;
+import io.onedev.server.web.util.ConfirmClickModifier;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.CursorSupport;
+import io.onedev.server.web.util.DeleteCallback;
 
 public abstract class BuildDetailPage extends ProjectPage 
 		implements InputContext, BuildAware, JobAuthorizationContextAware {
@@ -284,34 +287,6 @@ public abstract class BuildDetailPage extends ProjectPage
 
 				}.setOutputMarkupId(true));
 
-				add(new AjaxLink<Void>("edit") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						DescriptionBean bean = new DescriptionBean();
-						bean.setValue(getBuild().getDescription());
-						new BeanEditModalPanel<Serializable>(target, bean) {
-
-							@Override
-							protected String onSave(AjaxRequestTarget target, Serializable bean) {
-								getBuild().setDescription(((DescriptionBean)bean).getValue());
-								OneDev.getInstance(BuildManager.class).update(getBuild());
-								OneDev.getInstance(ListenerRegistry.class).post(new BuildUpdated(getBuild()));
-								((BasePage)getPage()).notifyObservablesChange(target, getBuild().getChangeObservables());
-								close();
-								return null;
-							}
-
-						};
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(SecurityUtils.canManageBuild(getBuild()));
-					}
-
-				});
 				add(new AjaxLink<Void>("terminal") {
 
 					private TerminalManager getTerminalManager() {
@@ -421,23 +396,76 @@ public abstract class BuildDetailPage extends ProjectPage
 		
 		add(jobNotFoundContainer);
 		
-		add(new MarkdownViewer("description", new AbstractReadOnlyModel<>() {
-
+		add(new CommentPanel("description") {
+			
 			@Override
-			public String getObject() {
+			protected String getComment() {
 				return getBuild().getDescription();
 			}
 
-		}, null) {
+			@Override
+			protected void onSaveComment(AjaxRequestTarget target, String comment) {
+				getBuild().setDescription(comment);
+				OneDev.getInstance(BuildManager.class).update(getBuild());
+			}
+			
+			@Override
+			protected Project getProject() {
+				return getBuild().getProject();
+			}
 
+			@Override
+			protected AttachmentSupport getAttachmentSupport() {
+				return null;
+			}
+
+			@Override
+			protected boolean canManageComment() {
+				return SecurityUtils.canManageBuild(getBuild());
+			}
+
+			@Override
+			protected String getRequiredLabel() {
+				return null;
+			}
+
+			@Override
+			protected String getEmptyDescription() {
+				return "No description";
+			}
+
+			@Override
+			protected ContentVersionSupport getContentVersionSupport() {
+				return null;
+			}
+
+			@Override
+			protected DeleteCallback getDeleteCallback() {
+				return null;
+			}
+
+			@Override
+			protected String getAutosaveKey() {
+				return "build:" + getBuild().getId() + ":description";
+			}
+
+			@Override
+			protected ReactionSupport getReactionSupport() {
+				return null;
+			}
+
+			@Override
+			protected boolean isQuoteEnabled() {
+				return false;
+			}
+			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getBuild().getDescription() != null);
+				setVisible(getBuild().getDescription() != null || SecurityUtils.canManageBuild(getBuild()));
 			}
-			
-		}.setOutputMarkupPlaceholderTag(true).add(newBuildObserver(getBuild().getId())));
-		
+		});
+
 		add(new Tabbable("buildTabs", new LoadableDetachableModel<>() {
 
 			@Override

@@ -26,6 +26,7 @@ import io.onedev.server.model.support.EntityReaction;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.comment.CommentPanel;
+import io.onedev.server.web.component.comment.ReactionSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
@@ -136,16 +137,23 @@ class PullRequestCommentPanel extends Panel {
 			}
 
 			@Override
-			protected Collection<? extends EntityReaction> getReactions() {
-				return PullRequestCommentPanel.this.getComment().getReactions();
-			}
+			protected ReactionSupport getReactionSupport() {
+				return new ReactionSupport() {
 
-			@Override
-			protected void onToggleEmoji(AjaxRequestTarget target, String emoji) {
-				OneDev.getInstance(PullRequestCommentReactionManager.class).toggleEmoji(
-						SecurityUtils.getUser(), 
-						PullRequestCommentPanel.this.getComment(), 
-						emoji);
+					@Override
+					public Collection<? extends EntityReaction> getReactions() {
+						return PullRequestCommentPanel.this.getComment().getReactions();
+					}
+		
+					@Override
+					public void onToggleEmoji(AjaxRequestTarget target, String emoji) {
+						OneDev.getInstance(PullRequestCommentReactionManager.class).toggleEmoji(
+								SecurityUtils.getUser(), 
+								PullRequestCommentPanel.this.getComment(), 
+								emoji);
+					}
+							
+				};
 			}
 			
 		});

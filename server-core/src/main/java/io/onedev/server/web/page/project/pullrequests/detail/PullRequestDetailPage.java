@@ -112,6 +112,7 @@ import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.comment.CommentPanel;
+import io.onedev.server.web.component.comment.ReactionSupport;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.reference.EntityReferencePanel;
@@ -1687,16 +1688,22 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 
 			@Override
-			protected Collection<? extends EntityReaction> getReactions() {
-				return getPullRequest().getReactions();
-			}
+			protected ReactionSupport getReactionSupport() {
+				return new ReactionSupport() {
 
-			@Override
-			protected void onToggleEmoji(AjaxRequestTarget target, String emoji) {
-				OneDev.getInstance(PullRequestReactionManager.class).toggleEmoji(
-						SecurityUtils.getUser(), 
-						getPullRequest(), 
-						emoji);
+					@Override
+					public Collection<? extends EntityReaction> getReactions() {
+						return getPullRequest().getReactions();
+					}
+	
+					@Override
+					public void onToggleEmoji(AjaxRequestTarget target, String emoji) {
+						OneDev.getInstance(PullRequestReactionManager.class).toggleEmoji(
+								SecurityUtils.getUser(), 
+								getPullRequest(), 
+								emoji);
+					}
+				};
 			}
 			
 		});

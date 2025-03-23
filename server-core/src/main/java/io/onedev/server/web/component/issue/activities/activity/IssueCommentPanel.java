@@ -24,6 +24,7 @@ import io.onedev.server.model.support.EntityReaction;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.comment.CommentPanel;
+import io.onedev.server.web.component.comment.ReactionSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
@@ -60,6 +61,11 @@ class IssueCommentPanel extends Panel {
 			@Override
 			protected String getComment() {
 				return IssueCommentPanel.this.getComment().getContent();
+			}
+
+			@Override
+			protected boolean isQuoteEnabled() {
+				return true;
 			}
 
 			@Override
@@ -124,18 +130,25 @@ class IssueCommentPanel extends Panel {
 			}
 
 			@Override
-			protected Collection<? extends EntityReaction> getReactions() {
-				return IssueCommentPanel.this.getComment().getReactions();
+			protected ReactionSupport getReactionSupport() {
+				return new ReactionSupport() {
+
+					@Override
+					public Collection<? extends EntityReaction> getReactions() {
+						return IssueCommentPanel.this.getComment().getReactions();
+					}
+		
+					@Override
+					public void onToggleEmoji(AjaxRequestTarget target, String emoji) {
+						OneDev.getInstance(IssueCommentReactionManager.class).toggleEmoji(
+								SecurityUtils.getUser(), 
+								IssueCommentPanel.this.getComment(), 
+								emoji);
+					}
+					
+				};
 			}
 
-			@Override
-			protected void onToggleEmoji(AjaxRequestTarget target, String emoji) {
-				OneDev.getInstance(IssueCommentReactionManager.class).toggleEmoji(
-						SecurityUtils.getUser(), 
-						IssueCommentPanel.this.getComment(), 
-						emoji);
-			}
-			
 		});
 
 		setMarkupId(getComment().getAnchor());

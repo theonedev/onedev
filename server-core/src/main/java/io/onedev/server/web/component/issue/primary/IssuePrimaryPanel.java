@@ -1,14 +1,13 @@
 package io.onedev.server.web.component.issue.primary;
 
 import static io.onedev.server.security.SecurityUtils.canAccessIssue;
-import static io.onedev.server.security.SecurityUtils.canEditIssueLink;
-import static java.util.stream.Collectors.toList;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -62,6 +61,7 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentPanel;
+import io.onedev.server.web.component.comment.ReactionSupport;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
@@ -95,7 +95,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 		protected List<LinkDescriptor> load() {
 			var linkDescriptors = new ArrayList<LinkDescriptor>();
 			for (LinkSpec spec: linkSpecsModel.getObject()) {
-				if (canEditIssueLink(getProject(), spec)) {
+				if (SecurityUtils.canEditIssueLink(getProject(), spec)) {
 					if (spec.getOpposite() != null) {
 						if (spec.getOpposite().getParsedIssueQuery(getProject()).matches(getIssue()))
 							linkDescriptors.add(new LinkDescriptor(spec, false));
@@ -117,14 +117,14 @@ public abstract class IssuePrimaryPanel extends Panel {
 			List<LinkGroup> linkGroups = new ArrayList<>();
 			for (LinkSpec spec : linkSpecsModel.getObject()) {
 				if (spec.getOpposite() != null) {
-					var targetIssues = getIssue().findLinkedIssues(spec, false).stream().filter(it->canAccessIssue(it)).collect(toList());
+					var targetIssues = getIssue().findLinkedIssues(spec, false).stream().filter(it->canAccessIssue(it)).collect(Collectors.toList());
 					if (!targetIssues.isEmpty())
 						linkGroups.add(new LinkGroup(new LinkDescriptor(spec, false), targetIssues));
-					var sourceIssues = getIssue().findLinkedIssues(spec, true).stream().filter(it->canAccessIssue(it)).collect(toList());
+					var sourceIssues = getIssue().findLinkedIssues(spec, true).stream().filter(it->canAccessIssue(it)).collect(Collectors.toList());
 					if (!sourceIssues.isEmpty())
 						linkGroups.add(new LinkGroup(new LinkDescriptor(spec, true), sourceIssues));
 				} else {
-					var issues = getIssue().findLinkedIssues(spec, false).stream().filter(it->canAccessIssue(it)).collect(toList());
+					var issues = getIssue().findLinkedIssues(spec, false).stream().filter(it->canAccessIssue(it)).collect(Collectors.toList());
 					if (!issues.isEmpty())
 						linkGroups.add(new LinkGroup(new LinkDescriptor(spec, false), issues));
 				}
@@ -213,16 +213,23 @@ public abstract class IssuePrimaryPanel extends Panel {
 			}
 
 			@Override
-			protected Collection<? extends EntityReaction> getReactions() {
-				return getIssue().getReactions();
-			}
-
-			@Override
-			protected void onToggleEmoji(AjaxRequestTarget target, String emoji) {
-				OneDev.getInstance(IssueReactionManager.class).toggleEmoji(
-					SecurityUtils.getUser(), 
-					getIssue(), 
-					emoji);
+			protected ReactionSupport getReactionSupport() {
+				return new ReactionSupport() {
+					
+					@Override
+					public Collection<? extends EntityReaction> getReactions() {
+						return getIssue().getReactions();
+					}
+					
+					@Override
+					public void onToggleEmoji(AjaxRequestTarget target, String emoji) {
+						OneDev.getInstance(IssueReactionManager.class).toggleEmoji(
+							SecurityUtils.getUser(), 
+							getIssue(), 
+							emoji);
+					}
+		
+				};
 			}
 
 			@Override
@@ -300,7 +307,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 				var specId = spec.getId();
 				var opposite = descriptor.isOpposite();
 				
-				boolean canEditIssueLink = canEditIssueLink(getProject(), spec);
+				boolean canEditIssueLink = SecurityUtils.canEditIssueLink(getProject(), spec);
 				
 				String linkName = spec.getName(opposite);
 				item.add(new Label("name", linkName));
