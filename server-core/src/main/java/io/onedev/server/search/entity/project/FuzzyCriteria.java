@@ -3,11 +3,13 @@ package io.onedev.server.search.entity.project;
 import static io.onedev.server.search.entity.project.ProjectQueryLexer.Is;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 
 import com.google.common.base.Splitter;
@@ -47,6 +49,11 @@ public class FuzzyCriteria extends Criteria<Project> {
 				criterias.add(new PathCriteria("**/*" + part + "*/**", Is));
 		}
 		return new AndCriteria<>(criterias);
+	}
+
+	@Override
+	public List<Order> getPreferOrders(CriteriaBuilder builder, From<Project, Project> from) {
+		return List.of(builder.asc(from.get(Project.PROP_PATH_LEN)));
 	}
 
 	@Override

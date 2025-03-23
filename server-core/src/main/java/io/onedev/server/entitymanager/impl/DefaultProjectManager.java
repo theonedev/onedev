@@ -63,6 +63,7 @@ import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -1041,7 +1042,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 		query.where(getPredicates(projectQuery.getCriteria(), query, root, builder));
 
-		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
+		List<Order> orders = new ArrayList<>();
+		if (projectQuery.getCriteria() != null)
+			orders.addAll(projectQuery.getCriteria().getPreferOrders(builder, root));
+
 		for (EntitySort sort : projectQuery.getSorts()) {
 			if (sort.getDirection() == ASCENDING)
 				orders.add(builder.asc(ProjectQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));

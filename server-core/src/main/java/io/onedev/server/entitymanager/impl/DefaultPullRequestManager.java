@@ -38,6 +38,7 @@ import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -906,7 +907,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 
 		query.where(getPredicates(targetProject, requestQuery.getCriteria(), query, root, builder));
 
-		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
+		List<Order> orders = new ArrayList<>();
 		if (requestQuery.getCriteria() != null)
 			orders.addAll(requestQuery.getCriteria().getPreferOrders(builder, root));
 		for (EntitySort sort: requestQuery.getSorts()) {
