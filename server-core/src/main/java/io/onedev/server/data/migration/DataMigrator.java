@@ -7723,4 +7723,32 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate195(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (!element.elementText("status").equals("OPEN")) {
+						if (element.element("closeDate") == null) {
+							element.addElement("closeDate").addAttribute("class", "sql-timestamp").setText(element.element("submitDate").getText().trim());
+						}
+						var closeTimeGroupsElement = element.element("closeTimeGroups");
+						if (closeTimeGroupsElement == null) {
+							closeTimeGroupsElement = element.addElement("closeTimeGroups");
+							var submitTimeGroupsElement = element.element("submitTimeGroups");
+							closeTimeGroupsElement.addElement("day").setText(submitTimeGroupsElement.elementText("day"));
+							closeTimeGroupsElement.addElement("week").setText(submitTimeGroupsElement.elementText("week"));
+							closeTimeGroupsElement.addElement("month").setText(submitTimeGroupsElement.elementText("month"));	
+						}
+						var durationElement = element.element("duration");
+						if (durationElement == null) {
+							element.addElement("duration").setText("0");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }
