@@ -6,6 +6,9 @@
 1. Pull request status criteria of form `"Status" is "<name>"` is removed, use `open`, `merged`, or `discarded` instead
 1. Build status criteria of form `"Status" is "<name>"` is removed, use respective status criteria instead, such as `successful`, `failed`, `running`
 
+In case these changes prevent you accessing the dashboard, suffix the url with `?failsafe=true` to access the dashboard without rendering, and then edit 
+settings of relevant widget to fix the queries
+
 # 11.6.12
 
 ### RESTful API
