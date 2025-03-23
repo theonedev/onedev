@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server-plugin</artifactId>
-		<version>v11.7.5</version>
+		<version>11.7.6</version>
 	</parent>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.mailservice.smtpimap.SmtpImapModule</moduleClass>
