@@ -146,7 +146,11 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 		
 					@Override
 					protected Map<String, String> load() {
-						return choiceValues.stream().collect(Collectors.toMap(it -> it, it -> it));
+						var map = new LinkedHashMap<String, String>();
+						for (var value: choiceValues) {
+							map.put(value, value);
+						}
+						return map;
 					}
 		
 				}, false);
@@ -344,7 +348,10 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 
 			@Override
 			protected List<User> load() {
-				return getUserManager().query();
+				var users = getUserManager().query();
+				var cache = getUserManager().cloneCache();
+				users.sort(cache.comparingDisplayName(new ArrayList<>()));
+				return users;
 			}
 
 		}) {
@@ -389,7 +396,11 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 
 				@Override
 				protected Map<String, String> load() {
-					return getProject().getHierarchyIterations().stream().collect(Collectors.toMap(it -> it.getName(), it -> it.getName()));
+					var map = new LinkedHashMap<String, String>();
+					for (var iteration: getProject().getSortedHierarchyIterations()) {
+						map.put(iteration.getName(), iteration.getName());
+					}
+					return map;
 				}
 
 			}, false);

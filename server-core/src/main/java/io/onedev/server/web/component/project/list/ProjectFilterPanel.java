@@ -138,7 +138,10 @@ class ProjectFilterPanel extends FilterEditPanel<Project> {
 
 			@Override
 			protected List<Project> load() {
-				return new ArrayList<>(SecurityUtils.getAuthorizedProjects(new AccessProject()));
+				var projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new AccessProject()));
+				var cache = getProjectManager().cloneCache();
+				projects.sort(cache.comparingPath());
+				return projects;
 			}
 		}) {
 
@@ -183,8 +186,12 @@ class ProjectFilterPanel extends FilterEditPanel<Project> {
 
 			@Override
 			protected List<Project> load() {
-				return new ArrayList<>(SecurityUtils.getAuthorizedProjects(new AccessProject()));
+				var projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new AccessProject()));
+				var cache = getProjectManager().cloneCache();
+				projects.sort(cache.comparingPath());
+				return projects;
 			}
+
 		}) {
 
 			@Override
@@ -227,8 +234,11 @@ class ProjectFilterPanel extends FilterEditPanel<Project> {
 		}, new LoadableDetachableModel<List<User>>() {
 
 			@Override
-			protected List<User> load() {
-				return getUserManager().query();
+			protected List<User> load() {			
+				var users = getUserManager().query();
+				var cache = getUserManager().cloneCache();
+				users.sort(cache.comparingDisplayName(new ArrayList<>()));
+				return users;
 			}
 
 		}) {

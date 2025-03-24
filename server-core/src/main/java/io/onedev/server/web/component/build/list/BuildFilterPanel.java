@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -146,7 +147,9 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 			@Override
 			protected Map<String, String> load() {
 				var map = new LinkedHashMap<String, String>();
-				for (String jobName: getBuildManager().getAccessibleJobNames(getProject())) {
+				var jobNames = new ArrayList<>(getBuildManager().getAccessibleJobNames(getProject()));
+				Collections.sort(jobNames);
+				for (String jobName: jobNames) {
 					map.put(jobName, jobName);
 				}
 				return map;
@@ -168,47 +171,6 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 			
 		});
 		add(jobChoice);
-
-        var ranAgentChoice = new StringMultiChoice("ranAgent", new IModel<Collection<String>>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public Collection<String> getObject() {
-				var criterias = getMatchingCriterias(getModelObject().getCriteria(), RanOnCriteria.class, null);
-				return criterias.stream().map(it->it.getValue()).collect(toList());
-			}
-
-			@Override
-			public void setObject(Collection<String> object) {	
-				var criterias = Criteria.orCriterias(object.stream().map(it->new RanOnCriteria(it)).collect(toList()));
-				var query = getModelObject();
-				query.setCriteria(setMatchingCriteria(query.getCriteria(), RanOnCriteria.class, criterias, null));
-				getModel().setObject(query);
-			}
-
-		}, new LoadableDetachableModel<Map<String, String>>() {
-
-			@Override
-			protected Map<String, String> load() {
-				var map = new LinkedHashMap<String, String>();
-				for (Agent agent: getAgentManager().query()) {
-					map.put(agent.getName(), agent.getName());
-				}
-				return map;
-			}
-		}, false);
-
-		ranAgentChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
-
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-			}
-			
-		});
-		add(ranAgentChoice);
 
 		var submittedByChoice = new UserMultiChoice("submittedBy", new IModel<Collection<User>>() {
 
@@ -234,7 +196,10 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 
 			@Override
 			protected List<User> load() {
-				return getUserManager().query();
+				var users = getUserManager().query();
+				var cache = getUserManager().cloneCache();
+				users.sort(cache.comparingDisplayName(new ArrayList<>()));
+				return users;
 			}
 
 		}) {
@@ -298,6 +263,49 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 			
 		});
 		add(labelChoice);		
+
+        var ranAgentChoice = new StringMultiChoice("ranAgent", new IModel<Collection<String>>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Collection<String> getObject() {
+				var criterias = getMatchingCriterias(getModelObject().getCriteria(), RanOnCriteria.class, null);
+				return criterias.stream().map(it->it.getValue()).collect(toList());
+			}
+
+			@Override
+			public void setObject(Collection<String> object) {	
+				var criterias = Criteria.orCriterias(object.stream().map(it->new RanOnCriteria(it)).collect(toList()));
+				var query = getModelObject();
+				query.setCriteria(setMatchingCriteria(query.getCriteria(), RanOnCriteria.class, criterias, null));
+				getModel().setObject(query);
+			}
+
+		}, new LoadableDetachableModel<Map<String, String>>() {
+
+			@Override
+			protected Map<String, String> load() {
+				var map = new LinkedHashMap<String, String>();
+				var agents = new ArrayList<>(getAgentManager().query());
+				agents.sort(Comparator.comparing(Agent::getName));
+				for (Agent agent: agents) {
+					map.put(agent.getName(), agent.getName());
+				}
+				return map;
+			}
+		}, false);
+
+		ranAgentChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+			}
+			
+		});
+		add(ranAgentChoice);
 
 		var submittedAfterPicker = new DatePicker("submittedAfter", new IModel<Date>() {
 

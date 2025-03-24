@@ -483,7 +483,7 @@ public abstract class IssueListPanel extends Panel {
 						protected List<Project> load() {
 							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new AccessProject()));
 							
-							ProjectCache cache = getProjectManger().cloneCache();
+							ProjectCache cache = getProjectManager().cloneCache();
 							CollectionUtils.filter(projects, new Predicate<Project>() {
 
 								@Override
@@ -1495,7 +1495,7 @@ public abstract class IssueListPanel extends Panel {
 			
 			private List<Project> getTargetProjects(boolean excludeCurrent) {
 				Collection<Project> collection = SecurityUtils.getAuthorizedProjects(new AccessProject());
-				ProjectCache cache = getProjectManger().cloneCache();
+				ProjectCache cache = getProjectManager().cloneCache();
 				
 				CollectionUtils.filter(collection, new Predicate<Project>() {
 
@@ -1902,7 +1902,7 @@ public abstract class IssueListPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	private ProjectManager getProjectManger() {
+	private ProjectManager getProjectManager() {
 		return OneDev.getInstance(ProjectManager.class);
 	}
 	

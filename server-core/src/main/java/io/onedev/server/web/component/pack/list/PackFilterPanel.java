@@ -121,7 +121,10 @@ class PackFilterPanel extends FilterEditPanel<Pack> {
 
 			@Override
 			protected List<Project> load() {
-				return new ArrayList<>(SecurityUtils.getAuthorizedProjects(new AccessProject()));
+				var projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new AccessProject()));
+				var cache = getProjectManager().cloneCache();
+				projects.sort(cache.comparingPath());
+				return projects;
 			}
 
 		}) {
@@ -166,7 +169,10 @@ class PackFilterPanel extends FilterEditPanel<Pack> {
 
 			@Override
 			protected List<User> load() {
-				return getUserManager().query();
+				var users = getUserManager().query();
+				var cache = getUserManager().cloneCache();
+				users.sort(cache.comparingDisplayName(new ArrayList<>()));
+				return users;
 			}
 
 		}) {

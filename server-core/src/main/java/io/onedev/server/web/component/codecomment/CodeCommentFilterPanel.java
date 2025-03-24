@@ -4,6 +4,7 @@ import static io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer.I
 import static io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer.IsUntil;
 import static java.util.stream.Collectors.toList;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -117,7 +118,10 @@ class CodeCommentFilterPanel extends FilterEditPanel<CodeComment> {
 
 			@Override
 			protected List<User> load() {
-				return getUserManager().query();
+				var users = getUserManager().query();
+				var cache = getUserManager().cloneCache();
+				users.sort(cache.comparingDisplayName(new ArrayList<>()));
+				return users;
 			}
 
 		}) {
