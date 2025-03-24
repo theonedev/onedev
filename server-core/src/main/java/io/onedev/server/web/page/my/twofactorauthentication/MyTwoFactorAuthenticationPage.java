@@ -12,6 +12,8 @@ public class MyTwoFactorAuthenticationPage extends MyPage {
 
 	public MyTwoFactorAuthenticationPage(PageParameters params) {
 		super(params);
+		if (getLoginUser().isServiceAccount())
+			throw new IllegalStateException();
 	}
 	
 	@Override

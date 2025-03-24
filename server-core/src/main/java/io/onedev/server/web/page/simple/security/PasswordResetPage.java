@@ -88,8 +88,12 @@ public class PasswordResetPage extends SimplePage {
 				protected TaskResult runTask(TaskLogger logger) {
 					return OneDev.getInstance(SessionManager.class).call(() -> {
 						User user = getUserManager().findByName(loginNameOrEmail);
-						if (user == null)
+						if (user != null) {
+							if (user.isServiceAccount())
+								throw new ExplicitException("Can not reset password for service account");
+						} else {
 							user = getUserManager().findByVerifiedEmailAddress(loginNameOrEmail);
+						}
 						if (user == null) {
 							throw new ExplicitException("No user found with login name or verified email: " + loginNameOrEmail);
 						} else if (user.getPassword() == null) {

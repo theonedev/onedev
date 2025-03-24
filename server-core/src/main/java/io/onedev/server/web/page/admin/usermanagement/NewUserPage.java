@@ -53,34 +53,38 @@ public class NewUserPage extends AdministrationPage {
 				User userWithSameName = getUserManager().findByName(bean.getName());
 				if (userWithSameName != null) {
 					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
-							"Login name already used by another account");
+							"User name already used by another account");
 				} 
 				
-				if (getEmailAddressManager().findByValue(bean.getEmailAddress()) != null) {
+				if (!bean.isServiceAccount() && getEmailAddressManager().findByValue(bean.getEmailAddress()) != null) {
 					editor.error(new Path(new PathNode.Named(NewUserBean.PROP_EMAIL_ADDRESS)),
 							"Email address already used by another user");
 				} 
-				if (editor.isValid()){
+				if (editor.isValid()) {
 					User user = new User();
 					user.setName(bean.getName());
 					user.setFullName(bean.getFullName());
-					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(bean.getPassword()));
-					
-					EmailAddress emailAddress = new EmailAddress();
-					emailAddress.setValue(bean.getEmailAddress());
-					emailAddress.setOwner(user);
-					emailAddress.setVerificationCode(null);
-					
-					OneDev.getInstance(TransactionManager.class).run(new Runnable() {
-
-						@Override
-						public void run() {
-							getUserManager().create(user);
-							getEmailAddressManager().create(emailAddress);
-						}
+					user.setServiceAccount(bean.isServiceAccount());
+					if (user.isServiceAccount()) {
+						getUserManager().create(user);						
+					} else {
+						user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(bean.getPassword()));
+						EmailAddress emailAddress = new EmailAddress();
+						emailAddress.setValue(bean.getEmailAddress());
+						emailAddress.setOwner(user);
+						emailAddress.setVerificationCode(null);
 						
-					});
-					
+						OneDev.getInstance(TransactionManager.class).run(new Runnable() {
+	
+							@Override
+							public void run() {
+								getUserManager().create(user);
+								getEmailAddressManager().create(emailAddress);
+							}
+							
+						});
+					}
+										
 					Session.get().success("New user created");
 					if (continueToAdd) {
 						bean = new NewUserBean();

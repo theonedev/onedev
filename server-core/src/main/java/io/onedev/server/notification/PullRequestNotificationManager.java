@@ -69,264 +69,269 @@ public class PullRequestNotificationManager {
 	@Transactional
 	@Listen
 	public void on(PullRequestEvent event) {
-		PullRequest request = event.getRequest();
-		User user = event.getUser();
-
-		String url = event.getUrl();
-
-		for (Map.Entry<User, Boolean> entry : new QueryWatchBuilder<PullRequest>() {
-
-			@Override
-			protected PullRequest getEntity() {
-				return request;
-			}
-
-			@Override
-			protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
-				return request.getTargetProject().getPullRequestQueryPersonalizations();
-			}
-
-			@Override
-			protected EntityQuery<PullRequest> parse(String queryString) {
-				return PullRequestQuery.parse(request.getTargetProject(), queryString, true);
-			}
-
-			@Override
-			protected Collection<? extends NamedQuery> getNamedQueries() {
-				return request.getTargetProject().getNamedPullRequestQueries();
-			}
-
-		}.getWatches().entrySet()) {
-			watchManager.watch(request, entry.getKey(), entry.getValue());
-		}
-
-		for (Map.Entry<User, Boolean> entry : new QueryWatchBuilder<PullRequest>() {
-
-			@Override
-			protected PullRequest getEntity() {
-				return request;
-			}
-
-			@Override
-			protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
-				return userManager.query().stream().map(it -> it.getPullRequestQueryPersonalization()).collect(Collectors.toList());
-			}
-
-			@Override
-			protected EntityQuery<PullRequest> parse(String queryString) {
-				return PullRequestQuery.parse(null, queryString, true);
-			}
-
-			@Override
-			protected Collection<? extends NamedQuery> getNamedQueries() {
-				return settingManager.getPullRequestSetting().getNamedQueries();
-			}
-
-		}.getWatches().entrySet()) {
-			watchManager.watch(request, entry.getKey(), entry.getValue());
-		}
-
-		Collection<String> notifiedEmailAddresses;
-		if (event instanceof PullRequestCommentCreated)
-			notifiedEmailAddresses = ((PullRequestCommentCreated) event).getNotifiedEmailAddresses();
-		else
-			notifiedEmailAddresses = new HashSet<>();
-		
-		Collection<User> notifiedUsers = Sets.newHashSet();
-		if (user != null) {
-			if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
-				notifiedUsers.add(user); 
-			if (!user.isSystem())
-				watchManager.watch(request, user, true);
-		}
-
-		User committer = null;
-		if (event instanceof PullRequestUpdated) {
-			PullRequestUpdated pullRequestUpdated = (PullRequestUpdated) event;
-			Collection<User> committers = pullRequestUpdated.getCommitters();
-			if (committers.size() == 1) {
-				committer = committers.iterator().next();
-				notifiedUsers.add(committer);
-			}
-			for (User each : committers) {
-				if (!each.isSystem())
-					watchManager.watch(request, each, true);
-			}
-		}
-
-		String senderName;
-		String summary;
-		if (user != null) {
-			senderName = user.getDisplayName();
-			summary = user.getDisplayName() + " " + event.getActivity();
-		} else if (committer != null) {
-			senderName = null;
-			summary = committer.getDisplayName() + " " + event.getActivity();
-		} else {
-			senderName = null;
-			summary = StringUtils.capitalize(event.getActivity());
-		}
-		
-		var emojis = Emojis.getInstance();
-		String replyAddress = mailManager.getReplyAddress(request);
-		boolean replyable = replyAddress != null;
-
-		Set<User> reviewers = new HashSet<>();
-		Set<User> assignees = new HashSet<>();
-		if (event instanceof PullRequestOpened) {
-			for (PullRequestReview review : request.getReviews()) {
-				if (review.getStatus() == Status.PENDING)
-					reviewers.add(review.getUser());
-			}
-			for (PullRequestAssignment assignment : request.getAssignments())
-				assignees.add(assignment.getUser());
-		} else if (event instanceof PullRequestChanged) {
-			PullRequestChanged changeEvent = (PullRequestChanged) event;
-			PullRequestChangeData changeData = changeEvent.getChange().getData();
-			if ((changeData instanceof PullRequestApproveData
-					|| changeData instanceof PullRequestRequestedForChangesData
-					|| changeData instanceof PullRequestDiscardData)
-					&& request.getSubmitter() != null && !notifiedUsers.contains(request.getSubmitter())) {
-				String subject = String.format(
-						"[Pull Request %s] (%s) %s", 
-						request.getReference(),
-						WordUtils.capitalize(changeData.getActivity()), 
-						emojis.apply(request.getTitle()));
-				String threadingReferences = String.format("<%s-%s@onedev>",
-						changeData.getActivity().replace(' ', '-'), request.getUUID());
-				EmailAddress emailAddress = request.getSubmitter().getPrimaryEmailAddress();
-				if (emailAddress != null && emailAddress.isVerified()) {
-					mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
-							Lists.newArrayList(), Lists.newArrayList(), subject,
-							getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null),
-							getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
-							replyAddress, senderName, threadingReferences);
+		if (event.getUser() == null || !event.getUser().isServiceAccount()) {
+			PullRequest request = event.getRequest();
+			User user = event.getUser();
+	
+			String url = event.getUrl();
+	
+			for (Map.Entry<User, Boolean> entry : new QueryWatchBuilder<PullRequest>() {
+	
+				@Override
+				protected PullRequest getEntity() {
+					return request;
 				}
-				notifiedUsers.add(request.getSubmitter());
-			}
-		} else if (event instanceof PullRequestAssigned) {
-			assignees.add(((PullRequestAssigned) event).getAssignee());
-		} else if (event instanceof PullRequestReviewRequested) {
-			reviewers.add(((PullRequestReviewRequested) event).getReviewer());
-		}
-
-		for (User assignee : assignees) {
-			watchManager.watch(request, assignee, true);
-			if (!notifiedUsers.contains(assignee)) {
-				String subject = String.format(
-						"[Pull Request %s] (Assigned) %s",
-						request.getReference(), 
-						emojis.apply(request.getTitle()));
-				String threadingReferences = String.format("<assigned-%s@onedev>", request.getUUID());
-				String assignmentSummary;
-				if (user != null)
-					assignmentSummary = user.getDisplayName() + " assigned to you";
-				else
-					assignmentSummary = "Assigned to you";
-				EmailAddress emailAddress = assignee.getPrimaryEmailAddress();
-				if (emailAddress != null && emailAddress.isVerified()) {
-					mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
-							Lists.newArrayList(), Lists.newArrayList(), subject,
-							getEmailBody(true, event, assignmentSummary, event.getHtmlBody(), url, replyable, null),
-							getEmailBody(false, event, assignmentSummary, event.getTextBody(), url, replyable, null),
-							replyAddress, senderName, threadingReferences);
+	
+				@Override
+				protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
+					return request.getTargetProject().getPullRequestQueryPersonalizations();
 				}
-				notifiedUsers.add(assignee);
-			}
-		}
-
-		for (User reviewer : reviewers) {
-			watchManager.watch(request, reviewer, true);
-			if (!notifiedUsers.contains(reviewer)) {
-				String subject = String.format(
-						"[Pull Request %s] (Review Request) %s",
-						request.getReference(), 
-						emojis.apply(request.getTitle()));
-				String threadingReferences = String.format("<review-invitation-%s@onedev>", request.getUUID());
-				String reviewInvitationSummary;
-				if (user != null)
-					reviewInvitationSummary = user.getDisplayName() + " requested review from you";
-				else
-					reviewInvitationSummary = "Requested review from you";
-
-				EmailAddress emailAddress = reviewer.getPrimaryEmailAddress();
-				if (emailAddress != null && emailAddress.isVerified()) {
-					mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
-							Lists.newArrayList(), Lists.newArrayList(), subject,
-							getEmailBody(true, event, reviewInvitationSummary, event.getHtmlBody(), url, replyable, null),
-							getEmailBody(false, event, reviewInvitationSummary, event.getTextBody(), url, replyable, null),
-							replyAddress, senderName, threadingReferences);
+	
+				@Override
+				protected EntityQuery<PullRequest> parse(String queryString) {
+					return PullRequestQuery.parse(request.getTargetProject(), queryString, true);
 				}
-				notifiedUsers.add(reviewer);
+	
+				@Override
+				protected Collection<? extends NamedQuery> getNamedQueries() {
+					return request.getTargetProject().getNamedPullRequestQueries();
+				}
+	
+			}.getWatches().entrySet()) {
+				watchManager.watch(request, entry.getKey(), entry.getValue());
 			}
-		}
-		
-		if (event.getCommentText() instanceof MarkdownText) {
-			MarkdownText markdown = (MarkdownText) event.getCommentText();
-			for (String userName : new MentionParser().parseMentions(markdown.getRendered())) {
-				User mentionedUser = userManager.findByName(userName);
-				if (mentionedUser != null) {
-					mentionManager.mention(request, mentionedUser);
-					watchManager.watch(request, mentionedUser, true);
-					if (!isNotified(notifiedEmailAddresses, mentionedUser)) {
-						String subject = String.format(
-								"[Pull Request %s] (Mentioned You) %s", 
-								request.getReference(), 
-								emojis.apply(request.getTitle()));
-						String threadingReferences = String.format("<mentioned-%s@onedev>", request.getUUID());
-
-						EmailAddress emailAddress = mentionedUser.getPrimaryEmailAddress();
-						if (emailAddress != null && emailAddress.isVerified()) {
-							mailManager.sendMailAsync(Sets.newHashSet(emailAddress.getValue()),
-									Sets.newHashSet(), Sets.newHashSet(), subject,
-									getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null),
-									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
-									replyAddress, senderName, threadingReferences);
+	
+			for (Map.Entry<User, Boolean> entry : new QueryWatchBuilder<PullRequest>() {
+	
+				@Override
+				protected PullRequest getEntity() {
+					return request;
+				}
+	
+				@Override
+				protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
+					return userManager.query().stream().map(it -> it.getPullRequestQueryPersonalization()).collect(Collectors.toList());
+				}
+	
+				@Override
+				protected EntityQuery<PullRequest> parse(String queryString) {
+					return PullRequestQuery.parse(null, queryString, true);
+				}
+	
+				@Override
+				protected Collection<? extends NamedQuery> getNamedQueries() {
+					return settingManager.getPullRequestSetting().getNamedQueries();
+				}
+	
+			}.getWatches().entrySet()) {
+				watchManager.watch(request, entry.getKey(), entry.getValue());
+			}
+	
+			Collection<String> notifiedEmailAddresses;
+			if (event instanceof PullRequestCommentCreated)
+				notifiedEmailAddresses = ((PullRequestCommentCreated) event).getNotifiedEmailAddresses();
+			else
+				notifiedEmailAddresses = new HashSet<>();
+			
+			Collection<User> notifiedUsers = Sets.newHashSet();
+			if (user != null) {
+				if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
+					notifiedUsers.add(user); 
+				if (!user.isSystem() && !user.isServiceAccount())
+					watchManager.watch(request, user, true);
+			}
+	
+			User committer = null;
+			if (event instanceof PullRequestUpdated) {
+				PullRequestUpdated pullRequestUpdated = (PullRequestUpdated) event;
+				Collection<User> committers = pullRequestUpdated.getCommitters();
+				if (committers.size() == 1) {
+					committer = committers.iterator().next();
+					notifiedUsers.add(committer);
+				}
+				for (User each : committers) {
+					if (!each.isSystem() && !each.isServiceAccount())
+						watchManager.watch(request, each, true);
+				}
+			}
+	
+			String senderName;
+			String summary;
+			if (user != null) {
+				senderName = user.getDisplayName();
+				summary = user.getDisplayName() + " " + event.getActivity();
+			} else if (committer != null) {
+				senderName = null;
+				summary = committer.getDisplayName() + " " + event.getActivity();
+			} else {
+				senderName = null;
+				summary = StringUtils.capitalize(event.getActivity());
+			}
+			
+			var emojis = Emojis.getInstance();
+			String replyAddress = mailManager.getReplyAddress(request);
+			boolean replyable = replyAddress != null;
+	
+			Set<User> reviewers = new HashSet<>();
+			Set<User> assignees = new HashSet<>();
+			if (event instanceof PullRequestOpened) {
+				for (PullRequestReview review : request.getReviews()) {
+					if (review.getStatus() == Status.PENDING)
+						reviewers.add(review.getUser());
+				}
+				for (PullRequestAssignment assignment : request.getAssignments())
+					assignees.add(assignment.getUser());
+			} else if (event instanceof PullRequestChanged) {
+				PullRequestChanged changeEvent = (PullRequestChanged) event;
+				PullRequestChangeData changeData = changeEvent.getChange().getData();
+				if ((changeData instanceof PullRequestApproveData
+						|| changeData instanceof PullRequestRequestedForChangesData
+						|| changeData instanceof PullRequestDiscardData)
+						&& request.getSubmitter() != null && !notifiedUsers.contains(request.getSubmitter())) {
+					String subject = String.format(
+							"[Pull Request %s] (%s) %s", 
+							request.getReference(),
+							WordUtils.capitalize(changeData.getActivity()), 
+							emojis.apply(request.getTitle()));
+					String threadingReferences = String.format("<%s-%s@onedev>",
+							changeData.getActivity().replace(' ', '-'), request.getUUID());
+					EmailAddress emailAddress = request.getSubmitter().getPrimaryEmailAddress();
+					if (emailAddress != null && emailAddress.isVerified()) {
+						mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
+								Lists.newArrayList(), Lists.newArrayList(), subject,
+								getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null),
+								getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
+								replyAddress, senderName, threadingReferences);
+					}
+					notifiedUsers.add(request.getSubmitter());
+				}
+			} else if (event instanceof PullRequestAssigned) {
+				assignees.add(((PullRequestAssigned) event).getAssignee());
+			} else if (event instanceof PullRequestReviewRequested) {
+				reviewers.add(((PullRequestReviewRequested) event).getReviewer());
+			}
+	
+			for (User assignee : assignees) {
+				if (!assignee.isServiceAccount())
+					watchManager.watch(request, assignee, true);
+				if (!notifiedUsers.contains(assignee)) {
+					String subject = String.format(
+							"[Pull Request %s] (Assigned) %s",
+							request.getReference(), 
+							emojis.apply(request.getTitle()));
+					String threadingReferences = String.format("<assigned-%s@onedev>", request.getUUID());
+					String assignmentSummary;
+					if (user != null)
+						assignmentSummary = user.getDisplayName() + " assigned to you";
+					else
+						assignmentSummary = "Assigned to you";
+					EmailAddress emailAddress = assignee.getPrimaryEmailAddress();
+					if (emailAddress != null && emailAddress.isVerified()) {
+						mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
+								Lists.newArrayList(), Lists.newArrayList(), subject,
+								getEmailBody(true, event, assignmentSummary, event.getHtmlBody(), url, replyable, null),
+								getEmailBody(false, event, assignmentSummary, event.getTextBody(), url, replyable, null),
+								replyAddress, senderName, threadingReferences);
+					}
+					notifiedUsers.add(assignee);
+				}
+			}
+	
+			for (User reviewer : reviewers) {
+				if (!reviewer.isServiceAccount())
+					watchManager.watch(request, reviewer, true);
+				if (!notifiedUsers.contains(reviewer)) {
+					String subject = String.format(
+							"[Pull Request %s] (Review Request) %s",
+							request.getReference(), 
+							emojis.apply(request.getTitle()));
+					String threadingReferences = String.format("<review-invitation-%s@onedev>", request.getUUID());
+					String reviewInvitationSummary;
+					if (user != null)
+						reviewInvitationSummary = user.getDisplayName() + " requested review from you";
+					else
+						reviewInvitationSummary = "Requested review from you";
+	
+					EmailAddress emailAddress = reviewer.getPrimaryEmailAddress();
+					if (emailAddress != null && emailAddress.isVerified()) {
+						mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
+								Lists.newArrayList(), Lists.newArrayList(), subject,
+								getEmailBody(true, event, reviewInvitationSummary, event.getHtmlBody(), url, replyable, null),
+								getEmailBody(false, event, reviewInvitationSummary, event.getTextBody(), url, replyable, null),
+								replyAddress, senderName, threadingReferences);
+					}
+					notifiedUsers.add(reviewer);
+				}
+			}
+			
+			if (event.getCommentText() instanceof MarkdownText) {
+				MarkdownText markdown = (MarkdownText) event.getCommentText();
+				for (String userName : new MentionParser().parseMentions(markdown.getRendered())) {
+					User mentionedUser = userManager.findByName(userName);
+					if (mentionedUser != null) {
+						mentionManager.mention(request, mentionedUser);
+						if (!mentionedUser.isServiceAccount())
+							watchManager.watch(request, mentionedUser, true);
+						if (!isNotified(notifiedEmailAddresses, mentionedUser)) {
+							String subject = String.format(
+									"[Pull Request %s] (Mentioned You) %s", 
+									request.getReference(), 
+									emojis.apply(request.getTitle()));
+							String threadingReferences = String.format("<mentioned-%s@onedev>", request.getUUID());
+	
+							EmailAddress emailAddress = mentionedUser.getPrimaryEmailAddress();
+							if (emailAddress != null && emailAddress.isVerified()) {
+								mailManager.sendMailAsync(Sets.newHashSet(emailAddress.getValue()),
+										Sets.newHashSet(), Sets.newHashSet(), subject,
+										getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null),
+										getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
+										replyAddress, senderName, threadingReferences);
+							}
+							notifiedUsers.add(mentionedUser);
 						}
-						notifiedUsers.add(mentionedUser);
 					}
 				}
 			}
-		}
-
-		if (!event.isMinor()) {
-			Collection<String> bccEmailAddresses = new HashSet<>();
-			if (user != null && !notifiedUsers.contains(user) 
-					&& user.getPrimaryEmailAddress() != null 
-					&& user.getPrimaryEmailAddress().isVerified()) {
-				bccEmailAddresses.add(user.getPrimaryEmailAddress().getValue());
-			}
-
-			for (PullRequestWatch watch : request.getWatches()) {
-				Date visitDate = userInfoManager.getPullRequestVisitDate(watch.getUser(), request);
-				Permission permission = new ProjectPermission(request.getProject(), new ReadCode());
-				if (watch.isWatching()
-						&& (visitDate == null || visitDate.before(event.getDate()))
-						&& (!(event instanceof PullRequestUpdated) || !watch.getUser().equals(request.getSubmitter()))
-						&& !notifiedUsers.contains(watch.getUser())
-						&& !isNotified(notifiedEmailAddresses, watch.getUser())
-						&& watch.getUser().asSubject().isPermitted(permission)) {
-					EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
-					if (emailAddress != null && emailAddress.isVerified())
-						bccEmailAddresses.add(emailAddress.getValue());
+	
+			if (!event.isMinor()) {
+				Collection<String> bccEmailAddresses = new HashSet<>();
+				if (user != null && !notifiedUsers.contains(user) 
+						&& user.getPrimaryEmailAddress() != null 
+						&& user.getPrimaryEmailAddress().isVerified()) {
+					bccEmailAddresses.add(user.getPrimaryEmailAddress().getValue());
 				}
-			}
-
-			if (!bccEmailAddresses.isEmpty()) {
-				String subject = String.format(
-						"[Pull Request %s] (%s) %s",
-						request.getReference(), 
-						(event instanceof PullRequestOpened) ? "Opened" : "Updated", 
-						emojis.apply(request.getTitle()));
-				String threadingReferences = "<" + request.getUUID() + "@onedev>";
-				Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(request));
-				String htmlBody = getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
-				String textBody = getEmailBody(false, event, summary, event.getTextBody(), url, replyable, unsubscribable);
-				mailManager.sendMailAsync(
-						Lists.newArrayList(), Lists.newArrayList(),
-						bccEmailAddresses, subject, htmlBody, textBody,
-						replyAddress, senderName, threadingReferences);
-			}
+	
+				for (PullRequestWatch watch : request.getWatches()) {
+					Date visitDate = userInfoManager.getPullRequestVisitDate(watch.getUser(), request);
+					Permission permission = new ProjectPermission(request.getProject(), new ReadCode());
+					if (watch.isWatching()
+							&& (visitDate == null || visitDate.before(event.getDate()))
+							&& (!(event instanceof PullRequestUpdated) || !watch.getUser().equals(request.getSubmitter()))
+							&& !notifiedUsers.contains(watch.getUser())
+							&& !isNotified(notifiedEmailAddresses, watch.getUser())
+							&& watch.getUser().asSubject().isPermitted(permission)) {
+						EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
+						if (emailAddress != null && emailAddress.isVerified())
+							bccEmailAddresses.add(emailAddress.getValue());
+					}
+				}
+	
+				if (!bccEmailAddresses.isEmpty()) {
+					String subject = String.format(
+							"[Pull Request %s] (%s) %s",
+							request.getReference(), 
+							(event instanceof PullRequestOpened) ? "Opened" : "Updated", 
+							emojis.apply(request.getTitle()));
+					String threadingReferences = "<" + request.getUUID() + "@onedev>";
+					Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(request));
+					String htmlBody = getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
+					String textBody = getEmailBody(false, event, summary, event.getTextBody(), url, replyable, unsubscribable);
+					mailManager.sendMailAsync(
+							Lists.newArrayList(), Lists.newArrayList(),
+							bccEmailAddresses, subject, htmlBody, textBody,
+							replyAddress, senderName, threadingReferences);
+				}
+			}			
 		}
 	}
 

@@ -263,7 +263,8 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			
 		});
 		
-		form.add(new CheckBox("sendNotifications", new PropertyModel<>(this, "sendNotifications")));
+		form.add(new CheckBox("sendNotifications", new PropertyModel<>(this, "sendNotifications"))
+				.setVisible(!SecurityUtils.getUser().isServiceAccount()));
 		
 		form.add(new AjaxButton("save") {
 

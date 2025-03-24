@@ -112,7 +112,7 @@ public class BuildNotificationManager {
 	@Sessional
 	@Listen
 	public void on(BuildEvent event) {
-		if (!(event instanceof BuildUpdated)) {
+		if (!(event instanceof BuildUpdated) && (event.getUser() == null || !event.getUser().isServiceAccount())) {
 			Project project = event.getProject();
 			Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
 			for (BuildQueryPersonalization personalization: project.getBuildQueryPersonalizations()) {

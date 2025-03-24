@@ -88,90 +88,92 @@ public class PackNotificationManager {
 	@Sessional
 	@Listen
 	public void on(PackEvent event) {
-		Project project = event.getProject();
-		Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
-		for (PackQueryPersonalization personalization: project.getPackQueryPersonalizations()) {
-			for (String name: personalization.getQuerySubscriptionSupport().getQuerySubscriptions()) {
-				String commonName = NamedQuery.getCommonName(name);
-				if (commonName != null) {
-					fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
-							NamedQuery.find(project.getNamedPackQueries(), commonName));
-				}
-				String personalName = NamedQuery.getPersonalName(name);
-				if (personalName != null) {
-					fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
-							NamedQuery.find(personalization.getQueries(), personalName));
-				}
-			}
-		}
-
-		Pack pack = event.getPack();
-		Collection<String> notifyEmails = new HashSet<>();
-		for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
-			User user = entry.getKey();
-			Permission permission = new ProjectPermission(pack.getProject(), new ReadPack());
-			if (user.asSubject().isPermitted(permission)) {
-				for (String queryString: entry.getValue()) {
-					User.push(user);
-					try {
-						if (PackQuery.parse(event.getProject(), queryString, true).matches(pack)) {
-							EmailAddress emailAddress = user.getPrimaryEmailAddress();
-							if (emailAddress != null && emailAddress.isVerified())
-								notifyEmails.add(emailAddress.getValue());
-							break;
-						}
-					} catch (Exception e) {
-						String message = String.format("Error processing package subscription (user: %s, project: %s, package: %s, query: %s)", 
-								user.getName(), pack.getProject().getPath(), pack.getType() + " " + pack.getReference(false), queryString);
-						logger.error(message, e);
-					} finally {
-						User.pop();
+		if (!event.getUser().isServiceAccount()) {
+			Project project = event.getProject();
+			Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
+			for (PackQueryPersonalization personalization: project.getPackQueryPersonalizations()) {
+				for (String name: personalization.getQuerySubscriptionSupport().getQuerySubscriptions()) {
+					String commonName = NamedQuery.getCommonName(name);
+					if (commonName != null) {
+						fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
+								NamedQuery.find(project.getNamedPackQueries(), commonName));
+					}
+					String personalName = NamedQuery.getPersonalName(name);
+					if (personalName != null) {
+						fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
+								NamedQuery.find(personalization.getQueries(), personalName));
 					}
 				}
 			}
-		}
-		
-		subscribedQueryStrings.clear();
-		for (User user: userManager.query()) {
-			for (String name: user.getPackQueryPersonalization().getQuerySubscriptionSupport().getQuerySubscriptions()) {
-				String globalName = NamedQuery.getCommonName(name);
-				if (globalName != null) {
-					fillSubscribedQueryStrings(subscribedQueryStrings, user, 
-							NamedQuery.find(settingManager.getPackSetting().getNamedQueries(), globalName));
-				}
-				String personalName = NamedQuery.getPersonalName(name);
-				if (personalName != null) {
-					fillSubscribedQueryStrings(subscribedQueryStrings, user, 
-							NamedQuery.find(user.getPackQueryPersonalization().getQueries(), personalName));
-				}
-			}
-		}
-
-		for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
-			User user = entry.getKey();
-			Permission permission = new ProjectPermission(pack.getProject(), new ReadPack());
-			if (user.asSubject().isPermitted(permission)) {
-				for (String queryString: entry.getValue()) {
-					User.push(user);
-					try {
-						if (PackQuery.parse(null, queryString, true).matches(pack)) {
-							EmailAddress emailAddress = user.getPrimaryEmailAddress();
-							if (emailAddress != null && emailAddress.isVerified())
-								notifyEmails.add(emailAddress.getValue());
-							break;
+	
+			Pack pack = event.getPack();
+			Collection<String> notifyEmails = new HashSet<>();
+			for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
+				User user = entry.getKey();
+				Permission permission = new ProjectPermission(pack.getProject(), new ReadPack());
+				if (user.asSubject().isPermitted(permission)) {
+					for (String queryString: entry.getValue()) {
+						User.push(user);
+						try {
+							if (PackQuery.parse(event.getProject(), queryString, true).matches(pack)) {
+								EmailAddress emailAddress = user.getPrimaryEmailAddress();
+								if (emailAddress != null && emailAddress.isVerified())
+									notifyEmails.add(emailAddress.getValue());
+								break;
+							}
+						} catch (Exception e) {
+							String message = String.format("Error processing package subscription (user: %s, project: %s, package: %s, query: %s)", 
+									user.getName(), pack.getProject().getPath(), pack.getType() + " " + pack.getReference(false), queryString);
+							logger.error(message, e);
+						} finally {
+							User.pop();
 						}
-					} catch (Exception e) {
-						String message = String.format("Error processing package subscription (user: %s, project: %s, package: %s, query: %s)", 
-								user.getName(), pack.getProject().getPath(), pack.getType() + " " + pack.getReference(false), queryString);
-						logger.error(message, e);
-					} finally {
-						User.pop();
 					}
 				}
 			}
+			
+			subscribedQueryStrings.clear();
+			for (User user: userManager.query()) {
+				for (String name: user.getPackQueryPersonalization().getQuerySubscriptionSupport().getQuerySubscriptions()) {
+					String globalName = NamedQuery.getCommonName(name);
+					if (globalName != null) {
+						fillSubscribedQueryStrings(subscribedQueryStrings, user, 
+								NamedQuery.find(settingManager.getPackSetting().getNamedQueries(), globalName));
+					}
+					String personalName = NamedQuery.getPersonalName(name);
+					if (personalName != null) {
+						fillSubscribedQueryStrings(subscribedQueryStrings, user, 
+								NamedQuery.find(user.getPackQueryPersonalization().getQueries(), personalName));
+					}
+				}
+			}
+	
+			for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
+				User user = entry.getKey();
+				Permission permission = new ProjectPermission(pack.getProject(), new ReadPack());
+				if (user.asSubject().isPermitted(permission)) {
+					for (String queryString: entry.getValue()) {
+						User.push(user);
+						try {
+							if (PackQuery.parse(null, queryString, true).matches(pack)) {
+								EmailAddress emailAddress = user.getPrimaryEmailAddress();
+								if (emailAddress != null && emailAddress.isVerified())
+									notifyEmails.add(emailAddress.getValue());
+								break;
+							}
+						} catch (Exception e) {
+							String message = String.format("Error processing package subscription (user: %s, project: %s, package: %s, query: %s)", 
+									user.getName(), pack.getProject().getPath(), pack.getType() + " " + pack.getReference(false), queryString);
+							logger.error(message, e);
+						} finally {
+							User.pop();
+						}
+					}
+				}
+			}
+			
+			notify(event, notifyEmails);	
 		}
-		
-		notify(event, notifyEmails);
 	}
 
 }

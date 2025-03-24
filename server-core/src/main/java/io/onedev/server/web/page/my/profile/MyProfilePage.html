@@ -1,10 +1,13 @@
 <wicket:extend>
-	<div wicket:id="authSource" class="mb-4"></div>
+	<div wicket:id="note" class="mb-4"></div>
 	<div wicket:id="content"></div>
 	<wicket:fragment wicket:id="authViaInternalDatabaseFrag">
 		<div class="alert alert-light alert-notice">You are authenticating via internal database</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="authViaExternalSystemFrag">
 		<div class="alert alert-light-warning alert-notice">You are authenticating via external system</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="serviceAccountFrag">
+		<div class="alert alert-light-warning alert-notice">You are a service account</div>
 	</wicket:fragment>
 </wicket:extend>

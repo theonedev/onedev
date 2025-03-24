@@ -10,6 +10,8 @@ public class UserTwoFactorAuthenticationPage extends UserPage {
 
 	public UserTwoFactorAuthenticationPage(PageParameters params) {
 		super(params);
+		if (getUser().isServiceAccount())
+			throw new IllegalStateException();
 	}
 	
 	@Override

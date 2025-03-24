@@ -1,22 +1,32 @@
 package io.onedev.server.security.realm;
 
-import com.google.common.collect.Sets;
-import io.onedev.server.entitymanager.*;
-import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
+import java.util.Collection;
+import java.util.concurrent.Callable;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.credential.AllowAllCredentialsMatcher;
 import org.apache.shiro.realm.AuthenticatingRealm;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.Collection;
-import java.util.concurrent.Callable;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
+
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.MembershipManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
+import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.TransactionManager;
 
 @Singleton
 public class SsoAuthenticatingRealm extends AuthenticatingRealm {
@@ -112,6 +122,7 @@ public class SsoAuthenticatingRealm extends AuthenticatingRealm {
 					&& userManager.findByName(userName) != null) {
 				throw new AuthenticationException("Login name '" + userName + "' already used by another user");
 			} else {
+				Preconditions.checkState(!emailAddress.getOwner().isServiceAccount());
 				updateUser(emailAddress, authenticated);
 				return emailAddress.getOwner();
 			}

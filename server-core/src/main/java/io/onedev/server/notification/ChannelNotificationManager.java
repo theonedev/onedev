@@ -72,7 +72,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	@Sessional
 	@Listen
 	public void on(PullRequestEvent event) {
-		if (!event.isMinor()) {
+		if (!event.isMinor() && (event.getUser() == null || !event.getUser().isServiceAccount())) {
 			PullRequest request = event.getRequest();
 			User user = event.getUser();
 
@@ -91,23 +91,27 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	@Sessional
 	@Listen
 	public void on(BuildEvent event) {
-		Build build = event.getBuild();
+		if (event.getUser() == null || !event.getUser().isServiceAccount()) {
+			Build build = event.getBuild();
 
-		var status = StringUtils.capitalize(build.getStatus().toString().toLowerCase());
-		String title;
-		if (build.getVersion() != null) 
-			title = format("[Build %s] (%s: %s) %s", build.getReference(), build.getJobName(), build.getVersion(), status);
-		else
-			title = format("[Build %s] (%s) %s", build.getReference(), build.getJobName(), status);			
-		postIfApplicable(title, event);
+			var status = StringUtils.capitalize(build.getStatus().toString().toLowerCase());
+			String title;
+			if (build.getVersion() != null) 
+				title = format("[Build %s] (%s: %s) %s", build.getReference(), build.getJobName(), build.getVersion(), status);
+			else
+				title = format("[Build %s] (%s) %s", build.getReference(), build.getJobName(), status);			
+			postIfApplicable(title, event);
+		}
 	}
 
 	@Sessional
 	@Listen
 	public void on(PackEvent event) {
-		Pack pack = event.getPack();
-		var title = format("[%s %s] Package published", pack.getType(), pack.getReference(true));
-		postIfApplicable(title, event);
+		if (!event.getUser().isServiceAccount()) {
+			Pack pack = event.getPack();
+			var title = format("[%s %s] Package published", pack.getType(), pack.getReference(true));
+			postIfApplicable(title, event);
+		}
 	}
 	
 	@Sessional
@@ -130,7 +134,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	@Sessional
 	@Listen
 	public void on(CodeCommentEvent event) {
-		if (!(event instanceof CodeCommentEdited)) {
+		if (!(event instanceof CodeCommentEdited) && !event.getUser().isServiceAccount()) {
 			CodeComment comment = event.getComment();
 
 			String title = format("[Code Comment %s:%s] %s %s", 

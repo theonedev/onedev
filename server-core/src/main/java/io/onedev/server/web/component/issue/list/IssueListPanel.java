@@ -975,61 +975,63 @@ public abstract class IssueListPanel extends Panel {
 
 					});
 				}
-				menuItems.add(new MenuItem() {
+				if (!SecurityUtils.getAuthUser().isServiceAccount()) {
+					menuItems.add(new MenuItem() {
 
-					@Override
-					public String getLabel() {
-						return "Watch/Unwatch Selected Issues";
-					}
+						@Override
+						public String getLabel() {
+							return "Watch/Unwatch Selected Issues";
+						}
 
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new DropdownLink(id) {
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new DropdownLink(id) {
 
-							@Override
-							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new WatchStatusPanel(id) {
+								@Override
+								protected Component newContent(String id, FloatingPanel dropdown2) {
+									return new WatchStatusPanel(id) {
 
-									@Override
-									protected WatchStatus getWatchStatus() {
-										return null;
-									}
+										@Override
+										protected WatchStatus getWatchStatus() {
+											return null;
+										}
 
-									@Override
-									protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
-										dropdown.close();
-										dropdown2.close();
+										@Override
+										protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
+											dropdown.close();
+											dropdown2.close();
 
-										var issues = selectionColumn.getSelections().stream()
-												.map(it->it.getObject()).collect(toList());
-										getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), issues, watchStatus);
-										selectionColumn.getSelections().clear();
-										Session.get().success("Watch status changed");
-									}
-								};
-							}
-
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(!selectionColumn.getSelections().isEmpty());
-							}
-
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "Please select issues to watch/unwatch");
+											var issues = selectionColumn.getSelections().stream()
+													.map(it->it.getObject()).collect(toList());
+											getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), issues, watchStatus);
+											selectionColumn.getSelections().clear();
+											Session.get().success("Watch status changed");
+										}
+									};
 								}
-							}
 
-						};
-					}
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(!selectionColumn.getSelections().isEmpty());
+								}
 
-				});
-				
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "Please select issues to watch/unwatch");
+									}
+								}
+
+							};
+						}
+
+					});
+				}
+
 				if (getProject() != null && getProject().isTimeTracking() 
 						&& SecurityUtils.canManageIssues(getProject())
 						&& WicketUtils.isSubscriptionActive()) {
@@ -1390,60 +1392,62 @@ public abstract class IssueListPanel extends Panel {
 					});
 				}
 
-				menuItems.add(new MenuItem() {
+				if (!SecurityUtils.getAuthUser().isServiceAccount()) {
+					menuItems.add(new MenuItem() {
 
-					@Override
-					public String getLabel() {
-						return "Watch/Unwatch All Queried Issues";
-					}
+						@Override
+						public String getLabel() {
+							return "Watch/Unwatch All Queried Issues";
+						}
 
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new DropdownLink(id) {
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new DropdownLink(id) {
 
-							@Override
-							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new WatchStatusPanel(id) {
+								@Override
+								protected Component newContent(String id, FloatingPanel dropdown2) {
+									return new WatchStatusPanel(id) {
 
-									@Override
-									protected WatchStatus getWatchStatus() {
-										return null;
-									}
+										@Override
+										protected WatchStatus getWatchStatus() {
+											return null;
+										}
 
-									@Override
-									protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
-										dropdown.close();
-										dropdown2.close();
+										@Override
+										protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
+											dropdown.close();
+											dropdown2.close();
 
-										Collection<Issue> issues = new ArrayList<>();
-										for (@SuppressWarnings("unchecked") var it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
-											issues.add(it.next());
-										getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), issues, watchStatus);
-										Session.get().success("Watch status changed");
-									}
+											Collection<Issue> issues = new ArrayList<>();
+											for (@SuppressWarnings("unchecked") var it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
+												issues.add(it.next());
+											getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), issues, watchStatus);
+											Session.get().success("Watch status changed");
+										}
 
-								};
-							}
-
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(issuesTable.getItemCount() != 0);
-							}
-
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "No issues to watch/unwatch");
+									};
 								}
-							}
-						};
-					}
 
-				});
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(issuesTable.getItemCount() != 0);
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "No issues to watch/unwatch");
+									}
+								}
+							};
+						}
+
+					});
+				}
 
 				menuItems.add(new MenuItem() {
 

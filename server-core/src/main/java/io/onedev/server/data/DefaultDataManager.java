@@ -2,6 +2,7 @@ package io.onedev.server.data;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
+import static io.onedev.server.model.User.PROP_SERVICE_ACCOUNT;
 import static io.onedev.server.model.support.administration.SystemSetting.PROP_CURL_LOCATION;
 import static io.onedev.server.model.support.administration.SystemSetting.PROP_DISABLE_AUTO_UPDATE_CHECK;
 import static io.onedev.server.model.support.administration.SystemSetting.PROP_GIT_LOCATION;
@@ -680,7 +681,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			if (validator.validate(bean).isEmpty()) {
 				createRoot(bean);
 			} else {
-				manualConfigs.add(new ManualConfig("Create Administrator Account", null, bean, Sets.newHashSet(PROP_NOTIFY_OWN_EVENTS)) {
+				manualConfigs.add(new ManualConfig("Create Administrator Account", null, bean, Sets.newHashSet(PROP_SERVICE_ACCOUNT, PROP_NOTIFY_OWN_EVENTS)) {
 	
 					@Override
 					public void complete() {

@@ -15,6 +15,7 @@ import java.util.List;
 @Editable(name="Add Issues to Iteration")
 public class AddToIterationBean implements Serializable {
 	
+	public static final String PROP_SEND_NOTIFICATIONS = "sendNotifications";
 	private Long projectId;
 	
 	private String iterationPrefix;

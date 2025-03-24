@@ -13,6 +13,8 @@ public class MyPasswordPage extends MyPage {
 	
 	public MyPasswordPage(PageParameters params) {
 		super(params);
+		if (getLoginUser().isServiceAccount())
+			throw new IllegalStateException();
 		if (getLoginUser().getPassword() == null)
 			throw new ExplicitException("Unable to change password as you are authenticating via external system");
 	}

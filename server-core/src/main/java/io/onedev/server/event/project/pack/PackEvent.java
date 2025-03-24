@@ -6,6 +6,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PackManager;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.Pack;
+import io.onedev.server.model.User;
 import io.onedev.server.web.UrlManager;
 
 public abstract class PackEvent extends ProjectEvent {
@@ -14,8 +15,8 @@ public abstract class PackEvent extends ProjectEvent {
 	
 	private final Long packId;
 	
-	public PackEvent(Date date, Pack pack) {
-		super(null, date, pack.getProject());
+	public PackEvent(User user, Date date, Pack pack) {
+		super(user, date, pack.getProject());
 		packId = pack.getId();
 	}
 

@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.issues.boards;
 
+import java.util.HashSet;
+
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
@@ -120,7 +122,10 @@ abstract class AbstractColumnPanel extends Panel implements EditContext {
 					bean.setIterationPrefix(getIterationPrefix());
 					if (getIterationSelection().getIteration() != null)
 						bean.setCurrentIteration(getIterationSelection().getIteration().getName());
-					new BeanEditModalPanel<>(target, bean) {
+					var excludeProperties = new HashSet<String>();
+					if (SecurityUtils.getUser().isServiceAccount())
+						excludeProperties.add(AddToIterationBean.PROP_SEND_NOTIFICATIONS);
+					new BeanEditModalPanel<>(target, bean, excludeProperties, true, null) {
 
 						@Override
 						protected String onSave(AjaxRequestTarget target, AddToIterationBean bean) {
@@ -155,7 +160,7 @@ abstract class AbstractColumnPanel extends Panel implements EditContext {
 				}
 			}));
 		} else {
-			return new WebMarkupContainer(componentId);
+			return new WebMarkupContainer(componentId).setVisible(false);
 		}
 	}
 	

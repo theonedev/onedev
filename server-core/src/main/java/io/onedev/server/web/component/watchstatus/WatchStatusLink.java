@@ -31,7 +31,7 @@ public abstract class WatchStatusLink extends DropdownLink {
 			protected String load() {
 				WatchStatus status = getWatchStatus();
 				if (status == WatchStatus.IGNORE)
-					return "do-not-watch";
+					return "ignore";
 				else if (status == WatchStatus.WATCH)
 					return "watch";
 				else

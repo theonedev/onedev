@@ -72,19 +72,21 @@ public abstract class UserPage extends AdministrationPage implements UserAware {
 		
 		var params = paramsOf(getUser());
 		tabs.add(new PageTab(Model.of("Profile"), Model.of("profile"), UserProfilePage.class, params));
-		tabs.add(new PageTab(Model.of("Email Addresses"), Model.of("mail"), UserEmailAddressesPage.class, params));
+		if (!getUser().isServiceAccount()) 
+			tabs.add(new PageTab(Model.of("Email Addresses"), Model.of("mail"), UserEmailAddressesPage.class, params));		
 		tabs.add(new PageTab(Model.of("Edit Avatar"), Model.of("avatar"), UserAvatarPage.class, params));
-			
-		tabs.add(new PageTab(Model.of("Password"), Model.of("password"), UserPasswordPage.class, params));
+		if (!getUser().isServiceAccount())
+			tabs.add(new PageTab(Model.of("Password"), Model.of("password"), UserPasswordPage.class, params));
 		tabs.add(new PageTab(Model.of("Belonging Groups"), Model.of("group"), UserMembershipsPage.class, params));
 		tabs.add(new PageTab(Model.of("Authorized Projects"), Model.of("project"), UserAuthorizationsPage.class, params));
 		if (OneDev.getInstance(ServerConfig.class).getSshPort() != 0)
 			tabs.add(new PageTab(Model.of("SSH Keys"), Model.of("key"), UserSshKeysPage.class, params));
 		tabs.add(new PageTab(Model.of("GPG Keys"), Model.of("key"), UserGpgKeysPage.class, params));
 		tabs.add(new PageTab(Model.of("Access Tokens"), Model.of("token"), UserAccessTokensPage.class, params));
-		if (getUser().isEnforce2FA())
+		if (!getUser().isServiceAccount() && getUser().isEnforce2FA())
 			tabs.add(new PageTab(Model.of("Two-factor Authentication"), Model.of("shield"), UserTwoFactorAuthenticationPage.class, params));
-		tabs.add(new PageTab(Model.of("Query Watches"), Model.of("bell"), UserQueryWatchesPage.class, params));
+		if (!getUser().isServiceAccount())
+			tabs.add(new PageTab(Model.of("Query Watches"), Model.of("bell"), UserQueryWatchesPage.class, params));
 		
 		add(new Tabbable("userTabs", tabs));
 	}

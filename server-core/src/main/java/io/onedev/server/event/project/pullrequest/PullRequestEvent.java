@@ -2,6 +2,8 @@ package io.onedev.server.event.project.pullrequest;
 
 import java.util.Date;
 
+import javax.annotation.Nullable;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.web.UrlManager;
@@ -15,7 +17,7 @@ public abstract class PullRequestEvent extends ProjectEvent {
 	
 	private final Long requestId;
 	
-	public PullRequestEvent(User user, Date date, PullRequest request) {
+	public PullRequestEvent(@Nullable User user, Date date, PullRequest request) {
 		super(user, date, request.getTargetProject());
 		requestId = request.getId();
 	}

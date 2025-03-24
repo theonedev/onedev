@@ -26,7 +26,7 @@ public class IssueChanged extends IssueEvent implements CommitAware {
 	private final String comment;
 	
 	public IssueChanged(IssueChange change, @Nullable String comment) {
-		this(change, comment, true);
+		this(change, comment, !change.getUser().isServiceAccount());
 	}
 
 	public IssueChanged(IssueChange change, @Nullable String comment, boolean sendNotifications) {

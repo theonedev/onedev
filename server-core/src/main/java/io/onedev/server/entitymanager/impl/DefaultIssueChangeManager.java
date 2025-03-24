@@ -108,7 +108,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Transactional
 	@Override
 	public void create(IssueChange change, @Nullable String note) {
-		create(change, note, true);
+		create(change, note, !change.getUser().isServiceAccount());
 	}
 
 	@Transactional
@@ -247,7 +247,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Transactional
 	@Override
 	public void addSchedule(Issue issue, Iteration iteration) {
-		addSchedule(issue, iteration, true);
+		addSchedule(issue, iteration, !SecurityUtils.getUser().isServiceAccount());
 	}
 
 	protected void addSchedule(Issue issue, Iteration iteration, boolean sendNotifications) {
@@ -278,7 +278,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Transactional
 	@Override
 	public void removeSchedule(Issue issue, Iteration iteration) {
-		removeSchedule(issue, iteration, true);
+		removeSchedule(issue, iteration, !SecurityUtils.getUser().isServiceAccount());
 	}
 
 	@Transactional

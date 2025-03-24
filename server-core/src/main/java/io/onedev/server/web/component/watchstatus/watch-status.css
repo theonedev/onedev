@@ -7,7 +7,7 @@
 .watch-status.watch:AFTER {
 	content: "Watch";
 }
-.watch-status.do-not-watch:AFTER {
+.watch-status.ignore:AFTER {
 	content: "Ignore";
 }
 .watch-status .icon {
@@ -15,7 +15,7 @@
 }
 .watch-status.default .icon-bell, 
 .watch-status.watch .icon-bell-ring, 
-.watch-status.do-not-watch .icon-bell-off  {
+.watch-status.ignore .icon-bell-off  {
 	display: inline-block;
 }
 

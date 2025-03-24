@@ -107,7 +107,7 @@ public abstract class EntityWatchesPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getAuthUser() != null);
+				setVisible(SecurityUtils.getAuthUser() != null && !SecurityUtils.getAuthUser().isServiceAccount());
 			}
 
 			@Override

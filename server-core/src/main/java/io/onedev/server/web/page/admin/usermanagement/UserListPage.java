@@ -367,6 +367,7 @@ public class UserListPage extends AdministrationPage {
 				};
 				link.add(new UserAvatar("avatar", user));
 				link.add(new Label("name", user.getName()));
+				link.add(new Label("serviceAccount", "service").setVisible(user.isServiceAccount()));
 				fragment.add(link);
 				cellItem.add(fragment);
 			}
@@ -392,15 +393,19 @@ public class UserListPage extends AdministrationPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId,
 									 IModel<User> rowModel) {
-				EmailAddress emailAddress = rowModel.getObject().getPrimaryEmailAddress();
-				if (emailAddress != null) {
-					Fragment fragment = new Fragment(componentId, "emailFrag", UserListPage.this);
-					fragment.add(new Label("emailAddress", emailAddress.getValue()));
-					fragment.add(new EmailAddressVerificationStatusBadge(
-							"verificationStatus", Model.of(emailAddress)));
-					cellItem.add(fragment);
+				if (rowModel.getObject().isServiceAccount()) {
+					cellItem.add(new Label(componentId, "<i>N/A</i>").setEscapeModelStrings(false));
 				} else {
-					cellItem.add(new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false));
+					EmailAddress emailAddress = rowModel.getObject().getPrimaryEmailAddress();
+					if (emailAddress != null) {
+						Fragment fragment = new Fragment(componentId, "emailFrag", UserListPage.this);
+						fragment.add(new Label("emailAddress", emailAddress.getValue()));
+						fragment.add(new EmailAddressVerificationStatusBadge(
+								"verificationStatus", Model.of(emailAddress)));
+						cellItem.add(fragment);
+					} else {
+						cellItem.add(new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false));
+					}
 				}
 			}
 
@@ -415,7 +420,11 @@ public class UserListPage extends AdministrationPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId, IModel<User> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getAuthSource()));
+				if (rowModel.getObject().isServiceAccount()) {
+					cellItem.add(new Label(componentId, "<i>N/A</i>").setEscapeModelStrings(false));
+				} else {
+					cellItem.add(new Label(componentId, rowModel.getObject().getAuthSource()));
+				}
 			}
 
 		});

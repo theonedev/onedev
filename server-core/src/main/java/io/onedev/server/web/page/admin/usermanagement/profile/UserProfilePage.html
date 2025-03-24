@@ -1,5 +1,5 @@
 <wicket:extend>
-	<div wicket:id="authSource" class="mb-4"></div>
+	<div wicket:id="note" class="mb-4"></div>
 	<div wicket:id="content"></div>
 	<wicket:fragment wicket:id="authViaInternalDatabaseFrag">
 		<div class="alert alert-light alert-notice">This user is authenticating via internal database.
@@ -10,5 +10,8 @@
 		<div class="alert alert-light-warning alert-notice">This user is authenticating via external system.
 			To authenticate via internal database, <a wicket:id="setPasswordForUser">set password for user</a> or <form wicket:id="tellUserToResetPassword" class="d-inline"><a wicket:id="tellUserToResetPassword">tell user to reset password</a></form>
 		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="serviceAccountFrag">
+		<div class="alert alert-light-warning alert-notice">This is a service account for task automation purpose</div>
 	</wicket:fragment>
 </wicket:extend>

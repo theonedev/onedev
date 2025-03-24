@@ -18,6 +18,8 @@ public class MyQueryWatchesPage extends MyPage {
 
     public MyQueryWatchesPage(PageParameters params) {
         super(params);
+        if (getLoginUser().isServiceAccount())
+            throw new IllegalStateException();
         tabName = params.get(PARAM_TAB).toString(QueryWatchesPanel.TAB_ISSUE);
     }
 

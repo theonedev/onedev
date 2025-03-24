@@ -1,21 +1,14 @@
 package io.onedev.server.rest.resource;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.annotation.UserName;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.SshKeyManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.*;
-import io.onedev.server.model.support.NamedProjectQuery;
-import io.onedev.server.model.support.build.NamedBuildQuery;
-import io.onedev.server.model.support.issue.NamedIssueQuery;
-import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
-import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.rest.annotation.EntityCreate;
-import io.onedev.server.security.SecurityUtils;
-import org.apache.shiro.authc.credential.PasswordService;
-import org.apache.shiro.authz.UnauthenticatedException;
-import org.apache.shiro.authz.UnauthorizedException;
+import static java.util.stream.Collectors.toList;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,11 +16,50 @@ import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.Serializable;
-import java.util.*;
+
+import org.apache.shiro.authc.credential.PasswordService;
+import org.apache.shiro.authz.UnauthenticatedException;
+import org.apache.shiro.authz.UnauthorizedException;
+
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.annotation.UserName;
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.AccessToken;
+import io.onedev.server.model.BuildQueryPersonalization;
+import io.onedev.server.model.CodeCommentQueryPersonalization;
+import io.onedev.server.model.CommitQueryPersonalization;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.IssueQueryPersonalization;
+import io.onedev.server.model.IssueVote;
+import io.onedev.server.model.IssueWatch;
+import io.onedev.server.model.Membership;
+import io.onedev.server.model.PullRequestAssignment;
+import io.onedev.server.model.PullRequestQueryPersonalization;
+import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestWatch;
+import io.onedev.server.model.SshKey;
+import io.onedev.server.model.User;
+import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.model.support.NamedProjectQuery;
+import io.onedev.server.model.support.build.NamedBuildQuery;
+import io.onedev.server.model.support.issue.NamedIssueQuery;
+import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.annotation.EntityCreate;
+import io.onedev.server.security.SecurityUtils;
 
 @Api(order=5000)
 @Path("/users")
@@ -53,24 +85,34 @@ public class UserResource {
 		this.emailAddressManager = emailAddressManager;
 	}
 
+	private ProfileData getProfileData(User user) {
+		var profile = new ProfileData();
+		profile.setServiceAccount(user.isServiceAccount());
+		profile.setName(user.getName());
+		profile.setFullName(user.getFullName());
+		if (!user.isServiceAccount()) 
+			profile.setNotifyOwnEvents(user.isNotifyOwnEvents());
+		return profile;
+	}
+
 	@Api(order=100)
 	@Path("/{userId}")
     @GET
-    public User getProfile(@PathParam("userId") Long userId) {
+    public ProfileData getProfile(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
-		return user;
+		return getProfileData(user);
     }
 
 	@Api(order=200)
 	@Path("/me")
     @GET
-    public User getMyProfile() {
+    public ProfileData getMyProfile() {
 		User user = SecurityUtils.getAuthUser();
 		if (user == null)
 			throw new UnauthorizedException();
-		return user;
+		return getProfileData(user);
     }
 	
 	@Api(order=250)
@@ -241,14 +283,14 @@ public class UserResource {
 	
 	@Api(order=1800)
 	@GET
-    public List<User> queryProfile(
+    public List<ProfileData> queryProfile(
     		@QueryParam("term") @Api(description="Any string in login name, full name or email address") String term, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 
-    	return userManager.query(term, offset, count);
+    	return userManager.query(term, offset, count).stream().map(this::getProfileData).collect(toList());
     }
 	
 	@Api(order=1850)
@@ -268,23 +310,27 @@ public class UserResource {
 		if (SecurityUtils.isAdministrator()) {
 			if (userManager.findByName(data.getName()) != null)
 				throw new ExplicitException("Login name is already used by another user");
-			if (emailAddressManager.findByValue(data.getEmailAddress()) != null)
+			if (!data.isServiceAccount() && emailAddressManager.findByValue(data.getEmailAddress()) != null)
 				throw new ExplicitException("Email address is already used by another user");
 			
 			User user = new User();
+			user.setServiceAccount(data.isServiceAccount());
 			user.setName(data.getName());
 			user.setFullName(data.getFullName());
-			user.setPassword(passwordService.encryptPassword(data.getPassword()));
-			userManager.create(user);
-			
-			EmailAddress emailAddress = new EmailAddress();
-			emailAddress.setGit(true);
-			emailAddress.setPrimary(true);
-			emailAddress.setOwner(user);
-			emailAddress.setValue(data.getEmailAddress());
-			emailAddress.setVerificationCode(null);
-			emailAddressManager.create(emailAddress);
-			
+			if (data.isServiceAccount()) {
+				userManager.create(user);
+			} else {
+				user.setNotifyOwnEvents(data.isNotifyOwnEvents());
+				user.setPassword(passwordService.encryptPassword(data.getPassword()));
+				userManager.create(user);
+				EmailAddress emailAddress = new EmailAddress();
+				emailAddress.setGit(true);
+				emailAddress.setPrimary(true);
+				emailAddress.setOwner(user);
+				emailAddress.setValue(data.getEmailAddress());
+				emailAddress.setVerificationCode(null);
+				emailAddressManager.create(emailAddress);
+			}
 			return user.getId();
 		} else {
 			throw new UnauthenticatedException();
@@ -304,6 +350,8 @@ public class UserResource {
 			String oldName = user.getName();
 			user.setName(data.getName());
 			user.setFullName(data.getFullName());
+			if (!user.isServiceAccount())
+				user.setNotifyOwnEvents(data.isNotifyOwnEvents());
 			userManager.update(user, oldName);
 			return Response.ok().build();
 		} else { 
@@ -320,6 +368,8 @@ public class UserResource {
 			user.setPassword(passwordService.encryptPassword(password));
 			userManager.update(user, null);
 			return Response.ok().build();
+		} else if (user.isServiceAccount()) {
+			throw new ExplicitException("Can not set password for service account");
 		} else if (user.equals(SecurityUtils.getAuthUser())) {
 			if (user.getPassword() == null) {
 				throw new ExplicitException("The user is currently authenticated via external system, "
@@ -339,6 +389,8 @@ public class UserResource {
 	@DELETE
 	public Response resetTwoFactorAuthentication(@PathParam("userId") Long userId) {
 		User user = userManager.load(userId);
+		if (user.isServiceAccount())
+			throw new ExplicitException("Can not reset two factor authentication for service account");
 		if (SecurityUtils.isAdministrator()) {
 			user.setTwoFactorAuthentication(null);
 			userManager.update(user, null);
@@ -355,6 +407,8 @@ public class UserResource {
     	User user = userManager.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
+		if (user.isServiceAccount()) 
+			throw new ExplicitException("Can not set queries and watches for service account");
 		user.setBuildQuerySubscriptions(queriesAndWatches.buildQuerySubscriptions);
 		user.setIssueQueryWatches(queriesAndWatches.issueQueryWatches);
 		user.setPullRequestQueryWatches(queriesAndWatches.pullRequestQueryWatches);
@@ -406,15 +460,36 @@ public class UserResource {
 
 		private static final long serialVersionUID = 1L;
 		
+		@Api(order=50, exampleProvider="getServiceAccountExample", description="Create user as service account")
+		private boolean serviceAccount;
+
+		@Api(order=100, description="Login name of the user")
 		private String name;
 		
+		@Api(order=150, description = "Password of the user. Only required if not created as service account")
 		private String password;
 		
 		private String fullName;
 		
+		@Api(order=300, description = "Email address of the user. Only required if not created as service account")
 		private String emailAddress;
 
-		@Api(order=100, description="Login name of the user")
+		@Api(order=400, description = "Whether or not to notify user on own events. Only required if not created as service account")
+		private boolean notifyOwnEvents;
+
+		public boolean isServiceAccount() {
+			return serviceAccount;
+		}
+
+		public void setServiceAccount(boolean serviceAccount) {
+			this.serviceAccount = serviceAccount;
+		}
+
+		@SuppressWarnings("unused")
+		private static boolean getServiceAccountExample() {
+			return false;
+		}
+
 		@UserName
 		@NotEmpty
 		public String getName() {
@@ -425,7 +500,6 @@ public class UserResource {
 			this.name = name;
 		}
 
-		@Api(order=150)
 		@NotEmpty
 		public String getPassword() {
 			return password;
@@ -444,7 +518,6 @@ public class UserResource {
 			this.fullName = fullName;
 		}
 
-		@Api(order=300)
 		@Email
 		@NotEmpty
 		public String getEmailAddress() {
@@ -455,17 +528,76 @@ public class UserResource {
 			this.emailAddress = emailAddress;
 		}
 
+		public boolean isNotifyOwnEvents() {
+			return notifyOwnEvents;
+		}
+
+		public void setNotifyOwnEvents(boolean notifyOwnEvents) {
+			this.notifyOwnEvents = notifyOwnEvents;
+		}
 	}
-	
+
+	public static class ProfileData implements Serializable {
+		private static final long serialVersionUID = 1L;
+		
+		@Api(order=50, description="Whether or not the user is a service account")
+		private boolean serviceAccount;
+
+		@Api(order=100, description="Login name of the user")
+		private String name;
+		
+		@Api(order=200)
+		private String fullName;
+
+		@Api(order=300, description = "Whether or not to notify user on own events. Only meaningful for non service account")
+		private boolean notifyOwnEvents;
+
+		public boolean isServiceAccount() {
+			return serviceAccount;
+		}
+
+		public void setServiceAccount(boolean serviceAccount) {
+			this.serviceAccount = serviceAccount;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getFullName() {
+			return fullName;
+		}
+
+		public void setFullName(String fullName) {
+			this.fullName = fullName;
+		}
+
+		public boolean isNotifyOwnEvents() {
+			return notifyOwnEvents;
+		}
+
+		public void setNotifyOwnEvents(boolean notifyOwnEvents) {
+			this.notifyOwnEvents = notifyOwnEvents;
+		}
+	}
+
 	public static class ProfileUpdateData implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 		
+		@Api(order=100, description="Login name of the user")
 		private String name;
 		
+		@Api(order=200)
 		private String fullName;
+
+		@Api(order=300, description = "Whether or not to notify user on own events. Only required for non service account")
+		private boolean notifyOwnEvents;
 		
-		@Api(order=100, description="Login name of the user")
 		@UserName
 		@NotEmpty
 		public String getName() {
@@ -476,7 +608,6 @@ public class UserResource {
 			this.name = name;
 		}
 
-		@Api(order=200)
 		public String getFullName() {
 			return fullName;
 		}
@@ -485,6 +616,13 @@ public class UserResource {
 			this.fullName = fullName;
 		}
 
+		public boolean isNotifyOwnEvents() {
+			return notifyOwnEvents;
+		}
+
+		public void setNotifyOwnEvents(boolean notifyOwnEvents) {
+			this.notifyOwnEvents = notifyOwnEvents;
+		}
 	}
 	
 	public static class QueriesAndWatches implements Serializable {

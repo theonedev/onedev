@@ -11,6 +11,8 @@ public class UserEmailAddressesPage extends UserPage {
 
 	public UserEmailAddressesPage(PageParameters params) {
 		super(params);
+		if (getUser().isServiceAccount())
+			throw new IllegalStateException();
 	}
 
 	@Override

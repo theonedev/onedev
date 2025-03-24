@@ -308,7 +308,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(getQueryPersonalization().getQueryWatchSupport() != null);
+						setVisible(!SecurityUtils.getAuthUser().isServiceAccount() && getQueryPersonalization().getQueryWatchSupport() != null);
 					}
 					
 				});
@@ -334,7 +334,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(getQueryPersonalization().getQuerySubscriptionSupport() != null);
+						setVisible(!SecurityUtils.getAuthUser().isServiceAccount() && getQueryPersonalization().getQuerySubscriptionSupport() != null);
 					}
 					
 				});
@@ -390,6 +390,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(SecurityUtils.getAuthUser() != null 
+								&& !SecurityUtils.getAuthUser().isServiceAccount()
 								&& getQueryPersonalization() != null 
 								&& getQueryPersonalization().getQueryWatchSupport() != null);
 					}
@@ -419,6 +420,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(SecurityUtils.getAuthUser() != null 
+								&& !SecurityUtils.getAuthUser().isServiceAccount()
 								&& getQueryPersonalization() != null
 								&& getQueryPersonalization().getQuerySubscriptionSupport() != null);
 					}

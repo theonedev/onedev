@@ -261,61 +261,63 @@ public abstract class PullRequestListPanel extends Panel {
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
 
-				menuItems.add(new MenuItem() {
+				if (!SecurityUtils.getAuthUser().isServiceAccount()) {
+					menuItems.add(new MenuItem() {
 
-					@Override
-					public String getLabel() {
-						return "Watch/Unwatch Selected Pull Requests";
-					}
+						@Override
+						public String getLabel() {
+							return "Watch/Unwatch Selected Pull Requests";
+						}
 
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new DropdownLink(id) {
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new DropdownLink(id) {
 
-							@Override
-							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new WatchStatusPanel(id) {
+								@Override
+								protected Component newContent(String id, FloatingPanel dropdown2) {
+									return new WatchStatusPanel(id) {
 
-									@Override
-									protected WatchStatus getWatchStatus() {
-										return null;
-									}
+										@Override
+										protected WatchStatus getWatchStatus() {
+											return null;
+										}
 
-									@Override
-									protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
-										dropdown.close();
-										dropdown2.close();
+										@Override
+										protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
+											dropdown.close();
+											dropdown2.close();
 
-										var requests = selectionColumn.getSelections().stream()
-												.map(it->it.getObject()).collect(toList());
-										getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
-										selectionColumn.getSelections().clear();
-										Session.get().success("Watch status changed");
-									}
-								};
-							}
-
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(!selectionColumn.getSelections().isEmpty());
-							}
-
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "Please select pull requests to watch/unwatch");
+											var requests = selectionColumn.getSelections().stream()
+													.map(it->it.getObject()).collect(toList());
+											getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
+											selectionColumn.getSelections().clear();
+											Session.get().success("Watch status changed");
+										}
+									};
 								}
-							}
 
-						};
-					}
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(!selectionColumn.getSelections().isEmpty());
+								}
 
-				});
-				
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "Please select pull requests to watch/unwatch");
+									}
+								}
+
+							};
+						}
+
+					});
+				}
+
 				if (getProject() != null && SecurityUtils.canManagePullRequests(getProject())) {
 					menuItems.add(new MenuItem() {
 
@@ -455,60 +457,62 @@ public abstract class PullRequestListPanel extends Panel {
 					});
 				}
 
-				menuItems.add(new MenuItem() {
+				if (!SecurityUtils.getAuthUser().isServiceAccount()) {
+					menuItems.add(new MenuItem() {
 
-					@Override
-					public String getLabel() {
-						return "Watch/Unwatch All Queried Pull Requests";
-					}
+						@Override
+						public String getLabel() {
+							return "Watch/Unwatch All Queried Pull Requests";
+						}
 
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new DropdownLink(id) {
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new DropdownLink(id) {
 
-							@Override
-							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new WatchStatusPanel(id) {
+								@Override
+								protected Component newContent(String id, FloatingPanel dropdown2) {
+									return new WatchStatusPanel(id) {
 
-									@Override
-									protected WatchStatus getWatchStatus() {
-										return null;
-									}
+										@Override
+										protected WatchStatus getWatchStatus() {
+											return null;
+										}
 
-									@Override
-									protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
-										dropdown.close();
-										dropdown2.close();
+										@Override
+										protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
+											dropdown.close();
+											dropdown2.close();
 
-										Collection<PullRequest> requests = new ArrayList<>();
-										for (@SuppressWarnings("unchecked") var it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
-											requests.add(it.next());
-										getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
-										Session.get().success("Watch status changed");
-									}
+											Collection<PullRequest> requests = new ArrayList<>();
+											for (@SuppressWarnings("unchecked") var it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
+												requests.add(it.next());
+											getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
+											Session.get().success("Watch status changed");
+										}
 
-								};
-							}
-
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(requestsTable.getItemCount() != 0);
-							}
-
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "No pull requests to watch/unwatch");
+									};
 								}
-							}
-						};
-					}
 
-				});
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(requestsTable.getItemCount() != 0);
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "No pull requests to watch/unwatch");
+									}
+								}
+							};
+						}
+
+					});
+				}
 				
 				if (getProject() != null && SecurityUtils.canManagePullRequests(getProject())) {
 					menuItems.add(new MenuItem() {

@@ -803,7 +803,10 @@ public abstract class LayoutPage extends BasePage {
 		if (loginUser != null) {
 			userInfo.add(new UserAvatar("avatar", loginUser));
 			userInfo.add(new Label("name", loginUser.getDisplayName()));
-			if (loginUser.getEmailAddresses().isEmpty()) {
+			if (loginUser.isServiceAccount()) {
+				userInfo.add(new WebMarkupContainer("hasUnverifiedLink").setVisible(false));
+				userInfo.add(new WebMarkupContainer("noPrimaryAddressLink").setVisible(false));
+			} else if (loginUser.getEmailAddresses().isEmpty()) {
 				userInfo.add(new WebMarkupContainer("hasUnverifiedLink").setVisible(false));
 				userInfo.add(new ViewStateAwarePageLink<Void>("noPrimaryAddressLink", MyEmailAddressesPage.class));
 			} else if (loginUser.getEmailAddresses().stream().anyMatch(it->!it.isVerified())) {
@@ -823,15 +826,19 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof MyProfilePage)
 			item.add(AttributeAppender.append("class", "active"));
 
-		userInfo.add(item = new ViewStateAwarePageLink<Void>("myEmailSetting", MyEmailAddressesPage.class));
-		if (getPage() instanceof MyEmailAddressesPage)
-			item.add(AttributeAppender.append("class", "active"));
+		if (getLoginUser() != null && !getLoginUser().isServiceAccount()) {
+			userInfo.add(item = new ViewStateAwarePageLink<Void>("myEmailSetting", MyEmailAddressesPage.class));
+			if (getPage() instanceof MyEmailAddressesPage)
+				item.add(AttributeAppender.append("class", "active"));
+		} else {
+			userInfo.add(new WebMarkupContainer("myEmailSetting").setVisible(false));
+		}
 
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myAvatar", MyAvatarPage.class));
 		if (getPage() instanceof MyAvatarPage)
 			item.add(AttributeAppender.append("class", "active"));
 
-		if (loginUser != null && loginUser.getPassword() != null) {
+		if (loginUser != null && loginUser.getPassword() != null && !loginUser.isServiceAccount()) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("myPassword", MyPasswordPage.class));
 			if (getPage() instanceof MyPasswordPage)
 				item.add(AttributeAppender.append("class", "active"));
@@ -855,20 +862,27 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof MyAccessTokensPage)
 			item.add(AttributeAppender.append("class", "active"));
 
-		userInfo.add(item = new ViewStateAwarePageLink<Void>("myTwoFactorAuthentication", MyTwoFactorAuthenticationPage.class) {
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getLoginUser().isEnforce2FA());
-			}
-		});
-		if (getPage() instanceof MyTwoFactorAuthenticationPage)
-			item.add(AttributeAppender.append("class", "active"));
+		if (getLoginUser() != null && !getLoginUser().isServiceAccount()) {
+			userInfo.add(item = new ViewStateAwarePageLink<Void>("myTwoFactorAuthentication", MyTwoFactorAuthenticationPage.class) {
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(getLoginUser().isEnforce2FA());
+				}
+			});
+			if (getPage() instanceof MyTwoFactorAuthenticationPage)
+				item.add(AttributeAppender.append("class", "active"));
+		} else {
+			userInfo.add(new WebMarkupContainer("myTwoFactorAuthentication").setVisible(false));
+		}
 
-
-		userInfo.add(item = new ViewStateAwarePageLink<Void>("myQueryWatches", MyQueryWatchesPage.class));
-		if (getPage() instanceof MyQueryWatchesPage)
-			item.add(AttributeAppender.append("class", "active"));
+		if (getLoginUser() != null && !getLoginUser().isServiceAccount()) {
+			userInfo.add(item = new ViewStateAwarePageLink<Void>("myQueryWatches", MyQueryWatchesPage.class));
+			if (getPage() instanceof MyQueryWatchesPage)
+				item.add(AttributeAppender.append("class", "active"));
+		} else {
+			userInfo.add(new WebMarkupContainer("myQueryWatches").setVisible(false));
+		}
 
 		if (!SecurityUtils.isAnonymous(SecurityUtils.getPrevPrincipal())) {
 			Link<Void> signOutLink = new Link<Void>("signOut") {

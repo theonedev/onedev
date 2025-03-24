@@ -3,8 +3,9 @@ package io.onedev.server.web.util.editbean;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.model.User;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.model.User;
 
 @Editable
 public class NewUserBean extends User {
@@ -16,6 +17,7 @@ public class NewUserBean extends User {
 	private String emailAddress;
 
 	@Editable(order=1000)
+	@ShowCondition("isServiceAccountDisabled")
 	@NotEmpty
 	@Email
 	public String getEmailAddress() {

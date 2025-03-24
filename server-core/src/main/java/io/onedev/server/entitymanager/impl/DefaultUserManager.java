@@ -284,7 +284,10 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	public User findByPasswordResetCode(String passwordResetCode) {
 		var criteria = newCriteria();
 		criteria.add(Restrictions.eq("passwordResetCode", passwordResetCode));
-		return find(criteria);
+		var user = find(criteria);
+		if (user != null && user.isServiceAccount())
+			throw new IllegalStateException();
+		return user;
 	}
 	
 	@Override
@@ -367,10 +370,14 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	@Override
 	public User findByVerifiedEmailAddress(String emailAddressValue) {
 		EmailAddress emailAddress = emailAddressManager.findByValue(emailAddressValue);
-		if (emailAddress != null && emailAddress.isVerified())
-			return emailAddress.getOwner();
-		else
+		if (emailAddress != null && emailAddress.isVerified()) {
+			var user = emailAddress.getOwner();
+			if (user.isServiceAccount())
+				throw new IllegalStateException();
+			return user;
+		} else {
 			return null;
+		}
 	}
 
 	@Override

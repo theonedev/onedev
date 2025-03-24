@@ -185,7 +185,7 @@ public class IssueNotificationManager {
 		if (user != null) {
 			if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
 				notifiedUsers.add(user); 
-			if (!user.isSystem())
+			if (!user.isSystem() && !user.isServiceAccount())
 				watchManager.watch(issue, user, true);
 		}
 
@@ -216,7 +216,8 @@ public class IssueNotificationManager {
 			}
 			
 			for (User member: entry.getValue().getMembers()) {
-				watchManager.watch(issue, member, true);
+				if (!member.isServiceAccount()) 
+					watchManager.watch(issue, member, true);
 				authorizationManager.authorize(issue, member);
 			}
 			
@@ -244,7 +245,8 @@ public class IssueNotificationManager {
 			}
 			
 			for (User each: entry.getValue()) {
-				watchManager.watch(issue, each, true);
+				if (!each.isServiceAccount()) 
+					watchManager.watch(issue, each, true);
 				authorizationManager.authorize(issue, each);
 			}
 			notifiedUsers.addAll(entry.getValue());
@@ -256,7 +258,8 @@ public class IssueNotificationManager {
 				User mentionedUser = userManager.findByName(userName);
 				if (mentionedUser != null) {
 					mentionManager.mention(issue, mentionedUser);
-					watchManager.watch(issue, mentionedUser, true);
+					if (!mentionedUser.isServiceAccount())
+						watchManager.watch(issue, mentionedUser, true);
 					authorizationManager.authorize(issue, mentionedUser);
 					if (!isNotified(notifiedEmailAddresses, mentionedUser)) {
 						String subject = String.format(

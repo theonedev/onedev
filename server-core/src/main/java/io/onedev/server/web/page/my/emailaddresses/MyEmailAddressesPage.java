@@ -13,6 +13,8 @@ public class MyEmailAddressesPage extends MyPage {
 
 	public MyEmailAddressesPage(PageParameters params) {
 		super(params);
+		if (getLoginUser().isServiceAccount())
+			throw new IllegalStateException();
 	}
 
 	@Override

@@ -19,10 +19,12 @@ public class MyProfilePage extends MyPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		if (getUser().getPassword() != null)
-			add(new Fragment("authSource", "authViaInternalDatabaseFrag", this));
+		if (getUser().isServiceAccount())
+			add(new Fragment("note", "serviceAccountFrag", this));
+		else if (getUser().getPassword() != null)
+			add(new Fragment("note", "authViaInternalDatabaseFrag", this));
 		else
-			add(new Fragment("authSource", "authViaExternalSystemFrag", this));
+			add(new Fragment("note", "authViaExternalSystemFrag", this));
 		
 		add(new ProfileEditPanel("content", new AbstractReadOnlyModel<>() {
 

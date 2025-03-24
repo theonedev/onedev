@@ -37,10 +37,12 @@ public class UserProfilePage extends UserPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		WebMarkupContainer authSourceContainer;
-		if (getUser().getPassword() != null) {
-			authSourceContainer = new Fragment("authSource", "authViaInternalDatabaseFrag", this);
-			authSourceContainer.add(new Link<Void>("removePassword") {
+		WebMarkupContainer noteContainer;
+		if (getUser().isServiceAccount()) {
+			noteContainer = new Fragment("note", "serviceAccountFrag", this);
+		} else if (getUser().getPassword() != null) {
+			noteContainer = new Fragment("note", "authViaInternalDatabaseFrag", this);
+			noteContainer.add(new Link<Void>("removePassword") {
 
 				@Override
 				public void onClick() {
@@ -51,11 +53,11 @@ public class UserProfilePage extends UserPage {
 				}
 			}.add(new ConfirmClickModifier("Do you really want to remove password of this user?")));
 		} else {
-			authSourceContainer = new Fragment("authSource", "authViaExternalSystemFrag", this);
-			authSourceContainer.add(new BookmarkablePageLink<Void>("setPasswordForUser",
+			noteContainer = new Fragment("note", "authViaExternalSystemFrag", this);
+			noteContainer.add(new BookmarkablePageLink<Void>("setPasswordForUser",
 					UserPasswordPage.class, UserPasswordPage.paramsOf(getUser())));
 			var form = new Form<Void>("tellUserToResetPassword");
-			authSourceContainer.add(form);
+			noteContainer.add(form);
 			var userId = getUser().getId();
 			form.add(new TaskButton("tellUserToResetPassword") {
 
@@ -98,7 +100,7 @@ public class UserProfilePage extends UserPage {
 
 			});
 		}
-		add(authSourceContainer);
+		add(noteContainer);
 		
 		add(new ProfileEditPanel("content", userModel));
 	}

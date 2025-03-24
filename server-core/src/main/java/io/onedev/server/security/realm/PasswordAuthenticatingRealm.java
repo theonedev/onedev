@@ -137,6 +137,8 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 				else 
 					user = userManager.findByName(userNameOrEmailAddressValue);
 				if (user != null) {
+					if (user.isServiceAccount())
+						throw new AuthenticationException("Login not supported for service account");
 					if (user.getPassword() == null) {
 						Authenticator authenticator = settingManager.getAuthenticator();
 						if (authenticator != null) {
