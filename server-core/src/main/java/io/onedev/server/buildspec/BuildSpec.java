@@ -2248,5 +2248,49 @@ public class BuildSpec implements Serializable, Validatable {
 			}
 		});
 	}
+
+	@SuppressWarnings("unused")
+	private void migrate39(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (NodeTuple jobTuple: jobNode.getValue()) {
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("paramSpecs")) {
+							SequenceNode paramsNode = (SequenceNode) jobTuple.getValueNode();
+							for (Node paramsNodeItem: paramsNode.getValue()) {
+								MappingNode paramNode = (MappingNode) paramsNodeItem;
+								String paramType = paramNode.getTag().getValue();
+								if (paramType.equals("!WorkingPeriodParam")) {
+									paramNode.setTag(new Tag("!IntegerParam"));
+								}
+							}
+						}
+					}
+				}
+			} else if (specKey.equals("stepTemplates")) {
+				SequenceNode stepTemplatesNode = (SequenceNode) specTuple.getValueNode();
+				for (Node stepTemplatesNodeItem: stepTemplatesNode.getValue()) {
+					MappingNode stepTemplateNode = (MappingNode) stepTemplatesNodeItem;
+					for (NodeTuple stepTemplateTuple: stepTemplateNode.getValue()) {
+						String stemTemplateTupleKey = ((ScalarNode)stepTemplateTuple.getKeyNode()).getValue();
+						if (stemTemplateTupleKey.equals("paramSpecs")) {
+							SequenceNode paramsNode = (SequenceNode) stepTemplateTuple.getValueNode();
+							for (Node paramsNodeItem: paramsNode.getValue()) {
+								MappingNode paramNode = (MappingNode) paramsNodeItem;
+								String paramType = paramNode.getTag().getValue();
+								if (paramType.equals("!WorkingPeriodParam")) {
+									paramNode.setTag(new Tag("!IntegerParam"));
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	
 }

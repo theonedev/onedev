@@ -9,6 +9,15 @@
 In case these changes prevent you accessing the dashboard, suffix the url with `?failsafe=true` to access the dashboard without rendering, and then edit 
 settings of relevant widget to fix the queries
 
+### Issue
+
+Custom field type `Working Period` is removed, as it depends on time tracking setting which is a EE feature. Existing working period fields will be 
+converted to integer fields with value set to number of minutes 
+
+### Build Spec
+
+Build spec param type `Working Period` is removed for same reason as above. Existing working period params will be converted to integer params
+
 # 11.6.12
 
 ### RESTful API

@@ -7,7 +7,6 @@ import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.model.support.issue.field.spec.WorkingPeriodField;
 import io.onedev.server.web.component.chart.line.Line;
 import io.onedev.server.web.component.chart.line.LineChartPanel;
 import io.onedev.server.web.component.chart.line.LineSeries;
@@ -143,9 +142,7 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 					lines.add(new Line("Guide Line", guidelineYAxisValues, "#7E8299", null, "dashed"));
 
 					String yAxisValueFormatter;
-					if (getIndicator().equals(REMAINING_TIME) 
-							|| getIndicator().equals(ESTIMATED_TIME) 
-							|| getIssueSetting().getFieldSpec(getIndicator()) instanceof WorkingPeriodField) {
+					if (getIndicator().equals(REMAINING_TIME) || getIndicator().equals(ESTIMATED_TIME)) {
 						yAxisValueFormatter = String.format(""
 								+ "function(value) {"
 								+ "  if (value != undefined) "

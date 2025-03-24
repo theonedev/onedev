@@ -7759,6 +7759,29 @@ public class DataMigrator {
 					element.addElement("serviceAccount").setText("false");
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueFields.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var typeElement = element.element("type");
+					if (typeElement.getText().trim().equals("Working Period")) {
+						typeElement.setText("Integer");
+						element.element("value").setText(element.elementText("ordinal").trim());
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				try {
+					String content = FileUtils.readFileToString(file, UTF_8);
+					content = StringUtils.replace(content,
+							"io.onedev.server.model.support.issue.field.spec.WorkingPeriodField",
+							"io.onedev.server.model.support.issue.field.spec.IntegerField");
+					content = StringUtils.replace(content,
+							"io.onedev.server.buildspecmodel.inputspec.workingperiodinput",
+							"io.onedev.server.buildspecmodel.inputspec.integerinput");
+					FileUtils.writeFile(file, content, UTF_8);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 	}

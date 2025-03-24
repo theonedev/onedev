@@ -807,14 +807,14 @@ public class ImportServer implements Serializable, Validatable {
 										if (mapped == null) {
 											unmappedIssueFields.add(fieldName);
 											extraIssueInfo.put(fieldName, fieldValue);
-										} else if (!(mapped.getLeft() instanceof WorkingPeriodField)) {
-											mismatchedIssueFields.put(fieldName, "Should be mapped to a working period field");
+										} else if (!(mapped.getLeft() instanceof IntegerField)) {
+											mismatchedIssueFields.put(fieldName, "Should be mapped to a text field");
 											extraIssueInfo.put(fieldName, fieldValue);
 										} else {
 											IssueField issueField = new IssueField();
 											issueField.setIssue(issue);
 											issueField.setName(mapped.getLeft().getName());
-											issueField.setType(InputSpec.WORKING_PERIOD);
+											issueField.setType(InputSpec.INTEGER);
 											issueField.setValue(fieldValue);
 											issue.getFields().add(issueField);
 										}
