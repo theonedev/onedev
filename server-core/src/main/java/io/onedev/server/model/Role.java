@@ -41,6 +41,8 @@ public class Role extends AbstractEntity implements BasePermission {
 	
 	@Column(nullable=false, unique=true)
 	private String name;
+
+	private String description;
 	
 	private boolean manageProject;
 	
@@ -104,6 +106,15 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.name = name;
 	}
 	
+	@Editable(order=110)
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public boolean isOwner() {
 		return getId().equals(OWNER_ID);
 	}

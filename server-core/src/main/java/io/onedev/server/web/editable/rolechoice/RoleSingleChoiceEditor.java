@@ -1,29 +1,31 @@
 package io.onedev.server.web.editable.rolechoice;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
-import org.hibernate.criterion.Order;
+
+import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.RoleChoice;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Role;
-import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.web.component.stringchoice.StringSingleChoice;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.web.component.rolechoice.RoleSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
 public class RoleSingleChoiceEditor extends PropertyEditor<String> {
-
-	private StringSingleChoice input;
 	
-	public RoleSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
-			IModel<String> propertyModel) {
+	private RoleSingleChoice input;
+	
+	public RoleSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -31,20 +33,30 @@ public class RoleSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Map<String, String> roleNames = new LinkedHashMap<>();
+		List<Role> choices = new ArrayList<>();
 
-		var criteria = EntityCriteria.of(Role.class);
-		criteria.addOrder(Order.asc(Role.PROP_NAME));
-		for (Role role: OneDev.getInstance(RoleManager.class).query(criteria))
-			roleNames.put(role.getName(), role.getName());
+		ComponentContext componentContext = new ComponentContext(this);
+		ComponentContext.push(componentContext);
+		try {
+			RoleChoice roleChoice = descriptor.getPropertyGetter().getAnnotation(RoleChoice.class);
+			Preconditions.checkNotNull(roleChoice);
+			choices.addAll(OneDev.getInstance(RoleManager.class).query());
+			choices.sort(Comparator.comparing(Role::getName));
+		} finally {
+			ComponentContext.pop();
+		}
+		Role role;
+		if (getModelObject() != null)
+			role = OneDev.getInstance(RoleManager.class).find(getModelObject());
+		else
+			role = null;
 		
-		String selection = getModelObject();
-		if (!roleNames.containsKey(selection))
-			selection = null;
-		
-    	input = new StringSingleChoice("input", Model.of(selection), Model.ofMap(roleNames), false) {
+		if (role != null && !choices.contains(role))
+			role = null;
 
-			@Override
+    	input = new RoleSingleChoice("input", Model.of(role), Model.of(choices)) {
+
+    		@Override
 			protected void onInitialize() {
 				super.onInitialize();
 				getSettings().configurePlaceholder(descriptor);
@@ -52,9 +64,8 @@ public class RoleSingleChoiceEditor extends PropertyEditor<String> {
 			}
     		
     	};
-        
+
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
-        
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 
 			@Override
@@ -63,12 +74,17 @@ public class RoleSingleChoiceEditor extends PropertyEditor<String> {
 			}
 			
 		});
-		add(input);
+		
+        add(input);
 	}
 
 	@Override
 	protected String convertInputToValue() throws ConversionException {
-		return input.getConvertedInput();
+		Role role = input.getConvertedInput();
+		if (role != null)
+			return role.getName();
+		else
+			return null;
 	}
 
 	@Override

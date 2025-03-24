@@ -163,6 +163,15 @@ public class RoleListPage extends AdministrationPage {
 				cellItem.add(fragment);
 			}
 		});
+
+		columns.add(new AbstractColumn<Role, Void>(Model.of("Description")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Role>> cellItem, String componentId, IModel<Role> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getDescription()));
+			}
+			
+		});
 		
 		columns.add(new AbstractColumn<Role, Void>(Model.of("")) {
 

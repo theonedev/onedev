@@ -2,7 +2,7 @@ package io.onedev.server.web.editable.rolechoice;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
@@ -22,22 +22,21 @@ public class RoleChoiceEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
-        Method propertyGetter = descriptor.getPropertyGetter();
-        RoleChoice roleChoice = propertyGetter.getAnnotation(RoleChoice.class);
-        if (roleChoice != null) {
-        	if (List.class.isAssignableFrom(propertyGetter.getReturnType()) 
+		Method propertyGetter = descriptor.getPropertyGetter();
+        if (propertyGetter.getAnnotation(RoleChoice.class) != null) {
+        	if (Collection.class.isAssignableFrom(propertyGetter.getReturnType()) 
         			&& ReflectionUtils.getCollectionElementClass(propertyGetter.getGenericReturnType()) == String.class) {
-        		return new PropertyContext<List<String>>(descriptor) {
+        		return new PropertyContext<Collection<String>>(descriptor) {
 
 					@Override
-					public PropertyViewer renderForView(String componentId, final IModel<List<String>> model) {
+					public PropertyViewer renderForView(String componentId, final IModel<Collection<String>> model) {
 						return new PropertyViewer(componentId, descriptor) {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-						        List<String> roleNames = model.getObject();
-						        if (roleNames != null && !roleNames.isEmpty()) {
-						            return new Label(id, StringUtils.join(roleNames, ", " ));
+								Collection<String> teamNames = model.getObject();
+						        if (teamNames != null && !teamNames.isEmpty()) {
+						            return new Label(id, StringUtils.join(teamNames, ", " ));
 						        } else {
 									return new EmptyValueLabel(id) {
 
@@ -54,7 +53,7 @@ public class RoleChoiceEditSupport implements EditSupport {
 					}
 
 					@Override
-					public PropertyEditor<List<String>> renderForEdit(String componentId, IModel<List<String>> model) {
+					public PropertyEditor<Collection<String>> renderForEdit(String componentId, IModel<Collection<String>> model) {
 						return new RoleMultiChoiceEditor(componentId, descriptor, model);
 					}
         			
@@ -68,8 +67,9 @@ public class RoleChoiceEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-								if (model.getObject() != null) {
-						            return new Label(id, model.getObject());
+						        String teamName = model.getObject();
+						        if (teamName != null) {
+						            return new Label(id, teamName);
 						        } else {
 									return new EmptyValueLabel(id) {
 
@@ -92,7 +92,7 @@ public class RoleChoiceEditSupport implements EditSupport {
         			
         		};
         	} else {
-        		throw new RuntimeException("Annotation 'RoleChoice' should be applied to property with type 'String' or 'List<String>'.");
+        		throw new RuntimeException("Annotation 'TeamChoice' should be applied to property with type String or Collection<String>");
         	}
         } else {
             return null;

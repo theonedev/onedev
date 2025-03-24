@@ -2,9 +2,8 @@ package io.onedev.server.web.editable.rolechoice;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -12,37 +11,53 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import com.google.common.base.Preconditions;
+
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.RoleChoice;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Role;
-import io.onedev.server.web.component.stringchoice.StringMultiChoice;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.web.component.rolechoice.RoleMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
-public class RoleMultiChoiceEditor extends PropertyEditor<List<String>> {
+public class RoleMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 	
-	private StringMultiChoice input;
+	private RoleMultiChoice input;
 	
-	public RoleMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
-			IModel<List<String>> propertyModel) {
+	public RoleMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Collection<String>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		List<Role> choices = new ArrayList<>();
 		
-		Map<String, String> roleNames = new LinkedHashMap<>();
-		for (Role role: OneDev.getInstance(RoleManager.class).query())
-			roleNames.put(role.getName(), role.getName());
+		ComponentContext componentContext = new ComponentContext(this);
+		ComponentContext.push(componentContext);
+		try {
+			RoleChoice roleChoice = descriptor.getPropertyGetter().getAnnotation(RoleChoice.class);
+			Preconditions.checkNotNull(roleChoice);
+			choices.addAll(OneDev.getInstance(RoleManager.class).query());
+			choices.sort(Comparator.comparing(Role::getName));
+		} finally {
+			ComponentContext.pop();			
+		}
+	
+    	List<Role> selections = new ArrayList<>();
+		if (getModelObject() != null) {
+			RoleManager roleManager = OneDev.getInstance(RoleManager.class);
+			for (String roleName: getModelObject()) {
+				Role role = roleManager.find(roleName);
+				if (role != null && choices.contains(role))
+					selections.add(role);
+			}
+		} 
 		
-		Collection<String> selections = new ArrayList<>();
-		if (getModelObject() != null)
-			selections.addAll(getModelObject());
-		
-		selections.retainAll(roleNames.keySet());
-		
-		input = new StringMultiChoice("input", Model.of(selections), Model.ofMap(roleNames), false) {
+		input = new RoleMultiChoice("input", Model.of(selections), Model.of(choices)) {
 
 			@Override
 			protected void onInitialize() {
@@ -51,7 +66,6 @@ public class RoleMultiChoiceEditor extends PropertyEditor<List<String>> {
 			}
 			
 		};
-        input.setConvertEmptyInputStringToNull(true);
         
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
@@ -69,11 +83,13 @@ public class RoleMultiChoiceEditor extends PropertyEditor<List<String>> {
 
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
-		Collection<String> roleNames = input.getConvertedInput();
-		if (roleNames != null) 
-			return new ArrayList<>(roleNames);
-		else
-			return new ArrayList<>();
+		List<String> roleNames = new ArrayList<>();
+		Collection<Role> roles = input.getConvertedInput();
+		if (roles != null) {
+			for (Role role: roles)
+				roleNames.add(role.getName());
+		} 
+		return roleNames;
 	}
 
 	@Override
