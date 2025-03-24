@@ -36,6 +36,7 @@ public class Role extends AbstractEntity implements BasePermission {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_NAME = "name";
 	public static final Long OWNER_ID = 1L;
 	
 	@Column(nullable=false, unique=true)

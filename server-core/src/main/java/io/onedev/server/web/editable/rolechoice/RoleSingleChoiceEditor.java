@@ -8,10 +8,12 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
+import org.hibernate.criterion.Order;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Role;
+import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -30,7 +32,10 @@ public class RoleSingleChoiceEditor extends PropertyEditor<String> {
 		super.onInitialize();
 
 		Map<String, String> roleNames = new LinkedHashMap<>();
-		for (Role role: OneDev.getInstance(RoleManager.class).query())
+
+		var criteria = EntityCriteria.of(Role.class);
+		criteria.addOrder(Order.asc(Role.PROP_NAME));
+		for (Role role: OneDev.getInstance(RoleManager.class).query(criteria))
 			roleNames.put(role.getName(), role.getName());
 		
 		String selection = getModelObject();
