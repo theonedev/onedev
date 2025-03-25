@@ -111,7 +111,7 @@ public class BoardSpec implements Serializable {
 	@Editable(order=400, name="Board Columns", description="Specify columns of the board. "
 			+ "Each column corresponds to a value of the issue field specified above")
 	@Size(min=2, message="At least two columns need to be defined")
-	@ChoiceProvider("getColumnChoices")
+	@ChoiceProvider(value="getColumnChoices", displayNames="getColumnDisplayNames")
 	public List<String> getEditColumns() {
 		if (editColumns == null)
 			editColumns = new ArrayList<>();
@@ -211,8 +211,7 @@ public class BoardSpec implements Serializable {
 		return choices;
 	}
 	
-	@SuppressWarnings("unused")
-	private static Map<String, String> getColumnChoices() {
+	private static Map<String, String> getColumnDisplayNames() {
 		Map<String, String> choices = new LinkedHashMap<>();
 		String fieldName = (String) EditContext.get().getInputValue("identifyField");
 		if (Issue.NAME_STATE.equals(fieldName)) {
@@ -228,6 +227,11 @@ public class BoardSpec implements Serializable {
 			}
 		} 
 		return choices;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<String> getColumnChoices() {
+		return new ArrayList<>(getColumnDisplayNames().keySet());
 	}
 	
 	private static GlobalIssueSetting getIssueSetting() {

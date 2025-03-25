@@ -90,7 +90,11 @@ public class Role extends AbstractEntity implements BasePermission {
 	@OneToMany(mappedBy="role", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<GroupAuthorization> groupAuthorizations = new ArrayList<>();
-	
+
+	@OneToMany(mappedBy="role", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<AccessTokenAuthorization> accessTokenAuthorizations = new ArrayList<>();
+
 	@OneToMany(mappedBy=LinkAuthorization.PROP_ROLE, cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<LinkAuthorization> linkAuthorizations = new ArrayList<>();
@@ -256,7 +260,7 @@ public class Role extends AbstractEntity implements BasePermission {
 	
 	@Editable(order=625, placeholder="None", description="Optionally specify issue links allowed to edit")
 	@ShowCondition("isManageIssuesDisabled")
-	@ChoiceProvider("getIssueLinkChoices")
+	@ChoiceProvider(value="getIssueLinkChoices", displayNames = "getIssueLinkDisplayNames")
 	public List<String> getEditableIssueLinks() {
 		return editableIssueLinks;
 	}
@@ -265,8 +269,7 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.editableIssueLinks = editableIssueLinks;
 	}
 	
-	@SuppressWarnings("unused")
-	private static Map<String, String> getIssueLinkChoices() {
+	private static Map<String, String> getIssueLinkDisplayNames() {
 		Map<String, String> choices = new LinkedHashMap<>();
 		for (LinkSpec link: OneDev.getInstance(LinkSpecManager.class).queryAndSort()) {
 			if (link.getOpposite() != null)
@@ -275,6 +278,11 @@ public class Role extends AbstractEntity implements BasePermission {
 				choices.put(link.getName(), link.getName());
 		}
 		return choices;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<String> getIssueLinkChoices() {
+		return new ArrayList<>(getIssueLinkDisplayNames().keySet());
 	}
 
 	@Editable(order=650, name="Build Management", description="Build administrative permission for all jobs inside a project, "

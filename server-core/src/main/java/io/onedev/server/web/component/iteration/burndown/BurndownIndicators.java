@@ -34,7 +34,7 @@ public class BurndownIndicators {
 		choices.add(ISSUE_COUNT);
 
 		choices.addAll(getIssueSetting().getFieldSpecs().stream()
-				.filter(it -> it.getType().equals(InputSpec.INTEGER) || it.getType().equals(InputSpec.WORKING_PERIOD))
+				.filter(it -> it.getType().equals(InputSpec.INTEGER))
 				.map(FieldSpec::getName).collect(toList()));
 
 		return choices;

@@ -1,6 +1,6 @@
 package io.onedev.server.web.component.job;
 
-import java.util.Map;
+import java.util.List;
 
 import org.apache.wicket.model.IModel;
 
@@ -11,7 +11,7 @@ public class JobSingleChoice extends Select2Choice<String> {
 
 	private static final long serialVersionUID = 1L;
 
-	public JobSingleChoice(String id, IModel<String> model, IModel<Map<String, String>> choicesModel, boolean tagsMode) {
+	public JobSingleChoice(String id, IModel<String> model, IModel<List<String>> choicesModel, boolean tagsMode) {
 		super(id, model, new StringChoiceProvider(choicesModel, tagsMode));
 	}
 

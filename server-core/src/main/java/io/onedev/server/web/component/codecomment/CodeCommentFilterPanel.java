@@ -7,9 +7,7 @@ import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -75,14 +73,11 @@ class CodeCommentFilterPanel extends FilterEditPanel<CodeComment> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				var map = new LinkedHashMap<String, String>();
-				map.put("Unresolved", "Unresolved");
-				map.put("Resolved", "Resolved");
-				return map;
+			protected List<String> load() {
+				return List.of("Unresolved", "Resolved");
 			}
 		}, false);
 		statusChoice.add(new AjaxFormComponentUpdatingBehavior("change") {

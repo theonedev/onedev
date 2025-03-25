@@ -1,5 +1,14 @@
 package io.onedev.server.web.component.user.accesstoken;
 
+import static java.util.Comparator.comparing;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ProjectChoice;
 import io.onedev.server.annotation.RoleChoice;
@@ -10,21 +19,14 @@ import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.util.UserAware;
 import io.onedev.server.web.util.WicketUtils;
 
-import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Comparator.comparing;
-
 @Editable
-public class AuthorizationBean implements Serializable {
+public class AccessTokenAuthorizationBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private String projectPath;
 	
-	private String roleName;
+	private List<String> roleNames;
 
 	@Editable(order=100, name="Project")
 	@ProjectChoice("getManageableProjects")
@@ -47,13 +49,13 @@ public class AuthorizationBean implements Serializable {
 
 	@Editable(order=200, name="Role")
 	@RoleChoice
-	@NotEmpty
-	public String getRoleName() {
-		return roleName;
+	@Size(min=1, message = "At least one role must be selected")
+	public List<String> getRoleNames() {
+		return roleNames;
 	}
 
-	public void setRoleName(String roleName) {
-		this.roleName = roleName;
+	public void setRoleNames(List<String> roleNames) {
+		this.roleNames = roleNames;
 	}
 	
 }

@@ -1,6 +1,16 @@
 package io.onedev.server.web.component.user.accesstoken;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.Panel;
+
 import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AccessTokenAuthorizationManager;
 import io.onedev.server.entitymanager.AccessTokenManager;
@@ -12,13 +22,6 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.panel.Panel;
-
-import java.util.ArrayList;
 
 abstract class AccessTokenEditPanel extends Panel {
 	
@@ -62,13 +65,23 @@ abstract class AccessTokenEditPanel extends Panel {
 					token.setValue(bean.getValue());
 					token.setHasOwnerPermissions(bean.isHasOwnerPermissions());
 
+					var projectPaths = new HashSet<String>();
 					var authorizations = new ArrayList<AccessTokenAuthorization>();
 					for (var authorizationBean : bean.getAuthorizations()) {
-						var authorization = new AccessTokenAuthorization();
-						authorization.setProject(getProjectManager().findByPath(authorizationBean.getProjectPath()));
-						authorization.setRole(getRoleManager().find(authorizationBean.getRoleName()));
-						authorization.setToken(token);
-						authorizations.add(authorization);
+						if (!projectPaths.add(authorizationBean.getProjectPath())) {
+							editor.error(new Path(new PathNode.Named("authorizations")), "Duplicate authorizations found: " + authorizationBean.getProjectPath());
+							target.add(AccessTokenEditPanel.this);
+							return;
+						} else {
+							var project = getProjectManager().findByPath(authorizationBean.getProjectPath());
+							authorizationBean.getRoleNames().forEach(it -> {
+								var authorization = new AccessTokenAuthorization();
+								authorization.setProject(project);
+								authorization.setRole(getRoleManager().find(it));
+								authorization.setToken(token);
+								authorizations.add(authorization);
+							});
+						}	
 					}
 					token.setExpireDate(bean.getExpireDate());
 

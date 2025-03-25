@@ -2,7 +2,7 @@ package io.onedev.server.web.editable.choice;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,13 +15,13 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.select2.Select2MultiChoice;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.ChoiceProvider;
 
 public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 
@@ -40,29 +40,55 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		IModel<Map<String, String>> choicesModel = new LoadableDetachableModel<Map<String, String>>() {
+		IModel<List<String>> choicesModel = new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				Map<String, String> choices;
-				
-				ComponentContext componentContext = new ComponentContext(MultiChoiceEditor.this);
-				
+			protected List<String> load() {
+				ComponentContext componentContext = new ComponentContext(MultiChoiceEditor.this);				
 				ComponentContext.push(componentContext);
 				try {
-					Object result = ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().value());
-					if (result instanceof List) {
-						choices = new LinkedHashMap<>();
-						for (String each: (List<String>)result) 
-							choices.put(each, each);
-					} else {
-						choices = (Map<String, String>)result;
-					}
+					return (List<String>) ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().value());
 				} finally {
 					ComponentContext.pop();
 				}
-				
-				return choices;
+			}
+			
+		};
+
+		IModel<Map<String, String>> displayNamesModel = new LoadableDetachableModel<Map<String, String>>() {
+
+			@Override
+			protected Map<String, String> load() {
+				ComponentContext componentContext = new ComponentContext(MultiChoiceEditor.this);				
+				ComponentContext.push(componentContext);
+				if (getChoiceProvider().displayNames().length() != 0) {
+					try {
+						return (Map<String, String>) ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().displayNames());
+					} finally {
+						ComponentContext.pop();
+					} 
+				} else {
+					return new HashMap<>();
+				}
+			}
+			
+		};
+
+		IModel<Map<String, String>> descriptionsModel = new LoadableDetachableModel<Map<String, String>>() {
+
+			@Override
+			protected Map<String, String> load() {
+				ComponentContext componentContext = new ComponentContext(MultiChoiceEditor.this);				
+				ComponentContext.push(componentContext);
+				if (getChoiceProvider().descriptions().length() != 0) {
+					try {
+						return (Map<String, String>) ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().descriptions());
+					} finally {
+						ComponentContext.pop();
+					} 
+				} else {
+					return new HashMap<>();
+				}
 			}
 			
 		};
@@ -82,7 +108,7 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 		*/
 		if (selections == null) 
 			selections = new ArrayList<>();
-		input = new StringMultiChoice("input", Model.of(selections), choicesModel, getChoiceProvider().tagsMode()) {
+		input = new StringMultiChoice("input", Model.of(selections), choicesModel, displayNamesModel, descriptionsModel, getChoiceProvider().tagsMode()) {
 
 			@Override
 			protected void onInitialize() {

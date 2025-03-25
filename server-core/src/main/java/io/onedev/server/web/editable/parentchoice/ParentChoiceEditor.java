@@ -1,5 +1,15 @@
 package io.onedev.server.web.editable.parentchoice;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.util.convert.ConversionException;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -10,17 +20,6 @@ import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.util.convert.ConversionException;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ParentChoiceEditor extends PropertyEditor<String> {
 
@@ -35,11 +34,11 @@ public class ParentChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		IModel<Map<String, String>> choicesModel = new LoadableDetachableModel<Map<String, String>>() {
+		IModel<List<String>> choicesModel = new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				List<String> listOfProjectPath = new ArrayList<>();
+			protected List<String> load() {
+				List<String> projectPaths = new ArrayList<>();
 				Project currentProject = Project.get();
 				
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
@@ -47,15 +46,11 @@ public class ParentChoiceEditor extends PropertyEditor<String> {
 				for (Project project: SecurityUtils.getAuthorizedProjects(new CreateChildren())) {
 					if (currentProject == null || !cache.isSelfOrAncestorOf(currentProject.getId(), project.getId())) {
 						String projectPath = cache.get(project.getId()).getPath();
-						listOfProjectPath.add(projectPath);
+						projectPaths.add(projectPath);
 					}
 				}
-				Collections.sort(listOfProjectPath);
-				
-				Map<String, String> mapOfProjectPath = new LinkedHashMap<>();
-				for (String projectPath: listOfProjectPath)
-					mapOfProjectPath.put(projectPath, projectPath);
-				return mapOfProjectPath;
+				Collections.sort(projectPaths);				
+				return projectPaths;
 			}
 			
 		};

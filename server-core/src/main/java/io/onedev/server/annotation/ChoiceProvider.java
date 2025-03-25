@@ -10,6 +10,10 @@ import java.lang.annotation.Target;
 public @interface ChoiceProvider {
 
 	String value();
+
+	String displayNames() default "";
+
+	String descriptions() default "";
 	
 	boolean tagsMode() default false;
 	

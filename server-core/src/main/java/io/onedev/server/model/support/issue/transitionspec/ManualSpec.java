@@ -1,31 +1,39 @@
 package io.onedev.server.model.support.issue.transitionspec;
 
-import edu.emory.mathcs.backport.java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.IssueQuery;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.RoleManager;
-import io.onedev.server.model.*;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueField;
+import io.onedev.server.model.Membership;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.Role;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 @Editable(order=100, name="Transit manually")
 public class ManualSpec extends TransitionSpec {
@@ -54,7 +62,7 @@ public class ManualSpec extends TransitionSpec {
 	}
 	
 	@Editable(order=200, placeholder = "Any user", description="Optionally specify authorized roles to press this button. If not specified, all users are allowed")
-	@ChoiceProvider("getRoleChoices")
+	@ChoiceProvider(value="getRoleChoices", descriptions="getRoleDescriptions")
 	public List<String> getAuthorizedRoles() {
 		return authorizedRoles;
 	}
@@ -63,18 +71,24 @@ public class ManualSpec extends TransitionSpec {
 		this.authorizedRoles = authorizedRoles;
 	}
 	
+	private static Map<String, String> getRoleDescriptions() {
+		Map<String, String> descriptions = new HashMap<>();
+		for (Role role: OneDev.getInstance(RoleManager.class).query()) 
+			descriptions.put(role.getName(), role.getDescription());
+		descriptions = CollectionUtils.sortByKey(descriptions);
+		descriptions.put(ROLE_SUBMITTER, "user opening the issue");
+		for (FieldSpec field: getIssueSetting().getFieldSpecs()) {
+			if (field instanceof UserChoiceField)
+				descriptions.put("{" + field.getName()+ "}", "user associated with this field");
+			else if (field instanceof GroupChoiceField)
+				descriptions.put("{" + field.getName()+ "}", "group associated with this field");
+		}
+		return descriptions;
+	}
+
 	@SuppressWarnings("unused")
 	private static List<String> getRoleChoices() {
-		List<String> choices = new ArrayList<>();
-		for (Role role: OneDev.getInstance(RoleManager.class).query()) 
-			choices.add(role.getName());
-		Collections.sort(choices);
-		choices.add(ROLE_SUBMITTER);
-		for (FieldSpec field: getIssueSetting().getFieldSpecs()) {
-			if (field instanceof UserChoiceField || field instanceof GroupChoiceField)
-				choices.add("{" + field.getName()+ "}");
-		}
-		return choices;
+		return new ArrayList<>(getRoleDescriptions().keySet());
 	}
 
 	@Editable(order=500, placeholder="No fields to prompt", description="Optionally select fields "

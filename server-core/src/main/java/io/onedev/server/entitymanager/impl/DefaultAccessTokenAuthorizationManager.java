@@ -27,10 +27,10 @@ public class DefaultAccessTokenAuthorizationManager extends BaseEntityManager<Ac
 			var authorization = it.next();
 			boolean found = false;
 			for (var newAuthorization: authorizations) {
-				if (newAuthorization.getProject().equals(authorization.getProject())) {
+				if (newAuthorization.getProject().equals(authorization.getProject()) 
+						&& newAuthorization.getRole().equals(authorization.getRole())) {
 					found = true;
-					authorization.setRole(newAuthorization.getRole());
-					dao.persist(authorization);
+					break;
 				}
 			}
 			if (!found) {
@@ -42,7 +42,8 @@ public class DefaultAccessTokenAuthorizationManager extends BaseEntityManager<Ac
 		for (var newAuthorization: authorizations) {
 			boolean found = false;
 			for (var authorization: token.getAuthorizations()) {
-				if (authorization.getProject().equals(newAuthorization.getProject())) {
+				if (authorization.getProject().equals(newAuthorization.getProject()) 
+						&& authorization.getRole().equals(newAuthorization.getRole())) {
 					found = true;
 					break;
 				}

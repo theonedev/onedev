@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Entity
 @Table(
 		indexes={@Index(columnList="o_token_id"), @Index(columnList="o_project_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_token_id", "o_project_id"})
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_token_id", "o_project_id", "o_role_id"})
 })
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class AccessTokenAuthorization extends AbstractEntity {

@@ -8,9 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -31,9 +29,9 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.pack.LabelCriteria;
 import io.onedev.server.search.entity.pack.PackQueryLexer;
 import io.onedev.server.search.entity.pack.PublishDateCriteria;
-import io.onedev.server.search.entity.pack.PublishedViaProjectCriteria;
-import io.onedev.server.search.entity.pack.PublishedByUserCriteria;
 import io.onedev.server.search.entity.pack.PublishedByCriteria;
+import io.onedev.server.search.entity.pack.PublishedByUserCriteria;
+import io.onedev.server.search.entity.pack.PublishedViaProjectCriteria;
 import io.onedev.server.search.entity.pack.TypeCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
@@ -75,17 +73,13 @@ class PackFilterPanel extends FilterEditPanel<Pack> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				var map = new LinkedHashMap<String, String>();
-				List<PackSupport> packSupports = new ArrayList<>(OneDev.getExtensions(PackSupport.class));
+			protected List<String> load() {
+				var packSupports = new ArrayList<>(OneDev.getExtensions(PackSupport.class));
 				packSupports.sort(Comparator.comparing(PackSupport::getOrder));
-				for (var packSupport: packSupports) {
-					map.put(packSupport.getPackType(), packSupport.getPackType());
-				}	
-				return map;
+				return packSupports.stream().map(it->it.getPackType()).collect(toList());
 			}
 		}, false);
 		typeChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
@@ -214,17 +208,13 @@ class PackFilterPanel extends FilterEditPanel<Pack> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
+			protected List<String> load() {
 				var names = getLabelSpecManager().query().stream().map(it->it.getName()).collect(toList());
 				Collections.sort(names);
-				var map = new LinkedHashMap<String, String>();
-				for (String name: names) {
-					map.put(name, name);
-				}
-				return map;
+				return names;
 			}
 
 		}, false);

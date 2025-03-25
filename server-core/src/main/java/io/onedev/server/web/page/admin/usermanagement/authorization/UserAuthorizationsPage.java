@@ -2,7 +2,9 @@ package io.onedev.server.web.page.admin.usermanagement.authorization;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.wicket.Session;
@@ -31,10 +33,16 @@ public class UserAuthorizationsPage extends UserPage {
 		super.onInitialize();
 		
 		ProjectAuthorizationsBean authorizationsBean = new ProjectAuthorizationsBean();
-		for (UserAuthorization authorization: getUser().getProjectAuthorizations()) {
+		var userRoles = new HashMap<String, List<String>>();		
+		for (var authorization: getUser().getProjectAuthorizations()) {
+			String projectPath = authorization.getProject().getPath();
+			String roleName = authorization.getRole().getName();			
+			userRoles.computeIfAbsent(projectPath, k -> new ArrayList<>()).add(roleName);
+		}
+		for (var entry: userRoles.entrySet()) {
 			ProjectAuthorizationBean authorizationBean = new ProjectAuthorizationBean();
-			authorizationBean.setProjectPath(authorization.getProject().getPath());
-			authorizationBean.setRoleName(authorization.getRole().getName());
+			authorizationBean.setProjectPath(entry.getKey());
+			authorizationBean.setRoleNames(entry.getValue());
 			authorizationsBean.getAuthorizations().add(authorizationBean);
 		}
 
@@ -47,16 +55,18 @@ public class UserAuthorizationsPage extends UserPage {
 				Set<String> projectNames = new HashSet<>();
 				Collection<UserAuthorization> authorizations = new ArrayList<>();
 				for (ProjectAuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
-					if (projectNames.contains(authorizationBean.getProjectPath())) {
+					if (!projectNames.add(authorizationBean.getProjectPath())) {
 						error("Duplicate authorizations found: " + authorizationBean.getProjectPath());
 						return;
 					} else {
-						projectNames.add(authorizationBean.getProjectPath());
-						UserAuthorization authorization = new UserAuthorization();
-						authorization.setUser(getUser());
-						authorization.setProject(OneDev.getInstance(ProjectManager.class).findByPath(authorizationBean.getProjectPath()));
-						authorization.setRole(OneDev.getInstance(RoleManager.class).find(authorizationBean.getRoleName()));
-						authorizations.add(authorization);
+						var project = getProjectManager().findByPath(authorizationBean.getProjectPath());
+						authorizationBean.getRoleNames().stream().forEach(it -> {
+							UserAuthorization authorization = new UserAuthorization();
+							authorization.setUser(getUser());
+							authorization.setProject(project);
+							authorization.setRole(getRoleManager().find(it));
+							authorizations.add(authorization);
+						});
 					}
 				}
 				
@@ -70,4 +80,11 @@ public class UserAuthorizationsPage extends UserPage {
 		add(form);	
 	}
 
+	private RoleManager getRoleManager() {
+		return OneDev.getInstance(RoleManager.class);
+	}
+	
+	private ProjectManager getProjectManager() {
+		return OneDev.getInstance(ProjectManager.class);
+	}
 }

@@ -6,12 +6,11 @@ import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.I
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -83,15 +82,11 @@ class PullRequestFilterPanel extends FilterEditPanel<PullRequest> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				var map = new LinkedHashMap<String, String>();
-				for (PullRequest.Status status: PullRequest.Status.values()) {
-					map.put(status.name(), status.name());
-				}
-				return map;
+			protected List<String> load() {
+				return Arrays.stream(PullRequest.Status.values()).map(it->it.name()).collect(toList());
 			}
 		}, false);
 		statusChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
@@ -221,17 +216,13 @@ class PullRequestFilterPanel extends FilterEditPanel<PullRequest> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
+			protected List<String> load() {
 				var names = getLabelSpecManager().query().stream().map(it->it.getName()).collect(toList());
 				Collections.sort(names);
-				var map = new LinkedHashMap<String, String>();
-				for (String name: names) {
-					map.put(name, name);
-				}
-				return map;
+				return names;
 			}
 
 		}, false) {

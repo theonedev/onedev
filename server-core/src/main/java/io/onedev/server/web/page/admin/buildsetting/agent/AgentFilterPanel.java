@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -75,14 +74,11 @@ class AgentFilterPanel extends FilterEditPanel<Agent> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				var map = new LinkedHashMap<String, String>();
-				map.put("Online", "Online");
-				map.put("Offline", "Offline");
-				return map;
+			protected List<String> load() {
+				return List.of("Online", "Offline");
 			}
 		}, false);
 		statusChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
@@ -114,17 +110,15 @@ class AgentFilterPanel extends FilterEditPanel<Agent> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				var map = new LinkedHashMap<String, String>();
+			protected List<String> load() {
 				var osNames = new ArrayList<>(getAgentManager().getOsNames());
 				Collections.sort(osNames);
-				for (var os: osNames)
-					map.put(os, os);
-				return map;
+				return osNames;
 			}
+			
 		}, false);
 		osChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 
@@ -155,16 +149,13 @@ class AgentFilterPanel extends FilterEditPanel<Agent> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				var map = new LinkedHashMap<String, String>();
+			protected List<String> load() {
 				var osArchs = new ArrayList<>(getAgentManager().getOsArchs());
 				Collections.sort(osArchs);
-				for (var osArch: osArchs)
-					map.put(osArch, osArch);
-				return map;
+				return osArchs;
 			}
 		}, false);
 		osArchChoice.add(new AjaxFormComponentUpdatingBehavior("change") {

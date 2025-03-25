@@ -2,9 +2,7 @@ package io.onedev.server.web.editable.buildspec.job.choice;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -12,11 +10,11 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.annotation.JobChoice;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.job.JobMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.JobChoice;
 
 public class JobMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
@@ -31,20 +29,20 @@ public class JobMultiChoiceEditor extends PropertyEditor<List<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Map<String, String> choices = new LinkedHashMap<>();
+		List<String> choices = new ArrayList<>();
 		for (String jobName: Project.get().getJobNames())
-			choices.put(jobName, jobName);
+			choices.add(jobName);
 		
 		JobChoice jobChoice = Preconditions.checkNotNull(descriptor.getPropertyGetter().getAnnotation(JobChoice.class));
     	List<String> selections = new ArrayList<>();
 		if (getModelObject() != null) {
 			for (String selection: getModelObject()) {
-				if (jobChoice.tagsMode() || choices.containsKey(selection))
+				if (jobChoice.tagsMode() || choices.contains(selection))
 					selections.add(selection);
 			}
 		}
 		
-		input = new JobMultiChoice("input", Model.of(selections), Model.ofMap(choices), jobChoice.tagsMode()) {
+		input = new JobMultiChoice("input", Model.of(selections), Model.ofList(choices), jobChoice.tagsMode()) {
 
 			@Override
 			protected void onInitialize() {

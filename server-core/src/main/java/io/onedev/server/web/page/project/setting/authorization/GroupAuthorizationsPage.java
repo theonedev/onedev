@@ -1,5 +1,19 @@
 package io.onedev.server.web.page.project.setting.authorization;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.Session;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupAuthorizationManager;
 import io.onedev.server.entitymanager.GroupManager;
@@ -10,17 +24,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
-import org.apache.wicket.Component;
-import org.apache.wicket.Session;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 public class GroupAuthorizationsPage extends ProjectSettingPage {
 
@@ -33,10 +36,16 @@ public class GroupAuthorizationsPage extends ProjectSettingPage {
 		super.onInitialize();
 
 		GroupAuthorizationsBean authorizationsBean = new GroupAuthorizationsBean();
-		for (GroupAuthorization authorization: getProject().getGroupAuthorizations()) {
+		var groupRoles = new HashMap<String, List<String>>();		
+		for (var authorization: getProject().getGroupAuthorizations()) {
+			String groupName = authorization.getGroup().getName();
+			String roleName = authorization.getRole().getName();			
+			groupRoles.computeIfAbsent(groupName, k -> new ArrayList<>()).add(roleName);
+		}
+		for (var entry: groupRoles.entrySet()) {
 			GroupAuthorizationBean authorizationBean = new GroupAuthorizationBean();
-			authorizationBean.setGroupName(authorization.getGroup().getName());
-			authorizationBean.setRoleName(authorization.getRole().getName());
+			authorizationBean.setGroupName(entry.getKey());
+			authorizationBean.setRoleNames(entry.getValue());
 			authorizationsBean.getAuthorizations().add(authorizationBean);
 		}
 
@@ -66,7 +75,7 @@ public class GroupAuthorizationsPage extends ProjectSettingPage {
 						if (!canManageProject) {
 							for (GroupAuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
 								if (user.getGroups().stream().anyMatch(it->it.getName().equals(authorizationBean.getGroupName()))
-										&& OneDev.getInstance(RoleManager.class).find(authorizationBean.getRoleName()).isManageProject()) {
+										&& authorizationBean.getRoleNames().stream().anyMatch(it -> getRoleManager().find(it).isManageProject())) {
 									canManageProject = true;													
 									break;									
 								}
@@ -82,20 +91,22 @@ public class GroupAuthorizationsPage extends ProjectSettingPage {
 				Set<String> groupNames = new HashSet<>();
 				Collection<GroupAuthorization> authorizations = new ArrayList<>();
 				for (GroupAuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
-					if (groupNames.contains(authorizationBean.getGroupName())) {
+					if (!groupNames.add(authorizationBean.getGroupName())) {
 						error("Duplicate authorizations found: " + authorizationBean.getGroupName());
 						return;
 					} else {
-						groupNames.add(authorizationBean.getGroupName());
-						GroupAuthorization authorization = new GroupAuthorization();
-						authorization.setProject(getProject());
-						authorization.setGroup(OneDev.getInstance(GroupManager.class).find(authorizationBean.getGroupName()));
-						authorization.setRole(OneDev.getInstance(RoleManager.class).find(authorizationBean.getRoleName()));
-						authorizations.add(authorization);
+						var group = getGroupManager().find(authorizationBean.getGroupName());
+						authorizationBean.getRoleNames().stream().forEach(it -> {
+							GroupAuthorization authorization = new GroupAuthorization();
+							authorization.setProject(getProject());
+							authorization.setGroup(group);
+							authorization.setRole(getRoleManager().find(it));
+							authorizations.add(authorization);
+						});
 					}
 				}
 				
-				OneDev.getInstance(GroupAuthorizationManager.class).syncAuthorizations(getProject(), authorizations);
+				getGroupAuthorizationManager().syncAuthorizations(getProject(), authorizations);
 				Session.get().success("Group authorizations updated");
 			}
 			
@@ -103,6 +114,18 @@ public class GroupAuthorizationsPage extends ProjectSettingPage {
 		form.add(new FencedFeedbackPanel("feedback", form));
 		form.add(PropertyContext.edit("editor", authorizationsBean, "authorizations"));
 		add(form);
+	}
+
+	private RoleManager getRoleManager() {
+		return OneDev.getInstance(RoleManager.class);
+	}
+	
+	private GroupManager getGroupManager() {
+		return OneDev.getInstance(GroupManager.class);
+	}
+
+	private GroupAuthorizationManager getGroupAuthorizationManager() {
+		return OneDev.getInstance(GroupAuthorizationManager.class);
 	}
 
 	@Override

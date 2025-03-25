@@ -1,7 +1,7 @@
 package io.onedev.server.web.editable.branchchoice;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -11,13 +11,13 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.annotation.BranchChoice;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.BranchChoice;
 
 public class BranchSingleChoiceEditor extends PropertyEditor<String> {
 	
@@ -31,20 +31,19 @@ public class BranchSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
     	
-		Map<String, String> choices = new LinkedHashMap<>();
+		List<String> choices = new ArrayList<>();
 		if (Project.get() != null) {
 			for (RefFacade ref: Project.get().getBranchRefs()) {
-				String branch = GitUtils.ref2branch(ref.getName());
-				choices.put(branch, branch);
+				choices.add(GitUtils.ref2branch(ref.getName()));
 			}
 		}
 		
 		BranchChoice branchChoice = Preconditions.checkNotNull(descriptor.getPropertyGetter().getAnnotation(BranchChoice.class));
 		String selection = getModelObject();
-		if (!branchChoice.tagsMode() && !choices.containsKey(selection))
+		if (!branchChoice.tagsMode() && !choices.contains(selection))
 			selection = null;
 
-    	input = new BranchSingleChoice("input", Model.of(selection), Model.ofMap(choices), branchChoice.tagsMode()) {
+    	input = new BranchSingleChoice("input", Model.of(selection), Model.ofList(choices), branchChoice.tagsMode()) {
     		
 			@Override
 			protected void onInitialize() {

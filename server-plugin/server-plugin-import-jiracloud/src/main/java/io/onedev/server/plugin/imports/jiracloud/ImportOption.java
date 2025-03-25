@@ -82,7 +82,7 @@ public class ImportOption implements Serializable {
 	
 	@Editable(order=370, description="Optionally specify a working period field to hold time spent infomration.<br>"
 			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
-	@ChoiceProvider("getWorkingPeriodIssueFieldChoices")
+	@ChoiceProvider("getIntegerIssueFieldChoices")
 	public String getTimeSpentIssueField() {
 		return timeSpentIssueField;
 	}
@@ -93,7 +93,7 @@ public class ImportOption implements Serializable {
 
 	@Editable(order=380, description="Optionally specify a working period field to hold time estimate infomration.<br>"
 			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
-	@ChoiceProvider("getWorkingPeriodIssueFieldChoices")
+	@ChoiceProvider("getIntegerIssueFieldChoices")
 	public String getTimeEstimateIssueField() {
 		return timeEstimateIssueField;
 	}
@@ -103,10 +103,10 @@ public class ImportOption implements Serializable {
 	}
 
 	@SuppressWarnings("unused")
-	private static List<String> getWorkingPeriodIssueFieldChoices() {
+	private static List<String> getIntegerIssueFieldChoices() {
 		List<String> choices = new ArrayList<>();
 		for (FieldSpec field: getIssueSetting().getFieldSpecs()) {
-			if (field.getType().equals(InputSpec.WORKING_PERIOD))
+			if (field.getType().equals(InputSpec.INTEGER))
 				choices.add(field.getName());
 		}
 		return choices;

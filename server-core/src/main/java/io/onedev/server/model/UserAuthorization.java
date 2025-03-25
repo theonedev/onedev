@@ -14,14 +14,13 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Table(
 		indexes={@Index(columnList="o_user_id"), @Index(columnList="o_project_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_user_id", "o_project_id"})
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_user_id", "o_project_id", "o_role_id"})
 })
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class UserAuthorization extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
-	
-	
+		
 	public static String PROP_USER = "user";
 	
 	public static String PROP_ROLE = "role";

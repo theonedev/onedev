@@ -4,6 +4,7 @@ import static io.onedev.server.model.Build.SORT_FIELDS;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -737,14 +738,13 @@ public abstract class BuildListPanel extends Panel {
 						listParams = new ArrayList<>(object);
 					}
 					
-				}, new LoadableDetachableModel<Map<String, String>>() {
+				}, new LoadableDetachableModel<List<String>>() {
 
 					@Override
-					protected Map<String, String> load() {
-						Map<String, String> choices = new LinkedHashMap<>();
-						for (String fieldName: OneDev.getInstance(BuildParamManager.class).getParamNames(getProject()))
-							choices.put(fieldName, fieldName);
-						return choices;
+					protected List<String> load() {
+						var paramNames = new ArrayList<>(OneDev.getInstance(BuildParamManager.class).getParamNames(getProject()));
+						Collections.sort(paramNames);
+						return paramNames;
 					}
 					
 				}, false));

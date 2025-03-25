@@ -1,9 +1,7 @@
 package io.onedev.server.web.editable.bool;
 
-import io.onedev.server.web.component.stringchoice.StringSingleChoice;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.util.TextUtils;
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
@@ -11,8 +9,10 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import io.onedev.server.web.component.stringchoice.StringSingleChoice;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.util.TextUtils;
 
 public class NullableBooleanPropertyEditor extends PropertyEditor<Boolean> {
 
@@ -32,14 +32,11 @@ public class NullableBooleanPropertyEditor extends PropertyEditor<Boolean> {
 		else
 			selection = null;
 
-		input = new StringSingleChoice("input", Model.of(selection), new LoadableDetachableModel<Map<String, String>>() {
+		input = new StringSingleChoice("input", Model.of(selection), new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				Map<String, String> choices = new LinkedHashMap<>();
-				choices.put(TextUtils.getDisplayValue(true), TextUtils.getDisplayValue(true));
-				choices.put(TextUtils.getDisplayValue(false), TextUtils.getDisplayValue(false));
-				return choices;
+			protected List<String> load() {
+				return List.of(TextUtils.getDisplayValue(true), TextUtils.getDisplayValue(false));
 			}
 
 		}, false) {

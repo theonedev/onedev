@@ -323,6 +323,8 @@ onedev.server = {
 		formatResult: function(choice) {
             if (choice.id && choice.id.indexOf("<$OneDevSpecialChoice$>") == 0)
                 return "<i>" + choice.name.escapeHtml() + "</i>";
+            else if (choice.description)
+                return choice.name.escapeHtml() + " <span class='text-muted font-size-sm ml-1'>" + choice.description.escapeHtml() + "</span>";
             else
                 return choice.name.escapeHtml();
 		},

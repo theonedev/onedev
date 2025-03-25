@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -171,15 +169,11 @@ abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 				getModel().setObject(query);			
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				var map = new LinkedHashMap<String, String>();
-				for (var file: OneDev.getInstance(CommitInfoManager.class).getFiles(getProject().getId())) {
-					map.put(file, file);
-				}
-				return map;
+			protected List<String> load() {
+				return OneDev.getInstance(CommitInfoManager.class).getFiles(getProject().getId());
 			}
 		}, true);
 		fileChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
@@ -254,23 +248,15 @@ abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				var map = new LinkedHashMap<String, String>();
+			protected List<String> load() {
 				if (type == Revision.Type.BRANCH) {	
-					for (var ref: getProject().getBranchRefs()) {
-						var branch = GitUtils.ref2branch(ref.getName());
-						map.put(branch, branch);
-					}
+					return getProject().getBranchRefs().stream().map(it->GitUtils.ref2branch(it.getName())).collect(toList());
 				} else {
-					for (var ref: getProject().getTagRefs()) {
-						var tag = GitUtils.ref2tag(ref.getName());
-						map.put(tag, tag);
-					}
+					return getProject().getTagRefs().stream().map(it->GitUtils.ref2tag(it.getName())).collect(toList());
 				}
-				return map;
 			}
 		}, false);
 		choice.add(new AjaxFormComponentUpdatingBehavior("change") {
@@ -337,23 +323,19 @@ abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				Map<String, String> map = new LinkedHashMap<>();
-				var commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-				var users = commitInfoManager.getUsers(getProject().getId());
-				for (var user: users) {
+			protected List<String> load() {
+				var users = OneDev.getInstance(CommitInfoManager.class).getUsers(getProject().getId());
+				return users.stream().map(it-> {
 					String content;
-					if (StringUtils.isNotBlank(user.getEmailAddress()))
-						content = user.getName() + " <" + user.getEmailAddress() + ">";
+					if (StringUtils.isNotBlank(it.getEmailAddress()))
+						content = it.getName() + " <" + it.getEmailAddress() + ">";
 					else
-						content = user.getName() + " <>";
-					content = content.trim();
-					map.put(content, content);
-				}
-				return map;
+						content = it.getName() + " <>";
+					return content.trim();
+				}).collect(toList());
 			}
 		}, false);
 		choice.add(new AjaxFormComponentUpdatingBehavior("change") {

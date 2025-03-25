@@ -1,8 +1,51 @@
 package io.onedev.server.plugin.imports.jiracloud;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.unbescape.html.HtmlEscape;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -19,7 +62,12 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.issue.IssuesImported;
-import io.onedev.server.model.*;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.IssueField;
+import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -33,35 +81,6 @@ import io.onedev.server.util.Pair;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.taskbutton.TaskResult.HtmlMessgae;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.joda.time.format.ISODateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.unbescape.html.HtmlEscape;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Editable
 @ClassValidating
@@ -453,8 +472,6 @@ public class ImportServer implements Serializable, Validatable {
 			apiEndpoint = getApiEndpoint("/issuetype/project?projectId=" + jiraProject.get("id").asText());
 			for (JsonNode typeNode: list(client, apiEndpoint, logger)) 
 				untranslatedTypeNames.put(typeNode.get("id").asText(), typeNode.get("untranslatedName").asText());
-
-			var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
 			
 			AtomicInteger numOfImportedIssues = new AtomicInteger(0);
 			PageDataConsumer pageDataConsumer = new PageDataConsumer() {
@@ -655,8 +672,8 @@ public class ImportServer implements Serializable, Validatable {
 								IssueField issueField = new IssueField();
 								issueField.setIssue(issue);
 								issueField.setName(option.getTimeEstimateIssueField());
-								issueField.setType(InputSpec.WORKING_PERIOD);
-								issueField.setValue(timeTrackingSetting.formatWorkingPeriod(Integer.valueOf(timeEstimate)/60));
+								issueField.setType(InputSpec.INTEGER);
+								issueField.setValue(String.valueOf(timeEstimate));
 								issue.getFields().add(issueField);
 							}
 						}
@@ -666,8 +683,8 @@ public class ImportServer implements Serializable, Validatable {
 								IssueField issueField = new IssueField();
 								issueField.setIssue(issue);
 								issueField.setName(option.getTimeSpentIssueField());
-								issueField.setType(InputSpec.WORKING_PERIOD);
-								issueField.setValue(timeTrackingSetting.formatWorkingPeriod(Integer.valueOf(timeSpent)/60));
+								issueField.setType(InputSpec.INTEGER);
+								issueField.setValue(String.valueOf(timeSpent));
 								issue.getFields().add(issueField);
 							}
 						}

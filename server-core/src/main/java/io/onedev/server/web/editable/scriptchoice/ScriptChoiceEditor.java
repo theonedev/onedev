@@ -1,7 +1,7 @@
 package io.onedev.server.web.editable.scriptchoice;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -31,19 +31,18 @@ public class ScriptChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		IModel<Map<String, String>> choicesModel = new LoadableDetachableModel<Map<String, String>>() {
+		IModel<List<String>> choicesModel = new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				Map<String, String> choices = new LinkedHashMap<>();
+			protected List<String> load() {
+				List<String> choices = new ArrayList<>();
 				
 				for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts())
-					choices.put(script.getName(), script.getName());
+					choices.add(script.getName());
 				
 				for (ScriptContribution contribution: OneDev.getExtensions(ScriptContribution.class)) {
 					GroovyScript script = contribution.getScript();
-					String displayName = GroovyScript.BUILTIN_PREFIX + script.getName();
-					choices.put(displayName, displayName);
+					choices.add(GroovyScript.BUILTIN_PREFIX + script.getName());
 				}
 				
 				return choices;
@@ -52,7 +51,7 @@ public class ScriptChoiceEditor extends PropertyEditor<String> {
 		};
 		
 		String selection = getModelObject();
-		if (!choicesModel.getObject().containsKey(selection))
+		if (!choicesModel.getObject().contains(selection))
 			selection = null;
 		
 		input = new StringSingleChoice("input", Model.of(selection), choicesModel, false) {

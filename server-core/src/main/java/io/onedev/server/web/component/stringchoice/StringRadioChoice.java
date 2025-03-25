@@ -17,16 +17,20 @@ import java.util.*;
 
 public class StringRadioChoice extends FormComponentPanel<String> {
 	
-	private final IModel<Map<String, String>> choicesModel;
+	private final IModel<List<String>> choicesModel;
+
+	private final IModel<Map<String, String>> displayNamesModel;
 	
 	private RadioGroup<String> radioGroup;
-	
+
 	private Collection<Behavior> behaviors = new ArrayList<>();
 	
 	public StringRadioChoice(String id, IModel<String> selectionModel,
-                             IModel<Map<String, String>> choicesModel) {
+                             IModel<List<String>> choicesModel,
+                             IModel<Map<String, String>> displayNamesModel) {
 		super(id, selectionModel);
 		this.choicesModel = choicesModel;
+		this.displayNamesModel = displayNamesModel;
 	}
 
 	@Override
@@ -48,18 +52,21 @@ public class StringRadioChoice extends FormComponentPanel<String> {
 		radioGroup.setLabel(getLabel());
 		for (var behavior: behaviors)
 			radioGroup.add(behavior);
-		radioGroup.add(new ListView<>("options", new LoadableDetachableModel<List<Map.Entry<String, String>>>() {
+		radioGroup.add(new ListView<>("options", new LoadableDetachableModel<List<String>>() {
 			@Override
-			protected List<Map.Entry<String, String>> load() {
-				return new ArrayList<>(choicesModel.getObject().entrySet());
+			protected List<String> load() {
+				return choicesModel.getObject();
 			}
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<Map.Entry<String, String>> item) {
-				var entry = item.getModelObject();
-				item.add(new Radio<>("option", Model.of(entry.getKey())));
-				item.add(new Label("label", Model.of(entry.getValue())));
+			protected void populateItem(ListItem<String> item) {
+				var choice = item.getModelObject();
+				item.add(new Radio<>("option", Model.of(choice)));
+				var displayName = displayNamesModel.getObject().get(choice);
+				if (displayName == null)
+					displayName = choice;
+				item.add(new Label("label", Model.of(displayName)));
 			}
 		});
 		add(radioGroup);
@@ -96,6 +103,7 @@ public class StringRadioChoice extends FormComponentPanel<String> {
 	@Override
 	protected void onDetach() {
 		choicesModel.detach();
+		displayNamesModel.detach();
 		super.onDetach();
 	}
 }

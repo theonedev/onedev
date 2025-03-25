@@ -1,19 +1,19 @@
 package io.onedev.server.web.editable.stringlist;
 
-import io.onedev.server.web.component.select2.Select2MultiChoice;
-import io.onedev.server.web.component.stringchoice.StringMultiChoice;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import io.onedev.server.web.component.select2.Select2MultiChoice;
+import io.onedev.server.web.component.stringchoice.StringMultiChoice;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.PropertyEditor;
 
 public class StringListEditor extends PropertyEditor<List<String>> {
 
@@ -31,7 +31,7 @@ public class StringListEditor extends PropertyEditor<List<String>> {
 		
 		if (selections == null) 
 			selections = new ArrayList<>();
-		input = new StringMultiChoice("input", Model.of(selections), Model.ofMap(new HashMap<>()), true) {
+		input = new StringMultiChoice("input", Model.of(selections), Model.ofList(new ArrayList<>()), true) {
 
 			@Override
 			protected void onInitialize() {

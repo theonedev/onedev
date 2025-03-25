@@ -1,6 +1,6 @@
 package io.onedev.server.web.component.branch.choice;
 
-import java.util.Map;
+import java.util.List;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -12,7 +12,7 @@ import io.onedev.server.web.component.stringchoice.StringChoiceProvider;
 public class BranchSingleChoice extends Select2Choice<String> {
 
 	public BranchSingleChoice(String id, IModel<String> model, 
-			IModel<Map<String, String>> choicesModel, boolean tagsMode) {
+			IModel<List<String>> choicesModel, boolean tagsMode) {
 		super(id, model, new StringChoiceProvider(choicesModel, tagsMode));
 	}
 

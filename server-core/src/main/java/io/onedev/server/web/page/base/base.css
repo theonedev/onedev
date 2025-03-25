@@ -853,3 +853,6 @@ span.keycap {
 .modal-dialog.commit-message textarea, .modal-dialog .commit-message textarea {
 	height: 360px;
 }
+.bean-list td.property-roleNames {
+	width: 50%;
+}

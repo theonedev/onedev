@@ -14,7 +14,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Table(
 		indexes={@Index(columnList="o_group_id"), @Index(columnList="o_project_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_group_id", "o_project_id"})
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_group_id", "o_project_id", "o_role_id"})
 })
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class GroupAuthorization extends AbstractEntity {

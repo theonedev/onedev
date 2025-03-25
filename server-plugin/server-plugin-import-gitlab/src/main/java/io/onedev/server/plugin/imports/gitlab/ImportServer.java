@@ -77,6 +77,8 @@ public class ImportServer implements Serializable, Validatable {
 	private String apiUrl;
 	
 	private String accessToken;
+
+	private transient Map<String, String> groups;
 	
 	@Editable(order=10, name="GitLab API URL", description="Specify GitLab API url, for instance <tt>https://gitlab.example.com/api/v4</tt>")
 	@NotEmpty
@@ -102,28 +104,29 @@ public class ImportServer implements Serializable, Validatable {
 	}
 
 	Map<String, String> listGroups() {
-		Map<String, String> groups = new HashMap<>();
-		Client client = newClient();
-		try {
-			String apiEndpoint = getApiEndpoint("/groups?owned=true&top_level_only=true");
-			for (JsonNode groupNode: list(client, apiEndpoint, new TaskLogger() {
+		if (groups == null) {
+			groups = new HashMap<>();
+			Client client = newClient();
+			try {
+				String apiEndpoint = getApiEndpoint("/groups?owned=true&top_level_only=true");
+				for (JsonNode groupNode: list(client, apiEndpoint, new TaskLogger() {
 
-				@Override
-				public void log(String message, String sessionId) {
-					logger.info(message);
-				}
-				
-			})) {
-				groups.put(groupNode.get("id").asText(), groupNode.get("full_path").asText());
-			}	
-			
-		} catch (Exception e) {
-			logger.error("Error listing groups", e);
-		} finally {
-			client.close();
+					@Override
+					public void log(String message, String sessionId) {
+						logger.info(message);
+					}
+					
+				})) {
+					groups.put(groupNode.get("id").asText(), groupNode.get("full_path").asText());
+				}	
+			} catch (Exception e) {
+				logger.error("Error listing groups", e);
+			} finally {
+				client.close();
+			}
+			groups = CollectionUtils.sortByValue(groups);
 		}
-		
-		return CollectionUtils.sortByValue(groups);
+		return groups;
 	}
 	
 	List<String> listProjects(@Nullable String groupId, boolean includeForks) {
@@ -383,7 +386,6 @@ public class ImportServer implements Serializable, Validatable {
 				iterationMappings.put(iteration.getName(), iteration);
 			
 			String initialIssueState = getIssueSetting().getInitialStateSpec().getName();
-			var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
 				
 			List<Issue> issues = new ArrayList<>();
 			Map<Long, Long> issueNumberMappings = new HashMap<>();
@@ -544,8 +546,8 @@ public class ImportServer implements Serializable, Validatable {
 								IssueField issueField = new IssueField();
 								issueField.setIssue(issue);
 								issueField.setName(option.getEstimatedTimeIssueField());
-								issueField.setType(InputSpec.WORKING_PERIOD);
-								issueField.setValue(timeTrackingSetting.formatWorkingPeriod(value/60));
+								issueField.setType(InputSpec.INTEGER);
+								issueField.setValue(String.valueOf(value));
 								issue.getFields().add(issueField);
 							}
 						}
@@ -555,8 +557,8 @@ public class ImportServer implements Serializable, Validatable {
 								IssueField issueField = new IssueField();
 								issueField.setIssue(issue);
 								issueField.setName(option.getSpentTimeIssueField());
-								issueField.setType(InputSpec.WORKING_PERIOD);
-								issueField.setValue(timeTrackingSetting.formatWorkingPeriod(value/60));
+								issueField.setType(InputSpec.INTEGER);
+								issueField.setValue(String.valueOf(value));
 								issue.getFields().add(issueField);
 							}
 						}

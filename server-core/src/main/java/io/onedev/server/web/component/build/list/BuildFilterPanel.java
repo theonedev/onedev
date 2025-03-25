@@ -5,13 +5,12 @@ import static io.onedev.server.search.entity.build.BuildQueryLexer.IsUntil;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -102,16 +101,13 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				var map = new LinkedHashMap<String, String>();
-				for (Build.Status status: Build.Status.values()) {
-					map.put(status.name(), status.name());
-				}
-				return map;
+			protected List<String> load() {
+				return Arrays.stream(Build.Status.values()).map(it->it.name()).collect(toList());
 			}
+
 		}, false);
 		statusChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 
@@ -142,17 +138,13 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				var map = new LinkedHashMap<String, String>();
+			protected List<String> load() {
 				var jobNames = new ArrayList<>(getBuildManager().getAccessibleJobNames(getProject()));
 				Collections.sort(jobNames);
-				for (String jobName: jobNames) {
-					map.put(jobName, jobName);
-				}
-				return map;
+				return jobNames;
 			}
 		}, false) {
 
@@ -241,17 +233,13 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
+			protected List<String> load() {
 				var names = getLabelSpecManager().query().stream().map(it->it.getName()).collect(toList());
 				Collections.sort(names);
-				var map = new LinkedHashMap<String, String>();
-				for (String name: names) {
-					map.put(name, name);
-				}
-				return map;
+				return names;
 			}
 
 		}, false);
@@ -284,17 +272,13 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				var map = new LinkedHashMap<String, String>();
+			protected List<String> load() {
 				var agents = new ArrayList<>(getAgentManager().query());
 				agents.sort(Comparator.comparing(Agent::getName));
-				for (Agent agent: agents) {
-					map.put(agent.getName(), agent.getName());
-				}
-				return map;
+				return agents.stream().map(it->it.getName()).collect(toList());
 			}
 		}, false);
 

@@ -2,9 +2,7 @@ package io.onedev.server.web.editable.branchchoice;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -14,13 +12,13 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.annotation.BranchChoice;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.branch.choice.BranchMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.BranchChoice;
 
 public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
@@ -34,11 +32,10 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Map<String, String> choices = new LinkedHashMap<>();
+		List<String> choices = new ArrayList<>();
 		if (Project.get() != null) {
 			for (RefFacade ref: Project.get().getBranchRefs()) {
-				String branch = GitUtils.ref2branch(ref.getName());
-				choices.put(branch, branch);
+				choices.add(GitUtils.ref2branch(ref.getName()));
 			}
 		}
 
@@ -46,12 +43,12 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
     	Collection<String> selections = new ArrayList<>();
 		if (getModelObject() != null) {
 			for (String selection: getModelObject()) {
-				if (branchChoice.tagsMode() || choices.containsKey(selection))
+				if (branchChoice.tagsMode() || choices.contains(selection))
 					selections.add(selection);
 			}
 		}
 		
-		input = new BranchMultiChoice("input", Model.of(selections), Model.ofMap(choices), branchChoice.tagsMode()) {
+		input = new BranchMultiChoice("input", Model.of(selections), Model.ofList(choices), branchChoice.tagsMode()) {
 
 			@Override
 			protected void onInitialize() {

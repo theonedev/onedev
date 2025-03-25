@@ -1,21 +1,28 @@
 package io.onedev.server.web.component.user.accesstoken;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Secret;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.model.AccessToken;
+import io.onedev.server.model.AccessTokenAuthorization;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.Role;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.util.UserAware;
 import io.onedev.server.web.util.WicketUtils;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 @Editable
 public class AccessTokenEditBean implements Serializable {
@@ -28,7 +35,7 @@ public class AccessTokenEditBean implements Serializable {
 	
 	private boolean hasOwnerPermissions;
 
-	private List<AuthorizationBean> authorizations = new ArrayList<>();
+	private List<AccessTokenAuthorizationBean> authorizations = new ArrayList<>();
 	
 	private Date expireDate;
 
@@ -65,11 +72,11 @@ public class AccessTokenEditBean implements Serializable {
 	@Editable(order=300, name="Authorized Projects", description = "Only projects manageable by access token owner can be authorized")
 	@Size(min=1, message = "At least one project should be authorized")
 	@ShowCondition("isHasOwnerPermissionsDisabled")
-	public List<AuthorizationBean> getAuthorizations() {
+	public List<AccessTokenAuthorizationBean> getAuthorizations() {
 		return authorizations;
 	}
 
-	public void setAuthorizations(List<AuthorizationBean> authorizations) {
+	public void setAuthorizations(List<AccessTokenAuthorizationBean> authorizations) {
 		this.authorizations = authorizations;
 	}
 	
@@ -94,12 +101,21 @@ public class AccessTokenEditBean implements Serializable {
 		bean.setHasOwnerPermissions(token.isHasOwnerPermissions());
 		bean.setExpireDate(token.getExpireDate());
 
+		Map<Project, List<Role>> projectRoles = new HashMap<>();
+		for (AccessTokenAuthorization authorization : token.getAuthorizations()) {
+			Project project = authorization.getProject();
+			Role role = authorization.getRole();			
+			projectRoles.computeIfAbsent(project, k -> new ArrayList<>()).add(role);
+		}
+		
 		var user = WicketUtils.findInnermost(ComponentContext.get().getComponent(), UserAware.class).getUser();
-		for (var authorization: token.getAuthorizations()) {
-			if (SecurityUtils.canManageProject(user.asSubject(), authorization.getProject())) {
-				var authorizationBean = new AuthorizationBean();
-				authorizationBean.setProjectPath(authorization.getProject().getPath());
-				authorizationBean.setRoleName(authorization.getRole().getName());
+		for (var entry: projectRoles.entrySet()) {
+			Project project = entry.getKey();
+			List<Role> roles = entry.getValue();
+			if (SecurityUtils.canManageProject(user.asSubject(), project)) {
+				var authorizationBean = new AccessTokenAuthorizationBean();
+				authorizationBean.setProjectPath(project.getPath());
+				authorizationBean.setRoleNames(roles.stream().map(it->it.getName()).collect(Collectors.toList()));
 				bean.getAuthorizations().add(authorizationBean);
 			}
 		}

@@ -2,7 +2,9 @@ package io.onedev.server.web.page.project.setting.authorization;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.wicket.Component;
@@ -36,10 +38,16 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 		super.onInitialize();
 
 		UserAuthorizationsBean authorizationsBean = new UserAuthorizationsBean();
-		for (UserAuthorization authorization: getProject().getUserAuthorizations()) {
+		var userRoles = new HashMap<String, List<String>>();		
+		for (var authorization: getProject().getUserAuthorizations()) {
+			String userName = authorization.getUser().getName();
+			String roleName = authorization.getRole().getName();			
+			userRoles.computeIfAbsent(userName, k -> new ArrayList<>()).add(roleName);
+		}
+		for (var entry: userRoles.entrySet()) {
 			UserAuthorizationBean authorizationBean = new UserAuthorizationBean();
-			authorizationBean.setUserName(authorization.getUser().getName());
-			authorizationBean.setRoleName(authorization.getRole().getName());
+			authorizationBean.setUserName(entry.getKey());
+			authorizationBean.setRoleNames(entry.getValue());
 			authorizationsBean.getAuthorizations().add(authorizationBean);
 		}
 
@@ -74,7 +82,7 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 						if (!canManageProject) {
 							for (UserAuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
 								if (authorizationBean.getUserName().equals(user.getName())
-										&& OneDev.getInstance(RoleManager.class).find(authorizationBean.getRoleName()).isManageProject()) {
+										&& authorizationBean.getRoleNames().stream().anyMatch(it -> getRoleManager().find(it).isManageProject())) {
 									canManageProject = true;
 									break;
 								}
@@ -89,20 +97,22 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 				Set<String> userNames = new HashSet<>();
 				Collection<UserAuthorization> authorizations = new ArrayList<>();
 				for (UserAuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
-					if (userNames.contains(authorizationBean.getUserName())) {
+					if (!userNames.add(authorizationBean.getUserName())) {
 						error("Duplicate authorizations found: " + authorizationBean.getUserName());
 						return;
 					} else {
-						userNames.add(authorizationBean.getUserName());
-						UserAuthorization authorization = new UserAuthorization();
-						authorization.setProject(getProject());
-						authorization.setUser(OneDev.getInstance(UserManager.class).findByName(authorizationBean.getUserName()));
-						authorization.setRole(OneDev.getInstance(RoleManager.class).find(authorizationBean.getRoleName()));
-						authorizations.add(authorization);
+						var user = getUserManager().findByName(authorizationBean.getUserName());
+						authorizationBean.getRoleNames().stream().forEach(it -> {
+							UserAuthorization authorization = new UserAuthorization();
+							authorization.setProject(getProject());
+							authorization.setUser(user);
+							authorization.setRole(getRoleManager().find(it));
+							authorizations.add(authorization);
+						});
 					}
 				}
 				
-				OneDev.getInstance(UserAuthorizationManager.class).syncAuthorizations(getProject(), authorizations);
+				getUserAuthorizationManager().syncAuthorizations(getProject(), authorizations);
 				Session.get().success("User authorizations updated");
 			}
 			
@@ -110,6 +120,18 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 		form.add(new FencedFeedbackPanel("feedback", form));
 		form.add(PropertyContext.edit("editor", authorizationsBean, "authorizations"));
 		add(form);
+	}
+
+	private RoleManager getRoleManager() {
+		return OneDev.getInstance(RoleManager.class);
+	}
+
+	private UserManager getUserManager() {
+		return OneDev.getInstance(UserManager.class);
+	}
+
+	private UserAuthorizationManager getUserAuthorizationManager() {
+		return OneDev.getInstance(UserAuthorizationManager.class);
 	}
 
 	@Override

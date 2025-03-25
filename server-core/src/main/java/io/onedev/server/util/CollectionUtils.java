@@ -1,8 +1,14 @@
 package io.onedev.server.util;
 
-import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import java.util.*;
+import com.google.common.base.Preconditions;
 
 public class CollectionUtils extends org.apache.commons.collections.CollectionUtils {
 
@@ -34,6 +40,17 @@ public class CollectionUtils extends org.apache.commons.collections.CollectionUt
 			list.add(entryMap);
 		}
 		return list;
+	}
+
+	public static <K extends Comparable<? super K>, V> Map<K, V> sortByKey(Map<K, V> map) {
+        List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
+        list.sort(Map.Entry.comparingByKey());
+
+        Map<K, V> sorted = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : list) 
+            sorted.put(entry.getKey(), entry.getValue());
+		
+        return sorted;
 	}
 	
 	public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {

@@ -8,12 +8,9 @@ import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -52,7 +49,6 @@ import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.search.entity.issue.SubmittedByCriteria;
 import io.onedev.server.search.entity.issue.SubmittedByUserCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.datepicker.DatePicker;
@@ -93,15 +89,11 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<Map<String, String>>() {
+		}, new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				var map = new LinkedHashMap<String, String>();
-				for (var stateSpec: issueSetting.getStateSpecs()) {
-					map.put(stateSpec.getName(), stateSpec.getName());
-				}
-				return map;
+			protected List<String> load() {
+				return issueSetting.getStateSpecs().stream().map(it->it.getName()).collect(toList());
 			}
 
 		}, false);
@@ -142,15 +134,11 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 						getModel().setObject(query);
 					}
 		
-				}, new LoadableDetachableModel<Map<String, String>>() {
-		
+				}, new LoadableDetachableModel<List<String>>() {
+
 					@Override
-					protected Map<String, String> load() {
-						var map = new LinkedHashMap<String, String>();
-						for (var value: choiceValues) {
-							map.put(value, value);
-						}
-						return map;
+					protected List<String> load() {
+						return choiceValues;
 					}
 		
 				}, false);
@@ -301,13 +289,11 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 						getModel().setObject(query);
 					}
 		
-				}, new LoadableDetachableModel<Map<String, String>>() {
+				}, new LoadableDetachableModel<List<String>>() {
 		
 					@Override
-					protected Map<String, String> load() {
-						return CollectionUtils.newLinkedHashMap(
-							String.valueOf(true), String.valueOf(true), 
-							String.valueOf(false), String.valueOf(false));
+					protected List<String> load() {
+						return List.of(String.valueOf(true), String.valueOf(false));
 					}
 		
 				}, false);
@@ -392,15 +378,11 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 					getModel().setObject(query);
 				}
 
-			}, new LoadableDetachableModel<Map<String, String>>() {
+			}, new LoadableDetachableModel<List<String>>() {
 
 				@Override
-				protected Map<String, String> load() {
-					var map = new LinkedHashMap<String, String>();
-					for (var iteration: getProject().getSortedHierarchyIterations()) {
-						map.put(iteration.getName(), iteration.getName());
-					}
-					return map;
+				protected List<String> load() {
+					return getProject().getSortedHierarchyIterations().stream().map(it->it.getName()).collect(toList());
 				}
 
 			}, false);

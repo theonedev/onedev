@@ -696,7 +696,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		var userManager = OneDev.getInstance(UserManager.class);
 		UserCache cacheClone = userManager.cloneCache();
 
-		Collection<User> authorizedUsers = Sets.newHashSet(userManager.getRoot());
+		Collection<User> authorizedUsers = Set.of(userManager.getRoot());
 
 		Group defaultLoginGroup = getSettingManager().getSecuritySetting().getDefaultLoginGroup();
 		if (defaultLoginGroup != null && defaultLoginGroup.isAdministrator())

@@ -1,11 +1,12 @@
 package io.onedev.server.web.editable.enumeration;
 
-import io.onedev.server.annotation.RadioChoice;
-import io.onedev.server.web.component.stringchoice.StringRadioChoice;
-import io.onedev.server.web.component.stringchoice.StringSingleChoice;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.util.TextUtils;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -16,10 +17,12 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import io.onedev.server.annotation.RadioChoice;
+import io.onedev.server.web.component.stringchoice.StringRadioChoice;
+import io.onedev.server.web.component.stringchoice.StringSingleChoice;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings({ "unchecked", "rawtypes"})
 public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
@@ -52,24 +55,36 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
         else
         	selection = null;
 
-		var choicesModel = new LoadableDetachableModel<Map<String, String>>() {
+		var choicesModel = new LoadableDetachableModel<List<String>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				Map<String, String> choices = new LinkedHashMap<>();
+			protected List<String> load() {
+				List<String> choices = new ArrayList<>();
 				for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext(); ) {
-					Enum<?> value = (Enum<?>) it.next();
-						choices.put(value.name(), TextUtils.getDisplayValue(value));
+					choices.add(((Enum<?>) it.next()).name());
 				}
 				return choices;
 			}
 
 		};
+		var displayNamesModel = new LoadableDetachableModel<Map<String, String>>() {
+
+			@Override
+			protected Map<String, String> load() {
+				Map<String, String> displayNames = new HashMap<>();
+				for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext(); ) {
+					Enum<?> value = (Enum<?>) it.next();
+						displayNames.put(value.name(), TextUtils.getDisplayValue(value));
+				}
+				return displayNames;
+			}
+
+		};
 		
 		if (radioChoice) {
-			fragment.add(input = new StringRadioChoice("input", Model.of(selection), choicesModel));			
+			fragment.add(input = new StringRadioChoice("input", Model.of(selection), choicesModel, displayNamesModel));			
 		} else {
-			fragment.add(input = new StringSingleChoice("input", Model.of(selection), choicesModel, false) {
+			fragment.add(input = new StringSingleChoice("input", Model.of(selection), choicesModel, displayNamesModel, false) {
 
 				@Override
 				protected void onInitialize() {

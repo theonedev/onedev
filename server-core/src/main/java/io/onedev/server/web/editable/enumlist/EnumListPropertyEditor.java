@@ -2,12 +2,11 @@ package io.onedev.server.web.editable.enumlist;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
@@ -20,6 +19,7 @@ import io.onedev.server.web.component.select2.Select2MultiChoice;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
@@ -32,10 +32,6 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
 		super(id, propertyDescriptor, propertyModel);
 		enumClass = (Class<Enum>) ReflectionUtils.getCollectionElementClass(propertyDescriptor.getPropertyGetter().getGenericReturnType());
 	}
-
-	private String getDisplayValue(String choice) {
-		return StringUtils.capitalize(choice.replace('_', ' ').toLowerCase());
-	}
 	
 	@Override
 	protected void onInitialize() {
@@ -47,19 +43,33 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
         		selections.add(each.name());
         }
         
-        input = new StringMultiChoice("input", Model.of(selections), new LoadableDetachableModel<Map<String, String>>() {
+		var choicesModel = new LoadableDetachableModel<List<String>>() {
+
+			@Override
+			protected List<String> load() {
+				List<String> choices = new ArrayList<>();
+				for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext(); ) {
+					choices.add(((Enum<?>) it.next()).name());
+				}
+				return choices;
+			}
+
+		};
+		var displayNamesModel = new LoadableDetachableModel<Map<String, String>>() {
 
 			@Override
 			protected Map<String, String> load() {
-				Map<String, String> choices = new LinkedHashMap<>();
-		        for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
-		            Enum<?> value = (Enum<?>) it.next();
-		            choices.put(value.name(), getDisplayValue(value.toString()));
-		        }
-		        return choices;
+				Map<String, String> displayNames = new HashMap<>();
+				for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext(); ) {
+					Enum<?> value = (Enum<?>) it.next();
+						displayNames.put(value.name(), TextUtils.getDisplayValue(value));
+				}
+				return displayNames;
 			}
-        	
-        }, false) {
+
+		};
+
+        input = new StringMultiChoice("input", Model.of(selections), choicesModel, displayNamesModel, false) {
 
         	@Override
         	protected void onInitialize() {

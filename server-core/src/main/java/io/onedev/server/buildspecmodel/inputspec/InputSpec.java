@@ -41,9 +41,7 @@ public abstract class InputSpec implements Serializable {
 	public static final String INTEGER = "Integer";
 	
 	public static final String FLOAT = "Float";
-	
-	public static final String WORKING_PERIOD = "Working Period";
-	
+		
 	public static final String COMMIT = "Commit";
 	
 	public static final String ENUMERATION = "Enumeration";
