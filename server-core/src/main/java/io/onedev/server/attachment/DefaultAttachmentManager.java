@@ -10,6 +10,7 @@ import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -624,7 +625,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		return projectManager.runOnActiveServer(projectId, () -> read(getAttachmentLockName(projectId, attachmentGroup), () -> {
 			File attachmentFile = new File(getAttachmentGroupDir(projectId, attachmentGroup), attachment);
 			if (!attachmentFile.exists())
-				throw new RuntimeException("Attachment not found: " + attachment);
+				throw new FileNotFoundException("Attachment not found: " + attachment);
 			return new FileInfo(attachment, attachmentFile.lastModified(), 
 					attachmentFile.length(), null);
 		}));

@@ -1040,31 +1040,40 @@ onedev.server.markdown = {
 		    	$image.click(function() {
 		    		var $image = $(this);
 		    		$image.parent().css("position", "relative");
+					var width = $image.width();
+					var height = $image.height();
+					if (width < 64)
+						width = 64;
+					if (height < 64)
+						height = 64;
 		    		var $loadingIndicator = $("<div class='markdown-image-loading'></div>");
-		    		$loadingIndicator.css("width", $image.width()).css("height", $image.height());
+		    		$loadingIndicator.css("width", width).css("height", height);
 		    		$image.parent().append($loadingIndicator);
 		    		
 		    	    var actualImage = new Image();
-		    	    actualImage.onload = function() {
+		    	    actualImage.onload = function() {	
+						$loadingIndicator.remove();
+						var $modal = $("" +
+								"<div class='modal fade' role='dialog' tabindex='-1'>" +
+								"  <div class='modal-dialog' style='width: " + (actualImage.width+2) + "px; max-width: 90%;'>" +
+								"    <div class='modal-content' style='border-radius: 0;'>" +
+								"      <div class='modal-body' style='padding: 0;'>" +
+								"        <img src='" + actualImage.src + "' style='width: 100%;'></img>" +
+								"      </div>" +
+								"    </div>" +
+								"  </div>" +
+								"</div>");
+						$("body").append($modal);
+						$modal.find("img").click(function() {
+							$modal.modal("hide");
+						});
+						$modal.modal('show').on('show.bs.modal', function() {
+						}).on('hidden.bs.modal', function () {
+							$modal.remove();
+						});				
+		    	    }
+		    	    actualImage.onerror = function() {
 		    	    	$loadingIndicator.remove();
-		        		var $modal = $("" +
-		        				"<div class='modal fade' role='dialog' tabindex='-1'>" +
-		        				"  <div class='modal-dialog' style='width: " + (actualImage.width+2) + "px; max-width: 90%;'>" +
-		        				"    <div class='modal-content' style='border-radius: 0;'>" +
-		        				"      <div class='modal-body' style='padding: 0;'>" +
-		        				"        <img src='" + actualImage.src + "' style='width: 100%;'></img>" +
-		        				"      </div>" +
-		        				"    </div>" +
-		        				"  </div>" +
-		        				"</div>");
-		        		$("body").append($modal);
-		        		$modal.find("img").click(function() {
-		        			$modal.modal("hide");
-		        		});
-		    			$modal.modal('show').on('show.bs.modal', function() {
-		    			}).on('hidden.bs.modal', function () {
-		    		        $modal.remove();
-		    		    });			
 		    	    }
 		    	    actualImage.src = $image.attr("src");    		
 				});
