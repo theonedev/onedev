@@ -1,8 +1,4 @@
-version: 38
-imports:
-- projectPath: onedev
-  revision: main
-  accessTokenSecret: onedev-token
+version: 39
 jobs:
 - name: Release
   steps:
@@ -147,7 +143,7 @@ jobs:
 
         releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion | jq '.id')
 
-        releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"## Installation Guide\n\nhttps://docs.onedev.io/category/installation-guide\n\n## Change Log\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n## Incompatibilities\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/markdown/Incompatibilities/server-product/system/incompatibilities/incompatibilities.md\"}"
+        releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"## Installation Guide\n\nhttps://docs.onedev.io/category/installation-guide\n\n## Change Log\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+%2C+%22Priority%22+desc\n\n## Incompatibilities\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/markdown/Incompatibilities/server-product/system/incompatibilities/incompatibilities.md\"}"
 
         acceptHeader="Accept: application/vnd.github.v3+json"
         if [ "$releaseId" == "null" ]; then
@@ -374,6 +370,10 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
+imports:
+- projectPath: onedev
+  revision: main
+  accessTokenSecret: onedev-token
 stepTemplates:
 - name: scan vulnerabilities
   steps:
