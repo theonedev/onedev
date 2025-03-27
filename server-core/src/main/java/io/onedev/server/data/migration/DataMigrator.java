@@ -7765,7 +7765,12 @@ public class DataMigrator {
 					var typeElement = element.element("type");
 					if (typeElement.getText().trim().equals("Working Period")) {
 						typeElement.setText("Integer");
-						element.element("value").setText(element.elementText("ordinal").trim());
+						var valueElement = element.element("value");
+						var ordinalElement = element.element("ordinal");
+						if (valueElement != null) {
+							valueElement.setText(ordinalElement.getText().trim());
+						}
+						ordinalElement.setText("-1");
 					}
 				}
 				dom.writeToFile(file, false);
