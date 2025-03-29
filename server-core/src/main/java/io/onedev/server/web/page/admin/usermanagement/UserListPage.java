@@ -24,6 +24,7 @@ import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.Component;
@@ -367,7 +368,8 @@ public class UserListPage extends AdministrationPage {
 				};
 				link.add(new UserAvatar("avatar", user));
 				link.add(new Label("name", user.getName()));
-				link.add(new Label("serviceAccount", "service").setVisible(user.isServiceAccount()));
+				link.add(new Label("service", "service").setVisible(user.isServiceAccount()));
+				link.add(new Label("invalid", "invalid").setVisible(user.isServiceAccount() && !WicketUtils.isSubscriptionActive()));
 				fragment.add(link);
 				cellItem.add(fragment);
 			}

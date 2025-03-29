@@ -18,6 +18,7 @@ import org.hibernate.query.Query;
 import com.google.common.base.Preconditions;
 import com.hazelcast.core.HazelcastInstance;
 
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
@@ -28,6 +29,7 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.exception.NoSubscriptionException;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
@@ -61,6 +63,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     private final TransactionManager transactionManager;
     
     private final ClusterManager clusterManager;
+
+	private final SubscriptionManager subscriptionManager;
 	   
 	private volatile UserCache cache;
 	
@@ -68,7 +72,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     public DefaultUserManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
 							  IssueFieldManager issueFieldManager, IdManager idManager, 
 							  EmailAddressManager emailAddressManager, TransactionManager transactionManager, 
-							  ClusterManager clusterManager) {
+							  ClusterManager clusterManager, SubscriptionManager subscriptionManager) {
         super(dao);
         
         this.projectManager = projectManager;
@@ -78,6 +82,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
         this.emailAddressManager = emailAddressManager;
         this.transactionManager = transactionManager;
         this.clusterManager = clusterManager;
+		this.subscriptionManager = subscriptionManager;
     }
 
 	@Transactional
@@ -122,6 +127,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     @Override
     public void create(User user) {
 		Preconditions.checkState(user.isNew());
+		if (user.isServiceAccount() && !subscriptionManager.isSubscriptionActive())
+			throw new NoSubscriptionException();
 		user.setName(user.getName().toLowerCase());
 		dao.persist(user);
     }

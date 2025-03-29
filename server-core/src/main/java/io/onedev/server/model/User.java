@@ -40,6 +40,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.annotation.UserName;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -56,6 +57,7 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
+import io.onedev.server.web.util.WicketUtils;
 
 @Entity
 @Table(indexes={@Index(columnList=PROP_NAME), @Index(columnList=PROP_FULL_NAME)})
@@ -502,15 +504,28 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     	return SecurityUtils.asSubject(getPrincipals());
     }
 
-	@Editable(order=50, name="Service Account", description = "Whether or not to create as a service account "
-			+ "for task automation. Service account is not allowed to login via password, and will not generate "
-			+ "notifications for its activities")
+	@Editable(order=50, name="Service Account", descriptionProvider = "getServiceAccountDescription")
+	@SubscriptionRequired
 	public boolean isServiceAccount() {
 		return serviceAccount;
 	}
 
 	public void setServiceAccount(boolean serviceAccount) {
 		this.serviceAccount = serviceAccount;
+	}
+
+	@SuppressWarnings("unused")
+	private static String getServiceAccountDescription() {
+		if (!WicketUtils.isSubscriptionActive()) {
+			return "" 
+				+ "Whether or not to create as a service account for task automation purpose. Service account does not have password and email addresses, and will not generate "
+				+ "notifications for its activities. <b class='text-warning'>NOTE:</b> Service account is an enterprise feature. " 
+				+ "<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days";
+		} else {
+			return "" 
+				+ "Whether or not to create as a service account for task automation purpose. Service account does not have password and email addresses, and will not generate "
+				+ "notifications for its activities";
+		}
 	}
 
 	@SuppressWarnings("unused")

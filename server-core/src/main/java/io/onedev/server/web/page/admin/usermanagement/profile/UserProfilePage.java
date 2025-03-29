@@ -1,6 +1,19 @@
 package io.onedev.server.web.page.admin.usermanagement.profile;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.wicket.Session;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import com.google.common.collect.Lists;
+
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
@@ -15,17 +28,7 @@ import io.onedev.server.web.component.user.profileedit.ProfileEditPanel;
 import io.onedev.server.web.page.admin.usermanagement.UserPage;
 import io.onedev.server.web.page.admin.usermanagement.password.UserPasswordPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
-import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import io.onedev.server.web.util.WicketUtils;
 
 public class UserProfilePage extends UserPage {
 
@@ -39,7 +42,10 @@ public class UserProfilePage extends UserPage {
 
 		WebMarkupContainer noteContainer;
 		if (getUser().isServiceAccount()) {
-			noteContainer = new Fragment("note", "serviceAccountFrag", this);
+			if (WicketUtils.isSubscriptionActive())
+				noteContainer = new Fragment("note", "serviceAccountFrag", this);
+			else
+				noteContainer = new Fragment("note", "invalidServiceAccountFrag", this);
 		} else if (getUser().getPassword() != null) {
 			noteContainer = new Fragment("note", "authViaInternalDatabaseFrag", this);
 			noteContainer.add(new Link<Void>("removePassword") {
