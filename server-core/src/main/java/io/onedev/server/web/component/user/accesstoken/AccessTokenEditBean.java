@@ -19,10 +19,7 @@ import io.onedev.server.model.AccessTokenAuthorization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.web.util.UserAware;
-import io.onedev.server.web.util.WicketUtils;
 
 @Editable
 public class AccessTokenEditBean implements Serializable {
@@ -108,11 +105,10 @@ public class AccessTokenEditBean implements Serializable {
 			projectRoles.computeIfAbsent(project, k -> new ArrayList<>()).add(role);
 		}
 		
-		var user = WicketUtils.findInnermost(ComponentContext.get().getComponent(), UserAware.class).getUser();
 		for (var entry: projectRoles.entrySet()) {
 			Project project = entry.getKey();
 			List<Role> roles = entry.getValue();
-			if (SecurityUtils.canManageProject(user.asSubject(), project)) {
+			if (SecurityUtils.canManageProject(token.getOwner().asSubject(), project)) {
 				var authorizationBean = new AccessTokenAuthorizationBean();
 				authorizationBean.setProjectPath(project.getPath());
 				authorizationBean.setRoleNames(roles.stream().map(it->it.getName()).collect(Collectors.toList()));
