@@ -633,7 +633,7 @@ public abstract class CodeCommentListPanel extends Panel {
 					}
 					@Override
 					public EntityQuery<CodeComment> getObject() {
-						return queryModel.getObject() != null? queryModel.getObject() : new CodeCommentQuery();
+						return queryModel.getObject()!=null? queryModel.getObject() : new CodeCommentQuery();
 					}
 					@Override
 					public void setObject(EntityQuery<CodeComment> object) {
@@ -665,11 +665,7 @@ public abstract class CodeCommentListPanel extends Panel {
 					@Override
 					public List<EntitySort> getObject() {
 						var query = queryModel.getObject();
-						CodeCommentListPanel.this.getFeedbackMessages().clear();
-						if (query != null) 
-							return query.getSorts();
-						else
-							return new ArrayList<>();
+						return query!=null? query.getSorts() : new ArrayList<>();
 					}
 
 					@Override
@@ -678,8 +674,7 @@ public abstract class CodeCommentListPanel extends Panel {
 						CodeCommentListPanel.this.getFeedbackMessages().clear();
 						if (query == null)
 							query = new CodeCommentQuery();
-						query.getSorts().clear();
-						query.getSorts().addAll(object);
+						query.setSorts(object);
 						queryModel.setObject(query);
 						queryStringModel.setObject(query.toString());
 						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 

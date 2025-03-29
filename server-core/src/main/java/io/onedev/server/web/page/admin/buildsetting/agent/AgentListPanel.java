@@ -206,7 +206,7 @@ class AgentListPanel extends Panel {
 					}
 					@Override
 					public EntityQuery<Agent> getObject() {
-						return queryModel.getObject() != null? queryModel.getObject() : new AgentQuery();
+						return queryModel.getObject()!=null? queryModel.getObject() : new AgentQuery();
 					}
 					@Override
 					public void setObject(EntityQuery<Agent> object) {
@@ -236,25 +236,20 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public List<EntitySort> getObject() {
-						AgentQuery query = queryModel.getObject();
-						AgentListPanel.this.getFeedbackMessages().clear();
-						if (query != null)
-							return query.getSorts();
-						else
-							return new ArrayList<>();
+						var query = queryModel.getObject();
+						return query!=null? query.getSorts() : new ArrayList<>();
 					}
 
 					@Override
 					public void setObject(List<EntitySort> object) {
-						AgentQuery query = queryModel.getObject();
+						var query = queryModel.getObject();
 						AgentListPanel.this.getFeedbackMessages().clear();
 						if (query == null)
 							query = new AgentQuery();
-						query.getSorts().clear();
-						query.getSorts().addAll(object);
+						query.setSorts(object);
 						queryModel.setObject(query);
 						queryStringModel.setObject(query.toString());
-						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+						var target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);
 						doQuery(target);
 					}

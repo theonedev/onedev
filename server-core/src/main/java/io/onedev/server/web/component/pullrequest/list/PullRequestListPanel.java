@@ -718,16 +718,16 @@ public abstract class PullRequestListPanel extends Panel {
 					}
 					@Override
 					public EntityQuery<PullRequest> getObject() {
-						return queryModel.getObject() != null? queryModel.getObject() : new PullRequestQuery();
+						var query = parse(queryStringModel.getObject(), new PullRequestQuery());
+						return query!=null? query : new PullRequestQuery();
 					}
 					@Override
 					public void setObject(EntityQuery<PullRequest> object) {
 						PullRequestListPanel.this.getFeedbackMessages().clear();
-						queryModel.setObject((PullRequestQuery) object);
 						queryStringModel.setObject(object.toString());
 						var target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);
-						doQuery(target);	
+						doQuery(target);
 					}
 				});
 			}
@@ -752,11 +752,7 @@ public abstract class PullRequestListPanel extends Panel {
 					@Override
 					public List<EntitySort> getObject() {
 						var query = parse(queryStringModel.getObject(), new PullRequestQuery());
-						PullRequestListPanel.this.getFeedbackMessages().clear();
-						if (query != null)
-							return query.getSorts();
-						else
-							return new ArrayList<>();
+						return query!=null? query.getSorts() : new ArrayList<>();
 					}
 
 					@Override
@@ -765,10 +761,9 @@ public abstract class PullRequestListPanel extends Panel {
 						PullRequestListPanel.this.getFeedbackMessages().clear();
 						if (query == null)
 							query = new PullRequestQuery();
-						query.getSorts().clear();
-						query.getSorts().addAll(object);
+						query.setSorts(object);
 						queryStringModel.setObject(query.toString());
-						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+						var target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);
 						doQuery(target);
 					}

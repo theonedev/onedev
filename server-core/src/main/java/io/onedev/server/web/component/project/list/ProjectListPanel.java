@@ -301,16 +301,16 @@ public class ProjectListPanel extends Panel {
 					}
 					@Override
 					public EntityQuery<Project> getObject() {
-						return queryModel.getObject() != null? queryModel.getObject() : new ProjectQuery();
+						var query = parse(queryStringModel.getObject(), new ProjectQuery());
+						return query!=null? query : new ProjectQuery();
 					}
 					@Override
 					public void setObject(EntityQuery<Project> object) {
 						ProjectListPanel.this.getFeedbackMessages().clear();
-						queryModel.setObject((ProjectQuery) object);
 						queryStringModel.setObject(object.toString());
 						var target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);
-						doQuery(target);	
+						doQuery(target);
 					}
 				});
 			}
@@ -331,12 +331,8 @@ public class ProjectListPanel extends Panel {
 
 					@Override
 					public List<EntitySort> getObject() {
-						ProjectQuery query = parse(queryStringModel.getObject(), new ProjectQuery());
-						ProjectListPanel.this.getFeedbackMessages().clear();
-						if (query != null) 
-							return query.getSorts();
-						else
-							return new ArrayList<>();
+						var query = parse(queryStringModel.getObject(), new ProjectQuery());
+						return query!=null? query.getSorts() : new ArrayList<>();
 					}
 
 					@Override
@@ -345,10 +341,9 @@ public class ProjectListPanel extends Panel {
 						ProjectListPanel.this.getFeedbackMessages().clear();
 						if (query == null)
 							query = new ProjectQuery();
-						query.getSorts().clear();
-						query.getSorts().addAll(object);
+						query.setSorts(object);
 						queryStringModel.setObject(query.toString());
-						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
+						var target = RequestCycle.get().find(AjaxRequestTarget.class); 
 						target.add(queryInput);
 						doQuery(target);
 					}

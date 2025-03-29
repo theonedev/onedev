@@ -45,6 +45,6 @@ public class PublishedViaBuildCriteria extends Criteria<Pack> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return PackQueryLexer.PublishedByBuild + " " + quote(value);
+		return PackQuery.getRuleName(PackQueryLexer.PublishedByBuild) + " " + quote(value);
 	}
 }

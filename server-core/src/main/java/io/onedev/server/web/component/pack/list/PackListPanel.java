@@ -53,8 +53,6 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.pack.FuzzyCriteria;
 import io.onedev.server.search.entity.pack.PackQuery;
-import io.onedev.server.search.entity.pack.PackQueryLexer;
-import io.onedev.server.search.entity.pack.TypeCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
@@ -93,7 +91,7 @@ public abstract class PackListPanel extends Panel {
 
 		@Override
 		protected PackQuery load() {
-			return parse(queryStringModel.getObject(), getBaseQuery(), getPackType());
+			return parse(queryStringModel.getObject(), getBaseQuery());
 		}
 
 	};
@@ -127,7 +125,7 @@ public abstract class PackListPanel extends Panel {
 	}
 	
 	@Nullable
-	private PackQuery parse(@Nullable String queryString, PackQuery baseQuery, @Nullable String packType) {
+	private PackQuery parse(@Nullable String queryString, PackQuery baseQuery) {
 		PackQuery parsedQuery;
 		try {
 			parsedQuery = PackQuery.parse(getProject(), queryString, true);
@@ -141,10 +139,7 @@ public abstract class PackListPanel extends Panel {
 				parsedQuery = new PackQuery(new FuzzyCriteria(queryString));
 			}
 		}
-		var query = PackQuery.merge(baseQuery, parsedQuery);
-		if (packType != null)
-			query = PackQuery.merge(query, new PackQuery(new TypeCriteria(packType, PackQueryLexer.Is)));
-		return query;			
+		return PackQuery.merge(baseQuery, parsedQuery);
 	}
 	
 	@Override
@@ -399,16 +394,16 @@ public abstract class PackListPanel extends Panel {
 					}
 					@Override
 					public EntityQuery<Pack> getObject() {
-						return queryModel.getObject() != null? queryModel.getObject() : new PackQuery();
+						var query = parse(queryStringModel.getObject(), new PackQuery());
+						return query!=null? query : new PackQuery();
 					}
 					@Override
 					public void setObject(EntityQuery<Pack> object) {
 						PackListPanel.this.getFeedbackMessages().clear();
-						queryModel.setObject((PackQuery) object);
 						queryStringModel.setObject(object.toString());
 						var target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);
-						doQuery(target);	
+						doQuery(target);
 					}
 				});
 			}
@@ -432,24 +427,19 @@ public abstract class PackListPanel extends Panel {
 
 					@Override
 					public List<EntitySort> getObject() {
-						PackQuery query = parse(queryStringModel.getObject(), new PackQuery(), null);
-						PackListPanel.this.getFeedbackMessages().clear();
-						if (query != null)
-							return query.getSorts();
-						else
-							return new ArrayList<>();
+						var query = parse(queryStringModel.getObject(), new PackQuery());
+						return query!=null? query.getSorts() : new ArrayList<>();
 					}
 
 					@Override
 					public void setObject(List<EntitySort> object) {
-						PackQuery query = parse(queryStringModel.getObject(), new PackQuery(), null);
+						PackQuery query = parse(queryStringModel.getObject(), new PackQuery());
 						PackListPanel.this.getFeedbackMessages().clear();
 						if (query == null)
 							query = new PackQuery();
-						query.getSorts().clear();
-						query.getSorts().addAll(object);
+						query.setSorts(object);
 						queryStringModel.setObject(query.toString());
-						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+						var target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);
 						doQuery(target);
 					}

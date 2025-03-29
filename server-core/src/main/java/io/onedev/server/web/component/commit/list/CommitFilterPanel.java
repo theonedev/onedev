@@ -299,14 +299,14 @@ abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 				for (var i=0; i<criterias.size(); i++) {
 					var criteria = criterias.get(i);
 					if (isAuthor && (criteria instanceof AuthorCriteria)) {
-						if (object != null) 
+						if (!object.isEmpty()) 
 							criterias.set(i, new AuthorCriteria(new ArrayList<>(object)));
 						else
 							criterias.remove(i);
 						found = true;
 						break;
 					} else if (!isAuthor && criteria instanceof CommitterCriteria) {
-						if (object != null) 
+						if (!object.isEmpty()) 
 							criterias.set(i, new CommitterCriteria(new ArrayList<>(object)));
 						else
 							criterias.remove(i);
@@ -314,7 +314,7 @@ abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 						break;
 					}
 				}
-				if (!found && object != null) {
+				if (!found && !object.isEmpty()) {
 					if (isAuthor)
 						query.getCriterias().add(new AuthorCriteria(new ArrayList<>(object)));
 					else

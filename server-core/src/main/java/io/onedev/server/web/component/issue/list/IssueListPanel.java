@@ -305,17 +305,18 @@ public abstract class IssueListPanel extends Panel {
 					}
 					@Override
 					public EntityQuery<Issue> getObject() {
-						return queryModel.getObject() != null? queryModel.getObject() : new IssueQuery();
+						var query = parse(queryStringModel.getObject(), new IssueQuery());
+						return query!=null? query : new IssueQuery();
 					}
 					@Override
 					public void setObject(EntityQuery<Issue> object) {
 						IssueListPanel.this.getFeedbackMessages().clear();
-						queryModel.setObject((IssueQuery) object);
 						queryStringModel.setObject(object.toString());
 						var target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);
-						doQuery(target);	
+						doQuery(target);
 					}
+					
 				}) {
 					@Override
 					protected Project getProject() {
@@ -347,21 +348,16 @@ public abstract class IssueListPanel extends Panel {
 					@Override
 					public List<EntitySort> getObject() {
 						var query = parse(queryStringModel.getObject(), new IssueQuery());
-						IssueListPanel.this.getFeedbackMessages().clear();
-						if (query != null)
-							return query.getSorts();
-						else
-							return new ArrayList<>();
+						return query!=null? query.getSorts() : new ArrayList<>();
 					}
-
+ 
 					@Override
 					public void setObject(List<EntitySort> object) {
 						var query = parse(queryStringModel.getObject(), new IssueQuery());
 						IssueListPanel.this.getFeedbackMessages().clear();
 						if (query == null)
 							query = new IssueQuery();
-						query.getSorts().clear();
-						query.getSorts().addAll(object);
+						query.setSorts(object);
 						queryStringModel.setObject(query.toString());
 						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);

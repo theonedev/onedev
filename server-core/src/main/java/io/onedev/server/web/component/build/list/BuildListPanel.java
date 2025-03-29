@@ -819,16 +819,16 @@ public abstract class BuildListPanel extends Panel {
 					}
 					@Override
 					public EntityQuery<Build> getObject() {
-						return queryModel.getObject() != null? queryModel.getObject() : new BuildQuery();
+						var query = parse(queryStringModel.getObject(), new BuildQuery());
+						return query!=null? query : new BuildQuery();
 					}
 					@Override
 					public void setObject(EntityQuery<Build> object) {
 						BuildListPanel.this.getFeedbackMessages().clear();
-						queryModel.setObject((BuildQuery) object);
 						queryStringModel.setObject(object.toString());
 						var target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);
-						doQuery(target);	
+						doQuery(target);
 					}
 				}) {
 
@@ -860,11 +860,7 @@ public abstract class BuildListPanel extends Panel {
 					@Override
 					public List<EntitySort> getObject() {
 						BuildQuery query = parse(queryStringModel.getObject(), new BuildQuery());
-						BuildListPanel.this.getFeedbackMessages().clear();
-						if (query != null)
-							return query.getSorts();
-						else
-							return new ArrayList<>();
+						return query!=null? query.getSorts() : new ArrayList<>();
 					}
 
 					@Override
@@ -873,8 +869,7 @@ public abstract class BuildListPanel extends Panel {
 						BuildListPanel.this.getFeedbackMessages().clear();
 						if (query == null)
 							query = new BuildQuery();
-						query.getSorts().clear();
-						query.getSorts().addAll(object);
+						query.setSorts(object);
 						queryStringModel.setObject(query.toString());
 						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);

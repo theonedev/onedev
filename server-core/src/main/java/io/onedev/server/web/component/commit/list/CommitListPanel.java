@@ -104,21 +104,7 @@ public abstract class CommitListPanel extends Panel {
 
 		@Override
 		protected CommitQuery load() {
-			String queryString = queryStringModel.getObject();
-			CommitQuery parsedQuery;
-			try {
-				parsedQuery = CommitQuery.parse(getProject(), queryString, true);
-			} catch (Exception e) {
-				getFeedbackMessages().clear();
-				if (e instanceof ExplicitException) {
-					error(e.getMessage());
-					return null;
-				} else {
-					info("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ author(robin)");
-					parsedQuery = new CommitQuery(Lists.newArrayList(new FuzzyCriteria(Lists.newArrayList(queryString))));
-				}
-			}
-			return CommitQuery.merge(getBaseQuery(), parsedQuery);
+			return parse(queryStringModel.getObject(), getBaseQuery());
 		}
 		
 	};
@@ -273,6 +259,24 @@ public abstract class CommitListPanel extends Panel {
 	protected QuerySaveSupport getQuerySaveSupport() {
 		return null;
 	}
+
+	@Nullable
+	private CommitQuery parse(@Nullable String queryString, CommitQuery baseQuery) {
+		CommitQuery parsedQuery;
+		try {
+			parsedQuery = CommitQuery.parse(getProject(), queryString, true);
+		} catch (Exception e) {
+			getFeedbackMessages().clear();
+			if (e instanceof ExplicitException) {
+				error(e.getMessage());
+				return null;
+			} else {
+				info("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ author(robin)");
+				parsedQuery = new CommitQuery(Lists.newArrayList(new FuzzyCriteria(Lists.newArrayList(queryString))));
+			}
+		}
+		return CommitQuery.merge(baseQuery, parsedQuery);
+	}
 	
 	private void doQuery(AjaxRequestTarget target) {
 		page = 1;
@@ -349,16 +353,16 @@ public abstract class CommitListPanel extends Panel {
 					}
 					@Override
 					public CommitQuery getObject() {
-						return queryModel.getObject() != null? queryModel.getObject() : new CommitQuery(new ArrayList<>());
+						var query = parse(queryStringModel.getObject(), new CommitQuery(new ArrayList<>()));
+						return query!=null? query : new CommitQuery(new ArrayList<>());
 					}
 					@Override
 					public void setObject(CommitQuery object) {
 						CommitListPanel.this.getFeedbackMessages().clear();
-						queryModel.setObject(object);
 						queryStringModel.setObject(object.toString());
 						var target = RequestCycle.get().find(AjaxRequestTarget.class);
 						target.add(queryInput);
-						doQuery(target);	
+						doQuery(target);
 					}
 				}) {
 
