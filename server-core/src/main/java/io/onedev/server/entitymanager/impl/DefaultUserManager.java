@@ -128,7 +128,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     public void create(User user) {
 		Preconditions.checkState(user.isNew());
 		if (user.isServiceAccount() && !subscriptionManager.isSubscriptionActive())
-			throw new NoSubscriptionException();
+			throw new NoSubscriptionException("Service account");
 		user.setName(user.getName().toLowerCase());
 		dao.persist(user);
     }
