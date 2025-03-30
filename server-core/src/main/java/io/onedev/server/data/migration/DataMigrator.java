@@ -7791,4 +7791,16 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate197(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.addElement("disabled").setText("false");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

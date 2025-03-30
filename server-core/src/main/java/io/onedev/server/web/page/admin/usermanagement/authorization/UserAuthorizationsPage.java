@@ -26,6 +26,8 @@ public class UserAuthorizationsPage extends UserPage {
 
 	public UserAuthorizationsPage(PageParameters params) {
 		super(params);
+		if (getUser().isDisabled())
+			throw new IllegalStateException();
 	}
 
 	@Override

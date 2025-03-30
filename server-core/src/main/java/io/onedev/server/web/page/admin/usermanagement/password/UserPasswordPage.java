@@ -10,7 +10,7 @@ public class UserPasswordPage extends UserPage {
 	
 	public UserPasswordPage(PageParameters params) {
 		super(params);
-		if (getUser().isServiceAccount())
+		if (getUser().isServiceAccount() || getUser().isDisabled())
 			throw new IllegalStateException();
 	}
 

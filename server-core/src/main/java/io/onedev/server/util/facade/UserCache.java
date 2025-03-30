@@ -1,10 +1,11 @@
 package io.onedev.server.util.facade;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -52,10 +53,17 @@ public class UserCache extends MapProxy<Long, UserFacade> {
 	public UserCache clone() {
 		return new UserCache(new HashMap<>(delegate));
 	}
-	
-	public Collection<User> getUsers() {
+		
+	public Collection<User> getUsers(boolean includeDisabled) {
 		UserManager userManager = OneDev.getInstance(UserManager.class);
-		return keySet().stream().filter(it->it>0).map(it->userManager.load(it)).collect(Collectors.toSet());
+		return entrySet().stream()
+				.filter(it -> includeDisabled || !it.getValue().isDisabled())
+				.map(it -> userManager.load(it.getKey()))
+				.collect(toSet());
+	}
+
+	public Collection<User> getUsers() {
+		return getUsers(false);
 	}
 	
 	public Comparator<User> comparingDisplayName(Collection<User> topUsers) {

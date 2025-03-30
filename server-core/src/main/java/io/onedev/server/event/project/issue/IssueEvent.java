@@ -1,5 +1,10 @@
 package io.onedev.server.event.project.issue;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.event.project.ProjectEvent;
@@ -7,11 +12,6 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.web.UrlManager;
-
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 public abstract class IssueEvent extends ProjectEvent {
 

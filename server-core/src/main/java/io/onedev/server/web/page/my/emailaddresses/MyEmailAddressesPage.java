@@ -13,7 +13,7 @@ public class MyEmailAddressesPage extends MyPage {
 
 	public MyEmailAddressesPage(PageParameters params) {
 		super(params);
-		if (getLoginUser().isServiceAccount())
+		if (getUser().isServiceAccount())
 			throw new IllegalStateException();
 	}
 
@@ -24,7 +24,7 @@ public class MyEmailAddressesPage extends MyPage {
 
 			@Override
 			public User getObject() {
-				return getLoginUser();
+				return getUser();
 			}
 			
 		}));

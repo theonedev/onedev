@@ -1,13 +1,14 @@
 package io.onedev.server.entitymanager;
 
+import java.util.Collection;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
-
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.List;
 
 public interface UserManager extends EntityManager<User> {
 	
@@ -31,6 +32,14 @@ public interface UserManager extends EntityManager<User> {
 	void delete(User user);
 	
 	void delete(Collection<User> users);
+
+	void enable(User user);
+	
+	void enable(Collection<User> users);
+
+	void disable(User user);
+	
+	void disable(Collection<User> users);
 	
 	/**
 	 * Find root user in the system. 
@@ -82,7 +91,6 @@ public interface UserManager extends EntityManager<User> {
 	List<User> query(@Nullable String term, int firstResult, int maxResults);
 	
 	int count(String term);
-	
+		
 	UserCache cloneCache();
-	
 }

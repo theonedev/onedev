@@ -11,11 +11,17 @@ public class UserFacade extends EntityFacade {
 	private final String name;
 	
 	private final String fullName;
+
+	private final boolean serviceAccount;
+
+	private final boolean disabled;
 	
-	public UserFacade(Long id, String name, @Nullable String fullName) {
+	public UserFacade(Long id, String name, @Nullable String fullName, boolean serviceAccount, boolean disabled) {
 		super(id);
 		this.name = name;
 		this.fullName = fullName;
+		this.serviceAccount = serviceAccount;
+		this.disabled = disabled;
 	}
 
 	public String getName() {
@@ -50,6 +56,14 @@ public class UserFacade extends EntityFacade {
 			return user.getFacade();
 		else 
 			return null;
+	}
+
+	public boolean isServiceAccount() {
+		return serviceAccount;
+	}
+
+	public boolean isDisabled() {
+		return disabled;
 	}
 	
 }

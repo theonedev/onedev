@@ -85,11 +85,15 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		
 	public static final String PROP_SERVICE_ACCOUNT = "serviceAccount";
 
+	public static final String PROP_DISABLED = "disabled";
+
 	public static final String PROP_NOTIFY_OWN_EVENTS = "notifyOwnEvents";
 	
 	private static ThreadLocal<Stack<User>> stack = ThreadLocal.withInitial(() -> new Stack<>());
 	
 	private boolean serviceAccount;
+
+	private boolean disabled;
 
 	@Column(unique=true, nullable=false)
     private String name;
@@ -514,6 +518,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.serviceAccount = serviceAccount;
 	}
 
+	public boolean isDisabled() {
+		return disabled;
+	}
+	
+	public void setDisabled(boolean disabled) {
+		this.disabled = disabled;
+	}			
+
 	@SuppressWarnings("unused")
 	private static String getServiceAccountDescription() {
 		if (!WicketUtils.isSubscriptionActive()) {
@@ -882,6 +894,30 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.codeCommentQueryPersonalizations = codeCommentQueryPersonalizations;
 	}
 
+	public Collection<CodeCommentMention> getCodeCommentMentions() {
+		return codeCommentMentions;
+	}
+
+	public void setCodeCommentMentions(Collection<CodeCommentMention> codeCommentMentions) {
+		this.codeCommentMentions = codeCommentMentions;
+	}
+
+	public Collection<IssueMention> getIssueMentions() {
+		return issueMentions;
+	}
+
+	public void setIssueMentions(Collection<IssueMention> issueMentions) {
+		this.issueMentions = issueMentions;
+	}
+
+	public Collection<PullRequestMention> getPullRequestMentions() {
+		return pullRequestMentions;
+	}
+
+	public void setPullRequestMentions(Collection<PullRequestMention> pullRequestMentions) {
+		this.pullRequestMentions = pullRequestMentions;
+	}
+
 	public ArrayList<NamedProjectQuery> getProjectQueries() {
 		return projectQueries;
 	}
@@ -1032,7 +1068,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Override
 	public UserFacade getFacade() {
-		return new UserFacade(getId(), getName(), getFullName());
+		return new UserFacade(getId(), getName(), getFullName(), isServiceAccount(), isDisabled());
 	}
 	
 }

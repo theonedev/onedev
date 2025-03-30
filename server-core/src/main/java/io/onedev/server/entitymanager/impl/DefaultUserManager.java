@@ -20,6 +20,7 @@ import com.hazelcast.core.HazelcastInstance;
 
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -59,20 +60,21 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     private final IdManager idManager;
     
     private final EmailAddressManager emailAddressManager;
-        
+            
     private final TransactionManager transactionManager;
     
     private final ClusterManager clusterManager;
 
 	private final SubscriptionManager subscriptionManager;
-	   
+	
 	private volatile UserCache cache;
 	
 	@Inject
     public DefaultUserManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
 							  IssueFieldManager issueFieldManager, IdManager idManager, 
-							  EmailAddressManager emailAddressManager, TransactionManager transactionManager, 
-							  ClusterManager clusterManager, SubscriptionManager subscriptionManager) {
+							  EmailAddressManager emailAddressManager, AccessTokenManager accessTokenManager,
+							  TransactionManager transactionManager, ClusterManager clusterManager, 
+							  SubscriptionManager subscriptionManager) {
         super(dao);
         
         this.projectManager = projectManager;
@@ -154,27 +156,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     @Transactional
     @Override
 	public void delete(User user) {
-    	Usage usage = new Usage();
-		for (Project project: projectManager.query()) {
-			try {
-				Usage usageInProject = new Usage();
-				for (BranchProtection protection : project.getBranchProtections())
-					usageInProject.add(protection.onDeleteUser(user.getName()));
-				for (TagProtection protection : project.getTagProtections())
-					usageInProject.add(protection.onDeleteUser(user.getName()));
-				usageInProject.add(project.getIssueSetting().onDeleteUser(user.getName()));
-				usageInProject.add(project.getBuildSetting().onDeleteUser(user.getName()));
-				usageInProject.add(project.getPullRequestSetting().onDeleteUser(user.getName()));
-				usageInProject.prefix("project '" + project.getPath() + "': settings");
-				usage.add(usageInProject);
-			} catch (Exception e) {
-				throw new RuntimeException("Error checking user reference in project '" + project.getPath() + "'", e);
-			}
-		}
-
-		usage.add(settingManager.onDeleteUser(user.getName()));
-		
-		usage.checkInUse("User '" + user.getName() + "'");
+		checkUsage(user);
     	
     	Query<?> query = getSession().createQuery("update PullRequest set submitter=:unknown where submitter=:submitter");
     	query.setParameter("submitter", user);
@@ -253,12 +235,122 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		
 		dao.remove(user);
     }
+
+	private void checkUsage(User user) {
+    	Usage usage = new Usage();
+		for (Project project: projectManager.query()) {
+			try {
+				Usage usageInProject = new Usage();
+				for (BranchProtection protection : project.getBranchProtections())
+					usageInProject.add(protection.onDeleteUser(user.getName()));
+				for (TagProtection protection : project.getTagProtections())
+					usageInProject.add(protection.onDeleteUser(user.getName()));
+				usageInProject.add(project.getIssueSetting().onDeleteUser(user.getName()));
+				usageInProject.add(project.getBuildSetting().onDeleteUser(user.getName()));
+				usageInProject.add(project.getPullRequestSetting().onDeleteUser(user.getName()));
+				usageInProject.prefix("project '" + project.getPath() + "': settings");
+				usage.add(usageInProject);
+			} catch (Exception e) {
+				throw new RuntimeException("Error checking user reference in project '" + project.getPath() + "'", e);
+			}
+		}
+
+		usage.add(settingManager.onDeleteUser(user.getName()));
+		
+		usage.checkInUse("User '" + user.getName() + "'");    	
+	}
+
+	@Transactional
+	@Override
+	public void disable(User user) {
+		checkUsage(user);
+		
+		for (var authorization: user.getProjectAuthorizations())
+			dao.remove(authorization);
+		for (var membership: user.getMemberships())
+			dao.remove(membership);
+		for (var authorization: user.getIssueAuthorizations())
+			dao.remove(authorization);
+		for (var dashboard: user.getDashboards())
+			dao.remove(dashboard);
+		for (var token: user.getAccessTokens())
+			dao.remove(token);
+		for (var visit: user.getDashboardVisits())
+			dao.remove(visit);
+		for (var share: user.getDashboardShares())
+			dao.remove(share);	
+		for (var review: user.getPullRequestReviews())
+			dao.remove(review);
+		for (var assignment: user.getPullRequestAssignments())
+			dao.remove(assignment);
+		for (var watch: user.getPullRequestWatches())
+			dao.remove(watch);
+		for (var watch: user.getIssueWatches())
+			dao.remove(watch);
+		for (var vote: user.getIssueVotes())
+			dao.remove(vote);
+		for (var stopwatch: user.getStopwatches())
+			dao.remove(stopwatch);
+
+		for (var personalization: user.getIssueQueryPersonalizations())
+			dao.remove(personalization);
+		for (var personalization: user.getBuildQueryPersonalizations())
+			dao.remove(personalization);
+		for (var personalization: user.getPackQueryPersonalizations())
+			dao.remove(personalization);
+		for (var personalization: user.getPullRequestQueryPersonalizations())
+			dao.remove(personalization);
+		for (var personalization: user.getCommitQueryPersonalizations())
+			dao.remove(personalization);
+		for (var personalization: user.getCodeCommentQueryPersonalizations())
+			dao.remove(personalization);
+
+		for (var sshKey: user.getSshKeys())
+			dao.remove(sshKey);
+		for (var gpgKey: user.getGpgKeys())
+			dao.remove(gpgKey);
+		for (var pendingSuggestionApply: user.getPendingSuggestionApplies())
+			dao.remove(pendingSuggestionApply);
+		for (var mention: user.getCodeCommentMentions())
+			dao.remove(mention);
+		for (var mention: user.getIssueMentions())
+			dao.remove(mention);
+		for (var mention: user.getPullRequestMentions())
+			dao.remove(mention);
+
+		user.setPassword(null);
+		user.setPasswordResetCode(null);
+		user.setDisabled(true);
+
+		dao.persist(user);
+	}
 	
 	@Transactional
 	@Override
 	public void delete(Collection<User> users) {
 		for (var user: users)
 			delete(user);
+	}
+
+	@Transactional
+	@Override
+	public void disable(Collection<User> users) {
+		for (var user: users) 
+			disable(user);
+	}
+
+	@Transactional
+	@Override
+	public void enable(User user) {
+		user.setDisabled(false);
+		dao.persist(user);
+	}
+
+	@Transactional
+	@Override
+	public void enable(Collection<User> users) {
+		for (var user: users)
+			enable(user);
 	}
 	
 	@Sessional
@@ -291,10 +383,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	public User findByPasswordResetCode(String passwordResetCode) {
 		var criteria = newCriteria();
 		criteria.add(Restrictions.eq("passwordResetCode", passwordResetCode));
-		var user = find(criteria);
-		if (user != null && user.isServiceAccount())
-			throw new IllegalStateException();
-		return user;
+		return find(criteria);
 	}
 	
 	@Override
@@ -377,14 +466,10 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	@Override
 	public User findByVerifiedEmailAddress(String emailAddressValue) {
 		EmailAddress emailAddress = emailAddressManager.findByValue(emailAddressValue);
-		if (emailAddress != null && emailAddress.isVerified()) {
-			var user = emailAddress.getOwner();
-			if (user.isServiceAccount())
-				throw new IllegalStateException();
-			return user;
-		} else {
+		if (emailAddress != null && emailAddress.isVerified()) 
+			return emailAddress.getOwner();
+		else
 			return null;
-		}
 	}
 
 	@Override

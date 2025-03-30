@@ -1,5 +1,5 @@
 <wicket:extend>
-	<div wicket:id="note" class="mb-4"></div>
+	<div wicket:id="note"></div>
 	<div wicket:id="content"></div>
 	<wicket:fragment wicket:id="authViaInternalDatabaseFrag">
 		<div class="alert alert-light alert-notice">This user is authenticating via internal database.
@@ -12,9 +12,12 @@
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="serviceAccountFrag">
-		<div class="alert alert-light-warning alert-notice">This is a service account for task automation purpose</div>
+		<div class="alert alert-light-info alert-notice">This is a service account for task automation purpose</div>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="invalidServiceAccountFrag">
-		<div class="alert alert-light-danger alert-notice">Service account is only valid with an active subscription</div>
+	<wicket:fragment wicket:id="disabledFrag">
+		<div class="alert alert-light-warning alert-notice">This account is disabled</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="disabledServiceAccountFrag">
+		<div class="alert alert-light-warning alert-notice">This is a disabled service account</div>
 	</wicket:fragment>
 </wicket:extend>

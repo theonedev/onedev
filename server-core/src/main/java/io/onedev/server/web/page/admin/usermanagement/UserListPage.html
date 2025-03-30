@@ -11,6 +11,10 @@
 				<a wicket:id="operations" class="text-gray mr-4 mb-2 d-inline-block text-nowrap">
 					<wicket:svg href="ellipsis-circle" class="icon rotate-180"></wicket:svg> Operations
 				</a>
+				<a wicket:id="includeDisabled" class="text-gray mr-4 mb-2 d-inline-block text-nowrap">
+					<svg wicket:id="icon" class="icon"></svg>
+					Include Disabled
+				</a>
 				<span wicket:id="count" class="float-right text-gray"></span>
 			</div>
 			<table wicket:id="users" class="users table table-hover"></table>
@@ -21,7 +25,7 @@
 			<img wicket:id="avatar">
 			<span wicket:id="name" class="name"></span>
 			<span wicket:id="service" class="badge badge-info badge-sm ml-1">service</span>
-			<span wicket:id="invalid" class="badge badge-danger badge-sm ml-1">invalid</span>
+			<span wicket:id="disabled" class="badge badge-warning badge-sm ml-1">disabled</span>
 		</a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionsFrag">

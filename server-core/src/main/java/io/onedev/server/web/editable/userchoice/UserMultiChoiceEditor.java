@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.userchoice;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -16,16 +18,16 @@ import org.apache.wicket.util.convert.ConversionException;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.UserChoice;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.facade.UserCache;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.user.choice.UserMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.UserChoice;
 
 public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
@@ -55,16 +57,11 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 						.invokeStaticMethod(descriptor.getBeanClass(), userChoice.value());
 				choiceIds = users.stream().map(it->it.getId()).collect(Collectors.toList());
 			} else {
-				choiceIds = new ArrayList<>(cache.keySet());
-				choiceIds.removeIf(it->it<0);
-				choiceIds.sort(new Comparator<Long>() {
-
-					@Override
-					public int compare(Long o1, Long o2) {
-						return cache.get(o1).getDisplayName().compareTo(cache.get(o2).getDisplayName());
-					}
-					
-				});
+				choiceIds = cache.entrySet().stream()
+						.filter(it -> !it.getValue().isDisabled())
+						.map(it->it.getKey())
+						.collect(toList());
+				choiceIds.sort(Comparator.comparing(it -> cache.get(it).getDisplayName()));
 			}
 		} finally {
 			ComponentContext.pop();

@@ -8,9 +8,12 @@
 		<div class="alert alert-light-warning alert-notice">You are authenticating via external system</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="serviceAccountFrag">
-		<div class="alert alert-light-warning alert-notice">You are a service account for task automation purpose</div>
+		<div class="alert alert-light-info alert-notice">This is a service account for task automation purpose</div>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="invalidServiceAccountFrag">
-		<div class="alert alert-light-danger alert-notice">Service account is only valid with an active subscription</div>
+	<wicket:fragment wicket:id="disabledFrag">
+		<div class="alert alert-light-warning alert-notice">This account is disabled</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="disabledServiceAccountFrag">
+		<div class="alert alert-light-warning alert-notice">This is a disabled service account</div>
 	</wicket:fragment>
 </wicket:extend>

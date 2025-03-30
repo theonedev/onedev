@@ -694,13 +694,13 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
 	public static Collection<User> getAuthorizedUsers(Project project, BasePermission permission) {
 		var userManager = OneDev.getInstance(UserManager.class);
-		UserCache cacheClone = userManager.cloneCache();
+		UserCache cache = userManager.cloneCache();
 
-		Collection<User> authorizedUsers = Set.of(userManager.getRoot());
+		Collection<User> authorizedUsers = Sets.newHashSet(userManager.getRoot());
 
 		Group defaultLoginGroup = getSettingManager().getSecuritySetting().getDefaultLoginGroup();
 		if (defaultLoginGroup != null && defaultLoginGroup.isAdministrator())
-			return filterApplicableUsers(cacheClone.getUsers(), permission);
+			return filterApplicableUsers(cache.getUsers(), permission);
 
 		for (Group group: OneDev.getInstance(GroupManager.class).queryAdminstrator())
 			authorizedUsers.addAll(group.getMembers());
@@ -708,7 +708,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		Project current = project;
 		do {
 			if (current.getDefaultRole() != null && current.getDefaultRole().implies(permission))
-				return filterApplicableUsers(cacheClone.getUsers(), permission);
+				return filterApplicableUsers(cache.getUsers(), permission);
 
 			for (UserAuthorization authorization: current.getUserAuthorizations()) {
 				if (authorization.getRole().implies(permission))
@@ -718,7 +718,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			for (GroupAuthorization authorization: current.getGroupAuthorizations()) {
 				if (authorization.getRole().implies(permission)) {
 					if (authorization.getGroup().equals(defaultLoginGroup))
-						return filterApplicableUsers(cacheClone.getUsers(), permission);
+						return filterApplicableUsers(cache.getUsers(), permission);
 					authorizedUsers.addAll(authorization.getGroup().getMembers());
 				}
 			}

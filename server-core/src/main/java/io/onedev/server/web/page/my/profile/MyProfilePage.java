@@ -1,15 +1,15 @@
 package io.onedev.server.web.page.my.profile;
 
-import io.onedev.server.model.User;
-import io.onedev.server.web.component.user.profileedit.ProfileEditPanel;
-import io.onedev.server.web.page.my.MyPage;
-import io.onedev.server.web.util.WicketUtils;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import io.onedev.server.model.User;
+import io.onedev.server.web.component.user.profileedit.ProfileEditPanel;
+import io.onedev.server.web.page.my.MyPage;
+import io.onedev.server.web.util.WicketUtils;
 
 public class MyProfilePage extends MyPage {
 
@@ -21,11 +21,13 @@ public class MyProfilePage extends MyPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		if (getUser().isServiceAccount()) {
-			if (WicketUtils.isSubscriptionActive())
-				add(new Fragment("note", "serviceAccountFrag", this));
+		if (getUser().isDisabled() && WicketUtils.isSubscriptionActive()) {
+			if (getUser().isServiceAccount())
+				add(new Fragment("note", "disabledServiceAccountFrag", this));
 			else
-				add(new Fragment("note", "invalidServiceAccountFrag", this));
+				add(new Fragment("note", "disabledFrag", this));
+		} else if (getUser().isServiceAccount() && WicketUtils.isSubscriptionActive()) {
+			add(new Fragment("note", "serviceAccountFrag", this));
 		} else if (getUser().getPassword() != null) {
 			add(new Fragment("note", "authViaInternalDatabaseFrag", this));
 		} else {
@@ -36,7 +38,7 @@ public class MyProfilePage extends MyPage {
 
 			@Override
 			public User getObject() {
-				return getLoginUser();
+				return getUser();
 			}
 
 		}));

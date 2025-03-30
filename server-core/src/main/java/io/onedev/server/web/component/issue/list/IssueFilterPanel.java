@@ -334,7 +334,7 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 
 			@Override
 			protected List<User> load() {
-				var users = getUserManager().query();
+				var users = getUserManager().query().stream().filter(it -> !it.isDisabled()).collect(toList());
 				var cache = getUserManager().cloneCache();
 				users.sort(cache.comparingDisplayName(new ArrayList<>()));
 				return users;

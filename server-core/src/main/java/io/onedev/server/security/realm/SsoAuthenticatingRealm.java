@@ -1,5 +1,7 @@
 package io.onedev.server.security.realm;
 
+import static io.onedev.server.validation.validator.UserNameValidator.suggestUserName;
+
 import java.util.Collection;
 import java.util.concurrent.Callable;
 
@@ -12,7 +14,6 @@ import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.credential.AllowAllCredentialsMatcher;
 import org.apache.shiro.realm.AuthenticatingRealm;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.entitymanager.EmailAddressManager;
@@ -56,7 +57,7 @@ public class SsoAuthenticatingRealm extends AuthenticatingRealm {
 
 	private User newUser(SsoAuthenticated authenticated) {
 		User user = new User();
-		user.setName(authenticated.getUserName());
+		user.setName(suggestUserName(authenticated.getUserName()));
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
 		userManager.create(user);
@@ -84,12 +85,10 @@ public class SsoAuthenticatingRealm extends AuthenticatingRealm {
 	
 	private void updateUser(EmailAddress emailAddress, SsoAuthenticated authenticated) {
 		User user = emailAddress.getOwner();
-		user.setName(authenticated.getUserName());
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
 		userManager.update(user, null);
-		
-		emailAddress.setVerificationCode(null);
+
 		emailAddressManager.setAsPrimary(emailAddress);
 		
 		if (authenticated.getGroupNames() != null)
@@ -103,28 +102,27 @@ public class SsoAuthenticatingRealm extends AuthenticatingRealm {
 	public boolean supports(AuthenticationToken token) {
 		return token instanceof SsoAuthenticated;
 	}
-
+	
 	@Override
 	protected final AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) 
 			throws AuthenticationException {
 		return transactionManager.call((Callable<AuthenticationInfo>) () -> {
-			EmailAddress emailAddress;
-			SsoAuthenticated authenticated = (SsoAuthenticated) token;
-			String userName = authenticated.getUserName();
-			String emailAddressValue = authenticated.getEmail();
-			emailAddress = emailAddressManager.findByValue(emailAddressValue);
-			if (emailAddress == null || !emailAddress.isVerified()) {
-				if (userManager.findByName(userName) != null)
-					throw new AuthenticationException("Login name '" + userName + "' already used by another user");
-				else
+			var authenticated = (SsoAuthenticated) token;
+			var emailAddressValue = authenticated.getEmail();
+			var emailAddress = emailAddressManager.findByValue(emailAddressValue);
+			if (emailAddress != null) {
+				if (emailAddress.isVerified()) {
+					var user = emailAddress.getOwner();
+					if (user.isDisabled())
+						throw new AuthenticationException("User is disabled");
+					updateUser(emailAddress, authenticated);
+					return user;
+				} else {
+					emailAddressManager.delete(emailAddress);
 					return newUser(authenticated);
-			} else if (!userName.equalsIgnoreCase(emailAddress.getOwner().getName())
-					&& userManager.findByName(userName) != null) {
-				throw new AuthenticationException("Login name '" + userName + "' already used by another user");
+				}
 			} else {
-				Preconditions.checkState(!emailAddress.getOwner().isServiceAccount());
-				updateUser(emailAddress, authenticated);
-				return emailAddress.getOwner();
+				return newUser(authenticated);
 			}
 		});
 	}

@@ -12,21 +12,20 @@ public class MyTwoFactorAuthenticationPage extends MyPage {
 
 	public MyTwoFactorAuthenticationPage(PageParameters params) {
 		super(params);
-		if (getLoginUser().isServiceAccount())
+		if (getUser().isServiceAccount() || getUser().isDisabled())
 			throw new IllegalStateException();
+		else if (!getUser().isEnforce2FA())
+			throw new ExplicitException("Two-factor authentication not enabled");		
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (!getLoginUser().isEnforce2FA())
-			throw new ExplicitException("Two-factor authentication not enabled");
-		
 		add(new TwoFactorAuthenticationStatusPanel("content") {
 			@Override
 			protected User getUser() {
-				return getLoginUser();
+				return MyTwoFactorAuthenticationPage.this.getUser();
 			}
 		});
 	}

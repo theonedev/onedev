@@ -803,7 +803,7 @@ public abstract class LayoutPage extends BasePage {
 		if (loginUser != null) {
 			userInfo.add(new UserAvatar("avatar", loginUser));
 			userInfo.add(new Label("name", loginUser.getDisplayName()));
-			if (loginUser.isServiceAccount()) {
+			if (loginUser.isServiceAccount() || loginUser.isDisabled()) {
 				userInfo.add(new WebMarkupContainer("hasUnverifiedLink").setVisible(false));
 				userInfo.add(new WebMarkupContainer("noPrimaryAddressLink").setVisible(false));
 			} else if (loginUser.getEmailAddresses().isEmpty()) {
@@ -838,7 +838,7 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof MyAvatarPage)
 			item.add(AttributeAppender.append("class", "active"));
 
-		if (loginUser != null && loginUser.getPassword() != null && !loginUser.isServiceAccount()) {
+		if (loginUser != null && loginUser.getPassword() != null && !loginUser.isServiceAccount() && !loginUser.isDisabled()) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("myPassword", MyPasswordPage.class));
 			if (getPage() instanceof MyPasswordPage)
 				item.add(AttributeAppender.append("class", "active"));
@@ -846,7 +846,7 @@ public abstract class LayoutPage extends BasePage {
 			userInfo.add(new WebMarkupContainer("myPassword").setVisible(false));
 		}
 
-		if (OneDev.getInstance(ServerConfig.class).getSshPort() != 0) {
+		if (OneDev.getInstance(ServerConfig.class).getSshPort() != 0 && loginUser != null && !loginUser.isDisabled()) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("mySshKeys", MySshKeysPage.class));
 			if (getPage() instanceof MySshKeysPage)
 				item.add(AttributeAppender.append("class", "active"));
@@ -854,15 +854,23 @@ public abstract class LayoutPage extends BasePage {
 			userInfo.add(new WebMarkupContainer("mySshKeys").setVisible(false));
 		}
 
-		userInfo.add(item = new ViewStateAwarePageLink<Void>("myGpgKeys", MyGpgKeysPage.class));
-		if (getPage() instanceof MyGpgKeysPage)
-			item.add(AttributeAppender.append("class", "active"));
+		if (loginUser != null && !loginUser.isDisabled()) {
+			userInfo.add(item = new ViewStateAwarePageLink<Void>("myGpgKeys", MyGpgKeysPage.class));
+			if (getPage() instanceof MyGpgKeysPage)
+				item.add(AttributeAppender.append("class", "active"));
+		} else {
+			userInfo.add(new WebMarkupContainer("myGpgKeys").setVisible(false));
+		}
 
-		userInfo.add(item = new ViewStateAwarePageLink<Void>("myAccessTokens", MyAccessTokensPage.class));
-		if (getPage() instanceof MyAccessTokensPage)
-			item.add(AttributeAppender.append("class", "active"));
+		if (loginUser != null && !loginUser.isDisabled()) {
+			userInfo.add(item = new ViewStateAwarePageLink<Void>("myAccessTokens", MyAccessTokensPage.class));
+			if (getPage() instanceof MyAccessTokensPage)
+				item.add(AttributeAppender.append("class", "active"));
+		} else {
+			userInfo.add(new WebMarkupContainer("myAccessTokens").setVisible(false));
+		}
 
-		if (getLoginUser() != null && !getLoginUser().isServiceAccount()) {
+		if (getLoginUser() != null && !getLoginUser().isServiceAccount() && !getLoginUser().isDisabled()) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("myTwoFactorAuthentication", MyTwoFactorAuthenticationPage.class) {
 				@Override
 				protected void onConfigure() {
@@ -876,7 +884,7 @@ public abstract class LayoutPage extends BasePage {
 			userInfo.add(new WebMarkupContainer("myTwoFactorAuthentication").setVisible(false));
 		}
 
-		if (getLoginUser() != null && !getLoginUser().isServiceAccount()) {
+		if (getLoginUser() != null && !getLoginUser().isServiceAccount() && !getLoginUser().isDisabled()) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("myQueryWatches", MyQueryWatchesPage.class));
 			if (getPage() instanceof MyQueryWatchesPage)
 				item.add(AttributeAppender.append("class", "active"));

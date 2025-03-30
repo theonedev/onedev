@@ -13,9 +13,9 @@ public class MyPasswordPage extends MyPage {
 	
 	public MyPasswordPage(PageParameters params) {
 		super(params);
-		if (getLoginUser().isServiceAccount())
+		if (getUser().isServiceAccount() || getUser().isDisabled())
 			throw new IllegalStateException();
-		if (getLoginUser().getPassword() == null)
+		if (getUser().getPassword() == null)
 			throw new ExplicitException("Unable to change password as you are authenticating via external system");
 	}
 
@@ -27,7 +27,7 @@ public class MyPasswordPage extends MyPage {
 
 				@Override
 				public User getObject() {
-					return getLoginUser();
+					return getUser();
 				}
 				
 			}));

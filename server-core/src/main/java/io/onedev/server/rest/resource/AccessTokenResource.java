@@ -59,6 +59,8 @@ public class AccessTokenResource {
 		var owner = accessToken.getOwner();
 		if (!isAdministrator() && !owner.equals(getAuthUser()))
 			throw new UnauthorizedException();
+		else if (owner.isDisabled())
+			throw new ExplicitException("Can not create access token for disabled user");
 		
 		if (accessTokenManager.findByOwnerAndName(owner, accessToken.getName()) != null)
 			throw new ExplicitException("Name already used by another access token of the owner");

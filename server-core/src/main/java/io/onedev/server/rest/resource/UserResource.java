@@ -87,6 +87,7 @@ public class UserResource {
 
 	private ProfileData getProfileData(User user) {
 		var profile = new ProfileData();
+		profile.setDisabled(user.isDisabled());
 		profile.setServiceAccount(user.isServiceAccount());
 		profile.setName(user.getName());
 		profile.setFullName(user.getFullName());
@@ -368,6 +369,8 @@ public class UserResource {
 			user.setPassword(passwordService.encryptPassword(password));
 			userManager.update(user, null);
 			return Response.ok().build();
+		} else if (user.isDisabled()) {
+			throw new ExplicitException("Can not set password for disabled user");
 		} else if (user.isServiceAccount()) {
 			throw new ExplicitException("Can not set password for service account");
 		} else if (user.equals(SecurityUtils.getAuthUser())) {
@@ -389,14 +392,16 @@ public class UserResource {
 	@DELETE
 	public Response resetTwoFactorAuthentication(@PathParam("userId") Long userId) {
 		User user = userManager.load(userId);
-		if (user.isServiceAccount())
+		if (!SecurityUtils.isAdministrator()) {
+			throw new UnauthorizedException();
+		} else if (user.isDisabled()) {
+			throw new ExplicitException("Can not reset two factor authentication for disabled user");
+		} else if (user.isServiceAccount()) {
 			throw new ExplicitException("Can not reset two factor authentication for service account");
-		if (SecurityUtils.isAdministrator()) {
+		} else {
 			user.setTwoFactorAuthentication(null);
 			userManager.update(user, null);
 			return Response.ok().build();
-		} else {
-			throw new UnauthorizedException();
 		}
 	}
 	
@@ -407,7 +412,9 @@ public class UserResource {
     	User user = userManager.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
-		if (user.isServiceAccount()) 
+		else if (user.isDisabled()) 
+			throw new ExplicitException("Can not set queries and watches for disabled user");
+		else if (user.isServiceAccount()) 
 			throw new ExplicitException("Can not set queries and watches for service account");
 		user.setBuildQuerySubscriptions(queriesAndWatches.buildQuerySubscriptions);
 		user.setIssueQueryWatches(queriesAndWatches.issueQueryWatches);
@@ -428,7 +435,9 @@ public class UserResource {
 		User user = userManager.load(userId);
 		if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser()))
 			throw new UnauthorizedException();
-		
+		else if (user.isDisabled())
+			throw new ExplicitException("Can not add ssh key for disabled user");
+
 		SshKey sshKey = new SshKey();
 		sshKey.setContent(content);
 		sshKey.setCreatedAt(new Date());
@@ -540,6 +549,9 @@ public class UserResource {
 	public static class ProfileData implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
+		@Api(order=10, description="Whether or not the user is disabled")
+		private boolean disabled;
+
 		@Api(order=50, description="Whether or not the user is a service account")
 		private boolean serviceAccount;
 
@@ -551,6 +563,14 @@ public class UserResource {
 
 		@Api(order=300, description = "Whether or not to notify user on own events. Only meaningful for non service account")
 		private boolean notifyOwnEvents;
+
+		public boolean isDisabled() {
+			return disabled;
+		}
+
+		public void setDisabled(boolean disabled) {
+			this.disabled = disabled;
+		}
 
 		public boolean isServiceAccount() {
 			return serviceAccount;

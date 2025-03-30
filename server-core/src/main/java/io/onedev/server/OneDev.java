@@ -1,7 +1,42 @@
 package io.onedev.server;
 
+import static io.onedev.k8shelper.KubernetesHelper.BEARER;
+import static io.onedev.k8shelper.KubernetesHelper.checkStatus;
+import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+
+import org.apache.wicket.request.Url;
+import org.eclipse.jgit.util.FS.FileStoreAttributes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Provider;
 import com.hazelcast.core.HazelcastInstance;
+
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AppLoader;
@@ -28,34 +63,6 @@ import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.util.init.InitStage;
 import io.onedev.server.util.init.ManualConfig;
-import org.apache.wicket.request.Url;
-import org.eclipse.jgit.util.FS.FileStoreAttributes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
-import java.io.*;
-import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-
-import static io.onedev.k8shelper.KubernetesHelper.BEARER;
-import static io.onedev.k8shelper.KubernetesHelper.checkStatus;
-import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	

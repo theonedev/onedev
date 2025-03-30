@@ -1,6 +1,18 @@
 package io.onedev.server.web.component.user.profileedit;
 
+import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
+
+import java.io.Serializable;
+
+import org.apache.wicket.Session;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.IModel;
+
 import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -12,13 +24,8 @@ import io.onedev.server.web.component.user.UserDeleteLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
-import org.apache.wicket.Session;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.IModel;
-
-import java.io.Serializable;
+import io.onedev.server.web.util.ConfirmClickModifier;
+import io.onedev.server.web.util.WicketUtils;
 
 public class ProfileEditPanel extends GenericPanel<User> {
 
@@ -38,6 +45,9 @@ public class ProfileEditPanel extends GenericPanel<User> {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		var excludeProperties = Sets.newHashSet("password", "serviceAccount");
+		if (getUser().isServiceAccount() || getUser().isDisabled())
+			excludeProperties.add(PROP_NOTIFY_OWN_EVENTS);
 		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
 
 			@Override
@@ -56,7 +66,7 @@ public class ProfileEditPanel extends GenericPanel<User> {
 				editor.getDescriptor().copyProperties(object, getUser());
 			}
 			
-		}, Sets.newHashSet("password", "serviceAccount"), true);
+		}, excludeProperties, true);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -66,15 +76,14 @@ public class ProfileEditPanel extends GenericPanel<User> {
 				
 				User user = getUser();
 				
-				UserManager userManager = OneDev.getInstance(UserManager.class);
-				User userWithSameName = userManager.findByName(user.getName());
+				User userWithSameName = getUserManager().findByName(user.getName());
 				if (userWithSameName != null && !userWithSameName.equals(user)) {
 					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
 							"Login name already used by another account");
 				} 
 				
 				if (editor.isValid()) {
-					userManager.update(user, oldName);
+					getUserManager().update(user, oldName);
 					Session.get().success("Profile updated");
 					setResponsePage(getPage().getClass(), getPage().getPageParameters());
 				}
@@ -84,6 +93,41 @@ public class ProfileEditPanel extends GenericPanel<User> {
 		form.add(editor);
 		
 		form.add(new FencedFeedbackPanel("feedback", form).setEscapeModelStrings(false));
+		
+		form.add(new Link<Void>("enable") {
+
+			@Override
+			public void onClick() {
+				getUserManager().enable(getUser());
+				Session.get().success("User enabled");
+				setResponsePage(getPage().getClass(), getPage().getPageParameters());
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getUser().isDisabled() && WicketUtils.isSubscriptionActive());
+			}
+		}.add(new ConfirmClickModifier("Do you really want to enable this account?")));
+
+		form.add(new Link<Void>("disable") {
+
+			@Override
+			public void onClick() {
+				getUserManager().disable(getUser());
+				Session.get().success("User disabled");
+				setResponsePage(getPage().getClass(), getPage().getPageParameters());
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getUser().isDisabled() && WicketUtils.isSubscriptionActive());
+			}
+
+		}.add(new ConfirmClickModifier("Disabling account will reset password, clear access tokens, "
+				+ "and remove all references from other entities except for past activities. Do you "
+				+ "really want to continue?")));
 		
 		boolean canDelete;
 		if (getPage() instanceof MyProfilePage) {
@@ -104,4 +148,9 @@ public class ProfileEditPanel extends GenericPanel<User> {
 
 		add(form);
 	}
+
+	private UserManager getUserManager() {
+		return OneDev.getInstance(UserManager.class);
+	}
+
 }

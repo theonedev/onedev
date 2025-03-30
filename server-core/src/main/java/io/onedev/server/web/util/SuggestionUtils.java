@@ -335,15 +335,8 @@ public class SuggestionUtils {
 		List<InputSuggestion> suggestions = new ArrayList<>();
 
 		UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();
-		List<UserFacade> users = new ArrayList<>(cache.values());
-		users.sort(new Comparator<UserFacade>() {
-
-			@Override
-			public int compare(UserFacade o1, UserFacade o2) {
-				return o1.getDisplayName().compareTo(o2.getDisplayName());
-			}
-			
-		});
+		var users = cache.values().stream().filter(it -> !it.isDisabled()).collect(toList());
+		users.sort(Comparator.comparing(it -> it.getDisplayName()));
 		for (UserFacade user: users) {
 			LinearRange match = LinearRange.match(user.getName(), matchWith);
 			if (match != null) {

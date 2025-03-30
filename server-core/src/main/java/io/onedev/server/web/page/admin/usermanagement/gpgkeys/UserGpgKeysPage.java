@@ -24,6 +24,8 @@ public class UserGpgKeysPage extends UserPage {
 	
 	public UserGpgKeysPage(PageParameters params) {
 		super(params);
+		if (getUser().isDisabled())
+			throw new IllegalStateException();
 	}
 
 	@Override

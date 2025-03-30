@@ -1,10 +1,11 @@
 package io.onedev.server.web.editable.userchoice;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -57,18 +58,13 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 			if (userChoice.value().length() != 0) {
 				List<User> users = (List<User>) ReflectionUtils
 						.invokeStaticMethod(descriptor.getBeanClass(), userChoice.value());
-				choiceIds = users.stream().map(it->it.getId()).collect(Collectors.toList());
+				choiceIds = users.stream().map(it->it.getId()).collect(toList());
 			} else {
-				choiceIds = new ArrayList<>(cache.keySet());
-				choiceIds.removeIf(it->it<0);
-				choiceIds.sort(new Comparator<Long>() {
-
-					@Override
-					public int compare(Long o1, Long o2) {
-						return cache.get(o1).getDisplayName().compareTo(cache.get(o2).getDisplayName());
-					}
-					
-				});
+				choiceIds = cache.entrySet().stream()
+						.filter(it -> !it.getValue().isDisabled())
+						.map(it->it.getKey())
+						.collect(toList());
+				choiceIds.sort(Comparator.comparing(it -> cache.get(it).getDisplayName()));
 			}
 		} finally {
 			ComponentContext.pop();
@@ -102,7 +98,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 
 			@Override
 			protected List<User> load() {
-				return choiceIds.stream().map(it -> getUserManager().load(it)).collect(Collectors.toList());
+				return choiceIds.stream().map(it -> getUserManager().load(it)).collect(toList());
 			}
     		
     	}) {

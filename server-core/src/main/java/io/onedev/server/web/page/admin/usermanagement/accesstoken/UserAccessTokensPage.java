@@ -10,6 +10,8 @@ public class UserAccessTokensPage extends UserPage {
 
 	public UserAccessTokensPage(PageParameters params) {
 		super(params);
+		if (getUser().isDisabled())
+			throw new IllegalStateException();
 	}
 
 	@Override

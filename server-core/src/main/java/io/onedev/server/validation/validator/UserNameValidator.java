@@ -55,24 +55,30 @@ public class UserNameValidator implements ConstraintValidator<UserName, String> 
 
 			@Override
 			public String call() throws Exception {
-				String normalizedUserName = preferredUserName.replaceAll("[^\\w-\\.]", "-").toLowerCase();
+				String normalizedUserName = normalizeUserName(preferredUserName);
 				int suffix = 1;
 				UserManager userManager = OneDev.getInstance(UserManager.class);
 				while (true) {
 					String suggestedUserName = normalizedUserName;
 					if (suffix > 1)
 						suggestedUserName += suffix;
-					if (!suggestedUserName.equals("new") 
-							&& !suggestedUserName.equals(User.SYSTEM_NAME)
-							&& !suggestedUserName.equals(User.UNKNOWN_NAME)
-							&& userManager.findByName(suggestedUserName) == null) {
+					if (userManager.findByName(suggestedUserName) == null) 
 						return suggestedUserName;
-					}
 					suffix++;
 				}
 			}
 			
 		});
+	}
+
+	public static String normalizeUserName(String preferredUserName) {
+		String normalizedUserName = preferredUserName.replaceAll("[^\\w-\\.]", "-").toLowerCase();
+		if (normalizedUserName.equals("new") 
+				|| normalizedUserName.equals(User.SYSTEM_NAME)
+				|| normalizedUserName.equals(User.UNKNOWN_NAME)) {
+			normalizedUserName = normalizedUserName + "2";
+		}
+		return normalizedUserName;
 	}
 	
 }

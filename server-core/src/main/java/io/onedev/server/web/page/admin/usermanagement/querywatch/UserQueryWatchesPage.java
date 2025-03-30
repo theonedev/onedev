@@ -14,7 +14,7 @@ public class UserQueryWatchesPage extends UserPage {
 
     public UserQueryWatchesPage(PageParameters params) {
         super(params);
-        if (getUser().isServiceAccount())
+        if (getUser().isServiceAccount() || getUser().isDisabled())
             throw new IllegalStateException();
         tabName = params.get(PARAM_TAB).toString(QueryWatchesPanel.TAB_ISSUE);
     }

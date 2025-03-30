@@ -12,6 +12,8 @@ public class MyAccessTokensPage extends MyPage {
 
 	public MyAccessTokensPage(PageParameters params) {
 		super(params);
+		if (getUser().isDisabled())
+			throw new IllegalStateException();
 	}
 
 	@Override

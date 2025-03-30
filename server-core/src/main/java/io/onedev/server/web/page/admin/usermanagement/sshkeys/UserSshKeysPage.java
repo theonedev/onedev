@@ -19,6 +19,8 @@ public class UserSshKeysPage extends UserPage {
 
     public UserSshKeysPage(PageParameters params) {
         super(params);
+		if (getUser().isDisabled())
+			throw new IllegalStateException();
     }
     
     @Override

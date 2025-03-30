@@ -68,6 +68,8 @@ public class UserMembershipsPage extends UserPage {
 	
 	public UserMembershipsPage(PageParameters params) {
 		super(params);
+		if (getUser().isDisabled())
+			throw new IllegalStateException();
 	}
 
 	private EntityCriteria<Membership> getCriteria() {

@@ -24,6 +24,8 @@ public class MyGpgKeysPage extends MyPage {
 	
 	public MyGpgKeysPage(PageParameters params) {
 		super(params);
+		if (getUser().isDisabled())
+			throw new IllegalStateException();
 	}
 
 	@Override
@@ -44,7 +46,7 @@ public class MyGpgKeysPage extends MyPage {
 
 					@Override
 					protected User getUser() {
-						return getLoginUser();
+						return MyGpgKeysPage.this.getUser();
 					}
 
 					@Override

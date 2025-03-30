@@ -41,11 +41,13 @@ public class UserProfilePage extends UserPage {
 		super.onInitialize();
 
 		WebMarkupContainer noteContainer;
-		if (getUser().isServiceAccount()) {
-			if (WicketUtils.isSubscriptionActive())
-				noteContainer = new Fragment("note", "serviceAccountFrag", this);
+		if (getUser().isDisabled() && WicketUtils.isSubscriptionActive()) {
+			if (getUser().isServiceAccount())
+				noteContainer = new Fragment("note", "disabledServiceAccountFrag", this);
 			else
-				noteContainer = new Fragment("note", "invalidServiceAccountFrag", this);
+				noteContainer = new Fragment("note", "disabledFrag", this);
+		} else if (getUser().isServiceAccount() && WicketUtils.isSubscriptionActive()) {
+			noteContainer = new Fragment("note", "serviceAccountFrag", this);
 		} else if (getUser().getPassword() != null) {
 			noteContainer = new Fragment("note", "authViaInternalDatabaseFrag", this);
 			noteContainer.add(new Link<Void>("removePassword") {
@@ -106,6 +108,7 @@ public class UserProfilePage extends UserPage {
 
 			});
 		}
+
 		add(noteContainer);
 		
 		add(new ProfileEditPanel("content", userModel));

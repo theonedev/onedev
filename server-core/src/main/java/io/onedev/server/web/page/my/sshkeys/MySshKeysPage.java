@@ -22,6 +22,8 @@ public class MySshKeysPage extends MyPage {
 	
 	public MySshKeysPage(PageParameters params) {
 		super(params);
+		if (getUser().isDisabled())
+			throw new IllegalStateException();
 	}
 
 	@Override
@@ -42,7 +44,7 @@ public class MySshKeysPage extends MyPage {
 
 					@Override
 					protected User getUser() {
-						return getLoginUser();
+						return MySshKeysPage.this.getUser();
 					}
 
 					@Override

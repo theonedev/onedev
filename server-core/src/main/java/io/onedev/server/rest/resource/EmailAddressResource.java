@@ -61,9 +61,11 @@ public class EmailAddressResource {
 		var owner = emailAddress.getOwner();
 		if (!SecurityUtils.isAdministrator() && !owner.equals(getAuthUser()))
 			throw new UnauthorizedException();
-		if (owner.isServiceAccount())
+		else if (owner.isDisabled())
+			throw new ExplicitException("Can not set email address for disabled user");
+		else if (owner.isServiceAccount())
 			throw new ExplicitException("Can not set email address for service account");
-		if (emailAddressManager.findByValue(emailAddress.getValue()) != null)
+		else if (emailAddressManager.findByValue(emailAddress.getValue()) != null)
 			throw new ExplicitException("This email address is already used by another user");
 		
 		if (SecurityUtils.isAdministrator()) 

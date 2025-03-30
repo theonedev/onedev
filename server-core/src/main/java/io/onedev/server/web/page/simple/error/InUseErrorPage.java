@@ -44,12 +44,12 @@ public class InUseErrorPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "Unable To Delete Right Now";
+		return "Unable To Delete/Disable Right Now";
 	}
 
 	@Override
 	protected String getSubTitle() {
-		return "The object you are deleting is still being used";
+		return "The object you are deleting/disabling is still being used";
 	}
 
 	@Override

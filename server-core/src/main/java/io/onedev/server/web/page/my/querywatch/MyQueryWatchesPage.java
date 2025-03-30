@@ -18,7 +18,7 @@ public class MyQueryWatchesPage extends MyPage {
 
     public MyQueryWatchesPage(PageParameters params) {
         super(params);
-        if (getLoginUser().isServiceAccount())
+        if (getUser().isServiceAccount() || getUser().isDisabled())
             throw new IllegalStateException();
         tabName = params.get(PARAM_TAB).toString(QueryWatchesPanel.TAB_ISSUE);
     }
@@ -31,7 +31,7 @@ public class MyQueryWatchesPage extends MyPage {
 
             @Override
             public User getObject() {
-                return getLoginUser();
+                return getUser();
             }
 
         }, tabName) {
