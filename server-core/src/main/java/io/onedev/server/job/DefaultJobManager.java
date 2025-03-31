@@ -1135,8 +1135,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Listen
 	public void on(RefUpdated event) {
 		String branch = GitUtils.ref2branch(event.getRefName());
-		Project project = event.getProject();
-		cacheBranchSchedules(project, branch, event.getNewCommitId());
+		if (branch != null) {
+			Project project = event.getProject();
+			cacheBranchSchedules(project, branch, event.getNewCommitId());
+		}
 	}
 	
 	@Listen
