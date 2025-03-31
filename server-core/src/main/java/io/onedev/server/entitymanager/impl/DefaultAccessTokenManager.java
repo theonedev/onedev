@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.shiro.authc.DisabledAccountException;
+
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 
@@ -74,6 +76,12 @@ public class DefaultAccessTokenManager extends BaseEntityManager<AccessToken> im
 		}
 	}
 
+	private AccessToken checkDisabled(AccessToken accessToken) {
+		if (accessToken.getOwner().isDisabled())
+			throw new DisabledAccountException("Account is disabled");
+		return accessToken;
+	}
+
     @Override
     public final AccessToken findByValue(String value) {
 		return sessionManager.call(new Callable<AccessToken>() {
@@ -83,7 +91,7 @@ public class DefaultAccessTokenManager extends BaseEntityManager<AccessToken> im
 				if (cache != null) {
 					var facade = cache.findByValue(value);
 					if (facade != null) {
-						return load(facade.getId());
+						return checkDisabled(load(facade.getId()));
 					} else {
 						Long userId = temporalAccessTokens.get(value);
 						if (userId != null) {
@@ -91,7 +99,7 @@ public class DefaultAccessTokenManager extends BaseEntityManager<AccessToken> im
 							accessToken.setOwner(userManager.load(userId));
 							accessToken.setHasOwnerPermissions(true);
 							accessToken.setValue(value);
-							return accessToken;
+							return checkDisabled(accessToken);
 						} else {
 							return null;
 						}

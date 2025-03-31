@@ -11,6 +11,7 @@ import javax.inject.Singleton;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.DisabledAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authc.credential.PasswordMatcher;
@@ -145,8 +146,10 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 				var userName = normalizeUserName((String) token.getPrincipal());
 				user = userManager.findByName(userName);
 				if (user != null) {
-					if (user.isDisabled() || user.isServiceAccount())
-						throw new UnknownAccountException("Invalid credentials");
+					if (user.isDisabled())
+						throw new DisabledAccountException("Account is disabled");
+					else if (user.isServiceAccount())
+						throw new DisabledAccountException("Service account not allowed to login");
 					if (user.getPassword() == null) {
 						var authenticator = settingManager.getAuthenticator();
 						if (authenticator != null) {
