@@ -46,6 +46,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
@@ -449,7 +451,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				List<Revision> revisions = new ArrayList<>();
 				revisions.add(new Revision(COMMIT, request.getBaseCommitHash(), true));
 				revisions.add(new Revision(COMMIT, request.getLatestUpdate().getHeadCommitHash(), false));
-				return new CommitQuery(List.of(new RevisionCriteria(revisions)));
+				return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
 			}
 
 			@Override

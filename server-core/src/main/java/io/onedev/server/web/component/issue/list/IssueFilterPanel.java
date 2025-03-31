@@ -24,6 +24,8 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -293,7 +295,7 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 		
 					@Override
 					protected List<String> load() {
-						return List.of(String.valueOf(true), String.valueOf(false));
+						return Lists.newArrayList(String.valueOf(true), String.valueOf(false));
 					}
 		
 				}, false);

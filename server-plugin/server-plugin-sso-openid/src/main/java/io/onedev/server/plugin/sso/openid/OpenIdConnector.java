@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -234,7 +235,7 @@ public class OpenIdConnector extends SsoConnector {
 			if (getGroupsClaim() != null) {
 				var groupsArray = claims.getStringArrayClaim(getGroupsClaim());
 				if (groupsArray != null)
-					groups = List.of(groupsArray);
+					groups = Lists.newArrayList(groupsArray);
 				else 
 					groups = null;
 			} else {

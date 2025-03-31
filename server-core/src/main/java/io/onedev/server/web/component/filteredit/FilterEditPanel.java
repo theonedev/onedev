@@ -11,6 +11,8 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.Pair;
@@ -80,7 +82,7 @@ public abstract class FilterEditPanel<T extends AbstractEntity> extends GenericP
 		if (rootCriteria == null) {
 			return new ArrayList<>();
 		} else if (isCriteriaMatching(rootCriteria, criteriaClass, predicate)) {	
-			return (List<C>) List.of(rootCriteria);
+			return (List<C>) Lists.newArrayList(rootCriteria);
 		} else if (rootCriteria instanceof AndCriteria) {
 			var firstMatchingMember = getFirstMatchingMember((AndCriteria<T>) rootCriteria, criteriaClass, predicate);
 			if (firstMatchingMember != null) {
@@ -88,7 +90,7 @@ public abstract class FilterEditPanel<T extends AbstractEntity> extends GenericP
 				if (matchingCriteria instanceof OrCriteria) 
 					return getFlattenedMembers((OrCriteria<T>) matchingCriteria);
 				else
-					return (List<C>) List.of(matchingCriteria);
+					return (List<C>) Lists.newArrayList(matchingCriteria);
 			} else {
 				return new ArrayList<>();
 			}

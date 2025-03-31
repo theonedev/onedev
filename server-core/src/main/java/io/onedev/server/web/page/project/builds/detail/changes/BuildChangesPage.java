@@ -13,6 +13,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
@@ -79,7 +81,7 @@ public class BuildChangesPage extends BuildDetailPage {
 				if (baseCommitHash != null)
 					revisions.add(new Revision(COMMIT, baseCommitHash, true));
 				revisions.add(new Revision(COMMIT, getBuild().getCommitHash(), false));
-				return new CommitQuery(List.of(new RevisionCriteria(revisions)));
+				return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
 			}
 
 			@Override

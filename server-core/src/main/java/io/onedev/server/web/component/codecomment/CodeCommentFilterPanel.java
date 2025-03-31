@@ -16,6 +16,8 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.CodeComment;
@@ -77,7 +79,7 @@ class CodeCommentFilterPanel extends FilterEditPanel<CodeComment> {
 
 			@Override
 			protected List<String> load() {
-				return List.of("Unresolved", "Resolved");
+				return Lists.newArrayList("Unresolved", "Resolved");
 			}
 		}, false);
 		statusChoice.add(new AjaxFormComponentUpdatingBehavior("change") {

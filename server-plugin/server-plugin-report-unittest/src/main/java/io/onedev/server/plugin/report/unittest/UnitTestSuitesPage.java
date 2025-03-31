@@ -45,7 +45,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparingInt;
-import static java.util.List.of;
 import static java.util.stream.Collectors.toSet;
 
 public class UnitTestSuitesPage extends UnitTestReportPage {
@@ -93,7 +92,7 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 			state.actualStatuses = new HashSet<>();
 			var report = getReport();
 			if (report != null && namePatterns != null) {
-				var seenStatuses = report.getTestSuites(namePatterns.orNull(), of(Status.values()))
+				var seenStatuses = report.getTestSuites(namePatterns.orNull(), Lists.newArrayList(Status.values()))
 						.stream().map(TestSuite::getStatus).collect(toSet());
 				for (var status: Status.values()) {
 					if (seenStatuses.contains(status))

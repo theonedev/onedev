@@ -12,6 +12,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.StringUtils;
@@ -53,7 +54,7 @@ public class FuzzyCriteria extends Criteria<Project> {
 
 	@Override
 	public List<Order> getPreferOrders(CriteriaBuilder builder, From<Project, Project> from) {
-		return List.of(builder.asc(from.get(Project.PROP_PATH_LEN)));
+		return Lists.newArrayList(builder.asc(from.get(Project.PROP_PATH_LEN)));
 	}
 
 	@Override

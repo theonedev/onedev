@@ -14,6 +14,8 @@ import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.model.Agent;
@@ -78,7 +80,7 @@ class AgentFilterPanel extends FilterEditPanel<Agent> {
 
 			@Override
 			protected List<String> load() {
-				return List.of("Online", "Offline");
+				return Lists.newArrayList("Online", "Offline");
 			}
 		}, false);
 		statusChoice.add(new AjaxFormComponentUpdatingBehavior("change") {

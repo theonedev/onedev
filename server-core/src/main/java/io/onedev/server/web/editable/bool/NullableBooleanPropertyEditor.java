@@ -9,6 +9,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -36,7 +38,7 @@ public class NullableBooleanPropertyEditor extends PropertyEditor<Boolean> {
 
 			@Override
 			protected List<String> load() {
-				return List.of(TextUtils.getDisplayValue(true), TextUtils.getDisplayValue(false));
+				return Lists.newArrayList(TextUtils.getDisplayValue(true), TextUtils.getDisplayValue(false));
 			}
 
 		}, false) {

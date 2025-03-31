@@ -2,7 +2,6 @@ package io.onedev.server.web.editable.userchoice;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -17,6 +16,7 @@ import org.apache.wicket.util.convert.ConversionException;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.UserChoice;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.ComponentContext;
@@ -26,7 +26,6 @@ import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.user.choice.UserSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.annotation.UserChoice;
 
 public class UserSingleChoiceEditor extends PropertyEditor<String> {
 

@@ -32,6 +32,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.codequality.CodeProblem;
@@ -680,7 +682,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 							&& !mergeBase.equals(leftCommitId)) {
 						revisions.add(new Revision(COMMIT, leftCommitId.name(), false));
 					} 
-					return new CommitQuery(List.of(new RevisionCriteria(revisions)));
+					return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
 				}
 
 				@Override

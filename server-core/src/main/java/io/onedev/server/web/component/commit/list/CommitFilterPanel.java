@@ -14,6 +14,8 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.GitUtils;
@@ -98,7 +100,7 @@ abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 					}
 				}
 				if (!found && object != null) {
-					query.getCriterias().add(new RevisionCriteria(List.of(new Revision(Revision.Type.BUILD, object.getReference().toString(getProject()), false))));
+					query.getCriterias().add(new RevisionCriteria(Lists.newArrayList(new Revision(Revision.Type.BUILD, object.getReference().toString(getProject()), false))));
 				}
 				getModel().setObject(query);
 			}
@@ -156,7 +158,7 @@ abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 					var criteria = criterias.get(i);
 					if (criteria instanceof PathCriteria) {
 						if (object != null) 
-							criterias.set(i, new PathCriteria(List.of(object)));
+							criterias.set(i, new PathCriteria(Lists.newArrayList(object)));
 						else
 							criterias.remove(i);
 						found = true;
@@ -164,7 +166,7 @@ abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 					}
 				}
 				if (!found && object != null) {
-					query.getCriterias().add(new PathCriteria(List.of(object)));
+					query.getCriterias().add(new PathCriteria(Lists.newArrayList(object)));
 				}
 				getModel().setObject(query);			
 			}
@@ -243,7 +245,7 @@ abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 					}
 				}
 				if (!found && object != null) {
-					query.getCriterias().add(new RevisionCriteria(List.of(new Revision(type, object, false))));
+					query.getCriterias().add(new RevisionCriteria(Lists.newArrayList(new Revision(type, object, false))));
 				}
 				getModel().setObject(query);
 			}
@@ -377,14 +379,14 @@ abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 					var criteria = criterias.get(i);
 					if (isBefore && (criteria instanceof BeforeCriteria)) {
 						if (object != null) 
-							criterias.set(i, new BeforeCriteria(List.of(DateUtils.formatDate(object))));
+							criterias.set(i, new BeforeCriteria(Lists.newArrayList(DateUtils.formatDate(object))));
 						else
 							criterias.remove(i);
 						found = true;
 						break;
 					} else if (!isBefore && (criteria instanceof AfterCriteria)) {
 						if (object != null) 
-							criterias.set(i, new AfterCriteria(List.of(DateUtils.formatDate(object))));
+							criterias.set(i, new AfterCriteria(Lists.newArrayList(DateUtils.formatDate(object))));
 						else
 							criterias.remove(i);
 						found = true;
@@ -393,9 +395,9 @@ abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 				}
 				if (!found && object != null) {
 					if (isBefore)
-						query.getCriterias().add(new BeforeCriteria(List.of(DateUtils.formatDate(object))));
+						query.getCriterias().add(new BeforeCriteria(Lists.newArrayList(DateUtils.formatDate(object))));
 					else
-						query.getCriterias().add(new AfterCriteria(List.of(DateUtils.formatDate(object))));
+						query.getCriterias().add(new AfterCriteria(Lists.newArrayList(DateUtils.formatDate(object))));
 				}
 				getModel().setObject(query);
 			}

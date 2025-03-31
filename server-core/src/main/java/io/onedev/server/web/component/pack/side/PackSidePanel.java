@@ -22,6 +22,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PackLabelManager;
 import io.onedev.server.entitymanager.PackManager;
@@ -151,10 +153,10 @@ public abstract class PackSidePanel extends Panel {
 				add(new SelectPackToActChoice("changesSince", choiceProvider) {
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Pack selection) {
-						var revisionCriteria = new RevisionCriteria(List.of(
+						var revisionCriteria = new RevisionCriteria(Lists.newArrayList(
 								new Revision(COMMIT, selection.getBuild().getCommitHash(), true),
 								new Revision(COMMIT, getPack().getBuild().getCommitHash(), false)));
-						var commitQuery = new CommitQuery(List.of(revisionCriteria));
+						var commitQuery = new CommitQuery(Lists.newArrayList(revisionCriteria));
 						setResponsePage(ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(getPack().getBuild().getProject(), commitQuery.toString(), null));
 					}
 

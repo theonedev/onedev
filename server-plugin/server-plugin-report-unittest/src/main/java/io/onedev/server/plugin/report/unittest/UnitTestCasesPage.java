@@ -1,7 +1,6 @@
 package io.onedev.server.plugin.report.unittest;
 
 import static java.util.Comparator.comparingInt;
-import static java.util.List.of;
 import static java.util.stream.Collectors.toSet;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
@@ -109,7 +108,7 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 			state.actualStatuses = new HashSet<>();
 			var report = getReport();
 			if (report != null && namePatterns != null) {
-				var seenStatuses = report.getTestCases(testSuitePatterns.orNull(), namePatterns.orNull(), of(Status.values()))
+				var seenStatuses = report.getTestCases(testSuitePatterns.orNull(), namePatterns.orNull(), Lists.newArrayList(Status.values()))
 						.stream().map(UnitTestReport.TestCase::getStatus).collect(toSet());
 				for (var status: Status.values()) {
 					if (seenStatuses.contains(status))
