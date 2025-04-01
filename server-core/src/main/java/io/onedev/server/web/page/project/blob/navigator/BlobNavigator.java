@@ -245,10 +245,10 @@ public class BlobNavigator extends Panel {
 										var label = currentBlobIdent.path;
 										var parentBlobIdent = blobIdent;
 										var branchItem = fragment.getParent().getParent().findParent(BranchItem.class);
-										if (branchItem != null) {
+										if (branchItem != null) 
 											parentBlobIdent = (BlobIdent) branchItem.getModelObject();
+										if (parentBlobIdent.path != null)
 											label = label.substring(parentBlobIdent.path.length() + 1);
-										}
 										return label;
 									}
 								}));
