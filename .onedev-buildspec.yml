@@ -55,6 +55,7 @@ jobs:
         mv docker/onedev-$buildVersion docker/app
         cp -r agent docker/
 
+        cd $projectDir
         echo "$buildVersion" | cut -d. -f1 > buildVersion.major
         echo "$buildVersion" | cut -d. -f1,2 > buildVersion.major.minor
     useTTY: true
