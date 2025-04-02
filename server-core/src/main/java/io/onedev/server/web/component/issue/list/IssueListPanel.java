@@ -4,8 +4,11 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.search.entity.issue.IssueQuery.merge;
 import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -19,7 +22,10 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tika.mime.MimeTypes;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -46,6 +52,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
@@ -59,6 +66,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.AbstractResource;
+import org.dhatim.fastexcel.Workbook;
 
 import com.google.common.collect.Sets;
 
@@ -74,6 +83,7 @@ import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.imports.IssueImporterContribution;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -602,6 +612,169 @@ public abstract class IssueListPanel extends Panel {
 			
 		});
 		
+		add(new ResourceLink<Void>("exportXlsx", new AbstractResource() {
+
+			@Override
+			protected ResourceResponse newResourceResponse(Attributes attributes) {
+				ResourceResponse response = new ResourceResponse();
+				response.setContentType(MimeTypes.OCTET_STREAM);
+				response.disableCaching();
+				response.setFileName("issues.xlsx");
+				response.setWriteCallback(new WriteCallback() {
+		
+					@Override
+					public void writeData(Attributes attributes) {
+						var os = attributes.getResponse().getOutputStream();
+						var version = StringUtils.substringBeforeLast(OneDev.getInstance().getVersion(), ".");
+						if (version.startsWith("v"))
+							version = version.substring(1);
+							
+						try (var workBook = new Workbook(os, "OneDev", version)) {
+							var worksheet = workBook.newWorksheet("Issues");
+							
+							var colIndex = 0;
+							worksheet.value(0, colIndex++, "Number");
+							worksheet.value(0, colIndex++, "Title");
+							
+							for (String field: getListFields()) {
+								worksheet.value(0, colIndex++, field);
+							}
+							
+							var withTimeTracking = false;
+							var issues = new ArrayList<Issue>();
+							for (@SuppressWarnings("unchecked") var it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); ) {
+								var issue = it.next();
+								if (issue.getProject().isTimeTracking() && issue.getTotalEstimatedTime() != 0 && WicketUtils.isSubscriptionActive()) {
+									withTimeTracking = true;
+								}
+								issues.add(issue);
+							}
+							if (withTimeTracking) {
+								worksheet.value(0, colIndex++, "Estimated Time");
+								worksheet.value(0, colIndex++, "Spent Time");
+							}
+				
+							var rowIndex = 1;
+							var timeTrackingSetting = getGlobalIssueSetting().getTimeTrackingSetting();
+							for (var issue: issues) {
+								colIndex = 0;
+								
+								worksheet.value(rowIndex, colIndex++, issue.getReference().toString(getProject()));
+								worksheet.value(rowIndex, colIndex++, issue.getTitle());
+								
+								for (String field: getListFields()) {
+									if (field.equals(Issue.NAME_STATE)) {
+										worksheet.value(rowIndex, colIndex, issue.getState());
+									} else if (field.equals(IssueSchedule.NAME_ITERATION)) {
+										var iterations = issue.getIterations().stream().map(Iteration::getName).collect(joining(", "));
+										worksheet.value(rowIndex, colIndex, iterations);
+									} else {
+										var input = issue.getFieldInputs().get(field);
+										if (input != null) 
+											worksheet.value(rowIndex, colIndex, input.getValues().stream().collect(joining(", ")));
+									}
+									colIndex++;
+								}
+								if (withTimeTracking) {
+									if (issue.getProject().isTimeTracking() && issue.getTotalEstimatedTime() != 0) {
+										worksheet.value(rowIndex, colIndex++, timeTrackingSetting.formatWorkingPeriod(issue.getTotalEstimatedTime()));
+										worksheet.value(rowIndex, colIndex++, timeTrackingSetting.formatWorkingPeriod(issue.getTotalSpentTime()));
+									} else {
+										colIndex++;
+										colIndex++;
+									}
+								} 
+								rowIndex++;
+							}
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}						
+					}
+				});
+		
+				return response;
+			}
+
+		}));
+		add(new ResourceLink<Void>("exportCsv", new AbstractResource() {
+
+			@Override
+			protected ResourceResponse newResourceResponse(Attributes attributes) {
+				ResourceResponse response = new ResourceResponse();
+				response.setContentType(MimeTypes.OCTET_STREAM);
+				response.disableCaching();
+				response.setFileName("issues.csv");
+				response.setWriteCallback(new WriteCallback() {
+		
+					@Override
+					public void writeData(Attributes attributes) {
+						var os = attributes.getResponse().getOutputStream();
+						try (var printer = new CSVPrinter(new OutputStreamWriter(os), CSVFormat.DEFAULT)) {
+							var headers = new ArrayList<String>();
+							headers.add("Number");
+							headers.add("Title");
+							headers.addAll(getListFields());
+							
+							var withTimeTracking = false;
+							var issues = new ArrayList<Issue>();
+							for (@SuppressWarnings("unchecked") var it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); ) {
+								var issue = it.next();
+								if (issue.getProject().isTimeTracking() && issue.getTotalEstimatedTime() != 0 && WicketUtils.isSubscriptionActive()) {
+									withTimeTracking = true;
+								}
+								issues.add(issue);
+							}
+							if (withTimeTracking) {
+								headers.add("Estimated Time");
+								headers.add("Spent Time");
+							}
+							
+							printer.printRecord(headers);
+							
+							var timeTrackingSetting = getGlobalIssueSetting().getTimeTrackingSetting();
+							for (var issue: issues) {
+								var row = new ArrayList<String>();
+								
+								row.add(issue.getReference().toString(getProject()));
+								row.add(issue.getTitle());
+								
+								for (String field: getListFields()) {
+									if (field.equals(Issue.NAME_STATE)) {
+										row.add(issue.getState());
+									} else if (field.equals(IssueSchedule.NAME_ITERATION)) {
+										row.add(issue.getIterations().stream().map(Iteration::getName).collect(joining(", ")));
+									} else {
+										var input = issue.getFieldInputs().get(field);
+										if (input != null) 
+											row.add(input.getValues().stream().collect(joining(", ")));
+										else
+											row.add("");
+									}
+								}
+								
+								if (withTimeTracking) {
+									if (issue.getProject().isTimeTracking() && issue.getTotalEstimatedTime() != 0) {
+										row.add(timeTrackingSetting.formatWorkingPeriod(issue.getTotalEstimatedTime()));
+										row.add(timeTrackingSetting.formatWorkingPeriod(issue.getTotalSpentTime()));
+									} else {
+										row.add("");
+										row.add("");
+									}
+								} 
+								
+								printer.printRecord(row);
+							}					
+							printer.flush();
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}						
+					}
+
+				});
+				return response;
+			}
+
+		}));
 		add(new MenuLink("operations") {
 
 			private String getQueryAfterCopyOrMove() {
@@ -963,62 +1136,6 @@ public abstract class IssueListPanel extends Panel {
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
 										tag.put("title", "Please select issues to delete");
-									}
-								}
-
-							};
-						}
-
-					});
-				}
-				if (!SecurityUtils.getAuthUser().isServiceAccount()) {
-					menuItems.add(new MenuItem() {
-
-						@Override
-						public String getLabel() {
-							return "Watch/Unwatch Selected Issues";
-						}
-
-						@Override
-						public WebMarkupContainer newLink(String id) {
-							return new DropdownLink(id) {
-
-								@Override
-								protected Component newContent(String id, FloatingPanel dropdown2) {
-									return new WatchStatusPanel(id) {
-
-										@Override
-										protected WatchStatus getWatchStatus() {
-											return null;
-										}
-
-										@Override
-										protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
-											dropdown.close();
-											dropdown2.close();
-
-											var issues = selectionColumn.getSelections().stream()
-													.map(it->it.getObject()).collect(toList());
-											getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), issues, watchStatus);
-											selectionColumn.getSelections().clear();
-											Session.get().success("Watch status changed");
-										}
-									};
-								}
-
-								@Override
-								protected void onConfigure() {
-									super.onConfigure();
-									setEnabled(!selectionColumn.getSelections().isEmpty());
-								}
-
-								@Override
-								protected void onComponentTag(ComponentTag tag) {
-									super.onComponentTag(tag);
-									configure();
-									if (!isEnabled()) {
-										tag.put("disabled", "disabled");
-										tag.put("title", "Please select issues to watch/unwatch");
 									}
 								}
 
@@ -1485,6 +1602,103 @@ public abstract class IssueListPanel extends Panel {
 					}
 
 				});
+
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Export All Queried Issues To...";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new MenuLink(id) {
+
+							@Override
+							protected List<MenuItem> getMenuItems(FloatingPanel dropdown2) {
+								var menuItems = new ArrayList<MenuItem>();
+								menuItems.add(new MenuItem() {
+				
+									@Override
+									public String getLabel() {
+										return "XLSX";
+									}
+				
+									@Override
+									public WebMarkupContainer newLink(String id) {
+										return new AjaxLink<Void>(id) {
+				
+											@Override
+											protected void onConfigure() {
+												super.onConfigure();
+												setEnabled(issuesTable.getItemCount() != 0);
+											}
+				
+											@Override
+											protected void onComponentTag(ComponentTag tag) {
+												super.onComponentTag(tag);
+												configure();
+												if (!isEnabled()) {
+													tag.put("disabled", "disabled");
+													tag.put("title", "No issues to export");
+												}
+											}
+				
+											@Override
+											public void onClick(AjaxRequestTarget target) {
+												dropdown.close();
+												dropdown2.close();
+												target.appendJavaScript("window.location.href = $('#" + IssueListPanel.this.getMarkupId() + " .export-xlsx').attr('href');");
+											}
+				
+										};
+									}
+				
+								});
+								menuItems.add(new MenuItem() {
+				
+									@Override
+									public String getLabel() {
+										return "CSV";
+									}
+				
+									@Override
+									public WebMarkupContainer newLink(String id) {
+										return new AjaxLink<Void>(id) {
+				
+											@Override
+											protected void onConfigure() {
+												super.onConfigure();
+												setEnabled(issuesTable.getItemCount() != 0);
+											}
+				
+											@Override
+											protected void onComponentTag(ComponentTag tag) {
+												super.onComponentTag(tag);
+												configure();
+												if (!isEnabled()) {
+													tag.put("disabled", "disabled");
+													tag.put("title", "No issues to export");
+												}
+											}
+				
+											@Override
+											public void onClick(AjaxRequestTarget target) {
+												dropdown.close();
+												dropdown2.close();
+												target.appendJavaScript("window.location.href = $('#" + IssueListPanel.this.getMarkupId() + " .export-csv').attr('href');");
+											}
+				
+										};
+									}
+				
+								});											
+								return menuItems;
+							}
+
+						};
+					}
+				});	
 				
 				return menuItems;
 			}
@@ -1548,6 +1762,7 @@ public abstract class IssueListPanel extends Panel {
 				else
 					return "found 1 issue";
 			} 
+
 		}) {
 			@Override
 			protected void onConfigure() {
@@ -1948,7 +2163,7 @@ public abstract class IssueListPanel extends Panel {
 	
 	protected void onBatchDeleted(AjaxRequestTarget target) {
 	}
-	
+		
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
