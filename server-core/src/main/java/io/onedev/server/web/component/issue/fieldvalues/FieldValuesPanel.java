@@ -1,13 +1,52 @@
 package io.onedev.server.web.component.issue.fieldvalues;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
+import org.unbescape.html.HtmlEscape;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.IterationManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.*;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -16,6 +55,7 @@ import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ColorUtils;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
@@ -37,31 +77,6 @@ import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.ProjectAware;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.ObjectId;
-import org.unbescape.html.HtmlEscape;
-
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public abstract class FieldValuesPanel extends Panel implements EditContext, ProjectAware {
 
@@ -238,7 +253,11 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 			for (String value: getField().getValues()) {
 				WebMarkupContainer valueContainer = new WebMarkupContainer(valuesView.newChildId());
 				valuesView.add(valueContainer);
-				if (getField().getType().equals(FieldSpec.USER)) {
+				if (getField().getType().equals(FieldSpec.DATE)) {					
+					valueContainer.add(new Label("value", DateUtils.formatDate(new Date(Long.parseLong(value)))));
+				} else if (getField().getType().equals(FieldSpec.DATE_TIME)) {
+					valueContainer.add(new Label("value", DateUtils.formatDateTime(new Date(Long.parseLong(value)))));
+				} else if (getField().getType().equals(FieldSpec.USER)) {
 					User user = OneDev.getInstance(UserManager.class).findByName(value);
 					if (user != null)
 						valueContainer.add(new UserIdentPanel("value", user, userFieldDisplayMode));

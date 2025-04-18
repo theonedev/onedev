@@ -7,6 +7,7 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.File;
 import java.io.Serializable;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -65,10 +67,12 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CryptoUtils;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.ForceOrdinaryStyleBehavior;
+import io.onedev.server.web.behavior.ZoneIdBehavior;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
@@ -92,13 +96,15 @@ public abstract class BasePage extends WebPage {
 	private FeedbackPanel sessionFeedback;
 
 	private RepeatingView rootComponents;
+
+	private AbstractDefaultAjaxBehavior zoneIdDetectBehavior;
 	
 	public BasePage(PageParameters params) {
 		super(params);
 		checkReady();
 
-		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-		Cookie cookie = request.getCookie(COOKIE_DARK_MODE);
+		var request = (WebRequest) RequestCycle.get().getRequest();
+		var cookie = request.getCookie(COOKIE_DARK_MODE);
 		if (cookie != null)
 			darkMode = cookie.getValue().equals("yes");
 		else
@@ -295,6 +301,25 @@ public abstract class BasePage extends WebPage {
 
 		});
 
+		add(zoneIdDetectBehavior = new AbstractDefaultAjaxBehavior() {
+
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				var zoneId = ZoneId.of(RequestCycle.get().getRequest().getRequestParameters().getParameterValue("timezone").toString());
+				WebSession.get().setZoneId(zoneId);
+				if (!zoneId.equals(ZoneId.systemDefault())) {
+					visitChildren(Component.class, (IVisitor<Component, Void>) (object, visit) -> {
+						if (!object.getBehaviors(ZoneIdBehavior.class).isEmpty()) {
+							target.add(object);
+							visit.dontGoDeeper();
+						}
+
+					});
+			
+				}
+			}
+
+		});
 	}
 
 	public void notifyObservablesChange(IPartialPageRequestHandler handler, Collection<String> observables) {
@@ -339,6 +364,18 @@ public abstract class BasePage extends WebPage {
 
 	public RepeatingView getRootComponents() {
 		return rootComponents;
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+
+		if (WebSession.get().getZoneId() == null) {
+			var script = String.format(
+				"var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone; %s", 
+				zoneIdDetectBehavior.getCallbackFunctionBody(explicit("timezone")));
+			response.render(OnDomReadyHeaderItem.forScript(script));
+		}
 	}
 
 	@Override

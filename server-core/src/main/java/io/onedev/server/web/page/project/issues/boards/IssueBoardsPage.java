@@ -12,6 +12,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
@@ -444,8 +445,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 					} else {
 						var iteration = getIterationSelection().getIteration();
 						add(new Label("label", iteration.getName()));
-						if (iteration.getDueDate() != null
-								&& iteration.getDueDate().before(new Date())
+						if (iteration.getDueDay() != null
+								&& iteration.getDueDay() < DateUtils.toLocalDate(new Date()).toEpochDay()
 								&& !iteration.isClosed()) {
 							add(AttributeAppender.append("class", "btn-danger"));
 							add(AttributeAppender.replace("title", "Iteration is due"));
@@ -520,7 +521,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 								protected void onConfigure() {
 									super.onConfigure();
 									var iteration = item.getModelObject();
-									setVisible(iteration.getStartDate() != null && iteration.getDueDate() != null);
+									setVisible(iteration.getStartDay() != null && iteration.getDueDay() != null);
 								}
 							});
 							

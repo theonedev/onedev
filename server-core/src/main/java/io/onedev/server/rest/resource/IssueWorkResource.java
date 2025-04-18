@@ -1,21 +1,27 @@
 package io.onedev.server.rest.resource;
 
+import static io.onedev.server.security.SecurityUtils.canModifyOrDelete;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.shiro.authz.UnauthorizedException;
+
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.entitymanager.IssueWorkManager;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import static io.onedev.server.security.SecurityUtils.*;
 
 @Api(order=2250)
 @Path("/issue-works")
@@ -58,8 +64,6 @@ public class IssueWorkResource {
 				|| !SecurityUtils.isAdministrator() && !work.getUser().equals(SecurityUtils.getAuthUser())) {
 			throw new UnauthorizedException();
 		}
-
-		work.setDay(DateUtils.toLocalDate(work.getDate()).toEpochDay());		
 		workManager.createOrUpdate(work);
 		
 		return work.getId();
@@ -71,8 +75,7 @@ public class IssueWorkResource {
 	public Response update(@PathParam("workId") Long workId, @NotNull IssueWork work) {
 		if (!canModifyOrDelete(work)) 
 			throw new UnauthorizedException();
-
-		work.setDay(DateUtils.toLocalDate(work.getDate()).toEpochDay());
+		
 		workManager.createOrUpdate(work);
 
 		return Response.ok().build();

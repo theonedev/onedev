@@ -1,22 +1,28 @@
 package io.onedev.server.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.onedev.server.rest.annotation.Immutable;
+import static io.onedev.server.model.IssueWork.PROP_DATE;
+
+import java.util.Date;
+
+import javax.annotation.Nullable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.annotation.Nullable;
-import javax.persistence.*;
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import static io.onedev.server.model.IssueWork.PROP_DATE;
-import static io.onedev.server.model.IssueWork.PROP_DAY;
+import io.onedev.server.rest.annotation.Immutable;
 
 @Entity
-@Table(indexes={@Index(columnList="o_issue_id"), @Index(columnList="o_user_id"), 
-		@Index(columnList=PROP_DATE), @Index(columnList = PROP_DAY)})
+@Table(indexes={@Index(columnList="o_issue_id"), @Index(columnList="o_user_id"), @Index(columnList=PROP_DATE)})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class IssueWork extends AbstractEntity {
 
@@ -29,9 +35,7 @@ public class IssueWork extends AbstractEntity {
 	public static final String PROP_ISSUE = "issue";
 	
 	public static final String PROP_DATE = "date";
-	
-	public static final String PROP_DAY = "day";
-	
+		
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	@Immutable
@@ -45,10 +49,7 @@ public class IssueWork extends AbstractEntity {
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	@Column(nullable = false)
 	private Date date = new Date();
-	
-	@JsonIgnore
-	private long day;
-	
+		
 	private int minutes;
 
 	@Column(length=MAX_CONTENT_LEN)
@@ -76,14 +77,6 @@ public class IssueWork extends AbstractEntity {
 
 	public void setDate(Date date) {
 		this.date = date;
-	}
-
-	public long getDay() {
-		return day;
-	}
-
-	public void setDay(long day) {
-		this.day = day;
 	}
 
 	public int getMinutes() {

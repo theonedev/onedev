@@ -45,6 +45,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +70,7 @@ import io.onedev.server.search.commit.MessageCriteria;
 import io.onedev.server.search.commit.PathCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Constants;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.behavior.CommitQueryBehavior;
@@ -115,7 +117,7 @@ public abstract class CommitListPanel extends Panel {
 			List<RevCommit> separated = new ArrayList<>();
 			DateTime groupTime = null;
 			for (RevCommit commit: commits) {
-				DateTime commitTime = new DateTime(commit.getCommitterIdent().getWhen());
+				DateTime commitTime = new DateTime(commit.getCommitterIdent().getWhen()).withZone(DateTimeZone.forID(DateUtils.getZoneId().getId()));
 				if (groupTime == null || commitTime.getYear() != groupTime.getYear() 
 						|| commitTime.getDayOfYear() != groupTime.getDayOfYear()) {
 					groupTime = commitTime;
@@ -716,7 +718,7 @@ public abstract class CommitListPanel extends Panel {
 		} else {
 			item = new Fragment(itemId, "dateFrag", this);
 			DateTime dateTime = new DateTime(current.get(index+1).getCommitterIdent().getWhen());
-			item.add(new Label("date", Constants.DATE_FORMATTER.print(dateTime)));
+			item.add(new Label("date", Constants.DATE_FORMATTER.withZone(DateTimeZone.forID(DateUtils.getZoneId().getId())).print(dateTime)));
 			item.add(AttributeAppender.append("class", "date"));
 		}
 		item.setOutputMarkupId(true);

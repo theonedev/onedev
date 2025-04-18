@@ -1,5 +1,7 @@
 package io.onedev.server.xodus;
 
+import static io.onedev.server.util.DateUtils.toLocalDate;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,6 +9,7 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -87,7 +90,6 @@ import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ElementPumper;
 import io.onedev.server.util.NameAndEmail;
 import io.onedev.server.util.Pair;
@@ -537,7 +539,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 				@Override
 				public void process(LogCommit currentCommit) {
 					if (currentCommit.getCommitDate() != null && currentCommit.getParentHashes().size() <= 1) {
-						int day = (int) DateUtils.toLocalDate(currentCommit.getCommitDate()).toEpochDay();
+						int day = (int) toLocalDate(currentCommit.getCommitDate(), ZoneId.systemDefault()).toEpochDay();
 						updateContribution(overallContributions, day, currentCommit, filePatterns);
 
 						if (currentCommit.getAuthor() != null) {
@@ -784,7 +786,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 	private void updateLineStats(Transaction txn, LogCommit currentCommit, Map<Integer, Map<String, Integer>> lineStats,
 								 PatternSet filePatterns) {
-		int day = (int) DateUtils.toLocalDate(currentCommit.getCommitDate()).toEpochDay();
+		int day = (int) toLocalDate(currentCommit.getCommitDate(), ZoneId.systemDefault()).toEpochDay();
 
 		Map<String, Integer> lineStatsOnDay = lineStats.get(day);
 		if (lineStatsOnDay == null) {

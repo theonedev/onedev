@@ -5,10 +5,9 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspecmodel.inputspec.datetimeinput.DateTimeInput;
 import io.onedev.server.buildspecmodel.inputspec.datetimeinput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.server.util.Constants;
-import io.onedev.server.annotation.Editable;
 
 @Editable(order=600, name=FieldSpec.DATE_TIME)
 public class DateTimeField extends FieldSpec {
@@ -51,7 +50,7 @@ public class DateTimeField extends FieldSpec {
 	@Override
 	public long getOrdinal(String fieldValue) {
 		if (fieldValue != null) 
-			return Constants.DATETIME_FORMATTER.parseDateTime(fieldValue).toDate().getTime();
+			return Long.parseLong(fieldValue);
 		else
 			return super.getOrdinal(fieldValue);
 	}

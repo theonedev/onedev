@@ -1,62 +1,37 @@
 package io.onedev.server.entitymanager.impl;
 
-import com.google.common.collect.Lists;
+import static io.onedev.server.model.Stopwatch.PROP_ISSUE;
+import static io.onedev.server.model.Stopwatch.PROP_USER;
+
+import java.util.Date;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.hibernate.criterion.Restrictions;
+
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.mail.MailManager;
 import io.onedev.server.entitymanager.IssueWorkManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.StopwatchManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.Stopwatch;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.taskschedule.SchedulableTask;
-import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.DateUtils;
-import org.hibernate.criterion.Restrictions;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.ScheduleBuilder;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import static io.onedev.server.model.Stopwatch.PROP_ISSUE;
-import static io.onedev.server.model.Stopwatch.PROP_USER;
 
 @Singleton
-public class DefaultStopwatchManager extends BaseEntityManager<Stopwatch> implements StopwatchManager, SchedulableTask {
+public class DefaultStopwatchManager extends BaseEntityManager<Stopwatch> implements StopwatchManager {
 	
 	private final IssueWorkManager workManager;
 
-	private final TaskScheduler taskScheduler;
-	
-	private final MailManager mailManager;
-	
-	private final SettingManager settingManager;
-	
-	private String taskId;
-	
 	@Inject
-	public DefaultStopwatchManager(Dao dao, IssueWorkManager workManager, SettingManager settingManager,
-								   TaskScheduler taskScheduler, MailManager mailManager) {
+	public DefaultStopwatchManager(Dao dao, IssueWorkManager workManager) {
 		super(dao);
 		this.workManager = workManager;
-		this.taskScheduler = taskScheduler;
-		this.mailManager = mailManager;
-		this.settingManager = settingManager;
 	}
 
 	@Override
@@ -87,14 +62,12 @@ public class DefaultStopwatchManager extends BaseEntityManager<Stopwatch> implem
 	@Transactional
 	@Override
 	public void stopWork(Stopwatch stopwatch) {
-		stopWork(stopwatch, new Date());
-	}
-
-	private void stopWork(Stopwatch stopwatch, Date stopDate) {
 		int spentMinutes = (int) ((System.currentTimeMillis() - stopwatch.getDate().getTime()) / 60000);
 		if (spentMinutes > 0) {
-			var day = DateUtils.toLocalDate(stopwatch.getDate()).toEpochDay();
-			var works = workManager.query(stopwatch.getUser(), stopwatch.getIssue(), day);
+			var localDate = DateUtils.toLocalDate(stopwatch.getDate());
+			Date startOfDay = DateUtils.toDate(localDate.atStartOfDay());
+			Date endOfDay = DateUtils.toDate(localDate.atTime(23, 59, 59));
+			var works = workManager.query(stopwatch.getUser(), stopwatch.getIssue(), startOfDay, endOfDay);
 			works.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
 			IssueWork workWithoutNote = null;
 			for (var work: works) {
@@ -105,7 +78,6 @@ public class DefaultStopwatchManager extends BaseEntityManager<Stopwatch> implem
 			}
 			if (workWithoutNote == null) {
 				workWithoutNote = new IssueWork();
-				workWithoutNote.setDay(day);
 				workWithoutNote.setUser(stopwatch.getUser());
 				workWithoutNote.setIssue(stopwatch.getIssue());
 				workWithoutNote.setDate(new Date());
@@ -115,48 +87,5 @@ public class DefaultStopwatchManager extends BaseEntityManager<Stopwatch> implem
 		}
 		dao.remove(stopwatch);
 	}
-	
-	@Listen
-	public void on(SystemStarted event) {
-		taskId = taskScheduler.schedule(this);
-	}
-	
-	@Listen
-	public void on(SystemStopping event) {
-		if (taskId != null)
-			taskScheduler.unschedule(taskId);
-	}
-
-	@Transactional
-	@Override
-	public void execute() {
-		var day = DateUtils.toLocalDate(new Date()).toEpochDay();
-		for (var stopwatch: query(true)) {
-			var startDay = DateUtils.toLocalDate(stopwatch.getDate()).toEpochDay();
-			if (startDay < day) {
-				stopWork(stopwatch, DateUtils.toDate(LocalDate.ofEpochDay(startDay).atTime(23, 59)));
-
-				Map<String, Object> bindings = new HashMap<>();
-				bindings.put("stopwatch", stopwatch);
-
-				var template = settingManager.getEmailTemplates().getStopwatchOverdue();
-				var htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
-				var textBody = EmailTemplates.evalTemplate(false, template, bindings);
-
-				var emailAddress = stopwatch.getUser().getPrimaryEmailAddress();
-				if (emailAddress != null && emailAddress.isVerified()) {
-					mailManager.sendMail(Arrays.asList(emailAddress.getValue()),
-							Lists.newArrayList(), Lists.newArrayList(),
-							"[Stopwatch Overdue] Your Issue Stopwatch is Overdue",
-							htmlBody, textBody, null, null, null);
-				}
-			}
-		}
-	}
-
-	@Override
-	public ScheduleBuilder<?> getScheduleBuilder() {
-		return CronScheduleBuilder.cronSchedule("0 0 * * * ?");
-	}
-	
+		
 }

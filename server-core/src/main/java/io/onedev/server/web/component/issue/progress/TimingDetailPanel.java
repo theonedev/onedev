@@ -1,6 +1,17 @@
 package io.onedev.server.web.component.issue.progress;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.Page;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.Panel;
+
 import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueWorkManager;
@@ -11,19 +22,9 @@ import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.Stopwatch;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.timetracking.TimeTrackingManager;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.editbean.IssueWorkBean;
-import org.apache.wicket.Component;
-import org.apache.wicket.Page;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
 
 abstract class TimingDetailPanel extends Panel {
 
@@ -128,7 +129,6 @@ abstract class TimingDetailPanel extends Panel {
 						work.setUser(SecurityUtils.getAuthUser());
 						work.setMinutes(bean.getSpentTime());
 						work.setDate(bean.getStartAt());
-						work.setDay(DateUtils.toLocalDate(bean.getStartAt()).toEpochDay());
 						work.setNote(bean.getNote());
 						OneDev.getInstance(IssueWorkManager.class).createOrUpdate(work);
 						notifyObservablesChange(target);

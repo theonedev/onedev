@@ -1,6 +1,10 @@
 package io.onedev.server.web.component.iteration;
 
-import java.util.Date;
+import static io.onedev.server.util.DateUtils.formatDate;
+import static io.onedev.server.util.DateUtils.toDate;
+import static java.time.LocalDate.ofEpochDay;
+
+import java.time.LocalDate;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
@@ -8,7 +12,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.model.Iteration;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.svg.SpriteImage;
 
 public class IterationDateLabel extends Label {
@@ -22,15 +25,15 @@ public class IterationDateLabel extends Label {
 			protected String load() {
 				String arrow = "<svg class='icon'><use xlink:href='" + SpriteImage.getVersionedHref("arrow3") + "'/></svg>";
 				Iteration iteration = iterationIModel.getObject();
-				if (iteration.getStartDate() != null && iteration.getDueDate() != null) {
+				if (iteration.getStartDay() != null && iteration.getDueDay() != null) {
 					return ""
-							+ "<span title='Start date'>" + DateUtils.formatDate(iteration.getStartDate()) + "</span>" 
+							+ "<span title='Start date'>" + formatDate(toDate(ofEpochDay(iteration.getStartDay()).atStartOfDay())) + "</span>" 
 							+ " " + arrow + " "  
-							+ "<span title='Due date'>" + DateUtils.formatDate(iteration.getDueDate()) + "</span>";
-				} else if (iteration.getStartDate() != null) {
-					return "<span title='Start date'>" + DateUtils.formatDate(iteration.getStartDate()) + "</span> " + arrow;
-				} else if (iteration.getDueDate() != null) {
-					return arrow + " <span title='Due date'>" + DateUtils.formatDate(iteration.getDueDate()) + "</span>";
+							+ "<span title='Due date'>" + formatDate(toDate(ofEpochDay(iteration.getDueDay()).atStartOfDay())) + "</span>";
+				} else if (iteration.getStartDay() != null) {
+					return "<span title='Start date'>" + formatDate(toDate(ofEpochDay(iteration.getStartDay()).atStartOfDay())) + "</span> " + arrow;
+				} else if (iteration.getDueDay() != null) {
+					return arrow + " <span title='Due date'>" + formatDate(toDate(ofEpochDay(iteration.getDueDay()).atStartOfDay())) + "</span>";
 				} else {
 					return "<i> No start/due date</i>";
 				}
@@ -56,21 +59,21 @@ public class IterationDateLabel extends Label {
 			protected String load() {
 				Iteration iteration = iterationIModel.getObject();
 				if (!iteration.isClosed()) {
-					Date now = new Date();
-					if (iteration.getStartDate() != null && iteration.getDueDate() != null) {
-						if (now.before(iteration.getStartDate()))
+					var today = LocalDate.now().toEpochDay();
+					if (iteration.getStartDay() != null && iteration.getDueDay() != null) {
+						if (today < iteration.getStartDay())
 							return "";
-						else if (now.after(iteration.getStartDate()) && now.before(iteration.getDueDate()))
+						else if (today >= iteration.getStartDay() && today < iteration.getDueDay())
 							return "text-warning";
 						else
 							return "text-danger";
-					} else if (iteration.getStartDate() != null) {
-						if (now.before(iteration.getStartDate()))
+					} else if (iteration.getStartDay() != null) {
+						if (today < iteration.getStartDay())
 							return "";
 						else 
 							return "text-warning";
-					} else if (iteration.getDueDate() != null) {
-						if (now.before(iteration.getDueDate()))
+					} else if (iteration.getDueDay() != null) {
+						if (today < iteration.getDueDay())
 							return "";
 						else 
 							return "text-danger";

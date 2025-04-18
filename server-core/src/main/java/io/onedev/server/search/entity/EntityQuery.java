@@ -146,7 +146,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			throw new ExplicitException("Unrecognized date: " + value);
 		return dateValue;
 	}
-	
+
 	public static ProjectScopedCommit getCommitId(@Nullable Project project, String value) {
 		if (project != null && !value.contains(":"))
 			value = project.getPath() + ":" + value;

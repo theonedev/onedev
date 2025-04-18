@@ -1,5 +1,18 @@
 package io.onedev.server.web.util.editbean;
 
+import static io.onedev.server.util.DateUtils.toDate;
+import static java.lang.Integer.parseInt;
+import static java.time.LocalDate.ofEpochDay;
+import static java.util.stream.Collectors.toList;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.regex.Pattern;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
@@ -7,18 +20,8 @@ import io.onedev.server.annotation.Multiline;
 import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.validation.Validatable;
-import org.joda.time.DateTime;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.regex.Pattern;
-
-import static java.lang.Integer.parseInt;
-import static java.util.stream.Collectors.toList;
 
 @Editable
 @ClassValidating
@@ -97,8 +100,8 @@ public class IterationEditBean implements Validatable, Serializable {
 	public void update(Iteration iteration) {
 		iteration.setName(getName());
 		iteration.setDescription(getDescription());
-		iteration.setStartDate(getStartDate());
-		iteration.setDueDate(getDueDate());
+		iteration.setStartDay(DateUtils.toLocalDate(getStartDate()).toEpochDay());
+		iteration.setDueDay(DateUtils.toLocalDate(getDueDate()).toEpochDay());
 	}
 	
 	public static IterationEditBean ofNew(Project project, @Nullable String namePrefix) {
@@ -115,10 +118,10 @@ public class IterationEditBean implements Validatable, Serializable {
 			var matcher = ENDS_WITH_DIGITS.matcher(lastIteration.getName());
 			if (matcher.matches())
 				bean.setName(matcher.group(1) + (parseInt(matcher.group(2)) + 1));
-			if (lastIteration.getStartDate() != null && lastIteration.getDueDate() != null) {
-				bean.setStartDate(new DateTime(lastIteration.getDueDate()).plusDays(1).toDate());
-				var duration = lastIteration.getDueDate().getTime() - lastIteration.getStartDate().getTime();
-				bean.setDueDate(new DateTime(bean.getStartDate()).plusMillis((int) duration).toDate());
+			if (lastIteration.getStartDay() != null && lastIteration.getDueDay() != null) {
+				bean.setStartDate(toDate(ofEpochDay(lastIteration.getDueDay() + 1).atStartOfDay()));
+				var duration = lastIteration.getDueDay() - lastIteration.getStartDay();
+				bean.setDueDate(toDate(ofEpochDay(lastIteration.getDueDay() + duration).atStartOfDay()));
 			}
 		}
 		return bean;
@@ -130,8 +133,8 @@ public class IterationEditBean implements Validatable, Serializable {
 		bean.namePrefix = namePrefix;
 		bean.setName(iteration.getName());
 		bean.setDescription(iteration.getDescription());
-		bean.setStartDate(iteration.getStartDate());
-		bean.setDueDate(iteration.getDueDate());
+		bean.setStartDate(toDate(ofEpochDay(iteration.getStartDay()).atStartOfDay()));
+		bean.setDueDate(toDate(ofEpochDay(iteration.getDueDay()).atStartOfDay()));
 		return bean;
 	}
 

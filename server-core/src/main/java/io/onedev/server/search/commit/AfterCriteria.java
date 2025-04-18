@@ -32,7 +32,7 @@ public class AfterCriteria extends CommitCriteria {
 	@Override
 	public void fill(Project project, RevListOptions options) {
 		for (String value: values)
-			options.after(value);
+			options.after(DateUtils.formatISO8601Date(DateUtils.parseRelaxed(value)));
 	}
 
 	@Override

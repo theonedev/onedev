@@ -1,5 +1,28 @@
 package io.onedev.server.web.component.iteration.burndown;
 
+import static io.onedev.server.util.DateUtils.toLocalDate;
+import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.ESTIMATED_TIME;
+import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.ISSUE_COUNT;
+import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.REMAINING_TIME;
+import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.getDefault;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
@@ -11,19 +34,6 @@ import io.onedev.server.web.component.chart.line.Line;
 import io.onedev.server.web.component.chart.line.LineChartPanel;
 import io.onedev.server.web.component.chart.line.LineSeries;
 import io.onedev.server.xodus.IssueInfoManager;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-
-import javax.annotation.Nullable;
-import java.time.LocalDate;
-import java.util.*;
-
-import static io.onedev.server.util.DateUtils.toLocalDate;
-import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.*;
 
 public class IterationBurndownPanel extends GenericPanel<Iteration> {
 
@@ -45,11 +55,9 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 		super.onInitialize();
 		
 		String message = null;
-		if (getIteration().getStartDate() != null && getIteration().getDueDate() != null) {
-			if (getIteration().getStartDate().before(getIteration().getDueDate())) {
-				long startDay = toLocalDate(getIteration().getStartDate()).toEpochDay();
-				long dueDay = toLocalDate(getIteration().getDueDate()).toEpochDay();
-				if (dueDay - startDay >= MAX_DAYS) 
+		if (getIteration().getStartDay() != null && getIteration().getDueDay() != null) {
+			if (getIteration().getStartDay() < getIteration().getDueDay()) {
+				if (getIteration().getDueDay() - getIteration().getStartDay() >= MAX_DAYS) 
 					message = "Iteration spans too long to show burndown chart";						
 			} else {
 				message = "Iteration start date should be before due date";
@@ -67,21 +75,18 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 
 				@Override
 				protected LineSeries load() {
-					long startDay = toLocalDate(getIteration().getStartDate()).toEpochDay();					
-					long dueDay = toLocalDate(getIteration().getDueDate()).toEpochDay();
-
 					Map<Long, Map<String, Integer>> dailyStateMetrics = new LinkedHashMap<>();
 					for (IssueSchedule schedule : getIteration().getSchedules()) {
 						Issue issue = schedule.getIssue();
-						long scheduleDay = toLocalDate(schedule.getDate()).toEpochDay();
+						long scheduleDay = toLocalDate(schedule.getDate(), ZoneId.systemDefault()).toEpochDay();
 
 						Map<Long, Integer> dailyMetrics = new HashMap<>();
 						var issueInfoManager = OneDev.getInstance(IssueInfoManager.class);
-						var fromDay = Math.max(startDay, scheduleDay);
-						var dailyStates = issueInfoManager.getDailyStates(issue, fromDay, dueDay);
+						var fromDay = Math.max(getIteration().getStartDay(), scheduleDay);
+						var dailyStates = issueInfoManager.getDailyStates(issue, fromDay, getIteration().getDueDay());
 						if (getIndicator().equals(REMAINING_TIME)) {
 							var estimatedTime = issue.getOwnEstimatedTime();
-							for (var entry: issueInfoManager.getDailySpentTimes(issue, fromDay, dueDay).entrySet()) 
+							for (var entry: issueInfoManager.getDailySpentTimes(issue, fromDay, getIteration().getDueDay()).entrySet()) 
 								dailyMetrics.put(entry.getKey(), estimatedTime - entry.getValue());
 						} else {
 							int metric = getIndicatorValue(issue);
@@ -109,7 +114,7 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 					List<Line> lines = new ArrayList<>();
 
 					int initialIssueMetric = 0;
-					long today = LocalDate.now().toEpochDay();
+					var today = LocalDate.now().toEpochDay();
 					for (StateSpec spec : OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpecs()) {
 						List<Integer> yAxisValues = new ArrayList<>();
 						for (Map.Entry<Long, Map<String, Integer>> entry : dailyStateMetrics.entrySet()) {
