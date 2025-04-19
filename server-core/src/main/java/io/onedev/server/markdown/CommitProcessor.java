@@ -32,7 +32,7 @@ public class CommitProcessor implements HtmlProcessor {
 	private static final Collection<String> IGNORED_TAGS = ImmutableSet.of("pre", "code", "a");
 
 	private static final Pattern PATTERN_COMMIT = Pattern.compile(
-			"(^|\\W+)((" + ProjectPathValidator.PATTERN.pattern() + "):)?([a-z0-9]{40})($|[^a-z0-9])");
+			"(^|\\W+)((" + ProjectPathValidator.PATTERN.pattern() + "):)?([a-f0-9]{40})($|[^a-f0-9])");
 	
 	@Override
 	public void process(Document document, @Nullable Project project,
