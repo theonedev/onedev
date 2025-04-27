@@ -631,4 +631,9 @@ public class NugetPackService implements PackService {
 		return request.getHeader(HEADER_API_KEY);
 	}
 	
+	@Override
+	public List<String> normalize(List<String> pathSegments) {
+		return pathSegments;
+	}
+
 }

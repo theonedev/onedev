@@ -540,5 +540,10 @@ public class GemPackService implements PackService {
 		
 		return new RubyObject("Gem::Dependency", members);
 	}
+
+	@Override
+	public List<String> normalize(List<String> pathSegments) {
+		return pathSegments;
+	}
 	
 }

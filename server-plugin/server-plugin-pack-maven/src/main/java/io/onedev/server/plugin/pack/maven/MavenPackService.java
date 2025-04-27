@@ -454,5 +454,10 @@ public class MavenPackService implements PackService {
 			throw new HttpResponseAwareException(SC_BAD_REQUEST, "No group id");
 		return StringUtils.join(pathSegments, ".");
 	}
+
+	@Override
+	public List<String> normalize(List<String> pathSegments) {
+		return pathSegments;
+	}
 	
 }

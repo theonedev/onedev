@@ -70,6 +70,7 @@
     	<module>server-plugin-notification-discord</module>
 		<module>server-plugin-notification-ntfy</module>
 		<module>server-plugin-pack-container</module>
+		<module>server-plugin-pack-helm</module>
 		<module>server-plugin-pack-maven</module>
 		<module>server-plugin-pack-npm</module>
 		<module>server-plugin-pack-nuget</module>
