@@ -92,7 +92,7 @@ public abstract class BlobViewPanel extends Panel {
 				else
 					title = "Edit on branch " + context.getBlobIdent().revision;
 				
-				edit.add(AttributeAppender.append("title", title));
+				edit.add(AttributeAppender.append("data-tippy-content", title));
 				
 				AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link", true) {
 
@@ -129,7 +129,7 @@ public abstract class BlobViewPanel extends Panel {
 			else 
 				title = "Delete from branch " + context.getBlobIdent().revision;
 			
-			delete.add(AttributeAppender.append("title", title));
+			delete.add(AttributeAppender.append("data-tippy-content", title));
 			
 			AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link") {
 

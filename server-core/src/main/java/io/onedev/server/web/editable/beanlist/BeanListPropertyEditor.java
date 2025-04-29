@@ -130,7 +130,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				String description = EditableUtils.getDescription(propertyContext.getPropertyGetter());
 				if (description != null) {
 					WebMarkupContainer help = new WebMarkupContainer("help");
-					help.add(AttributeAppender.append("title", HtmlUtils.parse(description).text()));
+					help.add(AttributeAppender.append("data-tippy-content", HtmlUtils.parse(description).text()));
 					item.add(help);
 				} else {
 					item.add(new WebMarkupContainer("help").setVisible(false));

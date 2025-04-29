@@ -15,6 +15,7 @@ import io.onedev.server.web.asset.bootstrap.BootstrapResourceReference;
 import io.onedev.server.web.asset.clipboard.ClipboardResourceReference;
 import io.onedev.server.web.asset.cookies.CookiesResourceReference;
 import io.onedev.server.web.asset.perfectscrollbar.PerfectScrollbarResourceReference;
+import io.onedev.server.web.asset.tippy.TippyResourceReference;
 
 public class BaseResourceReference extends JavaScriptResourceReference {
 
@@ -32,6 +33,7 @@ public class BaseResourceReference extends JavaScriptResourceReference {
 	    		.getJavaScriptLibrarySettings().getJQueryReference()));		
 	    dependencies.add(JavaScriptHeaderItem.forReference(new BootstrapResourceReference()));
 	    dependencies.add(JavaScriptHeaderItem.forReference(new AlignResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new TippyResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new AutoSizeResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new PerfectScrollbarResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));

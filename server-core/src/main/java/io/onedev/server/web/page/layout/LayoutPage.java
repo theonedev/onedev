@@ -470,7 +470,6 @@ public abstract class LayoutPage extends BasePage {
 									menuLink.add(new WebMarkupContainer("bullet").add(AttributeAppender.append("class", bulletType)));
 								}
 								menuLink.add(AttributeAppender.append("style", "padding-left: " + (25 + (15 * (nestLevel - 1))) + "px;"));
-								menuLink.add(AttributeAppender.append("title", menuItem.getLabel()));
 								menuLink.add(new Label("label", menuItem.getLabel()));
 								if (menuItem.isActive())
 									menuLink.add(AttributeAppender.append("class", "active open"));

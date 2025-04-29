@@ -67,8 +67,8 @@ public class ExternalIssueTransformers implements Serializable, Validatable {
 
 		private String replaceWith;
 
-		@Editable(order = 100, name="Issue Pattern", description = "Specify a <a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'>regular expression</a> " +
-				"to match issue references. For instance: <code>(^|\\W)([A-Z][A-Z]+-\\d+)(?=\\W|$)</code>")
+		@Editable(order = 100, name="Issue Pattern", description = "Specify a &lt;a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'&gt;regular expression&lt;/a&gt; " +
+				"to match issue references. For instance:&lt;br&gt; &lt;em&gt;(^|\\W)([A-Z][A-Z]+-\\d+)(?=\\W|$)&lt;/em&gt;")
 		@NotEmpty
 		public String getPattern() {
 			return pattern;
@@ -78,7 +78,7 @@ public class ExternalIssueTransformers implements Serializable, Validatable {
 			this.pattern = pattern;
 		}
 
-		@Editable(order = 200, name="Replace With", description = "Specify text to replace matched issue references with, for instance: <code>$1&lt;a href='https://tracker.example.com/issues/$2'&gt;$2&lt;/a&gt;</code>. Here <code>$1</code> and <code>$2</code> represent catpure groups in the issue pattern")
+		@Editable(order = 200, name="Replace With", description = "Specify text to replace matched issue references with, for instance: &lt;br&gt;&lt;em&gt;$1&amp;lt;a href='http://track.example.com/issues/$2'&amp;gt;$2&amp;lt;/a&amp;gt;&lt;/em&gt; &lt;br&gt;Here $1 and $2 represent catpure groups in the example issue pattern (see issue pattern help)")
 		@NotEmpty
 		public String getReplaceWith() {
 			return replaceWith;
