@@ -1,0 +1,13 @@
+<wicket:extend>
+	<div class="text-muted mb-4">
+		<wicket:svg href="bulb" class="icon"/>
+        In case you are using external issue tracker, you can define transformers 
+		to transform external issue references into external issue links in various 
+		places, such as commit messages and pull request descriptions
+	</div>
+	<form wicket:id="form">
+		<div wicket:id="feedback"></div>
+		<div wicket:id="editor" class="mb-4"></div>
+		<input type="submit" class="btn btn-primary" value="Update">
+	</form>
+</wicket:extend>

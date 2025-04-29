@@ -117,6 +117,7 @@ import io.onedev.server.web.page.admin.groupmanagement.GroupPage;
 import io.onedev.server.web.page.admin.groupmanagement.create.NewGroupPage;
 import io.onedev.server.web.page.admin.issuesetting.commitmessagefixpatterns.CommitMessageFixPatternsPage;
 import io.onedev.server.web.page.admin.issuesetting.defaultboard.DefaultBoardListPage;
+import io.onedev.server.web.page.admin.issuesetting.externalissuepattern.ExternalIssueTransformersPage;
 import io.onedev.server.web.page.admin.issuesetting.fieldspec.IssueFieldListPage;
 import io.onedev.server.web.page.admin.issuesetting.integritycheck.CheckIssueIntegrityPage;
 import io.onedev.server.web.page.admin.issuesetting.issuetemplate.IssueTemplateListPage;
@@ -247,8 +248,7 @@ public abstract class LayoutPage extends BasePage {
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, keysTitle, keyManagementMenuItems));
 
 					List<SidebarMenuItem> issueSettingMenuItems = new ArrayList<>();
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Custom Fields",
-							IssueFieldListPage.class, new PageParameters()));
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Fields", IssueFieldListPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "States",
 							IssueStateListPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "State Transitions",
@@ -265,6 +265,7 @@ public abstract class LayoutPage extends BasePage {
 							IssueTemplateListPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Commit Message Fix Patterns",
 							CommitMessageFixPatternsPage.class, new PageParameters()));
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "External Issue Transformers", ExternalIssueTransformersPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Check Workflow Integrity",
 							CheckIssueIntegrityPage.class, new PageParameters()));
 

@@ -1,6 +1,20 @@
 package io.onedev.server.model.support.administration;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
 import com.google.common.collect.Lists;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.match.Matcher;
@@ -11,7 +25,13 @@ import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Spec
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.*;
+import io.onedev.server.model.support.issue.BoardSpec;
+import io.onedev.server.model.support.issue.CommitMessageFixPatterns;
+import io.onedev.server.model.support.issue.ExternalIssueTransformers;
+import io.onedev.server.model.support.issue.IssueTemplate;
+import io.onedev.server.model.support.issue.NamedIssueQuery;
+import io.onedev.server.model.support.issue.StateSpec;
+import io.onedev.server.model.support.issue.TimeTrackingSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValue;
@@ -25,17 +45,18 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.component.issue.workflowreconcile.*;
-
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
+import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
 @Editable
 public class GlobalIssueSetting implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
+
+	public static final String PROP_EXTERNAL_ISSUE_PATTERN = "externalIssuePattern";
 	
 	private List<StateSpec> stateSpecs = new ArrayList<>();
 	
@@ -56,6 +77,8 @@ public class GlobalIssueSetting implements Serializable {
 	private List<IssueTemplate> issueTemplates = new ArrayList<>();
 	
 	private CommitMessageFixPatterns commitMessageFixPatterns;
+
+	private ExternalIssueTransformers externalIssueTransformers;
 	
 	private boolean reconciled = true;
 	
@@ -247,6 +270,8 @@ public class GlobalIssueSetting implements Serializable {
 		commitMessageFixPatterns.getEntries().add(entry);
 		
 		timeTrackingSetting.setAggregationLink("Sub Issues");
+		
+		externalIssueTransformers = new ExternalIssueTransformers();
 	}
 	
 	public List<String> sortFieldNames(Collection<String> fieldNames) {
@@ -706,6 +731,14 @@ public class GlobalIssueSetting implements Serializable {
 
 	public void setCommitMessageFixPatterns(CommitMessageFixPatterns commitMessageFixPatterns) {
 		this.commitMessageFixPatterns = commitMessageFixPatterns;
+	}
+
+	public ExternalIssueTransformers getExternalIssueTransformers() {
+		return externalIssueTransformers;
+	}
+
+	public void setExternalIssueTransformers(ExternalIssueTransformers externalIssueTransformers) {
+		this.externalIssueTransformers = externalIssueTransformers;
 	}
 
 	@Nullable

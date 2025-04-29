@@ -7843,6 +7843,16 @@ public class DataMigrator {
 					element.element("day").detach();
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) 
+							valueElement.addElement("externalIssueTransformers").addElement("entries");
+					}
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}

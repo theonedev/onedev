@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableSet;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.TextNodeVisitor;
@@ -76,6 +77,10 @@ public class ReferenceUtils {
 			text = builder.toString();
 		} else {
 			text = transformer.apply(null, text);
+		}
+		var issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		for (var entry: issueSetting.getExternalIssueTransformers().getEntries()) {
+			text = text.replaceAll(entry.getPattern(), entry.getReplaceWith());
 		}
 		return text;
 	}
