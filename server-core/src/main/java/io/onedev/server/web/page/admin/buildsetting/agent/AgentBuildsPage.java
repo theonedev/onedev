@@ -58,7 +58,7 @@ public class AgentBuildsPage extends AgentDetailPage {
 				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
 			}
 			
-		}, true, true, 0) {
+		}, true, true) {
 
 			@Override
 			protected BuildQuery getBaseQuery() {

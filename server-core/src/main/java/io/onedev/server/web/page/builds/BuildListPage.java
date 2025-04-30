@@ -41,13 +41,9 @@ public class BuildListPage extends LayoutPage {
 	private static final String PARAM_PAGE = "page";
 	
 	private static final String PARAM_QUERY = "query";
-	
-	private static final String PARAM_EXPECTED_COUNT = "expectedCount";
-	
+		
 	private String query;
-	
-	private final int expectedCount;
-	
+		
 	private SavedQueriesPanel<NamedBuildQuery> savedQueries;
 	
 	private BuildListPanel buildList;
@@ -55,8 +51,6 @@ public class BuildListPage extends LayoutPage {
 	public BuildListPage(PageParameters params) {
 		super(params);
 		query = params.get(PARAM_QUERY).toOptionalString();
-		expectedCount = params.get(PARAM_EXPECTED_COUNT).toInt(0);
-		params.remove(PARAM_EXPECTED_COUNT);
 	}
 
 	private static GlobalBuildSetting getBuildSetting() {
@@ -77,7 +71,7 @@ public class BuildListPage extends LayoutPage {
 			@Override
 			protected Link<Void> newQueryLink(String componentId, NamedBuildQuery namedQuery) {
 				return new BookmarkablePageLink<Void>(componentId, BuildListPage.class, 
-						BuildListPage.paramsOf(namedQuery.getQuery(), 0, 0));
+						BuildListPage.paramsOf(namedQuery.getQuery(), 0));
 			}
 
 			@Override
@@ -119,7 +113,7 @@ public class BuildListPage extends LayoutPage {
 				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
 			}
 			
-		}, true, true, expectedCount) {
+		}, true, true) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
@@ -127,7 +121,7 @@ public class BuildListPage extends LayoutPage {
 
 					@Override
 					public PageParameters newPageParameters(int currentPage) {
-						return paramsOf(query, currentPage+1, 0);
+						return paramsOf(query, currentPage+1);
 					}
 					
 					@Override
@@ -217,26 +211,24 @@ public class BuildListPage extends LayoutPage {
 		target.add(buildList);
 	}
 	
-	public static PageParameters paramsOf(@Nullable String query, int page, int expectedCount) {
+	public static PageParameters paramsOf(@Nullable String query, int page) {
 		PageParameters params = new PageParameters();
 		if (query != null)
 			params.add(PARAM_QUERY, query);
 		if (page != 0)
 			params.add(PARAM_PAGE, page);
-		if (expectedCount != 0)
-			params.add(PARAM_EXPECTED_COUNT, expectedCount);
 		return params;
 	}
 
-	public static PageParameters paramsOf(int page, int expectedCount) {
+	public static PageParameters paramsOf(int page) {
 		String query = null;
 		User user = SecurityUtils.getAuthUser();
 		if (user != null && !user.getBuildQueryPersonalization().getQueries().isEmpty()) 
 			query = user.getBuildQueryPersonalization().getQueries().iterator().next().getQuery();
 		else if (!getBuildSetting().getNamedQueries().isEmpty())
 			query = getBuildSetting().getNamedQueries().iterator().next().getQuery();
-		
-		return paramsOf(query, page, expectedCount);
+			
+		return paramsOf(query, page);
 	}
 
 	@Override

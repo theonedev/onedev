@@ -145,6 +145,15 @@ public class GitLfsFilter implements Filter {
 			throw new ExplicitException("Project not specified");
 		return decodeFullRepoNameAsPath(projectPath);
 	}
+
+	private void reportProjectNotFoundOrInaccessible(HttpServletResponse response, String projectPath) {
+		if (SecurityUtils.getUser() != null) {
+			sendBatchError(response, SC_NOT_FOUND, "Project not found or inaccessible: " + projectPath);
+		} else {
+			response.addHeader("LFS-Authenticate", "Basic realm=\"OneDev\"");
+			sendBatchError(response, SC_UNAUTHORIZED, "Authentication required");
+		}
+	}
 	
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -168,7 +177,9 @@ public class GitLfsFilter implements Filter {
 					sessionManager.openSession();
 					try {
 						Project project = projectManager.findByPath(projectPath);
-						if (canReadCode(httpRequest, project))  
+						if (project == null || !SecurityUtils.canAccessProject(project))
+							reportProjectNotFoundOrInaccessible(httpResponse, projectPath);
+						else if (canReadCode(httpRequest, project))  
 							lfsObject = new LfsObject(project.getId(), objectId);
 						else 
 							sendAuthorizationError(httpResponse);
@@ -217,7 +228,9 @@ public class GitLfsFilter implements Filter {
 					sessionManager.openSession();
 					try {
 						Project project = projectManager.findByPath(getProjectPath(pathInfo));
-						if (SecurityUtils.canWriteCode(project))  
+						if (project == null || !SecurityUtils.canAccessProject(project))
+							reportProjectNotFoundOrInaccessible(httpResponse, projectPath);
+						else if (SecurityUtils.canWriteCode(project))  
 							lfsObject = new LfsObject(project.getId(), objectId);
 						else 
 							sendAuthorizationError(httpResponse);
@@ -285,8 +298,7 @@ public class GitLfsFilter implements Filter {
 			if (clusterAccess) {
 				ProjectFacade project = projectManager.findFacadeByPath(projectPath);
 				if (project == null) {
-					sendBatchError(httpResponse, SC_NOT_FOUND, 
-							"Project not found: " + projectPath);
+					sendBatchError(httpResponse, SC_NOT_FOUND, "Project not found: " + projectPath);
 				} else {
 					httpResponse.setContentType(CONTENT_TYPE);
 					if (pathInfo.endsWith("/batch")) {
@@ -306,9 +318,8 @@ public class GitLfsFilter implements Filter {
 				sessionManager.openSession();
 				try {
 					Project project = projectManager.findByPath(projectPath);
-					if (project == null) {
-						sendBatchError(httpResponse, SC_NOT_FOUND, 
-								"Project not found: " + projectPath);
+					if (project == null || !SecurityUtils.canAccessProject(project)) {
+						reportProjectNotFoundOrInaccessible(httpResponse, projectPath);
 					} else {
 						httpResponse.setContentType(CONTENT_TYPE);
 						if (pathInfo.endsWith("/batch")) {

@@ -741,8 +741,9 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				else
 					commitHash = request.getBuildCommitHash();
 
-				item.add(new RunJobLink("runJob",
-						ObjectId.fromString(commitHash), jobName, request.getMergeRef()) {
+				var commitId = ObjectId.fromString(commitHash);
+				var buildSpec = getProject().getBuildSpec(commitId);
+				item.add(new RunJobLink("runJob", commitId, jobName, request.getMergeRef()) {
 
 					@Override
 					protected Project getProject() {
@@ -757,10 +758,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 					@Override
 					protected void onConfigure() {
-						setVisible(SecurityUtils.canRunJob(getProject(), jobName)
-								|| SecurityUtils.canModifyPullRequest(getPullRequest()));
+						setVisible(buildSpec != null 
+								&& buildSpec.getJobMap().containsKey(jobName) 
+								&& (SecurityUtils.canRunJob(getProject(), jobName) || SecurityUtils.canModifyPullRequest(getPullRequest())));
 					}
-				});
+				});	
 			}
 
 			@Override

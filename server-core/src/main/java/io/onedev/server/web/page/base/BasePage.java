@@ -142,7 +142,7 @@ public abstract class BasePage extends WebPage {
 				throw new RedirectToUrlException(redirectUrl);
 			}
 		}
-
+		
 		if (!isPermitted())
 			unauthorized();
 
