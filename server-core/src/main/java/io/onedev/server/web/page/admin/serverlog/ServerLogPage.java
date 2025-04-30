@@ -1,15 +1,20 @@
 package io.onedev.server.web.page.admin.serverlog;
 
-import com.google.common.base.Joiner;
-import io.onedev.server.web.page.admin.ServerDetailPage;
-import io.onedev.server.web.resource.ServerLogResource;
-import io.onedev.server.web.resource.ServerLogResourceReference;
+import static io.onedev.agent.job.LogRequest.toZoneId;
+import static io.onedev.server.util.DateUtils.getZoneId;
+
+import java.util.List;
+
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import java.util.List;
+import com.google.common.base.Joiner;
+
+import io.onedev.server.web.page.admin.ServerDetailPage;
+import io.onedev.server.web.resource.ServerLogResource;
+import io.onedev.server.web.resource.ServerLogResourceReference;
 
 public class ServerLogPage extends ServerDetailPage {
 
@@ -30,10 +35,10 @@ public class ServerLogPage extends ServerDetailPage {
 		String content;
 		if (lines.size() > MAX_DISPLAY_LINES) {
 			add(new Label("warning", "Too many log entries, displaying recent " + MAX_DISPLAY_LINES));
-			content = Joiner.on("\n").join(lines.subList(lines.size()-MAX_DISPLAY_LINES, lines.size()));
+			content = Joiner.on("\n").join(toZoneId(lines.subList(lines.size()-MAX_DISPLAY_LINES, lines.size()), getZoneId()));
 		} else {
 			add(new WebMarkupContainer("warning").setVisible(false));
-			content = Joiner.on("\n").join(lines);
+			content = Joiner.on("\n").join(toZoneId(lines, getZoneId()));
 		}
 		
 		add(new Label("logContent", content));

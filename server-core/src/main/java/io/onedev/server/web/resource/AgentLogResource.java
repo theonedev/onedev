@@ -1,5 +1,8 @@
 package io.onedev.server.web.resource;
 
+import static io.onedev.agent.job.LogRequest.toZoneId;
+import static io.onedev.server.util.DateUtils.getZoneId;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -57,7 +60,7 @@ public class AgentLogResource extends AbstractResource {
 			public void writeData(Attributes attributes) throws IOException {
 				Agent agent = OneDev.getInstance(AgentManager.class).load(agentId);
 				List<String> agentLog = OneDev.getInstance(AgentManager.class).getAgentLog(agent);
-				String content = Joiner.on("\n").join(agentLog);
+				String content = Joiner.on("\n").join(toZoneId(agentLog, getZoneId()));
 				attributes.getResponse().getOutputStream().write(content.getBytes(StandardCharsets.UTF_8));
 			}				
 		});

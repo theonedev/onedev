@@ -1,5 +1,8 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
+import static io.onedev.agent.job.LogRequest.toZoneId;
+import static io.onedev.server.util.DateUtils.getZoneId;
+
 import java.util.List;
 
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -37,10 +40,10 @@ public class AgentLogPage extends AgentDetailPage {
 			String content;
 			if (lines.size() > MAX_DISPLAY_LINES) {
 				fragment.add(new Label("warning", "Too many log entries, displaying recent " + MAX_DISPLAY_LINES));
-				content = Joiner.on("\n").join(lines.subList(lines.size()-MAX_DISPLAY_LINES, lines.size()));
+				content = Joiner.on("\n").join(toZoneId(lines.subList(lines.size()-MAX_DISPLAY_LINES, lines.size()), getZoneId()));
 			} else {
 				fragment.add(new WebMarkupContainer("warning").setVisible(false));
-				content = Joiner.on("\n").join(lines);
+				content = Joiner.on("\n").join(toZoneId(lines, getZoneId()));
 			}
 			fragment.add(new Label("logContent", content));
 			
