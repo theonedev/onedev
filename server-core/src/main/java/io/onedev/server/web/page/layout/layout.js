@@ -136,10 +136,10 @@ onedev.server.layout = {
 		});
 		
 		if (onedev.server.util.isMac()) {
-			$("a.command-palette").attr("title", "cmd-k to show command palette").html("<span class='keycap'>⌘</span> <span class='keycap'>k</span>");
+			$("a.command-palette").attr("data-tippy-content", "cmd-k to show command palette").html("<span class='keycap'>⌘</span> <span class='keycap'>k</span>");
 		}
 		else
-			$("a.command-palette").attr("title", "ctrl-k to show command palette").html("<span class='keycap'>ctrl</span> <span class='keycap'>k</span>");
+			$("a.command-palette").attr("data-tippy-content", "ctrl-k to show command palette").html("<span class='keycap'>ctrl</span> <span class='keycap'>k</span>");
 		$(document).keydown(function(e) {
 			if (e.keyCode == 75 && (e.ctrlKey || e.metaKey) && !e.shiftKey && $('div.command-palette').length == 0) { // cmd+k
 				commandPaletteCallback();

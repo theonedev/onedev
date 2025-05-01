@@ -1,7 +1,7 @@
 package io.onedev.server.git;
 
 import io.onedev.agent.Agent;
-import io.onedev.commons.bootstrap.SensitiveMasker;
+import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
@@ -48,7 +48,7 @@ public class CommandUtils {
 		File homeDir = FileUtils.createTempDir("githome"); 
 		
 		ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
-		SensitiveMasker.push(text -> StringUtils.replace(text, clusterManager.getCredential(), "******"));
+		SecretMasker.push(text -> StringUtils.replace(text, clusterManager.getCredential(), "******"));
 		try {
 			Commandline git = newGit();
 			git.environments().put("HOME", homeDir.getAbsolutePath());
@@ -77,7 +77,7 @@ public class CommandUtils {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
-			SensitiveMasker.pop();
+			SecretMasker.pop();
 			FileUtils.deleteDir(homeDir);
 		}
 	}

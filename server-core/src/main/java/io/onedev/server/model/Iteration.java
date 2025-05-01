@@ -25,9 +25,9 @@ public class Iteration extends AbstractEntity {
 	
 	public static final String PROP_NAME = "name";
 	
-	public static final String PROP_START_DATE = "startDate";
+	public static final String PROP_START_DAY = "startDay";
 	
-	public static final String PROP_DUE_DATE = "dueDate";
+	public static final String PROP_DUE_DAY = "dueDay";
 	
 	public static final String PROP_CLOSED = "closed";
 	
@@ -42,9 +42,9 @@ public class Iteration extends AbstractEntity {
 	@Column(length=MAX_DESCRIPTION_LEN)
 	private String description;
 	
-	private Date startDate;
+	private Long startDay;
 	
-	private Date dueDate;
+	private Long dueDay;
 	
 	private boolean closed;
 
@@ -76,21 +76,21 @@ public class Iteration extends AbstractEntity {
 	}
 
 	@Nullable
-	public Date getStartDate() {
-		return startDate;
+	public Long getStartDay() {
+		return startDay;
 	}
 
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
+	public void setStartDay(Long startDay) {
+		this.startDay = startDay;
 	}
 
 	@Nullable
-	public Date getDueDate() {
-		return dueDate;
+	public Long getDueDay() {
+		return dueDay;
 	}
 
-	public void setDueDate(Date dueDate) {
-		this.dueDate = dueDate;
+	public void setDueDay(Long dueDay) {
+		this.dueDay = dueDay;
 	}
 
 	public boolean isClosed() {
@@ -150,22 +150,22 @@ public class Iteration extends AbstractEntity {
 
 		@Override
 		public int compare(Iteration o1, Iteration o2) {
-			if (o1.getStartDate() != null) {
-				if (o2.getStartDate() != null)
-					return o1.getStartDate().compareTo(o2.getStartDate());
+			if (o1.getStartDay() != null) {
+				if (o2.getStartDay() != null)
+					return o1.getStartDay().compareTo(o2.getStartDay());
 				else
 					return -1;
 			} else {
-				if (o2.getStartDate() != null) {
+				if (o2.getStartDay() != null) {
 					return 1;
 				} else {
-					if (o1.getDueDate() != null) {
-						if (o2.getDueDate() != null)
-							return o1.getDueDate().compareTo(o2.getDueDate());
+					if (o1.getDueDay() != null) {
+						if (o2.getDueDay() != null)
+							return o1.getDueDay().compareTo(o2.getDueDay());
 						else
 							return -1;
 					} else {
-						if (o2.getDueDate() != null)
+						if (o2.getDueDay() != null)
 							return 1;
 						else
 							return o1.getName().compareTo(o2.getName());

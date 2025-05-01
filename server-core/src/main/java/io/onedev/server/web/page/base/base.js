@@ -734,6 +734,22 @@ onedev.server = {
 		});
 		doSetup($(document));
 	},
+
+	setupTippy: function() {
+		function doSetup($container) {
+			setTimeout(function() {
+				tippy($container[0].querySelectorAll('[data-tippy-content]'), {
+					delay: [500, 0],
+					placement: 'auto'
+				});
+			}, 100);
+		}	
+		$(document).on("afterElementReplace", function(event, componentId) {
+			doSetup($("#" + componentId));
+		});
+		doSetup($(document));
+	},
+
 	perfectScrollbar: {
 		setup: function() {
 			function doSetup($container, afterElementReplace) {
@@ -885,6 +901,7 @@ onedev.server = {
 		onedev.server.setupRadio();
 		onedev.server.setupSwitch();
 		onedev.server.setupTable();
+		onedev.server.setupTippy();
 		onedev.server.history.init(popStateCallback);
 		onedev.server.perfectScrollbar.setup();
 

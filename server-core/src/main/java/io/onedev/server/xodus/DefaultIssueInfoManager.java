@@ -1,6 +1,25 @@
 package io.onedev.server.xodus;
 
+import static io.onedev.server.util.DateUtils.toLocalDate;
+import static java.lang.Long.valueOf;
+
+import java.io.File;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.time.ZoneId;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.commons.lang.SerializationUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.cluster.ClusterTask;
@@ -10,7 +29,13 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.ActiveServerChanged;
 import io.onedev.server.event.project.ProjectDeleted;
-import io.onedev.server.event.project.issue.*;
+import io.onedev.server.event.project.issue.IssueChanged;
+import io.onedev.server.event.project.issue.IssueDeleted;
+import io.onedev.server.event.project.issue.IssueOpened;
+import io.onedev.server.event.project.issue.IssuesCopied;
+import io.onedev.server.event.project.issue.IssuesDeleted;
+import io.onedev.server.event.project.issue.IssuesImported;
+import io.onedev.server.event.project.issue.IssuesMoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
@@ -26,21 +51,6 @@ import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
 import jetbrains.exodus.env.Transaction;
-import org.apache.commons.lang.SerializationUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.File;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import static io.onedev.server.util.DateUtils.toLocalDate;
-import static java.lang.Long.valueOf;
 
 @Singleton
 public class DefaultIssueInfoManager extends AbstractEnvironmentManager 
@@ -147,7 +157,7 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 					byte[] bytes = Preconditions.checkNotNull(readBytes(stateHistoryStore, txn, issueKey));
 					@SuppressWarnings("unchecked")
 					Map<Long, String> stateHistory = (Map<Long, String>) SerializationUtils.deserialize(bytes);
-					stateHistory.put(toLocalDate(change.getDate()).toEpochDay(), state);
+					stateHistory.put(toLocalDate(change.getDate(), ZoneId.systemDefault()).toEpochDay(), state);
 					stateHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) stateHistory)));
 				}
 
@@ -158,7 +168,7 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 					byte[] bytes = Preconditions.checkNotNull(readBytes(spentTimeHistoryStore, txn, issueKey));
 					@SuppressWarnings("unchecked")
 					Map<Long, Integer> spentTimeHistory = (Map<Long, Integer>) SerializationUtils.deserialize(bytes);
-					spentTimeHistory.put(toLocalDate(change.getDate()).toEpochDay(), spentTime);
+					spentTimeHistory.put(toLocalDate(change.getDate(), ZoneId.systemDefault()).toEpochDay(), spentTime);
 					spentTimeHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) spentTimeHistory)));
 				}
 				
@@ -178,7 +188,7 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 		byte[] bytes = readBytes(stateHistoryStore, txn, issueKey);
 		if (bytes == null) {
 			Map<Long, String> stateHistory = new LinkedHashMap<>(); 
-			stateHistory.put(toLocalDate(issue.getSubmitDate()).toEpochDay(), issue.getState());
+			stateHistory.put(toLocalDate(issue.getSubmitDate(), ZoneId.systemDefault()).toEpochDay(), issue.getState());
 			stateHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) stateHistory)));
 		}
 	}
@@ -188,7 +198,7 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 		byte[] bytes = readBytes(spentTimeHistoryStore, txn, issueKey);
 		if (bytes == null) {
 			Map<Long, Integer> spentTimeHistory = new LinkedHashMap<>();
-			spentTimeHistory.put(toLocalDate(issue.getSubmitDate()).toEpochDay(), issue.getOwnSpentTime());
+			spentTimeHistory.put(toLocalDate(issue.getSubmitDate(), ZoneId.systemDefault()).toEpochDay(), issue.getOwnSpentTime());
 			spentTimeHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) spentTimeHistory)));
 		}
 	}

@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.imports.bitbucketcloud;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.onedev.commons.bootstrap.SensitiveMasker;
+import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -223,7 +223,7 @@ public class ImportServer implements Serializable, Validatable {
 							URIBuilder builder = new URIBuilder(cloneUrl);
 							builder.setUserInfo(getUserName(), getAppPassword());
 
-							SensitiveMasker.push(text -> StringUtils.replace(text, getAppPassword(), "******"));
+							SecretMasker.push(text -> StringUtils.replace(text, getAppPassword(), "******"));
 							try {
 								if (dryRun) {
 									new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
@@ -233,7 +233,7 @@ public class ImportServer implements Serializable, Validatable {
 									projectManager.clone(project, builder.build().toString());
 								}
 							} finally {
-								SensitiveMasker.pop();
+								SecretMasker.pop();
 							}
 						} else {
 							logger.warning("Skipping code clone as the project already has code");

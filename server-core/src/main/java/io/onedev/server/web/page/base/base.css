@@ -856,3 +856,15 @@ span.keycap {
 .bean-list td.property-roleNames {
 	width: 50%;
 }
+.tippy-box {
+	background-color: var(--gray-dark);
+}
+.tippy-arrow {
+	color: var(--gray-dark);
+}
+.tippy-box a {
+	color: var(--primary) !important;
+}
+.tippy-box a:hover, .tippy-box a:focus {
+	color: rgb(127, 196, 255) !important;
+}

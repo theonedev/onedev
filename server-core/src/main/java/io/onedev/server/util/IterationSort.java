@@ -10,7 +10,7 @@ public enum IterationSort {
 
 		@Override
 		public Order getOrder(boolean closed) {
-			return closed?Order.desc(Iteration.PROP_DUE_DATE):Order.asc(Iteration.PROP_DUE_DATE);
+			return closed?Order.desc(Iteration.PROP_DUE_DAY):Order.asc(Iteration.PROP_DUE_DAY);
 		}
 		
 	},
@@ -18,7 +18,7 @@ public enum IterationSort {
 
 		@Override
 		public Order getOrder(boolean closed) {
-			return closed?Order.asc(Iteration.PROP_DUE_DATE):Order.desc(Iteration.PROP_DUE_DATE);
+			return closed?Order.asc(Iteration.PROP_DUE_DAY):Order.desc(Iteration.PROP_DUE_DAY);
 		}
 		
 	},

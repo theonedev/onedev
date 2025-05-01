@@ -1,18 +1,16 @@
 package io.onedev.server.buildspecmodel.inputspec.datetimeinput;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import javax.validation.ValidationException;
 
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.buildspecmodel.inputspec.datetimeinput.defaultvalueprovider.DefaultValueProvider;
-import org.joda.time.DateTime;
-
 import com.google.common.collect.Lists;
 
-import io.onedev.server.util.Constants;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.buildspecmodel.inputspec.datetimeinput.defaultvalueprovider.DefaultValueProvider;
 
 public class DateTimeInput {
 
@@ -33,7 +31,7 @@ public class DateTimeInput {
 	public static Object convertToObject(List<String> strings) {
 		try {
 			if (strings.size() == 1)
-				return Constants.DATETIME_FORMATTER.parseDateTime(strings.iterator().next()).toDate();
+			return new Date(Long.parseLong(strings.iterator().next()));
 			else if (strings.size() == 0)
 				return null;
 			else
@@ -45,7 +43,7 @@ public class DateTimeInput {
 
 	public static List<String> convertToStrings(Object value) {
 		if (value != null)
-			return Lists.newArrayList(Constants.DATETIME_FORMATTER.print(new DateTime(value)));
+			return Lists.newArrayList(String.valueOf(((Date)value).getTime()));
 		else
 			return new ArrayList<>();
 	}

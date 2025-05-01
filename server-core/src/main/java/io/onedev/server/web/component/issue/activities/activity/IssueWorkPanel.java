@@ -116,7 +116,6 @@ class IssueWorkPanel extends Panel {
 				var work = getWork();
 				work.setNote(bean.getNote());
 				work.setDate(bean.getStartAt());
-				work.setDay(DateUtils.toLocalDate(bean.getStartAt()).toEpochDay());
 				work.setMinutes(bean.getSpentTime());
 				getWorkManager().createOrUpdate(work);
 				var detailViewer = newDetailViewer("body");

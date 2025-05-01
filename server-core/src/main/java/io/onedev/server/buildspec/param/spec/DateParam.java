@@ -5,10 +5,9 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspecmodel.inputspec.dateinput.DateInput;
 import io.onedev.server.buildspecmodel.inputspec.dateinput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.server.util.Constants;
-import io.onedev.server.annotation.Editable;
 
 @Editable(order=505, name=ParamSpec.DATE)
 public class DateParam extends ParamSpec {
@@ -51,7 +50,7 @@ public class DateParam extends ParamSpec {
 	@Override
 	public long getOrdinal(String fieldValue) {
 		if (fieldValue != null) 
-			return Constants.DATE_FORMATTER.parseDateTime(fieldValue).toDate().getTime();
+			return Long.parseLong(fieldValue);
 		else
 			return super.getOrdinal(fieldValue);
 	}

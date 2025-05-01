@@ -22,14 +22,13 @@ public class CommitMessageFixPatternsPage extends IssueSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		CommitMessageFixPatterns patterns = getSettingManager().getIssueSetting().getCommitMessageFixPatterns();
+		CommitMessageFixPatterns patterns = getSetting().getCommitMessageFixPatterns();
 		Form<?> form = new Form<Void>("form") {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				var issueSetting = getSettingManager().getIssueSetting();
-				issueSetting.setCommitMessageFixPatterns(patterns);
-				getSettingManager().saveIssueSetting(issueSetting);
+				getSetting().setCommitMessageFixPatterns(patterns);
+				getSettingManager().saveIssueSetting(getSetting());
 				Session.get().success("Setting updated");
 			}
 		};

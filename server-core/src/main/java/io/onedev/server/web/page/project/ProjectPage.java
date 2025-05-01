@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -106,6 +107,7 @@ import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.code.CodeContribsPage;
 import io.onedev.server.web.page.project.stats.code.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
+import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.util.ProjectAware;
 
 public abstract class ProjectPage extends LayoutPage implements ProjectAware {
@@ -138,8 +140,12 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		projectPath = StringUtils.strip(projectPath, "/");
 		
 		Project project = getProjectManager().findByPath(projectPath);
-		if (project == null)
-			throw new EntityNotFoundException();
+		if (project == null || !SecurityUtils.canAccessProject(project)) {
+			if (getLoginUser() != null)
+				throw new EntityNotFoundException("Project not found or inaccessible");
+			else
+				throw new RestartResponseAtInterceptPageException(LoginPage.class);
+		}
 
 		Long projectId = project.getId();
 		projectModel = new LoadableDetachableModel<Project>() {
@@ -177,11 +183,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-	}
-
-	@Override
-	protected boolean isPermitted() {
-		return SecurityUtils.canAccessProject(getProject());
 	}
 	
 	@Override

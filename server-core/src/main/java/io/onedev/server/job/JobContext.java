@@ -1,5 +1,11 @@
 package io.onedev.server.job;
 
+import java.io.Serializable;
+import java.util.List;
+
+import org.eclipse.jgit.lib.ObjectId;
+
+import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.LeafFacade;
 import io.onedev.k8shelper.ServiceFacade;
@@ -7,10 +13,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import org.eclipse.jgit.lib.ObjectId;
-
-import java.io.Serializable;
-import java.util.List;
 
 public class JobContext implements Serializable {
 	
@@ -42,10 +44,12 @@ public class JobContext implements Serializable {
 	
 	private final long timeout;
 
+	private final SecretMasker secretMasker;
+
 	public JobContext(String jobToken, JobExecutor jobExecutor, Long projectId, String projectPath,
 					  String projectGitDir, Long buildId, Long buildNumber, Long submitSequence,
 					  List<Action> actions, String refName, ObjectId commitId, List<ServiceFacade> services,
-					  long timeout) {
+					  long timeout, SecretMasker secretMasker) {
 		this.jobToken = jobToken;
 		this.jobExecutor = jobExecutor;
 		this.projectId = projectId;
@@ -59,6 +63,7 @@ public class JobContext implements Serializable {
 		this.commitId = commitId;
 		this.services = services;
 		this.timeout = timeout;
+		this.secretMasker = secretMasker;
 	}
 	
 	public String getJobToken() {
@@ -121,6 +126,10 @@ public class JobContext implements Serializable {
 		var project = OneDev.getInstance(ProjectManager.class).load(projectId);
 		return project.isCommitOnBranch(commitId, project.getDefaultBranch())
 				&& project.isSelfOrAncestorOf(targetProject);
+	}
+
+	public SecretMasker getSecretMasker() {
+		return secretMasker;
 	}
 	
 }

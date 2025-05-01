@@ -147,8 +147,8 @@ public class NpmPackService implements PackService {
 					if (pathSegments.get(1).equals("dist-tags")) {
 						if (pathSegments.size() == 2) {
 							if (isGet) {
-								var project = checkProject(projectId, false);
 								sessionManager.run(() -> {
+									var project = checkProject(projectId, false);
 									var packs = packManager.queryByName(project, TYPE, packageName, null);
 									var distTags = new HashMap<String, String>();
 									for (var pack : packs) {
@@ -572,4 +572,9 @@ public class NpmPackService implements PackService {
 		return project;
 	}
 	
+	@Override
+	public List<String> normalize(List<String> pathSegments) {
+		return pathSegments;
+	}
+
 }

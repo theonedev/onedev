@@ -1,5 +1,9 @@
 package io.onedev.server.rest.resource;
 
+import static io.onedev.server.util.DateUtils.parseISO8601Date;
+import static io.onedev.server.util.DateUtils.toLocalDate;
+import static java.time.ZoneId.systemDefault;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -212,13 +216,13 @@ public class ProjectResource {
     	if (name != null)
     		criteria.add(Restrictions.ilike(Iteration.PROP_NAME, name.replace('%', '*')));
     	if (startBefore != null)
-    		criteria.add(Restrictions.le(Iteration.PROP_START_DATE, DateUtils.parseISO8601Date(startBefore)));
+    		criteria.add(Restrictions.le(Iteration.PROP_START_DAY, toLocalDate(parseISO8601Date(startBefore), systemDefault()).toEpochDay()));
     	if (startAfter != null)
-    		criteria.add(Restrictions.ge(Iteration.PROP_START_DATE, DateUtils.parseISO8601Date(startAfter)));
+    		criteria.add(Restrictions.ge(Iteration.PROP_START_DAY, toLocalDate(parseISO8601Date(startAfter), systemDefault()).toEpochDay()));
     	if (dueBefore != null)
-    		criteria.add(Restrictions.le(Iteration.PROP_DUE_DATE, DateUtils.parseISO8601Date(dueBefore)));
+    		criteria.add(Restrictions.le(Iteration.PROP_DUE_DAY, toLocalDate(parseISO8601Date(dueBefore), systemDefault()).toEpochDay()));
     	if (dueAfter != null)
-    		criteria.add(Restrictions.ge(Iteration.PROP_DUE_DATE, DateUtils.parseISO8601Date(dueAfter)));
+    		criteria.add(Restrictions.ge(Iteration.PROP_DUE_DAY, toLocalDate(parseISO8601Date(dueAfter), systemDefault()).toEpochDay()));
     	if (closed != null)
     		criteria.add(Restrictions.eq(Iteration.PROP_CLOSED, closed));
     	

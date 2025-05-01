@@ -1,7 +1,24 @@
 package io.onedev.server.web.page.project.stats.code;
 
+import static io.onedev.server.util.DateUtils.formatISO8601Date;
+import static io.onedev.server.util.DateUtils.toDate;
+import static java.time.LocalDate.ofEpochDay;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.AbstractResource;
+import org.eclipse.jgit.lib.PersonIdent;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.git.GitContribution;
@@ -14,25 +31,9 @@ import io.onedev.server.search.commit.AuthorCriteria;
 import io.onedev.server.search.commit.BeforeCriteria;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.xodus.CommitInfoManager;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.AbstractResource;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 class TopContributorsResource extends AbstractResource {
 
@@ -67,9 +68,8 @@ class TopContributorsResource extends AbstractResource {
 				if (!SecurityUtils.canReadCode(project))
 					throw new UnauthorizedException();
 
-				DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-				String fromDate = formatter.print(new DateTime(DateUtils.toDate(LocalDate.ofEpochDay(fromDay).atTime(0, 0, 0, 0))));
-				String toDate = formatter.print(new DateTime(DateUtils.toDate(LocalDate.ofEpochDay(toDay).plusDays(1).atTime(0, 0, 0, 0))));
+				String fromDate = formatISO8601Date(toDate(ofEpochDay(fromDay).atStartOfDay()));
+				String toDate = formatISO8601Date(toDate(ofEpochDay(toDay).plusDays(1).atStartOfDay()));
 				
 				List<GitContributor> topContributors = OneDev.getInstance(CommitInfoManager.class)
 						.getTopContributors(project.getId(), TOP_CONTRIBUTORS, type, fromDay, toDay);

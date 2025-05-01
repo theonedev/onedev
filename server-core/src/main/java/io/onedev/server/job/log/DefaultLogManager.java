@@ -1,6 +1,48 @@
 package io.onedev.server.job.log;
 
+import static io.onedev.commons.utils.LockUtils.getReadWriteLock;
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.commons.utils.LockUtils.write;
+import static io.onedev.server.model.Build.getLogLockName;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.regex.Pattern;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Splitter;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -22,28 +64,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.web.websocket.WebSocketManager;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.regex.Pattern;
-
-import static io.onedev.commons.utils.LockUtils.*;
-import static io.onedev.server.model.Build.getLogLockName;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 
 @Singleton
 public class DefaultLogManager implements LogManager, Serializable {
@@ -90,12 +110,7 @@ public class DefaultLogManager implements LogManager, Serializable {
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(LogManager.class);
 	}
-	
-	@Override
-	public TaskLogger newLogger(Build build) {
-		return newLogger(build, new ArrayList<>());
-	}
-	
+		
 	private void notifyListeners(Long buildId) {
 		clusterManager.submitToAllServers(() -> {
 			var lock = logListenersLock.readLock();
@@ -111,19 +126,18 @@ public class DefaultLogManager implements LogManager, Serializable {
 	}
 	
 	@Override
-	public TaskLogger newLogger(Build build, Collection<String> jobSecretsToMask) {
+	public TaskLogger newLogger(Build build) {
 		Long projectId = build.getProject().getId();
 		Long buildId = build.getId();
 		Long buildNumber = build.getNumber();
-		Collection<String> secretValuesToMask = build.getSecretValuesToMask();
-		secretValuesToMask.addAll(jobSecretsToMask);
+		Collection<String> secretsToMask = build.getMaskSecrets();
 		return new TaskLogger() {
 			
 			private final Map<String, StyleBuilder> styleBuilders = new ConcurrentHashMap<>();
 			
 			private void doLog(String message, StyleBuilder styleBuilder) {
 				message = Project.decodeFullRepoNameAsPath(message);
-				for (String maskSecret: secretValuesToMask)
+				for (String maskSecret: secretsToMask)
 					message = StringUtils.replace(message, maskSecret, SecretInput.MASK);
 				
 				String maskedMessage = message;

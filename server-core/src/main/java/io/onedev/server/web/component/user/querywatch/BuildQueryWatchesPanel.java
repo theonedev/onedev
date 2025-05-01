@@ -156,7 +156,7 @@ class BuildQueryWatchesPanel extends GenericPanel<User> {
                     link.add(new Label("label", name));
                     fragment.add(link);
                 } else {
-                    var link = new BookmarkablePageLink<Void>("link", BuildListPage.class, BuildListPage.paramsOf(rowModel.getObject().query, 1, 0));
+                    var link = new BookmarkablePageLink<Void>("link", BuildListPage.class, BuildListPage.paramsOf(rowModel.getObject().query, 1));
                     link.add(new Label("label", name));
                     fragment.add(link);
                 }

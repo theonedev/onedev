@@ -67,6 +67,10 @@ class SshCommand implements Command, ServerSessionAware {
 		this.commandString = commandString;
 		this.environments = environments;
 	}
+
+	private void reportProjectNotFoundOrInaccessible(String projectPath) {
+		onExit(-1, "Project not found or inaccessible: " + projectPath);
+	}
 	
 	@Override
 	public void start(ChannelSession channel, Environment env) throws IOException {
@@ -90,7 +94,7 @@ class SshCommand implements Command, ServerSessionAware {
 		if (StringUtils.isBlank(projectPath))
 			throw new ExplicitException("Project not specified");
         if (projectFacade == null) {
-			onExit(-1, "Unable to find project '" + projectPath + "'");
+			reportProjectNotFoundOrInaccessible(projectPath);
 			return;
         } 
 		
@@ -107,14 +111,18 @@ class SshCommand implements Command, ServerSessionAware {
 		        sessionManager.openSession(); 
 		        try {
 		        	Project project = projectManager.load(projectFacade.getId());
+					if (!SecurityUtils.canAccessProject(project)) {
+						reportProjectNotFoundOrInaccessible(projectPath);
+						return;
+					}
 		        	if (upload) {
 		    			if (!SecurityUtils.canReadCode(project)) {
-		    				onExit(-1, "You are not allowed to pull from the project");
+		    				onExit(-1, "You do not have permission to pull from the project");
 		    				return;
 		    			}
 		        	} else {
 		    			if (!SecurityUtils.canWriteCode(project)) {
-		    				onExit(-1, "You are not allowed to push to the project");
+		    				onExit(-1, "You do not have permission to push to the project");
 		    				return;
 		    			}
 		        	}

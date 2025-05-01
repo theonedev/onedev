@@ -85,7 +85,7 @@ public class PypiPackService implements PackService {
 	private String getAttribute(Map<String, List<String>> attributes, String attributeKey) {
 		var value = attributes.get(attributeKey);
 		if (value == null || value.isEmpty())
-			throw new ClientException(SC_BAD_REQUEST, "Form field not found: " + attributeKey);
+			throw new ClientException(SC_BAD_REQUEST, "Attribute not found: " + attributeKey);
 		return value.get(0);
 	}
 	
@@ -305,6 +305,11 @@ public class PypiPackService implements PackService {
 			throw new UnauthorizedException("No package read permission for project: " + project.getPath());
 		}
 		return project;
+	}
+
+	@Override
+	public List<String> normalize(List<String> pathSegments) {
+		return pathSegments;
 	}
 
 }

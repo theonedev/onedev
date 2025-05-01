@@ -120,8 +120,6 @@ public abstract class BuildListPanel extends Panel {
 	
 	private final boolean showDuration;
 	
-	private final int expectedCount;
-	
 	private final IModel<BuildQuery> queryModel = new LoadableDetachableModel<BuildQuery>() {
 
 		@Override
@@ -150,12 +148,11 @@ public abstract class BuildListPanel extends Panel {
 	private boolean querySubmitted = true;
 	
 	public BuildListPanel(String id, IModel<String> queryModel, boolean showRef,
-						  boolean showDuration, int expectedCount) {
+						  boolean showDuration) {
 		super(id);
 		this.queryStringModel = queryModel;
 		this.showRef = showRef;
 		this.showDuration = showDuration;
-		this.expectedCount = expectedCount;
 	}
 	
 	private BuildManager getBuildManager() {
@@ -1039,10 +1036,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 
 		};
-		
-		if (expectedCount != 0 && expectedCount != dataProvider.size())
-			warn("Some builds might be hidden due to permission policy");
-		
+				
 		body = new WebMarkupContainer("body");
 		add(body.setOutputMarkupId(true));
 		

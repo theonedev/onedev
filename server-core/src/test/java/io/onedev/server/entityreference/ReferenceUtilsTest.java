@@ -1,13 +1,5 @@
 package io.onedev.server.entityreference;
 
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.commons.loader.AppLoaderMocker;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Project;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.unbescape.html.HtmlEscape;
-
 import static io.onedev.server.entityreference.ReferenceUtils.extractReferences;
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 import static org.junit.Assert.assertEquals;
@@ -15,12 +7,25 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.unbescape.html.HtmlEscape;
+
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.loader.AppLoaderMocker;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+
 public class ReferenceUtilsTest extends AppLoaderMocker {
 
     @Test
     public void test() {
 		var projectManager = mock(ProjectManager.class);
-		Mockito.when(AppLoader.getInstance(ProjectManager.class)).thenReturn(projectManager);		
+		var settingManager = mock(SettingManager.class);
+		Mockito.when(AppLoader.getInstance(ProjectManager.class)).thenReturn(projectManager);	
+		Mockito.when(AppLoader.getInstance(SettingManager.class)).thenReturn(settingManager);	
 		var project1 = new Project();
 		project1.setId(1L);
 		project1.setKey("ONE");
@@ -35,6 +40,7 @@ public class ReferenceUtilsTest extends AppLoaderMocker {
 		when(projectManager.load(2L)).thenReturn(project2);
 		when(projectManager.findByKey("TWO")).thenReturn(project2);
 		when(projectManager.findByPath("test/project2")).thenReturn(project2);
+		when(settingManager.getIssueSetting()).thenReturn(new GlobalIssueSetting());
 
 		assertEquals("<a href='https://example.com'>A test issue</a>", transformReferences("A test issue", project1, ((reference, text) -> {
 			if (reference != null)

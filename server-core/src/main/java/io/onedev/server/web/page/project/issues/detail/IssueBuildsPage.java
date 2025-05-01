@@ -57,7 +57,7 @@ public class IssueBuildsPage extends IssueDetailPage {
 				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
 			}
 			
-		}, true, true, 0) {
+		}, true, true) {
 
 			@Override
 			protected BuildQuery getBaseQuery() {

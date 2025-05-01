@@ -801,7 +801,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 							title = "Build required for deletion. Submit pull request instead";
 						else 
 							title = "Delete from branch " + getBlobIdent().revision;
-						deleteContainer.add(AttributeAppender.append("title", title));
+						deleteContainer.add(AttributeAppender.append("data-tippy-content", title));
 						
 						AjaxLink<Void> deleteLink = new ViewStateAwareAjaxLink<Void>("link") {
 

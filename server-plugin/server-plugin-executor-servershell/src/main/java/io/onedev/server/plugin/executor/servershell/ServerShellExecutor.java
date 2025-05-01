@@ -1,31 +1,13 @@
 package io.onedev.server.plugin.executor.servershell;
 
-import io.onedev.agent.ExecutorUtils;
-import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.commons.utils.command.Commandline;
-import io.onedev.k8shelper.*;
-import io.onedev.server.OneDev;
-import io.onedev.server.annotation.Code;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Numeric;
-import io.onedev.server.annotation.OmitName;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.git.location.GitLocation;
-import io.onedev.server.job.*;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.plugin.executor.servershell.ServerShellExecutor.TestData;
-import io.onedev.server.terminal.CommandlineShell;
-import io.onedev.server.terminal.Shell;
-import io.onedev.server.terminal.Terminal;
-import io.onedev.server.web.util.Testable;
-import org.apache.commons.lang.SystemUtils;
+import static io.onedev.agent.ExecutorUtils.newInfoLogger;
+import static io.onedev.agent.ExecutorUtils.newWarningLogger;
+import static io.onedev.agent.ShellExecutorUtils.testCommands;
+import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
+import static io.onedev.k8shelper.KubernetesHelper.installGitCert;
+import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
+import static io.onedev.k8shelper.KubernetesHelper.stringifyStepPosition;
 
-import javax.validation.constraints.NotEmpty;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -35,10 +17,50 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.onedev.agent.ExecutorUtils.newInfoLogger;
-import static io.onedev.agent.ExecutorUtils.newWarningLogger;
-import static io.onedev.agent.ShellExecutorUtils.testCommands;
-import static io.onedev.k8shelper.KubernetesHelper.*;
+import javax.validation.constraints.NotEmpty;
+
+import org.apache.commons.lang.SystemUtils;
+
+import io.onedev.agent.ExecutorUtils;
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.bootstrap.SecretMasker;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.commons.utils.command.Commandline;
+import io.onedev.k8shelper.BuildImageFacade;
+import io.onedev.k8shelper.CheckoutFacade;
+import io.onedev.k8shelper.CloneInfo;
+import io.onedev.k8shelper.CommandFacade;
+import io.onedev.k8shelper.CompositeFacade;
+import io.onedev.k8shelper.LeafFacade;
+import io.onedev.k8shelper.LeafHandler;
+import io.onedev.k8shelper.PruneBuilderCacheFacade;
+import io.onedev.k8shelper.RunContainerFacade;
+import io.onedev.k8shelper.RunImagetoolsFacade;
+import io.onedev.k8shelper.ServerSideFacade;
+import io.onedev.k8shelper.ServerStepResult;
+import io.onedev.k8shelper.SetupCacheFacade;
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Code;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Numeric;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.git.location.GitLocation;
+import io.onedev.server.job.JobContext;
+import io.onedev.server.job.JobManager;
+import io.onedev.server.job.JobRunnable;
+import io.onedev.server.job.ResourceAllocator;
+import io.onedev.server.job.ServerCacheHelper;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.plugin.executor.servershell.ServerShellExecutor.TestData;
+import io.onedev.server.terminal.CommandlineShell;
+import io.onedev.server.terminal.Shell;
+import io.onedev.server.terminal.Terminal;
+import io.onedev.server.web.util.Testable;
 
 @Editable(order=ServerShellExecutor.ORDER, name="Server Shell Executor", description="" +
 		"This executor runs build jobs with OneDev server's shell facility.<br>" +
@@ -101,6 +123,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 						"onedev-build-" + jobContext.getProjectId() + "-" + jobContext.getBuildNumber() + "-" + jobContext.getSubmitSequence());
 				FileUtils.createDir(buildHome);
 				File workspaceDir = new File(buildHome, "workspace");
+				SecretMasker.push(jobContext.getSecretMasker());
 				try {
 					String localServer = getClusterManager().getLocalServerAddress();
 					jobLogger.log(String.format("Executing job (executor: %s, server: %s)...", 
@@ -241,6 +264,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					
 					return successful;
 				} finally {
+					SecretMasker.pop();
 					// Fix https://code.onedev.io/onedev/server/~issues/597
 					if (SystemUtils.IS_OS_WINDOWS && workspaceDir.exists())
 						FileUtils.deleteDir(workspaceDir);

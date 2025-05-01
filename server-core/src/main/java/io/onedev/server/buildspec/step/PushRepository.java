@@ -1,5 +1,14 @@
 package io.onedev.server.buildspec.step;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+
+import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
@@ -13,13 +22,6 @@ import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Editable(order=1080, name="Push to Remote", group=StepGroup.REPOSITORY_SYNC, 
 		description="This step pushes current commit to same ref on remote")
@@ -30,9 +32,10 @@ public class PushRepository extends SyncRepository {
 	@Override
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
 		return OneDev.getInstance(SessionManager.class).call(() -> {
+			var build = OneDev.getInstance(BuildManager.class).load(buildId);
 			var certificateFile = writeCertificate(getCertificate());
+			SecretMasker.push(build.getSecretMasker());
 			try {
-				var build = OneDev.getInstance(BuildManager.class).load(buildId);
 				if (OneDev.getInstance(ProjectManager.class).hasLfsObjects(build.getProject().getId())) {
 					Project project = build.getProject();
 					Commandline git = CommandUtils.newGit();
@@ -163,6 +166,7 @@ public class PushRepository extends SyncRepository {
 
 				}).checkReturnCode();
 			} finally {
+				SecretMasker.pop();
 				if (certificateFile != null)
 					FileUtils.deleteFile(certificateFile);
 			}

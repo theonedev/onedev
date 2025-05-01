@@ -14,7 +14,7 @@ public class ObjectNotFoundExceptionHandler extends AbstractExceptionHandler<Obj
     public HttpResponse getResponse(ObjectNotFoundException exception) {
 		var errorMessage = exception.getMessage();
 		if (errorMessage == null)
-			errorMessage = "Database entity not found";
+			errorMessage = "Not found";
 		return new HttpResponse(HttpServletResponse.SC_NOT_FOUND, errorMessage);
     }
     

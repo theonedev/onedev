@@ -16,6 +16,8 @@
  */
 package io.onedev.server.web.websocket;
 
+import java.io.IOException;
+
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.protocol.http.WebApplication;
@@ -31,8 +33,6 @@ import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.persistence.SessionManager;
-
-import java.io.IOException;
 
 /**
  * An {@link org.apache.wicket.protocol.ws.api.IWebSocketProcessor processor} that integrates with

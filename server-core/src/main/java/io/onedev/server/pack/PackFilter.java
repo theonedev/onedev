@@ -1,19 +1,8 @@
 package io.onedev.server.pack;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.AccessTokenManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.job.JobManager;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.security.ExceptionHandleFilter;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.shiro.codec.Base64;
-import org.apache.shiro.subject.support.DefaultSubjectContext;
-import org.apache.shiro.util.ThreadContext;
+import static org.apache.shiro.SecurityUtils.getSubject;
+
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,9 +12,23 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
-import java.util.Set;
 
-import static org.apache.shiro.SecurityUtils.getSubject;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.codec.Base64;
+import org.apache.shiro.subject.support.DefaultSubjectContext;
+import org.apache.shiro.util.ThreadContext;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.entitymanager.AccessTokenManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.job.JobManager;
+import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.security.ExceptionHandleFilter;
 
 @Singleton
 public class PackFilter extends ExceptionHandleFilter {
@@ -60,8 +63,9 @@ public class PackFilter extends ExceptionHandleFilter {
 				.splitToList(httpRequest.getRequestURI());
 		for (var packService: packServices) {
 			var serviceMark = "~" + packService.getServiceId();
-			var serviceMarkIndex = pathSegments.indexOf(serviceMark);
-			if (serviceMarkIndex != -1) {
+			if (pathSegments.contains(serviceMark)) {
+				pathSegments = packService.normalize(pathSegments);
+				var serviceMarkIndex = pathSegments.indexOf(serviceMark);
 				request.setAttribute(DefaultSubjectContext.SESSION_CREATION_ENABLED, Boolean.FALSE);
 				var projectPath = Joiner.on('/').join(pathSegments.subList(0, serviceMarkIndex));
 				var projectId = sessionManager.call(() -> {

@@ -1,12 +1,14 @@
 package io.onedev.server.model.support;
 
-import io.onedev.server.util.DateUtils;
-
-import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.time.DayOfWeek;
+import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
+
+import javax.persistence.Embeddable;
+
+import io.onedev.server.util.DateUtils;
 
 @Embeddable
 public class TimeGroups implements Serializable {
@@ -51,7 +53,7 @@ public class TimeGroups implements Serializable {
 	
 	public static TimeGroups of(Date date) {
 		var timeGroups = new TimeGroups();
-		var localDate = DateUtils.toLocalDate(date);
+		var localDate = DateUtils.toLocalDate(date, ZoneId.systemDefault());
 		timeGroups.setMonth((int) localDate.with(TemporalAdjusters.firstDayOfMonth()).toEpochDay());
 		timeGroups.setWeek((int) localDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toEpochDay());
 		timeGroups.setDay((int) localDate.toEpochDay());

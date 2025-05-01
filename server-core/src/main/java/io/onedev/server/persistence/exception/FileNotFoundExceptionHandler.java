@@ -15,7 +15,7 @@ public class FileNotFoundExceptionHandler extends AbstractExceptionHandler<FileN
     public HttpResponse getResponse(FileNotFoundException exception) {
 		var errorMessage = exception.getMessage();
 		if (errorMessage == null)
-			errorMessage = "File not found";
+			errorMessage = "Not found";
 		return new HttpResponse(HttpServletResponse.SC_NOT_FOUND, errorMessage);
     }
     

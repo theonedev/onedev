@@ -32,7 +32,7 @@ public class BeforeCriteria extends CommitCriteria {
 	@Override
 	public void fill(Project project, RevListOptions options) {
 		for (String value: values)
-			options.before(value);
+			options.before(DateUtils.formatISO8601Date(DateUtils.parseRelaxed(value)));
 	}
 
 	@Override

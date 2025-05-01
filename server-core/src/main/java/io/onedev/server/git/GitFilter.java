@@ -93,8 +93,7 @@ public class GitFilter implements Filter {
 		return StringUtils.stripStart(pathInfo, "/");
 	}
 	
-	private Long getProjectId(String projectInfo, boolean clusterAccess, boolean upload) {
-		var projectPath = decodeFullRepoNameAsPath(strip(projectInfo, "/"));
+	private Long getProjectId(String projectPath, boolean clusterAccess, boolean upload) {
 		var facade = projectManager.findFacadeByPath(projectPath);
 		if (facade == null && projectPath.endsWith(".git")) {
 			projectPath = StringUtils.substringBeforeLast(projectPath, ".");
@@ -103,10 +102,17 @@ public class GitFilter implements Filter {
 		if (StringUtils.isBlank(projectPath))
 			throw new ExplicitException("Project not specified");
 		if (facade == null) 
-			throw new ExplicitException(String.format("Unable to find project '%s'", projectPath));
+			reportProjectNotFoundOrInaccessible(projectPath);
 		return facade.getId();
 	}
-	
+
+	private void reportProjectNotFoundOrInaccessible(String projectPath) {
+		if (SecurityUtils.getUser() != null)
+			throw new ExplicitException("Project not found or inaccessible: " + projectPath);
+		else
+			throw new UnauthorizedException("Authentication required");
+	}
+
 	private void doNotCache(HttpServletResponse response) {
 		response.setHeader("Expires", "Fri, 01 Jan 1980 00:00:00 GMT");
 		response.setHeader("Pragma", "no-cache");
@@ -125,7 +131,8 @@ public class GitFilter implements Filter {
 		String service = StringUtils.substringAfterLast(pathInfo, "/");
 
 		String projectInfo = StringUtils.substringBeforeLast(pathInfo, "/");
-		Long projectId = getProjectId(projectInfo, clusterAccess, upload);
+		var projectPath = decodeFullRepoNameAsPath(strip(projectInfo, "/"));
+		Long projectId = getProjectId(projectPath, clusterAccess, upload);
 		
 		doNotCache(response);
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
@@ -153,6 +160,8 @@ public class GitFilter implements Filter {
 			sessionManager.openSession();
 			try {
 				Project project = projectManager.load(projectId);
+				if (!canAccessProject(request, project))
+					reportProjectNotFoundOrInaccessible(projectPath);
 				if (upload) {
 					checkPullPermission(request, project);
 				} else {
@@ -267,6 +276,18 @@ public class GitFilter implements Filter {
 				throw new UnauthorizedException("You do not have permission to pull from this project.");
 		}
 	}
+
+	private boolean canAccessProject(HttpServletRequest request, Project project) {
+		if (!SecurityUtils.canAccessProject(project)) {
+			for (CodePullAuthorizationSource source: codePullAuthorizationSources) {
+				if (source.canPullCode(request, project)) 
+					return true;
+			}
+			return false;
+		} else {
+			return true;
+		}
+	}
 	
 	protected void processRefs(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		boolean clusterAccess = SecurityUtils.isSystem();
@@ -278,12 +299,15 @@ public class GitFilter implements Filter {
 		pathInfo = StringUtils.stripStart(pathInfo, "/");
 
 		String projectInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
-		Long projectId = getProjectId(projectInfo, clusterAccess, upload);
-		
+		var projectPath = decodeFullRepoNameAsPath(strip(projectInfo, "/"));
+		Long projectId = getProjectId(projectPath, clusterAccess, upload);
+				
 		if (!clusterAccess) {
 			sessionManager.openSession();
 			try {
 				Project project = projectManager.load(projectId);
+				if (!canAccessProject(request, project))
+					reportProjectNotFoundOrInaccessible(projectPath);
 				if (upload) {
 					checkPullPermission(request, project);
 					writeInitial(response, service);

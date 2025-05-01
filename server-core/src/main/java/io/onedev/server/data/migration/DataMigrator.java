@@ -1,5 +1,8 @@
 package io.onedev.server.data.migration;
 
+import static io.onedev.server.util.Constants.DATETIME_FORMATTER;
+import static io.onedev.server.util.Constants.DATE_FORMATTER;
+import static io.onedev.server.util.DateUtils.toLocalDate;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
@@ -54,6 +57,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.Issue;
@@ -65,7 +69,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.TimeGroups;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.CryptoUtils;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.DirectoryVersionUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ParsedEmailAddress;
@@ -6757,9 +6760,9 @@ public class DataMigrator {
 					if (finishDateElement != null) {
 						var finishDate = parseDate(finishDateElement.getText().trim());
 						var finishTimeGroupsElement = element.addElement("finishTimeGroups");
-						finishTimeGroupsElement.addElement("day").setText(String.valueOf(DateUtils.toLocalDate(finishDate).toEpochDay()));
-						finishTimeGroupsElement.addElement("week").setText(String.valueOf(DateUtils.toLocalDate(finishDate).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toEpochDay()));
-						finishTimeGroupsElement.addElement("month").setText(String.valueOf(DateUtils.toLocalDate(finishDate).with(TemporalAdjusters.firstDayOfMonth()).toEpochDay()));
+						finishTimeGroupsElement.addElement("day").setText(String.valueOf(toLocalDate(finishDate).toEpochDay()));
+						finishTimeGroupsElement.addElement("week").setText(String.valueOf(toLocalDate(finishDate).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toEpochDay()));
+						finishTimeGroupsElement.addElement("month").setText(String.valueOf(toLocalDate(finishDate).with(TemporalAdjusters.firstDayOfMonth()).toEpochDay()));
 						if (runningDateElement != null)
 							element.addElement("runningDuration").setText(String.valueOf(finishDate.getTime() - parseDate(runningDateElement.getText().trim()).getTime()));
 					}
@@ -6772,18 +6775,18 @@ public class DataMigrator {
 				for (Element element : dom.getRootElement().elements()) {
 					var submitDate = parseDate(element.elementText("submitDate").trim());
 					var submitTimeGroupsElement = element.addElement("submitTimeGroups");
-					submitTimeGroupsElement.addElement("day").setText(String.valueOf(DateUtils.toLocalDate(submitDate).toEpochDay()));
-					submitTimeGroupsElement.addElement("week").setText(String.valueOf(DateUtils.toLocalDate(submitDate).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toEpochDay()));
-					submitTimeGroupsElement.addElement("month").setText(String.valueOf(DateUtils.toLocalDate(submitDate).with(TemporalAdjusters.firstDayOfMonth()).toEpochDay()));
+					submitTimeGroupsElement.addElement("day").setText(String.valueOf(toLocalDate(submitDate).toEpochDay()));
+					submitTimeGroupsElement.addElement("week").setText(String.valueOf(toLocalDate(submitDate).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toEpochDay()));
+					submitTimeGroupsElement.addElement("month").setText(String.valueOf(toLocalDate(submitDate).with(TemporalAdjusters.firstDayOfMonth()).toEpochDay()));
 
 					if (!element.elementTextTrim("status").equals("OPEN")) {
 						var closeDate = parseDate(element.element("lastActivity").elementText("date").trim());
 						element.addElement("closeDate").addAttribute("class", "sql-timestamp").setText(formatDate(closeDate));
 						element.addElement("duration").setText(String.valueOf(closeDate.getTime() - submitDate.getTime()));
 						var closeTimeGroupsElement = element.addElement("closeTimeGroups");
-						closeTimeGroupsElement.addElement("day").setText(String.valueOf(DateUtils.toLocalDate(closeDate).toEpochDay()));
-						closeTimeGroupsElement.addElement("week").setText(String.valueOf(DateUtils.toLocalDate(closeDate).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toEpochDay()));
-						closeTimeGroupsElement.addElement("month").setText(String.valueOf(DateUtils.toLocalDate(closeDate).with(TemporalAdjusters.firstDayOfMonth()).toEpochDay()));
+						closeTimeGroupsElement.addElement("day").setText(String.valueOf(toLocalDate(closeDate).toEpochDay()));
+						closeTimeGroupsElement.addElement("week").setText(String.valueOf(toLocalDate(closeDate).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toEpochDay()));
+						closeTimeGroupsElement.addElement("month").setText(String.valueOf(toLocalDate(closeDate).with(TemporalAdjusters.firstDayOfMonth()).toEpochDay()));
 					}
 				}
 				dom.writeToFile(file, false);
@@ -6832,9 +6835,9 @@ public class DataMigrator {
 		historyElement.addElement("state").setText(history.getState());
 		historyElement.addElement("date").addAttribute("class", "sql-timestamp").setText(formatDate(history.getDate()));
 		var timeGroupsElement = historyElement.addElement("timeGroups");
-		timeGroupsElement.addElement("day").setText(String.valueOf(DateUtils.toLocalDate(history.getDate()).toEpochDay()));
-		timeGroupsElement.addElement("week").setText(String.valueOf(DateUtils.toLocalDate(history.getDate()).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toEpochDay()));
-		timeGroupsElement.addElement("month").setText(String.valueOf(DateUtils.toLocalDate(history.getDate()).with(TemporalAdjusters.firstDayOfMonth()).toEpochDay()));
+		timeGroupsElement.addElement("day").setText(String.valueOf(toLocalDate(history.getDate()).toEpochDay()));
+		timeGroupsElement.addElement("week").setText(String.valueOf(toLocalDate(history.getDate()).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toEpochDay()));
+		timeGroupsElement.addElement("month").setText(String.valueOf(toLocalDate(history.getDate()).with(TemporalAdjusters.firstDayOfMonth()).toEpochDay()));
 		if (history.getDuration() != null)
 			historyElement.addElement("duration").setText(history.getDuration().toString());
 		return historyElement;
@@ -7024,7 +7027,7 @@ public class DataMigrator {
 	}
 
 	private void migrate176_timeGroups(Element timeGroupsElement, String dateString) {
-		var localDate = DateUtils.toLocalDate(parseDate(dateString));
+		var localDate = toLocalDate(parseDate(dateString));
 		timeGroupsElement.clearContent();
 		timeGroupsElement.addElement("day").setText(String.valueOf(localDate.toEpochDay()));
 		timeGroupsElement.addElement("week").setText(String.valueOf(localDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toEpochDay()));
@@ -7797,6 +7800,57 @@ public class DataMigrator {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
 					element.addElement("disabled").setText("false");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate198(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("IssueFields.xml") || file.getName().startsWith("BuildParams.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var type = element.elementText("type").trim();
+					var valueElement = element.element("value");
+					if (valueElement != null) {
+						if (type.equals(InputSpec.DATE)) {
+							valueElement.setText(String.valueOf(DATE_FORMATTER.parseDateTime(valueElement.getText().trim()).getMillis()));
+						} else if (type.equals(InputSpec.DATE_TIME)) {
+							valueElement.setText(String.valueOf(DATETIME_FORMATTER.parseDateTime(valueElement.getText().trim()).getMillis()));
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Iterations.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var startDateElement = element.element("startDate");
+					if (startDateElement != null) {
+						element.addElement("startDay").setText(String.valueOf(toLocalDate(parseDate(startDateElement.getText().trim()), ZoneId.systemDefault()).toEpochDay()));
+						startDateElement.detach();
+					}	
+					var dueDateElement = element.element("dueDate");
+					if (dueDateElement != null) {
+						element.addElement("dueDay").setText(String.valueOf(toLocalDate(parseDate(dueDateElement.getText().trim()), ZoneId.systemDefault()).toEpochDay()));
+						dueDateElement.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueWorks.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("day").detach();
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) 
+							valueElement.addElement("externalIssueTransformers").addElement("entries");
+					}
 				}
 				dom.writeToFile(file, false);
 			}

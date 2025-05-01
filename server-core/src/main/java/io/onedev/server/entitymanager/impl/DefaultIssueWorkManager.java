@@ -1,5 +1,26 @@
 package io.onedev.server.entitymanager.impl;
 
+import static io.onedev.server.model.IssueWork.PROP_DATE;
+import static io.onedev.server.model.IssueWork.PROP_ISSUE;
+import static io.onedev.server.model.IssueWork.PROP_USER;
+import static io.onedev.server.model.Project.PROP_TIME_TRACKING;
+import static java.util.stream.Collectors.toSet;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
+
 import edu.emory.mathcs.backport.java.util.Arrays;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
@@ -15,22 +36,6 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static io.onedev.server.model.IssueWork.*;
-import static io.onedev.server.model.Project.PROP_TIME_TRACKING;
-import static java.util.stream.Collectors.toSet;
 
 @Singleton
 public class DefaultIssueWorkManager extends BaseEntityManager<IssueWork> implements IssueWorkManager {
@@ -55,7 +60,7 @@ public class DefaultIssueWorkManager extends BaseEntityManager<IssueWork> implem
 	@SuppressWarnings("unchecked")
 	@Sessional
 	@Override
-	public List<IssueWork> query(ProjectScope projectScope, EntityQuery<Issue> issueQuery, long fromDay, long toDay) {
+	public List<IssueWork> query(ProjectScope projectScope, EntityQuery<Issue> issueQuery, Date fromDate, Date toDate) {
 		var builder = getSession().getCriteriaBuilder();
 		var criteriaQuery = builder.createQuery(IssueWork.class);
 		var root = criteriaQuery.from(IssueWork.class);
@@ -68,8 +73,8 @@ public class DefaultIssueWorkManager extends BaseEntityManager<IssueWork> implem
 		
 		Join<Project, Project> project = issue.join(Issue.PROP_PROJECT, JoinType.INNER);
 		predicates.add(builder.equal(project.get(PROP_TIME_TRACKING), true));
-		predicates.add(builder.ge(root.get(PROP_DAY), fromDay));
-		predicates.add(builder.le(root.get(PROP_DAY), toDay));
+		predicates.add(builder.greaterThanOrEqualTo(root.get(PROP_DATE), fromDate));
+		predicates.add(builder.lessThanOrEqualTo(root.get(PROP_DATE), toDate));
 		
 		criteriaQuery.where(predicates.toArray(new Predicate[0]));
 		List<javax.persistence.criteria.Order> preferOrders = new ArrayList<>();
@@ -101,11 +106,12 @@ public class DefaultIssueWorkManager extends BaseEntityManager<IssueWork> implem
 
 	@Sessional
 	@Override
-	public List<IssueWork> query(User user, Issue issue, long day) {
+	public List<IssueWork> query(User user, Issue issue, Date fromDate, Date toDate) {
 		var criteria = newCriteria();
 		criteria.add(Restrictions.eq(PROP_USER, user));
 		criteria.add(Restrictions.eq(PROP_ISSUE, issue));
-		criteria.add(Restrictions.eq(PROP_DAY, day));
+		criteria.add(Restrictions.ge(PROP_DATE, fromDate));
+		criteria.add(Restrictions.le(PROP_DATE, toDate));
 		return query(criteria);
 	}
 	

@@ -18,4 +18,6 @@ public interface PackService {
 	@Nullable
 	String getApiKey(HttpServletRequest request);
 	
+	List<String> normalize(List<String> pathSegments);
+	
 }

@@ -1,5 +1,6 @@
 package io.onedev.server.web;
 
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -7,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpSession;
 
-import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.subject.Subject;
@@ -16,6 +16,7 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.util.collections.ConcurrentHashSet;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 import io.onedev.server.web.util.Cursor;
 
 public class WebSession extends org.apache.wicket.protocol.http.WebSession {
@@ -29,6 +30,8 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 	private volatile Cursor packCursor;
 	
 	private volatile Cursor pullRequestCursor; 
+
+	private volatile ZoneId zoneId;
 	
 	private Map<Class<?>, String> redirectUrlsAfterDelete = new ConcurrentHashMap<>(); 
 	
@@ -106,6 +109,15 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 	
 	public Set<Long> getExpandedProjectIds() {
 		return expandedProjectIds;
+	}
+
+	@Nullable
+	public ZoneId getZoneId() {
+		return zoneId;
+	}
+
+	public void setZoneId(@Nullable ZoneId zoneId) {
+		this.zoneId = zoneId;
 	}
 
 	public static WebSession from(HttpSession session) {

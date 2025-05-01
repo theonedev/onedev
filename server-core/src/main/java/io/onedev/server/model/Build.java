@@ -65,6 +65,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
@@ -77,6 +78,7 @@ import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entityreference.BuildReference;
@@ -909,21 +911,28 @@ public class Build extends ProjectBelonging
 	public JobAuthorizationContext getJobSecretAuthorizationContext() {
 		return getJobAuthorizationContext();
 	}
+
+	public SecretMasker getSecretMasker() {
+		return SecretMasker.create(getMaskSecrets(), SecretInput.MASK);
+	}
 	
-	public Collection<String> getSecretValuesToMask() {
-		Collection<String> secretValuesToMask = new HashSet<>();
+	public Collection<String> getMaskSecrets() {
+		Collection<String> maskSecrets = new HashSet<>();
+		maskSecrets.add(getJobToken());
+		maskSecrets.add(OneDev.getInstance(ClusterManager.class).getCredential());
+
 		for (JobSecret secret: getProject().getHierarchyJobSecrets()) 
-			secretValuesToMask.add(secret.getValue());
+			maskSecrets.add(secret.getValue());
 		
 		for (BuildParam param: getParams()) {
 			if (param.getType().equals(ParamSpec.SECRET) && param.getValue() != null) {		
 				if (param.getValue().startsWith(SecretInput.LITERAL_VALUE_PREFIX)) 
-					secretValuesToMask.add(param.getValue().substring(SecretInput.LITERAL_VALUE_PREFIX.length()));
+					maskSecrets.add(param.getValue().substring(SecretInput.LITERAL_VALUE_PREFIX.length()));
 			}
 		}
 
-		secretValuesToMask.removeIf(s -> s.length() < SecretInput.MASK.length());
-		return secretValuesToMask;
+		maskSecrets.removeIf(s -> s.length() < SecretInput.MASK.length());
+		return maskSecrets;
 	}
 	
 	@Nullable
