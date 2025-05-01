@@ -4,6 +4,8 @@ import static io.onedev.server.model.User.PROP_FULL_NAME;
 import static io.onedev.server.model.User.PROP_NAME;
 import static io.onedev.server.security.SecurityUtils.asPrincipals;
 import static io.onedev.server.security.SecurityUtils.asUserPrincipal;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,7 +14,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -260,6 +261,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     private transient Optional<EmailAddress> primaryEmailAddress;
     
     private transient Optional<EmailAddress> gitEmailAddress;
+
+	private transient Collection<User> collaborators;
     
 	public QueryPersonalization<NamedProjectQuery> getProjectQueryPersonalization() {
 		return new QueryPersonalization<NamedProjectQuery>() {
@@ -698,7 +701,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public Collection<Group> getGroups() {
 		if (groups == null)  
-			groups = getMemberships().stream().map(it->it.getGroup()).collect(Collectors.toList());
+			groups = getMemberships().stream().map(it->it.getGroup()).collect(toList());
 		return groups;
 	}
 	
@@ -1066,6 +1069,13 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		return gitEmailAddress.orElse(null);
 	}
 	
+	public Collection<User> getCollaborators() {
+		if (collaborators == null) {
+			collaborators = getGroups().stream().flatMap(it->it.getMembers().stream()).filter(it -> !it.isDisabled()).collect(toSet());
+		}
+		return collaborators;
+	}
+
 	@Override
 	public UserFacade getFacade() {
 		return new UserFacade(getId(), getName(), getFullName(), isServiceAccount(), isDisabled());

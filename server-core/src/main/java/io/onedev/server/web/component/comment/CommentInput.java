@@ -35,7 +35,11 @@ public abstract class CommentInput extends MarkdownEditor {
 		return (query, count) -> {
 			var cache = getUserManager().cloneCache();
 			var participants = getParticipants();
-			var otherUsers = new ArrayList<>(cache.getUsers());
+			List<User> otherUsers;
+			if (SecurityUtils.isAdministrator())
+				otherUsers = new ArrayList<>(cache.getUsers());
+			else
+				otherUsers = new ArrayList<>(SecurityUtils.getUser().getCollaborators());
 			otherUsers.removeAll(participants);
 			
 			var similarities = new Similarities<>(participants) {
