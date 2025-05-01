@@ -335,15 +335,7 @@ public class SuggestionUtils {
 		List<InputSuggestion> suggestions = new ArrayList<>();
 
 		UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();
-		
-		List<UserFacade> users;
-		if (SecurityUtils.isAdministrator())
-			users = cache.values().stream().filter(it -> !it.isDisabled()).collect(toList());
-		else if (SecurityUtils.getUser() != null)
-			users = SecurityUtils.getUser().getCollaborators().stream().map(it -> it.getFacade()).collect(toList());
-		else
-			users = new ArrayList<>();
-		
+		var users = cache.values().stream().filter(it -> !it.isDisabled()).collect(toList());
 		users.sort(Comparator.comparing(it -> it.getDisplayName()));
 		for (UserFacade user: users) {
 			LinearRange match = LinearRange.match(user.getName(), matchWith);
@@ -361,11 +353,7 @@ public class SuggestionUtils {
 			}
 		}
 		
-		suggestions = sortAndTruncate(suggestions, matchWith);
-		if (!suggestions.isEmpty())
-			return suggestions;
-		else
-			return null;
+		return sortAndTruncate(suggestions, matchWith);
 	}
 	
 	public static List<InputSuggestion> suggestLinkSpecs(String matchWith) {

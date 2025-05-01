@@ -84,11 +84,7 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 					@Override
 					public List<User> findUsers(String query, int count) {
 						UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();
-						List<User> users;
-						if (SecurityUtils.isAdministrator())
-							users = new ArrayList<>(cache.getUsers());
-						else
-							users = new ArrayList<>(SecurityUtils.getUser().getCollaborators());
+						List<User> users = new ArrayList<>(cache.getUsers());
 						users.sort(cache.comparingDisplayName(Sets.newHashSet()));
 						
 						users = new Similarities<User>(users) {
