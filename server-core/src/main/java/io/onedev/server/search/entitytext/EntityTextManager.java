@@ -131,8 +131,6 @@ public abstract class EntityTextManager<T extends ProjectBelonging> implements S
 		STOP_WORDS.addAll(SwedishAnalyzer.getDefaultStopSet());
 
 		try {
-			STOP_WORDS.addAll(WordlistLoader.getSnowballWordSet(IOUtils.getDecodingReader(
-					SnowballFilter.class, "english_stop.txt", StandardCharsets.UTF_8)));
 		    STOP_WORDS.addAll(WordlistLoader.getWordSet(IOUtils.getDecodingReader(
 		    		EntityTextManager.class, "chinese_stop.txt", StandardCharsets.UTF_8)));
 		} catch (IOException e) {

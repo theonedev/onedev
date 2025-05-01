@@ -109,7 +109,7 @@ public class DefaultCodeCommentTextManager extends EntityTextManager<CodeComment
 
 		try (Analyzer analyzer = newAnalyzer()) {
 			Map<String, Float> boosts = new HashMap<>();
-			boosts.put(FIELD_PATH, 0.75f);
+			boosts.put(FIELD_PATH, 1.0f);
 			boosts.put(FIELD_COMMENT, 0.5f);
 			boosts.put(FIELD_REPLY, 0.25f);
 			MultiFieldQueryParser parser = new MultiFieldQueryParser(

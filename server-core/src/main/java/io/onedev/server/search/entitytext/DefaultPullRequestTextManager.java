@@ -123,7 +123,7 @@ public class DefaultPullRequestTextManager extends EntityTextManager<PullRequest
 
 		try (Analyzer analyzer = newAnalyzer()) {
 			Map<String, Float> boosts = new HashMap<>();
-			boosts.put(FIELD_TITLE, 0.75f);
+			boosts.put(FIELD_TITLE, 1.0f);
 			boosts.put(FIELD_DESCRIPTION, 0.5f);
 			boosts.put(FIELD_COMMENT, 0.25f);
 			MultiFieldQueryParser parser = new MultiFieldQueryParser(
