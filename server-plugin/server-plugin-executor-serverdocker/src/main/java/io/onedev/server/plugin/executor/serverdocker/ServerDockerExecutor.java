@@ -45,6 +45,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.agent.DockerExecutorUtils;
 import io.onedev.agent.ExecutorUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
@@ -311,7 +312,8 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 
 				hostBuildHome = new File(Bootstrap.getTempDir(),
 						"onedev-build-" + jobContext.getProjectId() + "-" + jobContext.getBuildNumber() + "-"	+ jobContext.getSubmitSequence());
-				FileUtils.createDir(hostBuildHome);					
+				FileUtils.createDir(hostBuildHome);		
+				SecretMasker.push(jobContext.getSecretMasker());
 				try {
 					String network = getName() + "-" + jobContext.getProjectId() + "-"
 							+ jobContext.getBuildNumber() + "-" + jobContext.getSubmitSequence();
@@ -608,6 +610,7 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 						deleteNetwork(newDocker(), network, jobLogger);
 					}
 				} finally {
+					SecretMasker.pop();
 					synchronized (hostBuildHome) {
 						deleteDir(hostBuildHome, newDocker(), Bootstrap.isInDocker());
 					}

@@ -1,7 +1,6 @@
 package io.onedev.server.job.log;
 
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -12,9 +11,7 @@ import io.onedev.server.buildspec.job.log.JobLogEntryEx;
 import io.onedev.server.model.Build;
 
 public interface LogManager {
-	
-	TaskLogger newLogger(Build build, Collection<String> jobSecrets);
-	
+		
 	TaskLogger newLogger(Build build);
 	
 	/**

@@ -133,6 +133,18 @@ public class GitLfsFilter implements Filter {
 		}
 	}
 
+	private boolean canAccessProject(HttpServletRequest request, Project project) {
+		if (!SecurityUtils.canAccessProject(project)) {
+			for (CodePullAuthorizationSource source: codePullAuthorizationSources) {
+				if (source.canPullCode(request, project)) 
+					return true;
+			}
+			return false;
+		} else {
+			return true;
+		}
+	}
+
 	private String getObjectUrl(HttpServletRequest request, String projectPath, String objectId) {
 		var serverUrl = settingManager.getSystemSetting().getServerUrl();
 		return String.format("%s/%s.git/lfs/objects/%s?lfs-objects=true", 
@@ -177,7 +189,7 @@ public class GitLfsFilter implements Filter {
 					sessionManager.openSession();
 					try {
 						Project project = projectManager.findByPath(projectPath);
-						if (project == null || !SecurityUtils.canAccessProject(project))
+						if (project == null || !canAccessProject(httpRequest, project))
 							reportProjectNotFoundOrInaccessible(httpResponse, projectPath);
 						else if (canReadCode(httpRequest, project))  
 							lfsObject = new LfsObject(project.getId(), objectId);
@@ -228,7 +240,7 @@ public class GitLfsFilter implements Filter {
 					sessionManager.openSession();
 					try {
 						Project project = projectManager.findByPath(getProjectPath(pathInfo));
-						if (project == null || !SecurityUtils.canAccessProject(project))
+						if (project == null || !canAccessProject(httpRequest, project))
 							reportProjectNotFoundOrInaccessible(httpResponse, projectPath);
 						else if (SecurityUtils.canWriteCode(project))  
 							lfsObject = new LfsObject(project.getId(), objectId);
@@ -318,7 +330,7 @@ public class GitLfsFilter implements Filter {
 				sessionManager.openSession();
 				try {
 					Project project = projectManager.findByPath(projectPath);
-					if (project == null || !SecurityUtils.canAccessProject(project)) {
+					if (project == null || !canAccessProject(httpRequest, project)) {
 						reportProjectNotFoundOrInaccessible(httpResponse, projectPath);
 					} else {
 						httpResponse.setContentType(CONTENT_TYPE);

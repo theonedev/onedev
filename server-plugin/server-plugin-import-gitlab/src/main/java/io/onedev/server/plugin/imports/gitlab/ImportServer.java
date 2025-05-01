@@ -40,7 +40,7 @@ import org.unbescape.html.HtmlEscape;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.bootstrap.SensitiveMasker;
+import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -318,7 +318,7 @@ public class ImportServer implements Serializable, Validatable {
 							URIBuilder builder = new URIBuilder(projectNode.get("http_url_to_repo").asText());
 							builder.setUserInfo("git", getAccessToken());
 
-							SensitiveMasker.push(new SensitiveMasker() {
+							SecretMasker.push(new SecretMasker() {
 
 								@Override
 								public String mask(String text) {
@@ -335,7 +335,7 @@ public class ImportServer implements Serializable, Validatable {
 									projectManager.clone(project, builder.build().toString());
 								}
 							} finally {
-								SensitiveMasker.pop();
+								SecretMasker.pop();
 							}
 						} else {
 							logger.warning("Skipping code clone as the project already has code");

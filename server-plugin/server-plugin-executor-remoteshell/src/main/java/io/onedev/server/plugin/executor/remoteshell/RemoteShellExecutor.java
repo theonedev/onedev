@@ -98,7 +98,8 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 				String jobToken = jobContext.getJobToken();
 				ShellJobData jobData = new ShellJobData(jobToken, getName(), jobContext.getProjectPath(),
 						jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
-						jobContext.getBuildNumber(), jobContext.getSubmitSequence(), jobContext.getActions());
+						jobContext.getBuildNumber(), jobContext.getSubmitSequence(), jobContext.getActions(), 
+						jobContext.getSecretMasker());
 
 				try {
 					return call(agentSession, jobData, jobContext.getTimeout()*1000L);

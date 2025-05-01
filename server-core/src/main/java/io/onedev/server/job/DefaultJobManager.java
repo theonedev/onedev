@@ -1,12 +1,87 @@
 package io.onedev.server.job;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.onedev.commons.utils.ExceptionUtils.find;
+import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
+import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
+import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
+import static org.eclipse.jgit.lib.Constants.R_HEADS;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidationException;
+import javax.validation.Validator;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.subject.Subject;
+import org.eclipse.jgit.lib.ObjectId;
+import org.joda.time.DateTime;
+import org.quartz.CronExpression;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.ScheduleBuilder;
+import org.quartz.SimpleScheduleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.hazelcast.map.IMap;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.*;
-import io.onedev.k8shelper.*;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TarUtils;
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.Action;
+import io.onedev.k8shelper.CheckoutFacade;
+import io.onedev.k8shelper.CompositeFacade;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.k8shelper.LeafFacade;
+import io.onedev.k8shelper.LeafVisitor;
+import io.onedev.k8shelper.ServerSideFacade;
+import io.onedev.k8shelper.ServerStepResult;
+import io.onedev.k8shelper.ServiceFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
@@ -29,14 +104,25 @@ import io.onedev.server.buildspec.step.ServerSideStep;
 import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.entitymanager.AccessTokenManager;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.ProjectDeleted;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.ScheduledTimeReaches;
-import io.onedev.server.event.project.build.*;
+import io.onedev.server.event.project.build.BuildFinished;
+import io.onedev.server.event.project.build.BuildPending;
+import io.onedev.server.event.project.build.BuildRetrying;
+import io.onedev.server.event.project.build.BuildSubmitted;
+import io.onedev.server.event.project.build.BuildUpdated;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
@@ -48,8 +134,14 @@ import io.onedev.server.job.log.LogManager;
 import io.onedev.server.job.log.ServerJobLogger;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
-import io.onedev.server.model.*;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
+import io.onedev.server.model.BuildDependence;
+import io.onedev.server.model.BuildParam;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
@@ -73,45 +165,6 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.EditableStringTransformer;
 import io.onedev.server.web.editable.EditableUtils;
 import nl.altindag.ssl.SSLFactory;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.shiro.subject.Subject;
-import org.eclipse.jgit.lib.ObjectId;
-import org.joda.time.DateTime;
-import org.quartz.CronExpression;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.ScheduleBuilder;
-import org.quartz.SimpleScheduleBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidationException;
-import javax.validation.Validator;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import java.io.*;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.onedev.commons.utils.ExceptionUtils.find;
-import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
-import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
-import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
-import static org.eclipse.jgit.lib.Constants.R_HEADS;
 
 @Singleton
 public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource, Serializable {
@@ -520,8 +573,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		String jobToken = build.getJobToken();
 		VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 
-		Collection<String> jobSecretsToMask = Sets.newHashSet(jobToken, clusterManager.getCredential());
-		TaskLogger jobLogger = logManager.newLogger(build, jobSecretsToMask);
+		TaskLogger jobLogger = logManager.newLogger(build);
 		String jobExecutorName = interpolator.interpolate(build.getJob().getJobExecutor());
 		JobExecutor jobExecutor = interpolator.interpolateProperties(getJobExecutor(build, jobExecutorName, jobLogger));
 		String sequentialGroup = interpolator.interpolate(build.getJob().getSequentialGroup());
@@ -568,7 +620,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 		JobContext jobContext = new JobContext(jobToken, jobExecutor, projectId, projectPath,
 				projectGitDir, buildId, buildNumber, buildSequence, actions, refName, commitId,
-				services, timeout);
+				services, timeout, build.getSecretMasker());
 		
 		return executorService.submit(() -> {
 			int retried = 0;

@@ -1,6 +1,6 @@
 package io.onedev.server.plugin.imports.url;
 
-import io.onedev.commons.bootstrap.SensitiveMasker;
+import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -113,7 +113,7 @@ public class ImportServer implements Serializable, Validatable {
 					if (authentication != null)
 						builder.setUserInfo(authentication.getUserName(), authentication.getPassword());
 
-					SensitiveMasker.push(text -> {
+					SecretMasker.push(text -> {
 						if (authentication != null)
 							return StringUtils.replace(text, authentication.getPassword(), "******");
 						else
@@ -129,7 +129,7 @@ public class ImportServer implements Serializable, Validatable {
 							getProjectManager().clone(project, builder.build().toString());
 						}
 					} finally {
-						SensitiveMasker.pop();
+						SecretMasker.pop();
 					}
 					return new TaskResult(true, new PlainMessage("project imported successfully"));
 				} else {

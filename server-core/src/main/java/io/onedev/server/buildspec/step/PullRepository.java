@@ -1,9 +1,31 @@
 package io.onedev.server.buildspec.step;
 
+import static com.google.common.collect.Maps.difference;
+import static io.onedev.server.git.GitUtils.getReachableCommits;
+import static java.util.stream.Collectors.toList;
+import static org.eclipse.jgit.lib.Constants.R_HEADS;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
+
+import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.MapDifference.ValueDifference;
+
 import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
@@ -11,6 +33,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
@@ -30,25 +53,6 @@ import io.onedev.server.git.command.LfsFetchCommand;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.commons.utils.match.WildcardUtils;
-import org.eclipse.jgit.lib.AnyObjectId;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotEmpty;
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static com.google.common.collect.Maps.difference;
-import static io.onedev.server.git.GitUtils.getReachableCommits;
-import static java.util.stream.Collectors.toList;
-import static org.eclipse.jgit.lib.Constants.R_HEADS;
 
 @Editable(order=1070, name="Pull from Remote", group=StepGroup.REPOSITORY_SYNC, description=""
 		+ "This step pulls specified refs from remote. For security reason, it is only allowed "
@@ -154,7 +158,7 @@ public class PullRepository extends SyncRepository {
 
 			String remoteUrl = getRemoteUrlWithCredential(build);
 			Long targetProjectId = targetProject.getId();
-			var task = new PullTask(targetProjectId, remoteUrl, getCertificate(), getRefs(), isForce(), isWithLfs(), getProxy());
+			var task = new PullTask(targetProjectId, remoteUrl, getCertificate(), getRefs(), isForce(), isWithLfs(), getProxy(), build.getSecretMasker());
 			getProjectManager().runOnActiveServer(targetProjectId, task);
 			return new ServerStepResult(true);
 		});
@@ -179,9 +183,12 @@ public class PullRepository extends SyncRepository {
 		private final boolean withLfs;
 		
 		private final String proxy;
+
+		private final SecretMasker secretMasker;
 		
 		PullTask(Long projectId, String remoteUrl, @Nullable String certificate, 
-				 String refs, boolean force, boolean withLfs, @Nullable String proxy) {
+				 String refs, boolean force, boolean withLfs, @Nullable String proxy, 
+				 SecretMasker secretMasker) {
 			this.projectId = projectId;
 			this.remoteUrl = remoteUrl;
 			this.certificate = certificate;
@@ -189,6 +196,7 @@ public class PullRepository extends SyncRepository {
 			this.force = force;
 			this.withLfs = withLfs;
 			this.proxy = proxy;
+			this.secretMasker = secretMasker;
 		}
 
 		private Map<String, ObjectId> getBranchCommits(Repository repository) {
@@ -210,6 +218,7 @@ public class PullRepository extends SyncRepository {
 		@Override
 		public Void call() throws Exception {
 			var certificateFile = writeCertificate(certificate);
+			SecretMasker.push(secretMasker);
 			try {
 				Repository repository = getProjectManager().getRepository(projectId);
 
@@ -363,6 +372,7 @@ public class PullRepository extends SyncRepository {
 
 				return null;
 			} finally {
+				SecretMasker.pop();
 				if (certificateFile != null)
 					FileUtils.deleteFile(certificateFile);
 			}

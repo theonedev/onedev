@@ -37,7 +37,7 @@ import org.unbescape.html.HtmlEscape;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.bootstrap.SensitiveMasker;
+import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -587,7 +587,7 @@ public class ImportServer implements Serializable, Validatable {
 							URIBuilder builder = new URIBuilder(repoNode.get("clone_url").asText());
 							builder.setUserInfo("git", getAccessToken());
 
-							SensitiveMasker.push(text -> StringUtils.replace(text, getAccessToken(), "******"));
+							SecretMasker.push(text -> StringUtils.replace(text, getAccessToken(), "******"));
 							try {
 								if (dryRun) {
 									new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
@@ -597,7 +597,7 @@ public class ImportServer implements Serializable, Validatable {
 									projectManager.clone(project, builder.build().toString());
 								}
 							} finally {
-								SensitiveMasker.pop();
+								SecretMasker.pop();
 							}
 						} else {
 							logger.warning("Skipping code clone as the project already has code");

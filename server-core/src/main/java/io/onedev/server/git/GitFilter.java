@@ -160,7 +160,7 @@ public class GitFilter implements Filter {
 			sessionManager.openSession();
 			try {
 				Project project = projectManager.load(projectId);
-				if (!SecurityUtils.canAccessProject(project))
+				if (!canAccessProject(request, project))
 					reportProjectNotFoundOrInaccessible(projectPath);
 				if (upload) {
 					checkPullPermission(request, project);
@@ -276,6 +276,18 @@ public class GitFilter implements Filter {
 				throw new UnauthorizedException("You do not have permission to pull from this project.");
 		}
 	}
+
+	private boolean canAccessProject(HttpServletRequest request, Project project) {
+		if (!SecurityUtils.canAccessProject(project)) {
+			for (CodePullAuthorizationSource source: codePullAuthorizationSources) {
+				if (source.canPullCode(request, project)) 
+					return true;
+			}
+			return false;
+		} else {
+			return true;
+		}
+	}
 	
 	protected void processRefs(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		boolean clusterAccess = SecurityUtils.isSystem();
@@ -294,7 +306,7 @@ public class GitFilter implements Filter {
 			sessionManager.openSession();
 			try {
 				Project project = projectManager.load(projectId);
-				if (!SecurityUtils.canAccessProject(project))
+				if (!canAccessProject(request, project))
 					reportProjectNotFoundOrInaccessible(projectPath);
 				if (upload) {
 					checkPullPermission(request, project);
