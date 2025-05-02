@@ -107,7 +107,7 @@ jobs:
         ./prepare.sh
 
         cd $projectDir/server-product/target/helm-chart
-        curl -u @job_token@:@secret:access-token@ -X POST --upload-file ./onedev-${buildVersion}.tgz https://code.onedev.io/onedev/~helm
+        curl -u @job_token@:@secret:onedev-token@ -X POST --upload-file ./onedev-${buildVersion}.tgz https://code.onedev.io/onedev/~helm
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
