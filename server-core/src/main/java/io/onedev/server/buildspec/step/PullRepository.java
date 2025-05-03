@@ -238,7 +238,8 @@ public class PullRepository extends SyncRepository {
 				for (String each : Splitter.on(' ').omitEmptyStrings().trimResults().split(refs))
 					git.addArgs(each + ":" + each);
 
-				git.execute(new LineConsumer() {
+				var errorMessage = new StringBuilder();
+				var result = git.execute(new LineConsumer() {
 
 					@Override
 					public void consume(String line) {
@@ -249,13 +250,18 @@ public class PullRepository extends SyncRepository {
 
 					@Override
 					public void consume(String line) {
-						if (!line.startsWith("From") && !line.contains("->"))
-							logger.error(line);
-						else
+						if (!line.startsWith("From")) {
+							errorMessage.append(line).append("\n");
+							logger.warn(line);
+						} else {
 							logger.debug(line);
+						}
 					}
 
-				}).checkReturnCode();
+				});
+				if (errorMessage.length() != 0)
+					result.setErrorMessage(errorMessage.toString());
+				result.checkReturnCode();
 
 				Map<String, ObjectId> newCommitIds = getBranchCommits(repository);
 
@@ -268,7 +274,8 @@ public class PullRepository extends SyncRepository {
 					git.addArgs("remote", "show", remoteUrl);
 
 					AtomicReference<String> headBranch = new AtomicReference<>(null);
-					git.execute(new LineConsumer() {
+					errorMessage.setLength(0);
+					result = git.execute(new LineConsumer() {
 
 						@Override
 						public void consume(String line) {
@@ -281,10 +288,14 @@ public class PullRepository extends SyncRepository {
 
 						@Override
 						public void consume(String line) {
+							errorMessage.append(line).append("\n");
 							logger.warn(line);
 						}
 
-					}).checkReturnCode();
+					});
+					if (errorMessage.length() != 0)
+						result.setErrorMessage(errorMessage.toString());
+					result.checkReturnCode();
 
 					if (headBranch.get() != null) {
 						if (GitUtils.resolve(repository, R_HEADS + headBranch.get(), false) == null) {
@@ -298,7 +309,8 @@ public class PullRepository extends SyncRepository {
 						git.clearArgs();
 						git.addArgs("branch");
 
-						git.execute(new LineConsumer() {
+						errorMessage.setLength(0);
+						result = git.execute(new LineConsumer() {
 
 							@Override
 							public void consume(String line) {
@@ -310,10 +322,14 @@ public class PullRepository extends SyncRepository {
 
 							@Override
 							public void consume(String line) {
+								errorMessage.append(line).append("\n");
 								logger.warn(line);
 							}
 
-						}).checkReturnCode();
+						});
+						if (errorMessage.length() != 0)
+							result.setErrorMessage(errorMessage.toString());
+						result.checkReturnCode();
 					}
 					if (headBranch.get() != null)
 						GitUtils.setDefaultBranch(repository, headBranch.get());
