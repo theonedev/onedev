@@ -1,8 +1,4 @@
 version: 39
-imports:
-- projectPath: onedev
-  revision: main
-  accessTokenSecret: onedev-token
 jobs:
 - name: Release
   steps:
@@ -65,10 +61,10 @@ jobs:
     templateName: scan vulnerabilities
     paramMatrix:
     - name: Scan Path
-      secret: false
       valuesProvider: !SpecifiedValues
         values:
         - - server-product/target/docker/app
+      secret: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishArtifactStep
     name: publish artifacts
@@ -111,7 +107,7 @@ jobs:
         ./prepare.sh
 
         cd $projectDir/server-product/target/helm-chart
-        cloudsmith push helm onedev/onedev onedev-${buildVersion}.tgz -k @secret:cloudsmith-token@
+        curl -u @job_token@:@secret:onedev-token@ -X POST --upload-file ./onedev-${buildVersion}.tgz https://code.onedev.io/onedev/~helm
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
@@ -282,10 +278,10 @@ jobs:
     templateName: scan vulnerabilities
     paramMatrix:
     - name: Scan Path
-      secret: false
       valuesProvider: !SpecifiedValues
         values:
         - - server-product/target/sandbox
+      secret: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !ScheduleTrigger
@@ -330,10 +326,10 @@ jobs:
     templateName: scan vulnerabilities
     paramMatrix:
     - name: Scan Path
-      secret: false
       valuesProvider: !SpecifiedValues
         values:
         - - server-product/target/sandbox
+      secret: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !BranchUpdateTrigger
@@ -369,6 +365,10 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
+imports:
+- projectPath: onedev
+  revision: main
+  accessTokenSecret: onedev-token
 stepTemplates:
 - name: scan vulnerabilities
   steps:
