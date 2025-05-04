@@ -157,7 +157,7 @@ public class ReviewRequirement {
 			criterias.add(builder.toString());
 		}
 		if (!criterias.isEmpty())
-			return StringUtils.join(criterias, " and ");
+			return StringUtils.join(criterias, " ");
 		else
 			return null;
 	}
