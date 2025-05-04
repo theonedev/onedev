@@ -35,12 +35,21 @@ jobs:
         # Prepare for artifact and site publish
         cp server-product/target/onedev-${buildVersion}.zip .
 
+        mkdir server-plugin-archetype-${buildVersion}
+        cd server-plugin/server-plugin-archetype
+        mvn help:effective-pom -Doutput=$projectDir/server-plugin-archetype-${buildVersion}/pom.xml
         cd $projectDir
+        sed -i 's/\/onedev-build\/workspace\/server-plugin\/server-plugin-archetype\///' server-plugin-archetype-${buildVersion}/pom.xml
+        cp -r server-plugin/server-plugin-archetype/src server-plugin-archetype-${buildVersion}
+        zip -r server-plugin-archetype-${buildVersion}.zip server-plugin-archetype-${buildVersion}
+        tar zcvf server-plugin-archetype-${buildVersion}.tar.gz server-plugin-archetype-${buildVersion}
 
         unzip onedev-${buildVersion}.zip
         tar zcvf onedev-${buildVersion}.tar.gz onedev-${buildVersion}
         sha256sum onedev-${buildVersion}.zip > onedev-${buildVersion}.zip.sha256
         sha256sum onedev-${buildVersion}.tar.gz > onedev-${buildVersion}.tar.gz.sha256
+        sha256sum server-plugin-archetype-${buildVersion}.zip > server-plugin-archetype-${buildVersion}.zip.sha256
+        sha256sum server-plugin-archetype-${buildVersion}.tar.gz > server-plugin-archetype-${buildVersion}.tar.gz.sha256
 
         cp server-product/docker/*.yaml .
 
