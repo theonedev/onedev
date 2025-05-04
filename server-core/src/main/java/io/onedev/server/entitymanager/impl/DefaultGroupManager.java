@@ -1,8 +1,21 @@
 package io.onedev.server.entitymanager.impl;
 
+import static org.hibernate.criterion.Restrictions.eq;
+
+import java.util.List;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+
 import com.google.common.base.Preconditions;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.IAtomicLong;
+
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
@@ -25,17 +38,6 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.facade.GroupCache;
 import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.usage.Usage;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.List;
-
-import static io.onedev.server.model.Group.PROP_NAME;
-import static org.hibernate.criterion.Restrictions.eq;
 
 @Singleton
 public class DefaultGroupManager extends BaseEntityManager<Group> implements GroupManager {
@@ -135,14 +137,11 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 	@Sessional
     @Override
     public Group find(String name) {
-		/*
 		GroupFacade facade = cache.find(name);
 		if (facade != null)
 			return load(facade.getId());
 		else
 			return null;
-		 */
-		return find(newCriteria().add(eq(PROP_NAME, name)));
     }
 
 	@Override
