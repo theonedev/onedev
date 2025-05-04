@@ -33,13 +33,13 @@ public class GroupAuthorizationsPage extends GroupPage {
 		super.onInitialize();
 
 		ProjectAuthorizationsBean authorizationsBean = new ProjectAuthorizationsBean();
-		var groupRoles = new HashMap<String, List<String>>();		
+		var projectRoles = new HashMap<String, List<String>>();		
 		for (var authorization: getGroup().getAuthorizations()) {
-			String groupName = authorization.getGroup().getName();
+			String projectPath = authorization.getProject().getPath();
 			String roleName = authorization.getRole().getName();			
-			groupRoles.computeIfAbsent(groupName, k -> new ArrayList<>()).add(roleName);
+			projectRoles.computeIfAbsent(projectPath, k -> new ArrayList<>()).add(roleName);
 		}
-		for (var entry: groupRoles.entrySet()) {
+		for (var entry: projectRoles.entrySet()) {
 			ProjectAuthorizationBean authorizationBean = new ProjectAuthorizationBean();
 			authorizationBean.setProjectPath(entry.getKey());
 			authorizationBean.setRoleNames(entry.getValue());
