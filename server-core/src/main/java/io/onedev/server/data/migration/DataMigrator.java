@@ -7857,4 +7857,95 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate199(File dataDir, Stack<Integer> versions) {
+		String defaultGroupName = null;
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("SECURITY")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var defaultLoginGroupNameElement = valueElement.element("defaultLoginGroupName");
+							if (defaultLoginGroupNameElement != null) {
+								defaultGroupName = defaultLoginGroupNameElement.getText().trim();
+								defaultLoginGroupNameElement.setName("defaultGroupName");
+								break;
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		String defaultLoginGroupId = null;
+		if (defaultGroupName != null) {
+			for (File file : dataDir.listFiles()) {
+				if (file.getName().startsWith("Groups.xml")) {
+					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+					for (Element element : dom.getRootElement().elements()) {
+						if (element.elementText("name").trim().equals(defaultGroupName)) {
+							defaultLoginGroupId = element.elementText("id").trim();
+							break;
+						}
+					}
+				}
+			}
+		}
+		if (defaultLoginGroupId != null) {			
+			long maxMembershipId = 0L;
+			int maxFileIndex = 0;
+			Set<String> userIdsInDefaultLoginGroup = new HashSet<>();
+			for (File file : dataDir.listFiles()) {
+				if (file.getName().startsWith("Memberships.xml")) {
+					var suffix = file.getName().substring("Memberships.xml".length());					
+					int fileIndex;
+					if (suffix.contains(".")) {
+						fileIndex = Integer.parseInt(StringUtils.substringAfter(suffix, "."));
+					} else {
+						fileIndex = 1;
+					}
+					maxFileIndex = Math.max(maxFileIndex, fileIndex);
+
+					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+					for (Element element : dom.getRootElement().elements()) {
+						maxMembershipId = Math.max(maxMembershipId, Long.parseLong(element.elementTextTrim("id")));
+						if (element.elementTextTrim("group").equals(defaultLoginGroupId)) 
+							userIdsInDefaultLoginGroup.add(element.elementTextTrim("user"));
+					}
+				}
+			}
+			Set<String> userIdsNotInDefaultLoginGroup = new HashSet<>();
+			for (File file : dataDir.listFiles()) {
+				if (file.getName().startsWith("Users.xml")) {
+					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+					for (Element element : dom.getRootElement().elements()) {
+						var userId = element.elementTextTrim("id");						
+						if (!userId.startsWith("-") && !userIdsInDefaultLoginGroup.contains(userId))
+							userIdsNotInDefaultLoginGroup.add(userId);
+					}
+				}
+			}
+
+			VersionedXmlDoc membershipsDom;
+			File membershipsFile;
+			if (maxFileIndex == 0) 
+				membershipsFile = new File(dataDir, "Memberships.xml");
+			else
+				membershipsFile = new File(dataDir, "Memberships.xml." + (maxFileIndex+1));
+
+			membershipsDom = new VersionedXmlDoc();
+			var listElement = membershipsDom.addElement("list");
+		
+			for (String userId: userIdsNotInDefaultLoginGroup) {
+				var membershipElement = listElement.addElement("io.onedev.server.model.Membership");
+				membershipElement.addAttribute("revision", "0.0.0");
+				membershipElement.addElement("user").setText(userId);
+				membershipElement.addElement("group").setText(defaultLoginGroupId);
+				membershipElement.addElement("id").setText(String.valueOf(++maxMembershipId));
+			}
+			membershipsDom.writeToFile(membershipsFile, true);
+		}
+	}
+
 }

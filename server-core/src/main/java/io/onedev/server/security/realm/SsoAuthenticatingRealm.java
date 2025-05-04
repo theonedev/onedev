@@ -3,6 +3,7 @@ package io.onedev.server.security.realm;
 import static io.onedev.server.validation.validator.UserNameValidator.suggestUserName;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
@@ -41,6 +42,8 @@ public class SsoAuthenticatingRealm extends AuthenticatingRealm {
     private final SshKeyManager sshKeyManager;
     
     private final EmailAddressManager emailAddressManager;
+
+	private final SettingManager settingManager;
     
 	@Inject
     public SsoAuthenticatingRealm(UserManager userManager, MembershipManager membershipManager,
@@ -53,6 +56,7 @@ public class SsoAuthenticatingRealm extends AuthenticatingRealm {
     	this.transactionManager = transactionManager;
     	this.sshKeyManager = sshKeyManager;
     	this.emailAddressManager = emailAddressManager;
+		this.settingManager = settingManager;
     }
 
 	private User newUser(SsoAuthenticated authenticated) {
@@ -75,6 +79,14 @@ public class SsoAuthenticatingRealm extends AuthenticatingRealm {
 		Collection<String> groupNames = authenticated.getGroupNames();
 		if (groupNames == null && authenticated.getConnector().getDefaultGroup() != null)
 			groupNames = Sets.newHashSet(authenticated.getConnector().getDefaultGroup());
+
+		var defaultLoginGroupName = settingManager.getSecuritySetting().getDefaultGroupName();
+		if (defaultLoginGroupName != null) {
+			if (groupNames == null)
+				groupNames = new HashSet<>();
+			groupNames.add(defaultLoginGroupName);
+		}
+	
 		if (groupNames != null) 
 			membershipManager.syncMemberships(user, groupNames);
 		
@@ -90,9 +102,14 @@ public class SsoAuthenticatingRealm extends AuthenticatingRealm {
 		userManager.update(user, null);
 
 		emailAddressManager.setAsPrimary(emailAddress);
-		
-		if (authenticated.getGroupNames() != null)
-			membershipManager.syncMemberships(user, authenticated.getGroupNames());
+
+		var groupNames = authenticated.getGroupNames();
+		if (groupNames != null) {
+			var defaultLoginGroupName = settingManager.getSecuritySetting().getDefaultGroupName();
+			if (defaultLoginGroupName != null)
+				groupNames.add(defaultLoginGroupName);
+			membershipManager.syncMemberships(user, groupNames);
+		}
 		
     	if (authenticated.getSshKeys() != null)
     		sshKeyManager.syncSshKeys(user, authenticated.getSshKeys());

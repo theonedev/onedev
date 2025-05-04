@@ -1,19 +1,15 @@
 package io.onedev.server.security.realm;
 
-import com.google.common.collect.Lists;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.Group;
-import io.onedev.server.model.IssueAuthorization;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.UserAuthorization;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.*;
-import io.onedev.server.util.Pair;
-import io.onedev.server.util.facade.UserFacade;
+import static io.onedev.server.security.SecurityUtils.getUser;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
+import javax.inject.Inject;
+
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -24,10 +20,25 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import javax.inject.Inject;
-import java.util.*;
+import com.google.common.collect.Lists;
 
-import static io.onedev.server.security.SecurityUtils.getUser;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.Group;
+import io.onedev.server.model.IssueAuthorization;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.BasePermission;
+import io.onedev.server.security.permission.ConfidentialIssuePermission;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.SystemAdministration;
+import io.onedev.server.security.permission.UserAdministration;
+import io.onedev.server.util.Pair;
+import io.onedev.server.util.facade.UserFacade;
 
 public class GeneralAuthorizingRealm extends AuthorizingRealm {
 
@@ -66,12 +77,7 @@ public class GeneralAuthorizingRealm extends AuthorizingRealm {
 				}
 
 				if (!isAdmin) {
-					List<Group> groups = new ArrayList<>(user.getGroups());
-					Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
-					if (defaultLoginGroup != null)
-						groups.add(defaultLoginGroup);
-
-					for (Group group : groups) {
+					for (Group group : user.getGroups()) {
 						if (group.implies(systemAdministration)) {
 							permissions.add(systemAdministration);
 							isAdmin = true;

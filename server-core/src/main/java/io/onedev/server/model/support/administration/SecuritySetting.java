@@ -32,7 +32,7 @@ public class SecuritySetting implements Serializable {
 	
 	private boolean enableSelfDeregister;
 	
-	private String defaultLoginGroupName;
+	private String defaultGroupName;
 	
 	private boolean enforce2FA;
 	
@@ -72,14 +72,14 @@ public class SecuritySetting implements Serializable {
 		return (boolean) EditContext.get().getInputValue("enableSelfRegister");
 	}
 
-	@Editable(order=300, name="Default Login Group", description="Optionally specify a default group for all users logged in")
+	@Editable(order=300, name="Default Group", description="Optionally add new users to specified default group")
 	@GroupChoice
-	public String getDefaultLoginGroupName() {
-		return defaultLoginGroupName;
+	public String getDefaultGroupName() {
+		return defaultGroupName;
 	}
 
-	public void setDefaultLoginGroupName(String defaultLoginGroupName) {
-		this.defaultLoginGroupName = defaultLoginGroupName;
+	public void setDefaultGroupName(String defaultGroupName) {
+		this.defaultGroupName = defaultGroupName;
 	}
 
 	@Editable(order=350, name="Enable Account Self Removal", description = "Whether or not user " +
@@ -114,11 +114,11 @@ public class SecuritySetting implements Serializable {
 	}
 
 	@Nullable
-	public Group getDefaultLoginGroup() {
-		if (defaultLoginGroupName != null) {
-       		Group group = OneDev.getInstance(GroupManager.class).find(defaultLoginGroupName);
+	public Group getDefaultGroup() {
+		if (defaultGroupName != null) {
+       		Group group = OneDev.getInstance(GroupManager.class).find(defaultGroupName);
        		if (group == null) 
-       			logger.error("Unable to find default login group: " + defaultLoginGroupName);
+       			logger.error("Unable to find default group: " + defaultGroupName);
        		else
        			return group;
 		}
@@ -126,13 +126,13 @@ public class SecuritySetting implements Serializable {
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {
-		if (oldName.equals(defaultLoginGroupName))
-			defaultLoginGroupName = newName;
+		if (oldName.equals(defaultGroupName))
+			defaultGroupName = newName;
 	}
 	
 	public Usage onDeleteGroup(String groupName) {
 		Usage usage = new Usage();
-		if (groupName.equals(defaultLoginGroupName))
+		if (groupName.equals(defaultGroupName))
 			usage.add("default group for sign-in users");
 		return usage.prefix("security settings");
 	}

@@ -1,13 +1,30 @@
 package io.onedev.server.web.page.simple.security;
 
+import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
+import static io.onedev.server.model.User.PROP_SERVICE_ACCOUNT;
+import static io.onedev.server.web.page.simple.security.SignUpBean.PROP_EMAIL_ADDRESS;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authc.credential.PasswordService;
+import org.apache.shiro.authz.UnauthenticatedException;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.Session;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.SubmitLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import com.google.common.collect.Sets;
-import io.onedev.commons.loader.AppLoader;
+
 import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.Group;
+import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.persistence.TransactionManager;
@@ -19,18 +36,6 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.simple.SimplePage;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authc.credential.PasswordService;
-import org.apache.shiro.authz.UnauthenticatedException;
-import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.SubmitLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import static io.onedev.server.model.User.*;
-import static io.onedev.server.web.page.simple.security.SignUpBean.PROP_EMAIL_ADDRESS;
 
 public class SignUpPage extends SimplePage {
 	
@@ -84,15 +89,19 @@ public class SignUpPage extends SimplePage {
 					User user = new User();
 					user.setName(bean.getName());
 					user.setFullName(bean.getFullName());
-					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(bean.getPassword()));
+					user.setPassword(getPasswordService().encryptPassword(bean.getPassword()));
 					
 					EmailAddress emailAddress = new EmailAddress();
 					emailAddress.setValue(bean.getEmailAddress());
 					emailAddress.setOwner(user);
+
+					var defaultLoginGroup = getSettingManager().getSecuritySetting().getDefaultGroup();
 					
-					OneDev.getInstance(TransactionManager.class).run(() -> {
+					getTransactionManager().run(() -> {
 						getUserManager().create(user);
 						getEmailAddressManager().create(emailAddress);
+						if (defaultLoginGroup != null) 
+							createMembership(user, defaultLoginGroup);
 					});
 					
 					Session.get().success("Account sign up successfully");
@@ -115,6 +124,10 @@ public class SignUpPage extends SimplePage {
 		});
 		add(form);
 	}
+
+	private PasswordService getPasswordService() {
+		return OneDev.getInstance(PasswordService.class);
+	}
 	
 	private UserManager getUserManager() {
 		return OneDev.getInstance(UserManager.class);
@@ -123,7 +136,27 @@ public class SignUpPage extends SimplePage {
 	private EmailAddressManager getEmailAddressManager() {
 		return OneDev.getInstance(EmailAddressManager.class);
 	}
+
+	private SettingManager getSettingManager() {
+		return OneDev.getInstance(SettingManager.class);
+	}
+
+	private TransactionManager getTransactionManager() {
+		return OneDev.getInstance(TransactionManager.class);
+	}
+
+	private MembershipManager getMembershipManager() {
+		return OneDev.getInstance(MembershipManager.class);
+	}
 	
+	private void createMembership(User user, Group group) {
+		var membership = new Membership();
+		membership.setUser(user);
+		membership.setGroup(group);
+		user.getMemberships().add(membership);
+		getMembershipManager().create(membership);
+	}
+
 	@Override
 	protected String getTitle() {
 		return "Sign Up";

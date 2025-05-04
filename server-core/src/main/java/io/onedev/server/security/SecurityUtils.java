@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
@@ -323,13 +322,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 					return true;
 			}
 
-			Set<Group> groups = new HashSet<>(user.getGroups());
-			Group defaultLoginGroup = OneDev.getInstance(SettingManager.class)
-					.getSecuritySetting().getDefaultLoginGroup();
-			if (defaultLoginGroup != null)
-				groups.add(defaultLoginGroup);
-
-			for (Group group: groups) {
+			for (Group group: user.getGroups()) {
 				for (GroupAuthorization authorization: group.getAuthorizations()) {
 					Project authorizedProject = authorization.getProject();
 					if (authorization.getRole().equals(role) && authorizedProject.isSelfOrAncestorOf(project))
@@ -657,15 +650,6 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 								addSubTreeIds(authorizedProjectIds, authorization.getProject());
 						}
 					}
-					Group defaultLoginGroup = getSettingManager().getSecuritySetting().getDefaultLoginGroup();
-					if (defaultLoginGroup != null) {
-						if (defaultLoginGroup.isAdministrator())
-							return cacheClone.getProjects();
-						for (GroupAuthorization authorization : defaultLoginGroup.getAuthorizations()) {
-							if (authorization.getRole().implies(permission))
-								addSubTreeIds(authorizedProjectIds, authorization.getProject());
-						}
-					}
 
 					for (UserAuthorization authorization : user.getProjectAuthorizations()) {
 						if (authorization.getRole().implies(permission))
@@ -698,10 +682,6 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
 		Collection<User> authorizedUsers = Sets.newHashSet(userManager.getRoot());
 
-		Group defaultLoginGroup = getSettingManager().getSecuritySetting().getDefaultLoginGroup();
-		if (defaultLoginGroup != null && defaultLoginGroup.isAdministrator())
-			return filterApplicableUsers(cache.getUsers(), permission);
-
 		for (Group group: OneDev.getInstance(GroupManager.class).queryAdminstrator())
 			authorizedUsers.addAll(group.getMembers());
 
@@ -717,8 +697,6 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
 			for (GroupAuthorization authorization: current.getGroupAuthorizations()) {
 				if (authorization.getRole().implies(permission)) {
-					if (authorization.getGroup().equals(defaultLoginGroup))
-						return filterApplicableUsers(cache.getUsers(), permission);
 					authorizedUsers.addAll(authorization.getGroup().getMembers());
 				}
 			}
@@ -758,12 +736,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 					}
 				}
 
-				Set<Group> groups = new HashSet<>(user.getGroups());
-				Group defaultLoginGroup = getSettingManager().getSecuritySetting().getDefaultLoginGroup();
-				if (defaultLoginGroup != null)
-					groups.add(defaultLoginGroup);
-
-				for (Group group: groups) {
+				for (Group group: user.getGroups()) {
 					for (GroupAuthorization authorization: group.getAuthorizations()) {
 						if (authorization.getProject().isSelfOrAncestorOf(project)) {
 							populateAccessibleJobNames(accessibleJobNames, availableJobNames,
