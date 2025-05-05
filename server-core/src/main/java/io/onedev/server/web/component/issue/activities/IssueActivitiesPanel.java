@@ -39,6 +39,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entitymanager.IssueCommentManager;
+import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
@@ -129,7 +130,13 @@ public abstract class IssueActivitiesPanel extends Panel {
 						&& !(change.getData() instanceof IssueOwnSpentTimeChangeData)
 						&& !(change.getData() instanceof IssueTotalSpentTimeChangeData)
 						&& !(change.getData() instanceof IssueOwnEstimatedTimeChangeData && !canAccessTimeTracking(project))) {
-					otherActivities.add(new IssueChangeActivity(change));
+					if (change.getData() instanceof ReferencedFromAware) {
+						var referencedFromAware = (ReferencedFromAware<?>) change.getData();
+						if (ReferencedFromAware.canDisplay(referencedFromAware))
+							otherActivities.add(new IssueChangeActivity(change));		
+					} else {
+			            otherActivities.add(new IssueChangeActivity(change));
+					}
 				}
 			}
 		}

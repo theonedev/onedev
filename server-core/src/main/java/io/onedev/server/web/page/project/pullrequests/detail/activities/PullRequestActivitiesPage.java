@@ -134,7 +134,13 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			for (PullRequestChange change: getPullRequest().getChanges()) {
 				if (!(change.getData() instanceof ReferencedFromAware) 
 						&& !(change.getData() instanceof PullRequestDescriptionChangeData)) {
-					otherActivities.add(new PullRequestChangeActivity(change));
+					if (change.getData() instanceof ReferencedFromAware) {
+						var referencedFromAware = (ReferencedFromAware<?>) change.getData();
+						if (ReferencedFromAware.canDisplay(referencedFromAware))
+							otherActivities.add(new PullRequestChangeActivity(change));		
+					} else {
+						otherActivities.add(new PullRequestChangeActivity(change));
+					}							
 				}
 			}
 		}
