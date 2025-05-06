@@ -1,21 +1,18 @@
 package io.onedev.server.web.page.simple.security;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.BrandingSetting;
-import io.onedev.server.model.support.administration.sso.SsoConnector;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.realm.PasswordAuthenticatingRealm;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationSetupPanel;
-import io.onedev.server.web.page.simple.SimpleCssResourceReference;
-import io.onedev.server.web.page.simple.SimplePage;
-import org.apache.shiro.authc.*;
+import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
+import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
+import static io.onedev.server.web.translation.Translation._T;
+
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -33,8 +30,18 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
-import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.BrandingSetting;
+import io.onedev.server.model.support.administration.sso.SsoConnector;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.realm.PasswordAuthenticatingRealm;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationSetupPanel;
+import io.onedev.server.web.page.simple.SimpleCssResourceReference;
+import io.onedev.server.web.page.simple.SimplePage;
 
 public class LoginPage extends SimplePage {
 
@@ -50,7 +57,7 @@ public class LoginPage extends SimplePage {
 	
 	private String errorMessage;
 	
-	private String subTitle = "Enter your details to login to your account";
+	private String subTitle = _T("Enter your details to login to your account");
 	
 	public LoginPage(PageParameters params) {
 		super(params);
@@ -80,19 +87,17 @@ public class LoginPage extends SimplePage {
 					var user = (User) OneDev.getInstance(PasswordAuthenticatingRealm.class).getAuthenticationInfo(token);
 					if (user.isEnforce2FA()) {
 						if (user.getTwoFactorAuthentication() != null) {
-							subTitle = "Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. "
-									+ "If you encounter problems, make sure time of OneDev server and your device running TOTP "
-									+ "authenticator is in sync";
+							subTitle = _T("Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. If you encounter problems, make sure time of OneDev server and your device running TOTP authenticator is in sync");
 							newPasscodeVerifyFrag(user.getId());
 						} else {
-							subTitle = "Set up two-factor authentication";
+							subTitle = _T("Set up two-factor authentication");
 							newTwoFactorAuthenticationSetup(user.getId());
 						}
 					} else {
 						afterLogin(user);
 					}
 				} catch (IncorrectCredentialsException|UnknownAccountException e) {
-					error("Invalid credentials");
+					error(_T("Invalid credentials"));
 				} catch (AuthenticationException ae) {
 					error(ae.getMessage());
 				}
@@ -121,7 +126,7 @@ public class LoginPage extends SimplePage {
 				userName = object;
 			}
 
-		}).setLabel(Model.of("User name")).setRequired(true));
+		}).setLabel(Model.of(_T("User name"))).setRequired(true).add(AttributeAppender.append("placeholder", _T("Login name or email address"))));
 		
 		form.add(new PasswordTextField("password", new IModel<String>() {
 
@@ -139,7 +144,7 @@ public class LoginPage extends SimplePage {
 				password = object;
 			}
 			
-		}).setLabel(Model.of("Password")).setRequired(true));
+		}).setLabel(Model.of(_T("Password"))).setRequired(true).add(AttributeAppender.append("placeholder", _T("Password"))));
 		
 		form.add(new CheckBox("rememberMe", new IModel<Boolean>() {
 
@@ -257,19 +262,19 @@ public class LoginPage extends SimplePage {
 				LoginPage.this.passcode = object;
 			}
 			
-		}).setLabel(Model.of("Passcode")).setRequired(true));
+		}).setLabel(Model.of("Passcode")).setRequired(true).add(AttributeAppender.append("placeholder", _T("6-digits passcode"))));
 		
 		fragment.add(form);
+
 		fragment.add(new Link<Void>("verifyRecoveryCode") {
 
 			@Override
 			public void onClick() {
-				subTitle = "Please input one of your recovery codes saved when enable two-factor authentication";
+				subTitle = _T("Please input one of your recovery codes saved when enable two-factor authentication");
 				newRecoveryCodeVerifyFrag(userId);
 			}
 			
 		});
-		
 		replace(fragment);
 	}
 
@@ -307,7 +312,7 @@ public class LoginPage extends SimplePage {
 				LoginPage.this.recoveryCode = object;
 			}
 			
-		}).setLabel(Model.of("Recovery code")).setRequired(true));
+		}).setLabel(Model.of("Recovery code")).setRequired(true).add(AttributeAppender.append("placeholder", _T("Recovery code"))));
 		
 		fragment.add(form);
 		replace(fragment);
@@ -321,7 +326,7 @@ public class LoginPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "Sign In To " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return _T("Sign In To") + " " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
 	}
 
 	@Override

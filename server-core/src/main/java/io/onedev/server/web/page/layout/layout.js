@@ -1,5 +1,5 @@
 onedev.server.layout = {
-	onDomReady: function(commandPaletteCallback) {
+	onDomReady: function(commandPaletteCallback, macCommandPaletteTooltip, nonMacCommandPaletteTooltip) {
 		var $body = $("body");
 		var $sidebar = $(".sidebar");
 		var $sidebarBody = $(".sidebar-body");
@@ -136,10 +136,10 @@ onedev.server.layout = {
 		});
 		
 		if (onedev.server.util.isMac()) {
-			$("a.command-palette").attr("data-tippy-content", "cmd-k to show command palette").html("<span class='keycap'>⌘</span> <span class='keycap'>k</span>");
+			$("a.command-palette").attr("data-tippy-content", macCommandPaletteTooltip).html("<span class='keycap'>⌘</span> <span class='keycap'>k</span>");
 		}
 		else
-			$("a.command-palette").attr("data-tippy-content", "ctrl-k to show command palette").html("<span class='keycap'>ctrl</span> <span class='keycap'>k</span>");
+			$("a.command-palette").attr("data-tippy-content", nonMacCommandPaletteTooltip).html("<span class='keycap'>ctrl</span> <span class='keycap'>k</span>");
 		$(document).keydown(function(e) {
 			if (e.keyCode == 75 && (e.ctrlKey || e.metaKey) && !e.shiftKey && $('div.command-palette').length == 0) { // cmd+k
 				commandPaletteCallback();

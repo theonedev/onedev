@@ -19,6 +19,8 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,7 +99,7 @@ public class ServerInitPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return initStage.getMessage();
+		return _T(initStage.getMessage());
 	}
 
 	@Override

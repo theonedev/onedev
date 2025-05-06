@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.project.list;
 
 import static io.onedev.server.model.Project.SORT_FIELDS;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -368,7 +369,7 @@ public class ProjectListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Move Selected Projects To...";
+						return _T("Move Selected Projects To...");
 					}
 
 					@Override
@@ -474,7 +475,7 @@ public class ProjectListPanel extends Panel {
 	
 						@Override
 						public String getLabel() {
-							return "Set Selected As Root Projects";
+							return _T("Set Selected As Root Projects");
 						}
 	
 						@Override
@@ -556,7 +557,7 @@ public class ProjectListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Delete Selected Projects";
+						return _T("Delete Selected Projects");
 					}
 					
 					@Override
@@ -637,7 +638,7 @@ public class ProjectListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Move All Queried Projects To...";
+						return _T("Move All Queried Projects To...");
 					}
 					
 					@Override
@@ -745,7 +746,7 @@ public class ProjectListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Set All Queried As Root Projects";
+							return _T("Set All Queried As Root Projects");
 						}
 						
 						@Override
@@ -829,7 +830,7 @@ public class ProjectListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Delete All Queried Projects";
+						return _T("Delete All Queried Projects");
 					}
 					
 					@Override
@@ -1003,6 +1004,8 @@ public class ProjectListPanel extends Panel {
 			}
 			
 		});
+
+		queryInput.add(AttributeAppender.replace("placeholder", _T("Query/order projects")));
 		
 		Form<?> queryForm = new Form<Void>("query");
 		queryForm.add(queryInput);
@@ -1014,16 +1017,17 @@ public class ProjectListPanel extends Panel {
 				doQuery(target);
 			}
 			
-		});
+		}.add(AttributeAppender.replace("data-tippy-content", _T("Query"))));
 		add(queryForm);
 		
 		if (getParentProject() != null) {
 			PageParameters params = NewProjectPage.paramsOf(getParentProject());
 			add(new BookmarkablePageLink<Void>("addProject", NewProjectPage.class, params)
-					.add(AttributeAppender.replace("title", "Add child project"))
+					.add(AttributeAppender.replace("data-tippy-content", _T("Add child project")))
 					.setVisible(canCreateProjects));
 		} else {
 			add(new BookmarkablePageLink<Void>("addProject", NewProjectPage.class)
+					.add(AttributeAppender.replace("data-tippy-content", _T("Add project")))
 					.setVisible(canCreateProjects));
 		}
 

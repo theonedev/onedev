@@ -8,6 +8,9 @@
  */
 package io.onedev.server.web.component.wizard;
 
+import static io.onedev.server.web.translation.Translation._T;
+import static java.text.MessageFormat.format;
+
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -51,8 +54,7 @@ public abstract class WizardPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				String template = "Step %s of %s: %s";
-				return String.format(template, activeStepIndex+1, steps.size(), getActiveStep().getTitle());
+				return format(_T("Step {0} of {1}: "), activeStepIndex+1, steps.size()) + _T(getActiveStep().getTitle());
 			}
 			
 		}));
@@ -60,7 +62,7 @@ public abstract class WizardPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return getActiveStep().getDescription();
+				return _T(getActiveStep().getDescription());
 			}
 			
 		}) {

@@ -1,6 +1,9 @@
 package io.onedev.server.model.support.issue;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -209,9 +212,9 @@ public class TimeTrackingSetting implements Serializable {
 	
 	public String getWorkingPeriodHelp() {
 		if (useHoursAndMinutesOnly) {
-			return "Expects one or more <tt>&lt;number&gt;(h|m)</tt>. For instance <tt>1h 1m</tt> represents 1 hour and 1 minute";
+			return _T("Expects one or more <tt>&lt;number&gt;(h|m)</tt>. For instance <tt>1h 1m</tt> represents 1 hour and 1 minute");
 		} else {
-			return String.format("Expects one or more <tt>&lt;number&gt;(w|d|h|m)</tt>. For instance <tt>1w 1d 1h 1m</tt> represents 1 week (%d days), 1 day (%d hours), 1 hour, and 1 minute", 
+			return MessageFormat.format(_T("Expects one or more <tt>&lt;number&gt;(w|d|h|m)</tt>. For instance <tt>1w 1d 1h 1m</tt> represents 1 week ({0} days), 1 day ({1} hours), 1 hour, and 1 minute"), 
 					daysPerWeek, hoursPerDay);
 		}
 	}

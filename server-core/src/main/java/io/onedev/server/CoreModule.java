@@ -82,6 +82,7 @@ import io.onedev.server.commandhandler.ApplyDatabaseConstraints;
 import io.onedev.server.commandhandler.BackupDatabase;
 import io.onedev.server.commandhandler.CheckDataVersion;
 import io.onedev.server.commandhandler.CleanDatabase;
+import io.onedev.server.commandhandler.ExtractTranslationKeys;
 import io.onedev.server.commandhandler.ResetAdminPassword;
 import io.onedev.server.commandhandler.RestoreDatabase;
 import io.onedev.server.commandhandler.Upgrade;
@@ -868,6 +869,8 @@ public class CoreModule extends AbstractPluginModule {
 				return CleanDatabase.class;
 			else if (ResetAdminPassword.COMMAND.equals(Bootstrap.command.getName()))
 				return ResetAdminPassword.class;
+			else if (ExtractTranslationKeys.COMMAND.equals(Bootstrap.command.getName()))
+				return ExtractTranslationKeys.class;
 			else
 				throw new RuntimeException("Unrecognized command: " + Bootstrap.command.getName());
 		} else {

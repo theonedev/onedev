@@ -2,18 +2,18 @@
 	<div wicket:id="note" class="mb-4"></div>
 	<div wicket:id="content"></div>
 	<wicket:fragment wicket:id="authViaInternalDatabaseFrag">
-		<div class="alert alert-light alert-notice">You are authenticating via internal database</div>
+		<div class="alert alert-light alert-notice"><wicket:t>You are authenticating via internal database</wicket:t></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="authViaExternalSystemFrag">
-		<div class="alert alert-light-warning alert-notice">You are authenticating via external system</div>
+		<div class="alert alert-light-warning alert-notice"><wicket:t>You are authenticating via external system</wicket:t></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="serviceAccountFrag">
-		<div class="alert alert-light-info alert-notice">This is a service account for task automation purpose</div>
+		<div class="alert alert-light-info alert-notice"><wicket:t>This is a service account for task automation purpose</wicket:t></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="disabledFrag">
-		<div class="alert alert-light-warning alert-notice">This account is disabled</div>
+		<div class="alert alert-light-warning alert-notice"><wicket:t>This account is disabled</wicket:t></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="disabledServiceAccountFrag">
-		<div class="alert alert-light-warning alert-notice">This is a disabled service account</div>
+		<div class="alert alert-light-warning alert-notice"><wicket:t>This is a disabled service account</wicket:t></div>
 	</wicket:fragment>
 </wicket:extend>

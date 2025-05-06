@@ -5,7 +5,7 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
 
-@Editable(name="Use Specified Git", order=200)
+@Editable(order=200, name="Use Specified Git")
 public class SpecifiedGit extends GitLocation {
 
 	private static final long serialVersionUID = 1L;

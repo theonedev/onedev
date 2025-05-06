@@ -192,6 +192,7 @@ public class PropertyDescriptor implements Serializable {
 		return EditableUtils.getDisplayName(getPropertyGetter());
 	}
 	
+	@Nullable
 	public String getDescription() {
 		return EditableUtils.getDescription(getPropertyGetter());
 	}

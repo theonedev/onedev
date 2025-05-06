@@ -45,11 +45,12 @@
 			<div wicket:id="title" class="topbar-title"></div>
 		</div>
 		<div class="topbar-right text-nowrap">
-			<a wicket:id="alerts" class="text-warning topbar-link" title="Alerts"><wicket:svg href="exclamation-circle-o" class="icon fade-in-out"></wicket:svg></a>
-			<a wicket:id="newVersionStatus" class="new-version-status topbar-link" data-tippy-content="New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting"><img wicket:id="icon"/></a>
-			<a wicket:id="darkMode" class="topbar-link" data-tippy-content="Toggle dark mode"><svg wicket:id="icon" class="icon"/></a>
-			<a wicket:id="showCommandPalette" class="topbar-link command-palette"></a>
-			<a wicket:id="signIn" class="topbar-link sign-in"><wicket:svg href="login" class="icon"/> <span class="d-none d-sm-inline">Sign In</span></a>
+			<a wicket:id="alerts" class="text-warning topbar-link"><wicket:svg href="exclamation-circle-o" class="icon fade-in-out"></wicket:svg></a>
+			<a wicket:id="newVersionStatus" class="new-version-status topbar-link"><img wicket:id="icon"/></a>
+			<a wicket:id="darkMode" class="topbar-link"><svg wicket:id="icon" class="icon"/></a>
+			<a wicket:id="showCommandPalette" class="topbar-link command-palette"></a>			
+			<a wicket:id="languageSelector" class="topbar-link language-selector"><wicket:svg href="globe" class="icon"></wicket:svg></a>
+			<a wicket:id="signIn" class="topbar-link sign-in"><wicket:svg href="login" class="icon"/> <span class="d-none d-sm-inline"><wicket:t>Sign In</wicket:t></span></a>
 			<div wicket:id="userInfo" class="dropdown user-info">
 				<a href="#" class="dropdown-toggle user-info no-dropdown-caret topbar-link" data-toggle="dropdown">
 					<img wicket:id="avatar">
@@ -68,39 +69,39 @@
 					</wicket:enclosure>
 					<a wicket:id="myProfile" class="dropdown-item">
 						<wicket:svg href="profile" class="icon mr-2"></wicket:svg>
-						Profile
+						<wicket:t>Profile</wicket:t>
 					</a>
 					<a wicket:id="myEmailSetting" class="dropdown-item">
 						<wicket:svg href="mail" class="icon mr-2"></wicket:svg>
-						Email Addresses
+						<wicket:t>Email Addresses</wicket:t>
 					</a>
 					<a wicket:id="myAvatar" class="dropdown-item">
 						<wicket:svg href="avatar" class="icon mr-2"></wicket:svg>
-						Edit Avatar
+						<wicket:t>Edit Avatar</wicket:t>
 					</a>
 					<a wicket:id="myPassword" class="dropdown-item">
 						<wicket:svg href="password" class="icon mr-2"></wicket:svg>
-						Password
+						<wicket:t>Password</wicket:t>
 					</a>
 					<a wicket:id="mySshKeys" class="dropdown-item">
 						<wicket:svg href="key" class="icon mr-2"></wicket:svg>
-						SSH Keys
+						<wicket:t>SSH Keys</wicket:t>
 					</a>
 					<a wicket:id="myGpgKeys" class="dropdown-item">
 						<wicket:svg href="key" class="icon mr-2"></wicket:svg>
-						GPG Keys
+						<wicket:t>GPG Keys</wicket:t>
 					</a>
 					<a wicket:id="myAccessTokens" class="dropdown-item">
 						<wicket:svg href="token" class="icon mr-2"></wicket:svg>
-						Access Tokens
+						<wicket:t>Access Tokens</wicket:t>
 					</a>
 					<a wicket:id="myTwoFactorAuthentication" class="dropdown-item">
 						<wicket:svg href="shield" class="icon mr-2"></wicket:svg>
-						Two-factor Authentication
+						<wicket:t>Two-factor Authentication</wicket:t>
 					</a>
 					<a wicket:id="myQueryWatches" class="dropdown-item">
 						<wicket:svg href="bell" class="icon mr-2"></wicket:svg>
-						Query Watches
+						<wicket:t>Query Watches</wicket:t>
 					</a>
 					<a wicket:id="signOut" class="dropdown-item">
 						<wicket:svg href="logout" class="icon mr-2"></wicket:svg>

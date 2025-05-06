@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.my.profile;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -46,7 +48,7 @@ public class MyProfilePage extends MyPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "My Profile");
+		return new Label(componentId, _T("My Profile"));
 	}
 
 }

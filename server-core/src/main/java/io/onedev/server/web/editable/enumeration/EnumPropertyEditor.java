@@ -74,7 +74,7 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 				Map<String, String> displayNames = new HashMap<>();
 				for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext(); ) {
 					Enum<?> value = (Enum<?>) it.next();
-						displayNames.put(value.name(), TextUtils.getDisplayValue(value));
+					displayNames.put(value.name(), getString("t: " + TextUtils.getDisplayValue(value)));
 				}
 				return displayNames;
 			}

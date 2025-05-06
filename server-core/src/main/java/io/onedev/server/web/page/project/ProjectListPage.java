@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -234,7 +236,7 @@ public class ProjectListPage extends LayoutPage {
 	
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Projects");
+		return new Label(componentId, _T("Projects"));
 	}
 
 }

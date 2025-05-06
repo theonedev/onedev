@@ -1,5 +1,13 @@
 package io.onedev.server.web.editable;
 
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Localizer;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
@@ -9,11 +17,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.util.interpolative.VariableInterpolator;
-
-import javax.annotation.Nullable;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.util.List;
 
 public class EditableUtils {
 	
@@ -86,14 +89,14 @@ public class EditableUtils {
 			String description = getDescription(element, editable);
 			if (description.length() != 0) {
 				if (description.endsWith("<br>")) {
-					description += VariableInterpolator.HELP;
+					description += VariableInterpolator.getHelp();
 				} else {
 					if (!description.endsWith("."))
 						description += ".";
-					description += " " + VariableInterpolator.HELP;
+					description += " " + VariableInterpolator.getHelp();
 				}
 			} else {
-				description = VariableInterpolator.HELP;
+				description = VariableInterpolator.getHelp();
 			}
 			return description;
 		} else if (element.getAnnotation(WorkingPeriod.class) != null) {
@@ -119,7 +122,7 @@ public class EditableUtils {
 	private static String getDescription(AnnotatedElement element, Editable editable) {
 		String description = editable.description();
 		if (description.length() != 0) {
-			return description;
+			return Localizer.get().getString("t: " + description, null);
 		} else if (editable.descriptionProvider().length() != 0) {
 			Class<?> clazz;
 			if (element instanceof Class) 

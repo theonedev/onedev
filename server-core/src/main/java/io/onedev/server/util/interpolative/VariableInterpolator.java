@@ -22,11 +22,9 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import static io.onedev.k8shelper.KubernetesHelper.*;
+import static io.onedev.server.web.translation.Translation._T;
 
 public class VariableInterpolator {
-
-	public static final String HELP = "<b>Tips: </b> Type <tt>@</tt> to <a href='https://docs.onedev.io/appendix/job-variables' target='_blank' tabindex='-1'>insert variable</a>. "
-			+ "Use <tt>@@</tt> for literal <tt>@</tt>";
 	
 	public static final String PREFIX_PARAM = "param:"; 
 	
@@ -160,4 +158,8 @@ public class VariableInterpolator {
 				io.onedev.server.annotation.Interpolative.class);
 	}	
 		
+	public static String getHelp() {
+		return _T("<b>Tips: </b> Type <tt>@</tt> to <a href='https://docs.onedev.io/appendix/job-variables' target='_blank' tabindex='-1'>insert variable</a>. "
+			+ "Use <tt>@@</tt> for literal <tt>@</tt>");
+	}
 }

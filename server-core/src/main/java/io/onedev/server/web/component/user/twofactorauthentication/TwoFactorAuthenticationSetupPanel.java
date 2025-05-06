@@ -1,17 +1,18 @@
 package io.onedev.server.web.component.user.twofactorauthentication;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.TwoFactorAuthentication;
-import io.onedev.server.util.CryptoUtils;
-import io.onedev.server.web.page.simple.security.LoginPage;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.IOException;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.codec.binary.Base32;
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -27,10 +28,13 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.AbstractResource;
 import org.apache.wicket.request.resource.ContentDisposition;
 
-import java.io.IOException;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.TwoFactorAuthentication;
+import io.onedev.server.util.CryptoUtils;
+import io.onedev.server.web.page.simple.security.LoginPage;
 
 public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<User> {
 
@@ -97,6 +101,7 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 		});
 		
 		TextField<String> input = new TextField<String>("passcode", Model.of(""));
+		input.add(AttributeAppender.append("placeholder", _T("6-digits passcode")));
 		form.add(input);
 		form.add(new FencedFeedbackPanel("feedback", form));
 		form.add(new AjaxButton("verify") {
@@ -156,7 +161,7 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 				}
 			}
 			
-		});
+		}.add(new AttributeAppender("value", _T("Verify"))));
 		form.setOutputMarkupId(true);
 		
 		fragment.add(form);	
