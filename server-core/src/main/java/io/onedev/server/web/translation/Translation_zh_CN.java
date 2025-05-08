@@ -166,6 +166,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			{"This account is disabled", "此账户已禁用"},
 			{"This is a disabled service account", "这是一个已禁用的服务账户"},
 			{"My Profile", "我的个人资料"},
+			{"Specify System Settings", "系统设置"},
 		};
 	}
 
