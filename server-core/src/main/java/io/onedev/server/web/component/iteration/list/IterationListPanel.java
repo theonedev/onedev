@@ -244,7 +244,7 @@ public class IterationListPanel extends GenericPanel<Project> {
 
 		});
 
-		columns.add(new AbstractColumn<>(Model.of("Due Date")) {
+		columns.add(new AbstractColumn<>(Model.of("Start/Due Date")) {
 
 			@Override
 			public String getCssClass() {

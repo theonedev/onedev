@@ -102,9 +102,13 @@ public class IterationEditBean implements Validatable, Serializable {
 		iteration.setDescription(getDescription());
 		if (getStartDate() != null) {
 			iteration.setStartDay(DateUtils.toLocalDate(getStartDate()).toEpochDay());
+		} else {	
+			iteration.setStartDay(null);
 		}
 		if (getDueDate() != null) {
 			iteration.setDueDay(DateUtils.toLocalDate(getDueDate()).toEpochDay());
+		} else {
+			iteration.setDueDay(null);
 		}
 	}
 	
@@ -137,8 +141,16 @@ public class IterationEditBean implements Validatable, Serializable {
 		bean.namePrefix = namePrefix;
 		bean.setName(iteration.getName());
 		bean.setDescription(iteration.getDescription());
-		bean.setStartDate(toDate(ofEpochDay(iteration.getStartDay()).atStartOfDay()));
-		bean.setDueDate(toDate(ofEpochDay(iteration.getDueDay()).atStartOfDay()));
+		if (iteration.getStartDay() != null) {
+			bean.setStartDate(toDate(ofEpochDay(iteration.getStartDay()).atStartOfDay()));
+		} else {
+			bean.setStartDate(null);
+		}
+		if (iteration.getDueDay() != null) {
+			bean.setDueDate(toDate(ofEpochDay(iteration.getDueDay()).atStartOfDay()));
+		} else {
+			bean.setDueDate(null);
+		}
 		return bean;
 	}
 
