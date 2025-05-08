@@ -100,8 +100,12 @@ public class IterationEditBean implements Validatable, Serializable {
 	public void update(Iteration iteration) {
 		iteration.setName(getName());
 		iteration.setDescription(getDescription());
-		iteration.setStartDay(DateUtils.toLocalDate(getStartDate()).toEpochDay());
-		iteration.setDueDay(DateUtils.toLocalDate(getDueDate()).toEpochDay());
+		if (getStartDate() != null) {
+			iteration.setStartDay(DateUtils.toLocalDate(getStartDate()).toEpochDay());
+		}
+		if (getDueDate() != null) {
+			iteration.setDueDay(DateUtils.toLocalDate(getDueDate()).toEpochDay());
+		}
 	}
 	
 	public static IterationEditBean ofNew(Project project, @Nullable String namePrefix) {

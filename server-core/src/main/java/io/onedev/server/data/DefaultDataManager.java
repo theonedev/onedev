@@ -731,7 +731,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			if (ingressUrl != null)
 				excludedProps.add("serverUrl");
 
-			manualConfigs.add(new ManualConfig("Specify System Setting", null, 
+			manualConfigs.add(new ManualConfig("Specify System Settings", null, 
 					systemSetting, excludedProps) {
 	
 				@Override
