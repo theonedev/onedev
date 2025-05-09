@@ -77,6 +77,7 @@ public class ExtractTranslationKeys extends CommandHandler {
 		try {
 			Set<String> localizationKeys = new TreeSet<>();
 
+			/* 
 			Files.walk(projectDir.toPath())
 				.filter(it -> it.toString().endsWith(".class"))
 				.forEach(it -> {
@@ -125,7 +126,8 @@ public class ExtractTranslationKeys extends CommandHandler {
 						}
 					}
 				});
-
+			*/
+			
 			Files.walk(projectDir.toPath())
 				.filter(it -> it.toString().contains("src/main/java/io/onedev/server"))
 				.filter(it -> it.toString().endsWith(".java"))
@@ -166,6 +168,7 @@ public class ExtractTranslationKeys extends CommandHandler {
 									else
 										newLines.add("			{\"" + escapeJava(key, LEVEL_1_BASIC_ESCAPE_SET) + "\", \"**** translate this ****\"},");
 								}
+								newLines.add("		};");
 							} else {
 								var translation = parseTranslation(line);
 								translations.put(translation.getLeft(), translation.getRight());

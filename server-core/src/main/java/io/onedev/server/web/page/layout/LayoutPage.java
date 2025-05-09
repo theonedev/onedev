@@ -168,8 +168,6 @@ import io.onedev.server.web.util.WicketUtils;
 
 public abstract class LayoutPage extends BasePage {
 	
-	private static final String COOKIE_LANGUAGE = "language";
-
 	private AbstractDefaultAjaxBehavior commandPaletteBehavior;
 
 	private AbstractDefaultAjaxBehavior newVersionStatusBehavior;

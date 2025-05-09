@@ -11,6 +11,7 @@ import java.time.ZoneId;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
@@ -21,6 +22,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
@@ -90,6 +92,8 @@ public abstract class BasePage extends WebPage {
 	};
 	
 	private static final String COOKIE_DARK_MODE = "darkMode";
+	
+	protected static final String COOKIE_LANGUAGE = "language";
 
 	private boolean darkMode;
 
@@ -109,6 +113,18 @@ public abstract class BasePage extends WebPage {
 			darkMode = cookie.getValue().equals("yes");
 		else
 			darkMode = false;
+
+		WebRequest webRequest = (WebRequest) RequestCycle.get().getRequest();
+		Cookie languageCookie = webRequest.getCookie(COOKIE_LANGUAGE);
+		if (languageCookie != null) {
+			String language = languageCookie.getValue();
+			if (Locale.SIMPLIFIED_CHINESE.getLanguage().equals(language)) {
+				Session.get().setLocale(Locale.SIMPLIFIED_CHINESE);
+			} else {
+				Session.get().setLocale(Locale.ENGLISH);
+			}
+		}
+	
 	}
 
 	public boolean isDarkMode() {
