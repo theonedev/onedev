@@ -77,7 +77,6 @@ public class ExtractTranslationKeys extends CommandHandler {
 		try {
 			Set<String> localizationKeys = new TreeSet<>();
 
-			/* 
 			Files.walk(projectDir.toPath())
 				.filter(it -> it.toString().endsWith(".class"))
 				.forEach(it -> {
@@ -126,7 +125,6 @@ public class ExtractTranslationKeys extends CommandHandler {
 						}
 					}
 				});
-			*/
 			
 			Files.walk(projectDir.toPath())
 				.filter(it -> it.toString().contains("src/main/java/io/onedev/server"))

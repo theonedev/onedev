@@ -155,7 +155,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 	protected Object[][] getManualContents() {
 		return new Object[][] {
 			{"Create Administrator Account", "创建管理员账户"},
-			{"Server Setup", "服务器设置"},			
+			{"Server Setup", "服务器设置"},	
+			{"Specify System Settings", "指定系统设置"}
 		};
 	}
 	
