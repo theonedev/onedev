@@ -269,9 +269,9 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.signatureverification.DefaultSignatureVerificationManager;
 import io.onedev.server.git.signatureverification.SignatureVerificationManager;
 import io.onedev.server.git.signatureverification.SignatureVerifier;
-import io.onedev.server.jetty.DefaultJettyLauncher;
+import io.onedev.server.jetty.DefaultJettyManager;
 import io.onedev.server.jetty.DefaultSessionDataStoreFactory;
-import io.onedev.server.jetty.JettyLauncher;
+import io.onedev.server.jetty.JettyManager;
 import io.onedev.server.job.DefaultJobManager;
 import io.onedev.server.job.DefaultResourceAllocator;
 import io.onedev.server.job.JobManager;
@@ -418,8 +418,8 @@ public class CoreModule extends AbstractPluginModule {
 		super.configure();
 		
 		bind(ListenerRegistry.class).to(DefaultListenerRegistry.class);
-		bind(JettyLauncher.class).to(DefaultJettyLauncher.class);
-		bind(ServletContextHandler.class).toProvider(DefaultJettyLauncher.class);
+		bind(JettyManager.class).to(DefaultJettyManager.class);
+		bind(ServletContextHandler.class).toProvider(DefaultJettyManager.class);
 		
 		bind(ObjectMapper.class).toProvider(ObjectMapperProvider.class).in(Singleton.class);
 		

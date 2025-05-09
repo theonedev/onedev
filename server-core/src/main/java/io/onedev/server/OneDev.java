@@ -52,7 +52,7 @@ import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.ServerNotReadyException;
-import io.onedev.server.jetty.JettyLauncher;
+import io.onedev.server.jetty.JettyManager;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.SessionFactoryManager;
@@ -68,7 +68,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	
 	private static final Logger logger = LoggerFactory.getLogger(OneDev.class);
 	
-	private final Provider<JettyLauncher> jettyLauncherProvider;
+	private final Provider<JettyManager> jettyLauncherProvider;
 		
 	private final SessionManager sessionManager;
 	
@@ -100,7 +100,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	
 	// Some are injected via provider as instantiation might encounter problem during upgrade 
 	@Inject
-	public OneDev(Provider<JettyLauncher> jettyLauncherProvider, TaskScheduler taskScheduler,
+	public OneDev(Provider<JettyManager> jettyLauncherProvider, TaskScheduler taskScheduler,
                   SessionManager sessionManager, Provider<ServerConfig> serverConfigProvider,
                   DataManager dataManager, ExecutorService executorService,
                   ListenerRegistry listenerRegistry, ClusterManager clusterManager,

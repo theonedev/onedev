@@ -27,13 +27,13 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExceptionUtils;
 
 @Singleton
-public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletContextHandler> {
+public class DefaultJettyManager implements JettyManager, Provider<ServletContextHandler> {
 
 	private static final int MAX_CONTENT_SIZE = 5000000;
 
 	private final SessionDataStoreFactory sessionDataStoreFactory;
 	
-	private Server jettyServer;
+	private Server server;
 	
 	private ServletContextHandler servletContextHandler;
 	
@@ -50,7 +50,7 @@ public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletCont
 	 * Inject providers here to avoid circurlar dependencies when dependency graph gets complicated
 	 */
 	@Inject
-	public DefaultJettyLauncher(
+	public DefaultJettyManager(
 			SessionDataStoreFactory sessionDataStoreFactory,
 			Provider<Set<ServerConfigurator>> serverConfiguratorsProvider, 
 			Provider<Set<ServletConfigurator>> servletConfiguratorsProvider) {
@@ -61,14 +61,14 @@ public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletCont
 	
 	@Override
 	public void start() {
-		jettyServer = new Server();
+		server = new Server();
 
-		jettyServer.addBean(sessionDataStoreFactory);
+		server.addBean(sessionDataStoreFactory);
 		
         servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setMaxFormContentSize(MAX_CONTENT_SIZE);
 
-        servletContextHandler.setClassLoader(DefaultJettyLauncher.class.getClassLoader());
+        servletContextHandler.setClassLoader(DefaultJettyManager.class.getClassLoader());
         
         servletContextHandler.setErrorHandler(new ErrorPageErrorHandler());
         servletContextHandler.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
@@ -103,14 +103,14 @@ public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletCont
 		gzipHandler.setIncludedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.PUT.name());
 		gzipHandler.setExcludedMimeTypes(MimeTypes.OCTET_STREAM);
 
-        jettyServer.setHandler(gzipHandler);
+        server.setHandler(gzipHandler);
         
         for (ServerConfigurator configurator: serverConfiguratorsProvider.get()) 
-        	configurator.configure(jettyServer);
+        	configurator.configure(server);
         
         if (Bootstrap.command == null) {
 			try {
-				jettyServer.start();
+				server.start();
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}
@@ -119,9 +119,9 @@ public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletCont
 
 	@Override
 	public void stop() {
-		if (jettyServer != null && jettyServer.isStarted()) {
+		if (server != null && server.isStarted()) {
 			try {
-				jettyServer.stop();
+				server.stop();
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}

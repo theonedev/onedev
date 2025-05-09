@@ -142,10 +142,12 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	@Nullable
 	public static User getAuthUser(String principal) {
 		var userId = getAuthUserId(principal);
-		if (userId != null)
-			return OneDev.getInstance(UserManager.class).get(userId);
-		else
-			return null;
+		if (userId != null) {
+			var user = OneDev.getInstance(UserManager.class).get(userId);
+			if (user != null && !user.isDisabled())
+				return user;
+		}
+		return null;
 	}
 
 	@Nullable

@@ -28,15 +28,15 @@ public interface UserManager extends EntityManager<User> {
 	void update(User user, @Nullable String oldName);
 	
 	void replicate(User user);
-	
+
 	void delete(User user);
-	
+
 	void delete(Collection<User> users);
 
 	void enable(User user);
-	
-	void enable(Collection<User> users);
 
+	void enable(Collection<User> users);
+	
 	void disable(User user);
 	
 	void disable(Collection<User> users);
@@ -93,4 +93,5 @@ public interface UserManager extends EntityManager<User> {
 	int count(String term);
 		
 	UserCache cloneCache();
+	
 }

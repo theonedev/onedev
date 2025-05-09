@@ -16,6 +16,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -354,6 +355,36 @@ public class UserResource {
 			if (!user.isServiceAccount())
 				user.setNotifyOwnEvents(data.isNotifyOwnEvents());
 			userManager.update(user, oldName);
+			return Response.ok().build();
+		} else { 
+			throw new UnauthenticatedException();
+		}
+    }
+
+	@Api(order=1960, description="Disable user")
+	@Path("/{userId}/disable")
+    @POST
+    public Response disable(@PathParam("userId") Long userId) {
+		if (SecurityUtils.isAdministrator()) { 	
+			if (userId <= User.ROOT_ID)		
+				throw new BadRequestException("Should only disable normal users");
+			var user = userManager.load(userId);
+			userManager.disable(user);
+			return Response.ok().build();
+		} else { 
+			throw new UnauthenticatedException();
+		}
+    }
+
+	@Api(order=1970, description="Enable user")
+	@Path("/{userId}/enable")
+    @POST
+    public Response enable(@PathParam("userId") Long userId) {
+		if (SecurityUtils.isAdministrator()) { 	
+			if (userId <= User.ROOT_ID)		
+				throw new BadRequestException("Should only enable normal users");
+			var user = userManager.load(userId);
+			userManager.enable(user);
 			return Response.ok().build();
 		} else { 
 			throw new UnauthenticatedException();

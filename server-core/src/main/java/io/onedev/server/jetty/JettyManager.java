@@ -1,6 +1,6 @@
 package io.onedev.server.jetty;
 
-public interface JettyLauncher {
+public interface JettyManager {
 	
 	void start();
 	
