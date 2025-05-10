@@ -1,24 +1,22 @@
 package io.onedev.server.web.translation;
 
-import java.util.ListResourceBundle;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.ResourceBundle;
 
-public abstract class TranslationResourceBundle extends ListResourceBundle {
+public abstract class TranslationResourceBundle extends ResourceBundle {
 
-    @Override
-    protected final Object[][] getContents() {
-        Object[][] autoContents = getAutoContents();
-        Object[][] manualContents = getManualContents();
-        
-        Object[][] mergedContents = new Object[autoContents.length + manualContents.length][];
-        
-        System.arraycopy(autoContents, 0, mergedContents, 0, autoContents.length);
-        System.arraycopy(manualContents, 0, mergedContents, autoContents.length, manualContents.length);
-        
-        return mergedContents;
-    }
+	@Override
+	protected Object handleGetObject(String key) {
+		return getContents().get(key);
+	}
 
-    protected abstract Object[][] getAutoContents();
+	@Override
+	public Enumeration<String> getKeys() {
+		return Collections.enumeration(getContents().keySet());
+	}
 
-    protected abstract Object[][] getManualContents();
+	protected abstract Map<String, String> getContents();
 
 }

@@ -50,23 +50,23 @@ public class ExtractTranslationKeysTest {
 
     @Test
     public void testExtractTranslation() {
-        String line = "                   {\"Dashboards\", \"仪表盘\"},";
+        String line = "                   m.put(\"Dashboards\", \"仪表盘\");";
         assertEquals(new Pair<>("Dashboards", "仪表盘"), 
                 ExtractTranslationKeys.parseTranslation(line));
 
-        line = "			{\"Hello\", \"你好\"},";
+        line = "			m . put( \"Hello\" ,\"你好\" ) ;";
         assertEquals(new Pair<>("Hello", "你好"), 
                 ExtractTranslationKeys.parseTranslation(line));
         
-        line = "			{\"Complex \\\"quoted\\\" text\", \"复杂的\\\"引用\\\"文本\"},";
+        line = "			m.put(\"Complex \\\"quoted\\\" text\", \"复杂的\\\"引用\\\"文本\");";
         assertEquals(new Pair<>("Complex \"quoted\" text", "复杂的\"引用\"文本"), 
                 ExtractTranslationKeys.parseTranslation(line));
         
-        line = "			{\"Escaped characters: \\t\\r\\n\\f\\b\\\\\", \"转义字符: \\t\\r\\n\\f\\b\\\\\"},";
+        line = "			m.put(\"Escaped characters: \\t\\r\\n\\f\\b\\\\\", \"转义字符: \\t\\r\\n\\f\\b\\\\\");";
         assertEquals(new Pair<>("Escaped characters: \t\r\n\f\b\\", "转义字符: \t\r\n\f\b\\"), 
                 ExtractTranslationKeys.parseTranslation(line));
         
-        line = "			{\"Unicode: \\u0048\\u0065\\u006C\\u006C\\u006F\", \"Unicode: \\u4F60\\u597D\"},";
+        line = "			m.put(\"Unicode: \\u0048\\u0065\\u006C\\u006C\\u006F\", \"Unicode: \\u4F60\\u597D\");";
         assertEquals(new Pair<>("Unicode: Hello", "Unicode: 你好"), 
                 ExtractTranslationKeys.parseTranslation(line));
     }
