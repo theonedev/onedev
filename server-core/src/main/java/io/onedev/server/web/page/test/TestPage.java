@@ -1,7 +1,5 @@
 package io.onedev.server.web.page.test;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -25,7 +23,6 @@ public class TestPage extends BasePage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				System.out.println(_T("hello world"));
 			}	
 			
 		});

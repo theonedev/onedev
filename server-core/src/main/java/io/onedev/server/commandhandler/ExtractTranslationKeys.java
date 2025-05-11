@@ -10,8 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,6 +46,8 @@ public class ExtractTranslationKeys extends CommandHandler {
 	private static final Pattern _T_PATTERN = Pattern.compile("_T\\(\\s*\"((?:[^\"\\\\]|\\\\.)*)\"\\s*\\)");
 
 	private static final Pattern TRANSLATION_PATTERN = Pattern.compile("m\\s*\\.\\s*put\\s*\\(\\s*\"((?:[^\"\\\\]|\\\\.)*)\"\\s*,\\s*\"((?:[^\"\\\\]|\\\\.)*)\"\\s*\\)\\s*;");
+
+	private static final String TRANSLATE_PLACEHOLDER = "**** translate this ****";
 	
 	@Inject
 	public ExtractTranslationKeys(HibernateConfig hibernateConfig) {
@@ -152,23 +154,29 @@ public class ExtractTranslationKeys extends CommandHandler {
 				if (file.getName().startsWith(Translation.class.getSimpleName() + "_")) {
 					var newLines = new ArrayList<String>();
 					var lines = Files.readAllLines(file.toPath());
-					var translations = new HashMap<String, String>();
+					var translations = new TreeMap<String, String>();
 					var inAutoContentsBlock = false;
 					for (var line: lines) {
 						if (inAutoContentsBlock) {
-							if (line.trim().length() == 0) {
+							if (line.trim().equals("// Manual contents")) {
 								inAutoContentsBlock = false;
-								for (var key: localizationKeys) {
-									var value = translations.get(key);
-									if (value != null)
-										newLines.add("		m.put(\"" + escapeJava(key, LEVEL_1_BASIC_ESCAPE_SET) + "\", \"" + escapeJava(value, LEVEL_1_BASIC_ESCAPE_SET) + "\");");
-									else
-										newLines.add("		m.put(\"" + escapeJava(key, LEVEL_1_BASIC_ESCAPE_SET) + "\", \"**** translate this ****\");");
+								translations.keySet().retainAll(localizationKeys);
+								for (var entry: translations.entrySet()) {
+									var key = entry.getKey();
+									var value = entry.getValue();
+									newLines.add("		m.put(\"" + escapeJava(key, LEVEL_1_BASIC_ESCAPE_SET) + "\", \"" + escapeJava(value, LEVEL_1_BASIC_ESCAPE_SET) + "\");");
 								}
+								localizationKeys.removeAll(translations.keySet());
+								for (var key: localizationKeys) {
+									newLines.add("		m.put(\"" + escapeJava(key, LEVEL_1_BASIC_ESCAPE_SET) + "\", \"**** translate this ****\");");
+								}
+								newLines.add("");
 								newLines.add(line);
-							} else {
+							} else if (line.trim().length() != 0) {
 								var translation = parseTranslation(line);
-								translations.put(translation.getLeft(), translation.getRight());
+								if (!translation.getRight().equals(TRANSLATE_PLACEHOLDER)) {
+									translations.put(translation.getLeft(), translation.getRight());
+								}
 							}
 						} else if (line.trim().equals("// Auto contents")) {
 							inAutoContentsBlock = true;
