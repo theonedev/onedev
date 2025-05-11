@@ -17,8 +17,8 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -125,21 +125,11 @@ public class PolymorphicEditor extends ValueEditor<Serializable> {
 				PolymorphicEditor.this.replace(newBeanEditor(bean));
 			}
 
-		}, implementationNames, new IChoiceRenderer<String>() {
+		}, implementationNames, new ChoiceRenderer<String>() {
 
 			@Override
 			public Object getDisplayValue(String object) {
 				return getString("t: " + object);
-			}
-
-			@Override
-			public String getIdValue(String object, int index) {
-				return String.valueOf(index);
-			}
-
-			@Override
-			public String getObject(String id, IModel<? extends List<? extends String>> choices) {
-				return choices.getObject().get(Integer.parseInt(id));
 			}
 			
 		}) {

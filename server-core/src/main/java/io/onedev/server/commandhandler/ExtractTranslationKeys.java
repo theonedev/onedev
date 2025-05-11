@@ -114,6 +114,14 @@ public class ExtractTranslationKeys extends CommandHandler {
 										if (description.length() != 0) {
 											localizationKeys.add(description);
 										}
+										var placeholder = annotation.placeholder();
+										if (placeholder.length() != 0) {
+											localizationKeys.add(placeholder);
+										}
+										var rootPlaceholder = annotation.rootPlaceholder();
+										if (rootPlaceholder.length() != 0) {
+											localizationKeys.add(rootPlaceholder);
+										}
 									}
 								}
 								if (clazz.isEnum()) {

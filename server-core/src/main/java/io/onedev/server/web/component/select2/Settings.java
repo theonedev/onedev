@@ -20,6 +20,8 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import org.json.JSONException;
 import org.json.JSONStringer;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
@@ -416,14 +418,14 @@ public final class Settings implements Serializable {
 			Method propertyGetter = propertyDescriptor.getPropertyGetter();
 			String placeholder = EditableUtils.getPlaceholder(propertyGetter);
 			if (placeholder != null) {
-				setPlaceholder(placeholder);
+				setPlaceholder(_T(placeholder));
 			} else if (propertyDescriptor.isPropertyRequired()) {
 				if (propertyDescriptor.getPropertyGetter().getAnnotation(OmitName.class) != null)
-					setPlaceholder("Choose " + propertyDescriptor.getDisplayName().toLowerCase() + "...");
+					setPlaceholder(_T("Choose") + " " + _T(propertyDescriptor.getDisplayName()).toLowerCase() + "...");
 				else
-					setPlaceholder("Choose...");
+					setPlaceholder(_T("Choose..."));
 			} else if (propertyDescriptor.getPropertyGetter().getAnnotation(OmitName.class) != null) {
-				setPlaceholder(EditableUtils.getDisplayName(propertyDescriptor.getPropertyGetter()));
+				setPlaceholder(_T(propertyDescriptor.getDisplayName()));
 			}
 		} finally {
 			ComponentContext.pop();

@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.lang.reflect.Method;
 import java.util.Set;
 
@@ -129,9 +131,9 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 					
 					String placeholder = EditableUtils.getPlaceholder(getter);
 					if (placeholder != null) 
-						return placeholder;
+						return _T(placeholder);
 					else if (getter.getAnnotation(OmitName.class) != null)  
-						return EditableUtils.getDisplayName(getter);
+						return _T(EditableUtils.getDisplayName(getter));
 					else 
 						return "";
 				} finally {

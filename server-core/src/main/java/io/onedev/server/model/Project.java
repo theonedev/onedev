@@ -4,6 +4,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
 import static io.onedev.server.model.Project.PROP_NAME;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
+import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.commons.lang3.StringUtils.replace;
 
 import java.io.File;
@@ -488,7 +489,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.name = name;
 	}
 
-	@Editable(order=150, description = "Optionally define a unique key for the project with two or " +
+	@Editable(order=150, name = "Project Key", description = "Optionally define a unique key for the project with two or " +
 			"more upper case letters. This key can be used to reference issues, builds, and pull requests " +
 			"with a stable and short form <code>&lt;project key&gt;-&lt;number&gt;</code> instead of " +
 			"<code>&lt;project path&gt;#&lt;number&gt;</code>")
@@ -1061,11 +1062,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@SuppressWarnings("unused")
 	private static String getTimeTrackingDescription() {
 		if (!WicketUtils.isSubscriptionActive()) {
-			return "<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. " +
-					"<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days";
+			return _T("<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days");
 		} else {
-			return "Enable <a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>time tracking</a> for this " +
-					"project to track progress and generate timesheets";
+			return _T("Enable <a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>time tracking</a> for this project to track progress and generate timesheets");
 		}
 	}
 
@@ -1081,7 +1080,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	@SuppressWarnings("unused")
 	private static String getPackManagementDescription() {
-		return "Enable <a href='https://docs.onedev.io/tutorials/package/working-with-packages' target='_blank'>package management</a> for this project";
+		return _T("Enable <a href='https://docs.onedev.io/tutorials/package/working-with-packages' target='_blank'>package management</a> for this project");
 	}
 
 	public void setPackManagement(boolean packManagement) {
