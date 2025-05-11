@@ -374,6 +374,7 @@ public class DefaultGitService implements GitService, Serializable {
 		return runOnProjectServer(projectId, () -> {
 			Repository repository = getRepository(projectId);
 			try (RevWalk revWalk = new RevWalk(repository)) {
+				Preconditions.checkArgument(!revision.contains(".."));
 				Ref ref = repository.findRef(revision);
 				return ref != null ? new RefFacade(revWalk, ref) : null;
 			}

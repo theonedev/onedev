@@ -86,6 +86,7 @@ public class GitUtils {
 	public static void setDefaultBranch(Repository repository, String defaultBranch) {
 		var defaultBranchRef = branch2ref(defaultBranch);
 		try {
+			Preconditions.checkArgument(!defaultBranch.contains(".."));
 			if (repository.findRef(defaultBranchRef) != null) {
 				RefUpdate refUpdate = getRefUpdate(repository, "HEAD");
 				linkRef(refUpdate, branch2ref(defaultBranch));
