@@ -43,7 +43,7 @@ abstract class ContentPanel extends Panel {
 			
 		}).setEscapeModelStrings(false));
 
-		add(new FencedFeedbackPanel("feedback", this).setEscapeModelStrings(false));
+		add(new FencedFeedbackPanel("feedback", this));
 		
 		add(new WebMarkupContainer("input").setVisible(getConfirmInput() != null));
 		

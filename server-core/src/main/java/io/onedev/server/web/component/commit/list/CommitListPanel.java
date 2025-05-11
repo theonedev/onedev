@@ -434,7 +434,6 @@ public abstract class CommitListPanel extends Panel {
 		
 		FencedFeedbackPanel feedback;
 		body.add(feedback = new FencedFeedbackPanel("feedback", this));
-		feedback.setEscapeModelStrings(false);
 		
 		body.add(new WebMarkupContainer("noCommits") {
 

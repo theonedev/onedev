@@ -121,7 +121,7 @@ public class RoleDetailPage extends AdministrationPage {
 			};	
 			
 			form.add(editor);
-			form.add(new FencedFeedbackPanel("feedback", form).setEscapeModelStrings(false));
+			form.add(new FencedFeedbackPanel("feedback", form));
 			
 			form.add(new Link<Void>("delete") {
 
