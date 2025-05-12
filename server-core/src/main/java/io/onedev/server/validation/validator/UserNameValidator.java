@@ -6,11 +6,12 @@ import java.util.regex.Pattern;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.UserName;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.annotation.UserName;
 
 public class UserNameValidator implements ConstraintValidator<UserName, String> {
 	
@@ -71,8 +72,8 @@ public class UserNameValidator implements ConstraintValidator<UserName, String> 
 		});
 	}
 
-	public static String normalizeUserName(String preferredUserName) {
-		String normalizedUserName = preferredUserName.replaceAll("[^\\w-\\.]", "-").toLowerCase();
+	public static String normalizeUserName(String preferredUserName) {		
+		String normalizedUserName = StringUtils.substringBefore(preferredUserName, "@").replaceAll("[^\\w-\\.]", "-").toLowerCase();
 		if (normalizedUserName.equals("new") 
 				|| normalizedUserName.equals(User.SYSTEM_NAME)
 				|| normalizedUserName.equals(User.UNKNOWN_NAME)) {
