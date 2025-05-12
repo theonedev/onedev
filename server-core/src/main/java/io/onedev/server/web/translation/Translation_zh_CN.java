@@ -871,7 +871,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"如果当前构建规范不再使用该密钥，但仍需要存在以重现旧构建，则将该密钥标记为已存档。已存档的密钥将不会默认显示");
 		m.put("Markdown","Markdown");
 		m.put("Markdown Report","Markdown 报告");
-		m.put("Markdown from file","Markdown 从文件");
+		m.put("Markdown from file","Markdown（基于文件）");
 		m.put("Max Code Search Entries","最大代码搜索条目");
 		m.put("Max Commit Message Line Length","最大提交消息行长度");
 		m.put("Max Git LFS File Size (MB)","最大 Git LFS 文件大小 (MB)");
