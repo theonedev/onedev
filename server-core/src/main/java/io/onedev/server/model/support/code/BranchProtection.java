@@ -264,7 +264,8 @@ public class BranchProtection implements Serializable {
 		reviewRequirement = parsedReviewRequirement.toString();
 	}
 	
-	@Editable(order=500, name="Required Builds", placeholder="No any", description="Optionally choose required builds")
+	@Editable(order=500, name="Required Builds", placeholder="No any", description="Optionally choose required builds. You may also " +
+			"input jobs not listed here, and press ENTER to add them")
 	@JobChoice(tagsMode=true)
 	public List<String> getJobNames() {
 		return jobNames;
