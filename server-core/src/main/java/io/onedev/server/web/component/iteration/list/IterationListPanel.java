@@ -1,5 +1,41 @@
 package io.onedev.server.web.component.iteration.list;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.hibernate.criterion.Restrictions;
+
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IterationManager;
@@ -18,44 +54,20 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
+import io.onedev.server.web.component.iteration.IterationDateLabel;
+import io.onedev.server.web.component.iteration.actions.IterationActionsPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.iteration.IterationDateLabel;
-import io.onedev.server.web.component.iteration.actions.IterationActionsPanel;
 import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
 import io.onedev.server.web.page.project.issues.iteration.NewIterationPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.criterion.Restrictions;
-
-import javax.annotation.Nullable;
-import java.util.*;
 
 public class IterationListPanel extends GenericPanel<Project> {
+
+	private static final int MAX_DESC_DISP_LEN = 64;
 
 	private boolean closed;
 	
@@ -258,6 +270,21 @@ public class IterationListPanel extends GenericPanel<Project> {
 			}
 
 		});
+
+		columns.add(new AbstractColumn<>(Model.of("Description")) {
+
+			@Override
+			public String getCssClass() {
+				return "description d-none d-lg-table-cell align-middle";
+			}
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Iteration>> cellItem, String componentId,
+                                     IModel<Iteration> rowModel) {
+				cellItem.add(new Label(componentId, StringUtils.abbreviate(rowModel.getObject().getDescription(), MAX_DESC_DISP_LEN)));
+			}
+
+		});
 		
 		columns.add(new AbstractColumn<>(Model.of("Issue Stats")) {
 
@@ -388,6 +415,12 @@ public class IterationListPanel extends GenericPanel<Project> {
 	
 	private Project getProject() {
 		return getModelObject();
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new IterationListCssResourceReference()));
 	}
 
 	protected void onSortChanged(AjaxRequestTarget target, IterationSort sort) {

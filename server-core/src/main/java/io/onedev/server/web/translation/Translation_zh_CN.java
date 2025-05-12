@@ -1029,6 +1029,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"如果未检索到成员资格信息，可选择将新认证的用户添加到指定组");
 		m.put("Optionally add newly authenticated user to specified group if membership information is not retrieved",
 			"如果未检索到成员资格信息，可选择将新认证的用户添加到指定组");
+		m.put("Optionally choose required builds. You may also input jobs not listed here, and press ENTER to add them",
+			"可选：选择所需验证的任务。您也可以在此处输入未列出的任务，并按回车添加它们");
 		m.put("Optionally configure proxy to access remote repository. Proxy should be in the format of &lt;proxy host&gt;:&lt;proxy port&gt;",
 			"可选择为访问远程仓库配置代理。代理应为 <i>&lt;代理主机&gt;:&lt;代理端口&gt;</i> 格式");
 		m.put("Optionally define a unique key for the project with two or more upper case letters. This key can be used to reference issues, builds, and pull requests with a stable and short form <code>&lt;project key&gt;-&lt;number&gt;</code> instead of <code>&lt;project path&gt;#&lt;number&gt;</code>",
@@ -2232,8 +2234,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("new field","新字段");
 		m.put("root","根");
 		m.put("true","真");
-		m.put("Optionally choose required builds. You may also input jobs not listed here, and press ENTER to add them",
-			"可选：选择所需验证的任务。您也可以在此处输入未列出的任务，并按回车添加它们");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
