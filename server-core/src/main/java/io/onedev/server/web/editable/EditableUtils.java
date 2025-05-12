@@ -1,12 +1,12 @@
 package io.onedev.server.web.editable;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.annotation.Nullable;
-
-import org.apache.wicket.Localizer;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
@@ -36,6 +36,11 @@ public class EditableUtils {
 			return editable.name();
 		else 
 			return BeanUtils.getDisplayName(element);
+	}
+
+	public static boolean isTranslatable(AnnotatedElement element) {
+		var editable = element.getAnnotation(Editable.class);
+		return editable == null || editable.translatable();
 	}
 	
 	/**
@@ -122,7 +127,10 @@ public class EditableUtils {
 	private static String getDescription(AnnotatedElement element, Editable editable) {
 		String description = editable.description();
 		if (description.length() != 0) {
-			return Localizer.get().getString("t: " + description, null);
+			if (isTranslatable(element))
+				return _T(description);
+			else
+				return description;
 		} else if (editable.descriptionProvider().length() != 0) {
 			Class<?> clazz;
 			if (element instanceof Class) 
@@ -151,7 +159,10 @@ public class EditableUtils {
 		if (project != null && project.getParent() == null) {
 			String placeholder = editable.rootPlaceholder();
 			if (placeholder.length() != 0) {
-				return placeholder;
+				if (isTranslatable(element))
+					return _T(placeholder);
+				else
+					return placeholder;
 			} else if (editable.rootPlaceholderProvider().length() != 0) {
 				Class<?> clazz;
 				if (element instanceof Class) 
@@ -165,7 +176,10 @@ public class EditableUtils {
 		}
 		String placeholder = editable.placeholder();
 		if (placeholder.length() != 0) {
-			return placeholder;
+			if (isTranslatable(element))
+				return _T(placeholder);
+			else
+				return placeholder;
 		} else if (editable.placeholderProvider().length() != 0) {
 			Class<?> clazz;
 			if (element instanceof Class) 

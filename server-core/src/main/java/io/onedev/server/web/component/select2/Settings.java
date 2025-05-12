@@ -418,7 +418,7 @@ public final class Settings implements Serializable {
 			Method propertyGetter = propertyDescriptor.getPropertyGetter();
 			String placeholder = EditableUtils.getPlaceholder(propertyGetter);
 			if (placeholder != null) {
-				setPlaceholder(_T(placeholder));
+				setPlaceholder(placeholder);
 			} else if (propertyDescriptor.isPropertyRequired()) {
 				if (propertyDescriptor.getPropertyGetter().getAnnotation(OmitName.class) != null)
 					setPlaceholder(_T("Choose") + " " + _T(propertyDescriptor.getDisplayName()).toLowerCase() + "...");

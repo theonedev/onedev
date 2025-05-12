@@ -147,18 +147,22 @@ public abstract class InputSpec implements Serializable {
 			buffer.append("    @Editable(name=\"" + escape(name) 
 					+ "\", placeholder=\"" + escape(getNameOfEmptyValue()) 
 					+ "\", description=\"" + escape(description) 
-					+ "\", order=" + index + ")\n");
+					+ "\", translatable=false"
+					+ ", order=" + index + ")\n");
 		} else if (description != null) {
 			buffer.append("    @Editable(name=\"" + escape(name) 
 					+ "\", description=\"" + escape(description) 
-					+ "\", order=" + index + ")\n");
+					+ "\", translatable=false"
+					+ ", order=" + index + ")\n");
 		} else if (getNameOfEmptyValue() != null) {
 			buffer.append("    @Editable(name=\"" + escape(name) 
 					+ "\", placeholder=\"" + escape(getNameOfEmptyValue()) 
-					+ "\", order=" + index + ")\n");
+					+ "\", translatable=false"
+					+ ", order=" + index + ")\n");
 		} else {
-			buffer.append("    @Editable(name=\"" + escape(name) + 
-					"\", order=" + index + ")\n");
+			buffer.append("    @Editable(name=\"" + escape(name) 
+					+ "\", translatable=false"
+					+ ", order=" + index + ")\n");
 		}
 		if (showCondition != null) 
 			buffer.append("    @ShowCondition(\"isInput" + index + "Visible\")\n");

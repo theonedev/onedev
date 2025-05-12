@@ -6,7 +6,6 @@ import static org.unbescape.java.JavaEscapeLevel.LEVEL_1_BASIC_ESCAPE_SET;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,6 +15,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -31,7 +31,6 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Pair;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.translation.Translation;
 import io.onedev.server.web.util.TextUtils;
@@ -43,7 +42,11 @@ public class ExtractTranslationKeys extends CommandHandler {
 
 	public static final String COMMAND = "extract-translation-keys";
 
-	private static final Pattern _T_PATTERN = Pattern.compile("_T\\(\\s*\"((?:[^\"\\\\]|\\\\.)*)\"\\s*\\)");
+	private static final Pattern _T_PATTERN = Pattern.compile("_T\\s*\\(\\s*\"((?:[^\"\\\\]|\\\\.)*)\"(?:\\s*\\+\\s*\"((?:[^\"\\\\]|\\\\.)*)\")*\\s*\\)");
+
+	private static final Pattern STRING_LITERAL_PATTERN = Pattern.compile("\"((?:[^\"\\\\]|\\\\.)*)\"");
+
+	public static final Pattern EXTRACTED_KEYS_BLOCK_PATTERN = Pattern.compile("(\n\\s*//\\s*extracted\\s*keys\\s*\n)(.*)(\n\\s*//\\s*manually\\s*added\\s*keys)", Pattern.DOTALL|Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern TRANSLATION_PATTERN = Pattern.compile("m\\s*\\.\\s*put\\s*\\(\\s*\"((?:[^\"\\\\]|\\\\.)*)\"\\s*,\\s*\"((?:[^\"\\\\]|\\\\.)*)\"\\s*\\)\\s*;");
 
@@ -77,7 +80,7 @@ public class ExtractTranslationKeys extends CommandHandler {
 		logger.info("Extracting localization keys...");
 		
 		try {
-			Set<String> localizationKeys = new TreeSet<>();
+			Set<String> extractedTranslationKeys = new TreeSet<>();
 
 			Files.walk(projectDir.toPath())
 				.filter(it -> it.toString().endsWith(".class"))
@@ -100,33 +103,33 @@ public class ExtractTranslationKeys extends CommandHandler {
 								var clazz = Class.forName(className);
 								var editable = clazz.getAnnotation(Editable.class);
 								if (editable != null) {
-									localizationKeys.add(EditableUtils.getDisplayName(clazz));
+									extractedTranslationKeys.add(EditableUtils.getDisplayName(clazz));
 									var description = editable.description();
 									if (description.length() != 0) {
-										localizationKeys.add(description);
+										extractedTranslationKeys.add(description);
 									}
 								}
 								for (var method: clazz.getDeclaredMethods()) {
 									var annotation = method.getAnnotation(Editable.class);
 									if (annotation != null) {
-										localizationKeys.add(EditableUtils.getDisplayName(method));
+										extractedTranslationKeys.add(EditableUtils.getDisplayName(method));
 										var description = annotation.description();
 										if (description.length() != 0) {
-											localizationKeys.add(description);
+											extractedTranslationKeys.add(description);
 										}
 										var placeholder = annotation.placeholder();
 										if (placeholder.length() != 0) {
-											localizationKeys.add(placeholder);
+											extractedTranslationKeys.add(placeholder);
 										}
 										var rootPlaceholder = annotation.rootPlaceholder();
 										if (rootPlaceholder.length() != 0) {
-											localizationKeys.add(rootPlaceholder);
+											extractedTranslationKeys.add(rootPlaceholder);
 										}
 									}
 								}
 								if (clazz.isEnum()) {
 									for (var constant: clazz.getEnumConstants()) {
-										localizationKeys.add(TextUtils.getDisplayValue((Enum<?>) constant));
+										extractedTranslationKeys.add(TextUtils.getDisplayValue((Enum<?>) constant));
 									}
 								}
 							} catch (ClassNotFoundException e) {
@@ -141,7 +144,7 @@ public class ExtractTranslationKeys extends CommandHandler {
 				.filter(it -> it.toString().endsWith(".java"))
 				.forEach(it -> {
 					try {
-						localizationKeys.addAll(extract_T(Files.readString(it)));
+						extractedTranslationKeys.addAll(extract_T(Files.readString(it)));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -152,7 +155,7 @@ public class ExtractTranslationKeys extends CommandHandler {
 				.filter(it -> it.toString().endsWith(".html"))
 				.forEach(it -> {
 					try {
-						localizationKeys.addAll(extract_wicket_t(Files.readString(it)));
+						extractedTranslationKeys.addAll(extract_wicket_t(Files.readString(it)));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -160,40 +163,8 @@ public class ExtractTranslationKeys extends CommandHandler {
 
 			for (var file: new File(projectDir, "server-core/src/main/java/" + Translation.class.getPackageName().replace(".", "/")).listFiles()) {
 				if (file.getName().startsWith(Translation.class.getSimpleName() + "_")) {
-					var newLines = new ArrayList<String>();
-					var lines = Files.readAllLines(file.toPath());
-					var translations = new TreeMap<String, String>();
-					var inAutoContentsBlock = false;
-					for (var line: lines) {
-						if (inAutoContentsBlock) {
-							if (line.trim().equals("// Manual contents")) {
-								inAutoContentsBlock = false;
-								translations.keySet().retainAll(localizationKeys);
-								for (var entry: translations.entrySet()) {
-									var key = entry.getKey();
-									var value = entry.getValue();
-									newLines.add("		m.put(\"" + escapeJava(key, LEVEL_1_BASIC_ESCAPE_SET) + "\", \"" + escapeJava(value, LEVEL_1_BASIC_ESCAPE_SET) + "\");");
-								}
-								localizationKeys.removeAll(translations.keySet());
-								for (var key: localizationKeys) {
-									newLines.add("		m.put(\"" + escapeJava(key, LEVEL_1_BASIC_ESCAPE_SET) + "\", \"**** translate this ****\");");
-								}
-								newLines.add("");
-								newLines.add(line);
-							} else if (line.trim().length() != 0) {
-								var translation = parseTranslation(line);
-								if (!translation.getRight().equals(TRANSLATE_PLACEHOLDER)) {
-									translations.put(translation.getLeft(), translation.getRight());
-								}
-							}
-						} else if (line.trim().equals("// Auto contents")) {
-							inAutoContentsBlock = true;
-							newLines.add(line);
-						} else {
-							newLines.add(line);
-						}
-					}
-					Files.write(file.toPath(), newLines, StandardCharsets.UTF_8);
+					var content = updateTranslationKeys(Files.readString(file.toPath()), extractedTranslationKeys);
+					Files.writeString(file.toPath(), content);
 				}
 			}
 		} catch (Throwable e) {
@@ -208,11 +179,14 @@ public class ExtractTranslationKeys extends CommandHandler {
 		var extracted = new ArrayList<String>();
 		Matcher matcher = _T_PATTERN.matcher(content);
 		while (matcher.find()) {
-			String key = matcher.group(1);
-			key = unescapeJava(key);
-			if (!key.isEmpty()) {
-				extracted.add(key);
+			StringBuilder key = new StringBuilder();
+			String match = matcher.group(0);
+			Matcher literalMatcher = STRING_LITERAL_PATTERN.matcher(match);
+			while (literalMatcher.find()) {
+				key.append(unescapeJava(literalMatcher.group(1)));
 			}
+			if (key.length() != 0) 
+				extracted.add(key.toString());
 		}
 		return extracted;
 	}
@@ -231,13 +205,45 @@ public class ExtractTranslationKeys extends CommandHandler {
 		return extracted;
 	}
 
-	public static Pair<String, String> parseTranslation(String line) {
-		Matcher matcher = TRANSLATION_PATTERN.matcher(line);
-		if (matcher.find()) {
-			return new Pair<>(unescapeJava(matcher.group(1)), unescapeJava(matcher.group(2)));
-		} else {
-			throw new RuntimeException("Invalid translation line: " + line);
+	public static String updateTranslationKeys(String content, Collection<String> extractedTranslationKeys) {
+		extractedTranslationKeys = new TreeSet<>(extractedTranslationKeys);
+		var matcher = EXTRACTED_KEYS_BLOCK_PATTERN.matcher(content);
+		if (!matcher.find())
+			throw new RuntimeException("Unable to find extracted keys block");
+		var newContent = new StringBuffer();
+		var translations = new StringBuffer();
+		var existingTranslations = new TreeMap<String, String>();
+		String extractedKeysBlock = matcher.group(2);
+		var translationMatcher = TRANSLATION_PATTERN.matcher(extractedKeysBlock);
+		while (translationMatcher.find()) {
+			var key = unescapeJava(translationMatcher.group(1));
+			var value = unescapeJava(translationMatcher.group(2));
+			if (!value.equals(TRANSLATE_PLACEHOLDER)) 
+				existingTranslations.put(key, value);
 		}
+		existingTranslations.keySet().retainAll(extractedTranslationKeys);
+		for (var entry: existingTranslations.entrySet()) {
+			addToTranslations(translations, entry.getKey(), entry.getValue());
+		}
+		extractedTranslationKeys.removeAll(existingTranslations.keySet());
+		for (var key: extractedTranslationKeys) {
+			addToTranslations(translations, key, null);
+		}
+		matcher.appendReplacement(newContent, matcher.group(1) + Matcher.quoteReplacement(translations.toString()) + matcher.group(3));
+		matcher.appendTail(newContent);
+		return newContent.toString();
+	}
+
+	private static void addToTranslations(StringBuffer translations, String key, @Nullable String value) {
+		key = escapeJava(key, LEVEL_1_BASIC_ESCAPE_SET);
+		if (value != null) 
+			value = escapeJava(value, LEVEL_1_BASIC_ESCAPE_SET);
+		else
+			value = "**** translate this ****";
+		translations.append("\t\tm.put(\"" + key + "\",");
+		if (key.length() > 80)
+			translations.append("\n\t\t\t");
+		translations.append("\"" + value + "\");\n");
 	}
 
 	@Override

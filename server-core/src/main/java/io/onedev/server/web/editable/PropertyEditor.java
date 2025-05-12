@@ -131,7 +131,7 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 					
 					String placeholder = EditableUtils.getPlaceholder(getter);
 					if (placeholder != null) 
-						return _T(placeholder);
+						return placeholder;
 					else if (getter.getAnnotation(OmitName.class) != null)  
 						return _T(EditableUtils.getDisplayName(getter));
 					else 

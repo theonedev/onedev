@@ -30,6 +30,8 @@ public @interface Editable {
 	String description() default "";
 	
 	String descriptionProvider() default "";
+
+	boolean translatable() default true;
 	
 	boolean hidden() default false;
 }

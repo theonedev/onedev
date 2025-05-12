@@ -121,7 +121,10 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				
 				setOutputMarkupPlaceholderTag(true);
 				
-				Label nameLabel = new Label("name", getString("t: " + property.getDescriptor().getDisplayName()));
+				String label = property.getDescriptor().getDisplayName();
+				if (EditableUtils.isTranslatable(property.getPropertyGetter()))
+					label = getString("t: " + label);
+				Label nameLabel = new Label("name", label);
 				add(nameLabel);
 				
 				OmitName omitName = property.getPropertyGetter().getAnnotation(OmitName.class);
