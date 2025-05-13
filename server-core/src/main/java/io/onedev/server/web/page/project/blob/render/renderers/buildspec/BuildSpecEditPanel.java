@@ -70,6 +70,7 @@ import java.util.List;
 
 import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getActiveElementIndex;
 import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getUrlSegment;
+import static io.onedev.server.web.translation.Translation._T;
 
 public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements BuildSpecAware, EditCompleteAware {
 
@@ -214,7 +215,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 													if (job.getName() != null)
 														return HtmlEscape.escapeHtml5(job.getName());
 													else
-														return "<i>No Name</i>";
+														return _T("<i>No Name</i>");
 												}
 												
 											}).setEscapeModelStrings(false));
@@ -249,7 +250,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 											menuItems.add(new MenuItem() {
 												@Override
 												public String getLabel() {
-													return "Copy";
+													return _T("Copy");
 												}
 
 												@Override
@@ -277,7 +278,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 											menuItems.add(new MenuItem() {
 												@Override
 												public String getLabel() {
-													return "Delete";
+													return _T("Delete");
 												}
 
 												@Override
@@ -1017,7 +1018,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 									if (element.getName() != null)
 										return HtmlEscape.escapeHtml5(element.getName());
 									else
-										return "<i>No Name</i>";
+										return _T("<i>No Name</i>");
 								}
 								
 							}).setEscapeModelStrings(false));

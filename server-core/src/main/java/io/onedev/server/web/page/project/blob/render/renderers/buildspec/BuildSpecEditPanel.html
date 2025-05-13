@@ -2,11 +2,11 @@
     <div wicket:id="content" class="build-spec build-spec-edit d-flex flex-column flex-grow-1"></div>
     <wicket:fragment wicket:id="parseableFrag">
     	<div class="head">
-    		<a wicket:id="jobs" class="jobs">Jobs</a>
-    		<a wicket:id="services" class="services">Services</a>
-    		<a wicket:id="stepTemplates" class="step-templates">Step Templates</a>
-    		<a wicket:id="properties" class="properties">Properties</a>
-    		<a wicket:id="imports" class="imports">Imports</a>
+    		<a wicket:id="jobs" class="jobs"><wicket:t>Jobs</wicket:t></a>
+    		<a wicket:id="services" class="services"><wicket:t>Services</wicket:t></a>
+    		<a wicket:id="stepTemplates" class="step-templates"><wicket:t>Step Templates</wicket:t></a>
+    		<a wicket:id="properties" class="properties"><wicket:t>Properties</wicket:t></a>
+    		<a wicket:id="imports" class="imports"><wicket:t>Imports</wicket:t></a>
     	</div>
         <div wicket:id="body" class="body d-flex flex-column flex-grow-1">
 			<div wicket:id="feedback"></div>
@@ -14,7 +14,7 @@
 		</div>
     </wicket:fragment>
     <wicket:fragment wicket:id="unparseableFrag">
-        <div class="title">Error parsing build spec</div>
+        <div class="title"><wicket:t>Error parsing build spec</wicket:t></div>
         <div wicket:id="errorMessage" class="error-message"></div>
     </wicket:fragment>
 	<wicket:fragment wicket:id="jobsFrag">
@@ -34,7 +34,7 @@
             </div></div>
             <div class="add btn-group btn-block">
                 <a wicket:id="create" class="create btn btn-primary justify-content-start no-suggestions">
-                    <wicket:svg href="plus" class="icon flex-shrink-0 mr-1"></wicket:svg> Add New
+                    <wicket:svg href="plus" class="icon flex-shrink-0 mr-1"></wicket:svg> <wicket:t>Add New</wicket:t>
                 </a>
             </div>
         </div>
@@ -52,7 +52,7 @@
 	</wicket:fragment>
     <wicket:fragment wicket:id="addJobFrag">
         <a wicket:id="create" class="create btn btn-primary justify-content-start text-nowrap">
-            <wicket:svg href="plus" class="icon flex-shrink-0 mr-1"></wicket:svg> Add New
+            <wicket:svg href="plus" class="icon flex-shrink-0 mr-1"></wicket:svg> <wicket:t>Add New</wicket:t>
         </a>
         <a wicket:id="suggestions" class="suggestions btn btn-primary flex-grow-0 flex-shrink-0 btn-icon" title="Suggestions">
 			<wicket:svg href="wand" class="icon"/>

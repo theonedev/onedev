@@ -80,7 +80,7 @@ public class NoCommitsPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Upload Files";
+							return _T("Upload Files");
 						}
 
 						@Override
