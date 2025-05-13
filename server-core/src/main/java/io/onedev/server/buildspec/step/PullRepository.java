@@ -4,8 +4,9 @@ import static com.google.common.collect.Maps.difference;
 import static io.onedev.server.git.GitUtils.getReachableCommits;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.jgit.lib.Constants.R_HEADS;
-
+import static org.eclipse.jgit.lib.Constants.R_TAGS;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,7 @@ import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.LfsFetchAllCommand;
 import io.onedev.server.git.command.LfsFetchCommand;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
@@ -199,9 +201,12 @@ public class PullRepository extends SyncRepository {
 			this.secretMasker = secretMasker;
 		}
 
-		private Map<String, ObjectId> getBranchCommits(Repository repository) {
+		private Map<String, ObjectId> getRefCommits(Repository repository) {
 			Map<String, ObjectId> commitIds = new HashMap<>();
-			for (var ref: GitUtils.getCommitRefs(repository, R_HEADS)) {
+			var commitRefs = new ArrayList<RefFacade>();
+			commitRefs.addAll(GitUtils.getCommitRefs(repository, R_HEADS));
+			commitRefs.addAll(GitUtils.getCommitRefs(repository, R_TAGS));
+			for (var ref: commitRefs) {
 				boolean matches = false;
 				for (String pattern: Splitter.on(" ").omitEmptyStrings().trimResults().split(refs)) {
 					if (WildcardUtils.matchString(pattern, ref.getName())) {
@@ -223,7 +228,7 @@ public class PullRepository extends SyncRepository {
 				Repository repository = getProjectManager().getRepository(projectId);
 
 				String defaultBranch = GitUtils.getDefaultBranch(repository);
-				Map<String, ObjectId> oldCommitIds = getBranchCommits(repository);
+				Map<String, ObjectId> oldCommitIds = getRefCommits(repository);
 
 				Commandline git = CommandUtils.newGit();
 				configureProxy(git, proxy);
@@ -263,7 +268,7 @@ public class PullRepository extends SyncRepository {
 					result.setErrorMessage(errorMessage.toString());
 				result.checkReturnCode();
 
-				Map<String, ObjectId> newCommitIds = getBranchCommits(repository);
+				Map<String, ObjectId> newCommitIds = getRefCommits(repository);
 
 				if (defaultBranch == null) {
 					logger.debug("Determining remote head branch...");
