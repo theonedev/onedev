@@ -240,7 +240,7 @@ public class ExtractTranslationKeys extends CommandHandler {
 			value = escapeJava(value, LEVEL_1_BASIC_ESCAPE_SET);
 		else
 			value = "**** translate this ****";
-		translations.append("\t\tm.put(\"" + key + "\",");
+		translations.append("\t\tm.put(\"" + key + "\", ");
 		if (key.length() > 80)
 			translations.append("\n\t\t\t");
 		translations.append("\"" + value + "\");\n");
