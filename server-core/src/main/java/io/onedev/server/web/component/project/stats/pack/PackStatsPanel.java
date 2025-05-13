@@ -15,6 +15,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +48,7 @@ public class PackStatsPanel extends Panel {
 
 			@Override
 			protected String load() {
-				return getTotalCount() + " packages";
+				return getTotalCount() + " " + _T("packages");
 			}
 			
 		}));
@@ -70,7 +72,7 @@ public class PackStatsPanel extends Panel {
 				PageParameters params = ProjectPacksPage.paramsOf(getProject(), query.toString(), 0);
 				Link<Void> typeLink = new BookmarkablePageLink<Void>("link", ProjectPacksPage.class, params);
 				String type = entry.getKey();
-				typeLink.add(new Label("label", entry.getValue() + " " + type + "(s)"));
+				typeLink.add(new Label("label", entry.getValue() + " " + _T(type + "(s)")));
 				
 				item.add(typeLink);
 			}

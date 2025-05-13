@@ -12,7 +12,7 @@
 				</wicket:enclosure>
 				<span wicket:id="size"></span>
 				<wicket:enclosure child="lfsHint">
-				<span wicket:id="lfsHint" class="text-muted">|</span> Stored with Git LFS
+				<span wicket:id="lfsHint" class="text-muted">|</span> <wicket:t>Stored with Git LFS</wicket:t>
 				</wicket:enclosure>
 			</div>
 			<div class="tools d-flex align-items-center">
@@ -29,12 +29,12 @@
 					</a>
 					</span>
 					</wicket:container>
-                    <a wicket:id="download" class="btn btn-xs btn-light btn-hover-primary btn-icon" data-tippy-content="Download">
+                    <a wicket:id="download" class="btn btn-xs btn-light btn-hover-primary btn-icon">
 						<wicket:svg href="download2" class="icon"></wicket:svg>
 					</a>
 				</div>
 				<!-- Put all options in a single line to make :empty selector working -->
-				<div class="options d-flex align-items-center"><wicket:enclosure child="viewPlain"><label class="checkbox"><input type="checkbox" wicket:id="viewPlain"> View Source</label></wicket:enclosure><wicket:enclosure child="blame"><label class="checkbox"><input type="checkbox" wicket:id="blame"> Blame</label></wicket:enclosure><wicket:container wicket:id="extraOptions"></wicket:container></div>
+				<div class="options d-flex align-items-center"><wicket:enclosure child="viewPlain"><label class="checkbox"><input type="checkbox" wicket:id="viewPlain"> <wicket:t>View Source</wicket:t></label></wicket:enclosure><wicket:enclosure child="blame"><label class="checkbox"><input type="checkbox" wicket:id="blame"> <wicket:t>Blame</wicket:t></label></wicket:enclosure><wicket:container wicket:id="extraOptions"></wicket:container></div>
 				<div wicket:id="formats" class="formats d-none d-sm-block"></div>
 			</div>
 		</div>

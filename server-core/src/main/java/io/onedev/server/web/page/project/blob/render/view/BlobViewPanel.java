@@ -1,5 +1,9 @@
 package io.onedev.server.web.page.project.blob.render.view;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -18,6 +22,7 @@ import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.resource.ContentDisposition;
 
 import com.google.common.base.Preconditions;
 
@@ -34,7 +39,6 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
-import org.apache.wicket.request.resource.ContentDisposition;
 
 public abstract class BlobViewPanel extends Panel {
 
@@ -82,15 +86,15 @@ public abstract class BlobViewPanel extends Panel {
 			if (project.getBlob(context.getBlobIdent(), true).getLfsPointer() == null && isEditSupported()) {
 				String title;
 				if (reviewRequired) 
-					title = "Review required for this change. Submit pull request instead";
+					title = _T("Review required for this change. Submit pull request instead");
 				else if (buildRequired) 
-					title = "Build required for this change. Submit pull request instead";
+					title = _T("Build required for this change. Submit pull request instead");
 				else if (signatureRequiredButNoSigningKey)
-					title = "Signature required for this change, please generate system GPG signing key first";
+					title = _T("Signature required for this change, please generate system GPG signing key first");
 				else if (fileTooLarge)
-					title = "File is too large to edit here";
+					title = _T("File is too large to edit here");
 				else
-					title = "Edit on branch " + context.getBlobIdent().revision;
+					title = MessageFormat.format(_T("Edit on branch {0}"), context.getBlobIdent().revision);
 				
 				edit.add(AttributeAppender.append("data-tippy-content", title));
 				
@@ -123,11 +127,11 @@ public abstract class BlobViewPanel extends Panel {
 			
 			String title;
 			if (reviewRequired) 
-				title = "Review required for this change. Submit pull request instead";
+				title = _T("Review required for this change. Submit pull request instead");
 			else if (buildRequired) 
-				title = "Build required for this change. Submit pull request instead";
+				title = _T("Build required for this change. Submit pull request instead");
 			else 
-				title = "Delete from branch " + context.getBlobIdent().revision;
+				title = MessageFormat.format(_T("Delete from branch {0}"), context.getBlobIdent().revision);
 			
 			delete.add(AttributeAppender.append("data-tippy-content", title));
 			
@@ -183,7 +187,7 @@ public abstract class BlobViewPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines().size() + " lines";
+				return context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines().size() + " " + _T("lines");
 			}
 			
 		}) {
@@ -229,8 +233,11 @@ public abstract class BlobViewPanel extends Panel {
 		
 		add(newFormats("formats"));
 		
-		add(new ResourceLink<Void>("download", new RawBlobResourceReference(), 
+		ResourceLink<Void> downloadLink;
+		add(downloadLink = new ResourceLink<Void>("download", new RawBlobResourceReference(), 
 				RawBlobResource.paramsOf(context.getProject(), context.getBlobIdent(), ContentDisposition.ATTACHMENT)));
+		downloadLink.add(AttributeAppender.append("data-tippy-content", _T("Download")));
+
 		add(new CheckBox("viewPlain", Model.of(context.getMode() == Mode.VIEW && context.isViewPlain())) {
 			
 			@Override

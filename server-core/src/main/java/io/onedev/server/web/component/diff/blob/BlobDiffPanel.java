@@ -1,23 +1,12 @@
 package io.onedev.server.web.component.diff.blob;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.git.*;
-import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.diff.DiffUtils;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.component.diff.DiffRenderer;
-import io.onedev.server.web.component.diff.blob.text.BlobTextDiffPanel;
-import io.onedev.server.web.component.diff.diffstat.DiffStatBar;
-import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
-import io.onedev.server.web.component.diff.revision.DiffViewMode;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.util.DiffPlanarRange;
-import io.onedev.server.web.util.EditParamsAware;
+import static io.onedev.server.util.diff.DiffUtils.MAX_LINE_LEN;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+
+import javax.annotation.Nullable;
+
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -36,9 +25,28 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.FileMode;
 
-import javax.annotation.Nullable;
-
-import static io.onedev.server.util.diff.DiffUtils.MAX_LINE_LEN;
+import io.onedev.server.OneDev;
+import io.onedev.server.git.Blob;
+import io.onedev.server.git.BlobChange;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.LfsObject;
+import io.onedev.server.git.LfsPointer;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.diff.DiffUtils;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.component.diff.DiffRenderer;
+import io.onedev.server.web.component.diff.blob.text.BlobTextDiffPanel;
+import io.onedev.server.web.component.diff.diffstat.DiffStatBar;
+import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
+import io.onedev.server.web.component.diff.revision.DiffViewMode;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.web.util.DiffPlanarRange;
+import io.onedev.server.web.util.EditParamsAware;
 
 public class BlobDiffPanel extends Panel {
 
@@ -249,7 +257,7 @@ public class BlobDiffPanel extends Panel {
 					}
 
 				};
-				editLink.add(AttributeAppender.replace("title", "Edit on source branch"));
+				editLink.add(AttributeAppender.replace("title", _T("Edit on source branch")));
 				add(editLink);
 			} else if (SecurityUtils.canModifyFile(change.getProject(), change.getBlobIdent().revision, change.getPath())
 					&& change.getProject().getBranchRef(change.getBlobIdent().revision) != null) {
@@ -267,7 +275,7 @@ public class BlobDiffPanel extends Panel {
 					}
 
 				};
-				editLink.add(AttributeAppender.replace("title", "Edit on branch " + change.getBlobIdent().revision));
+				editLink.add(AttributeAppender.replace("title", MessageFormat.format(_T("Edit on branch {0}"), change.getBlobIdent().revision)));
 				add(editLink);
 			} else {
 				add(new WebMarkupContainer("editFile").setVisible(false));

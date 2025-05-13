@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.project.stats.issue;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -61,9 +63,8 @@ public class IssueStatsPanel extends Panel {
 		issuesLink.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 			@Override
-			public String getObject() {
-				
-				return getTotalCount() + " issues";
+			public String getObject() {				
+				return getTotalCount() + " " + _T("issues");
 			}
 			
 		}));

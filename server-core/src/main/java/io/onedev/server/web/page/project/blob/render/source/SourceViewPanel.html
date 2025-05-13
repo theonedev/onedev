@@ -3,8 +3,8 @@
 		<div wicket:id="comment" class="comment need-width d-flex overflow-hidden flex-shrink-0">
 			<div class="content flex-grow-1 overflow-hidden d-flex flex-column">
 				<div wicket:id="head" class="head d-flex align-items-center px-3 py-2 flex-shrink-0 border-bottom">
-					<h6 class="mr-2 mb-0">Code Comment</h6>
-					<span wicket:id="outdated" class="badge badge-sm badge-warning mr-2">outdated</span>
+					<h6 class="mr-2 mb-0"><wicket:t>Code Comment</wicket:t></h6>
+					<span wicket:id="outdated" class="badge badge-sm badge-warning mr-2"><wicket:t>outdated</wicket:t></span>
 					<span wicket:id="status" class="mr-2"></span>
 					<a wicket:id="locate" class="locate btn btn-light btn-icon btn-xs btn-hover-primary ml-2 mr-3" title="Show commented code snippet"><wicket:svg href="hand" class="icon"></wicket:svg></a>
 					<a wicket:id="close" class="ml-auto text-muted text-hover-primary" title="Hide comment"><wicket:svg href="times" class="icon"></wicket:svg></a>
@@ -41,11 +41,11 @@
 			<div class="form-group mb-3">
 				<div wicket:id="content"></div>
 			</div>
-			<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware mr-1">Save</button>
-			<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
+			<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware mr-1"><wicket:t>Save</wicket:t></button>
+			<button wicket:id="cancel" class="btn btn-sm btn-secondary"><wicket:t>Cancel</wicket:t></button>
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionsFrag">
-		<wicket:enclosure child="outline"><label class="checkbox"><input type="checkbox" wicket:id="outline" class="outline-toggle"> Outline</label></wicket:enclosure>
+		<wicket:enclosure child="outline"><label class="checkbox"><input type="checkbox" wicket:id="outline" class="outline-toggle"><wicket:t>Outline</wicket:t></label></wicket:enclosure>
 	</wicket:fragment>
 </wicket:extend>

@@ -1,5 +1,9 @@
 package io.onedev.server.web.component.project.stats.code;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
@@ -11,12 +15,12 @@ import org.eclipse.jgit.lib.Constants;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.xodus.CommitInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
+import io.onedev.server.xodus.CommitInfoManager;
 
 public class CodeStatsPanel extends GenericPanel<Project> {
 
@@ -59,7 +63,7 @@ public class CodeStatsPanel extends GenericPanel<Project> {
 
 			@Override
 			protected String load() {
-				return getCommitInfoManager().getFileCount(getProject().getId()) + " files";
+				return MessageFormat.format(_T("{0} files"), getCommitInfoManager().getFileCount(getProject().getId()));
 			}
 			
 		}));
@@ -71,7 +75,7 @@ public class CodeStatsPanel extends GenericPanel<Project> {
 
 			@Override
 			protected String load() {
-				return commitCountModel.getObject() + " commits";
+				return MessageFormat.format(_T("{0} commits"), commitCountModel.getObject());
 			}
 			
 		}));
@@ -85,7 +89,7 @@ public class CodeStatsPanel extends GenericPanel<Project> {
 			protected String load() {
 				int branchCount = OneDev.getInstance(GitService.class)
 						.countRefs(getProject().getId(), Constants.R_HEADS);
-				return branchCount + " branches";
+				return MessageFormat.format(_T("{0} branches"), branchCount);
 			}
 			
 		}));
@@ -99,7 +103,7 @@ public class CodeStatsPanel extends GenericPanel<Project> {
 			protected String load() {
 				int tagCount = OneDev.getInstance(GitService.class)
 						.countRefs(getProject().getId(), Constants.R_TAGS);
-				return tagCount + " tags";
+				return MessageFormat.format(_T("{0} tags"), tagCount);
 			}
 			
 		}));

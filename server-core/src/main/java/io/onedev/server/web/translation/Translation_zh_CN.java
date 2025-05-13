@@ -26,6 +26,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"<b class='text-warning'>注意：</b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>时间跟踪</a>是企业版功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
 		m.put("<b>Tips: </b> Type <tt>@</tt> to <a href='https://docs.onedev.io/appendix/job-variables' target='_blank' tabindex='-1'>insert variable</a>. Use <tt>@@</tt> for literal <tt>@</tt>", 
 			"<b>提示: </b> 输入 <tt>@</tt> 插入变量。使用 <tt>@@</tt> 插入字面量 <tt>@</tt>");
+		m.put("<i>No Name</i>", "<i>无名称</i>");
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"用于验证提交信息页脚的<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java正则表达式</a>");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
@@ -47,6 +48,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Active Since", "活跃起");
 		m.put("Add", "添加");
 		m.put("Add Issues to Iteration", "将工单添加到迭代");
+		m.put("Add New", "添加");
 		m.put("Add Spent Time", "添加已用时间");
 		m.put("Add child project", "添加子项目");
 		m.put("Add dashboard", "添加仪表板");
@@ -162,7 +164,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Bitbucket Workspace", "Bitbucket工作区");
 		m.put("Bitbucket app password should be generated with permission <b>account/read</b>, <b>repositories/read</b> and <b>issues:read</b>", 
 			"Bitbucket应用密码应使用权限<b>account/read</b>、<b>repositories/read</b>和<b>issues:read</b>生成");
-		m.put("Blame", "追溯");
+		m.put("Blame", "更改记录");
 		m.put("Blob", "Blob");
 		m.put("Blob hash", "Blob哈希");
 		m.put("Blob index version", "Blob索引版本");
@@ -222,6 +224,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Build is successful", "构建成功");
 		m.put("Build list", "构建列表");
 		m.put("Build number", "构建编号");
+		m.put("Build required for deletion. Submit pull request instead", "需要构建才能删除。请提交拉取请求");
+		m.put("Build required for this change. Submit pull request instead", "需要构建才能更改。请提交拉取请求");
 		m.put("Build version", "构建版本");
 		m.put("Build with Persistent Volume", "使用持久卷构建");
 		m.put("Builds", "构建");
@@ -303,6 +307,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Code", "代码");
 		m.put("Code Analysis", "代码分析");
 		m.put("Code Analysis Setting", "代码分析设置");
+		m.put("Code Comment", "代码注解");
 		m.put("Code Comment Management", "代码注释管理");
 		m.put("Code Comments", "代码注释");
 		m.put("Code Compare", "代码比较");
@@ -333,7 +338,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Commit date", "提交日期");
 		m.put("Commit hash", "提交哈希");
 		m.put("Commit index version", "提交索引版本");
-		m.put("Commits", "提交记录");
+		m.put("Commits", "提交");
 		m.put("Committed After", "提交后");
 		m.put("Committed Before", "提交前");
 		m.put("Committed By", "提交者");
@@ -349,6 +354,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Container default", "容器默认");
 		m.put("Content", "内容");
 		m.put("Contributed settings", "贡献的设置");
+		m.put("Copy", "复制");
 		m.put("Copy Files with SCP", "使用 SCP 复制文件");
 		m.put("Copy dashboard", "复制仪表板");
 		m.put("Copy to clipboard", "复制到剪贴板");
@@ -412,6 +418,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Delete Selected Projects", "删除选中的项目");
 		m.put("Delete Source Branch After Merge", "合并后删除源分支");
 		m.put("Delete dashboard", "删除仪表板");
+		m.put("Delete from branch {0}", "从分支 {0} 删除");
 		m.put("Delete this field", "删除该字段");
 		m.put("Delete this state", "删除该状态");
 		m.put("Delete this value", "删除该值");
@@ -454,6 +461,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Edit", "编辑");
 		m.put("Edit Avatar", "编辑头像");
 		m.put("Edit Estimated Time", "编辑预计时间");
+		m.put("Edit Source", "编辑源码");
 		m.put("Edit Timesheet", "编辑工时表");
 		m.put("Edit dashboard", "编辑仪表板");
 		m.put("Edit plain", "编辑纯文本");
@@ -502,6 +510,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Env Var", "环境变量");
 		m.put("Environment Variables", "环境变量");
 		m.put("Equal", "等于");
+		m.put("Error parsing build spec", "解析构建规范时出错");
 		m.put("Estimated Time", "预计时间");
 		m.put("Estimated Time Edit Bean", "预计时间编辑 Bean");
 		m.put("Estimated Time Issue Field", "预计时间工单字段");
@@ -1296,6 +1305,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Osv License Scanner", "OSV 许可证扫描器");
 		m.put("Osv Vulnerability Scanner", "OSV 漏洞扫描器");
 		m.put("Other", "其他");
+		m.put("Outline", "大纲");
 		m.put("Outline Search", "大纲搜索");
 		m.put("Output", "输出");
 		m.put("Ownered By", "拥有者");
@@ -1491,6 +1501,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Retrieve Submodules", "检索子模块");
 		m.put("Retry Condition", "重试条件");
 		m.put("Retry Delay", "重试延迟");
+		m.put("Review required for deletion. Submit pull request instead", "需要审查才能删除。请提交拉取请求");
+		m.put("Review required for this change. Submit pull request instead", "需要审查才能更改。请提交拉取请求");
 		m.put("Reviewers", "审查者");
 		m.put("Revision", "修订");
 		m.put("Revision indexing in progress...", "正在索引当前版本...");
@@ -2192,6 +2204,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Verification Code", "验证码");
 		m.put("Verify", "验证");
 		m.put("View", "视图");
+		m.put("View Source", "查看源码");
 		m.put("Viewer", "查看者");
 		m.put("Volume Mount", "卷挂载");
 		m.put("Volume Mounts", "卷挂载");
@@ -2258,6 +2271,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Widget", "小部件");
 		m.put("Widget Tab", "小部件标签");
 		m.put("Widget Timesheet Setting", "小部件时间表设置");
+		m.put("Will be transcoded to UTF-8", "将被转码为 UTF-8");
 		m.put("Window", "窗口");
 		m.put("Window Memory", "窗口内存");
 		m.put("Working Directory", "工作目录");
@@ -2276,6 +2290,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("YouTrack Password or Access Token", "YouTrack 密码或访问令牌");
 		m.put("YouTrack Project", "YouTrack 项目");
 		m.put("YouTrack Projects to Import", "要导入的 YouTrack 项目");
+		m.put("builds", "构建");
 		m.put("cmd-k to show command palette", "cmd-k 显示命令面板");
 		m.put("ctrl-k to show command palette", "ctrl-k 显示命令面板");
 		m.put("curl Command Line", "curl 命令行");
@@ -2288,23 +2303,46 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("has any value of", "具有任何值");
 		m.put("is empty", "为空");
 		m.put("is not empty", "不为空");
+		m.put("issues", "工单");
+		m.put("lines", "行");
 		m.put("new field", "新字段");
+		m.put("outdated", "过时");
+		m.put("packages", "包");
+		m.put("pull requests", "拉取请求");
 		m.put("root", "根");
 		m.put("search in this revision will be accurate after indexed", "索引完成后，在当前版本中的搜索将更准确");
-		m.put("true", "真");
-		m.put("Add New", "添加");
-		m.put("Edit Source", "编辑源码");
-		m.put("Error parsing build spec", "解析构建规范时出错");
-		m.put("Will be transcoded to UTF-8", "将被转码为 UTF-8");
 		m.put("submit", "提交");
-		m.put("<i>No Name</i>", "<i>无名称</i>");
-		m.put("Copy", "复制");
+		m.put("true", "真");
+		m.put("{0} branches", "{0} 个分支");
+		m.put("{0} commits", "{0} 个提交");
+		m.put("{0} files", "{0} 个文件");
+		m.put("{0} tags", "{0} 个标签");
+		m.put("Edit on branch {0}", "在分支 {0} 编辑");
+		m.put("Edit on source branch", "在源分支编辑");
+		m.put("File is too large to edit here", "文件太大，无法在此编辑");
+		m.put("Signature required for this change, please generate system GPG signing key first", "需要签名才能更改。请先生成系统 GPG 签名密钥");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
 		m.put("Server Setup", "服务器设置");	
 		m.put("Specify System Settings", "指定系统设置");
 		m.put("adding .onedev-buildspec.yml", "添加 .onedev-buildspec.yml");
+		m.put("WAITING", "等待");
+		m.put("PENDING", "待定");
+		m.put("FAILED", "失败");
+		m.put("CANCELLED", "已取消");
+		m.put("TIMED_OUT", "已超时");
+		m.put("SUCCESSFUL", "成功");		
+		m.put("OPEN", "打开");
+		m.put("MERGED", "已合并");
+		m.put("DISCARDED", "已放弃");
+		m.put("Container Image(s)", "容器镜像");
+		m.put("RubyGems(s)", "RubyGems");
+		m.put("NPM(s)", "NPM");
+		m.put("Maven(s)", "Maven");
+		m.put("NuGet(s)", "NuGet");
+		m.put("PyPI(s)", "PyPI");
+		m.put("Helm(s)", "Helm");
 	}
 	
 	@Override

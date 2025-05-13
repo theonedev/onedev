@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.project.stats.pullrequest;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +54,7 @@ public class PullRequestStatsPanel extends Panel {
 
 			@Override
 			protected String load() {
-				return getTotalCount() + " pull requests";
+				return getTotalCount() + " " + _T("pull requests");
 			}
 			
 		}));
@@ -83,7 +85,7 @@ public class PullRequestStatsPanel extends Panel {
 				PageParameters params = ProjectPullRequestsPage.paramsOf(getProject(), query.toString(), 0);
 				Link<Void> statusLink = new BookmarkablePageLink<Void>("link", ProjectPullRequestsPage.class, params);
 				String statusName = entry.getKey().toString();
-				statusLink.add(new Label("label", entry.getValue() + " " + statusName));
+				statusLink.add(new Label("label", entry.getValue() + " " + _T(statusName)));
 				
 				String cssClass;
 				switch (entry.getKey()) {

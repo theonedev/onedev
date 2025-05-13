@@ -1,9 +1,64 @@
 package io.onedev.server.web.page.project.blob;
 
+import static io.onedev.server.web.translation.Translation._T;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
+import java.io.Serializable;
+import java.net.URISyntaxException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.wicket.Component;
+import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.ResourceLink;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
+
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
@@ -14,7 +69,13 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.project.CommitIndexed;
-import io.onedev.server.git.*;
+import io.onedev.server.git.Blob;
+import io.onedev.server.git.BlobContent;
+import io.onedev.server.git.BlobEdits;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.LfsObject;
+import io.onedev.server.git.LfsPointer;
 import io.onedev.server.git.exception.BlobEditException;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
@@ -67,51 +128,6 @@ import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 import io.onedev.server.web.upload.FileUpload;
 import io.onedev.server.web.util.EditParamsAware;
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.wicket.Component;
-import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.ResourceLink;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.IRequestParameters;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.flow.RedirectToUrlException;
-import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.visit.IVisit;
-import org.apache.wicket.util.visit.IVisitor;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.net.URISyntaxException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static io.onedev.server.web.translation.Translation._T;
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, 
 		EditParamsAware, JobAuthorizationContextAware {
@@ -783,7 +799,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 					fragment.add(new WebMarkupContainer("lfsHint").setVisible(blob.getLfsPointer() != null));
 					
 					fragment.add(new ResourceLink<Void>("download", new RawBlobResourceReference(), 
-							RawBlobResource.paramsOf(getProject(), getBlobIdent())));
+							RawBlobResource.paramsOf(getProject(), getBlobIdent())).add(AttributeAppender.append("data-tippy-content", _T("Download"))));
 					
 					WebMarkupContainer deleteContainer = new WebMarkupContainer("delete");
 					fragment.add(deleteContainer);
@@ -797,11 +813,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 						
 						String title;
 						if (reviewRequired) 
-							title = "Review required for deletion. Submit pull request instead";
+							title = _T("Review required for deletion. Submit pull request instead");
 						else if (buildRequired) 
-							title = "Build required for deletion. Submit pull request instead";
+							title = _T("Build required for deletion. Submit pull request instead");
 						else 
-							title = "Delete from branch " + getBlobIdent().revision;
+							title = MessageFormat.format(_T("Delete from branch {0}"), getBlobIdent().revision);
 						deleteContainer.add(AttributeAppender.append("data-tippy-content", title));
 						
 						AjaxLink<Void> deleteLink = new ViewStateAwareAjaxLink<Void>("link") {
