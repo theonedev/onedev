@@ -105,6 +105,7 @@ import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 import java.util.*;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 /**
@@ -1187,7 +1188,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 				@Override
 				public String getLabel() {
-					return "Outline Search";
+					return _T("Outline Search");
 				}
 
 				@Override

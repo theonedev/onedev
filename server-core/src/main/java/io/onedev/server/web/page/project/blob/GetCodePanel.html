@@ -1,9 +1,9 @@
 <wicket:panel>
 	<div wicket:id="clone" class="clone"></div>
-	<div class="d-flex justify-content-between download">
-		<a wicket:id="downloadAsZip" class="btn btn-block btn-primary mr-4 text-nowrap">Download zip</a>
+	<div wicket:id="download" class="d-flex justify-content-between download">
+		<a wicket:id="downloadAsZip" class="btn btn-block btn-primary mr-4 text-nowrap"><wicket:t>Download</wicket:t> zip</a>
 		<span></span>
-		<a wicket:id="downloadAsTgz" class="btn btn-block btn-primary text-nowrap">Download tar.gz</a>
+		<a wicket:id="downloadAsTgz" class="btn btn-block btn-primary text-nowrap"><wicket:t>Download</wicket:t> tar.gz</a>
 	</div>
 	<wicket:fragment wicket:id="urlFrag">
 		<div class="url input-group">
@@ -13,8 +13,8 @@
 			</div>
 		</div>
 		<div class="open-in-ide mt-4 mb-2">
-			<a wicket:id="vscode" class="mr-2"><wicket:svg href="vscode" class="icon"/>Clone in VSCode</a> 
-			<a wicket:id="intellij" class="mr-2"><wicket:svg href="intellij" class="icon"/>Clone in IntelliJ</a>
+			<a wicket:id="vscode" class="mr-2"><wicket:svg href="vscode" class="icon"/><wicket:t>Clone in VSCode</wicket:t></a> 
+			<a wicket:id="intellij" class="mr-2"><wicket:svg href="intellij" class="icon"/><wicket:t>Clone in IntelliJ</wicket:t></a>
 		</div>
 	</wicket:fragment>
 </wicket:panel>

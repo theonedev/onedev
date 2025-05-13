@@ -1,12 +1,10 @@
 package io.onedev.server.web.page.project.blob;
 
-import io.onedev.server.model.Project;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
-import io.onedev.server.web.component.project.gitprotocol.GitProtocolPanel;
-import io.onedev.server.web.resource.ArchiveResource;
-import io.onedev.server.web.resource.ArchiveResourceReference;
+import static java.net.URLEncoder.encode;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.ResourceLink;
@@ -15,8 +13,12 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import static java.net.URLEncoder.encode;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import io.onedev.server.model.Project;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.component.project.gitprotocol.GitProtocolPanel;
+import io.onedev.server.web.resource.ArchiveResource;
+import io.onedev.server.web.resource.ArchiveResourceReference;
 
 public abstract class GetCodePanel extends Panel {
 
@@ -69,18 +71,20 @@ public abstract class GetCodePanel extends Panel {
 			
 		});
 		
-		
-		add(new ResourceLink<Void>("downloadAsZip", new ArchiveResourceReference(), 
+		var downloadContainer = new WebMarkupContainer("download");
+		add(downloadContainer);
+		downloadContainer.setVisible(getRevision() != null);
+		downloadContainer.add(new ResourceLink<Void>("downloadAsZip", new ArchiveResourceReference(), 
 				ArchiveResource.paramsOf(getProject().getId(), getRevision(), ArchiveResource.FORMAT_ZIP)) {
 
 			@Override
 			protected CharSequence getOnClickScript(CharSequence url) {
 				return dropdown.closeBeforeClick(super.getOnClickScript(url));
 			}
-			
+
 		});
 		
-		add(new ResourceLink<Void>("downloadAsTgz", new ArchiveResourceReference(), 
+		downloadContainer.add(new ResourceLink<Void>("downloadAsTgz", new ArchiveResourceReference(), 
 				ArchiveResource.paramsOf(getProject().getId(), getRevision(), ArchiveResource.FORMAT_TGZ)) {
 
 			@Override

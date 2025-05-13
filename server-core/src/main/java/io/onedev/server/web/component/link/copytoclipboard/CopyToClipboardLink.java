@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.link.copytoclipboard;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -28,8 +30,10 @@ public class CopyToClipboardLink extends WebMarkupContainer {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new CopyToClipboardResourceReference()));
-		String script = String.format("onedev.server.copyToClipboard.onDomReady('%s', '%s');", 
-				getMarkupId(true), JavaScriptEscape.escapeJavaScript(textModel.getObject()));
+		String script = String.format("onedev.server.copyToClipboard.onDomReady('%s', '%s', '%s');", 
+				getMarkupId(true), 
+				JavaScriptEscape.escapeJavaScript(textModel.getObject()), 
+				_T("Copy to clipboard"));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	

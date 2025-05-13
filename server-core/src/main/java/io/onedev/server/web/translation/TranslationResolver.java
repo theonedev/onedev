@@ -1,5 +1,6 @@
 package io.onedev.server.web.translation;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static java.lang.Character.isWhitespace;
 
 import org.apache.wicket.Component;
@@ -57,7 +58,7 @@ public class TranslationResolver implements IComponentResolver {
 						}
 						var prefix = html.substring(0, index1 + 1 + index11);
 						var suffix = html.substring(index1 + 2 + index22, html.length());
-						return Markup.of(prefix + getString("t: " + normalizedInnerHtml) + suffix);
+						return Markup.of(prefix + _T(normalizedInnerHtml) + suffix);
 					} else {
 						return markup;
 					}

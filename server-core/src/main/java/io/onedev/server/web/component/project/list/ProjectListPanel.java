@@ -3,6 +3,7 @@ package io.onedev.server.web.component.project.list;
 import static io.onedev.server.model.Project.SORT_FIELDS;
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -963,7 +964,7 @@ public class ProjectListPanel extends Panel {
 	
 							@Override
 							public String getLabel() {
-								return "From " + importer.getName();
+								return MessageFormat.format(_T("From {0}"), importer.getName());
 							}
 	
 							@Override
@@ -1035,9 +1036,9 @@ public class ProjectListPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return "found " + dataProvider.size() + " projects";
+					return MessageFormat.format(_T("found {0} projects"), dataProvider.size());
 				else
-					return "found 1 project";
+					return _T("found 1 project");
 			}
 		}) {
 			@Override

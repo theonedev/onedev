@@ -1,5 +1,5 @@
 onedev.server.copyToClipboard = {
-	onDomReady: function(buttonId, text) {
+	onDomReady: function(buttonId, text, tooltip) {
 		var $button = $("#" + buttonId);
 		var options = {
 			text: function() {
@@ -10,7 +10,7 @@ onedev.server.copyToClipboard = {
 		if ($modal.length != 0) 
 			options.container = $modal[0];
 		new ClipboardJS("#"+buttonId, options);
-		$button.attr("title", "Copy to clipboard");
+		$button.attr("data-tippy-content", tooltip);
 		$button.addClass("pressable");
 	}
 };

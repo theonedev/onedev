@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.project.gitprotocol;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.servlet.http.Cookie;
 
 import io.onedev.server.ServerConfig;
@@ -50,9 +52,9 @@ public abstract class GitProtocolPanel extends Panel {
 			@Override
 			protected String load() {
 				if (useSsh)
-					return "SSH Clone URL";
+					return _T("SSH Clone URL");
 				else
-					return "HTTP(S) Clone URL";
+					return _T("HTTP(S) Clone URL");
 			}
 			
 		}));
@@ -70,9 +72,9 @@ public abstract class GitProtocolPanel extends Panel {
 			@Override
 			protected String load() {
 				if (useSsh)
-					return "Switch to HTTP(S)";
+					return _T("Switch to HTTP(S)");
 				else
-					return "Switch to SSH";
+					return _T("Switch to SSH");
 			}
 			
 		}));
@@ -101,7 +103,7 @@ public abstract class GitProtocolPanel extends Panel {
 		add(newContent("content"));
 		
 		SshSetting sshSetting = OneDev.getInstance(SettingManager.class).getSshSetting();
-		add(new Label("fingerPrint", "Server fingerprint: " + sshSetting.getFingerPrint()) {
+		add(new Label("fingerPrint", _T("Server fingerprint") + ": " + sshSetting.getFingerPrint()) {
 
 			@Override
 			protected void onConfigure() {

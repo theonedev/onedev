@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.nocommits;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +58,7 @@ public class NoCommitsPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Create New File";
+							return _T("Create New File");
 						}
 
 						@Override

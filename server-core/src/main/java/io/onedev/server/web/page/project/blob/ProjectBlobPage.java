@@ -110,6 +110,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, 
@@ -401,7 +402,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 					@Override
 					public String getLabel() {
-						return "Create New File";
+						return _T("Create New File");
 					}
 
 					@Override
@@ -423,7 +424,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 					@Override
 					public String getLabel() {
-						return "Upload Files";
+						return _T("Upload Files");
 					}
 
 					@Override
@@ -510,7 +511,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 					@Override
 					public String getLabel() {
-						return "Quick Search";
+						return _T("Quick Search");
 					}
 
 					@Override
@@ -541,7 +542,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 					@Override
 					public String getLabel() {
-						return "Advanced Search";
+						return _T("Advanced Search");
 					}
 
 					@Override
@@ -612,7 +613,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(state.blobIdent.revision != null && state.blobIdent.path == null);
+				setVisible(state.blobIdent.path == null);
 			}
 
 			@Override
@@ -903,13 +904,13 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 						Project project = getProject();
 						String file = BuildSpec.BLOB_PATH;
 						if (user == null) {
-							Session.get().warn("Please login to perform this operation");
-						} else if (!SecurityUtils.canWriteCode(project)) {
-							Session.get().warn("Code write permission is required for this operation");
+							Session.get().warn(_T("Please login to perform this operation"));
+						} else if (!SecurityUtils.canWriteCode(project)) {	
+							Session.get().warn(_T("Code write permission is required for this operation"));
 						} else if (project.isReviewRequiredForModification(user, branch, file)
 								|| project.isBuildRequiredForModification(user, branch, file)
 								|| project.isCommitSignatureRequiredButNoSigningKey(user, branch)) {
-							Session.get().warn("This operation is disallowed by branch protection rule");
+							Session.get().warn(_T("This operation is disallowed by branch protection rule"));
 						} else {
 							onModeChange(target, Mode.ADD, BuildSpec.BLOB_PATH);
 						}
@@ -917,7 +918,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 					@Override
 					public IModel<?> getBody() {
-						return Model.of("adding " + BuildSpec.BLOB_PATH);
+						return Model.of(_T("adding " + BuildSpec.BLOB_PATH));
 					}
 					
 				});
@@ -963,7 +964,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				if (isOnBranch())
-					tag.put("title", "Press 'y' to get permalink");
+					tag.put("data-tippy-content", _T("Press 'y' to get permalink"));
 			}
 
 			@Override
@@ -1608,7 +1609,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Files");
+		return new Label(componentId, _T("Files"));
 	}
 
 	@Override

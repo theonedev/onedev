@@ -7,19 +7,19 @@
 				<div wicket:id="blobNavigator" class="blob-navigator mr-3 py-2"></div>
 			</div>
 			<div wicket:id="blobOperations" class="py-2">
-				<a wicket:id="getCode" title="Code clone or download" class="mr-4 font-weight-boldest font-size-lg text-nowrap link-info"><wicket:svg href="download2" class="icon"/> Clone</a>
-				<a wicket:id="add" title="Add files to current directory" class="mr-3 text-nowrap dropdown-toggle">Add</a>
-				<a wicket:id="search" title="Search files, symbols and texts" class="mr-3 text-nowrap dropdown-toggle">Search</a>
-				<a wicket:id="history" title="Commit history of current path" class="text-nowrap">History</a>
+				<a wicket:id="getCode" title="Code clone or download" class="mr-4 font-weight-boldest font-size-lg text-nowrap link-info"><wicket:svg href="download2" class="icon"/> <wicket:t>Clone</wicket:t></a>
+				<a wicket:id="add" title="Add files to current directory" class="mr-3 text-nowrap dropdown-toggle"><wicket:t>Add</wicket:t></a>
+				<a wicket:id="search" title="Search files, symbols and texts" class="mr-3 text-nowrap dropdown-toggle"><wicket:t>Search</wicket:t></a>
+				<a wicket:id="history" title="Commit history of current path" class="text-nowrap"><wicket:t>History</wicket:t></a>
 			</div>
 		</div>
 		<div wicket:id="revisionIndexing" class="p-3 revision-indexing text-warning flex-shrink-0">
 			<wicket:svg href="loading" class="icon spin"/>
-			Revision indexing in progress... (search in this revision will be accurate after indexed)
+			<wicket:t>Revision indexing in progress...</wicket:t> (<wicket:t>search in this revision will be accurate after indexed</wicket:t>)
 		</div>
 		<div wicket:id="buildSupportNote" class="build-support-note p-3 flex-shrink-0">
 			<wicket:svg href="bulb" class="icon"/> 
-			Enable build support by <a wicket:id="addFile" class="link-primary"></a>
+			<wicket:t>Enable build support by <a wicket:id="addFile" class="link-primary"></a></wicket:t>
 		</div>
 		<div wicket:id="blobContent" class="blob-content autofit flex-grow-1 d-flex flex-column"></div>
 		<div wicket:id="searchResult" class="search-result flex-shrink-0 flex-column overflow-hidden">
@@ -32,7 +32,7 @@
 			<span class="text-gray">
 			<span wicket:id="size"></span>
 				<wicket:enclosure child="lfsHint">
-					<span wicket:id="lfsHint" class="text-muted">|</span> Stored with Git LFS
+					<span wicket:id="lfsHint" class="text-muted">|</span> <wicket:t>Stored with Git LFS</wicket:t>
 				</wicket:enclosure>
 			</span>
 			<span>
@@ -46,7 +46,7 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="lfsObjectMissingFrag">
 	<div class="alert alert-notice alert-light-warning m-4">
-		This is a Git LFS object, but the storage file is missing
+		<wicket:t>This is a Git LFS object, but the storage file is missing</wicket:t>
 	</div>
 	</wicket:fragment>
 </wicket:extend>
