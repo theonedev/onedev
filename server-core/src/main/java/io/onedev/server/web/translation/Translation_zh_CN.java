@@ -148,6 +148,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Auto Spec", "自动规范");
 		m.put("Auto update check is performed by requesting an image in your browser from onedev.io indicating new version availability, with color indicating severity of the update. It works the same way as how gravatar requests avatar images. If disabled, you are highly recommended to check update manually from time to time (can be done via help menu on left bottom of the screen) to see if there are any security/critical fixes", 
 			"自动更新检查通过从 onedev.io 请求一个图像来完成，该图像会指示新版本的可用性，颜色表示更新的严重程度。其工作方式与 gravatar 请求头像图片相同。如果禁用，强烈建议你定期手动检查更新（可通过屏幕左下角的帮助菜单执行），以确保获得安全/关键修复");
+		m.put("Auto-discovered executor", "自动发现的执行器");
 		m.put("Available Choices", "可选项");
 		m.put("Avatar", "头像");
 		m.put("Avatar Service Url", "头像服务地址");
@@ -578,6 +579,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Filter", "过滤");
 		m.put("Filter Issues", "过滤工单");
 		m.put("Finish", "完成");
+		m.put("First applicable executor", "第一个适用的执行器");
 		m.put("Fix Type", "修复类型");
 		m.put("Float", "浮点数");
 		m.put("For a particular project, the first matching entry will be used", "对于特定项目，第一个匹配的条目将被使用");
@@ -722,7 +724,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Ignore this param", "忽略此参数");
 		m.put("Ignore trailing", "忽略后缀");
 		m.put("Ignored Licenses", "忽略的许可证");
-		m.put("Image", "图片");
+		m.put("Image", "容器镜像");
 		m.put("Imap Ssl Setting", "IMAP SSL 设置");
 		m.put("Imap With Ssl", "IMAP 使用 SSL");
 		m.put("Implicit SSL", "隐式 SSL");
@@ -1091,6 +1093,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("OpenSSH public key begins with 'ssh-rsa', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521', 'ssh-ed25519', 'sk-ecdsa-sha2-nistp256@openssh.com', or 'sk-ssh-ed25519@openssh.com'", 
 			"OpenSSH 公钥以 'ssh-rsa'、'ecdsa-sha2-nistp256'、'ecdsa-sha2-nistp384'、'ecdsa-sha2-nistp521'、'ssh-ed25519'、'sk-ecdsa-sha2-nistp256@openssh.com' 或 'sk-ssh-ed25519@openssh.com' 开头");
 		m.put("Operations", "操作");
+		m.put("Optional", "可选");
 		m.put("Optionally Specify project to create issue in. Leave empty to create in current project", 
 			"可选择指定要在其中创建工单的项目。留空则在当前项目中创建");
 		m.put("Optionally add new users to specified default group", "可选择将新用户添加到指定的默认组");
@@ -2184,7 +2187,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Undefined Field Resolution", "未定义字段解析");
 		m.put("Undefined Field Value Resolution", "未定义字段值解析");
 		m.put("Undefined State Resolution", "未定义状态解析");
-		m.put("Under which condition this step should run", "此步骤应在何种条件下运行");
 		m.put("Unified", "统一");
 		m.put("Unlimited", "无限制");
 		m.put("Unspecified", "未指定");
@@ -2361,8 +2363,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{0} commits", "{0} 个提交");
 		m.put("{0} files", "{0} 个文件");
 		m.put("{0} tags", "{0} 个标签");
-		m.put("Auto-discovered executor", "自动发现的执行器");
-		m.put("First applicable executor", "第一个适用的执行器");
+		m.put("Under which condition this step should run. <b>Successful</b> means all non-optional steps running before this step are successful", 
+			"在什么条件下应运行此步骤。<b>成功</b>表示在此步骤之前运行的所有非可选步骤都已成功");
+		m.put("Whether or not this step is optional. Execution failure of an optional step will not cause the build to fail, and execute condition of subsequent steps will not take optional step into account", 
+			"此步骤是否为可选。可选步骤执行失败不会导致构建失败，后续步骤的执行条件也不会将可选步骤计算在内");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
@@ -2389,7 +2393,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("service", "服务");
 		m.put("step template", "步骤模板");
 		m.put("property", "属性");		
-		m.put("All previous steps were successful", "所有前面步骤都成功");
+		m.put("Successful", "成功");
 		m.put("Always", "总是");
 		m.put("Never", "从不");
 	}

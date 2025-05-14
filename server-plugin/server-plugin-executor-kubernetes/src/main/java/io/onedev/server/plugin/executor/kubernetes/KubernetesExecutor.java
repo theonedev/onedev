@@ -52,6 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.onedev.k8shelper.ExecuteCondition.ALWAYS;
 import static io.onedev.k8shelper.KubernetesHelper.*;
 import static io.onedev.k8shelper.RegistryLoginFacade.merge;
 import static io.onedev.server.util.CollectionUtils.newHashMap;
@@ -932,7 +933,7 @@ public class KubernetesExecutor extends JobExecutor implements RegistryLoginAwar
 					List<Action> actions = new ArrayList<>();
 					CommandFacade facade = new CommandFacade((String) executionContext, null, null,
 							"this does not matter", new HashMap<>(), false);
-					actions.add(new Action("test", facade, ExecuteCondition.ALWAYS));
+					actions.add(new Action("test", facade, ALWAYS, false));
 					entryFacade = new CompositeFacade(actions);
 				}
 				

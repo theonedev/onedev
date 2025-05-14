@@ -2293,4 +2293,23 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 	
+	@SuppressWarnings("unused")
+	private void migrate40(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var stepNode: stepsNode.getValue()) {
+				var stepMappingNode = (MappingNode) stepNode;
+				for (var itStepTuple = stepMappingNode.getValue().iterator(); itStepTuple.hasNext();) {
+					var stepTuple = itStepTuple.next();
+					var keyNode = (ScalarNode) stepTuple.getKeyNode();
+					if (keyNode.getValue().equals("condition")) {
+						var valueNode = (ScalarNode) stepTuple.getValueNode();
+						if (valueNode.getValue().equals("ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL")) 
+							valueNode.setValue("SUCCESSFUL");
+					}
+				}
+				stepMappingNode.getValue().add(new NodeTuple(new ScalarNode(Tag.STR, "optional"), new ScalarNode(Tag.STR, "false")));
+			}
+		});
+	}
+
 }
