@@ -25,7 +25,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-warning'>注意：</b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>时间跟踪</a>是企业版功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
 		m.put("<b>Tips: </b> Type <tt>@</tt> to <a href='https://docs.onedev.io/appendix/job-variables' target='_blank' tabindex='-1'>insert variable</a>. Use <tt>@@</tt> for literal <tt>@</tt>", 
-			"<b>提示: </b> 输入 <tt>@</tt> 插入变量。使用 <tt>@@</tt> 插入字面量 <tt>@</tt>");
+			"<b>提示: </b> 输入 <tt>@</tt> 插入变量。使用 <tt>@@</tt> 插入字符 <tt>@</tt>");
 		m.put("<i>No Name</i>", "<i>无名称</i>");
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"用于验证提交信息页脚的<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java正则表达式</a>");
@@ -50,9 +50,15 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Add Issues to Iteration", "将工单添加到迭代");
 		m.put("Add New", "添加");
 		m.put("Add Spent Time", "添加已用时间");
+		m.put("Add after", "添加到后面");
+		m.put("Add before", "添加到前面");
 		m.put("Add child project", "添加子项目");
 		m.put("Add dashboard", "添加仪表板");
+		m.put("Add new", "添加");
+		m.put("Add new file", "添加新文件");
+		m.put("Add new import", "添加新导入");
 		m.put("Add project", "添加项目");
+		m.put("Add {0}", "添加 {0}");
 		m.put("Additions", "新增");
 		m.put("Administration", "管理");
 		m.put("Administrative permission over a project", "项目的管理权限");
@@ -319,6 +325,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"项目内的代码注释管理权限，包括对多个代码注释的批量操作");
 		m.put("Code is committed", "代码已提交");
 		m.put("Code push", "代码推送");
+		m.put("Code read permission is required to import build spec (import project: {0}, import revision: {1})", 
+			"需要代码读取权限才能导入构建规范（导入项目：{0}，导入版本：{1})");
 		m.put("Code write permission is required for this operation", "需要代码写入权限才能执行此操作");
 		m.put("Collapse all", "全部折叠");
 		m.put("Color", "颜色");
@@ -335,6 +343,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Commit Suggestion", "提交建议");
 		m.put("Commit Types", "提交类型");
 		m.put("Commit Types For Footer Check", "用于尾部检查的提交类型");
+		m.put("Commit Your Change", "提交您的更改");
 		m.put("Commit date", "提交日期");
 		m.put("Commit hash", "提交哈希");
 		m.put("Commit index version", "提交索引版本");
@@ -363,6 +372,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Cppcheck Report", "Cppcheck 报告");
 		m.put("Cpu Limit", "CPU 限制");
 		m.put("Cpu Request", "CPU 请求");
+		m.put("Create", "创建");
 		m.put("Create Branch", "创建分支");
 		m.put("Create Branch Bean", "创建分支 Bean");
 		m.put("Create Branch Bean With Revision", "带版本的创建分支 Bean");
@@ -420,10 +430,12 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Delete dashboard", "删除仪表板");
 		m.put("Delete from branch {0}", "从分支 {0} 删除");
 		m.put("Delete this field", "删除该字段");
+		m.put("Delete this import", "删除此导入");
 		m.put("Delete this state", "删除该状态");
 		m.put("Delete this value", "删除该值");
 		m.put("Deletions", "删除数");
 		m.put("Denied", "拒绝");
+		m.put("Dependencies & Services", "依赖与服务");
 		m.put("Dependency job finished", "依赖任务已完成");
 		m.put("Descending", "降序");
 		m.put("Description", "描述");
@@ -464,8 +476,11 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Edit Source", "编辑源码");
 		m.put("Edit Timesheet", "编辑工时表");
 		m.put("Edit dashboard", "编辑仪表板");
+		m.put("Edit on branch {0}", "在分支 {0} 编辑");
+		m.put("Edit on source branch", "在源分支编辑");
 		m.put("Edit plain", "编辑纯文本");
 		m.put("Edit saved queries", "编辑保存的查询");
+		m.put("Edit {0}", "编辑 {0}");
 		m.put("Editable Issue Fields", "可编辑的工单字段");
 		m.put("Editable Issue Links", "可编辑的工单链接");
 		m.put("Editor", "编辑器");
@@ -557,6 +572,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("File Protection", "文件保护");
 		m.put("File Protections", "文件保护");
 		m.put("File changes", "文件更改");
+		m.put("File is too large to edit here", "文件太大，无法在此编辑");
 		m.put("Files", "文件");
 		m.put("Files to Be Analyzed", "要分析的文件");
 		m.put("Filter", "过滤");
@@ -587,6 +603,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("GPG Trusted Keys", "GPG 受信任密钥");
 		m.put("GPG public key begins with '-----BEGIN PGP PUBLIC KEY BLOCK-----'", "GPG 公钥以 '-----BEGIN PGP PUBLIC KEY BLOCK-----' 开头，以 '-----END PGP PUBLIC KEY BLOCK-----' 结尾");
 		m.put("General", "常规");
+		m.put("General Settings", "常规设置");
+		m.put("General settings updated", "常规设置已更新");
 		m.put("Generate File Checksum", "生成文件校验和");
 		m.put("Generic LDAP", "通用 LDAP");
 		m.put("Get", "获取");
@@ -691,6 +709,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"如果指定，所有从 GitHub 导入的公共仓库将使用此作为默认角色。私有仓库不受影响");
 		m.put("If specified, total estimated/spent time of an issue will also include linked issues of this type", 
 			"如果指定，工单的预计/已用时间也将包括此类型的链接工单");
+		m.put("If this option is enabled, git lfs command needs to be installed on OneDev server (even this step runs on other node)", 
+			"如果启用此选项，git lfs 命令需要安装在 OneDev 服务器上（即使此步骤在其他节点上运行）");
 		m.put("If ticked, group indicated by this field will be able to edit estimated time of corresponding issues if time tracking is enabled", 
 			"如果勾选，此组将能够在启用了工时跟踪的情况下编辑相应工单的预计工时");
 		m.put("Ignore", "忽略");
@@ -719,6 +739,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Import Repository", "导入仓库");
 		m.put("Import Server", "导入服务器");
 		m.put("Import Workspace", "导入工作区");
+		m.put("Import build spec elements (jobs, services, step templates and properties) from other projects. Imported elements are treated as if they are defined locally. Locally defined elements will override imported elements with same name", 
+			"从其他项目导入构建规范元素（任务、服务、步骤模板和属性）。导入的元素被视为本地定义的元素。本地定义的元素将覆盖具有相同名称的导入元素");
 		m.put("Imports", "导入");
 		m.put("In Projects", "在项目中");
 		m.put("In case IMAP host certificate is self-signed or its CA root is not accepted, you may tell OneDev to bypass certificate check. <b class='text-danger'>WARNING: </b> In an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the certificate into OneDev</a> instead", 
@@ -754,6 +776,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Issue Creation Setting", "工单创建设置");
 		m.put("Issue Creation Settings", "工单创建设置");
 		m.put("Issue Description", "工单描述");
+		m.put("Issue Details", "工单详情");
 		m.put("Issue Field Mapping", "工单字段映射");
 		m.put("Issue Field Mappings", "工单字段映射");
 		m.put("Issue Field Set", "工单字段集");
@@ -930,6 +953,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Months", "月");
 		m.put("Months to Display", "显示的月数");
 		m.put("More Options", "更多选项");
+		m.put("More Settings", "更多设置");
 		m.put("Most branch coverage", "最小的分支覆盖率");
 		m.put("Most line coverage", "最小的行覆盖率");
 		m.put("Mount Docker Sock", "挂载 Docker Sock");
@@ -1002,13 +1026,18 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("No group by", "无分组");
 		m.put("No ignore file", "无忽略文件");
 		m.put("No ignored licenses", "无忽略的许可证");
+		m.put("No imports defined", "无导入");
+		m.put("No jobs defined", "未定义任务");
 		m.put("No limit", "无限制");
 		m.put("No mail service", "无邮件服务");
 		m.put("No one", "无任何人");
 		m.put("No parent", "无父级");
+		m.put("No properties defined", "未定义属性");
 		m.put("No proxy", "无代理");
 		m.put("No required services", "无所需服务");
 		m.put("No secret config", "无秘密配置");
+		m.put("No services defined", "未定义服务");
+		m.put("No step templates defined", "未定义步骤模板");
 		m.put("Node Selector", "节点选择器");
 		m.put("Node Selector Entry", "节点选择器条目");
 		m.put("None", "无");
@@ -1075,8 +1104,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"可选择为访问远程仓库配置代理。代理应为 <i>&lt;代理主机&gt;:&lt;代理端口&gt;</i> 格式");
 		m.put("Optionally define a unique key for the project with two or more upper case letters. This key can be used to reference issues, builds, and pull requests with a stable and short form <code>&lt;project key&gt;-&lt;number&gt;</code> instead of <code>&lt;project path&gt;#&lt;number&gt;</code>", 
 			"可选择为项目定义一个唯一的键，该键由两个或更多大写字母组成。此键可用于引用工单、构建和拉取请求，使用稳定的短格式 <code>&lt;project key&gt;-&lt;number&gt;</code> 代替 <code>&lt;project path&gt;#&lt;number&gt;</code>");
-		m.put("Optionally define parameter specifications of the job", "可选择为任务定义参数规范");
-		m.put("Optionally define parameter specifications of the step template", "可选择为步骤模板定义参数规范");
+		m.put("Optionally define parameter specifications of the job", "可选择为任务定义参数");
+		m.put("Optionally define parameter specifications of the step template", "可选择为步骤模板定义参数");
 		m.put("Optionally describe the group", "可选择描述组");
 		m.put("Optionally describes the custom field. Html tags are accepted", "可选择描述自定义字段。接受 HTML 标签");
 		m.put("Optionally describes the param. Html tags are accepted.", "可选择描述参数。接受 HTML 标签");
@@ -1327,10 +1356,11 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Param Map", "参数映射");
 		m.put("Param Matrix", "参数矩阵");
 		m.put("Param Name", "参数名称");
-		m.put("Param Spec", "参数规范");
-		m.put("Param Spec Bean", "参数规范Bean");
-		m.put("Parameter Specs", "参数规范");
+		m.put("Param Spec", "参数");
+		m.put("Param Spec Bean", "参数Bean");
+		m.put("Parameter Specs", "参数");
 		m.put("Params", "参数");
+		m.put("Params & Triggers", "参数与触发器");
 		m.put("Parent Bean", "父Bean");
 		m.put("Parent OneDev Project", "父OneDev项目");
 		m.put("Parent Project", "父项目");
@@ -1384,6 +1414,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Principal name of the account to login into office 365 mail server to send/receive emails. Make sure this account <b>owns</b> the registered application indicated by application id above", 
 			"登录到 office 365 邮件服务器发送/接收电子邮件的帐户的主名称。确保此帐户 <b>拥有</b> 上述应用程序 ID 指示的注册应用程序");
 		m.put("Private Key Secret", "私钥密钥");
+		m.put("Privilege Settings", "权限设置");
 		m.put("Profile", "个人资料");
 		m.put("Project", "项目");
 		m.put("Project Authorization Bean", "项目授权 Bean");
@@ -1483,6 +1514,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Remote Url", "远程 URL");
 		m.put("Remove Fields", "删除字段");
 		m.put("Remove From Current Iteration", "从当前迭代中删除");
+		m.put("Rename {0}", "重命名 {0}");
 		m.put("Renovate CLI Options", "Renovate CLI 选项");
 		m.put("Renovate JavaScript Config", "Renovate JavaScript 配置");
 		m.put("Replace With", "替换为");
@@ -1495,7 +1527,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Require Successful", "要求成功");
 		m.put("Required Builds", "要求构建");
 		m.put("Required Reviewers", "要求审查者");
-		m.put("Required Services", "要求服务");
+		m.put("Required Services", "所需服务");
+		m.put("Resource Settings", "资源设置");
 		m.put("Retrieve Groups", "检索组");
 		m.put("Retrieve LFS Files", "检索 LFS 文件");
 		m.put("Retrieve Submodules", "检索子模块");
@@ -1528,6 +1561,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKSPACE</code>. <b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote docker executor", 
 			"运行指定的 docker 容器。<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> 挂载到容器中，其路径放置在环境变量 <code>ONEDEV_WORKSPACE</code> 中。<b class='text-warning'>注意：</b> 此步骤只能由服务器 docker 执行器或远程 docker 执行器执行");
 		m.put("Run specified step template", "运行指定的步骤模板");
+		m.put("Run this job", "运行此任务");
 		m.put("Running", "运行中");
 		m.put("SMTP Host", "SMTP 主机");
 		m.put("SMTP Password", "SMTP 密码");
@@ -1637,6 +1671,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Sign Up Bean", "注册 Bean");
 		m.put("Sign Up!", "注册！");
 		m.put("Sign in", "登录");
+		m.put("Signature required for this change, please generate system GPG signing key first", "需要签名才能更改。请先生成系统 GPG 签名密钥");
 		m.put("Single Sign On", "单点登录");
 		m.put("Single sign on via discord.com", "通过 discord.com 单点登录");
 		m.put("Single sign on via twitch.tv", "通过 twitch.tv 单点登录");
@@ -2062,6 +2097,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Then enter the passcode shown in the TOTP authenticator to verify", "然后输入 TOTP 认证器中显示的验证码进行验证");
 		m.put("These authenticators normally run on your mobile phone, some examples are Google Authenticator, Microsoft Authenticator, Authy, 1Password etc.", 
 			"这些认证器通常在您的手机上运行，例如 Google Authenticator、Microsoft Authenticator、Authy、1Password 等");
+		m.put("This <span wicket:id=\"elementTypeName\"></span> is imported from <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a>", 
+			"此 <span wicket:id=\"elementTypeName\"></span> 是从 <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a> 导入的");
 		m.put("This account is disabled", "此账户已禁用");
 		m.put("This address should be <code>verified sender</code> in SendGrid and will be used as sender address of various email notifications. One can also reply to this address to post issue or pull request comments if <code>Receive Posted Email</code> option is enabled below", 
 			"此地址应在 SendGrid 中为 <code>已验证的发送者</code>，将用作各种电子邮件通知的发送者地址。如果下面启用了 <code>接收已发布电子邮件</code> 选项，用户也可以回复此地址以发布工单或拉取请求评论");
@@ -2088,6 +2125,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("This operation is disallowed by branch protection rule", "此操作被分支保护规则禁止");
 		m.put("This permission enables one to access confidential issues", "此权限允许访问机密工单");
 		m.put("This permission enables one to schedule issues into iterations", "此权限允许将工单调度到迭代中");
+		m.put("This property is imported from {0}", "此属性是从 {0} 导入的");
 		m.put("This report will be displayed in pull request overview page if build is triggered by pull request", 
 			"如果构建由拉取请求触发，此报告将显示在拉取请求概览页面中");
 		m.put("This step can only be executed by a docker aware executor", "此步骤只能由支持 Docker 的执行器执行");
@@ -2149,7 +2187,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Under which condition this step should run", "此步骤应在何种条件下运行");
 		m.put("Unified", "统一");
 		m.put("Unlimited", "无限制");
+		m.put("Unspecified", "未指定");
 		m.put("Unsupported", "不支持");
+		m.put("Update", "更新");
 		m.put("Update Dependencies via Renovate", "通过 Renovate 更新依赖");
 		m.put("Update body", "更新主体");
 		m.put("Upload Access Token Secret", "上传访问令牌密钥");
@@ -2241,6 +2281,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Whether or not to be able to access time tracking info of issues", "是否能够访问工单的时间跟踪信息");
 		m.put("Whether or not to enable code management for the project", "是否为项目启用代码管理");
 		m.put("Whether or not to enable issue management for the project", "是否为项目启用工单管理");
+		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
+			"如果启用此选项，git lfs 命令需要安装在 OneDev 服务器上（即使此步骤在其他节点上运行）");
+		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project. If this option is enabled, git lfs command needs to be installed on OneDev server", 
+			"如果启用此选项，git lfs 命令需要安装在 OneDev 服务器上（即使此步骤在其他节点上运行）");
 		m.put("Whether or not to import forked Bitbucket repositories", "是否导入分叉的 Bitbucket 仓库");
 		m.put("Whether or not to import forked GitHub repositories", "是否导入分叉的 GitHub 仓库");
 		m.put("Whether or not to import forked GitLab projects", "是否导入分叉的 GitLab 项目");
@@ -2317,10 +2361,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{0} commits", "{0} 个提交");
 		m.put("{0} files", "{0} 个文件");
 		m.put("{0} tags", "{0} 个标签");
-		m.put("Edit on branch {0}", "在分支 {0} 编辑");
-		m.put("Edit on source branch", "在源分支编辑");
-		m.put("File is too large to edit here", "文件太大，无法在此编辑");
-		m.put("Signature required for this change, please generate system GPG signing key first", "需要签名才能更改。请先生成系统 GPG 签名密钥");
+		m.put("Auto-discovered executor", "自动发现的执行器");
+		m.put("First applicable executor", "第一个适用的执行器");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
@@ -2343,6 +2385,13 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("NuGet(s)", "NuGet");
 		m.put("PyPI(s)", "PyPI");
 		m.put("Helm(s)", "Helm");
+		m.put("job", "任务");
+		m.put("service", "服务");
+		m.put("step template", "步骤模板");
+		m.put("property", "属性");		
+		m.put("All previous steps were successful", "所有前面步骤都成功");
+		m.put("Always", "总是");
+		m.put("Never", "从不");
 	}
 	
 	@Override

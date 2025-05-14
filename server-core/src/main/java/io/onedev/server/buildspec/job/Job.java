@@ -8,6 +8,7 @@ import static io.onedev.server.model.Build.NAME_TAG;
 import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -150,9 +151,9 @@ public class Job implements NamedElement, Validatable {
 	@SuppressWarnings("unused")
 	private static String getJobExecutorPlaceholder() {
 		if (OneDev.getInstance(SettingManager.class).getJobExecutors().isEmpty())
-			return "Auto-discovered executor";
+			return _T("Auto-discovered executor");
 		else 
-			return "First applicable executor";
+			return _T("First applicable executor");
 	}
 	
 	@SuppressWarnings("unused")

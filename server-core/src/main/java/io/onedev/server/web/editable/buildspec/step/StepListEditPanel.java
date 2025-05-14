@@ -18,6 +18,8 @@ import io.onedev.server.web.component.typeselect.TypeSelectPanel;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
+import io.onedev.server.web.util.TextUtils;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -45,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.onedev.server.web.component.floating.AlignPlacement.bottom;
+import static io.onedev.server.web.translation.Translation._T;
 
 class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 
@@ -96,7 +99,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 
 		});		
 		
-		columns.add(new AbstractColumn<>(Model.of("Name")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
@@ -105,11 +108,11 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 
 		});		
 		
-		columns.add(new AbstractColumn<>(Model.of("Condition")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Condition"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getCondition().getDisplayName()));
+				cellItem.add(new Label(componentId, _T(TextUtils.getDisplayValue(rowModel.getObject().getCondition()))));
 			}
 
 		});		
@@ -160,7 +163,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 						menuItems.add(new MenuItem() {
 							@Override
 							public String getLabel() {
-								return "Add before";
+								return _T("Add before");
 							}
 
 							@Override
@@ -177,7 +180,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 						menuItems.add(new MenuItem() {
 							@Override
 							public String getLabel() {
-								return "Add after";
+								return _T("Add after");
 							}
 
 							@Override
@@ -194,7 +197,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 						menuItems.add(new MenuItem() {
 							@Override
 							public String getLabel() {
-								return "Copy";
+								return _T("Copy");
 							}
 
 							@Override
@@ -235,7 +238,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 						menuItems.add(new MenuItem() {
 							@Override
 							public String getLabel() {
-								return "Delete";
+								return _T("Delete");
 							}
 
 							@Override
@@ -281,7 +284,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 		DataTable<Step, Void> dataTable;
 		add(dataTable = new DataTable<>("steps", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<>(dataTable, null));
-		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Unspecified")));
+		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of(_T("Unspecified"))));
 		dataTable.add(new NoRecordsBehavior());
 		
 		dataTable.add(new SortBehavior() {

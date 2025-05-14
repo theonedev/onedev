@@ -7,6 +7,7 @@ import static io.onedev.server.model.Project.PROP_KEY;
 import static io.onedev.server.model.Project.PROP_NAME;
 import static io.onedev.server.model.Project.PROP_PACK_MANAGEMENT;
 import static io.onedev.server.model.Project.PROP_TIME_TRACKING;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -16,6 +17,7 @@ import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
@@ -151,7 +153,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 							}
 							
 						});
-						Session.get().success("General settings updated");
+						Session.get().success(_T("General settings updated"));
 						setResponsePage(GeneralProjectSettingPage.class, paramsOf(project));
 					}
 				}
@@ -164,6 +166,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		form.add(labelsEditor);
 		form.add(parentEditor);
 		
+		form.add(new WebMarkupContainer("submit").add(AttributeAppender.append("value", _T("Update"))));
 		form.add(new AjaxLink<Void>("delete") {
 
 			@Override
@@ -208,7 +211,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "General Settings").add(AttributeAppender.replace("class", "text-truncate"));
+		return new Label(componentId, _T("General Settings")).add(AttributeAppender.replace("class", "text-truncate"));
 	}
 
 }

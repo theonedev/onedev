@@ -113,6 +113,9 @@ public class ExtractTranslationKeys extends CommandHandler {
 									var annotation = method.getAnnotation(Editable.class);
 									if (annotation != null) {
 										extractedTranslationKeys.add(EditableUtils.getDisplayName(method));
+										var group = EditableUtils.getGroup(method);
+										if (group != null)
+											extractedTranslationKeys.add(group);
 										var description = annotation.description();
 										if (description.length() != 0) {
 											extractedTranslationKeys.add(description);

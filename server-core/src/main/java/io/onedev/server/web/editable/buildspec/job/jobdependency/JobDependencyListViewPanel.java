@@ -21,6 +21,8 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -129,7 +131,7 @@ class JobDependencyListViewPanel extends Panel {
 				super.onInitialize();
 				add(new NoRecordsBehavior());
 				addTopToolbar(new HeadersToolbar<Void>(this, null));
-				addBottomToolbar(new NoRecordsToolbar(this, Model.of("Unspecified")));
+				addBottomToolbar(new NoRecordsToolbar(this, Model.of(_T("Unspecified"))));
 			}
 			
 		});

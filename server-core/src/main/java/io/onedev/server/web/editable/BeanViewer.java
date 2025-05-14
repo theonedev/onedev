@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -55,7 +57,7 @@ public class BeanViewer extends Panel {
 			}
 			groupsView.add(groupContainer);
 			WebMarkupContainer toggleLink = new WebMarkupContainer("toggle");
-			toggleLink.add(new Label("groupName", entry.getKey()));
+			toggleLink.add(new Label("groupName", _T(entry.getKey())));
 			groupContainer.add(toggleLink);
 
 			if (entry.getKey().length() == 0) {
@@ -97,8 +99,7 @@ public class BeanViewer extends Panel {
 				WebMarkupContainer valueTd = new WebMarkupContainer("value");
 				propertyContainer.add(valueTd);
 				
-				String displayName = property.getDisplayName();
-				Component content = new Label("content", displayName);
+				Component content = new Label("content", _T(property.getDisplayName()));
 				nameTd.add(content);
 				OmitName omitName = propertyGetter.getAnnotation(OmitName.class);
 

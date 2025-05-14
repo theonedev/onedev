@@ -30,6 +30,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.ObjectId;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -143,7 +146,7 @@ public abstract class JobInfoButton extends Panel {
 				return null;
 			}
 			
-		});
+		}.add(AttributeAppender.append("data-tippy-content", _T("Run this job"))));
 	}
 	
 	@Override

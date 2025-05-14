@@ -29,6 +29,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -178,7 +180,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				onPropertyUpdating(target);
 			}
 
-		}.setDefaultFormProcessing(false));
+		}.setDefaultFormProcessing(false).add(AttributeAppender.append("data-tippy-content", _T("Add new"))));
 		
 		table.add(noRecords = new WebMarkupContainer("noRecords") {
 

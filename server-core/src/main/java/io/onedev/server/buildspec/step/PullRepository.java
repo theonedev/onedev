@@ -2,6 +2,7 @@ package io.onedev.server.buildspec.step;
 
 import static com.google.common.collect.Maps.difference;
 import static io.onedev.server.git.GitUtils.getReachableCommits;
+import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.jgit.lib.Constants.R_HEADS;
 import static org.eclipse.jgit.lib.Constants.R_TAGS;
@@ -127,8 +128,8 @@ public class PullRepository extends SyncRepository {
 	@SuppressWarnings("unused")
 	private static String getLfsDescription() {
 		if (!Bootstrap.isInDocker()) {
-			return "If this option is enabled, git lfs command needs to be installed on OneDev server "
-					+ "(even this step runs on other node)";
+			return _T("If this option is enabled, git lfs command needs to be installed on OneDev server "
+					+ "(even this step runs on other node)");
 		} else {
 			return null;
 		}

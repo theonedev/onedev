@@ -1,10 +1,47 @@
 package io.onedev.server.web.page.project.blob.render.commitoption;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.git.*;
+import io.onedev.server.git.BlobChange;
+import io.onedev.server.git.BlobContent;
+import io.onedev.server.git.BlobEdits;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
@@ -25,28 +62,6 @@ import io.onedev.server.web.page.project.blob.RevisionResolved;
 import io.onedev.server.web.page.project.blob.navigator.BlobNameChanging;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.Broadcast;
-import org.apache.wicket.event.IEvent;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-
-import javax.annotation.Nullable;
-import java.util.*;
 
 public class CommitOptionPanel extends Panel {
 
@@ -103,13 +118,13 @@ public class CommitOptionPanel extends Panel {
 			
 			if (oldPath == null) {
 				if (newName != null)
-					commitMessage = "Add " + newName;
+					commitMessage = MessageFormat.format(_T("Add {0}"), newName);
 				else
-					commitMessage = "Add new file";
+					commitMessage = _T("Add new file");
 			} else if (oldPath.equals(newPath)) {
-				commitMessage = "Edit " + oldName;
+				commitMessage = MessageFormat.format(_T("Edit {0}"), oldName);
 			} else {
-				commitMessage = "Rename " + oldName;
+				commitMessage = MessageFormat.format(_T("Rename {0}"), oldName);
 			}
 		}
 		if (context.getProject().getBranchProtection(context.getBlobIdent().revision, SecurityUtils.getUser()).isEnforceConventionalCommits())
@@ -189,6 +204,7 @@ public class CommitOptionPanel extends Panel {
 			}
 			
 		};
+		saveButton.add(AttributeAppender.append("value", _T("Commit")));		
 		saveButton.setOutputMarkupId(true);
 		form.add(saveButton);
 		
@@ -211,7 +227,7 @@ public class CommitOptionPanel extends Panel {
 				context.onModeChange(target, Mode.VIEW, null);
 			}
 			
-		});
+		}.add(AttributeAppender.append("value", _T("Cancel"))));
 
 		setOutputMarkupId(true);
 	}

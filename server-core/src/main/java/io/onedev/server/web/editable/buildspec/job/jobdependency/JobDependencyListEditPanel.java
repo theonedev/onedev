@@ -33,6 +33,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -235,7 +237,7 @@ class JobDependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 		DataTable<JobDependency, Void> dataTable;
 		add(dataTable = new DataTable<JobDependency, Void>("dependencies", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
-		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Unspecified")));
+		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of(_T("Unspecified"))));
 		dataTable.add(new NoRecordsBehavior());
 		dataTable.add(new SortBehavior() {
 

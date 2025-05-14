@@ -10,6 +10,9 @@ import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.usage.Usage;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,10 +44,10 @@ public class ProjectPullRequestSetting implements Serializable {
 	@SuppressWarnings("unused")
 	private static String getLfsDescription() {
 		if (!Bootstrap.isInDocker()) {
-			return "Whether or not to fetch LFS objects if pull request is opened from a different project. " +
-					"If this option is enabled, git lfs command needs to be installed on OneDev server";
+			return _T("Whether or not to fetch LFS objects if pull request is opened from a different project. " +
+					"If this option is enabled, git lfs command needs to be installed on OneDev server");
 		} else {
-			return "Whether or not to fetch LFS objects if pull request is opened from a different project.";
+			return _T("Whether or not to fetch LFS objects if pull request is opened from a different project.");
 		}
 	}
 	

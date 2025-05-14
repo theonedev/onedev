@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.buildspec.job.projectdependency;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -125,7 +127,7 @@ class ProjectDependencyListViewPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				addTopToolbar(new HeadersToolbar<Void>(this, null));
-				addBottomToolbar(new NoRecordsToolbar(this, Model.of("Unspecified")));
+				addBottomToolbar(new NoRecordsToolbar(this, Model.of(_T("Unspecified"))));
 				add(new NoRecordsBehavior());
 			}
 			

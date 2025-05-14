@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.buildspec.imports;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +9,7 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -70,7 +73,7 @@ class ImportListEditPanel extends PropertyEditor<List<Serializable>> {
 				target.prependJavaScript(script);
 			}
 			
-		});
+		}.add(AttributeAppender.append("data-tippy-content", _T("Add new import"))));
 		
 		add(new SortBehavior() {
 			
@@ -104,7 +107,8 @@ class ImportListEditPanel extends PropertyEditor<List<Serializable>> {
 				target.appendJavaScript(script);
 			}
 			
-		});
+		}.add(AttributeAppender.append("data-tippy-content", _T("Delete this import"))));
+		
 		fragment.add(new FencedFeedbackPanel("feedback", fragment));
 		fragment.add(BeanContext.edit("editor", aImport));
 		fragment.setOutputMarkupId(true);

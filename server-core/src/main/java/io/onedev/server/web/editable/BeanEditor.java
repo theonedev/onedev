@@ -26,6 +26,9 @@ import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
 import javax.validation.Validator;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -123,7 +126,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				
 				String label = property.getDescriptor().getDisplayName();
 				if (EditableUtils.isTranslatable(property.getPropertyGetter()))
-					label = getString("t: " + label);
+					label = _T(label);
 				Label nameLabel = new Label("name", label);
 				add(nameLabel);
 				
@@ -231,7 +234,10 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			}
 			
 			WebMarkupContainer toggleLink = new WebMarkupContainer("toggle");
-			toggleLink.add(new Label("groupName", entry.getKey()));
+			String groupName = entry.getKey();
+			if (EditableUtils.isTranslatable(descriptor.getBeanClass()))
+				groupName = _T(groupName);
+			toggleLink.add(new Label("groupName", groupName));
 			groupContainer.add(toggleLink);
 			
 			RepeatingView propertiesView = new RepeatingView("properties");

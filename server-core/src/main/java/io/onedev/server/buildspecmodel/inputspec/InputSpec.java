@@ -241,7 +241,7 @@ public abstract class InputSpec implements Serializable {
 		buffer.append("import javax.validation.constraints.*;\n");
 		buffer.append("import org.hibernate.validator.constraints.*;\n");
 		buffer.append("\n");
-		buffer.append("@Editable(name=").append("\"").append(description).append("\")\n");
+		buffer.append("@Editable(name=").append("\"").append(description).append("\", translatable=false)\n");
 		buffer.append("class " + className + " implements java.io.Serializable {\n");
 		buffer.append("\n");
 		buffer.append("    private static final long serialVersionUID = 1L;\n");

@@ -1,6 +1,27 @@
 package io.onedev.server.web.page.project;
 
+import static io.onedev.server.model.Project.PROP_CODE_MANAGEMENT;
+import static io.onedev.server.model.Project.PROP_DESCRIPTION;
+import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT;
+import static io.onedev.server.model.Project.PROP_KEY;
+import static io.onedev.server.model.Project.PROP_NAME;
+import static io.onedev.server.model.Project.PROP_PACK_MANAGEMENT;
+import static io.onedev.server.model.Project.PROP_TIME_TRACKING;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.Collection;
+
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.wicket.Component;
+import org.apache.wicket.Session;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectLabelManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -19,16 +40,6 @@ import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.setting.general.DefaultRoleBean;
 import io.onedev.server.web.page.project.setting.general.ParentBean;
 import io.onedev.server.web.util.editbean.LabelsBean;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.wicket.Component;
-import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import java.util.Collection;
-
-import static io.onedev.server.model.Project.*;
 
 public class NewProjectPage extends LayoutPage {
 
@@ -119,7 +130,7 @@ public class NewProjectPage extends LayoutPage {
 		form.add(labelsEditor);
 		form.add(BeanContext.edit("defaultRoleEditor", defaultRoleBean));
 		form.add(parentEditor);
-		
+		form.add(new WebMarkupContainer("submit").add(AttributeAppender.append("value", _T("Create"))));
 		add(form);
 	}
 

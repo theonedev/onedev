@@ -31,14 +31,14 @@
     </wicket:fragment>
 	<wicket:fragment wicket:id="elementImportNoticeFrag">
 		<div class="alert alert-light-info">
-			This <span wicket:id="elementTypeName"></span> is imported from <a wicket:id="link" class="alert-link"><span wicket:id="label"></span></a>
+			<wicket:t>This <span wicket:id="elementTypeName"></span> is imported from <a wicket:id="link" class="alert-link"><span wicket:id="label"></span></a></wicket:t>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="propertiesFrag">
 	    <table class="table">
 	        <thead>
-	            <th>Name</th>
-	            <th>Value</th>
+	            <th><wicket:t>Name</wicket:t></th>
+	            <th><wicket:t>Value</wicket:t></th>
 	        </thead>
 	        <tbody>
 	            <tr wicket:id="properties">
@@ -54,7 +54,7 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="jobFrag">
     	<a wicket:id="select" class="select btn btn-outline-secondary justify-content-start text-nowrap"><span wicket:id="label"></span></a>
-    	<a wicket:id="run" class="run btn btn-outline-secondary btn-icon flex-grow-0 flex-shrink-0" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
+    	<a wicket:id="run" class="run btn btn-outline-secondary btn-icon flex-grow-0 flex-shrink-0"><wicket:svg href="play" class="icon"></wicket:svg></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="elementDetailFrag">
 	    <div class="body flex-grow-1 autofit p-3">

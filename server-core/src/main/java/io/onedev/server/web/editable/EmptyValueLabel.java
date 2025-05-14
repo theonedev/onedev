@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.lang.reflect.AnnotatedElement;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -23,7 +25,7 @@ public abstract class EmptyValueLabel extends Label {
 					if (placeholder != null && EditableUtils.isDisplayPlaceholderAsValue(getElement()))
 						return "<i>" + HtmlEscape.escapeHtml5(placeholder) + "</i>";
 					else
-						return "<i>Unspecified</i>";
+						return "<i>" + _T("Unspecified") + "</i>";
 				} finally {
 					ComponentContext.pop();
 				}

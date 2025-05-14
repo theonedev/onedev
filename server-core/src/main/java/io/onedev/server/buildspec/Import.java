@@ -1,6 +1,9 @@
 package io.onedev.server.buildspec;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -160,8 +163,8 @@ public class Import implements Serializable, Validatable {
 			}
 			if (!subject.isPermitted(new ProjectPermission(project, new ReadCode())) 
 					&& !project.isPermittedByLoginUser(new ReadCode())) {
-				String errorMessage = String.format(
-						"Code read permission is required to import build spec (import project: %s, import revision: %s)", 
+				String errorMessage = MessageFormat.format(
+						_T("Code read permission is required to import build spec (import project: {0}, import revision: {1})"), 
 						projectPath, revision);
 				throw new ExplicitException(errorMessage);
 			}

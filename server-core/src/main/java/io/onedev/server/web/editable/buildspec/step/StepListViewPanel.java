@@ -6,6 +6,8 @@ import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
 import io.onedev.server.web.component.offcanvas.OffCanvasPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.util.TextUtils;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -22,6 +24,8 @@ import org.apache.wicket.markup.repeater.data.IDataProvider;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -44,7 +48,7 @@ class StepListViewPanel extends Panel {
 		
 		List<IColumn<Step, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<Step, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<Step, Void>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
@@ -53,11 +57,11 @@ class StepListViewPanel extends Panel {
 			
 		});		
 		
-		columns.add(new AbstractColumn<Step, Void>(Model.of("Condition")) {
+		columns.add(new AbstractColumn<Step, Void>(Model.of(_T("Condition"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getCondition().getDisplayName()));
+				cellItem.add(new Label(componentId, _T(TextUtils.getDisplayValue(rowModel.getObject().getCondition()))));
 			}
 		});		
 		
@@ -120,7 +124,7 @@ class StepListViewPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				addTopToolbar(new HeadersToolbar<Void>(this, null));
-				addBottomToolbar(new NoRecordsToolbar(this, Model.of("Unspecified")));
+				addBottomToolbar(new NoRecordsToolbar(this, Model.of(_T("Unspecified"))));
 				add(new NoRecordsBehavior());
 			}
 			

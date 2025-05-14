@@ -1,6 +1,44 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getActiveElementIndex;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getPosition;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getSelection;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getUrlSegment;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.behavior.Behavior;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.eclipse.jgit.lib.FileMode;
+import org.unbescape.html.HtmlEscape;
+
 import com.google.common.base.Throwables;
+
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
@@ -30,36 +68,6 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.behavior.Behavior;
-import org.apache.wicket.event.Broadcast;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.eclipse.jgit.lib.FileMode;
-import org.unbescape.html.HtmlEscape;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.*;
 
 public class BuildSpecBlobViewPanel extends BlobViewPanel {
 
@@ -135,8 +143,8 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 													}
 													
 												};
-												link.add(AttributeAppender.append("title", 
-														"This property is imported from " + aImport.getProjectPath()));
+												link.add(AttributeAppender.append("data-tippy-content", 
+														MessageFormat.format(_T("This property is imported from {0}"), aImport.getProjectPath())));
 												link.setEnabled(SecurityUtils.canReadCode(project));
 												item.add(link);
 											} else {
@@ -152,7 +160,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 							};
 							propertiesViewer.add(AttributeAppender.append("class", "properties autofit pr-3"));
 						} else {
-							propertiesViewer = new Label("content", "No properties defined");
+							propertiesViewer = new Label("content", _T("No properties defined"));
 							String cssClasses = "properties not-defined alert alert-notice alert-light-warning d-flex";
 							propertiesViewer.add(AttributeAppender.append("class", cssClasses));
 						}
@@ -243,7 +251,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 													return null;
 												}
 		
-											});
+											}.add(AttributeAppender.append("data-tippy-content", _T("Run this job"))));
 											jobNav.add(AttributeAppender.append("class", "nav btn-group flex-nowrap"));
 											return jobNav;
 										}
@@ -290,7 +298,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 							};
 						} else {
 							String cssClasses = "jobs not-defined alert alert-notice alert-light-warning d-flex";
-							jobsViewer = new Label("content", "No jobs defined").add(AttributeAppender.append("class", cssClasses));
+							jobsViewer = new Label("content", _T("No jobs defined")).add(AttributeAppender.append("class", cssClasses));
 						}
 						jobsViewer.add(new Behavior() {
 								
@@ -332,7 +340,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 							};
 						} else {
 							String cssClasses = "services not-defined alert alert-notice alert-light-warning d-flex";
-							servicesViewer = new Label("content", "No services defined").add(AttributeAppender.append("class", cssClasses));
+							servicesViewer = new Label("content", _T("No services defined")).add(AttributeAppender.append("class", cssClasses));
 						}
 						servicesViewer.add(new Behavior() {
 								
@@ -374,7 +382,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 							};
 						} else {
 							String cssClasses = "step-templates not-defined alert alert-notice alert-light-warning d-flex";
-							templatesViewer = new Label("content", "No step templates defined").add(AttributeAppender.append("class", cssClasses));
+							templatesViewer = new Label("content", _T("No step templates defined")).add(AttributeAppender.append("class", cssClasses));
 						}
 						templatesViewer.add(new Behavior() {
 								
@@ -400,7 +408,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 							importsViewer = PropertyContext.view("content", buildSpec, "imports");
 							importsViewer.add(AttributeAppender.append("class", "imports autofit pr-3"));
 						} else {
-							importsViewer = new Label("content", "No imports defined");
+							importsViewer = new Label("content", _T("No imports defined"));
 							String cssClasses = "imports not-defined alert alert-notice alert-light-warning d-flex";
 							importsViewer.add(AttributeAppender.append("class", cssClasses));
 						}
@@ -670,7 +678,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 		protected void onInitialize() {
 			super.onInitialize();
 			
-			add(new Label("elementTypeName", EditableUtils.getDisplayName(elementClass).toLowerCase()));
+			add(new Label("elementTypeName", _T(EditableUtils.getDisplayName(elementClass).toLowerCase())));
 			
 			if (aImport != null) {
 				ProjectBlobPage.State state = new ProjectBlobPage.State();
