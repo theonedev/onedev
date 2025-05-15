@@ -151,12 +151,10 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 			throws AuthenticationException {
 		return transactionManager.call(() -> {
 			try {
-				var user = userManager.findByVerifiedEmailAddress((String) token.getPrincipal());
-				if (user != null && user.getPassword() != null)
-					return user;
-					
 				var userName = normalizeUserName((String) token.getPrincipal());
-				user = userManager.findByName(userName);
+				var user = userManager.findByVerifiedEmailAddress((String) token.getPrincipal());
+				if (user == null) 
+					user = userManager.findByName(userName);
 				if (user != null) {
 					if (user.isDisabled())
 						throw new DisabledAccountException("Account is disabled");

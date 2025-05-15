@@ -2187,6 +2187,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Undefined Field Resolution", "未定义字段解析");
 		m.put("Undefined Field Value Resolution", "未定义字段值解析");
 		m.put("Undefined State Resolution", "未定义状态解析");
+		m.put("Under which condition this step should run. <b>Successful</b> means all non-optional steps running before this step are successful", 
+			"在什么条件下应运行此步骤。<b>成功</b>表示在此步骤之前运行的所有非可选步骤都已成功");
 		m.put("Unified", "统一");
 		m.put("Unlimited", "无限制");
 		m.put("Unspecified", "未指定");
@@ -2363,10 +2365,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{0} commits", "{0} 个提交");
 		m.put("{0} files", "{0} 个文件");
 		m.put("{0} tags", "{0} 个标签");
-		m.put("Under which condition this step should run. <b>Successful</b> means all non-optional steps running before this step are successful", 
-			"在什么条件下应运行此步骤。<b>成功</b>表示在此步骤之前运行的所有非可选步骤都已成功");
-		m.put("Whether or not this step is optional. Execution failure of an optional step will not cause the build to fail, and execute condition of subsequent steps will not take optional step into account", 
-			"此步骤是否为可选。可选步骤执行失败不会导致构建失败，后续步骤的执行条件也不会将可选步骤计算在内");
+		m.put("Whether or not this step is optional. Execution failure of an optional step will not cause the build to fail, and successful condition of subsequent steps will not take optional step into account", 
+			"**** translate this ****");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
