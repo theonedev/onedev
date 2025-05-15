@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.bool;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
@@ -32,7 +34,7 @@ public class BooleanEditSupport implements EditSupport {
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 							if (model.getObject() != null) {
-								return new Label(id, TextUtils.getDisplayValue(model.getObject()));
+								return new Label(id, _T(TextUtils.getDisplayValue(model.getObject())));
 							} else {
 								return new EmptyValueLabel(id) {
 

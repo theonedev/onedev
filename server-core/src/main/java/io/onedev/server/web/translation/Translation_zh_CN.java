@@ -1007,7 +1007,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting", 
 			"新版本可用。红色表示安全/关键更新，黄色表示错误修复，蓝色表示功能更新。点击查看更改。可在系统设置中禁用");
 		m.put("Next", "下一步");
-		m.put("No", "无");
+		m.put("No", "否");
 		m.put("No Activity Days", "无活动天数");
 		m.put("No SSH keys configured in your account. You may <a wicket:id=\"sshKeys\" class=\"link-primary\">add a key</a> or switch to <a wicket:id=\"useHttp\" class=\"link-primary\">HTTP(S)</a> url", 
 			"没有配置 SSH 密钥。您可以 <a wicket:id=\"sshKeys\" class=\"link-primary\">添加一个密钥</a> 或切换到 <a wicket:id=\"useHttp\" class=\"link-primary\">HTTP(S)</a> 克隆 URL");
@@ -2275,6 +2275,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Whether or not this field accepts empty value", "此字段是否接受空值");
 		m.put("Whether or not this param accepts empty value", "此参数是否接受空值");
 		m.put("Whether or not this script can be used in CI/CD jobs", "此脚本是否可用于 CI/CD 任务");
+		m.put("Whether or not this step is optional. Execution failure of an optional step will not cause the build to fail, and successful condition of subsequent steps will not take optional step into account", 
+			"是否此步骤是可选的。如果可选步骤失败，不会导致构建失败，后续步骤的执行条件也不会将可选步骤考虑在内");
 		m.put("Whether or not to allow anonymous users to access this server", "是否允许匿名用户访问此服务器");
 		m.put("Whether or not to allow creating root projects (project without parent)", "是否允许创建根项目（无父项目的项目）");
 		m.put("Whether or not to also include children of above projects", "是否同时包含上述项目的子项目");
@@ -2365,8 +2367,18 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{0} commits", "{0} 个提交");
 		m.put("{0} files", "{0} 个文件");
 		m.put("{0} tags", "{0} 个标签");
-		m.put("Whether or not this step is optional. Execution failure of an optional step will not cause the build to fail, and successful condition of subsequent steps will not take optional step into account", 
-			"**** translate this ****");
+		m.put("<b class='text-danger'>NOTE: </b> This step requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意：</b> 此步骤需要企业版订阅。<a href='https://onedev.io/pricing' target='_blank'>免费试用 30 天</a>");
+		m.put("Run osv scanner to scan violated licenses used by various <a href='https://deps.dev/' target='_blank'>dependencies</a>. It can only be executed by docker aware executor.", 
+			"运行 OSV 扫描器扫描各种 <a href='https://deps.dev/' target='_blank'>依赖项</a> 使用的违反许可证。它只能由 docker 感知执行器执行。");
+		m.put("Run osv scanner to scan vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
+			"运行 OSV 扫描器扫描各种 <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>锁定文件</a> 中的漏洞。它只能由 docker 感知执行器执行。");
+		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>It can only be executed by docker aware executor.", 
+			"运行 trivy 容器镜像扫描器扫描指定镜像中的问题。对于漏洞，它检查各种 <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>分布文件</a>。它只能由 docker 感知执行器执行。");
+		m.put("Run trivy filesystem scanner to scan various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>lock files</a>. It can only be executed by a docker aware executor, and is recommended to run <span class='text-warning'>after dependencies are resolved</span> (npm install or alike). Compared to OSV scanner, its setup is a bit verbose, but can provide more accurate result", 
+			"运行 trivy 文件系统扫描器扫描各种 <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>锁定文件</a>。它只能由 docker 感知执行器执行，建议在 <span class='text-warning'>依赖项解析后</span> 运行（例如 npm install）。与 OSV 扫描器相比，它的设置稍微冗长，但可以提供更准确的结果");
+		m.put("Run trivy rootfs scanner to scan various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>. It can only be executed by a docker aware executor and is recommended to run against staging area of your project", 
+			"运行 trivy 根文件系统扫描器扫描各种 <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>分布文件</a>。它只能由 docker 感知执行器执行，建议在项目暂存区域运行。");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
@@ -2396,6 +2408,13 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Successful", "成功");
 		m.put("Always", "总是");
 		m.put("Never", "从不");
+		m.put("Yes", "是");
+		m.put("Security & Compliance", "安全与合规");
+		m.put("Dependency Management", "依赖管理");
+		m.put("Publish", "发布");
+		m.put("Repository Sync", "仓库同步");
+		m.put("Utilities", "工具");
+		m.put("Docker Image", "Docker 镜像");
 	}
 	
 	@Override

@@ -37,6 +37,7 @@ import java.util.*;
 
 import static io.onedev.server.util.HtmlUtils.getText;
 import static io.onedev.server.web.editable.EditableUtils.getDescription;
+import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 public abstract class TypeSelectPanel<T extends Serializable> extends Panel {
@@ -218,7 +219,7 @@ public abstract class TypeSelectPanel<T extends Serializable> extends Panel {
 						}
 						
 					};
-					link.add(new Label("label", node.getName()));
+					link.add(new Label("label", _T(node.getName())));
 					fragment.add(link);
 					
 					return fragment;
@@ -235,7 +236,7 @@ public abstract class TypeSelectPanel<T extends Serializable> extends Panel {
 						}
 						
 					};
-					link.add(new Label("label", EditableUtils.getDisplayName(typeNode.type)));
+					link.add(new Label("label", _T(EditableUtils.getDisplayName(typeNode.type))));
 					
 					for (TreeNode each: nodes) {
 						if (each instanceof TypeNode) {

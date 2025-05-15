@@ -1,6 +1,9 @@
 package io.onedev.server.web.editable.bool;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -11,6 +14,7 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -39,6 +43,15 @@ public class NullableBooleanPropertyEditor extends PropertyEditor<Boolean> {
 			@Override
 			protected List<String> load() {
 				return Lists.newArrayList(TextUtils.getDisplayValue(true), TextUtils.getDisplayValue(false));
+			}
+
+		}, new LoadableDetachableModel<Map<String, String>>() {
+
+			@Override
+			protected Map<String, String> load() {
+				return CollectionUtils.newHashMap(
+						TextUtils.getDisplayValue(true), _T(TextUtils.getDisplayValue(true)), 
+						TextUtils.getDisplayValue(false), _T(TextUtils.getDisplayValue(false)));
 			}
 
 		}, false) {
