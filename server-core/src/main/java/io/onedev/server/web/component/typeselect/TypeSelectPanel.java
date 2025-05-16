@@ -1,16 +1,20 @@
 package io.onedev.server.web.component.typeselect;
 
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.commons.loader.ImplementationRegistry;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.util.Similarities;
-import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
-import io.onedev.server.web.editable.EditableUtils;
+import static io.onedev.server.util.HtmlUtils.getText;
+import static io.onedev.server.web.editable.EditableUtils.getDescription;
+import static io.onedev.server.web.translation.Translation._T;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -32,13 +36,15 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import java.io.Serializable;
-import java.util.*;
-
-import static io.onedev.server.util.HtmlUtils.getText;
-import static io.onedev.server.web.editable.EditableUtils.getDescription;
-import static io.onedev.server.web.translation.Translation._T;
-import static org.apache.commons.lang3.StringUtils.substringBefore;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.loader.ImplementationRegistry;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.util.Similarities;
+import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.editable.EditableUtils;
 
 public abstract class TypeSelectPanel<T extends Serializable> extends Panel {
 
@@ -50,9 +56,8 @@ public abstract class TypeSelectPanel<T extends Serializable> extends Panel {
 		
 		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(TypeSelectPanel.class, getClass());
 		Class<? extends T> baseType = (Class<T>) typeArguments.get(0);
-		
 		ImplementationRegistry registry = AppLoader.getInstance(ImplementationRegistry.class);
-		types = new ArrayList<>(registry.getImplementations(baseType));
+		types = new ArrayList<Class<? extends T>>(registry.getImplementations(baseType));
 		EditableUtils.sortAnnotatedElements(types);
 	}
 	
@@ -61,6 +66,7 @@ public abstract class TypeSelectPanel<T extends Serializable> extends Panel {
 		super.onInitialize();
 
 		TextField<String> searchField = new TextField<>("input", Model.of(""));
+		searchField.add(new AttributeModifier("placeholder", _T("Type to filter")));
 		add(searchField);
 		
 		searchField.add(new OnTypingDoneBehavior(100) {
@@ -83,12 +89,12 @@ public abstract class TypeSelectPanel<T extends Serializable> extends Panel {
 
 						@Override
 						protected double getSimilarScore(TreeNode item) {
-							String fullName = item.getName();
+							String fullName = _T(item.getName());
 							if (item instanceof TypeNode) {
 								TypeNode<?> typeNode = (TypeNode<?>) item;
 								String groupName = EditableUtils.getGroup(typeNode.type);
 								if (groupName != null)
-									fullName = groupName + "/" + fullName;
+									fullName = _T(groupName) + "/" + fullName;
 							}
 							return Similarities.getSimilarScore(
 									StringUtils.deleteWhitespace(fullName), 

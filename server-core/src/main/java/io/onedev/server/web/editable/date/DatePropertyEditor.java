@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.date;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.lang.reflect.Method;
 import java.util.Date;
 
@@ -43,7 +45,7 @@ public class DatePropertyEditor extends PropertyEditor<Date> {
 					withTime? "Choose date and time...": "Choose date..."));
 		}
 
-		input.setLabel(Model.of(getDescriptor().getDisplayName()));
+		input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
 		add(input);
 		
 		input.add(new OnTypingDoneBehavior() {

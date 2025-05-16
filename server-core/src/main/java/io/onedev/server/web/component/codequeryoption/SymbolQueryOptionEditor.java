@@ -4,6 +4,9 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.search.code.query.SymbolQuery;
 import io.onedev.server.search.code.query.SymbolQueryOption;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -35,10 +38,10 @@ public class SymbolQueryOptionEditor extends FormComponentPanel<SymbolQueryOptio
 		WebMarkupContainer termContainer = new WebMarkupContainer("term");
 		add(termContainer);
 		term = new TextField<>("term", Model.of(option.getTerm()));
-		term.setRequired(true).setLabel(Model.of("Symbol name"));
+		term.setRequired(true).setLabel(Model.of(_T("Symbol name")));
 		term.add(validatable -> {
 			if (StringUtils.isBlank(validatable.getValue())) {
-				validatable.error(messageSource -> "This field is required");
+				validatable.error(messageSource -> _T("This field is required"));
 			} else {
 				try {
 					new SymbolQuery.Builder(validatable.getValue())
@@ -46,7 +49,7 @@ public class SymbolQueryOptionEditor extends FormComponentPanel<SymbolQueryOptio
 							.build()
 							.asLuceneQuery();
 				} catch (TooGeneralQueryException e) {
-					validatable.error((IValidationError) messageSource -> "Search is too general");
+					validatable.error((IValidationError) messageSource -> _T("Search is too general"));
 				}
 			}
 		});

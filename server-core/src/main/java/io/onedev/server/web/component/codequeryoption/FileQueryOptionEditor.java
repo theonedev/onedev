@@ -3,6 +3,9 @@ package io.onedev.server.web.component.codequeryoption;
 import io.onedev.server.search.code.query.FileQuery;
 import io.onedev.server.search.code.query.FileQueryOption;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -31,12 +34,12 @@ public class FileQueryOptionEditor extends FormComponentPanel<FileQueryOption> {
 		WebMarkupContainer termContainer = new WebMarkupContainer("term");
 		add(termContainer);
 		term = new TextField<>("term", Model.of(option.getTerm()));
-		term.setRequired(true).setLabel(Model.of("File name"));
+		term.setRequired(true).setLabel(Model.of(_T("File name")));
 		term.add(validatable -> {
 			try {
 				new FileQuery.Builder(validatable.getValue()).count(1).build().asLuceneQuery();
 			} catch (TooGeneralQueryException e) {
-				validatable.error(messageSource -> "Search is too general");
+				validatable.error(messageSource -> _T("Search is too general"));
 			}
 		});
 

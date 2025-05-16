@@ -65,6 +65,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Administration", "管理");
 		m.put("Administrative permission over a project", "项目的管理权限");
 		m.put("Advanced Search", "高级搜索");
+		m.put("Age", "年龄");
 		m.put("Agent", "代理");
 		m.put("Agent Attribute", "代理属性");
 		m.put("Agent Edit Bean", "代理编辑Bean");
@@ -2194,6 +2195,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Two-factor authentication is now configured", "两阶段验证现已配置完成");
 		m.put("Type", "类型");
 		m.put("Type password here", "在此输入密码");
+		m.put("Type to filter", "过滤");
 		m.put("URL", "URL");
 		m.put("Unauthorized", "未授权");
 		m.put("Undefined Field Resolution", "未定义字段解析");
@@ -2379,6 +2381,47 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{0} commits", "{0} 个提交");
 		m.put("{0} files", "{0} 个文件");
 		m.put("{0} tags", "{0} 个标签");
+		m.put("'..' is not allowed in the directory", "'..' 不允许在目录中使用");
+		m.put("Able to merge without conflicts", "可以合并而没有冲突");
+		m.put("Add New Email Address", "添加新电子邮件地址");
+		m.put("Add files via upload", "通过上传添加文件");
+		m.put("At least one email address should be configured, please add a new one first", "至少应配置一个电子邮件地址，请先添加一个新地址");
+		m.put("Attachment", "附件");
+		m.put("Bean", "Bean");
+		m.put("Calculating merge preview...", "计算合并预览...");
+		m.put("Comment", "评论");
+		m.put("Comment too long", "评论过长");
+		m.put("Create Pull Request", "创建拉取请求");
+		m.put("Description too long", "描述过长");
+		m.put("Do you really want to delete this email address?", "您真的要删除这个电子邮件地址吗？");
+		m.put("Email address", "电子邮件地址");
+		m.put("File name", "文件名");
+		m.put("Git email address will be used as git author/committer for commits created on web UI", 
+			"Git 电子邮件地址将用于在 Web UI 上创建的提交的作者/提交者");
+		m.put("Invalid PCRE syntax", "无效的 PCRE 语法");
+		m.put("Leave a comment", "留下评论");
+		m.put("Login name or email", "登录名或电子邮件");
+		m.put("Malformed email address", "格式错误的电子邮件地址");
+		m.put("Passcode", "Passcode");
+		m.put("Password and its confirmation should be identical.", "密码和其确认应相同。");
+		m.put("Please confirm the password.", "请确认密码。");
+		m.put("Primary email address will be used to receive notifications, show gravatar (if enabled) etc.", 
+			"主电子邮件地址将用于接收通知、显示 Gravatar（如果启用）等。");
+		m.put("Resend Verification Email", "重新发送验证电子邮件");
+		m.put("Search for", "搜索");
+		m.put("Search is too general", "搜索过于笼统");
+		m.put("Set As Primary", "设置为主");
+		m.put("Some one changed the content you are editing. Reload the page and try again.", "有人修改了您正在编辑的内容。重新加载页面并重试。");
+		m.put("Symbol name", "符号名称");
+		m.put("There are merge conflicts. You can still create the pull request though", "有合并冲突。您仍然可以创建拉取请求");
+		m.put("This email address is being used", "此电子邮件地址正在使用");
+		m.put("This field is required", "此字段是必填的");
+		m.put("Unable to send verification email as mail service is not configured yet", "无法发送验证电子邮件，因为邮件服务未配置");
+		m.put("Unverified email address is <b>NOT</b> applicable for above functionalities", "未验证的电子邮件地址不适用于上述功能");
+		m.put("Use For Git Operations", "用于 Git 操作");
+		m.put("Verification email sent, please check it", "验证电子邮件已发送，请检查");
+		m.put("When determine if the user is author/committer of a git commit, all emails listed here will be checked", 
+			"确定用户是否是 git 提交的作者/提交者时，将检查此处列出的所有电子邮件");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");

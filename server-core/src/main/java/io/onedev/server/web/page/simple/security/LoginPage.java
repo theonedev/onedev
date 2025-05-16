@@ -262,7 +262,7 @@ public class LoginPage extends SimplePage {
 				LoginPage.this.passcode = object;
 			}
 			
-		}).setLabel(Model.of("Passcode")).setRequired(true).add(AttributeAppender.append("placeholder", _T("6-digits passcode"))));
+		}).setLabel(Model.of(_T("Passcode"))).setRequired(true).add(AttributeAppender.append("placeholder", _T("6-digits passcode"))));
 		
 		fragment.add(form);
 
@@ -312,7 +312,7 @@ public class LoginPage extends SimplePage {
 				LoginPage.this.recoveryCode = object;
 			}
 			
-		}).setLabel(Model.of("Recovery code")).setRequired(true).add(AttributeAppender.append("placeholder", _T("Recovery code"))));
+		}).setLabel(Model.of(_T("Recovery code"))).setRequired(true).add(AttributeAppender.append("placeholder", _T("Recovery code"))));
 		
 		fragment.add(form);
 		replace(fragment);

@@ -49,7 +49,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.collection.internal.PersistentBag;
 import org.hibernate.type.Type;
-import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.matcher.AbstractMatcher;
@@ -366,6 +365,7 @@ import io.onedev.server.util.xstream.ReflectionConverter;
 import io.onedev.server.util.xstream.StringConverter;
 import io.onedev.server.util.xstream.VersionedDocumentConverter;
 import io.onedev.server.validation.ValidatorProvider;
+import io.onedev.server.validation.MessageInterpolator;
 import io.onedev.server.web.DefaultUrlManager;
 import io.onedev.server.web.DefaultWicketFilter;
 import io.onedev.server.web.DefaultWicketServlet;
@@ -427,7 +427,7 @@ public class CoreModule extends AbstractPluginModule {
 			Configuration<?> configuration = Validation
 					.byDefaultProvider()
 					.configure()
-					.messageInterpolator(new ParameterMessageInterpolator());
+					.messageInterpolator(new MessageInterpolator());
 			return configuration.buildValidatorFactory();
 		}).in(Singleton.class);
 		

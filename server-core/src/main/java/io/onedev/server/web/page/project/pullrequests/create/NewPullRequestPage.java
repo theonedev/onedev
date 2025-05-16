@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.pullrequests.create;
 
 import static io.onedev.server.search.commit.Revision.Type.COMMIT;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -695,7 +696,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			}
 			
 		});
-		titleInput.setRequired(true).setLabel(Model.of("Title"));
+		titleInput.setRequired(true).setLabel(Model.of(_T("Title")));
 		
 		form.add(new FencedFeedbackPanel("titleFeedback", titleInput));
 		
@@ -748,7 +749,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		};
 		descriptionInput.add(validatable -> {
 			if (validatable.getValue().length() > PullRequest.MAX_DESCRIPTION_LEN) {
-				validatable.error(messageSource -> "Description too long");
+				validatable.error(messageSource -> _T("Description too long"));
 			}
 		});
 		
@@ -871,15 +872,15 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				request.setMergePreview(mergePreview);
 				
 				if (merged != null) {
-					String html = String.format("<svg class='icon mt-n1 mr-1'><use xlink:href='%s'/></svg> Able to merge without conflicts", 
-							SpriteImage.getVersionedHref("tick-circle-o"));
+					String html = String.format("<svg class='icon mt-n1 mr-1'><use xlink:href='%s'/></svg> ", SpriteImage.getVersionedHref("tick-circle-o")) 
+							+ _T("Able to merge without conflicts");
 					Component result = new Label(componentId, html);
 					result.add(AttributeAppender.append("class", "no-conflict"));
 					result.setEscapeModelStrings(false);
 					return result;
 				} else { 
-					String html = String.format("<svg class='icon mt-n1 mr-1'><use xlink:href='%s'/></svg> There are merge conflicts. "
-							+ "You can still create the pull request though", SpriteImage.getVersionedHref("warning-o"));
+					String html = String.format("<svg class='icon mt-n1 mr-1'><use xlink:href='%s'/></svg> ", SpriteImage.getVersionedHref("warning-o")) 
+							+ _T("There are merge conflicts. You can still create the pull request though");
 					Component result = new Label(componentId, html);
 					result.add(AttributeAppender.append("class", "conflict"));
 					result.setEscapeModelStrings(false);
@@ -889,8 +890,8 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 
 			@Override
 			public Component getLoadingComponent(String markupId) {
-				String html = String.format("<svg class='icon spin mt-n1 mr-1'><use xlink:href='%s'/></svg> Calculating merge preview...", 
-						SpriteImage.getVersionedHref("loading"));
+				String html = String.format("<svg class='icon spin mt-n1 mr-1'><use xlink:href='%s'/></svg> ", SpriteImage.getVersionedHref("loading")) 
+						+ _T("Calculating merge preview...");
 				Component component = new Label(markupId, html);
 				component.add(AttributeAppender.append("class", "calculating"));
 				component.setEscapeModelStrings(false);
@@ -1073,7 +1074,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "<span class='text-nowrap'>Create Pull Request</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-nowrap'>" + _T("Create Pull Request") + "</span>").setEscapeModelStrings(false);
 	}
 	
 	@Override

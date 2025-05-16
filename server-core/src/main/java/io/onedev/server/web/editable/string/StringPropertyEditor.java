@@ -15,6 +15,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.lang.reflect.Method;
 
 public class StringPropertyEditor extends PropertyEditor<String> {
@@ -54,8 +56,8 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 			fragment.add(input = new TextField<String>("input", Model.of(getModelObject())));
 			input.setType(getDescriptor().getPropertyClass());
 			add(fragment);
-			}
-		input.setLabel(Model.of(getDescriptor().getDisplayName()));		
+		}
+		input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));		
 		
 		if (inputAssist != null) {
 			input.add(inputAssist);

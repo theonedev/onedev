@@ -1,9 +1,75 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
+import static io.onedev.server.model.PullRequest.PROP_CLOSE_DAY;
+import static io.onedev.server.model.PullRequest.PROP_CLOSE_MONTH;
+import static io.onedev.server.model.PullRequest.PROP_CLOSE_WEEK;
+import static io.onedev.server.model.PullRequest.PROP_COMMENT_COUNT;
+import static io.onedev.server.model.PullRequest.PROP_CONFUSED_COUNT;
+import static io.onedev.server.model.PullRequest.PROP_EYES_COUNT;
+import static io.onedev.server.model.PullRequest.PROP_HEART_COUNT;
+import static io.onedev.server.model.PullRequest.PROP_ROCKET_COUNT;
+import static io.onedev.server.model.PullRequest.PROP_SMILE_COUNT;
+import static io.onedev.server.model.PullRequest.PROP_STATUS;
+import static io.onedev.server.model.PullRequest.PROP_SUBMIT_DATE;
+import static io.onedev.server.model.PullRequest.PROP_SUBMIT_DAY;
+import static io.onedev.server.model.PullRequest.PROP_SUBMIT_MONTH;
+import static io.onedev.server.model.PullRequest.PROP_SUBMIT_WEEK;
+import static io.onedev.server.model.PullRequest.PROP_TADA_COUNT;
+import static io.onedev.server.model.PullRequest.PROP_THUMBS_DOWN_COUNT;
+import static io.onedev.server.model.PullRequest.PROP_THUMBS_UP_COUNT;
+import static io.onedev.server.model.PullRequest.PROP_TITLE;
+import static io.onedev.server.model.PullRequest.PROP_UUID;
+import static io.onedev.server.model.support.TimeGroups.PROP_DAY;
+import static io.onedev.server.model.support.TimeGroups.PROP_MONTH;
+import static io.onedev.server.model.support.TimeGroups.PROP_WEEK;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
+import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
+import static java.lang.ThreadLocal.withInitial;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Stack;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.annotations.DynamicUpdate;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import io.onedev.commons.utils.WordUtils;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -13,7 +79,11 @@ import io.onedev.server.entityreference.PullRequestReference;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.CommitMessageError;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.model.support.*;
+import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.model.support.LabelSupport;
+import io.onedev.server.model.support.LastActivity;
+import io.onedev.server.model.support.ProjectBelonging;
+import io.onedev.server.model.support.TimeGroups;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.BuildRequirement;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
@@ -26,24 +96,9 @@ import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.util.PullRequestAware;
+import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.xodus.VisitInfoManager;
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.hibernate.annotations.DynamicUpdate;
-
-import javax.annotation.Nullable;
-import javax.persistence.*;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
-import static io.onedev.server.model.PullRequest.*;
-import static io.onedev.server.model.support.TimeGroups.*;
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.*;
-import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
-import static java.lang.ThreadLocal.withInitial;
 
 @Entity
 @Table(
@@ -224,7 +279,7 @@ public class PullRequest extends ProjectBelonging
 		
 		@Override
 		public String toString() {
-			return WordUtils.toWords(name());
+			return TextUtils.getDisplayValue(this);
 		}
 		
 	}

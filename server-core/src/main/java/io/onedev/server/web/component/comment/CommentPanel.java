@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.comment;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -153,7 +155,7 @@ public abstract class CommentPanel extends Panel {
 							editor.replaceWith(viewer);
 							target.add(viewer);
 						} catch (StaleStateException e) {
-							warn("Some one changed the content you are editing. Reload the page and try again.");
+							warn(_T("Some one changed the content you are editing. Reload the page and try again."));
 							target.add(feedback);
 						} catch (ExplicitException e) {
 							error(e.getMessage());

@@ -4,6 +4,9 @@ import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -43,7 +46,7 @@ public class SecretPropertyEditor extends PropertyEditor<String> {
 		
 		input2 = new TextArea<>("input2", Model.of(getModelObject()));
 		input2.setRequired(false);
-		input2.setLabel(Model.of(getDescriptor().getDisplayName()));
+		input2.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
 		input2.add(new OnTypingDoneBehavior() {
 
 			@Override

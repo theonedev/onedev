@@ -30,6 +30,9 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,7 +76,7 @@ public class PasswordResetPage extends SimplePage {
 					loginNameOrEmail = object;
 				}
 
-			}).setLabel(Model.of("Login name or email")).setRequired(true));
+			}).setLabel(Model.of(_T("Login name or email"))).setRequired(true));
 
 			form.add(new TaskButton("resettingPassword") {
 

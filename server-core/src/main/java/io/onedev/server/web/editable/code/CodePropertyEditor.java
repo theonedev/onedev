@@ -32,6 +32,8 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.convert.ConversionException;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +60,7 @@ public class CodePropertyEditor extends PropertyEditor<Serializable> {
 		else
 			container.add(input = new TextArea<String>("input", Model.of(StringUtils.join((List<?>)getModelObject(), "\n"))));
 		
-		input.setLabel(Model.of(getDescriptor().getDisplayName()));		
+		input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));		
 		input.setOutputMarkupId(true);
 
 		input.add(new OnTypingDoneBehavior() {

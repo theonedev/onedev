@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.issue.create;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -111,7 +113,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 				FieldUtils.getEditableFields(getProject(), fieldNames)));
 		
 		titleInput = new TextField<>("title", Model.of("")); 
-		titleInput.setRequired(true).setLabel(Model.of("Title"));
+		titleInput.setRequired(true).setLabel(Model.of(_T("Title")));
 		add(titleInput);
 		add(new FencedFeedbackPanel("titleFeedback", titleInput));
 		

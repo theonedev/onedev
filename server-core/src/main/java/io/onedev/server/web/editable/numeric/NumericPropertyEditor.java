@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.numeric;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
@@ -25,7 +27,7 @@ public class NumericPropertyEditor extends PropertyEditor<Number> {
 		input = new TextField<Number>("input", Model.of(getModelObject()));
 		input.setType(getDescriptor().getPropertyClass());
 		add(input);
-		input.setLabel(Model.of(getDescriptor().getDisplayName()));
+		input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
 		
 		input.add(new OnTypingDoneBehavior() {
 

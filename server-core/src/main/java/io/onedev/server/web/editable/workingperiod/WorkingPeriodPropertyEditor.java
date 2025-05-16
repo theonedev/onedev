@@ -13,6 +13,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.validation.ValidationException;
 
 public class WorkingPeriodPropertyEditor extends PropertyEditor<Integer> {
@@ -34,7 +36,7 @@ public class WorkingPeriodPropertyEditor extends PropertyEditor<Integer> {
 			period = null;
 		input = new TextField<>("input", Model.of(period));
 		add(input);
-		input.setLabel(Model.of(getDescriptor().getDisplayName()));
+		input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
 		
 		input.add(new OnTypingDoneBehavior() {
 

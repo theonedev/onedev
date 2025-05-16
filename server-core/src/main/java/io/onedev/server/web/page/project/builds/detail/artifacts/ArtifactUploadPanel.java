@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.builds.detail.artifacts;
 
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -84,7 +85,7 @@ public abstract class ArtifactUploadPanel extends Panel {
 				"files", 
 				new PropertyModel<String>(this, "uploadId"), 
 				null, 0, maxUploadFileSize);
-		dropzone.setRequired(true).setLabel(Model.of("File"));
+		dropzone.setRequired(true).setLabel(Model.of(_T("File")));
 		form.add(dropzone);
 		
 		form.add(new AjaxButton("upload") {
@@ -101,7 +102,7 @@ public abstract class ArtifactUploadPanel extends Panel {
 				super.onSubmit(target, form);
 				
 				if (directory != null && directory.contains("..")) {
-					error("'..' is not allowed in the directory");
+					error(_T("'..' is not allowed in the directory"));
 					target.add(feedback);
 				} else {
 					ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);

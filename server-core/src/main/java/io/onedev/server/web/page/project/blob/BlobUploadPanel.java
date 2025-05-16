@@ -7,6 +7,9 @@ import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.upload.UploadManager;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -65,7 +68,7 @@ public abstract class BlobUploadPanel extends Panel {
 				"files", 
 				new PropertyModel<String>(this, "uploadId"), 
 				null, 0, maxUploadFileSize);
-		dropzone.setRequired(true).setLabel(Model.of("File"));
+		dropzone.setRequired(true).setLabel(Model.of(_T("File")));
 		form.add(dropzone);
 		
 		form.add(new AjaxButton("upload") {
@@ -76,7 +79,7 @@ public abstract class BlobUploadPanel extends Panel {
 
 				String commitMessage = BlobUploadPanel.this.commitMessage;
 				if (StringUtils.isBlank(commitMessage))
-					commitMessage = "Add files via upload";
+					commitMessage = _T("Add files via upload");
 				
 				var upload = getUploadManager().getUpload(uploadId);
 				try {

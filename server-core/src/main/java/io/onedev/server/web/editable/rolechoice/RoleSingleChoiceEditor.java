@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.rolechoice;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -65,7 +67,7 @@ public class RoleSingleChoiceEditor extends PropertyEditor<String> {
     		
     	};
 
-        input.setLabel(Model.of(getDescriptor().getDisplayName()));
+        input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 
 			@Override

@@ -67,7 +67,6 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Markdown;
@@ -103,6 +102,7 @@ import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.util.BuildAware;
+import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.WicketUtils;
 
 @Entity
@@ -317,7 +317,7 @@ public class Build extends ProjectBelonging
 		
 		@Override
 		public String toString() {
-			return WordUtils.toWords(name());
+			return TextUtils.getDisplayValue(this);
 		}
 		
 		public abstract boolean isFinished();

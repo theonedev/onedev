@@ -107,6 +107,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -870,7 +871,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 								});
 								contentInput.setRequired(true);
-								contentInput.setLabel(Model.of("Comment"));
+								contentInput.setLabel(Model.of(_T("Comment")));
 
 								FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form);
 								feedback.setOutputMarkupPlaceholderTag(true);
@@ -2083,7 +2084,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 						});
 						contentInput.setRequired(true);
-						contentInput.setLabel(Model.of("Comment"));
+						contentInput.setLabel(Model.of(_T("Comment")));
 
 						FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form);
 						feedback.setOutputMarkupPlaceholderTag(true);

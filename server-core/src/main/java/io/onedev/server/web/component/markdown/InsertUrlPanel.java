@@ -63,6 +63,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 abstract class InsertUrlPanel extends Panel {
@@ -418,7 +419,7 @@ abstract class InsertUrlPanel extends Panel {
 			if (maxFilesize <= 0)
 				maxFilesize = 1;
 			form.add(new DropzoneField("file", model, acceptedFiles, 1, maxFilesize)
-					.setRequired(true).setLabel(Model.of("Attachment")));
+					.setRequired(true).setLabel(Model.of(_T("Attachment"))));
 			
 			form.add(new AjaxButton("insert"){});
 			form.add(new AjaxLink<Void>("cancel") {
@@ -441,7 +442,7 @@ abstract class InsertUrlPanel extends Panel {
 			form.add(feedback);
 			
 			form.add(new DropzoneField("file", model, acceptedFiles, 1, maxUploadFileSize)
-					.setRequired(true).setLabel(Model.of("Attachment")));
+					.setRequired(true).setLabel(Model.of(_T("Attachment"))));
 
 			form.add(new TextField<String>("directory", new IModel<String>() {
 

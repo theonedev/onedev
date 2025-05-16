@@ -27,6 +27,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
+import static io.onedev.server.web.translation.Translation._T;
 
 public abstract class IssueEditableTitlePanel extends Panel {
 
@@ -62,7 +63,7 @@ public abstract class IssueEditableTitlePanel extends Panel {
 			
 		});
 		titleInput.setRequired(true);
-		titleInput.setLabel(Model.of("Title"));
+		titleInput.setLabel(Model.of(_T("Title")));
 		
 		form.add(titleInput);
 		

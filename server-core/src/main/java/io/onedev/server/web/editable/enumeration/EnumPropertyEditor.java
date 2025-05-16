@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.enumeration;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -96,7 +98,7 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 			});
 		}
 		
-        input.setLabel(Model.of(getDescriptor().getDisplayName()));
+        input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
 		
 		if (radioChoice) {
 			input.add(new AjaxFormChoiceComponentUpdatingBehavior() {

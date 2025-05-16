@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.issue.activities;
 
 import static io.onedev.server.security.SecurityUtils.canAccessTimeTracking;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -246,7 +247,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 				
 				@Override
 				protected List<Behavior> getInputBehaviors() {
-					return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
+					return Lists.newArrayList(AttributeModifier.replace("placeholder", _T("Leave a comment")));
 				}
 
 				@Override
@@ -255,7 +256,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 				}
 			};
 			input.setOutputMarkupId(true);
-			input.setRequired(true).setLabel(Model.of("Comment"));
+			input.setRequired(true).setLabel(Model.of(_T("Comment")));
 			
 			Form<?> form = new Form<Void>("form");
 			form.add(new FencedFeedbackPanel("feedback", form));
@@ -267,7 +268,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 					super.onSubmit(target, form);
 					String content = input.getModelObject();
 					if (content.length() > IssueComment.MAX_CONTENT_LEN) {
-						error("Comment too long");
+						error(_T("Comment too long"));
 						target.add(form);
 					} else {
 						IssueComment comment = new IssueComment();

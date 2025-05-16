@@ -15,6 +15,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.annotation.Nullable;
 
 public class BuildSingleChoiceEditor extends PropertyEditor<Long> {
@@ -63,7 +65,7 @@ public class BuildSingleChoiceEditor extends PropertyEditor<Long> {
     		
     	};
         
-        input.setLabel(Model.of(getDescriptor().getDisplayName()));
+        input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 

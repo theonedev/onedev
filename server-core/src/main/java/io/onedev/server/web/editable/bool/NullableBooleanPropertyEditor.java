@@ -64,7 +64,7 @@ public class NullableBooleanPropertyEditor extends PropertyEditor<Boolean> {
 			}
 
 		};
-		input.setLabel(Model.of(getDescriptor().getDisplayName()));
+		input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
 
 		input.add(new AjaxFormComponentUpdatingBehavior("change") {
 

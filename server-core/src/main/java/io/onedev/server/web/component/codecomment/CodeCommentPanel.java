@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.codecomment;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -202,7 +204,7 @@ public abstract class CodeCommentPanel extends Panel {
 				};
 				form.add(contentInput);
 				contentInput.setRequired(true);
-				contentInput.setLabel(Model.of("Comment"));
+				contentInput.setLabel(Model.of(_T("Comment")));
 				
 				FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
@@ -589,7 +591,7 @@ public abstract class CodeCommentPanel extends Panel {
 			
 		};
 		contentInput.setRequired(resolved == null);
-		contentInput.setLabel(Model.of("Content"));
+		contentInput.setLabel(Model.of(_T("Content")));
 		form.add(contentInput);
 		
 		FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form); 
@@ -879,7 +881,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 					};
 					contentInput.setRequired(true);
-					contentInput.setLabel(Model.of("Comment"));
+					contentInput.setLabel(Model.of(_T("Content")));
 					form.add(contentInput);
 					
 					FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form); 

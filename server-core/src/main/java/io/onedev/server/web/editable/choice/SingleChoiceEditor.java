@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.choice;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,7 +114,7 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 			}
 			
 		};
-        input.setLabel(Model.of(getDescriptor().getDisplayName()));
+        input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
 
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 

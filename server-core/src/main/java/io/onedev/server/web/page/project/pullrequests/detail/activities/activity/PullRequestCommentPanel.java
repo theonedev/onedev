@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -116,7 +118,7 @@ class PullRequestCommentPanel extends Panel {
 
 			@Override
 			protected String getRequiredLabel() {
-				return "Comment";
+				return _T("Comment");
 			}
 
 			@Override

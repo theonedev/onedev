@@ -14,6 +14,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.validation.IValidationError;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -41,7 +43,7 @@ public class TextQueryOptionEditor extends FormComponentPanel<TextQueryOption> {
 		WebMarkupContainer termContainer = new WebMarkupContainer("term");
 		add(termContainer);
 		term = new TextField<>("term", Model.of(option.getTerm()));
-		term.setRequired(true).setLabel(Model.of("Search for"));
+		term.setRequired(true).setLabel(Model.of(_T("Search for")));
 		term.add(validatable -> {
 			boolean regex = this.regex.getInput() != null;
 			try {
@@ -53,9 +55,9 @@ public class TextQueryOptionEditor extends FormComponentPanel<TextQueryOption> {
 						.build()
 						.asLuceneQuery();
 			} catch (PatternSyntaxException e) {
-				validatable.error((IValidationError) messageSource -> "Invalid PCRE syntax");
+				validatable.error((IValidationError) messageSource -> _T("Invalid PCRE syntax"));
 			} catch (TooGeneralQueryException e) {
-				validatable.error((IValidationError) messageSource -> "Search is too general");
+				validatable.error((IValidationError) messageSource -> _T("Search is too general"));
 			}
 		});
 

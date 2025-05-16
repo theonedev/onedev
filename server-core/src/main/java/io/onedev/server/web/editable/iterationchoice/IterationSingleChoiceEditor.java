@@ -15,6 +15,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,7 +70,7 @@ public class IterationSingleChoiceEditor extends PropertyEditor<String> {
     		
     	};
         
-        input.setLabel(Model.of(getDescriptor().getDisplayName()));
+        input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 

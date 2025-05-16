@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.agentquery;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.FormComponent;
@@ -34,7 +36,7 @@ public class AgentQueryEditPanel extends PropertyEditor<String> {
 		
 		add(input = new TextField<String>("input", Model.of(getModelObject())));
 		input.setType(getDescriptor().getPropertyClass());
-		input.setLabel(Model.of(getDescriptor().getDisplayName()));		
+		input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));		
 		
 		input.add(new AgentQueryBehavior(forExecutor));
 		

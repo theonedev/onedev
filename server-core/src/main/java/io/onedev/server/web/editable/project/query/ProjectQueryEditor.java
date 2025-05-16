@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.project.query;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
@@ -26,7 +28,7 @@ public class ProjectQueryEditor extends PropertyEditor<String> {
     	input = new TextField<String>("input", getModel());
         input.add(new ProjectQueryBehavior(false));
         
-		input.setLabel(Model.of(getDescriptor().getDisplayName()));
+		input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
         
         add(input);
 		input.add(new OnTypingDoneBehavior() {

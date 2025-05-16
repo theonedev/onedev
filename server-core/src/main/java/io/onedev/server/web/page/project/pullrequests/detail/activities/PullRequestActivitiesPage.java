@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -258,7 +260,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				}
 				
 			};
-			input.setRequired(true).setLabel(Model.of("Comment"));
+			input.setRequired(true).setLabel(Model.of(_T("Comment")));
 			form.add(input);
 			
 			form.add(new FencedFeedbackPanel("feedback", form));
@@ -271,7 +273,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 
 					String content = input.getModelObject();
 					if (content.length() > PullRequestComment.MAX_CONTENT_LEN) {
-						form.error("Comment too long");
+						form.error(_T("Comment too long"));
 						target.add(form);
 					} else {
 						PullRequestComment comment = new PullRequestComment();

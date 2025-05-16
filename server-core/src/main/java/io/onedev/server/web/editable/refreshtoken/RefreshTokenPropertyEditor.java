@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.refreshtoken;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -62,7 +64,7 @@ public class RefreshTokenPropertyEditor extends PropertyEditor<String> {
 		input = new PasswordTextField("input", Model.of(getModelObject()));
 		input.setRequired(true);
 		input.setResetPassword(false);
-		input.setLabel(Model.of(getDescriptor().getDisplayName()));
+		input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
 		add(input);
 
 		input.add(new OnTypingDoneBehavior() {

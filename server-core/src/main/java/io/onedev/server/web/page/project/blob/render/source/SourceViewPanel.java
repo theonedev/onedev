@@ -522,7 +522,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 						}
 						
 					});
-					contentInput.setRequired(true).setLabel(Model.of("Comment"));
+					contentInput.setRequired(true).setLabel(Model.of(_T("Comment")));
 					
 					FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form); 
 					feedback.setOutputMarkupPlaceholderTag(true);

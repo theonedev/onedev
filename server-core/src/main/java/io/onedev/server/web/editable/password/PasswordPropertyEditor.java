@@ -5,6 +5,9 @@ import io.onedev.server.annotation.Password;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.PasswordTextField;
@@ -27,7 +30,7 @@ public class PasswordPropertyEditor extends PropertyEditor<String> {
 		input = new PasswordTextField("input", Model.of(getModelObject()));
 		input.setRequired(false);
 		input.setResetPassword(false);
-		input.setLabel(Model.of(getDescriptor().getDisplayName()));
+		input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
 		add(input);
 
 		Password password = getDescriptor().getPropertyGetter().getAnnotation(Password.class);

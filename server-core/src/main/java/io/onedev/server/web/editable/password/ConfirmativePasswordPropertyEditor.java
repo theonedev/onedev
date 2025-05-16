@@ -33,14 +33,14 @@ public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 		input = new PasswordTextField("input", Model.of(getModelObject()));
 		input.setResetPassword(true);
 		input.setRequired(false);
-		input.setLabel(Model.of(getDescriptor().getDisplayName()));
+		input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
 		input.add(AttributeModifier.replace("placeholder", _T("Type password here")));
 		add(input);
 		
 		inputAgain = new PasswordTextField("inputAgain", Model.of(getModelObject()));
 		inputAgain.setResetPassword(true);
 		inputAgain.setRequired(false);
-		inputAgain.setLabel(Model.of(getDescriptor().getDisplayName()));
+		inputAgain.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
 		inputAgain.add(AttributeModifier.replace("placeholder", _T("Confirm password here")));
 		add(inputAgain);
 		
@@ -72,13 +72,13 @@ public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 	protected String convertInputToValue() throws ConversionException {
 		if (input.getConvertedInput() != null) {
 			if (inputAgain.getConvertedInput() == null)
-				throw new ConversionException("Please confirm the password.");
+				throw new ConversionException(_T("Please confirm the password."));
 			else if (!input.getConvertedInput().equals(inputAgain.getConvertedInput()))
-				throw new ConversionException("Password and its confirmation should be identical.");
+				throw new ConversionException(_T("Password and its confirmation should be identical."));
 			else
 				return input.getConvertedInput();
 		} else if (inputAgain.getConvertedInput() != null) {
-			throw new ConversionException("Password and its confirmation should be identical.");
+			throw new ConversionException(_T("Password and its confirmation should be identical."));
 		} else {
 			return input.getConvertedInput();
 		}

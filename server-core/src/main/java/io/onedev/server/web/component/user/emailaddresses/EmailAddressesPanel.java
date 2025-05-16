@@ -1,17 +1,12 @@
 package io.onedev.server.web.component.user.emailaddresses;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.component.EmailAddressVerificationStatusBadge;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.page.my.MyPage;
-import io.onedev.server.web.util.ConfirmClickModifier;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -31,9 +26,17 @@ import org.apache.wicket.validation.IErrorMessageSource;
 import org.apache.wicket.validation.IValidationError;
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.component.EmailAddressVerificationStatusBadge;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.util.ConfirmClickModifier;
 
 public class EmailAddressesPanel extends GenericPanel<User> {
 
@@ -46,12 +49,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		if (getPage() instanceof MyPage)
-			add(new Label("who", "you are "));
-		else
-			add(new Label("who", "this user is "));
-		
+				
 		add(new ListView<EmailAddress>("emailAddresses", new AbstractReadOnlyModel<List<EmailAddress>>() {
 
 			@Override
@@ -85,7 +83,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 								@Override
 								public String getLabel() {
-									return "Set As Primary";
+									return _T("Set As Primary");
 								}
 
 								@Override
@@ -107,7 +105,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 								@Override
 								public String getLabel() {
-									return "Use For Git Operations";
+									return _T("Use For Git Operations");
 								}
 
 								@Override
@@ -129,7 +127,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 								@Override
 								public String getLabel() {
-									return "Resend Verification Email";
+									return _T("Resend Verification Email");
 								}
 
 								@Override
@@ -140,10 +138,10 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 										public void onClick(AjaxRequestTarget target) {
 											if (OneDev.getInstance(SettingManager.class).getMailService() != null) {
 												getEmailAddressManager().sendVerificationEmail(item.getModelObject());
-												Session.get().success("Verification email sent, please check it");
+												Session.get().success(_T("Verification email sent, please check it"));
 											} else {
 												target.appendJavaScript(String.format("alert('%s');", 
-														"Unable to send verification email as mail service is not configured yet"));
+														_T("Unable to send verification email as mail service is not configured yet")));
 											}
 											dropdown.close();
 										}
@@ -170,12 +168,12 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 										if (hasMultipleEmailAddresses)
 											getEmailAddressManager().delete(getEmailAddressManager().load(emailAddressId));
 										else 
-											Session.get().warn("At least one email address should be configured, please add a new one first");
+											Session.get().warn(_T("At least one email address should be configured, please add a new one first"));
 									}
 
 								};
 								if (getUser().getEmailAddresses().size() > 1)
-									link.add(new ConfirmClickModifier("Do you really want to delete this email address?"));
+									link.add(new ConfirmClickModifier(_T("Do you really want to delete this email address?")));
 								return link;
 							}
 							
@@ -201,7 +199,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 				super.onSubmit();
 				
 				if (getEmailAddressManager().findByValue(emailAddressValue) != null) {
-					error("This email address is being used");
+					error(_T("This email address is being used"));
 				} else {
 					EmailAddress address = new EmailAddress();
 					address.setValue(emailAddressValue);
@@ -231,7 +229,8 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 			}
 
 		});
-		input.setLabel(Model.of("Email address"));
+		input.add(AttributeModifier.append("placeholder", _T("Email address")));
+		input.setLabel(Model.of(_T("Email address")));
 		input.setRequired(true);
 		input.add(validatable -> {
 			String emailAddress = validatable.getValue();
@@ -240,7 +239,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 					@Override
 					public Serializable getErrorMessage(IErrorMessageSource messageSource) {
-						return "Malformed email address";
+						return _T("Malformed email address");
 					}
 
 				});
