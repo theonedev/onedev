@@ -1043,8 +1043,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		query.where(getPredicates(projectQuery.getCriteria(), query, root, builder));
 
 		List<Order> orders = new ArrayList<>();
-		if (projectQuery.getCriteria() != null)
-			orders.addAll(projectQuery.getCriteria().getPreferOrders(builder, root));
 
 		for (EntitySort sort : projectQuery.getSorts()) {
 			if (sort.getDirection() == ASCENDING)
@@ -1052,6 +1050,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			else
 				orders.add(builder.desc(ProjectQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 		}
+
+		if (projectQuery.getCriteria() != null)
+			orders.addAll(projectQuery.getCriteria().getPreferOrders(builder, root));
 
 		var found = false;
 		for (var order: orders) {

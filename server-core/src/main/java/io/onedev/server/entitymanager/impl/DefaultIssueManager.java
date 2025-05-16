@@ -273,7 +273,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public List<javax.persistence.criteria.Order> buildOrders(List<EntitySort> sorts, CriteriaBuilder builder, 
 															  From<Issue, Issue> issue, 
 															  List<javax.persistence.criteria.Order> preferOrders) {
-		List<javax.persistence.criteria.Order> orders = new ArrayList<>(preferOrders);
+		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: sorts) {
 			if (Issue.SORT_FIELDS.containsKey(sort.getField())) {
 				if (sort.getDirection() == Direction.ASCENDING)
@@ -290,6 +290,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			}
 		}
 
+		orders.addAll(preferOrders);
+				
 		var found = false;
 		for (var order: orders) {
 			if (order.getExpression() instanceof SingularAttributePath) {

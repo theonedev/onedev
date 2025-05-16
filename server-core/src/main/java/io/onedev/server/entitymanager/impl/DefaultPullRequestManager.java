@@ -908,8 +908,6 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		query.where(getPredicates(targetProject, requestQuery.getCriteria(), query, root, builder));
 
 		List<Order> orders = new ArrayList<>();
-		if (requestQuery.getCriteria() != null)
-			orders.addAll(requestQuery.getCriteria().getPreferOrders(builder, root));
 		for (EntitySort sort: requestQuery.getSorts()) {
 			if (sort.getDirection() == Direction.ASCENDING) {
 				orders.add(builder.asc(PullRequestQuery.getPath(
@@ -919,6 +917,9 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 						root, PullRequest.SORT_FIELDS.get(sort.getField()).getProperty())));
 			}
 		}
+
+		if (requestQuery.getCriteria() != null)
+			orders.addAll(requestQuery.getCriteria().getPreferOrders(builder, root));
 
 		var found = false;
 		for (var order: orders) {

@@ -1,7 +1,5 @@
 package io.onedev.server.web.page.project.issues.detail;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
@@ -20,15 +18,10 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.IRequestHandler;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.cycle.IRequestCycleListener;
+import org.apache.wicket.request.cycle.AbstractRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
@@ -44,18 +37,15 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
-import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.primary.IssuePrimaryPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
+import io.onedev.server.web.component.issue.tabs.IssueTabsPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
-import io.onedev.server.web.component.tabbable.PageTab;
-import io.onedev.server.web.component.tabbable.Tab;
-import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
@@ -65,7 +55,7 @@ import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 import io.onedev.server.xodus.VisitInfoManager;
 
-public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext {
+public class IssueDetailPage extends ProjectIssuesPage implements InputContext {
 
 	public static final String PARAM_ISSUE = "issue";
 	
@@ -151,53 +141,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			}
 		});
 		
-		add(new Tabbable("issueTabs", new LoadableDetachableModel<>() {
-			@Override
-			protected List<? extends Tab> load() {
-				List<Tab> tabs = new ArrayList<>();
-				tabs.add(new PageTab(Model.of("Activities"), IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue())) {
-
-					@Override
-					protected Component renderOptions(String componentId) {
-						IssueActivitiesPage page = (IssueActivitiesPage) getPage();
-						return page.renderOptions(componentId);
-					}
-
-				});
-
-				if (!getIssue().getFixCommits(false).isEmpty()) {
-					if (SecurityUtils.canReadCode(getProject())) {
-						tabs.add(new PageTab(Model.of("Fixing Commits"), IssueCommitsPage.class, IssueCommitsPage.paramsOf(getIssue())));
-						if (!getIssue().getPullRequests().isEmpty())
-							tabs.add(new PageTab(Model.of("Pull Requests"), IssuePullRequestsPage.class, IssuePullRequestsPage.paramsOf(getIssue())));
-					}
-					// Do not calculate fix builds now as it might be slow
-					tabs.add(new PageTab(Model.of("Fixing Builds"), IssueBuildsPage.class, IssueBuildsPage.paramsOf(getIssue())));
-				}
-
-				if (getIssue().isConfidential() && SecurityUtils.canModifyIssue(getIssue()))
-					tabs.add(new PageTab(Model.of("Authorizations"), IssueAuthorizationsPage.class, IssueAuthorizationsPage.paramsOf(getIssue())));
-
-				return tabs;
-			}
-
-		}) {
-			@Override
-			public void onInitialize() {
-				super.onInitialize();
-				
-				add(new ChangeObserver() {
-
-					@Override
-					public Collection<String> findObservables() {
-						return Lists.newArrayList(Issue.getDetailChangeObservable(getIssue().getId()));
-					}
-
-				});
-				
-				setOutputMarkupId(true);
-			}
-		});
+		add(new IssueTabsPanel("issueTabs", issueModel));
 		
 		add(new SideInfoPanel("side") {
 
@@ -277,45 +221,12 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			
 		});
 		
-		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
-			
-			@Override
-			public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
-			}
-			
-			@Override
-			public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
-			}
-			
-			@Override
-			public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
-			}
-			
-			@Override
-			public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
-			}
-			
-			@Override
-			public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
-			}
-			
-			@Override
-			public IRequestHandler onException(RequestCycle cycle, Exception ex) {
-				return null;
-			}
+		RequestCycle.get().getListeners().add(new AbstractRequestCycleListener() {
 			
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				if (SecurityUtils.getAuthUser() != null) 
 					OneDev.getInstance(VisitInfoManager.class).visitIssue(SecurityUtils.getAuthUser(), getIssue());
-			}
-			
-			@Override
-			public void onDetach(RequestCycle cycle) {
-			}
-			
-			@Override
-			public void onBeginRequest(RequestCycle cycle) {
 			}
 			
 		});	

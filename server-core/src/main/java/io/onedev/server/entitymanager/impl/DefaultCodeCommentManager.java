@@ -278,14 +278,15 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 		query.where(getPredicates(project, commentQuery.getCriteria(), request, query, root, builder));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
-		if (commentQuery.getCriteria() != null)
-			orders.addAll(commentQuery.getCriteria().getPreferOrders(builder, root));
 		for (EntitySort sort: commentQuery.getSorts()) {
 			if (sort.getDirection() == ASCENDING)
 				orders.add(builder.asc(CodeCommentQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 			else
 				orders.add(builder.desc(CodeCommentQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 		}
+		
+		if (commentQuery.getCriteria() != null)
+			orders.addAll(commentQuery.getCriteria().getPreferOrders(builder, root));
 
 		var found = false;
 		for (var order: orders) {

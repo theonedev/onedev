@@ -32,7 +32,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAler
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 
@@ -106,7 +106,7 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 				super.onSubmit();
 				Issue issue = editor.getConvertedInput();
 				OneDev.getInstance(IssueManager.class).open(issue);
-				setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue));
+				setResponsePage(IssueDetailPage.class, IssueDetailPage.paramsOf(issue));
 			}
 			
 		};

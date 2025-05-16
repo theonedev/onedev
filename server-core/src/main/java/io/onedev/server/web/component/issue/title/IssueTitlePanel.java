@@ -1,13 +1,9 @@
 package io.onedev.server.web.component.issue.title;
 
-import io.onedev.server.entityreference.LinkTransformer;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.web.WebSession;
-import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.component.link.ActionablePageLink;
-import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.util.Cursor;
+import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
+
+import javax.annotation.Nullable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -18,9 +14,14 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import javax.annotation.Nullable;
-
-import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
+import io.onedev.server.entityreference.LinkTransformer;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.web.component.link.ActionablePageLink;
+import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
+import io.onedev.server.web.util.Cursor;
 
 public abstract class IssueTitlePanel extends Panel {
 
@@ -36,7 +37,7 @@ public abstract class IssueTitlePanel extends Panel {
 		var label = "(" + issue.getReference().toString(getCurrentProject()) + ")";
 		WebMarkupContainer numberLink;
 		add(numberLink = new ActionablePageLink("number", 
-				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue)) {
+				IssueDetailPage.class, IssueDetailPage.paramsOf(issue)) {
 
 			@Override
 			public IModel<?> getBody() {
@@ -53,8 +54,8 @@ public abstract class IssueTitlePanel extends Panel {
 			
 		});
 		
-		String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
-				IssueActivitiesPage.paramsOf(issue)).toString();
+		String url = RequestCycle.get().urlFor(IssueDetailPage.class, 
+				IssueDetailPage.paramsOf(issue)).toString();
 
 		var transformed = transformReferences(issue.getTitle(), issue.getProject(), new LinkTransformer(url));
 		transformed = Emojis.getInstance().apply(transformed);
