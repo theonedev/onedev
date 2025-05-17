@@ -18,7 +18,7 @@ import io.onedev.server.web.UrlManager;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
-import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
 public class ReferenceProcessor implements HtmlProcessor {
@@ -33,7 +33,7 @@ public class ReferenceProcessor implements HtmlProcessor {
 			if (reference instanceof IssueReference) {
 				String url;
 				if (RequestCycle.get() != null)
-					url = RequestCycle.get().urlFor(IssueDetailPage.class, IssueDetailPage.paramsOf(reference.getProject(), reference.getNumber())).toString();
+					url = RequestCycle.get().urlFor(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(reference.getProject(), reference.getNumber())).toString();
 				else
 					url = OneDev.getInstance(UrlManager.class).urlForIssue(reference.getProject(), reference.getNumber());
 				return String.format("<a href='%s' class='issue reference' data-reference='%s'>%s</a>",

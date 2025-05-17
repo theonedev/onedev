@@ -20,7 +20,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.component.link.ActionablePageLink;
-import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.Cursor;
 
 public abstract class IssueTitlePanel extends Panel {
@@ -37,7 +37,7 @@ public abstract class IssueTitlePanel extends Panel {
 		var label = "(" + issue.getReference().toString(getCurrentProject()) + ")";
 		WebMarkupContainer numberLink;
 		add(numberLink = new ActionablePageLink("number", 
-				IssueDetailPage.class, IssueDetailPage.paramsOf(issue)) {
+				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue)) {
 
 			@Override
 			public IModel<?> getBody() {
@@ -54,8 +54,8 @@ public abstract class IssueTitlePanel extends Panel {
 			
 		});
 		
-		String url = RequestCycle.get().urlFor(IssueDetailPage.class, 
-				IssueDetailPage.paramsOf(issue)).toString();
+		String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
+				IssueActivitiesPage.paramsOf(issue)).toString();
 
 		var transformed = transformReferences(issue.getTitle(), issue.getProject(), new LinkTransformer(url));
 		transformed = Emojis.getInstance().apply(transformed);

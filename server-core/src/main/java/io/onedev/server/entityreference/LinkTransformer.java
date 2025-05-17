@@ -8,7 +8,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
-import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
 public class LinkTransformer implements BiFunction<EntityReference, String, String> {
@@ -23,8 +23,8 @@ public class LinkTransformer implements BiFunction<EntityReference, String, Stri
 	public String apply(@Nullable EntityReference reference, String text) {
 		text = HtmlEscape.escapeHtml5(text);
 		if (reference instanceof IssueReference) {
-			return "<a class='embedded-reference link-info' href='" + RequestCycle.get().urlFor(IssueDetailPage.class,
-					IssueDetailPage.paramsOf(reference.getProject(), reference.getNumber())) + "'>" + text + "</a>";
+			return "<a class='embedded-reference link-info' href='" + RequestCycle.get().urlFor(IssueActivitiesPage.class,
+					IssueActivitiesPage.paramsOf(reference.getProject(), reference.getNumber())) + "'>" + text + "</a>";
 		} else if (reference instanceof BuildReference) {
 			return "<a class='embedded-reference link-info' href='" + RequestCycle.get().urlFor(BuildDashboardPage.class,
 					BuildDashboardPage.paramsOf(reference.getProject(), reference.getNumber())) + "'>" + text + "</a>";

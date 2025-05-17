@@ -14,7 +14,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 
 public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
 
@@ -40,8 +40,8 @@ public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
 		Issue issue = getModelObject();
 		
 		if (SecurityUtils.canAccessProject(issue.getProject())) {
-			String url = RequestCycle.get().urlFor(IssueDetailPage.class, 
-					IssueDetailPage.paramsOf(issue)).toString();
+			String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
+					IssueActivitiesPage.paramsOf(issue)).toString();
 			String summary = String.format("<a href='%s'>%s</a>", 
 					url, escapeHtml5(issue.getSummary(project)));
 			add(new Label("summary", summary).setEscapeModelStrings(false));

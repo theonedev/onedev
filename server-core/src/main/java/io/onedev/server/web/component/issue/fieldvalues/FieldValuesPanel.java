@@ -73,7 +73,7 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.ProjectAware;
@@ -267,8 +267,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 					Issue issue = OneDev.getInstance(IssueManager.class).get(Long.valueOf(value));
 					if (issue != null) {
 						Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
-						Link<Void> issueLink = new BookmarkablePageLink<Void>("link", IssueDetailPage.class, 
-								IssueDetailPage.paramsOf(issue));
+						Link<Void> issueLink = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
+								IssueActivitiesPage.paramsOf(issue));
 						issueLink.add(new Label("label", issue.getReference().toString(getProject())));
 						linkFrag.add(issueLink);
 						valueContainer.add(linkFrag);

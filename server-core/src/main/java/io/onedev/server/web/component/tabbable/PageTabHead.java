@@ -15,8 +15,8 @@ public class PageTabHead extends Panel {
 
 	private final PageTab tab;
 	
-	public PageTabHead(String id, PageTab tab) {
-		super(id);
+	public PageTabHead(String componentId, PageTab tab) {
+		super(componentId);
 		this.tab = tab;
 	}
 
@@ -33,8 +33,8 @@ public class PageTabHead extends Panel {
 		link.add(new Label("label", tab.getTitleModel()));
 	}
 
-	protected Link<?> newLink(String linkId, Class<? extends Page> pageClass, PageParameters pageParams) {
-		return new ViewStateAwarePageLink<Void>(linkId, pageClass, pageParams);
+	protected Link<?> newLink(String componentId, Class<? extends Page> pageClass, PageParameters pageParams) {
+		return new ViewStateAwarePageLink<Void>(componentId, pageClass, pageParams);
 	}
 
 }

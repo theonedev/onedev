@@ -24,6 +24,7 @@ import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -54,9 +55,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.IRequestHandler;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.cycle.IRequestCycleListener;
+import org.apache.wicket.request.cycle.AbstractRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -135,6 +134,7 @@ import io.onedev.server.web.component.pullrequest.review.ReviewListPanel;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
+import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -165,6 +165,8 @@ import io.onedev.server.xodus.VisitInfoManager;
 public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware {
 
 	public static final String PARAM_REQUEST = "request";
+
+	private static final String KEY_SCROLL_TOP = "onedev.pullRequest.scrollTop";
 
 	protected final IModel<PullRequest> requestModel;
 
@@ -803,13 +805,39 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		tabs.add(new PageTab(Model.of("Activities"), PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(getPullRequest())) {
 
 			@Override
+			public Component render(String componentId) {
+				return new PageTabHead(componentId, this) {
+
+					@Override
+					protected Link<?> newLink(String componentId, Class<? extends Page> pageClass, PageParameters pageParams) {
+						return new ViewStateAwarePageLink<Void>(componentId, pageClass, pageParams, KEY_SCROLL_TOP);
+					}
+
+				};
+			}
+
+			@Override
 			protected Component renderOptions(String componentId) {
 				PullRequestActivitiesPage page = (PullRequestActivitiesPage) getPage();
 				return page.renderOptions(componentId);
 			}
 
 		});
-		tabs.add(new PageTab(Model.of("File Changes"), PullRequestChangesPage.class, PullRequestChangesPage.paramsOf(getPullRequest())));
+		tabs.add(new PageTab(Model.of("File Changes"), PullRequestChangesPage.class, PullRequestChangesPage.paramsOf(getPullRequest())) {
+
+			@Override
+			public Component render(String componentId) {
+				return new PageTabHead(componentId, this) {
+					
+					@Override
+					protected Link<?> newLink(String componentId, Class<? extends Page> pageClass, PageParameters pageParams) {
+						return new ViewStateAwarePageLink<Void>(componentId, pageClass, pageParams, KEY_SCROLL_TOP);
+					}
+
+				};
+			}
+
+		});
 		tabs.add(new PageTab(Model.of("Code Comments"), PullRequestCodeCommentsPage.class, PullRequestCodeCommentsPage.paramsOf(getPullRequest())) {
 			@Override
 			public Component render(String componentId) {
@@ -820,7 +848,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				// resolved issues
 				Link<Void> link = new ViewStateAwarePageLink<Void>("link",
 						PullRequestCodeCommentsPage.class,
-						PullRequestCodeCommentsPage.paramsOf(getPullRequest()));
+						PullRequestCodeCommentsPage.paramsOf(getPullRequest()), 
+						KEY_SCROLL_TOP);
 				link.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 					@Override
 					protected String load() {
@@ -848,45 +877,12 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
 
-		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
-
-			@Override
-			public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
-			}
-
-			@Override
-			public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
-			}
-
-			@Override
-			public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
-			}
-
-			@Override
-			public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
-			}
-
-			@Override
-			public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
-			}
-
-			@Override
-			public IRequestHandler onException(RequestCycle cycle, Exception ex) {
-				return null;
-			}
+		RequestCycle.get().getListeners().add(new AbstractRequestCycleListener() {
 
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				if (SecurityUtils.getAuthUser() != null)
 					OneDev.getInstance(VisitInfoManager.class).visitPullRequest(SecurityUtils.getAuthUser(), getPullRequest());
-			}
-
-			@Override
-			public void onDetach(RequestCycle cycle) {
-			}
-
-			@Override
-			public void onBeginRequest(RequestCycle cycle) {
 			}
 
 		});
@@ -2261,7 +2257,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new PullRequestDetailResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new PullRequestDetailResourceReference()));		
+		response.render(OnDomReadyHeaderItem.forScript(String.format( "onedev.server.pullRequestDetail.onDomReady('%s');", KEY_SCROLL_TOP)));
 	}
 
 	@Override

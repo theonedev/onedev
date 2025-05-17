@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.issues.detail;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
@@ -7,21 +9,26 @@ import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.AbstractRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
@@ -37,15 +44,19 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.primary.IssuePrimaryPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
-import io.onedev.server.web.component.issue.tabs.IssueTabsPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
+import io.onedev.server.web.component.tabbable.PageTab;
+import io.onedev.server.web.component.tabbable.PageTabHead;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
@@ -55,10 +66,12 @@ import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 import io.onedev.server.xodus.VisitInfoManager;
 
-public class IssueDetailPage extends ProjectIssuesPage implements InputContext {
+public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext {
 
 	public static final String PARAM_ISSUE = "issue";
 	
+	private static final String KEY_SCROLL_TOP = "onedev.issue.scrollTop";
+
 	protected final IModel<Issue> issueModel;
 	
 	public IssueDetailPage(PageParameters params) {
@@ -141,7 +154,123 @@ public class IssueDetailPage extends ProjectIssuesPage implements InputContext {
 			}
 		});
 		
-		add(new IssueTabsPanel("issueTabs", issueModel));
+		add(new Tabbable("issueTabs", new LoadableDetachableModel<>() {
+			@Override
+			protected List<? extends Tab> load() {
+				List<Tab> tabs = new ArrayList<>();
+				tabs.add(new PageTab(Model.of("Activities"), IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue())) {
+
+					@Override
+					public Component render(String componentId) {
+						return new PageTabHead(componentId, this) {
+		
+							@Override
+							protected Link<?> newLink(String componentId, Class<? extends Page> pageClass, PageParameters pageParams) {
+								return new ViewStateAwarePageLink<Void>(componentId, pageClass, pageParams, KEY_SCROLL_TOP);
+							}
+		
+						};
+					}
+		
+					@Override
+					protected Component renderOptions(String componentId) {
+						IssueActivitiesPage page = (IssueActivitiesPage) getPage();
+						return page.renderOptions(componentId);
+					}
+
+				});
+
+				if (!getIssue().getFixCommits(false).isEmpty()) {
+					if (SecurityUtils.canReadCode(getProject())) {
+						tabs.add(new PageTab(Model.of("Fixing Commits"), IssueCommitsPage.class, IssueCommitsPage.paramsOf(getIssue())) {
+
+							@Override
+							public Component render(String componentId) {
+								return new PageTabHead(componentId, this) {
+				
+									@Override
+									protected Link<?> newLink(String componentId, Class<? extends Page> pageClass, PageParameters pageParams) {
+										return new ViewStateAwarePageLink<Void>(componentId, pageClass, pageParams, KEY_SCROLL_TOP);
+									}
+				
+								};
+							}
+
+						});
+						if (!getIssue().getPullRequests().isEmpty()) {
+							tabs.add(new PageTab(Model.of("Pull Requests"), IssuePullRequestsPage.class, IssuePullRequestsPage.paramsOf(getIssue())) {
+
+								@Override
+								public Component render(String componentId) {
+									return new PageTabHead(componentId, this) {
+					
+										@Override
+										protected Link<?> newLink(String componentId, Class<? extends Page> pageClass, PageParameters pageParams) {
+											return new ViewStateAwarePageLink<Void>(componentId, pageClass, pageParams, KEY_SCROLL_TOP);
+										}
+					
+									};
+								}
+	
+							});
+						}
+					}
+					// Do not calculate fix builds now as it might be slow
+					tabs.add(new PageTab(Model.of("Fixing Builds"), IssueBuildsPage.class, IssueBuildsPage.paramsOf(getIssue())) {
+
+						@Override
+						public Component render(String componentId) {
+							return new PageTabHead(componentId, this) {
+			
+								@Override
+								protected Link<?> newLink(String componentId, Class<? extends Page> pageClass, PageParameters pageParams) {
+									return new ViewStateAwarePageLink<Void>(componentId, pageClass, pageParams, KEY_SCROLL_TOP);
+								}
+			
+							};
+						}
+
+					});
+				}
+
+				if (getIssue().isConfidential() && SecurityUtils.canModifyIssue(getIssue())) {
+					tabs.add(new PageTab(Model.of("Authorizations"), IssueAuthorizationsPage.class, IssueAuthorizationsPage.paramsOf(getIssue())) {
+
+						@Override
+						public Component render(String componentId) {
+							return new PageTabHead(componentId, this) {
+			
+								@Override
+								protected Link<?> newLink(String componentId, Class<? extends Page> pageClass, PageParameters pageParams) {
+									return new ViewStateAwarePageLink<Void>(componentId, pageClass, pageParams, KEY_SCROLL_TOP);
+								}
+			
+							};
+						}
+					
+					});
+				}
+
+				return tabs;
+			}
+
+		}) {
+			@Override
+			public void onInitialize() {
+				super.onInitialize();
+				
+				add(new ChangeObserver() {
+
+					@Override
+					public Collection<String> findObservables() {
+						return Lists.newArrayList(Issue.getDetailChangeObservable(getIssue().getId()));
+					}
+
+				});
+				
+				setOutputMarkupId(true);
+			}
+		});
 		
 		add(new SideInfoPanel("side") {
 
@@ -222,13 +351,13 @@ public class IssueDetailPage extends ProjectIssuesPage implements InputContext {
 		});
 		
 		RequestCycle.get().getListeners().add(new AbstractRequestCycleListener() {
-			
+						
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				if (SecurityUtils.getAuthUser() != null) 
 					OneDev.getInstance(VisitInfoManager.class).visitIssue(SecurityUtils.getAuthUser(), getIssue());
 			}
-			
+						
 		});	
 
 	}
@@ -280,7 +409,8 @@ public class IssueDetailPage extends ProjectIssuesPage implements InputContext {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new IssueDetailCssResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new IssueDetailResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript(String.format( "onedev.server.issueDetail.onDomReady('%s');", KEY_SCROLL_TOP)));
 	}
 	
 	@Override

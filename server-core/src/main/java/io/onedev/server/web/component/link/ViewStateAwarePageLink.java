@@ -14,17 +14,29 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
  */
 public class ViewStateAwarePageLink<T> extends BookmarkablePageLink<T> {
 
+	private final String scrollTopKey;
+
 	public <C extends Page> ViewStateAwarePageLink(String id, final Class<C> pageClass) {
-		super(id, pageClass);
+		this(id, pageClass, new PageParameters());
 	}
 
 	public <C extends Page> ViewStateAwarePageLink(String id, final Class<C> pageClass, PageParameters parameters) {
+		this(id, pageClass, parameters, null);
+	}
+
+	public <C extends Page> ViewStateAwarePageLink(String id, final Class<C> pageClass, PageParameters parameters, String scrollTopKey) {
 		super(id, pageClass, parameters);
+		this.scrollTopKey = scrollTopKey;
 	}
 
 	@Override
 	protected CharSequence getOnClickScript(CharSequence url) {
-		return "onedev.server.viewState.getFromViewAndSetToHistory();";
+		var script = "onedev.server.viewState.getFromViewAndSetToHistory();";
+		if (scrollTopKey != null) {
+			script += "" + 
+				"localStorage.setItem('" + scrollTopKey + "', Math.floor($(this).closest('.autofit').scrollTop()).toString());";
+		}
+		return script;
 	}
 	
 }

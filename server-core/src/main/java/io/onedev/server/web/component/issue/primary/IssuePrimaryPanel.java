@@ -77,7 +77,7 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.DeleteCallback;
 
 public abstract class IssuePrimaryPanel extends Panel {
@@ -515,8 +515,8 @@ public abstract class IssuePrimaryPanel extends Panel {
 			Long linkedIssueId = linkedIssue.getId();
 			Fragment fragment = new Fragment(componentId, "linkedIssueFrag", this);
 
-			var link = new BookmarkablePageLink<Void>("title", IssueDetailPage.class, 
-					IssueDetailPage.paramsOf(linkedIssue));
+			var link = new BookmarkablePageLink<Void>("title", IssueActivitiesPage.class, 
+					IssueActivitiesPage.paramsOf(linkedIssue));
 			link.add(new Label("label", linkedIssue.getTitle() + " (" + linkedIssue.getReference().toString(getProject()) + ")"));
 			fragment.add(link);
 			
