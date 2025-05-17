@@ -1,5 +1,9 @@
 package io.onedev.server.web.component.branch.create;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -55,17 +59,17 @@ public abstract class CreateBranchPanel extends Panel {
 				String branchName = helperBean.getName();
 				if (project.getObjectId(GitUtils.branch2ref(branchName), false) != null) {
 					editor.error(new Path(new PathNode.Named("name")), 
-							"Branch '" + branchName + "' already exists, please choose a different name");
+							MessageFormat.format(_T("Branch '{0}' already exists, please choose a different name"), branchName));
 					target.add(form);
 				} else if (project.getBranchProtection(branchName, user).isPreventCreation()) {
 					editor.error(new Path(new PathNode.Named("name")), 
-							"Creation of this branch is prohibited per branch protection rule");
+							_T("Creation of this branch is prohibited per branch protection rule"));
 					target.add(form);
 				} else {
 					if (!project.isCommitSignatureRequirementSatisfied(user, 
 							branchName, project.getRevCommit(revision, true))) {
 						editor.error(new Path(new PathNode.Named("name")), 
-								"Valid signature required for head commit of this branch per branch protection rule");
+								_T("Valid signature required for head commit of this branch per branch protection rule"));
 						target.add(form);
 					} else {
 						OneDev.getInstance(GitService.class).createBranch(project, branchName, revision);

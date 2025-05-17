@@ -59,6 +59,7 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.SuggestionUtils;
+import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.wicket.Component;
@@ -537,7 +538,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 								@Override
 								public String getLabel() {
-									return StringUtils.capitalize(value.name().toLowerCase()) + " view";
+									return _T(TextUtils.getDisplayValue(value) + " view");
 								}
 
 								@Override
@@ -569,7 +570,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 								@Override
 								public String getLabel() {
-									return StringUtils.capitalize(value.name().toLowerCase()).replace('_', ' ') + " whitespace";
+									return _T(TextUtils.getDisplayValue(value) + " whitespace");
 								}
 
 								@Override
@@ -589,14 +590,15 @@ public abstract class RevisionDiffPanel extends Panel {
 						return menuItems;
 					}
 					
-				});
+				}.add(AttributeAppender.append("data-tippy-content", _T("Diff options"))));
 			}			
 			
-		}.setOutputMarkupId(true));
-		
+		}.setOutputMarkupId(true));		
+
 		Form<?> pathFilterForm = new Form<Void>("pathFilter");
 		TextField<String> filterInput;
 		pathFilterForm.add(filterInput = new TextField<String>("input", pathFilterModel));
+		filterInput.add(AttributeAppender.append("placeholder", _T("Filter by path")));
 		
 		Set<String> setOfInvolvedPaths = new HashSet<>();
 		for (DiffEntryFacade diffEntry: diffEntriesModel.getObject()) {
@@ -668,7 +670,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				doFilter(target);
 			}
 			
-		});
+		}.add(AttributeAppender.append("data-tippy-content", _T("Filter"))));
 		
 		add(pathFilterForm);
 		
@@ -711,7 +713,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				navigationContainer.configure();
 				return navigationContainer.isVisible()? "active": "";
 			}
-		})));
+		})).add(AttributeAppender.append("data-tippy-content", _T("Toggle navigation"))));
 		
 		body = new WebMarkupContainer("body") {
 			@Override
@@ -1628,7 +1630,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				setVisible(commentContainer.getDefaultModelObject() != null);
 			}
 
-		}.setOutputMarkupId(true));
+		}.add(AttributeAppender.append("data-tippy-content", _T("Show commented code snippet"))).setOutputMarkupId(true));
 
 		head.add(new AjaxLink<Void>("close") {
 
@@ -1658,7 +1660,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				}
 			}
 
-		});
+		}.add(AttributeAppender.append("data-tippy-content", _T("Hide comment"))));
 
 		if (annotationSupport != null) {
 			CodeComment openComment = annotationSupport.getOpenComment();

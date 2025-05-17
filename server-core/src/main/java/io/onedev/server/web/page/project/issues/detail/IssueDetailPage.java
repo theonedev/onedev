@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.issues.detail;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -158,7 +160,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			@Override
 			protected List<? extends Tab> load() {
 				List<Tab> tabs = new ArrayList<>();
-				tabs.add(new PageTab(Model.of("Activities"), IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue())) {
+				tabs.add(new PageTab(Model.of(_T("Activities")), IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue())) {
 
 					@Override
 					public Component render(String componentId) {
@@ -182,7 +184,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 				if (!getIssue().getFixCommits(false).isEmpty()) {
 					if (SecurityUtils.canReadCode(getProject())) {
-						tabs.add(new PageTab(Model.of("Fixing Commits"), IssueCommitsPage.class, IssueCommitsPage.paramsOf(getIssue())) {
+						tabs.add(new PageTab(Model.of(_T("Fixing Commits")), IssueCommitsPage.class, IssueCommitsPage.paramsOf(getIssue())) {
 
 							@Override
 							public Component render(String componentId) {
@@ -198,7 +200,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 						});
 						if (!getIssue().getPullRequests().isEmpty()) {
-							tabs.add(new PageTab(Model.of("Pull Requests"), IssuePullRequestsPage.class, IssuePullRequestsPage.paramsOf(getIssue())) {
+							tabs.add(new PageTab(Model.of(_T("Pull Requests")), IssuePullRequestsPage.class, IssuePullRequestsPage.paramsOf(getIssue())) {
 
 								@Override
 								public Component render(String componentId) {
@@ -216,7 +218,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 						}
 					}
 					// Do not calculate fix builds now as it might be slow
-					tabs.add(new PageTab(Model.of("Fixing Builds"), IssueBuildsPage.class, IssueBuildsPage.paramsOf(getIssue())) {
+					tabs.add(new PageTab(Model.of(_T("Fixing Builds")), IssueBuildsPage.class, IssueBuildsPage.paramsOf(getIssue())) {
 
 						@Override
 						public Component render(String componentId) {
@@ -234,7 +236,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 				}
 
 				if (getIssue().isConfidential() && SecurityUtils.canModifyIssue(getIssue())) {
-					tabs.add(new PageTab(Model.of("Authorizations"), IssueAuthorizationsPage.class, IssueAuthorizationsPage.paramsOf(getIssue())) {
+					tabs.add(new PageTab(Model.of(_T("Authorizations")), IssueAuthorizationsPage.class, IssueAuthorizationsPage.paramsOf(getIssue())) {
 
 						@Override
 						public Component render(String componentId) {

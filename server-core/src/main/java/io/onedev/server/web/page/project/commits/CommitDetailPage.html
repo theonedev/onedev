@@ -6,8 +6,8 @@
 					<div class="subject d-flex flex-wrap align-items-center">
 						<h4 wicket:id="title" class="mr-3 mb-0"></h4>
 						<div class="ml-auto btn-group">
-							<a wicket:id="browseCode" class="btn btn-sm btn-outline-secondary">Browse Code</a>
-							<a wicket:id="commitOperations" type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">Operations</a>
+							<a wicket:id="browseCode" class="btn btn-sm btn-outline-secondary"><wicket:t>Browse Code</wicket:t></a>
+							<a wicket:id="commitOperations" type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle"><wicket:t>Operations</wicket:t></a>
 						</div>
 					</div>
 					<pre wicket:id="detail" class="detail mb-0 mt-3"></pre>
@@ -60,7 +60,7 @@
     </wicket:fragment>
 	<wicket:fragment wicket:id="projectTitleFrag">
 		<span class="d-flex align-items-center">
-			<a wicket:id="commits">Commits</a>
+			<a wicket:id="commits"><wicket:t>Commits</wicket:t></a>
 			<span class="dot"></span>
 			<span wicket:id="commitHash"></span>
 		</span>

@@ -1,5 +1,9 @@
 package io.onedev.server.web.component.createtag;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -60,10 +64,10 @@ public abstract class CreateTagPanel extends Panel {
 				User user = SecurityUtils.getAuthUser();
 				if (project.getObjectId(GitUtils.tag2ref(tagName), false) != null) {
 					editor.error(new Path(new PathNode.Named("name")), 
-							"Tag '" + helperBean.getName() + "' already exists, please choose a different name.");
+							MessageFormat.format(_T("Tag '{0}' already exists, please choose a different name."), helperBean.getName()));
 					target.add(form);
 				} else if (project.getTagProtection(tagName, user).isPreventCreation()) {
-					editor.error(new Path(new PathNode.Named("name")), "Unable to create protected tag"); 
+					editor.error(new Path(new PathNode.Named("name")), _T("Unable to create protected tag")); 
 					target.add(form);
 				} else {
 					try {

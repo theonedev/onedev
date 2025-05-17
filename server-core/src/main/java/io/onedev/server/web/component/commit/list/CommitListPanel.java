@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.commit.list;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -153,7 +155,7 @@ public abstract class CommitListPanel extends Panel {
 					if (e.getMessage() != null)
 						error(e.getMessage());
 					else
-						error("Error calculating commits: check log for details");
+						error(_T("Error calculating commits: check log for details"));
 					commitHashes = new ArrayList<>();
 					logger.error("Error calculating commits: ", e);
 				}
@@ -273,7 +275,7 @@ public abstract class CommitListPanel extends Panel {
 				error(e.getMessage());
 				return null;
 			} else {
-				info("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ author(robin)");
+				info(_T("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ author(robin)"));
 				parsedQuery = new CommitQuery(Lists.newArrayList(new FuzzyCriteria(Lists.newArrayList(queryString))));
 			}
 		}
@@ -334,9 +336,9 @@ public abstract class CommitListPanel extends Panel {
 				if (!isEnabled()) 
 					tag.append("class", "disabled", " ");
 				if (!querySubmitted)
-					tag.put("title", "Query not submitted");
+					tag.put("data-tippy-content", _T("Query not submitted"));
 				else if (queryModel.getObject() == null)
-					tag.put("title", "Can not save malformed query");
+					tag.put("data-tippy-content", _T("Can not save malformed query"));
 			}
 
 			@Override
@@ -405,6 +407,8 @@ public abstract class CommitListPanel extends Panel {
 			}
 			
 		});
+
+		queryInput.add(new AttributeAppender("placeholder", _T("Query commits")));
 		
 		Form<?> queryForm = new Form<Void>("query");
 		queryForm.add(queryInput);
@@ -417,7 +421,7 @@ public abstract class CommitListPanel extends Panel {
 				doQuery(target);
 			}
 			
-		});
+		}.add(new AttributeAppender("data-tippy-content", _T("Query"))));
 		add(queryForm);
 		
 		body = new WebMarkupContainer("body") {
@@ -661,7 +665,8 @@ public abstract class CommitListPanel extends Panel {
 			}
 			ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
 			PageParameters params = ProjectBlobPage.paramsOf(getProject(), browseState);
-			item.add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));
+			item.add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params)
+					.add(new AttributeAppender("data-tippy-content", _T("Browse code"))));
 			
 			if (getCompareWith() != null) {
 				RevisionComparePage.State compareState = new RevisionComparePage.State();
@@ -672,7 +677,8 @@ public abstract class CommitListPanel extends Panel {
 				compareState.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 				
 				params = RevisionComparePage.paramsOf(getProject(), compareState);
-				item.add(new ViewStateAwarePageLink<Void>("compare", RevisionComparePage.class, params));
+				item.add(new ViewStateAwarePageLink<Void>("compare", RevisionComparePage.class, params)
+						.add(new AttributeAppender("data-tippy-content", _T("Compare with base revision"))));
 			} else {
 				item.add(new WebMarkupContainer("compare").setVisible(false));
 			}

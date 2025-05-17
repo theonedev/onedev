@@ -18,6 +18,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.clear();
 
 		// Extracted keys
+		m.put("'..' is not allowed in the directory", "'..' 不允许在目录中使用");
 		m.put("6-digits passcode", "6 位数代码");
 		m.put("7 days", "7 天");
 		m.put("<a wicket:id=\"verifyRecoveryCode\">Verify by recovery code</a> if you can not access your TOTP authenticator", 
@@ -33,6 +34,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"用于验证提交信息页脚的<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java正则表达式</a>");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"你的JIRA云实例的API地址，例如：<tt>https://your-domain.atlassian.net/rest/api/3</tt>");
+		m.put("Able to merge without conflicts", "可以合并而没有冲突");
 		m.put("Access Anonymously", "匿名访问");
 		m.put("Access Build Log", "访问构建日志");
 		m.put("Access Build Pipeline", "访问构建流水线");
@@ -48,14 +50,17 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Account Name", "账户名称");
 		m.put("Active Directory", "Active Directory");
 		m.put("Active Since", "活跃起");
+		m.put("Activities", "活动");
 		m.put("Add", "添加");
 		m.put("Add Issues to Iteration", "将工单添加到迭代");
 		m.put("Add New", "添加");
+		m.put("Add New Email Address", "添加新电子邮件地址");
 		m.put("Add Spent Time", "添加已用时间");
 		m.put("Add after", "添加到后面");
 		m.put("Add before", "添加到前面");
 		m.put("Add child project", "添加子项目");
 		m.put("Add dashboard", "添加仪表板");
+		m.put("Add files via upload", "通过上传添加文件");
 		m.put("Add new", "添加");
 		m.put("Add new file", "添加新文件");
 		m.put("Add new import", "添加新导入");
@@ -65,7 +70,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Administration", "管理");
 		m.put("Administrative permission over a project", "项目的管理权限");
 		m.put("Advanced Search", "高级搜索");
-		m.put("Age", "年龄");
 		m.put("Agent", "代理");
 		m.put("Agent Attribute", "代理属性");
 		m.put("Agent Edit Bean", "代理编辑Bean");
@@ -135,6 +139,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Ascending", "升序");
 		m.put("Assignees Issue Field", "受让人工单字段");
 		m.put("Asymmetric", "非对称");
+		m.put("At least one email address should be configured, please add a new one first", "至少应配置一个电子邮件地址，请先添加一个新地址");
+		m.put("Attachment", "附件");
 		m.put("Attributes", "属性");
 		m.put("Authentication", "身份验证");
 		m.put("Authentication Required", "需要身份验证");
@@ -194,6 +200,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Both", "两者");
 		m.put("Bottom", "底部");
 		m.put("Branch", "分支");
+		m.put("Branch '{0}' already exists, please choose a different name", "分支 '{0}' 已存在，请选择不同的名称");
 		m.put("Branch Choice Bean", "分支选择Bean");
 		m.put("Branch Name", "分支名称");
 		m.put("Branch Protection", "分支保护");
@@ -202,6 +209,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Branches", "分支");
 		m.put("Brand Setting Edit Bean", "品牌设置编辑Bean");
 		m.put("Branding", "品牌设置");
+		m.put("Browse Code", "浏览代码");
+		m.put("Browse code", "浏览代码");
 		m.put("Build", "构建");
 		m.put("Build Artifact Storage", "构建构件存储");
 		m.put("Build Commit", "构建提交");
@@ -259,9 +268,11 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Cache Paths", "缓存路径");
 		m.put("Cache Setting Bean", "缓存设置 Bean");
 		m.put("Cache will be deleted to save space if not accessed for this number of days", "缓存在未访问达到指定天数后将被删除以节省空间");
+		m.put("Calculating merge preview...", "计算合并预览...");
 		m.put("Can Be Used By Jobs", "可被任务使用");
 		m.put("Can Create Root Projects", "可以创建根项目");
 		m.put("Can Edit Estimated Time", "可以编辑预估时间");
+		m.put("Can not save malformed query", "无法保存格式错误的查询");
 		m.put("Cancel", "取消");
 		m.put("Cancelled", "已取消");
 		m.put("Certificates to Trust", "信任的证书");
@@ -289,6 +300,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Checkout Code", "签出代码");
 		m.put("Checkout Path", "签出路径");
 		m.put("Checkstyle Report", "Checkstyle 报告");
+		m.put("Cherry-Pick", "cherry-pick");
+		m.put("Cherry-picked successfully", "cherry-pick 成功");
 		m.put("Child Projects", "子项目");
 		m.put("Child Projects Of", "子项目");
 		m.put("Choice Provider", "选项提供器");
@@ -335,6 +348,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Collapse all", "全部折叠");
 		m.put("Color", "颜色");
 		m.put("Commands", "命令");
+		m.put("Comment", "评论");
+		m.put("Comment too long", "评论过长");
 		m.put("Commit", "提交");
 		m.put("Commit Batched Suggestions", "提交批量建议");
 		m.put("Commit Message", "提交信息");
@@ -351,11 +366,13 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Commit date", "提交日期");
 		m.put("Commit hash", "提交哈希");
 		m.put("Commit index version", "提交索引版本");
+		m.put("Commit signature required but no GPG signing key specified", "提交签名需要但未指定 GPG 签名密钥");
 		m.put("Commits", "提交");
 		m.put("Committed After", "提交后");
 		m.put("Committed Before", "提交前");
 		m.put("Committed By", "提交者");
 		m.put("Committer", "提交者");
+		m.put("Compare with base revision", "与基线版本比较");
 		m.put("Concurrency", "并发");
 		m.put("Condition", "条件");
 		m.put("Confidential", "保密");
@@ -382,6 +399,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Create Branch Bean With Revision", "带版本的创建分支 Bean");
 		m.put("Create Child Projects", "创建子项目");
 		m.put("Create New File", "创建新文件");
+		m.put("Create Pull Request", "创建合并请求");
 		m.put("Create Tag", "创建标签");
 		m.put("Create Tag Bean", "创建标签 Bean");
 		m.put("Create Tag Bean With Revision", "带版本的创建标签 Bean");
@@ -390,6 +408,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Create issue", "创建工单");
 		m.put("Create merge commit", "创建合并提交");
 		m.put("Create merge commit if necessary", "如有必要，创建合并提交");
+		m.put("Creation of this branch is prohibited per branch protection rule", "此分支的创建受分支保护规则限制");
 		m.put("Critical", "严重");
 		m.put("Cron Expression", "Cron 表达式");
 		m.put("Cron schedule", "Cron 调度");
@@ -444,6 +463,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Descending", "降序");
 		m.put("Description", "描述");
 		m.put("Description Templates", "描述模板");
+		m.put("Description too long", "描述过长");
 		m.put("Destination Path", "目标路径");
 		m.put("Destinations", "目标");
 		m.put("Detect Licenses", "检测许可证");
@@ -464,6 +484,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Do not ignore", "不要忽略");
 		m.put("Do not retrieve", "不检索");
 		m.put("Do not retrieve groups", "不检索组");
+		m.put("Do you really want to delete this email address?", "您真的要删除这个电子邮件地址吗？");
 		m.put("Docker Executable", "Docker 可执行文件");
 		m.put("Docker Image", "Docker 镜像");
 		m.put("Docker Sock Path", "Docker Sock 路径");
@@ -492,6 +513,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Email Addresses", "电子邮件地址");
 		m.put("Email Templates", "邮件模板");
 		m.put("Email Verification", "邮件验证");
+		m.put("Email address", "电子邮件地址");
 		m.put("Email templates", "邮箱模板");
 		m.put("Enable", "启用");
 		m.put("Enable <a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>time tracking</a> for this project to track progress and generate timesheets", 
@@ -529,7 +551,12 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Env Var", "环境变量");
 		m.put("Environment Variables", "环境变量");
 		m.put("Equal", "等于");
+		m.put("Error calculating commits: check log for details", "计算提交时出错：请检查日志");
+		m.put("Error cherry-picking to {0}: Merge conflicts detected", "cherry-pick 到 {0} 时出错：合并冲突检测到");
+		m.put("Error cherry-picking to {0}: {1}", "cherry-pick 到 {0} 时出错：{1}");
 		m.put("Error parsing build spec", "解析构建规范时出错");
+		m.put("Error reverting on {0}: Merge conflicts detected", "revert 到 {0} 时出错：合并冲突检测到");
+		m.put("Error reverting on {0}: {1}", "revert 到 {0} 时出错：{1}");
 		m.put("Estimated Time", "预计时间");
 		m.put("Estimated Time Edit Bean", "预计时间编辑 Bean");
 		m.put("Estimated Time Issue Field", "预计时间工单字段");
@@ -577,6 +604,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("File Protections", "文件保护");
 		m.put("File changes", "文件更改");
 		m.put("File is too large to edit here", "文件太大，无法在此编辑");
+		m.put("File name", "文件名");
 		m.put("Files", "文件");
 		m.put("Files to Be Analyzed", "要分析的文件");
 		m.put("Filter", "过滤");
@@ -584,6 +612,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Finish", "完成");
 		m.put("First applicable executor", "第一个适用的执行器");
 		m.put("Fix Type", "修复类型");
+		m.put("Fixing Builds", "修复构建");
+		m.put("Fixing Commits", "修复提交");
 		m.put("Float", "浮点数");
 		m.put("For a particular project, the first matching entry will be used", "对于特定项目，第一个匹配的条目将被使用");
 		m.put("For build commit not reachable from default branch, a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> should be specified as access token with create branch permission", 
@@ -622,6 +652,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Git Location", "Git 位置");
 		m.put("Git Pack Config", "Git 打包配置");
 		m.put("Git Path", "Git 路径");
+		m.put("Git email address will be used as git author/committer for commits created on web UI", 
+			"Git 电子邮件地址将用于在 Web UI 上创建的提交的作者/提交者");
 		m.put("GitHub", "GitHub");
 		m.put("GitHub API URL", "GitHub API URL");
 		m.put("GitHub Issue Label", "GitHub 工单标签");
@@ -773,7 +805,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Install Subscription Key", "安装订阅密钥");
 		m.put("Integer", "整数");
 		m.put("Interpreter", "解释器");
+		m.put("Invalid PCRE syntax", "无效的 PCRE 语法");
 		m.put("Invalid credentials", "无效的凭据");
+		m.put("Invalid request path", "无效的请求路径");
 		m.put("Invitations", "邀请");
 		m.put("Is Site Admin", "是否为站点管理员");
 		m.put("Issue", "工单");
@@ -894,6 +928,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Leaf Projects", "叶子项目");
 		m.put("Least branch coverage", "最小的分支覆盖率");
 		m.put("Least line coverage", "最小的行覆盖率");
+		m.put("Leave a comment", "留下评论");
 		m.put("Leave a note", "留下备注");
 		m.put("Left", "左");
 		m.put("License Setting", "许可证设置");
@@ -910,6 +945,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Load Keys", "加载密钥");
 		m.put("Log Work", "记录工作");
 		m.put("Login Name", "登录名称");
+		m.put("Login name or email", "登录名或电子邮件");
 		m.put("Login name or email address", "登录名或电子邮件地址");
 		m.put("Logo for Dark Mode", "暗黑模式下的Logo");
 		m.put("Logo for Light Mode", "亮色模式下的Logo");
@@ -922,6 +958,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Mail Service", "邮件服务");
 		m.put("Mail Service Bean", "邮件服务Bean");
 		m.put("Mail service", "邮件服务");
+		m.put("Malformed email address", "格式错误的电子邮件地址");
 		m.put("Manage Job", "管理任务");
 		m.put("Manager DN", "管理员DN");
 		m.put("Manager Password", "管理员密码");
@@ -959,6 +996,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Months to Display", "显示的月数");
 		m.put("More Options", "更多选项");
 		m.put("More Settings", "更多设置");
+		m.put("More commits", "更多提交");
 		m.put("Most branch coverage", "最小的分支覆盖率");
 		m.put("Most line coverage", "最小的行覆盖率");
 		m.put("Mount Docker Sock", "挂载 Docker Sock");
@@ -1019,6 +1057,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("No activity for some time", "无活动一段时间");
 		m.put("No aggregation", "无聚合");
 		m.put("No any", "无任何");
+		m.put("No branch to cherry-pick to", "没有分支可以 cherry-pick");
+		m.put("No branch to revert on", "没有分支可以 revert");
 		m.put("No config file", "无配置文件");
 		m.put("No default group", "无默认组");
 		m.put("No default role", "无默认角色");
@@ -1372,12 +1412,14 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Parent Project", "父项目");
 		m.put("Parents", "父项目");
 		m.put("Partially covered", "部分覆盖");
+		m.put("Passcode", "Passcode");
 		m.put("Passed", "通过");
 		m.put("Password", "密码");
 		m.put("Password Edit Bean", "密码编辑 Bean");
 		m.put("Password Reset", "密码重置");
 		m.put("Password Reset Bean", "密码重置 Bean");
 		m.put("Password Secret", "密码密钥");
+		m.put("Password and its confirmation should be identical.", "密码和其确认应相同。");
 		m.put("Password or Access Token for Remote Repository", "密码或远程仓库的访问令牌");
 		m.put("Paste subscription key here", "在此粘贴订阅密钥");
 		m.put("Path placeholder", "路径占位符");
@@ -1389,10 +1431,13 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Performance", "性能");
 		m.put("Performance Setting", "性能设置");
 		m.put("Performance Settings", "性能设置");
+		m.put("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ author(robin)", 
+			"执行模糊查询。使用 '~' 包围搜索文本以添加更多条件，例如：~text to search~ author(robin)");
 		m.put("Platform", "平台");
 		m.put("Platforms", "平台");
 		m.put("Please <a wicket:id=\"download\" class=\"font-weight-bolder\">download</a> recovery codes below and keep them secret. These codes can be used to provide one-time access to your account in case you can not access the authentication application. They will <b>NOT</b> be displayed again", 
 			"请<a wicket:id=\"download\" class=\"font-weight-bolder\">下载</a>下方的恢复代码并妥善保管。这些代码可用于在您无法访问认证应用程序时提供一次性账户访问权限。它们<b>不会</b>再次显示");
+		m.put("Please confirm the password.", "请确认密码。");
 		m.put("Please input one of your recovery codes saved when enable two-factor authentication", 
 			"请输入在启用两阶段验证时保存的恢复代码");
 		m.put("Please login to perform this operation", "请登录才能执行此操作");
@@ -1415,6 +1460,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Prevent Update", "防止更新");
 		m.put("Previous", "上一步");
 		m.put("Primary", "主");
+		m.put("Primary email address will be used to receive notifications, show gravatar (if enabled) etc.", 
+			"主电子邮件地址将用于接收通知、显示 Gravatar（如果启用）等。");
 		m.put("Primary or alias email address of above account to be used as sender address of various email notifications. User can also reply to this address to post issue or pull request comments via email if <code>Check Incoming Email</code> option is enabled below", 
 			"主或别名邮箱地址作为各种电子邮件通知的发件人地址。如果启用了 <code>Check Incoming Email</code> 选项，用户也可以回复此地址通过电子邮件发布问题或合并请求评论");
 		m.put("Principal name of the account to login into office 365 mail server to send/receive emails. Make sure this account <b>owns</b> the registered application indicated by application id above", 
@@ -1489,6 +1536,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Queries", "查询");
 		m.put("Query", "查询");
 		m.put("Query Watches", "订阅的查询");
+		m.put("Query commits", "查询提交");
+		m.put("Query not submitted", "查询未提交");
 		m.put("Query param", "查询参数");
 		m.put("Query/order projects", "查询/排序项目");
 		m.put("Quick Search", "快速搜索");
@@ -1534,12 +1583,15 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Required Builds", "要求构建");
 		m.put("Required Reviewers", "要求审查者");
 		m.put("Required Services", "所需服务");
+		m.put("Resend Verification Email", "重新发送验证电子邮件");
 		m.put("Resource Settings", "资源设置");
 		m.put("Retrieve Groups", "检索组");
 		m.put("Retrieve LFS Files", "检索 LFS 文件");
 		m.put("Retrieve Submodules", "检索子模块");
 		m.put("Retry Condition", "重试条件");
 		m.put("Retry Delay", "重试延迟");
+		m.put("Revert", "回滚");
+		m.put("Reverted successfully", "revert 成功");
 		m.put("Review required for deletion. Submit pull request instead", "需要审查才能删除。请提交合并请求");
 		m.put("Review required for this change. Submit pull request instead", "需要审查才能更改。请提交合并请求");
 		m.put("Reviewers", "审查者");
@@ -1603,12 +1655,16 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Scripting Value", "脚本值");
 		m.put("Search", "搜索");
 		m.put("Search Groups Using Filter", "使用过滤器搜索组");
+		m.put("Search for", "搜索");
+		m.put("Search is too general", "搜索过于笼统");
 		m.put("Secret", "密钥");
 		m.put("Secret Config File", "密钥配置文件");
 		m.put("Secret Setting", "密钥设置");
 		m.put("Security", "安全");
 		m.put("Security Setting", "安全设置");
 		m.put("Security Settings", "安全设置");
+		m.put("Select Branch to Cherry Pick to", "选择分支进行 cherry-pick");
+		m.put("Select Branch to Revert on", "选择分支进行 revert");
 		m.put("Select iteration to schedule issues into", "选择迭代调度问题");
 		m.put("Select organization to import from. Leave empty to import from repositories under current account", 
 			"选择要从中导入的组织。留空以从当前帐户下的存储库导入");
@@ -1647,6 +1703,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Service desk setting", "服务台设置");
 		m.put("Services", "服务");
 		m.put("Set All Queried As Root Projects", "设置所有查询的项目为根项目");
+		m.put("Set As Primary", "设置为主");
 		m.put("Set Build Description", "设置构建描述");
 		m.put("Set Build Version", "设置构建版本");
 		m.put("Set Selected As Root Projects", "设置选中的项目为根项目");
@@ -1697,6 +1754,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Slack Notifications", "Slack 通知");
 		m.put("Smtp Ssl Setting", "SMTP SSL 设置");
 		m.put("Smtp With Ssl", "SMTP SSL");
+		m.put("Some one changed the content you are editing. Reload the page and try again.", "有人修改了您正在编辑的内容。重新加载页面并重试。");
 		m.put("Source", "源");
 		m.put("Source Docker Image", "Docker 镜像源");
 		m.put("Source Path", "源路径");
@@ -1723,6 +1781,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"指定 <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json 输出文件相对 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>。此文件可以通过 clippy json 输出选项生成，例如 <code>cargo clippy --message-format json>check-result.json</code>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify CPD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/cpd.xml</tt>. Use * or ? for pattern match", 
 			"指定 CPD 结果 xml 文件相对 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>，例如 <tt>target/cpd.xml</tt>。使用 * 或 ? 进行模式匹配");
+		m.put("Specify Commit Message", "指定提交消息");
 		m.put("Specify ESLint report file in checkstyle format under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with ESLint option <tt>'-f checkstyle'</tt> and <tt>'-o'</tt>. Use * or ? for pattern match", 
 			"指定 ESLint 报告文件在 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> 中以 checkstyle 格式生成。此文件可以通过 ESLint 选项 <tt>'-f checkstyle'</tt> 和 <tt>'-o'</tt> 生成。使用 * 或 ? 进行模式匹配");
 		m.put("Specify GitHub API url, for instance <tt>https://api.github.com</tt>", "指定 GitHub API URL，例如 <tt>https://api.github.com</tt>");
@@ -2071,6 +2130,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Suffix Pattern", "后缀模式");
 		m.put("Switch to HTTP(S)", "切换到 HTTP(S)");
 		m.put("Switch to SSH", "切换到 SSH");
+		m.put("Symbol name", "符号名称");
 		m.put("Symbols", "符号");
 		m.put("Sync Repository", "同步仓库");
 		m.put("System", "系统");
@@ -2084,6 +2144,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Tab Width", "制表符宽度");
 		m.put("Tabs", "制表符");
 		m.put("Tag", "标签");
+		m.put("Tag '{0}' already exists, please choose a different name.", "标签 '{0}' 已存在，请选择不同的名称");
 		m.put("Tag Message", "标签消息");
 		m.put("Tag Name", "标签名称");
 		m.put("Tag Protection", "标签保护");
@@ -2111,6 +2172,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("The secret which allows you to ensure that POST requests sent to the payload URL are from OneDev. When you set a secret you'll receive the X-OneDev-Signature header in the webhook POST request", 
 			"确保发送到有效负载 URL 的 POST 请求来自 OneDev 的密钥。设置密钥后，您将在 Webhook POST 请求中收到 X-OneDev-Signature 头部");
 		m.put("Then enter the passcode shown in the TOTP authenticator to verify", "然后输入 TOTP 认证器中显示的验证码进行验证");
+		m.put("There are merge conflicts. You can still create the pull request though", "有合并冲突。您仍然可以创建合并请求");
 		m.put("These authenticators normally run on your mobile phone, some examples are Google Authenticator, Microsoft Authenticator, Authy, 1Password etc.", 
 			"这些认证器通常在您的手机上运行，例如 Google Authenticator、Microsoft Authenticator、Authy、1Password 等");
 		m.put("This <span wicket:id=\"elementTypeName\"></span> is imported from <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a>", 
@@ -2120,6 +2182,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"此地址应在 SendGrid 中为 <code>已验证的发送者</code>，将用作各种电子邮件通知的发送者地址。如果下面启用了 <code>接收已发布电子邮件</code> 选项，用户也可以回复此地址以发布工单或合并请求评论");
 		m.put("This address will be used as sender address of various email notifications. User can also reply to this address to post issue or pull request comments via email if <code>Check Incoming Email</code> option is enabled below", 
 			"此地址将用作各种电子邮件通知的发送者地址。如果下面启用了 <code>检查接收电子邮件</code> 选项，用户也可以通过电子邮件回复此地址以发布工单或合并请求评论");
+		m.put("This change needs to be verified by some jobs. Submit pull request instead", "此更改需要由某些任务验证。请提交合并请求");
+		m.put("This email address is being used", "此电子邮件地址正在使用");
 		m.put("This executor runs build jobs as docker containers on OneDev server", "此执行器在 OneDev 服务器上以 Docker 容器运行构建任务");
 		m.put("This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>", 
 			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a> 在远程机器上以 Docker 容器运行构建任务");
@@ -2129,6 +2193,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"此执行器使用 OneDev 服务器的 shell 设施运行构建任务。<br><b class='text-danger'>警告</b>：使用此执行器运行的任务具有与 OneDev 服务器进程相同的权限。确保通过任务要求设置仅允许受信任的任务使用");
 		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as corresponding agent process. Make sure it can only be used by trusted jobs via job requirement setting", 
 			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a> 使用远程机器的 shell 设施运行构建任务。<br><b class='text-danger'>警告</b>：使用此执行器运行的任务具有与相应代理进程相同的权限。确保通过任务要求设置仅允许受信任的任务使用");
+		m.put("This field is required", "此字段是必填的");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"此过滤器用于确定当前用户的 LDAP 条目。例如：<i>(&(uid={0})(objectclass=person))</i>。在此示例中，<i>{0}</i> 表示当前用户的登录名");
 		m.put("This is a Git LFS object, but the storage file is missing", "这是一个 Git LFS 对象，但存储文件缺失");
@@ -2173,6 +2238,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("To State", "到状态");
 		m.put("To States", "到状态");
 		m.put("Toggle dark mode", "切换暗模式");
+		m.put("Too many commits to load", "加载的提交太多");
 		m.put("Toomanyrequests", "请求过多");
 		m.put("Top", "顶部");
 		m.put("Topo", "拓扑");
@@ -2197,6 +2263,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Type password here", "在此输入密码");
 		m.put("Type to filter", "过滤");
 		m.put("URL", "URL");
+		m.put("Unable to create protected tag", "无法创建受保护的标签");
+		m.put("Unable to send verification email as mail service is not configured yet", "无法发送验证电子邮件，因为邮件服务未配置");
 		m.put("Unauthorized", "未授权");
 		m.put("Undefined Field Resolution", "未定义字段解析");
 		m.put("Undefined Field Value Resolution", "未定义字段值解析");
@@ -2207,6 +2275,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Unlimited", "无限制");
 		m.put("Unspecified", "未指定");
 		m.put("Unsupported", "不支持");
+		m.put("Unverified email address is <b>NOT</b> applicable for above functionalities", "未验证的电子邮件地址不适用于上述功能");
 		m.put("Update", "更新");
 		m.put("Update Dependencies via Renovate", "通过 Renovate 更新依赖");
 		m.put("Update body", "更新主体");
@@ -2220,6 +2289,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Upload to Project", "上传到项目");
 		m.put("Url", "URL");
 		m.put("Use Avatar Service", "使用头像服务");
+		m.put("Use For Git Operations", "用于 Git 操作");
 		m.put("Use Git in System Path", "使用系统路径中的 Git");
 		m.put("Use Hours And Minutes Only", "仅使用小时和分钟");
 		m.put("Use Specified Git", "使用指定的 Git");
@@ -2253,6 +2323,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("User can sign up if this option is enabled", "如果启用此选项，用户可以注册");
 		m.put("User name", "用户名");
 		m.put("Users", "用户");
+		m.put("Valid signature required for head commit of this branch per branch protection rule", 
+			"此分支的头部提交需要有效的签名，受分支保护规则限制");
 		m.put("Value", "值");
 		m.put("Value Matcher", "值匹配器");
 		m.put("Value Provider", "值提供者");
@@ -2260,6 +2332,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Values Provider", "值提供者");
 		m.put("Variable", "变量");
 		m.put("Verification Code", "验证码");
+		m.put("Verification email sent, please check it", "验证电子邮件已发送，请检查");
 		m.put("Verify", "验证");
 		m.put("View", "视图");
 		m.put("View Source", "查看源码");
@@ -2274,6 +2347,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Webhook Url", "Webhook URL");
 		m.put("Week", "周");
 		m.put("When", "何时");
+		m.put("When determine if the user is author/committer of a git commit, all emails listed here will be checked", 
+			"确定用户是否是 git 提交的作者/提交者时，将检查此处列出的所有电子邮件");
 		m.put("When target branch of a pull request has new commits, merge commit of the pull request will be recalculated, and this option tells whether or not to accept pull request builds ran on previous merged commit. If enabled, you will need to re-run required builds on the new merge commit. This setting takes effect only when required builds are specified", 
 			"当合并请求的目标分支有新提交时，合并请求的合并提交将被重新计算，此选项决定是否接受在之前合并提交上运行的合并请求构建。如果启用，您需要在新的合并提交上重新运行所需的构建。此设置仅在指定了所需构建时生效");
 		m.put("When this work starts", "此工作开始时");
@@ -2381,47 +2456,13 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{0} commits", "{0} 个提交");
 		m.put("{0} files", "{0} 个文件");
 		m.put("{0} tags", "{0} 个标签");
-		m.put("'..' is not allowed in the directory", "'..' 不允许在目录中使用");
-		m.put("Able to merge without conflicts", "可以合并而没有冲突");
-		m.put("Add New Email Address", "添加新电子邮件地址");
-		m.put("Add files via upload", "通过上传添加文件");
-		m.put("At least one email address should be configured, please add a new one first", "至少应配置一个电子邮件地址，请先添加一个新地址");
-		m.put("Attachment", "附件");
-		m.put("Bean", "Bean");
-		m.put("Calculating merge preview...", "计算合并预览...");
-		m.put("Comment", "评论");
-		m.put("Comment too long", "评论过长");
-		m.put("Create Pull Request", "创建合并请求");
-		m.put("Description too long", "描述过长");
-		m.put("Do you really want to delete this email address?", "您真的要删除这个电子邮件地址吗？");
-		m.put("Email address", "电子邮件地址");
-		m.put("File name", "文件名");
-		m.put("Git email address will be used as git author/committer for commits created on web UI", 
-			"Git 电子邮件地址将用于在 Web UI 上创建的提交的作者/提交者");
-		m.put("Invalid PCRE syntax", "无效的 PCRE 语法");
-		m.put("Leave a comment", "留下评论");
-		m.put("Login name or email", "登录名或电子邮件");
-		m.put("Malformed email address", "格式错误的电子邮件地址");
-		m.put("Passcode", "Passcode");
-		m.put("Password and its confirmation should be identical.", "密码和其确认应相同。");
-		m.put("Please confirm the password.", "请确认密码。");
-		m.put("Primary email address will be used to receive notifications, show gravatar (if enabled) etc.", 
-			"主电子邮件地址将用于接收通知、显示 Gravatar（如果启用）等。");
-		m.put("Resend Verification Email", "重新发送验证电子邮件");
-		m.put("Search for", "搜索");
-		m.put("Search is too general", "搜索过于笼统");
-		m.put("Set As Primary", "设置为主");
-		m.put("Some one changed the content you are editing. Reload the page and try again.", "有人修改了您正在编辑的内容。重新加载页面并重试。");
-		m.put("Symbol name", "符号名称");
-		m.put("There are merge conflicts. You can still create the pull request though", "有合并冲突。您仍然可以创建合并请求");
-		m.put("This email address is being used", "此电子邮件地址正在使用");
-		m.put("This field is required", "此字段是必填的");
-		m.put("Unable to send verification email as mail service is not configured yet", "无法发送验证电子邮件，因为邮件服务未配置");
-		m.put("Unverified email address is <b>NOT</b> applicable for above functionalities", "未验证的电子邮件地址不适用于上述功能");
-		m.put("Use For Git Operations", "用于 Git 操作");
-		m.put("Verification email sent, please check it", "验证电子邮件已发送，请检查");
-		m.put("When determine if the user is author/committer of a git commit, all emails listed here will be checked", 
-			"确定用户是否是 git 提交的作者/提交者时，将检查此处列出的所有电子邮件");
+		m.put("Diff options", "差异选项");
+		m.put("Filter by path", "按路径过滤");
+		m.put("Hide comment", "隐藏注释");
+		m.put("Revision indexing in progress... (symbol navigation in revisions will be accurate after indexed)", 
+			"版本索引中... (当前版本中的符号导航在索引后才会准确)");
+		m.put("Show commented code snippet", "显示注释的代码片段");
+		m.put("Toggle navigation", "切换导航");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
@@ -2458,6 +2499,13 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Repository Sync", "仓库同步");
 		m.put("Utilities", "工具");
 		m.put("Docker Image", "Docker 镜像");
+		m.put("Unified view", "统一视图");
+		m.put("Split view", "分割视图");
+		m.put("Ignore all whitespace", "忽略所有空白");
+		m.put("Ignore change whitespace", "忽略空白变化");
+		m.put("Ignore leading whitespace", "忽略开始的空白");
+		m.put("Ignore trailing whitespace", "忽略结束的空白");
+		m.put("Do not ignore whitespace", "不忽略空白");
 	}
 	
 	@Override

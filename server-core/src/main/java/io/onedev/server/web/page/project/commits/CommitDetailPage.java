@@ -81,9 +81,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.*;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
+import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 
 public class CommitDetailPage extends ProjectPage implements RevisionAnnotationSupport, JobAuthorizationContextAware {
@@ -148,13 +150,13 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 		List<String> revisionSegments = new ArrayList<>();
 		String segment = params.get(PARAM_COMMIT).toString();
 		if (segment.contains(".."))
-			throw new ExplicitException("Invalid request path");
+			throw new ExplicitException(_T("Invalid request path"));
 		if (segment.length() != 0)
 			revisionSegments.add(segment);
 		for (int i=0; i<params.getIndexedCount(); i++) {
 			segment = params.get(i).toString();
 			if (segment.contains(".."))
-				throw new ExplicitException("Invalid request path");
+				throw new ExplicitException(_T("Invalid request path"));
 			if (segment.length() != 0)
 				revisionSegments.add(segment);
 		}
@@ -219,7 +221,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 					menuItems.add(new MenuItem() {
 						@Override
 						public String getLabel() {
-							return "Create Branch";
+							return _T("Create Branch");
 						}
 
 						@Override
@@ -251,7 +253,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 					menuItems.add(new MenuItem() {
 						@Override
 						public String getLabel() {
-							return "Create Tag";
+							return _T("Create Tag");
 						}
 
 						@Override
@@ -285,7 +287,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 					menuItems.add(new MenuItem() {
 						@Override
 						public String getLabel() {
-							return "Cherry-Pick";
+							return _T("Cherry-Pick");
 						}
 
 						@Override
@@ -300,12 +302,12 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 											.map(it -> GitUtils.ref2branch(it.getName()))
 											.collect(toList());
 									if (operateBranches.isEmpty()) {
-										Session.get().error("No branch to cherry-pick to");
+										Session.get().error(_T("No branch to cherry-pick to"));
 									} else if (operateBranches.size() == 1) {
 										var branch = operateBranches.get(0);
 										cherryPickOrRevert(target, branch, true);
 									} else {
-										new BeanEditModalPanel<>(target, new BranchChoiceBean(), "Select Branch to Cherry Pick to") {
+										new BeanEditModalPanel<>(target, new BranchChoiceBean(), _T("Select Branch to Cherry Pick to")) {
 
 											@Override
 											protected String onSave(AjaxRequestTarget target, BranchChoiceBean bean) {
@@ -322,7 +324,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 					menuItems.add(new MenuItem() {
 						@Override
 						public String getLabel() {
-							return "Revert";
+							return _T("Revert");
 						}
 
 						@Override
@@ -337,12 +339,12 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 											.map(it -> GitUtils.ref2branch(it.getName()))
 											.collect(toList());
 									if (operateBranches.isEmpty()) {
-										Session.get().error("No branch to revert on");
+										Session.get().error(_T("No branch to revert on"));
 									} else if (operateBranches.size() == 1) {
 										var branch = operateBranches.get(0);
 										cherryPickOrRevert(target, branch, false);
 									} else {
-										new BeanEditModalPanel<>(target, new BranchChoiceBean(), "Select Branch to Revert on") {
+										new BeanEditModalPanel<>(target, new BranchChoiceBean(), _T("Select Branch to Revert on")) {
 
 											@Override
 											protected String onSave(AjaxRequestTarget target, BranchChoiceBean bean) {
@@ -997,13 +999,13 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	private String checkUpdateBranch(BranchProtection protection, ObjectId oldCommitId, ObjectId newCommitId) {
 		var project = getProject();
 		if (protection.isReviewRequiredForPush(project, oldCommitId, newCommitId, new HashMap<>()))
-			return "Review required for this change. Submit pull request instead";
+			return _T("Review required for this change. Submit pull request instead");
 		var buildRequirement = protection.getBuildRequirement(project, oldCommitId, newCommitId, new HashMap<>());
 		if (!buildRequirement.getRequiredJobs().isEmpty())
-			return "This change needs to be verified by some jobs. Submit pull request instead";
+			return _T("This change needs to be verified by some jobs. Submit pull request instead");
 		if (protection.isCommitSignatureRequired()
 				&& OneDev.getInstance(SettingManager.class).getGpgSetting().getSigningKey() == null) {
-			return "Commit signature required but no GPG signing key specified";
+			return _T("Commit signature required but no GPG signing key specified");
 		}
 		return null;
 	}
@@ -1027,11 +1029,11 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 			var errorMessage = checkUpdateBranch(protection, targetCommit.copy(), resultCommitId);
 			if (errorMessage != null) {
 				if (cherryPick)
-					Session.get().error("Error cherry-picking to " + branch + ": " + errorMessage);
+					Session.get().error(MessageFormat.format(_T("Error cherry-picking to {0}: {1}"), branch, errorMessage));
 				else
-					Session.get().error("Error reverting on " + branch + ": " + errorMessage);
+					Session.get().error(MessageFormat.format(_T("Error reverting on {0}: {1}"), branch, errorMessage));
 			} else {
-				new BeanEditModalPanel<>(target, bean, "Specify Commit Message") {
+				new BeanEditModalPanel<>(target, bean, _T("Specify Commit Message")) {
 					@Override
 					protected boolean isDirtyAware() {
 						return false;
@@ -1053,18 +1055,18 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 						target.add(refsContainer);
 						close();
 						if (cherryPick)
-							getSession().success("Cherry-picked successfully");
+							getSession().success(_T("Cherry-picked successfully"));
 						else
-							getSession().success("Reverted successfully");
+							getSession().success(_T("Reverted successfully"));
 						return null;
 					}
 				};
 			}
 		} else {
 			if (cherryPick)
-				Session.get().error("Error cherry-picking to " + branch + ": Merge conflicts detected");
+				Session.get().error(MessageFormat.format(_T("Error cherry-picking to {0}: Merge conflicts detected"), branch));
 			else
-				Session.get().error("Error reverting on " + branch + ": Merge conflicts detected");
+				Session.get().error(MessageFormat.format(_T("Error reverting on {0}: Merge conflicts detected"), branch));
 		}
 	}
 

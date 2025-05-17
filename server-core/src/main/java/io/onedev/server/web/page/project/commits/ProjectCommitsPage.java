@@ -30,6 +30,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -235,12 +238,12 @@ public class ProjectCommitsPage extends ProjectPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Commits");
+		return new Label(componentId, _T("Commits"));
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		return "Commits - " + getProject().getPath();
+		return _T("Commits") + " - " + getProject().getPath();
 	}
 	
 	@Override
