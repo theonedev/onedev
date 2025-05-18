@@ -87,16 +87,20 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
+	public PullRequestQuery(@Nullable Criteria<PullRequest> criteria, List<EntitySort> sorts, List<EntitySort> baseSorts) {
+		super(criteria, sorts, baseSorts);
+	}
+
 	public PullRequestQuery(@Nullable Criteria<PullRequest> criteria, List<EntitySort> sorts) {
-		super(criteria, sorts);
+		this(criteria, sorts, new ArrayList<>());
 	}
 
 	public PullRequestQuery(@Nullable Criteria<PullRequest> criteria) {
-		super(criteria, new ArrayList<>());
+		this(criteria, new ArrayList<>());
 	}
 
 	public PullRequestQuery() {
-		super(null, new ArrayList<>());
+		this(null);
 	}
 
 	public static PullRequestQuery parse(@Nullable Project project, @Nullable String queryString, boolean withCurrentUserCriteria) {
@@ -528,16 +532,13 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 		return AntlrUtils.getLexerRule(PullRequestQueryLexer.ruleNames, operatorName);
 	}
 
-	public static PullRequestQuery merge(PullRequestQuery query1, PullRequestQuery query2) {
+	public static PullRequestQuery merge(PullRequestQuery baseQuery, PullRequestQuery query) {
 		List<Criteria<PullRequest>> criterias = new ArrayList<>();
-		if (query1.getCriteria() != null)
-			criterias.add(query1.getCriteria());
-		if (query2.getCriteria() != null)
-			criterias.add(query2.getCriteria());
-		List<EntitySort> sorts = new ArrayList<>();
-		sorts.addAll(query1.getSorts());
-		sorts.addAll(query2.getSorts());
-		return new PullRequestQuery(Criteria.andCriterias(criterias), sorts);
+		if (baseQuery.getCriteria() != null)
+			criterias.add(baseQuery.getCriteria());
+		if (query.getCriteria() != null)
+			criterias.add(query.getCriteria());
+		return new PullRequestQuery(Criteria.andCriterias(criterias), query.getSorts(), baseQuery.getSorts());
 	}
 
 }

@@ -50,7 +50,6 @@ import static io.onedev.server.search.entity.issue.IssueQueryParser.WatchedByMe;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -119,20 +118,24 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateReso
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 import io.onedev.server.web.util.WicketUtils;
 
-public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> {
+public class IssueQuery extends EntityQuery<Issue> {
 
 	private static final long serialVersionUID = 1L;
 
+	public IssueQuery(@Nullable Criteria<Issue> criteria, List<EntitySort> sorts, List<EntitySort> baseSorts) {
+		super(criteria, sorts, baseSorts);
+	}
+
 	public IssueQuery(@Nullable Criteria<Issue> criteria, List<EntitySort> sorts) {
-		super(criteria, sorts);
+		this(criteria, sorts, new ArrayList<>());
 	}
 
 	public IssueQuery(@Nullable Criteria<Issue> criteria) {
-		super(criteria, new ArrayList<>());
+		this(criteria, new ArrayList<>());
 	}
 
 	public IssueQuery() {
-		super(null, new ArrayList<>());
+		this(null);
 	}
 
 	public static IssueQuery parse(@Nullable Project project, @Nullable String queryString,
@@ -731,24 +734,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 			criterias.add(baseQuery.getCriteria());
 		if (query.getCriteria() != null)
 			criterias.add(query.getCriteria());
-		List<EntitySort> sorts = new ArrayList<>();
-		
-		// query sorts should take precedence over base query sorts
-		sorts.addAll(query.getSorts());
-		sorts.addAll(baseQuery.getSorts());
-		return new IssueQuery(Criteria.andCriterias(criterias), sorts);
-	}
-
-	@Override
-	public int compare(Issue o1, Issue o2) {
-		for (EntitySort sort : getSorts()) {
-			int result = SORT_FIELDS.get(sort.getField()).getComparator().compare(o1, o2);
-			if (sort.getDirection() == DESCENDING)
-				result *= -1;
-			if (result != 0)
-				return result;
-		}
-		return 0;
+		return new IssueQuery(Criteria.andCriterias(criterias), query.getSorts(), baseQuery.getSorts());
 	}
 
 }

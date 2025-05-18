@@ -898,6 +898,13 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		return predicates.toArray(new Predicate[0]);
 	}
 
+	private Order getOrder(EntitySort sort, CriteriaBuilder builder, From<PullRequest, PullRequest> root) {
+		if (sort.getDirection() == Direction.ASCENDING)
+			return builder.asc(PullRequestQuery.getPath(root, PullRequest.SORT_FIELDS.get(sort.getField()).getProperty()));
+		else
+			return builder.desc(PullRequestQuery.getPath(root, PullRequest.SORT_FIELDS.get(sort.getField()).getProperty()));
+	}
+
 	@SuppressWarnings("rawtypes")
 	private CriteriaQuery<PullRequest> buildCriteriaQuery(Session session, @Nullable Project targetProject,
 			EntityQuery<PullRequest> requestQuery) {
@@ -908,18 +915,14 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		query.where(getPredicates(targetProject, requestQuery.getCriteria(), query, root, builder));
 
 		List<Order> orders = new ArrayList<>();
-		for (EntitySort sort: requestQuery.getSorts()) {
-			if (sort.getDirection() == Direction.ASCENDING) {
-				orders.add(builder.asc(PullRequestQuery.getPath(
-						root, PullRequest.SORT_FIELDS.get(sort.getField()).getProperty())));
-			} else {
-				orders.add(builder.desc(PullRequestQuery.getPath(
-						root, PullRequest.SORT_FIELDS.get(sort.getField()).getProperty())));
-			}
-		}
+		for (EntitySort sort: requestQuery.getSorts()) 
+			orders.add(getOrder(sort, builder, root));
 
 		if (requestQuery.getCriteria() != null)
 			orders.addAll(requestQuery.getCriteria().getPreferOrders(builder, root));
+
+		for (EntitySort sort: requestQuery.getBaseSorts()) 
+			orders.add(getOrder(sort, builder, root));
 
 		var found = false;
 		for (var order: orders) {

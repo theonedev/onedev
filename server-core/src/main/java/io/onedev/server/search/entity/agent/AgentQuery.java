@@ -61,11 +61,11 @@ public class AgentQuery extends EntityQuery<Agent> {
 	}
 
 	public AgentQuery(@Nullable Criteria<Agent> criteria) {
-		super(criteria, new ArrayList<>());
+		this(criteria, new ArrayList<>());
 	}
 
 	public AgentQuery() {
-		super(null, new ArrayList<>());
+		this(null);
 	}
 	
 	public static AgentQuery parse(@Nullable String queryString, boolean forExecutor) {
@@ -245,15 +245,14 @@ public class AgentQuery extends EntityQuery<Agent> {
 		return AntlrUtils.getLexerRule(AgentQueryLexer.ruleNames, operatorName);
 	}
 	
-	public static AgentQuery merge(AgentQuery query1, AgentQuery query2) {
+	public static AgentQuery merge(AgentQuery baseQuery, AgentQuery query) {
 		List<Criteria<Agent>> criterias = new ArrayList<>();
-		if (query1.getCriteria() != null)
-			criterias.add(query1.getCriteria());
-		if (query2.getCriteria() != null)
-			criterias.add(query2.getCriteria());
-		List<EntitySort> sorts = new ArrayList<>();
-		sorts.addAll(query1.getSorts());
-		sorts.addAll(query2.getSorts());
+		if (baseQuery.getCriteria() != null)
+			criterias.add(baseQuery.getCriteria());
+		if (query.getCriteria() != null)
+			criterias.add(query.getCriteria());
+		List<EntitySort> sorts = new ArrayList<>(query.getSorts());
+		sorts.addAll(baseQuery.getSorts());
 		return new AgentQuery(Criteria.andCriterias(criterias), sorts);
 	}
 	

@@ -81,6 +81,7 @@ import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.IssueSortField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
@@ -1166,20 +1167,41 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	}
 	
 	public List<Issue> findLinkedIssues(LinkSpec spec, boolean opposite) {
+		class IssueComparator implements Comparator<Issue> {
+
+			private final List<EntitySort> sorts;
+
+			IssueComparator(List<EntitySort> sorts) {
+				this.sorts = sorts;
+			}
+
+			@Override
+			public int compare(Issue o1, Issue o2) {
+				for (EntitySort sort : sorts) {
+					int result = SORT_FIELDS.get(sort.getField()).getComparator().compare(o1, o2);
+					if (sort.getDirection() == DESCENDING)
+						result *= -1;
+					if (result != 0)
+						return result;
+				}
+				return 0;
+			}
+		}
+
 		if (spec.getOpposite() != null) {
 			if (opposite) {
 				return getSourceLinks().stream()
 						.filter(it->it.getSpec().equals(spec))
 						.sorted()
 						.map(it->it.getSource())
-						.sorted(spec.getOpposite().getParsedIssueQuery(getProject()))
+						.sorted(new IssueComparator(spec.getOpposite().getParsedIssueQuery(getProject()).getSorts()))
 						.collect(Collectors.toList());
 			} else {
 				return getTargetLinks().stream()
 						.filter(it->it.getSpec().equals(spec))
 						.sorted()
 						.map(it->it.getTarget())
-						.sorted(spec.getParsedIssueQuery(getProject()))
+						.sorted(new IssueComparator(spec.getParsedIssueQuery(getProject()).getSorts()))
 						.collect(Collectors.toList());
 			}
 		} else {
@@ -1187,7 +1209,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 					.filter(it->it.getSpec().equals(spec))
 					.sorted()
 					.map(it->it.getLinked(this))
-					.sorted(spec.getParsedIssueQuery(getProject()))
+					.sorted(new IssueComparator(spec.getParsedIssueQuery(getProject()).getSorts()))
 					.collect(Collectors.toList());
 		}
 	}

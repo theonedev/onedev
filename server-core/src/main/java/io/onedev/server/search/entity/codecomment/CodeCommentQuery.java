@@ -72,11 +72,11 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 	}
 
 	public CodeCommentQuery(@Nullable Criteria<CodeComment> criteria) {
-		super(criteria, new ArrayList<>());
+		this(criteria, new ArrayList<>());
 	}
 
 	public CodeCommentQuery() {
-		super(null, new ArrayList<>());
+		this(null);
 	}
 
 	public static CodeCommentQuery parse(Project project, @Nullable String queryString,

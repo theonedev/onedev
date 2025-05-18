@@ -1033,6 +1033,13 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return count(true);
 	}
 
+	private Order getOrder(EntitySort sort, CriteriaBuilder builder, From<Project, Project> root) {
+		if (sort.getDirection() == ASCENDING)
+			return builder.asc(ProjectQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty()));
+		else
+			return builder.desc(ProjectQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty()));
+	}
+
 	@SuppressWarnings("rawtypes")
 	private CriteriaQuery<Project> buildCriteriaQuery(Session session, EntityQuery<Project> projectQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -1044,15 +1051,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 		List<Order> orders = new ArrayList<>();
 
-		for (EntitySort sort : projectQuery.getSorts()) {
-			if (sort.getDirection() == ASCENDING)
-				orders.add(builder.asc(ProjectQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
-			else
-				orders.add(builder.desc(ProjectQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
-		}
+		for (EntitySort sort : projectQuery.getSorts()) 
+			orders.add(getOrder(sort, builder, root));
 
 		if (projectQuery.getCriteria() != null)
 			orders.addAll(projectQuery.getCriteria().getPreferOrders(builder, root));
+
+		for (EntitySort sort : projectQuery.getBaseSorts()) 
+			orders.add(getOrder(sort, builder, root));
 
 		var found = false;
 		for (var order: orders) {

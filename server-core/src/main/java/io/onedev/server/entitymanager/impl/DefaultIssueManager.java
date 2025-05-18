@@ -268,29 +268,36 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		dao.persist(issue);
 	}
 
+	private javax.persistence.criteria.Order getOrder(EntitySort sort, CriteriaBuilder builder, From<Issue, Issue> issue) {
+		if (Issue.SORT_FIELDS.containsKey(sort.getField())) {
+			if (sort.getDirection() == Direction.ASCENDING)
+				return builder.asc(IssueQuery.getPath(issue, Issue.SORT_FIELDS.get(sort.getField()).getProperty()));
+			else
+				return builder.desc(IssueQuery.getPath(issue, Issue.SORT_FIELDS.get(sort.getField()).getProperty()));
+		} else {
+			Join<Issue, IssueField> join = issue.join(Issue.PROP_FIELDS, JoinType.LEFT);
+			join.on(builder.equal(join.get(IssueField.PROP_NAME), sort.getField()));
+			if (sort.getDirection() == Direction.ASCENDING)
+				return builder.asc(join.get(IssueField.PROP_ORDINAL));
+			else
+				return builder.desc(join.get(IssueField.PROP_ORDINAL));
+		}
+	}
+
 	@SuppressWarnings("rawtypes")
 	@Override
-	public List<javax.persistence.criteria.Order> buildOrders(List<EntitySort> sorts, CriteriaBuilder builder, 
+	public List<javax.persistence.criteria.Order> buildOrders(EntityQuery<Issue> query, CriteriaBuilder builder, 
 															  From<Issue, Issue> issue, 
 															  List<javax.persistence.criteria.Order> preferOrders) {
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
-		for (EntitySort sort: sorts) {
-			if (Issue.SORT_FIELDS.containsKey(sort.getField())) {
-				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(IssueQuery.getPath(issue, Issue.SORT_FIELDS.get(sort.getField()).getProperty())));
-				else
-					orders.add(builder.desc(IssueQuery.getPath(issue, Issue.SORT_FIELDS.get(sort.getField()).getProperty())));
-			} else {
-				Join<Issue, IssueField> join = issue.join(Issue.PROP_FIELDS, JoinType.LEFT);
-				join.on(builder.equal(join.get(IssueField.PROP_NAME), sort.getField()));
-				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(join.get(IssueField.PROP_ORDINAL)));
-				else
-					orders.add(builder.desc(join.get(IssueField.PROP_ORDINAL)));
-			}
-		}
+
+		for (EntitySort sort: query.getSorts()) 
+			orders.add(getOrder(sort, builder, issue));
 
 		orders.addAll(preferOrders);
+		
+		for (EntitySort sort: query.getBaseSorts()) 
+			orders.add(getOrder(sort, builder, issue));
 				
 		var found = false;
 		for (var order: orders) {
@@ -327,7 +334,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		List<javax.persistence.criteria.Order> preferOrders = new ArrayList<>();
 		if (criteria != null)
 			preferOrders.addAll(criteria.getPreferOrders(builder, root));
-		criteriaQuery.orderBy(buildOrders(issueQuery.getSorts(), builder, root, preferOrders));
+		criteriaQuery.orderBy(buildOrders(issueQuery, builder, root, preferOrders));
 		
 		Query<Issue> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);

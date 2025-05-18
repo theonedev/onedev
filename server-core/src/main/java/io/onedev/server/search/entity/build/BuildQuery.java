@@ -395,15 +395,15 @@ public class BuildQuery extends EntityQuery<Build> {
 		return AntlrUtils.getLexerRule(BuildQueryLexer.ruleNames, operatorName);
 	}
 		
-	public static BuildQuery merge(BuildQuery query1, BuildQuery query2) {
+	public static BuildQuery merge(BuildQuery baseQuery, BuildQuery query) {
 		List<Criteria<Build>> criterias = new ArrayList<>();
-		if (query1.getCriteria() != null)
-			criterias.add(query1.getCriteria());
-		if (query2.getCriteria() != null)
-			criterias.add(query2.getCriteria());
+		if (baseQuery.getCriteria() != null)
+			criterias.add(baseQuery.getCriteria());
+		if (query.getCriteria() != null)
+			criterias.add(query.getCriteria());
 		List<EntitySort> sorts = new ArrayList<>();
-		sorts.addAll(query1.getSorts());
-		sorts.addAll(query2.getSorts());
+		sorts.addAll(query.getSorts());
+		sorts.addAll(baseQuery.getSorts());
 		return new BuildQuery(Criteria.andCriterias(criterias), sorts);
 	}
 	

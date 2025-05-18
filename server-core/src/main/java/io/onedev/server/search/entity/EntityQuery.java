@@ -1,6 +1,7 @@
 package io.onedev.server.search.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -50,9 +51,16 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 
 	private List<EntitySort> sorts;
 
+	private List<EntitySort> baseSorts;
+
 	public EntityQuery(@Nullable Criteria<T> criteria, List<EntitySort> sorts) {
+		this(criteria, sorts, new ArrayList<>());
+	}
+
+	public EntityQuery(@Nullable Criteria<T> criteria, List<EntitySort> sorts, List<EntitySort> baseSorts) {
 		this.criteria = criteria;
 		this.sorts = sorts;
+		this.baseSorts = baseSorts;
 	}
 
 	@Nullable
@@ -70,6 +78,14 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 
 	public void setSorts(List<EntitySort> sorts) {
 		this.sorts = sorts;
+	}
+
+	public List<EntitySort> getBaseSorts() {
+		return baseSorts;
+	}
+
+	public void setBaseSorts(List<EntitySort> baseSorts) {
+		this.baseSorts = baseSorts;
 	}
 	
 	public static String getValue(String token) {

@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.pullrequest.list;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.merge;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
@@ -175,7 +176,7 @@ public abstract class PullRequestListPanel extends Panel {
 				parsedQuery = new PullRequestQuery(new FuzzyCriteria(queryString));
 			}
 		}
-		return PullRequestQuery.merge(baseQuery, parsedQuery);
+		return merge(baseQuery, parsedQuery);
 	}
 	
 	@Override

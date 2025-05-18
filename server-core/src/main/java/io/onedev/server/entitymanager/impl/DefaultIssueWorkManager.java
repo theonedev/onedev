@@ -80,7 +80,7 @@ public class DefaultIssueWorkManager extends BaseEntityManager<IssueWork> implem
 		List<javax.persistence.criteria.Order> preferOrders = new ArrayList<>();
 		if (issueQuery.getCriteria() != null) 
 			preferOrders.addAll(issueQuery.getCriteria().getPreferOrders(builder, issue));
-		criteriaQuery.orderBy(issueManager.buildOrders(issueQuery.getSorts(), builder, issue, preferOrders));
+		criteriaQuery.orderBy(issueManager.buildOrders(issueQuery, builder, issue, preferOrders));
 
 		Query<IssueWork> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(0);

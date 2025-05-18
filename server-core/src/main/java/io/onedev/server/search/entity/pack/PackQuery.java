@@ -257,15 +257,14 @@ public class PackQuery extends EntityQuery<Pack> {
 		return AntlrUtils.getLexerRule(PackQueryLexer.ruleNames, operatorName);
 	}
 	
-	public static PackQuery merge(PackQuery query1, PackQuery query2) {
+	public static PackQuery merge(PackQuery baseQuery, PackQuery query) {
 		List<Criteria<Pack>> criterias = new ArrayList<>();
-		if (query1.getCriteria() != null)
-			criterias.add(query1.getCriteria());
-		if (query2.getCriteria() != null)
-			criterias.add(query2.getCriteria());
-		List<EntitySort> sorts = new ArrayList<>();
-		sorts.addAll(query1.getSorts());
-		sorts.addAll(query2.getSorts());
+		if (baseQuery.getCriteria() != null)
+			criterias.add(baseQuery.getCriteria());
+		if (query.getCriteria() != null)
+			criterias.add(query.getCriteria());
+		List<EntitySort> sorts = new ArrayList<>(query.getSorts());
+		sorts.addAll(baseQuery.getSorts());
 		return new PackQuery(Criteria.andCriterias(criterias), sorts);
 	}
 	
