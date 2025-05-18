@@ -1,66 +1,21 @@
 package io.onedev.server.web.page.project.blob.render.source;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
-import io.onedev.commons.jsymbol.Symbol;
-import io.onedev.commons.jsymbol.SymbolExtractor;
-import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
-import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.PlanarRange;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.codequality.*;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.git.BlameBlock;
-import io.onedev.server.git.Blob;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.service.GitService;
-import io.onedev.server.model.*;
-import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.model.support.Mark;
-import io.onedev.server.search.code.CodeSearchManager;
-import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.Similarities;
-import io.onedev.server.util.diff.DiffUtils;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
-import io.onedev.server.web.component.codecomment.CodeCommentPanel;
-import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
-import io.onedev.server.web.component.markdown.SuggestionSupport;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.sourceformat.OptionChangeCallback;
-import io.onedev.server.web.component.sourceformat.SourceFormatPanel;
-import io.onedev.server.web.component.suggestionapply.SuggestionApplyBean;
-import io.onedev.server.web.component.suggestionapply.SuggestionApplyModalPanel;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
-import io.onedev.server.web.page.project.blob.render.BlobRenderer;
-import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
-import io.onedev.server.web.page.project.blob.render.view.Positionable;
-import io.onedev.server.web.page.project.blob.search.SearchMenuContributor;
-import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.util.AnnotationInfo;
-import io.onedev.server.web.util.CodeCommentInfo;
-import io.onedev.server.web.util.WicketUtils;
+import static io.onedev.server.web.translation.Translation._T;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxChannel;
@@ -101,12 +56,76 @@ import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import javax.annotation.Nullable;
-import javax.servlet.http.Cookie;
-import java.util.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 
-import static io.onedev.server.web.translation.Translation._T;
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+import io.onedev.commons.jsymbol.Symbol;
+import io.onedev.commons.jsymbol.SymbolExtractor;
+import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.PlanarRange;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
+import io.onedev.server.codequality.BlobTarget;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.CodeProblemContribution;
+import io.onedev.server.codequality.CoverageStatus;
+import io.onedev.server.codequality.LineCoverageContribution;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
+import io.onedev.server.git.BlameBlock;
+import io.onedev.server.git.Blob;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.CodeCommentStatusChange;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.CompareContext;
+import io.onedev.server.model.support.Mark;
+import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.hit.QueryHit;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.Similarities;
+import io.onedev.server.util.diff.DiffUtils;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
+import io.onedev.server.web.component.codecomment.CodeCommentPanel;
+import io.onedev.server.web.component.comment.CommentInput;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.component.markdown.SuggestionSupport;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.sourceformat.OptionChangeCallback;
+import io.onedev.server.web.component.sourceformat.SourceFormatPanel;
+import io.onedev.server.web.component.suggestionapply.SuggestionApplyBean;
+import io.onedev.server.web.component.suggestionapply.SuggestionApplyModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
+import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
+import io.onedev.server.web.page.project.blob.render.view.Positionable;
+import io.onedev.server.web.page.project.blob.search.SearchMenuContributor;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.util.AnnotationInfo;
+import io.onedev.server.web.util.CodeCommentInfo;
+import io.onedev.server.web.util.WicketUtils;
 
 /**
  * Make sure to add only one source view panel per page
@@ -330,7 +349,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				setVisible(commentContainer.getDefaultModelObject() != null);
 			}
 			
-		}.setOutputMarkupId(true));
+		}.add(AttributeAppender.append("data-tippy-content", _T("Show commented code snippet"))).setOutputMarkupId(true));
 		
 		head.add(new Label("status", new LoadableDetachableModel<String>() {
 
@@ -398,7 +417,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				closeComment(target);
 			}
 			
-		});
+		}.add(AttributeAppender.append("data-tippy-content", _T("Hide comment"))));
 		
 		commentContainer.setOutputMarkupPlaceholderTag(true);
 		
@@ -958,8 +977,14 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		else
 			markRange = markRange.normalize(blob.getText().getLines());
 		
+		var translations = Map.of(
+			"perma-link", _T("Permanent link of this selection"), 
+			"copy-to-clipboard", _T("Copy selected text to clipboard"), 
+			"add-comment", _T("Add comment on this selection"), 
+			"login-to-comment", _T("Login to comment on selection"));
+
 		String script = String.format("onedev.server.sourceView.onDomReady("
-				+ "'%s', '%s', %s, %s, '%s', '%s', %s, %s, %s, %s, '%s', %s);", 
+				+ "'%s', '%s', %s, %s, '%s', '%s', %s, %s, %s, %s, '%s', %s, %s);", 
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path),
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
 				convertToJson(openCommentInfo),
@@ -971,7 +996,8 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				blameMessageBehavior.getCallback(),
 				sourceFormat.getTabSize(),
 				sourceFormat.getLineWrapMode(), 
-				convertToJson(annotationInfoModel.getObject()));
+				convertToJson(annotationInfoModel.getObject()), 
+				convertToJson(translations));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
 		if (markRange != null) {

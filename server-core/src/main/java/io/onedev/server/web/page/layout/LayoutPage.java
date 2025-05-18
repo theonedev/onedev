@@ -551,9 +551,9 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected String load() {
 				if (isSubscriptionActive() && SecurityUtils.isAdministrator())
-					return "Bug Report";
+					return _T("Bug Report");
 				else
-					return "Support & Bug Report";
+					return _T("Support & Bug Report");
 			}
 
 		}));

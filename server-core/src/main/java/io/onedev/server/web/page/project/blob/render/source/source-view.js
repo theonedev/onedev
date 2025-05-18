@@ -1,8 +1,8 @@
 onedev.server.sourceView = {
 	onDomReady: function(filePath, fileContent, openComment, markRange, symbolTooltipId, 
 			revision, blameInfos, callback, blameMessageCallback, tabSize, lineWrapMode, 
-			annotationInfo) {
-		
+			annotationInfo, translations) {
+		onedev.server.sourceView.translations = translations;
 		var $sourceView = $(".source-view");
 		var $code = $sourceView.children(".code");
 
@@ -394,10 +394,10 @@ onedev.server.sourceView = {
 		
 		var $content;
 		let svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#link'/></svg>`;
-		$content = $(`<div><a class='permanent'>${svg} Permanent link of this selection</a>`);
+		$content = $(`<div><a class='permanent'>${svg} ${onedev.server.sourceView.translations["perma-link"]}</a>`);
 		$content.children("a.permanent").attr("href", selectionUrl);
 		svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#copy'/></svg>`;
-		$content.append(`<a class='copy-marked'>${svg} Copy selected text to clipboard</a>`);
+		$content.append(`<a class='copy-marked'>${svg} ${onedev.server.sourceView.translations["copy-to-clipboard"]}</a>`);
 		var clipboard = new ClipboardJS(".copy-marked", {
 		    text: function() {
 		        return cm.getSelection("\n");
@@ -411,7 +411,7 @@ onedev.server.sourceView = {
 		});
 		if (loggedIn) {
 			let svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#comment'/></svg>`;
-			$content.append(`<a class='comment'>${svg} Add comment on this selection</a>`);
+			$content.append(`<a class='comment'>${svg} ${onedev.server.sourceView.translations["add-comment"]}</a>`);
 			$content.children("a.comment").click(function() {
 				if (onedev.server.sourceView.confirmUnsavedChanges()) {
 					$(".selection-popover").remove();
@@ -422,7 +422,7 @@ onedev.server.sourceView = {
 		} else {
 			let loginHref = $(".sign-in").attr("href");
 			let svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#warning'/></svg>`;
-			$content.append(`<a href='${loginHref}' class='comment'>${svg} Login to comment on selection</a>`);
+			$content.append(`<a href='${loginHref}' class='comment'>${svg} ${onedev.server.sourceView.translations["login-to-comment"]}</a>`);
 		}			
 		
 		$(".source-view").selectionPopover("open", {

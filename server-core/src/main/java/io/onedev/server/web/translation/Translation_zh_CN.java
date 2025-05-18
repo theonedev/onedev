@@ -59,6 +59,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Add after", "添加到后面");
 		m.put("Add before", "添加到前面");
 		m.put("Add child project", "添加子项目");
+		m.put("Add comment on this selection", "在此选择上添加注释");
 		m.put("Add dashboard", "添加仪表板");
 		m.put("Add files via upload", "通过上传添加文件");
 		m.put("Add new", "添加");
@@ -211,6 +212,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Branding", "品牌设置");
 		m.put("Browse Code", "浏览代码");
 		m.put("Browse code", "浏览代码");
+		m.put("Bug Report", "错误报告");
 		m.put("Build", "构建");
 		m.put("Build Artifact Storage", "构建构件存储");
 		m.put("Build Commit", "构建提交");
@@ -283,6 +285,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Channel Notification", "频道通知");
 		m.put("Check Commit Message Footer", "检查提交消息尾部");
 		m.put("Check Incoming Email", "检查接收的电子邮件");
+		m.put("Check Update", "检查更新");
 		m.put("Check Workflow Integrity", "检查工作流完整性");
 		m.put("Check this to enforce two-factor authentication for all users in the system", "勾选此项以强制系统中所有用户启用两阶段身份验证");
 		m.put("Check this to enforce two-factor authentication for all users in this group", "勾选此项以强制本组所有用户启用两阶段身份验证");
@@ -387,6 +390,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Copy", "复制");
 		m.put("Copy Files with SCP", "使用 SCP 复制文件");
 		m.put("Copy dashboard", "复制仪表板");
+		m.put("Copy selected text to clipboard", "复制选中的文本到剪贴板");
 		m.put("Copy to clipboard", "复制到剪贴板");
 		m.put("Count", "数量");
 		m.put("Covered", "覆盖");
@@ -469,6 +473,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Detect Licenses", "检测许可证");
 		m.put("Detect Secrets", "检测敏感信息");
 		m.put("Detect Vulnerabilities", "检测漏洞");
+		m.put("Diff options", "差异选项");
 		m.put("Digest invalid", "摘要无效");
 		m.put("Directories to Skip", "要跳过的目录");
 		m.put("Directory (tenant) ID", "目录（租户）ID");
@@ -490,6 +495,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Docker Sock Path", "Docker Sock 路径");
 		m.put("Docker hub", "Docker 中心");
 		m.put("Dockerfile", "Dockerfile");
+		m.put("Documentation", "文档");
 		m.put("Don't have an account yet?", "没有账户？");
 		m.put("Download", "下载");
 		m.put("Due Date", "截止日期");
@@ -609,6 +615,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Files to Be Analyzed", "要分析的文件");
 		m.put("Filter", "过滤");
 		m.put("Filter Issues", "过滤工单");
+		m.put("Filter by path", "按路径过滤");
 		m.put("Finish", "完成");
 		m.put("First applicable executor", "第一个适用的执行器");
 		m.put("Fix Type", "修复类型");
@@ -724,6 +731,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("HTTP(S)", "HTTP(S)");
 		m.put("HTTP(S) Clone URL", "HTTP(S) 克隆 URL");
 		m.put("Has Owner Permissions", "有所有者权限");
+		m.put("Hide comment", "隐藏注释");
 		m.put("Hide saved queries", "隐藏保存的查询");
 		m.put("High", "高");
 		m.put("History", "历史");
@@ -796,6 +804,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Include Child Projects", "包含子项目");
 		m.put("Include Forks", "包含分支");
 		m.put("Include When Issue is Opened", "在工单打开时包含");
+		m.put("Incompatibilities", "不兼容性");
 		m.put("Indicator", "指示器");
 		m.put("Inherit from parent", "从父级继承");
 		m.put("Input Spec", "输入规范");
@@ -931,6 +940,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Leave a comment", "留下评论");
 		m.put("Leave a note", "留下备注");
 		m.put("Left", "左");
+		m.put("License Agreement", "许可协议");
 		m.put("License Setting", "许可证设置");
 		m.put("Line changes", "行变化");
 		m.put("Link Spec", "链接规范");
@@ -947,6 +957,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Login Name", "登录名称");
 		m.put("Login name or email", "登录名或电子邮件");
 		m.put("Login name or email address", "登录名或电子邮件地址");
+		m.put("Login to comment on selection", "登录以在选择上添加注释");
 		m.put("Logo for Dark Mode", "暗黑模式下的Logo");
 		m.put("Logo for Light Mode", "亮色模式下的Logo");
 		m.put("Long-live refresh token of above account which will be used to generate access token to access Gmail. <b class='text-info'>TIPS: </b> you may use the button at right side of this field to generate refresh token. Note that whenever client id, client secret, or account name is changed, refresh token should be re-generated", 
@@ -1433,6 +1444,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Performance Settings", "性能设置");
 		m.put("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ author(robin)", 
 			"执行模糊查询。使用 '~' 包围搜索文本以添加更多条件，例如：~text to search~ author(robin)");
+		m.put("Permanent link of this selection", "此选择的永久链接");
 		m.put("Platform", "平台");
 		m.put("Platforms", "平台");
 		m.put("Please <a wicket:id=\"download\" class=\"font-weight-bolder\">download</a> recovery codes below and keep them secret. These codes can be used to provide one-time access to your account in case you can not access the authentication application. They will <b>NOT</b> be displayed again", 
@@ -1541,6 +1553,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Query param", "查询参数");
 		m.put("Query/order projects", "查询/排序项目");
 		m.put("Quick Search", "快速搜索");
+		m.put("RESTful API", "RESTful API");
 		m.put("Read", "读取");
 		m.put("Read body", "读取正文");
 		m.put("Readiness Check Command", "准备检查命令");
@@ -1597,6 +1610,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Reviewers", "审查者");
 		m.put("Revision", "修订");
 		m.put("Revision indexing in progress...", "正在索引当前版本...");
+		m.put("Revision indexing in progress... (symbol navigation in revisions will be accurate after indexed)", 
+			"版本索引中... (当前版本中的符号导航在索引后才会准确)");
 		m.put("Right", "右");
 		m.put("Role", "角色");
 		m.put("Role Management", "角色管理");
@@ -1738,6 +1753,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Show Pull Request Stats", "显示合并请求统计");
 		m.put("Show Saved Queries", "显示保存的查询");
 		m.put("Show Works Of", "显示工作量");
+		m.put("Show commented code snippet", "显示注释的代码片段");
 		m.put("Sign In", "登录");
 		m.put("Sign In To", "登录到");
 		m.put("Sign Out", "登出");
@@ -2128,6 +2144,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Subscription data", "订阅数据");
 		m.put("Successful", "成功");
 		m.put("Suffix Pattern", "后缀模式");
+		m.put("Support & Bug Report", "技术支持与错误报告");
+		m.put("Support Request", "支持请求");
 		m.put("Switch to HTTP(S)", "切换到 HTTP(S)");
 		m.put("Switch to SSH", "切换到 SSH");
 		m.put("Symbol name", "符号名称");
@@ -2238,6 +2256,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("To State", "到状态");
 		m.put("To States", "到状态");
 		m.put("Toggle dark mode", "切换暗模式");
+		m.put("Toggle navigation", "切换导航");
 		m.put("Too many commits to load", "加载的提交太多");
 		m.put("Toomanyrequests", "请求过多");
 		m.put("Top", "顶部");
@@ -2252,6 +2271,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Trivy Container Image Scanner", "Trivy 容器镜像扫描器");
 		m.put("Trivy Filesystem Scanner", "Trivy 文件系统扫描器");
 		m.put("Trivy Rootfs Scanner", "Trivy 根文件系统扫描器");
+		m.put("Try EE", "试用企业版");
+		m.put("Try Enterprise Edition", "试用企业版");
 		m.put("Twitch", "Twitch");
 		m.put("Two-factor Authentication", "两阶段验证");
 		m.put("Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. If you encounter problems, make sure time of OneDev server and your device running TOTP authenticator is in sync", 
@@ -2456,13 +2477,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{0} commits", "{0} 个提交");
 		m.put("{0} files", "{0} 个文件");
 		m.put("{0} tags", "{0} 个标签");
-		m.put("Diff options", "差异选项");
-		m.put("Filter by path", "按路径过滤");
-		m.put("Hide comment", "隐藏注释");
-		m.put("Revision indexing in progress... (symbol navigation in revisions will be accurate after indexed)", 
-			"版本索引中... (当前版本中的符号导航在索引后才会准确)");
-		m.put("Show commented code snippet", "显示注释的代码片段");
-		m.put("Toggle navigation", "切换导航");
+		m.put("Below content is restored from an unsaved change. Clear to discard", "以下内容从未保存的更改中恢复。清除以丢弃");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
