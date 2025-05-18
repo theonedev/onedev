@@ -294,6 +294,9 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<Build> builds = new ArrayList<>();
+
+	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
+	private Collection<IssueDescriptionRevision> descriptionRevisions = new ArrayList<>();
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -334,6 +337,8 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	private int ownSpentTime;
 	
 	private int progress = -1;
+
+	private int descriptionRevisionCount;
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
@@ -589,6 +594,22 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 
 	public void setVotes(Collection<IssueVote> votes) {
 		this.votes = votes;
+	}
+
+	public Collection<IssueDescriptionRevision> getDescriptionRevisions() {
+		return descriptionRevisions;
+	}
+
+	public void setDescriptionRevisions(Collection<IssueDescriptionRevision> descriptionRevisions) {
+		this.descriptionRevisions = descriptionRevisions;
+	}
+
+	public int getDescriptionRevisionCount() {
+		return descriptionRevisionCount;
+	}
+
+	public void setDescriptionRevisionCount(int descriptionRevisionCount) {
+		this.descriptionRevisionCount = descriptionRevisionCount;
 	}
 
 	@Override
@@ -1140,7 +1161,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		}
 		return null;
 	}
-	
+		
 	@Nullable
 	public Issue findLinkedIssue(LinkSpec spec, boolean opposite) {
 		if (spec.getOpposite() != null) {

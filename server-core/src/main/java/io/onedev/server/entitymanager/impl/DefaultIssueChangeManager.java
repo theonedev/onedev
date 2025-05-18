@@ -1,43 +1,20 @@
 package io.onedev.server.entitymanager.impl;
 
-import com.google.common.base.Preconditions;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.match.Matcher;
-import io.onedev.commons.utils.match.PathMatcher;
-import io.onedev.commons.utils.match.StringMatcher;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.*;
-import io.onedev.server.entityreference.ReferenceChangeManager;
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.project.RefUpdated;
-import io.onedev.server.event.project.build.BuildFinished;
-import io.onedev.server.event.project.issue.IssueChanged;
-import io.onedev.server.event.project.pullrequest.PullRequestChanged;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.*;
-import io.onedev.server.model.support.issue.changedata.*;
-import io.onedev.server.model.support.issue.transitionspec.*;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.BaseEntityManager;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.search.entity.issue.*;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.taskschedule.SchedulableTask;
-import io.onedev.server.taskschedule.TaskScheduler;
-import io.onedev.server.util.Input;
-import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.patternset.PatternSet;
+import static java.lang.Integer.MAX_VALUE;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
@@ -52,12 +29,87 @@ import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.*;
+import com.google.common.base.Preconditions;
 
-import static java.lang.Integer.MAX_VALUE;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
+import io.onedev.commons.utils.match.StringMatcher;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.IssueDescriptionRevisionManager;
+import io.onedev.server.entitymanager.IssueFieldManager;
+import io.onedev.server.entitymanager.IssueLinkManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.IssueScheduleManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entityreference.ReferenceChangeManager;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.RefUpdated;
+import io.onedev.server.event.project.build.BuildFinished;
+import io.onedev.server.event.project.issue.IssueChanged;
+import io.onedev.server.event.project.pullrequest.PullRequestChanged;
+import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.IssueDescriptionRevision;
+import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.model.LinkSpec;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
+import io.onedev.server.model.support.issue.changedata.IssueConfidentialChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueFieldChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueIterationAddData;
+import io.onedev.server.model.support.issue.changedata.IssueIterationChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueIterationRemoveData;
+import io.onedev.server.model.support.issue.changedata.IssueLinkAddData;
+import io.onedev.server.model.support.issue.changedata.IssueLinkRemoveData;
+import io.onedev.server.model.support.issue.changedata.IssueOwnEstimatedTimeChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueOwnSpentTimeChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueTotalEstimatedTimeChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueTotalSpentTimeChangeData;
+import io.onedev.server.model.support.issue.transitionspec.BranchUpdatedSpec;
+import io.onedev.server.model.support.issue.transitionspec.BuildSuccessfulSpec;
+import io.onedev.server.model.support.issue.transitionspec.IssueStateTransitedSpec;
+import io.onedev.server.model.support.issue.transitionspec.NoActivitySpec;
+import io.onedev.server.model.support.issue.transitionspec.PullRequestDiscardedSpec;
+import io.onedev.server.model.support.issue.transitionspec.PullRequestMergedSpec;
+import io.onedev.server.model.support.issue.transitionspec.PullRequestOpenedSpec;
+import io.onedev.server.model.support.issue.transitionspec.PullRequestSpec;
+import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.persistence.dao.BaseEntityManager;
+import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.search.entity.issue.LastActivityDateCriteria;
+import io.onedev.server.search.entity.issue.StateCriteria;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.taskschedule.SchedulableTask;
+import io.onedev.server.taskschedule.TaskScheduler;
+import io.onedev.server.util.Input;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.patternset.PatternSet;
 
 @Singleton
 public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
@@ -70,6 +122,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	private final IssueManager issueManager;
 	
 	private final IssueFieldManager issueFieldManager;
+
+	private final IssueDescriptionRevisionManager descriptionRevisionManager;
 	
 	private final ProjectManager projectManager;
 	
@@ -81,7 +135,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	private final TaskScheduler taskScheduler;
 	
-	private final ClusterManager clusterManager;
+	private final ClusterManager clusterManager;	
 	
 	private final ReferenceChangeManager entityReferenceManager;
 	
@@ -89,13 +143,15 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	@Inject
 	public DefaultIssueChangeManager(Dao dao, IssueManager issueManager, IssueFieldManager issueFieldManager,
+									 IssueDescriptionRevisionManager descriptionRevisionManager,
 									 ProjectManager projectManager, ListenerRegistry listenerRegistry, 
 									 TaskScheduler taskScheduler, IssueScheduleManager issueScheduleManager, 
 									 IssueLinkManager issueLinkManager, ClusterManager clusterManager, 
 									 ReferenceChangeManager entityReferenceManager) {
-		super(dao);
+		super(dao);		
 		this.issueManager = issueManager;
 		this.issueFieldManager = issueFieldManager;
+		this.descriptionRevisionManager = descriptionRevisionManager;
 		this.projectManager = projectManager;
 		this.listenerRegistry = listenerRegistry;
 		this.taskScheduler = taskScheduler;
@@ -217,14 +273,23 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			if (description != null && description.length() > Issue.MAX_DESCRIPTION_LEN)
 				throw new ExplicitException("Description too long");
 			issue.setDescription(description);
+			issue.setDescriptionRevisionCount(issue.getDescriptionRevisionCount() + 1);
 			entityReferenceManager.addReferenceChange(SecurityUtils.getUser(), issue, description);
 
+			var user = SecurityUtils.getUser();
 			IssueChange change = new IssueChange();
 			change.setIssue(issue);
-			change.setUser(SecurityUtils.getUser());
+			change.setUser(user);
 			change.setData(new IssueDescriptionChangeData(prevDescription, issue.getDescription()));
 			create(change, null);
 			dao.persist(issue);
+
+			var revision = new IssueDescriptionRevision();
+			revision.setIssue(issue);
+			revision.setUser(user);
+			revision.setOldContent(prevDescription);
+			revision.setNewContent(description);
+			descriptionRevisionManager.create(revision);
 		}
 	}
 	

@@ -138,7 +138,7 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<PendingSuggestionApply> pendingSuggestionApplies = new ArrayList<>();
-	
+		
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
 	

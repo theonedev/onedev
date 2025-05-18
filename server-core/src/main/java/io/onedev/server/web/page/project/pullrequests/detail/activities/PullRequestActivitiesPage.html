@@ -5,27 +5,27 @@
 	</ul>
 	<wicket:fragment wicket:id="loginToCommentFrag">
 		<div class="login-to-comment alert alert-light text-center font-size-h6">
-			<a wicket:id="login" class="link-primary">Login to comment</a>
+			<a wicket:id="login" class="link-primary"><wicket:t>Login to comment</wicket:t></a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="addCommentFrag">
 		<form wicket:id="form" class="add-comment leave-confirm no-autofocus">
 			<div wicket:id="feedback"></div>
-			<div wicket:id="input" placeholder="Leave a comment"></div>
-			<button wicket:id="save" class="btn btn-primary dirty-aware mt-3">Comment</button>
+			<div wicket:id="input"></div>
+			<button wicket:id="save" class="btn btn-primary dirty-aware mt-3"><wicket:t>Comment</wicket:t></button>
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="sinceChangesRowFrag">
 		<div class="d-flex align-items-center p-0">
 			<span class="mr-3"><wicket:svg href="diff" class="icon text-primary"/></span>
-			<a wicket:id="sinceChanges" class="link-primary font-size-h6">Changes since last visit</a>
+			<a wicket:id="sinceChanges" class="link-primary font-size-h6"><wicket:t>Changes since last visit</wicket:t></a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="optionsFrag">
 		<div class="pull-request-activity-options">
-			<a wicket:id="showComments" class="btn btn-xs text-muted btn-active-secondary btn-icon" title="Toggle comments"><wicket:svg href="comments" class="icon"></wicket:svg></a>
-			<a wicket:id="showCommits" class="btn btn-xs text-muted btn-active-secondary btn-icon" title="Toggle commits"><wicket:svg href="commit" class="icon"></wicket:svg></a>
-			<a wicket:id="showChangeHistory" class="btn btn-xs text-muted btn-active-secondary btn-icon" title="Toggle change history"><wicket:svg href="history" class="icon"></wicket:svg></a>
+			<a wicket:id="showComments" class="btn btn-xs text-muted btn-active-secondary btn-icon"><wicket:svg href="comments" class="icon"></wicket:svg></a>
+			<a wicket:id="showCommits" class="btn btn-xs text-muted btn-active-secondary btn-icon"><wicket:svg href="commit" class="icon"></wicket:svg></a>
+			<a wicket:id="showChangeHistory" class="btn btn-xs text-muted btn-active-secondary btn-icon"><wicket:svg href="history" class="icon"></wicket:svg></a>
 		</div>
 	</wicket:fragment>
 </wicket:extend>

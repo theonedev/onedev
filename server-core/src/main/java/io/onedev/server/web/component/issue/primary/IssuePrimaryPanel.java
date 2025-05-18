@@ -1,8 +1,10 @@
 package io.onedev.server.web.component.issue.primary;
 
 import static io.onedev.server.security.SecurityUtils.canAccessIssue;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,6 +50,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.CommentRevision;
 import io.onedev.server.model.support.EntityReaction;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
@@ -60,6 +63,7 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.comment.CommentHistoryLink;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.comment.ReactionSupport;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -148,10 +152,12 @@ public abstract class IssuePrimaryPanel extends Panel {
 		add(new Label("submitDate", DateUtils.formatAge(issue.getSubmitDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(issue.getSubmitDate()))));
 
-		if (issue.getOnBehalfOf() != null)
-			add(new Label("submitOnBehalfOf", " on behalf of <b>" + HtmlEscape.escapeHtml5(EmailAddressUtils.describe(issue.getOnBehalfOf(), SecurityUtils.canManageIssues(getProject()))) + "</b>").setEscapeModelStrings(false));
-		else 
+		if (issue.getOnBehalfOf() != null) {
+			var onBehalfOfInfo = HtmlEscape.escapeHtml5(EmailAddressUtils.describe(issue.getOnBehalfOf(), SecurityUtils.canManageIssues(getProject())));
+			add(new Label("submitOnBehalfOf", " " + MessageFormat.format(_T("(on behalf of <b>{0}</b>)"), onBehalfOfInfo)).setEscapeModelStrings(false));
+		} else {
 			add(new WebMarkupContainer("submitOnBehalfOf").setVisible(false));
+		}
 
 		add(new CommentPanel("description") {
 			
@@ -234,15 +240,14 @@ public abstract class IssuePrimaryPanel extends Panel {
 
 			@Override
 			protected Component newMoreActions(String componentId) {
-				var fragment = new Fragment(componentId, "linkIssuesActionFrag", IssuePrimaryPanel.this) {
+				var fragment = new Fragment(componentId, "moreIssueActionsFrag", IssuePrimaryPanel.this) {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(!addibleLinkDescriptorsModel.getObject().isEmpty());
+						setVisible(!addibleLinkDescriptorsModel.getObject().isEmpty() || getIssue().getDescriptionRevisionCount() != 0);
 					}
 				};
 				fragment.add(new MenuLink("linkIssues") {
-
 
 					@Override
 					protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
@@ -272,6 +277,27 @@ public abstract class IssuePrimaryPanel extends Panel {
 						}
 						return menuItems;
 					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!addibleLinkDescriptorsModel.getObject().isEmpty());
+					}
+
+				});
+				fragment.add(new CommentHistoryLink("history") {
+
+					@Override
+					protected Collection<? extends CommentRevision> getCommentRevisions() {
+						return getIssue().getDescriptionRevisions();
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getIssue().getDescriptionRevisionCount() != 0);
+					}
+
 				});
 				return fragment;
 			}
@@ -349,7 +375,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						onLinkIssue(target, specId, opposite, linkName);
 					}
-				}.setVisible(applicable && canEditIssueLink));
+				}.add(AttributeAppender.append("data-tippy-content", _T("Link issues"))).setVisible(applicable && canEditIssueLink));
 			}
 			
 		});
@@ -359,7 +385,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 		var spec = getLinkSpecManager().load(specId);
 		if (!opposite && !spec.isMultiple() && getIssue().findLinkedIssue(spec, false) != null 
 				|| opposite && !spec.getOpposite().isMultiple() && getIssue().findLinkedIssue(spec, true) != null) {
-			Session.get().error("An issue already linked for " + spec.getName(opposite) + ". Unlink it first");							
+			Session.get().error(MessageFormat.format(_T("An issue already linked for {0}. Unlink it first"), spec.getName(opposite)));							
 		} else {
 			new ModalPanel(target) {
 
@@ -421,7 +447,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 
 					List<Tab> tabs = new ArrayList<>();
 					
-					tabs.add(new AjaxActionTab(Model.of("Create New")) {
+					tabs.add(new AjaxActionTab(Model.of(_T("Create New"))) {
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 							issuePopulator = newCreateNewPanel("tabContent");
@@ -430,7 +456,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 						}
 					});
 					
-					tabs.add(new AjaxActionTab(Model.of("Select Existing")) {
+					tabs.add(new AjaxActionTab(Model.of(_T("Select Existing"))) {
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 							issuePopulator = newLinkExistingPanel("tabContent");
@@ -442,7 +468,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 					form.add(new Tabbable("tabs", tabs));
 					form.add(issuePopulator = newCreateNewPanel("tabContent"));
 
-					form.add(new Label("title", "Add " + linkName));
+					form.add(new Label("title", MessageFormat.format(_T("Add {0}"), linkName)));
 
 					form.add(new AjaxButton("save") {
 						@Override
@@ -458,10 +484,10 @@ public abstract class IssuePrimaryPanel extends Panel {
 							} else {
 								LinkSpec spec = getLinkSpecManager().load(specId);
 								if (getIssue().getId().equals(linkIssue.getId())) {
-									form.error("Can not link to self");
+									form.error(_T("Can not link to self"));
 									target.add(form);
 								} else if (getIssue().findLinkedIssues(spec, opposite).contains(linkIssue)) { 
-									form.error("Issue already linked");
+									form.error(_T("Issue already linked"));
 									target.add(form);
 								} else {
 									getIssueChangeManager().addLink(spec, getIssue(), linkIssue, opposite);
@@ -475,7 +501,8 @@ public abstract class IssuePrimaryPanel extends Panel {
 						protected void onError(AjaxRequestTarget target, Form<?> form) {
 							target.add(form);
 						}
-					});
+					}.add(AttributeAppender.append("value", _T("Ok"))));
+
 					form.add(new AjaxLink<Void>("close") {
 						@Override
 						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -526,7 +553,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 					super.updateAjaxAttributes(attributes);
 					attributes.getAjaxCallListeners().add(new ConfirmClickListener(
-							"Do you really want to remove this link?"));
+							_T("Do you really want to remove this link?")));
 				}
 
 				@Override
@@ -536,7 +563,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 					notifyIssueChange(target, getIssue());
 				}
 				
-			}.setVisible(deleteListener != null));
+			}.add(AttributeAppender.append("data-tippy-content", _T("Unlink this issue"))).setVisible(deleteListener != null));
 
 			AjaxLink<Void> stateLink = new TransitionMenuLink("state") {
 

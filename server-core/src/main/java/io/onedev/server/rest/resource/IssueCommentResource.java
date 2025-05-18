@@ -21,7 +21,9 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.IssueCommentManager;
+import io.onedev.server.entitymanager.IssueCommentRevisionManager;
 import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.IssueCommentRevision;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
@@ -33,10 +35,13 @@ import io.onedev.server.security.SecurityUtils;
 public class IssueCommentResource {
 
 	private final IssueCommentManager commentManager;
+	
+	private final IssueCommentRevisionManager commentRevisionManager;
 
 	@Inject
-	public IssueCommentResource(IssueCommentManager commentManager) {
+	public IssueCommentResource(IssueCommentManager commentManager, IssueCommentRevisionManager commentRevisionManager) {
 		this.commentManager = commentManager;
+		this.commentRevisionManager = commentRevisionManager;
 	}
 
 	@Api(order=100)
@@ -63,10 +68,23 @@ public class IssueCommentResource {
 	@Api(order=250, description="Update issue comment of specified id")
 	@Path("/{commentId}")
 	@POST
-	public Response update(@PathParam("commentId") Long commentId, @NotNull IssueComment comment) {
+	public Response update(@PathParam("commentId") Long commentId, @NotNull String content) {
+		var comment = commentManager.load(commentId);
 		if (!canModifyOrDelete(comment)) 
 			throw new UnauthorizedException();
-		commentManager.update(comment);
+		var oldContent = comment.getContent();
+		if (!oldContent.equals(content)) {
+			comment.setContent(content);
+			comment.setRevisionCount(comment.getRevisionCount() + 1);
+			commentManager.update(comment);
+
+			var revision = new IssueCommentRevision();
+			revision.setComment(comment);
+			revision.setUser(SecurityUtils.getUser());
+			revision.setOldContent(oldContent);
+			revision.setNewContent(content);
+			commentRevisionManager.create(revision);
+		}
 		return Response.ok().build();
 	}
 	

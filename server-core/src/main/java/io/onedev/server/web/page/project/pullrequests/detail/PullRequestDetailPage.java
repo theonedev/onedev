@@ -90,6 +90,7 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.CommentRevision;
 import io.onedev.server.model.support.EntityReaction;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.code.BuildRequirement;
@@ -111,6 +112,7 @@ import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.branch.BranchLink;
+import io.onedev.server.web.component.comment.CommentHistoryLink;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.comment.ReactionSupport;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
@@ -1705,6 +1707,33 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				};
 			}
 			
+			@Override
+			protected Component newMoreActions(String id) {
+				var fragment = new Fragment(id, "moreDescriptionActionsFrag", PullRequestDetailPage.this) {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getPullRequest().getDescriptionRevisionCount() != 0);
+					}
+
+				};
+				fragment.add(new CommentHistoryLink("history") {
+
+					@Override
+					protected Collection<? extends CommentRevision> getCommentRevisions() {
+						return getPullRequest().getDescriptionRevisions();
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getPullRequest().getDescriptionRevisionCount() != 0);
+					}
+
+				});
+				return fragment;
+			}
 		});
 
 		return descriptionContainer;

@@ -163,21 +163,21 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 				tabs.add(new PageTab(Model.of(_T("Activities")), IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue())) {
 
 					@Override
-					public Component render(String componentId) {
-						return new PageTabHead(componentId, this) {
+					public Component render(String id) {
+						return new PageTabHead(id, this) {
 		
 							@Override
-							protected Link<?> newLink(String componentId, Class<? extends Page> pageClass, PageParameters pageParams) {
-								return new ViewStateAwarePageLink<Void>(componentId, pageClass, pageParams, KEY_SCROLL_TOP);
+							protected Link<?> newLink(String id, Class<? extends Page> pageClass, PageParameters pageParams) {
+								return new ViewStateAwarePageLink<Void>(id, pageClass, pageParams, KEY_SCROLL_TOP);
 							}
 		
 						};
 					}
 		
 					@Override
-					protected Component renderOptions(String componentId) {
+					protected Component renderOptions(String id) {
 						IssueActivitiesPage page = (IssueActivitiesPage) getPage();
-						return page.renderOptions(componentId);
+						return page.renderOptions(id);
 					}
 
 				});

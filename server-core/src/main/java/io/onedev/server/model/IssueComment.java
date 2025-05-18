@@ -16,6 +16,7 @@ import javax.persistence.Table;
 
 import io.onedev.server.model.support.EntityComment;
 import io.onedev.server.rest.annotation.Immutable;
+import io.onedev.server.util.facade.IssueCommentFacade;
 
 @Entity
 @Table(indexes={
@@ -33,6 +34,11 @@ public class IssueComment extends EntityComment {
 	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<IssueCommentReaction> reactions = new ArrayList<>();
+
+	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
+	private Collection<IssueCommentRevision> revisions = new ArrayList<>();
+
+	private int revisionCount;
 
 	@Lob
 	private InternetAddress onBehalfOf;
@@ -65,6 +71,27 @@ public class IssueComment extends EntityComment {
 
 	public void setReactions(Collection<IssueCommentReaction> reactions) {
 		this.reactions = reactions;
+	}
+
+	public Collection<IssueCommentRevision> getRevisions() {
+		return revisions;
+	}
+
+	public void setRevisions(Collection<IssueCommentRevision> revisions) {
+		this.revisions = revisions;
+	}
+
+	@Override
+	public IssueCommentFacade getFacade() {
+		return new IssueCommentFacade(getId(), getIssue().getId(), getContent());
+	}
+
+	public int getRevisionCount() {
+		return revisionCount;
+	}
+
+	public void setRevisionCount(int revisionCount) {
+		this.revisionCount = revisionCount;
 	}
 	
 }

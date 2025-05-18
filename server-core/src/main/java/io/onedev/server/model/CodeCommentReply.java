@@ -1,9 +1,15 @@
 package io.onedev.server.model;
 
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.EntityComment;
-
-import javax.persistence.*;
 
 @Entity
 @Table(indexes={

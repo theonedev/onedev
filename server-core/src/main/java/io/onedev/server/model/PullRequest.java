@@ -374,6 +374,8 @@ public class PullRequest extends ProjectBelonging
 	
 	private int eyesCount;
 
+	private int descriptionRevisionCount;
+
 	@Embedded
 	private LastActivity lastActivity;
 
@@ -421,6 +423,9 @@ public class PullRequest extends ProjectBelonging
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReaction> reactions = new ArrayList<>();
+
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	private Collection<PullRequestDescriptionRevision> descriptionRevisions = new ArrayList<>();
 
 	private transient Boolean mergedIntoTarget;
 
@@ -1031,6 +1036,22 @@ public class PullRequest extends ProjectBelonging
 	
 	public static String getChangeObservable(Long requestId) {
 		return PullRequest.class.getName() + ":" + requestId;
+	}
+
+	public Collection<PullRequestDescriptionRevision> getDescriptionRevisions() {
+		return descriptionRevisions;
+	}
+
+	public void setDescriptionRevisions(Collection<PullRequestDescriptionRevision> descriptionRevisions) {
+		this.descriptionRevisions = descriptionRevisions;
+	}
+
+	public int getDescriptionRevisionCount() {
+		return descriptionRevisionCount;
+	}
+
+	public void setDescriptionRevisionCount(int descriptionRevisionCount) {
+		this.descriptionRevisionCount = descriptionRevisionCount;
 	}
 
 	public Collection<Long> getFixedIssueIds() {

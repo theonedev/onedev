@@ -1,18 +1,28 @@
 package io.onedev.server.rest.resource;
 
-import io.onedev.server.entitymanager.PullRequestCommentManager;
-import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.security.SecurityUtils;
-import org.apache.shiro.authz.UnauthorizedException;
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
+
+import org.apache.shiro.authz.UnauthorizedException;
+
+import io.onedev.server.entitymanager.PullRequestCommentManager;
+import io.onedev.server.entitymanager.PullRequestCommentRevisionManager;
+import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.PullRequestCommentRevision;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.security.SecurityUtils;
 
 @Api(order=3200)
 @Path("/pull-request-comments")
@@ -23,9 +33,12 @@ public class PullRequestCommentResource {
 
 	private final PullRequestCommentManager commentManager;
 
+	private final PullRequestCommentRevisionManager commentRevisionManager;
+
 	@Inject
-	public PullRequestCommentResource(PullRequestCommentManager commentManager) {
+	public PullRequestCommentResource(PullRequestCommentManager commentManager, PullRequestCommentRevisionManager commentRevisionManager) {
 		this.commentManager = commentManager;
+		this.commentRevisionManager = commentRevisionManager;
 	}
 
 	@Api(order=100)
@@ -54,11 +67,23 @@ public class PullRequestCommentResource {
 	@Api(order=250, description="Update pull request comment of specified id")
 	@Path("/{commentId}")
 	@POST
-	public Response update(@PathParam("commentId") Long commentId, @NotNull PullRequestComment comment) {
+	public Response update(@PathParam("commentId") Long commentId, @NotNull String content) {
+		var comment = commentManager.load(commentId);
 		if (!SecurityUtils.canModifyOrDelete(comment))
 			throw new UnauthorizedException();
+		var oldContent = comment.getContent();
+		if (!oldContent.equals(content)) {
+			comment.setContent(content);
+			comment.setRevisionCount(comment.getRevisionCount() + 1);
+			commentManager.update(comment);
 
-		commentManager.update(comment);
+			var revision = new PullRequestCommentRevision();
+			revision.setComment(comment);
+			revision.setUser(SecurityUtils.getUser());
+			revision.setOldContent(oldContent);
+			revision.setNewContent(content);
+			commentRevisionManager.create(revision);
+		}
 
 		return Response.ok().build();
 	}

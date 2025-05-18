@@ -13,12 +13,14 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.entitymanager.PullRequestDescriptionRevisionManager;
 import io.onedev.server.entityreference.ReferenceChangeManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pullrequest.PullRequestChanged;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.PullRequestDescriptionRevision;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestAutoMergeChangeData;
@@ -35,16 +37,20 @@ import io.onedev.server.security.SecurityUtils;
 public class DefaultPullRequestChangeManager extends BaseEntityManager<PullRequestChange> 
 		implements PullRequestChangeManager {
 
+	private final PullRequestDescriptionRevisionManager descriptionRevisionManager;
+	
 	private final ListenerRegistry listenerRegistry;
 	
 	private final ReferenceChangeManager entityReferenceManager;
 	
 	@Inject
 	public DefaultPullRequestChangeManager(Dao dao, ListenerRegistry listenerRegistry, 
-										   ReferenceChangeManager entityReferenceManager) {
+										   ReferenceChangeManager entityReferenceManager, 
+										   PullRequestDescriptionRevisionManager descriptionRevisionManager) {
 		super(dao);
 		this.listenerRegistry = listenerRegistry;
 		this.entityReferenceManager = entityReferenceManager;
+		this.descriptionRevisionManager = descriptionRevisionManager;
 	}
 
 	@Transactional
@@ -120,14 +126,24 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 			if (description != null && description.length() > PullRequest.MAX_DESCRIPTION_LEN)
 				throw new ExplicitException("Description too long");
 			request.setDescription(description);
+			request.setDescriptionRevisionCount(request.getDescriptionRevisionCount() + 1);
 			entityReferenceManager.addReferenceChange(SecurityUtils.getUser(), request, description);
+
+			var user = SecurityUtils.getUser();
 
 			PullRequestChange change = new PullRequestChange();
 			change.setRequest(request);
-			change.setUser(SecurityUtils.getUser());
+			change.setUser(user);
 			change.setData(new PullRequestDescriptionChangeData(prevDescription, request.getDescription()));
 			create(change, null);
 			dao.persist(request);
+
+			var revision = new PullRequestDescriptionRevision();
+			revision.setRequest(request);
+			revision.setUser(user);
+			revision.setOldContent(prevDescription);
+			revision.setNewContent(description);
+			descriptionRevisionManager.create(revision);
 		}
 	}
 	

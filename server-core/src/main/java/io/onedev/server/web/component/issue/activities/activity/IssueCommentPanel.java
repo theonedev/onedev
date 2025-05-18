@@ -3,11 +3,13 @@ package io.onedev.server.web.component.issue.activities.activity;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,12 +19,17 @@ import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueCommentReactionManager;
+import io.onedev.server.entitymanager.IssueCommentRevisionManager;
 import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.IssueCommentRevision;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.CommentRevision;
 import io.onedev.server.model.support.EntityReaction;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.component.comment.CommentHistoryLink;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.comment.ReactionSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
@@ -73,10 +80,23 @@ class IssueCommentPanel extends Panel {
 				if (comment.length() > IssueComment.MAX_CONTENT_LEN)
 					throw new ExplicitException("Comment too long");
 				var entity = IssueCommentPanel.this.getComment();
-				entity.setContent(comment);
-				OneDev.getInstance(IssueCommentManager.class).update(entity);
-				var page = (BasePage) getPage();
-				page.notifyObservablesChange(target, entity.getIssue().getChangeObservables(false));				
+				var oldComment = entity.getContent();
+				if (!oldComment.equals(comment)) {
+					getTransactionManager().run(() -> {
+						entity.setContent(comment);
+						entity.setRevisionCount(entity.getRevisionCount() + 1);
+						getIssueCommentManager().update(entity);
+
+						var revision = new IssueCommentRevision();
+						revision.setComment(entity);
+						revision.setUser(SecurityUtils.getUser());
+						revision.setOldContent(oldComment);
+						revision.setNewContent(comment);
+						getIssueCommentRevisionManager().create(revision);
+					});
+					var page = (BasePage) getPage();
+					page.notifyObservablesChange(target, entity.getIssue().getChangeObservables(false));				
+				}
 			}
 
 			@Override
@@ -124,7 +144,7 @@ class IssueCommentPanel extends Panel {
 					var issue = IssueCommentPanel.this.getComment().getIssue();
 					target.appendJavaScript(String.format("$('#%s').remove();", IssueCommentPanel.this.getMarkupId()));	
 					IssueCommentPanel.this.remove();
-					OneDev.getInstance(IssueCommentManager.class).delete(IssueCommentPanel.this.getComment());
+					getIssueCommentManager().delete(IssueCommentPanel.this.getComment());
 					page.notifyObservablesChange(target, issue.getChangeObservables(false));					
 				};
 			}
@@ -140,7 +160,7 @@ class IssueCommentPanel extends Panel {
 		
 					@Override
 					public void onToggleEmoji(AjaxRequestTarget target, String emoji) {
-						OneDev.getInstance(IssueCommentReactionManager.class).toggleEmoji(
+						getIssueCommentReactionManager().toggleEmoji(
 								SecurityUtils.getUser(), 
 								IssueCommentPanel.this.getComment(), 
 								emoji);
@@ -149,6 +169,25 @@ class IssueCommentPanel extends Panel {
 				};
 			}
 
+			@Override
+			protected Component newMoreActions(String id) {
+				var fragment = new Fragment(id, "historyFrag", IssueCommentPanel.this);
+				fragment.add(new CommentHistoryLink("history") {
+
+					@Override
+					protected Collection<? extends CommentRevision> getCommentRevisions() {
+						return IssueCommentPanel.this.getComment().getRevisions();
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(IssueCommentPanel.this.getComment().getRevisionCount() != 0);
+					}
+
+				});
+				return fragment;
+			}
 		});
 
 		setMarkupId(getComment().getAnchor());
@@ -159,4 +198,19 @@ class IssueCommentPanel extends Panel {
 		return ((IssueCommentActivity) getDefaultModelObject()).getComment();
 	}
 	
+	private TransactionManager getTransactionManager() {
+		return OneDev.getInstance(TransactionManager.class);
+	}
+
+	private IssueCommentRevisionManager getIssueCommentRevisionManager() {
+		return OneDev.getInstance(IssueCommentRevisionManager.class);
+	}
+
+	private IssueCommentManager getIssueCommentManager() {
+		return OneDev.getInstance(IssueCommentManager.class);
+	}
+
+	private IssueCommentReactionManager getIssueCommentReactionManager() {
+		return OneDev.getInstance(IssueCommentReactionManager.class);
+	}
 }

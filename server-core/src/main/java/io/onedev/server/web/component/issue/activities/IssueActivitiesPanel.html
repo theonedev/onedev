@@ -5,7 +5,7 @@
 	</ul>
 	<wicket:fragment wicket:id="loginToCommentFrag">
 		<div class="login-to-comment alert alert-light text-center font-size-h6">
-			<a wicket:id="login" class="link-primary">Login to comment</a>
+			<a wicket:id="login" class="link-primary"><wicket:t>Login to comment</wicket:t></a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="addCommentFrag">
@@ -13,15 +13,15 @@
 			<div wicket:id="feedback"></div>
 			<div wicket:id="comment" placeholder="Leave a comment"></div>
 			<div class="mt-3">
-				<button wicket:id="save" type="submit" class="btn btn-primary dirty-aware">Comment</button>
+				<button wicket:id="save" type="submit" class="btn btn-primary dirty-aware"><wicket:t>Comment</wicket:t></button>
 			</div>
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="optionsFrag">
 		<div class="issue-activity-options">
-			<a wicket:id="showComments" class="btn btn-xs text-muted btn-active-secondary btn-icon" title="Toggle comments"><wicket:svg href="comments" class="icon"></wicket:svg></a>
-			<a wicket:id="showChangeHistory" class="btn btn-xs text-muted btn-active-secondary btn-icon" title="Toggle change history"><wicket:svg href="history" class="icon"></wicket:svg></a>
-			<a wicket:id="showWorkLog" class="btn btn-xs text-muted btn-active-secondary btn-icon" title="Toggle work log"><wicket:svg href="work-log" class="icon"></wicket:svg></a>
+			<a wicket:id="showComments" class="btn btn-xs text-muted btn-active-secondary btn-icon"><wicket:svg href="comments" class="icon"></wicket:svg></a>
+			<a wicket:id="showChangeHistory" class="btn btn-xs text-muted btn-active-secondary btn-icon"><wicket:svg href="history" class="icon"></wicket:svg></a>
+			<a wicket:id="showWorkLog" class="btn btn-xs text-muted btn-active-secondary btn-icon"><wicket:svg href="work-log" class="icon"></wicket:svg></a>
 		</div>
 	</wicket:fragment>
 </wicket:panel>

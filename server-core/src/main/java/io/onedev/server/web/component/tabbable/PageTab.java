@@ -131,12 +131,12 @@ public class PageTab extends Tab {
 	/**
 	 * Override this to provide your own logic of populating tab item (the &lt;li&gt; element).
 	 * 
-	 * @param componentId
+	 * @param id
 	 * 			Id of the component to add to the item. 
 	 */
 	@Override
-	public Component render(String componentId) {
-		return new PageTabHead(componentId, this);
+	public Component render(String id) {
+		return new PageTabHead(id, this);
 	}
 	
 	@Override

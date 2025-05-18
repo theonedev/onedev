@@ -299,8 +299,8 @@ public abstract class CommentPanel extends Panel {
 		return null;
 	}
 	
-	protected Component newMoreActions(String componentId) {
-		return new WebMarkupContainer("moreActions").setVisible(false);
+	protected Component newMoreActions(String id) {
+		return new WebMarkupContainer(id).setVisible(false);
 	}
 	
 	@Nullable

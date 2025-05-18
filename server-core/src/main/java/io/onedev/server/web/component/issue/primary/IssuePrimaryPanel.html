@@ -1,14 +1,16 @@
 <wicket:panel>
 	<div class="issue-primary border border-dashed border-primary rounded p-4">
 		<div class="mb-3">
-			<span wicket:id="submitterAvatar" class="mr-1"></span> <span wicket:id="submitterName" class="user"></span> opened <span wicket:id="submitDate"></span> <span wicket:id="submitOnBehalfOf"></span>
+			<span wicket:id="submitterAvatar" class="mr-1"></span> 
+			<wicket:t><span wicket:id="submitterName" class="user"></span> opened <span wicket:id="submitDate"></span></wicket:t>
+			<span wicket:id="submitOnBehalfOf"></span>
 		</div>
 		<div wicket:id="description"></div>        
 		<ul wicket:id="links" class="links list-unstyled mt-4 mb-0 border-top pt-4">
 			<li wicket:id="links" class="mb-4 mb-last-child-0">
 				<div class="head h6 d-flex align-items-center">
 					<span wicket:id="name" class="flex-shrink-0 mr-2"></span>
-					<a wicket:id="addLink" title="Link issue" class="d-flex align-items-center"><wicket:svg href="plus" class="icon icon-sm"/></a>
+					<a wicket:id="addLink" class="d-flex align-items-center"><wicket:svg href="plus" class="icon icon-sm"/></a>
 				</div>
 				<ul class="body linked-issues list-unstyled mb-0">
 					<li wicket:id="linkedIssues" class="py-2 border-top d-flex align-items-center"></li>
@@ -16,9 +18,15 @@
 			</li>
 		</ul>	
 	</div>
-	<wicket:fragment wicket:id="linkIssuesActionFrag">
+	<wicket:fragment wicket:id="moreIssueActionsFrag">
+		<wicket:enclosure>
 		<span class="d-first-child-none dot mr-2"></span>
-		<a wicket:id="linkIssues" class="text-muted text-hover-primary mr-2">Link Issues</a>
+		<a wicket:id="linkIssues" class="text-muted text-hover-primary mr-2"><wicket:t>Links</wicket:t></a>
+		</wicket:enclosure>
+		<wicket:enclosure>
+		<span class="d-first-child-none dot mr-2"></span>
+		<a wicket:id="history" class="text-muted text-hover-primary mr-2"><wicket:t>History</wicket:t></a>
+		</wicket:enclosure>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="addLinkFrag">
 		<form wicket:id="form" class="leave-confirm">
@@ -31,14 +39,14 @@
 				<div wicket:id="tabContent" class="tab-content"></div>
 			</div>
 			<div class="modal-footer">
-				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Ok"></input>
-				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary"></input>
+				<a wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></a>
 			</div>
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="linkedIssueFrag">
 		<a wicket:id="title"><span wicket:id="label"></span></a>
-		<a wicket:id="unlink" class="action ml-2" title="Unlink this issue"><wicket:svg href="unlink" class="icon icon-sm"/></a>
+		<a wicket:id="unlink" class="action ml-2"><wicket:svg href="unlink" class="icon icon-sm"/></a>
 		<a wicket:id="state" class="state ml-auto"><span wicket:id="badge"></span></a>
 	</wicket:fragment>
 </wicket:panel>

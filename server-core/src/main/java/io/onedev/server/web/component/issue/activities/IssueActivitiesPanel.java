@@ -347,7 +347,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 				target.appendJavaScript(String.format("$('#%s').toggleClass('active');", getMarkupId()));
 			}
 
-		});
+		}.add(new AttributeAppender("data-tippy-content", _T("Toggle comments"))));
 		showCommentsLink.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 			@Override
 			public String getObject() {
@@ -382,7 +382,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 				target.appendJavaScript(String.format("$('#%s').toggleClass('active');", getMarkupId()));
 			}
 
-		});
+		}.add(new AttributeAppender("data-tippy-content", _T("Toggle change history"))));
 		
 		fragment.add(new AjaxLink<Void>("showWorkLog") {
 
@@ -420,7 +420,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 						&& canAccessTimeTracking(project));
 			}
 			
-		});
+		}.add(new AttributeAppender("data-tippy-content", _T("Toggle work log"))));
 		
 		return fragment;
 	}

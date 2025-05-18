@@ -5,11 +5,13 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.jetbrains.annotations.Nullable;
@@ -20,13 +22,18 @@ import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.PullRequestCommentReactionManager;
+import io.onedev.server.entitymanager.PullRequestCommentRevisionManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.PullRequestCommentRevision;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.CommentRevision;
 import io.onedev.server.model.support.EntityReaction;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.component.comment.CommentHistoryLink;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.comment.ReactionSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
@@ -82,10 +89,24 @@ class PullRequestCommentPanel extends Panel {
 				if (comment.length() > PullRequestComment.MAX_CONTENT_LEN)
 					throw new ExplicitException("Comment too long");
 				var entity = PullRequestCommentPanel.this.getComment();
-				entity.setContent(comment);
-				getPullRequestCommentManager().update(entity);
-				var page = (BasePage) getPage();
-				page.notifyObservableChange(target, PullRequest.getChangeObservable(entity.getRequest().getId()));				
+
+				var oldComment = entity.getContent();
+				if (!oldComment.equals(comment)) {
+					getTransactionManager().run(() -> {
+						entity.setContent(comment);
+						entity.setRevisionCount(entity.getRevisionCount() + 1);
+						getPullRequestCommentManager().update(entity);
+
+						var revision = new PullRequestCommentRevision();
+						revision.setComment(entity);
+						revision.setUser(SecurityUtils.getUser());
+						revision.setOldContent(oldComment);
+						revision.setNewContent(comment);
+						getPullRequestCommentRevisionManager().create(revision);
+					});
+					var page = (BasePage) getPage();
+					page.notifyObservableChange(target, PullRequest.getChangeObservable(entity.getRequest().getId()));				
+				}
 			}
 
 			@Override
@@ -149,7 +170,7 @@ class PullRequestCommentPanel extends Panel {
 		
 					@Override
 					public void onToggleEmoji(AjaxRequestTarget target, String emoji) {
-						OneDev.getInstance(PullRequestCommentReactionManager.class).toggleEmoji(
+						getPullRequestCommentReactionManager().toggleEmoji(
 								SecurityUtils.getUser(), 
 								PullRequestCommentPanel.this.getComment(), 
 								emoji);
@@ -158,14 +179,46 @@ class PullRequestCommentPanel extends Panel {
 				};
 			}
 			
+			@Override
+			protected Component newMoreActions(String id) {
+				var fragment = new Fragment(id, "historyFrag", PullRequestCommentPanel.this);
+				fragment.add(new CommentHistoryLink("history") {
+
+					@Override
+					protected Collection<? extends CommentRevision> getCommentRevisions() {
+						return PullRequestCommentPanel.this.getComment().getRevisions();
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(PullRequestCommentPanel.this.getComment().getRevisionCount() != 0);
+					}
+
+				});
+				return fragment;
+			}
+
 		});
 
 		setMarkupId(getComment().getAnchor());
 		setOutputMarkupId(true);
 	}
 
+	private TransactionManager getTransactionManager() {
+		return OneDev.getInstance(TransactionManager.class);
+	}
+
+	private PullRequestCommentRevisionManager getPullRequestCommentRevisionManager() {
+		return OneDev.getInstance(PullRequestCommentRevisionManager.class);
+	}
+
 	private PullRequestCommentManager getPullRequestCommentManager() {
 		return OneDev.getInstance(PullRequestCommentManager.class);
+	}
+
+	private PullRequestCommentReactionManager getPullRequestCommentReactionManager() {
+		return OneDev.getInstance(PullRequestCommentReactionManager.class);
 	}
 
 	private PullRequestComment getComment() {

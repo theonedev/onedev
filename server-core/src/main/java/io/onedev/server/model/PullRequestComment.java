@@ -14,6 +14,7 @@ import javax.persistence.Table;
 
 import io.onedev.server.model.support.EntityComment;
 import io.onedev.server.rest.annotation.Immutable;
+import io.onedev.server.util.facade.PullRequestCommentFacade;
 
 @Entity
 @Table(indexes={@Index(columnList="o_request_id"), @Index(columnList="o_user_id")})
@@ -30,6 +31,11 @@ public class PullRequestComment extends EntityComment {
 	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestCommentReaction> reactions = new ArrayList<>();
+
+	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
+	private Collection<PullRequestCommentRevision> revisions = new ArrayList<>();
+
+	private int revisionCount;
 
 	public PullRequest getRequest() {
 		return request;
@@ -54,6 +60,27 @@ public class PullRequestComment extends EntityComment {
 
 	public void setReactions(Collection<PullRequestCommentReaction> reactions) {
 		this.reactions = reactions;
+	}
+
+	public Collection<PullRequestCommentRevision> getRevisions() {
+		return revisions;
+	}
+
+	public void setRevisions(Collection<PullRequestCommentRevision> revisions) {
+		this.revisions = revisions;
+	}
+
+	@Override
+	public PullRequestCommentFacade getFacade() {
+		return new PullRequestCommentFacade(getId(), getRequest().getId(), getContent());
+	}
+
+	public int getRevisionCount() {
+		return revisionCount;
+	}
+
+	public void setRevisionCount(int revisionCount) {
+		this.revisionCount = revisionCount;
 	}
 	
 }

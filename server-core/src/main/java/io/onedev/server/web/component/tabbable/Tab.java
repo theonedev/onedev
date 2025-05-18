@@ -8,10 +8,10 @@ import org.apache.wicket.Component;
 
 public abstract class Tab implements Serializable {
 	
-	protected abstract Component render(String componentId);
+	protected abstract Component render(String id);
 	
 	@Nullable
-	protected Component renderOptions(String componentId) {
+	protected Component renderOptions(String id) {
 		return null;
 	}
 	

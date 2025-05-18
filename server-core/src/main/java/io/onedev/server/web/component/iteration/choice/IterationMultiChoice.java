@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.iteration.choice;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Collection;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -21,9 +23,9 @@ public class IterationMultiChoice extends Select2MultiChoice<Iteration> {
 	protected void onInitialize() {
 		super.onInitialize();
 		if (isRequired())
-			getSettings().setPlaceholder("Choose iterations...");
+			getSettings().setPlaceholder(_T("Choose iterations..."));
 		else
-			getSettings().setPlaceholder("Not specified");
+			getSettings().setPlaceholder(_T("Not specified"));
 		getSettings().setFormatResult("onedev.server.iterationChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.iterationChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.iterationChoiceFormatter.escapeMarkup");

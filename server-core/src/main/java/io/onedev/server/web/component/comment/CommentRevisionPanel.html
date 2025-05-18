@@ -1,0 +1,12 @@
+<wicket:panel>
+    <div class="modal-header">
+        <h5 wicket:id="title" id="modal-title" class="modal-title"></h5>
+        <button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+    </div>
+    <div class="modal-body">
+        <wicket:container wicket:id="content"></wicket:container>
+    </div>
+    <div class="modal-footer justify-content-center">
+        <a wicket:id="ok" class="btn btn-secondary"><wicket:t>Close</wicket:t></a>
+    </div>
+</wicket:panel>
