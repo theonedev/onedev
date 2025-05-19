@@ -1,5 +1,7 @@
 package io.onedev.server.markdown;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -74,7 +76,7 @@ public class CodeProcessor implements HtmlProcessor {
 						Selection selection = suggestionSupport.getSelection();
 						List<String> content = selection.getContent();
 						List<DiffBlock<String>> diffBlocks = DiffUtils.diff(content, suggestion);
-						codeElement.html("<div class='pb-2 mb-2 head font-size-xs mx-n2 px-2'>Suggested change</div>" 
+						codeElement.html("<div class='pb-2 mb-2 head font-size-xs mx-n2 px-2'>" + _T("Suggested change") + "</div>" 
 									+ new DiffRenderer(diffBlocks).renderDiffs());
 						codeElement.attr("data-suggestion", suggestionContent);
 						codeElement.attr("data-suggestionfile", suggestionSupport.getFileName());
@@ -94,7 +96,7 @@ public class CodeProcessor implements HtmlProcessor {
 							}
 						}
 					} else {
-						codeElement.prepend("<p><i>Suggested change</i></p>");
+						codeElement.prepend("<p><i>" + _T("Suggested change") + "</i></p>");
 					}
 				}
 			}

@@ -1,6 +1,56 @@
 package io.onedev.server.web.component.markdown;
 
+import static io.onedev.server.web.translation.Translation._T;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.activation.MimetypesFileTypeMap;
+import javax.annotation.Nullable;
+
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.wicket.Component;
+import org.apache.wicket.MetaDataKey;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextArea;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.image.ExternalImage;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.protocol.http.WebSession;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.util.lang.Bytes;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.unbescape.javascript.JavaScriptEscape;
+
 import com.google.common.base.Preconditions;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
@@ -28,43 +78,6 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.upload.FileUpload;
 import io.onedev.server.web.upload.UploadManager;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.wicket.Component;
-import org.apache.wicket.MetaDataKey;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.image.ExternalImage;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.*;
-import org.apache.wicket.protocol.http.WebSession;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.util.lang.Bytes;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-import org.unbescape.javascript.JavaScriptEscape;
-
-import javax.activation.MimetypesFileTypeMap;
-import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-
-import static io.onedev.server.web.translation.Translation._T;
-import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 abstract class InsertUrlPanel extends Panel {
 
@@ -77,13 +90,7 @@ abstract class InsertUrlPanel extends Panel {
 	private static final MetaDataKey<HashSet<String>> FILE_PICKER_STATE = new MetaDataKey<HashSet<String>>(){};
 	
 	private static final MetaDataKey<HashSet<String>> FOLDER_PICKER_STATE = new MetaDataKey<HashSet<String>>(){};
-	
-	private static final String TAB_INPUT_URL = "Input URL";
-	
-	private static final String TAB_PICK_EXISTING = "Pick Existing";
-	
-	private static final String TAB_UPLOAD = "Upload";
-	
+				
 	private static final String CONTENT_ID = "content";
 	
 	private String uploadId;
@@ -121,11 +128,11 @@ abstract class InsertUrlPanel extends Panel {
 		Form<?> form = new Form<Void>("form");
 		form.add(new FencedFeedbackPanel("feedback", form));
 		
-		form.add(new Label("urlLabel", isImage?"Image URL":"Link URL"));
-		form.add(new Label("urlHelp", isImage?"Absolute or relative url of the image":"Absolute or relative url of the link"));
+		form.add(new Label("urlLabel", isImage? _T("Image URL") : _T("Link URL")));
+		form.add(new Label("urlHelp", isImage? _T("Absolute or relative url of the image") : _T("Absolute or relative url of the link")));
 		form.add(new TextField<String>("url", new PropertyModel<String>(this, "linkUrl")));
 		
-		form.add(new Label("textLabel", isImage?"Image Text": "Link Text"));
+		form.add(new Label("textLabel", isImage? _T("Image Text") : _T("Link Text")));
 		form.add(new TextField<String>("text", new PropertyModel<String>(this, "linkText")));
 		
 		form.add(new AjaxButton("insert", form) {
@@ -135,9 +142,9 @@ abstract class InsertUrlPanel extends Panel {
 				super.onSubmit(target, form);
 				if (StringUtils.isBlank(linkUrl)) {
 					if (isImage)
-						error("Image URL should be specified");
+						error(_T("Image URL should be specified"));
 					else
-						error("Link URL should be specified");
+						error(_T("Link URL should be specified"));
 					target.add(fragment);
 				} else {
 					if (linkText == null)
@@ -309,12 +316,18 @@ abstract class InsertUrlPanel extends Panel {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							markdownEditor.insertUrl(target, true, attachmentUrl,
+							markdownEditor.insertUrl(target, isImage, attachmentUrl,
 									linkText != null ? linkText : attachmentName, null);
 							onClose(target);
 						}
 
 					};
+					
+					if (isImage)
+						selectLink.add(new AttributeAppender("data-tippy-content", _T("Insert this image")));
+					else
+						selectLink.add(new AttributeAppender("data-tippy-content", _T("Insert link to this file")));
+
 					if (isImage)
 						selectLink.add(new ExternalImage("image", escapeHtml5(attachmentUrl)));
 					else
@@ -322,12 +335,12 @@ abstract class InsertUrlPanel extends Panel {
 					
 					item.add(selectLink);
 
-					item.add(new AjaxLink<Void>("delete") {
+					var deleteLink = new AjaxLink<Void>("delete") {
 
 						@Override
 						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 							super.updateAjaxAttributes(attributes);
-							attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete '" + attachmentName + "'?"));
+							attributes.getAjaxCallListeners().add(new ConfirmClickListener(MessageFormat.format(_T("Do you really want to delete \"{0}\"?"), attachmentName)));
 						}
 
 						@Override
@@ -342,7 +355,12 @@ abstract class InsertUrlPanel extends Panel {
 							target.add(fragment);
 						}
 
-					});
+					};
+					if (isImage)
+						deleteLink.add(new AttributeAppender("data-tippy-content", _T("Remove this image")));
+					else
+						deleteLink.add(new AttributeAppender("data-tippy-content", _T("Remove this file")));
+					item.add(deleteLink);
 				}
 
 				@Override
@@ -504,7 +522,7 @@ abstract class InsertUrlPanel extends Panel {
 					};
 				}
 				
-			});
+			}.add(new AttributeAppender("data-tippy-content", _T("Select"))));
 
 			form.add(new AjaxLink<Void>("cancel") {
 				@Override
@@ -521,8 +539,8 @@ abstract class InsertUrlPanel extends Panel {
 				}
 				
 			};
-			form.add(new TextArea<String>("commitMessage", 
-					new PropertyModel<String>(this, "commitMessage")).add(behavior));
+			form.add(new TextArea<String>("commitMessage", new PropertyModel<String>(this, "commitMessage"))
+					.add(behavior).add(new AttributeAppender("placeholder", _T("Add files via upload"))));
 			
 			form.add(new AjaxButton("insert") {
 
@@ -533,7 +551,7 @@ abstract class InsertUrlPanel extends Panel {
 					BlobRenderContext context = Preconditions.checkNotNull(markdownEditor.getBlobRenderContext());
 					String commitMessage = InsertUrlPanel.this.commitMessage;
 					if (StringUtils.isBlank(commitMessage))
-						commitMessage = "Add files via upload";
+						commitMessage = _T("Add files via upload");
 
 					var upload = getUploadManager().getUpload(uploadId);
 					try {
@@ -576,47 +594,51 @@ abstract class InsertUrlPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("title", isImage?"Insert Image":"Insert Link"));
+		add(new Label("title", isImage? _T("Insert Image") : _T("Insert Link")));
 		
 		if (markdownEditor.getBlobRenderContext() == null && markdownEditor.getAttachmentSupport() == null) {
 			add(newInputUrlPanel());
 		} else {
+			String tabInputUrl = _T("Input URL");
+			String tabPickExisting = _T("Pick Existing");
+			String tabUpload = _T("Upload");
+
 			Fragment fragment = new Fragment(CONTENT_ID, "tabbedFrag", this);
 			List<Tab> tabs = new ArrayList<>();
-			AjaxActionTab inputUrlTab = new AjaxActionTab(Model.of(TAB_INPUT_URL)) {
+			AjaxActionTab inputUrlTab = new AjaxActionTab(Model.of(tabInputUrl)) {
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 					Component content = newInputUrlPanel();
 					target.add(content);
 					fragment.replace(content);
-					WebSession.get().setMetaData(ACTIVE_TAB, TAB_INPUT_URL);
+					WebSession.get().setMetaData(ACTIVE_TAB, tabInputUrl);
 				}
 				
 			};
 			tabs.add(inputUrlTab);
-			
-			AjaxActionTab pickExistingTab = new AjaxActionTab(Model.of(TAB_PICK_EXISTING)) {
+
+			AjaxActionTab pickExistingTab = new AjaxActionTab(Model.of(tabPickExisting)) {
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 					Component content = newPickExistingPanel();
 					target.add(content);
 					fragment.replace(content);
-					WebSession.get().setMetaData(ACTIVE_TAB, TAB_PICK_EXISTING);
+					WebSession.get().setMetaData(ACTIVE_TAB, tabPickExisting);
 				}
 				
 			};
 			tabs.add(pickExistingTab);
 			
-			AjaxActionTab uploadTab = new AjaxActionTab(Model.of(TAB_UPLOAD)) {
+			AjaxActionTab uploadTab = new AjaxActionTab(Model.of(tabUpload)) {
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 					Component content = newUploadPanel();
 					target.add(content);
 					fragment.replace(content);
-					WebSession.get().setMetaData(ACTIVE_TAB, TAB_UPLOAD);
+					WebSession.get().setMetaData(ACTIVE_TAB, tabUpload);
 				}
 				
 			};
@@ -626,10 +648,10 @@ abstract class InsertUrlPanel extends Panel {
 			
 			inputUrlTab.setSelected(false);
 			String activeTab = WebSession.get().getMetaData(ACTIVE_TAB);
-			if (TAB_PICK_EXISTING.equals(activeTab)) {
+			if (tabPickExisting.equals(activeTab)) {
 				pickExistingTab.setSelected(true);
 				fragment.add(newPickExistingPanel());
-			} else if (TAB_UPLOAD.equals(activeTab)) {
+			} else if (tabUpload.equals(activeTab)) {
 				uploadTab.setSelected(true);
 				fragment.add(newUploadPanel());
 			} else {

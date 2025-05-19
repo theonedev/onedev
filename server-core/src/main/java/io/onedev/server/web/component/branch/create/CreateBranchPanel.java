@@ -59,7 +59,7 @@ public abstract class CreateBranchPanel extends Panel {
 				String branchName = helperBean.getName();
 				if (project.getObjectId(GitUtils.branch2ref(branchName), false) != null) {
 					editor.error(new Path(new PathNode.Named("name")), 
-							MessageFormat.format(_T("Branch '{0}' already exists, please choose a different name"), branchName));
+							MessageFormat.format(_T("Branch \"{0}\" already exists, please choose a different name"), branchName));
 					target.add(form);
 				} else if (project.getBranchProtection(branchName, user).isPreventCreation()) {
 					editor.error(new Path(new PathNode.Named("name")), 

@@ -64,7 +64,8 @@ onedev.server.markdown = {
 	},
 	onDomReady: function(containerId, callback, atWhoLimit, attachmentUploadUrl, 
 			attachmentMaxSize, canMentionUser, canReferenceEntity, 
-			projectPathPattern, projectKeyPattern, autosaveKey) {
+			projectPathPattern, projectKeyPattern, autosaveKey, translations) {
+		onedev.server.markdown.translations = translations;
 		var $container = $("#" + containerId);
 		var useFixedWidthFontCookieName = "markdownEditor.useFixedWidthFont";
 		var useFixedWidthFont = Cookies.get(useFixedWidthFontCookieName);
@@ -89,12 +90,12 @@ onedev.server.markdown = {
 		$head.find(".dropdown>a").dropdown();
 		
 		if ($suggestion.attr("disabled") == "disabled") {
-			$suggestion.attr("title", "Commented code is outdated");
+			$suggestion.attr("title", onedev.server.markdown.translations["commented-code-outdated"]);
 		} else {
 			if (onedev.server.util.isMac())		
-				$suggestion.attr("title", "Suggest changes (cmd-g)");
+				$suggestion.attr("title", onedev.server.markdown.translations["suggest-changes"] + " (cmd-g)");
 			else
-				$suggestion.attr("title", "Suggest changes (ctrl-g)");
+				$suggestion.attr("title", onedev.server.markdown.translations["suggest-changes"] + " (ctrl-g)");
 				
 			$suggestion.click(function() {
 				var content = $(this).data("content");
@@ -139,7 +140,7 @@ onedev.server.markdown = {
 			$rendered.data("caretOffset", caretOffset);
 			
 			onedev.server.perfectScrollbar.empty($rendered);
-			$rendered.html("<div class='message'>Loading...</div>");
+			$rendered.html("<div class='message'>" + onedev.server.markdown.translations["loading"] + "</div>");
 			
 			$editLink.removeClass("active");
 			$previewLink.addClass("active");
@@ -151,7 +152,7 @@ onedev.server.markdown = {
 			
 			$input.focus();
 			
-			$rendered.html("<div class='message'>Loading...</div>");
+			$rendered.html("<div class='message'>" + onedev.server.markdown.translations["loading"] + "</div>");
 			
 			$editLink.removeClass("active");
 			$previewLink.removeClass("active");
@@ -639,15 +640,15 @@ onedev.server.markdown = {
 			
 			function uploadFile(file) {
 				if (file.size> attachmentMaxSize) {
-					var message = "!!Upload should be less than " + Math.round(attachmentMaxSize/1024/1024) + " Mb!!";
-					onedev.server.markdown.updateUploadMessage($input, message);
+					var message = "!!" + onedev.server.markdown.translations["upload-should-be-less-than"] + "!!";
+					onedev.server.markdown.updateUploadMessage($input, message.replace("{0}", Math.round(attachmentMaxSize/1024/1024)));
 				} else {
 					var xhr = new XMLHttpRequest();
 					var val = $input.val();
 					var i=1;
-					var message = "[Uploading file...]";
+					var message = "[" + onedev.server.markdown.translations["uploading-file"] + "...]";
 					while (val.indexOf(message) != -1) {
-						message = "[Uploading file" + (++i) + "...]";
+						message = "[" + onedev.server.markdown.translations["uploading-file"] + (++i) + "...]";
 					}
 
 					xhr.replaceMessage = message;
@@ -673,7 +674,7 @@ onedev.server.markdown = {
 					};
 					xhr.onerror = function() {
 						onedev.server.markdown.updateUploadMessage($input, 
-								"!!Unable to connect to server!!", xhr.replaceMessage);
+								"!!" + onedev.server.markdown.translations["unable-to-connect-to-server"] + "!!", xhr.replaceMessage);
 					};
 					
 					xhr.open("POST", attachmentUploadUrl, true);
@@ -846,7 +847,7 @@ onedev.server.markdown = {
 
 		$actionMenu.find(".do-code").click(function() {
 			$input.focus();
-			var langHint = "programming language";
+			var langHint = onedev.server.markdown.translations["programming-language"];
 			var selected = $input.range();
 			var prefix = onedev.server.markdown.getBlockPrefix($input);
 			var suffix = onedev.server.markdown.getBlockSuffix($input);
@@ -884,7 +885,7 @@ onedev.server.markdown = {
 		$actionMenu.find(".do-emoji").click(function() {
 			if (!$emojis.hasClass("loaded") && !$emojis.hasClass("loading")) {
 				$emojis.addClass("loading");
-				$emojis.html("Loading emojis...");
+				$emojis.html(onedev.server.markdown.translations["loading-emojis"]);
 				callback("loadEmojis");
 			}
 			$emojis.toggle();
@@ -1101,7 +1102,7 @@ onedev.server.markdown = {
 			
 			if (!$this.parent().hasClass("suggestion")) {
 				var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#copy'/></svg>";
-				var $copy = $("<a class='pressable' title='Copy to clipboard'>" + icon + "</a>");
+				var $copy = $("<a class='pressable' data-tippy-content='" + onedev.server.markdown.translations["copy-to-clipboard"] + "'>" + icon + "</a>");
 				$actions.append($copy);
 				var options = {
 					text: function() {
@@ -1118,18 +1119,18 @@ onedev.server.markdown = {
 			if (suggestionCallback) {
 				if ($this.data("suggestionoutdated")) {
 					var icon = "<svg class='icon icon-sm'><use xlink:href='" + onedev.server.icons + "#warning'/></svg>";
-					var $warning = $("<a class='ml-2' disabled='disabled' title='Suggestion is outdated either due to code change or pull request close'>" + icon + "</a>");
+					var $warning = $("<a class='ml-2' disabled='disabled' data-tippy-content='" + onedev.server.markdown.translations["suggestion-outdated"] + "'>" + icon + "</a>");
 					$actions.append($warning);
 				} else if ($this.data("suggestionapplyinbatch")) {
 					var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#minus-square'/></svg>";
-					var $removeFromBatch = $("<a class='pressable ml-2' title='Remove from batch'>" + icon + "</a>");
+					var $removeFromBatch = $("<a class='pressable ml-2' data-tippy-content='" + onedev.server.markdown.translations["remove-from-batch"] + "'>" + icon + "</a>");
 					$removeFromBatch.click(function() {
 						suggestionCallback("removeFromBatch");
 					});
 					$actions.append($removeFromBatch);
 				} else if ($this.data("suggestionappliable")) {
 					var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#add-to-git'/></svg>";
-					var $apply = $("<a class='pressable ml-2' title='Commit suggestion'>" + icon + "</a>");
+					var $apply = $("<a class='pressable ml-2' data-tippy-content='" + onedev.server.markdown.translations["commit-suggestion"] + "'>" + icon + "</a>");
 					$actions.append($apply);
 					$apply.click(function() {
 						suggestionCallback("apply", $this.data("suggestion"));
@@ -1137,7 +1138,7 @@ onedev.server.markdown = {
 					
 					if ($this.data("suggestionbatchappliable")) {
 						var icon = "<svg class='icon flip-x'><use xlink:href='" + onedev.server.icons + "#plus-square'/></svg>";
-						var $addToBatch = $("<a class='pressable ml-2' title='Add to batch to commit with other suggestions later'>" + icon + "</a>");
+						var $addToBatch = $("<a class='pressable ml-2' data-tippy-content='" + onedev.server.markdown.translations["add-to-batch"] + "'>" + icon + "</a>");
 						$addToBatch.click(function() {
 							suggestionCallback("addToBatch", $this.data("suggestion"));
 						});
@@ -1158,7 +1159,8 @@ onedev.server.markdown = {
 		}
 	},
 	onViewerDomReady: function(containerId, taskCallback, taskSourcePositionDataAttribute, referenceCallback, 
-			suggestionCallback) {
+			suggestionCallback, translations) {
+		onedev.server.markdown.translations = translations;
 		var $container = $("#" + containerId);
 		$container.data("suggestionCallback", suggestionCallback);
 		
@@ -1195,7 +1197,7 @@ onedev.server.markdown = {
 				referenceType = "commit";
 			}
 			if (referenceType) {
-				var $tooltip = $("<div id='reference-tooltip'>Loading...</div>");
+				var $tooltip = $("<div id='reference-tooltip'>" + onedev.server.markdown.translations["loading"] + "</div>");
 				$tooltip.data("trigger", this);
 				$tooltip.data("alignment", alignment);
 				$("body").append($tooltip);
@@ -1229,7 +1231,7 @@ onedev.server.markdown = {
 			}).text(state);
 			$tooltip.find(".title").text(title);
 		} else {
-			$tooltip.empty().append("<i>Issue not exist or access denied</i>");			
+			$tooltip.empty().append("<i>" + onedev.server.markdown.translations["issue-not-exist-or-access-denied"] + "</i>");			
 		}
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
@@ -1243,7 +1245,7 @@ onedev.server.markdown = {
 			$tooltip.find(".status").addClass(statusCss).text(status);
 			$tooltip.find(".title").text(title);
 		} else {
-			$tooltip.empty().append("<i>Pull request not exist or access denied</i>");			
+			$tooltip.empty().append("<i>" + onedev.server.markdown.translations["pull-request-not-exist-or-access-denied"] + "</i>");			
 		}
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
@@ -1256,7 +1258,7 @@ onedev.server.markdown = {
 					"</div>");
 			$tooltip.find(".title").text(title);
 		} else {
-			$tooltip.empty().append("<i>Build not exist or access denied</i>");			
+			$tooltip.empty().append("<i>" + onedev.server.markdown.translations["build-not-exist-or-access-denied"] + "</i>");			
 		}
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
@@ -1280,7 +1282,7 @@ onedev.server.markdown = {
 			$tooltip.find(".date").text(date);
 			$tooltip.find(".body").text(commitMessage);
 		} else {
-			$tooltip.empty().append("<i>Commit not exist or access denied</i>");			
+			$tooltip.empty().append("<i>" + onedev.server.markdown.translations["commit-not-exist-or-access-denied"] + "</i>");			
 		}
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
@@ -1322,7 +1324,7 @@ onedev.server.markdown = {
 
     	var sanitizedUrl = $('<div>'+url+'</div>').text();
     	var message;
-    	var defaultDescription = "Enter description here";
+    	var defaultDescription = onedev.server.markdown.translations["enter-description-here"];
     	if (name)
     		message = '['+name+']('+sanitizedUrl+')';
     	else

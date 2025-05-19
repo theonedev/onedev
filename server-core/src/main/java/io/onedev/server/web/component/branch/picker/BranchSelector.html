@@ -1,7 +1,7 @@
 <wicket:panel>
 	<div class="branch-selector p-4">
 		<div class="d-flex align-items-center">
-			<input wicket:id="branch" class="form-control form-control-sm branch" placeholder="Search branch"></input>
+			<input wicket:id="branch" class="form-control form-control-sm branch"></input>
 			<wicket:svg href="magnify" class="icon text-muted icon-magnify"></wicket:svg>
 		</div>
 		<ul wicket:id="branches" class="branches list-unstyled mb-0 mt-3">
@@ -9,6 +9,6 @@
 				<a wicket:id="link"><wicket:svg href="tick" class="icon mr-2"/> <span wicket:id="label"></span></a>
 			</li>			
 		</ul>
-		<div wicket:id="noBranches" class="no-branches alert alert-notice alert-light-warning mb-0 mt-4 px-4 py-3">No branches Found</div>
+		<div wicket:id="noBranches" class="no-branches alert alert-notice alert-light-warning mb-0 mt-4 px-4 py-3"><wicket:t>No branches Found</wicket:t></div>
 	</div>
 </wicket:panel>

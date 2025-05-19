@@ -64,7 +64,7 @@ public abstract class CreateTagPanel extends Panel {
 				User user = SecurityUtils.getAuthUser();
 				if (project.getObjectId(GitUtils.tag2ref(tagName), false) != null) {
 					editor.error(new Path(new PathNode.Named("name")), 
-							MessageFormat.format(_T("Tag '{0}' already exists, please choose a different name."), helperBean.getName()));
+							MessageFormat.format(_T("Tag \"{0}\" already exists, please choose a different name."), helperBean.getName()));
 					target.add(form);
 				} else if (project.getTagProtection(tagName, user).isPreventCreation()) {
 					editor.error(new Path(new PathNode.Named("name")), _T("Unable to create protected tag")); 

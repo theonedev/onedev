@@ -48,6 +48,7 @@ import java.util.List;
 
 import static io.onedev.server.git.GitUtils.branch2ref;
 import static io.onedev.server.git.GitUtils.tag2ref;
+import static io.onedev.server.web.translation.Translation._T;
 import static org.eclipse.jgit.lib.Constants.R_REFS;
 
 public abstract class RevisionSelector extends Panel {
@@ -160,15 +161,15 @@ public abstract class RevisionSelector extends Panel {
 			protected String load() {
 				if (branchesActive) {
 					if (canCreateBranch) {
-						return "Find or create branch";
+						return _T("Find or create branch");
 					} else {
-						return "Find branch";
+						return _T("Find branch");
 					}
 				} else {
 					if (canCreateTag) {
-						return "Find or create tag";
+						return _T("Find or create tag");
 					} else {
-						return "Find tag";
+						return _T("Find tag");
 					}
 				}
 			}
@@ -201,7 +202,7 @@ public abstract class RevisionSelector extends Panel {
 		
 		List<Tab> tabs = new ArrayList<>();
 		AjaxActionTab branchesTab;
-		tabs.add(branchesTab = new AjaxActionTab(Model.of("branches")) {
+		tabs.add(branchesTab = new AjaxActionTab(Model.of(_T("branches"))) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -211,7 +212,7 @@ public abstract class RevisionSelector extends Panel {
 			
 		});
 		AjaxActionTab tagsTab;
-		tabs.add(tagsTab = new AjaxActionTab(Model.of("tags")) {
+		tabs.add(tagsTab = new AjaxActionTab(Model.of(_T("tags"))) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -401,7 +402,7 @@ public abstract class RevisionSelector extends Panel {
 				item.add(AttributeAppender.append("class", "active"));
 			itemsView.add(item);
 		}
-		itemsContainer.add(new Label("noItems", branchesActive? "No branches found": "No tags found") {
+		itemsContainer.add(new Label("noItems", branchesActive? _T("No branches found"): _T("No tags found")) {
 
 			@Override
 			protected void onConfigure() {

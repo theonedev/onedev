@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.markdown;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 
@@ -143,7 +144,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			input = StringUtils.replace(input, "\r\n", "\n");
 			return renderMarkdown(input);
 		} else {
-			return "<div class='message'>Nothing to preview</div>";
+			return "<div class='message'>" + _T("Nothing to preview") + "</div>";
 		}
 	}
 	
@@ -190,9 +191,24 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		container.setOutputMarkupId(true);
 		
 		add(container);
-		
+
+		container.add(new WebMarkupContainer("doBold").add(AttributeAppender.append("data-tippy-content", _T("Bold"))));
+		container.add(new WebMarkupContainer("doItalic").add(AttributeAppender.append("data-tippy-content", _T("Italic"))));
+		container.add(new WebMarkupContainer("doHeader").add(AttributeAppender.append("data-tippy-content", _T("md.heading"))));
+		container.add(new WebMarkupContainer("doLink").add(AttributeAppender.append("data-tippy-content", _T("Link"))));
+		container.add(new WebMarkupContainer("doImage").add(AttributeAppender.append("data-tippy-content", _T("md.image"))));
+		container.add(new WebMarkupContainer("doList").add(AttributeAppender.append("data-tippy-content", _T("Unordered list"))));
+		container.add(new WebMarkupContainer("doOrderlist").add(AttributeAppender.append("data-tippy-content", _T("Ordered list"))));
+		container.add(new WebMarkupContainer("doTasklist").add(AttributeAppender.append("data-tippy-content", _T("Task list"))));
+		container.add(new WebMarkupContainer("doCode").add(AttributeAppender.append("data-tippy-content", _T("Code"))));
+		container.add(new WebMarkupContainer("doQuote").add(AttributeAppender.append("data-tippy-content", _T("Quote"))));
+		container.add(new WebMarkupContainer("doEmoji").add(AttributeAppender.append("data-tippy-content", _T("Show emojis"))));
+		container.add(new WebMarkupContainer("previewLink").add(AttributeAppender.append("data-tippy-content", _T("Preview"))));
+
 		WebMarkupContainer editLink = new WebMarkupContainer("editLink");
-		WebMarkupContainer splitLink = new WebMarkupContainer("splitLink");
+		editLink.add(AttributeAppender.append("data-tippy-content", _T("Edit")));
+		WebMarkupContainer splitLink = new WebMarkupContainer("splitLink");		
+		splitLink.add(AttributeAppender.append("data-tippy-content", _T("Split view")));
 		WebMarkupContainer preview = new WebMarkupContainer("preview");
 		WebMarkupContainer edit = new WebMarkupContainer("edit");
 		container.add(editLink);
@@ -204,7 +220,6 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		
 		var referenceSupport = getReferenceSupport();
 		container.add(new DropdownLink("doReference") {
-
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
@@ -224,7 +239,11 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				return fragment;
 			}
 			
-		}.setVisible(referenceSupport != null));
+		}.add(AttributeAppender.append("data-tippy-content", "Reference issue, build, or pull request")).setVisible(referenceSupport != null));
+
+		container.add(new WebMarkupContainer("doFixedwidth").add(AttributeAppender.append("data-tippy-content", _T("Toggle fixed width font"))));
+		container.add(new WebMarkupContainer("doFullscreen").add(AttributeAppender.append("data-tippy-content", _T("Full screen"))));
+		container.add(new WebMarkupContainer("doHelp").add(AttributeAppender.append("data-tippy-content", _T("Help"))));
 		
 		container.add(new DropdownLink("actionMenuTrigger") {
 
@@ -266,7 +285,9 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			
 		});
 		
-		container.add(new WebMarkupContainer("doMention").setVisible(getUserMentionSupport() != null));
+		container.add(new WebMarkupContainer("doMention")
+				.add(AttributeAppender.append("data-tippy-content", _T("Mention someone")))
+				.setVisible(getUserMentionSupport() != null));
 		
 		container.add(new WebMarkupContainer("doSuggestion") {
 
@@ -288,7 +309,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				setVisible(getSuggestionSupport() != null);
 			}
 			
-		});
+		}.add(AttributeAppender.append("data-tippy-content", _T("Code suggestion"))));
 		
 		edit.add(input = new TextArea<>("input", Model.of(getModelObject())) {
 
@@ -616,7 +637,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		else
 			escapedAutosaveKey = "undefined";
 		
-		String script = String.format("onedev.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, '%s', '%s', %s);", 
+		String script = String.format("onedev.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, '%s', '%s', %s, %s);", 
 				container.getMarkupId(), 
 				actionCallback, 
 				ATWHO_LIMIT, 
@@ -626,7 +647,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				getReferenceSupport() != null, 
 				escapeJavaScript(ProjectPathValidator.PATTERN.pattern()),
 				escapeJavaScript(ProjectKeyValidator.PATTERN.pattern()), 
-				escapedAutosaveKey);
+				escapedAutosaveKey, 
+				JavascriptTranslations.get());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
 		script = String.format("onedev.server.markdown.onLoad('%s');", container.getMarkupId());
@@ -691,5 +713,5 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	public void focus(AjaxRequestTarget target) {
 		target.appendJavaScript(String.format("$('#%s textarea').focus();", getMarkupId()));
 	}
-	
+
 }

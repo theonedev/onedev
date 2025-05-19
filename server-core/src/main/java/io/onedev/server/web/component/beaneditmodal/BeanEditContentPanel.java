@@ -18,6 +18,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.Collection;
 
@@ -45,7 +48,7 @@ abstract class BeanEditContentPanel extends Panel {
 		if (getTitle() != null)
 			form.add(new Label("title", getTitle()));
 		else
-			form.add(new Label("title", EditableUtils.getDisplayName(getBean().getClass())));
+			form.add(new Label("title", _T(EditableUtils.getDisplayName(getBean().getClass()))));
 		
 		String description = StringUtils.trimToNull(StringUtils.stripStart(
 				EditableUtils.getDescription(getBean().getClass()), "."));

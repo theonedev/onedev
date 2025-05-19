@@ -49,6 +49,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -283,6 +286,7 @@ public class BlobNavigator extends Panel {
 				name = file.path;
 			
 			nameInput = new TextField<String>("input", Model.of(name));
+			nameInput.add(AttributeAppender.append("placeholder", _T("Name your file")));
 			form.add(nameInput);
 			nameInput.add(new AjaxFormSubmitBehavior(form, "input") {
 

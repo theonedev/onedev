@@ -2,7 +2,7 @@ package io.onedev.server.web.translation;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -16,6 +16,8 @@ import io.onedev.commons.bootstrap.Bootstrap;
 public class Translation extends TranslationResourceBundle {
 
 	private static final Logger logger = LoggerFactory.getLogger(Translation.class);
+
+	private static final Map<String, String> m = new HashMap<>();
 
 	public static String _T(String key) {
 		return Localizer.get().getString("t: " + key, null);
@@ -56,10 +58,23 @@ public class Translation extends TranslationResourceBundle {
 		}
 	}
 
+	static {
+		init();
+		Translation.watchUpdate(Translation.class, () -> {
+			init();
+		});
+	}
+
+	private static void init() {
+		m.clear();
+		m.put("md.heading", "Heading");
+		m.put("md.image", "Image");
+		m.put("container-image", "Image");
+	}
 
 	@Override
 	protected Map<String, String> getContents() {
-		return Collections.emptyMap();
+		return m;
 	}
 
 }

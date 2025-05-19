@@ -62,7 +62,7 @@ public class CommandStep extends Step {
 		return (boolean) EditContext.get().getInputValue("runInContainer");
 	}
 	
-	@Editable(order=100, description="Specify container image to execute commands inside")
+	@Editable(order=100, name="container-image", description="Specify container image to execute commands inside")
 	@ShowCondition("isRunInContainerEnabled")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty

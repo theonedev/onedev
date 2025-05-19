@@ -330,11 +330,11 @@ public class MarkdownViewer extends GenericPanel<String> {
 		CharSequence suggestionCallback = suggestionBehavior.getCallbackFunction(
 				explicit(SUGGESTION_ACTION), explicit(SUGGESTION_CONTENT));
 		
-		String script = String.format("onedev.server.markdown.onViewerDomReady('%s', %s, '%s', %s, %s);", 
+		String script = String.format("onedev.server.markdown.onViewerDomReady('%s', %s, '%s', %s, %s, %s);", 
 				getMarkupId(), 
 				contentVersionSupport!=null?taskCallback:"undefined", 
 				SourcePositionTrackExtension.DATA_START_ATTRIBUTE, 
-				referenceCallback, suggestionCallback);
+				referenceCallback, suggestionCallback, JavascriptTranslations.get());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
