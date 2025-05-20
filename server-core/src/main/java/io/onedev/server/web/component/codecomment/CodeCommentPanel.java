@@ -35,9 +35,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.IRequestHandler;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.cycle.IRequestCycleListener;
+import org.apache.wicket.request.cycle.AbstractRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
@@ -127,7 +125,7 @@ public abstract class CodeCommentPanel extends Panel {
 				@Override
 				protected void onComponentTag(ComponentTag tag) {
 					super.onComponentTag(tag);
-					tag.put("title", "Current context is different from the context when this comment is added, click to show the comment context");
+					tag.put("data-tippy-content", _T("Current context is different from the context when this comment is added, click to show the comment context"));
 				}
 				
 			});
@@ -163,7 +161,6 @@ public abstract class CodeCommentPanel extends Panel {
 		});
 		
 		viewFragment.add(new WebMarkupContainer("anchor").setVisible(false));
-
 		viewFragment.add(new AjaxLink<Void>("edit") {
 
 			@Override
@@ -248,7 +245,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 						String content = contentInput.getModelObject();
 						if (content.length() > CodeComment.MAX_CONTENT_LEN) {
-							error("Comment too long");
+							error(_T("Comment too long"));
 							target.add(feedback);
 						} else {
 							CodeComment comment = getComment();
@@ -350,9 +347,9 @@ public abstract class CodeCommentPanel extends Panel {
 				super.updateAjaxAttributes(attributes);
 				String confirmMessage;
 				if (getComment().getReplies().isEmpty()) {
-					confirmMessage = "Do you really want to delete this code comment?";
+					confirmMessage = _T("Do you really want to delete this code comment?");
 				} else {
-					confirmMessage = "Do you really want to delete this code comment and all its replies?";
+					confirmMessage = _T("Do you really want to delete this code comment and all its replies?");
 				}
 				attributes.getAjaxCallListeners().add(new ConfirmClickListener(confirmMessage));
 			}
@@ -477,45 +474,12 @@ public abstract class CodeCommentPanel extends Panel {
 			
 		});
 
-		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
-
-			@Override
-			public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
-			}
-
-			@Override
-			public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
-			}
-
-			@Override
-			public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
-			}
-
-			@Override
-			public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
-			}
-
-			@Override
-			public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
-			}
-
-			@Override
-			public IRequestHandler onException(RequestCycle cycle, Exception ex) {
-				return null;
-			}
+		RequestCycle.get().getListeners().add(new AbstractRequestCycleListener() {
 
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				if (SecurityUtils.getAuthUser() != null)
 					OneDev.getInstance(VisitInfoManager.class).visitCodeComment(SecurityUtils.getAuthUser(), getComment());
-			}
-
-			@Override
-			public void onDetach(RequestCycle cycle) {
-			}
-
-			@Override
-			public void onBeginRequest(RequestCycle cycle) {
 			}
 
 		});
@@ -640,7 +604,7 @@ public abstract class CodeCommentPanel extends Panel {
 				
 				String content = contentInput.getModelObject();
 				if (content != null && content.length() > CodeCommentReply.MAX_CONTENT_LEN) {
-					error("Comment too long");
+					error(_T("Comment too long"));
 					target.add(feedback);
 				} else {
 					if (resolved == null) {
@@ -733,7 +697,7 @@ public abstract class CodeCommentPanel extends Panel {
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
-						tag.put("title", "Current context is different from this action, click to show the comment context");
+						tag.put("data-tippy-content", _T("Current context is different from this action, click to show the comment context"));
 					}
 					
 				});
@@ -798,7 +762,7 @@ public abstract class CodeCommentPanel extends Panel {
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
-						tag.put("title", "Current context is different from the context when this reply is added, click to show the reply context");
+						tag.put("data-tippy-content", _T("Current context is different from the context when this reply is added, click to show the reply context"));
 					}
 					
 				});
@@ -810,6 +774,8 @@ public abstract class CodeCommentPanel extends Panel {
 
 				@Override
 				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					tag.put("data-tippy-content", _T("Permanent link"));
 					tag.put("href", "#" + getReply().getAnchor());
 				}
 				
@@ -969,7 +935,7 @@ public abstract class CodeCommentPanel extends Panel {
 				@Override
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 					super.updateAjaxAttributes(attributes);
-					attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this reply?"));
+					attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to delete this reply?")));
 				}
 
 				@Override

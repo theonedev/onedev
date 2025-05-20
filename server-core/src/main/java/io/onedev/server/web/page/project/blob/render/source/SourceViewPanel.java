@@ -372,11 +372,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				add(AttributeAppender.replace("title", new AbstractReadOnlyModel<String>() {
+				add(AttributeAppender.replace("data-tippy-content", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
-						return context.getOpenComment().isResolved()? "Resolved": "Unresolved";
+						return context.getOpenComment().isResolved()? _T("Resolved"): _T("Unresolved");
 					}
 					
 				}));
@@ -981,7 +981,13 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			"perma-link", _T("Permanent link of this selection"), 
 			"copy-to-clipboard", _T("Copy selected text to clipboard"), 
 			"add-comment", _T("Add comment on this selection"), 
-			"login-to-comment", _T("Login to comment on selection"));
+			"login-to-comment", _T("Login to comment on selection"),
+			"covered-by-tests", _T("Covered by tests"),
+			"not-covered-by-any-test", _T("Not covered by any test"),
+			"partially-covered-by-some-tests", _T("Partially covered by some tests"),
+			"unsaved-changes-prompt", _T("There are unsaved changes, discard and continue?"),
+			"click-to-show-comment-of-marked-text", _T("Click to show comment of marked text"),
+			"loading", _T("Loading..."));
 
 		String script = String.format("onedev.server.sourceView.onDomReady("
 				+ "'%s', '%s', %s, %s, '%s', '%s', %s, %s, %s, %s, '%s', %s, %s);", 

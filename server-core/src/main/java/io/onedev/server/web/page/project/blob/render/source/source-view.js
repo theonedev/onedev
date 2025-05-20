@@ -225,13 +225,18 @@ onedev.server.sourceView = {
 	addCoverageGutter: function(line, coverageStatus) {
 		let tooltip;
 		if (coverageStatus == 'COVERED')
-			tooltip = `Covered by tests`;
+			tooltip = onedev.server.sourceView.translations["covered-by-tests"];
 		else if (coverageStatus == 'NOT_COVERED')
-			tooltip = "Not covered by any test";
+			tooltip = onedev.server.sourceView.translations["not-covered-by-any-test"];
 		else
-			tooltip = "Partially covered by some tests";
+			tooltip = onedev.server.sourceView.translations["partially-covered-by-some-tests"];
 			
-		let $gutter = $(`<a class='CodeMirror-coverage d-block' title='${tooltip}'>&nbsp;</a>`);
+		let $gutter = $(`<a class='CodeMirror-coverage d-block' data-tippy-content='${tooltip}'>&nbsp;</a>`);
+
+		tippy($gutter[0], {
+			delay: [500, 0],
+			placement: 'auto'
+		});		
 
 		$gutter.addClass(coverageStatus.toLowerCase());
 			
@@ -299,7 +304,7 @@ onedev.server.sourceView = {
 		cm.setGutterMarker(parseInt(line), "CodeMirror-problems", $gutter[0]);	
 	},
 	confirmUnsavedChanges: function() {
-		return $(".source-view").find("form.dirty").length == 0 || confirm("There are unsaved changes, discard and continue?"); 
+		return $(".source-view").find("form.dirty").length == 0 || confirm(onedev.server.sourceView.translations["unsaved-changes-prompt"]); 
 	},
 	addCommentGutter: function(line, comments) {
 		$(".comment-popover[data-line='" + line + "']").remove();
@@ -326,7 +331,7 @@ onedev.server.sourceView = {
 					cssClasses += " updated";
 					updated = true;
 				}
-				content += `<a class='${cssClasses}' title='Click to show comment of marked text'>#${comments[i].id}</a>`;
+				content += `<a class='${cssClasses}' data-tippy-content='${onedev.server.sourceView.translations["click-to-show-comment-of-marked-text"]}'>#${comments[i].id}</a>`;
 			}
 
 			let cssClasses = "comment-indicator";
@@ -362,6 +367,10 @@ onedev.server.sourceView = {
 									range.toRow, range.toColumn);
 						}
 					});
+					tippy(this, {
+						delay: [500, 0],
+						placement: 'auto'
+					});		
 				});
 				onedev.server.sourceView.highlightCommentTrigger();				
 			});
@@ -371,7 +380,7 @@ onedev.server.sourceView = {
 			if (comment.updated)
 				cssClasses += " updated";
 			var svg = `<svg class='icon'><use xlink:href='${onedev.server.icons}#comment'/></svg>`;
-			$gutter.append(`<a class='${cssClasses}' title='Click to show comment of marked text'>${svg}</a>`);
+			$gutter.append(`<a class='${cssClasses}' data-tippy-content='${onedev.server.sourceView.translations["click-to-show-comment-of-marked-text"]}'>${svg}</a>`);
 			var $indicator = $gutter.children("a");
 			$indicator.mouseover(function() {
 				onedev.server.codemirror.mark(cm, comment.range);
@@ -384,6 +393,10 @@ onedev.server.sourceView = {
 					callback("openComment", comment.id, range.fromRow, range.fromColumn, 
 							range.toRow, range.toColumn);
 				}
+			});
+			tippy($indicator[0], {
+				delay: [500, 0],
+				placement: 'auto'
 			});
 		}
 		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		
@@ -609,7 +622,7 @@ onedev.server.sourceView = {
     				$hashLink.hover(function() {
     					var tooltipId = "blame-message-line-" + $(this).data("line");
     					blameMessageCallback(tooltipId, $(this).data("hash"));
-    					var $tooltip = $("<div class='blame-message'><div class='loading'>Loading...</div></div>");
+    					var $tooltip = $("<div class='blame-message'><div class='loading'>${onedev.server.sourceView.translations[\"loading\"]}...</div></div>");
     					$tooltip.attr("id", tooltipId);
     					$tooltip.data("trigger", this);
     					$tooltip.data("alignment", alignment);

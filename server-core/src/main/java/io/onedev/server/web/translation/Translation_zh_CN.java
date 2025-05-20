@@ -139,6 +139,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Applicable Senders", "适用发送者");
 		m.put("Applicable Users", "适用用户");
 		m.put("Application (client) ID", "应用（客户端）ID");
+		m.put("Apply suggested change from code comment", "从代码注解应用建议的更改");
 		m.put("Approved", "已批准");
 		m.put("Arbitrary scope", "任意范围");
 		m.put("Arbitrary type", "任意类型");
@@ -351,15 +352,15 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Code Analysis", "代码分析");
 		m.put("Code Analysis Setting", "代码分析设置");
 		m.put("Code Comment", "代码注解");
-		m.put("Code Comment Management", "代码注释管理");
-		m.put("Code Comments", "代码注释");
+		m.put("Code Comment Management", "代码注解管理");
+		m.put("Code Comments", "代码注解");
 		m.put("Code Compare", "代码比较");
 		m.put("Code Management", "代码管理");
 		m.put("Code Privilege", "代码权限");
 		m.put("Code Search", "代码搜索");
-		m.put("Code comment", "代码注释");
+		m.put("Code comment", "代码注解");
 		m.put("Code comment administrative permission inside a project, including batch operations over multiple code comments", 
-			"项目内的代码注释管理权限，包括对多个代码注释的批量操作");
+			"项目内的代码注解管理权限，包括对多个代码注解的批量操作");
 		m.put("Code is committed", "代码已提交");
 		m.put("Code push", "代码推送");
 		m.put("Code read permission is required to import build spec (import project: {0}, import revision: {1})", 
@@ -406,7 +407,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Confirm password here", "在此确认密码");
 		m.put("Confirm your action", "确认你的操作");
 		m.put("Connector", "连接器");
-		m.put("container-image", "容器镜像");
 		m.put("Container default", "容器默认");
 		m.put("Content", "内容");
 		m.put("Contributed settings", "贡献的设置");
@@ -432,16 +432,19 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Create Tag Bean", "创建标签 Bean");
 		m.put("Create Tag Bean With Revision", "带版本的创建标签 Bean");
 		m.put("Create body", "创建正文");
+		m.put("Create branch <b>{0}</b> from {1}", "创建分支 <b>{0}</b>（基于 {1}）");
 		m.put("Create child projects under a project", "在项目下创建子项目");
 		m.put("Create issue", "创建工单");
 		m.put("Create merge commit", "创建合并提交");
 		m.put("Create merge commit if necessary", "如有必要，创建合并提交");
+		m.put("Create tag <b>{0}</b> from {1}", "创建标签 <b>{0}</b>（基于 {1}）");
 		m.put("Creation of this branch is prohibited per branch protection rule", "此分支的创建受分支保护规则限制");
 		m.put("Critical", "严重");
 		m.put("Cron Expression", "Cron 表达式");
 		m.put("Cron schedule", "Cron 调度");
 		m.put("Curl Location", "Curl 路径");
 		m.put("Current Iteration", "当前迭代");
+		m.put("Current context is different from this action, click to show the comment context", "当前上下文与此操作不同，点击显示评论上下文");
 		m.put("Current platform", "当前平台");
 		m.put("Current project", "当前项目");
 		m.put("Custom Linux Shell", "自定义 Linux Shell");
@@ -476,6 +479,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"首次重试的延迟时间（秒）。后续重试的延迟时间将基于该值进行指数退避计算");
 		m.put("Delete", "删除");
 		m.put("Delete All Queried Projects", "删除所有查询的项目");
+		m.put("Delete Selected Comments", "删除选中的评论");
 		m.put("Delete Selected Projects", "删除选中的项目");
 		m.put("Delete Source Branch After Merge", "合并后删除源分支");
 		m.put("Delete dashboard", "删除仪表板");
@@ -515,7 +519,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Do not retrieve", "不检索");
 		m.put("Do not retrieve groups", "不检索组");
 		m.put("Do you really want to delete \"{0}\"?", "您真的要删除 \"{0}\" 吗？");
+		m.put("Do you really want to delete this code comment and all its replies?", "您真的要删除此代码评论及其所有回复吗？");
+		m.put("Do you really want to delete this code comment?", "您真的要删除此代码评论吗？");
 		m.put("Do you really want to delete this email address?", "您真的要删除这个电子邮件地址吗？");
+		m.put("Do you really want to delete this reply?", "您真的要删除此回复吗？");
 		m.put("Do you really want to remove this link?", "您确定要删除此链接吗？");
 		m.put("Docker Executable", "Docker 可执行文件");
 		m.put("Docker Image", "Docker 镜像");
@@ -1131,6 +1138,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("No branch to revert on", "没有分支可以 revert");
 		m.put("No branches Found", "未找到分支");
 		m.put("No branches found", "未找到分支");
+		m.put("No comments to set resolved", "没有评论可以设置为已解决");
+		m.put("No comments to set unresolved", "没有评论可以设置为未解决");
 		m.put("No config file", "无配置文件");
 		m.put("No default group", "无默认组");
 		m.put("No default role", "无默认角色");
@@ -1513,6 +1522,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Performance Settings", "性能设置");
 		m.put("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ author(robin)", 
 			"执行模糊查询。使用 '~' 包围搜索文本以添加更多条件，例如：~text to search~ author(robin)");
+		m.put("Permanent link", "永久链接");
 		m.put("Permanent link of this selection", "此选择的永久链接");
 		m.put("Pick Existing", "选择现有");
 		m.put("Platform", "平台");
@@ -1523,6 +1533,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Please input one of your recovery codes saved when enable two-factor authentication", 
 			"请输入在启用两阶段验证时保存的恢复代码");
 		m.put("Please login to perform this operation", "请登录才能执行此操作");
+		m.put("Please select comments to delete", "请选择要删除的评论");
+		m.put("Please select comments to set resolved", "请选择要设置为已解决的评论");
+		m.put("Please select comments to set unresolved", "请选择要设置为未解决的评论");
 		m.put("Please specify file name above before editing content", "请在编辑内容之前指定文件名");
 		m.put("Poll Interval", "轮询间隔");
 		m.put("Populate Tag Mappings", "填充标签映射");
@@ -1669,6 +1682,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Renovate JavaScript Config", "Renovate JavaScript 配置");
 		m.put("Replace With", "替换为");
 		m.put("Replica Count", "副本数量");
+		m.put("Reply", "回复");
 		m.put("Report Name", "报告名称");
 		m.put("Request Scopes", "请求范围");
 		m.put("Requested for changes", "请求更改");
@@ -1679,6 +1693,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Required Reviewers", "要求审查者");
 		m.put("Required Services", "所需服务");
 		m.put("Resend Verification Email", "重新发送验证电子邮件");
+		m.put("Resolved", "已解决");
 		m.put("Resource Settings", "资源设置");
 		m.put("Retrieve Groups", "检索组");
 		m.put("Retrieve LFS Files", "检索 LFS 文件");
@@ -1803,10 +1818,16 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Service desk setting", "服务台设置");
 		m.put("Services", "服务");
 		m.put("Set All Queried As Root Projects", "设置所有查询的项目为根项目");
+		m.put("Set All Queried Comments as Resolved", "设置所有选中的评论为已解决");
+		m.put("Set All Queried Comments as Unresolved", "设置所有选中的评论为未解决");
 		m.put("Set As Primary", "设置为主");
 		m.put("Set Build Description", "设置构建描述");
 		m.put("Set Build Version", "设置构建版本");
+		m.put("Set Resolved", "设置为已解决");
 		m.put("Set Selected As Root Projects", "设置选中的项目为根项目");
+		m.put("Set Selected Comments as Resolved", "设置选中的评论为已解决");
+		m.put("Set Selected Comments as Unresolved", "设置选中的评论为未解决");
+		m.put("Set Unresolved", "设置为未解决");
 		m.put("Set Up Cache", "设置缓存");
 		m.put("Set Up Renovate Cache", "设置 Renovate 缓存");
 		m.put("Set Up Trivy Cache", "设置 Trivy 缓存");
@@ -2380,6 +2401,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"为增强安全性，您的账户已强制启用两阶段验证。请按照以下步骤进行设置");
 		m.put("Two-factor authentication is now configured", "两阶段验证现已配置完成");
 		m.put("Type", "类型");
+		m.put("Type <code>yes</code> below to delete selected comments", "在下方输入 <code>yes</code> 以删除选中的评论");
 		m.put("Type password here", "在此输入密码");
 		m.put("Type to filter", "过滤");
 		m.put("URL", "URL");
@@ -2397,6 +2419,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Unlink this issue", "取消链接此工单");
 		m.put("Unordered List", "无序列表");
 		m.put("Unordered list", "无序列表");
+		m.put("Unresolved", "未解决");
 		m.put("Unspecified", "未指定");
 		m.put("Unsupported", "不支持");
 		m.put("Unverified email address is <b>NOT</b> applicable for above functionalities", "未验证的电子邮件地址不适用于上述功能");
@@ -2560,13 +2583,16 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("branches", "分支");
 		m.put("builds", "构建");
 		m.put("cmd-k to show command palette", "cmd-k 显示命令面板");
+		m.put("container-image", "容器镜像");
 		m.put("ctrl-k to show command palette", "ctrl-k 显示命令面板");
 		m.put("curl Command Line", "curl 命令行");
 		m.put("curl Path", "curl 路径");
 		m.put("descending", "降序");
 		m.put("does not have any value of", "没有任何值");
 		m.put("false", "假");
+		m.put("found 1 comment", "找到 1 条评论");
 		m.put("found 1 project", "找到 1 个项目");
+		m.put("found {0} comments", "找到 {0} 条评论");
 		m.put("found {0} projects", "找到 {0} 个项目");
 		m.put("has any value of", "具有任何值");
 		m.put("is empty", "为空");
@@ -2576,6 +2602,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("md.heading", "标题");
 		m.put("md.image", "图片");
 		m.put("new field", "新字段");
+		m.put("on file {0}", "在文件 {0} 上");
 		m.put("outdated", "过时");
 		m.put("packages", "包");
 		m.put("pull requests", "合并请求");
@@ -2589,8 +2616,16 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{0} edited {1}", "{0} 编辑于 {1}");
 		m.put("{0} files", "{0} 个文件");
 		m.put("{0} tags", "{0} 个标签");
-		m.put("Apply suggested change from code comment", "从代码注释应用建议的更改");
-
+		m.put("Click to show comment of marked text", "点击显示标记文本的评论");
+		m.put("Covered by tests", "被测试覆盖");
+		m.put("Current context is different from the context when this comment is added, click to show the comment context", 
+			"当前上下文与添加此评论时的上下文不同，点击显示评论上下文");
+		m.put("Current context is different from the context when this reply is added, click to show the reply context", 
+			"当前上下文与添加此回复时的上下文不同，点击显示回复上下文");
+		m.put("Not covered by any test", "未被任何测试覆盖");
+		m.put("Partially covered by some tests", "部分被测试覆盖");
+		m.put("There are unsaved changes, discard and continue?", "有未保存的更改，是否丢弃并继续？");
+		
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
 		m.put("Server Setup", "服务器设置");	

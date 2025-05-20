@@ -12,7 +12,7 @@
 				<span wicket:id="action" class="action"></span>
 				<span wicket:id="date" class="date"></span>
 				<a wicket:id="context"><wicket:svg href="warning" class="icon icon-sm"/></a>					
-				<a wicket:id="anchor" title="Permanent link" class="reply-anchor ml-2"><wicket:svg href="link" class="icon rotate-45"/></a>
+				<a wicket:id="anchor" class="reply-anchor ml-2"><wicket:svg href="link" class="icon rotate-45"/></a>
 			</div>
 			<div class="body">
 				<div wicket:id="content"></div>
@@ -29,10 +29,10 @@
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionsFrag">
-		<a wicket:id="reply" class="btn btn-sm btn-outline-secondary mr-2">Reply</a>
-		<a wicket:id="resolve" class="btn btn-sm btn-outline-secondary mr-2">Set Resolved</a>
-		<a wicket:id="unresolve" class="btn btn-sm btn-outline-secondary">Set Unresolved</a>
-		<a wicket:id="delete" class="btn btn-sm btn-outline-danger ml-auto">Delete</a>
+		<a wicket:id="reply" class="btn btn-sm btn-outline-secondary mr-2"><wicket:t>Reply</wicket:t></a>
+		<a wicket:id="resolve" class="btn btn-sm btn-outline-secondary mr-2"><wicket:t>Set Resolved</wicket:t></a>
+		<a wicket:id="unresolve" class="btn btn-sm btn-outline-secondary"><wicket:t>Set Unresolved</wicket:t></a>
+		<a wicket:id="delete" class="btn btn-sm btn-outline-danger ml-auto"><wicket:t>Delete</wicket:t></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="statusChangeFrag">
 		<div class="user-avatar flex-shrink-0"><a wicket:id="userAvatar"></a></div>

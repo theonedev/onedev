@@ -1,7 +1,9 @@
 package io.onedev.server.web.component.codecomment;
 
 import static io.onedev.server.model.CodeComment.SORT_FIELDS;
+import static io.onedev.server.web.translation.Translation._T;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -198,9 +200,9 @@ public abstract class CodeCommentListPanel extends Panel {
 				if (!isEnabled()) 
 					tag.append("class", "disabled", " ");
 				if (!querySubmitted)
-					tag.put("title", "Query not submitted");
+					tag.put("data-tippy-content", _T("Query not submitted"));
 				else if (queryModel.getObject() == null)
-					tag.put("title", "Can not save malformed query");
+					tag.put("data-tippy-content", _T("Can not save malformed query"));
 			}
 
 			@Override
@@ -259,7 +261,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Set Selected Comments as Resolved";
+						return _T("Set Selected Comments as Resolved");
 					}
 					
 					@Override
@@ -294,7 +296,7 @@ public abstract class CodeCommentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select comments to set resolved");
+									tag.put("data-tippy-content", _T("Please select comments to set resolved"));
 								}
 							}
 							
@@ -307,7 +309,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Set Selected Comments as Unresolved";
+						return _T("Set Selected Comments as Unresolved");
 					}
 					
 					@Override
@@ -342,7 +344,7 @@ public abstract class CodeCommentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select comments to set unresolved");
+									tag.put("data-tippy-content", _T("Please select comments to set unresolved"));
 								}
 							}
 							
@@ -356,7 +358,7 @@ public abstract class CodeCommentListPanel extends Panel {
 	
 						@Override
 						public String getLabel() {
-							return "Delete Selected Comments";
+							return _T("Delete Selected Comments");
 						}
 						
 						@Override
@@ -381,7 +383,7 @@ public abstract class CodeCommentListPanel extends Panel {
 										
 										@Override
 										protected String getConfirmMessage() {
-											return "Type <code>yes</code> below to delete selected issues";
+											return _T("Type <code>yes</code> below to delete selected comments");
 										}
 										
 										@Override
@@ -405,7 +407,7 @@ public abstract class CodeCommentListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "Please select issues to delete");
+										tag.put("data-tippy-content", _T("Please select comments to delete"));
 									}
 								}
 								
@@ -419,7 +421,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Set All Queried Comments as Resolved";
+						return _T("Set All Queried Comments as Resolved");
 					}
 					
 					@Override
@@ -451,7 +453,7 @@ public abstract class CodeCommentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No comments to set resolved");
+									tag.put("data-tippy-content", _T("No comments to set resolved"));
 								}
 							}
 							
@@ -464,7 +466,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Set All Queried Comments as Unresolved";
+						return _T("Set All Queried Comments as Unresolved");
 					}
 					
 					@Override
@@ -496,7 +498,7 @@ public abstract class CodeCommentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No comments to set unresolved");
+									tag.put("data-tippy-content", _T("No comments to set unresolved"));
 								}
 							}
 							
@@ -738,9 +740,9 @@ public abstract class CodeCommentListPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return "found " + dataProvider.size() + " comments";
+					return MessageFormat.format(_T("found {0} comments"), dataProvider.size());
 				else
-					return "found 1 comment";
+					return _T("found 1 comment");
 			}
 		}) {
 			@Override
@@ -859,7 +861,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				link.add(new Label("label", StringUtils.abbreviate(comment.getContent(), MAX_DESCRIPTION_LEN)));
 				fragment.add(link);
 
-				fragment.add(new Label("file", "on file " + comment.getMark().getPath()));
+				fragment.add(new Label("file", MessageFormat.format(_T("on file {0}"), comment.getMark().getPath())));
 
 				LastActivity lastActivity = comment.getLastActivity();
 				if (lastActivity.getUser() != null) {

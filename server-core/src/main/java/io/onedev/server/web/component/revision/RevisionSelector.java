@@ -43,6 +43,8 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
 
 import javax.annotation.Nullable;
+
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -362,11 +364,13 @@ public abstract class RevisionSelector extends Panel {
 			icon = "commit";
 		} else if (itemValue.startsWith(ADD_FLAG)) {
 			String label;
-			if (branchesActive)
-				label = "Create branch <b>" + HtmlEscape.escapeHtml5(ref) + "</b>";
-			else
-				label = "Create tag <b>" + HtmlEscape.escapeHtml5(ref) + "</b>";
-			label += " from " + HtmlEscape.escapeHtml5(revision);
+			if (branchesActive) {
+				label = MessageFormat.format(_T("Create branch <b>{0}</b> from {1}"), 
+						HtmlEscape.escapeHtml5(ref), HtmlEscape.escapeHtml5(revision));
+			} else {
+				label = MessageFormat.format(_T("Create tag <b>{0}</b> from {1}"), 
+						HtmlEscape.escapeHtml5(ref), HtmlEscape.escapeHtml5(revision));
+			}
 			link.add(new Label("label", label).setEscapeModelStrings(false));
 			icon = "plus";
 		} else {
