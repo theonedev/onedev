@@ -2,6 +2,7 @@ package io.onedev.server.web.component.diff.blob.text;
 
 import static io.onedev.server.codequality.BlobTarget.groupByLine;
 import static io.onedev.server.util.diff.DiffRenderer.toHtml;
+import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 
@@ -35,6 +36,7 @@ import org.unbescape.html.HtmlEscape;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import com.ibm.icu.text.SpoofChecker;
 
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
@@ -112,6 +114,8 @@ public class BlobTextDiffPanel extends Panel {
 		}
 		
 	};
+
+	private static final SpoofChecker confusableChecker = new SpoofChecker.Builder().setChecks(SpoofChecker.CONFUSABLE).build();
 	
 	private Component symbolTooltip;
 	
@@ -499,16 +503,16 @@ public class BlobTextDiffPanel extends Panel {
 							for (int j=0; j<block.getElements().size(); j++) { 
 								List<DiffBlock<String>> lineDiff = lineDiffs.get(j);
 								if (lineDiff != null) 
-									appendDelete(builder, block, j, lineDiff);
+									appendUnifiedDelete(builder, block, j, lineDiff);
 								else 
-									appendDelete(builder, block, j, null);
+									appendUnifiedDelete(builder, block, j, null);
 							}
 							for (int j=0; j<nextBlock.getElements().size(); j++) {
 								List<DiffBlock<String>> lineDiff = lineDiffs.get(j);
 								if (lineDiff != null) 
-									appendInsert(builder, nextBlock, j, lineDiff);
+									appendUnifiedInsert(builder, nextBlock, j, lineDiff);
 								else 
-									appendInsert(builder, nextBlock, j, null);
+									appendUnifiedInsert(builder, nextBlock, j, null);
 							}
 						} else {
 							int prevLineIndex = 0;
@@ -529,16 +533,28 @@ public class BlobTextDiffPanel extends Panel {
 						}
 						i++;
 					} else {
-						for (int j=0; j<block.getElements().size(); j++) 
-							appendDelete(builder, block, j, null);
+						for (int j=0; j<block.getElements().size(); j++) {
+							if (diffMode == DiffViewMode.UNIFIED)
+								appendUnifiedDelete(builder, block, j, null);
+							else
+								appendSplitDelete(builder, block, j);
+						}
 					}
 				} else {
-					for (int j=0; j<block.getElements().size(); j++) 
-						appendDelete(builder, block, j, null);
+					for (int j=0; j<block.getElements().size(); j++) {
+						if (diffMode == DiffViewMode.UNIFIED)
+							appendUnifiedDelete(builder, block, j, null);
+						else
+							appendSplitDelete(builder, block, j);
+					}
 				}
 			} else {
-				for (int j=0; j<block.getElements().size(); j++) 
-					appendInsert(builder, block, j, null);
+				for (int j=0; j<block.getElements().size(); j++) {
+					if (diffMode == DiffViewMode.UNIFIED)
+						appendUnifiedInsert(builder, block, j, null);
+					else
+						appendSplitInsert(builder, block, j);
+				}
 			}
 		}
 		return builder.toString();
@@ -547,25 +563,18 @@ public class BlobTextDiffPanel extends Panel {
 	private void appendDeletesAndInserts(StringBuilder builder, DiffBlock<String> deleteBlock, 
 			DiffBlock<String> insertBlock, int fromDeleteLineIndex, int toDeleteLineIndex, 
 			int fromInsertLineIndex, int toInsertLineIndex) {
-		if (diffMode == DiffViewMode.UNIFIED) {
-			for (int i=fromDeleteLineIndex; i<toDeleteLineIndex; i++)
-				appendDelete(builder, deleteBlock, i, null);
-			for (int i=fromInsertLineIndex; i<toInsertLineIndex; i++)
-				appendInsert(builder, insertBlock, i, null);
+		int deleteSize = toDeleteLineIndex - fromDeleteLineIndex;
+		int insertSize = toInsertLineIndex - fromInsertLineIndex;
+		if (deleteSize < insertSize) {
+			for (int i=fromDeleteLineIndex; i<toDeleteLineIndex; i++) 
+				appendDeleteAndInsert(builder, deleteBlock, insertBlock, i, i-fromDeleteLineIndex+fromInsertLineIndex);
+			for (int i=fromInsertLineIndex+deleteSize; i<toInsertLineIndex; i++)
+				appendSplitInsert(builder, insertBlock, i);
 		} else {
-			int deleteSize = toDeleteLineIndex - fromDeleteLineIndex;
-			int insertSize = toInsertLineIndex - fromInsertLineIndex;
-			if (deleteSize < insertSize) {
-				for (int i=fromDeleteLineIndex; i<toDeleteLineIndex; i++) 
-					appendSideBySide(builder, deleteBlock, insertBlock, i, i-fromDeleteLineIndex+fromInsertLineIndex);
-				for (int i=fromInsertLineIndex+deleteSize; i<toInsertLineIndex; i++)
-					appendInsert(builder, insertBlock, i, null);
-			} else {
-				for (int i=fromInsertLineIndex; i<toInsertLineIndex; i++) 
-					appendSideBySide(builder, deleteBlock, insertBlock, i-fromInsertLineIndex+fromDeleteLineIndex, i);
-				for (int i=fromDeleteLineIndex+insertSize; i<toDeleteLineIndex; i++)
-					appendDelete(builder, deleteBlock, i, null);
-			}
+			for (int i=fromInsertLineIndex; i<toInsertLineIndex; i++) 
+				appendDeleteAndInsert(builder, deleteBlock, insertBlock, i-fromInsertLineIndex+fromDeleteLineIndex, i);
+			for (int i=fromDeleteLineIndex+insertSize; i<toDeleteLineIndex; i++)
+				appendSplitDelete(builder, deleteBlock, i);
 		}
 	}
 	
@@ -703,101 +712,122 @@ public class BlobTextDiffPanel extends Panel {
 		builder.append("</tr>");
 	}
 	
-	private void appendInsert(StringBuilder builder, DiffBlock<String> block, int lineIndex, 
+	private void appendSplitInsert(StringBuilder builder, DiffBlock<String> block, int lineIndex) {
+		builder.append("<tr class='code original'>");
+
+		int newLineNo = block.getNewStart() + lineIndex;
+		if (blameInfo != null) {
+			builder.append("<td class='blame noselect'>&nbsp;</td>");
+		}
+		builder.append("<td class='number noselect'><a class='coverage'>&nbsp;</a></td>");
+		builder.append("<td class='operation noselect'></td>");
+		builder.append("<td class='content left none'>&nbsp;</td>");
+		if (blameInfo != null) {
+			appendBlame(builder, -1, newLineNo);
+		}
+		builder.append("<td class='number noselect new'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
+		builder.append("<td class='operation noselect new'>+</td>");
+		builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
+		appendLine(builder, block.getElements().get(lineIndex));
+		builder.append("</td></tr>");
+	}
+	
+	private void appendUnifiedInsert(StringBuilder builder, DiffBlock<String> block, int lineIndex, 
 			@Nullable List<DiffBlock<String>> tokenDiffs) {
 		builder.append("<tr class='code original'>");
 
 		int newLineNo = block.getNewStart() + lineIndex;
-		if (diffMode == DiffViewMode.UNIFIED) {
-			if (blameInfo != null) {
-				appendBlame(builder, -1, newLineNo);
-			}
-			builder.append("<td class='number noselect new'><a class='coverage'>&nbsp;</a></td>");
-			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
-			builder.append("<td class='operation noselect new'>+</td>");
-			builder.append("<td class='content new' data-new='").append(newLineNo).append("'>");
-			if (tokenDiffs != null) {
-				if (tokenDiffs.isEmpty()) {
-					builder.append("&nbsp;");
-				} else {
-					for (DiffBlock<String> tokenBlock: tokenDiffs) { 
-						for (String token: tokenBlock.getElements()) {
-							if (tokenBlock.getOperation() != Operation.DELETE) 
-								builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
-						}
-					}
-				}			
-			} else {
-				appendLine(builder, block.getElements().get(lineIndex));
-			}
-			builder.append("</td>");
-		} else {
-			if (blameInfo != null) {
-				builder.append("<td class='blame noselect'>&nbsp;</td>");
-			}
-			builder.append("<td class='number noselect'><a class='coverage'>&nbsp;</a></td>");
-			builder.append("<td class='operation noselect'></td>");
-			builder.append("<td class='content left none'>&nbsp;</td>");
-			if (blameInfo != null) {
-				appendBlame(builder, -1, newLineNo);
-			}
-			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
-			builder.append("<td class='operation noselect new'>+</td>");
-			builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
-			appendLine(builder, block.getElements().get(lineIndex));
-			builder.append("</td>");
+		if (blameInfo != null) {
+			appendBlame(builder, -1, newLineNo);
 		}
-		builder.append("</tr>");
+		builder.append("<td class='number noselect new'><a class='coverage'>&nbsp;</a></td>");	
+		builder.append("<td class='number noselect new'>");
+		boolean confusable = false;
+		var oldLineBuilder = new StringBuilder();
+		var newLineBuilder = new StringBuilder();
+		if (tokenDiffs != null && !tokenDiffs.isEmpty()) {
+			for (DiffBlock<String> tokenBlock: tokenDiffs) { 
+				for (String token: tokenBlock.getElements()) {
+					if (tokenBlock.getOperation() != Operation.DELETE || tokenBlock.getOperation() != Operation.EQUAL) 
+						oldLineBuilder.append(token);
+					if (tokenBlock.getOperation() != Operation.INSERT || tokenBlock.getOperation() != Operation.EQUAL) 
+						newLineBuilder.append(token);
+				}
+				confusable = isConfusable(oldLineBuilder.toString(), newLineBuilder.toString());
+			}
+		}
+		if (confusable)
+			builder.append(getConfusableMark());
+		builder.append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
+		builder.append("<td class='operation noselect new'>+</td>");
+		builder.append("<td class='content new' data-new='").append(newLineNo).append("'>");
+		if (tokenDiffs != null) {
+			if (tokenDiffs.isEmpty()) {
+				builder.append("&nbsp;");
+			} else {
+				for (DiffBlock<String> tokenBlock: tokenDiffs) { 
+					for (String token: tokenBlock.getElements()) {
+						if (tokenBlock.getOperation() != Operation.DELETE) 
+							builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
+					}
+				}
+			}			
+		} else {
+			appendLine(builder, block.getElements().get(lineIndex));
+		}
+		builder.append("</td></tr>");
+	}
+
+	private void appendSplitDelete(StringBuilder builder, DiffBlock<String> block, int lineIndex) {
+		builder.append("<tr class='code original'>");
+		
+		int oldLineNo = block.getOldStart() + lineIndex;
+		if (blameInfo != null) {
+			appendBlame(builder, oldLineNo, -1);
+		}
+		builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
+		builder.append("<td class='operation noselect old'>-</td>");
+		builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
+		appendLine(builder, block.getElements().get(lineIndex));
+		builder.append("</td>");
+		if (blameInfo != null) {
+			builder.append("<td class='blame noselect'>&nbsp;</td>");
+		}
+		builder.append("<td class='number noselect'><a class='coverage'>&nbsp;</a></td>");
+		builder.append("<td class='operation noselect'>&nbsp;</td>");
+		builder.append("<td class='content right none'>&nbsp;</td></tr>");
 	}
 	
-	private void appendDelete(StringBuilder builder, DiffBlock<String> block, int lineIndex, 
+	private void appendUnifiedDelete(StringBuilder builder, DiffBlock<String> block, int lineIndex, 
 			@Nullable List<DiffBlock<String>> tokenDiffs) {
 		builder.append("<tr class='code original'>");
 		
 		int oldLineNo = block.getOldStart() + lineIndex;
-		if (diffMode == DiffViewMode.UNIFIED ) {
-			if (blameInfo != null) {
-				appendBlame(builder, oldLineNo, -1);
-			}
-			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
-			builder.append("<td class='number noselect old'><a class='coverage'>&nbsp;</a></td>");
-			builder.append("<td class='operation noselect old'>-</td>");
-			builder.append("<td class='content old' data-old='").append(oldLineNo).append("'>");
-			if (tokenDiffs != null) {
-				if (tokenDiffs.isEmpty()) {
-					builder.append("&nbsp;");
-				} else {
-					for (DiffBlock<String> tokenBlock: tokenDiffs) { 
-						for (String token: tokenBlock.getElements()) {
-							if (tokenBlock.getOperation() != Operation.INSERT) 
-								builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
-						}
+		if (blameInfo != null) {
+			appendBlame(builder, oldLineNo, -1);
+		}
+		builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
+		builder.append("<td class='number noselect old'><a class='coverage'>&nbsp;</a></td>");
+		builder.append("<td class='operation noselect old'>-</td>");
+		builder.append("<td class='content old' data-old='").append(oldLineNo).append("'>");
+		if (tokenDiffs != null) {
+			if (tokenDiffs.isEmpty()) {
+				builder.append("&nbsp;");
+			} else {
+				for (DiffBlock<String> tokenBlock: tokenDiffs) { 
+					for (String token: tokenBlock.getElements()) {
+						if (tokenBlock.getOperation() != Operation.INSERT) 
+							builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
 					}
 				}
-			} else {
-				appendLine(builder, block.getElements().get(lineIndex));
 			}
-			builder.append("</td>");
 		} else {
-			if (blameInfo != null) {
-				appendBlame(builder, oldLineNo, -1);
-			}
-			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
-			builder.append("<td class='operation noselect old'>-</td>");
-			builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
 			appendLine(builder, block.getElements().get(lineIndex));
-			builder.append("</td>");
-			if (blameInfo != null) {
-				builder.append("<td class='blame noselect'>&nbsp;</td>");
-			}
-			builder.append("<td class='number noselect'><a class='coverage'>&nbsp;</a></td>");
-			builder.append("<td class='operation noselect'>&nbsp;</td>");
-			builder.append("<td class='content right none'>&nbsp;</td>");
 		}
-		builder.append("</tr>");
+		builder.append("</td></tr>");
 	}
-	
-	private void appendSideBySide(StringBuilder builder, DiffBlock<String> deleteBlock, 
+
+	private void appendDeleteAndInsert(StringBuilder builder, DiffBlock<String> deleteBlock, 
 			DiffBlock<String> insertBlock, int deleteLineIndex, int insertLineIndex) {
 		builder.append("<tr class='code original'>");
 
@@ -831,62 +861,46 @@ public class BlobTextDiffPanel extends Panel {
 
 		int oldLineNo = deleteBlock.getOldStart() + deleteLineIndex;
 		int newLineNo = insertBlock.getNewStart() + insertLineIndex;
-		if (diffMode == DiffViewMode.UNIFIED) {
-			if (blameInfo != null) {
-				appendBlame(builder, oldLineNo, newLineNo);
-			}
-			builder.append("<td class='number noselect old new'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
-			builder.append("<td class='number noselect old new'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
-			builder.append("<td class='operation noselect old new'>*</td>");
-			builder.append("<td class='content old new' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
-			if (tokenDiffs.isEmpty()) {
-				builder.append("&nbsp;");
-			} else {
-				for (DiffBlock<String> tokenBlock: tokenDiffs) { 
-					for (String token: tokenBlock.getElements()) 
+		if (blameInfo != null) {
+			appendBlame(builder, oldLineNo, -1);
+		}
+
+		builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
+		builder.append("<td class='operation noselect old'>-</td>");
+		builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
+
+		if (tokenDiffs.isEmpty()) {
+			builder.append("&nbsp;");
+		} else {
+			for (DiffBlock<String> tokenBlock: tokenDiffs) { 
+				for (String token: tokenBlock.getElements()) {
+					if (tokenBlock.getOperation() != Operation.INSERT) 
 						builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
 				}
 			}
-			builder.append("</td>");
-		} else {
-			if (blameInfo != null) {
-				appendBlame(builder, oldLineNo, -1);
-			}
-			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
-			builder.append("<td class='operation noselect old'>-</td>");
-			builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
-			if (tokenDiffs.isEmpty()) {
-				builder.append("&nbsp;");
-			} else {
-				for (DiffBlock<String> tokenBlock: tokenDiffs) { 
-					for (String token: tokenBlock.getElements()) {
-						if (tokenBlock.getOperation() != Operation.INSERT) 
-							builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
-					}
-				}
-			}
-			builder.append("</td>");
-			
-			if (blameInfo != null) {
-				appendBlame(builder, -1, newLineNo);
-			}
-			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
-			builder.append("<td class='operation noselect new'>+</td>");
-			builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
-			if (tokenDiffs.isEmpty()) {
-				builder.append("&nbsp;");
-			} else {
-				for (DiffBlock<String> tokenBlock: tokenDiffs) { 
-					for (String token: tokenBlock.getElements()) {
-						if (tokenBlock.getOperation() != Operation.DELETE) 
-							builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
-					}
-				}
-			}			
-			builder.append("</td>");
 		}
-		
-		builder.append("</tr>");
+		builder.append("</td>");
+
+		if (blameInfo != null) {
+			appendBlame(builder, -1, newLineNo);
+		}
+		builder.append("<td class='number noselect new'>");
+		if (isConfusable(deleteBlock.getElements().get(deleteLineIndex), insertBlock.getElements().get(insertLineIndex)))
+			builder.append(getConfusableMark());		
+		builder.append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
+		builder.append("<td class='operation noselect new'>+</td>");
+		builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
+		if (tokenDiffs.isEmpty()) {
+			builder.append("&nbsp;");
+		} else {
+			for (DiffBlock<String> tokenBlock: tokenDiffs) { 
+				for (String token: tokenBlock.getElements()) {
+					if (tokenBlock.getOperation() != Operation.DELETE) 
+						builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
+				}
+			}
+		}			
+		builder.append("</td></tr>");		
 	}
 	
 	private void appendExpander(StringBuilder builder, int blockIndex, int skippedLines) {
@@ -986,6 +1000,16 @@ public class BlobTextDiffPanel extends Panel {
 	public BlobAnnotationSupport getAnnotationSupport() {
 		return null;
 	} 
+
+	private String getConfusableMark() {
+		return String.format(
+			"<a class='text-warning confusable' data-tippy-content='" + _T("This line has confusable unicode character modification") + "'><svg class='icon icon-sm'><use xlink:href='%s'/></svg></a>",
+			SpriteImage.getVersionedHref("warning-o"));
+	}
+
+	private boolean isConfusable(String text1, String text2) {
+		return confusableChecker.areConfusable(text1, text2) != 0;	
+	}
 	
 	private static class BlameInfo implements Serializable {
 		

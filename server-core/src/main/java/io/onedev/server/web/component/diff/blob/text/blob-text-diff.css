@@ -11,6 +11,7 @@
 	border-left: 1px solid var(--light-gray);
 	text-align: right;
 	color: var(--gray);
+	white-space: nowrap;
 }
 .dark-mode .blob-text-diff>.text-diff>tbody>tr>td.number {
 	border-left-color: var(--dark-mode-lighter-dark);
@@ -107,6 +108,7 @@
 	padding-top: 0.1rem;
 	border-left: 1px solid var(--light-gray);
 }
+
 .dark-mode .blob-text-diff>.text-diff>tbody>tr>td.operation {
 	border-left-color: var(--dark-mode-lighter-dark);
 }
@@ -174,7 +176,8 @@
 }
 
 .blob-text-diff>.text-diff>tbody>tr>td.number>.comment-indicator,
-.blob-text-diff>.text-diff>tbody>tr>td.number>.problem-trigger {
+.blob-text-diff>.text-diff>tbody>tr>td.number>.problem-trigger, 
+.blob-text-diff>.text-diff>tbody>tr>td.number>.confusable {
 	margin-right: 0.3rem;
 }
 

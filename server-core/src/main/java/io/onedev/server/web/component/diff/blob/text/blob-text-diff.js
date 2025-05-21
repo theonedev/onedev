@@ -1115,8 +1115,11 @@ onedev.server.blobTextDiff = {
 				}).data("popoverInited", true);				
 			}			
 		});		
-		
-		$lineNumTd.prepend($trigger);
+		var $confusable = $lineNumTd.children(".confusable");
+		if ($confusable.length != 0)
+			$confusable.after($trigger);
+		else
+			$lineNumTd.prepend($trigger);
 	},
 	addCoverateInfo: function($container, leftSide, line, coverageStatus) {
 		var $lineNumTd = onedev.server.blobTextDiff.getLineNumTd($container, leftSide, line);

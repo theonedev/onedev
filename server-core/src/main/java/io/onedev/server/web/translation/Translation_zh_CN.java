@@ -329,6 +329,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Choose issue...", "选择工单...");
 		m.put("Choose iterations...", "选择迭代...");
 		m.put("Choose...", "选择...");
+		m.put("Click to show comment of marked text", "点击显示标记文本的评论");
 		m.put("Client ID of this OneDev instance registered in Google cloud", "在 Google Cloud 注册的本 OneDev 实例的客户端 ID");
 		m.put("Client Id", "客户端 ID");
 		m.put("Client Secret", "客户端密钥");
@@ -417,6 +418,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Copy to clipboard", "复制到剪贴板");
 		m.put("Count", "数量");
 		m.put("Covered", "覆盖");
+		m.put("Covered by tests", "被测试覆盖");
 		m.put("Cppcheck Report", "Cppcheck 报告");
 		m.put("Cpu Limit", "CPU 限制");
 		m.put("Cpu Request", "CPU 请求");
@@ -444,6 +446,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Cron schedule", "Cron 调度");
 		m.put("Curl Location", "Curl 路径");
 		m.put("Current Iteration", "当前迭代");
+		m.put("Current context is different from the context when this comment is added, click to show the comment context", 
+			"当前上下文与添加此评论时的上下文不同，点击显示评论上下文");
+		m.put("Current context is different from the context when this reply is added, click to show the reply context", 
+			"当前上下文与添加此回复时的上下文不同，点击显示回复上下文");
 		m.put("Current context is different from this action, click to show the comment context", "当前上下文与此操作不同，点击显示评论上下文");
 		m.put("Current platform", "当前平台");
 		m.put("Current project", "当前项目");
@@ -1174,6 +1180,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Not Active Since", "不活跃起");
 		m.put("Not assigned", "未分配");
 		m.put("Not covered", "未覆盖");
+		m.put("Not covered by any test", "未被任何测试覆盖");
 		m.put("Not displaying any fields", "不显示任何字段");
 		m.put("Not displaying any links", "不显示任何链接");
 		m.put("Not passed", "未通过");
@@ -1501,6 +1508,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Parent Project", "父项目");
 		m.put("Parents", "父项目");
 		m.put("Partially covered", "部分覆盖");
+		m.put("Partially covered by some tests", "部分被测试覆盖");
 		m.put("Passcode", "Passcode");
 		m.put("Passed", "通过");
 		m.put("Password", "密码");
@@ -2306,6 +2314,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"确保发送到有效负载 URL 的 POST 请求来自 OneDev 的密钥。设置密钥后，您将在 Webhook POST 请求中收到 X-OneDev-Signature 头部");
 		m.put("Then enter the passcode shown in the TOTP authenticator to verify", "然后输入 TOTP 认证器中显示的验证码进行验证");
 		m.put("There are merge conflicts. You can still create the pull request though", "有合并冲突。您仍然可以创建合并请求");
+		m.put("There are unsaved changes, discard and continue?", "有未保存的更改，是否丢弃并继续？");
 		m.put("These authenticators normally run on your mobile phone, some examples are Google Authenticator, Microsoft Authenticator, Authy, 1Password etc.", 
 			"这些认证器通常在您的手机上运行，例如 Google Authenticator、Microsoft Authenticator、Authy、1Password 等");
 		m.put("This <span wicket:id=\"elementTypeName\"></span> is imported from <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a>", 
@@ -2616,16 +2625,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{0} edited {1}", "{0} 编辑于 {1}");
 		m.put("{0} files", "{0} 个文件");
 		m.put("{0} tags", "{0} 个标签");
-		m.put("Click to show comment of marked text", "点击显示标记文本的评论");
-		m.put("Covered by tests", "被测试覆盖");
-		m.put("Current context is different from the context when this comment is added, click to show the comment context", 
-			"当前上下文与添加此评论时的上下文不同，点击显示评论上下文");
-		m.put("Current context is different from the context when this reply is added, click to show the reply context", 
-			"当前上下文与添加此回复时的上下文不同，点击显示回复上下文");
-		m.put("Not covered by any test", "未被任何测试覆盖");
-		m.put("Partially covered by some tests", "部分被测试覆盖");
-		m.put("There are unsaved changes, discard and continue?", "有未保存的更改，是否丢弃并继续？");
-		
+		m.put("This line has confusable unicode character modification", "此行有可疑的 Unicode 字符修改");
+
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
 		m.put("Server Setup", "服务器设置");	
