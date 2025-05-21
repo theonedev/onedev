@@ -986,7 +986,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			"not-covered-by-any-test", _T("Not covered by any test"),
 			"partially-covered-by-some-tests", _T("Partially covered by some tests"),
 			"unsaved-changes-prompt", _T("There are unsaved changes, discard and continue?"),
-			"click-to-show-comment-of-marked-text", _T("Click to show comment of marked text"),
+			"show-comment", _T("Click to show comment of marked text"),
 			"loading", _T("Loading..."));
 
 		String script = String.format("onedev.server.sourceView.onDomReady("

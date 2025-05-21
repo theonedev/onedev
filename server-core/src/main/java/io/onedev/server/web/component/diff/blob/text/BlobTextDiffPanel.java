@@ -408,8 +408,22 @@ public class BlobTextDiffPanel extends Panel {
 				explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3"), explicit("param4"), explicit("param5"),
 				explicit("param6"), explicit("param7"), explicit("param8")); 
-		
-		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s);", 
+
+		var translations = new HashMap<String, String>();
+		translations.put("unable-to-comment", _T("Unable to comment"));
+		translations.put("perma-link", _T("Permanent link of this selection")); 
+		translations.put("copy-to-clipboard", _T("Copy selected text to clipboard")); 
+		translations.put("add-comment", _T("Add comment on this selection")); 
+		translations.put("login-to-comment", _T("Login to comment on selection"));
+		translations.put("covered-by-tests", _T("Covered by tests"));
+		translations.put("not-covered-by-any-test", _T("Not covered by any test"));
+		translations.put("partially-covered-by-some-tests", _T("Partially covered by some tests"));
+		translations.put("unsaved-changes-prompt", _T("There are unsaved changes, discard and continue?"));
+		translations.put("show-comment", _T("Click to show comment of marked text"));
+		translations.put("loading", _T("Loading..."));
+		translations.put("invalid-selection", _T("Invalid selection, click for details"));
+
+		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s);", 
 				getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, 
 				change.getNewBlobIdent().revision,
@@ -418,7 +432,7 @@ public class BlobTextDiffPanel extends Panel {
 				callback, blameMessageBehavior.getCallback(),
 				convertToJson(markRange), convertToJson(openCommentInfo), 
 				convertToJson(annotationInfoModel.getObject()), 
-				commentContainerId);
+				commentContainerId, convertToJson(translations));
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 
@@ -427,7 +441,7 @@ public class BlobTextDiffPanel extends Panel {
 			jsonOfMarkRange = convertToJson(markRange);
 		else
 			jsonOfMarkRange = "undefined";
-		script = String.format("onedev.server.blobTextDiff.onWindowLoad('%s', %s);", getMarkupId(), jsonOfMarkRange);
+		script = String.format("onedev.server.blobTextDiff.onLoad('%s', %s);", getMarkupId(), jsonOfMarkRange);
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 	

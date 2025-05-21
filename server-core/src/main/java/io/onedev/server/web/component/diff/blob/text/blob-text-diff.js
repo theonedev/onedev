@@ -2,7 +2,8 @@ onedev.server.blobTextDiff = {
 	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta, .cm-string, .cm-tag, .cm-attribute, cm-builtin, cm-qualifier",
 	onDomReady: function(containerId, symbolTooltipId, oldRev, newRev, oldPath, newPath, 
 						 callback, blameMessageCallback, markRange, openComment, 
-						 annotationInfo, commentContainerId) {
+						 annotationInfo, commentContainerId, translations) {
+		onedev.server.blobTextDiff.translations = translations;
 		var $container = $("#" + containerId);
 		$container.data("commentContainerId", commentContainerId);
 		$container.data("callback", callback);
@@ -332,7 +333,7 @@ onedev.server.blobTextDiff = {
 
 			function showInvalidSelection() {
 				var $content = $("<div></div>");
-				$content.append(`<a class='invalid'><svg class='icon'><use xlink:href='${onedev.server.icons}#warning'/></svg> Invalid selection, click for details</a>`);
+				$content.append(`<a class='invalid'><svg class='icon'><use xlink:href='${onedev.server.icons}#warning'/></svg> ${onedev.server.blobTextDiff.translations["invalid-selection"]}</a>`);
 				$content.children("a").attr("href", "https://docs.onedev.io/appendix/diff-selection").attr("target", "_blank");
 				return {
 					position: position, 
@@ -481,7 +482,7 @@ onedev.server.blobTextDiff = {
 			onedev.server.blobTextDiff.mark($container, markRange);	
 		}			
 	},
-	onWindowLoad: function(containerId, markRange) {
+	onLoad: function(containerId, markRange) {
 		var $container = $("#" + containerId);
 		if (markRange && onedev.server.viewState.getFromHistory() === undefined)
 			onedev.server.blobTextDiff.scrollTo($container, markRange);
@@ -758,7 +759,7 @@ onedev.server.blobTextDiff = {
 
 			var tooltipId = "blame-message-" + containerId + "_" + oldLine + "_" + newLine;
 			$container.data("blameMessageCallback")(tooltipId, $(this).data("hash"));
-			var $tooltip = $("<div class='blame-message'><div class='loading'>Loading...</div></div>");
+			var $tooltip = $("<div class='blame-message'><div class='loading'>" + onedev.server.blobTextDiff.translations["loading"] + "</div></div>");
 			$tooltip.attr("id", tooltipId);
 			$tooltip.data("trigger", this);
 			$tooltip.data("alignment", alignment);
@@ -770,11 +771,11 @@ onedev.server.blobTextDiff = {
 		var $container = $("#" + containerId);
 		
 		if (!markUrl) {
-			$content = $(`<div><span class='invalid'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#warning'/></svg> Unable to comment here</a>`);
+			$content = $(`<div><span class='invalid'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#warning'/></svg> ${onedev.server.blobTextDiff.translations["unable-to-comment"]}</span></div>`);
 		} else {
-			var $content = $(`<div><a class='permanent'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#link'/></svg> Permanent link of this selection</a>`);
+			var $content = $(`<div><a class='permanent'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#link'/></svg> ${onedev.server.blobTextDiff.translations["perma-link"]}</a>`);
 			$content.children("a.permanent").attr("href", markUrl);
-			$content.append(`<a class='copy-marked'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#copy'/></svg> Copy selected text to clipboard</a>`);
+			$content.append(`<a class='copy-marked'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#copy'/></svg> ${onedev.server.blobTextDiff.translations["copy-to-clipboard"]}</a>`);
 			var clipboard = new ClipboardJS(".copy-marked", {
 			    text: function(trigger) {
 			        return markedText;
@@ -785,7 +786,7 @@ onedev.server.blobTextDiff = {
 				$(".selection-popover").remove();
 			});
 			if (loggedIn) {
-				$content.append(`<a class='comment'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#comment'/></svg> Add comment on this selection</a>`);
+				$content.append(`<a class='comment'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#comment'/></svg> ${onedev.server.blobTextDiff.translations["add-comment"]}</a>`);
 				$content.children("a.comment").click(function() {
 					if (onedev.server.blobTextDiff.confirmUnsavedChanges($container)) {
 						$container.data("callback")("addComment", markRange.leftSide, 
@@ -794,7 +795,7 @@ onedev.server.blobTextDiff = {
 				});
 			} else {
 				var loginHref = $(".sign-in").attr("href");
-				$content.append(`<a class='comment' href='${loginHref}'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#warning'/></svg> Login to comment on selection</a>`);
+				$content.append(`<a class='comment' href='${loginHref}'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#warning'/></svg> ${onedev.server.blobTextDiff.translations["login-to-comment-on-selection"]}</a>`);
 			}			
 		}		
 		
@@ -805,7 +806,7 @@ onedev.server.blobTextDiff = {
 	},
 	confirmUnsavedChanges: function($container) {
 		return $("#"+$container.data("commentContainerId")).find("form.dirty").length == 0 
-				|| confirm("There are unsaved changes, discard and continue?"); 
+				|| confirm(onedev.server.blobTextDiff.translations["unsaved-changes-prompt"]); 
 	},
 	expand: function(containerId, blockIndex, expandedHtml) {
 		var $container = $("#" + containerId);
@@ -873,7 +874,6 @@ onedev.server.blobTextDiff = {
 		var $startTd = $container.find("td.content[data-" + oldOrNew + "='" + (startCursor[0]-1) + "']");
 		var $endTd = $container.find("td.content[data-" + oldOrNew + "='" + (endCursor[0]-1) + "']");
 		if ($startTd.length == 0) { 
-			console.error("Unable to find start td!");
 			$startTd = undefined;
 		} else if ($startTd.length == 2) {
 			if (oldOrNew == "old") {
@@ -883,7 +883,6 @@ onedev.server.blobTextDiff = {
 			}
 		}
 		if ($endTd.length == 0) {
-			console.error("Unable to find end td!");
 			$endTd = undefined;
 		} else if ($endTd.length == 2) {
 			if (oldOrNew == "old") {
@@ -1126,13 +1125,17 @@ onedev.server.blobTextDiff = {
 		var cssClass = coverageStatus.toLowerCase();
 		var title;
 		if (coverageStatus == 'COVERED') 
-			title = "Covered by tests"; 
+			title = onedev.server.blobTextDiff.translations["covered-by-tests"]; 
 		else if (coverageStatus == 'NOT_COVERED')
-			title = "Not covered by any test";
+			title = onedev.server.blobTextDiff.translations["not-covered-by-any-test"];
 		else  
-			title = "Partially covered by some tests";
+			title = onedev.server.blobTextDiff.translations["partially-covered-by-some-tests"];
 			
-		$lineNumTd.find(".coverage").addClass(cssClass).attr("title", title);		
+		$lineNumTd.find(".coverage").addClass(cssClass).attr("data-tippy-content", title);		
+		tippy($lineNumTd.find(".coverage")[0], {
+			delay: [500, 0],
+			placement: 'auto'
+		});		
 	},
 	addCommentIndicator: function($container, leftSide, line, comments) {
 		var oldOrNew = leftSide?"old":"new";
@@ -1160,7 +1163,7 @@ onedev.server.blobTextDiff = {
 					cssClasses += " updated";
 					updated = true;
 				}
-				content += `<a class='${cssClasses}' title='Click to show comment of marked text'>#${comments[i].id}</a>`;
+				content += `<a class='${cssClasses}' data-tippy-content='${onedev.server.blobTextDiff.translations["show-comment"]}'>#${comments[i].id}</a>`;
 			}
 
 			if (updated)
@@ -1195,6 +1198,10 @@ onedev.server.blobTextDiff = {
 									comment.range.fromColumn, comment.range.toRow, comment.range.toColumn);
 						}
 					});
+					tippy(this, {
+						delay: [500, 0],
+						placement: 'auto'
+					});					
 				});
 				onedev.server.blobTextDiff.highlightCommentTrigger($container);				
 			});
@@ -1202,7 +1209,7 @@ onedev.server.blobTextDiff = {
 			var comment = comments[0];
 			if (comment.updated)
 				$indicator.addClass("updated");
-			$indicator.addClass("comment-trigger").attr("title", "Click to show comment of marked text");
+			$indicator.addClass("comment-trigger").attr("data-tippy-content", onedev.server.blobTextDiff.translations["show-comment"]);
 			$indicator.append("<svg class='icon'><use xlink:href='" + onedev.server.icons + "#comment'/></svg>");
 			$indicator.mouseover(function() {
 				onedev.server.blobTextDiff.mark($container, comment.range);
@@ -1216,6 +1223,10 @@ onedev.server.blobTextDiff = {
 							comment.range.fromColumn, comment.range.toRow, comment.range.toColumn);
 				}
 			});
+			tippy($indicator[0], {
+				delay: [500, 0],
+				placement: 'auto'
+			});						
 		}
 		$lineNumTd.children(".comment-indicator").remove();
 		$lineNumTd.prepend($indicator);

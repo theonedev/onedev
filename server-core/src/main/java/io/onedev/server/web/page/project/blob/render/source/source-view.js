@@ -331,7 +331,7 @@ onedev.server.sourceView = {
 					cssClasses += " updated";
 					updated = true;
 				}
-				content += `<a class='${cssClasses}' data-tippy-content='${onedev.server.sourceView.translations["click-to-show-comment-of-marked-text"]}'>#${comments[i].id}</a>`;
+				content += `<a class='${cssClasses}' data-tippy-content='${onedev.server.sourceView.translations["show-comment"]}'>#${comments[i].id}</a>`;
 			}
 
 			let cssClasses = "comment-indicator";
@@ -380,7 +380,7 @@ onedev.server.sourceView = {
 			if (comment.updated)
 				cssClasses += " updated";
 			var svg = `<svg class='icon'><use xlink:href='${onedev.server.icons}#comment'/></svg>`;
-			$gutter.append(`<a class='${cssClasses}' data-tippy-content='${onedev.server.sourceView.translations["click-to-show-comment-of-marked-text"]}'>${svg}</a>`);
+			$gutter.append(`<a class='${cssClasses}' data-tippy-content='${onedev.server.sourceView.translations["show-comment"]}'>${svg}</a>`);
 			var $indicator = $gutter.children("a");
 			$indicator.mouseover(function() {
 				onedev.server.codemirror.mark(cm, comment.range);

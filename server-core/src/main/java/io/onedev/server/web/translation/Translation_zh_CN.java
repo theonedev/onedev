@@ -139,7 +139,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Applicable Senders", "适用发送者");
 		m.put("Applicable Users", "适用用户");
 		m.put("Application (client) ID", "应用（客户端）ID");
-		m.put("Apply suggested change from code comment", "从代码注解应用建议的更改");
+		m.put("Apply suggested change from code comment", "从代码评论应用建议的更改");
 		m.put("Approved", "已批准");
 		m.put("Arbitrary scope", "任意范围");
 		m.put("Arbitrary type", "任意类型");
@@ -352,16 +352,16 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Code", "代码");
 		m.put("Code Analysis", "代码分析");
 		m.put("Code Analysis Setting", "代码分析设置");
-		m.put("Code Comment", "代码注解");
-		m.put("Code Comment Management", "代码注解管理");
-		m.put("Code Comments", "代码注解");
+		m.put("Code Comment", "代码评论");
+		m.put("Code Comment Management", "代码评论管理");
+		m.put("Code Comments", "代码评论");
 		m.put("Code Compare", "代码比较");
 		m.put("Code Management", "代码管理");
 		m.put("Code Privilege", "代码权限");
 		m.put("Code Search", "代码搜索");
-		m.put("Code comment", "代码注解");
+		m.put("Code comment", "代码评论");
 		m.put("Code comment administrative permission inside a project, including batch operations over multiple code comments", 
-			"项目内的代码注解管理权限，包括对多个代码注解的批量操作");
+			"项目内的代码评论管理权限，包括对多个代码评论的批量操作");
 		m.put("Code is committed", "代码已提交");
 		m.put("Code push", "代码推送");
 		m.put("Code read permission is required to import build spec (import project: {0}, import revision: {1})", 
@@ -2345,6 +2345,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"此密钥用于确定项目层次结构中是否存在缓存命中（按顺序从当前项目搜索到根项目，以下加载密钥同理）。如果缓存的密钥与此处定义的密钥完全相同，则视为缓存命中");
 		m.put("This key is used to download and upload cache in project hierarchy (search from current project to root project in order)", 
 			"此密钥用于在项目层次结构中下载和上传缓存（按顺序从当前项目搜索到根项目）");
+		m.put("This line has confusable unicode character modification", "此行有可疑的 Unicode 字符修改");
 		m.put("This operation is disallowed by branch protection rule", "此操作被分支保护规则禁止");
 		m.put("This permission enables one to access confidential issues", "此权限允许访问机密工单");
 		m.put("This permission enables one to schedule issues into iterations", "此权限允许将工单调度到迭代中");
@@ -2625,7 +2626,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{0} edited {1}", "{0} 编辑于 {1}");
 		m.put("{0} files", "{0} 个文件");
 		m.put("{0} tags", "{0} 个标签");
-		m.put("This line has confusable unicode character modification", "此行有可疑的 Unicode 字符修改");
+		m.put("Unable to comment here", "无法在此添加评论");
+		m.put("Invalid selection, click for details", "无效的选择，点击查看详情");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
