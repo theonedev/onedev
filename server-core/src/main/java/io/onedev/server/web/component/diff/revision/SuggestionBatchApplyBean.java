@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.diff.revision;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 
 import javax.validation.constraints.NotEmpty;
@@ -13,7 +15,7 @@ public class SuggestionBatchApplyBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String commitMessage = "Apply suggested changes from code comments";
+	private String commitMessage = _T("Apply suggested changes from code comments");
 
 	@Editable
 	@OmitName

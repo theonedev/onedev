@@ -1,5 +1,7 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -93,10 +95,10 @@ public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 		String description;
 		switch (suggestedLiteral) {
 		case "-":
-			description = "exclude"; 
+			description = _T("exclude"); 
 			break;
 		case " ":
-			description = "space";
+			description = _T("space");
 			break;
 		case "\"":
 			return null;

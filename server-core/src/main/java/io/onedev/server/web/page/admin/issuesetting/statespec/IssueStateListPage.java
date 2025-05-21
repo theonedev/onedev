@@ -34,6 +34,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.unbescape.html.HtmlEscape;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -133,7 +135,7 @@ public class IssueStateListPage extends IssueSettingPage {
 				if (description != null)
 					cellItem.add(new Label(componentId, description));
 				else
-					cellItem.add(new Label(componentId, "<i>No description</i>").setEscapeModelStrings(false));
+					cellItem.add(new Label(componentId, "<i>" + _T("No description") + "</i>").setEscapeModelStrings(false));
 			}
 
 			@Override

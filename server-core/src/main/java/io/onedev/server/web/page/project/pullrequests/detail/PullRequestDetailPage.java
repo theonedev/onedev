@@ -1668,7 +1668,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected String getEmptyDescription() {
-				return "No description";
+				return _T("No description");
 			}
 			
 			@Override

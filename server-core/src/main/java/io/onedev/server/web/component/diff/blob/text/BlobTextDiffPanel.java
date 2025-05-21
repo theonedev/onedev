@@ -7,6 +7,7 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -523,10 +524,14 @@ public class BlobTextDiffPanel extends Panel {
 							}
 							for (int j=0; j<nextBlock.getElements().size(); j++) {
 								List<DiffBlock<String>> lineDiff = lineDiffs.get(j);
-								if (lineDiff != null) 
-									appendUnifiedInsert(builder, nextBlock, j, lineDiff);
-								else 
+								if (lineDiff != null) {
+									var oldLine = block.getElements().get(j);
+									var newLine = nextBlock.getElements().get(j);
+									var confusable = isConfusable(oldLine, newLine);
+									appendUnifiedInsert(builder, nextBlock, j, new Pair<>(lineDiff, confusable));
+								} else {
 									appendUnifiedInsert(builder, nextBlock, j, null);
+								}
 							}
 						} else {
 							int prevLineIndex = 0;
@@ -747,7 +752,7 @@ public class BlobTextDiffPanel extends Panel {
 	}
 	
 	private void appendUnifiedInsert(StringBuilder builder, DiffBlock<String> block, int lineIndex, 
-			@Nullable List<DiffBlock<String>> tokenDiffs) {
+			@Nullable Pair<List<DiffBlock<String>>, Boolean> lineCompareInfo) {
 		builder.append("<tr class='code original'>");
 
 		int newLineNo = block.getNewStart() + lineIndex;
@@ -756,30 +761,16 @@ public class BlobTextDiffPanel extends Panel {
 		}
 		builder.append("<td class='number noselect new'><a class='coverage'>&nbsp;</a></td>");	
 		builder.append("<td class='number noselect new'>");
-		boolean confusable = false;
-		var oldLineBuilder = new StringBuilder();
-		var newLineBuilder = new StringBuilder();
-		if (tokenDiffs != null && !tokenDiffs.isEmpty()) {
-			for (DiffBlock<String> tokenBlock: tokenDiffs) { 
-				for (String token: tokenBlock.getElements()) {
-					if (tokenBlock.getOperation() != Operation.DELETE || tokenBlock.getOperation() != Operation.EQUAL) 
-						oldLineBuilder.append(token);
-					if (tokenBlock.getOperation() != Operation.INSERT || tokenBlock.getOperation() != Operation.EQUAL) 
-						newLineBuilder.append(token);
-				}
-				confusable = isConfusable(oldLineBuilder.toString(), newLineBuilder.toString());
-			}
-		}
-		if (confusable)
+		if (lineCompareInfo != null && lineCompareInfo.getRight())
 			builder.append(getConfusableMark());
 		builder.append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 		builder.append("<td class='operation noselect new'>+</td>");
 		builder.append("<td class='content new' data-new='").append(newLineNo).append("'>");
-		if (tokenDiffs != null) {
-			if (tokenDiffs.isEmpty()) {
+		if (lineCompareInfo != null) {
+			if (lineCompareInfo.getLeft().isEmpty()) {
 				builder.append("&nbsp;");
 			} else {
-				for (DiffBlock<String> tokenBlock: tokenDiffs) { 
+				for (DiffBlock<String> tokenBlock: lineCompareInfo.getLeft()) { 
 					for (String token: tokenBlock.getElements()) {
 						if (tokenBlock.getOperation() != Operation.DELETE) 
 							builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
@@ -926,33 +917,34 @@ public class BlobTextDiffPanel extends Panel {
 				SpriteImage.getVersionedHref(IconScope.class, "ellipsis"));
 		
 		String script = String.format("javascript:$('#%s').data('callback')('expand', %d);", getMarkupId(), blockIndex);
+		var skippedMessage = MessageFormat.format(_T("skipped {0} lines"), skippedLines);
 		if (diffMode == DiffViewMode.UNIFIED) {
 			if (blameInfo != null) {
-				builder.append("<td colspan='3' class='expander noselect'><a title='Show more lines' href=\"")
+				builder.append("<td colspan='3' class='expander noselect'><a data-tippy-content='" + _T("Show more lines") + "' href=\"")
 						.append(script).append("\">").append(expandSvg).append("</a></td>");
 				blameInfo.lastCommitHash = null;
 				blameInfo.lastOldCommitHash = null;
 				blameInfo.lastNewCommitHash = null;
 			} else {
-				builder.append("<td colspan='2' class='expander noselect'><a title='Show more lines' href=\"")
+				builder.append("<td colspan='2' class='expander noselect'><a data-tippy-content='" + _T("Show more lines") + "' href=\"")
 						.append(script).append("\">").append(expandSvg).append("</a></td>");
 			}
-			builder.append("<td colspan='2' class='skipped noselect'>").append(ellipsisSvg).append(" skipped ")
-					.append(skippedLines).append(" lines ").append(ellipsisSvg).append("</td>");
+			builder.append("<td colspan='2' class='skipped noselect'>").append(ellipsisSvg).append(" ")
+					.append(skippedMessage).append(" ").append(ellipsisSvg).append("</td>");
 		} else {
 			if (blameInfo != null) {
-				builder.append("<td colspan='2' class='expander noselect'><a title='Show more lines' href=\"").append(script)
+				builder.append("<td colspan='2' class='expander noselect'><a data-tippy-content='" + _T("Show more lines") + "' href=\"").append(script)
 						.append("\">").append(expandSvg).append("</a></td>");
-				builder.append("<td class='skipped noselect' colspan='6'>").append(ellipsisSvg).append(" skipped ")
-						.append(skippedLines).append(" lines ").append(ellipsisSvg).append("</td>");
+				builder.append("<td class='skipped noselect' colspan='6'>").append(ellipsisSvg).append(" ")
+						.append(skippedMessage).append(" ").append(ellipsisSvg).append("</td>");
 				blameInfo.lastCommitHash = null;
 				blameInfo.lastOldCommitHash = null;
 				blameInfo.lastNewCommitHash = null;
 			} else {
-				builder.append("<td class='expander noselect'><a title='Show more lines' href=\"").append(script)
+				builder.append("<td class='expander noselect'><a data-tippy-content='" + _T("Show more lines") + "' href=\"").append(script)
 						.append("\">").append(expandSvg).append("</a></td>");
-				builder.append("<td class='skipped noselect' colspan='5'>").append(ellipsisSvg).append(" skipped ")
-						.append(skippedLines).append(" lines ").append(ellipsisSvg).append("</td>");
+				builder.append("<td class='skipped noselect' colspan='5'>").append(ellipsisSvg).append(" ")
+						.append(skippedMessage).append(" ").append(ellipsisSvg).append("</td>");
 			}
 		}
 		builder.append("</tr>");

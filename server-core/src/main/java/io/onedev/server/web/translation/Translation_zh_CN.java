@@ -140,6 +140,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Applicable Users", "适用用户");
 		m.put("Application (client) ID", "应用（客户端）ID");
 		m.put("Apply suggested change from code comment", "从代码评论应用建议的更改");
+		m.put("Apply suggested changes from code comments", "从代码评论应用建议的更改");
 		m.put("Approved", "已批准");
 		m.put("Arbitrary scope", "任意范围");
 		m.put("Arbitrary type", "任意类型");
@@ -186,6 +187,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Below are some common criterias. Type in search box above to view the complete list and available combinations.", 
 			"以下是一些常见的条件。在搜索框中输入以查看完整列表和可用组合。");
 		m.put("Below content is restored from an unsaved change. Clear to discard", "以下内容从未保存的更改中恢复。清除以丢弃");
+		m.put("Binary file.", "二进制文件");
 		m.put("Bitbucket App Password", "Bitbucket应用密码");
 		m.put("Bitbucket Login Name", "Bitbucket登录名");
 		m.put("Bitbucket Repositories to Import", "要导入的Bitbucket仓库");
@@ -410,6 +412,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Connector", "连接器");
 		m.put("Container default", "容器默认");
 		m.put("Content", "内容");
+		m.put("Content is identical", "内容相同");
 		m.put("Contributed settings", "贡献的设置");
 		m.put("Copy", "复制");
 		m.put("Copy Files with SCP", "使用 SCP 复制文件");
@@ -507,6 +510,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Detect Licenses", "检测许可证");
 		m.put("Detect Secrets", "检测敏感信息");
 		m.put("Detect Vulnerabilities", "检测漏洞");
+		m.put("Diff is too large to be displayed.", "差异太大，无法显示");
 		m.put("Diff options", "差异选项");
 		m.put("Digest invalid", "摘要无效");
 		m.put("Directories to Skip", "要跳过的目录");
@@ -514,6 +518,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Directory (tenant) ID", "目录（租户）ID");
 		m.put("Disable Auto Update Check", "禁用自动更新检查");
 		m.put("Disable Dashboard", "禁用仪表盘");
+		m.put("Discard", "丢弃");
 		m.put("Discarded", "已丢弃");
 		m.put("Discord", "Discord");
 		m.put("Discord Notifications", "Discord 通知");
@@ -529,6 +534,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Do you really want to delete this code comment?", "您真的要删除此代码评论吗？");
 		m.put("Do you really want to delete this email address?", "您真的要删除这个电子邮件地址吗？");
 		m.put("Do you really want to delete this reply?", "您真的要删除此回复吗？");
+		m.put("Do you really want to discard batched suggestions?", "您真的要丢弃批量建议吗？");
 		m.put("Do you really want to remove this link?", "您确定要删除此链接吗？");
 		m.put("Docker Executable", "Docker 可执行文件");
 		m.put("Docker Image", "Docker 镜像");
@@ -563,6 +569,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Email Verification", "邮件验证");
 		m.put("Email address", "电子邮件地址");
 		m.put("Email templates", "邮箱模板");
+		m.put("Empty file added.", "空文件已添加");
+		m.put("Empty file removed.", "空文件已删除");
 		m.put("Enable", "启用");
 		m.put("Enable <a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>time tracking</a> for this project to track progress and generate timesheets", 
 			"为此项目启用<a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>时间跟踪</a>以跟踪进度并生成时间表");
@@ -647,6 +655,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Fields", "字段");
 		m.put("Fields And Links Bean", "字段和链接 Bean");
 		m.put("File", "文件");
+		m.put("File Changes", "文件变更");
 		m.put("File Path", "文件路径");
 		m.put("File Patterns", "文件模式");
 		m.put("File Protection", "文件保护");
@@ -875,6 +884,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Invalid PCRE syntax", "无效的 PCRE 语法");
 		m.put("Invalid credentials", "无效的凭据");
 		m.put("Invalid request path", "无效的请求路径");
+		m.put("Invalid selection, click for details", "无效的选择，点击查看详情");
 		m.put("Invitations", "邀请");
 		m.put("Is Site Admin", "是否为站点管理员");
 		m.put("Issue", "工单");
@@ -1151,6 +1161,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("No default role", "无默认角色");
 		m.put("No default value", "无默认值");
 		m.put("No description", "无描述");
+		m.put("No diffs", "没有差异");
+		m.put("No diffs to navigate", "没有差异可导航");
 		m.put("No directories to skip", "无要跳过的目录");
 		m.put("No external authenticator", "无外部认证器");
 		m.put("No fields to prompt", "无要提示的字段");
@@ -1519,6 +1531,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Password and its confirmation should be identical.", "密码和其确认应相同。");
 		m.put("Password or Access Token for Remote Repository", "密码或远程仓库的访问令牌");
 		m.put("Paste subscription key here", "在此粘贴订阅密钥");
+		m.put("Path containing spaces or starting with dash needs to be quoted", "路径包含空格或以破折号开头时需要用引号括起来");
 		m.put("Path placeholder", "路径占位符");
 		m.put("Path to kubectl", "kubectl 的路径");
 		m.put("Paths", "路径");
@@ -1839,6 +1852,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Set Up Cache", "设置缓存");
 		m.put("Set Up Renovate Cache", "设置 Renovate 缓存");
 		m.put("Set Up Trivy Cache", "设置 Trivy 缓存");
+		m.put("Set reviewed", "设置为已审阅");
+		m.put("Set unreviewed", "设置为未审阅");
 		m.put("Set up discord notification settings. Settings will be inherited by child projects, and can be overridden by defining settings with same webhook url", 
 			"设置 Discord 通知设置。设置将继承给子项目，并可以通过定义具有相同 Webhook URL 的设置来覆盖");
 		m.put("Set up job cache to speed up job execution. Check <a href='https://docs.onedev.io/tutorials/cicd/job-cache' target='_blank'>this tutorial</a> on how to use job cache", 
@@ -1870,6 +1885,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Show Works Of", "显示工作量");
 		m.put("Show commented code snippet", "显示注释的代码片段");
 		m.put("Show emojis", "显示表情符号");
+		m.put("Show more lines", "显示更多行");
+		m.put("Showing first {0} files as there are too many", "显示前 {0} 个文件，因为文件太多");
 		m.put("Sign In", "登录");
 		m.put("Sign In To", "登录到");
 		m.put("Sign Out", "登出");
@@ -2255,6 +2272,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"步骤将在同一节点上按顺序执行，共享同一 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作空间</a>");
 		m.put("Stopwatch Overdue", "秒表逾期");
 		m.put("Storage Setting", "存储设置");
+		m.put("Storage file missing", "存储文件缺失");
 		m.put("Storage not found", "未找到存储");
 		m.put("Stored with Git LFS", "使用 Git LFS 存储");
 		m.put("Subject", "主题");
@@ -2415,8 +2433,11 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Type password here", "在此输入密码");
 		m.put("Type to filter", "过滤");
 		m.put("URL", "URL");
+		m.put("Unable to comment", "无法添加评论");
 		m.put("Unable to connect to server", "无法连接到服务器");
 		m.put("Unable to create protected tag", "无法创建受保护的标签");
+		m.put("Unable to diff as some line is too long.", "无法比较，因为某些行太长");
+		m.put("Unable to diff as the file is too large.", "无法比较，因为文件太大");
 		m.put("Unable to send verification email as mail service is not configured yet", "无法发送验证电子邮件，因为邮件服务未配置");
 		m.put("Unauthorized", "未授权");
 		m.put("Undefined Field Resolution", "未定义字段解析");
@@ -2448,6 +2469,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Upload to Project", "上传到项目");
 		m.put("Uploading file", "上传文件");
 		m.put("Url", "URL");
+		m.put("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude", 
+			"使用 '**', '*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀为 '-' 以排除");
 		m.put("Use Avatar Service", "使用头像服务");
 		m.put("Use For Git Operations", "用于 Git 操作");
 		m.put("Use Git in System Path", "使用系统路径中的 Git");
@@ -2494,7 +2517,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Verification Code", "验证码");
 		m.put("Verification email sent, please check it", "验证电子邮件已发送，请检查");
 		m.put("Verify", "验证");
-		m.put("View", "视图");
+		m.put("View", "查看");
 		m.put("View Source", "查看源码");
 		m.put("Viewer", "查看者");
 		m.put("Volume Mount", "卷挂载");
@@ -2599,6 +2622,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("curl Path", "curl 路径");
 		m.put("descending", "降序");
 		m.put("does not have any value of", "没有任何值");
+		m.put("exclude", "排除");
 		m.put("false", "假");
 		m.put("found 1 comment", "找到 1 条评论");
 		m.put("found 1 project", "找到 1 个项目");
@@ -2618,6 +2642,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("pull requests", "合并请求");
 		m.put("root", "根");
 		m.put("search in this revision will be accurate after indexed", "索引完成后，在当前版本中的搜索将更准确");
+		m.put("skipped {0} lines", "跳过 {0} 行");
+		m.put("space", "空格");
 		m.put("submit", "提交");
 		m.put("tags", "标签");
 		m.put("true", "真");
@@ -2626,9 +2652,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{0} edited {1}", "{0} 编辑于 {1}");
 		m.put("{0} files", "{0} 个文件");
 		m.put("{0} tags", "{0} 个标签");
-		m.put("Unable to comment here", "无法在此添加评论");
-		m.put("Invalid selection, click for details", "无效的选择，点击查看详情");
-
+		m.put("{0} reviewed", "{0} 已审查");
+		
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
 		m.put("Server Setup", "服务器设置");	

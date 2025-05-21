@@ -200,7 +200,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 
 			@Override
 			protected String getEmptyDescription() {
-				return "No description";
+				return _T("No description");
 			}
 
 			@Override

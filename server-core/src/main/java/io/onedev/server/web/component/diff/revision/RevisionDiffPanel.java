@@ -106,6 +106,7 @@ import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.*;
 
 import static io.onedev.server.web.translation.Translation._T;
@@ -434,7 +435,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 							@Override
 							public String getLabel() {
-								return "Commit";
+								return _T("Commit");
 							}
 
 							@Override
@@ -492,7 +493,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 							@Override
 							public String getLabel() {
-								return "Discard";
+								return _T("Discard");
 							}
 
 							@Override
@@ -503,7 +504,7 @@ public abstract class RevisionDiffPanel extends Panel {
 									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 										super.updateAjaxAttributes(attributes);
 										attributes.getAjaxCallListeners().add(new ConfirmClickListener(
-												"Do you really want to discard batched suggestions?"));
+												_T("Do you really want to discard batched suggestions?")));
 									}
 
 									@Override
@@ -632,8 +633,8 @@ public abstract class RevisionDiffPanel extends Panel {
 			@Override
 			protected List<String> getHints(TerminalExpect terminalExpect) {
 				return Lists.newArrayList(
-						"Path containing spaces or starting with dash needs to be quoted",
-						"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
+						_T("Path containing spaces or starting with dash needs to be quoted"),
+						_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude")
 						);
 			}
 			
@@ -694,7 +695,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			@Override
 			protected String load() {
 				var reviewSupport = getReviewSupport();
-				return getDisplayChanges().stream().filter(it->reviewSupport.isReviewed(it.getPath())).count() + "/" + getDisplayChanges().size() + " reviewed";
+				return MessageFormat.format(_T("{0} reviewed"), getDisplayChanges().stream().filter(it->reviewSupport.isReviewed(it.getPath())).count() + "/" + getDisplayChanges().size());
 			}
 		}));
 		reviewProgress.setOutputMarkupPlaceholderTag(true);
@@ -733,7 +734,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return "Showing first " + getDisplayChanges().size() + " files as there are too many";
+				return MessageFormat.format(_T("Showing first {0} files as there are too many"), getDisplayChanges().size());
 			}
 			
 		}) {
@@ -915,7 +916,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 										String content = contentInput.getModelObject();
 										if (content.length() > CodeComment.MAX_CONTENT_LEN) {
-											error("Comment too long");
+											error(_T("Comment too long"));
 											target.add(feedback);
 										} else {
 											CodeComment comment = new CodeComment();
@@ -1484,7 +1485,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				}
 			});
 		} else {
-			navigationContainer.add(new Label("content", "<i>No diffs to navigate</i>").setEscapeModelStrings(false));
+			navigationContainer.add(new Label("content", "<i>" + _T("No diffs to navigate") + "</i>").setEscapeModelStrings(false));
 		}
 
 		navigationContainer.setOutputMarkupPlaceholderTag(true);
@@ -1578,14 +1579,14 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 
-				add(AttributeAppender.replace("title", new AbstractReadOnlyModel<String>() {
+				add(AttributeAppender.replace("data-tippy-content", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
 						if (annotationSupport.getOpenComment().isResolved())
-							return "Resolved";
+							return _T("Resolved");
 						else
-							return "Unresolved";
+							return _T("Unresolved");
 					}
 
 				}));
@@ -2128,7 +2129,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 								 String content = contentInput.getModelObject();
 								 if (content.length() > CodeComment.MAX_CONTENT_LEN) {
-									 error("Comment too long");
+									 error(_T("Comment too long"));
 									 target.add(feedback);
 								 } else {
 									 CodeComment comment = new CodeComment();

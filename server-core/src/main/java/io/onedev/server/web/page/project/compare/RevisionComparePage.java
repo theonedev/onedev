@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.compare;
 
 import static io.onedev.server.search.commit.Revision.Type.COMMIT;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -506,7 +507,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 		if (mergeBase != null) {
 			List<Tab> tabs = new ArrayList<>();
 			
-			tabs.add(new AjaxActionTab(Model.of("Commits")) {
+			tabs.add(new AjaxActionTab(Model.of(_T("Commits"))) {
 				
 				@Override
 				public boolean isSelected() {
@@ -523,7 +524,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 				
 			});
 
-			tabs.add(new AjaxActionTab(Model.of("File Changes")) {
+			tabs.add(new AjaxActionTab(Model.of(_T("File Changes"))) {
 				
 				@Override
 				public boolean isSelected() {

@@ -866,6 +866,12 @@ onedev.server.blobTextDiff = {
 		
 		onedev.server.blobTextDiff.initBlameTooltip(containerId, $expandedTrs.find(">td.blame>a.hash"));
 		onedev.server.blobTextDiff.highlightSyntax($container);
+		$container.find("td.expander a").each(function() {
+			tippy(this, {
+				delay: [500, 0],
+				placement: 'auto'
+			});
+		});
 	},
 	getMarkInfo: function($container, markRange) {
 		var oldOrNew = markRange.leftSide?"old":"new";
