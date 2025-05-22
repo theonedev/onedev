@@ -1,8 +1,10 @@
 package io.onedev.server.web.page.project.branches;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -340,6 +342,8 @@ public class ProjectBranchesPage extends ProjectPage {
 			}
 			
 		}));
+		searchField.add(AttributeAppender.append("placeholder", _T("Filter branches...")));
+
 		searchField.add(new OnSearchingBehavior());
 		
 		add(new ModalLink("createBranch") {
@@ -376,23 +380,23 @@ public class ProjectBranchesPage extends ProjectPage {
 						User user = Preconditions.checkNotNull(getLoginUser());
 						if (getProject().getObjectId(GitUtils.branch2ref(branchName), false) != null) {
 							editor.error(new Path(new PathNode.Named("name")), 
-									"Branch '" + branchName + "' already exists, please choose a different name");
+									MessageFormat.format(_T("Branch '{0}' already exists, please choose a different name"), branchName));
 							target.add(form);
 						} else if (getProject().getBranchProtection(branchName, user).isPreventCreation()) {
-							editor.error(new Path(new PathNode.Named("name")), "Unable to create protected branch");
+							editor.error(new Path(new PathNode.Named("name")), _T("Unable to create protected branch"));
 							target.add(form);
 						} else {
 							RevCommit commit = getProject().getRevCommit(helperBean.getRevision(), true);
 							if (!getProject().isCommitSignatureRequirementSatisfied(user, branchName, commit)) {
 								editor.error(new Path(new PathNode.Named("name")), 
-										"Valid signature required for head commit of this branch per branch protection rule");
+										_T("Valid signature required for head commit of this branch per branch protection rule"));
 								target.add(form);
 							} else {
 								OneDev.getInstance(GitService.class).createBranch(getProject(), branchName, helperBean.getRevision());
 								modal.close();
 								target.add(branchesTable);
 								
-								getSession().success("Branch '" + branchName + "' created");
+								getSession().success(MessageFormat.format(_T("Branch '{0}' created"), branchName));
 							}
 						}
 					}
@@ -502,12 +506,13 @@ public class ProjectBranchesPage extends ProjectPage {
 					if (effectiveRequest.isOpen()) {
 						requestLink.add(new Label("label", "Open"));
 						requestLink.add(AttributeAppender.append("class", "btn-warning"));
-						requestLink.add(AttributeAppender.append("title", "A pull request is open for this change"));
+						requestLink.add(AttributeAppender.append("data-tippy-content", 
+								_T("A pull request is open for this change")));
 					} else {
 						requestLink.add(new Label("label", "Merged"));
 						requestLink.add(AttributeAppender.append("class", "btn-success"));
-						requestLink.add(AttributeAppender.append("title", 
-								"This change is squashed/rebased onto base branch via a pull request"));
+						requestLink.add(AttributeAppender.append("data-tippy-content", 
+								_T("This change is squashed/rebased onto base branch via a pull request")));
 					}
 				} else {
 					requestLink = new WebMarkupContainer("effectiveRequest");
@@ -523,7 +528,7 @@ public class ProjectBranchesPage extends ProjectPage {
 						return ref.getName();
 					}
 					
-				});
+				}.add(AttributeAppender.append("data-tippy-content", _T("Download archive of this branch"))));
 				
 				actionsContainer.add(new ModalLink("delete") {
 
@@ -532,9 +537,9 @@ public class ProjectBranchesPage extends ProjectPage {
 						super.disableLink(tag);
 						tag.append("class", "disabled", " ");
 						if (getProject().getDefaultBranch().equals(branch)) {
-							tag.put("title", "Can not delete default branch");
+							tag.put("data-tippy-content", _T("Can not delete default branch"));
 						} else {
-							tag.put("title", "Deletion not allowed due to branch protection rule");
+							tag.put("data-tippy-content", _T("Deletion not allowed due to branch protection rule"));
 						}
 					}
 
@@ -553,14 +558,14 @@ public class ProjectBranchesPage extends ProjectPage {
 							bodyFrag.add(new Label("branch", branch));
 							fragment.add(bodyFrag);
 						} else {
-							fragment.add(new Label("body", "You selected to delete branch " + branch));
+							fragment.add(new Label("body", MessageFormat.format(_T("You selected to delete branch {0}"), branch)));
 						}
 						fragment.add(new AjaxLink<Void>("delete") {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								OneDev.getInstance(ProjectManager.class).deleteBranch(getProject(), branch);
-								getSession().success("Branch '" + branch + "' deleted");
+								getSession().success(MessageFormat.format(_T("Branch '{0}' deleted"), branch));
 								if (branch.equals(baseBranch)) {
 									baseBranch = getProject().getDefaultBranch();
 									target.add(baseChoice);
@@ -606,7 +611,7 @@ public class ProjectBranchesPage extends ProjectPage {
 						
 					}
 
-				});
+				}.add(AttributeAppender.append("data-tippy-content", _T("Delete this branch"))));
 				
 				actionsContainer.add(new AjaxLink<Void>("makeDefault") {
 
@@ -727,8 +732,7 @@ public class ProjectBranchesPage extends ProjectPage {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new Label("count", count));
-				add(new Label("label", ahead?"ahead":"behind"));
+				add(new Label("label", MessageFormat.format(ahead? _T("{0} ahead") : _T("{0} behind"), count)));
 			}
 
 			@Override
@@ -736,9 +740,9 @@ public class ProjectBranchesPage extends ProjectPage {
 				super.onComponentTag(tag);
 				
 				if (ahead)
-					tag.put("title", "" + count + " commits ahead of base branch");
+					tag.put("data-tippy-content", MessageFormat.format(_T("{0} commits ahead of base branch"), count));
 				else
-					tag.put("title", "" + count + " commits behind of base branch");
+					tag.put("data-tippy-content", MessageFormat.format(_T("{0} commits behind of base branch"), count));
 					
 				if (count == 0)
 					tag.setName("span");
@@ -825,12 +829,12 @@ public class ProjectBranchesPage extends ProjectPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Branches");
+		return new Label(componentId, _T("Branches"));
 	}
 
 	@Override
 	protected String getPageTitle() {
-		return "Branches - " + getProject().getPath();
+		return _T("Branches") + " - " + getProject().getPath();
 	}
 	
 	@Override

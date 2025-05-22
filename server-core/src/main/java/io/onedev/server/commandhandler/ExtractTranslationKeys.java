@@ -18,6 +18,9 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -128,6 +131,18 @@ public class ExtractTranslationKeys extends CommandHandler {
 										if (rootPlaceholder.length() != 0) {
 											extractedTranslationKeys.add(rootPlaceholder);
 										}
+									}
+									var notEmpty = method.getAnnotation(NotEmpty.class);
+									if (notEmpty != null && notEmpty.message().length() != 0) {
+										extractedTranslationKeys.add(notEmpty.message());
+									}
+									var notNull = method.getAnnotation(NotNull.class);
+									if (notNull != null && notNull.message().length() != 0) {
+										extractedTranslationKeys.add(notNull.message());
+									}
+									var size = method.getAnnotation(Size.class);
+									if (size != null && size.message().length() != 0) {
+										extractedTranslationKeys.add(size.message());
 									}
 								}
 								if (clazz.isEnum()) {

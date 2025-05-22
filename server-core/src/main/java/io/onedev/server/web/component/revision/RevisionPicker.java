@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.revision;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
@@ -67,7 +69,7 @@ public abstract class RevisionPicker extends DropdownLink {
 				
 			};
 		} else {
-			return new Label(id, "Project not specified yet").add(AttributeAppender.append("class", "m-3 text-danger font-italic"));
+			return new Label(id, _T("Project not specified yet")).add(AttributeAppender.append("class", "m-3 text-danger font-italic"));
 		}
 	}
 
@@ -104,7 +106,7 @@ public abstract class RevisionPicker extends DropdownLink {
 				} 
 				label = HtmlEscape.escapeHtml5(label);
 			} else {
-				label = "Choose Revision";
+				label = _T("Choose Revision");
 				icon = "";
 			}
 			

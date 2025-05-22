@@ -3,11 +3,11 @@
 		<div class="card-body">
 			<div class="head d-flex flex-wrap">
 				<div class="input-group base mr-3 mb-4 d-none d-lg-inline-flex">
-					<span class="input-group-prepend"><span class="input-group-text">Base</span></span> 
+					<span class="input-group-prepend"><span class="input-group-text"><wicket:t>Base</wicket:t></span></span> 
 					<input wicket:id="baseBranch" type="hidden" class="form-control">					
 				</div>
 				<div class="clearable-wrapper mr-3 mb-4">
-					<input wicket:id="filterBranches" class="form-control search" placeholder="Filter branches...">
+					<input wicket:id="filterBranches" class="form-control search">
 				</div>
 				<a wicket:id="createBranch" class="btn btn-primary btn-icon mb-4"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 			</div>
@@ -21,7 +21,7 @@
 		<div class="title my-2">
 			<a wicket:id="branchLink" class="name mr-2"><span wicket:id="name"></span></a>
 			<a wicket:id="buildStatus" class="build-status mr-2"></a>
-			<span class="badge badge-info badge-sm mr-2" wicket:id="default">default</span>
+			<span class="badge badge-info badge-sm mr-2" wicket:id="default"><wicket:t>default</wicket:t></span>
 		</div>
 		<div class="commit-message mb-2">
 			<span wicket:id="message"></span>
@@ -30,22 +30,22 @@
 			<span wicket:id="contributor" class="contributor"></span>
 		</div>
 		<div wicket:id="actions" class="actions">
-			<a wicket:id="download" class="btn btn-light btn-hover-primary btn-sm btn-icon mr-2 mb-2" title="Download tag archive"><wicket:svg href="download" class="icon"/></a>
-			<a wicket:id="delete" class="btn btn-sm btn-icon btn-light btn-hover-danger mr-2 mb-2" title="Delete this branch"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+			<a wicket:id="download" class="btn btn-light btn-hover-primary btn-sm btn-icon mr-2 mb-2"><wicket:svg href="download" class="icon"/></a>
+			<a wicket:id="delete" class="btn btn-sm btn-icon btn-light btn-hover-danger mr-2 mb-2"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 			<a wicket:id="makeDefault" class="make-default btn btn-sm btn-light btn-hover-primary mr-2 mb-2"><wicket:svg href="tick" class="icon mr-2"/> Set default</a>
 			<a wicket:id="effectiveRequest" class="btn btn-sm mr-2 mb-2"><wicket:svg href="pull-request" class="icon mr-1"></wicket:svg> <span wicket:id="label"></span></a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="aheadBehindFrag">
 		<div class="text">
-			<a wicket:id="link"><span wicket:id="count"></span> <span wicket:id="label"></span></a>
+			<a wicket:id="link"><span wicket:id="label"></span></a>
 		</div>
 		<div class="bar" wicket:id="bar"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="createBranchFrag">
 		<form wicket:id="form" class="create-branch">
 			<div class="modal-header">
-				<h5 class="modal-title">Create Branch</h5>
+				<h5 class="modal-title"><wicket:t>Create Branch</wicket:t></h5>
 				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 			</div>
 			<div class="modal-body">
@@ -53,26 +53,26 @@
 				<div wicket:id="editor"></div>
 			</div>
 			<div class="modal-footer">
-				<button wicket:id="create" class="btn btn-primary">Create</button>
-				<button wicket:id="cancel" class="btn btn-secondary">Cancel</button>
+				<button wicket:id="create" class="btn btn-primary"><wicket:t>Create</wicket:t></button>
+				<button wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></button>
 			</div>
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="confirmDeleteBranchFrag">
         <div class="confirm-delete-branch">
             <div class="modal-header">
-                <h5 class="modal-title">Please confirm</h5>
+                <h5 class="modal-title"><wicket:t>Please confirm</wicket:t></h5>
                 <button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
             </div>
             <div wicket:id="body" class="modal-body"></div>
             <div class="modal-footer">
-                <a wicket:id="delete" class="btn btn-danger">Delete</a>
-                <a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+                <a wicket:id="delete" class="btn btn-danger"><wicket:t>Delete</wicket:t></a>
+                <a wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></a>
             </div>
         </div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="openRequestsFrag">
-		There are <a wicket:id="openRequests">open pull requests</a> against branch <span wicket:id="branch"></span>. 
-		These pull requests will be discarded if the branch is deleted.
+		<wicket:t>There are <a wicket:id="openRequests">open pull requests</a> against branch <span wicket:id="branch"></span>. 
+		These pull requests will be discarded if the branch is deleted.</wicket:t>
 	</wicket:fragment>
 </wicket:extend>

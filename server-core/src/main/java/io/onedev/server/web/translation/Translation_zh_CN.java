@@ -37,6 +37,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"<span wicket:id=\"submitterName\" class=\"user\"></span> 于 <span wicket:id=\"submitDate\"></span> 创建");
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"用于验证提交信息页脚的<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java正则表达式</a>");
+		m.put("A pull request is open for this change", "一个合并请求正在审查此更改");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"你的JIRA云实例的API地址，例如：<tt>https://your-domain.atlassian.net/rest/api/3</tt>");
 		m.put("Able to merge without conflicts", "可以合并而没有冲突");
@@ -180,6 +181,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Backup Schedule", "备份计划");
 		m.put("Backup Setting", "备份设置");
 		m.put("Backup Setting Holder", "备份设置持有者");
+		m.put("Base", "基准");
 		m.put("Base Gpg Key", "基础GPG密钥");
 		m.put("Base Query", "基础查询");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
@@ -216,6 +218,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Bottom", "底部");
 		m.put("Branch", "分支");
 		m.put("Branch \"{0}\" already exists, please choose a different name", "分支 \"{0}\" 已存在，请选择不同的名称");
+		m.put("Branch '{0}' already exists, please choose a different name", "分支 '{0}' 已存在，请选择不同的名称");
+		m.put("Branch '{0}' created", "分支 '{0}' 已创建");
+		m.put("Branch '{0}' deleted", "分支 '{0}' 已删除");
 		m.put("Branch Choice Bean", "分支选择Bean");
 		m.put("Branch Name", "分支名称");
 		m.put("Branch Protection", "分支保护");
@@ -289,6 +294,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Can Be Used By Jobs", "可被任务使用");
 		m.put("Can Create Root Projects", "可以创建根项目");
 		m.put("Can Edit Estimated Time", "可以编辑预估时间");
+		m.put("Can not delete default branch", "不能删除默认分支");
 		m.put("Can not link to self", "不能链接到自己");
 		m.put("Can not save malformed query", "无法保存格式错误的查询");
 		m.put("Cancel", "取消");
@@ -327,6 +333,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Choice Provider", "选项提供器");
 		m.put("Choose", "选择");
 		m.put("Choose JIRA project to import issues from", "选择要导入工单的 JIRA 项目");
+		m.put("Choose Revision", "选择版本");
 		m.put("Choose YouTrack project to import issues from", "选择要导入工单的 YouTrack 项目");
 		m.put("Choose issue...", "选择工单...");
 		m.put("Choose iterations...", "选择迭代...");
@@ -493,10 +500,12 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Delete Source Branch After Merge", "合并后删除源分支");
 		m.put("Delete dashboard", "删除仪表板");
 		m.put("Delete from branch {0}", "从分支 {0} 删除");
+		m.put("Delete this branch", "删除此分支");
 		m.put("Delete this field", "删除该字段");
 		m.put("Delete this import", "删除此导入");
 		m.put("Delete this state", "删除该状态");
 		m.put("Delete this value", "删除该值");
+		m.put("Deletion not allowed due to branch protection rule", "由于分支保护规则，不允许删除此分支");
 		m.put("Deletions", "删除数");
 		m.put("Denied", "拒绝");
 		m.put("Dependencies & Services", "依赖与服务");
@@ -544,6 +553,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Documentation", "文档");
 		m.put("Don't have an account yet?", "没有账户？");
 		m.put("Download", "下载");
+		m.put("Download archive of this branch", "下载此分支的归档");
 		m.put("Due Date", "截止日期");
 		m.put("Due Date Issue Field", "截止日期工单字段");
 		m.put("ESLint Report", "ESLint 报告");
@@ -667,6 +677,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Files to Be Analyzed", "要分析的文件");
 		m.put("Filter", "过滤");
 		m.put("Filter Issues", "过滤工单");
+		m.put("Filter branches...", "过滤分支...");
 		m.put("Filter by path", "按路径过滤");
 		m.put("Find branch", "查找分支");
 		m.put("Find or create branch", "查找或创建分支");
@@ -1550,6 +1561,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Platforms", "平台");
 		m.put("Please <a wicket:id=\"download\" class=\"font-weight-bolder\">download</a> recovery codes below and keep them secret. These codes can be used to provide one-time access to your account in case you can not access the authentication application. They will <b>NOT</b> be displayed again", 
 			"请<a wicket:id=\"download\" class=\"font-weight-bolder\">下载</a>下方的恢复代码并妥善保管。这些代码可用于在您无法访问认证应用程序时提供一次性账户访问权限。它们<b>不会</b>再次显示");
+		m.put("Please confirm", "请确认");
 		m.put("Please confirm the password.", "请确认密码。");
 		m.put("Please input one of your recovery codes saved when enable two-factor authentication", 
 			"请输入在启用两阶段验证时保存的恢复代码");
@@ -1606,6 +1618,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Project id", "项目 ID");
 		m.put("Project list", "项目列表");
 		m.put("Project name", "项目名称");
+		m.put("Project not specified yet", "项目未指定");
 		m.put("Project overview", "项目概览");
 		m.put("Project path", "项目路径");
 		m.put("Projects", "项目");
@@ -2331,6 +2344,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("The secret which allows you to ensure that POST requests sent to the payload URL are from OneDev. When you set a secret you'll receive the X-OneDev-Signature header in the webhook POST request", 
 			"确保发送到有效负载 URL 的 POST 请求来自 OneDev 的密钥。设置密钥后，您将在 Webhook POST 请求中收到 X-OneDev-Signature 头部");
 		m.put("Then enter the passcode shown in the TOTP authenticator to verify", "然后输入 TOTP 认证器中显示的验证码进行验证");
+		m.put("There are <a wicket:id=\"openRequests\">open pull requests</a> against branch <span wicket:id=\"branch\"></span>. These pull requests will be discarded if the branch is deleted.", 
+			"分支 <span wicket:id=\"branch\"></span> 有 <a wicket:id=\"openRequests\">打开的合并请求</a>。如果分支被删除，这些合并请求将被丢弃。");
 		m.put("There are merge conflicts. You can still create the pull request though", "有合并冲突。您仍然可以创建合并请求");
 		m.put("There are unsaved changes, discard and continue?", "有未保存的更改，是否丢弃并继续？");
 		m.put("These authenticators normally run on your mobile phone, some examples are Google Authenticator, Microsoft Authenticator, Authy, 1Password etc.", 
@@ -2342,6 +2357,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"此地址应在 SendGrid 中为 <code>已验证的发送者</code>，将用作各种电子邮件通知的发送者地址。如果下面启用了 <code>接收已发布电子邮件</code> 选项，用户也可以回复此地址以发布工单或合并请求评论");
 		m.put("This address will be used as sender address of various email notifications. User can also reply to this address to post issue or pull request comments via email if <code>Check Incoming Email</code> option is enabled below", 
 			"此地址将用作各种电子邮件通知的发送者地址。如果下面启用了 <code>检查接收电子邮件</code> 选项，用户也可以通过电子邮件回复此地址以发布工单或合并请求评论");
+		m.put("This change is squashed/rebased onto base branch via a pull request", "此更改已通过合并请求压缩/重定基到基础分支");
 		m.put("This change needs to be verified by some jobs. Submit pull request instead", "此更改需要由某些任务验证。请提交合并请求");
 		m.put("This email address is being used", "此电子邮件地址正在使用");
 		m.put("This executor runs build jobs as docker containers on OneDev server", "此执行器在 OneDev 服务器上以 Docker 容器运行构建任务");
@@ -2435,6 +2451,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("URL", "URL");
 		m.put("Unable to comment", "无法添加评论");
 		m.put("Unable to connect to server", "无法连接到服务器");
+		m.put("Unable to create protected branch", "无法创建受保护的分支");
 		m.put("Unable to create protected tag", "无法创建受保护的标签");
 		m.put("Unable to diff as some line is too long.", "无法比较，因为某些行太长");
 		m.put("Unable to diff as the file is too large.", "无法比较，因为文件太大");
@@ -2603,6 +2620,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("You may also drop file/image to the input box, or paste image from clipboard", "您也可以将文件/图像拖到输入框中，或从剪贴板粘贴图像");
 		m.put("You may initialize the project by <a wicket:id=\"addFiles\" class=\"link-primary\">adding files</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">setting up build spec</a>, or <a wicket:id=\"pushInstructions\" class=\"link-primary\">pushing an existing repository</a>", 
 			"您可以通过 <a wicket:id=\"addFiles\" class=\"link-primary\">添加文件</a>、<a wicket:id=\"setupBuildSpec\" class=\"link-primary\">定义构建规范</a> 或 <a wicket:id=\"pushInstructions\" class=\"link-primary\">推送现有仓库</a> 来初始化项目");
+		m.put("You selected to delete branch {0}", "您选择删除分支 {0}");
 		m.put("You've been logged out", "您已登出");
 		m.put("YouTrack API URL", "YouTrack API URL");
 		m.put("YouTrack Issue Field", "YouTrack 工单字段");
@@ -2620,6 +2638,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("ctrl-k to show command palette", "ctrl-k 显示命令面板");
 		m.put("curl Command Line", "curl 命令行");
 		m.put("curl Path", "curl 路径");
+		m.put("default", "默认");
 		m.put("descending", "降序");
 		m.put("does not have any value of", "没有任何值");
 		m.put("exclude", "排除");
@@ -2647,13 +2666,41 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("submit", "提交");
 		m.put("tags", "标签");
 		m.put("true", "真");
+		m.put("{0} ahead", "{0} 领先");
+		m.put("{0} behind", "{0} 落后");
 		m.put("{0} branches", "{0} 个分支");
 		m.put("{0} commits", "{0} 个提交");
+		m.put("{0} commits ahead of base branch", "{0} 个提交领先于基准分支");
+		m.put("{0} commits behind of base branch", "{0} 个提交落后于基准分支");
 		m.put("{0} edited {1}", "{0} 编辑于 {1}");
 		m.put("{0} files", "{0} 个文件");
-		m.put("{0} tags", "{0} 个标签");
 		m.put("{0} reviewed", "{0} 已审查");
-		
+		m.put("{0} tags", "{0} 个标签");
+		m.put("At least one choice need to be specified", "至少需要指定一个选项");
+		m.put("At least one entry should be specified", "至少需要指定一个条目");
+		m.put("At least one event type needs to be selected", "至少需要选择一个事件类型");
+		m.put("At least one field needs to be specified", "至少需要指定一个字段");
+		m.put("At least one project should be authorized", "至少需要授权一个项目");
+		m.put("At least one project should be selected", "至少需要选择一个项目");
+		m.put("At least one repository should be selected", "至少需要选择一个仓库");
+		m.put("At least one role is required", "至少需要一个角色");
+		m.put("At least one role must be selected", "至少需要选择一个角色");
+		m.put("At least one state needs to be specified", "至少需要指定一个状态");
+		m.put("At least one state should be specified", "至少需要指定一个状态");
+		m.put("At least one tab should be added", "至少需要添加一个标签");
+		m.put("At least one user search base should be specified", "至少需要指定一个用户搜索基础");
+		m.put("At least one value needs to be specified", "至少需要指定一个值");
+		m.put("At least two columns need to be defined", "至少需要定义两个列");
+		m.put("May not be empty", "不能为空");
+		m.put("Must not be empty", "不能为空");
+		m.put("Please choose revision to create branch from", "请选择要从中创建分支的版本");
+		m.put("Please select revision to create tag from", "请选择要从中创建标签的版本");
+		m.put("choose a color for this state", "选择一个颜色");
+		m.put("may not be empty", "不能为空");
+		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
+		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
+		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
+
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
 		m.put("Server Setup", "服务器设置");	
