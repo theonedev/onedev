@@ -152,7 +152,22 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Ascending", "升序");
 		m.put("Assignees Issue Field", "受让人工单字段");
 		m.put("Asymmetric", "非对称");
+		m.put("At least one choice need to be specified", "至少需要指定一个选项");
 		m.put("At least one email address should be configured, please add a new one first", "至少应配置一个电子邮件地址，请先添加一个新地址");
+		m.put("At least one entry should be specified", "至少需要指定一个条目");
+		m.put("At least one event type needs to be selected", "至少需要选择一个事件类型");
+		m.put("At least one field needs to be specified", "至少需要指定一个字段");
+		m.put("At least one project should be authorized", "至少需要授权一个项目");
+		m.put("At least one project should be selected", "至少需要选择一个项目");
+		m.put("At least one repository should be selected", "至少需要选择一个仓库");
+		m.put("At least one role is required", "至少需要一个角色");
+		m.put("At least one role must be selected", "至少需要选择一个角色");
+		m.put("At least one state needs to be specified", "至少需要指定一个状态");
+		m.put("At least one state should be specified", "至少需要指定一个状态");
+		m.put("At least one tab should be added", "至少需要添加一个标签");
+		m.put("At least one user search base should be specified", "至少需要指定一个用户搜索基础");
+		m.put("At least one value needs to be specified", "至少需要指定一个值");
+		m.put("At least two columns need to be defined", "至少需要定义两个列");
 		m.put("Attachment", "附件");
 		m.put("Attributes", "属性");
 		m.put("Authentication", "身份验证");
@@ -1083,6 +1098,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Max Value", "最大值");
 		m.put("Maximum number of entries to return when search code in repository", "搜索代码库时返回的最大条目数");
 		m.put("Maximum of retries before giving up", "放弃前的最大重试次数");
+		m.put("May not be empty", "不能为空");
 		m.put("Medium", "中等");
 		m.put("Memory Limit", "内存限制");
 		m.put("Memory Request", "内存请求");
@@ -1108,6 +1124,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Multiple", "多");
 		m.put("Multiple Lines", "多行");
 		m.put("Multiple On the Other Side", "多行在另一侧");
+		m.put("Must not be empty", "不能为空");
 		m.put("My Profile", "我的个人资料");
 		m.put("Mypy Report", "Mypy 报告");
 		m.put("Name", "名称");
@@ -1561,6 +1578,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Platforms", "平台");
 		m.put("Please <a wicket:id=\"download\" class=\"font-weight-bolder\">download</a> recovery codes below and keep them secret. These codes can be used to provide one-time access to your account in case you can not access the authentication application. They will <b>NOT</b> be displayed again", 
 			"请<a wicket:id=\"download\" class=\"font-weight-bolder\">下载</a>下方的恢复代码并妥善保管。这些代码可用于在您无法访问认证应用程序时提供一次性账户访问权限。它们<b>不会</b>再次显示");
+		m.put("Please choose revision to create branch from", "请选择要从中创建分支的版本");
 		m.put("Please confirm", "请确认");
 		m.put("Please confirm the password.", "请确认密码。");
 		m.put("Please input one of your recovery codes saved when enable two-factor authentication", 
@@ -1569,6 +1587,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Please select comments to delete", "请选择要删除的评论");
 		m.put("Please select comments to set resolved", "请选择要设置为已解决的评论");
 		m.put("Please select comments to set unresolved", "请选择要设置为未解决的评论");
+		m.put("Please select revision to create tag from", "请选择要从中创建标签的版本");
 		m.put("Please specify file name above before editing content", "请在编辑内容之前指定文件名");
 		m.put("Poll Interval", "轮询间隔");
 		m.put("Populate Tag Mappings", "填充标签映射");
@@ -2315,7 +2334,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Tabs", "制表符");
 		m.put("Tag", "标签");
 		m.put("Tag \"{0}\" already exists, please choose a different name.", "标签 \"{0}\" 已存在，请选择不同的名称");
-		m.put("Tag Message", "标签消息");
+		m.put("Tag Message", "标签注释");
 		m.put("Tag Name", "标签名称");
 		m.put("Tag Protection", "标签保护");
 		m.put("Tag creation", "标签创建");
@@ -2633,6 +2652,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("YouTrack Projects to Import", "要导入的 YouTrack 项目");
 		m.put("branches", "分支");
 		m.put("builds", "构建");
+		m.put("choose a color for this state", "选择一个颜色");
 		m.put("cmd-k to show command palette", "cmd-k 显示命令面板");
 		m.put("container-image", "容器镜像");
 		m.put("ctrl-k to show command palette", "ctrl-k 显示命令面板");
@@ -2652,6 +2672,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("is not empty", "不为空");
 		m.put("issues", "工单");
 		m.put("lines", "行");
+		m.put("may not be empty", "不能为空");
 		m.put("md.heading", "标题");
 		m.put("md.image", "图片");
 		m.put("new field", "新字段");
@@ -2676,30 +2697,18 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{0} files", "{0} 个文件");
 		m.put("{0} reviewed", "{0} 已审查");
 		m.put("{0} tags", "{0} 个标签");
-		m.put("At least one choice need to be specified", "至少需要指定一个选项");
-		m.put("At least one entry should be specified", "至少需要指定一个条目");
-		m.put("At least one event type needs to be selected", "至少需要选择一个事件类型");
-		m.put("At least one field needs to be specified", "至少需要指定一个字段");
-		m.put("At least one project should be authorized", "至少需要授权一个项目");
-		m.put("At least one project should be selected", "至少需要选择一个项目");
-		m.put("At least one repository should be selected", "至少需要选择一个仓库");
-		m.put("At least one role is required", "至少需要一个角色");
-		m.put("At least one role must be selected", "至少需要选择一个角色");
-		m.put("At least one state needs to be specified", "至少需要指定一个状态");
-		m.put("At least one state should be specified", "至少需要指定一个状态");
-		m.put("At least one tab should be added", "至少需要添加一个标签");
-		m.put("At least one user search base should be specified", "至少需要指定一个用户搜索基础");
-		m.put("At least one value needs to be specified", "至少需要指定一个值");
-		m.put("At least two columns need to be defined", "至少需要定义两个列");
-		m.put("May not be empty", "不能为空");
-		m.put("Must not be empty", "不能为空");
-		m.put("Please choose revision to create branch from", "请选择要从中创建分支的版本");
-		m.put("Please select revision to create tag from", "请选择要从中创建标签的版本");
-		m.put("choose a color for this state", "选择一个颜色");
-		m.put("may not be empty", "不能为空");
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
+		m.put("Create tag", "创建标签");
+		m.put("Delete this tag", "删除此标签");
+		m.put("Deletion not allowed due to tag protection rule", "由于标签保护规则，删除不允许");
+		m.put("Do you really want to delete tag {0}?", "您真的要删除标签 {0} 吗？");
+		m.put("Download tag archive", "下载标签归档");
+		m.put("Filter tags...", "过滤标签...");
+		m.put("Tag '{0}' already exists, please choose a different name", "标签 '{0}' 已存在，请选择不同的名称");
+		m.put("Tag '{0}' created", "标签 '{0}' 已创建");
+		m.put("Tag '{0}' deleted", "标签 '{0}' 已删除");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");

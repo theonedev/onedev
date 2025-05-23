@@ -3,10 +3,10 @@
 		<div class="card-body">
 			<div class="head d-flex align-items-center flex-wrap">
 				<div class="clearable-wrapper mr-3 mb-4">
-					<input wicket:id="filterTags" class="form-control search" placeholder="Filter tags...">
+					<input wicket:id="filterTags" class="form-control search">
 				</div>
 				<div class="mb-4 mr-3">
-					<a wicket:id="createTag" class="btn btn-primary btn-icon" title="Create tag"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+					<a wicket:id="createTag" class="btn btn-primary btn-icon"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 				</div>
 			</div>
             <div class="body">
@@ -28,8 +28,8 @@
 			<span wicket:id="contributor" class="contributor"></span>
 		</div>
 		<div class="actions mb-2">
-			<a wicket:id="download" class="btn btn-light btn-hover-primary btn-sm btn-icon mr-2" title="Download tag archive"><wicket:svg href="download" class="icon"/></a>
-			<a wicket:id="delete" class="btn btn-light btn-hover-danger btn-sm btn-icon" title="Delete this tag"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+			<a wicket:id="download" class="btn btn-light btn-hover-primary btn-sm btn-icon mr-2"><wicket:svg href="download" class="icon"/></a>
+			<a wicket:id="delete" class="btn btn-light btn-hover-danger btn-sm btn-icon"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="annotatedFrag">
@@ -42,7 +42,7 @@
 	<wicket:fragment wicket:id="createTagFrag">
 		<form wicket:id="form" class="create-tag">
 			<div class="modal-header">
-				<h5 class="modal-title">Create Tag</h5>
+				<h5 class="modal-title"><wicket:t>Create Tag</wicket:t></h5>
 				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 			</div>
 			<div class="modal-body">
@@ -50,8 +50,8 @@
 				<div wicket:id="editor"></div>
 			</div>
 			<div class="modal-footer">
-				<button wicket:id="create" class="btn btn-primary">Create</button>
-				<button wicket:id="cancel" class="btn btn-secondary">Cancel</button>
+				<button wicket:id="create" class="btn btn-primary"><wicket:t>Create</wicket:t></button>
+				<button wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></button>
 			</div>
 		</form>
 	</wicket:fragment>

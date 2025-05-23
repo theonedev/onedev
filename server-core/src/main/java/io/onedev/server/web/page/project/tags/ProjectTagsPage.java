@@ -79,9 +79,11 @@ import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTag;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.*;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
+import static io.onedev.server.web.translation.Translation._T;
 
 public class ProjectTagsPage extends ProjectPage {
 
@@ -191,6 +193,7 @@ public class ProjectTagsPage extends ProjectPage {
 			}
 			
 		}));
+		searchField.add(AttributeAppender.append("placeholder", _T("Filter tags...")));
 		
 		searchField.add(new OnTypingDoneBehavior(200) {
 
@@ -235,10 +238,10 @@ public class ProjectTagsPage extends ProjectPage {
 						
 						if (getProject().getObjectId(GitUtils.tag2ref(tagName), false) != null) {
 							editor.error(new Path(new PathNode.Named("name")), 
-									"Tag '" + tagName + "' already exists, please choose a different name.");
+									MessageFormat.format(_T("Tag '{0}' already exists, please choose a different name"), tagName));
 							target.add(form);
 						} else if (getProject().getTagProtection(tagName, user).isPreventCreation()) {
-							editor.error(new Path(new PathNode.Named("name")), "Unable to create protected tag"); 
+							editor.error(new Path(new PathNode.Named("name")), _T("Unable to create protected tag")); 
 							target.add(form);
 						} else {
 							try {
@@ -248,7 +251,7 @@ public class ProjectTagsPage extends ProjectPage {
 								modal.close();
 								target.add(tagsTable);
 								
-								getSession().success("Tag '" + tagName + "' created");
+								getSession().success(MessageFormat.format(_T("Tag '{0}' created"), tagName));
 							} catch (Exception e) {
 								ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
 								if (explicitException != null) {
@@ -288,7 +291,7 @@ public class ProjectTagsPage extends ProjectPage {
 				return fragment;
 			}
 			
-		});
+		}.add(AttributeAppender.append("data-tippy-content", _T("Create tag"))));
 		
 		List<IColumn<RefFacade, Void>> columns = new ArrayList<>();
 		
@@ -389,27 +392,27 @@ public class ProjectTagsPage extends ProjectPage {
 						return ref.getName();
 					}
 					
-				});
+				}.add(AttributeAppender.append("data-tippy-content", _T("Download tag archive"))));
 				
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete tag " + tagName + "?"));
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener(MessageFormat.format(_T("Do you really want to delete tag {0}?"), tagName)));
 					}
 
 					@Override
 					protected void disableLink(ComponentTag tag) {
 						super.disableLink(tag);
 						tag.append("class", "disabled", " ");
-						tag.put("title", "Deletion not allowed due to tag protection rule");
+						tag.put("data-tippy-content", _T("Deletion not allowed due to tag protection rule"));
 					}
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						OneDev.getInstance(ProjectManager.class).deleteTag(getProject(), tagName);
-						WebSession.get().success("Tag '" + tagName + "' deleted");
+						WebSession.get().success(MessageFormat.format(_T("Tag '{0}' deleted"), tagName));
 						target.add(tagsTable);
 					}
 
@@ -424,7 +427,7 @@ public class ProjectTagsPage extends ProjectPage {
 							setVisible(false);
 					}
 					
-				});		
+				}.add(AttributeAppender.append("data-tippy-content", _T("Delete this tag"))));		
 				
 				cellItem.add(fragment);
 			}
@@ -508,12 +511,12 @@ public class ProjectTagsPage extends ProjectPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Tags");
+		return new Label(componentId, _T("Tags"));
 	}
 
 	@Override
 	protected String getPageTitle() {
-		return "Tags - " + getProject().getPath();
+		return _T("Tags") + " - " + getProject().getPath();
 	}
 	
 	@Override
