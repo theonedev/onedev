@@ -69,7 +69,7 @@ public class CommitProcessor implements HtmlProcessor {
 						if (RequestCycle.get() != null) 
 							url = RequestCycle.get().urlFor(CommitDetailPage.class, CommitDetailPage.paramsOf(commitProject, commitId.name())).toString();
 						else 
-							url = OneDev.getInstance(UrlManager.class).urlFor(new ProjectAndRevision(commitProject, commitId.name()));							
+							url = OneDev.getInstance(UrlManager.class).urlFor(new ProjectAndRevision(commitProject, commitId.name()), true);							
 						commitReplacement = String.format("<a href='%s' class='commit reference' data-reference='%s'>%s</a>", 
 								url, commitPrefix + commitId.name(), commitPrefix + GitUtils.abbreviateSHA(commitId.name()));
 					} else {

@@ -291,7 +291,7 @@ public class NpmPackService implements PackService {
 					var project = checkProject(projectId, false);
 					sessionManager.run(() -> {
 						var packs = packManager.queryByName(project, TYPE, packageName, null);
-						var npmUrl = urlManager.urlFor(project) + "/~" + getServiceId() + "/" + encodePath(packageName);
+						var npmUrl = urlManager.urlFor(project, true) + "/~" + getServiceId() + "/" + encodePath(packageName);
 						var distTagsNode = objectMapper.createObjectNode();
 						var versionsNode = objectMapper.createObjectNode();
 						NpmData latestPackData = null;

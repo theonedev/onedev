@@ -1,6 +1,7 @@
 package io.onedev.server.xodus;
 
 import static io.onedev.server.util.DateUtils.toLocalDate;
+import static java.util.stream.Collectors.toSet;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -53,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
+import com.hazelcast.map.IMap;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
@@ -75,6 +79,7 @@ import io.onedev.server.event.project.ActiveServerChanged;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.issue.IssueCommitsAttached;
 import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
 import io.onedev.server.git.GitUtils;
@@ -88,6 +93,7 @@ import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.git.command.RevListCommand.Order;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.ElementPumper;
@@ -115,7 +121,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 
-	private static final int INFO_VERSION = 18;
+	private static final int INFO_VERSION = 19;
 
 	private static final long LOG_FILE_SIZE = 256 * 1024;
 
@@ -149,6 +155,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 	private static final String DAILY_CONTRIBUTIONS_STORE = "dailyContributions";
 
+	private static final String USER_COMMITS_STORE = "userCommits";
+
 	private static final ByteIterable NEXT_PATH_INDEX_KEY = new StringByteIterable("nextPathIndex");
 
 	private static final ByteIterable NEXT_USER_INDEX_KEY = new StringByteIterable("nextUserIndex");
@@ -159,7 +167,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 	private static final ByteIterable LAST_COMMIT_OF_LINE_STATS_KEY = new StringByteIterable("lastCommitOfLineStats");
 
-	private static final ByteIterable LAST_COMMIT_OF_CONTRIBS_KEY = new StringByteIterable("lastCommitOfContribs");
+	private static final ByteIterable LAST_COMMIT_OF_CONTRIBUTIONS_KEY = new StringByteIterable("lastCommitOfContributions");
 
 	private static final ByteIterable LAST_COMMIT_OF_FILES_KEY = new StringByteIterable("lastCommitOfFiles");
 
@@ -200,6 +208,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 	private final Map<Long, Integer> totalCommitCountCache = new ConcurrentHashMap<>();
 
 	private final Map<Long, List<NameAndEmail>> usersCache = new ConcurrentHashMap<>();
+
+	private volatile IMap<String, Set<Long>> contributedProjects;
 
 	@Inject
 	public DefaultCommitInfoManager(ProjectManager projectManager, 
@@ -280,6 +290,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 					users = SerializationUtils.deserialize(userBytes);
 				else
 					users = new HashSet<>();
+				var usersChanged = new AtomicBoolean(false);
 
 				new ElementPumper<LogCommit>() {
 
@@ -368,12 +379,15 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 								listenerRegistry.post(new IssueCommitsAttached(issueManager.load(issueId)));
 							}
 							
-							if (currentCommit.getCommitter() != null)
-								users.add(new NameAndEmail(currentCommit.getCommitter()));
+							if (currentCommit.getCommitter() != null) {
+								if (users.add(new NameAndEmail(currentCommit.getCommitter())))
+									usersChanged.set(true);
+							}
 
 							if (currentCommit.getAuthor() != null) {
 								NameAndEmail nameAndEmail = new NameAndEmail(currentCommit.getAuthor());
-								users.add(nameAndEmail);
+								if (users.add(nameAndEmail))
+									usersChanged.set(true);
 
 								ByteIterable authorKey = new ArrayByteIterable(SerializationUtils.serialize(nameAndEmail));
 								int userIndex = readInt(userToIndexStore, txn, authorKey, -1);
@@ -456,9 +470,12 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 				writeInt(defaultStore, txn, NEXT_EMAIL_INDEX_KEY, nextIndex.email);
 				writeInt(defaultStore, txn, NEXT_PATH_INDEX_KEY, nextIndex.path);
 
-				userBytes = SerializationUtils.serialize((Serializable) users);
-				defaultStore.put(txn, USERS_KEY, new ArrayByteIterable(userBytes));
-				usersCache.remove(project.getId());
+				if (usersChanged.get()) {
+					userBytes = SerializationUtils.serialize((Serializable) users);
+					defaultStore.put(txn, USERS_KEY, new ArrayByteIterable(userBytes));
+					usersCache.remove(project.getId());
+					updateContributedProjects(project.getId(), users);
+				}
 
 				for (Map.Entry<Long, Integer> entry : commitCountCache.entrySet())
 					writeInt(commitCountsStore, txn, new LongByteIterable(entry.getKey()), entry.getValue());
@@ -469,25 +486,36 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 		if (GitUtils.branch2ref(project.getDefaultBranch()).equals(refName)) {
 			collectLineStats(project, commitId);
-			collectContribs(project, commitId);
+			collectContributions(project, commitId);
 			collectFiles(project, commitId);
 		}
 
 		logger.debug("Collected commit information (project: {}, ref: {})", project.getPath(), refName);
 	}
 
-	private void collectContribs(Project project, ObjectId commitId) {
+	private void updateContributedProjects(Long projectId, Set<NameAndEmail> users) {
+		for (var user: users) {
+			var contributedProjectsOfEmail = contributedProjects.get(user.getEmailAddress());
+			if (contributedProjectsOfEmail == null) 
+				contributedProjectsOfEmail = new HashSet<>();
+			if (contributedProjectsOfEmail.add(projectId))
+				contributedProjects.put(user.getEmailAddress(), contributedProjectsOfEmail);
+		}
+	}
+
+	private void collectContributions(Project project, ObjectId commitId) {
 		Environment env = getEnv(project.getId().toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 		Store userToIndexStore = getStore(env, USER_TO_INDEX_STORE);
 		Store dailyContributionsStore = getStore(env, DAILY_CONTRIBUTIONS_STORE);
+		Store userCommitsStore = getStore(env, USER_COMMITS_STORE);
 
 		Repository repository = projectManager.getRepository(project.getId());
 		PatternSet filePatterns = PatternSet.parse(project.findCodeAnalysisPatterns());
 
 		ObjectId lastCommitId = env.computeInTransaction(txn -> {
 			ObjectId innerLastCommitId;
-			byte[] lastCommitBytes = readBytes(defaultStore, txn, LAST_COMMIT_OF_CONTRIBS_KEY);
+			byte[] lastCommitBytes = readBytes(defaultStore, txn, LAST_COMMIT_OF_CONTRIBUTIONS_KEY);
 			if (lastCommitBytes != null) {
 				innerLastCommitId = ObjectId.fromRaw(lastCommitBytes);
 				try {
@@ -504,9 +532,11 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 		processCommitRange(project, commitId, lastCommitId, (untilCommitId, sinceCommitId) -> env.executeInTransaction(txn -> {
 			Map<Integer, GitContribution> overallContributions =
-					deserializeContributions(readBytes(defaultStore, txn, OVERALL_CONTRIBUTIONS_KEY));
+					deserializeDailyContributions(readBytes(defaultStore, txn, OVERALL_CONTRIBUTIONS_KEY));
 
 			Map<Integer, Map<Integer, GitContribution>> dailyContributionsCache = new HashMap<>();
+
+			Map<String, Map<ObjectId, Long>> userCommitsCache = new HashMap<>();
 
 			new ElementPumper<LogCommit>() {
 
@@ -540,7 +570,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 				public void process(LogCommit currentCommit) {
 					if (currentCommit.getCommitDate() != null && currentCommit.getParentHashes().size() <= 1) {
 						int day = (int) toLocalDate(currentCommit.getCommitDate(), ZoneId.systemDefault()).toEpochDay();
-						updateContribution(overallContributions, day, currentCommit, filePatterns);
+						updateContrib(overallContributions, day, currentCommit, filePatterns);
 
 						if (currentCommit.getAuthor() != null) {
 							NameAndEmail author = new NameAndEmail(currentCommit.getAuthor());
@@ -548,13 +578,20 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 							int userIndex = readInt(userToIndexStore, txn, authorKey, -1);
 							Preconditions.checkState(userIndex != -1);
 
-							Map<Integer, GitContribution> contributionsOnDay = dailyContributionsCache.get(day);
-							if (contributionsOnDay == null) {
-								contributionsOnDay = deserializeContributions(readBytes(
+							Map<Integer, GitContribution> contribsOnDay = dailyContributionsCache.get(day);
+							if (contribsOnDay == null) {
+								contribsOnDay = deserializeDailyContributions(readBytes(
 										dailyContributionsStore, txn, new IntByteIterable(day)));
-								dailyContributionsCache.put(day, contributionsOnDay);
+								dailyContributionsCache.put(day, contribsOnDay);
 							}
-							updateContribution(contributionsOnDay, userIndex, currentCommit, filePatterns);
+							updateContrib(contribsOnDay, userIndex, currentCommit, filePatterns);
+
+							var userCommits = userCommitsCache.get(author.getEmailAddress());
+							if (userCommits == null) {
+								userCommits = deserializeUserCommits(readBytes(userCommitsStore, txn, new StringByteIterable(author.getEmailAddress())));
+								userCommitsCache.put(author.getEmailAddress(), userCommits);
+							}
+							userCommits.put(ObjectId.fromString(currentCommit.getHash()), currentCommit.getAuthor().getWhen().getTime());
 						}
 					}
 				}
@@ -562,14 +599,20 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 			}.pump();
 
 			for (Map.Entry<Integer, Map<Integer, GitContribution>> entry : dailyContributionsCache.entrySet()) {
-				byte[] bytesOfContributionsOnDay = serializeContributions(entry.getValue());
+				byte[] bytesOfContributionsOnDay = serializeDailyContributions(entry.getValue());
 				dailyContributionsStore.put(txn, new IntByteIterable(entry.getKey()),
 						new ArrayByteIterable(bytesOfContributionsOnDay));
 			}
-			defaultStore.put(txn, OVERALL_CONTRIBUTIONS_KEY,
-					new ArrayByteIterable(serializeContributions(overallContributions)));
 
-			defaultStore.put(txn, LAST_COMMIT_OF_CONTRIBS_KEY, new CommitByteIterable(untilCommitId));
+			for (Map.Entry<String, Map<ObjectId, Long>> entry : userCommitsCache.entrySet()) {
+				userCommitsStore.put(txn, new StringByteIterable(entry.getKey()), 
+						new ArrayByteIterable(serializeUserCommits(entry.getValue())));
+			}
+
+			defaultStore.put(txn, OVERALL_CONTRIBUTIONS_KEY,
+					new ArrayByteIterable(serializeDailyContributions(overallContributions)));
+
+			defaultStore.put(txn, LAST_COMMIT_OF_CONTRIBUTIONS_KEY, new CommitByteIterable(untilCommitId));
 		}));
 	}
 
@@ -941,7 +984,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 	}
 
-	private void updateContribution(Map<Integer, GitContribution> contributions, int key, LogCommit commit,
+	private void updateContrib(Map<Integer, GitContribution> contributions, int key, LogCommit commit,
 									PatternSet filePatterns) {
 		GitContribution contribution = contributions.get(key);
 		if (contribution != null) {
@@ -1100,10 +1143,27 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 	@Sessional
 	@Listen
+	public void on(SystemStarting event) {
+		contributedProjects = clusterManager.getHazelcastInstance().getMap("contributedProjects");
+	}
+
+	@Sessional
+	@Listen
 	public void on(SystemStarted event) {
 		for (var projectId: projectManager.getActiveIds()) {
 			checkVersion(getEnvDir(projectId.toString()));
 			collect(projectId);
+
+			Environment env = getEnv(projectId.toString());
+			Store store = getStore(env, DEFAULT_STORE);
+
+			env.computeInReadonlyTransaction(txn -> {
+				byte[] bytes = readBytes(store, txn, USERS_KEY);
+				if (bytes != null) 
+					updateContributedProjects(projectId, SerializationUtils.deserialize(bytes));
+				return null;
+			});
+
 		}
 	}
 	
@@ -1338,7 +1398,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 				return env.computeInReadonlyTransaction(txn -> {
 					Map<Integer, GitContribution> overallContributions = new HashMap<>();
 					for (Map.Entry<Integer, GitContribution> entry :
-							deserializeContributions(readBytes(store, txn, OVERALL_CONTRIBUTIONS_KEY)).entrySet()) {
+							deserializeDailyContributions(readBytes(store, txn, OVERALL_CONTRIBUTIONS_KEY)).entrySet()) {
 						overallContributions.put(entry.getKey(), entry.getValue());
 					}
 					return overallContributions;
@@ -1400,30 +1460,30 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 					@Override
 					public List<GitContributor> compute(Transaction txn) {
 						Map<Integer, GitContribution> overallContributions =
-								deserializeContributions(readBytes(defaultStore, txn, OVERALL_CONTRIBUTIONS_KEY));
+								deserializeDailyContributions(readBytes(defaultStore, txn, OVERALL_CONTRIBUTIONS_KEY));
 						Map<NameAndEmail, GitContribution> totalContributions = new HashMap<>();
 						Map<Integer, Optional<NameAndEmail>> users = new HashMap<>();
-						Map<Integer, Map<Integer, GitContribution>> contributionsByDay = new LinkedHashMap<>();
+						Map<Integer, Map<Integer, GitContribution>> contribsByDay = new LinkedHashMap<>();
 
 						for (int dayValue : overallContributions.keySet()) {
 							if (dayValue >= fromDay && dayValue <= toDay) {
 								ByteIterable dayKey = new IntByteIterable(dayValue);
-								Map<Integer, GitContribution> contributionsOnDay =
-										deserializeContributions(readBytes(dailyContributionsStore, txn, dayKey));
-								contributionsByDay.put(dayValue, contributionsOnDay);
-								for (Map.Entry<Integer, GitContribution> entry : contributionsOnDay.entrySet()) {
+								Map<Integer, GitContribution> contribsOnDay =
+										deserializeDailyContributions(readBytes(dailyContributionsStore, txn, dayKey));
+								contribsByDay.put(dayValue, contribsOnDay);
+								for (Map.Entry<Integer, GitContribution> entry : contribsOnDay.entrySet()) {
 									NameAndEmail user = getUser(txn, users, entry.getKey());
 									if (user != null) {
-										GitContribution totalContribution = totalContributions.get(user);
-										if (totalContribution == null) {
-											totalContribution = entry.getValue();
+										GitContribution totalContrib = totalContributions.get(user);
+										if (totalContrib == null) {
+											totalContrib = entry.getValue();
 										} else {
-											totalContribution = new GitContribution(
-													totalContribution.getCommits() + entry.getValue().getCommits(),
-													totalContribution.getAdditions() + entry.getValue().getAdditions(),
-													totalContribution.getDeletions() + entry.getValue().getDeletions());
+											totalContrib = new GitContribution(
+													totalContrib.getCommits() + entry.getValue().getCommits(),
+													totalContrib.getAdditions() + entry.getValue().getAdditions(),
+													totalContrib.getDeletions() + entry.getValue().getDeletions());
 										}
-										totalContributions.put(user, totalContribution);
+										totalContributions.put(user, totalContrib);
 									}
 								}
 							}
@@ -1446,21 +1506,21 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 						Map<NameAndEmail, Map<Integer, Integer>> userContributions = new HashMap<>();
 
-						for (Map.Entry<Integer, Map<Integer, GitContribution>> dayEntry : contributionsByDay.entrySet()) {
+						for (Map.Entry<Integer, Map<Integer, GitContribution>> dayEntry : contribsByDay.entrySet()) {
 							for (Map.Entry<Integer, GitContribution> userEntry : dayEntry.getValue().entrySet()) {
 								NameAndEmail user = getUser(txn, users, userEntry.getKey());
 								if (user != null && topUserSet.contains(user)) {
-									Map<Integer, Integer> contributionsOfUser = userContributions.get(user);
-									if (contributionsOfUser == null) {
-										contributionsOfUser = new HashMap<>();
-										userContributions.put(user, contributionsOfUser);
+									Map<Integer, Integer> contribsOfUser = userContributions.get(user);
+									if (contribsOfUser == null) {
+										contribsOfUser = new HashMap<>();
+										userContributions.put(user, contribsOfUser);
 									}
 									if (type == GitContribution.Type.COMMITS)
-										contributionsOfUser.put(dayEntry.getKey(), userEntry.getValue().getCommits());
+										contribsOfUser.put(dayEntry.getKey(), userEntry.getValue().getCommits());
 									else if (type == GitContribution.Type.ADDITIONS)
-										contributionsOfUser.put(dayEntry.getKey(), userEntry.getValue().getAdditions());
+										contribsOfUser.put(dayEntry.getKey(), userEntry.getValue().getAdditions());
 									else
-										contributionsOfUser.put(dayEntry.getKey(), userEntry.getValue().getDeletions());
+										contribsOfUser.put(dayEntry.getKey(), userEntry.getValue().getDeletions());
 								}
 							}
 						}
@@ -1482,7 +1542,63 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 	}
 
-	private Map<Integer, GitContribution> deserializeContributions(byte[] bytes) {
+	@Sessional
+	@Override
+	public Map<Long, Map<ObjectId, Long>> getUserCommits(User user, Date fromDate, Date toDate) {		
+		var userCommits = new HashMap<Long, Map<ObjectId, Long>>();
+		if (contributedProjects != null) {
+			var emailAddresses = user.getEmailAddresses().stream()
+					.filter(it -> it.isVerified())
+					.map(it -> it.getValue())
+					.collect(toSet());
+			var cache = projectManager.cloneCache();
+			var projectIds = new HashSet<Long>();
+			for (var emailAddress: emailAddresses) {
+				var projectIdsOfEmailAddress = contributedProjects.get(emailAddress);	
+				if (projectIdsOfEmailAddress != null) {
+					projectIds.addAll(projectIdsOfEmailAddress);
+				}
+			}
+			for (var projectId: projectIds) {
+				var project = cache.get(projectId);				
+				if (project != null && project.isCodeManagement() && project.getForkedFromId() == null) {
+					var activeServer = projectManager.getActiveServer(projectId, false);
+					if (activeServer != null) {
+						userCommits.put(projectId, clusterManager.runOnServer(activeServer, new ClusterTask<>() {
+
+							private static final long serialVersionUID = 1L;
+				
+							@Override
+							public Map<ObjectId, Long> call() {
+								Environment env = getEnv(projectId.toString());
+								Store userCommitsStore = getStore(env, USER_COMMITS_STORE);
+				
+								return env.computeInReadonlyTransaction(new TransactionalComputable<Map<ObjectId, Long>>() {
+				
+									@Override
+									public Map<ObjectId, Long> compute(Transaction txn) {
+										var userCommits = new HashMap<ObjectId, Long>();
+										for (var emailAddress: emailAddresses) {
+											deserializeUserCommits(readBytes(userCommitsStore, txn, new StringByteIterable(emailAddress))).entrySet().forEach(it -> {
+												if (it.getValue() >= fromDate.getTime() && it.getValue() <= toDate.getTime())
+													userCommits.put(it.getKey(), it.getValue());
+											});
+										}
+										return userCommits;
+									}
+				
+								});
+							}
+				
+						}));	
+					}
+				}
+			}
+		}
+		return userCommits;
+	}	
+
+	private Map<Integer, GitContribution> deserializeDailyContributions(byte[] bytes) {
 		if (bytes != null) {
 			Map<Integer, GitContribution> contributions = new HashMap<>();
 			int pos = 0;
@@ -1503,10 +1619,27 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 		}
 	}
 
-	private byte[] serializeContributions(Map<Integer, GitContribution> contributions) {
-		byte[] bytes = new byte[contributions.size() * Integer.BYTES * 4];
+	private Map<ObjectId, Long> deserializeUserCommits(byte[] bytes) {
+		if (bytes != null) {
+			Map<ObjectId, Long> userCommits = new HashMap<>();
+			int pos = 0;
+			for (int i = 0; i < bytes.length / (20 + Long.BYTES); i++) {
+				ObjectId key = ObjectId.fromRaw(bytes, pos);
+				pos += 20;
+				long value = ByteBuffer.wrap(bytes, pos, Long.BYTES).getLong();
+				pos += Long.BYTES;
+				userCommits.put(key, value);
+			}
+			return userCommits;
+		} else {
+			return new HashMap<>();
+		}
+	}
+
+	private byte[] serializeDailyContributions(Map<Integer, GitContribution> dailyContributions) {
+		byte[] bytes = new byte[dailyContributions.size() * Integer.BYTES * 4];
 		int pos = 0;
-		for (Map.Entry<Integer, GitContribution> entry : contributions.entrySet()) {
+		for (Map.Entry<Integer, GitContribution> entry : dailyContributions.entrySet()) {
 			byte[] keyBytes = ByteBuffer.allocate(Integer.BYTES).putInt(entry.getKey()).array();
 			System.arraycopy(keyBytes, 0, bytes, pos, Integer.BYTES);
 			pos += Integer.BYTES;
@@ -1519,6 +1652,19 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 			byte[] deletionsBytes = ByteBuffer.allocate(Integer.BYTES).putInt(entry.getValue().getDeletions()).array();
 			System.arraycopy(deletionsBytes, 0, bytes, pos, Integer.BYTES);
 			pos += Integer.BYTES;
+		}
+		return bytes;
+	}
+
+	private byte[] serializeUserCommits(Map<ObjectId, Long> userCommits) {
+		byte[] bytes = new byte[userCommits.size() * (20 + Long.BYTES)];
+		int pos = 0;
+		for (Map.Entry<ObjectId, Long> entry : userCommits.entrySet()) {
+			entry.getKey().copyRawTo(bytes, pos);
+			pos += 20;
+			byte[] valueBytes = ByteBuffer.allocate(Long.BYTES).putLong(entry.getValue()).array();
+			System.arraycopy(valueBytes, 0, bytes, pos, Long.BYTES);
+			pos += Long.BYTES;
 		}
 		return bytes;
 	}

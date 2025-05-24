@@ -1,11 +1,11 @@
 <wicket:extend>
 	<div class="alert alert-notice alert-light-info mb-4">
 		<wicket:svg href="bulb" class="icon mr-2"></wicket:svg>
-		When authorize a project, all child projects will also be authorized with assigned roles
+		<wicket:t>When authorize a project, all child projects will also be authorized with assigned roles</wicket:t>
 	</div>
 	<form wicket:id="form" class="group-authorizations leave-confirm">
 		<div wicket:id="feedback"></div>
 		<div wicket:id="editor"></div>
-		<input type="submit" class="btn btn-primary dirty-aware mt-4" value="Save">
+		<input wicket:id="submit" type="submit" class="btn btn-primary dirty-aware mt-4">
 	</form>
 </wicket:extend>

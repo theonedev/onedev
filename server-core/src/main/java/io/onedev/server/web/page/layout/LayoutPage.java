@@ -149,7 +149,6 @@ import io.onedev.server.web.page.admin.usermanagement.InvitationListPage;
 import io.onedev.server.web.page.admin.usermanagement.NewInvitationPage;
 import io.onedev.server.web.page.admin.usermanagement.NewUserPage;
 import io.onedev.server.web.page.admin.usermanagement.UserListPage;
-import io.onedev.server.web.page.admin.usermanagement.UserPage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.my.MyPage;
@@ -157,6 +156,7 @@ import io.onedev.server.web.page.my.accesstoken.MyAccessTokensPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
 import io.onedev.server.web.page.my.gpgkeys.MyGpgKeysPage;
+import io.onedev.server.web.page.my.overview.MyOverviewPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.querywatch.MyQueryWatchesPage;
@@ -164,6 +164,7 @@ import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthenticationPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.page.simple.security.LogoutPage;
+import io.onedev.server.web.page.user.UserPage;
 import io.onedev.server.web.util.WicketUtils;
 
 public abstract class LayoutPage extends BasePage {
@@ -921,6 +922,10 @@ public abstract class LayoutPage extends BasePage {
 		}
 
 		WebMarkupContainer item;
+		userInfo.add(item = new ViewStateAwarePageLink<Void>("myOverview", MyOverviewPage.class));
+		if (getPage() instanceof MyOverviewPage)
+			item.add(AttributeAppender.append("class", "active"));
+
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myProfile", MyProfilePage.class));
 		if (getPage() instanceof MyProfilePage)
 			item.add(AttributeAppender.append("class", "active"));
@@ -997,7 +1002,7 @@ public abstract class LayoutPage extends BasePage {
 				@Override
 				public void onClick() {
 					SecurityUtils.getSubject().releaseRunAs();
-					Session.get().warn("Exited impersonation");
+					Session.get().warn(_T("Exited impersonation"));
 					throw new RestartResponseException(HomePage.class);
 				}
 

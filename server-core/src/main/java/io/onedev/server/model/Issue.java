@@ -1130,7 +1130,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	}
 	
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(this);
+		return OneDev.getInstance(UrlManager.class).urlFor(this, true);
 	}
 	
 	public Collection<Iteration> getIterations() {

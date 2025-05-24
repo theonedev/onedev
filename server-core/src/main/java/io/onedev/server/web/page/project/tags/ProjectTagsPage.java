@@ -238,7 +238,7 @@ public class ProjectTagsPage extends ProjectPage {
 						
 						if (getProject().getObjectId(GitUtils.tag2ref(tagName), false) != null) {
 							editor.error(new Path(new PathNode.Named("name")), 
-									MessageFormat.format(_T("Tag '{0}' already exists, please choose a different name"), tagName));
+									MessageFormat.format(_T("Tag \"{0}\" already exists, please choose a different name"), tagName));
 							target.add(form);
 						} else if (getProject().getTagProtection(tagName, user).isPreventCreation()) {
 							editor.error(new Path(new PathNode.Named("name")), _T("Unable to create protected tag")); 
@@ -251,7 +251,7 @@ public class ProjectTagsPage extends ProjectPage {
 								modal.close();
 								target.add(tagsTable);
 								
-								getSession().success(MessageFormat.format(_T("Tag '{0}' created"), tagName));
+								getSession().success(MessageFormat.format(_T("Tag \"{0}\" created"), tagName));
 							} catch (Exception e) {
 								ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
 								if (explicitException != null) {
@@ -412,7 +412,7 @@ public class ProjectTagsPage extends ProjectPage {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						OneDev.getInstance(ProjectManager.class).deleteTag(getProject(), tagName);
-						WebSession.get().success(MessageFormat.format(_T("Tag '{0}' deleted"), tagName));
+						WebSession.get().success(MessageFormat.format(_T("Tag \"{0}\" deleted"), tagName));
 						target.add(tagsTable);
 					}
 

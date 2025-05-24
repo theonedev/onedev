@@ -375,7 +375,7 @@ public class IssueNotificationManager {
 						"Moved",
 						emojis.apply(issue.getTitle()));
 				
-				var url = urlManager.urlFor(issue);
+				var url = urlManager.urlFor(issue, true);
 				String textDetail = "" +
 						"Previous project: " + event.getSourceProject().getPath() + 
 						"\n" +

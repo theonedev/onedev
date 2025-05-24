@@ -1,15 +1,10 @@
 package io.onedev.server.web.page.admin.groupmanagement;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.model.Group;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.component.tabbable.PageTab;
-import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.admin.groupmanagement.authorization.GroupAuthorizationsPage;
-import io.onedev.server.web.page.admin.groupmanagement.membership.GroupMembershipsPage;
-import io.onedev.server.web.page.admin.groupmanagement.profile.GroupProfilePage;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
@@ -23,8 +18,16 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.model.Group;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.component.tabbable.PageTab;
+import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.page.admin.groupmanagement.authorization.GroupAuthorizationsPage;
+import io.onedev.server.web.page.admin.groupmanagement.membership.GroupMembershipsPage;
+import io.onedev.server.web.page.admin.groupmanagement.profile.GroupProfilePage;
 
 public abstract class GroupPage extends AdministrationPage {
 	
@@ -58,9 +61,9 @@ public abstract class GroupPage extends AdministrationPage {
 		List<PageTab> tabs = new ArrayList<>();
 		
 		var params = paramsOf(getGroup());
-		tabs.add(new PageTab(Model.of("Profile"), Model.of("profile"), GroupProfilePage.class, params));
-		tabs.add(new PageTab(Model.of("Members"), Model.of("members"), GroupMembershipsPage.class, params));
-		tabs.add(new PageTab(Model.of("Authorized Projects"), Model.of("project"), GroupAuthorizationsPage.class, params));
+		tabs.add(new PageTab(Model.of(_T("Profile")), Model.of("profile"), GroupProfilePage.class, params));
+		tabs.add(new PageTab(Model.of(_T("Members")), Model.of("members"), GroupMembershipsPage.class, params));
+		tabs.add(new PageTab(Model.of(_T("Authorized Projects")), Model.of("project"), GroupAuthorizationsPage.class, params));
 		
 		add(new Tabbable("groupTabs", tabs));
 	}

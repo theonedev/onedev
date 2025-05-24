@@ -3,17 +3,17 @@
 		<div class="card-body">
 			<div class="d-flex align-items-center mb-4">
 				<div class="clearable-wrapper flex-grow-1 mr-3">
-					<input wicket:id="filterUsers" class="form-control search" placeholder="Filter by name or email address">
+					<input wicket:id="filterUsers" class="form-control search">
 				</div>
 				<a wicket:id="addNew" class="btn btn-icon btn-primary flex-shrink-0"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 			</div>
 			<div class="mb-4">
 				<a wicket:id="operations" class="text-gray mr-4 mb-2 d-inline-block text-nowrap">
-					<wicket:svg href="ellipsis-circle" class="icon rotate-180"></wicket:svg> Operations
+					<wicket:svg href="ellipsis-circle" class="icon rotate-180"></wicket:svg><wicket:t>Operations</wicket:t>
 				</a>
 				<a wicket:id="includeDisabled" class="text-gray mr-4 mb-2 d-inline-block text-nowrap">
 					<svg wicket:id="icon" class="icon"></svg>
-					Include Disabled
+					<wicket:t>Include Disabled</wicket:t>
 				</a>
 				<span wicket:id="count" class="float-right text-gray"></span>
 			</div>
@@ -24,12 +24,12 @@
 		<a wicket:id="link">
 			<img wicket:id="avatar">
 			<span wicket:id="name" class="name"></span>
-			<span wicket:id="service" class="badge badge-info badge-sm ml-1">service</span>
-			<span wicket:id="disabled" class="badge badge-warning badge-sm ml-1">disabled</span>
+			<span wicket:id="service" class="badge badge-info badge-sm ml-1"><wicket:t>service</wicket:t></span>
+			<span wicket:id="disabled" class="badge badge-warning badge-sm ml-1"><wicket:t>disabled</wicket:t></span>
 		</a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionsFrag">
-		<a wicket:id="impersonate" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="Impersonate this user"><wicket:svg href="user-tick" class="icon align-middle"/></a>
+		<a wicket:id="impersonate" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1"><wicket:svg href="user-tick" class="icon align-middle"/></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="emailFrag">
 		<span wicket:id="emailAddress"></span>

@@ -380,7 +380,7 @@ public class ProjectBranchesPage extends ProjectPage {
 						User user = Preconditions.checkNotNull(getLoginUser());
 						if (getProject().getObjectId(GitUtils.branch2ref(branchName), false) != null) {
 							editor.error(new Path(new PathNode.Named("name")), 
-									MessageFormat.format(_T("Branch '{0}' already exists, please choose a different name"), branchName));
+									MessageFormat.format(_T("Branch \"{0}\" already exists, please choose a different name"), branchName));
 							target.add(form);
 						} else if (getProject().getBranchProtection(branchName, user).isPreventCreation()) {
 							editor.error(new Path(new PathNode.Named("name")), _T("Unable to create protected branch"));
@@ -396,7 +396,7 @@ public class ProjectBranchesPage extends ProjectPage {
 								modal.close();
 								target.add(branchesTable);
 								
-								getSession().success(MessageFormat.format(_T("Branch '{0}' created"), branchName));
+								getSession().success(MessageFormat.format(_T("Branch \"{0}\" created"), branchName));
 							}
 						}
 					}
@@ -558,14 +558,14 @@ public class ProjectBranchesPage extends ProjectPage {
 							bodyFrag.add(new Label("branch", branch));
 							fragment.add(bodyFrag);
 						} else {
-							fragment.add(new Label("body", MessageFormat.format(_T("You selected to delete branch {0}"), branch)));
+							fragment.add(new Label("body", MessageFormat.format(_T("You selected to delete branch \"{0}\""), branch)));
 						}
 						fragment.add(new AjaxLink<Void>("delete") {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								OneDev.getInstance(ProjectManager.class).deleteBranch(getProject(), branch);
-								getSession().success(MessageFormat.format(_T("Branch '{0}' deleted"), branch));
+								getSession().success(MessageFormat.format(_T("Branch \"{0}\" deleted"), branch));
 								if (branch.equals(baseBranch)) {
 									baseBranch = getProject().getDefaultBranch();
 									target.add(baseChoice);

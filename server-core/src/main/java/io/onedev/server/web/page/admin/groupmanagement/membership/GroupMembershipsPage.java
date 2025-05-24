@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.groupmanagement.membership;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -9,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -60,7 +63,7 @@ import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
 import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
 import io.onedev.server.web.page.admin.groupmanagement.GroupPage;
-import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
+import io.onedev.server.web.page.user.profile.UserProfilePage;
 
 public class GroupMembershipsPage extends GroupPage {
 
@@ -96,6 +99,7 @@ public class GroupMembershipsPage extends GroupPage {
 		TextField<String> searchField;
 		
 		add(searchField = new TextField<String>("filterUsers", Model.of(query)));
+		searchField.add(AttributeAppender.append("placeholder", _T("Filter by name...")));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
@@ -137,7 +141,7 @@ public class GroupMembershipsPage extends GroupPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				getSettings().setPlaceholder("Add member...");
+				getSettings().setPlaceholder(_T("Add member..."));
 				getSettings().setFormatResult("onedev.server.userChoiceFormatter.formatResult");
 				getSettings().setFormatSelection("onedev.server.userChoiceFormatter.formatSelection");
 				getSettings().setEscapeMarkup("onedev.server.userChoiceFormatter.escapeMarkup");
@@ -151,7 +155,7 @@ public class GroupMembershipsPage extends GroupPage {
 				OneDev.getInstance(MembershipManager.class).create(membership);
 				target.add(membershipsTable);
 				selectionColumn.getSelections().clear();
-				Session.get().success("Member added");
+				Session.get().success(_T("Member added"));
 			}
 			
 			@Override
@@ -179,7 +183,7 @@ public class GroupMembershipsPage extends GroupPage {
 
 					@Override
 					public String getLabel() {
-						return "Delete Selected Memberships";
+						return _T("Delete Selected Memberships");
 					}
 
 					@Override
@@ -203,7 +207,7 @@ public class GroupMembershipsPage extends GroupPage {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete selected memberships";
+										return _T("Type <code>yes</code> below to delete selected memberships");
 									}
 									
 									@Override
@@ -227,7 +231,7 @@ public class GroupMembershipsPage extends GroupPage {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select memberships to delete");
+									tag.put("data-tippy-content", _T("Please select memberships to delete"));
 								}
 							}
 							
@@ -241,7 +245,7 @@ public class GroupMembershipsPage extends GroupPage {
 
 					@Override
 					public String getLabel() {
-						return "Delete All Queried Memberships";
+						return _T("Delete All Queried Memberships");
 					}
 					
 					@Override
@@ -267,7 +271,7 @@ public class GroupMembershipsPage extends GroupPage {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete all queried memberships";
+										return _T("Type <code>yes</code> below to delete all queried memberships");
 									}
 									
 									@Override
@@ -290,7 +294,7 @@ public class GroupMembershipsPage extends GroupPage {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No memberships to delete");
+									tag.put("data-tippy-content", _T("No memberships to delete"));
 								}
 							}
 							
@@ -308,7 +312,7 @@ public class GroupMembershipsPage extends GroupPage {
 		
 		columns.add(selectionColumn = new SelectionColumn<Membership, Void>());
 		
-		columns.add(new AbstractColumn<Membership, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<Membership, Void>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Membership>> cellItem, String componentId,
@@ -324,7 +328,7 @@ public class GroupMembershipsPage extends GroupPage {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Membership, Void>(Model.of("Primary Email")) {
+		columns.add(new AbstractColumn<Membership, Void>(Model.of(_T("Primary Email"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Membership>> cellItem, String componentId,
@@ -337,7 +341,7 @@ public class GroupMembershipsPage extends GroupPage {
 							"verificationStatus", Model.of(emailAddress)));
 					cellItem.add(fragment);
 				} else {
-					cellItem.add(new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false));
+					cellItem.add(new Label(componentId, "<i>" + _T("Not specified") + "</i>").setEscapeModelStrings(false));
 				}
 			}
 			

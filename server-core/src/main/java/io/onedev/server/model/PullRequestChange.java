@@ -19,6 +19,12 @@ public class PullRequestChange extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final String PROP_REQUEST = "request";
+	
+	public static final String PROP_USER = "user";
+	
+	public static final String PROP_DATE = "date";
+	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private PullRequest request;

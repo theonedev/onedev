@@ -68,6 +68,8 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 						.setVisible(emailAddress.equals(getUser().getPrimaryEmailAddress())));
 				item.add(new WebMarkupContainer("git")
 						.setVisible(emailAddress.equals(getUser().getGitEmailAddress())));
+				item.add(new WebMarkupContainer("public")
+ 						.setVisible(emailAddress.isOpen()));
 				
 				item.add(new EmailAddressVerificationStatusBadge("verificationStatus", item.getModel()));
 				
@@ -122,6 +124,50 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 								
 							});
 						}
+						if (!emailAddress.equals(getUser().getPublicEmailAddress())) {
+							menuItems.add(new MenuItem() {
+
+								@Override
+								public String getLabel() {
+									return _T("Set as Public");
+								}
+
+								@Override
+								public WebMarkupContainer newLink(String id) {
+									return new Link<Void>(id) {
+
+										@Override
+										public void onClick() {
+											getEmailAddressManager().setAsPublic(getEmailAddressManager().load(emailAddressId));
+										}
+										
+									};
+								}
+								
+							});
+						} else {
+							menuItems.add(new MenuItem() {
+
+								@Override
+								public String getLabel() {
+									return _T("Set as Private");
+								}
+
+								@Override
+								public WebMarkupContainer newLink(String id) {
+									return new Link<Void>(id) {
+
+										@Override
+										public void onClick() {
+											getEmailAddressManager().setAsPrivate(getEmailAddressManager().load(emailAddressId));
+										}
+										
+									};
+								}
+								
+							});
+						}
+
 						if (!emailAddress.isVerified()) {
 							menuItems.add(new MenuItem() {
 
@@ -155,7 +201,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 							@Override
 							public String getLabel() {
-								return "Delete";
+								return _T("Delete");
 							}
 
 							@Override

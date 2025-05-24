@@ -1177,4 +1177,21 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		return comparisonBase;
 	}
 
+	@Sessional
+	@Override
+	public List<PullRequest> query(User submitter, Date fromDate, Date toDate) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<PullRequest> query = builder.createQuery(PullRequest.class);
+		From<PullRequest, PullRequest> root = query.from(PullRequest.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+
+		predicates.add(builder.equal(root.get(PullRequest.PROP_SUBMITTER), submitter));
+		predicates.add(builder.greaterThanOrEqualTo(root.get(PullRequest.PROP_SUBMIT_DATE), fromDate));
+		predicates.add(builder.lessThanOrEqualTo(root.get(PullRequest.PROP_SUBMIT_DATE), toDate));
+			
+		query.where(predicates.toArray(new Predicate[0]));
+		
+		return getSession().createQuery(query).getResultList();
+	}
 }

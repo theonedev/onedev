@@ -1,5 +1,9 @@
 package io.onedev.server.web.component.commandpalette;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
@@ -10,10 +14,6 @@ import io.onedev.server.search.entity.issue.ReferenceCriteria;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 public class IssueParam extends ParamSegment {
 

@@ -20,6 +20,12 @@ public class IssueChange extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_ISSUE = "issue";
+
+	public static final String PROP_USER = "user";
+
+	public static final String PROP_DATE = "date";
+
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private Issue issue;

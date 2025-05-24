@@ -4,6 +4,7 @@ import static io.onedev.server.model.User.PROP_FULL_NAME;
 import static io.onedev.server.model.User.PROP_NAME;
 import static io.onedev.server.security.SecurityUtils.asPrincipals;
 import static io.onedev.server.security.SecurityUtils.asUserPrincipal;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -260,7 +261,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     private transient Optional<EmailAddress> primaryEmailAddress;
     
     private transient Optional<EmailAddress> gitEmailAddress;
-    
+
+    private transient Optional<EmailAddress> publicEmailAddress;
+	
 	public QueryPersonalization<NamedProjectQuery> getProjectQueryPersonalization() {
 		return new QueryPersonalization<NamedProjectQuery>() {
 
@@ -529,14 +532,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@SuppressWarnings("unused")
 	private static String getServiceAccountDescription() {
 		if (!WicketUtils.isSubscriptionActive()) {
-			return "" 
+			return _T("" 
 				+ "Whether or not to create as a service account for task automation purpose. Service account does not have password and email addresses, and will not generate "
 				+ "notifications for its activities. <b class='text-warning'>NOTE:</b> Service account is an enterprise feature. " 
-				+ "<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days";
+				+ "<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days");
 		} else {
-			return "" 
+			return _T("" 
 				+ "Whether or not to create as a service account for task automation purpose. Service account does not have password and email addresses, and will not generate "
-				+ "notifications for its activities";
+				+ "notifications for its activities");
 		}
 	}
 
@@ -1064,6 +1067,13 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		if (gitEmailAddress == null)
 			gitEmailAddress = Optional.ofNullable(getEmailAddressManager().findGit(this));
 		return gitEmailAddress.orElse(null);
+	}
+
+	@Nullable
+	public EmailAddress getPublicEmailAddress() {
+		if (publicEmailAddress == null)
+			publicEmailAddress = Optional.ofNullable(getEmailAddressManager().findPublic(this));
+		return publicEmailAddress.orElse(null);
 	}
 	
 	@Override

@@ -1,16 +1,19 @@
 package io.onedev.server.entitymanager;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.LinkSpec;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
-
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 public interface IssueChangeManager extends EntityManager<IssueChange> {
 	
@@ -56,4 +59,5 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	
 	List<IssueChange> queryAfter(Long projectId, Long afterChangeId, int count);
 
+	List<IssueChange> query(User submitter, Date fromDate, Date toDate);
 }

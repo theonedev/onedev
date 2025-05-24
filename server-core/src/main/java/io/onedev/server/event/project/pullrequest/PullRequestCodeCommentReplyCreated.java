@@ -35,7 +35,7 @@ public class PullRequestCodeCommentReplyCreated extends PullRequestCodeCommentEv
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getReply());
+		return OneDev.getInstance(UrlManager.class).urlFor(getReply(), true);
 	}
 
 }

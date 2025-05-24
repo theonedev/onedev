@@ -96,7 +96,7 @@ public class RefUpdated extends ProjectEvent implements CommitAware {
 	@Override
 	public String getUrl() {
 		if (newCommitId != null)
-			return OneDev.getInstance(UrlManager.class).urlFor(getProject(), newCommitId);
+			return OneDev.getInstance(UrlManager.class).urlFor(getProject(), newCommitId, true);
 		else
 			throw new UnsupportedOperationException();
 	}

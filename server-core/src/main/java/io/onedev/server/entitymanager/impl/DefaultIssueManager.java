@@ -1284,5 +1284,23 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		}
 		return orderedIssues;
 	}
+
+	@Sessional
+	@Override
+	public List<Issue> query(User submitter, Date fromDate, Date toDate) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Issue> query = builder.createQuery(Issue.class);
+		From<Issue, Issue> root = query.from(Issue.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+
+		predicates.add(builder.equal(root.get(Issue.PROP_SUBMITTER), submitter));
+		predicates.add(builder.greaterThanOrEqualTo(root.get(Issue.PROP_SUBMIT_DATE), fromDate));
+		predicates.add(builder.lessThanOrEqualTo(root.get(Issue.PROP_SUBMIT_DATE), toDate));
+			
+		query.where(predicates.toArray(new Predicate[0]));
+		
+		return getSession().createQuery(query).getResultList();
+	}
 	
 }

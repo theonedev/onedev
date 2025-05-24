@@ -1,11 +1,14 @@
 package io.onedev.server.web.component.user.profileedit;
 
 import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 
 import org.apache.wicket.Session;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.GenericPanel;
@@ -79,12 +82,12 @@ public class ProfileEditPanel extends GenericPanel<User> {
 				User userWithSameName = getUserManager().findByName(user.getName());
 				if (userWithSameName != null && !userWithSameName.equals(user)) {
 					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
-							"Login name already used by another account");
+							_T("Login name already used by another account"));
 				} 
 				
 				if (editor.isValid()) {
 					getUserManager().update(user, oldName);
-					Session.get().success("Profile updated");
+					Session.get().success(_T("Profile updated"));
 					setResponsePage(getPage().getClass(), getPage().getPageParameters());
 				}
 			}
@@ -94,6 +97,7 @@ public class ProfileEditPanel extends GenericPanel<User> {
 		
 		form.add(new FencedFeedbackPanel("feedback", form));
 		
+		form.add(new WebMarkupContainer("submit").add(AttributeAppender.append("value", _T("Save"))));
 		form.add(new Link<Void>("enable") {
 
 			@Override
@@ -108,14 +112,14 @@ public class ProfileEditPanel extends GenericPanel<User> {
 				super.onConfigure();
 				setVisible(getUser().isDisabled() && WicketUtils.isSubscriptionActive());
 			}
-		}.add(new ConfirmClickModifier("Do you really want to enable this account?")));
+		}.add(new ConfirmClickModifier(_T("Do you really want to enable this account?"))));
 
 		form.add(new Link<Void>("disable") {
 
 			@Override
 			public void onClick() {
 				getUserManager().disable(getUser());
-				Session.get().success("User disabled");
+				Session.get().success(_T("User disabled"));
 				setResponsePage(getPage().getClass(), getPage().getPageParameters());
 			}
 
@@ -125,9 +129,9 @@ public class ProfileEditPanel extends GenericPanel<User> {
 				setVisible(!getUser().isDisabled() && WicketUtils.isSubscriptionActive());
 			}
 
-		}.add(new ConfirmClickModifier("Disabling account will reset password, clear access tokens, "
+		}.add(new ConfirmClickModifier(_T("Disabling account will reset password, clear access tokens, "
 				+ "and remove all references from other entities except for past activities. Do you "
-				+ "really want to continue?")));
+				+ "really want to continue?"))));
 		
 		boolean canDelete;
 		if (getPage() instanceof MyProfilePage) {

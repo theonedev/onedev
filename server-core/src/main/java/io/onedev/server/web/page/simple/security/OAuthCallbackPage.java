@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.simple.security;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -36,7 +38,7 @@ public class OAuthCallbackPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "Please wait...";
+		return _T("Please wait...");
 	}
 
 	@Override

@@ -56,7 +56,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.UrlManager;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -119,8 +118,8 @@ public abstract class CodeCommentPanel extends Panel {
 		viewFragment.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate()))
 				.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getCreateDate()))));
 		if (isContextDifferent(getComment().getCompareContext())) {
-			String url = OneDev.getInstance(UrlManager.class).urlFor(getComment());
-			viewFragment.add(new ExternalLink("context", UrlUtils.makeRelative(url)) {
+			String url = OneDev.getInstance(UrlManager.class).urlFor(getComment(), false);
+			viewFragment.add(new ExternalLink("context", url) {
 
 				@Override
 				protected void onComponentTag(ComponentTag tag) {
@@ -691,8 +690,8 @@ public abstract class CodeCommentPanel extends Panel {
 			fragment.add(new Label("date", DateUtils.formatAge(getChange().getDate()))
 					.add(new AttributeAppender("title", DateUtils.formatDateTime(getChange().getDate()))));
 			if (isContextDifferent(getChange().getCompareContext())) {
-				String url = OneDev.getInstance(UrlManager.class).urlFor(getChange());
-				fragment.add(new ExternalLink("context", UrlUtils.makeRelative(url)) {
+				String url = OneDev.getInstance(UrlManager.class).urlFor(getChange(), false);
+				fragment.add(new ExternalLink("context", url) {
 
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
@@ -756,8 +755,8 @@ public abstract class CodeCommentPanel extends Panel {
 			viewFragment.add(new Label("date", DateUtils.formatAge(reply.getDate()))
 					.add(new AttributeAppender("title", DateUtils.formatDateTime(reply.getDate()))));
 			if (isContextDifferent(reply.getCompareContext())) {
-				String url = OneDev.getInstance(UrlManager.class).urlFor(reply);
-				viewFragment.add(new ExternalLink("context", UrlUtils.makeRelative(url)) {
+				String url = OneDev.getInstance(UrlManager.class).urlFor(reply, false);
+				viewFragment.add(new ExternalLink("context", url) {
 
 					@Override
 					protected void onComponentTag(ComponentTag tag) {

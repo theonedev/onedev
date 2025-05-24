@@ -27,11 +27,11 @@ import io.onedev.server.util.patternset.PatternSet;
 
 public class ProjectCache extends MapProxy<Long, ProjectFacade> {
 
+	private static final long serialVersionUID = 1L;
+
 	public ProjectCache(Map<Long, ProjectFacade> delegate) {
 		super(delegate);
 	}
-
-	private static final long serialVersionUID = 1L;
 	
 	public boolean isSelfOrAncestorOf(Long parentId, Long childId) {
 		if (parentId.equals(childId)) { 

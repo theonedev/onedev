@@ -47,7 +47,7 @@ public class CodeCommentStatusChanged extends CodeCommentEvent {
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getChange());
+		return OneDev.getInstance(UrlManager.class).urlFor(getChange(), true);
 	}
 	
 }

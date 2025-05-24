@@ -27,7 +27,7 @@ public class PullRequestCodeCommentCreated extends PullRequestCodeCommentEvent {
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getComment());
+		return OneDev.getInstance(UrlManager.class).urlFor(getComment(), true);
 	}
 
 }

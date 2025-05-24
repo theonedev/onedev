@@ -33,7 +33,7 @@ public abstract class PullRequestEvent extends ProjectEvent {
 	
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getRequest());
+		return OneDev.getInstance(UrlManager.class).urlFor(getRequest(), true);
 	}
 	
 }

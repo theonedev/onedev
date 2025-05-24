@@ -1166,6 +1166,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 
 	@Override
+	public ProjectFacade findFacade(Long projectId) {
+		return cache.get(projectId);
+	}
+
+	@Override
 	public String getFavoriteQuery() {
 		User user = SecurityUtils.getUser();
 		if (user != null && !user.getProjectQueryPersonalization().getQueries().isEmpty()) {

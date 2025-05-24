@@ -1,25 +1,19 @@
 package io.onedev.server.web.page.admin.groupmanagement;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.model.Group;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.WebSession;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.link.ActionablePageLink;
-import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.admin.groupmanagement.create.NewGroupPage;
-import io.onedev.server.web.page.admin.groupmanagement.profile.GroupProfilePage;
-import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
-import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -39,10 +33,22 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.model.Group;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.link.ActionablePageLink;
+import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.page.admin.groupmanagement.create.NewGroupPage;
+import io.onedev.server.web.page.admin.groupmanagement.profile.GroupProfilePage;
+import io.onedev.server.web.util.TextUtils;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 
 public class GroupListPage extends AdministrationPage {
 
@@ -115,6 +121,7 @@ public class GroupListPage extends AdministrationPage {
 			}
 			
 		}));
+		searchField.add(AttributeAppender.append("placeholder", _T("Filter by name")));
 		
 		searchField.add(new OnTypingDoneBehavior(100) {
 
@@ -135,7 +142,7 @@ public class GroupListPage extends AdministrationPage {
 		
 		List<IColumn<Group, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<>(Model.of("Name")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId, IModel<Group> rowModel) {
@@ -158,23 +165,23 @@ public class GroupListPage extends AdministrationPage {
 			}
 		});
 		
-		columns.add(new AbstractColumn<>(Model.of("Is Site Admin")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Is Site Admin"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId,
 									 IModel<Group> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().isAdministrator()));
+				cellItem.add(new Label(componentId, _T(TextUtils.getDisplayValue(rowModel.getObject().isAdministrator()))));
 			}
 
 		});
 		
-		columns.add(new AbstractColumn<Group, Void>(Model.of("Can Create Root Projects")) {
+		columns.add(new AbstractColumn<Group, Void>(Model.of(_T("Can Create Root Projects"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId,
 					IModel<Group> rowModel) {
 				Group group = rowModel.getObject();
-				cellItem.add(new Label(componentId, group.isAdministrator() || group.isCreateRootProjects()));
+				cellItem.add(new Label(componentId, _T(TextUtils.getDisplayValue(group.isAdministrator() || group.isCreateRootProjects()))));
 			}
 			
 		});
@@ -190,7 +197,7 @@ public class GroupListPage extends AdministrationPage {
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						String message = "Do you really want to delete group '" + rowModel.getObject().getName() + "'?";
+						String message = MessageFormat.format(_T("Do you really want to delete group \"{0}\"?"), rowModel.getObject().getName());
 						attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
 					}
 
@@ -198,11 +205,11 @@ public class GroupListPage extends AdministrationPage {
 					public void onClick(AjaxRequestTarget target) {
 						Group group = rowModel.getObject();
 						OneDev.getInstance(GroupManager.class).delete(group);
-						Session.get().success("Group '" + group.getName() + "' deleted");
+						Session.get().success(MessageFormat.format(_T("Group \"{0}\" deleted"), group.getName()));
 						target.add(groupsTable);
 					}
 
-				});
+				}.add(AttributeAppender.append("data-tippy-content", _T("Delete this group"))));
 
 				cellItem.add(fragment);
 			}
@@ -275,7 +282,7 @@ public class GroupListPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Groups");
+		return new Label(componentId, _T("Groups"));
 	}
 
 }

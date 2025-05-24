@@ -34,7 +34,7 @@ public class CodeCommentReplyCreated extends CodeCommentEvent {
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getReply());
+		return OneDev.getInstance(UrlManager.class).urlFor(getReply(), true);
 	}
 
 }

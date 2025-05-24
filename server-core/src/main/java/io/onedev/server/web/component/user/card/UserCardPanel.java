@@ -1,12 +1,15 @@
 package io.onedev.server.web.component.user.card;
 
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
+
+import java.text.MessageFormat;
+
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
@@ -43,14 +46,14 @@ public class UserCardPanel extends GenericPanel<User> {
 		container.add(new UserAvatar("avatar", getUser()));
 		
 		StringBuilder builder = new StringBuilder();
-		builder.append("<div>" + HtmlEscape.escapeHtml5(getUser().getDisplayName()) + "</div>");
+		builder.append("<div>" + escapeHtml5(getUser().getDisplayName()) + "</div>");
 		
 		if (getUser().isUnknown()) 
 			builder.append("<i>Unknown Account</i>");
 		else if (getUser().isSystem()) 
 			builder.append("<i>System Account</i>");
 		else 
-			builder.append("<i>@" + HtmlEscape.escapeHtml5(getUser().getName()) + "</i>");
+			builder.append(MessageFormat.format("<a href=\"/~users/{0}\">@{1}</a>", getUser().getId(), escapeHtml5(getUser().getName())));
 		container.add(new Label("info", builder.toString()).setEscapeModelStrings(false));
 	}
 

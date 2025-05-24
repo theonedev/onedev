@@ -48,7 +48,7 @@ public abstract class BuildEvent extends ProjectEvent implements CommitAware {
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getBuild());
+		return OneDev.getInstance(UrlManager.class).urlFor(getBuild(), true);
 	}
 	
 }

@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.my.avatar;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -30,7 +32,7 @@ public class MyAvatarPage extends MyPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Edit My Avatar");
+		return new Label(componentId, _T("Edit My Avatar"));
 	}
 
 }

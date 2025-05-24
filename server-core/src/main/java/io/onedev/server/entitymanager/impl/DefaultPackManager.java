@@ -11,7 +11,6 @@ import static io.onedev.server.model.Pack.SORT_FIELDS;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static java.lang.Math.min;
 
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +38,6 @@ import org.hibernate.query.Query;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.entitymanager.PackBlobManager;
 import io.onedev.server.entitymanager.PackBlobReferenceManager;
 import io.onedev.server.entitymanager.PackLabelManager;
@@ -463,8 +461,4 @@ public class DefaultPackManager extends BaseEntityManager<Pack>
 			delete(pack);
 	}
 
-	public Object writeReplace() throws ObjectStreamException {
-		return new ManagedSerializedForm(PackManager.class);
-	}
-	
 }

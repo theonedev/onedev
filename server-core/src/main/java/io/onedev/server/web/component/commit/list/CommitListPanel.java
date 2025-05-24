@@ -71,7 +71,6 @@ import io.onedev.server.search.commit.FuzzyCriteria;
 import io.onedev.server.search.commit.MessageCriteria;
 import io.onedev.server.search.commit.PathCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Constants;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.util.patternset.PatternSet;
@@ -722,8 +721,7 @@ public abstract class CommitListPanel extends Panel {
 			item.add(AttributeAppender.append("class", "commit"));
 		} else {
 			item = new Fragment(itemId, "dateFrag", this);
-			DateTime dateTime = new DateTime(current.get(index+1).getCommitterIdent().getWhen());
-			item.add(new Label("date", Constants.DATE_FORMATTER.withZone(DateTimeZone.forID(DateUtils.getZoneId().getId())).print(dateTime)));
+			item.add(new Label("date", DateUtils.formatDate(current.get(index+1).getCommitterIdent().getWhen())));
 			item.add(AttributeAppender.append("class", "date"));
 		}
 		item.setOutputMarkupId(true);

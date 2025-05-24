@@ -1,10 +1,14 @@
 package io.onedev.server.web.page.admin.usermanagement;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
@@ -28,7 +32,8 @@ import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
+import io.onedev.server.web.page.user.profile.UserProfilePage;
+import io.onedev.server.web.page.user.UserCssResourceReference;
 import io.onedev.server.web.util.editbean.NewUserBean;
 
 public class NewUserPage extends AdministrationPage {
@@ -56,12 +61,12 @@ public class NewUserPage extends AdministrationPage {
 				User userWithSameName = getUserManager().findByName(bean.getName());
 				if (userWithSameName != null) {
 					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
-							"User name already used by another account");
+							_T("User name already used by another account"));
 				} 
 				
 				if (!bean.isServiceAccount() && getEmailAddressManager().findByValue(bean.getEmailAddress()) != null) {
 					editor.error(new Path(new PathNode.Named(NewUserBean.PROP_EMAIL_ADDRESS)),
-							"Email address already used by another user");
+							_T("Email address already used by another user"));
 				} 
 				if (editor.isValid()) {
 					User user = new User();
@@ -98,7 +103,7 @@ public class NewUserPage extends AdministrationPage {
 						});
 					}
 										
-					Session.get().success("New user created");
+					Session.get().success(_T("New user created"));
 					if (continueToAdd) {
 						bean = new NewUserBean();
 						replace(BeanContext.edit("editor", bean));
@@ -110,6 +115,7 @@ public class NewUserPage extends AdministrationPage {
 			
 		};
 		form.add(editor);
+		form.add(new WebMarkupContainer("submit").add(AttributeAppender.append("value", _T("Create"))));
 		form.add(new CheckBox("continueToAdd", new IModel<Boolean>() {
 
 			@Override
@@ -166,7 +172,7 @@ public class NewUserPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Create User");
+		return new Label(componentId, _T("Create User"));
 	}
 
 }

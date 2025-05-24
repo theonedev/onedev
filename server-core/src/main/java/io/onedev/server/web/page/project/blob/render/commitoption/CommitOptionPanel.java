@@ -197,7 +197,7 @@ public class CommitOptionPanel extends Panel {
 				
 				if (save(target)) {
 					String script = String.format(""
-							+ "$('#%s').attr('disabled', 'disabled').val('Please wait...');"
+							+ "$('#%s').attr('disabled', 'disabled').val('" + _T("Please wait...") + "');"
 							+ "onedev.server.form.markClean($('form'));", getMarkupId());
 					target.appendJavaScript(script);
 				} 

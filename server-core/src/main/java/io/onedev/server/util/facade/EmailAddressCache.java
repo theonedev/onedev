@@ -60,4 +60,12 @@ public class EmailAddressCache extends MapProxy<Long, EmailAddressFacade> {
 		return null;
 	}
 	
+	@Nullable
+	public EmailAddressFacade findPublic(User user) {
+		for (EmailAddressFacade facade: values()) {
+			if (facade.isOpen() && facade.getOwnerId().equals(user.getId())) 
+				return facade;
+		}
+		return null;
+	}
 }

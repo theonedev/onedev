@@ -76,7 +76,7 @@ public class PackNotificationManager {
 			else
 				summary = "Package published via build " + pack.getBuild().getReference();
 
-			String url = urlManager.urlFor(pack);
+			String url = urlManager.urlFor(pack, true);
 			String threadingReferences = "<" + pack.getProject().getPath() + "-pack-" + pack.getId() + "@onedev>";
 			String htmlBody = getEmailBody(true, event, summary, null, url, false, null);
 			String textBody = getEmailBody(false, event, summary, null, url, false, null);

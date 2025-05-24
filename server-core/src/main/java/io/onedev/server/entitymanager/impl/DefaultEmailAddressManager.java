@@ -108,6 +108,24 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 
     @Transactional
 	@Override
+	public void setAsPublic(EmailAddress emailAddress) {
+    	for (EmailAddress each: emailAddress.getOwner().getEmailAddresses()) {
+    		each.setOpen(false);
+    		dao.persist(each);
+    	}
+    	emailAddress.setOpen(true);
+    	dao.persist(emailAddress);
+	}
+
+    @Transactional
+	@Override
+	public void setAsPrivate(EmailAddress emailAddress) {
+    	emailAddress.setOpen(false);
+    	dao.persist(emailAddress);
+	}
+
+    @Transactional
+	@Override
 	public void useForGitOperations(EmailAddress emailAddress) {
     	for (EmailAddress each: emailAddress.getOwner().getEmailAddresses()) {
     		each.setGit(false);
@@ -237,6 +255,15 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 	@Override
 	public EmailAddress findGit(User user) {
 		EmailAddressFacade facade = cache.findGit(user);
+		if (facade != null)
+			return load(facade.getId());
+		else
+			return null;
+	}
+
+	@Override
+	public EmailAddress findPublic(User user) {
+		EmailAddressFacade facade = cache.findPublic(user);
 		if (facade != null)
 			return load(facade.getId());
 		else

@@ -44,7 +44,7 @@ public class PullRequestCodeCommentStatusChanged extends PullRequestCodeCommentE
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getChange());
+		return OneDev.getInstance(UrlManager.class).urlFor(getChange(), true);
 	}
 
 }

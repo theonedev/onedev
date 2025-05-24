@@ -55,6 +55,7 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Mark;
@@ -355,4 +356,21 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 		return find(criteria);
 	}
 
+	@Sessional
+	@Override
+	public List<CodeComment> query(User creator, Date fromDate, Date toDate) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<CodeComment> query = builder.createQuery(CodeComment.class);
+		From<CodeComment, CodeComment> root = query.from(CodeComment.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+
+		predicates.add(builder.equal(root.get(CodeComment.PROP_USER), creator));
+		predicates.add(builder.greaterThanOrEqualTo(root.get(CodeComment.PROP_CREATE_DATE), fromDate));
+		predicates.add(builder.lessThanOrEqualTo(root.get(CodeComment.PROP_CREATE_DATE), toDate));
+			
+		query.where(predicates.toArray(new Predicate[0]));
+		
+		return getSession().createQuery(query).getResultList();
+	}
 }

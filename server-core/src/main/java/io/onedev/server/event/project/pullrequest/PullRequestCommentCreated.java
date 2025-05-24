@@ -43,7 +43,7 @@ public class PullRequestCommentCreated extends PullRequestEvent {
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getComment());
+		return OneDev.getInstance(UrlManager.class).urlFor(getComment(), true);
 	}
 
 }

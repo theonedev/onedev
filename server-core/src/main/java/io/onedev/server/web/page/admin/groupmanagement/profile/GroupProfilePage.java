@@ -1,9 +1,14 @@
 package io.onedev.server.web.page.admin.groupmanagement.profile;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
+import java.text.MessageFormat;
 
 import org.apache.wicket.Session;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
@@ -67,25 +72,26 @@ public class GroupProfilePage extends GroupPage {
 				Group groupWithSameName = groupManager.find(group.getName());
 				if (groupWithSameName != null && !groupWithSameName.equals(group)) {
 					editor.error(new Path(new PathNode.Named("name")),
-							"This name has already been used by another group.");
+							_T("This name has already been used by another group"));
 				} 
 				if (editor.isValid()) {
 					groupManager.update(group, oldName);
 					setResponsePage(GroupProfilePage.class, GroupProfilePage.paramsOf(group));
-					Session.get().success("Profile updated");
+					Session.get().success(_T("Profile updated"));
 				}
 			}
 			
 		};	
 		form.add(editor);
 		form.add(new FencedFeedbackPanel("feedback", form));
-		
+		form.add(new WebMarkupContainer("submit").add(AttributeAppender.append("value", _T("Save"))));
+
 		form.add(new Link<Void>("delete") {
 
 			@Override
 			public void onClick() {
 				OneDev.getInstance(GroupManager.class).delete(getGroup());
-				Session.get().success("Group '" + getGroup().getName() + "' deleted");
+				Session.get().success(MessageFormat.format(_T("Group \"{0}\" deleted"), getGroup().getName()));
 				
 				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Group.class);
 				if (redirectUrlAfterDelete != null)
@@ -94,7 +100,7 @@ public class GroupProfilePage extends GroupPage {
 					setResponsePage(GroupListPage.class);
 			}
 			
-		}.add(new ConfirmClickModifier("Do you really want to delete group '" + getGroup().getName() + "'?")));
+		}.add(new ConfirmClickModifier(MessageFormat.format(_T("Do you really want to delete group \"{0}\"?"), getGroup().getName()))));
 		
 		add(form);
 	}

@@ -1,11 +1,17 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
 
 import org.joda.time.DateTime;
 
@@ -21,6 +27,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestDescriptionRevision;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestAutoMergeChangeData;
@@ -36,7 +43,7 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class DefaultPullRequestChangeManager extends BaseEntityManager<PullRequestChange> 
 		implements PullRequestChangeManager {
-
+	
 	private final PullRequestDescriptionRevisionManager descriptionRevisionManager;
 	
 	private final ListenerRegistry listenerRegistry;
@@ -164,6 +171,23 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 			
 			dao.persist(request);
 		}
+	}
+
+	@Override
+	public List<PullRequestChange> query(User submitter, Date fromDate, Date toDate) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<PullRequestChange> query = builder.createQuery(PullRequestChange.class);
+		From<PullRequestChange, PullRequestChange> root = query.from(PullRequestChange.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+
+		predicates.add(builder.equal(root.get(PullRequestChange.PROP_USER), submitter));
+		predicates.add(builder.greaterThanOrEqualTo(root.get(PullRequestChange.PROP_DATE), fromDate));
+		predicates.add(builder.lessThanOrEqualTo(root.get(PullRequestChange.PROP_DATE), toDate));
+			
+		query.where(predicates.toArray(new Predicate[0]));
+		
+		return getSession().createQuery(query).getResultList();
 	}
 
 }

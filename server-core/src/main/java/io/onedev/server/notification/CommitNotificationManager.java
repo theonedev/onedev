@@ -114,7 +114,7 @@ public class CommitNotificationManager {
 						commit.getShortMessage(),
 						StringUtils.capitalize(event.getActivity()));
 
-				String url = urlManager.urlFor(project, commit);
+				String url = urlManager.urlFor(project, commit, true);
 				String summary = String.format("Commit authored by %s", commit.getAuthorIdent().getName());
 
 				String threadingReferences = "<commit-" + commit.name() + "@onedev>";

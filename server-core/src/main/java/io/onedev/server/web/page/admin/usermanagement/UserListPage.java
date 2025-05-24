@@ -1,6 +1,9 @@
 package io.onedev.server.web.page.admin.usermanagement;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,6 +17,7 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -59,7 +63,8 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
+import io.onedev.server.web.page.user.overview.UserOverviewPage;
+import io.onedev.server.web.page.user.UserCssResourceReference;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
@@ -181,6 +186,7 @@ public class UserListPage extends AdministrationPage {
 			}
 
 		}));
+		searchField.add(AttributeAppender.append("placeholder", _T("Filter by name or email address")));
 		
 		searchField.add(new OnTypingDoneBehavior(100) {
 
@@ -210,7 +216,7 @@ public class UserListPage extends AdministrationPage {
 
 						@Override
 						public String getLabel() {
-							return "Enable Selected Users";
+							return _T("Enable Selected Users");
 						}
 
 						@Override
@@ -224,7 +230,7 @@ public class UserListPage extends AdministrationPage {
 									target.add(countLabel);
 									target.add(usersTable);
 									selectionColumn.getSelections().clear();
-									Session.get().success("Users enabled successfully");
+									Session.get().success(_T("Users enabled successfully"));
 								}
 
 								@Override
@@ -239,7 +245,7 @@ public class UserListPage extends AdministrationPage {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "Please select users to enable");
+										tag.put("data-tippy-content", _T("Please select users to enable"));
 									}
 								}
 
@@ -251,7 +257,7 @@ public class UserListPage extends AdministrationPage {
 
 						@Override
 						public String getLabel() {
-							return "Disable Selected Users";
+							return _T("Disable Selected Users");
 						}
 
 						@Override
@@ -265,10 +271,10 @@ public class UserListPage extends AdministrationPage {
 									for (var model: selectionColumn.getSelections()) {
 										var user = model.getObject();
 										if (user.isRoot()) {
-											Session.get().error("Can not disable root account");
+											Session.get().error(_T("Can not disable root account"));
 											return;
 										} else if (user.equals(SecurityUtils.getAuthUser())) {
-											Session.get().error("Can not disable yourself");
+											Session.get().error(_T("Can not disable yourself"));
 											return;
 										}
 									}
@@ -281,13 +287,13 @@ public class UserListPage extends AdministrationPage {
 											target.add(countLabel);
 											target.add(usersTable);
 											selectionColumn.getSelections().clear();
-											Session.get().success("Users disabled successfully");
+											Session.get().success(_T("Users disabled successfully"));
 										}
 
 										@Override
 										protected String getConfirmMessage() {
-											return "Disabling accounts will reset password, clear access tokens, and remove all references from other " 
-													+ "entities except for past activities. Type <code>yes</code> to confirm";
+											return _T("Disabling accounts will reset password, clear access tokens, and remove all references from other " 
+													+ "entities except for past activities. Type <code>yes</code> to confirm");
 										}
 
 										@Override
@@ -310,7 +316,7 @@ public class UserListPage extends AdministrationPage {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "Please select users to disable");
+										tag.put("data-tippy-content", _T("Please select users to disable"));
 									}
 								}
 
@@ -323,7 +329,7 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					public String getLabel() {
-						return "Delete Selected Users";
+						return _T("Delete Selected Users");
 					}
 
 					@Override
@@ -337,10 +343,10 @@ public class UserListPage extends AdministrationPage {
 								for (var model: selectionColumn.getSelections()) {
 									var user = model.getObject();
 									if (user.isRoot()) {
-										Session.get().error("Can not delete root account");
+										Session.get().error(_T("Can not delete root account"));
 										return;
 									} else if (user.equals(SecurityUtils.getAuthUser())) {
-										Session.get().error("Can not delete yourself");
+										Session.get().error(_T("Can not delete yourself"));
 										return;
 									}
 								}
@@ -353,12 +359,12 @@ public class UserListPage extends AdministrationPage {
 										target.add(countLabel);
 										target.add(usersTable);
 										selectionColumn.getSelections().clear();
-										Session.get().success("Users deleted successfully");
+										Session.get().success(_T("Users deleted successfully"));
 									}
 
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to confirm deleting selected users";
+										return _T("Type <code>yes</code> below to confirm deleting selected users");
 									}
 
 									@Override
@@ -395,7 +401,7 @@ public class UserListPage extends AdministrationPage {
 
 						@Override
 						public String getLabel() {
-							return "Enable All Queried Users";
+							return _T("Enable All Queried Users");
 						}
 	
 						@Override
@@ -414,7 +420,7 @@ public class UserListPage extends AdministrationPage {
 									usersModel.detach();
 									selectionColumn.getSelections().clear();
 
-									Session.get().success("Users enabled successfully");								
+									Session.get().success(_T("Users enabled successfully"));								
 								}
 	
 								@Override
@@ -429,7 +435,7 @@ public class UserListPage extends AdministrationPage {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "No users to enable");
+										tag.put("data-tippy-content", _T("No users to enable"));
 									}
 								}
 	
@@ -441,7 +447,7 @@ public class UserListPage extends AdministrationPage {
 
 						@Override
 						public String getLabel() {
-							return "Disable All Queried Users";
+							return _T("Disable All Queried Users");
 						}
 	
 						@Override
@@ -455,10 +461,10 @@ public class UserListPage extends AdministrationPage {
 									for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();) {
 										var user = it.next();
 										if (user.isRoot()) {
-											Session.get().error("Can not disable root account");
+											Session.get().error(_T("Can not disable root account"));
 											return;
 										} else if (user.equals(SecurityUtils.getAuthUser())) {
-											Session.get().error("Can not disable yourself");
+											Session.get().error(_T("Can not disable yourself"));
 											return;
 										}
 									}
@@ -476,13 +482,13 @@ public class UserListPage extends AdministrationPage {
 											usersModel.detach();
 											selectionColumn.getSelections().clear();
 	
-											Session.get().success("Users disabled successfully");
+											Session.get().success(_T("Users disabled successfully"));
 										}
 	
 										@Override
 										protected String getConfirmMessage() {
-											return "Disabling accounts will reset password, clear access tokens, and remove all references from other " 
-													+ "entities except for past activities. Type <code>yes</code> to confirm";
+											return _T("Disabling accounts will reset password, clear access tokens, and remove all references from other " 
+													+ "entities except for past activities. Type <code>yes</code> to confirm");
 										}
 	
 										@Override
@@ -505,7 +511,7 @@ public class UserListPage extends AdministrationPage {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "No users to disable");
+										tag.put("data-tippy-content", _T("No users to disable"));
 									}
 								}
 	
@@ -519,7 +525,7 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					public String getLabel() {
-						return "Delete All Queried Users";
+						return _T("Delete All Queried Users");
 					}
 
 					@Override
@@ -533,10 +539,10 @@ public class UserListPage extends AdministrationPage {
 								for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();) {
 									var user = it.next();
 									if (user.isRoot()) {
-										Session.get().error("Can not delete root account");
+										Session.get().error(_T("Can not delete root account"));
 										return;
 									} else if (user.equals(SecurityUtils.getAuthUser())) {
-										Session.get().error("Can not delete yourself");
+										Session.get().error(_T("Can not delete yourself"));
 										return;
 									}
 								}
@@ -554,12 +560,12 @@ public class UserListPage extends AdministrationPage {
 										usersModel.detach();
 										selectionColumn.getSelections().clear();
 
-										Session.get().success("Users deleted successfully");
+										Session.get().success(_T("Users deleted successfully"));
 									}
 
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to confirm deleting all queried users";
+										return _T("Type <code>yes</code> below to confirm deleting all queried users");
 									}
 
 									@Override
@@ -582,7 +588,7 @@ public class UserListPage extends AdministrationPage {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No users to delete");
+									tag.put("data-tippy-content", _T("No users to delete"));
 								}
 							}
 
@@ -633,14 +639,14 @@ public class UserListPage extends AdministrationPage {
 
 		columns.add(selectionColumn = new SelectionColumn<User, Void>());
 		
-		columns.add(new AbstractColumn<>(Model.of("Login Name")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Login Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId,
 									 IModel<User> rowModel) {
 				User user = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "nameFrag", UserListPage.this);
-				WebMarkupContainer link = new ActionablePageLink("link", UserProfilePage.class, UserProfilePage.paramsOf(user)) {
+				WebMarkupContainer link = new ActionablePageLink("link", UserOverviewPage.class, UserOverviewPage.paramsOf(user)) {
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {
@@ -659,7 +665,7 @@ public class UserListPage extends AdministrationPage {
 			}
 		});
 		
-		columns.add(new AbstractColumn<>(Model.of("Full Name")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Full Name"))) {
 
 			@Override
 			public String getCssClass() {
@@ -674,7 +680,7 @@ public class UserListPage extends AdministrationPage {
 
 		});
 		
-		columns.add(new AbstractColumn<>(Model.of("Primary Email")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Primary Email"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId,
@@ -690,14 +696,14 @@ public class UserListPage extends AdministrationPage {
 								"verificationStatus", Model.of(emailAddress)));
 						cellItem.add(fragment);
 					} else {
-						cellItem.add(new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false));
+						cellItem.add(new Label(componentId, "<i>" + _T("Not specified") + "</i>").setEscapeModelStrings(false));
 					}
 				}
 			}
 
 		});
 		
-		columns.add(new AbstractColumn<>(Model.of("Auth Source")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Auth Source"))) {
 
 			@Override
 			public String getCssClass() {
@@ -707,9 +713,9 @@ public class UserListPage extends AdministrationPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId, IModel<User> rowModel) {
 				if (rowModel.getObject().isServiceAccount() || rowModel.getObject().isDisabled()) {
-					cellItem.add(new Label(componentId, "<i>N/A</i>").setEscapeModelStrings(false));
+					cellItem.add(new Label(componentId, "<i>" + _T("N/A") + "</i>").setEscapeModelStrings(false));
 				} else {
-					cellItem.add(new Label(componentId, rowModel.getObject().getAuthSource()));
+					cellItem.add(new Label(componentId, _T(rowModel.getObject().getAuthSource())));
 				}
 			}
 
@@ -729,7 +735,7 @@ public class UserListPage extends AdministrationPage {
 						throw new RestartResponseException(HomePage.class);
 					}
 										
-				});
+				}.add(AttributeAppender.append("data-tippy-content", _T("Impersonate this user"))));
 				
 				cellItem.add(fragment);
 			}
@@ -745,9 +751,9 @@ public class UserListPage extends AdministrationPage {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return "found " + dataProvider.size() + " users";
+					return MessageFormat.format(_T("found {0} users"), dataProvider.size());
 				else
-					return "found 1 user";
+					return _T("found 1 user");
 			}
 		}) {
 			@Override
@@ -838,7 +844,7 @@ public class UserListPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Users");
+		return new Label(componentId, _T("Users"));
 	}
 
 	public static class State implements Serializable {

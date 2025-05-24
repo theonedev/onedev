@@ -1,7 +1,17 @@
 package io.onedev.server.web.behavior;
 
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.model.IModel;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -15,19 +25,12 @@ import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQueryParser;
-import io.onedev.server.util.Constants;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.NameAndEmail;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.xodus.CommitInfoManager;
-import org.apache.wicket.Component;
-import org.apache.wicket.model.IModel;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 public class CommitQueryBehavior extends ANTLRAssistBehavior {
 
@@ -95,8 +98,9 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 							case CommitQueryParser.BEFORE:
 							case CommitQueryParser.AFTER:
 								List<String> candidates = new ArrayList<>(DATE_EXAMPLES);
-								candidates.add(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis()));
-								candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));
+								var currentDate = ZonedDateTime.now(DateUtils.getZoneId());
+								candidates.add(currentDate.format(DateUtils.DATETIME_FORMATTER));
+								candidates.add(currentDate.format(DateUtils.DATE_FORMATTER));
 								suggestions = SuggestionUtils.suggest(candidates, matchWith);
 								return !suggestions.isEmpty()? suggestions: null;
 							case CommitQueryParser.PATH:

@@ -1,6 +1,7 @@
 package io.onedev.server.entitymanager;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.IssueTimes;
@@ -96,4 +98,6 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	List<Issue> loadIssues(List<Long> issueIds);
 
+	List<Issue> query(User submitter, Date fromDate, Date toDate);
+	
 }

@@ -4,12 +4,12 @@
 			<form wicket:id="form" class="leave-confirm">
 				<div wicket:id="editor"></div>
 				<div class="actions clearfix">
-					<input class="btn btn-primary dirty-aware float-left" value="Save" type="submit">
+					<input wicket:id="submit" class="btn btn-primary dirty-aware float-left" type="submit">
 				</div>
 			</form>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="topbarTitleFrag">
-		<a wicket:id="groups">Groups</a> <span class="dot"></span> <span class="text-truncate">Create Group</span> 
+		<a wicket:id="groups">Groups</a> <span class="dot"></span> <span class="text-truncate"><wicket:t>Create Group</wicket:t></span> 
 	</wicket:fragment>
 </wicket:extend>

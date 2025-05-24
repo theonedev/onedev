@@ -52,7 +52,7 @@ public abstract class IssueEvent extends ProjectEvent {
 	
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getIssue());
+		return OneDev.getInstance(UrlManager.class).urlFor(getIssue(), true);
 	}
 
 	public boolean isSendNotifications() {

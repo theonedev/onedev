@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.taskbutton;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,9 +66,9 @@ abstract class TaskFeedbackPanel extends Panel {
 					@Override
 					protected String load() {
 						if (getResult() != null)
-							return "Ok";
+							return _T("Ok");
 						else
-							return "Cancel";
+							return _T("Cancel");
 					}
 					
 				};

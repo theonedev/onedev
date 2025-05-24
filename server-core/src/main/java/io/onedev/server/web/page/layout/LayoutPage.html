@@ -59,14 +59,18 @@
 				<div class="dropdown-menu">
 					<wicket:enclosure child="hasUnverifiedLink">
 						<div class="mx-3 my-2 alert alert-light-warning">
-							You have unverified <a wicket:id="hasUnverifiedLink">email addresses</a>
+							<wicket:t>You have unverified <a wicket:id="hasUnverifiedLink">email addresses</a></wicket:t>
 						</div>
 					</wicket:enclosure>
 					<wicket:enclosure child="noPrimaryAddressLink">
 						<div class="mx-3 my-2 alert alert-light-warning">
-							Primary <a wicket:id="noPrimaryAddressLink">email address</a> not specified
+							<wicket:t>Primary <a wicket:id="noPrimaryAddressLink">email address</a> not specified</wicket:t>
 						</div>
 					</wicket:enclosure>
+					<a wicket:id="myOverview" class="dropdown-item">
+						<wicket:svg href="grid" class="icon mr-2"></wicket:svg>
+						<wicket:t>Overview</wicket:t>
+					</a>
 					<a wicket:id="myProfile" class="dropdown-item">
 						<wicket:svg href="profile" class="icon mr-2"></wicket:svg>
 						<wicket:t>Profile</wicket:t>
@@ -133,10 +137,10 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="alertsFrag">
 		<div class="alerts">
-			<div class="text-center font-size-h6 border-bottom bg-light px-3 py-2 mb-2">Alerts</div>
+			<div class="text-center font-size-h6 border-bottom bg-light px-3 py-2 mb-2"><wicket:t>Alerts</wicket:t></div>
 			<table wicket:id="alerts" class="table"></table>
 			<div class="px-2 pb-2">
-				<a wicket:id="clear" class="btn btn-sm btn-block btn-light-primary">Delete All</a>
+				<a wicket:id="clear" class="btn btn-sm btn-block btn-light-primary"><wicket:t>Delete All</wicket:t></a>
 			</div>
 		</div>
 	</wicket:fragment>

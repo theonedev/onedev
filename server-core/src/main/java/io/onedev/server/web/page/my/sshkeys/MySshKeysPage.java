@@ -1,5 +1,17 @@
 package io.onedev.server.web.page.my.sshkeys;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -7,14 +19,6 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.sshkey.InsertSshKeyPanel;
 import io.onedev.server.web.component.user.sshkey.SshKeyListPanel;
 import io.onedev.server.web.page.my.MyPage;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MySshKeysPage extends MyPage {
 	
@@ -54,7 +58,7 @@ public class MySshKeysPage extends MyPage {
 					
 				};
             }
-		});
+		}.add(AttributeAppender.append("data-tippy-content", _T("Add SSH Key"))));
             
 		keyList = new SshKeyListPanel("keyList", new LoadableDetachableModel<List<SshKey>>() {
 			
@@ -70,7 +74,7 @@ public class MySshKeysPage extends MyPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "My SSH Keys");
+		return new Label(componentId, _T("My SSH Keys"));
 	}
 	
 }

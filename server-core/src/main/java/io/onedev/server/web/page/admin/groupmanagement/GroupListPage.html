@@ -3,7 +3,7 @@
 		<div class="card-body">
 			<div class="d-flex align-items-center mb-4">
 				<div class="clearable-wrapper mr-3 flex-grow-1">
-					<input wicket:id="filterGroups" class="form-control search" placeholder="Filter by name">
+					<input wicket:id="filterGroups" class="form-control search">
 				</div>
 				<a wicket:id="addNew" class="btn btn-icon btn-primary flex-shrink-0"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 			</div>
@@ -14,6 +14,6 @@
 		<a wicket:id="link"><span wicket:id="label"></span></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionFrag">
-		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete this group"><wicket:svg href="trash" class="icon align-middle"></wicket:svg></a>
+		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger"><wicket:svg href="trash" class="icon align-middle"></wicket:svg></a>
 	</wicket:fragment>
 </wicket:extend>

@@ -30,6 +30,9 @@ import org.quartz.SimpleScheduleBuilder;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -127,7 +130,7 @@ public abstract class TaskButton extends AjaxButton {
 		
 		ExecutorService executorService = OneDev.getInstance(ExecutorService.class);
 		List<JobLogEntryEx> messages = new ArrayList<>();
-		messages.add(new JobLogEntryEx(new JobLogEntry(new Date(), "Please wait...")));
+		messages.add(new JobLogEntryEx(new JobLogEntry(new Date(), _T("Please wait..."))));
 		TaskFuture future = getTaskFutures().put(path, new TaskFuture(executorService.submit(new Callable<TaskResult>() {
 
 			@Override
@@ -196,7 +199,7 @@ public abstract class TaskButton extends AjaxButton {
 
 			@Override
 			protected Component newContent(String id) {
-				return new TaskFeedbackPanel(id, StringUtils.capitalize(title)) {
+				return new TaskFeedbackPanel(id, _T(StringUtils.capitalize(title))) {
 
 					@Override
 					protected void onClose(AjaxRequestTarget target) {

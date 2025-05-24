@@ -1,0 +1,44 @@
+<wicket:panel>
+    <div class="user-overview d-flex m-n5 no-autofocus">
+        <div class="flex-shrink-0 info border-right p-5 text-center d-none d-lg-block">
+            <img wicket:id="avatar">
+            <div wicket:id="name" class="mt-4"></div>
+            <div wicket:id="fullName" class="mt-1"></div>
+            <wicket:enclosure child="emailAddress">
+                <div class="mt-1">
+                    <a wicket:id="emailAddress"><span wicket:id="label"></span></a>
+                </div>
+            </wicket:enclosure>
+        </div>
+        <div class="activities p-5">
+            <div class="d-flex mb-4 align-items-center">
+                <div class="font-size-h2 mr-4 mb-0"><wicket:t>Activities</wicket:t></div>
+                <div class="date-range ml-auto">
+                    <input wicket:id="dateRange" class="form-control form-control-sm">
+                </div>
+            </div>
+            <div class="stats border rounded p-4">                
+                <div class="daily-stats overflow-auto mb-5"></div>
+                <div class="type-stats resize-aware"></div>
+            </div>
+            <ul class="detail list-unstyled mb-0">
+                <li wicket:id="activities" class="activity"></li>
+                <li wicket:id="more" class="text-center mt-3"><a wicket:id="link" class="btn btn-primary btn-sm"><wicket:t>More Activities</wicket:t></a></li>
+                <wicket:enclosure>
+                    <li class="activity inaccessibles mt-5"><wicket:svg href="lock" class="icon mr-1"/> <span wicket:id="inaccessibles"></span></li>
+                </wicket:enclosure>
+            </ul>
+        </div>
+    </div>
+    <wicket:fragment wicket:id="dateFrag">
+        <h5 class="mt-4 mb-3 d-flex align-items-center">
+            <wicket:svg href="calendar" class="icon mr-2"/> <span wicket:id="date"></span>
+        </h5>
+    </wicket:fragment>
+    <wicket:fragment wicket:id="activityFrag">
+        <div class="ml-4 mt-2">
+            <span wicket:id="time" class="text-monospace"></span>
+            <span wicket:id="description"></span>
+        </div>
+    </wicket:fragment>
+</wicket:panel>

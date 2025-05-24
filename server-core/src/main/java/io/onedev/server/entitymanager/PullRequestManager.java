@@ -78,4 +78,6 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 
 	ObjectId getComparisonBase(PullRequest request, ObjectId oldCommitId, ObjectId newCommitId);
 
+	List<PullRequest> query(User submitter, Date fromDate, Date toDate);
+
 }

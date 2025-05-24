@@ -26,12 +26,19 @@ public interface EmailAddressManager extends EntityManager<EmailAddress> {
 
 	@Nullable
 	EmailAddress findGit(User user);
+
+	@Nullable
+	EmailAddress findPublic(User user);
 	
 	@Nullable
 	EmailAddress findByPersonIdent(PersonIdent personIdent);
 	
 	void setAsPrimary(EmailAddress emailAddress);
-	
+
+	void setAsPublic(EmailAddress emailAddress);
+
+	void setAsPrivate(EmailAddress emailAddress);
+
 	void useForGitOperations(EmailAddress emailAddress);
 	
 	void sendVerificationEmail(EmailAddress emailAddress);

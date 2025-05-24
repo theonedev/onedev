@@ -752,7 +752,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(this);
+		return OneDev.getInstance(UrlManager.class).urlFor(this, true);
 	}
 	
 	@Nullable
@@ -780,8 +780,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Override
 	public ProjectFacade getFacade() {
 		return new ProjectFacade(getId(), getName(), getKey(), getPath(), getServiceDeskEmailAddress(), 
-				isCodeManagement(), isIssueManagement(), getGitPackConfig(), 
-				lastEventDate.getId(), idOf(getDefaultRole()), idOf(getParent()));
+				isCodeManagement(), isIssueManagement(), getGitPackConfig(), lastEventDate.getId(), 
+				idOf(getDefaultRole()), idOf(getParent()), idOf(getForkedFrom()));
 	}
 	
 	/**

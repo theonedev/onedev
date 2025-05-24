@@ -1,5 +1,24 @@
 package io.onedev.server.web.page.project.issues.boards;
 
+import static java.lang.Long.parseLong;
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.util.visit.IVisitor;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
@@ -13,23 +32,6 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.util.Cursor;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.util.visit.IVisitor;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-
-import static java.lang.Long.parseLong;
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 
 abstract class CardListPanel extends Panel {
 

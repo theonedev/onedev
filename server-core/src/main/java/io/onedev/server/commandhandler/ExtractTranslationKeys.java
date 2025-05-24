@@ -22,10 +22,6 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +42,8 @@ public class ExtractTranslationKeys extends CommandHandler {
 	public static final String COMMAND = "extract-translation-keys";
 
 	private static final Pattern _T_PATTERN = Pattern.compile("_T\\s*\\(\\s*\"((?:[^\"\\\\]|\\\\.)*)\"(?:\\s*\\+\\s*\"((?:[^\"\\\\]|\\\\.)*)\")*\\s*\\)");
+
+	private static final Pattern WICKET_T_PATTERN = Pattern.compile("<wicket:t>(.+?)</wicket:t>", Pattern.DOTALL|Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern STRING_LITERAL_PATTERN = Pattern.compile("\"((?:[^\"\\\\]|\\\\.)*)\"");
 
@@ -211,14 +209,11 @@ public class ExtractTranslationKeys extends CommandHandler {
 
 	public static Collection<String> extract_wicket_t(String content) {
 		var extracted = new ArrayList<String>();
-		Document doc = Jsoup.parse(content);
-		Elements wicketMessages = doc.select("wicket\\:t");
-		for (Element element : wicketMessages) {
-			String key = element.html().trim();
-			key = key.replaceAll("\\s+", " ");
-			if (!key.isEmpty()) {
+		Matcher matcher = WICKET_T_PATTERN.matcher(content);
+		while (matcher.find()) {
+			var key = matcher.group(1).trim().replaceAll("\\s+", " ");
+			if (key.length() != 0) 
 				extracted.add(key);
-			}
 		}
 		return extracted;
 	}

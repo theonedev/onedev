@@ -1140,4 +1140,5 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	public File getArtifactsDir(Long projectId, Long buildNumber) {
 		return new File(getBuildDir(projectId, buildNumber), ARTIFACTS_DIR);
 	}
+
 }

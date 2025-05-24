@@ -48,7 +48,7 @@ public class IssueCommentCreated extends IssueEvent {
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getComment());
+		return OneDev.getInstance(UrlManager.class).urlFor(getComment(), true);
 	}
 
 }

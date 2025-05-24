@@ -1,12 +1,16 @@
 package io.onedev.server.entitymanager;
 
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.dao.EntityManager;
-
-import javax.annotation.Nullable;
 
 public interface PullRequestChangeManager extends EntityManager<PullRequestChange> {
 
@@ -22,4 +26,6 @@ public interface PullRequestChangeManager extends EntityManager<PullRequestChang
 	
 	void changeTargetBranch(PullRequest request, String targetBranch);
 	
+	List<PullRequestChange> query(User submitter, Date fromDate, Date toDate);
+
 }

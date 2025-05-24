@@ -26,7 +26,7 @@ public abstract class PackEvent extends ProjectEvent {
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getPack());
+		return OneDev.getInstance(UrlManager.class).urlFor(getPack(), true);
 	}
 	
 }

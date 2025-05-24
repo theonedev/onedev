@@ -2,6 +2,7 @@ package io.onedev.server.xodus;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
+import io.onedev.server.model.User;
 import io.onedev.server.util.NameAndEmail;
 import io.onedev.server.util.facade.EmailAddressFacade;
 
@@ -69,6 +71,8 @@ public interface CommitInfoManager {
 	 */
 	List<GitContributor> getTopContributors(Long projectId, int top, 
 			GitContribution.Type type, int fromDay, int toDay);
+
+	Map<Long, Map<ObjectId, Long>> getUserCommits(User user, Date fromDate, Date toDate);
 
 	/**
 	 * Get source code line statistics over time

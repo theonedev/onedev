@@ -102,6 +102,15 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		WebSecurityManager securityManager = AppLoader.getInstance(WebSecurityManager.class);
 		return new Subject.Builder(securityManager).principals(principals).buildSubject();
 	}
+
+	public static Subject asSubject(@Nullable User user) {
+		if (user == null)
+			return asAnonymous();
+		else if (user.isSystem())
+			return asSystem();
+		else
+			return asSubject(asPrincipals(asUserPrincipal(user.getId())));
+	}
 	
 	public static boolean isAnonymous(String principal) {
 		return principal.equals(PRINCIPAL_ANONYMOUS);
@@ -357,7 +366,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canAccessConfidentialIssues(Project project) {
-		return getSubject().isPermitted(new ProjectPermission(project, new AccessConfidentialIssues()));
+		return canAccessConfidentialIssues(getSubject(), project);
+	}
+
+	public static boolean canAccessConfidentialIssues(Subject subject, Project project) {
+		return subject.isPermitted(new ProjectPermission(project, new AccessConfidentialIssues()));
 	}
 	
 	public static boolean canAccessTimeTracking(Project project) {

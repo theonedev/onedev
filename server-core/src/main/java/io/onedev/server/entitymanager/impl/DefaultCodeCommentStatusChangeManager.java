@@ -1,11 +1,19 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
 
 import com.google.common.base.Preconditions;
+
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.codecomment.CodeCommentStatusChanged;
@@ -14,6 +22,8 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
+import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -63,6 +73,24 @@ public class DefaultCodeCommentStatusChangeManager extends BaseEntityManager<Cod
 	public void create(Collection<CodeCommentStatusChange> changes, String note) {
 		for (CodeCommentStatusChange  change: changes)
 			create(change, note);
+	}
+
+	@Sessional
+	@Override
+	public List<CodeCommentStatusChange> query(User creator, Date fromDate, Date toDate) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<CodeCommentStatusChange> query = builder.createQuery(CodeCommentStatusChange.class);
+		From<CodeCommentStatusChange, CodeCommentStatusChange> root = query.from(CodeCommentStatusChange.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+
+		predicates.add(builder.equal(root.get(CodeCommentStatusChange.PROP_USER), creator));
+		predicates.add(builder.greaterThanOrEqualTo(root.get(CodeCommentStatusChange.PROP_DATE), fromDate));
+		predicates.add(builder.lessThanOrEqualTo(root.get(CodeCommentStatusChange.PROP_DATE), toDate));
+			
+		query.where(predicates.toArray(new Predicate[0]));
+		
+		return getSession().createQuery(query).getResultList();
 	}
 	
 }

@@ -105,7 +105,7 @@ public abstract class ProjectEvent extends Event implements Serializable {
 	}
 	
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getProject());
+		return OneDev.getInstance(UrlManager.class).urlFor(getProject(), true);
 	}
 	
 	@Nullable

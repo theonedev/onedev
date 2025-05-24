@@ -1,5 +1,7 @@
 package io.onedev.server.web.component;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
@@ -18,7 +20,7 @@ public class EmailAddressVerificationStatusBadge extends Label {
 
 			@Override
 			protected String load() {
-				return !emailAddressModel.getObject().isVerified()?"Unverified":"";
+				return !emailAddressModel.getObject().isVerified()?_T("Unverified"):"";
 			}
 			
 		});

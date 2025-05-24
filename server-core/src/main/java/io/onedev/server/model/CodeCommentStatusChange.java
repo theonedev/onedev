@@ -21,6 +21,12 @@ public class CodeCommentStatusChange extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_COMMENT = "comment";
+
+	public static final String PROP_USER = "user";
+
+	public static final String PROP_DATE = "date";
+
 	public static final String PROP_COMPARE_CONTEXT = "compareContext";
 	
 	@ManyToOne

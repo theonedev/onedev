@@ -4,6 +4,9 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.passwordedit.PasswordEditPanel;
 import io.onedev.server.web.page.my.MyPage;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -16,7 +19,7 @@ public class MyPasswordPage extends MyPage {
 		if (getUser().isServiceAccount() || getUser().isDisabled())
 			throw new IllegalStateException();
 		if (getUser().getPassword() == null)
-			throw new ExplicitException("Unable to change password as you are authenticating via external system");
+			throw new ExplicitException(_T("Unable to change password as you are authenticating via external system"));
 	}
 
 	@Override
@@ -35,7 +38,7 @@ public class MyPasswordPage extends MyPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Change My Password");
+		return new Label(componentId, _T("Change My Password"));
 	}
 
 }

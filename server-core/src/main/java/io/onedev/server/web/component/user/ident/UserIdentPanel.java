@@ -8,6 +8,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
@@ -16,6 +17,7 @@ import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.card.UserCardPanel;
+import io.onedev.server.web.page.user.overview.UserOverviewPage;
 
 public class UserIdentPanel extends GenericPanel<User> {
 
@@ -63,6 +65,8 @@ public class UserIdentPanel extends GenericPanel<User> {
 	protected void onComponentTag(ComponentTag tag) {
 		super.onComponentTag(tag);
 		tag.setName("a");
+		var url = RequestCycle.get().urlFor(UserOverviewPage.class, UserOverviewPage.paramsOf(getUser()));
+		tag.put("href", url.toString());
 	}
 
 	@Override

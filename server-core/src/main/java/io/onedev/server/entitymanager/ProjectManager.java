@@ -87,6 +87,9 @@ public interface ProjectManager extends EntityManager<Project> {
 	Collection<Long> getPathMatchingIds(PatternSet patternSet);
 	
 	ProjectCache cloneCache();
+
+	@Nullable
+	ProjectFacade findFacade(Long projectId);
 	
 	@Nullable
 	String getFavoriteQuery();

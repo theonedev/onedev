@@ -3,6 +3,7 @@ package io.onedev.server.util;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -10,8 +11,6 @@ import java.util.TimeZone;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.format.ISODateTimeFormat;
 import org.ocpsoft.prettytime.PrettyTime;
 
@@ -22,7 +21,19 @@ import com.joestelmach.natty.Parser;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.web.WebSession;
 
-public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
+public class DateUtils {
+
+    public static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm";
+
+    public static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern(DATETIME_FORMAT);
+
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
+
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
+
+    public static final String TIME_FORMAT = "HH:mm";
+
+    public static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern(TIME_FORMAT);
 
 	private static final PrettyTime PRETTY_TIME = new PrettyTime();
 	
@@ -46,8 +57,24 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 		}
 	}
 
+	public static Date parseDate(String dateString, int hour, int minute, int second) {
+		return parseDate(dateString, getZoneId(), hour, minute, second);
+	}
+
+	public static Date parseDateTime(String dateString) {
+		return parseDateTime(dateString, getZoneId());
+	}
+	
+	public static Date parseDate(String dateString, ZoneId zoneId, int hour, int minute, int second) {
+		return Date.from(LocalDate.from(DATE_FORMATTER.parse(dateString)).atStartOfDay(zoneId).toInstant());
+	}
+
+	public static Date parseDateTime(String dateString, ZoneId zoneId) {
+		return Date.from(LocalDateTime.from(DATETIME_FORMATTER.parse(dateString)).atZone(zoneId).toInstant());
+	}
+
     public static String formatDate(Date date, ZoneId zoneId) {
-        return Constants.DATE_FORMATTER.withZone(DateTimeZone.forID(zoneId.getId())).print(new DateTime(date));
+        return date.toInstant().atZone(zoneId).format(DATE_FORMATTER);
     }
 
     public static String formatDate(Date date) {
@@ -55,11 +82,19 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     }
 
     public static String formatDateTime(Date date, ZoneId zoneId) {
-        return Constants.DATETIME_FORMATTER.withZone(DateTimeZone.forID(zoneId.getId())).print(new DateTime(date));
+        return date.toInstant().atZone(zoneId).format(DATETIME_FORMATTER);
     }
 
     public static String formatDateTime(Date date) {
         return formatDateTime(date, getZoneId());
+    }
+
+    public static String formatTime(Date date, ZoneId zoneId) {
+        return date.toInstant().atZone(zoneId).format(TIME_FORMATTER);
+    }
+
+    public static String formatTime(Date date) {
+        return formatTime(date, getZoneId());
     }
 
     @Nullable

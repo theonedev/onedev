@@ -6,43 +6,43 @@ import org.eclipse.jgit.lib.ObjectId;
 
 public interface UrlManager {
 	
-	String urlForProject(Long projectId);
+	String urlForProject(Long projectId, boolean withRootUrl);
 	
-	String urlForProject(String projectPath);
+	String urlForProject(String projectPath, boolean withRootUrl);
 	
-	String urlFor(Project project);
+	String urlFor(Project project, boolean withRootUrl);
 	
-	String urlFor(PullRequest request);
+	String urlFor(PullRequest request, boolean withRootUrl);
 	
-	String urlForPullRequest(Project project, Long pullRequestNumber);
+	String urlForPullRequest(Project project, Long pullRequestNumber, boolean withRootUrl);
 	
-	String urlFor(PullRequestComment comment);
+	String urlFor(PullRequestComment comment, boolean withRootUrl);
 	
-	String urlFor(PullRequestChange change);
+	String urlFor(PullRequestChange change, boolean withRootUrl);
 	
-	String urlFor(Issue issue);
+	String urlFor(Issue issue, boolean withRootUrl);
 	
-	String urlForIssue(Project project, Long issueNumber);
+	String urlForIssue(Project project, Long issueNumber, boolean withRootUrl);
 	
-	String urlFor(Build build);
+	String urlFor(Build build, boolean withRootUrl);
 
-	String urlForBuild(Project project, Long buildNumber);
+	String urlForBuild(Project project, Long buildNumber, boolean withRootUrl);
 	
-	String urlFor(IssueComment comment);
+	String urlFor(IssueComment comment, boolean withRootUrl);
 	
-	String urlFor(IssueChange change);
+	String urlFor(IssueChange change, boolean withRootUrl);
 	
-	String urlFor(CodeComment comment);
+	String urlFor(CodeComment comment, boolean withRootUrl);
 
-	String urlFor(Pack pack);
+	String urlFor(Pack pack, boolean withRootUrl);
 	
-	String urlFor(CodeCommentReply reply);
+	String urlFor(CodeCommentReply reply, boolean withRootUrl);
 	
-	String urlFor(CodeCommentStatusChange change);
+	String urlFor(CodeCommentStatusChange change, boolean withRootUrl);
 	
-	String urlFor(ProjectAndRevision projectAndRevision);
+	String urlFor(ProjectAndRevision projectAndRevision, boolean withRootUrl);
 	
-	String urlFor(Project project, ObjectId commitId);
+	String urlFor(Project project, ObjectId commitId, boolean withRootUrl);
 	
     String cloneUrlFor(Project project, boolean ssh);
     

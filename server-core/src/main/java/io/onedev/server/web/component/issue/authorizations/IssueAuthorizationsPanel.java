@@ -55,7 +55,7 @@ import io.onedev.server.web.component.select2.SelectToActChoice;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
 import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
-import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
+import io.onedev.server.web.page.user.profile.UserProfilePage;
 
 public abstract class IssueAuthorizationsPanel extends Panel {
 

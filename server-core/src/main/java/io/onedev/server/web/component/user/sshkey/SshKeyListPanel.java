@@ -1,16 +1,16 @@
 package io.onedev.server.web.component.user.sshkey;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SshKeyManager;
-import io.onedev.server.model.SshKey;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -26,9 +26,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.model.SshKey;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
 
 public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
 
@@ -48,7 +52,7 @@ public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
         
 		List<IColumn<SshKey, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<>(Model.of("Fingerprint")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Fingerprint"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<SshKey>> cellItem, String componentId,
@@ -58,7 +62,7 @@ public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
 
 		});
 		
-		columns.add(new AbstractColumn<>(Model.of("Comment")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Comment"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<SshKey>> cellItem, String componentId,
@@ -67,12 +71,12 @@ public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
 				if (comment != null)
 					cellItem.add(new Label(componentId, comment));
 				else
-					cellItem.add(new Label(componentId, "<i>No comment</i>").setEscapeModelStrings(false));
+					cellItem.add(new Label(componentId, "<i>" + _T("No comment") + "</i>").setEscapeModelStrings(false));
 			}
 
 		});
 		
-		columns.add(new AbstractColumn<>(Model.of("Created At")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Created At"))) {
 
 			@Override
 			public String getCssClass() {
@@ -100,18 +104,18 @@ public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
 					public void onClick(AjaxRequestTarget target) {
 						SshKey sshKey = rowModel.getObject();
 						OneDev.getInstance(SshKeyManager.class).delete(sshKey);
-						Session.get().success("SSH key deleted");
+						Session.get().success(_T("SSH key deleted"));
 						target.add(sshKeysTable);
 					}
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						String message = "Do you really want to delete this SSH key?";
+						String message = _T("Do you really want to delete this SSH key?");
 						attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
 					}
 
-				});
+				}.add(AttributeAppender.append("data-tippy-content", _T("Delete this key"))));
 				
 				cellItem.add(fragment);
 			}

@@ -28,13 +28,13 @@ import io.onedev.server.web.mapper.ProjectMapperUtils;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentDetailPage;
 import io.onedev.server.web.page.admin.groupmanagement.GroupPage;
 import io.onedev.server.web.page.admin.rolemanagement.RoleDetailPage;
-import io.onedev.server.web.page.admin.usermanagement.UserPage;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
 import io.onedev.server.web.page.project.issues.iteration.IterationDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
+import io.onedev.server.web.page.user.UserPage;
 
 public abstract class ParsedUrl implements Serializable {
 

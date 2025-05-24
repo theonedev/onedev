@@ -106,5 +106,5 @@ public interface BuildManager extends EntityManager<Build> {
 	File getBuildDir(Long projectId, Long buildNumber);
 
 	File getArtifactsDir(Long projectId, Long buildNumber);
-	
+		
 }

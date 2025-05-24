@@ -15,7 +15,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.convert.IConverter;
 import org.apache.wicket.util.convert.converter.DateConverter;
 
-import io.onedev.server.util.Constants;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BasePage;
@@ -51,7 +50,7 @@ public class DatePicker extends DateTextField {
     }
 
 	private static String getDatePattern(boolean withTime) {
-		return withTime?Constants.DATETIME_FORMAT: Constants.DATE_FORMAT;
+		return withTime?DateUtils.DATETIME_FORMAT: DateUtils.DATE_FORMAT;
 	}
 
 	@Override

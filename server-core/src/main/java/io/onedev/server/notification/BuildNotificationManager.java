@@ -100,7 +100,7 @@ public class BuildNotificationManager {
 			else
 				summary = status + " on ref " + build.getRefName();
 			
-			String url = urlManager.urlFor(build);
+			String url = urlManager.urlFor(build, true);
 			String threadingReferences = "<" + build.getProject().getPath() + "-build-" + build.getNumber() + "@onedev>";
 			String htmlBody = getEmailBody(true, event, summary, null, url, false, null);
 			String textBody = getEmailBody(false, event, summary, null, url, false, null);

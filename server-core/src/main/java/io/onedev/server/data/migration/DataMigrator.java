@@ -1,7 +1,5 @@
 package io.onedev.server.data.migration;
 
-import static io.onedev.server.util.Constants.DATETIME_FORMATTER;
-import static io.onedev.server.util.Constants.DATE_FORMATTER;
 import static io.onedev.server.util.DateUtils.toLocalDate;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Comparator.comparing;
@@ -69,6 +67,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.TimeGroups;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.CryptoUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.DirectoryVersionUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ParsedEmailAddress;
@@ -7815,9 +7814,9 @@ public class DataMigrator {
 					var valueElement = element.element("value");
 					if (valueElement != null) {
 						if (type.equals(InputSpec.DATE)) {
-							valueElement.setText(String.valueOf(DATE_FORMATTER.parseDateTime(valueElement.getText().trim()).getMillis()));
+							valueElement.setText(String.valueOf(DateUtils.parseDate(valueElement.getText().trim(), ZoneId.systemDefault(), 12, 0, 0).getTime()));
 						} else if (type.equals(InputSpec.DATE_TIME)) {
-							valueElement.setText(String.valueOf(DATETIME_FORMATTER.parseDateTime(valueElement.getText().trim()).getMillis()));
+							valueElement.setText(String.valueOf(DateUtils.parseDateTime(valueElement.getText().trim(), ZoneId.systemDefault()).getTime()));
 						}
 					}
 				}
@@ -7978,4 +7977,14 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate201(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("EmailAddresss.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements())
+					element.addElement("open").setText("false");
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 }

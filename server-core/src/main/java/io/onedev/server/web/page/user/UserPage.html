@@ -1,0 +1,13 @@
+<wicket:extend>
+	<div class="card user-detail m-2 m-sm-5">
+		<div class="card-body">
+        	<ul wicket:id="userTabs" class="tabs nav nav-bold nav-tabs nav-tabs-line text-weight-bold mb-4"></ul>
+			<wicket:child></wicket:child>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="topbarTitleFrag">
+		<a wicket:id="users" class="d-inline-block"><wicket:t>Users</wicket:t></a> 
+		<span class="dot d-inline-block"></span> 
+		<span wicket:id="userName" class="d-inline-block"></span> 
+	</wicket:fragment>
+</wicket:extend>

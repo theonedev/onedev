@@ -33,18 +33,18 @@ public class DefaultUrlManager implements UrlManager {
 	}
 	
 	@Override
-	public String urlForProject(Long projectId) {
-		return urlForProject(projectManager.findFacadeById(projectId).getPath());
+	public String urlForProject(Long projectId, boolean withRootUrl) {
+		return urlForProject(projectManager.findFacadeById(projectId).getPath(), withRootUrl);
 	}
 	
 	@Override
-	public String urlForProject(String projectPath) {
-		return settingManager.getSystemSetting().getServerUrl() + "/" + projectPath;
+	public String urlForProject(String projectPath, boolean withRootUrl) {
+		return (withRootUrl ? settingManager.getSystemSetting().getServerUrl() : "") + "/" + projectPath;
 	}
 	
 	@Override
-	public String urlFor(Project project) {
-		return urlForProject(project.getId());
+	public String urlFor(Project project, boolean withRootUrl) {
+		return urlForProject(project.getId(), withRootUrl);
 	}
 
 	@Override
@@ -56,31 +56,31 @@ public class DefaultUrlManager implements UrlManager {
 	}
 	
 	@Override
-	public String urlFor(CodeComment comment) {
-		return urlFor(comment, comment.getCompareContext());
+	public String urlFor(CodeComment comment, boolean withRootUrl) {
+		return urlFor(comment, comment.getCompareContext(), withRootUrl);
 	}
 
 	@Override
-	public String urlFor(CodeCommentReply reply) {
-		return urlFor(reply.getComment(), reply.getCompareContext()) + "#" + reply.getAnchor();
+	public String urlFor(CodeCommentReply reply, boolean withRootUrl) {
+		return urlFor(reply.getComment(), reply.getCompareContext(), withRootUrl) + "#" + reply.getAnchor();
 	}
 
 	@Override
-	public String urlFor(CodeCommentStatusChange change) {
-		return urlFor(change.getComment(), change.getCompareContext()) + "#" + change.getAnchor();
+	public String urlFor(CodeCommentStatusChange change, boolean withRootUrl) {
+		return urlFor(change.getComment(), change.getCompareContext(), withRootUrl) + "#" + change.getAnchor();
 	}
 
 	@Override
-	public String urlFor(ProjectAndRevision projectAndRevision) {
-		return urlFor(projectAndRevision.getProject()) + "/~commits/" + projectAndRevision.getRevision();
+	public String urlFor(ProjectAndRevision projectAndRevision, boolean withRootUrl) {
+		return urlFor(projectAndRevision.getProject(), withRootUrl) + "/~commits/" + projectAndRevision.getRevision();
 	}
 
 	@Override
-	public String urlFor(Project project, ObjectId commitId) {
-		return urlFor(new ProjectAndRevision(project, commitId.name()));
+	public String urlFor(Project project, ObjectId commitId, boolean withRootUrl) {
+		return urlFor(new ProjectAndRevision(project, commitId.name()), withRootUrl);
 	}
 
-	private String urlFor(CodeComment comment, CompareContext compareContext) {
+	private String urlFor(CodeComment comment, CompareContext compareContext, boolean withRootUrl) {
 		Project project = comment.getProject();
 		if (comment.isValid()) {
 			PullRequest request = compareContext.getPullRequest();
@@ -89,7 +89,7 @@ public class DefaultUrlManager implements UrlManager {
 				if (request != null) {
 					PageParameters params = new PageParameters();
 					PullRequestChangesPage.fillParams(params, PullRequestChangesPage.getState(comment, compareContext));
-					return urlFor(request) + "/changes" + paramsEncoder.encodePageParameters(params);
+					return urlFor(request, withRootUrl) + "/changes" + paramsEncoder.encodePageParameters(params);
 				} else {
 					RevCommit oldCommit;
 					if (compareContext.getOldCommitHash().equals(ObjectId.zeroId().name()))
@@ -98,7 +98,7 @@ public class DefaultUrlManager implements UrlManager {
 						oldCommit = project.getRevCommit(compareContext.getOldCommitHash(), true);
 					RevCommit newCommit = project.getRevCommit(compareContext.getNewCommitHash(), true);
 					if (oldCommit == null || isParent(oldCommit, newCommit)) {
-						String url = urlFor(comment.getProject());
+						String url = urlFor(comment.getProject(), withRootUrl);
 						PageParameters params = new PageParameters();
 						CommitDetailPage.State state = CommitDetailPage.getState(comment, compareContext);
 
@@ -109,14 +109,14 @@ public class DefaultUrlManager implements UrlManager {
 						CommitDetailPage.fillParams(params, state);
 						return url + "/~commits/" + paramsEncoder.encodePageParameters(params);
 					} else {
-						String url = urlFor(comment.getProject());
+						String url = urlFor(comment.getProject(), withRootUrl);
 						PageParameters params = new PageParameters();
 						RevisionComparePage.fillParams(params, RevisionComparePage.getState(comment, compareContext));
 						return url + "/~compare" + paramsEncoder.encodePageParameters(params);
 					}
 				}
 			} else {
-				String url = urlFor(comment.getProject());
+				String url = urlFor(comment.getProject(), withRootUrl);
 				PageParameters params = new PageParameters();
 				ProjectBlobPage.State state = ProjectBlobPage.getState(comment);
 
@@ -135,7 +135,7 @@ public class DefaultUrlManager implements UrlManager {
 				return url + "/~files/" + paramsEncoder.encodePageParameters(params);
 			}
 		} else {
-			return urlFor(project) + "/~code-comments/" + comment.getId() + "/invalid";
+			return urlFor(project, withRootUrl) + "/~code-comments/" + comment.getId() + "/invalid";
 		}
 	}
 	
@@ -148,58 +148,58 @@ public class DefaultUrlManager implements UrlManager {
 	}
 	
 	@Override
-	public String urlFor(PullRequest request) {
-		return urlForPullRequest(request.getProject(), request.getNumber());
+	public String urlFor(PullRequest request, boolean withRootUrl) {
+		return urlForPullRequest(request.getProject(), request.getNumber(), withRootUrl);
 	}
 
 	@Override
-	public String urlForPullRequest(Project project, Long pullRequestNumber) {
-		return urlFor(project) + "/~pulls/" + pullRequestNumber;
+	public String urlForPullRequest(Project project, Long pullRequestNumber, boolean withRootUrl) {
+		return urlFor(project, withRootUrl) + "/~pulls/" + pullRequestNumber;
 	}
 
 	@Override
-	public String urlFor(PullRequestComment comment) {
-		return urlFor(comment.getRequest()) + "#" + comment.getAnchor();
+	public String urlFor(PullRequestComment comment, boolean withRootUrl) {
+		return urlFor(comment.getRequest(), withRootUrl) + "#" + comment.getAnchor();
 	}
 
 	@Override
-	public String urlFor(PullRequestChange change) {
-		return urlFor(change.getRequest()) + "#" + change.getAnchor();
+	public String urlFor(PullRequestChange change, boolean withRootUrl) {
+		return urlFor(change.getRequest(), withRootUrl) + "#" + change.getAnchor();
 	}
 
 	@Override
-	public String urlFor(Issue issue) {
-		return urlForIssue(issue.getProject(), issue.getNumber());
+	public String urlFor(Issue issue, boolean withRootUrl) {
+		return urlForIssue(issue.getProject(), issue.getNumber(), withRootUrl);
 	}
 
 	@Override
-	public String urlForIssue(Project project, Long issueNumber) {
-		return urlFor(project) + "/~issues/" + issueNumber;
+	public String urlForIssue(Project project, Long issueNumber, boolean withRootUrl) {
+		return urlFor(project, withRootUrl) + "/~issues/" + issueNumber;
 	}
 
 	@Override
-	public String urlFor(Build build) {
-		return urlForBuild(build.getProject(), build.getNumber());
+	public String urlFor(Build build, boolean withRootUrl) {
+		return urlForBuild(build.getProject(), build.getNumber(), withRootUrl);
 	}
 
 	@Override
-	public String urlForBuild(Project project, Long buildNumber) {
-		return urlFor(project) + "/~builds/" + buildNumber;
+	public String urlForBuild(Project project, Long buildNumber, boolean withRootUrl) {
+		return urlFor(project, withRootUrl) + "/~builds/" + buildNumber;
 	}
 
 	@Override
-	public String urlFor(Pack pack) {
-		return urlFor(pack.getProject()) + "/~packages/" + pack.getId();
+	public String urlFor(Pack pack, boolean withRootUrl) {
+		return urlFor(pack.getProject(), withRootUrl) + "/~packages/" + pack.getId();
 	}
 	
 	@Override
-	public String urlFor(IssueComment comment) {
-		return urlFor(comment.getIssue()) + "#" + comment.getAnchor();
+	public String urlFor(IssueComment comment, boolean withRootUrl) {
+		return urlFor(comment.getIssue(), withRootUrl) + "#" + comment.getAnchor();
 	}
 
 	@Override
-	public String urlFor(IssueChange change) {
-		return urlFor(change.getIssue()) + "#" + change.getAnchor();
+	public String urlFor(IssueChange change, boolean withRootUrl) {
+		return urlFor(change.getIssue(), withRootUrl) + "#" + change.getAnchor();
 	}
 	
 }

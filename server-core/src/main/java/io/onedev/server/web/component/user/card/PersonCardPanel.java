@@ -1,12 +1,15 @@
 package io.onedev.server.web.component.user.card;
 
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
+
+import java.text.MessageFormat;
+
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.EmailAddressManager;
@@ -45,12 +48,12 @@ public class PersonCardPanel extends Panel {
 		else
 			displayName = personIdent.getName();
 		
-		builder.append("<div>" + HtmlEscape.escapeHtml5(displayName) + " <i>(" + gitRole + ")</i></div>");
+		builder.append("<div>" + escapeHtml5(displayName) + " <i>(" + gitRole + ")</i></div>");
 		
 		if (personIdent.getName().equals(User.SYSTEM_NAME)) 
 			builder.append("<i>System Account</i>");
 		else if (emailAddress != null && emailAddress.isVerified()) 
-			builder.append("<i>@" + HtmlEscape.escapeHtml5(emailAddress.getOwner().getName()) + "</i>"); 
+			builder.append(MessageFormat.format("<a href=\"/~users/{0}\">@{1}</a>", emailAddress.getOwner().getId(), escapeHtml5(emailAddress.getOwner().getName()))); 
 		else 
 			builder.append("<i>No OneDev Account</i>");
 		

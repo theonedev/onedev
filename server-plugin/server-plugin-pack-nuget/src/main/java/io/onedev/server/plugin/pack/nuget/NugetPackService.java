@@ -586,7 +586,7 @@ public class NugetPackService implements PackService {
 	}
 	
 	private String getBaseUrl(Project project) {
-		return urlManager.urlFor(project) + "/~" + SERVICE_ID;
+		return urlManager.urlFor(project, true) + "/~" + SERVICE_ID;
 	}
 
 	private String getRegistrationIndexUrl(String baseUrl, String name) {

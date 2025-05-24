@@ -70,6 +70,25 @@ public class Translation extends TranslationResourceBundle {
 		m.put("md.heading", "Heading");
 		m.put("md.image", "Image");
 		m.put("container-image", "Image");
+		m.put("month.Apr", "Apr");
+		m.put("month.Aug", "Aug");
+		m.put("month.Dec", "Dec");
+		m.put("month.Feb", "Feb");
+		m.put("month.Jan", "Jan");
+		m.put("month.Jul", "Jul");
+		m.put("month.Jun", "Jun");
+		m.put("month.Mar", "Mar");
+		m.put("month.May", "May");
+		m.put("month.Nov", "Nov");
+		m.put("month.Oct", "Oct");
+		m.put("month.Sep", "Sep");
+		m.put("week.Fri", "Fri");
+		m.put("week.Mon", "Mon");
+		m.put("week.Sat", "Sat");
+		m.put("week.Sun", "Sun");
+		m.put("week.Thu", "Thu");
+		m.put("week.Tue", "Tue");
+		m.put("week.Wed", "Wed");
 	}
 
 	@Override

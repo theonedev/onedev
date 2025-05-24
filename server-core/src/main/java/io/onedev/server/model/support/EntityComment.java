@@ -22,6 +22,8 @@ public abstract class EntityComment extends AbstractEntity {
 	
 	public static final String PROP_CONTENT = "content";
 
+	public static final String PROP_DATE = "date";
+
 	@JsonProperty(access = READ_ONLY)
 	@Column(nullable=false)
 	private Date date = new Date();

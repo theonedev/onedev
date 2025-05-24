@@ -36,8 +36,10 @@ public class EmailAddress extends AbstractEntity {
 
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private boolean git;
-    
-	
+
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	private boolean open;
+    	
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(nullable=false)
 	@Immutable
@@ -81,6 +83,14 @@ public class EmailAddress extends AbstractEntity {
 		this.git = git;
 	}
 
+	public boolean isOpen() {
+		return open;
+	}
+
+	public void setOpen(boolean open) {
+		this.open = open;
+	}
+
 	public User getOwner() {
         return owner;
     }
@@ -96,7 +106,7 @@ public class EmailAddress extends AbstractEntity {
 	@Override
 	public EmailAddressFacade getFacade() {
 		return new EmailAddressFacade(getId(), getOwner().getId(), getValue(), 
-				isPrimary(), isGit(), getVerificationCode());
+				isPrimary(), isGit(), isOpen(), getVerificationCode());
 	}
 	
 }

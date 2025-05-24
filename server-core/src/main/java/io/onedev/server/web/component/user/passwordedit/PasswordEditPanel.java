@@ -15,6 +15,8 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -46,9 +48,9 @@ public class PasswordEditPanel extends GenericPanel<User> {
 			protected void onSubmit() {
 				super.onSubmit();
 				if (getUser().getPassword() != null)
-					Session.get().success("Password has been changed");
+					Session.get().success(_T("Password has been changed"));
 				else
-					Session.get().success("Password has been set");
+					Session.get().success(_T("Password has been set"));
 					
 				getUser().setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(bean.getNewPassword()));
 				OneDev.getInstance(UserManager.class).update(getUser(), null);
@@ -65,7 +67,7 @@ public class PasswordEditPanel extends GenericPanel<User> {
 		form.add(new Button("submit").add(AttributeAppender.append("value", new AbstractReadOnlyModel<>() {
 			@Override
 			public String getObject() {
-				return getUser().getPassword()!=null?"Change":"Set";
+				return getUser().getPassword()!=null?_T("Change"):_T("Set");
 			}
 		})));
 	}

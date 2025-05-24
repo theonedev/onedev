@@ -69,7 +69,6 @@ import io.onedev.server.search.entity.codecomment.FuzzyCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Provider;
-import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.UrlManager;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.ChangeObserver;
@@ -856,8 +855,8 @@ public abstract class CodeCommentListPanel extends Panel {
 					}
 				});
 
-				String url = OneDev.getInstance(UrlManager.class).urlFor(comment);
-				var link = new ExternalLink("description", UrlUtils.makeRelative(url));
+				String url = OneDev.getInstance(UrlManager.class).urlFor(comment, false);
+				var link = new ExternalLink("description", url);
 				link.add(new Label("label", StringUtils.abbreviate(comment.getContent(), MAX_DESCRIPTION_LEN)));
 				fragment.add(link);
 

@@ -156,7 +156,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 	private void showPullRequestLink(Output output, Long projectId, String branch, String defaultBranch) {
     	output.writeLine();
     	output.writeLine("Create a pull request for '"+ branch +"' by visiting:");
-		output.writeLine("    " + urlManager.urlForProject(projectId) 
+		output.writeLine("    " + urlManager.urlForProject(projectId, true) 
 				+"/~pulls/new?target=" 
 				+ projectId 
 				+ ":" 

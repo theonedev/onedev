@@ -35,7 +35,7 @@ public class ReferenceProcessor implements HtmlProcessor {
 				if (RequestCycle.get() != null)
 					url = RequestCycle.get().urlFor(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(reference.getProject(), reference.getNumber())).toString();
 				else
-					url = OneDev.getInstance(UrlManager.class).urlForIssue(reference.getProject(), reference.getNumber());
+					url = OneDev.getInstance(UrlManager.class).urlForIssue(reference.getProject(), reference.getNumber(), true);
 				return String.format("<a href='%s' class='issue reference' data-reference='%s'>%s</a>",
 						url, reference, text);
 			} else if (reference instanceof BuildReference) {
@@ -43,7 +43,7 @@ public class ReferenceProcessor implements HtmlProcessor {
 				if (RequestCycle.get() != null)
 					url = RequestCycle.get().urlFor(BuildDashboardPage.class, BuildDashboardPage.paramsOf(reference.getProject(), reference.getNumber())).toString();
 				else
-					url = OneDev.getInstance(UrlManager.class).urlForBuild(reference.getProject(), reference.getNumber());
+					url = OneDev.getInstance(UrlManager.class).urlForBuild(reference.getProject(), reference.getNumber(), true);
 				var build = OneDev.getInstance(BuildManager.class).find(reference.getProject(), reference.getNumber());
 				if (build != null && build.getVersion() != null)
 					text += " (" + HtmlEscape.escapeHtml5(build.getVersion()) + ")";
@@ -54,7 +54,7 @@ public class ReferenceProcessor implements HtmlProcessor {
 				if (RequestCycle.get() != null)
 					url = RequestCycle.get().urlFor(PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(reference.getProject(), reference.getNumber())).toString();
 				else
-					url = OneDev.getInstance(UrlManager.class).urlForPullRequest(reference.getProject(), reference.getNumber());
+					url = OneDev.getInstance(UrlManager.class).urlForPullRequest(reference.getProject(), reference.getNumber(), true);
 				return String.format("<a href='%s' class='pull-request reference' data-reference='%s'>%s</a>",
 						url, reference, text);
 			} else {
