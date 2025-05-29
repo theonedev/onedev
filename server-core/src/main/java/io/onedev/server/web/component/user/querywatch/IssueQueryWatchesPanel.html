@@ -1,10 +1,12 @@
 <wicket:panel>
     <div class="alert alert-notice alert-light mb-4">
-        Issue query watch only affects new issues. To manage watch status of existing issues 
-        in batch, filter issues by watch status in issues page, and then take appropriate action
+        <wicket:t>
+            Issue query watch only affects new issues. To manage watch status of existing issues 
+            in batch, filter issues by watch status in issues page, and then take appropriate action
+        </wicket:t>
     </div>
     <div class="mb-3">
-        <a wicket:id="deleteSelected" class="btn btn-danger">Delete Selected</a>
+        <a wicket:id="deleteSelected" class="btn btn-danger"><wicket:t>Delete Selected</wicket:t></a>
     </div>
     <table wicket:id="queries" class="table table-condensed"></table>
     <wicket:fragment wicket:id="linkFrag">

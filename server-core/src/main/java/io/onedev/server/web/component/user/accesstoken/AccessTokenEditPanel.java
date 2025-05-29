@@ -1,5 +1,8 @@
 package io.onedev.server.web.component.user.accesstoken;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -58,7 +61,7 @@ abstract class AccessTokenEditPanel extends Panel {
 						nameConflict = true;						
 				}
 				if (nameConflict) {
-					editor.error(new Path(new PathNode.Named("name")), "Name already used by another access token of the owner");
+					editor.error(new Path(new PathNode.Named("name")), _T("Name already used by another access token of the owner"));
 					target.add(AccessTokenEditPanel.this);
 				} else {
 					token.setName(bean.getName());
@@ -69,7 +72,7 @@ abstract class AccessTokenEditPanel extends Panel {
 					var authorizations = new ArrayList<AccessTokenAuthorization>();
 					for (var authorizationBean : bean.getAuthorizations()) {
 						if (!projectPaths.add(authorizationBean.getProjectPath())) {
-							editor.error(new Path(new PathNode.Named("authorizations")), "Duplicate authorizations found: " + authorizationBean.getProjectPath());
+							editor.error(new Path(new PathNode.Named("authorizations")), MessageFormat.format(_T("Duplicate authorizations found: {0}"), authorizationBean.getProjectPath()));
 							target.add(AccessTokenEditPanel.this);
 							return;
 						} else {

@@ -1,6 +1,36 @@
 package io.onedev.server.web.editable.jobprivilege;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.IEvent;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.data.IDataProvider;
+import org.apache.wicket.markup.repeater.data.ListDataProvider;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.util.convert.ConversionException;
+
 import com.google.common.base.Joiner;
+
 import io.onedev.server.model.support.role.JobPrivilege;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -13,28 +43,6 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.event.IEvent;
-import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.*;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.markup.repeater.data.IDataProvider;
-import org.apache.wicket.markup.repeater.data.ListDataProvider;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.util.convert.ConversionException;
-
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 
@@ -74,7 +82,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 				};
 			}
 			
-		});
+		}.add(AttributeAppender.append("data-tippy-content", _T("Add new"))));
 		
 		List<IColumn<JobPrivilege, Void>> columns = new ArrayList<>();
 		
@@ -101,7 +109,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 
 		});		
 		
-		columns.add(new AbstractColumn<>(Model.of("Job Names")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Job Names"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobPrivilege>> cellItem, String componentId, IModel<JobPrivilege> rowModel) {
@@ -109,25 +117,25 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<>(Model.of("Privilege")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Privilege"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobPrivilege>> cellItem, String componentId, IModel<JobPrivilege> rowModel) {
 				JobPrivilege privilege = rowModel.getObject();
 				if (privilege.isManageJob()) {
-					cellItem.add(new Label(componentId, "manage job"));
+					cellItem.add(new Label(componentId, _T("manage job")));
 				} else if (privilege.isRunJob()) {
-					cellItem.add(new Label(componentId, "run job"));
+					cellItem.add(new Label(componentId, _T("run job")));
 				} else {
 					var accessibles = new ArrayList<>();
 					if (privilege.isAccessLog())
-						accessibles.add("log");
+						accessibles.add(_T("log"));
 					if (privilege.isAccessPipeline())
-						accessibles.add("pipeline");
-					accessibles.add("artifacts");
+						accessibles.add(_T("pipeline"));
+					accessibles.add(_T("artifacts"));
 					if (privilege.getAccessibleReports() != null)
-						accessibles.add("reports:" + privilege.getAccessibleReports());
-					cellItem.add(new Label(componentId, "access [" + Joiner.on(", ").join(accessibles) + "]"));
+						accessibles.add(_T("reports") + ":" + privilege.getAccessibleReports());
+					cellItem.add(new Label(componentId, MessageFormat.format(_T("access [{0}]"), Joiner.on(", ").join(accessibles))));
 				}
 			}
 		});		
@@ -159,13 +167,13 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 						};
 					}
 
-				});
+				}.add(AttributeAppender.append("data-tippy-content", _T("Edit"))));
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this privilege?"));
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to delete this privilege?")));
 					}
 
 					@Override
@@ -176,7 +184,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 						target.add(JobPrivilegeListEditPanel.this);
 					}
 
-				});
+				}.add(AttributeAppender.append("data-tippy-content", _T("Delete"))));
 				cellItem.add(fragment);
 			}
 

@@ -1,10 +1,12 @@
 <wicket:panel>
     <div class="alert alert-notice alert-light mb-4">
-        Pull request query watch only affects new pull requests. To manage watch status of existing pull requests 
-        in batch, filter pull requests by watch status in pull requests page, and then take appropriate action
+        <wicket:t>
+            Pull request query watch only affects new pull requests. To manage watch status of existing pull requests 
+            in batch, filter pull requests by watch status in pull requests page, and then take appropriate action
+        </wicket:t>
     </div>
     <div class="mb-4">
-        <a wicket:id="deleteSelected" class="btn btn-danger">Delete Selected</a>
+        <a wicket:id="deleteSelected" class="btn btn-danger"><wicket:t>Delete Selected</wicket:t></a>
     </div>
     <table wicket:id="queries" class="table"></table>
     <wicket:fragment wicket:id="linkFrag">

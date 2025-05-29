@@ -1,16 +1,19 @@
 package io.onedev.server.web.page.admin.rolemanagement;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -41,6 +44,7 @@ import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 
 public class RoleListPage extends AdministrationPage {
 
@@ -113,6 +117,7 @@ public class RoleListPage extends AdministrationPage {
 			}
 			
 		}));
+		searchField.add(AttributeAppender.append("placeholder", _T("Filter roles...")));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
@@ -138,7 +143,7 @@ public class RoleListPage extends AdministrationPage {
 		
 		List<IColumn<Role, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<Role, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<Role, Void>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Role>> cellItem, String componentId, IModel<Role> rowModel) {
@@ -164,7 +169,7 @@ public class RoleListPage extends AdministrationPage {
 			}
 		});
 
-		columns.add(new AbstractColumn<Role, Void>(Model.of("Description")) {
+		columns.add(new AbstractColumn<Role, Void>(Model.of(_T("Description"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Role>> cellItem, String componentId, IModel<Role> rowModel) {
@@ -184,7 +189,7 @@ public class RoleListPage extends AdministrationPage {
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						String message = "Do you really want to delete role '" + rowModel.getObject().getName() + "'?";						
+						String message = MessageFormat.format(_T("Do you really want to delete role \"{0}\"?"), rowModel.getObject().getName());						
 						attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
 					}
 
@@ -192,7 +197,7 @@ public class RoleListPage extends AdministrationPage {
 					public void onClick(AjaxRequestTarget target) {
 						Role role = rowModel.getObject();
 						OneDev.getInstance(RoleManager.class).delete(role);
-						Session.get().success("Role '" + role.getName() + "' deleted");
+						Session.get().success(MessageFormat.format(_T("Role \"{0}\" deleted"), role.getName()));
 						target.add(rolesTable);
 					}
 
@@ -201,7 +206,7 @@ public class RoleListPage extends AdministrationPage {
 						super.onComponentTag(tag);
 						if (!isEnabled()) {
 							tag.put("disabled", "disabled");
-							tag.put("title", "This is a built-in role and can not be deleted");
+							tag.put("data-tippy-content", _T("This is a built-in role and can not be deleted"));
 						}
 					}
 
@@ -278,7 +283,7 @@ public class RoleListPage extends AdministrationPage {
 	
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Roles");
+		return new Label(componentId, _T("Roles"));
 	}
 
 }

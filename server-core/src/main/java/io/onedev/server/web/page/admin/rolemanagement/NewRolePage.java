@@ -1,10 +1,14 @@
 package io.onedev.server.web.page.admin.rolemanagement;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -46,20 +50,22 @@ public class NewRolePage extends AdministrationPage {
 				Role roleWithSameName = roleManager.find(role.getName());
 				if (roleWithSameName != null) {
 					editor.error(new Path(new PathNode.Named("name")),
-							"This name has already been used by another role");
+							_T("This name has already been used by another role"));
 				} 
 				if (editor.isValid()) {
 					Collection<LinkSpec> authorizedLinks = new ArrayList<>();
 					for (String linkName: role.getEditableIssueLinks()) 
 						authorizedLinks.add(OneDev.getInstance(LinkSpecManager.class).find(linkName));
 					roleManager.create(role, authorizedLinks);
-					Session.get().success("Role created");
+					Session.get().success(_T("Role created"));
 					setResponsePage(RoleListPage.class);
 				}
 			}
 			
 		};
 		form.add(editor);
+		form.add(new WebMarkupContainer("save").add(AttributeAppender.append("value", _T("Save"))));
+
 		add(form);
 	}
 

@@ -3,11 +3,11 @@
 		<div class="card-body">
 			<form wicket:id="form" class="leave-confirm">
 				<div wicket:id="editor"></div>
-				<input class="btn btn-primary dirty-aware mt-3" value="Save" type="submit">
+				<input wicket:id="save" class="btn btn-primary dirty-aware mt-3" type="submit">
 			</form>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="topbarTitleFrag">
-		<a wicket:id="roles">Roles</a> <span class="dot"></span> <span class="text-truncate">Create New</span> 
+		<a wicket:id="roles"><wicket:t>Roles</wicket:t></a> <span class="dot"></span> <span class="text-truncate"><wicket:t>Create New</wicket:t></span> 
 	</wicket:fragment>
 </wicket:extend>

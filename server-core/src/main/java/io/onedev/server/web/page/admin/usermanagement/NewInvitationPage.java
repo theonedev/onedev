@@ -1,5 +1,18 @@
 package io.onedev.server.web.page.admin.usermanagement;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
@@ -11,14 +24,6 @@ import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.mailservice.MailServicePage;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 public class NewInvitationPage extends AdministrationPage {
 
@@ -37,12 +42,14 @@ public class NewInvitationPage extends AdministrationPage {
 			Form<?> form = new Form<Void>("form");
 			form.add(BeanContext.edit("editor", bean));
 			form.add(new FencedFeedbackPanel("feedback", form));
+			var sendingMessage = _T("Sending invitation to \"{0}\"...");
+			var sentMessage = _T("Invitations sent");
 			form.add(new TaskButton("invite") {
 
 				@Override
 				protected TaskResult runTask(TaskLogger logger) throws InterruptedException {
 					for (String emailAddress: bean.getListOfEmailAddresses()) {
-						logger.log("Sending invitation to '" + emailAddress + "'...");
+						logger.log(MessageFormat.format(sendingMessage, emailAddress));
 						UserInvitation invitation = new UserInvitation();
 						invitation.setEmailAddress(emailAddress);
 						UserInvitationManager userInvitationManager = OneDev.getInstance(UserInvitationManager.class);
@@ -51,7 +58,7 @@ public class NewInvitationPage extends AdministrationPage {
 						if (Thread.interrupted())
 							throw new InterruptedException();
 					}
-					return new TaskResult(true, new PlainMessage("Invitations sent"));
+					return new TaskResult(true, new PlainMessage(sentMessage));
 				}
 
 				@Override
@@ -72,7 +79,7 @@ public class NewInvitationPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Invite Users");
+		return new Label(componentId, _T("Invite Users"));
 	}
 
 }

@@ -7,7 +7,7 @@ import org.apache.wicket.Component;
 
 public abstract class UserActivity implements Serializable {
     
-    public enum Type {CODE_COMMIT, ISSUE, PULL_REQUEST_AND_CODE_REVIEW}
+    public enum Type {ISSUE, CODE_COMMIT, PULL_REQUEST_AND_CODE_REVIEW}
     
     private final Date date;
 

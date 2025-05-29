@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.user.querywatch;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +41,7 @@ public abstract class QueryWatchesPanel extends GenericPanel<User> {
         
         List<Tab> tabs = new ArrayList<>();
         
-        var issueTab = new AjaxActionTab(Model.of("Issue"), null) {
+        var issueTab = new AjaxActionTab(Model.of(_T("Issue")), null) {
             @Override
             protected void onSelect(AjaxRequestTarget target, Component tabLink) {
                 onTabSelected(target, TAB_ISSUE);
@@ -47,7 +49,7 @@ public abstract class QueryWatchesPanel extends GenericPanel<User> {
         };
         tabs.add(issueTab);        
         
-        var pullRequestTab = new AjaxActionTab(Model.of("Pull Request"), null) {
+        var pullRequestTab = new AjaxActionTab(Model.of(_T("Pull Request")), null) {
             @Override
             protected void onSelect(AjaxRequestTarget target, Component tabLink) {
                 onTabSelected(target, TAB_PULL_REQUEST);
@@ -55,7 +57,7 @@ public abstract class QueryWatchesPanel extends GenericPanel<User> {
         };
         tabs.add(pullRequestTab);
 
-        var buildTab = new AjaxActionTab(Model.of("Build"), null) {
+        var buildTab = new AjaxActionTab(Model.of(_T("Build")), null) {
             @Override
             protected void onSelect(AjaxRequestTarget target, Component tabLink) {
                 onTabSelected(target, TAB_BUILD);
@@ -63,7 +65,7 @@ public abstract class QueryWatchesPanel extends GenericPanel<User> {
         };
         tabs.add(buildTab);
         
-        var packTab = new AjaxActionTab(Model.of("Pack"), null) {
+        var packTab = new AjaxActionTab(Model.of(_T("Pack")), null) {
             @Override
             protected void onSelect(AjaxRequestTarget target, Component tabLink) {
                 onTabSelected(target, TAB_PACK);
@@ -71,7 +73,7 @@ public abstract class QueryWatchesPanel extends GenericPanel<User> {
         };
         tabs.add(packTab);
 
-        var commitTab = new AjaxActionTab(Model.of("Commit"), null) {
+        var commitTab = new AjaxActionTab(Model.of(_T("Commit")), null) {
             @Override
             protected void onSelect(AjaxRequestTarget target, Component tabLink) {
                 onTabSelected(target, TAB_COMMIT);

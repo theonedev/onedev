@@ -1,19 +1,24 @@
 package io.onedev.server.web.component.user.accesstoken;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Panel;
+
 import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.editable.BeanContext;
-import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Panel;
 
 abstract class AccessTokenPanel extends Panel {
 	
@@ -34,7 +39,7 @@ abstract class AccessTokenPanel extends Panel {
 				onEdit(target);
 			}
 			
-		});
+		}.add(AttributeAppender.append("data-tippy-content", _T("Edit this access token"))));
 		add(new AjaxLink<Void>("regenerate") {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -51,7 +56,7 @@ abstract class AccessTokenPanel extends Panel {
 				target.add(AccessTokenPanel.this);
 				Session.get().success("Access token regenerated successfully");
 			}
-		});
+		}.add(AttributeAppender.append("data-tippy-content", _T("Regenerate this access token"))));
 		add(new AjaxLink<Void>("delete") {
 
 			@Override
@@ -65,7 +70,7 @@ abstract class AccessTokenPanel extends Panel {
 				onDelete(target);
 			}
 			
-		});
+		}.add(AttributeAppender.append("data-tippy-content", _T("Delete this access token"))));
 		
 		add(new WebMarkupContainer("expired").setVisible(getToken().isExpired()));
 		

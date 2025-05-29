@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.user.membership;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -89,6 +92,7 @@ public class UserMembershipsPage extends UserPage {
 		TextField<String> searchField;
 		
 		add(searchField = new TextField<String>("filterGroups", Model.of(query)));
+		searchField.add(AttributeAppender.append("placeholder", _T("Filter by name...")));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
@@ -130,7 +134,7 @@ public class UserMembershipsPage extends UserPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				getSettings().setPlaceholder("Add to group...");
+				getSettings().setPlaceholder(_T("Add to group..."));
 				getSettings().setFormatResult("onedev.server.groupChoiceFormatter.formatResult");
 				getSettings().setFormatSelection("onedev.server.groupChoiceFormatter.formatSelection");
 				getSettings().setEscapeMarkup("onedev.server.groupChoiceFormatter.escapeMarkup");
@@ -145,7 +149,7 @@ public class UserMembershipsPage extends UserPage {
 				target.add(membershipsTable);
 				if (selectionColumn != null)
 					selectionColumn.getSelections().clear();
-				Session.get().success("Group added");
+				Session.get().success(_T("Group added"));
 			}
 			
 			@Override
@@ -167,7 +171,7 @@ public class UserMembershipsPage extends UserPage {
 
 					@Override
 					public String getLabel() {
-						return "Delete Selected Memberships";
+						return _T("Delete Selected Memberships");
 					}
 
 					@Override
@@ -215,7 +219,7 @@ public class UserMembershipsPage extends UserPage {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select memberships to delete");
+									tag.put("data-tippy-content", _T("Please select memberships to delete"));
 								}
 							}
 							
@@ -229,7 +233,7 @@ public class UserMembershipsPage extends UserPage {
 
 					@Override
 					public String getLabel() {
-						return "Delete All Queried Memberships";
+						return _T("Delete All Queried Memberships");
 					}
 					
 					@Override
@@ -255,7 +259,7 @@ public class UserMembershipsPage extends UserPage {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete all queried memberships";
+										return _T("Type <code>yes</code> below to delete all queried memberships");
 									}
 									
 									@Override
@@ -278,7 +282,7 @@ public class UserMembershipsPage extends UserPage {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No memberships to delete");
+									tag.put("data-tippy-content", _T("No memberships to delete"));
 								}
 							}
 							
@@ -296,7 +300,7 @@ public class UserMembershipsPage extends UserPage {
 		
 		columns.add(selectionColumn = new SelectionColumn<>());
 		
-		columns.add(new AbstractColumn<>(Model.of("Name")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Membership>> cellItem, String componentId,
@@ -317,7 +321,7 @@ public class UserMembershipsPage extends UserPage {
 			}
 		});
 		
-		columns.add(new AbstractColumn<>(Model.of("Description")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Description"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Membership>> cellItem, String componentId,

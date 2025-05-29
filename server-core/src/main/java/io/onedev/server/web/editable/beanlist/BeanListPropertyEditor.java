@@ -119,7 +119,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 			@Override
 			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
 				PropertyContext<Serializable> propertyContext = item.getModelObject();
-				item.add(new Label("header", EditableUtils.getDisplayName(propertyContext.getPropertyGetter())));
+				item.add(new Label("header", _T(EditableUtils.getDisplayName(propertyContext.getPropertyGetter()))));
 				item.add(AttributeAppender.append("class", "property-" + propertyContext.getPropertyName()));
 
 				String required;
@@ -285,7 +285,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				onPropertyUpdating(target);
 			}
 
-		}.setDefaultFormProcessing(false));
+		}.setDefaultFormProcessing(false).add(AttributeAppender.append("data-tippy-content", _T("Delete this"))));
 		
 		return row;
 	}

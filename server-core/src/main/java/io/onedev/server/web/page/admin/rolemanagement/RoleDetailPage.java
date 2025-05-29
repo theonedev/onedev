@@ -1,6 +1,9 @@
 package io.onedev.server.web.page.admin.rolemanagement;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -8,7 +11,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -106,7 +111,7 @@ public class RoleDetailPage extends AdministrationPage {
 					Role roleWithSameName = roleManager.find(role.getName());
 					if (roleWithSameName != null && !roleWithSameName.equals(role)) {
 						editor.error(new Path(new PathNode.Named("name")),
-								"This name has already been used by another role.");
+								_T("This name has already been used by another role."));
 					} 
 					if (editor.isValid()) {
 						Collection<LinkSpec> authorizedLinks = new ArrayList<>();
@@ -114,7 +119,7 @@ public class RoleDetailPage extends AdministrationPage {
 							authorizedLinks.add(OneDev.getInstance(LinkSpecManager.class).find(linkName));
 						roleManager.update(role, authorizedLinks, oldName);
 						setResponsePage(RoleDetailPage.class, RoleDetailPage.paramsOf(role));
-						Session.get().success("Role updated");
+						Session.get().success(MessageFormat.format(_T("Role \"{0}\" updated"), role.getName()));
 					}
 				}
 				
@@ -122,13 +127,13 @@ public class RoleDetailPage extends AdministrationPage {
 			
 			form.add(editor);
 			form.add(new FencedFeedbackPanel("feedback", form));
-			
+			form.add(new WebMarkupContainer("save").add(AttributeAppender.append("value", _T("Save"))));
 			form.add(new Link<Void>("delete") {
 
 				@Override
 				public void onClick() {
 					OneDev.getInstance(RoleManager.class).delete(getRole());
-					Session.get().success("Role '" + getRole().getName() + "' deleted");
+					Session.get().success(MessageFormat.format(_T("Role \"{0}\" deleted"), getRole().getName()));
 					
 					String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Role.class);
 					if (redirectUrlAfterDelete != null)
@@ -143,7 +148,7 @@ public class RoleDetailPage extends AdministrationPage {
 					setVisible(!getRole().isOwner());
 				}
 				
-			}.add(new ConfirmClickModifier("Do you really want to delete role '" + getRole().getName() + "'?")));
+			}.add(new ConfirmClickModifier(MessageFormat.format(_T("Do you really want to delete role \"{0}\"?"), getRole().getName()))));
 			
 			fragment.add(form);
 			add(fragment);

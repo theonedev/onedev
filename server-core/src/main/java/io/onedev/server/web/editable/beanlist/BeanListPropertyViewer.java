@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.beanlist;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -76,7 +78,7 @@ public class BeanListPropertyViewer extends Panel {
 			@Override
 			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
 				PropertyContext<?> propertyContext = item.getModelObject();
-				item.add(new Label("header", EditableUtils.getDisplayName(propertyContext.getPropertyGetter())));
+				item.add(new Label("header", _T(EditableUtils.getDisplayName(propertyContext.getPropertyGetter()))));
 				item.add(AttributeAppender.append("class", "property-" + propertyContext.getPropertyName()));
 			}
 

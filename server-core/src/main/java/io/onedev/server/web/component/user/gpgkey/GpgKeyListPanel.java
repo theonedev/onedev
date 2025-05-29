@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.user.gpgkey;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -9,6 +11,7 @@ import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -144,7 +147,7 @@ public class GpgKeyListPanel extends GenericPanel<List<GpgKey>> {
 						attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
 					}
 
-				});
+				}.add(AttributeAppender.append("data-tippy-content", _T("Delete this key"))));
 				
 				cellItem.add(fragment);
 			}

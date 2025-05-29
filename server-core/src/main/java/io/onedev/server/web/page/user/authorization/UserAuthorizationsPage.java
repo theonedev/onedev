@@ -1,5 +1,8 @@
 package io.onedev.server.web.page.user.authorization;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,7 +11,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.wicket.Session;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -58,7 +63,7 @@ public class UserAuthorizationsPage extends UserPage {
 				Collection<UserAuthorization> authorizations = new ArrayList<>();
 				for (ProjectAuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
 					if (!projectNames.add(authorizationBean.getProjectPath())) {
-						error("Duplicate authorizations found: " + authorizationBean.getProjectPath());
+						error(MessageFormat.format(_T("Duplicate authorizations found: {0}"), authorizationBean.getProjectPath()));
 						return;
 					} else {
 						var project = getProjectManager().findByPath(authorizationBean.getProjectPath());
@@ -73,12 +78,13 @@ public class UserAuthorizationsPage extends UserPage {
 				}
 				
 				OneDev.getInstance(UserAuthorizationManager.class).syncAuthorizations(getUser(), authorizations);
-				Session.get().success("Project authorizations updated");
+				Session.get().success(_T("Project authorizations updated"));
 			}
 			
 		};
 		form.add(new FencedFeedbackPanel("feedback", form));
 		form.add(PropertyContext.edit("editor", authorizationsBean, "authorizations"));
+		form.add(new WebMarkupContainer("submit").add(AttributeAppender.append("value", _T("Save"))));
 		add(form);	
 	}
 

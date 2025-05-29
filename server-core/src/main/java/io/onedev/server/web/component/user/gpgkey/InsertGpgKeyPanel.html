@@ -1,7 +1,7 @@
 <wicket:panel>
 	<div class="insert-gpg-key">
 		<div class="modal-header">
-			<h5 class="modal-title">Add a GPG Public Key</h5>
+			<h5 class="modal-title"><wicket:t>Add a GPG Public Key</wicket:t></h5>
 			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 		</div>
 		<form wicket:id="form">
@@ -9,8 +9,8 @@
 				<div wicket:id="editor"></div>
 			</div>
 			<div class="modal-footer">
-				<input wicket:id="add" type="submit" class="btn btn-primary dirty-aware" value="Add">
-				<button wicket:id="cancel" type="button" class="btn btn-secondary">Cancel</button>
+				<input wicket:id="add" type="submit" class="btn btn-primary dirty-aware">
+				<button wicket:id="cancel" type="button" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></button>
 			</div>
 		</form>
 	</div>

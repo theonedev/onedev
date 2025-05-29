@@ -1,10 +1,14 @@
 package io.onedev.server.web.component.user.gpgkey;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.Date;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
@@ -21,7 +25,6 @@ import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.page.my.MyPage;
 
 public abstract class InsertGpgKeyPanel extends Panel {
 
@@ -59,16 +62,14 @@ public abstract class InsertGpgKeyPanel extends Panel {
                 gpgKey.setKeyId(gpgKey.getKeyIds().get(0));
                 
                 if (gpgKey.getKeyIds().stream().anyMatch(it->gpgKeyManager.findSigningKey(it)!=null)) { 
-					editor.error(new Path(new PathNode.Named("content")), "This key or one of its subkey is already in use");
+					editor.error(new Path(new PathNode.Named("content")), _T("This key or one of its subkey is already in use"));
 					target.add(form);
                 } else {
                 	boolean hasErrors = false;
                 	for (String emailAddressValue: GpgUtils.getEmailAddresses(gpgKey.getPublicKeys().get(0))) {
                     	EmailAddress emailAddress = OneDev.getInstance(EmailAddressManager.class).findByValue(emailAddressValue);
                     	if (emailAddress == null || !emailAddress.isVerified() || !emailAddress.getOwner().equals(getUser())) {
-                    		String who = (getPage() instanceof MyPage)? "yours": "the user";
-                    		editor.error(new Path(new PathNode.Named("content")), "This key is associated with " + emailAddressValue 
-                    				+ ", however it is NOT a verified email address of " + who);
+                    		editor.error(new Path(new PathNode.Named("content")), MessageFormat.format(_T("This key is associated with {0}, however it is NOT a verified email address of this user"), emailAddressValue));
                     		target.add(form);
                     		hasErrors = true;
                     		break;
@@ -88,7 +89,7 @@ public abstract class InsertGpgKeyPanel extends Panel {
                 target.add(form);
             }
             
-        });
+        }.add(AttributeAppender.append("value", _T("Add"))));
         
         form.add(new AjaxLink<Void>("cancel") {
             

@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.my.querywatch;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
@@ -48,7 +50,7 @@ public class MyQueryWatchesPage extends MyPage {
 
     @Override
     protected Component newTopbarTitle(String componentId) {
-        return new Label(componentId, "Query Watches");
+        return new Label(componentId, _T("Query Watches"));
     }
 
 } 

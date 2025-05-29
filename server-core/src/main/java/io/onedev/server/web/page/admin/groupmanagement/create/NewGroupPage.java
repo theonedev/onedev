@@ -54,7 +54,7 @@ public class NewGroupPage extends AdministrationPage {
 				} 
 				if (editor.isValid()) {
 					groupManager.create(group);
-					Session.get().success("Group created");
+					Session.get().success(_T("Group created"));
 					setResponsePage(GroupMembershipsPage.class, GroupMembershipsPage.paramsOf(group));
 				}
 			}

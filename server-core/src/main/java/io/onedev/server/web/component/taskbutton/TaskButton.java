@@ -131,6 +131,7 @@ public abstract class TaskButton extends AjaxButton {
 		ExecutorService executorService = OneDev.getInstance(ExecutorService.class);
 		List<JobLogEntryEx> messages = new ArrayList<>();
 		messages.add(new JobLogEntryEx(new JobLogEntry(new Date(), _T("Please wait..."))));
+		var errorMessage = _T("Error executing task");
 		TaskFuture future = getTaskFutures().put(path, new TaskFuture(executorService.submit(new Callable<TaskResult>() {
 
 			@Override
@@ -170,7 +171,7 @@ public abstract class TaskButton extends AjaxButton {
 						else								
 							logger.error(null, e);
 					}
-					return new TaskResult(false, new PlainMessage("Error " + title));
+					return new TaskResult(false, new PlainMessage(errorMessage));
 				} 
 			}
 			

@@ -1,23 +1,19 @@
 package io.onedev.server.web.page.admin.usermanagement;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserInvitationManager;
-import io.onedev.server.model.UserInvitation;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.ajaxlistener.ShowGlobalAjaxIndicatorListener;
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
-import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -34,10 +30,19 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserInvitationManager;
+import io.onedev.server.model.UserInvitation;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.ajaxlistener.ShowGlobalAjaxIndicatorListener;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 
 public class InvitationListPage extends AdministrationPage {
 
@@ -110,6 +115,7 @@ public class InvitationListPage extends AdministrationPage {
 			}
 			
 		}));
+		searchField.add(AttributeAppender.append("placeholder", _T("Filter")));
 		
 		searchField.add(new OnTypingDoneBehavior(100) {
 
@@ -136,7 +142,7 @@ public class InvitationListPage extends AdministrationPage {
 		
 		List<IColumn<UserInvitation, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<>(Model.of("Email Address")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Email Address"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<UserInvitation>> cellItem,
@@ -166,21 +172,20 @@ public class InvitationListPage extends AdministrationPage {
 						if (OneDev.getInstance(SettingManager.class).getMailService() != null) {
 							UserInvitation invitation = rowModel.getObject();
 							getInvitationManager().sendInvitationEmail(invitation);
-							Session.get().success("Invitation sent to '" + invitation.getEmailAddress() + "'");
+							Session.get().success(MessageFormat.format(_T("Invitation sent to \"{0}\""), invitation.getEmailAddress()));
 						} else {
-							Session.get().error("Mail service not configured");
+							Session.get().error(_T("Mail service not configured"));
 						}
 					}
 
-				});
+				}.add(AttributeAppender.append("data-tippy-content", _T("Resend invitation"))));
 
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						String message = "Do you really want to cancel invitation to '"
-								+ rowModel.getObject().getEmailAddress() + "'?";
+						String message = MessageFormat.format(_T("Do you really want to cancel invitation to \"{0}\"?"), rowModel.getObject().getEmailAddress());
 						attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
 					}
 
@@ -188,7 +193,7 @@ public class InvitationListPage extends AdministrationPage {
 					public void onClick(AjaxRequestTarget target) {
 						UserInvitation invitation = rowModel.getObject();
 						getInvitationManager().delete(invitation);
-						Session.get().success("Invitation to '" + invitation.getEmailAddress() + "' deleted");
+						Session.get().success(MessageFormat.format(_T("Invitation to \"{0}\" deleted"), invitation.getEmailAddress()));
 						target.add(invitationsTable);
 					}
 
@@ -198,7 +203,7 @@ public class InvitationListPage extends AdministrationPage {
 						setVisible(SecurityUtils.isAdministrator());
 					}
 
-				});
+				}.add(AttributeAppender.append("data-tippy-content", _T("Cancel invitation"))));
 
 				cellItem.add(fragment);
 			}
@@ -264,7 +269,7 @@ public class InvitationListPage extends AdministrationPage {
 	
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Invitations");
+		return new Label(componentId, _T("Invitations"));
 	}
 
 }

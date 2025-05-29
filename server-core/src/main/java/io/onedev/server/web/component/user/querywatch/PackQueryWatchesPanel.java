@@ -2,6 +2,7 @@ package io.onedev.server.web.component.user.querywatch;
 
 import static io.onedev.server.model.support.NamedQuery.COMMON_NAME_PREFIX;
 import static io.onedev.server.model.support.NamedQuery.PERSONAL_NAME_PREFIX;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -117,11 +118,11 @@ class PackQueryWatchesPanel extends GenericPanel<User> {
                 super.onComponentTag(tag);
                 if (!isEnabled()) {
                     tag.put("disabled", "disabled");
-                    tag.put("title", "Please select query watches to delete");
+                    tag.put("data-tippy-content", _T("Please select query watches to delete"));
                 }
             }
             
-        }.add(new ConfirmClickModifier("Do you really want to delete selected query watches?")).setOutputMarkupId(true);
+        }.add(new ConfirmClickModifier(_T("Do you really want to delete selected query watches?"))).setOutputMarkupId(true);
 
         add(deleteSelected);        
 
@@ -144,9 +145,9 @@ class PackQueryWatchesPanel extends GenericPanel<User> {
                                      IModel<QueryInfo> rowModel) {
                 var name = rowModel.getObject().name;
                 if (name.startsWith(COMMON_NAME_PREFIX)) 
-                    name = name.substring(COMMON_NAME_PREFIX.length()) + " (common)";
+                    name = name.substring(COMMON_NAME_PREFIX.length()) + " (" + _T("common") + ")";
                 else
-                    name = name.substring(PERSONAL_NAME_PREFIX.length()) + " (personal)";
+                    name = name.substring(PERSONAL_NAME_PREFIX.length()) + " (" + _T("personal") + ")";
                                         
                 var fragment = new Fragment(componentId, "linkFrag", PackQueryWatchesPanel.this);
                 var projectId = rowModel.getObject().projectId;
@@ -178,7 +179,7 @@ class PackQueryWatchesPanel extends GenericPanel<User> {
                     fragment.add(link);
                     cellItem.add(fragment);
                 } else {
-                    cellItem.add(new Label(componentId, "<i>Global</i>").setEscapeModelStrings(false));
+                    cellItem.add(new Label(componentId, "<i>" + _T("Global") + "</i>").setEscapeModelStrings(false));
                 }
             }
         });
