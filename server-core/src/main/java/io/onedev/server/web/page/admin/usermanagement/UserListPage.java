@@ -658,8 +658,8 @@ public class UserListPage extends AdministrationPage {
 				};
 				link.add(new UserAvatar("avatar", user));
 				link.add(new Label("name", user.getName()));
-				link.add(new Label("service", "service").setVisible(user.isServiceAccount() && WicketUtils.isSubscriptionActive()));
-				link.add(new Label("disabled", "disabled").setVisible(user.isDisabled() && WicketUtils.isSubscriptionActive()));
+				link.add(new WebMarkupContainer("service").setVisible(user.isServiceAccount() && WicketUtils.isSubscriptionActive()));
+				link.add(new WebMarkupContainer("disabled").setVisible(user.isDisabled() && WicketUtils.isSubscriptionActive()));
 				fragment.add(link);
 				cellItem.add(fragment);
 			}

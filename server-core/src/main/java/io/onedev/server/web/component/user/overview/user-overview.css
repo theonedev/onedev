@@ -1,3 +1,6 @@
+.user-overview .info {
+    width: 240px;
+}
 .user-overview>.info .avatar {
     width: 160px;
     height: 160px;

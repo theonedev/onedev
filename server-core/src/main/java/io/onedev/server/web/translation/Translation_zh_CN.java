@@ -1759,7 +1759,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Private Key Secret", "私钥密钥");
 		m.put("Privilege", "权限");
 		m.put("Privilege Settings", "权限设置");
-		m.put("Profile", "资料");
+		m.put("Profile", "基本信息");
 		m.put("Profile updated", "配置已更新");
 		m.put("Programming language", "编程语言");
 		m.put("Project", "项目");
@@ -2592,10 +2592,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"此步骤设置 trivy 数据库缓存以加速各种扫描步骤。如果需要使用，请将其放置在扫描步骤之前");
 		m.put("This trigger will only be applicable if tagged commit is reachable from branches specified here. Multiple branches should be separated with spaces. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all branches", 
 			"此触发器仅在标记的提交可从此处指定的分支访问时适用。多个分支应以空格分隔。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。以 '-' 为前缀表示排除。留空表示匹配所有分支");
-		m.put("This user is authenticating via external system. To authenticate via internal database, <a wicket:id=\"setPasswordForUser\">set password for user</a> or <a wicket:id=\"tellUserToResetPassword\">tell user to reset password</a>", 
-			"此用户通过外部系统进行认证。要通过内部数据库进行认证，<a wicket:id=\"setPasswordForUser\">设置用户密码</a> 或 <a wicket:id=\"tellUserToResetPassword\">告诉用户重置密码</a>");
-		m.put("This user is authenticating via internal database. <a wicket:id=\"removePassword\">Remove password</a> to force the user to authenticate via external system", 
-			"此用户正在通过内部数据库进行认证。<a wicket:id=\"removePassword\">删除密码</a> 以强制用户通过外部系统进行认证");
 		m.put("Threads", "线程");
 		m.put("Time Estimate Issue Field", "工单时间估算字段");
 		m.put("Time Range", "时间范围");
@@ -2835,8 +2831,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Window Memory", "窗口内存");
 		m.put("Working Directory", "工作目录");
 		m.put("Write", "写入");
-		m.put("You are authenticating via external system", "您正在通过外部系统进行认证");
-		m.put("You are authenticating via internal database", "您正在通过内部数据库进行认证");
 		m.put("You have unverified <a wicket:id=\"hasUnverifiedLink\">email addresses</a>", "您有未验证的 <a wicket:id=\"hasUnverifiedLink\">电子邮件地址</a>");
 		m.put("You may also drop file/image to the input box, or paste image from clipboard", "您也可以将文件/图像拖到输入框中，或从剪贴板粘贴图像");
 		m.put("You may initialize the project by <a wicket:id=\"addFiles\" class=\"link-primary\">adding files</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">setting up build spec</a>, or <a wicket:id=\"pushInstructions\" class=\"link-primary\">pushing an existing repository</a>", 
@@ -2853,6 +2847,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("YouTrack Project", "YouTrack 项目");
 		m.put("YouTrack Projects to Import", "要导入的 YouTrack 项目");
 		m.put("[Reset Password] Please Reset Your OneDev Password", "[重置密码] 请重置您的 OneDev 密码");
+		m.put("access [{0}]", "访问 [{0}]");
+		m.put("artifacts", "制品");
 		m.put("branches", "分支");
 		m.put("builds", "构建");
 		m.put("choose a color for this state", "选择一个颜色");
@@ -2880,6 +2876,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("is not empty", "不为空");
 		m.put("issues", "工单");
 		m.put("lines", "行");
+		m.put("log", "日志");
+		m.put("manage job", "管理任务");
 		m.put("may not be empty", "不能为空");
 		m.put("md.heading", "标题");
 		m.put("md.image", "图片");
@@ -2900,8 +2898,11 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("outdated", "过时");
 		m.put("packages", "包");
 		m.put("personal", "个人");
+		m.put("pipeline", "流水线");
 		m.put("pull requests", "合并请求");
+		m.put("reports", "报告");
 		m.put("root", "根");
+		m.put("run job", "运行任务");
 		m.put("search in this revision will be accurate after indexed", "索引完成后，在当前版本中的搜索将更准确");
 		m.put("service", "服务");
 		m.put("skipped {0} lines", "跳过 {0} 行");
@@ -2931,14 +2932,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("access [{0}]", "访问 [{0}]");
-		m.put("artifacts", "制品");
-		m.put("log", "日志");
-		m.put("manage job", "管理任务");
-		m.put("pipeline", "流水线");
-		m.put("reports", "报告");
-		m.put("run job", "运行任务");
-		
+		m.put("Do you really want to remove this account?", "您确定要删除此账户吗？");
+		m.put("This user is authenticating via external system.", "此用户通过外部系统进行身份验证。");
+		m.put("This user is authenticating via internal database.", "此用户通过内部数据库进行身份验证。");
+
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
 		m.put("Server Setup", "服务器设置");	

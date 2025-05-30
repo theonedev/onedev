@@ -15,6 +15,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -24,6 +25,9 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
@@ -32,8 +36,10 @@ import org.apache.wicket.model.Model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
@@ -44,7 +50,11 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.mail.MailManager;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
@@ -52,10 +62,16 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardD
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
+import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.DateRange;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.datepicker.DateRangePicker;
+import io.onedev.server.web.component.taskbutton.TaskButton;
+import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.user.UserAvatar;
+import io.onedev.server.web.component.user.UserDeleteLink;
 import io.onedev.server.web.component.user.overview.activity.ApprovePullRequest;
 import io.onedev.server.web.component.user.overview.activity.CommentIssue;
 import io.onedev.server.web.component.user.overview.activity.CommentPullRequest;
@@ -72,7 +88,10 @@ import io.onedev.server.web.component.user.overview.activity.ResolveCodeComment;
 import io.onedev.server.web.component.user.overview.activity.TransitIssue;
 import io.onedev.server.web.component.user.overview.activity.UnresolveCodeComment;
 import io.onedev.server.web.component.user.overview.activity.UserActivity;
+import io.onedev.server.web.page.user.password.UserPasswordPage;
+import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.TextUtils;
+import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.xodus.CommitInfoManager;
 
 public abstract class UserOverviewPanel extends GenericPanel<User> {
@@ -159,7 +178,7 @@ public abstract class UserOverviewPanel extends GenericPanel<User> {
     protected void onInitialize() {
         super.onInitialize();
 
-        var user = getModelObject();
+        var user = getUser();
         add(new UserAvatar("avatar", user));
 
         add(new Label("name", "@" + user.getName()));
@@ -193,6 +212,149 @@ public abstract class UserOverviewPanel extends GenericPanel<User> {
 
             }.setVisible(false));
         }
+
+		WebMarkupContainer noteContainer;
+		if (user.isDisabled() && WicketUtils.isSubscriptionActive()) {
+			if (user.isServiceAccount())
+				noteContainer = new Fragment("note", "disabledServiceAccountFrag", this);
+			else
+				noteContainer = new Fragment("note", "disabledFrag", this);
+		} else if (user.isServiceAccount() && WicketUtils.isSubscriptionActive()) {
+			noteContainer = new Fragment("note", "serviceAccountFrag", this);
+		} else if (user.getPassword() != null) {
+			noteContainer = new Fragment("note", "authViaInternalDatabaseFrag", this);
+            var actions = new WebMarkupContainer("actions");
+            actions.setVisible(SecurityUtils.isAdministrator());
+            noteContainer.add(actions);
+			actions.add(new Link<Void>("removePassword") {
+
+				@Override
+				public void onClick() {
+                    var user = getUser();
+					user.setPassword(null);
+					getUserManager().update(user, null);
+					Session.get().success(_T("Password has been removed"));
+					setResponsePage(UserPasswordPage.class, UserPasswordPage.paramsOf(user));
+				}
+
+			}.add(new ConfirmClickModifier(_T("Do you really want to remove password of this user?"))));
+            
+            noteContainer.setVisible(SecurityUtils.isAdministrator() || getUser().equals(SecurityUtils.getAuthUser()));
+		} else {
+			noteContainer = new Fragment("note", "authViaExternalSystemFrag", this);
+			var form = new Form<Void>("form");
+            form.setVisible(SecurityUtils.isAdministrator());
+			noteContainer.add(form);
+			form.add(new BookmarkablePageLink<Void>("setPasswordForUser",
+					UserPasswordPage.class, UserPasswordPage.paramsOf(getUser())));
+			var passwordResetRequestSentMessage = _T("Password reset request has been sent");
+			var noVerifiedPrimaryEmailAddressMessage = _T("No verified primary email address");
+			var mailServiceNotConfiguredMessage = _T("Unable to notify user as mail service is not configured");
+			var mailSubject = _T("[Reset Password] Please Reset Your OneDev Password");
+			form.add(new TaskButton("tellUserToResetPassword") {
+
+				@Override
+				protected TaskResult runTask(TaskLogger logger) {
+					var sessionManager = OneDev.getInstance(SessionManager.class);
+					return sessionManager.call(() -> {
+						SettingManager settingManager = OneDev.getInstance(SettingManager.class);
+						if (settingManager.getMailService() != null) {
+                            var user = getUser();
+							if (user.getPrimaryEmailAddress() != null && user.getPrimaryEmailAddress().isVerified()) {
+								String passwordResetCode = CryptoUtils.generateSecret();
+								user.setPasswordResetCode(passwordResetCode);
+								getUserManager().update(user, null);
+
+								MailManager mailManager = OneDev.getInstance(MailManager.class);
+
+								Map<String, Object> bindings = new HashMap<>();
+								bindings.put("passwordResetUrl", settingManager.getSystemSetting().getServerUrl() + "/~reset-password/" + passwordResetCode);
+								bindings.put("user", user);
+
+								var template = settingManager.getEmailTemplates().getPasswordReset();
+								var htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
+								var textBody = EmailTemplates.evalTemplate(false, template, bindings);
+
+								mailManager.sendMail(Arrays.asList(user.getPrimaryEmailAddress().getValue()),
+										Lists.newArrayList(), Lists.newArrayList(),
+										mailSubject,
+										htmlBody, textBody, null, null, null);
+
+								return new TaskResult(true, new TaskResult.PlainMessage(passwordResetRequestSentMessage));
+							} else {
+								return new TaskResult(false, new TaskResult.PlainMessage(noVerifiedPrimaryEmailAddressMessage));
+							}
+						} else {
+							return new TaskResult(false, new TaskResult.PlainMessage(mailServiceNotConfiguredMessage));
+						}
+					});
+				}
+
+			});
+            noteContainer.setVisible(SecurityUtils.isAdministrator() || getUser().equals(SecurityUtils.getUser()));
+		}
+
+		add(noteContainer);		
+        
+		add(new Link<Void>("enable") {
+
+			@Override
+			public void onClick() {
+				getUserManager().enable(getUser());
+				Session.get().success("User enabled");
+				setResponsePage(getPage().getClass(), getPage().getPageParameters());
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.isAdministrator() && getUser().isDisabled() && WicketUtils.isSubscriptionActive());
+			}
+
+		}.add(new ConfirmClickModifier(_T("Do you really want to enable this account?"))));
+
+		add(new Link<Void>("disable") {
+
+			@Override
+			public void onClick() {
+				getUserManager().disable(getUser());
+				Session.get().success(_T("User disabled"));
+				setResponsePage(getPage().getClass(), getPage().getPageParameters());
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.isAdministrator() 
+                        && !getUser().equals(SecurityUtils.getAuthUser()) 
+                        && !getUser().isDisabled() 
+                        && WicketUtils.isSubscriptionActive());
+			}
+
+		}.add(new ConfirmClickModifier(_T("Disabling account will reset password, clear access tokens, "
+				+ "and remove all references from other entities except for past activities. Do you "
+				+ "really want to continue?"))));
+		
+		add(new UserDeleteLink("delete") {
+
+			@Override
+			protected User getUser() {
+				return UserOverviewPanel.this.getUser();
+			}
+
+            @Override
+            protected void onConfigure() {
+                super.onConfigure();
+                if (getUser().isRoot()) {
+                    setVisible(false);
+                } else if (SecurityUtils.isAdministrator()) {
+                    setVisible(true);
+                } else {
+                    setVisible(getUser().equals(SecurityUtils.getAuthUser()) 
+                            && getSettingManager().getSecuritySetting().isEnableSelfDeregister());
+                }
+            }
+		});        
 
         var dateRangePicker = new DateRangePicker("dateRange", Model.of(new DateRange(fromDate, toDate)));
         dateRangePicker.add(new AjaxFormComponentUpdatingBehavior("change") {
@@ -263,6 +425,18 @@ public abstract class UserOverviewPanel extends GenericPanel<User> {
         setOutputMarkupId(true);
     }
 
+    private UserManager getUserManager() {
+        return OneDev.getInstance(UserManager.class);
+    }
+
+    private SettingManager getSettingManager() {
+        return OneDev.getInstance(SettingManager.class);
+    }
+
+    private User getUser() {
+        return getModelObject();
+    }
+
     private List<Component> newActivityRows(RepeatingView activitiesView, UserActivity activity) {
         var rows = new ArrayList<Component>();
         var activityDate = DateUtils.toLocalDate(activity.getDate());
@@ -284,7 +458,7 @@ public abstract class UserOverviewPanel extends GenericPanel<User> {
     private List<UserActivity> getActivities(Date fromDate, Date toDate) {
         var activities = new ArrayList<UserActivity>();
 
-        var user = getModelObject();
+        var user = getUser();
 
         var commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
         for (var entry: commitInfoManager.getUserCommits(user, fromDate, toDate).entrySet()) {

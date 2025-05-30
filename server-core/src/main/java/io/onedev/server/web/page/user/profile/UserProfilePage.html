@@ -1,31 +1,3 @@
 <wicket:extend>
-	<div wicket:id="note"></div>
 	<div wicket:id="content"></div>
-	<wicket:fragment wicket:id="authViaInternalDatabaseFrag">
-		<div class="alert alert-light alert-notice">
-			<wicket:t>
-				This user is authenticating via internal database.
-				<a wicket:id="removePassword">Remove password</a> to force the user to authenticate via external system
-			</wicket:t>
-		</div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="authViaExternalSystemFrag">
-		<div class="alert alert-light-warning alert-notice">
-			<form wicket:id="form" class="d-inline">
-			<wicket:t>
-				This user is authenticating via external system.
-				To authenticate via internal database, <a wicket:id="setPasswordForUser">set password for user</a> or <a wicket:id="tellUserToResetPassword">tell user to reset password</a>
-			</wicket:t>
-			</form>
-		</div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="serviceAccountFrag">
-		<div class="alert alert-light-info alert-notice"><wicket:t>This is a service account for task automation purpose</wicket:t></div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="disabledFrag">
-		<div class="alert alert-light-warning alert-notice"><wicket:t>This account is disabled</wicket:t></div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="disabledServiceAccountFrag">
-		<div class="alert alert-light-warning alert-notice"><wicket:t>This is a disabled service account</wicket:t></div>
-	</wicket:fragment>
 </wicket:extend>
