@@ -1,6 +1,9 @@
 package io.onedev.server.web.component.pullrequest.assignment;
 
 import io.onedev.server.web.page.base.BasePage;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -32,7 +35,7 @@ public abstract class AssigneeChoice extends SelectToActChoice<User> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		getSettings().setPlaceholder("Add assignee...");
+		getSettings().setPlaceholder(_T("Add assignee..."));
 		getSettings().setFormatResult("onedev.server.userChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.userChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.userChoiceFormatter.escapeMarkup");

@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.pullrequests.create;
 import static io.onedev.server.search.commit.Revision.Type.COMMIT;
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,6 +35,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
@@ -110,6 +112,7 @@ import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
+import io.onedev.server.web.util.TextUtils;
 
 public class NewPullRequestPage extends ProjectPage implements RevisionAnnotationSupport {
 
@@ -373,7 +376,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				setResponsePage(NewPullRequestPage.class, params);
 			}
 			
-		});
+		}.add(AttributeAppender.append("data-tippy-content", Model.of(_T("Swap")))));
 		
 		Fragment fragment;
 		PullRequest request = getPullRequest();
@@ -394,7 +397,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		if (getPullRequest() != null) {
 			List<Tab> tabs = new ArrayList<>();
 			
-			tabs.add(new AjaxActionTab(Model.of("Commits")) {
+			tabs.add(new AjaxActionTab(Model.of(_T("Commits"))) {
 				
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -406,7 +409,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				
 			});
 
-			tabs.add(new AjaxActionTab(Model.of("File Changes")) {
+			tabs.add(new AjaxActionTab(Model.of(_T("File Changes"))) {
 				
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -586,7 +589,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 
 					@Override
 					public String getObject() {
-						return "pull request #" + getPullRequest().getNumber();
+						return MessageFormat.format(_T("pull request #{0}"), getPullRequest().getNumber());
 					}
 					
 				}));
@@ -653,7 +656,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				ProjectAndBranch source = getPullRequest().getSource();
 				if (!target.getObjectName().equals(getPullRequest().getTarget().getObjectName()) 
 						|| !source.getObjectName().equals(getPullRequest().getSource().getObjectName())) {
-					getSession().warn("Either target branch or source branch has new commits just now, please re-check.");
+					getSession().warn(_T("Either target branch or source branch has new commits just now, please re-check."));
 					setResponsePage(NewPullRequestPage.class, paramsOf(getProject(), target, source));
 				} else {
 					getPullRequest().setSource(source);
@@ -688,6 +691,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			}
 			
 		});
+		titleInput.add(AttributeAppender.append("placeholder", Model.of(_T("Input title here"))));
 		titleInput.add(new ReferenceInputBehavior() {
 			
 			@Override
@@ -832,9 +836,27 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			
 		};
 		
-		List<MergeStrategy> mergeStrategies = Arrays.asList(MergeStrategy.values());
+		var mergeStrategies = Arrays.asList(MergeStrategy.values());
+		var renderer = new IChoiceRenderer<MergeStrategy>() {
+
+			@Override
+			public Object getDisplayValue(MergeStrategy object) {
+				return _T(TextUtils.getDisplayValue(object));
+			}
+
+			@Override
+			public String getIdValue(MergeStrategy object, int index) {
+				return object.name();
+			}
+
+			@Override
+			public MergeStrategy getObject(String id, IModel<? extends List<? extends MergeStrategy>> choices) {
+				return MergeStrategy.fromString(id);
+			}
+			
+		};
 		DropDownChoice<MergeStrategy> mergeStrategyDropdown = 
-				new DropDownChoice<MergeStrategy>("select", mergeStrategyModel, mergeStrategies);
+				new DropDownChoice<MergeStrategy>("select", mergeStrategyModel, mergeStrategies, renderer);
 
 		mergeStrategyDropdown.add(new OnChangeAjaxBehavior() {
 			
@@ -849,7 +871,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		
 		container.add(mergeStrategyDropdown);
 		
-		container.add(new Label("help", getPullRequest().getMergeStrategy().getDescription()));
+		container.add(new Label("help", _T(getPullRequest().getMergeStrategy().getDescription())));
 		
 		container.add(new AjaxLazyLoadPanel("status") {
 			

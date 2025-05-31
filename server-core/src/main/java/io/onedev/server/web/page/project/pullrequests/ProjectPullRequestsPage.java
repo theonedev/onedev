@@ -35,6 +35,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -257,12 +260,12 @@ public class ProjectPullRequestsPage extends ProjectPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "<span class='text-nowrap'>Pull Requests</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-nowrap'>" + _T("Pull Requests") + "</span>").setEscapeModelStrings(false);
 	}
 
 	@Override
 	protected String getPageTitle() {
-		return "Pull Requests - " + getProject().getPath();
+		return _T("Pull Requests") + " - " + getProject().getPath();
 	}
 	
 	@Override

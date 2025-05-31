@@ -832,27 +832,30 @@ onedev.server = {
 	},
 	
 	formatBriefDuration(seconds) {
+		var translations = onedev.server.translations;
 		var intervals = [];
 		var days = Math.floor(seconds/86400);
 		if (days != 0)
-			intervals.push(days + "d");
+			intervals.push(translations["{0}d"].replace("{0}", days));
 		seconds = seconds%86400;
 		var hours = Math.floor(seconds/3600);
 		if (hours != 0)
-			intervals.push(hours + "h");
+			intervals.push(translations["{0}h"].replace("{0}", hours));
 		seconds = seconds%3600;
 		var minutes = Math.floor(seconds/60);
 		if (minutes != 0)
-			intervals.push(minutes + "m");
+			intervals.push(translations["{0}m"].replace("{0}", minutes));
 		seconds = seconds%60;
 		if (seconds != 0)
-			intervals.push(seconds + "s");
+			intervals.push(translations["{0}s"].replace("{0}", seconds));
 		if (intervals.length != 0)
 			return intervals.join(" ");
 		else
-			return "0s";
+			return translations["{0}s"].replace("{0}", "0");
 	},
-	onDomReady: function(bootTimestamp, icons, popStateCallback, removeAutosaveKeys) {
+	onDomReady: function(bootTimestamp, icons, popStateCallback, removeAutosaveKeys, translations) {
+		onedev.server.translations = translations;
+
 		onedev.server.bootTimestamp = bootTimestamp;
 		onedev.server.icons = icons;
 

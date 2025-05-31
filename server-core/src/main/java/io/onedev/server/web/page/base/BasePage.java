@@ -3,12 +3,14 @@ package io.onedev.server.web.page.base;
 import static io.onedev.server.web.behavior.ChangeObserver.filterObservables;
 import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
 import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
+import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.File;
 import java.io.Serializable;
 import java.time.ZoneId;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -200,19 +202,25 @@ public abstract class BasePage extends WebPage {
 
 				response.render(JavaScriptHeaderItem.forReference(new BaseResourceReference()));
 
-				String jsonOfRemoveAutosaveKeys;
-				try {
-					jsonOfRemoveAutosaveKeys = OneDev.getInstance(ObjectMapper.class).writeValueAsString(getRemoveAutosaveKeys());
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
+				var translations = new HashMap<String, String>();
+				translations.put("{0}m", _T("{0}m"));
+				translations.put("{0}h", _T("{0}h"));
+				translations.put("{0}d", _T("{0}d"));
+				translations.put("{0}s", _T("{0}s"));
+				
 				getSession().setMetaData(REMOVE_AUTOSAVE_KEYS, null);
-				response.render(OnDomReadyHeaderItem.forScript(
-						String.format("onedev.server.onDomReady('%s', '%s', %s, %s);",
+
+				try {
+					response.render(OnDomReadyHeaderItem.forScript(
+						String.format("onedev.server.onDomReady('%s', '%s', %s, %s, %s);",
 								String.valueOf(OneDev.getInstance().getBootDate().getTime()),
 								SpriteImage.getVersionedHref(IconScope.class, null),
 								popStateBehavior.getCallbackFunction(explicit("data")).toString(), 
-								jsonOfRemoveAutosaveKeys)));
+								OneDev.getInstance(ObjectMapper.class).writeValueAsString(getRemoveAutosaveKeys()),
+								OneDev.getInstance(ObjectMapper.class).writeValueAsString(translations))));
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
 				response.render(OnLoadHeaderItem.forScript("onedev.server.onWindowLoad();"));
 			}
 

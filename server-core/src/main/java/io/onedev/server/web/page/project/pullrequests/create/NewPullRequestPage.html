@@ -3,17 +3,17 @@
 		<div class="revision-compare mb-5">
 			<div class="base revision card">
 				<div class="card-body">
-					<div class="title">Target</div>
+					<div class="title"><wicket:t>Target</wicket:t></div>
 					<div wicket:id="target" class="selector"></div>
 					<a wicket:id="targetCommitLink" class="message"><span wicket:id="message"></span></a>
 				</div>
 			</div>
 			<div class="swap">
-				<a wicket:id="swap" class="btn btn-primary btn-icon" title="Swap"><wicket:svg href="swap" class="icon"></wicket:svg></a>
+				<a wicket:id="swap" class="btn btn-primary btn-icon"><wicket:svg href="swap" class="icon"></wicket:svg></a>
 			</div>
 			<div class="compare revision card">
 				<div class="card-body">
-					<div class="title">Source</div>
+					<div class="title"><wicket:t>Source</wicket:t></div>
 					<div wicket:id="source" class="selector"></div>
 					<a wicket:id="sourceCommitLink" class="message"><span wicket:id="message"></span></a>
 				</div>
@@ -37,29 +37,29 @@
 	<wicket:fragment wicket:id="sameBranchFrag">
 		<div class="alert alert-notice alert-light-warning shadow mb-5">
 			<div class="summary">
-				<span>Please select different branches</span>
+				<span><wicket:t>Please select different branches</wicket:t></span>
 			</div>
 		</div>		
 	</wicket:fragment>
 	<wicket:fragment wicket:id="mergedFrag">
 		<div class="alert alert-notice alert-light-success shadow mb-5">
 			<div class="summary">
-				Branch <a wicket:id="targetBranch"></a> is up to date with all commits from <a wicket:id="sourceBranch"></a>.
-				Try <a wicket:id="swapBranches">swap source and target</a> for the comparison.
+				<wicket:t>Branch <a wicket:id="targetBranch"></a> is up to date with all commits from <a wicket:id="sourceBranch"></a>.
+				Try <a wicket:id="swapBranches">swap source and target</a> for the comparison.</wicket:t>
 			</div>
 		</div>		
 	</wicket:fragment>
 	<wicket:fragment wicket:id="unrelatedHistoryFrag">
 		<div class="alert alert-notice alert-light-warning shadow mb-5">
 			<div class="summary">
-				<span>History of target branch and source branch is unrelated</span>
+				<span><wicket:t>History of target branch and source branch is unrelated</wicket:t></span>
 			</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="branchNotSpecifiedFrag">
 		<div class="alert alert-notice alert-light-warning shadow mb-5">
 			<div class="summary">
-				<span>Please select branches to create pull request</span>
+				<span><wicket:t>Please select branches to create pull request</wicket:t></span>
 			</div>
 		</div>
 	</wicket:fragment>
@@ -68,17 +68,17 @@
 			<div class="card-body">
 				<form wicket:id="form" class="leave-confirm">
 					<div class="form-group">
-						<label>Title <span class="text-danger"></span></label>
-						<input wicket:id="title" type="text" class="form-control" placeholder="Input title here">
+						<label><wicket:t>Title</wicket:t> <span class="text-danger"></span></label>
+						<input wicket:id="title" type="text" class="form-control">
 						<div wicket:id="titleFeedback"></div>
 					</div>
 					<div class="form-group">
-						<label>Description</label>
+						<label><wicket:t>Description</wicket:t></label>
 						<div wicket:id="description"></div>						
 						<div wicket:id="descriptionFeedback"></div>
 					</div>
 					<div class="form-group merge-strategy">
-						<label>Merge Strategy</label>
+						<label><wicket:t>Merge Strategy</wicket:t></label>
 						<div wicket:id="mergeStrategy">
 							<select wicket:id="select" class="form-control custom-select"></select>
 							<div wicket:id="help" class="form-text text-muted"></div>	
@@ -86,16 +86,16 @@
 						</div>						
 					</div>
 					<div class="form-group">
-						<label>Reviewers</label>
+						<label><wicket:t>Reviewers</wicket:t></label>
 						<div wicket:id="reviewers"></div>
-						<div class="text-muted form-text">Pull request can only be merged after getting approvals from all reviewers</div>
+						<div class="text-muted form-text"><wicket:t>Pull request can only be merged after getting approvals from all reviewers</wicket:t></div>
 					</div>
 					<div class="form-group">
-						<label>Assignees <a wicket:id="assignToMe" class="ml-2 font-weight-normal font-size-sm">assign to me</a></label>
+						<label><wicket:t>Assignees</wicket:t> <a wicket:id="assignToMe" class="ml-2 font-weight-normal font-size-sm"><wicket:t>assign to me</wicket:t></a></label>
 						<div wicket:id="assignees"></div>
-						<div class="text-muted form-text">Assignees have code write permission and will be responsible for merging the pull request</div>
+						<div class="text-muted form-text"><wicket:t>Assignees have code write permission and will be responsible for merging the pull request</wicket:t></div>
 					</div>
-					<button wicket:id="send" type="submit" class="btn btn-primary">Send Pull Request</button>
+					<button wicket:id="send" type="submit" class="btn btn-primary"><wicket:t>Send Pull Request</wicket:t></button>
 				</form>
 			</div>
 		</div>	

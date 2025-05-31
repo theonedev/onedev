@@ -4,29 +4,29 @@
 			<div class="d-flex mb-4">
 				<form wicket:id="query" class="clearable-wrapper flex-grow-1">
 					<div class="input-group">
-						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query/order pull requests">
+						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control">
 						<span class="input-group-append">
-							<button wicket:id="submit" type="submit" class="btn btn-outline-secondary btn-icon" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+							<button wicket:id="submit" type="submit" class="btn btn-outline-secondary btn-icon"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
 						</span>
 					</div>
 				</form>
-				<a wicket:id="newPullRequest" class="btn btn-primary btn-icon flex-shrink-0 ml-3" title="Open new pull request"><wicket:svg href="plus" class="icon"/></a>
+				<a wicket:id="newPullRequest" class="btn btn-primary btn-icon flex-shrink-0 ml-3"><wicket:svg href="plus" class="icon"/></a>
 			</div>
 			<div class="operations mb-5">
 				<a wicket:id="showSavedQueries" class="show-saved-queries text-gray mr-4 mb-2 text-nowrap d-inline-block">
-					<wicket:svg href="eye" class="icon"></wicket:svg> Show Saved Queries
+					<wicket:svg href="eye" class="icon"></wicket:svg> <wicket:t>Show Saved Queries</wicket:t>
 				</a>
 				<a wicket:id="saveQuery" class="save-query text-gray mr-4 mb-2 text-nowrap d-inline-block">
-					<wicket:svg href="save" class="icon"></wicket:svg> Save Query
+					<wicket:svg href="save" class="icon"></wicket:svg> <wicket:t>Save Query</wicket:t>
 				</a>
 				<a wicket:id="filter" class="filter text-gray d-inline-block mb-2 mr-4">
-					<wicket:svg href="filter" class="icon"></wicket:svg> Filters
+					<wicket:svg href="filter" class="icon"></wicket:svg> <wicket:t>Filter</wicket:t>
 				</a>
 				<a wicket:id="orderBy" class="order-by text-gray mr-4 mb-2 text-nowrap d-inline-block">
-					<wicket:svg href="sort" class="icon"></wicket:svg> Order By
+					<wicket:svg href="sort" class="icon"></wicket:svg> <wicket:t>Order By</wicket:t>
 				</a>
 				<a wicket:id="operations" class="operations text-gray mr-4 mb-2 d-inline-block text-nowrap">
-					<wicket:svg href="ellipsis-circle" class="icon"></wicket:svg> Operations
+					<wicket:svg href="ellipsis-circle" class="icon"></wicket:svg> <wicket:t>Operations</wicket:t>
 				</a>
 				<span wicket:id="extraActions"></span>
 				<span wicket:id="count" class="float-right text-gray"></span>

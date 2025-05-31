@@ -14,7 +14,7 @@ import io.onedev.server.model.User;
 
 public enum MergeStrategy {
 	
-	CREATE_MERGE_COMMIT("Add all commits from source branch to target branch with a merge commit.") {
+	CREATE_MERGE_COMMIT("Add all commits from source branch to target branch with a merge commit") {
 
 		@Override
 		public ObjectId merge(PullRequest request, String commitMessage) {

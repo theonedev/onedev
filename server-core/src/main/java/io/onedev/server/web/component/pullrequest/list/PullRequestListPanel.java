@@ -2,8 +2,10 @@ package io.onedev.server.web.component.pullrequest.list;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.merge;
+import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -172,7 +174,7 @@ public abstract class PullRequestListPanel extends Panel {
 				error(e.getMessage());
 				return null;
 			} else {
-				info("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and open");
+				info(_T("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and open"));
 				parsedQuery = new PullRequestQuery(new FuzzyCriteria(queryString));
 			}
 		}
@@ -244,9 +246,9 @@ public abstract class PullRequestListPanel extends Panel {
 				if (!isEnabled()) 
 					tag.append("class", "disabled", " ");
 				if (!querySubmitted)
-					tag.put("title", "Query not submitted");
+					tag.put("data-tippy-content", _T("Query not submitted"));
 				else if (queryModel.getObject() == null)
-					tag.put("title", "Can not save malformed query");
+					tag.put("data-tippy-content", _T("Can not save malformed query"));
 			}
 
 			@Override
@@ -267,7 +269,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Watch/Unwatch Selected Pull Requests";
+							return _T("Watch/Unwatch Selected Pull Requests");
 						}
 
 						@Override
@@ -292,7 +294,7 @@ public abstract class PullRequestListPanel extends Panel {
 													.map(it->it.getObject()).collect(toList());
 											getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
 											selectionColumn.getSelections().clear();
-											Session.get().success("Watch status changed");
+											Session.get().success(_T("Watch status changed"));
 										}
 									};
 								}
@@ -309,7 +311,7 @@ public abstract class PullRequestListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "Please select pull requests to watch/unwatch");
+										tag.put("data-tippy-content", _T("Please select pull requests to watch/unwatch"));
 									}
 								}
 
@@ -324,7 +326,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Discard Selected Pull Requests";
+							return _T("Discard Selected Pull Requests");
 						}
 
 						@Override
@@ -339,7 +341,7 @@ public abstract class PullRequestListPanel extends Panel {
 									for (IModel<PullRequest> each : selectionColumn.getSelections()) {
 										PullRequest request = each.getObject();
 										if (!request.isOpen()) {
-											errorMessage = "Pull request #" + request.getNumber() + " already closed";
+											errorMessage = MessageFormat.format(_T("Pull request #{0} already closed"), request.getNumber());
 											break;
 										}
 									}
@@ -360,7 +362,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 											@Override
 											protected String getConfirmMessage() {
-												return "Type <code>yes</code> below to discard selected pull requests";
+												return _T("Type <code>yes</code> below to discard selected pull requests");
 											}
 
 											@Override
@@ -385,7 +387,7 @@ public abstract class PullRequestListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "Please select pull requests to discard");
+										tag.put("data-tippy-content", _T("Please select pull requests to discard"));
 									}
 								}
 
@@ -398,7 +400,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Delete Selected Pull Requests";
+							return _T("Delete Selected Pull Requests");
 						}
 
 						@Override
@@ -424,7 +426,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 										@Override
 										protected String getConfirmMessage() {
-											return "Type <code>yes</code> below to delete selected pull requests";
+											return _T("Type <code>yes</code> below to delete selected pull requests");
 										}
 
 										@Override
@@ -448,7 +450,7 @@ public abstract class PullRequestListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "Please select pull requests to delete");
+										tag.put("data-tippy-content", _T("Please select pull requests to delete"));
 									}
 								}
 
@@ -463,7 +465,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Watch/Unwatch All Queried Pull Requests";
+							return _T("Watch/Unwatch All Queried Pull Requests");
 						}
 
 						@Override
@@ -488,7 +490,7 @@ public abstract class PullRequestListPanel extends Panel {
 											for (@SuppressWarnings("unchecked") var it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
 												requests.add(it.next());
 											getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
-											Session.get().success("Watch status changed");
+											Session.get().success(_T("Watch status changed"));
 										}
 
 									};
@@ -506,7 +508,7 @@ public abstract class PullRequestListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "No pull requests to watch/unwatch");
+										tag.put("data-tippy-content", _T("No pull requests to watch/unwatch"));
 									}
 								}
 							};
@@ -520,7 +522,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Discard All Queried Pull Requests";
+							return _T("Discard All Queried Pull Requests");
 						}
 
 						@Override
@@ -536,7 +538,7 @@ public abstract class PullRequestListPanel extends Panel {
 									for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); ) {
 										PullRequest request = it.next();
 										if (!request.isOpen()) {
-											errorMessage = "Pull request #" + request.getNumber() + " already closed";
+											errorMessage = MessageFormat.format(_T("Pull request #{0} already closed"), request.getNumber());
 											break;
 										}
 									}
@@ -558,7 +560,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 											@Override
 											protected String getConfirmMessage() {
-												return "Type <code>yes</code> below to discard all queried pull requests";
+												return _T("Type <code>yes</code> below to discard all queried pull requests");
 											}
 
 											@Override
@@ -583,7 +585,7 @@ public abstract class PullRequestListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "No pull requests to discard");
+										tag.put("data-tippy-content", _T("No pull requests to discard"));
 									}
 								}
 
@@ -596,7 +598,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Delete All Queried Pull Requests";
+							return _T("Delete All Queried Pull Requests");
 						}
 
 						@Override
@@ -624,7 +626,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 										@Override
 										protected String getConfirmMessage() {
-											return "Type <code>yes</code> below to delete all queried pull requests";
+											return _T("Type <code>yes</code> below to delete all queried pull requests");
 										}
 
 										@Override
@@ -648,7 +650,7 @@ public abstract class PullRequestListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "No pull requests to delete");
+										tag.put("data-tippy-content", _T("No pull requests to delete"));
 									}
 								}
 
@@ -662,7 +664,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Set All Queried Pull Requests as Read";
+						return _T("Set All Queried Pull Requests as Read");
 					}
 
 					@Override
@@ -681,7 +683,7 @@ public abstract class PullRequestListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No pull requests to set as read");
+									tag.put("data-tippy-content", _T("No pull requests to set as read"));
 								}
 							}
 
@@ -806,6 +808,7 @@ public abstract class PullRequestListPanel extends Panel {
 			}
 			
 		});
+		queryInput.add(AttributeAppender.append("placeholder", _T("Query/order pull requests")));
 		
 		Form<?> queryForm = new Form<Void>("query");
 		queryForm.add(queryInput);
@@ -819,6 +822,7 @@ public abstract class PullRequestListPanel extends Panel {
 			}
 			
 		});
+		queryInput.add(AttributeAppender.append("data-tippy-content", _T("Query")));
 		add(queryForm);
 
 		if (getProject() == null) {
@@ -839,7 +843,7 @@ public abstract class PullRequestListPanel extends Panel {
 					}) {
 						@Override
 						protected String getTitle() {
-							return "Select Project";
+							return _T("Select Project");
 						}
 						
 						@Override
@@ -850,10 +854,10 @@ public abstract class PullRequestListPanel extends Panel {
 					}.add(AttributeAppender.append("class", "no-current"));
 				}
 				
-			});
+			}.add(AttributeAppender.append("data-tippy-content", _T("Open new pull request"))));
 		} else {
 			add(new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class,
-					NewPullRequestPage.paramsOf(getProject())));		
+					NewPullRequestPage.paramsOf(getProject())).add(AttributeAppender.append("data-tippy-content", _T("Open new pull request"))));		
 		}
 		body = new WebMarkupContainer("body");
 		add(body.setOutputMarkupId(true));
@@ -1004,9 +1008,9 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return "found " + dataProvider.size() + " pull requests";
+					return MessageFormat.format(_T("found {0} pull requests"), dataProvider.size());
 				else
-					return "found 1 pull request";
+					return _T("found 1 pull request");
 			}
 		}) {
 			@Override

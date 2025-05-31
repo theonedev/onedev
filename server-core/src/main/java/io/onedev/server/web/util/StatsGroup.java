@@ -6,6 +6,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.Path;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 import java.util.*;
@@ -41,7 +44,7 @@ public enum StatsGroup {
 		public String toString(int groupValue) {
 			var localDate = LocalDate.ofEpochDay(groupValue);
 			var weekFields = WeekFields.of(Locale.getDefault());
-			return String.format("w%02d", localDate.get(weekFields.weekOfWeekBasedYear()));
+			return String.format(_T("w%02d"), localDate.get(weekFields.weekOfWeekBasedYear()));
 		}
 
 		@Override
