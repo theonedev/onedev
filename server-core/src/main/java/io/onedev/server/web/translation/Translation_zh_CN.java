@@ -627,6 +627,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Do you really want to discard batched suggestions?", "您真的要丢弃批量建议吗？");
 		m.put("Do you really want to enable this account?", "您真的要启用此账户吗？");
 		m.put("Do you really want to remove password of this user?", "您真的要删除此用户的密码吗？");
+		m.put("Do you really want to remove this account?", "您确定要删除此账户吗？");
 		m.put("Do you really want to remove this link?", "您确定要删除此链接吗？");
 		m.put("Docker Executable", "Docker 可执行文件");
 		m.put("Docker Image", "Docker 镜像");
@@ -2592,6 +2593,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"此步骤设置 trivy 数据库缓存以加速各种扫描步骤。如果需要使用，请将其放置在扫描步骤之前");
 		m.put("This trigger will only be applicable if tagged commit is reachable from branches specified here. Multiple branches should be separated with spaces. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all branches", 
 			"此触发器仅在标记的提交可从此处指定的分支访问时适用。多个分支应以空格分隔。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。以 '-' 为前缀表示排除。留空表示匹配所有分支");
+		m.put("This user is authenticating via external system.", "此用户通过外部系统进行身份验证。");
+		m.put("This user is authenticating via internal database.", "此用户通过内部数据库进行身份验证。");
 		m.put("Threads", "线程");
 		m.put("Time Estimate Issue Field", "工单时间估算字段");
 		m.put("Time Range", "时间范围");
@@ -2932,9 +2935,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Do you really want to remove this account?", "您确定要删除此账户吗？");
-		m.put("This user is authenticating via external system.", "此用户通过外部系统进行身份验证。");
-		m.put("This user is authenticating via internal database.", "此用户通过内部数据库进行身份验证。");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");

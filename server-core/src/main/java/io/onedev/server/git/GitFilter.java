@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -108,7 +109,7 @@ public class GitFilter implements Filter {
 
 	private void reportProjectNotFoundOrInaccessible(String projectPath) {
 		if (SecurityUtils.getUser() != null)
-			throw new ExplicitException("Project not found or inaccessible: " + projectPath);
+			throw new EntityNotFoundException("Project not found or inaccessible: " + projectPath);
 		else
 			throw new UnauthorizedException("Authentication required");
 	}
