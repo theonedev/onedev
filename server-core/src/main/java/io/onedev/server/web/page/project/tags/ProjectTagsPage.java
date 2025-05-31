@@ -193,7 +193,6 @@ public class ProjectTagsPage extends ProjectPage {
 			}
 			
 		}));
-		searchField.add(AttributeAppender.append("placeholder", _T("Filter tags...")));
 		
 		searchField.add(new OnTypingDoneBehavior(200) {
 

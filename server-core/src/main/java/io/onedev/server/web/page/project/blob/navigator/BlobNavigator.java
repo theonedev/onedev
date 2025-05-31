@@ -1,23 +1,11 @@
 package io.onedev.server.web.page.project.blob.navigator;
 
-import com.google.common.base.Splitter;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.BlobIdentFilter;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.util.ChildrenAggregator;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
-import io.onedev.server.web.asset.dropdowntriangleindicator.DropdownTriangleIndicatorCssResourceReference;
-import io.onedev.server.web.behavior.CtrlAwareOnClickAjaxBehavior;
-import io.onedev.server.web.component.blob.BlobIcon;
-import io.onedev.server.web.component.floating.AlignPlacement;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxChannel.Type;
@@ -48,13 +36,25 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
-import javax.annotation.Nullable;
+import com.google.common.base.Splitter;
 
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.BlobIdentFilter;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.util.ChildrenAggregator;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
+import io.onedev.server.web.asset.dropdowntriangleindicator.DropdownTriangleIndicatorCssResourceReference;
+import io.onedev.server.web.behavior.CtrlAwareOnClickAjaxBehavior;
+import io.onedev.server.web.component.blob.BlobIcon;
+import io.onedev.server.web.component.floating.AlignPlacement;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 
 public class BlobNavigator extends Panel {
 
@@ -286,7 +286,6 @@ public class BlobNavigator extends Panel {
 				name = file.path;
 			
 			nameInput = new TextField<String>("input", Model.of(name));
-			nameInput.add(AttributeAppender.append("placeholder", _T("Name your file")));
 			form.add(nameInput);
 			nameInput.add(new AjaxFormSubmitBehavior(form, "input") {
 

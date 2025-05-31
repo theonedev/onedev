@@ -14,7 +14,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -66,7 +65,6 @@ public abstract class TypeSelectPanel<T extends Serializable> extends Panel {
 		super.onInitialize();
 
 		TextField<String> searchField = new TextField<>("input", Model.of(""));
-		searchField.add(new AttributeModifier("placeholder", _T("Type to filter")));
 		add(searchField);
 		
 		searchField.add(new OnTypingDoneBehavior(100) {

@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -275,7 +274,6 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 			}
 
 		});
-		input.add(AttributeModifier.append("placeholder", _T("Email address")));
 		input.setLabel(Model.of(_T("Email address")));
 		input.setRequired(true);
 		input.add(validatable -> {

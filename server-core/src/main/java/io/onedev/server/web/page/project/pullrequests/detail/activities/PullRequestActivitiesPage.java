@@ -256,11 +256,10 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				
 				@Override
 				protected List<Behavior> getInputBehaviors() {
-					return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
+					return Lists.newArrayList(AttributeModifier.replace("placeholder", _T("Leave a comment")));
 				}
 				
 			};
-			input.add(new AttributeAppender("placeholder", _T("Leave a comment")));
 			input.setRequired(true).setLabel(Model.of(_T("Comment")));
 			form.add(input);
 			

@@ -20,6 +20,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		// Extracted keys
 		m.put("'..' is not allowed in the directory", "'..' 不允许在目录中使用");
 		m.put("(on behalf of <b>{0}</b>)", "（代表 <b>{0}</b>）");
+		m.put("1w 1d 1h 1m", "1w 1d 1h 1m");
 		m.put("6-digits passcode", "6 位数代码");
 		m.put("7 days", "7 天");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid and katex support</a>.", 
@@ -59,6 +60,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"访问令牌用于 API 访问和仓库拉取/推送。它不能用于登录 Web UI");
 		m.put("Access token is intended for api access or repository pull/push. It can not be used to sign in to web ui", 
 			"访问令牌用于 API 访问或仓库拉取/推送。它不能用于登录 Web UI");
+		m.put("Access token regenerated successfully", "访问令牌重新生成成功");
 		m.put("Account Email", "账户邮箱");
 		m.put("Account Name", "账户名称");
 		m.put("Active Directory", "Active Directory");
@@ -66,11 +68,13 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Activities", "活动");
 		m.put("Activity by type", "按类型统计的活动");
 		m.put("Add", "添加");
+		m.put("Add GPG key", "添加 GPG 密钥");
 		m.put("Add GPG keys here to verify commits/tags signed by this user", "在此添加 GPG 密钥以验证此用户的代码提交/标签签名");
 		m.put("Add GPG keys here to verify commits/tags signed by you", "在此添加 GPG 密钥以验证由您签名的提交/标签");
 		m.put("Add Issues to Iteration", "将工单添加到迭代");
 		m.put("Add New", "添加");
 		m.put("Add New Email Address", "添加新电子邮件地址");
+		m.put("Add SSH key", "添加 SSH 密钥");
 		m.put("Add Spent Time", "添加已用时间");
 		m.put("Add a GPG Public Key", "添加一个 GPG 公钥");
 		m.put("Add a SSH Key", "添加 SSH 密钥");
@@ -79,7 +83,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Add before", "添加到前面");
 		m.put("Add child project", "添加子项目");
 		m.put("Add comment on this selection", "在此选择上添加注释");
+		m.put("Add dashboard", "添加仪表板");
 		m.put("Add files via upload", "通过上传添加文件");
+		m.put("Add link", "添加链接");
 		m.put("Add member...", "添加成员...");
 		m.put("Add new", "添加");
 		m.put("Add new file", "添加新文件");
@@ -524,6 +530,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Current project", "当前项目");
 		m.put("Custom Linux Shell", "自定义 Linux Shell");
 		m.put("Dashboard Share Bean", "仪表盘共享 Bean");
+		m.put("Dashboard name", "仪表板名称");
 		m.put("Dashboards", "仪表盘");
 		m.put("Database Backup", "数据库备份");
 		m.put("Date", "日期");
@@ -568,6 +575,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Delete dashboard", "删除仪表板");
 		m.put("Delete from branch {0}", "从分支 {0} 删除");
 		m.put("Delete this", "删除");
+		m.put("Delete this GPG key", "删除此 GPG 密钥");
 		m.put("Delete this access token", "删除此访问令牌");
 		m.put("Delete this branch", "删除此分支");
 		m.put("Delete this field", "删除该字段");
@@ -627,7 +635,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Do you really want to delete role \"{0}\"?", "确定要删除角色 \"{0}\" 吗？");
 		m.put("Do you really want to delete selected query watches?", "您真的要删除选中的查询订阅吗？");
 		m.put("Do you really want to delete tag {0}?", "确定要删除标签 {0} 吗？");
+		m.put("Do you really want to delete this GPG key?", "您确定要删除此 GPG 密钥吗？");
 		m.put("Do you really want to delete this SSH key?", "您确定要删除此 SSH 密钥吗？");
+		m.put("Do you really want to delete this access token?", "您确定要删除此访问令牌吗？");
 		m.put("Do you really want to delete this code comment and all its replies?", "您真的要删除此代码评论及其所有回复吗？");
 		m.put("Do you really want to delete this code comment?", "您真的要删除此代码评论吗？");
 		m.put("Do you really want to delete this email address?", "您真的要删除这个电子邮件地址吗？");
@@ -648,6 +658,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Download", "下载");
 		m.put("Download archive of this branch", "下载此分支的归档");
 		m.put("Download tag archive", "下载标签归档");
+		m.put("Dry Run", "试运行");
 		m.put("Due Date", "截止日期");
 		m.put("Due Date Issue Field", "截止日期工单字段");
 		m.put("Duplicate authorizations found: {0}", "找到重复的授权：{0}");
@@ -782,6 +793,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("File changes", "文件更改");
 		m.put("File is too large to edit here", "文件太大，无法在此编辑");
 		m.put("File name", "文件名");
+		m.put("File name patterns such as *.java, *.c", "文件名模式，如 *.java, *.c");
 		m.put("Files", "文件");
 		m.put("Files to Be Analyzed", "要分析的文件");
 		m.put("Filter", "过滤");
@@ -791,8 +803,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Filter by name or email address", "按名称或电子邮件地址过滤");
 		m.put("Filter by name...", "按名称过滤...");
 		m.put("Filter by path", "按路径过滤");
-		m.put("Filter roles...", "筛选角色...");
+		m.put("Filter by test suite", "按测试套件筛选");
 		m.put("Filter tags...", "过滤标签...");
+		m.put("Filter targets", "筛选目标");
+		m.put("Filter...", "筛选...");
 		m.put("Find branch", "查找分支");
 		m.put("Find or create branch", "查找或创建分支");
 		m.put("Find or create tag", "查找或创建标签");
@@ -800,6 +814,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Fingerprint", "指纹");
 		m.put("Finish", "完成");
 		m.put("First applicable executor", "第一个适用的执行器");
+		m.put("Fix", "修复");
 		m.put("Fix Type", "修复类型");
 		m.put("Fixing Builds", "修复构建");
 		m.put("Fixing Commits", "修复提交");
@@ -826,6 +841,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("GPG Public Key", "GPG 公钥");
 		m.put("GPG Signing Key", "GPG 签名密钥");
 		m.put("GPG Trusted Keys", "GPG 受信任密钥");
+		m.put("GPG key deleted", "GPG 密钥已删除");
 		m.put("GPG public key begins with '-----BEGIN PGP PUBLIC KEY BLOCK-----'", "GPG 公钥以 '-----BEGIN PGP PUBLIC KEY BLOCK-----' 开头，以 '-----END PGP PUBLIC KEY BLOCK-----' 结尾");
 		m.put("General", "常规");
 		m.put("General Settings", "常规设置");
@@ -1005,6 +1021,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Input Spec", "输入规范");
 		m.put("Input URL", "输入 URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "输入允许的 CORS 来源，按回车键添加");
+		m.put("Input revision", "输入版本");
+		m.put("Input title", "输入标题");
 		m.put("Input title here", "输入标题");
 		m.put("Input user search base. Hit ENTER to add", "输入用户搜索基础。按回车键添加");
 		m.put("Insert", "插入");
@@ -1727,6 +1745,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Permanent link", "永久链接");
 		m.put("Permanent link of this selection", "此选择的永久链接");
 		m.put("Pick Existing", "选择现有");
+		m.put("Plain text expected", "需要纯文本");
 		m.put("Platform", "平台");
 		m.put("Platforms", "平台");
 		m.put("Please <a wicket:id=\"download\" class=\"font-weight-bolder\">download</a> recovery codes below and keep them secret. These codes can be used to provide one-time access to your account in case you can not access the authentication application. They will <b>NOT</b> be displayed again", 
@@ -1869,6 +1888,11 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Query commits", "查询提交");
 		m.put("Query not submitted", "查询未提交");
 		m.put("Query param", "查询参数");
+		m.put("Query/order agents", "查询/排序代理");
+		m.put("Query/order builds", "查询/排序构建");
+		m.put("Query/order comments", "查询/排序评论");
+		m.put("Query/order issues", "查询/排序工单");
+		m.put("Query/order packages", "查询/排序包");
 		m.put("Query/order projects", "查询/排序项目");
 		m.put("Query/order pull requests", "查询/排序合并请求");
 		m.put("Quick Search", "快速搜索");
@@ -2000,6 +2024,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Save", "保存");
 		m.put("Save Query", "保存查询");
 		m.put("Save Query Bean", "保存查询 Bean");
+		m.put("Save Settings", "保存设置");
+		m.put("Save Settings & Redistribute Projects", "保存设置并重新分布项目");
+		m.put("Save Template", "保存模板");
 		m.put("Save as Mine", "保存为我的");
 		m.put("Saved Queries", "保存的查询");
 		m.put("Scan Path", "扫描路径");
@@ -2013,6 +2040,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Search branch", "搜索分支");
 		m.put("Search for", "搜索");
 		m.put("Search is too general", "搜索过于笼统");
+		m.put("Search job", "搜索任务");
+		m.put("Search project", "搜索项目");
 		m.put("Secret", "密钥");
 		m.put("Secret Config File", "密钥配置文件");
 		m.put("Secret Setting", "密钥设置");
@@ -2114,11 +2143,13 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Show Works Of", "显示工作量");
 		m.put("Show commented code snippet", "显示注释的代码片段");
 		m.put("Show emojis", "显示表情符号");
+		m.put("Show in build list", "在构建列表中显示");
 		m.put("Show more lines", "显示更多行");
 		m.put("Showing first {0} files as there are too many", "显示前 {0} 个文件，因为文件太多");
 		m.put("Sign In", "登录");
 		m.put("Sign In To", "登录到");
 		m.put("Sign Out", "登出");
+		m.put("Sign Up", "注册");
 		m.put("Sign Up Bean", "注册 Bean");
 		m.put("Sign Up!", "注册！");
 		m.put("Sign in", "登录");
@@ -2556,6 +2587,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Terminal output", "终端输出");
 		m.put("Terminal ready", "终端就绪");
 		m.put("Terminal resize", "终端调整大小");
+		m.put("Test Settings", "测试设置");
 		m.put("Text", "文本");
 		m.put("The URL of the server endpoint that will receive the webhook POST requests", "接收 Webhook POST 请求的服务器端点 URL");
 		m.put("The permission to access build log", "访问构建日志的权限");
@@ -2651,6 +2683,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Toggle commits", "切换提交");
 		m.put("Toggle dark mode", "切换暗模式");
 		m.put("Toggle fixed width font", "切换固定宽度字体");
+		m.put("Toggle full screen", "切换全屏");
 		m.put("Toggle navigation", "切换导航");
 		m.put("Toggle work log", "切换工作日志");
 		m.put("Too many commits to load", "加载的提交太多");
@@ -2689,6 +2722,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Type <code>yes</code> below to discard selected pull requests", "在下方输入 <code>yes</code> 以放弃选定的合并请求");
 		m.put("Type password here", "在此输入密码");
 		m.put("Type to filter", "过滤");
+		m.put("Type to filter...", "输入以筛选...");
 		m.put("URL", "URL");
 		m.put("Unable to change password as you are authenticating via external system", "无法更改密码，因为您正在通过外部系统进行认证");
 		m.put("Unable to comment", "无法添加评论");
@@ -2992,17 +3026,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Access token regenerated successfully", "访问令牌重新生成成功");
-		m.put("Add GPG key", "添加 GPG 密钥");
-		m.put("Add SSH key", "添加 SSH 密钥");
-		m.put("Add link", "添加链接");
-		m.put("Delete this GPG key", "删除此 GPG 密钥");
-		m.put("Do you really want to delete this GPG key?", "您确定要删除此 GPG 密钥吗？");
-		m.put("Do you really want to delete this access token?", "您确定要删除此访问令牌吗？");
-		m.put("GPG key deleted", "GPG 密钥已删除");
-		m.put("Show in build list", "在构建列表中显示");
-		m.put("Toggle full screen", "切换全屏");
-		m.put("Add dashboard", "添加仪表板");
+		m.put("Filter roles", "过滤角色");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");

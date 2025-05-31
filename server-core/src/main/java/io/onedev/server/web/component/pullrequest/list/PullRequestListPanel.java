@@ -808,7 +808,6 @@ public abstract class PullRequestListPanel extends Panel {
 			}
 			
 		});
-		queryInput.add(AttributeAppender.append("placeholder", _T("Query/order pull requests")));
 		
 		Form<?> queryForm = new Form<Void>("query");
 		queryForm.add(queryInput);

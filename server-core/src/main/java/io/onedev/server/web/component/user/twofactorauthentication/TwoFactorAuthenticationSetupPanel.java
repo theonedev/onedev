@@ -1,7 +1,5 @@
 package io.onedev.server.web.component.user.twofactorauthentication;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -12,7 +10,6 @@ import org.apache.tika.mime.MediaType;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -101,7 +98,6 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 		});
 		
 		TextField<String> input = new TextField<String>("passcode", Model.of(""));
-		input.add(AttributeAppender.append("placeholder", _T("6-digits passcode")));
 		form.add(input);
 		form.add(new FencedFeedbackPanel("feedback", form));
 		form.add(new AjaxButton("verify") {

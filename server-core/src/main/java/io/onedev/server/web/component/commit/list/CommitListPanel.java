@@ -406,8 +406,6 @@ public abstract class CommitListPanel extends Panel {
 			}
 			
 		});
-
-		queryInput.add(new AttributeAppender("placeholder", _T("Query commits")));
 		
 		Form<?> queryForm = new Form<Void>("query");
 		queryForm.add(queryInput);

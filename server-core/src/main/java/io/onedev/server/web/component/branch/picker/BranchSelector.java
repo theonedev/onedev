@@ -1,7 +1,5 @@
 package io.onedev.server.web.component.branch.picker;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,7 +66,6 @@ public abstract class BranchSelector extends Panel {
 		super.onInitialize();
 		
 		branchField = new TextField<String>("branch", Model.of(""));
-		branchField.add(AttributeAppender.append("placeholder", _T("Search branch")));
 		branchField.setOutputMarkupId(true);
 		add(branchField);
 		

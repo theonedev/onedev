@@ -1005,8 +1005,6 @@ public class ProjectListPanel extends Panel {
 			}
 			
 		});
-
-		queryInput.add(AttributeAppender.replace("placeholder", _T("Query/order projects")));
 		
 		Form<?> queryForm = new Form<Void>("query");
 		queryForm.add(queryInput);

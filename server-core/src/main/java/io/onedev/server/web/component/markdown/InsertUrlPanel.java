@@ -539,8 +539,7 @@ abstract class InsertUrlPanel extends Panel {
 				}
 				
 			};
-			form.add(new TextArea<String>("commitMessage", new PropertyModel<String>(this, "commitMessage"))
-					.add(behavior).add(new AttributeAppender("placeholder", _T("Add files via upload"))));
+			form.add(new TextArea<String>("commitMessage", new PropertyModel<String>(this, "commitMessage")).add(behavior));
 			
 			form.add(new AjaxButton("insert") {
 

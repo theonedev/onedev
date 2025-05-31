@@ -17,7 +17,6 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -63,8 +62,8 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.user.overview.UserOverviewPage;
 import io.onedev.server.web.page.user.UserCssResourceReference;
+import io.onedev.server.web.page.user.overview.UserOverviewPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
@@ -186,7 +185,6 @@ public class UserListPage extends AdministrationPage {
 			}
 
 		}));
-		searchField.add(AttributeAppender.append("placeholder", _T("Filter by name or email address")));
 		
 		searchField.add(new OnTypingDoneBehavior(100) {
 

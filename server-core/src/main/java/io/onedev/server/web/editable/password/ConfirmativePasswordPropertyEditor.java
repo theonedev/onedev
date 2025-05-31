@@ -2,7 +2,6 @@ package io.onedev.server.web.editable.password;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.PasswordTextField;
@@ -34,14 +33,12 @@ public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 		input.setResetPassword(true);
 		input.setRequired(false);
 		input.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
-		input.add(AttributeModifier.replace("placeholder", _T("Type password here")));
 		add(input);
 		
 		inputAgain = new PasswordTextField("inputAgain", Model.of(getModelObject()));
 		inputAgain.setResetPassword(true);
 		inputAgain.setRequired(false);
 		inputAgain.setLabel(Model.of(_T(getDescriptor().getDisplayName())));
-		inputAgain.add(AttributeModifier.replace("placeholder", _T("Confirm password here")));
 		add(inputAgain);
 		
 		Password password = getDescriptor().getPropertyGetter().getAnnotation(Password.class);

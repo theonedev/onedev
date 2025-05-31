@@ -599,7 +599,6 @@ public abstract class RevisionDiffPanel extends Panel {
 		Form<?> pathFilterForm = new Form<Void>("pathFilter");
 		TextField<String> filterInput;
 		pathFilterForm.add(filterInput = new TextField<String>("input", pathFilterModel));
-		filterInput.add(AttributeAppender.append("placeholder", _T("Filter by path")));
 		
 		Set<String> setOfInvolvedPaths = new HashSet<>();
 		for (DiffEntryFacade diffEntry: diffEntriesModel.getObject()) {

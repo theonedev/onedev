@@ -5,10 +5,10 @@
 		<form wicket:id="form" method="post">
 			<div wicket:id="feedback"></div>
 			<div class="form-group">
-				<input wicket:id="userName" autocomplete="username" type="text" class="form-control">
+				<input wicket:id="userName" autocomplete="username" type="text" class="form-control" t:placeholder="Login name or email address">
 			</div>
 			<div class="form-group">
-				<input wicket:id="password" autocomplete="current-password" type="password" class="form-control">
+				<input wicket:id="password" autocomplete="current-password" type="password" class="form-control" t:placeholder="Password">
 			</div>
 			<div class="form-group d-flex flex-wrap justify-content-between">
 				<div class="checkbox-inline">
@@ -36,7 +36,7 @@
 		<form wicket:id="form" method="post">
 			<div wicket:id="feedback"></div>
 			<div class="form-group">
-				<input wicket:id="passcode" autocomplete="one-time-code" type="text" class="form-control">
+				<input wicket:id="passcode" autocomplete="one-time-code" type="text" class="form-control" t:placeholder="6-digits passcode">
 			</div>
 			<button class="btn btn-primary font-weight-bold" type="submit"><wicket:t>Verify</wicket:t></button>
 		</form>
@@ -51,7 +51,7 @@
 		<form wicket:id="form" method="post">
 			<div wicket:id="feedback"></div>
 			<div class="form-group">
-				<input wicket:id="recoveryCode" type="text" class="form-control">
+				<input wicket:id="recoveryCode" type="text" class="form-control" t:placeholder="Recovery code">
 			</div>
 			<button class="btn btn-primary font-weight-bold" type="submit"><wicket:t>Verify</wicket:t></button>
 		</form>

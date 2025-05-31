@@ -342,7 +342,6 @@ public class ProjectBranchesPage extends ProjectPage {
 			}
 			
 		}));
-		searchField.add(AttributeAppender.append("placeholder", _T("Filter branches...")));
 
 		searchField.add(new OnSearchingBehavior());
 		

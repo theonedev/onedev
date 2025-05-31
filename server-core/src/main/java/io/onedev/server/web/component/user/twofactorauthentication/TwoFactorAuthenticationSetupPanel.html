@@ -17,7 +17,7 @@
 			<div class="text-secondary font-size-lg font-weight-boldest mb-2">
 			<wicket:t>Then enter the passcode shown in the TOTP authenticator to verify</wicket:t>
 			</div>
-			<input wicket:id="passcode" class="form-control mt-2">
+			<input wicket:id="passcode" class="form-control mt-2" t:placeholder="6-digits passcode">
 			<div wicket:id="feedback" class="mb-n3 mt-3"></div>
 			<div class="mt-5">
 				<input wicket:id="verify" type="submit" t:value="Verify" class="dirty-aware btn btn-primary">

@@ -12,7 +12,6 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -126,7 +125,7 @@ public class LoginPage extends SimplePage {
 				userName = object;
 			}
 
-		}).setLabel(Model.of(_T("User name"))).setRequired(true).add(AttributeAppender.append("placeholder", _T("Login name or email address"))));
+		}).setLabel(Model.of(_T("User name"))).setRequired(true));
 		
 		form.add(new PasswordTextField("password", new IModel<String>() {
 
@@ -144,7 +143,7 @@ public class LoginPage extends SimplePage {
 				password = object;
 			}
 			
-		}).setLabel(Model.of(_T("Password"))).setRequired(true).add(AttributeAppender.append("placeholder", _T("Password"))));
+		}).setLabel(Model.of(_T("Password"))).setRequired(true));
 		
 		form.add(new CheckBox("rememberMe", new IModel<Boolean>() {
 
@@ -262,7 +261,7 @@ public class LoginPage extends SimplePage {
 				LoginPage.this.passcode = object;
 			}
 			
-		}).setLabel(Model.of(_T("Passcode"))).setRequired(true).add(AttributeAppender.append("placeholder", _T("6-digits passcode"))));
+		}).setLabel(Model.of(_T("Passcode"))).setRequired(true));
 		
 		fragment.add(form);
 
@@ -312,7 +311,7 @@ public class LoginPage extends SimplePage {
 				LoginPage.this.recoveryCode = object;
 			}
 			
-		}).setLabel(Model.of(_T("Recovery code"))).setRequired(true).add(AttributeAppender.append("placeholder", _T("Recovery code"))));
+		}).setLabel(Model.of(_T("Recovery code"))).setRequired(true));
 		
 		fragment.add(form);
 		replace(fragment);
