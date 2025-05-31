@@ -799,7 +799,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 					fragment.add(new WebMarkupContainer("lfsHint").setVisible(blob.getLfsPointer() != null));
 					
 					fragment.add(new ResourceLink<Void>("download", new RawBlobResourceReference(), 
-							RawBlobResource.paramsOf(getProject(), getBlobIdent())).add(AttributeAppender.append("data-tippy-content", _T("Download"))));
+							RawBlobResource.paramsOf(getProject(), getBlobIdent())));
 					
 					WebMarkupContainer deleteContainer = new WebMarkupContainer("delete");
 					fragment.add(deleteContainer);

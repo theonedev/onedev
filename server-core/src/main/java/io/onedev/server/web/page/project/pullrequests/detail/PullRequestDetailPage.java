@@ -767,7 +767,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 								&& buildSpec.getJobMap().containsKey(jobName) 
 								&& (SecurityUtils.canRunJob(getProject(), jobName) || SecurityUtils.canModifyPullRequest(getPullRequest())));
 					}
-				}.add(AttributeAppender.append("data-tippy-content", _T("Run this job"))));	
+				});	
 			}
 
 			@Override

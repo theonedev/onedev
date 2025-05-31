@@ -2,9 +2,9 @@
 	<div class="access-token border rounded">
 		<h6 class="border-bottom px-4 py-3">
 			<span wicket:id="name" class="mr-2"></span>
-			<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-			<a wicket:id="regenerate" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1"><wicket:svg href="refresh" class="icon"></wicket:svg></a>
-			<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger mr-4"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+			<a wicket:id="edit" t:data-tippy-content="Edit this access token" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+			<a wicket:id="regenerate" t:data-tippy-content="Regenerate this access token" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1"><wicket:svg href="refresh" class="icon"></wicket:svg></a>
+			<a wicket:id="delete" t:data-tippy-content="Delete this access token" class="btn btn-xs btn-icon btn-light btn-hover-danger mr-4"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 			<span wicket:id="expired" class="badge badge-light-danger"><wicket:t>Expired</wicket:t></span>
 		</h6>
 		<div wicket:id="viewer" class="p-4"></div>

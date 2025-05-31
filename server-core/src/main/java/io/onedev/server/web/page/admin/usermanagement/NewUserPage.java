@@ -5,10 +5,8 @@ import static io.onedev.server.web.translation.Translation._T;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
@@ -32,8 +30,8 @@ import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.user.profile.UserProfilePage;
 import io.onedev.server.web.page.user.UserCssResourceReference;
+import io.onedev.server.web.page.user.profile.UserProfilePage;
 import io.onedev.server.web.util.editbean.NewUserBean;
 
 public class NewUserPage extends AdministrationPage {
@@ -115,7 +113,6 @@ public class NewUserPage extends AdministrationPage {
 			
 		};
 		form.add(editor);
-		form.add(new WebMarkupContainer("submit").add(AttributeAppender.append("value", _T("Create"))));
 		form.add(new CheckBox("continueToAdd", new IModel<Boolean>() {
 
 			@Override

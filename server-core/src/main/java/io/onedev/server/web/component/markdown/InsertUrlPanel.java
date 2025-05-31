@@ -522,7 +522,7 @@ abstract class InsertUrlPanel extends Panel {
 					};
 				}
 				
-			}.add(new AttributeAppender("data-tippy-content", _T("Select"))));
+			});
 
 			form.add(new AjaxLink<Void>("cancel") {
 				@Override

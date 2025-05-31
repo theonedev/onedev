@@ -5,7 +5,7 @@
 				<div class="input-group">
 					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control">
 					<span class="input-group-append">
-						<button wicket:id="submit" type="submit" class="btn btn-outline-secondary btn-icon"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+						<button wicket:id="submit" t:data-tippy-content="Query" type="submit" class="btn btn-outline-secondary btn-icon"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
 					</span>
 				</div>
 			</form>
@@ -58,9 +58,9 @@
 	            <a wicket:id="copyHash" class="btn btn-outline-secondary btn-icon"><wicket:svg href="copy" class="icon"></wicket:svg></a>
 	        </span>
 	        <span class="btn-group browse">
-	            <a wicket:id="browseCode" class="btn btn-outline-secondary btn-icon"><wicket:svg href="files" class="icon"></wicket:svg></a>
+	            <a wicket:id="browseCode" t:data-tippy-content="Browse code" class="btn btn-outline-secondary btn-icon"><wicket:svg href="files" class="icon"></wicket:svg></a>
 	            <wicket:enclosure>
-	            <a wicket:id="compare" class="compare btn btn-outline-secondary btn-icon"><wicket:svg href="diff" class="icon"></wicket:svg></a>
+	            <a wicket:id="compare" t:data-tippy-content="Compare with base revision" class="compare btn btn-outline-secondary btn-icon"><wicket:svg href="diff" class="icon"></wicket:svg></a>
 	            </wicket:enclosure>
 	        </span>
 		</div>

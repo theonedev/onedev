@@ -209,7 +209,7 @@ public class GroupListPage extends AdministrationPage {
 						target.add(groupsTable);
 					}
 
-				}.add(AttributeAppender.append("data-tippy-content", _T("Delete this group"))));
+				});
 
 				cellItem.add(fragment);
 			}

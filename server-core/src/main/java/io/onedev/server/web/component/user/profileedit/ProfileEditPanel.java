@@ -6,9 +6,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.io.Serializable;
 
 import org.apache.wicket.Session;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
@@ -89,7 +87,6 @@ public class ProfileEditPanel extends GenericPanel<User> {
 		form.add(editor);
 		
 		form.add(new FencedFeedbackPanel("feedback", form));		
-		form.add(new WebMarkupContainer("submit").add(AttributeAppender.append("value", _T("Save"))));
 		
 		add(form);
 	}

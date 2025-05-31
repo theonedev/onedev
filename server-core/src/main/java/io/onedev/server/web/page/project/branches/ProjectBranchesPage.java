@@ -528,7 +528,7 @@ public class ProjectBranchesPage extends ProjectPage {
 						return ref.getName();
 					}
 					
-				}.add(AttributeAppender.append("data-tippy-content", _T("Download archive of this branch"))));
+				});
 				
 				actionsContainer.add(new ModalLink("delete") {
 
@@ -611,7 +611,7 @@ public class ProjectBranchesPage extends ProjectPage {
 						
 					}
 
-				}.add(AttributeAppender.append("data-tippy-content", _T("Delete this branch"))));
+				});
 				
 				actionsContainer.add(new AjaxLink<Void>("makeDefault") {
 

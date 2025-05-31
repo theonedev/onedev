@@ -6,7 +6,6 @@ import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -39,7 +38,7 @@ abstract class AccessTokenPanel extends Panel {
 				onEdit(target);
 			}
 			
-		}.add(AttributeAppender.append("data-tippy-content", _T("Edit this access token"))));
+		});
 		add(new AjaxLink<Void>("regenerate") {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -54,15 +53,15 @@ abstract class AccessTokenPanel extends Panel {
 				token.setValue(CryptoUtils.generateSecret());
 				OneDev.getInstance(AccessTokenManager.class).createOrUpdate(token);
 				target.add(AccessTokenPanel.this);
-				Session.get().success("Access token regenerated successfully");
+				Session.get().success(_T("Access token regenerated successfully"));
 			}
-		}.add(AttributeAppender.append("data-tippy-content", _T("Regenerate this access token"))));
+		});
 		add(new AjaxLink<Void>("delete") {
 
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this access token?"));
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to delete this access token?")));
 			}
 
 			@Override
@@ -70,7 +69,7 @@ abstract class AccessTokenPanel extends Panel {
 				onDelete(target);
 			}
 			
-		}.add(AttributeAppender.append("data-tippy-content", _T("Delete this access token"))));
+		});
 		
 		add(new WebMarkupContainer("expired").setVisible(getToken().isExpired()));
 		

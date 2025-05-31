@@ -7,12 +7,12 @@
 			override imported elements with same name</wicket:t>
 		</div>
 		<div wicket:id="imports" class="import"></div>
-		<a wicket:id="add" class="add btn btn-light btn-hover-primary btn-block"><wicket:svg href="plus" class="icon align-middle mr-1"></wicket:svg></a>
+		<a wicket:id="add" t:data-tippy-content="Add new import" class="add btn btn-light btn-hover-primary btn-block"><wicket:svg href="plus" class="icon align-middle mr-1"></wicket:svg></a>
 	</div>
 	<wicket:fragment wicket:id="importEditFrag">
 		<div class="head import-head d-flex align-items-center">
 			<span class="drag-indicator mr-2"><wicket:svg href="grip" class="icon"></wicket:svg></span>
-			<a wicket:id="delete" class="btn btn-light btn-xs btn-icon btn-hover-danger text-muted mr-4">
+			<a wicket:id="delete" t:data-tippy-content="Delete this import" class="btn btn-light btn-xs btn-icon btn-hover-danger text-muted mr-4">
 				<wicket:svg href="trash" class="icon"/>
 			</a>
 		</div>

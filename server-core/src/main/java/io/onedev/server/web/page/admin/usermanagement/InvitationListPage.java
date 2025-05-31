@@ -178,7 +178,7 @@ public class InvitationListPage extends AdministrationPage {
 						}
 					}
 
-				}.add(AttributeAppender.append("data-tippy-content", _T("Resend invitation"))));
+				});
 
 				fragment.add(new AjaxLink<Void>("delete") {
 
@@ -203,7 +203,7 @@ public class InvitationListPage extends AdministrationPage {
 						setVisible(SecurityUtils.isAdministrator());
 					}
 
-				}.add(AttributeAppender.append("data-tippy-content", _T("Cancel invitation"))));
+				});
 
 				cellItem.add(fragment);
 			}

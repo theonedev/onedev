@@ -7,8 +7,6 @@ import java.util.Collection;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -64,7 +62,6 @@ public class NewRolePage extends AdministrationPage {
 			
 		};
 		form.add(editor);
-		form.add(new WebMarkupContainer("save").add(AttributeAppender.append("value", _T("Save"))));
 
 		add(form);
 	}

@@ -11,9 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -127,7 +125,6 @@ public class RoleDetailPage extends AdministrationPage {
 			
 			form.add(editor);
 			form.add(new FencedFeedbackPanel("feedback", form));
-			form.add(new WebMarkupContainer("save").add(AttributeAppender.append("value", _T("Save"))));
 			form.add(new Link<Void>("delete") {
 
 				@Override

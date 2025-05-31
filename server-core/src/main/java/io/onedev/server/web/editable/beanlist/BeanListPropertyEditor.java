@@ -180,7 +180,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				onPropertyUpdating(target);
 			}
 
-		}.setDefaultFormProcessing(false).add(AttributeAppender.append("data-tippy-content", _T("Add new"))));
+		}.setDefaultFormProcessing(false));
 		
 		table.add(noRecords = new WebMarkupContainer("noRecords") {
 
@@ -285,7 +285,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				onPropertyUpdating(target);
 			}
 
-		}.setDefaultFormProcessing(false).add(AttributeAppender.append("data-tippy-content", _T("Delete this"))));
+		}.setDefaultFormProcessing(false));
 		
 		return row;
 	}

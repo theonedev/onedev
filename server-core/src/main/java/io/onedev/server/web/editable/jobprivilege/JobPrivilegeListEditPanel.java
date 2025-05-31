@@ -11,7 +11,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
@@ -82,7 +81,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 				};
 			}
 			
-		}.add(AttributeAppender.append("data-tippy-content", _T("Add new"))));
+		});
 		
 		List<IColumn<JobPrivilege, Void>> columns = new ArrayList<>();
 		
@@ -167,7 +166,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 						};
 					}
 
-				}.add(AttributeAppender.append("data-tippy-content", _T("Edit"))));
+				});
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
@@ -184,7 +183,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 						target.add(JobPrivilegeListEditPanel.this);
 					}
 
-				}.add(AttributeAppender.append("data-tippy-content", _T("Delete"))));
+				});
 				cellItem.add(fragment);
 			}
 

@@ -3,20 +3,20 @@
 		<div class="head flex-shrink-0">
 			<div class="actions d-flex flex-wrap">
 				<div class="normal-mode flex-wrap d-none d-lg-flex mr-4">
-					<a wicket:id="doBold" class="do-bold"><wicket:svg href="bold" class="icon"></wicket:svg></a>
-					<a wicket:id="doItalic" class="do-italic"><wicket:svg href="italic" class="icon"></wicket:svg></a>
-					<a wicket:id="doHeader" class="do-header"><wicket:svg href="header" class="icon"></wicket:svg></a>
+					<a t:data-tippy-content="Bold" class="do-bold"><wicket:svg href="bold" class="icon"></wicket:svg></a>
+					<a t:data-tippy-content="Italic" class="do-italic"><wicket:svg href="italic" class="icon"></wicket:svg></a>
+					<a t:data-tippy-content="md.heading" class="do-header"><wicket:svg href="header" class="icon"></wicket:svg></a>
 					<span class="separator"></span>
-					<a wicket:id="doLink" class="do-link"><wicket:svg href="link" class="icon"></wicket:svg></a>
-					<a wicket:id="doImage" class="do-image"><wicket:svg href="image" class="icon"></wicket:svg></a>
+					<a t:data-tippy-content="Link" class="do-link"><wicket:svg href="link" class="icon"></wicket:svg></a>
+					<a t:data-tippy-content="md.image" class="do-image"><wicket:svg href="image" class="icon"></wicket:svg></a>
 					<span class="separator"></span>
-					<a wicket:id="doList" class="do-list"><wicket:svg href="unordered-list" class="icon"></wicket:svg></a>
-					<a wicket:id="doOrderlist" class="do-orderlist"><wicket:svg href="ordered-list" class="icon"></wicket:svg></a>
-					<a wicket:id="doTasklist" class="do-tasklist"><wicket:svg href="tick-box" class="icon"></wicket:svg></a>
-					<a wicket:id="doCode" class="do-code"><wicket:svg href="code" class="icon"></wicket:svg></a>
-					<a wicket:id="doQuote" class="do-quote"><wicket:svg href="quote" class="icon"></wicket:svg></a>
+					<a t:data-tippy-content="Unordered list" class="do-list"><wicket:svg href="unordered-list" class="icon"></wicket:svg></a>
+					<a t:data-tippy-content="Ordered list" class="do-orderlist"><wicket:svg href="ordered-list" class="icon"></wicket:svg></a>
+					<a t:data-tippy-content="Task list" class="do-tasklist"><wicket:svg href="tick-box" class="icon"></wicket:svg></a>
+					<a t:data-tippy-content="Code" class="do-code"><wicket:svg href="code" class="icon"></wicket:svg></a>
+					<a t:data-tippy-content="Quote" class="do-quote"><wicket:svg href="quote" class="icon"></wicket:svg></a>
 					<span class="separator"></span>
-					<a wicket:id="doEmoji" class="do-emoji"><wicket:svg href="smile" class="icon"></wicket:svg></a>
+					<a t:data-tippy-content="Show emojis" class="do-emoji"><wicket:svg href="smile" class="icon"></wicket:svg></a>
 					<a wicket:id="doMention" class="do-mention"><wicket:svg href="at" class="icon"></wicket:svg></a>
 					<a wicket:id="doReference"><wicket:svg href="reference" class="icon"></wicket:svg></a>
 				</div>
@@ -24,14 +24,14 @@
 					<a wicket:id="actionMenuTrigger"><wicket:svg href="menu" class="icon"></wicket:svg></a>
 				</div>
 				<div class="ml-auto d-flex flex-wrap">
-					<a wicket:id="doSuggestion" class="do-suggestion mr-2"><wicket:svg href="diff" class="icon"></wicket:svg></a>
-					<a wicket:id="doFixedwidth" class="do-fixedwidth"><wicket:svg href="text-width" class="icon"></wicket:svg></a>
-					<a wicket:id="doFullscreen" class="do-fullscreen"><wicket:svg href="maximize" class="icon"></wicket:svg></a>
-					<a wicket:id="doHelp" class="do-help"><wicket:svg href="question" class="icon"></wicket:svg></a>
+					<a wicket:id="doSuggestion" t:data-tippy-content="Code suggestion" class="do-suggestion mr-2"><wicket:svg href="diff" class="icon"></wicket:svg></a>
+					<a t:data-tippy-content="Toggle fixed width font" class="do-fixedwidth"><wicket:svg href="text-width" class="icon"></wicket:svg></a>
+					<a t:data-tippy-content="Toggle full screen" class="do-fullscreen"><wicket:svg href="maximize" class="icon"></wicket:svg></a>
+					<a t:data-tippy-content="Help" class="do-help"><wicket:svg href="question" class="icon"></wicket:svg></a>
 					<span class="separator"></span>
-					<a wicket:id="editLink" class="edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-					<a wicket:id="previewLink" class="preview"><wicket:svg href="eye" class="icon"></wicket:svg></a>
-					<a wicket:id="splitLink" class="split"><wicket:svg href="split" class="icon"></wicket:svg></a>
+					<a wicket:id="editLink" class="edit" t:data-tippy-content="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+					<a class="preview" t:data-tippy-content="Preview"><wicket:svg href="eye" class="icon"></wicket:svg></a>
+					<a wicket:id="splitLink" t:data-tippy-content="Split view" class="split"><wicket:svg href="split" class="icon"></wicket:svg></a>
 					<div wicket:id="lazyResourceLoader" class="d-none"></div>
 				</div>						
 			</div>			
@@ -81,7 +81,7 @@
 		<a class="dropdown-item do-quote"><wicket:svg href="quote" class="icon mr-1"></wicket:svg> <wicket:t>Quote</wicket:t></a>
 		<div class="dropdown-divider"></div>
 		<a class="dropdown-item do-emoji"><wicket:svg href="smile" class="icon mr-1"></wicket:svg> <wicket:t>Show Emojis</wicket:t></a>
-		<a wicket:id="doMention" class="dropdown-item do-mention"><wicket:svg href="at" class="icon mr-1"></wicket:svg> <wicket:t>Mention Someone</wicket:t></a>
+		<a wicket:id="doMention" t:data-tippy-content="Mention someone" class="dropdown-item do-mention"><wicket:svg href="at" class="icon mr-1"></wicket:svg> <wicket:t>Mention Someone</wicket:t></a>
 		<wicket:container wicket:id="doReference"></wicket:container>
 	</wicket:fragment>
 </wicket:panel>

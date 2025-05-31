@@ -1,13 +1,10 @@
 package io.onedev.server.web.page.user.gpgkeys;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -59,7 +56,7 @@ public class UserGpgKeysPage extends UserPage {
 				};
             }
             
-		}.add(AttributeAppender.append("data-tippy-content", _T("Add GPG Key"))));
+		});
             
 		keyList = new GpgKeyListPanel("keyList", new LoadableDetachableModel<List<GpgKey>>() {
 			

@@ -1,6 +1,26 @@
 package io.onedev.server.web.component.job.jobinfo;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.entitymanager.BuildManager;
@@ -17,26 +37,6 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
-import org.apache.wicket.Component;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.eclipse.jgit.lib.ObjectId;
-
-import javax.annotation.Nullable;
-
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
 
 public abstract class JobInfoButton extends Panel {
 
@@ -146,7 +146,7 @@ public abstract class JobInfoButton extends Panel {
 				return null;
 			}
 			
-		}.add(AttributeAppender.append("data-tippy-content", _T("Run this job"))));
+		});
 	}
 	
 	@Override

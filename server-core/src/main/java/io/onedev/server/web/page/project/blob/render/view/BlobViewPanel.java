@@ -233,10 +233,8 @@ public abstract class BlobViewPanel extends Panel {
 		
 		add(newFormats("formats"));
 		
-		ResourceLink<Void> downloadLink;
-		add(downloadLink = new ResourceLink<Void>("download", new RawBlobResourceReference(), 
+		add(new ResourceLink<Void>("download", new RawBlobResourceReference(), 
 				RawBlobResource.paramsOf(context.getProject(), context.getBlobIdent(), ContentDisposition.ATTACHMENT)));
-		downloadLink.add(AttributeAppender.append("data-tippy-content", _T("Download")));
 
 		add(new CheckBox("viewPlain", Model.of(context.getMode() == Mode.VIEW && context.isViewPlain())) {
 			

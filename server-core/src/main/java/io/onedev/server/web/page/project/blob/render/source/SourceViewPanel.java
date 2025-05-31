@@ -349,7 +349,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				setVisible(commentContainer.getDefaultModelObject() != null);
 			}
 			
-		}.add(AttributeAppender.append("data-tippy-content", _T("Show commented code snippet"))).setOutputMarkupId(true));
+		}.setOutputMarkupId(true));
 		
 		head.add(new Label("status", new LoadableDetachableModel<String>() {
 
@@ -417,7 +417,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				closeComment(target);
 			}
 			
-		}.add(AttributeAppender.append("data-tippy-content", _T("Hide comment"))));
+		});
 		
 		commentContainer.setOutputMarkupPlaceholderTag(true);
 		

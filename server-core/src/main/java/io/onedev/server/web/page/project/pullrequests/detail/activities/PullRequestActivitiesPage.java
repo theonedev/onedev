@@ -442,7 +442,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				target.appendJavaScript(String.format("$('#%s').toggleClass('active');", getMarkupId()));
 			}
 			
-		}.add(new AttributeAppender("data-tippy-content", _T("Toggle comments"))));
+		});
 		
 		fragment.add(new AjaxLink<Void>("showCommits") {
 
@@ -466,7 +466,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				target.appendJavaScript(String.format("$('#%s').toggleClass('active');", getMarkupId()));
 			}
 
-		}.add(new AttributeAppender("data-tippy-content", _T("Toggle commits"))));
+		});
 		
 		fragment.add(new AjaxLink<Void>("showChangeHistory") {
 
@@ -496,7 +496,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				target.appendJavaScript(String.format("$('#%s').toggleClass('active');", getMarkupId()));
 			}
 
-		}.add(new AttributeAppender("data-tippy-content", _T("Toggle change history"))));
+		});
 		
 		return fragment;
 	}

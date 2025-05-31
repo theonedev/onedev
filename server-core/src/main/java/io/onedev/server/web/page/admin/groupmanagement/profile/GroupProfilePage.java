@@ -6,9 +6,7 @@ import java.io.Serializable;
 import java.text.MessageFormat;
 
 import org.apache.wicket.Session;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
@@ -84,7 +82,6 @@ public class GroupProfilePage extends GroupPage {
 		};	
 		form.add(editor);
 		form.add(new FencedFeedbackPanel("feedback", form));
-		form.add(new WebMarkupContainer("submit").add(AttributeAppender.append("value", _T("Save"))));
 
 		form.add(new Link<Void>("delete") {
 

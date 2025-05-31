@@ -20,7 +20,6 @@ import java.util.Properties;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
@@ -696,12 +695,6 @@ public abstract class LayoutPage extends BasePage {
 			}
 
 			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(AttributeAppender.append("data-tippy-content", _T("Alerts")));
-			}
-
-			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(getAlertManager().count() != 0);
@@ -761,8 +754,6 @@ public abstract class LayoutPage extends BasePage {
 					}
 
 				}));
-
-				add(new AttributeModifier("data-tippy-content", _T("Toggle dark mode")));
 			}
 
 		});
@@ -789,7 +780,6 @@ public abstract class LayoutPage extends BasePage {
 					}
 
 				});
-				add(AttributeAppender.append("data-tippy-content", _T("New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting")));
 			}
 
 			@Override
@@ -807,12 +797,6 @@ public abstract class LayoutPage extends BasePage {
 		});
 
 		topbar.add(new MenuLink("languageSelector") {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(AttributeAppender.append("data-tippy-content", _T("Language")));
-			}
 
 			private void setLanguageCookie(String language) {
 				Cookie cookie = new Cookie(COOKIE_LANGUAGE, language);

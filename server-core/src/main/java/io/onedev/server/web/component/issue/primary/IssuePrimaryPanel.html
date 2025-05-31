@@ -10,7 +10,7 @@
 			<li wicket:id="links" class="mb-4 mb-last-child-0">
 				<div class="head h6 d-flex align-items-center">
 					<span wicket:id="name" class="flex-shrink-0 mr-2"></span>
-					<a wicket:id="addLink" class="d-flex align-items-center"><wicket:svg href="plus" class="icon icon-sm"/></a>
+					<a wicket:id="addLink" t:data-tippy-content="Add link" class="d-flex align-items-center"><wicket:svg href="plus" class="icon icon-sm"/></a>
 				</div>
 				<ul class="body linked-issues list-unstyled mb-0">
 					<li wicket:id="linkedIssues" class="py-2 border-top d-flex align-items-center"></li>
@@ -39,14 +39,14 @@
 				<div wicket:id="tabContent" class="tab-content"></div>
 			</div>
 			<div class="modal-footer">
-				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary"></input>
+				<input wicket:id="save" type="submit" value="Ok" class="dirty-aware btn btn-primary"></input>
 				<a wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></a>
 			</div>
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="linkedIssueFrag">
 		<a wicket:id="title"><span wicket:id="label"></span></a>
-		<a wicket:id="unlink" class="action ml-2"><wicket:svg href="unlink" class="icon icon-sm"/></a>
+		<a wicket:id="unlink" t:data-tippy-content="Unlink this issue" class="action ml-2"><wicket:svg href="unlink" class="icon icon-sm"/></a>
 		<a wicket:id="state" class="state ml-auto"><span wicket:id="badge"></span></a>
 	</wicket:fragment>
 </wicket:panel>

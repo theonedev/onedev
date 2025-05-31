@@ -291,7 +291,7 @@ public class ProjectTagsPage extends ProjectPage {
 				return fragment;
 			}
 			
-		}.add(AttributeAppender.append("data-tippy-content", _T("Create tag"))));
+		});
 		
 		List<IColumn<RefFacade, Void>> columns = new ArrayList<>();
 		
@@ -392,7 +392,7 @@ public class ProjectTagsPage extends ProjectPage {
 						return ref.getName();
 					}
 					
-				}.add(AttributeAppender.append("data-tippy-content", _T("Download tag archive"))));
+				});
 				
 				fragment.add(new AjaxLink<Void>("delete") {
 
@@ -427,7 +427,7 @@ public class ProjectTagsPage extends ProjectPage {
 							setVisible(false);
 					}
 					
-				}.add(AttributeAppender.append("data-tippy-content", _T("Delete this tag"))));		
+				});		
 				
 				cellItem.add(fragment);
 			}

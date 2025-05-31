@@ -1,14 +1,11 @@
 package io.onedev.server.web.editable.jobprivilege;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -88,7 +85,7 @@ abstract class JobPrivilegeEditPanel extends Panel {
 				}
 			}
 			
-		}.add(AttributeAppender.append("value", _T("Save"))));
+		});
 		
 		form.add(new AjaxLink<Void>("cancel") {
 

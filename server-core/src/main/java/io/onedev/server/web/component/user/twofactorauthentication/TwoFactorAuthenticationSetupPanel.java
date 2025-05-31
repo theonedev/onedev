@@ -161,7 +161,7 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 				}
 			}
 			
-		}.add(new AttributeAppender("value", _T("Verify"))));
+		});
 		form.setOutputMarkupId(true);
 		
 		fragment.add(form);	

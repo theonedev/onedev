@@ -591,7 +591,7 @@ public abstract class RevisionDiffPanel extends Panel {
 						return menuItems;
 					}
 					
-				}.add(AttributeAppender.append("data-tippy-content", _T("Diff options"))));
+				});
 			}			
 			
 		}.setOutputMarkupId(true));		
@@ -671,7 +671,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				doFilter(target);
 			}
 			
-		}.add(AttributeAppender.append("data-tippy-content", _T("Filter"))));
+		});
 		
 		add(pathFilterForm);
 		
@@ -714,7 +714,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				navigationContainer.configure();
 				return navigationContainer.isVisible()? "active": "";
 			}
-		})).add(AttributeAppender.append("data-tippy-content", _T("Toggle navigation"))));
+		})));
 		
 		body = new WebMarkupContainer("body") {
 			@Override
@@ -1631,7 +1631,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				setVisible(commentContainer.getDefaultModelObject() != null);
 			}
 
-		}.add(AttributeAppender.append("data-tippy-content", _T("Show commented code snippet"))).setOutputMarkupId(true));
+		}.setOutputMarkupId(true));
 
 		head.add(new AjaxLink<Void>("close") {
 
@@ -1661,7 +1661,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				}
 			}
 
-		}.add(AttributeAppender.append("data-tippy-content", _T("Hide comment"))));
+		});
 
 		if (annotationSupport != null) {
 			CodeComment openComment = annotationSupport.getOpenComment();

@@ -7,8 +7,8 @@
 		<!-- disable auto focus here as otherwise we have problems jumping to marked code blocks -->
 		<div class="head no-autofocus d-flex align-items-center flex-nowrap">
 			<span wicket:id="operations" class="btn-group mr-3">
-				<a wicket:id="batchedSuggestions" class="batched-suggestions btn btn-light flex-shrink-0" title="Batched suggestions"><wicket:svg href="diff" class="icon icon-lg mr-2"/> <span wicket:id="count" class="mr-1">3</span><wicket:svg href="arrow" class="icon rotate-90"/></a>
-				<a wicket:id="option" class="btn btn-light btn-icon btn-lg flex-shrink-0"><wicket:svg href="gear" class="icon"/></a>
+				<a wicket:id="batchedSuggestions" class="batched-suggestions btn btn-light flex-shrink-0" t:data-tippy-content="Batched suggestions"><wicket:svg href="diff" class="icon icon-lg mr-2"/> <span wicket:id="count" class="mr-1">3</span><wicket:svg href="arrow" class="icon rotate-90"/></a>
+				<a wicket:id="option" class="btn btn-light btn-icon btn-lg flex-shrink-0" t:data-tippy-content="Diff options"><wicket:svg href="gear" class="icon"/></a>
 			</span>
 			<div class="path-filter flex-grow-1">				
 				<form wicket:id="pathFilter">
@@ -16,7 +16,7 @@
 						<div class="input-group">
                             <input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off">
 							<span class="input-group-append">
-								<button wicket:id="submit" class="btn btn-icon btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+								<button wicket:id="submit" class="btn btn-icon btn-outline-secondary" type="submit" t:data-tippy-content="Filter"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
 							</span>
 						</div>
 					</div>
@@ -26,7 +26,7 @@
 				<div wicket:id="bar" class="position-absolute rounded"></div>
 				<div wicket:id="label" class="font-size-sm ml-auto mr-auto"></div>
 			</div>
-			<a wicket:id="toggleNavigation" class="btn btn-icon btn-light btn-active-primary ml-3"><wicket:svg href="sidebar" class="icon flip-x"/></a>
+			<a wicket:id="toggleNavigation" class="btn btn-icon btn-light btn-active-primary ml-3" t:data-tippy-content="Toggle navigation"><wicket:svg href="sidebar" class="icon flip-x"/></a>
 		</div>
 		<div wicket:id="body" class="body">
 			<div wicket:id="feedback"></div>
@@ -38,8 +38,8 @@
 							<h6 class="mb-0 mr-2"><wicket:t>Code Comment</wicket:t></h6>
 							<span wicket:id="outdated" class="mr-2 badge badge-sm badge-warning"><wicket:t>outdated</wicket:t></span>
 							<span wicket:id="status" class="mr-2"></span>
-							<a wicket:id="locate" class="btn btn-xs btn-icon btn-hover-primary btn-light locate ml-2 mr-3"><wicket:svg href="hand" class="icon"></wicket:svg></a>
-							<a wicket:id="close" class="ml-auto"><wicket:svg href="times" class="icon"></wicket:svg></a>
+							<a wicket:id="locate" class="btn btn-xs btn-icon btn-hover-primary btn-light locate ml-2 mr-3" t:data-tippy-content="Show commented code snippet"><wicket:svg href="hand" class="icon"></wicket:svg></a>
+							<a wicket:id="close" class="ml-auto" t:data-tippy-content="Hide comment"><wicket:svg href="times" class="icon"></wicket:svg></a>
 						</div>
 						<div wicket:id="body" class="body overflow-auto flex-grow-1 p-3"></div>
 					</div>

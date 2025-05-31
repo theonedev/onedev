@@ -375,7 +375,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						onLinkIssue(target, specId, opposite, linkName);
 					}
-				}.add(AttributeAppender.append("data-tippy-content", _T("Link issues"))).setVisible(applicable && canEditIssueLink));
+				}.setVisible(applicable && canEditIssueLink));
 			}
 			
 		});
@@ -501,7 +501,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 						protected void onError(AjaxRequestTarget target, Form<?> form) {
 							target.add(form);
 						}
-					}.add(AttributeAppender.append("value", _T("Ok"))));
+					});
 
 					form.add(new AjaxLink<Void>("close") {
 						@Override
@@ -563,7 +563,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 					notifyIssueChange(target, getIssue());
 				}
 				
-			}.add(AttributeAppender.append("data-tippy-content", _T("Unlink this issue"))).setVisible(deleteListener != null));
+			}.setVisible(deleteListener != null));
 
 			AjaxLink<Void> stateLink = new TransitionMenuLink("state") {
 

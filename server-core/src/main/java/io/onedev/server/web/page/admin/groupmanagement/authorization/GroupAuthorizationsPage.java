@@ -11,9 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.wicket.Session;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -82,7 +80,6 @@ public class GroupAuthorizationsPage extends GroupPage {
 		};
 		form.add(new FencedFeedbackPanel("feedback", form));
 		form.add(PropertyContext.edit("editor", authorizationsBean, "authorizations"));
-		form.add(new WebMarkupContainer("submit").add(AttributeAppender.append("value", _T("Save"))));
 		add(form);
 	}
 

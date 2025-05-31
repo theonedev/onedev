@@ -251,7 +251,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 													return null;
 												}
 		
-											}.add(AttributeAppender.append("data-tippy-content", _T("Run this job"))));
+											});
 											jobNav.add(AttributeAppender.append("class", "nav btn-group flex-nowrap"));
 											return jobNav;
 										}

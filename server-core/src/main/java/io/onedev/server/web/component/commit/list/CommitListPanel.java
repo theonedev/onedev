@@ -420,7 +420,7 @@ public abstract class CommitListPanel extends Panel {
 				doQuery(target);
 			}
 			
-		}.add(new AttributeAppender("data-tippy-content", _T("Query"))));
+		});
 		add(queryForm);
 		
 		body = new WebMarkupContainer("body") {
@@ -664,8 +664,7 @@ public abstract class CommitListPanel extends Panel {
 			}
 			ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
 			PageParameters params = ProjectBlobPage.paramsOf(getProject(), browseState);
-			item.add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params)
-					.add(new AttributeAppender("data-tippy-content", _T("Browse code"))));
+			item.add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));
 			
 			if (getCompareWith() != null) {
 				RevisionComparePage.State compareState = new RevisionComparePage.State();
@@ -676,8 +675,7 @@ public abstract class CommitListPanel extends Panel {
 				compareState.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 				
 				params = RevisionComparePage.paramsOf(getProject(), compareState);
-				item.add(new ViewStateAwarePageLink<Void>("compare", RevisionComparePage.class, params)
-						.add(new AttributeAppender("data-tippy-content", _T("Compare with base revision"))));
+				item.add(new ViewStateAwarePageLink<Void>("compare", RevisionComparePage.class, params));
 			} else {
 				item.add(new WebMarkupContainer("compare").setVisible(false));
 			}

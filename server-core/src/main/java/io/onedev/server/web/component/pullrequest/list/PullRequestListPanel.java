@@ -822,7 +822,6 @@ public abstract class PullRequestListPanel extends Panel {
 			}
 			
 		});
-		queryInput.add(AttributeAppender.append("data-tippy-content", _T("Query")));
 		add(queryForm);
 
 		if (getProject() == null) {
@@ -854,10 +853,10 @@ public abstract class PullRequestListPanel extends Panel {
 					}.add(AttributeAppender.append("class", "no-current"));
 				}
 				
-			}.add(AttributeAppender.append("data-tippy-content", _T("Open new pull request"))));
+			});
 		} else {
 			add(new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class,
-					NewPullRequestPage.paramsOf(getProject())).add(AttributeAppender.append("data-tippy-content", _T("Open new pull request"))));		
+					NewPullRequestPage.paramsOf(getProject())));		
 		}
 		body = new WebMarkupContainer("body");
 		add(body.setOutputMarkupId(true));

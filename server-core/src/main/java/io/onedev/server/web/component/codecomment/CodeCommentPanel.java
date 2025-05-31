@@ -774,7 +774,6 @@ public abstract class CodeCommentPanel extends Panel {
 				@Override
 				protected void onComponentTag(ComponentTag tag) {
 					super.onComponentTag(tag);
-					tag.put("data-tippy-content", _T("Permanent link"));
 					tag.put("href", "#" + getReply().getAnchor());
 				}
 				

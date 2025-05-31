@@ -66,13 +66,11 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Activities", "活动");
 		m.put("Activity by type", "按类型统计的活动");
 		m.put("Add", "添加");
-		m.put("Add GPG Key", "添加 GPG 密钥");
 		m.put("Add GPG keys here to verify commits/tags signed by this user", "在此添加 GPG 密钥以验证此用户的代码提交/标签签名");
 		m.put("Add GPG keys here to verify commits/tags signed by you", "在此添加 GPG 密钥以验证由您签名的提交/标签");
 		m.put("Add Issues to Iteration", "将工单添加到迭代");
 		m.put("Add New", "添加");
 		m.put("Add New Email Address", "添加新电子邮件地址");
-		m.put("Add SSH Key", "添加 SSH 密钥");
 		m.put("Add Spent Time", "添加已用时间");
 		m.put("Add a GPG Public Key", "添加一个 GPG 公钥");
 		m.put("Add a SSH Key", "添加 SSH 密钥");
@@ -81,7 +79,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Add before", "添加到前面");
 		m.put("Add child project", "添加子项目");
 		m.put("Add comment on this selection", "在此选择上添加注释");
-		m.put("Add dashboard", "添加仪表板");
 		m.put("Add files via upload", "通过上传添加文件");
 		m.put("Add member...", "添加成员...");
 		m.put("Add new", "添加");
@@ -225,6 +222,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Base Query", "基础查询");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Base64 编码的 PEM 格式，以 -----BEGIN CERTIFICATE----- 开头，以 -----END CERTIFICATE----- 结尾");
+		m.put("Batched suggestions", "批量建议");
 		m.put("Belonging Groups", "所属组");
 		m.put("Below are some common criterias. Type in search box above to view the complete list and available combinations.", 
 			"以下是一些常见的条件。在搜索框中输入以查看完整列表和可用组合。");
@@ -595,7 +593,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Detect Secrets", "检测敏感信息");
 		m.put("Detect Vulnerabilities", "检测漏洞");
 		m.put("Diff is too large to be displayed.", "差异太大，无法显示");
-		m.put("Diff options", "差异选项");
+		m.put("Diff options", "比较选项");
 		m.put("Digest invalid", "摘要无效");
 		m.put("Directories to Skip", "要跳过的目录");
 		m.put("Directory", "目录");
@@ -664,7 +662,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Edit dashboard", "编辑仪表板");
 		m.put("Edit issue title", "编辑工单标题");
 		m.put("Edit on branch {0}", "在分支 {0} 编辑");
-		m.put("Edit on source branch", "在源分支编辑");
+		m.put("Edit on source branch", "在源分支上编辑");
 		m.put("Edit plain", "编辑纯文本");
 		m.put("Edit saved queries", "编辑保存的查询");
 		m.put("Edit this access token", "编辑此访问令牌");
@@ -823,7 +821,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("From States", "从状态");
 		m.put("From {0}", "从 {0}");
 		m.put("Full Name", "全名");
-		m.put("Full screen", "全屏");
 		m.put("Furthest due date", "最晚截止日期");
 		m.put("GPG Keys", "GPG 密钥");
 		m.put("GPG Public Key", "GPG 公钥");
@@ -1167,7 +1164,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Link Text", "链接文本");
 		m.put("Link URL", "链接 URL");
 		m.put("Link URL should be specified", "链接 URL 应该指定");
-		m.put("Link issues", "链接工单");
 		m.put("Linkable Issues", "可链接的工单");
 		m.put("Linkable Issues On the Other Side", "可链接的工单在另一侧");
 		m.put("Links", "链接");
@@ -2996,6 +2992,17 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
+		m.put("Access token regenerated successfully", "访问令牌重新生成成功");
+		m.put("Add GPG key", "添加 GPG 密钥");
+		m.put("Add SSH key", "添加 SSH 密钥");
+		m.put("Add link", "添加链接");
+		m.put("Delete this GPG key", "删除此 GPG 密钥");
+		m.put("Do you really want to delete this GPG key?", "您确定要删除此 GPG 密钥吗？");
+		m.put("Do you really want to delete this access token?", "您确定要删除此访问令牌吗？");
+		m.put("GPG key deleted", "GPG 密钥已删除");
+		m.put("Show in build list", "在构建列表中显示");
+		m.put("Toggle full screen", "切换全屏");
+		m.put("Add dashboard", "添加仪表板");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");

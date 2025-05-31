@@ -192,23 +192,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		
 		add(container);
 
-		container.add(new WebMarkupContainer("doBold").add(AttributeAppender.append("data-tippy-content", _T("Bold"))));
-		container.add(new WebMarkupContainer("doItalic").add(AttributeAppender.append("data-tippy-content", _T("Italic"))));
-		container.add(new WebMarkupContainer("doHeader").add(AttributeAppender.append("data-tippy-content", _T("md.heading"))));
-		container.add(new WebMarkupContainer("doLink").add(AttributeAppender.append("data-tippy-content", _T("Link"))));
-		container.add(new WebMarkupContainer("doImage").add(AttributeAppender.append("data-tippy-content", _T("md.image"))));
-		container.add(new WebMarkupContainer("doList").add(AttributeAppender.append("data-tippy-content", _T("Unordered list"))));
-		container.add(new WebMarkupContainer("doOrderlist").add(AttributeAppender.append("data-tippy-content", _T("Ordered list"))));
-		container.add(new WebMarkupContainer("doTasklist").add(AttributeAppender.append("data-tippy-content", _T("Task list"))));
-		container.add(new WebMarkupContainer("doCode").add(AttributeAppender.append("data-tippy-content", _T("Code"))));
-		container.add(new WebMarkupContainer("doQuote").add(AttributeAppender.append("data-tippy-content", _T("Quote"))));
-		container.add(new WebMarkupContainer("doEmoji").add(AttributeAppender.append("data-tippy-content", _T("Show emojis"))));
-		container.add(new WebMarkupContainer("previewLink").add(AttributeAppender.append("data-tippy-content", _T("Preview"))));
-
 		WebMarkupContainer editLink = new WebMarkupContainer("editLink");
-		editLink.add(AttributeAppender.append("data-tippy-content", _T("Edit")));
 		WebMarkupContainer splitLink = new WebMarkupContainer("splitLink");		
-		splitLink.add(AttributeAppender.append("data-tippy-content", _T("Split view")));
 		WebMarkupContainer preview = new WebMarkupContainer("preview");
 		WebMarkupContainer edit = new WebMarkupContainer("edit");
 		container.add(editLink);
@@ -240,10 +225,6 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			}
 			
 		}.add(AttributeAppender.append("data-tippy-content", "Reference issue, build, or pull request")).setVisible(referenceSupport != null));
-
-		container.add(new WebMarkupContainer("doFixedwidth").add(AttributeAppender.append("data-tippy-content", _T("Toggle fixed width font"))));
-		container.add(new WebMarkupContainer("doFullscreen").add(AttributeAppender.append("data-tippy-content", _T("Full screen"))));
-		container.add(new WebMarkupContainer("doHelp").add(AttributeAppender.append("data-tippy-content", _T("Help"))));
 		
 		container.add(new DropdownLink("actionMenuTrigger") {
 
@@ -285,9 +266,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			
 		});
 		
-		container.add(new WebMarkupContainer("doMention")
-				.add(AttributeAppender.append("data-tippy-content", _T("Mention someone")))
-				.setVisible(getUserMentionSupport() != null));
+		container.add(new WebMarkupContainer("doMention").setVisible(getUserMentionSupport() != null));
 		
 		container.add(new WebMarkupContainer("doSuggestion") {
 
@@ -309,7 +288,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				setVisible(getSuggestionSupport() != null);
 			}
 			
-		}.add(AttributeAppender.append("data-tippy-content", _T("Code suggestion"))));
+		});
 		
 		edit.add(input = new TextArea<>("input", Model.of(getModelObject())) {
 

@@ -30,8 +30,8 @@
 			<span wicket:id="contributor" class="contributor"></span>
 		</div>
 		<div wicket:id="actions" class="actions">
-			<a wicket:id="download" class="btn btn-light btn-hover-primary btn-sm btn-icon mr-2 mb-2"><wicket:svg href="download" class="icon"/></a>
-			<a wicket:id="delete" class="btn btn-sm btn-icon btn-light btn-hover-danger mr-2 mb-2"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+			<a wicket:id="download" t:data-tippy-content="Download archive of this branch" class="btn btn-light btn-hover-primary btn-sm btn-icon mr-2 mb-2"><wicket:svg href="download" class="icon"/></a>
+			<a wicket:id="delete" t:data-tippy-content="Delete this branch" class="btn btn-sm btn-icon btn-light btn-hover-danger mr-2 mb-2"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 			<a wicket:id="makeDefault" class="make-default btn btn-sm btn-light btn-hover-primary mr-2 mb-2"><wicket:svg href="tick" class="icon mr-2"/> Set default</a>
 			<a wicket:id="effectiveRequest" class="btn btn-sm mr-2 mb-2"><wicket:svg href="pull-request" class="icon mr-1"></wicket:svg> <span wicket:id="label"></span></a>
 		</div>

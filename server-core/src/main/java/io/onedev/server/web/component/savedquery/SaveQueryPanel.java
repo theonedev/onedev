@@ -1,13 +1,10 @@
 package io.onedev.server.web.component.savedquery;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -53,7 +50,7 @@ public abstract class SaveQueryPanel extends Panel {
 					myQuerySupport.onSave(target, bean.getName());
 				}
 				
-			}.add(AttributeAppender.append("value", _T("Save as Mine"))));
+			});
 		} else {
 			form.add(new WebMarkupContainer("saveForMine").setVisible(false));
 		}

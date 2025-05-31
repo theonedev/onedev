@@ -1018,7 +1018,7 @@ public class ProjectListPanel extends Panel {
 				doQuery(target);
 			}
 			
-		}.add(AttributeAppender.replace("data-tippy-content", _T("Query"))));
+		});
 		add(queryForm);
 		
 		if (getParentProject() != null) {

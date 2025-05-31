@@ -11,7 +11,6 @@ import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -136,18 +135,18 @@ public class GpgKeyListPanel extends GenericPanel<List<GpgKey>> {
 					public void onClick(AjaxRequestTarget target) {
 						GpgKey GpgKey = rowModel.getObject();
 						OneDev.getInstance(GpgKeyManager.class).delete(GpgKey);
-						Session.get().success("GPG key deleted");
+						Session.get().success(_T("GPG key deleted"));
 						target.add(gpgKeysTable);
 					}
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						String message = "Do you really want to delete this GPG key?";
+						String message = _T("Do you really want to delete this GPG key?");
 						attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
 					}
 
-				}.add(AttributeAppender.append("data-tippy-content", _T("Delete this key"))));
+				});
 				
 				cellItem.add(fragment);
 			}

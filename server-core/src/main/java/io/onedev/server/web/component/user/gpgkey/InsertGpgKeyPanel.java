@@ -8,7 +8,6 @@ import java.util.Date;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
@@ -89,7 +88,7 @@ public abstract class InsertGpgKeyPanel extends Panel {
                 target.add(form);
             }
             
-        }.add(AttributeAppender.append("value", _T("Add"))));
+        });
         
         form.add(new AjaxLink<Void>("cancel") {
             

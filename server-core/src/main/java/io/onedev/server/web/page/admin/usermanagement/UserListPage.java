@@ -735,7 +735,7 @@ public class UserListPage extends AdministrationPage {
 						throw new RestartResponseException(HomePage.class);
 					}
 										
-				}.add(AttributeAppender.append("data-tippy-content", _T("Impersonate this user"))));
+				});
 				
 				cellItem.add(fragment);
 			}

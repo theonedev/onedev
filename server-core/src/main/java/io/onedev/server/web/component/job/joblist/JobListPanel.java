@@ -1,7 +1,5 @@
 package io.onedev.server.web.component.job.joblist;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -12,7 +10,6 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -126,7 +123,7 @@ public abstract class JobListPanel extends Panel {
 					return JobListPanel.this.getPullRequest();
 				}
 				
-			}.add(AttributeAppender.append("data-tippy-content", _T("Run this job"))));
+			});
 			
 			jobItem.add(new BookmarkablePageLink<Void>("showInList", ProjectBuildsPage.class, 
 					ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(commitId, job.getName(), refName, getPullRequest()), 0)) {

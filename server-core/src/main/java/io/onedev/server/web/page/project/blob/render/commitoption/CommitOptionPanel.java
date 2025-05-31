@@ -17,7 +17,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
@@ -204,7 +203,6 @@ public class CommitOptionPanel extends Panel {
 			}
 			
 		};
-		saveButton.add(AttributeAppender.append("value", _T("Commit")));		
 		saveButton.setOutputMarkupId(true);
 		form.add(saveButton);
 		
@@ -227,7 +225,7 @@ public class CommitOptionPanel extends Panel {
 				context.onModeChange(target, Mode.VIEW, null);
 			}
 			
-		}.add(AttributeAppender.append("value", _T("Cancel"))));
+		});
 
 		setOutputMarkupId(true);
 	}

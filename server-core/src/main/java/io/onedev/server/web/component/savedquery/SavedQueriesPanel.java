@@ -1,7 +1,5 @@
 package io.onedev.server.web.component.savedquery;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -15,7 +13,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
@@ -136,7 +133,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				((BasePage) getPage()).resizeWindow(target);
 			}
 			
-		}.add(AttributeAppender.replace("data-tippy-content", _T("Hide saved queries"))));
+		});
 		
 		add(new ModalLink("edit") {
 
@@ -275,7 +272,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				return fragment;
 			}
 			
-		}.add(AttributeAppender.replace("data-tippy-content", _T("Edit saved queries"))));
+		});
 		
 		add(new ListView<T>("personalQueries", new LoadableDetachableModel<List<T>>() {
 

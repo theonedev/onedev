@@ -45,11 +45,11 @@
 			<div wicket:id="title" class="topbar-title"></div>
 		</div>
 		<div class="topbar-right text-nowrap">
-			<a wicket:id="alerts" class="text-warning topbar-link"><wicket:svg href="exclamation-circle-o" class="icon fade-in-out"></wicket:svg></a>
-			<a wicket:id="newVersionStatus" class="new-version-status topbar-link"><img wicket:id="icon"/></a>
-			<a wicket:id="darkMode" class="topbar-link"><svg wicket:id="icon" class="icon"/></a>
+			<a wicket:id="alerts" t:data-tippy-content="Alerts" class="text-warning topbar-link"><wicket:svg href="exclamation-circle-o" class="icon fade-in-out"></wicket:svg></a>
+			<a wicket:id="newVersionStatus" t:data-tippy-content="New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting" class="new-version-status topbar-link"><img wicket:id="icon"/></a>
+			<a wicket:id="darkMode" t:data-tippy-content="Toggle dark mode" class="topbar-link"><svg wicket:id="icon" class="icon"/></a>
 			<a wicket:id="showCommandPalette" class="topbar-link command-palette"></a>			
-			<a wicket:id="languageSelector" class="topbar-link language-selector"><wicket:svg href="globe" class="icon"></wicket:svg></a>
+			<a wicket:id="languageSelector" t:data-tippy-content="Language" class="topbar-link language-selector"><wicket:svg href="globe" class="icon"></wicket:svg></a>
 			<a wicket:id="signIn" class="topbar-link sign-in"><wicket:svg href="login" class="icon"/> <span class="d-none d-sm-inline"><wicket:t>Sign In</wicket:t></span></a>
 			<div wicket:id="userInfo" class="dropdown user-info">
 				<a href="#" class="dropdown-toggle user-info no-dropdown-caret topbar-link" data-toggle="dropdown">

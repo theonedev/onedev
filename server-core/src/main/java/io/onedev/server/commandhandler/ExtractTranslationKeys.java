@@ -48,7 +48,7 @@ public class ExtractTranslationKeys extends CommandHandler {
 	private static final Pattern TAG_PATTERN = Pattern.compile("<wicket:t>(.+?)</wicket:t>",
 			Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile("\\Wt:[a-zA-Z]+\\s*=\\s*(\"[^\"]*?\"|'[^']*?')",
+	private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile("\\Wt:[a-zA-Z0-9\\-_]+\\s*=\\s*(\"[^\"]*?\"|'[^']*?')",
 			Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern STRING_LITERAL_PATTERN = Pattern.compile("\"((?:[^\"\\\\]|\\\\.)*)\"");

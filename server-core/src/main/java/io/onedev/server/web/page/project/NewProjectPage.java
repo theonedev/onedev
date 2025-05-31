@@ -7,15 +7,12 @@ import static io.onedev.server.model.Project.PROP_KEY;
 import static io.onedev.server.model.Project.PROP_NAME;
 import static io.onedev.server.model.Project.PROP_PACK_MANAGEMENT;
 import static io.onedev.server.model.Project.PROP_TIME_TRACKING;
-import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.Collection;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -130,7 +127,6 @@ public class NewProjectPage extends LayoutPage {
 		form.add(labelsEditor);
 		form.add(BeanContext.edit("defaultRoleEditor", defaultRoleBean));
 		form.add(parentEditor);
-		form.add(new WebMarkupContainer("submit").add(AttributeAppender.append("value", _T("Create"))));
 		add(form);
 	}
 
