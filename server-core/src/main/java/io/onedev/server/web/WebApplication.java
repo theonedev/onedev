@@ -31,6 +31,9 @@ import org.apache.wicket.core.request.handler.PageProvider;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
 import org.apache.wicket.core.request.mapper.HomePageMapper;
 import org.apache.wicket.core.request.mapper.ResourceMapper;
+import org.apache.wicket.markup.MarkupFactory;
+import org.apache.wicket.markup.MarkupParser;
+import org.apache.wicket.markup.MarkupResourceStream;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.pages.AbstractErrorPage;
@@ -76,6 +79,7 @@ import io.onedev.server.web.resource.SpriteResourceStream;
 import io.onedev.server.web.resourcebundle.ResourceBundleReferences;
 import io.onedev.server.web.translation.TranslationResolver;
 import io.onedev.server.web.translation.TranslationStringResourceLoader;
+import io.onedev.server.web.translation.TranslationTagHandler;
 import io.onedev.server.web.util.AbsoluteUrlRenderer;
 import io.onedev.server.web.websocket.WebSocketManager;
 import io.onedev.server.web.websocket.WebSocketMessages;
@@ -105,9 +109,19 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 		getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
 		getMarkupSettings().setStripComments(true);
 		getMarkupSettings().setStripWicketTags(true);
+		getMarkupSettings().setMarkupFactory(new MarkupFactory() {
+
+			public MarkupParser newMarkupParser(final MarkupResourceStream resource) {
+				var parser = new MarkupParser(newXmlPullParser(), resource);
+				parser.add(new TranslationTagHandler(resource));
+				return parser;
+			}			
+			
+		});
 		
 		getPageSettings().addComponentResolver(new SpriteImageResolver());
 		getPageSettings().addComponentResolver(new TranslationResolver());
+		getPageSettings().addComponentResolver(new TranslationTagHandler());
 		
 		getResourceSettings().getStringResourceLoaders().add(0, new TranslationStringResourceLoader());
 		if (getConfigurationType() == RuntimeConfigurationType.DEVELOPMENT) {

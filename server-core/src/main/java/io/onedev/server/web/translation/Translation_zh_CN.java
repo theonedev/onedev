@@ -77,6 +77,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Add a GPG Public Key", "添加一个 GPG 公钥");
 		m.put("Add a SSH Key", "添加 SSH 密钥");
 		m.put("Add after", "添加到后面");
+		m.put("Add assignee...", "添加分配人员...");
 		m.put("Add before", "添加到前面");
 		m.put("Add child project", "添加子项目");
 		m.put("Add comment on this selection", "在此选择上添加注释");
@@ -87,6 +88,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Add new file", "添加新文件");
 		m.put("Add new import", "添加新导入");
 		m.put("Add project", "添加项目");
+		m.put("Add reviewer...", "添加审查人员...");
 		m.put("Add to batch to commit with other suggestions later", "稍后与其他建议一起提交");
 		m.put("Add to group...", "添加到组...");
 		m.put("Add {0}", "添加 {0}");
@@ -2517,6 +2519,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Suggestion is outdated either due to code change or pull request close", "建议由于代码更改或合并请求关闭而过时");
 		m.put("Support & Bug Report", "技术支持与错误报告");
 		m.put("Support Request", "支持请求");
+		m.put("Swap", "交换");
 		m.put("Switch to HTTP(S)", "切换到 HTTP(S)");
 		m.put("Switch to SSH", "切换到 SSH");
 		m.put("Symbol name", "符号名称");
@@ -2993,9 +2996,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Add assignee...", "添加分配人员...");
-		m.put("Add reviewer...", "添加审查人员...");
-		m.put("Swap", "交换");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
