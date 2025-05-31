@@ -8,11 +8,11 @@
 				<a wicket:id="edit" title="Edit title" class="btn btn-xs btn-icon btn-light btn-hover-primary edit mr-3"><wicket:svg href="edit" class="icon"></wicket:svg></a>
 				<form wicket:id="editForm" class="form flex-grow-1 d-flex align-items-center">
 					<div class="clearable-wrapper mr-3 flex-grow-1">
-						<input wicket:id="title" type="text" placeholder="Input title" class="form-control">
+						<input wicket:id="title" type="text" t:placeholder="Input title" class="form-control">
 					</div>
 					<div class="flex-shrink-0 text-nowrap">
-						<button wicket:id="save" title="Save" value="Save" class="btn btn-primary btn-icon mr-1" type="submit"><wicket:svg href="tick" class="icon"></wicket:svg></button>
-						<a wicket:id="cancel" title="Cancel" type="button" value="Cancel" class="btn btn-secondary btn-icon"><wicket:svg href="times" class="icon"></wicket:svg></a>
+						<button wicket:id="save" title="Save" t:value="Save" class="btn btn-primary btn-icon mr-1" type="submit"><wicket:svg href="tick" class="icon"></wicket:svg></button>
+						<a wicket:id="cancel" title="Cancel" type="button" t:value="Cancel" class="btn btn-secondary btn-icon"><wicket:svg href="times" class="icon"></wicket:svg></a>
 					</div>
 				</form>
 			</div>

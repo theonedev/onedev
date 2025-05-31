@@ -4,7 +4,7 @@
 			<div class="d-flex mb-4">
 				<form wicket:id="query" class="clearable-wrapper flex-grow-1">
 					<div class="input-group">
-						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query/order builds">
+						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" t:placeholder="Query/order builds">
 						<span class="input-group-append">
 							<button wicket:id="submit" type="submit" class="btn btn-icon btn-outline-secondary" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
 						</span>
@@ -69,7 +69,7 @@
 					<input wicket:id="params" type="hidden" class="form-control">
 				</div>
 				<div class="modal-footer">
-					<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save">
+					<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" t:value="Save">
 					<button wicket:id="useDefault" class="btn btn-primary">Use Default</button>
 					<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
 				</div>
