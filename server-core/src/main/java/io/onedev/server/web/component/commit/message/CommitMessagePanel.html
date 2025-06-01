@@ -1,7 +1,7 @@
 <wicket:panel>
 	<div class="commit-message d-flex align-items-center flex-wrap">
 		<span wicket:id="summary" class="summary text-break"></span> 
-		<a class="btn btn-xs h-75 btn-secondary btn-icon ml-2" href="javascript:void(0);" title="Toggle detail message" onclick="$(this).next().toggle(); $(window).resize();" wicket:id="toggle">
+		<a class="btn btn-xs h-75 btn-secondary btn-icon ml-2" href="javascript:void(0);" t:data-tippy-content="Toggle detail message" onclick="$(this).next().toggle(); $(window).resize();" wicket:id="toggle">
 			<wicket:svg href="ellipsis" class="icon"/>
 		</a>
 		<pre wicket:id="detail" class="detail text-break w-100"></pre>

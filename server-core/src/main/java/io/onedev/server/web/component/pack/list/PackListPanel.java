@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.pack.list;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -312,7 +314,7 @@ public abstract class PackListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Delete All Queried Packages";
+						return _T("Delete All Queried Packages");
 					}
 					
 					@Override

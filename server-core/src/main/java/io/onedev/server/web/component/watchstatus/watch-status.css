@@ -1,21 +1,12 @@
 .watch-status:AFTER {
 	margin-left: 0.5rem;
 }
-.watch-status.default:AFTER {
-	content: "Watch if involved";
-}
-.watch-status.watch:AFTER {
-	content: "Watch";
-}
-.watch-status.ignore:AFTER {
-	content: "Ignore";
-}
-.watch-status .icon {
+.watch-status>span {
 	display: none;
 }
-.watch-status.default .icon-bell, 
-.watch-status.watch .icon-bell-ring, 
-.watch-status.ignore .icon-bell-off  {
+.watch-status.default>span.default, 
+.watch-status.watch>span.watch, 
+.watch-status.ignore>span.ignore  {
 	display: inline-block;
 }
 

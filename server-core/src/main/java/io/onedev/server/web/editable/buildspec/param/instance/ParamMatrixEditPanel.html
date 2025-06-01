@@ -15,11 +15,11 @@
         <div wicket:id="values" class="specified-value">
 			<div class="d-flex align-items-center mb-3">
 	            <div wicket:id="value" class="flex-grow-1 mr-3"></div>
-	            <a wicket:id="delete" class="flex-shrink-0 btn btn-icon btn-light btn-hover-danger" title="Delete this value"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+	            <a wicket:id="delete" class="flex-shrink-0 btn btn-icon btn-light btn-hover-danger" t:data-tippy-content="Delete this value"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 			</div>
             <div wicket:id="feedback" class="feedback mb-3"></div>
         </div>
-        <a wicket:id="add" class="btn btn-light btn-hover-primary btn-block mb-1" title="Add value"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+        <a wicket:id="add" class="btn btn-light btn-hover-primary btn-block mb-1" t:data-tippy-content="Add value"><wicket:svg href="plus" class="icon"></wicket:svg></a>
         <div wicket:id="matrixDescription" class="text-muted font-size-sm"></div>
     </wicket:fragment>
 </wicket:panel>

@@ -1,5 +1,9 @@
 package io.onedev.server.web.component.diff.diffstat;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -14,15 +18,12 @@ public class DiffStatBar extends Panel {
 	private final int additions;
 	
 	private final int deletions;
-	
-	private final boolean showTooltip;
-	
-	public DiffStatBar(String id, int additions, int deletions, boolean showTooltip) {
+		
+	public DiffStatBar(String id, int additions, int deletions) {
 		super(id);
 
 		this.additions = additions;
 		this.deletions = deletions;
-		this.showTooltip = showTooltip;
 	}
 
 	@Override
@@ -64,8 +65,7 @@ public class DiffStatBar extends Panel {
 			}
 		}).setEscapeModelStrings(false));
 		
-		if (showTooltip)
-			add(AttributeAppender.append("title", additions + " additions & " + deletions + " deletions"));			
+		add(AttributeAppender.append("data-tippy-content", MessageFormat.format(_T("{0} additions & {1} deletions"), additions, deletions)));			
 	}
 	
 	private int getAdditionBlocks() {

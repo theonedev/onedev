@@ -4,11 +4,11 @@
 			<div class="base revision card">
 				<div class="card-body">
 					<div class="head">
-						<div class="title">Base</div>
+						<div class="title"><wicket:t>Base</wicket:t></div>
 						<wicket:enclosure child="compareWithMergeBase">
 						<label class="checkbox">
 							<input wicket:id="compareWithMergeBase" type="checkbox">
-							common ancestor
+							<wicket:t>common ancestor</wicket:t>
 						</label>
 						<span wicket:id="mergeBaseTooltip" class="help"><wicket:svg href="question-circle-o" class="icon"></wicket:svg></span>
 						</wicket:enclosure>
@@ -18,27 +18,27 @@
 				</div>
 			</div>
 			<div class="swap">
-				<a wicket:id="swap" class="btn btn-primary btn-icon" title="Swap"><wicket:svg href="swap" class="icon"></wicket:svg></a>
+				<a wicket:id="swap" class="btn btn-primary btn-icon" t:data-tippy-content="Swap"><wicket:svg href="swap" class="icon"></wicket:svg></a>
 			</div>
 			<div class="compare revision card">
 				<div class="card-body">
-					<div class="title">Compare</div>
+					<div class="title"><wicket:t>Compare</wicket:t></div>
 					<div wicket:id="rightRevSelector" class="selector"></div>
 					<a wicket:id="rightCommitLink" class="message"><span wicket:id="message"></span></a>
 				</div>
 			</div>
 		</div>
 		<div wicket:id="effectiveRequest" class="alert alert-notice alert-light-success mb-5">
-			<span wicket:id="description"></span> <a wicket:id="link"><span wicket:id="label"></span></a>
+			<span wicket:id="description"></span>
 		</div>
 		<div>
-			<a wicket:id="createRequest" class="btn btn-primary btn-block mb-5"><wicket:svg href="plus" class="icon mr-2"/> Create Pull Request for This Change</a>
+			<a wicket:id="createRequest" class="btn btn-primary btn-block mb-5"><wicket:svg href="plus" class="icon mr-2"/> <wicket:t>Create Pull Request for This Change</wicket:t></a>
 		</div>
 		<div wicket:id="revisionNotSpecified" class="alert alert-notice alert-light-warning mb-5">
-			<span>Please select revisions to compare</span>
+			<span><wicket:t>Please select revisions to compare</wicket:t></span>
 		</div>
 		<div wicket:id="unrelatedHistory" class="alert alert-notice alert-light-warning mb-5">
-			<span>History of comparing revisions is unrelated</span>
+			<span><wicket:t>History of comparing revisions is unrelated</wicket:t></span>
 		</div>
 		<wicket:enclosure child="tabs">
 		<div class="card compare-result">

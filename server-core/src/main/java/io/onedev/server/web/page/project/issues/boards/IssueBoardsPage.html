@@ -4,13 +4,13 @@
 		<div class="head flex-shrink-0">
 			<form wicket:id="query" class="d-flex flex-wrap flex-md-nowrap">
 				<span class="btn-group flex-shrink-0 mr-0 mr-md-4 mb-3 mb-md-0">
-					<a wicket:id="board" title="Board" class="board-selector btn btn-outline-secondary btn-hover-primary text-nowrap bg-white">
+					<a wicket:id="board" t:data-tippy-content="Board" class="board-selector btn btn-outline-secondary btn-hover-primary text-nowrap bg-white">
 						<wicket:svg href="split" class="icon mr-2"></wicket:svg>
 						<span wicket:id="label"></span>
 						<wicket:svg href="arrow" class="icon rotate-90 ml-1"></wicket:svg>
 					</a>
-					<a wicket:id="backlog" title="Show issues not scheduled into current iteration" class="bg-white backlog btn btn-outline-secondary btn-hover-primary text-nowrap"><wicket:svg href="inbox" class="icon mr-2"></wicket:svg> Backlog</a>
-					<a wicket:id="iteration" title="Iteration" class="iteration-selector btn text-nowrap bg-white">
+					<a wicket:id="backlog" t:data-tippy-content="Show issues not scheduled into current iteration" class="bg-white backlog btn btn-outline-secondary btn-hover-primary text-nowrap"><wicket:svg href="inbox" class="icon mr-2"></wicket:svg> Backlog</a>
+					<a wicket:id="iteration" t:data-tippy-content="Iteration" class="iteration-selector btn text-nowrap bg-white">
 						<wicket:svg href="iteration" class="icon mr-2"></wicket:svg>
 						<span wicket:id="label"></span>
 						<wicket:svg href="arrow" class="icon rotate-90 ml-1"></wicket:svg>
@@ -20,7 +20,7 @@
 					<div class="input-group">
 						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control">
 						<span class="input-group-append">
-							<button wicket:id="submit" type="submit" class="bg-white btn btn-icon btn-outline-secondary btn-hover-primary" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+							<button wicket:id="submit" type="submit" class="bg-white btn btn-icon btn-outline-secondary btn-hover-primary" t:data-tippy-content="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
 						</span>
 					</div>
 				</div>
@@ -51,9 +51,9 @@
 						<span wicket:id="default" class="badge badge-sm badge-light-info ml-2">default</span>
 					</td>
 					<td wicket:id="actions" class="actions text-right">
-						<a wicket:id="edit" class="btn btn-icon btn-xs btn-light btn-hover-primary mr-1" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-						<a wicket:id="copy" class="btn btn-icon btn-xs btn-light btn-hover-primary mr-1" title="Copy"><wicket:svg href="copy" class="icon"></wicket:svg></a>
-						<a wicket:id="delete" class="btn btn-icon btn-xs btn-light btn-hover-danger" title="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+						<a wicket:id="edit" class="btn btn-icon btn-xs btn-light btn-hover-primary mr-1" t:data-tippy-content="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+						<a wicket:id="copy" class="btn btn-icon btn-xs btn-light btn-hover-primary mr-1" t:data-tippy-content="Copy"><wicket:svg href="copy" class="icon"></wicket:svg></a>
+						<a wicket:id="delete" class="btn btn-icon btn-xs btn-light btn-hover-danger" t:data-tippy-content="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 					</td>
 				</tr>
 			</table>
@@ -69,7 +69,7 @@
 					<td class="name text-nowrap">
 						<a wicket:id="select"><span wicket:id="name"></span></a> 
 						<span wicket:id="inherited" class="ml-2 badge badge-info badge-sm">Inherited</span>
-						<a wicket:id="burndown" title="Burndown chart" class="ml-2"><wicket:svg href="burndown" class="icon"/></a>
+						<a wicket:id="burndown" t:data-tippy-content="Burndown chart" class="ml-2"><wicket:svg href="burndown" class="icon"/></a>
 					</td>
 					<td class="status text-nowrap">
 						<span wicket:id="status"></span>

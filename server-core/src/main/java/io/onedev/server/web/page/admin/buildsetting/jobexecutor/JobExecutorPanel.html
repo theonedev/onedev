@@ -7,10 +7,10 @@
 					<wicket:svg href="grip" class="icon icon-lg"></wicket:svg>
 				</span>
 				<span wicket:id="name" class="name mr-3"></span>
-				<a wicket:id="edit" title="Edit this executor" onclick="$(this).closest('.job-executor').addClass('expanded');" class="btn btn-light btn-xs btn-icon btn-hover-primary text-muted mr-2">
+				<a wicket:id="edit" t:data-tippy-content="Edit this executor" onclick="$(this).closest('.job-executor').addClass('expanded');" class="btn btn-light btn-xs btn-icon btn-hover-primary text-muted mr-2">
 					<wicket:svg href="edit" class="icon"/>
 				</a>
-				<a wicket:id="delete" title="Delete this executor" class="btn btn-light btn-xs btn-icon btn-hover-danger text-muted mr-4">
+				<a wicket:id="delete" t:data-tippy-content="Delete this executor" class="btn btn-light btn-xs btn-icon btn-hover-danger text-muted mr-4">
 					<wicket:svg href="trash" class="icon"/>
 				</a>
 				<span wicket:id="disabled" class="badge badge-light-warning">Disabled</span>

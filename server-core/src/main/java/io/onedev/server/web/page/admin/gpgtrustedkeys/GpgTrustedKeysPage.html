@@ -4,12 +4,12 @@
 			<div class="alert alert-light alert-notice mb-4">
 				Add GPG public keys to be trusted here. Commits signed with trusted keys will be shown as verified. 
 			</div>
-			<a wicket:id="newKey" class="btn btn-primary btn-icon mb-4" title="Add GPG Key"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+			<a wicket:id="newKey" class="btn btn-primary btn-icon mb-4" t:data-tippy-content="Add GPG key"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 			<table wicket:id="keys" class="table table-hover"></table>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="actionFrag">
-		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete this key"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" t:data-tippy-content="Delete this key"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="addKeyFrag">
 		<div class="add-gpg-trusted-key">

@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.pullrequest;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -17,7 +19,7 @@ public class RequestStatusBadge extends Label {
 
 			@Override
 			protected String load() {
-				return requestModel.getObject().getStatus().toString();
+				return _T(requestModel.getObject().getStatus().toString());
 			}
 			
 		});

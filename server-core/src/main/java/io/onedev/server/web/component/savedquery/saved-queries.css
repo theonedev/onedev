@@ -1,5 +1,5 @@
-.saved-queries > .card-body .watch-status:after, 
-.saved-queries > .card-body .subscription-status:after {
+.saved-queries > .card-body .watch-status .text, 
+.saved-queries > .card-body .subscription-status .text {
 	display: none;
 }
 .edit-saved-queries .modal-footer {

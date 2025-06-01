@@ -14,7 +14,7 @@
 			<div>
 				<span wicket:id="forkInfo" class="btn-group fork-info">
 				    <a wicket:id="forks" class="btn btn-light btn-hover-primary"><span wicket:id="label"></span></a>
-					<a wicket:id="forkNow" class="btn btn-light btn-hover-primary btn-icon" title="Fork now"><wicket:svg href="fork" class="icon"/></a>
+					<a wicket:id="forkNow" class="btn btn-light btn-hover-primary btn-icon" t:data-tippy-content="Fork now"><wicket:svg href="fork" class="icon"/></a>
 				</span>			
 			</div>
 			</wicket:enclosure>
@@ -33,7 +33,7 @@
 				<tr wicket:id="replicas">
 					<td wicket:id="server"></td>
 					<td class="text-right">
-						<a wicket:id="sync" title="Request to sync"><wicket:svg href="refresh" class="icon"/></a>
+						<a wicket:id="sync" t:data-tippy-content="Request to sync"><wicket:svg href="refresh" class="icon"/></a>
 					</td>
 				</tr>
 				</tbody>

@@ -2,11 +2,11 @@
 	<div class="step-list">
 		<table wicket:id="steps" class="table-hover"></table>
 		<div class="foot">
-			<a wicket:id="addNew" title="Add new step" class="btn btn-light btn-hover-primary btn-block"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+			<a wicket:id="addNew" t:data-tippy-content="Add new step" class="btn btn-light btn-hover-primary btn-block"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="actionColumnFrag">
-		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-		<a wicket:id="actions" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="More operations"><wicket:svg href="arrow" class="icon rotate-90"></wicket:svg></a>
+		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" t:data-tippy-content="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+		<a wicket:id="actions" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" t:data-tippy-content="More operations"><wicket:svg href="arrow" class="icon rotate-90"></wicket:svg></a>
  	</wicket:fragment>
 </wicket:panel>

@@ -6,7 +6,7 @@
 				<div class="input-group">
 					<input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off" t:placeholder="Filter targets">
 					<span class="input-group-append">
-						<button wicket:id="submit" title="Filter" class="btn btn-icon btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+						<button wicket:id="submit" t:data-tippy-content="Filter" class="btn btn-icon btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
 					</span>
 				</div>
 			</div>
@@ -20,7 +20,7 @@
 						<a wicket:id="toggle" class="name mr-2"><wicket:svg href="arrow" class="icon"/> 
 							<span wicket:id="key"></span>
 						</a>
-						<a wicket:id="view" title="View source" class="mr-auto"><wicket:svg href="file" class="icon"/></a>
+						<a wicket:id="view" t:data-tippy-content="View source" class="mr-auto"><wicket:svg href="file" class="icon"/></a>
 					</div>
 					<wicket:enclosure child="problems">
 						<div class="problems mt-2">

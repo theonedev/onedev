@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.entity.watches;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,7 +53,7 @@ public abstract class EntityWatchesPanel extends Panel {
 
 			@Override
 			protected String load() {
-				return "Watchers (" + getEffectWatches().size() + ")";
+				return _T("Watchers") + " (" + getEffectWatches().size() + ")";
 			}
 			
 		}));

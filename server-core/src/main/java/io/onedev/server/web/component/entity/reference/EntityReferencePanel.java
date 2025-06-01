@@ -3,6 +3,11 @@ package io.onedev.server.web.component.entity.reference;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -24,11 +29,11 @@ public abstract class EntityReferencePanel extends Panel {
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
-				var help = "Reference this " + getReference().getType() 
-						+ " in markdown or commit message via below string.";
+				var help = MessageFormat.format(_T("Reference this {0} in markdown or commit message via below string."), 
+						_T(getReference().getType()));
 				if (getReference().getProject().getKey() == null)
-					help += " Project path can be omitted if reference from current project";
-				tag.put("title", help);
+					help += _T(" Project path can be omitted if reference from current project");
+				tag.put("data-tippy-content", help);
 			}
 			
 		});

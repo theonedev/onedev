@@ -11,12 +11,12 @@
 	<wicket:fragment wicket:id="pinnedIssueFrag">
 		<div class="primary d-flex align-items-center flex-wrap row-gap-2 position-relative mb-3">
 			<span wicket:id="numberAndTitle" class="mr-2"></span>
-			<a wicket:id="copy" title="Copy issue number and title" class="copy mr-2 btn btn-icon btn-xs btn-light btn-hover-primary">
+			<a wicket:id="copy" t:data-tippy-content="Copy issue number and title" class="copy mr-2 btn btn-icon btn-xs btn-light btn-hover-primary">
 				<wicket:svg href="copy" class="icon"/>
 			</a>
 			<span wicket:id="progress" class="d-flex align-items-center mr-2"></span>
 			<span wicket:id="links" class="links d-flex align-items-center"/>
-			<a wicket:id="unpin" title="Unpin this issue" class="unpin btn btn-icon btn-xs btn-light btn-hover-primary"><wicket:svg href="unpin" class="icon flip-x"/></a>
+			<a wicket:id="unpin" t:data-tippy-content="Unpin this issue" class="unpin btn btn-icon btn-xs btn-light btn-hover-primary"><wicket:svg href="unpin" class="icon flip-x"/></a>
 		</div>
 		<div class="secondary d-flex flex-wrap">
 			<div wicket:id="fields" class="field"></div>

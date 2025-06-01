@@ -4,11 +4,11 @@
 			<wicket:svg href="bulb" class="icon"/> Define all custom issue states here. The first state will be used as 
 			initial state of created issues
 		</div>
-		<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" title="Add issue state"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+		<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" t:data-tippy-content="Add issue state"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 		<table wicket:id="issueStates" class="table table-hover"></table>
 	</div>
 	<wicket:fragment wicket:id="stateActionsFrag">
-		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="Edit this state"><wicket:svg href="edit" class="icon align-middle"></wicket:svg></a>
-		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete this state"><wicket:svg href="trash" class="icon align-middle"></wicket:svg></a>
+		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" t:data-tippy-content="Edit this state"><wicket:svg href="edit" class="icon align-middle"></wicket:svg></a>
+		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" t:data-tippy-content="Delete this state"><wicket:svg href="trash" class="icon align-middle"></wicket:svg></a>
 	</wicket:fragment>
 </wicket:extend>

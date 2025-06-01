@@ -8,14 +8,14 @@
 	                <span wicket:id="statusLabel"></span>
 	            </div>
 				<div wicket:id="actions" class="mr-2">
-	                <a wicket:id="rebuild" class="btn btn-icon btn-light btn-hover-primary btn-xs mr-2" title="Re-run this build"><wicket:svg href="re-run" class="icon"/></a>
-	                <a wicket:id="cancel" class="btn btn-icon btn-light btn-hover-danger btn-xs mr-2" title="Cancel this build"><wicket:svg href="cancel" class="icon"/></a>
-					<a wicket:id="terminal" title="Open terminal of current running step" class="ee-feature btn btn-icon btn-light btn-hover-primary btn-xs mr-2"><wicket:svg href="terminal" class="icon"/></a>
-		            <a wicket:id="promotions" class="btn btn-icon btn-light btn-hover-primary btn-xs mr-2" title="Promotions"><wicket:svg href="next" class="icon"/></a>
+	                <a wicket:id="rebuild" class="btn btn-icon btn-light btn-hover-primary btn-xs mr-2" t:data-tippy-content="Re-run this build"><wicket:svg href="re-run" class="icon"/></a>
+	                <a wicket:id="cancel" class="btn btn-icon btn-light btn-hover-danger btn-xs mr-2" t:data-tippy-content="Cancel this build"><wicket:svg href="cancel" class="icon"/></a>
+					<a wicket:id="terminal" t:data-tippy-content="Open terminal of current running step" class="ee-feature btn btn-icon btn-light btn-hover-primary btn-xs mr-2"><wicket:svg href="terminal" class="icon"/></a>
+		            <a wicket:id="promotions" class="btn btn-icon btn-light btn-hover-primary btn-xs mr-2" t:data-tippy-content="Promotions"><wicket:svg href="next" class="icon"/></a>
 				</div>
 			</div>
 			<div class="card-toolbar">
-	    		<a wicket:id="moreInfo" class="more-info side-info ml-auto" title="More info"><wicket:svg href="ellipsis" class="icon"/></a>
+	    		<a wicket:id="moreInfo" class="more-info side-info ml-auto" t:data-tippy-content="More info"><wicket:svg href="ellipsis" class="icon"/></a>
 			</div>
 		</div>
 		<div class="card-body d-flex flex-grow-1 position-relative">

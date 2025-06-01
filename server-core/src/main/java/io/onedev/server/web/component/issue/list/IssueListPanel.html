@@ -6,11 +6,11 @@
 					<div class="input-group">
 						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" t:placeholder="Query/order issues">
 						<span class="input-group-append">
-							<button wicket:id="submit" type="submit" class="btn btn-outline-secondary btn-icon" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+							<button wicket:id="submit" type="submit" class="btn btn-outline-secondary btn-icon" t:data-tippy-content="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
 						</span>
 					</div>
 				</form>
-				<a wicket:id="newIssue" class="add-new btn btn-primary btn-icon flex-shrink-0 ml-3" title="Create new issue"><wicket:svg href="plus" class="icon"/></a>
+				<a wicket:id="newIssue" class="add-new btn btn-primary btn-icon flex-shrink-0 ml-3" t:data-tippy-content="Create new issue"><wicket:svg href="plus" class="icon"/></a>
 			</div>
 			<div class="mb-5">
 				<a wicket:id="showSavedQueries" class="show-saved-queries text-gray d-inline-block mr-4 mb-2 text-nowrap">
@@ -57,20 +57,20 @@
 		<div class="primary d-flex mb-3">
 			<div class="mr-4 flex-grow-1 d-flex flex-wrap row-gap-2">
 				<span wicket:id="numberAndTitle" class="mr-2"></span>
-				<a wicket:id="copy" title="Copy issue number and title" class="copy mr-2 btn btn-icon btn-xs btn-light btn-hover-primary">
+				<a wicket:id="copy" t:data-tippy-content="Copy issue number and title" class="copy mr-2 btn btn-icon btn-xs btn-light btn-hover-primary">
 					<wicket:svg href="copy" class="icon"/>
 				</a>
-				<a wicket:id="pin" title="Pin this issue" class="pin mr-2 btn btn-icon btn-xs btn-light btn-hover-primary">
+				<a wicket:id="pin" t:data-tippy-content="Pin this issue" class="pin mr-2 btn btn-icon btn-xs btn-light btn-hover-primary">
 					<wicket:svg href="pin" class="icon"/>
 				</a>
 				<span wicket:id="progress" class="d-flex align-items-center mr-2"></span>
 				<span wicket:id="links" class="d-flex align-items-center links"></span>
 			</div>
 			<div class="flex-shrink-0 d-none d-lg-block text-muted">
-				<span class="votes mr-2" title="Votes">
+				<span class="votes mr-2" t:data-tippy-content="Votes">
 					<wicket:svg href="thumb-up" class="icon"></wicket:svg> <span wicket:id="votes"></span>
 				</span>
-				<span class="comments" title="Comments">
+				<span class="comments" t:data-tippy-content="Comments">
 					<wicket:svg href="comments" class="icon"></wicket:svg> <span wicket:id="comments"></span>
 				</span>
 			</div>

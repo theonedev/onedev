@@ -3,14 +3,14 @@
 		<div class="head d-flex align-items-center px-3 py-2 flex-shrink-0">
 			<h6 class="title mr-4 mb-0">Search Result</h6>
 			<div class="actions text-nowrap mr-2">
-				<a wicket:id="prevMatch" title="Show previous match" class="mr-1"><wicket:svg href="arrow2" class="icon rotate-270"></wicket:svg></a>
-				<a wicket:id="nextMatch" title="Show next match" class="mr-1"><wicket:svg href="arrow2" class="icon rotate-90"></wicket:svg></a>
-				<a wicket:id="expandAll" title="Expand all" class="mr-2"><wicket:svg href="plus-square" class="icon"></wicket:svg></a>
-				<a wicket:id="collapseAll" title="Collapse all"><wicket:svg href="minus-square" class="icon"></wicket:svg></a>
+				<a wicket:id="prevMatch" t:data-tippy-content="Show previous match" class="mr-1"><wicket:svg href="arrow2" class="icon rotate-270"></wicket:svg></a>
+				<a wicket:id="nextMatch" t:data-tippy-content="Show next match" class="mr-1"><wicket:svg href="arrow2" class="icon rotate-90"></wicket:svg></a>
+				<a wicket:id="expandAll" t:data-tippy-content="Expand all" class="mr-2"><wicket:svg href="plus-square" class="icon"></wicket:svg></a>
+				<a wicket:id="collapseAll" t:data-tippy-content="Collapse all"><wicket:svg href="minus-square" class="icon"></wicket:svg></a>
 			</div>
 			<div wicket:id="hasMoreMessage" class="warning mr-2 d-none d-md-inline text-muted"></div>
 			<div class="ml-auto">
-				<a wicket:id="close" class="text-muted text-hover-primary" title="Close"><wicket:svg href="times" class="icon"></wicket:svg></a>
+				<a wicket:id="close" class="text-muted text-hover-primary" t:data-tippy-content="Close"><wicket:svg href="times" class="icon"></wicket:svg></a>
 			</div>
 		</div>
 		<ul class="body list-unstyled mb-0 px-3 py-2 overflow-auto flex-grow-1">

@@ -3,8 +3,8 @@
 		<wicket:svg href="history" class="icon text-gray"></wicket:svg>
 		<div class="head">
 			<span wicket:id="avatar" class="mr-1"></span>
-			<span wicket:id="name"></span> <span wicket:id="description"></span> <span wicket:id="age"></span>
-			<a wicket:id="changes" class="since-changes ml-2" title="Changes since this action"><wicket:svg href="diff" class="icon"></wicket:svg></a>
+			<wicket:t><span wicket:id="name"></span> <span wicket:id="description"></span> <span wicket:id="age"></span></wicket:t>
+			<a wicket:id="changes" class="since-changes ml-2" t:data-tippy-content="Changes since this action"><wicket:svg href="diff" class="icon"></wicket:svg></a>
 		</div>
 		<div wicket:id="body" class="body mt-3"></div>		
 	</div>

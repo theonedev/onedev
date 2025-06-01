@@ -4,6 +4,7 @@ import static io.onedev.server.search.commit.Revision.Type.COMMIT;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,7 +26,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -74,7 +74,6 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
-import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.EditParamsAware;
 
@@ -227,7 +226,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 		 * project  
 		 */
 		if (!state.compareWithMergeBase && !state.leftSide.getProject().equals(state.rightSide.getProject())) 
-			throw new IllegalArgumentException("Can only compare with common ancestor when different projects are involved");
+			throw new IllegalArgumentException(_T("Can only compare with common ancestor when different projects are involved"));
 		
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
@@ -335,12 +334,12 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 		String tooltip;
 		if (!state.leftSide.getProject().equals(state.rightSide.getProject())) {
 			checkBox.add(AttributeAppender.append("disabled", "disabled"));
-			tooltip = "Can only compare with common ancestor when different projects are involved";
+			tooltip = _T("Can only compare with common ancestor when different projects are involved");
 		} else {
-			tooltip = "Check this to compare \"right side\" with common ancestor of left and right";
+			tooltip = _T("Check this to compare right side with common ancestor of left and right");
 		}
 		
-		add(new WebMarkupContainer("mergeBaseTooltip").add(AttributeAppender.append("title", tooltip)));
+		add(new WebMarkupContainer("mergeBaseTooltip").add(AttributeAppender.append("data-tippy-content", tooltip)));
 
 		if (state.leftSide.getRevision() != null) {
 			PageParameters params = CommitDetailPage.paramsOf(state.leftSide.getProject(), state.leftSide.getCommit().name());
@@ -445,41 +444,19 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 			protected void onInitialize() {
 				super.onInitialize();
 
-				add(new Label("description", new AbstractReadOnlyModel<String>() {
+				add(new Label("description", new LoadableDetachableModel<String>() {
 
 					@Override
-					public String getObject() {
-						if (requestModel.getObject().isOpen())
-							return "This change is already opened for merge by ";
+					protected String load() {
+						var request = requestModel.getObject();
+						var link = String.format("<a href='%s'>%s</a>", RequestCycle.get().urlFor(PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(request)), "#" + request.getNumber());
+						if (request.isOpen())
+							return MessageFormat.format(_T("This change is already opened for merge by pull request {0}"), link);
 						else 
-							return "This change is squashed/rebased onto base branch via ";
+							return MessageFormat.format(_T("This change is squashed/rebased onto base branch via pull request {0}"), link);
 					}
 					
-				}).setEscapeModelStrings(false));
-				
-				add(new Link<Void>("link") {
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						add(new Label("label", new AbstractReadOnlyModel<String>() {
-
-							@Override
-							public String getObject() {
-								return "pull request #" + requestModel.getObject().getNumber();
-							}
-							
-						}));
-					}
-
-					@Override
-					public void onClick() {
-						PageParameters params = PullRequestDetailPage.paramsOf(requestModel.getObject());
-						setResponsePage(PullRequestActivitiesPage.class, params);
-					}
-					
-				});
-				
+				}).setEscapeModelStrings(false));								
 			}
 			
 		});
@@ -880,7 +857,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Code Compare");
+		return new Label(componentId, _T("Code Compare"));
 	}
 
 	@Override
@@ -958,7 +935,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	
 	@Override
 	protected String getPageTitle() {
-		return "Code Compare - " + getProject().getPath();
+		return _T("Code Compare") + " - " + getProject().getPath();
 	}
 	
 	@Override

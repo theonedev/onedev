@@ -1,13 +1,13 @@
 <wicket:extend>
 	<div class="card">
 		<div class="card-body">
-			<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" title="Add SSO Provider"><wicket:svg href="plus" class="icon"/></a>
+			<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" t:data-tippy-content="Add SSO provider"><wicket:svg href="plus" class="icon"/></a>
 			<table wicket:id="connectors" class="table table-hover"></table>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="actionColumnFrag">
-		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" t:data-tippy-content="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" t:data-tippy-content="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="callbackUriFrag">
 		<span wicket:id="value"></span>

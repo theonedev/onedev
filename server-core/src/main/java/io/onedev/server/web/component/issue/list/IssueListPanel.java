@@ -3,6 +3,7 @@ package io.onedev.server.web.component.issue.list;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.search.entity.issue.IssueQuery.merge;
+import static io.onedev.server.web.translation.Translation._T;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -1443,7 +1444,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Delete All Queried Issues";
+							return _T("Delete All Queried Issues");
 						}
 
 						@Override

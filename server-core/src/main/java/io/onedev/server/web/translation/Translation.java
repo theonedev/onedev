@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.wicket.Application;
 import org.apache.wicket.Localizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,10 @@ public class Translation extends TranslationResourceBundle {
 	private static final Map<String, String> m = new HashMap<>();
 
 	public static String _T(String key) {
-		return Localizer.get().getString("t: " + key, null);
+		if (Application.exists()) 
+			return Localizer.get().getString("t: " + key, null);
+		else 
+			return key;
 	}
 	
 	public static void watchUpdate(Class<? extends TranslationResourceBundle> translationClass, Runnable onUpdate) {

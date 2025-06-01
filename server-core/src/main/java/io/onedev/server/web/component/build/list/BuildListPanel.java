@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.build.list;
 
 import static io.onedev.server.model.Build.SORT_FIELDS;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -637,7 +638,7 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Delete All Queried Builds";
+						return _T("Delete All Queried Builds");
 					}
 					
 					@Override

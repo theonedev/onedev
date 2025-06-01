@@ -4,6 +4,9 @@ import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.svg.SpriteImage;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -44,9 +47,9 @@ public abstract class WatchStatusLink extends DropdownLink {
 	@Override
 	public IModel<?> getBody() {
 		return Model.of(String.format(""
-				+ "<svg class='icon icon-bell-ring'><use xlink:href='%s'/></svg>"
-				+ "<svg class='icon icon-bell'><use xlink:href='%s'/></svg>"
-				+ "<svg class='icon icon-bell-off'><use xlink:href='%s'/></svg>", 
+				+ "<span class='default'><svg class='icon'><use xlink:href='%s'/></svg> <span class='text'>" + _T("Watch if involved") + "</span></span>"
+				+ "<span class='watch'><svg class='icon'><use xlink:href='%s'/></svg> <span class='text'>" + _T("Watch") + "</span></span>"
+				+ "<span class='ignore'><svg class='icon'><use xlink:href='%s'/></svg> <span class='text'>" + _T("Ignore") + "</span></span>", 
 				SpriteImage.getVersionedHref("bell-ring"), 
 				SpriteImage.getVersionedHref("bell"), 
 				SpriteImage.getVersionedHref("bell-off")));

@@ -157,7 +157,7 @@ public class BlobDiffPanel extends Panel {
 
 		});
 
-		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions(), true) {
+		add(new DiffStatBar("diffStat", change.getAdditions(), change.getDeletions()) {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();

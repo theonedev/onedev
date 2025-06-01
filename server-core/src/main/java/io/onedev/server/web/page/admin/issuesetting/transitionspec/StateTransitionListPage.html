@@ -5,7 +5,7 @@
 			or automatically when some events happen. And the rule can be configured to apply to certain projects and issues 
 			via the applicable issues setting
 		</div>
-		<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" title="Add issue state transition"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+		<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" t:data-tippy-content="Add issue state transition"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 		<table wicket:id="stateTransitions" class="table table-hover"></table>
 	</div>
 	<wicket:fragment wicket:id="descriptionFrag">
@@ -18,7 +18,7 @@
 		<div wicket:id="applicable"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionColumnFrag">
-		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" t:data-tippy-content="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" t:data-tippy-content="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 	</wicket:fragment>
 </wicket:extend>

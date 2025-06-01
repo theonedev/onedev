@@ -58,6 +58,7 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.*;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 public class PullRequestChangesPage extends PullRequestDetailPage implements RevisionAnnotationSupport, EditParamsAware {
@@ -483,7 +484,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						RevCommit commit = item.getModelObject();
 						if (!getPullRequest().getPendingCommits().contains(commit)) {
 							item.add(AttributeAppender.append("class", "rebased"));
-							item.add(AttributeAppender.append("title", "This commit is rebased"));
+							item.add(AttributeAppender.append("title", _T("This commit is rebased")));
 						}
 						item.add(AttributeAppender.append("data-hash", commit.name()));
 						item.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
@@ -500,13 +501,13 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			public String getObject() {
 				String oldName;
 				if (state.oldCommitHash.equals(getPullRequest().getBaseCommitHash()))
-					oldName = "base";
+					oldName = _T("base");
 				else
 					oldName = GitUtils.abbreviateSHA(state.oldCommitHash);
 
 				String newName;
 				if (state.newCommitHash.equals(getPullRequest().getLatestUpdate().getHeadCommitHash())) {
-					newName = "head";
+					newName = _T("head");
 				} else {
 					newName = GitUtils.abbreviateSHA(state.newCommitHash);
 				}

@@ -111,7 +111,7 @@ public abstract class CodeCommentListPanel extends Panel {
 					error(e.getMessage());
 					return null;
 				} else {
-					info("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and unresolved");
+					info(_T("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and unresolved"));
 					return new CodeCommentQuery(new FuzzyCriteria(queryString));
 				}
 			}
@@ -511,7 +511,7 @@ public abstract class CodeCommentListPanel extends Panel {
 	
 						@Override
 						public String getLabel() {
-							return "Delete All Queried Comments";
+							return _T("Delete All Queried Comments");
 						}
 						
 						@Override
@@ -539,7 +539,7 @@ public abstract class CodeCommentListPanel extends Panel {
 										
 										@Override
 										protected String getConfirmMessage() {
-											return "Type <code>yes</code> below to delete all queried comments";
+											return _T("Type <code>yes</code> below to delete all queried comments");
 										}
 										
 										@Override
@@ -562,7 +562,7 @@ public abstract class CodeCommentListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "No comments to delete");
+										tag.put("data-tippy-content", _T("No comments to delete"));
 									}
 								}
 								
@@ -576,7 +576,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Set All Queried Comments as Read";
+						return _T("Set All Queried Comments as Read");
 					}
 
 					@Override
@@ -595,7 +595,7 @@ public abstract class CodeCommentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No comments to set as read");
+									tag.put("data-tippy-content", _T("No comments to set as read"));
 								}
 							}
 
@@ -831,11 +831,11 @@ public abstract class CodeCommentListPanel extends Panel {
 					protected String load() {
 						if (rowModel.getObject().isResolved()) {
 							return String.format(
-									"<span title='Resolved'><svg class='icon text-success mr-1'><use xlink:href='%s'/></svg></span>",
+									"<span data-tippy-content=\"" + _T("Resolved") + "\"><svg class='icon text-success mr-1'><use xlink:href='%s'/></svg></span>",
 									SpriteImage.getVersionedHref("tick-circle-o"));
 						} else {
 							return String.format(
-									"<span title='Unresolved'><svg class='icon text-warning mr-1'><use xlink:href='%s'/></svg></span>",
+									"<span data-tippy-content=\"" + _T("Unresolved") + "\"><svg class='icon text-warning mr-1'><use xlink:href='%s'/></svg></span>",
 									SpriteImage.getVersionedHref("dot"));
 						}
 					}

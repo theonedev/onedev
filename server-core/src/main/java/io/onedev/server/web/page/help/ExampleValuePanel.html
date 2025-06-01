@@ -1,6 +1,6 @@
 <wicket:panel>
 	<wicket:container wicket:id="content"></wicket:container> 
-	<a wicket:id="hint" class="example-value-hint" title="More info about this property"><wicket:svg href="info-circle" class="icon icon-sm"/></a>
+	<a wicket:id="hint" class="example-value-hint" t:data-tippy-content="More info about this property"><wicket:svg href="info-circle" class="icon icon-sm"/></a>
 	
 	<wicket:fragment wicket:id="objectFrag">
 	<span class="example-value-brace">{</span>
@@ -56,7 +56,7 @@
 		<wicket:container wicket:id="name"></wicket:container> 
 		<span class="example-value-code">:</span> 
 		<wicket:container wicket:id="value"></wicket:container> 
-		<a wicket:id="implementations" class="example-value-implementations" title="All possible classes"><wicket:svg href="play" class="icon rotate-90"/></a>
+		<a wicket:id="implementations" class="example-value-implementations" t:data-tippy-content="All possible classes"><wicket:svg href="play" class="icon rotate-90"/></a>
 		<span wicket:id="comma" class="example-value-comma">,</span> 
 	</wicket:fragment>
 </wicket:panel>

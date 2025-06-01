@@ -4,10 +4,10 @@
 			<span class="mr-2">Backlog</span>
 			<span wicket:id="count" class="card-count badge badge-secondary badge-sm mr-2"></span>
 			<div class="ml-auto">
-				<a wicket:id="addCard" title="Add new card to this column" class="add-card"><wicket:svg href="plus" class="icon"></wicket:svg></a>
-				<a wicket:id="addToIteration" title="Add all cards to specified iteration" class="add-to-iteration"><wicket:svg href="iteration" class="icon"></wicket:svg></a>
-				<a wicket:id="showProgress" title="Show total estimated/spent time" class="show-progress ml-1"><wicket:svg href="clock" class="icon"></wicket:svg></a>
-				<a wicket:id="viewAsList" title="Show issues in list" class="view-list ml-1"><wicket:svg href="unordered-list" class="icon"></wicket:svg></a>
+				<a wicket:id="addCard" t:data-tippy-content="Add new card to this column" class="add-card"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+				<a wicket:id="addToIteration" t:data-tippy-content="Add all cards to specified iteration" class="add-to-iteration"><wicket:svg href="iteration" class="icon"></wicket:svg></a>
+				<a wicket:id="showProgress" t:data-tippy-content="Show total estimated/spent time" class="show-progress ml-1"><wicket:svg href="clock" class="icon"></wicket:svg></a>
+				<a wicket:id="viewAsList" t:data-tippy-content="Show issues in list" class="view-list ml-1"><wicket:svg href="unordered-list" class="icon"></wicket:svg></a>
 			</div>
 		</div>
 		<div wicket:id="body" class="body flex-grow-1 d-flex flex-column overflow-auto px-4 pt-4"></div>

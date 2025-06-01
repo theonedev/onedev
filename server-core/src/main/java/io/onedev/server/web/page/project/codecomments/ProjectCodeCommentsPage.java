@@ -31,6 +31,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -236,12 +239,12 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "<span class='text-truncate'>Code Comments</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-truncate'>" + _T("Code Comments") + "</span>").setEscapeModelStrings(false);
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		return "Code Comments - " + getProject().getPath();
+		return _T("Code Comments") + " - " + getProject().getPath();
 	}
 	
 	@Override

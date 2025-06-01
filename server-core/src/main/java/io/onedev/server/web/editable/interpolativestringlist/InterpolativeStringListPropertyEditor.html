@@ -13,7 +13,7 @@
 						<div wicket:id="feedback"></div>
 					</td>
 					<td class="actions minimum">
-						<a wicket:id="deleteElement" class="btn btn-icon btn-light btn-hover-danger" title="Delete this"><wicket:svg href="trash" class="icon delete"/></a>
+						<a wicket:id="deleteElement" class="btn btn-icon btn-light btn-hover-danger" t:data-tippy-content="Delete this"><wicket:svg href="trash" class="icon delete"/></a>
 					</td>
                 </tr>
             </tbody>
@@ -23,6 +23,6 @@
 				</tr>
 			</tfoot>
         </table>
-		<div class="foot"><a wicket:id="addElement" title="Add new" class="add-element btn btn-light btn-hover-primary btn-block"><wicket:svg href="plus" class="icon"></wicket:svg></a></div>
+		<div class="foot"><a wicket:id="addElement" t:data-tippy-content="Add new" class="add-element btn btn-light btn-hover-primary btn-block"><wicket:svg href="plus" class="icon"></wicket:svg></a></div>
     </div>
 </wicket:panel>

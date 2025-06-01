@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.subscriptionstatus;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.ComponentTag;
@@ -35,10 +37,10 @@ public abstract class SubscriptionStatusLink extends AjaxLink<Void> {
 			classes = "";
 		if (isSubscribed()) {
 			tag.put("class", classes + " subscription-status subscribed");
-			tag.put("title", "Watched. Click to unwatch");
+			tag.put("data-tippy-content", _T("Watched. Click to unwatch"));
 		} else {
 			tag.put("class", classes + " subscription-status unsubscribed");
-			tag.put("title", "Unwatched. Click to watch");
+			tag.put("data-tippy-content", _T("Unwatched. Click to watch"));
 		}
 	}
 

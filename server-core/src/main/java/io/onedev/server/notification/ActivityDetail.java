@@ -1,20 +1,11 @@
 package io.onedev.server.notification;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.web.UrlManager;
-import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.util.PropertyChange;
-import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.asset.fieldcompare.FieldCompareCssResourceReference;
-import io.onedev.server.web.component.codecomment.referencedfrom.ReferencedFromCodeCommentPanel;
-import io.onedev.server.web.component.commit.info.CommitInfoPanel;
-import io.onedev.server.web.component.issue.referencedfrom.ReferencedFromIssuePanel;
-import io.onedev.server.web.component.pullrequest.referencedfrom.ReferencedFromPullRequestPanel;
-import io.onedev.server.web.page.project.ProjectPage;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -23,9 +14,21 @@ import org.apache.wicket.model.Model;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
+import io.onedev.server.OneDev;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.PropertyChange;
+import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.web.asset.fieldcompare.FieldCompareCssResourceReference;
+import io.onedev.server.web.component.codecomment.referencedfrom.ReferencedFromCodeCommentPanel;
+import io.onedev.server.web.component.commit.info.CommitInfoPanel;
+import io.onedev.server.web.component.issue.referencedfrom.ReferencedFromIssuePanel;
+import io.onedev.server.web.component.pullrequest.referencedfrom.ReferencedFromPullRequestPanel;
+import io.onedev.server.web.page.project.ProjectPage;
 
 public class ActivityDetail implements Serializable {
 
@@ -72,9 +75,9 @@ public class ActivityDetail implements Serializable {
 		builder.append("  <thead>");
 		builder.append("    <tr>");
 		if (changes.size() != 1 || !hideNameIfOnlyOneRow) 
-			builder.append("      <th style='padding:0.4em 0.6em; border-bottom:1px solid #EBEDF3; font-size:0.9em; text-align:left;'>Name</th>");
-		builder.append("      <th style='padding:0.4em 0.6em; border-bottom:1px solid #EBEDF3; font-size:0.9em; text-align:left;'>Previous Value</th>");
-		builder.append("      <th style='padding:0.4em 0.6em; border-bottom:1px solid #EBEDF3; font-size:0.9em; text-align:left;'>Current Value</th>");
+			builder.append("      <th style='padding:0.4em 0.6em; border-bottom:1px solid #EBEDF3; font-size:0.9em; text-align:left;'>" + _T("Name") + "</th>");
+		builder.append("      <th style='padding:0.4em 0.6em; border-bottom:1px solid #EBEDF3; font-size:0.9em; text-align:left;'>" + _T("Previous Value") + "</th>");
+		builder.append("      <th style='padding:0.4em 0.6em; border-bottom:1px solid #EBEDF3; font-size:0.9em; text-align:left;'>" + _T("Current Value") + "</th>");
 		builder.append("    </tr>");
 		builder.append("  </thead>");
 		builder.append("  <tbody>");

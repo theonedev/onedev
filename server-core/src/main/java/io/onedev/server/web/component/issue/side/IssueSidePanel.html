@@ -26,7 +26,7 @@
 				<li wicket:id="iterations" class="bg-light rounded p-3">
 					<div class="d-flex">
 						<a wicket:id="link" class="mr-2"><span wicket:id="label"></span></a>
-						<a wicket:id="delete" class="mr-2 flex-shrink-0" title="Remove issue from this iteration"><wicket:svg href="trash" class="icon icon-sm"></wicket:svg></a>
+						<a wicket:id="delete" class="mr-2 flex-shrink-0" t:data-tippy-content="Remove issue from this iteration"><wicket:svg href="trash" class="icon icon-sm"></wicket:svg></a>
 						<span wicket:id="status" class="status ml-auto"></span> 
 					</div>
 					<div wicket:id="progress" class="mt-3"></div>
@@ -58,7 +58,7 @@
 				<li wicket:id="externalParticipants" class="pb-2">
 					<div class="d-flex">
 						<span wicket:id="label" class="mr-2"></span>
-						<a wicket:id="delete" class="flex-shrink-0 ml-auto" title="Remove this external participant from issue"><wicket:svg href="trash" class="icon icon-sm"></wicket:svg></a>
+						<a wicket:id="delete" class="flex-shrink-0 ml-auto" t:data-tippy-content="Remove this external participant from issue"><wicket:svg href="trash" class="icon icon-sm"></wicket:svg></a>
 					</div>
 				</li>
 				<span class="form-text font-size-sm text-muted">

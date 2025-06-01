@@ -1,5 +1,8 @@
 package io.onedev.server.web.component.entity.nav;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -62,7 +65,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 				super.onComponentTag(tag);
 				if (getCursor() == null || getCursor().getOffset() <= 0)
 					tag.put("disabled", "disabled");
-				tag.put("title", "Previous " + entityName);
+				tag.put("title", MessageFormat.format(_T("Previous {0}"), _T(entityName)));
 			}
 
 			@Override
@@ -79,7 +82,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 					Cursor prevCursor = new Cursor(getCursor().getQuery(), count, offset, projectScope);
 					getCursorSupport().navTo(target, entities.get(0), prevCursor);
 				} else {
-					WebSession.get().warn("No more " + entityName + "s");
+					WebSession.get().warn(_T("No more " + entityName + "s"));
 				}
 			}
 			
@@ -97,7 +100,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 				super.onComponentTag(tag);
 				if (getCursor() == null || getCursor().getOffset() >= getCursor().getCount()-1)
 					tag.put("disabled", "disabled");
-				tag.put("title", "Next " + entityName);
+				tag.put("title", MessageFormat.format(_T("Next {0}"), _T(entityName)));
 			}
 
 			@Override
@@ -116,7 +119,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 					Cursor nextCursor = new Cursor(getCursor().getQuery(), count, offset, projectScope);
 					getCursorSupport().navTo(target, entities.get(0), nextCursor);
 				} else {
-					WebSession.get().warn("No more " + entityName + "s");
+					WebSession.get().warn(_T("No more " + entityName + "s"));
 				}
 			}
 			
@@ -127,9 +130,9 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 			@Override
 			public String getObject() {
 				if (getCursor() != null)
-					return entityName + " " + (getCursor().getOffset() + 1) + " of " + getCursor().getCount();				
+					return _T(entityName) + " " + (getCursor().getOffset() + 1) + "/" + getCursor().getCount();				
 				else
-					return entityName + " 1 of 1";
+					return _T(entityName) + " 1/1";
 			}
 			
 		}));
