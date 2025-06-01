@@ -55,6 +55,7 @@ public abstract class SyncRepository extends ServerSideStep {
 	}
 	
 	@Editable(order=300, description="Optionally specify user name to access remote repository")
+	@Interpolative(variableSuggester="suggestVariables")
 	public String getUserName() {
 		return userName;
 	}
