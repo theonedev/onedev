@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.builds.detail;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -431,7 +433,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 			@Override
 			protected String getEmptyDescription() {
-				return "No description";
+				return _T("No description");
 			}
 
 			@Override

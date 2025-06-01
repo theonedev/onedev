@@ -1,6 +1,7 @@
 package io.onedev.server.git;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import javax.inject.Inject;
@@ -14,14 +15,15 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.base.Splitter;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.util.UrlUtils;
+import io.onedev.server.web.UrlManager;
 
 @Singleton
 public class GoGetFilter implements Filter {
@@ -31,12 +33,16 @@ public class GoGetFilter implements Filter {
 	private final UrlManager urlManager;
 	
 	private final SessionManager sessionManager;
+
+	private final SettingManager settingManager;
 	
 	@Inject
-	public GoGetFilter(ProjectManager projectManager, UrlManager urlManager, SessionManager sessionManager) {
+	public GoGetFilter(ProjectManager projectManager, UrlManager urlManager, 
+			SessionManager sessionManager, SettingManager settingManager) {
 		this.projectManager = projectManager;
 		this.urlManager = urlManager;
 		this.sessionManager = sessionManager;
+		this.settingManager = settingManager;
 	}
 	
 	@Override
@@ -52,19 +58,16 @@ public class GoGetFilter implements Filter {
 		if (httpRequest.getQueryString() != null && httpRequest.getQueryString().contains("go-get=1")) {
 			sessionManager.openSession();
 			try {
-				String hostAndPath = StringUtils.substringAfter(httpRequest.getRequestURL().toString(), "://");
-				String host = StringUtils.substringBefore(hostAndPath, "/");
-				String path = StringUtils.substringAfter(hostAndPath, "/");
-				
-				Project parent = null;
+				String path = StringUtils.strip(new URL(httpRequest.getRequestURL().toString()).getPath(), "/");
+				Project project = null;
 				for (String pathSegment: Splitter.on("/").trimResults().omitEmptyStrings().split(path)) {
-					Project project = projectManager.find(parent, pathSegment);
-					if (project != null) 
-						parent = project;
+					Project childProject = projectManager.find(project, pathSegment);
+					if (childProject != null) 
+						project = childProject;
 					else 
 						break;
 				}
-				if (parent != null) {
+				if (project != null) {
 					StringBuilder builder = new StringBuilder();
 					builder.append(String.format(""
 							+ "<!doctype html>\n"
@@ -73,7 +76,7 @@ public class GoGetFilter implements Filter {
 							+ "<meta charset=\"utf-8\">\n"
 							+ "<meta name=\"go-import\" content=\"%s git %s\">\n"
 							+ "</head>\n"
-							+ "</html>", host + "/" + parent.getPath(), urlManager.cloneUrlFor(parent, false)));
+							+ "</html>", UrlUtils.getServer(settingManager.getSystemSetting().getServerUrl()) + "/" + project.getPath(), urlManager.cloneUrlFor(project, false)));
 					byte[] bytes = builder.toString().getBytes(StandardCharsets.UTF_8);
 					httpResponse.getOutputStream().write(bytes);
 					httpResponse.setStatus(HttpServletResponse.SC_OK);
