@@ -1,5 +1,7 @@
 package io.onedev.server.event.project.pullrequest;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.web.UrlManager;
 import io.onedev.server.model.CodeComment;
@@ -22,7 +24,7 @@ public class PullRequestCodeCommentCreated extends PullRequestCodeCommentEvent {
 
 	@Override
 	public String getActivity() {
-		return "created code comment"; 
+		return _T("created code comment"); 
 	}
 
 	@Override

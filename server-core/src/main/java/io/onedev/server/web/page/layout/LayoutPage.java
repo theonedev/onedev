@@ -369,7 +369,7 @@ public abstract class LayoutPage extends BasePage {
 						}
 						contributedMenuItemsOfGroup.add(new SidebarMenuItem.Page(
 								null,
-								EditableUtils.getDisplayName(contributedSettingClass),
+								_T(EditableUtils.getDisplayName(contributedSettingClass)),
 								ContributedAdministrationSettingPage.class,
 								ContributedAdministrationSettingPage.paramsOf(contributedSettingClass)));
 					}

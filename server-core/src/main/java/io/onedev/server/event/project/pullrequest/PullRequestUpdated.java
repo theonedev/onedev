@@ -1,5 +1,7 @@
 package io.onedev.server.event.project.pullrequest;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -28,7 +30,7 @@ public class PullRequestUpdated extends PullRequestEvent {
 
 	@Override
 	public String getActivity() {
-		return "added commits";
+		return _T("added commits");
 	}
 
 	public Collection<User> getCommitters() {

@@ -1,5 +1,8 @@
 package io.onedev.server.event.project.pullrequest;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
@@ -20,7 +23,7 @@ public class PullRequestReviewRequested extends PullRequestEvent {
 	
 	@Override
 	public String getActivity() {
-		return "requested review from " + getReviewer().getDisplayName();
+		return MessageFormat.format(_T("requested review from {0}"), getReviewer().getDisplayName());
 	}
 
 	public User getReviewer() {

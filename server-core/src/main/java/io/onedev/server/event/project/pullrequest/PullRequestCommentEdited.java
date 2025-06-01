@@ -5,6 +5,8 @@ import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.security.SecurityUtils;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Date;
 
 public class PullRequestCommentEdited extends PullRequestEvent {
@@ -29,7 +31,7 @@ public class PullRequestCommentEdited extends PullRequestEvent {
 
 	@Override
 	public String getActivity() {
-		return "comment edited";
+		return _T("comment edited");
 	}
 
 }

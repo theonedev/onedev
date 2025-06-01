@@ -4,6 +4,8 @@ import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Date;
 
 public class PullRequestDeleted extends ProjectEvent {
@@ -23,7 +25,7 @@ public class PullRequestDeleted extends ProjectEvent {
 
 	@Override
 	public String getActivity() {
-		return "pull request deleted";
+		return _T("pull request deleted");
 	}
 	
 }

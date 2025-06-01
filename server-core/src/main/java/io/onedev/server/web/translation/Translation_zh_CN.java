@@ -26,6 +26,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("7 days", "7 天");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid and katex support</a>.", 
 			"可使用 <a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub 风格的 markdown</a>，并支持 <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid 和 katex</a>。");
+		m.put("<a wicket:id=\"user\" class=\"link-gray\"></a> <span wicket:id=\"activity\"></span> <span wicket:id=\"date\"></span>", 
+			"<a wicket:id=\"user\" class=\"link-gray\"></a> 于 <span wicket:id=\"date\"></span><span wicket:id=\"activity\"></span>");
 		m.put("<a wicket:id=\"verifyRecoveryCode\">Verify by recovery code</a> if you can not access your TOTP authenticator", 
 			"<a wicket:id=\"verifyRecoveryCode\">通过恢复代码验证</a>（如果您无法访问 TOTP 认证器）");
 		m.put("<b class='text-danger'>NOTE: </b> This step requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
@@ -36,6 +38,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("<b>Tips: </b> Type <tt>@</tt> to <a href='https://docs.onedev.io/appendix/job-variables' target='_blank' tabindex='-1'>insert variable</a>. Use <tt>@@</tt> for literal <tt>@</tt>", 
 			"<b>提示: </b> 输入 <tt>@</tt> 插入变量。使用 <tt>@@</tt> 插入字符 <tt>@</tt>");
 		m.put("<i>No Name</i>", "<i>无名称</i>");
+		m.put("<span wicket:id=\"name\"></span> <span wicket:id=\"description\"></span> <span wicket:id=\"age\"></span>", 
+			"<span wicket:id=\"name\"></span> 于 <span wicket:id=\"age\"></span><span wicket:id=\"description\"></span>");
+		m.put("<span wicket:id=\"name\"></span> commented <span wicket:id=\"age\"></span>", "<span wicket:id=\"name\"></span> 于 <span wicket:id=\"age\"></span>评论");
 		m.put("<span wicket:id=\"submitterName\" class=\"user\"></span> opened <span wicket:id=\"submitDate\"></span>", 
 			"<span wicket:id=\"submitterName\" class=\"user\"></span> 于 <span wicket:id=\"submitDate\"></span> 创建");
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
@@ -43,7 +48,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("A pull request is open for this change", "一个合并请求正在审查此更改");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"你的JIRA云实例的API地址，例如：<tt>https://your-domain.atlassian.net/rest/api/3</tt>");
-		m.put("Able to merge without conflicts", "可以合并而没有冲突");
+		m.put("Able to merge without conflicts", "没有冲突，可以合并");
 		m.put("Absolute or relative url of the image", "图片的绝对或相对 URL");
 		m.put("Absolute or relative url of the link", "链接的绝对或相对 URL");
 		m.put("Access Anonymously", "匿名访问");
@@ -3164,18 +3169,25 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("YouTrack Projects to Import", "要导入的 YouTrack 项目");
 		m.put("[Reset Password] Please Reset Your OneDev Password", "[重置密码] 请重置您的 OneDev 密码");
 		m.put("access [{0}]", "访问 [{0}]");
+		m.put("added commits", "添加提交");
 		m.put("and more", "更多");
 		m.put("artifacts", "制品");
 		m.put("assign to me", "分配给我");
+		m.put("assigned to \"{0}\"", "分配给 \"{0}\"");
 		m.put("base", "基准");
 		m.put("branches", "分支");
+		m.put("build commit updated", "构建提交更新");
 		m.put("builds", "构建");
+		m.put("check failed", "检查失败");
 		m.put("choose a color for this state", "选择一个颜色");
 		m.put("cmd-k to show command palette", "cmd-k 显示命令面板");
+		m.put("comment edited", "评论编辑");
+		m.put("commented", "评论");
 		m.put("common", "公共");
 		m.put("common ancestor", "共同祖先");
 		m.put("container-image", "容器镜像");
 		m.put("copy", "复制");
+		m.put("created code comment", "创建代码评论");
 		m.put("ctrl-k to show command palette", "ctrl-k 显示命令面板");
 		m.put("curl Command Line", "curl 命令行");
 		m.put("curl Path", "curl 路径");
@@ -3206,6 +3218,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("may not be empty", "不能为空");
 		m.put("md.heading", "标题");
 		m.put("md.image", "图片");
+		m.put("merge preview updated", "合并预览更新");
 		m.put("merged", "已合并");
 		m.put("month.Apr", "四月");
 		m.put("month.Aug", "八月");
@@ -3227,8 +3240,14 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("personal", "个人");
 		m.put("pipeline", "流水线");
 		m.put("pull request #{0}", "合并请求 #{0}");
+		m.put("pull request deleted", "合并请求删除");
 		m.put("pull requests", "合并请求");
+		m.put("pull requests deleted", "合并请求删除");
+		m.put("removed reviewer \"{0}\"", "移除审查者 \"{0}\"");
+		m.put("replied code comment", "回复代码评论");
 		m.put("reports", "报告");
+		m.put("requested review from {0}", "请求审查者 \"{0}\"");
+		m.put("resolved code comment", "解决代码评论");
 		m.put("root", "根");
 		m.put("run job", "运行任务");
 		m.put("search in this revision will be accurate after indexed", "索引完成后，在当前版本中的搜索将更准确");
@@ -3237,7 +3256,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("space", "空格");
 		m.put("submit", "提交");
 		m.put("tags", "标签");
+		m.put("touched", "触摸");
 		m.put("true", "真");
+		m.put("unassigned from \"{0}\"", "取消分配给 \"{0}\"");
+		m.put("unresolved code comment", "将代码评论标记为未解决");
 		m.put("w%02d", "第 %d 周");
 		m.put("week.Fri", "周五");
 		m.put("week.Mon", "周一");
@@ -3267,10 +3289,14 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("<span wicket:id=\"name\"></span> <span wicket:id=\"description\"></span> <span wicket:id=\"age\"></span>", 
-			"<span wicket:id=\"name\"></span> 于 <span wicket:id=\"age\"></span> <span wicket:id=\"description\"></span>");
-		m.put("<span wicket:id=\"name\"></span> commented <span wicket:id=\"age\"></span>", 
-			"<span wicket:id=\"name\"></span> 于 <span wicket:id=\"age\"></span> 评论");
+		m.put("<b class='text-danger'>NOTE: </b> This requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意：</b> 这需要企业订阅。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
+		m.put("High Availability & Scalability", "高可用和可扩展");
+		m.put("Set up Microsoft Teams notification settings. Settings will be inherited by child projects, and can be overridden by defining settings with same webhook url. ", 
+			"设置 Microsoft Teams 通知设置。设置将继承给子项目，并可以通过定义具有相同 webhook url 的设置来覆盖。");
+		m.put("Setting has been saved", "设置已保存");
+		m.put("Subscription Management", "订阅管理");
+		m.put("Unexpected setting: {0}", "未知设置：{0}");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
@@ -3347,6 +3373,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("action:deleted source branch", "删除了源分支");
 		m.put("action:restored source branch", "恢复了源分支");
 		m.put("action:changed target branch", "更改了目标分支");
+		m.put("action:commented", "评论");
 	}
 		
 	@Override

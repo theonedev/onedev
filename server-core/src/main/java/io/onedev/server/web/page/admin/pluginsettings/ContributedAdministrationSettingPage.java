@@ -1,13 +1,14 @@
 package io.onedev.server.web.page.admin.pluginsettings;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.layout.AdministrationSettingContribution;
-import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+
+import javax.annotation.Nullable;
+import javax.validation.Validator;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -18,10 +19,14 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import javax.annotation.Nullable;
-import javax.validation.Validator;
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.page.layout.AdministrationSettingContribution;
+import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 
 public class ContributedAdministrationSettingPage extends AdministrationPage {
 
@@ -47,7 +52,7 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 		}
 
 		if (settingClass == null)
-			throw new RuntimeException("Unexpected setting: " + settingName);
+			throw new RuntimeException(MessageFormat.format(_T("Unexpected setting: {0}"), settingName));
 	}
 
 	private SettingManager getSettingManager() {
@@ -76,7 +81,7 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 				else
 					getSettingManager().removeContributedSetting(settingClass);
 				
-				getSession().success("Setting has been saved");
+				getSession().success(_T("Setting has been saved"));
 				
 				setResponsePage(ContributedAdministrationSettingPage.class, paramsOf(settingClass));
 			}
@@ -152,7 +157,7 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, EditableUtils.getDisplayName(settingClass));
+		return new Label(componentId, _T(EditableUtils.getDisplayName(settingClass)));
 	}
 
 	public static String getSettingName(Class<?> settingClass) {

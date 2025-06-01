@@ -1,5 +1,8 @@
 package io.onedev.server.event.project.pullrequest;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
@@ -25,7 +28,7 @@ public class PullRequestAssigned extends PullRequestEvent {
 	
 	@Override
 	public String getActivity() {
-		return "assigned to \"" + getAssignee().getDisplayName() + "\"";
+		return MessageFormat.format(_T("assigned to \"{0}\""), getAssignee().getDisplayName());
 	}
 
 	public User getAssignee() {

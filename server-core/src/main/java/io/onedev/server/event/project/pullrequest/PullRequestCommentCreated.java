@@ -1,5 +1,7 @@
 package io.onedev.server.event.project.pullrequest;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Collection;
 
 import io.onedev.server.OneDev;
@@ -38,7 +40,7 @@ public class PullRequestCommentCreated extends PullRequestEvent {
 
 	@Override
 	public String getActivity() {
-		return "commented";
+		return _T("commented");
 	}
 
 	@Override

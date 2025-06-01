@@ -34,8 +34,6 @@ public class DateUtils {
     public static final String TIME_FORMAT = "HH:mm";
 
     public static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern(TIME_FORMAT);
-
-	private static final PrettyTime PRETTY_TIME = new PrettyTime();
 	
 	public static final List<String> RELAX_DATE_EXAMPLES = Lists.newArrayList(
 			"2:30pm", "4-23", "2018-2-3", "one hour ago", "2 hours ago", "3PM", "noon", "today", 
@@ -43,7 +41,7 @@ public class DateUtils {
 			"4 weeks ago", "last month", "1 month 2 days ago", "last year", "1 year ago"); 
 	
     public static String formatAge(Date date) {
-    	return PRETTY_TIME.format(date);
+    	return new PrettyTime(WebSession.get().getLocale()).format(date);
     }
 
 	public static ZoneId getZoneId() {

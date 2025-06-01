@@ -1,5 +1,8 @@
 package io.onedev.server.event.project.pullrequest;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.Date;
 
 import javax.annotation.Nullable;
@@ -22,7 +25,7 @@ public class PullRequestUnassigned extends PullRequestEvent {
 	
 	@Override
 	public String getActivity() {
-		return "unassigned from \"" + getAssignee().getDisplayName() + "\"";
+		return MessageFormat.format(_T("unassigned from \"{0}\""), getAssignee().getDisplayName());
 	}
 	
 	@Nullable

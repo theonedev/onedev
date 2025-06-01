@@ -5,6 +5,8 @@ import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 import org.eclipse.jgit.lib.ObjectId;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Date;
 
 public class PullRequestBuildCommitUpdated extends PullRequestEvent implements CommitAware {
@@ -17,7 +19,7 @@ public class PullRequestBuildCommitUpdated extends PullRequestEvent implements C
 
 	@Override
 	public String getActivity() {
-		return "Build commit updated";
+		return _T("build commit updated");
 	}
 
 	@Override

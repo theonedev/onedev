@@ -1,5 +1,7 @@
 package io.onedev.server.event.project.pullrequest;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
@@ -37,9 +39,9 @@ public class PullRequestCodeCommentStatusChanged extends PullRequestCodeCommentE
 	@Override
 	public String getActivity() {
 		if (getChange().isResolved())
-			return "resolved code comment"; 
+			return _T("resolved code comment"); 
 		else
-			return "unresolved code comment";
+			return _T("unresolved code comment");
 	}
 
 	@Override
