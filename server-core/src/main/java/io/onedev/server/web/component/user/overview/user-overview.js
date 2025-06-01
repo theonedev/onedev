@@ -2,7 +2,7 @@ onedev.server.userOverview = {
     onDomReady: function(activityStatsByDay, fromDay, toDay, activityStatsByType, types, translations) {
         const graphContainer = $(".user-overview .daily-stats")[0];
         const DAY_IN_MS = 24 * 60 * 60 * 1000;
-        const monthNames = [translations["month.jan"], translations["month.feb"], translations["month.mar"], translations["month.apr"], translations["month.may"], translations["month.jun"], translations["month.jul"], translations["month.aug"], translations["month.sep"], translations["month.oct"], translations["month.nov"], translations["month.dec"]];
+        const monthNames = [translations["jan"], translations["feb"], translations["mar"], translations["apr"], translations["may"], translations["jun"], translations["jul"], translations["aug"], translations["sep"], translations["oct"], translations["nov"], translations["dec"]];
 
         function getEpochDay(date) {
             // Get the date at midnight in local timezone
@@ -87,7 +87,7 @@ onedev.server.userOverview = {
 
         const dayLabelsCol = document.createElement("div");
         dayLabelsCol.className = "calendar-day-labels";
-        const dayLabelTexts = [translations["week.sun"], translations["week.mon"], translations["week.tue"], translations["week.wed"], translations["week.thu"], translations["week.fri"], translations["week.sat"]];
+        const dayLabelTexts = [translations["sun"], translations["mon"], translations["tue"], translations["wed"], translations["thu"], translations["fri"], translations["sat"]];
         const showDayLabelFor = [false, true, false, true, false, true, false]; // Show Mon, Wed, Fri
 
         for (let i = 0; i < 7; i++) {

@@ -30,6 +30,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"<a wicket:id=\"user\" class=\"link-gray\"></a> 于 <span wicket:id=\"date\"></span><span wicket:id=\"activity\"></span>");
 		m.put("<a wicket:id=\"verifyRecoveryCode\">Verify by recovery code</a> if you can not access your TOTP authenticator", 
 			"<a wicket:id=\"verifyRecoveryCode\">通过恢复代码验证</a>（如果您无法访问 TOTP 认证器）");
+		m.put("<b class='text-danger'>NOTE: </b> This requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"<b class='text-danger'>注意：</b> 这需要企业订阅。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
 		m.put("<b class='text-danger'>NOTE: </b> This step requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>注意：</b> 此步骤需要企业版订阅。<a href='https://onedev.io/pricing' target='_blank'>免费试用 30 天</a>");
 		m.put("<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
@@ -1043,6 +1045,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Hide comment", "隐藏注释");
 		m.put("Hide saved queries", "隐藏保存的查询");
 		m.put("High", "高");
+		m.put("High Availability & Scalability", "高可用和可扩展");
 		m.put("History", "历史");
 		m.put("History of comparing revisions is unrelated", "比较的版本历史不相关");
 		m.put("History of target branch and source branch is unrelated", "目标分支和源分支的历史记录不相关");
@@ -2298,6 +2301,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Set as Public", "设为公开");
 		m.put("Set reviewed", "设置为已审阅");
 		m.put("Set unreviewed", "设置为未审阅");
+		m.put("Set up Microsoft Teams notification settings. Settings will be inherited by child projects, and can be overridden by defining settings with same webhook url. ", 
+			"设置 Microsoft Teams 通知设置。设置将继承给子项目，并可以通过定义具有相同 webhook url 的设置来覆盖。");
 		m.put("Set up discord notification settings. Settings will be inherited by child projects, and can be overridden by defining settings with same webhook url", 
 			"设置 Discord 通知设置。设置将继承给子项目，并可以通过定义具有相同 Webhook URL 的设置来覆盖");
 		m.put("Set up job cache to speed up job execution. Check <a href='https://docs.onedev.io/tutorials/cicd/job-cache' target='_blank'>this tutorial</a> on how to use job cache", 
@@ -2308,6 +2313,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"设置 Slack 通知设置。设置将继承给子项目，并可以通过定义具有相同 Webhook URL 的设置来覆盖");
 		m.put("Set up two-factor authentication", "设置两阶段验证");
 		m.put("Setting", "设置");
+		m.put("Setting has been saved", "设置已保存");
 		m.put("Settings", "设置");
 		m.put("Settings and permissions of parent project will be inherited by this project", "父项目的设置和权限将继承给此项目");
 		m.put("Share dashboard", "共享仪表板");
@@ -2747,6 +2753,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Subject", "主题");
 		m.put("Submitter", "提交者");
 		m.put("Subscription Key", "订阅密钥");
+		m.put("Subscription Management", "订阅管理");
 		m.put("Subscription data", "订阅数据");
 		m.put("Successful", "成功");
 		m.put("Suffix Pattern", "后缀模式");
@@ -2964,6 +2971,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Undefined State Resolution", "未定义状态解析");
 		m.put("Under which condition this step should run. <b>Successful</b> means all non-optional steps running before this step are successful", 
 			"在什么条件下应运行此步骤。<b>成功</b>表示在此步骤之前运行的所有非可选步骤都已成功");
+		m.put("Unexpected setting: {0}", "未知设置：{0}");
 		m.put("Unified", "统一");
 		m.put("Unlimited", "无限制");
 		m.put("Unlink this issue", "取消链接此工单");
@@ -3216,22 +3224,22 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("log", "日志");
 		m.put("manage job", "管理任务");
 		m.put("may not be empty", "不能为空");
-		m.put("md.heading", "标题");
-		m.put("md.image", "图片");
+		m.put("md:heading", "标题");
+		m.put("md:image", "图片");
 		m.put("merge preview updated", "合并预览更新");
 		m.put("merged", "已合并");
-		m.put("month.Apr", "四月");
-		m.put("month.Aug", "八月");
-		m.put("month.Dec", "十二月");
-		m.put("month.Feb", "二月");
-		m.put("month.Jan", "一月");
-		m.put("month.Jul", "七月");
-		m.put("month.Jun", "六月");
-		m.put("month.Mar", "三月");
-		m.put("month.May", "五月");
-		m.put("month.Nov", "十一月");
-		m.put("month.Oct", "十月");
-		m.put("month.Sep", "九月");
+		m.put("month:Apr", "四月");
+		m.put("month:Aug", "八月");
+		m.put("month:Dec", "十二月");
+		m.put("month:Feb", "二月");
+		m.put("month:Jan", "一月");
+		m.put("month:Jul", "七月");
+		m.put("month:Jun", "六月");
+		m.put("month:Mar", "三月");
+		m.put("month:May", "五月");
+		m.put("month:Nov", "十一月");
+		m.put("month:Oct", "十月");
+		m.put("month:Sep", "九月");
 		m.put("new field", "新字段");
 		m.put("on file {0}", "在文件 {0} 上");
 		m.put("opened", "已创建");
@@ -3261,13 +3269,13 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("unassigned from \"{0}\"", "取消分配给 \"{0}\"");
 		m.put("unresolved code comment", "将代码评论标记为未解决");
 		m.put("w%02d", "第 %d 周");
-		m.put("week.Fri", "周五");
-		m.put("week.Mon", "周一");
-		m.put("week.Sat", "周六");
-		m.put("week.Sun", "周日");
-		m.put("week.Thu", "周四");
-		m.put("week.Tue", "周二");
-		m.put("week.Wed", "周三");
+		m.put("week:Fri", "周五");
+		m.put("week:Mon", "周一");
+		m.put("week:Sat", "周六");
+		m.put("week:Sun", "周日");
+		m.put("week:Thu", "周四");
+		m.put("week:Tue", "周二");
+		m.put("week:Wed", "周三");
 		m.put("{0} Month(s)", "{0} 个月");
 		m.put("{0} activities on {1}", "{1} 有 {0} 个活动");
 		m.put("{0} additions & {1} deletions", "{0} 个添加，{1} 个删除");
@@ -3289,14 +3297,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("<b class='text-danger'>NOTE: </b> This requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-danger'>注意：</b> 这需要企业订阅。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
-		m.put("High Availability & Scalability", "高可用和可扩展");
-		m.put("Set up Microsoft Teams notification settings. Settings will be inherited by child projects, and can be overridden by defining settings with same webhook url. ", 
-			"设置 Microsoft Teams 通知设置。设置将继承给子项目，并可以通过定义具有相同 webhook url 的设置来覆盖。");
-		m.put("Setting has been saved", "设置已保存");
-		m.put("Subscription Management", "订阅管理");
-		m.put("Unexpected setting: {0}", "未知设置：{0}");
+		m.put("Timesheets", "时间表");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
