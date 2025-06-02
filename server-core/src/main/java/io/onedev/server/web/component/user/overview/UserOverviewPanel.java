@@ -234,7 +234,7 @@ public abstract class UserOverviewPanel extends GenericPanel<User> {
 					user.setPassword(null);
 					getUserManager().update(user, null);
 					Session.get().success(_T("Password has been removed"));
-					setResponsePage(UserPasswordPage.class, UserPasswordPage.paramsOf(user));
+                    setResponsePage(getPage().getClass(), getPage().getPageParameters());
 				}
 
 			}.add(new ConfirmClickModifier(_T("Do you really want to remove password of this user?"))));

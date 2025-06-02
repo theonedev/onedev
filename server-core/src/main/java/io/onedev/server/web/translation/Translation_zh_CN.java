@@ -454,6 +454,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Check this to require valid signature of head commit", "勾选此项以要求主提交具有有效签名");
 		m.put("Check this to retrieve Git LFS files", "勾选此项以获取 Git LFS 文件");
 		m.put("Checkbox", "复选框");
+		m.put("Checking field values...", "检查字段值...");
+		m.put("Checking fields...", "检查字段...");
+		m.put("Checking state and field ordinals...", "检查状态和字段排序...");
+		m.put("Checking state...", "检查状态...");
 		m.put("Checkout Code", "签出代码");
 		m.put("Checkout Path", "签出路径");
 		m.put("Checkout Pull Request Head", "检出合并请求的头部提交");
@@ -981,6 +985,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Fix Undefined States", "修复未定义的状态");
 		m.put("Fixing Builds", "修复构建");
 		m.put("Fixing Commits", "修复提交");
+		m.put("Fixing...", "修复中...");
 		m.put("Float", "浮点数");
 		m.put("For a particular project, the first matching entry will be used", "对于特定项目，第一个匹配的条目将被使用");
 		m.put("For build commit not reachable from default branch, a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> should be specified as access token with create branch permission", 
@@ -3338,6 +3343,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Will be transcoded to UTF-8", "将被转码为 UTF-8");
 		m.put("Window", "窗口");
 		m.put("Window Memory", "窗口内存");
+		m.put("Workflow reconciliation completed", "工单工作流一致性检查完成");
 		m.put("Working Directory", "工作目录");
 		m.put("Write", "写入");
 		m.put("You are rebasing source branch on top of target branch", "您正在将源分支 rebase 到目标分支之上");
@@ -3498,12 +3504,13 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Checking field values...", "检查字段值...");
-		m.put("Checking fields...", "检查字段...");
-		m.put("Checking state and field ordinals...", "检查状态和字段排序...");
-		m.put("Checking state...", "检查状态...");
-		m.put("Fixing...", "修复中...");
-		m.put("Workflow reconciliation completed", "工单工作流一致性检查完成");
+		m.put("<a wicket:id=\"removePassword\">Remove password</a> to force the user to authenticate via external system", 
+			"<a wicket:id=\"removePassword\">移除密码</a> 以强制用户通过外部系统进行身份验证");
+		m.put("To authenticate via internal database, <a wicket:id=\"setPasswordForUser\">set password for user</a> or <a wicket:id=\"tellUserToResetPassword\">tell user to reset password</a>", 
+			"通过内部数据库进行身份验证，<a wicket:id=\"setPasswordForUser\">设置用户密码</a> 或 <a wicket:id=\"tellUserToResetPassword\">告诉用户重置密码</a>");
+		m.put("This user is currently authenticating via external system. Setting password will switch to use internal database", 
+			"该用户当前通过外部系统进行身份验证。设置密码将切换到使用内部数据库");
+		m.put("My Email Addresses", "我的电子邮件地址");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");

@@ -40,7 +40,7 @@
 		<div class="alert alert-light p-2 font-size-sm">
             <wicket:t>This user is authenticating via internal database.</wicket:t>
             <div wicket:id="actions">                
-            <a wicket:id="removePassword">Remove password</a> to force the user to authenticate via external system
+            <wicket:t><a wicket:id="removePassword">Remove password</a> to force the user to authenticate via external system</wicket:t>
             </div>
 		</div>
 	</wicket:fragment>
@@ -48,7 +48,7 @@
 		<div class="alert alert-light p-2 font-size-sm">
             <wicket:t>This user is authenticating via external system.</wicket:t>
 			<form wicket:id="form" class="d-inline">
-				To authenticate via internal database, <a wicket:id="setPasswordForUser">set password for user</a> or <a wicket:id="tellUserToResetPassword">tell user to reset password</a>
+				<wicket:t>To authenticate via internal database, <a wicket:id="setPasswordForUser">set password for user</a> or <a wicket:id="tellUserToResetPassword">tell user to reset password</a></wicket:t>
 			</form>
 		</div>
 	</wicket:fragment>

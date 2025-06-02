@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.my.emailaddresses;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -32,7 +34,7 @@ public class MyEmailAddressesPage extends MyPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "My Email Addresses");
+		return new Label(componentId, _T("My Email Addresses"));
 	}
 
 }
