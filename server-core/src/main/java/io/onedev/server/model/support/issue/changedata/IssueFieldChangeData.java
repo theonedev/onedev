@@ -2,6 +2,7 @@ package io.onedev.server.model.support.issue.changedata;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,12 +12,14 @@ import java.util.stream.Collectors;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.notification.ActivityDetail;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 
 public class IssueFieldChangeData extends IssueChangeData {
@@ -40,17 +43,39 @@ public class IssueFieldChangeData extends IssueChangeData {
 		return newFields;
 	}
 
+	private List<String> getDisplayValues(Input input) {
+		var displayValues = new ArrayList<String>();
+		for (var value: input.getValues()) {
+			if (input.getType().equals(InputSpec.DATE)) {
+				try {
+					displayValues.add(DateUtils.formatDate(new Date(Long.parseLong(value))));
+				} catch (Exception e) {
+					displayValues.add(value);
+				}
+			} else if (input.getType().equals(InputSpec.DATE_TIME)) {
+				try {
+					displayValues.add(DateUtils.formatDateTime(new Date(Long.parseLong(value))));
+				} catch (Exception e) {
+					displayValues.add(value);
+				}
+			} else {
+				displayValues.add(value);
+			}
+		}
+		return displayValues;
+	}
+
 	public Map<String, String> getOldFieldValues() {
 		Map<String, String> oldFieldValues = new LinkedHashMap<>();
 		for (Map.Entry<String, Input> entry: oldFields.entrySet())
-			oldFieldValues.put(entry.getKey(), StringUtils.join(entry.getValue().getValues()));
+			oldFieldValues.put(entry.getKey(), StringUtils.join(getDisplayValues(entry.getValue())));
 		return oldFieldValues;
 	}
 	
 	public Map<String, String> getNewFieldValues() {
 		Map<String, String> newFieldValues = new LinkedHashMap<>();
 		for (Map.Entry<String, Input> entry: newFields.entrySet())
-			newFieldValues.put(entry.getKey(), StringUtils.join(entry.getValue().getValues()));
+			newFieldValues.put(entry.getKey(), StringUtils.join(getDisplayValues(entry.getValue())));
 		return newFieldValues;
 	}
 	
