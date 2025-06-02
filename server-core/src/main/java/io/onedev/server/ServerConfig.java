@@ -22,6 +22,8 @@ public class ServerConfig {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ServerConfig.class);
 
+	private static final String PROP_HTTP_HOST = "http_host";
+
 	private static final String PROP_HTTP_PORT = "http_port";
 
 	private static final String PROP_SSH_PORT = "ssh_port";
@@ -32,6 +34,8 @@ public class ServerConfig {
 
 	private static final String PROP_CLUSTER_PORT = "cluster_port";
 	
+	private final String httpHost;
+
 	private final int httpPort;
 
 	private final int sshPort;
@@ -46,6 +50,13 @@ public class ServerConfig {
 		File file = new File(installDir, "conf/server.properties");
 		Properties props = loadProperties(file);
 		
+		String httpHost = System.getenv(PROP_HTTP_HOST);
+		if (StringUtils.isBlank(httpHost))
+			httpHost = props.getProperty(PROP_HTTP_HOST);
+		if (StringUtils.isBlank(httpHost))
+			httpHost = "0.0.0.0";
+		this.httpHost = httpHost;
+
 		String httpPortStr = System.getenv(PROP_HTTP_PORT);
 		if (StringUtils.isBlank(httpPortStr))
 			httpPortStr = props.getProperty(PROP_HTTP_PORT);
@@ -160,6 +171,10 @@ public class ServerConfig {
 
 	public int getClusterPort() {
 		return clusterPort;
+	}
+
+	public String getHttpHost() {
+		return httpHost;
 	}
 	
 	public String getServerName() {

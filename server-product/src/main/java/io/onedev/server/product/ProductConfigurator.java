@@ -22,6 +22,7 @@ public class ProductConfigurator implements ServerConfigurator {
 	@Override
 	public void configure(Server server) {
 		ServerConnector connector = new ServerConnector(server);
+		connector.setHost(serverConfig.getHttpHost());
 		connector.setPort(serverConfig.getHttpPort());
 		HttpConfiguration configuration = new HttpConfiguration();
 		configuration.setRequestHeaderSize(16*1024);
