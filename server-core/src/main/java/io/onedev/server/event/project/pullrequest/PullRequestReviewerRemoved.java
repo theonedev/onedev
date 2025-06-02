@@ -1,7 +1,5 @@
 package io.onedev.server.event.project.pullrequest;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import java.text.MessageFormat;
 import java.util.Date;
 
@@ -28,7 +26,7 @@ public class PullRequestReviewerRemoved extends PullRequestEvent {
 	
 	@Override
 	public String getActivity() {
-		return MessageFormat.format(_T("removed reviewer \"{0}\""), getReviewer().getDisplayName());
+		return MessageFormat.format("removed reviewer \"{0}\"", getReviewer().getDisplayName());
 	}
 
 	public User getReviewer() {

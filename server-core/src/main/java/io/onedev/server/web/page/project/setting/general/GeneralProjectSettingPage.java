@@ -10,6 +10,7 @@ import static io.onedev.server.model.Project.PROP_TIME_TRACKING;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.Collection;
 
 import org.apache.wicket.Component;
@@ -35,7 +36,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.WebSession;
-import io.onedev.server.web.component.project.ConfirmDeleteModal;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectListPage;
@@ -112,15 +113,15 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 					if (parentBean.getParentPath() != null) {
 						Project parent = getProjectManager().findByPath(parentBean.getParentPath());
 						if (parent == null) 
-							parentError = "Parent project not found";
+							parentError = _T("Parent project not found");
 						else if (project.isSelfOrAncestorOf(parent)) 
-							parentError = "Can not use current or descendant project as parent";
+							parentError = _T("Can not use current or descendant project as parent");
 						else if (!SecurityUtils.canCreateChildren(parent)) 
-							parentError = "Not authorized to move project under this parent";
+							parentError = _T("Not authorized to move project under this parent");
 						else
 							project.setParent(parent);
 					} else if (!SecurityUtils.canCreateRootProjects()) {
-						parentError = "Not authorized to set as root project";
+						parentError = _T("Not authorized to set as root project");
 					} else {
 						project.setParent(null);
 					}
@@ -132,13 +133,13 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 					var projectWithSameName = getProjectManager().find(project.getParent(), project.getName());
 					if (projectWithSameName != null && !projectWithSameName.equals(project)) {
 						editor.error(new Path(new PathNode.Named(PROP_NAME)),
-								"This name has already been used by another project");
+								_T("This name has already been used by another project"));
 					} 
 					if (project.getKey() != null) {
 						var projectWithSameKey = getProjectManager().findByKey(project.getKey());
 						if (projectWithSameKey != null && !projectWithSameKey.equals(project)) {
 							editor.error(new Path(new PathNode.Named(PROP_KEY)),
-									"This key has already been used by another project");
+									_T("This key has already been used by another project"));
 						}
 					}
 					if (editor.isValid()) {
@@ -169,13 +170,13 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				new ConfirmDeleteModal(target) {
+				new ConfirmModalPanel(target) {
 
 					@Override
 					protected void onConfirm(AjaxRequestTarget target) {
 						Project project = getProject();
 						OneDev.getInstance(ProjectManager.class).delete(project);
-						getSession().success("Requested to delete project");
+						getSession().success(MessageFormat.format(_T("Project \"{0}\" deleted"), project.getPath()));
 						String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Project.class);
 						if (redirectUrlAfterDelete != null)
 							throw new RedirectToUrlException(redirectUrlAfterDelete);
@@ -185,8 +186,8 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 
 					@Override
 					protected String getConfirmMessage() {
-						return "Everything inside this project and all child projects will be deleted and can not be recovered, "
-								+ "please type project path <code>" + getProject().getPath() + "</code> below to confirm deletion.";
+						return MessageFormat.format(_T("Everything inside this project and all child projects will be deleted and can not be recovered, "
+								+ "please type project path <code>{0}</code> below to confirm deletion."), getProject().getPath());
 					}
 
 					@Override
@@ -194,11 +195,6 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 						return getProject().getPath();
 					}
 					
-					@Override
-					protected Project getProject() {
-						return GeneralProjectSettingPage.this.getProject();
-					}
-
 				};
 			}
 			

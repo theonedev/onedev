@@ -1,7 +1,5 @@
 package io.onedev.server.event.project.pullrequest;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import java.util.Date;
 
 import io.onedev.server.event.project.ProjectEvent;
@@ -25,7 +23,7 @@ public class PullRequestTouched extends ProjectEvent {
 
 	@Override
 	public String getActivity() {
-		return _T("touched");
+		return "touched";
 	}
 	
 }

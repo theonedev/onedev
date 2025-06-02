@@ -14,30 +14,30 @@
 			</div>
 			<div class="mb-5">
 				<a wicket:id="showSavedQueries" class="show-saved-queries text-gray d-inline-block mr-4 mb-2 text-nowrap">
-					<wicket:svg href="eye" class="icon"></wicket:svg> Show Saved Queries
+					<wicket:svg href="eye" class="icon"></wicket:svg> <wicket:t>Show Saved Queries</wicket:t>
 				</a>
 				<a wicket:id="saveQuery" class="save-query text-gray d-inline-block mr-4 mb-2 text-nowrap">
-					<wicket:svg href="save" class="icon"></wicket:svg> Save Query
+					<wicket:svg href="save" class="icon"></wicket:svg> <wicket:t>Save Query</wicket:t>
 				</a>
 				<a wicket:id="filter" class="filter text-gray d-inline-block mb-2 mr-4">
-					<wicket:svg href="filter" class="icon"></wicket:svg> Filters
+					<wicket:svg href="filter" class="icon"></wicket:svg> <wicket:t>Filters</wicket:t>
 				</a>
 				<a wicket:id="orderBy" class="order-by text-gray mr-4 mb-2 d-inline-block text-nowrap">
-					<wicket:svg href="sort" class="icon"></wicket:svg> Order By
+					<wicket:svg href="sort" class="icon"></wicket:svg> <wicket:t>Order By</wicket:t>
 				</a>
 				<a wicket:id="operations" class="text-gray mr-4 mb-2 d-inline-block text-nowrap">
-					<wicket:svg href="ellipsis-circle" class="icon rotate-180"></wicket:svg> Operations
+					<wicket:svg href="ellipsis-circle" class="icon rotate-180"></wicket:svg> <wicket:t>Operations</wicket:t>	
 				</a>
-				<a wicket:id="exportXlsx" class="d-none export-xlsx">Export XLSX</a>
-				<a wicket:id="exportCsv" class="d-none export-csv">Export CSV</a>
+				<a wicket:id="exportXlsx" class="d-none export-xlsx"><wicket:t>Export XLSX</wicket:t></a>
+				<a wicket:id="exportCsv" class="d-none export-csv"><wicket:t>Export CSV</wicket:t></a>
 				<a wicket:id="fieldsAndLinks" class="fields-and-links text-gray mr-4 mb-2 d-inline-block text-nowrap">
-					<wicket:svg href="select" class="icon"></wicket:svg> Fields & Links
+					<wicket:svg href="select" class="icon"></wicket:svg> <wicket:t>Fields & Links</wicket:t>
 				</a>
 				<a wicket:id="import" class="import-issues text-gray mr-4 mb-2 d-inline-block text-nowrap">
-					<wicket:svg href="import" class="icon"></wicket:svg> Import
+					<wicket:svg href="import" class="icon"></wicket:svg> <wicket:t>Import</wicket:t>
 				</a>
 				<a wicket:id="showProgress" class="text-gray mr-4 mb-2 d-inline-block text-nowrap">
-					<wicket:svg href="clock" class="icon"></wicket:svg> Timing
+					<wicket:svg href="clock" class="icon"></wicket:svg> <wicket:t>Timing</wicket:t>
 				</a>
 				<span wicket:id="extraActions"></span>
 				<span wicket:id="count" class="float-right text-gray"></span>
@@ -47,8 +47,8 @@
 				<table wicket:id="issues" class="table"></table>
 				<div wicket:id="tips" class="form-text text-muted">
 					<wicket:svg href="bulb" class="icon icon-sm"/>
-					By default issues of parent and child projects will also be listed.
-					Use query <code>&quot;Project&quot; is current</code> to show issues only belong to this project
+					<wicket:t>By default issues of parent and child projects will also be listed.
+					Use query <code>&quot;Project&quot; is current</code> to show issues only belong to this project</wicket:t>
 				</div>
 			</div>
 		</div>
@@ -96,7 +96,7 @@
 		<div class="issue-fields-and-links">
 			<form wicket:id="form">
 				<div class="modal-header">
-					<h5 id="modal-title" class="modal-title">Fields & Links</h5>
+					<h5 id="modal-title" class="modal-title"><wicket:t>Fields & Links</wicket:t></h5>
 					<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 				</div>
 				<div class="modal-body">
@@ -104,8 +104,8 @@
 				</div>
 				<div class="modal-footer">
 					<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" t:value="Save">
-					<button wicket:id="useDefault" class="btn btn-primary">Use Default</button>
-					<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+					<button wicket:id="useDefault" class="btn btn-primary"><wicket:t>Use Default</wicket:t></button>
+					<a wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></a>
 				</div>
 			</form>
 		</div>

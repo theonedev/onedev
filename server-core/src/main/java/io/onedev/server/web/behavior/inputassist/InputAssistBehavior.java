@@ -1,17 +1,12 @@
 package io.onedev.server.web.behavior.inputassist;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import io.onedev.commons.codeassist.InputCompletion;
-import io.onedev.commons.codeassist.InputStatus;
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.commons.utils.LinearRange;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.RangeUtils;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.component.floating.*;
+import static io.onedev.server.web.translation.Translation._T;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -24,10 +19,23 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+import io.onedev.commons.codeassist.InputCompletion;
+import io.onedev.commons.codeassist.InputStatus;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.RangeUtils;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.floating.AlignPlacement;
+import io.onedev.server.web.component.floating.AlignTarget;
+import io.onedev.server.web.component.floating.Alignment;
+import io.onedev.server.web.component.floating.ComponentTarget;
+import io.onedev.server.web.component.floating.FloatingPanel;
 
 public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
@@ -229,9 +237,18 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 		response.render(JavaScriptHeaderItem.forReference(new InputAssistResourceReference()));
 		
-		String script = String.format("onedev.server.inputassist.onDomReady('%s', %s);", 
-				getComponent().getMarkupId(true), 
-				getCallbackFunction(explicit("type"), explicit("input"), explicit("caret"), explicit("event")));
+		var translations = new HashMap<String, String>();
+		translations.put("activeHelp", _T("<span class='keycap'>Tab</span> or <span class='keycap'>Enter</span> to complete."));
+		translations.put("inactiveHelp", _T("<span class='keycap'>Tab</span> to complete."));
+		String script;
+		try {
+			script = String.format("onedev.server.inputassist.onDomReady('%s', %s, %s);", 
+					getComponent().getMarkupId(true), 
+					getCallbackFunction(explicit("type"), explicit("input"), explicit("caret"), explicit("event")),
+					AppLoader.getInstance(ObjectMapper.class).writeValueAsString(translations));
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

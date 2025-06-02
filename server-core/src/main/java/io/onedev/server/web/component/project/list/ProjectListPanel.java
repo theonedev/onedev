@@ -282,9 +282,9 @@ public class ProjectListPanel extends Panel {
 				if (!isEnabled()) 
 					tag.append("class", "disabled", " ");
 				if (!querySubmitted)
-					tag.put("title", "Query not submitted");
+					tag.put("data-tippy-content", _T("Query not submitted"));
 				else if (queryModel.getObject() == null)
-					tag.put("title", "Can not save malformed query");
+					tag.put("data-tippy-content", _T("Can not save malformed query"));
 			}
 
 			@Override
@@ -398,15 +398,15 @@ public class ProjectListPanel extends Panel {
 										for (IModel<Project> each: selectionColumn.getSelections()) {
 											Project eachProject = each.getObject();
 											if (!SecurityUtils.canManageProject(eachProject)) {
-												errorMessage = "Project manage privilege required to move '" + eachProject + "'";
+												errorMessage = MessageFormat.format(_T("Project manage privilege required to move \"{0}\""), eachProject);
 												break;
 											} else if (eachProject.isSelfOrAncestorOf(project)) {
-												errorMessage = "Can not move project '" + eachProject + "' to be under itself or its descendants";
-												break;
+												errorMessage = MessageFormat.format(_T("Can not move project \"{0}\" to be under itself or its descendants"), eachProject);
+												break;	
 											} else {
 												Project projectWithSameName = getProjectManager().find(project, eachProject.getName());
 												if (projectWithSameName != null && !projectWithSameName.equals(eachProject)) {
-													errorMessage = "A child project with name '" + eachProject.getName() + "' already exists under '" + project.getPath() + "'";
+													errorMessage = MessageFormat.format(_T("A child project with name \"{0}\" already exists under \"{1}\""), eachProject.getName(), project.getPath());
 													break;
 												}
 											}
@@ -430,12 +430,12 @@ public class ProjectListPanel extends Panel {
 													target.add(countLabel);
 													target.add(body);
 													selectionColumn.getSelections().clear();
-													Session.get().success("Projects moved");
+													Session.get().success(_T("Projects moved"));
 												}
 												
 												@Override
 												protected String getConfirmMessage() {
-													return "Type <code>yes</code> below to move selected projects to be under '" + getTargetProject() + "'";
+													return MessageFormat.format(_T("Type <code>yes</code> below to move selected projects to be under \"{0}\""), getTargetProject());
 												}
 												
 												@Override
@@ -462,7 +462,7 @@ public class ProjectListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select projects to move");
+									tag.put("data-tippy-content", _T("Please select projects to move"));
 								}
 							}
 							
@@ -491,12 +491,12 @@ public class ProjectListPanel extends Panel {
 									for (IModel<Project> each: selectionColumn.getSelections()) {
 										Project eachProject = each.getObject();
 										if (!SecurityUtils.canManageProject(eachProject)) {
-											errorMessage = "Project manage privilege required to modify '" + eachProject + "'";
+											errorMessage = MessageFormat.format(_T("Project manage privilege required to modify \"{0}\""), eachProject);
 											break;
 										} else {
 											Project projectWithSameName = getProjectManager().findByPath(eachProject.getName());
 											if (projectWithSameName != null && !projectWithSameName.equals(eachProject)) {
-												errorMessage = "A root project with name '" + eachProject.getName() + "' already exists";
+												errorMessage = MessageFormat.format(_T("A root project with name \"{0}\" already exists"), eachProject.getName());
 												break;
 											}
 										}
@@ -516,12 +516,12 @@ public class ProjectListPanel extends Panel {
 												target.add(countLabel);
 												target.add(body);
 												selectionColumn.getSelections().clear();
-												Session.get().success("Projects modified");
+												Session.get().success(_T("Projects modified"));
 											}
 											
 											@Override
 											protected String getConfirmMessage() {
-												return "Type <code>yes</code> below to set selected as root projects";
+												return _T("Type <code>yes</code> below to set selected as root projects");
 											}
 											
 											@Override
@@ -545,7 +545,7 @@ public class ProjectListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "Please select projects to modify");
+										tag.put("data-tippy-content", _T("Please select projects to modify"));
 									}
 								}
 								
@@ -573,7 +573,7 @@ public class ProjectListPanel extends Panel {
 								for (IModel<Project> each: selectionColumn.getSelections()) { 
 									Project eachProject = each.getObject();
 									if (!SecurityUtils.canManageProject(eachProject)) {
-										errorMessage = "Project manage privilege required to delete '" + eachProject + "'";
+										errorMessage = MessageFormat.format(_T("Project manage privilege required to delete \"{0}\""), eachProject);
 										break;
 									}
 								}
@@ -595,14 +595,14 @@ public class ProjectListPanel extends Panel {
 											selectionColumn.getSelections().clear();
 											target.add(countLabel);
 											target.add(body);
-											Session.get().success("Projects deleted");
+											Session.get().success(_T("Projects deleted"));
 											var page = (BasePage) getPage();
 											page.notifyObservablesChange(target, observables);
 										}
 										
 										@Override
 										protected String getConfirmMessage() {
-											return "Type <code>yes</code> below to delete selected projects";
+											return _T("Type <code>yes</code> below to delete selected projects");
 										}
 										
 										@Override
@@ -626,7 +626,7 @@ public class ProjectListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select projects to delete");
+									tag.put("data-tippy-content", _T("Please select projects to delete"));
 								}
 							}
 							
@@ -668,15 +668,15 @@ public class ProjectListPanel extends Panel {
 										for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) {
 											Project eachProject = it.next();
 											if (!SecurityUtils.canManageProject(eachProject)) {
-												errorMessage = "Project manage privilege required to move '" + eachProject + "'";
+												errorMessage = MessageFormat.format(_T("Project manage privilege required to move \"{0}\""), eachProject);
 												break;
 											} else if (eachProject.isSelfOrAncestorOf(project)) {
-												errorMessage = "Can not move project '" + eachProject + "' to be under itself or its descendants";
+												errorMessage = MessageFormat.format(_T("Can not move project \"{0}\" to be under itself or its descendants"), eachProject);
 												break;
 											} else {
 												Project projectWithSameName = getProjectManager().find(project, eachProject.getName());
 												if (projectWithSameName != null && !projectWithSameName.equals(eachProject)) {
-													errorMessage = "A child project with name '" + eachProject.getName() + "' already exists under '" + project.getPath() + "'";
+													errorMessage = MessageFormat.format(_T("A child project with name \"{0}\" already exists under \"{1}\""), eachProject.getName(), project.getPath());
 													break;
 												}
 											}
@@ -701,12 +701,12 @@ public class ProjectListPanel extends Panel {
 													target.add(countLabel);
 													target.add(body);
 													selectionColumn.getSelections().clear();
-													Session.get().success("Projects moved");
+													Session.get().success(_T("Projects moved"));
 												}
 												
 												@Override
 												protected String getConfirmMessage() {
-													return "Type <code>yes</code> below to move all queried projects to be under '" + getTargetProject() + "'";
+													return MessageFormat.format(_T("Type <code>yes</code> below to move all queried projects to be under \"{0}\""), getTargetProject());
 												}
 												
 												@Override
@@ -733,7 +733,7 @@ public class ProjectListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No projects to move");
+									tag.put("data-tippy-content", _T("No projects to move"));
 								}
 							}
 							
@@ -762,12 +762,12 @@ public class ProjectListPanel extends Panel {
 									for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) {
 										Project eachProject = it.next();
 										if (!SecurityUtils.canManageProject(eachProject)) {
-											errorMessage = "Project manage privilege required to modify '" + eachProject + "'";
+											errorMessage = MessageFormat.format(_T("Project manage privilege required to modify \"{0}\""), eachProject);
 											break;
 										} else {
 											Project projectWithSameName = getProjectManager().findByPath(eachProject.getName());
 											if (projectWithSameName != null && !projectWithSameName.equals(eachProject)) {
-												errorMessage = "A root project with name '" + eachProject.getName() + "' already exists";
+												errorMessage = MessageFormat.format(_T("A root project with name \"{0}\" already exists"), eachProject.getName());
 												break;
 											}
 										}
@@ -788,12 +788,12 @@ public class ProjectListPanel extends Panel {
 												target.add(countLabel);
 												target.add(body);
 												selectionColumn.getSelections().clear();
-												Session.get().success("Projects modified");
+												Session.get().success(_T("Projects modified"));
 											}
 											
 											@Override
 											protected String getConfirmMessage() {
-												return "Type <code>yes</code> below to set all queried as root projects";
+												return _T("Type <code>yes</code> below to set all queried as root projects");
 											}
 											
 											@Override
@@ -817,7 +817,7 @@ public class ProjectListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "No projects to modify");
+										tag.put("data-tippy-content", _T("No projects to modify"));
 									}
 								}
 								
@@ -847,7 +847,7 @@ public class ProjectListPanel extends Panel {
 								for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) {
 									Project eachProject = it.next();
 									if (!SecurityUtils.canManageProject(eachProject)) {
-										errorMessage = "Project manage privilege required to delete '" + eachProject + "'";
+										errorMessage = MessageFormat.format(_T("Project manage privilege required to delete \"{0}\""), eachProject);
 										break;
 									}
 								}
@@ -871,14 +871,14 @@ public class ProjectListPanel extends Panel {
 											selectionColumn.getSelections().clear();
 											target.add(countLabel);
 											target.add(body);
-											Session.get().success("Projects deleted");
+											Session.get().success(_T("Projects deleted"));
 											var page = (BasePage) getPage();
 											page.notifyObservablesChange(target, observables);
 										}
 										
 										@Override
 										protected String getConfirmMessage() {
-											return "Type <code>yes</code> below to delete all queried projects";
+											return _T("Type <code>yes</code> below to delete all queried projects");
 										}
 										
 										@Override
@@ -903,7 +903,7 @@ public class ProjectListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No projects to delete");
+									tag.put("data-tippy-content", _T("No projects to delete"));
 								}
 							}
 							
@@ -931,7 +931,7 @@ public class ProjectListPanel extends Panel {
 			@Override
 			protected String getHelp() {
 				if (!SecurityUtils.isAdministrator())
-					return "Permission will be checked upon actual operation";
+					return _T("Permission will be checked upon actual operation");
 				else
 					return null;
 			}
@@ -1088,7 +1088,7 @@ public class ProjectListPanel extends Panel {
 		};
 		
 		if (expectedCount != 0 && expectedCount != dataProvider.size())
-			warn("Some projects might be hidden due to permission policy");
+			warn(_T("Some projects might be hidden due to permission policy"));
 		
 		body = new WebMarkupContainer("body");
 		add(body.setOutputMarkupId(true));
@@ -1250,7 +1250,7 @@ public class ProjectListPanel extends Panel {
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-		 					add(new Label("label", children.size() + " child projects"));
+		 					add(new Label("label", MessageFormat.format(_T("{0} child projects"), children.size())));
 						}
  						
  					});
@@ -1298,7 +1298,7 @@ public class ProjectListPanel extends Panel {
 				error(e.getMessage());
 				return null;
 			} else {
-				info("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and owned by me");
+				info(_T("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and owned by me"));
 				parsedQuery = new ProjectQuery(new FuzzyCriteria(queryString));
 			}
 		}

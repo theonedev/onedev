@@ -1,5 +1,7 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -49,7 +51,7 @@ public class NotificationReceiverBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return "value needs to be enclosed in brackets";
+						return _T("value needs to be enclosed in brackets");
 					}
 					
 				}.suggest(terminalExpect);
@@ -63,7 +65,7 @@ public class NotificationReceiverBehavior extends ANTLRAssistBehavior {
 		String description;
 		switch (suggestedLiteral) {
 		case " ":
-			description = "space";
+			description = _T("space");
 			break;
 		default:
 			description = null;

@@ -1,6 +1,7 @@
 onedev.server.inputassist = {
-	onDomReady: function(inputId, callback) {
+	onDomReady: function(inputId, callback, translations) {
 		var $input = $("#" + inputId);
+		onedev.server.inputassist.translations = translations;
 		
 		onedev.server.inputassist.markErrors(inputId, []);
 		
@@ -212,9 +213,9 @@ onedev.server.inputassist = {
 	
 	updateHelp: function($dropdown) {
 		if ($dropdown.find("li.active").length != 0) {
-			$dropdown.find(".help .complete").empty().append("<span class='keycap'>Tab</span> or <span class='keycap'>Enter</span> to complete.");
+			$dropdown.find(".help .complete").empty().append(onedev.server.inputassist.translations["activeHelp"]);
 		} else {
-			$dropdown.find(".help .complete").empty().append("<span class='keycap'>Tab</span> to complete.");
+			$dropdown.find(".help .complete").empty().append(onedev.server.inputassist.translations["inactiveHelp"]);
 		}
 	}
 };

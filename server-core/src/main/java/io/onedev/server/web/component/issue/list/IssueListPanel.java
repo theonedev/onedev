@@ -10,6 +10,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -219,7 +220,7 @@ public abstract class IssueListPanel extends Panel {
 				error(e.getMessage());
 				return null;
 			} else {
-				info("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and \"State\" is \"Open\"");
+				info(_T("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and \"State\" is \"Open\""));
 				parsedQuery = new IssueQuery(new FuzzyCriteria(queryString));
 			}
 		}
@@ -295,9 +296,9 @@ public abstract class IssueListPanel extends Panel {
 				if (!isEnabled()) 
 					tag.append("class", "disabled", " ");
 				if (!querySubmitted)
-					tag.put("title", "Query not submitted");
+					tag.put("data-tippy-content", _T("Query not submitted"));
 				else if (queryModel.getObject() == null)
-					tag.put("title", "Can not save malformed query");
+					tag.put("data-tippy-content", _T("Can not save malformed query"));
 			}
 
 			@Override
@@ -399,7 +400,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "From " + importer.getName();
+							return MessageFormat.format(_T("From {0}"), importer.getName());
 						}
 
 						@Override
@@ -507,7 +508,7 @@ public abstract class IssueListPanel extends Panel {
 						
 						@Override
 						protected String getTitle() {
-							return "Select Project";
+							return _T("Select Project");
 						}
 
 						@Override
@@ -631,14 +632,20 @@ public abstract class IssueListPanel extends Panel {
 							version = version.substring(1);
 							
 						try (var workBook = new Workbook(os, "OneDev", version)) {
-							var worksheet = workBook.newWorksheet("Issues");
+							var worksheet = workBook.newWorksheet(_T("Issues"));
 							
 							var colIndex = 0;
-							worksheet.value(0, colIndex++, "Number");
-							worksheet.value(0, colIndex++, "Title");
+							worksheet.value(0, colIndex++, _T("issue:Number"));
+							worksheet.value(0, colIndex++, _T("Title"));
 							
 							for (String field: getListFields()) {
-								worksheet.value(0, colIndex++, field);
+								if (field.equals(Issue.NAME_STATE)) {
+									worksheet.value(0, colIndex++, _T("State"));
+								} else if (field.equals(IssueSchedule.NAME_ITERATION)) {
+									worksheet.value(0, colIndex++, _T("Iteration"));
+								} else {
+									worksheet.value(0, colIndex++, field);
+								}
 							}
 							
 							var withTimeTracking = false;
@@ -651,8 +658,8 @@ public abstract class IssueListPanel extends Panel {
 								issues.add(issue);
 							}
 							if (withTimeTracking) {
-								worksheet.value(0, colIndex++, "Estimated Time");
-								worksheet.value(0, colIndex++, "Spent Time");
+								worksheet.value(0, colIndex++, _T("Estimated Time"));
+								worksheet.value(0, colIndex++, _T("Spent Time"));
 							}
 				
 							var rowIndex = 1;
@@ -712,10 +719,17 @@ public abstract class IssueListPanel extends Panel {
 						var os = attributes.getResponse().getOutputStream();
 						try (var printer = new CSVPrinter(new OutputStreamWriter(os), CSVFormat.DEFAULT)) {
 							var headers = new ArrayList<String>();
-							headers.add("Number");
-							headers.add("Title");
-							headers.addAll(getListFields());
-							
+							headers.add(_T("issue:Number"));
+							headers.add(_T("Title"));
+							for (String field: getListFields()) {
+								if (field.equals(Issue.NAME_STATE)) {
+									headers.add(_T("State"));
+								} else if (field.equals(IssueSchedule.NAME_ITERATION)) {
+									headers.add(_T("Iteration"));
+								} else {
+									headers.add(field);
+								}
+							}
 							var withTimeTracking = false;
 							var issues = new ArrayList<Issue>();
 							for (@SuppressWarnings("unchecked") var it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); ) {
@@ -726,8 +740,8 @@ public abstract class IssueListPanel extends Panel {
 								issues.add(issue);
 							}
 							if (withTimeTracking) {
-								headers.add("Estimated Time");
-								headers.add("Spent Time");
+								headers.add(_T("Estimated Time"));
+								headers.add(_T("Spent Time"));
 							}
 							
 							printer.printRecord(headers);
@@ -797,7 +811,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Sync Timing of Selected Issues";
+							return _T("Sync Timing of Selected Issues");
 						}
 
 						@Override
@@ -816,7 +830,7 @@ public abstract class IssueListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "Please select issues to sync estimated/spent time");
+										tag.put("data-tippy-content", _T("Please select issues to sync estimated/spent time"));
 									}
 								}
 
@@ -827,7 +841,7 @@ public abstract class IssueListPanel extends Panel {
 											.map(it->it.getObject()).map(Issue::getId).collect(toList());
 									getTimeTrackingManager().requestToSyncTimes(issueIds);
 									selectionColumn.getSelections().clear();
-									Session.get().success("Requested to sync estimated/spent time");
+									Session.get().success(_T("Requested to sync estimated/spent time"));
 								}
 
 							};
@@ -841,7 +855,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Batch Edit Selected Issues";
+							return _T("Batch Edit Selected Issues");
 						}
 
 						@Override
@@ -909,7 +923,7 @@ public abstract class IssueListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "Please select issues to edit");
+										tag.put("data-tippy-content", _T("Please select issues to edit"));
 									}
 								}
 
@@ -922,7 +936,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Move Selected Issues To...";
+							return _T("Move Selected Issues To...");
 						}
 
 						@Override
@@ -960,12 +974,12 @@ public abstract class IssueListPanel extends Panel {
 													OneDev.getInstance(IssueManager.class).move(issues, getProject(), getTargetProject());
 													setResponsePage(ProjectIssueListPage.class,
 															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
-													Session.get().success("Issues moved");
+													Session.get().success(_T("Issues moved"));
 												}
 
 												@Override
 												protected String getConfirmMessage() {
-													return "Type <code>yes</code> below to move selected issues to project '" + getTargetProject() + "'";
+													return MessageFormat.format(_T("Type <code>yes</code> below to move selected issues to project \"{0}\""), getTargetProject());
 												}
 
 												@Override
@@ -991,7 +1005,7 @@ public abstract class IssueListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "Please select issues to move");
+										tag.put("data-tippy-content", _T("Please select issues to move"));
 									}
 								}
 
@@ -1004,7 +1018,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Copy Selected Issues To...";
+							return _T("Copy Selected Issues To...");
 						}
 
 						@Override
@@ -1042,12 +1056,12 @@ public abstract class IssueListPanel extends Panel {
 													OneDev.getInstance(IssueManager.class).copy(issues, getProject(), getTargetProject());
 													setResponsePage(ProjectIssueListPage.class,
 															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
-													Session.get().success("Issues copied");
+													Session.get().success(_T("Issues copied"));
 												}
 
 												@Override
 												protected String getConfirmMessage() {
-													return "Type <code>yes</code> below to copy selected issues to project '" + getTargetProject() + "'";
+													return MessageFormat.format(_T("Type <code>yes</code> below to copy selected issues to project \"{0}\""), getTargetProject());
 												}
 
 												@Override
@@ -1073,7 +1087,7 @@ public abstract class IssueListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "Please select issues to copy");
+										tag.put("data-tippy-content", _T("Please select issues to copy"));
 									}
 								}
 
@@ -1086,7 +1100,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Delete Selected Issues";
+							return _T("Delete Selected Issues");
 						}
 
 						@Override
@@ -1112,7 +1126,7 @@ public abstract class IssueListPanel extends Panel {
 
 										@Override
 										protected String getConfirmMessage() {
-											return "Type <code>yes</code> below to delete selected issues";
+											return _T("Type <code>yes</code> below to delete selected issues");
 										}
 
 										@Override
@@ -1136,7 +1150,7 @@ public abstract class IssueListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "Please select issues to delete");
+										tag.put("data-tippy-content", _T("Please select issues to delete"));
 									}
 								}
 
@@ -1153,7 +1167,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Sync Timing of All Queried Issues";
+							return _T("Sync Timing of All Queried Issues");
 						}
 
 						@Override
@@ -1168,7 +1182,7 @@ public abstract class IssueListPanel extends Panel {
 									Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
 										issueIds.add(it.next().getId());
 									getTimeTrackingManager().requestToSyncTimes(issueIds);
-									Session.get().success("Requested to sync estimated/spent time");
+									Session.get().success(_T("Requested to sync estimated/spent time"));
 								}
 								
 								@Override
@@ -1183,7 +1197,7 @@ public abstract class IssueListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "No issues to sync estimated/spent time");
+										tag.put("data-tippy-content", _T("No issues to sync estimated/spent time"));
 									}
 								}
 
@@ -1198,7 +1212,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Batch Edit All Queried Issues";
+							return _T("Batch Edit All Queried Issues");
 						}
 
 						@Override
@@ -1263,7 +1277,7 @@ public abstract class IssueListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "No issues to edit");
+										tag.put("data-tippy-content", _T("No issues to edit"));
 									}
 								}
 
@@ -1276,7 +1290,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Move All Queried Issues To...";
+							return _T("Move All Queried Issues To...");
 						}
 
 						@Override
@@ -1316,12 +1330,12 @@ public abstract class IssueListPanel extends Panel {
 													OneDev.getInstance(IssueManager.class).move(issues, getProject(), getTargetProject());
 													setResponsePage(ProjectIssueListPage.class,
 															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
-													Session.get().success("Issues moved");
+													Session.get().success(_T("Issues moved"));
 												}
 
 												@Override
 												protected String getConfirmMessage() {
-													return "Type <code>yes</code> below to move all queried issues to project '" + getTargetProject() + "'";
+													return MessageFormat.format(_T("Type <code>yes</code> below to move all queried issues to project \"{0}\""), getTargetProject());
 												}
 
 												@Override
@@ -1347,7 +1361,7 @@ public abstract class IssueListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "No issues to move");
+										tag.put("data-tippy-content", _T("No issues to move"));
 									}
 								}
 
@@ -1360,7 +1374,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Copy All Queried Issues To...";
+							return _T("Copy All Queried Issues To...");
 						}
 
 						@Override
@@ -1400,12 +1414,12 @@ public abstract class IssueListPanel extends Panel {
 													OneDev.getInstance(IssueManager.class).copy(issues, getProject(), getTargetProject());
 													setResponsePage(ProjectIssueListPage.class,
 															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
-													Session.get().success("Issues copied");
+													Session.get().success(_T("Issues copied"));
 												}
 
 												@Override
 												protected String getConfirmMessage() {
-													return "Type <code>yes</code> below to copy all queried issues to project '" + getTargetProject() + "'";
+													return MessageFormat.format(_T("Type <code>yes</code> below to copy all queried issues to project \"{0}\""), getTargetProject());
 												}
 
 												@Override
@@ -1431,7 +1445,7 @@ public abstract class IssueListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "No issues to copy");
+										tag.put("data-tippy-content", _T("No issues to copy"));
 									}
 								}
 
@@ -1473,7 +1487,7 @@ public abstract class IssueListPanel extends Panel {
 
 										@Override
 										protected String getConfirmMessage() {
-											return "Type <code>yes</code> below to delete all queried issues";
+											return _T("Type <code>yes</code> below to delete all queried issues");
 										}
 
 										@Override
@@ -1496,7 +1510,7 @@ public abstract class IssueListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "No issues to delete");
+										tag.put("data-tippy-content", _T("No issues to delete"));
 									}
 								}
 
@@ -1511,7 +1525,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public String getLabel() {
-							return "Watch/Unwatch All Queried Issues";
+							return _T("Watch/Unwatch All Queried Issues");
 						}
 
 						@Override
@@ -1536,7 +1550,7 @@ public abstract class IssueListPanel extends Panel {
 											for (@SuppressWarnings("unchecked") var it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
 												issues.add(it.next());
 											getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), issues, watchStatus);
-											Session.get().success("Watch status changed");
+											Session.get().success(_T("Watch status changed"));
 										}
 
 									};
@@ -1554,7 +1568,7 @@ public abstract class IssueListPanel extends Panel {
 									configure();
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
-										tag.put("title", "No issues to watch/unwatch");
+										tag.put("data-tippy-content", _T("No issues to watch/unwatch"));
 									}
 								}
 							};
@@ -1567,7 +1581,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Set All Queried Issues as Read";
+						return _T("Set All Queried Issues as Read");
 					}
 
 					@Override
@@ -1586,7 +1600,7 @@ public abstract class IssueListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No issues to set as read");
+									tag.put("data-tippy-content", _T("No issues to set as read"));
 								}
 							}
 
@@ -1608,7 +1622,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Export All Queried Issues To...";
+						return _T("Export All Queried Issues To...");
 					}
 
 					@Override
@@ -1641,7 +1655,7 @@ public abstract class IssueListPanel extends Panel {
 												configure();
 												if (!isEnabled()) {
 													tag.put("disabled", "disabled");
-													tag.put("title", "No issues to export");
+													tag.put("data-tippy-content", _T("No issues to export"));
 												}
 											}
 				
@@ -1679,7 +1693,7 @@ public abstract class IssueListPanel extends Panel {
 												configure();
 												if (!isEnabled()) {
 													tag.put("disabled", "disabled");
-													tag.put("title", "No issues to export");
+													tag.put("data-tippy-content", _T("No issues to export"));
 												}
 											}
 				
@@ -1759,9 +1773,9 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return "found " + dataProvider.size() + " issues";
+					return MessageFormat.format(_T("found {0} issues"), dataProvider.size());
 				else
-					return "found 1 issue";
+					return _T("found 1 issue");
 			} 
 
 		}) {

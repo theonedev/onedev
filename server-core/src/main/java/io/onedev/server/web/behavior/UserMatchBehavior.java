@@ -12,6 +12,7 @@ import java.util.List;
 
 import static io.onedev.server.util.usermatch.UserMatchLexer.GROUP;
 import static io.onedev.server.util.usermatch.UserMatchLexer.USER;
+import static io.onedev.server.web.translation.Translation._T;
 
 public class UserMatchBehavior extends ANTLRAssistBehavior {
 	
@@ -41,7 +42,7 @@ public class UserMatchBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return "value needs to be enclosed in parenthesis";
+						return _T("value needs to be enclosed in parenthesis");
 					}
 					
 				}.suggest(terminalExpect);

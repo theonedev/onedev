@@ -1,7 +1,5 @@
 package io.onedev.server.event.project.pullrequest;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import java.util.Date;
 
 import io.onedev.server.model.PullRequest;
@@ -21,7 +19,7 @@ public class PullRequestCheckFailed extends PullRequestEvent {
 	
 	@Override
 	public String getActivity() {
-		return _T("check failed");
+		return "check failed";
 	}
 
 }

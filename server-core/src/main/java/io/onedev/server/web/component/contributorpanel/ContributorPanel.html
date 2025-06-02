@@ -1,10 +1,13 @@
 <wicket:panel>
-	<span class="contributor text-muted">
-		<a wicket:id="author" class="name link-gray"></a> 
-        committed 
-        <wicket:enclosure child="committer">
-		with <a wicket:id="committer" class="name link-gray"></a>
-		</wicket:enclosure>
-		<span wicket:id="date"></span>
-	</span>
+	<span wicket:id="content" class="contributor text-muted"></span>
+	<wicket:fragment wicket:id="withCommitterFrag">
+		<wicket:t>
+		<a wicket:id="author" class="name link-gray"></a> committed with <a wicket:id="committer" class="name link-gray"></a> <span wicket:id="date"></span>
+		</wicket:t>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="withoutCommitterFrag">
+		<wicket:t>
+		<a wicket:id="author" class="name link-gray"></a> committed <span wicket:id="date"></span>
+		</wicket:t>
+	</wicket:fragment>
 </wicket:panel>

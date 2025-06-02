@@ -110,7 +110,7 @@ public class TimeTrackingSetting implements Serializable {
 	public Usage onDeleteLink(String linkName) {
 		Usage usage = new Usage();
 		if (linkName.equals(aggregationLink))
-			usage.add("time aggregation link");
+			usage.add(_T("time aggregation link"));
 		return usage;
 	}
 
@@ -122,7 +122,7 @@ public class TimeTrackingSetting implements Serializable {
 	public int parseWorkingPeriod(String period) {
 		period = StringUtils.deleteWhitespace(period);
 		if (StringUtils.isBlank(period))
-			throw new ValidationException("Invalid working period");
+			throw new ValidationException(_T("Invalid working period"));
 
 		if (period.equals("0"))
 			return 0;
@@ -130,7 +130,7 @@ public class TimeTrackingSetting implements Serializable {
 		if (useHoursAndMinutesOnly) {
 			Matcher matcher = HOURS_AND_MINUTES_ONLY_WORKING_PERIOD_PATTERN.matcher(period);
 			if (!matcher.matches())
-				throw new ValidationException("Invalid working period");
+				throw new ValidationException(_T("Invalid working period"));
 	
 			int minutes = 0;	
 			if (matcher.group(1) != null) {
@@ -145,7 +145,7 @@ public class TimeTrackingSetting implements Serializable {
 		} else {
 			Matcher matcher = WORKING_PERIOD_PATTERN.matcher(period);
 			if (!matcher.matches())
-				throw new ValidationException("Invalid working period");
+				throw new ValidationException(_T("Invalid working period"));
 	
 			int minutes = 0;
 			if (matcher.group(1) != null) {
@@ -177,13 +177,13 @@ public class TimeTrackingSetting implements Serializable {
 
 			StringBuilder builder = new StringBuilder();
 			if (hours != 0)
-				builder.append(hours).append("h ");
+				builder.append(MessageFormat.format(_T("{0}h"), hours)).append(" ");
 			if (minutes != 0)
-				builder.append(minutes).append("m");
+				builder.append(MessageFormat.format(_T("{0}m"), minutes));
 	
 			String formatted = builder.toString().trim();
 			if (formatted.length() == 0)
-				formatted = "0h";
+				formatted = MessageFormat.format(_T("{0}h"), 0);
 			return formatted;	
 		} else {
 			int weeks = minutes / (60 * hoursPerDay * daysPerWeek);
@@ -195,17 +195,17 @@ public class TimeTrackingSetting implements Serializable {
 	
 			StringBuilder builder = new StringBuilder();
 			if (weeks != 0)
-				builder.append(weeks).append("w ");
+				builder.append(MessageFormat.format(_T("{0}w"), weeks)).append(" ");
 			if (days != 0)
-				builder.append(days).append("d ");
+				builder.append(MessageFormat.format(_T("{0}d"), days)).append(" ");
 			if (hours != 0)
-				builder.append(hours).append("h ");
+				builder.append(MessageFormat.format(_T("{0}h"), hours)).append(" ");
 			if (minutes != 0)
-				builder.append(minutes).append("m");
+				builder.append(MessageFormat.format(_T("{0}m"), minutes));
 	
 			String formatted = builder.toString().trim();
 			if (formatted.length() == 0)
-				formatted = "0h";
+				formatted = MessageFormat.format(_T("{0}h"), 0);
 			return formatted;	
 		}
 	}

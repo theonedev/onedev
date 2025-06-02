@@ -19,7 +19,7 @@ onedev.server.datePicker = {
 			},
 			onClose: function(selectedDates, dateStr, instance) {
 				open = false;				
-				if(selectedDates.length == 1) {
+				if(selectedDates.length == 1 && rangeMode) {
 					instance.setDate([selectedDates[0],selectedDates[0]], true);
 				}
 			}			

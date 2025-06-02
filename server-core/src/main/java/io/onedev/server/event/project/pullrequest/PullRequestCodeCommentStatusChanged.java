@@ -1,16 +1,14 @@
 package io.onedev.server.event.project.pullrequest;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.web.UrlManager;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
+import io.onedev.server.web.UrlManager;
 
 public class PullRequestCodeCommentStatusChanged extends PullRequestCodeCommentEvent {
 
@@ -39,9 +37,9 @@ public class PullRequestCodeCommentStatusChanged extends PullRequestCodeCommentE
 	@Override
 	public String getActivity() {
 		if (getChange().isResolved())
-			return _T("resolved code comment"); 
+			return "resolved code comment"; 
 		else
-			return _T("unresolved code comment");
+			return "unresolved code comment";
 	}
 
 	@Override

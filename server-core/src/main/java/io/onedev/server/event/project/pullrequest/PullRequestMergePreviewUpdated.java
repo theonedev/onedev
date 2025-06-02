@@ -1,10 +1,8 @@
 package io.onedev.server.event.project.pullrequest;
 
-import io.onedev.server.model.PullRequest;
-
-import static io.onedev.server.web.translation.Translation._T;
-
 import java.util.Date;
+
+import io.onedev.server.model.PullRequest;
 
 public class PullRequestMergePreviewUpdated extends PullRequestEvent {
 	
@@ -16,7 +14,7 @@ public class PullRequestMergePreviewUpdated extends PullRequestEvent {
 
 	@Override
 	public String getActivity() {
-		return _T("merge preview updated");
+		return "merge preview updated";
 	}
 
 	@Override

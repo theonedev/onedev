@@ -1,7 +1,5 @@
 package io.onedev.server.event.project.pullrequest;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
@@ -21,7 +19,7 @@ public class PullRequestOpened extends PullRequestEvent {
 
 	@Override
 	public String getActivity() {
-		return _T("opened");
+		return "opened";
 	}
 
 }

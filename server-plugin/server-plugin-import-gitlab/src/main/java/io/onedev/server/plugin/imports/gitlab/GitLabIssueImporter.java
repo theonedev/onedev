@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.imports.gitlab;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +29,7 @@ public class GitLabIssueImporter implements IssueImporter {
 
 		@Override
 		public String getTitle() {
-			return "Authenticate to GitLab";
+			return _T("Authenticate to GitLab");
 		}
 
 		@Override
@@ -43,7 +45,7 @@ public class GitLabIssueImporter implements IssueImporter {
 
 		@Override
 		public String getTitle() {
-			return "Choose project";
+			return _T("Choose project");
 		}
 
 		@Override
@@ -61,7 +63,7 @@ public class GitLabIssueImporter implements IssueImporter {
 
 		@Override
 		public String getTitle() {
-			return "Specify import option";
+			return _T("Specify import option");
 		}
 
 		@Override

@@ -1,13 +1,11 @@
 package io.onedev.server.event.project.pullrequest;
 
+import java.util.Date;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.security.SecurityUtils;
-
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.Date;
 
 public class PullRequestCommentEdited extends PullRequestEvent {
 
@@ -31,7 +29,7 @@ public class PullRequestCommentEdited extends PullRequestEvent {
 
 	@Override
 	public String getActivity() {
-		return _T("comment edited");
+		return "comment edited";
 	}
 
 }

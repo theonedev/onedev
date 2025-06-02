@@ -8,6 +8,8 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.util.ImportStep;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -21,7 +23,7 @@ public class JiraProjectImporter implements ProjectImporter {
 
 		@Override
 		public String getTitle() {
-			return "Authenticate to JIRA cloud";
+			return _T("Authenticate to JIRA cloud");
 		}
 
 		@Override
@@ -37,7 +39,7 @@ public class JiraProjectImporter implements ProjectImporter {
 
 		@Override
 		public String getTitle() {
-			return "Specify projects";
+			return _T("Specify projects");
 		}
 
 		@Override
@@ -55,7 +57,7 @@ public class JiraProjectImporter implements ProjectImporter {
 
 		@Override
 		public String getTitle() {
-			return "Specify import option";
+			return _T("Specify import option");
 		}
 
 		@Override

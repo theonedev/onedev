@@ -1,21 +1,21 @@
 <wicket:extend>
     <div class="form-group">
-        <label class="control-label">State</label>
+        <label class="control-label"><wicket:t>State</wicket:t></label>
         <input wicket:id="state" type="hidden" class="form-control">
     </div>    
     <div wicket:id="customFields" class="form-group"></div>
     <div class="form-group">
-        <label class="control-label">Submitted By</label>
+        <label class="control-label"><wicket:t>Submitted By</wicket:t></label>
         <input wicket:id="submittedBy" type="hidden" class="form-control">
     </div>    
     <wicket:enclosure>
         <div class="form-group">
-            <label class="control-label">Iteration</label>
+            <label class="control-label"><wicket:t>Iteration</wicket:t></label>
             <input wicket:id="iteration" type="hidden" class="form-control">
         </div>        
     </wicket:enclosure>
     <div class="form-group">
-        <label class="control-label">Confidential</label>
+        <label class="control-label"><wicket:t>Confidential</wicket:t></label>
         <span class="switch switch-sm switch-primary">
             <label>
                 <input wicket:id="confidential" type="checkbox">
@@ -23,13 +23,13 @@
         </span>
     </div>    
     <div class="form-group">
-        <label class="control-label">Active Since</label>
+        <label class="control-label"><wicket:t>Active Since</wicket:t></label>
         <div class="clearable-wrapper">
             <input wicket:id="activeSince" type="text" class="form-control">
         </div>
     </div>    
     <div class="form-group">
-        <label class="control-label">Not Active Since</label>
+        <label class="control-label"><wicket:t>Not Active Since</wicket:t></label>
         <div class="clearable-wrapper">
             <input wicket:id="notActiveSince" type="text" class="form-control">
         </div>

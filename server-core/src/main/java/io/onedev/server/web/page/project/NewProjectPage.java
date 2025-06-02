@@ -7,6 +7,7 @@ import static io.onedev.server.model.Project.PROP_KEY;
 import static io.onedev.server.model.Project.PROP_NAME;
 import static io.onedev.server.model.Project.PROP_PACK_MANAGEMENT;
 import static io.onedev.server.model.Project.PROP_TIME_TRACKING;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.Collection;
 
@@ -142,9 +143,9 @@ public class NewProjectPage extends LayoutPage {
 	@Override
 	protected Component newTopbarTitle(String componentId) {
 		if (parentId != null)
-			return new Label(componentId, "Create Child Project");
+			return new Label(componentId, _T("Create Child Project"));
 		else
-			return new Label(componentId, "Create Project");
+			return new Label(componentId, _T("Create Project"));
 	}
 	
 	public static PageParameters paramsOf(Project parent) {

@@ -47,6 +47,7 @@ import static io.onedev.server.search.entity.issue.IssueQueryLexer.WatchedBy;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.WatchedByMe;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.IgnoredBy;
 import static io.onedev.server.search.entity.issue.IssueQueryParser.IgnoredByMe;
+import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
@@ -150,13 +151,13 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							if ((field.equals(NAME_ESTIMATED_TIME) || field.equals(NAME_SPENT_TIME) || field.equals(NAME_PROGRESS))
 									&& issueSetting.getTimeTrackingSetting().getAggregationLink() != null) {
 								if (field.equals(NAME_ESTIMATED_TIME))
-									candidates.put(field, "Total estimated time");
+									candidates.put(field, _T("Total estimated time"));
 								else if (field.equals(NAME_SPENT_TIME))
-									candidates.put(field, "Total spent time");
+									candidates.put(field, _T("Total spent time"));
 								else
-									candidates.put(field, "Total spent time / total estimated time");
+									candidates.put(field, _T("Total spent time / total estimated time"));
 							} else if (field.equals(NAME_PROGRESS)) {
-								candidates.put(field, "Spent time / estimated time");
+								candidates.put(field, _T("Spent time / estimated time"));
 							} else {
 								candidates.put(field, null);
 							}
@@ -334,7 +335,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					
 					@Override
 					protected String getFencingDescription() {
-						return "value should be quoted";
+						return _T("value should be quoted");
 					}
 					
 				}.suggest(terminalExpect);
@@ -349,7 +350,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " to query title/description/comment";
+						return _T("enclose with ~ to query title/description/comment");
 					}
 
 				}.suggest(terminalExpect);
@@ -369,12 +370,12 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 			return null;
 		} else if (suggestedLiteral.equals(",")) {
 			if (parseExpect.findExpectByLabel("orderOperator") != null)
-				return Optional.of("add another order");
+				return Optional.of(_T("add another order"));
 			else
-				return Optional.of("or match another value");
+				return Optional.of(_T("or match another value"));
 		} else if (suggestedLiteral.equals("#")) {
 			if (getProject() != null)
-				return Optional.of("find issue by number");
+				return Optional.of(_T("find issue by number"));
 			else 
 				return null;
 		}
@@ -405,14 +406,14 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 					var fieldSpec = issueSetting.getFieldSpec(fieldName);
 					if (fieldName.equals(Issue.NAME_PROJECT)) {
-						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
+						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 					} else if (fieldName.equals(Issue.NAME_TITLE)
 							|| fieldName.equals(Issue.NAME_DESCRIPTION)
 							|| fieldName.equals(Issue.NAME_COMMENT)
 							|| fieldName.equals(IssueSchedule.NAME_ITERATION)
 							|| fieldSpec instanceof IterationChoiceField) {
-						hints.add("Use '*' for wildcard match");
-						hints.add("Use '\\' to escape quotes");
+						hints.add(_T("Use '*' for wildcard match"));
+						hints.add(_T("Use '\\' to escape quotes"));
 					}
 				}
 			}

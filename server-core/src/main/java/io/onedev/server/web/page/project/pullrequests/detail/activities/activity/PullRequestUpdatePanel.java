@@ -1,5 +1,8 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
 
@@ -42,7 +45,7 @@ class PullRequestUpdatePanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String tooManyMessage = "Too many commits, displaying recent " + WebConstants.MAX_DISPLAY_COMMITS;
+		String tooManyMessage = MessageFormat.format(_T("Too many commits, displaying recent {0}"), WebConstants.MAX_DISPLAY_COMMITS);
 		add(new Label("tooManyCommits", tooManyMessage) {
 
 			@Override
@@ -70,7 +73,7 @@ class PullRequestUpdatePanel extends Panel {
 				RevCommit commit = item.getModelObject();
 				if (!getUpdate().getRequest().getPendingCommits().contains(commit)) {
 					item.add(AttributeAppender.append("class", "rebased"));
-					item.add(AttributeAppender.append("title", "This commit is rebased"));
+					item.add(AttributeAppender.append("data-tippy-content", _T("This commit is rebased")));
 				}
 				
 				item.add(new PersonIdentPanel("author", commit.getAuthorIdent(), "Author", Mode.AVATAR));

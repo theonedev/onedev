@@ -1,7 +1,5 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -30,7 +28,7 @@ class PullRequestChangePanel extends Panel {
 
 		add(new UserIdentPanel("avatar", change.getUser(), Mode.AVATAR));
 		add(new Label("name", change.getUser().getDisplayName()));	
-		add(new Label("description", _T("action:" + change.getData().getActivity())));
+		add(new Label("description", change.getData().getActivity()));
 		
 		add(new Label("age", DateUtils.formatAge(change.getDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(change.getDate()))));

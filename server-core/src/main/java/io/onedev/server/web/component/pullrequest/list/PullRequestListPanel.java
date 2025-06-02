@@ -988,7 +988,7 @@ public abstract class PullRequestListPanel extends Panel {
 					fragment.add(new UserIdentPanel("user", lastActivity.getUser(), Mode.NAME));
 				else 
 					fragment.add(new WebMarkupContainer("user").setVisible(false));
-				fragment.add(new Label("activity", _T("action:" + lastActivity.getDescription())));
+				fragment.add(new Label("activity", _T(lastActivity.getDescription())));
 				fragment.add(new Label("date", DateUtils.formatAge(lastActivity.getDate()))
 					.add(new AttributeAppender("data-tippy-content", DateUtils.formatDateTime(lastActivity.getDate()))));
 				

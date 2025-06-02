@@ -7,20 +7,20 @@
 			</div>
 			<div class="modal-body">
 				<div class="alert alert-notice alert-light mb-4">
-					<b>NOTE:</b> Batch editing issues will not cause state transitions of other issues 
-					even if transition rule matches
+					<wicket:t><b>NOTE:</b> Batch editing issues will not cause state transitions of other issues 
+					even if transition rule matches</wicket:t>
 				</div>
-				<div class="mb-3 font-size-lg">Fields to Change</div>
+				<div class="mb-3 font-size-lg"><wicket:t>Fields to Change</wicket:t></div>
 				<div wicket:id="feedback"></div>
 				<div class="d-flex flex-wrap">
 					<label class="checkbox flex-shrink-0 mr-3 mb-4">
-	      				<input wicket:id="stateCheck" type="checkbox"> State
+	      				<input wicket:id="stateCheck" type="checkbox"> <wicket:t>State</wicket:t>
 	  				</label>					
 					<label class="checkbox flex-shrink-0 mr-3 mb-4">
-	      				<input wicket:id="confidentialCheck" type="checkbox"> Confidential
+	      				<input wicket:id="confidentialCheck" type="checkbox"> <wicket:t>Confidential</wicket:t>
 	  				</label>					
 					<label class="checkbox flex-shrink-0 mr-3 mb-4">
-	      				<input wicket:id="iterationCheck" type="checkbox"> Iteration
+	      				<input wicket:id="iterationCheck" type="checkbox"> <wicket:t>Iteration</wicket:t>
 	  				</label>					
 					<label wicket:id="customFields" class="checkbox flex-shrink-0 mr-3 mb-4">
 		      			<input wicket:id="customFieldCheck" type="checkbox"> <wicket:container wicket:id="name"></wicket:container>
@@ -32,7 +32,7 @@
 				<wicket:enclosure>
 				<div class="form-group">
 					<label class="name control-label">
-						<span>Send Notifications</span>
+						<span><wicket:t>Send Notifications</wicket:t></span>
 					</label>
 					<div>
 						<span class="switch switch-sm switch-primary">
@@ -41,13 +41,13 @@
 							</label>
 						</span>
 					</div>
-					<div class="text-muted form-text">Whether or not to send notifications to issue watchers for this change</div>
+					<div class="text-muted form-text"><wicket:t>Whether or not to send notifications to issue watchers for this change</wicket:t></div>
 				</div>
 				</wicket:enclosure>
 			</div>				
 			<div class="modal-footer">
 				<input wicket:id="save" type="submit" class="btn btn-primary" t:value="Save">
-				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+				<a wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></a>
 			</div>
 		</form>
 	</div>

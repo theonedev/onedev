@@ -6,6 +6,8 @@ import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.util.ImportStep;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -19,7 +21,7 @@ public class YouTrackProjectImporter implements ProjectImporter {
 
 		@Override
 		public String getTitle() {
-			return "Authenticate to YouTrack";
+			return _T("Authenticate to YouTrack");
 		}
 
 		@Override
@@ -35,7 +37,7 @@ public class YouTrackProjectImporter implements ProjectImporter {
 
 		@Override
 		public String getTitle() {
-			return "Specify projects";
+			return _T("Specify projects");
 		}
 
 		@Override
@@ -53,7 +55,7 @@ public class YouTrackProjectImporter implements ProjectImporter {
 
 		@Override
 		public String getTitle() {
-			return "Specify import option";
+			return _T("Specify import option");
 		}
 
 		@Override

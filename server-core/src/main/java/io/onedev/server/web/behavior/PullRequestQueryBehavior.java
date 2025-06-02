@@ -31,6 +31,7 @@ import static io.onedev.server.model.AbstractEntity.NAME_NUMBER;
 import static io.onedev.server.search.entity.EntityQuery.getValue;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.*;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.*;
+import static io.onedev.server.web.translation.Translation._T;
 
 public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 
@@ -66,7 +67,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 			if (spec.getRuleName().equals("Number")) {
 				return SuggestionUtils.suggestNumber(
 						terminalExpect.getUnmatchedText(),
-						"find pull request with this number");
+						_T("find pull request with this number"));
 			} else if (spec.getRuleName().equals("Quoted")) {
 				return new FenceAware(codeAssist.getGrammar(), '"', '"') {
 
@@ -162,7 +163,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return "value should be quoted";
+						return _T("value should be quoted");
 					}
 
 				}.suggest(terminalExpect);
@@ -176,7 +177,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " to query title/description/comment";
+						return _T("enclose with ~ to query title/description/comment");
 					}
 
 				}.suggest(terminalExpect);
@@ -192,12 +193,12 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 			return null;
 		} else if (suggestedLiteral.equals(",")) {
 			if (parseExpect.findExpectByLabel("orderOperator") != null)
-				return Optional.of("add another order");
+				return Optional.of(_T("add another order"));
 			else
-				return Optional.of("or match another value");
+				return Optional.of(_T("or match another value"));
 		} else if (suggestedLiteral.equals("#")) {
 			if (getProject() != null)
-				return Optional.of("find pull request by number");
+				return Optional.of(_T("find pull request by number"));
 			else
 				return null;
 		}
@@ -228,14 +229,14 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(PullRequest.NAME_TARGET_PROJECT)
 							|| fieldName.equals(PullRequest.NAME_TARGET_BRANCH)) {
-						hints.add("Use '**', '*', or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
+						hints.add(_T("Use '**', '*', or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 					} else if (fieldName.equals(PullRequest.NAME_TITLE) 
 							|| fieldName.equals(PullRequest.NAME_DESCRIPTION)
 							|| fieldName.equals(PullRequest.NAME_COMMENT)
 							|| fieldName.equals(PullRequest.NAME_SOURCE_PROJECT) 
 							|| fieldName.equals(PullRequest.NAME_SOURCE_BRANCH)) {
-						hints.add("Use '*' for wildcard match");
-						hints.add("Use '\\' to escape quotes");
+						hints.add(_T("Use '*' for wildcard match"));
+						hints.add(_T("Use '\\' to escape quotes"));
 					}
 				}
 			}

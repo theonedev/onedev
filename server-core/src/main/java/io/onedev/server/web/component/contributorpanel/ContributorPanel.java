@@ -1,8 +1,8 @@
 package io.onedev.server.web.component.contributorpanel;
 
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.eclipse.jgit.lib.PersonIdent;
 
@@ -25,16 +25,19 @@ public class ContributorPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new PersonIdentPanel("author", author, "Author", Mode.NAME));
+
+		Fragment fragment;
 		if (committer.getEmailAddress().equals(author.getEmailAddress())
 				&& committer.getName().equals(author.getName())) {
-			add(new WebMarkupContainer("committer").setVisible(false));
+			fragment = new Fragment("content", "withoutCommitterFrag", this);
 		} else {
-			add(new PersonIdentPanel("committer", committer, "Committer", Mode.NAME));
+			fragment = new Fragment("content", "withCommitterFrag", this);
+			fragment.add(new PersonIdentPanel("committer", committer, "Committer", Mode.NAME));
 		}
-		add(new Label("date", DateUtils.formatAge(committer.getWhen()))
+		fragment.add(new PersonIdentPanel("author", author, "Author", Mode.NAME));
+		fragment.add(new Label("date", DateUtils.formatAge(committer.getWhen()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(committer.getWhen()))));
+		add(fragment);
 	}
 
 }

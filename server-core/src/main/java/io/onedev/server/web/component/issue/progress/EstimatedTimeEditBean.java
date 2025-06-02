@@ -8,7 +8,11 @@ import io.onedev.server.entitymanager.SettingManager;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
+import java.text.MessageFormat;
 
 @Editable(name="Edit Estimated Time")
 public class EstimatedTimeEditBean implements Serializable {
@@ -32,7 +36,7 @@ public class EstimatedTimeEditBean implements Serializable {
 	private static String getEstimatedTimeDescription() {
 		var aggregationLink = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting().getAggregationLink();
 		if (aggregationLink != null)
-			return "Specify estimated time <b class='text-warning'>only for this issue</b>, not counting '" + aggregationLink + "'";
+			return MessageFormat.format(_T("Specify estimated time <b class='text-warning'>only for this issue</b>, not counting \"{0}\""), aggregationLink);
 		else 
 			return "";
 	}

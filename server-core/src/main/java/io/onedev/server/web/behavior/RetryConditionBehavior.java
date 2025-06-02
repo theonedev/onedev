@@ -1,5 +1,7 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +71,7 @@ public class RetryConditionBehavior extends ANTLRAssistBehavior {
 					
 					@Override
 					protected String getFencingDescription() {
-						return "value should be quoted";
+						return _T("value should be quoted");
 					}
 					
 				}.suggest(terminalExpect);
@@ -106,7 +108,7 @@ public class RetryConditionBehavior extends ANTLRAssistBehavior {
 			if ("criteriaValue".equals(spec.getLabel())) {
 				String unmatched = terminalExpect.getUnmatchedText();
 				if (unmatched.indexOf('"') == unmatched.lastIndexOf('"')) // only when we input criteria value
-					hints.add("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java pattern</a> is expected here");
+					hints.add(_T("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java pattern</a> is expected here"));
 			}
 		} 
 		return hints;

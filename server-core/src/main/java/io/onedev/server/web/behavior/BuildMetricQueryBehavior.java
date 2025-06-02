@@ -1,5 +1,7 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,7 +112,7 @@ public class BuildMetricQueryBehavior extends ANTLRAssistBehavior {
 					
 					@Override
 					protected String getFencingDescription() {
-						return "value should be quoted";
+						return _T("value should be quoted");
 					}
 					
 				}.suggest(terminalExpect);
@@ -122,7 +124,7 @@ public class BuildMetricQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (suggestedLiteral.equals(",")) 
-			return Optional.of("or match another value");
+			return Optional.of(_T("or match another value"));
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
@@ -150,10 +152,10 @@ public class BuildMetricQueryBehavior extends ANTLRAssistBehavior {
 					String fieldName = EntityQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Build.NAME_PROJECT) || fieldName.equals(Build.NAME_VERSION)
 							|| fieldName.equals(Build.NAME_JOB)) {
-						hints.add("Use '*' for wildcard match");
-						hints.add("Use '\\' to escape quotes");
+						hints.add(_T("Use '*' for wildcard match"));
+						hints.add(_T("Use '\\' to escape quotes"));
 					} else if (fieldName.equals(Build.NAME_BRANCH) || fieldName.equals(Build.NAME_TAG)) {
-						hints.add("Use '*' for wildcard match");
+						hints.add(_T("Use '*' for wildcard match"));
 					}
 				}
 			}

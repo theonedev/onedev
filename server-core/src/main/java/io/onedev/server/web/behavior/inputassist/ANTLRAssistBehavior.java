@@ -9,6 +9,9 @@ import io.onedev.commons.utils.StringUtils;
 import org.antlr.v4.runtime.*;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -217,7 +220,7 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		if (StringUtils.isNotBlank(suggestedLiteral)) 
 			return Optional.absent();
 		else 
-			return Optional.of("space");
+			return Optional.of(_T("space"));
 	}
 	
 }

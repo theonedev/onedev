@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static java.util.Collections.sort;
 
 public class AgentQueryBehavior extends ANTLRAssistBehavior {
@@ -103,7 +104,7 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 					
 					@Override
 					protected String getFencingDescription() {
-						return "value should be quoted";
+						return _T("value should be quoted");
 					}
 					
 				}.suggest(terminalExpect);
@@ -117,7 +118,7 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " to query name/ip/os";
+						return _T("enclose with ~ to query name/ip/os");
 					}
 
 				}.suggest(terminalExpect);
@@ -143,9 +144,9 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 		}
 		if (suggestedLiteral.equals(",")) {
 			if (parseExpect.findExpectByLabel("orderOperator") != null)
-				return Optional.of("add another order");
+				return Optional.of(_T("add another order"));
 			else
-				return Optional.of("or match another value");
+				return Optional.of(_T("or match another value"));
 		}
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");
@@ -177,7 +178,7 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 							|| fieldName.equals(Agent.NAME_OS_ARCH)
 							|| fieldName.equals(Agent.NAME_OS_VERSION) 
 							|| fieldName.equals(Agent.NAME_IP_ADDRESS)) {
-						hints.add("Use '*' for wildcard match");
+						hints.add(_T("Use '*' for wildcard match"));
 					}
 				}
 			}

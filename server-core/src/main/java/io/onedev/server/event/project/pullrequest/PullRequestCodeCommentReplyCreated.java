@@ -1,14 +1,12 @@
 package io.onedev.server.event.project.pullrequest;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.web.UrlManager;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
+import io.onedev.server.web.UrlManager;
 
 public class PullRequestCodeCommentReplyCreated extends PullRequestCodeCommentEvent {
 
@@ -32,7 +30,7 @@ public class PullRequestCodeCommentReplyCreated extends PullRequestCodeCommentEv
 
 	@Override
 	public String getActivity() {
-		return _T("replied code comment"); 
+		return "replied code comment"; 
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.imports.github;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +29,7 @@ public class GitHubIssueImporter implements IssueImporter {
 
 		@Override
 		public String getTitle() {
-			return "Authenticate to GitHub";
+			return _T("Authenticate to GitHub");
 		}
 
 		@Override
@@ -43,7 +45,7 @@ public class GitHubIssueImporter implements IssueImporter {
 
 		@Override
 		public String getTitle() {
-			return "Choose repository";
+			return _T("Choose repository");
 		}
 
 		@Override
@@ -61,7 +63,7 @@ public class GitHubIssueImporter implements IssueImporter {
 
 		@Override
 		public String getTitle() {
-			return "Specify import option";
+			return _T("Specify import option");
 		}
 
 		@Override

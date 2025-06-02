@@ -6,9 +6,11 @@ import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.NAME_S
 import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.PROP_CONFIDENTIAL;
 import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.PROP_ITERATIONS;
 import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.PROP_STATE;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -106,7 +108,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		Form<?> form = new Form<Void>("form");
 		form.setOutputMarkupId(true);
 		
-		form.add(new Label("title", "Batch Editing " + getIssueCount() + " Issues"));
+		form.add(new Label("title", MessageFormat.format(_T("Batch Editing {0} Issues"), getIssueCount())));
 		
 		form.add(new FencedFeedbackPanel("feedback", form));
 		
@@ -258,7 +260,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 
 			@Override
 			protected List<Behavior> getInputBehaviors() {
-				return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
+				return Lists.newArrayList(AttributeModifier.replace("placeholder", _T("Leave a comment")));
 			}
 			
 		});
@@ -324,7 +326,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 				if (!selectedFields.isEmpty()) {
 					runTaskBehavior.requestRun(target);
 				} else {
-					form.error("Please select fields to update");
+					form.error(_T("Please select fields to update"));
 					target.add(form);
 				}
 			}

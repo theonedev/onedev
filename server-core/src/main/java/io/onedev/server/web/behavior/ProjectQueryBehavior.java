@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 import static io.onedev.server.search.entity.project.ProjectQuery.getRuleName;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.*;
+import static io.onedev.server.web.translation.Translation._T;
 
 public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 
@@ -132,7 +133,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 					
 					@Override
 					protected String getFencingDescription() {
-						return "value should be quoted";
+						return _T("value should be quoted");
 					}
 					
 				}.suggest(terminalExpect);
@@ -146,7 +147,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " to query name/path";
+						return _T("enclose with ~ to query name/path");
 					}
 
 				}.suggest(terminalExpect);
@@ -162,9 +163,9 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 			return null;
 		} else if (suggestedLiteral.equals(",")) {
 			if (parseExpect.findExpectByLabel("orderOperator") != null)
-				return Optional.of("add another order");
+				return Optional.of(_T("add another order"));
 			else
-				return Optional.of("or match another value");
+				return Optional.of(_T("or match another value"));
 		}
 		
 		if (childQuery) {
@@ -201,21 +202,21 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 					if (fieldName.equals(Project.NAME_NAME)
 							|| fieldName.equals(Project.NAME_KEY) 
 							|| fieldName.equals(Project.NAME_SERVICE_DESK_EMAIL_ADDRESS)) {
-						hints.add("Use '*' for wildcard match");
+						hints.add(_T("Use '*' for wildcard match"));
 					} else if (fieldName.equals(Project.NAME_DESCRIPTION)) {
-						hints.add("Use '*' for wildcard match");
-						hints.add("Use '\\' to escape quotes");
+						hints.add(_T("Use '*' for wildcard match"));
+						hints.add(_T("Use '\\' to escape quotes"));
 					} else if (fieldName.equals(Project.NAME_PATH)) {
-						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
+						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 					}
 				} else {
 					Element operatorElement = terminalExpect.getState()
 							.findMatchedElementsByLabel("operator", true).iterator().next();
 					int type = operatorElement.getMatchedTokens().iterator().next().getType();
 					if (type == ProjectQueryLexer.ForksOf || type == ProjectQueryLexer.ChildrenOf) 
-						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
+						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 					else
-						hints.add("Use '\\' to escape quotes");
+						hints.add(_T("Use '\\' to escape quotes"));
 				}
 			}
 		} 

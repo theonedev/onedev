@@ -10,6 +10,7 @@ import static io.onedev.server.model.Build.NAME_LOG;
 import static io.onedev.server.model.Build.NAME_PROJECT;
 import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
 import static io.onedev.server.model.Build.NAME_TAG;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -57,9 +58,9 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String matchWith) {
 						if ("criteriaField".equals(spec.getLabel())) {
 							Map<String, String> fields = new LinkedHashMap<>();
-							fields.put(NAME_PROJECT, "project of the running job");
-							fields.put(NAME_BRANCH, "branch the job is running against");
-							fields.put(NAME_TAG, "tag the job is running against");
+							fields.put(NAME_PROJECT, _T("project of the running job"));
+							fields.put(NAME_BRANCH, _T("branch the job is running against"));
+							fields.put(NAME_TAG, _T("tag the job is running against"));
 							fields.put(NAME_PULL_REQUEST, null);
 							fields.put(NAME_LOG, null);
 							JobAware jobAware = getComponent().findParent(JobAware.class);
@@ -98,7 +99,7 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 					
 					@Override
 					protected String getFencingDescription() {
-						return "value should be quoted";
+						return _T("value should be quoted");
 					}
 					
 				}.suggest(terminalExpect);
@@ -110,7 +111,7 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (suggestedLiteral.equals(AntlrUtils.getLexerRuleName(ruleNames, OnBranch)))
-			return Optional.of("branch the build commit is merged into");
+			return Optional.of(_T("branch the build commit is merged into"));
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
@@ -138,16 +139,16 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(NAME_PROJECT) || fieldName.equals(NAME_BRANCH) || fieldName.equals(NAME_TAG))
-						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
+						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 					else if (fieldName.equals(Build.NAME_LOG))
-						hints.add("Use '*' for wildcard match");
+						hints.add(_T("Use '*' for wildcard match"));
 				} else {
 					List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
 					Preconditions.checkState(operatorElements.size() == 1);
 					String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 					int operator = getLexerRule(ruleNames, operatorName);
 					if (operator == OnBranch)
-						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
+						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 				}
 			}
 		} 

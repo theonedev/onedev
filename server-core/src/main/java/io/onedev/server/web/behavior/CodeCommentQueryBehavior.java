@@ -27,6 +27,7 @@ import java.util.List;
 
 import static io.onedev.server.search.entity.codecomment.CodeCommentQuery.getRuleName;
 import static io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer.*;
+import static io.onedev.server.web.translation.Translation._T;
 
 public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 
@@ -103,7 +104,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 					
 					@Override
 					protected String getFencingDescription() {
-						return "value should be quoted";
+						return _T("value should be quoted");
 					}
 					
 				}.suggest(terminalExpect);
@@ -117,7 +118,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " to query path/content/reply";
+						return _T("enclose with ~ to query path/content/reply");
 					}
 
 				}.suggest(terminalExpect);
@@ -133,9 +134,9 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 			return null;
 		} else if (suggestedLiteral.equals(",")) {
 			if (parseExpect.findExpectByLabel("orderOperator") != null)
-				return Optional.of("add another order");
+				return Optional.of(_T("add another order"));
 			else
-				return Optional.of("or match another value");
+				return Optional.of(_T("or match another value"));
 		}
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");
@@ -163,8 +164,8 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(CodeComment.NAME_CONTENT)) {
-						hints.add("Use '*' for wildcard match");
-						hints.add("Use '\\' to escape quotes");
+						hints.add(_T("Use '*' for wildcard match"));
+						hints.add(_T("Use '\\' to escape quotes"));
 					}
 				}
 			}

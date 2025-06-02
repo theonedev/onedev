@@ -1,17 +1,21 @@
 package io.onedev.server.web.component.issue.list;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.LinkSpec;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
 
 @Editable
 public class FieldsAndLinksBean implements Serializable {
@@ -24,7 +28,7 @@ public class FieldsAndLinksBean implements Serializable {
 
 	@Editable(order=100, name="Display Fields", placeholder="Not displaying any fields", 
 			description="Specify fields to be displayed in the issue list")
-	@ChoiceProvider("getFieldChoices")
+	@ChoiceProvider(value="getFieldChoices", displayNames="getFieldDisplayNames")
 	public List<String> getFields() {
 		return fields;
 	}
@@ -41,6 +45,16 @@ public class FieldsAndLinksBean implements Serializable {
 			choices.add(fieldName);
 		choices.add(IssueSchedule.NAME_ITERATION);
 		return choices;
+	}
+
+	@SuppressWarnings("unused")
+	private static Map<String, String> getFieldDisplayNames() {
+		Map<String, String> displayNames = new HashMap<>();
+		displayNames.put(Issue.NAME_STATE, _T("State"));
+		for (String fieldName: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldNames())
+			displayNames.put(fieldName, fieldName);
+		displayNames.put(IssueSchedule.NAME_ITERATION, _T("Iteration"));
+		return displayNames;
 	}
 	
 	@Editable(order=200, name="Display Links", placeholder="Not displaying any links", 

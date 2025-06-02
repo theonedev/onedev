@@ -27,6 +27,9 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +72,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 			if (spec.getRuleName().equals("Number")) {
 				return SuggestionUtils.suggestNumber(
 						terminalExpect.getUnmatchedText(), 
-						"find build with this number");
+						_T("find build with this number"));
 			} else if (spec.getRuleName().equals("Quoted")) {
 				return new FenceAware(codeAssist.getGrammar(), '"', '"') {
 
@@ -163,7 +166,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 					
 					@Override
 					protected String getFencingDescription() {
-						return "value should be quoted";
+						return _T("value should be quoted");
 					}
 					
 				}.suggest(terminalExpect);
@@ -177,7 +180,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " to query job/version";
+						return _T("enclose with ~ to query job/version");
 					}
 
 				}.suggest(terminalExpect);
@@ -206,12 +209,12 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 
 		if (suggestedLiteral.equals(",")) {
 			if (parseExpect.findExpectByLabel("orderOperator") != null)
-				return Optional.of("add another order");
+				return Optional.of(_T("add another order"));
 			else
-				return Optional.of("or match another value");
+				return Optional.of(_T("or match another value"));
 		} else if (suggestedLiteral.equals("#")) {
 			if (getProject() != null)
-				return Optional.of("find build by number");
+				return Optional.of(_T("find build by number"));
 			else
 				return null;
 		}
@@ -241,12 +244,12 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 				if (!fieldElements.isEmpty()) {
 					String fieldName = BuildQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Build.NAME_PROJECT)) {
-						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
+						hints.add(_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>"));
 					} else if (fieldName.equals(Build.NAME_VERSION) || fieldName.equals(Build.NAME_JOB)) {
-						hints.add("Use '*' for wildcard match");
-						hints.add("Use '\\' to escape quotes");
+						hints.add(_T("Use '*' for wildcard match"));
+						hints.add(_T("Use '\\' to escape quotes"));
 					} else if (fieldName.equals(Build.NAME_BRANCH) || fieldName.equals(Build.NAME_TAG)) {
-						hints.add("Use '*' for wildcard match");
+						hints.add(_T("Use '*' for wildcard match"));
 					}
 				}
 			}

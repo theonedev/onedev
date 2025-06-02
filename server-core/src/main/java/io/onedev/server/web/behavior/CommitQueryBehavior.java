@@ -1,5 +1,7 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -112,7 +114,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return "value needs to be enclosed in parenthesis";
+						return _T("value needs to be enclosed in parenthesis");
 					}
 					
 				}.suggest(terminalExpect);
@@ -127,7 +129,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected String getFencingDescription() {
-						return FUZZY_SUGGESTION_DESCRIPTION_PREFIX + " to query hash/message";
+						return _T("enclose with ~ to query hash/message");
 					}
 
 				}.suggest(terminalExpect);
@@ -151,8 +153,8 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 						|| tokenType == CommitQueryParser.AUTHOR
 						|| tokenType == CommitQueryParser.PATH
 						|| tokenType == CommitQueryParser.MESSAGE) {
-					hints.add("Use '*' for wildcard match");
-					hints.add("Use '\\' to escape brackets");
+					hints.add(_T("Use '*' for wildcard match"));
+					hints.add(_T("Use '\\' to escape brackets"));
 				}
 			}
 		} 
@@ -168,25 +170,25 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 		String description;
 		switch (suggestedLiteral) {
 			case "committer":
-				description = "committed by";
+				description = _T("committed by");
 				break;
 			case "author":
-				description = "authored by";
+				description = _T("authored by");
 				break;
 			case "message":
-				description = "commit message contains";
+				description = _T("commit message contains");
 				break;
 			case "before":
-				description = "before specified date";
+				description = _T("before specified date");
 				break;
 			case "after":
-				description = "after specified date";
+				description = _T("after specified date");
 				break;
 			case "path":
-				description = "touching specified path";
+				description = _T("touching specified path");
 				break;
 			case " ":
-				description = "space";
+				description = _T("space");
 				break;
 			default:
 				description = null;
