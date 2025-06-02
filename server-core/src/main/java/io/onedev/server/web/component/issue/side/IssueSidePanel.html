@@ -12,7 +12,7 @@
 		</div>
 		<wicket:enclosure child="confidential">
 		<div class="confidential d-flex align-items-center justify-content-between">
-			<div class="font-weight-bolder mr-3">Confidential</div>
+			<div class="font-weight-bolder mr-3"><wicket:t>Confidential</wicket:t></div>
 			<div class="switch switch-sm switch-primary">
 				<label>
 					<input wicket:id="confidential" type="checkbox">
@@ -21,7 +21,7 @@
 		</div>
 		</wicket:enclosure>
 		<div wicket:id="iterations" class="iterations">
-			<div class="head">Iterations</div>
+			<div class="head"><wicket:t>Iterations</wicket:t></div>
 			<ul class="body list-unstyled mb-0">
 				<li wicket:id="iterations" class="bg-light rounded p-3">
 					<div class="d-flex">
@@ -40,12 +40,12 @@
 		</div>
 		<div wicket:id="votes" class="votes">
 			<div class="head">
-				Issue Votes (<span wicket:id="count"></span>) 
+				<wicket:t>Issue Votes</wicket:t> (<span wicket:id="count"></span>) 
 			</div>
 			<div class="body">
 				<wicket:enclosure child="voters">
 				<div class="voters">
-					<span wicket:id="voters" class="mr-2 mb-3 d-inline-block"><a wicket:id="voter" class="avatar"></a></span> <a wicket:id="more">and more</a>
+					<span wicket:id="voters" class="mr-2 mb-3 d-inline-block"><a wicket:id="voter" class="avatar"></a></span> <a wicket:id="more"><wicket:t>and more</wicket:t></a>
 				</div>
 				</wicket:enclosure>
 				<a wicket:id="vote" class="btn btn-outline-secondary btn-sm vote"><wicket:svg href="thumb-up" class="icon mr-2"></wicket:svg> <span wicket:id="label"></span></a>
@@ -53,7 +53,7 @@
 		</div>
 		<div wicket:id="watches" class="watches"></div>
 		<div wicket:id="externalParticipants" class="external-participants">
-			<div class="head">External Participants</div>
+			<div class="head"><wicket:t>External Participants</wicket:t></div>
 			<ul class="body list-unstyled mb-0">
 				<li wicket:id="externalParticipants" class="pb-2">
 					<div class="d-flex">
@@ -63,14 +63,14 @@
 				</li>
 				<span class="form-text font-size-sm text-muted">
 					<wicket:svg href="bulb" class="icon"></wicket:svg>
- 					External participants do not have accounts and involve in the issue via email
+ 					<wicket:t>External participants do not have accounts and involve in the issue via email</wicket:t>
 				</span>
 			</ul>
 		</div>
 		<div wicket:id="reference"></div>
 		<wicket:enclosure child="delete">
 			<div>
-				<a wicket:id="delete" class="delete btn btn-light-danger">Delete</a>
+				<a wicket:id="delete" class="delete btn btn-light-danger"><wicket:t>Delete</wicket:t></a>
 			</div>
 		</wicket:enclosure>
 	</div>

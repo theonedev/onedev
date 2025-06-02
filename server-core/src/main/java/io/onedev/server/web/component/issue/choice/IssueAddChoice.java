@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.issue.choice;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
@@ -30,7 +32,7 @@ public abstract class IssueAddChoice extends SelectToActChoice<Issue> {
 	}
 
 	protected String getPlaceholder() {
-		return "Add Issue...";
+		return _T("Add Issue...");
 	}
 	
 }

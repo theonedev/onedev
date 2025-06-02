@@ -3,17 +3,17 @@
 	<wicket:fragment wicket:id="fixStatesFrag">
 		<form wicket:id="form" class="fix-states leave-confirm">
 			<div class="modal-header">
-				<h5 id="modal-title" class="modal-title">Fix Undefined States</h5>
+				<h5 id="modal-title" class="modal-title"><wicket:t>Fix Undefined States</wicket:t></h5>
 				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 			</div>
 			<div class="modal-body">
 				<div class="alert alert-notice alert-light-warning">
-					Please resolve undefined states below. Note that if you select to delete an undefined state, 
-					all issues with that state will be deleted 
+					<wicket:t>Please resolve undefined states below. Note that if you select to delete an undefined state, 
+					all issues with that state will be deleted</wicket:t>
 				</div>
 				<table class="table table-condensed">
 					<thead>
-						<tr><th>Undefined</th><th>Change To</th></tr>
+						<tr><th><wicket:t>Undefined</wicket:t></th><th><wicket:t>Change To</wicket:t></th></tr>
 					</thead>
 					<tbody>
 						<tr wicket:id="rows">
@@ -29,23 +29,23 @@
 			</div>
 			<div class="modal-footer">
 				<input wicket:id="fix" type="submit" class="dirty-aware btn btn-primary" t:value="Fix">
-				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+				<a wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></a>
 			</div>
 		</form>	
 	</wicket:fragment>
 	<wicket:fragment wicket:id="fixFieldsFrag">
 		<form wicket:id="form" class="fix-fields leave-confirm">
 			<div class="modal-header">
-				<h5 id="modal-title" class="modal-title">Fix Undefined Fields</h5>
+				<h5 id="modal-title" class="modal-title"><wicket:t>Fix Undefined Fields</wicket:t></h5>
 				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 			</div>
 			<div class="modal-body">
 				<div class="alert alert-notice alert-light-warning">
-					Please resolve undefined fields below
+					<wicket:t>Please resolve undefined fields below</wicket:t>
 				</div>
 				<table class="table table-condensed">
 					<thead>
-						<tr><th>Field Name</th><th>Resolution</th></tr>
+						<tr><th><wicket:t>Field Name</wicket:t></th><th><wicket:t>Resolution</wicket:t></th></tr>
 					</thead>
 					<tbody>
 						<tr wicket:id="rows">
@@ -61,23 +61,23 @@
 			</div>
 			<div class="modal-footer">
 				<input wicket:id="fix" type="submit" class="dirty-aware btn btn-primary" t:value="Fix">
-				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+				<a wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></a>
 			</div>
 		</form>	
 	</wicket:fragment>
 	<wicket:fragment wicket:id="fixFieldValuesFrag">
 		<form wicket:id="form" class="fix-field-values leave-confirm">
 			<div class="modal-header">
-				<h5 id="modal-title" class="modal-title">Fix Undefined Field Values</h5>
+				<h5 id="modal-title" class="modal-title"><wicket:t>Fix Undefined Field Values</wicket:t></h5>
 				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 			</div>
 			<div class="modal-body">
 				<div class="alert alert-notice alert-light-warning">
-					Please resolve undefined field values below
+					<wicket:t>Please resolve undefined field values below</wicket:t>
 				</div>
 				<table class="table table-condensed">
 					<thead>
-						<tr><th>Field Name</th><th>Field Value</th><th>Resolution</th></tr>
+						<tr><th><wicket:t>Field Name</wicket:t></th><th><wicket:t>Field Value</wicket:t></th><th><wicket:t>Resolution</wicket:t></th></tr>
 					</thead>
 					<tbody>
 						<tr wicket:id="rows">
@@ -96,7 +96,7 @@
 			</div>
 			<div class="modal-footer">
 				<input wicket:id="fix" type="submit" class="dirty-aware btn btn-primary" t:value="Fix">
-				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+				<a wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></a>
 			</div>
 		</form>	
 	</wicket:fragment>

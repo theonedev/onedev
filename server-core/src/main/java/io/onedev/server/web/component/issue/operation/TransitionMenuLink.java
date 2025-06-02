@@ -19,6 +19,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.*;
 
 public abstract class TransitionMenuLink extends MenuLink {
@@ -56,7 +58,7 @@ public abstract class TransitionMenuLink extends MenuLink {
 		if (!manualTransitionsModel.getObject().isEmpty()) {
 			return super.newContent(id, dropdown);
 		} else {
-			return new Label(id, "<div class='px-3 py-2'><i>No applicable transitions or no permission to transit</i></div>")
+			return new Label(id, "<div class='px-3 py-2'><i>" + _T("No applicable transitions or no permission to transit") + "</i></div>")
 					.setEscapeModelStrings(false);
 		}
 	}

@@ -3,7 +3,9 @@ package io.onedev.server.web.component.issue.side;
 import static io.onedev.server.security.SecurityUtils.canAccessIssue;
 import static io.onedev.server.security.SecurityUtils.canManageIssues;
 import static io.onedev.server.util.EmailAddressUtils.describe;
+import static io.onedev.server.web.translation.Translation._T;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -304,8 +306,7 @@ public abstract class IssueSidePanel extends Panel {
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
 						if (!getIssue().isNew()) {
-							attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to "
-									+ "remove the issue from iteration '" + item.getModelObject().getName() + "'?"));
+							attributes.getAjaxCallListeners().add(new ConfirmClickListener(MessageFormat.format(_T("Do you really want to remove the issue from iteration \"{0}\"?"), item.getModelObject().getName())));
 						}
 					}
 					
@@ -350,7 +351,7 @@ public abstract class IssueSidePanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				getSettings().setPlaceholder("Add to iteration...");
+				getSettings().setPlaceholder(_T("Add to iteration..."));
 				getSettings().setFormatResult("onedev.server.iterationChoiceFormatter.formatResult");
 				getSettings().setFormatSelection("onedev.server.iterationChoiceFormatter.formatSelection");
 				getSettings().setEscapeMarkup("onedev.server.iterationChoiceFormatter.escapeMarkup");
@@ -492,11 +493,11 @@ public abstract class IssueSidePanel extends Panel {
 					protected String load() {
 						if (SecurityUtils.getAuthUser() != null) {
 							if (getVote(SecurityUtils.getAuthUser()) != null)
-								return "Unvote";
+								return _T("Unvote");
 							else
-								return "Vote";
+								return _T("Vote");
 						} else {
-							return "Login to vote";
+							return _T("Login to vote");
 						}
 					}
 					

@@ -36,6 +36,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,7 +105,7 @@ public class IssueFieldListPage extends IssueSettingPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
@@ -111,12 +113,12 @@ public class IssueFieldListPage extends IssueSettingPage {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("Type")) {
+		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of(_T("Type"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
 				FieldSpec field = rowModel.getObject();
-				cellItem.add(new Label(componentId, EditableUtils.getDisplayName(field.getClass())));
+				cellItem.add(new Label(componentId, _T(EditableUtils.getDisplayName(field.getClass()))));
 			}
 		});		
 		
@@ -157,7 +159,7 @@ public class IssueFieldListPage extends IssueSettingPage {
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this field?"));
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to delete this field?")));
 					}
 	
 					@Override
@@ -216,7 +218,7 @@ public class IssueFieldListPage extends IssueSettingPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Issue Custom Fields");
+		return new Label(componentId, _T("Issue Custom Fields"));
 	}
 
 }

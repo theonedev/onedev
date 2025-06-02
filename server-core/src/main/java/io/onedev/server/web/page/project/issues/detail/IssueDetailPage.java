@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.issues.detail;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -93,12 +94,12 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 				try {
 					issueNumber = Long.valueOf(issueNumberString);
 				} catch (NumberFormatException e) {
-					throw new ValidationException("Invalid issue number: " + issueNumberString);
+					throw new ValidationException(MessageFormat.format(_T("Invalid issue number: {0}"), issueNumberString));
 				}
 				
 				Issue issue = getIssueManager().find(getProject(), issueNumber);
 				if (issue == null) { 
-					throw new EntityNotFoundException("Unable to find issue #" + issueNumber + " in project " + getProject());
+					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find issue #{0} in project {1}"), issueNumber, getProject()));
 				} else {
 					OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
 					if (!issue.getProject().equals(getProject())) 
@@ -292,7 +293,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 							@Override
 							public void onClick() {
 								getIssueManager().delete(getIssue());
-								Session.get().success("Issue #" + getIssue().getNumber() + " deleted");
+								Session.get().success(MessageFormat.format(_T("Issue #{0} deleted"), getIssue().getNumber()));
 								
 								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Issue.class);
 								if (redirectUrlAfterDelete != null)
@@ -301,7 +302,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 									setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject()));
 							}
 							
-						}.add(new ConfirmClickModifier("Do you really want to delete this issue?"));
+						}.add(new ConfirmClickModifier(_T("Do you really want to delete this issue?")));
 					}
 
 				};

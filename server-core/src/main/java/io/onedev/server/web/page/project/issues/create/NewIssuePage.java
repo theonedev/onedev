@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.issues.create;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -46,7 +48,7 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 		super(params);
 		
 		if (!getProject().isIssueManagement())
-			throw new ExplicitException("Issue management not enabled in this project");
+			throw new ExplicitException(_T("Issue management not enabled in this project"));
 		
 		User currentUser = getLoginUser();
 		if (currentUser == null)
@@ -139,7 +141,7 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 	
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "<span class='text-nowrap'>Create Issue</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-nowrap'>" + _T("Create Issue") + "</span>").setEscapeModelStrings(false);
 	}
 	
 	@Override

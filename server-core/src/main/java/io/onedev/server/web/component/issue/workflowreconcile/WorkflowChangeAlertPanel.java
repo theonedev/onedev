@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.issue.workflowreconcile;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.event.IEvent;
@@ -52,7 +54,7 @@ public abstract class WorkflowChangeAlertPanel extends Panel {
 				
 			});
 		} else {
-			add(new Label("reconcile", "reconciliation (need administrator permission)") {
+			add(new Label("reconcile", _T("reconciliation (need administrator permission)")) {
 
 				@Override
 				protected void onComponentTag(ComponentTag tag) {

@@ -2,7 +2,9 @@ package io.onedev.server.web.component.issue.authorizations;
 
 import static io.onedev.server.model.IssueAuthorization.PROP_ISSUE;
 import static io.onedev.server.model.IssueAuthorization.PROP_USER;
+import static io.onedev.server.web.translation.Translation._T;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -130,7 +132,7 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				getSettings().setPlaceholder("Authorize user...");
+				getSettings().setPlaceholder(_T("Authorize user..."));
 				getSettings().setFormatResult("onedev.server.userChoiceFormatter.formatResult");
 				getSettings().setFormatSelection("onedev.server.userChoiceFormatter.formatSelection");
 				getSettings().setEscapeMarkup("onedev.server.userChoiceFormatter.escapeMarkup");
@@ -143,7 +145,7 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 				authorization.setUser(OneDev.getInstance(UserManager.class).load(selection.getId()));
 				OneDev.getInstance(IssueAuthorizationManager.class).createOrUpdate(authorization);
 				target.add(authorizationsTable);
-				Session.get().success("User authorized");
+				Session.get().success(_T("User authorized"));
 			}
 			
 			@Override
@@ -163,7 +165,7 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 		
 		List<IColumn<IssueAuthorization, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<IssueAuthorization, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<IssueAuthorization, Void>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<IssueAuthorization>> cellItem, String componentId,
@@ -191,7 +193,7 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						IssueAuthorization authorization = rowModel.getObject();
 						OneDev.getInstance(IssueAuthorizationManager.class).delete(authorization);
-						Session.get().success("User '" + authorization.getUser().getDisplayName() + "' unauthorized");
+						Session.get().success(MessageFormat.format(_T("User \"{0}\" unauthorized"), authorization.getUser().getDisplayName()));
 						
 						target.add(authorizationsTable);
 					}
@@ -201,8 +203,7 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 						super.updateAjaxAttributes(attributes);
 						
 						IssueAuthorization authorization = rowModel.getObject();
-						String message = "Do you really want to unauthorize user '" 
-								+ authorization.getUser().getDisplayName() + "'?";
+						String message = MessageFormat.format(_T("Do you really want to unauthorize user \"{0}\"?"), authorization.getUser().getDisplayName());
 						attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
 					}
 

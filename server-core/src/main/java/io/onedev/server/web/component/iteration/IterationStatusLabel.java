@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.iteration;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -17,7 +19,7 @@ public class IterationStatusLabel extends Label {
 
 			@Override
 			protected String load() {
-				return iterationModel.getObject().getStatusName();
+				return _T(iterationModel.getObject().getStatusName());
 			}
 			
 		});

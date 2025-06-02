@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.issue.statestats;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -55,7 +57,7 @@ public abstract class StateStatsBar extends GenericPanel<Map<String, Integer>> {
 				
 			}.setEscapeModelStrings(false));
 			
-			add(AttributeAppender.append("title", "No issues in iteration"));
+			add(AttributeAppender.append("data-tippy-content", _T("No issues in iteration")));
 		}
 		
 		setOutputMarkupId(true);

@@ -146,7 +146,7 @@ public abstract class IssueEditableTitlePanel extends Panel {
 				setVisible(SecurityUtils.canModifyIssue(getIssue()));
 			}
 			
-		}.add(new AttributeAppender("data-tippy-content", Model.of(_T("Edit issue title")))));
+		});
 		
 		titleViewer.add(new CopyToClipboardLink("copy", 
 				Model.of(getIssue().getTitle() + " (" + getIssue().getReference().toString(getProject()) + ")")));

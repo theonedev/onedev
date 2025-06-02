@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.issue.workflowreconcile;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -128,7 +130,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 							super.updateAjaxAttributes(attributes);
 							attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
 							attributes.getAjaxCallListeners().add(new SelfDisableListener());
-							attributes.getAjaxCallListeners().add(new ChangeTextListener("Fixing..."));
+							attributes.getAjaxCallListeners().add(new ChangeTextListener(_T("Fixing...")));
 						}
 
 						@Override
@@ -152,7 +154,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 
 			@Override
 			public Component getLoadingComponent(String markupId) {
-				return newLoadingComponent(markupId, "Checking state...");
+				return newLoadingComponent(markupId, _T("Checking state..."));
 			}
 			
 		};
@@ -217,7 +219,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 							super.updateAjaxAttributes(attributes);
 							attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
 							attributes.getAjaxCallListeners().add(new SelfDisableListener());
-							attributes.getAjaxCallListeners().add(new ChangeTextListener("Fixing..."));
+							attributes.getAjaxCallListeners().add(new ChangeTextListener(_T("Fixing...")));
 						}
 
 						@Override
@@ -241,7 +243,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 
 			@Override
 			public Component getLoadingComponent(String markupId) {
-				return newLoadingComponent(markupId, "Checking fields...");
+				return newLoadingComponent(markupId, _T("Checking fields..."));
 			}
 			
 		};
@@ -350,14 +352,14 @@ public abstract class WorkflowReconcilePanel extends Panel {
 
 			@Override
 			public Component getLoadingComponent(String markupId) {
-				return newLoadingComponent(markupId, "Checking field values...");
+				return newLoadingComponent(markupId, _T("Checking field values..."));
 			}
 			
 		};
 	}
 	
 	private Component checkStateAndFieldOrdinals(String markupId) {
-		return new Label(markupId, "Checking state and field ordinals...") {
+		return new Label(markupId, _T("Checking state and field ordinals...")) {
 
 			private AbstractPostAjaxBehavior behavior;
 			
@@ -374,7 +376,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 						GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
 						issueSetting.setReconciled(true);
 						settingManager.saveIssueSetting(issueSetting);
-						Session.get().success("Workflow reconciliation completed");
+						Session.get().success(_T("Workflow reconciliation completed"));
 						onCompleted(target);
 					}
 					

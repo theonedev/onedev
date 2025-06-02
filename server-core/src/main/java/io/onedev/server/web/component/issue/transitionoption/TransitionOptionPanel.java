@@ -30,7 +30,11 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +66,7 @@ public abstract class TransitionOptionPanel extends Panel implements InputContex
 		
 		add(form);
 		
-		var title = String.format("Issue Transition (%s -> %s)", getIssue().getState(), getToState());
+		var title = MessageFormat.format(_T("Issue Transition ({0} -> {1})"), getIssue().getState(), getToState());
 		form.add(new Label("title", title));
 		
 		Collection<String> propertyNames = FieldUtils.getEditablePropertyNames(getIssue().getProject(), 
@@ -85,7 +89,7 @@ public abstract class TransitionOptionPanel extends Panel implements InputContex
 			
 			@Override
 			protected List<Behavior> getInputBehaviors() {
-				return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
+				return Lists.newArrayList(AttributeModifier.replace("placeholder", _T("Leave a comment")));
 			}
 			
 			@Override
