@@ -3511,6 +3511,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("This user is currently authenticating via external system. Setting password will switch to use internal database", 
 			"该用户当前通过外部系统进行身份验证。设置密码将切换到使用内部数据库");
 		m.put("My Email Addresses", "我的电子邮件地址");
+		m.put("<span wicket:id=\"activityCount\"></span> activities", "<span wicket:id=\"activityCount\"></span> 个活动");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");

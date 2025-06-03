@@ -376,6 +376,8 @@ public abstract class UserOverviewPanel extends GenericPanel<User> {
         dateRangePicker.setRequired(true);
         add(dateRangePicker);
 
+        add(new Label("activityCount", accessibleActivities.size() + inaccessibleActivityCount));
+
         activitiesView = new RepeatingView("activities");
         accessibleActivities.stream().limit(PAGE_SIZE).forEach(it -> {
             for (var row: newActivityRows(activitiesView, it)) {
