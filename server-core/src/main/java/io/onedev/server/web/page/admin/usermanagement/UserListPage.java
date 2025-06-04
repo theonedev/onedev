@@ -63,7 +63,7 @@ import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.user.UserCssResourceReference;
-import io.onedev.server.web.page.user.overview.UserOverviewPage;
+import io.onedev.server.web.page.user.profile.UserProfilePage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
@@ -644,7 +644,7 @@ public class UserListPage extends AdministrationPage {
 									 IModel<User> rowModel) {
 				User user = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "nameFrag", UserListPage.this);
-				WebMarkupContainer link = new ActionablePageLink("link", UserOverviewPage.class, UserOverviewPage.paramsOf(user)) {
+				WebMarkupContainer link = new ActionablePageLink("link", UserProfilePage.class, UserProfilePage.paramsOf(user)) {
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {

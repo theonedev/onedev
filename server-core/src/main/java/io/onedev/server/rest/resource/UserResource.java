@@ -86,35 +86,35 @@ public class UserResource {
 		this.emailAddressManager = emailAddressManager;
 	}
 
-	private ProfileData getProfileData(User user) {
-		var profile = new ProfileData();
-		profile.setDisabled(user.isDisabled());
-		profile.setServiceAccount(user.isServiceAccount());
-		profile.setName(user.getName());
-		profile.setFullName(user.getFullName());
+	private BasicSetting getBasicSetting(User user) {
+		var basicSetting = new BasicSetting();
+		basicSetting.setDisabled(user.isDisabled());
+		basicSetting.setServiceAccount(user.isServiceAccount());
+		basicSetting.setName(user.getName());
+		basicSetting.setFullName(user.getFullName());
 		if (!user.isServiceAccount()) 
-			profile.setNotifyOwnEvents(user.isNotifyOwnEvents());
-		return profile;
+			basicSetting.setNotifyOwnEvents(user.isNotifyOwnEvents());
+		return basicSetting;
 	}
 
-	@Api(order=100)
+	@Api(order=100, name="Get Basic Settings")
 	@Path("/{userId}")
     @GET
-    public ProfileData getProfile(@PathParam("userId") Long userId) {
+    public BasicSetting getBasicSetting(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
 			throw new UnauthorizedException();
-		return getProfileData(user);
+		return getBasicSetting(user);
     }
 
-	@Api(order=200)
+	@Api(order=200, name="Get Basic Settings of Current User")
 	@Path("/me")
     @GET
-    public ProfileData getMyProfile() {
+    public BasicSetting getMyBasicSetting() {
 		User user = SecurityUtils.getAuthUser();
 		if (user == null)
 			throw new UnauthorizedException();
-		return getProfileData(user);
+		return getBasicSetting(user);
     }
 	
 	@Api(order=250)
@@ -283,16 +283,16 @@ public class UserResource {
 		return queriesAndWatches;
     }
 	
-	@Api(order=1800)
+	@Api(order=1800, name="Query Basic Settings")
 	@GET
-    public List<ProfileData> queryProfile(
+    public List<BasicSetting> queryBasicSetting(
     		@QueryParam("term") @Api(description="Any string in login name, full name or email address") String term, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 
-    	return userManager.query(term, offset, count).stream().map(this::getProfileData).collect(toList());
+    	return userManager.query(term, offset, count).stream().map(this::getBasicSetting).collect(toList());
     }
 	
 	@Api(order=1850)
@@ -339,10 +339,10 @@ public class UserResource {
 		}
     }
 	
-	@Api(order=1950, description="Update user profile")
+	@Api(order=1950, name="Update Basic Settings")
 	@Path("/{userId}")
     @POST
-    public Response updateProfile(@PathParam("userId") Long userId, @NotNull @Valid ProfileUpdateData data) {
+    public Response updateBasicSetting(@PathParam("userId") Long userId, @NotNull @Valid BasicSettingUpdateData data) {
 		User user = userManager.load(userId);
 		if (SecurityUtils.isAdministrator() || user.equals(SecurityUtils.getAuthUser())) { 
 			User existingUser = userManager.findByName(data.getName());
@@ -577,7 +577,7 @@ public class UserResource {
 		}
 	}
 
-	public static class ProfileData implements Serializable {
+	public static class BasicSetting implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
 		@Api(order=10, description="Whether or not the user is disabled")
@@ -636,7 +636,7 @@ public class UserResource {
 		}
 	}
 
-	public static class ProfileUpdateData implements Serializable {
+	public static class BasicSettingUpdateData implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 		

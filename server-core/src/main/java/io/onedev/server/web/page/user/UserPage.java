@@ -31,10 +31,10 @@ import io.onedev.server.web.page.admin.usermanagement.UserListPage;
 import io.onedev.server.web.page.user.accesstoken.UserAccessTokensPage;
 import io.onedev.server.web.page.user.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.user.avatar.UserAvatarPage;
+import io.onedev.server.web.page.user.basicsetting.UserBasicSettingPage;
 import io.onedev.server.web.page.user.emailaddresses.UserEmailAddressesPage;
 import io.onedev.server.web.page.user.gpgkeys.UserGpgKeysPage;
 import io.onedev.server.web.page.user.membership.UserMembershipsPage;
-import io.onedev.server.web.page.user.overview.UserOverviewPage;
 import io.onedev.server.web.page.user.password.UserPasswordPage;
 import io.onedev.server.web.page.user.profile.UserProfilePage;
 import io.onedev.server.web.page.user.querywatch.UserQueryWatchesPage;
@@ -81,8 +81,8 @@ public abstract class UserPage extends LayoutPage implements UserAware {
 		List<PageTab> tabs = new ArrayList<>();
 		
 		var params = paramsOf(getUser());
-		tabs.add(new PageTab(Model.of(_T("Overview")), Model.of("grid"), UserOverviewPage.class, params));
 		tabs.add(new PageTab(Model.of(_T("Profile")), Model.of("profile"), UserProfilePage.class, params));
+		tabs.add(new PageTab(Model.of(_T("Basic Settings")), Model.of("info"), UserBasicSettingPage.class, params));
 		if (!getUser().isServiceAccount()) 
 			tabs.add(new PageTab(Model.of(_T("Email Addresses")), Model.of("mail"), UserEmailAddressesPage.class, params));		
 		tabs.add(new PageTab(Model.of(_T("Edit Avatar")), Model.of("avatar"), UserAvatarPage.class, params));

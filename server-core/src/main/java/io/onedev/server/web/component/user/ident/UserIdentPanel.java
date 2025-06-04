@@ -17,7 +17,7 @@ import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.card.UserCardPanel;
-import io.onedev.server.web.page.user.overview.UserOverviewPage;
+import io.onedev.server.web.page.user.profile.UserProfilePage;
 
 public class UserIdentPanel extends GenericPanel<User> {
 
@@ -65,7 +65,7 @@ public class UserIdentPanel extends GenericPanel<User> {
 	protected void onComponentTag(ComponentTag tag) {
 		super.onComponentTag(tag);
 		tag.setName("a");
-		var url = RequestCycle.get().urlFor(UserOverviewPage.class, UserOverviewPage.paramsOf(getUser()));
+		var url = RequestCycle.get().urlFor(UserProfilePage.class, UserProfilePage.paramsOf(getUser()));
 		tag.put("href", url.toString());
 	}
 

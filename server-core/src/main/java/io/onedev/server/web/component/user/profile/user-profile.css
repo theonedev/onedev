@@ -1,0 +1,309 @@
+.user-profile .info {
+    width: 240px;
+}
+.user-profile>.info .avatar {
+    width: 160px;
+    height: 160px;
+}
+
+.user-profile .activities, .user-profile .daily-stats {
+    min-width: 0;
+    max-width: 100%;
+    width: fit-content;
+}
+
+.user-profile .date-range {
+    width: 200px;
+}
+
+/* Contribution Calendar Styles */
+.user-profile .contribution-calendar {
+    font-size: 12px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    padding-bottom: 8px; /* Space for scrollbar */
+    box-sizing: border-box;
+}
+
+.user-profile .calendar-months {
+    position: relative; /* For absolute positioning of month labels */
+    height: 12px; /* Fixed height for month row */
+    margin-left: 25px; /* ADDED - to align with week columns after day labels */
+    margin-bottom: 4px;
+    white-space: nowrap;
+}
+
+.user-profile .month-label {
+    position: absolute; /* Will be positioned by JS */
+    text-align: left;
+    font-size: 10px;
+    color: #535370;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dark-mode .user-profile .month-label {
+    color: #8b949e;
+}
+
+.user-profile .calendar-body {
+    display: inline-flex; /* Changed from flex to inline-flex */
+    white-space: nowrap; /* Prevent wrapping */
+    padding: 1px; /* Add padding to make hover outlines visible */
+}
+
+.user-profile .calendar-day-labels {
+    width: 24px; /* ADDED - explicit width for day labels like 'Wed' */
+    flex-shrink: 0; /* ADDED - prevent shrinking */
+    display: flex;
+    flex-direction: column;
+    margin-right: 5px;
+    justify-content: flex-start; /* Changed from space-between to flex-start */
+    padding-top: 0; /* Remove padding-top */
+    padding-bottom: 0; /* Remove padding-bottom */
+    font-family: monospace;
+}
+
+.user-profile .day-label {
+    height: 12px; /* Match day-cell height */
+    line-height: 12px;
+    font-size: 10px;
+    color: #535370;
+    font-family: monospace;
+    margin-bottom: 2px; /* Add margin to match gap between cells */
+}
+
+.user-profile .day-label:last-child {
+    margin-bottom: 0; /* Remove margin from last label */
+}
+
+.dark-mode .user-profile .day-label {
+    color: #8b949e;
+}
+
+.user-profile .calendar-week-columns {
+    display: inline-flex; /* Changed from flex to inline-flex */
+    gap: 2px; /* Horizontal gap between weeks */
+    flex-wrap: nowrap; /* Explicitly prevent wrapping */
+    padding-right: 1px; /* Add padding to make rightmost hover outlines visible */
+}
+
+.user-profile .calendar-week {
+    display: flex;
+    flex-direction: column;
+    gap: 2px; /* Vertical gap between days in a week */
+}
+
+.user-profile .calendar-day-cell {
+    width: 12px;
+    height: 12px;
+    background-color: #ebedf0; /* Default, no activity */
+    border-radius: 2px;
+    box-sizing: border-box;
+}
+
+.dark-mode .user-profile .calendar-day-cell {
+    background-color: #36364F; /* Dark mode default */
+}
+
+.user-profile .calendar-day-cell.disabled {
+    background-color: #f8f9fa; /* Lighter than default, or transparent */
+    /* No hover effects for disabled cells */
+}
+
+.dark-mode .user-profile .calendar-day-cell.disabled {
+    background-color: #29293e; /* Slightly darker than previous value */
+}
+
+.user-profile .calendar-day-cell:not(.disabled):hover {
+    outline: 1px solid #9899ac;
+}
+
+.dark-mode .user-profile .calendar-day-cell:not(.disabled):hover {
+    outline: 1px solid #7E8299;
+}
+
+.user-profile .calendar-day-cell.selected {
+    outline: 2px solid #9899ac;
+}
+
+.dark-mode .user-profile .calendar-day-cell.selected {
+    outline: 2px solid #7E8299;
+}
+
+/* Contribution levels */
+.user-profile .calendar-day-cell[data-level="0"]:not(.disabled) {
+    background-color: #ebedf0;
+}
+.user-profile .calendar-day-cell[data-level="1"]:not(.disabled) {
+    background-color: #9be9a8;
+}
+.user-profile .calendar-day-cell[data-level="2"]:not(.disabled) {
+    background-color: #40c463;
+}
+.user-profile .calendar-day-cell[data-level="3"]:not(.disabled) {
+    background-color: #30a14e;
+}
+.user-profile .calendar-day-cell[data-level="4"]:not(.disabled) {
+    background-color: #216e39;
+}
+
+/* Dark mode contribution levels */
+.dark-mode .user-profile .calendar-day-cell[data-level="0"]:not(.disabled) {
+    background-color: #36364F;
+}
+.dark-mode .user-profile .calendar-day-cell[data-level="1"]:not(.disabled) {
+    background-color: #0e4429;
+}
+.dark-mode .user-profile .calendar-day-cell[data-level="2"]:not(.disabled) {
+    background-color: #006d32;
+}
+.dark-mode .user-profile .calendar-day-cell[data-level="3"]:not(.disabled) {
+    background-color: #26a641;
+}
+.dark-mode .user-profile .calendar-day-cell[data-level="4"]:not(.disabled) {
+    background-color: #39d353;
+}
+
+/* Legend styles */
+.user-profile .contribution-legend {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    margin-top: 8px;
+    color: #535370;
+}
+
+.dark-mode .user-profile .contribution-legend {
+    color: #8b949e;
+}
+
+/* Note styles */
+.user-profile .contribution-note {
+    font-size: 10px;
+    color: #535370;
+    text-align: left;
+    margin-left: 29px; /* Match the margin-left of calendar-months */
+}
+
+.dark-mode .user-profile .contribution-note {
+    color: #8b949e;
+}
+
+.user-profile .legend-elements {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.user-profile .legend-color-box {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    box-sizing: border-box;
+}
+
+.user-profile .legend-color-box[data-level="0"] {
+    background-color: #ebedf0;
+}
+.user-profile .legend-color-box[data-level="1"] {
+    background-color: #9be9a8;
+}
+.user-profile .legend-color-box[data-level="2"] {
+    background-color: #40c463;
+}
+.user-profile .legend-color-box[data-level="3"] {
+    background-color: #30a14e;
+}
+.user-profile .legend-color-box[data-level="4"] {
+    background-color: #216e39;
+}
+
+/* Dark mode legend colors */
+.dark-mode .user-profile .legend-color-box[data-level="0"] {
+    background-color: #36364F;
+}
+.dark-mode .user-profile .legend-color-box[data-level="1"] {
+    background-color: #0e4429;
+}
+.dark-mode .user-profile .legend-color-box[data-level="2"] {
+    background-color: #006d32;
+}
+.dark-mode .user-profile .legend-color-box[data-level="3"] {
+    background-color: #26a641;
+}
+.dark-mode .user-profile .legend-color-box[data-level="4"] {
+    background-color: #39d353;
+}
+
+/* Timeline styles for activities */
+.user-profile .detail {
+    position: relative;
+    padding-left: 20px;
+}
+
+.user-profile .detail::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--secondary);
+}
+
+.dark-mode .user-profile .detail::before {
+    background-color: var(--dark-mode-lighter-dark);
+}
+
+.user-profile .detail li {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.user-profile .detail li.activity::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--secondary);
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px var(--secondary);
+}
+
+.dark-mode .user-profile .detail li::before {
+    background-color: var(--dark-mode-lighter-dark);
+    border-color: var(--dark-mode-darker);
+    box-shadow: 0 0 0 2px var(--dark-mode-lighter-dark);
+}
+
+.user-profile .detail li:last-child {
+    margin-bottom: 0;
+}
+
+.user-profile .detail li[wicket\:id="more"]::before {
+    background-color: var(--secondary);
+    box-shadow: 0 0 0 2px var(--secondary);
+}
+
+.dark-mode .user-profile .detail li[wicket\:id="more"]::before {
+    background-color: var(--dark-mode-lighter-dark);
+    box-shadow: 0 0 0 2px var(--dark-mode-lighter-dark);
+}
+
+.user-profile .detail li[wicket\:id="inaccessibles"]::before {
+    background-color: var(--secondary);
+    box-shadow: 0 0 0 2px var(--secondary);
+}
+
+.dark-mode .user-profile .detail li[wicket\:id="inaccessibles"]::before {
+    background-color: var(--dark-mode-lighter-dark);
+    box-shadow: 0 0 0 2px var(--dark-mode-lighter-dark);
+}

@@ -30,6 +30,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"<a wicket:id=\"author\" class=\"name link-gray\"></a> 于 <span wicket:id=\"date\"></span> 提交");
 		m.put("<a wicket:id=\"author\" class=\"name link-gray\"></a> committed with <a wicket:id=\"committer\" class=\"name link-gray\"></a> <span wicket:id=\"date\"></span>", 
 			"<a wicket:id=\"author\" class=\"name link-gray\"></a> 于 <span wicket:id=\"date\"></span> 由 <a wicket:id=\"committer\" class=\"name link-gray\"></a> 提交");
+		m.put("<a wicket:id=\"removePassword\">Remove password</a> to force the user to authenticate via external system", 
+			"<a wicket:id=\"removePassword\">移除密码</a> 以强制用户通过外部系统进行身份验证");
 		m.put("<a wicket:id=\"verifyRecoveryCode\">Verify by recovery code</a> if you can not access your TOTP authenticator", 
 			"<a wicket:id=\"verifyRecoveryCode\">通过恢复代码验证</a>（如果您无法访问 TOTP 认证器）");
 		m.put("<b class='text-danger'>NOTE: </b> This requires an enterprise subscription. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
@@ -49,6 +51,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("<span class='keycap'>Tab</span> or <span class='keycap'>Enter</span> to complete.", 
 			"按 <span class='keycap'>Tab</span> 或 <span class='keycap'>Enter</span> 完成。");
 		m.put("<span class='keycap'>Tab</span> to complete.", "按 <span class='keycap'>Tab</span> 完成。");
+		m.put("<span wicket:id=\"activityCount\"></span> activities", "<span wicket:id=\"activityCount\"></span> 个活动");
 		m.put("<span wicket:id=\"submitterName\" class=\"user\"></span> opened <span wicket:id=\"submitDate\"></span>", 
 			"<span wicket:id=\"submitterName\" class=\"user\"></span> 于 <span wicket:id=\"submitDate\"></span> 创建");
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java pattern</a> is expected here", 
@@ -1480,8 +1483,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Multiple On the Other Side", "多行在另一侧");
 		m.put("Must not be empty", "不能为空");
 		m.put("My Access Tokens", "我的访问令牌");
+		m.put("My Email Addresses", "我的电子邮件地址");
 		m.put("My GPG Keys", "我的 GPG 密钥");
-		m.put("My Overview", "我的概览");
 		m.put("My Profile", "我的个人资料");
 		m.put("My SSH Keys", "我的 SSH 密钥");
 		m.put("Mypy Report", "Mypy 报告");
@@ -1919,7 +1922,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Output", "输出");
 		m.put("Overall Estimated Time:", "总体预计时间：");
 		m.put("Overall Spent Time:", "总体已用时间：");
-		m.put("Overview", "概览");
 		m.put("Own:", "自身");
 		m.put("Ownered By", "拥有者");
 		m.put("PEM private key begins with '-----BEGIN RSA PRIVATE KEY-----'", "PEM 私钥以 '-----BEGIN RSA PRIVATE KEY-----' 开头");
@@ -3047,6 +3049,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"此触发器仅在标记的提交可从此处指定的分支访问时适用。多个分支应以空格分隔。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。以 '-' 为前缀表示排除。留空表示匹配所有分支");
 		m.put("This user is authenticating via external system.", "此用户通过外部系统进行身份验证。");
 		m.put("This user is authenticating via internal database.", "此用户通过内部数据库进行身份验证。");
+		m.put("This user is currently authenticating via external system. Setting password will switch to use internal database", 
+			"该用户当前通过外部系统进行身份验证。设置密码将切换到使用内部数据库");
 		m.put("Threads", "线程");
 		m.put("Time Estimate Issue Field", "工单时间估算字段");
 		m.put("Time Range", "时间范围");
@@ -3063,6 +3067,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("To Everyone", "对所有人");
 		m.put("To State", "到状态");
 		m.put("To States", "到状态");
+		m.put("To authenticate via internal database, <a wicket:id=\"setPasswordForUser\">set password for user</a> or <a wicket:id=\"tellUserToResetPassword\">tell user to reset password</a>", 
+			"通过内部数据库进行身份验证，<a wicket:id=\"setPasswordForUser\">设置用户密码</a> 或 <a wicket:id=\"tellUserToResetPassword\">告诉用户重置密码</a>");
 		m.put("Toggle change history", "切换更改历史");
 		m.put("Toggle comments", "切换评论");
 		m.put("Toggle commits", "切换提交");
@@ -3218,7 +3224,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("User Management", "用户管理");
 		m.put("User Match Criteria", "用户匹配条件");
 		m.put("User Name", "用户名");
-		m.put("User Overview", "用户概览");
 		m.put("User Principal Name", "用户主体名称");
 		m.put("User SSH Key Attribute", "用户 SSH 密钥属性");
 		m.put("User Search Bases", "用户搜索基础");
@@ -3504,14 +3509,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("<a wicket:id=\"removePassword\">Remove password</a> to force the user to authenticate via external system", 
-			"<a wicket:id=\"removePassword\">移除密码</a> 以强制用户通过外部系统进行身份验证");
-		m.put("To authenticate via internal database, <a wicket:id=\"setPasswordForUser\">set password for user</a> or <a wicket:id=\"tellUserToResetPassword\">tell user to reset password</a>", 
-			"通过内部数据库进行身份验证，<a wicket:id=\"setPasswordForUser\">设置用户密码</a> 或 <a wicket:id=\"tellUserToResetPassword\">告诉用户重置密码</a>");
-		m.put("This user is currently authenticating via external system. Setting password will switch to use internal database", 
-			"该用户当前通过外部系统进行身份验证。设置密码将切换到使用内部数据库");
-		m.put("My Email Addresses", "我的电子邮件地址");
-		m.put("<span wicket:id=\"activityCount\"></span> activities", "<span wicket:id=\"activityCount\"></span> 个活动");
+		m.put("Basic Settings", "基本设置");
+		m.put("User Profile", "用户概况");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");

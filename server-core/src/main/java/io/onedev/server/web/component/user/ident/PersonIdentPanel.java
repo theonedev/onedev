@@ -20,7 +20,7 @@ import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.card.PersonCardPanel;
-import io.onedev.server.web.page.user.overview.UserOverviewPage;
+import io.onedev.server.web.page.user.profile.UserProfilePage;
 
 public class PersonIdentPanel extends Panel {
 
@@ -80,7 +80,7 @@ public class PersonIdentPanel extends Panel {
 		tag.setName("a");
 		var user = userModel.getObject();
 		if (user != null) {
-			var url = RequestCycle.get().urlFor(UserOverviewPage.class, UserOverviewPage.paramsOf(user));
+			var url = RequestCycle.get().urlFor(UserProfilePage.class, UserProfilePage.paramsOf(user));
 			tag.put("href", url.toString());		
 		}
 	}

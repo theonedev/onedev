@@ -57,7 +57,7 @@ import io.onedev.server.web.component.select2.SelectToActChoice;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
 import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
-import io.onedev.server.web.page.user.profile.UserProfilePage;
+import io.onedev.server.web.page.user.basicsetting.UserBasicSettingPage;
 
 public abstract class IssueAuthorizationsPanel extends Panel {
 
@@ -172,8 +172,8 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 					IModel<IssueAuthorization> rowModel) {
 				User user = rowModel.getObject().getUser();
 				Fragment fragment = new Fragment(componentId, "nameFrag", IssueAuthorizationsPanel.this);
-				Link<Void> link = new BookmarkablePageLink<Void>("link", UserProfilePage.class, 
-						UserProfilePage.paramsOf(user));
+				Link<Void> link = new BookmarkablePageLink<Void>("link", UserBasicSettingPage.class, 
+						UserBasicSettingPage.paramsOf(user));
 				link.add(new UserAvatar("avatar", user));
 				link.add(new Label("name", user.getDisplayName()));
 				fragment.add(link);

@@ -31,7 +31,7 @@ import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.user.UserCssResourceReference;
-import io.onedev.server.web.page.user.profile.UserProfilePage;
+import io.onedev.server.web.page.user.basicsetting.UserBasicSettingPage;
 import io.onedev.server.web.util.editbean.NewUserBean;
 
 public class NewUserPage extends AdministrationPage {
@@ -106,7 +106,7 @@ public class NewUserPage extends AdministrationPage {
 						bean = new NewUserBean();
 						replace(BeanContext.edit("editor", bean));
 					} else {
-						setResponsePage(UserProfilePage.class, UserProfilePage.paramsOf(user));
+						setResponsePage(UserBasicSettingPage.class, UserBasicSettingPage.paramsOf(user));
 					}
 				}
 			}

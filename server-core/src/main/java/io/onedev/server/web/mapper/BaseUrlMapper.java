@@ -69,10 +69,10 @@ import io.onedev.server.web.page.admin.usermanagement.NewUserPage;
 import io.onedev.server.web.page.admin.usermanagement.UserListPage;
 import io.onedev.server.web.page.user.accesstoken.UserAccessTokensPage;
 import io.onedev.server.web.page.user.avatar.UserAvatarPage;
+import io.onedev.server.web.page.user.basicsetting.UserBasicSettingPage;
 import io.onedev.server.web.page.user.emailaddresses.UserEmailAddressesPage;
 import io.onedev.server.web.page.user.gpgkeys.UserGpgKeysPage;
 import io.onedev.server.web.page.user.membership.UserMembershipsPage;
-import io.onedev.server.web.page.user.overview.UserOverviewPage;
 import io.onedev.server.web.page.user.password.UserPasswordPage;
 import io.onedev.server.web.page.user.profile.UserProfilePage;
 import io.onedev.server.web.page.user.querywatch.UserQueryWatchesPage;
@@ -86,9 +86,9 @@ import io.onedev.server.web.page.help.ResourceListPage;
 import io.onedev.server.web.page.issues.IssueListPage;
 import io.onedev.server.web.page.my.accesstoken.MyAccessTokensPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
+import io.onedev.server.web.page.my.basicsetting.MyBasicSettingPage;
 import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
 import io.onedev.server.web.page.my.gpgkeys.MyGpgKeysPage;
-import io.onedev.server.web.page.my.overview.MyOverviewPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.querywatch.MyQueryWatchesPage;
@@ -216,8 +216,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 	}
 	
 	private void addMyPages() {
-		add(new BasePageMapper("~my", MyOverviewPage.class));
-		add(new BasePageMapper("~my/profile", MyProfilePage.class));
+		add(new BasePageMapper("~my", MyProfilePage.class));
+		add(new BasePageMapper("~my/basic-setting", MyBasicSettingPage.class));
 		add(new BasePageMapper("~my/email-addresses", MyEmailAddressesPage.class));
 		add(new BasePageMapper("~my/avatar", MyAvatarPage.class));
 		add(new BasePageMapper("~my/password", MyPasswordPage.class));
@@ -270,8 +270,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 	}
  	
 	private void addUserPages() {
-		add(new BasePageMapper("~users/${user}", UserOverviewPage.class));
-		add(new BasePageMapper("~users/${user}/profile", UserProfilePage.class));
+		add(new BasePageMapper("~users/${user}", UserProfilePage.class));
+		add(new BasePageMapper("~users/${user}/basic-setting", UserBasicSettingPage.class));
 		add(new BasePageMapper("~users/${user}/email-setting", UserEmailAddressesPage.class));
 		add(new BasePageMapper("~users/${user}/groups", UserMembershipsPage.class));
 		add(new BasePageMapper("~users/${user}/authorizations", 

@@ -1,0 +1,75 @@
+<wicket:panel>
+    <div class="user-profile d-flex m-n5 no-autofocus">
+        <div class="flex-shrink-0 info p-5 border-right d-none d-lg-block text-center">
+            <img wicket:id="avatar">
+            <div wicket:id="name" class="mt-4"></div>
+            <div wicket:id="fullName" class="mt-1"></div>
+            <wicket:enclosure child="emailAddress">
+                <div class="mt-1">
+                    <a wicket:id="emailAddress"><span wicket:id="label"></span></a>
+                </div>
+            </wicket:enclosure>
+            <div wicket:id="note" class="mt-5"></div>
+            <div class="mt-5 text-center">
+                <a wicket:id="enable" class="btn btn-sm btn-outline-primary mr-3"><wicket:t>Enable</wicket:t></a>
+                <a wicket:id="disable" class="btn btn-sm btn-outline-warning mr-3"><wicket:t>Disable</wicket:t></a>
+                <a wicket:id="delete" class="btn btn-sm btn-outline-danger"><wicket:t>Delete</wicket:t></a>
+            </div>
+        </div>
+        <div class="activities p-5">
+            <div class="d-flex mb-4 align-items-center">
+                <div class="date-range mr-4">
+                    <input wicket:id="dateRange" class="form-control form-control-sm">
+                </div>
+                <div class="ml-auto mb-0"><wicket:t><span wicket:id="activityCount"></span> activities</wicket:t></div>
+            </div>
+            <div class="stats border rounded p-4">                
+                <div class="daily-stats overflow-auto mb-5"></div>
+                <div class="type-stats resize-aware"></div>
+            </div>
+            <ul class="detail list-unstyled mb-0">
+                <li wicket:id="activities" class="activity"></li>
+                <li wicket:id="more" class="text-center mt-3"><a wicket:id="link" class="btn btn-primary btn-sm"><wicket:t>More Activities</wicket:t></a></li>
+                <wicket:enclosure>
+                    <li class="activity inaccessibles mt-5"><wicket:svg href="lock" class="icon mr-1"/> <span wicket:id="inaccessibles"></span></li>
+                </wicket:enclosure>
+            </ul>
+        </div>
+    </div>
+	<wicket:fragment wicket:id="authViaInternalDatabaseFrag">
+		<div class="alert alert-light p-2 font-size-sm">
+            <wicket:t>This user is authenticating via internal database.</wicket:t>
+            <div wicket:id="actions">                
+            <wicket:t><a wicket:id="removePassword">Remove password</a> to force the user to authenticate via external system</wicket:t>
+            </div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="authViaExternalSystemFrag">
+		<div class="alert alert-light p-2 font-size-sm">
+            <wicket:t>This user is authenticating via external system.</wicket:t>
+			<form wicket:id="form" class="d-inline">
+				<wicket:t>To authenticate via internal database, <a wicket:id="setPasswordForUser">set password for user</a> or <a wicket:id="tellUserToResetPassword">tell user to reset password</a></wicket:t>
+			</form>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="serviceAccountFrag">
+		<div class="alert alert-light p-2 font-size-sm"><wicket:t>This is a service account for task automation purpose</wicket:t></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="disabledFrag">
+		<div class="alert alert-light-warning p-2 font-size-sm"><wicket:t>This account is disabled</wicket:t></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="disabledServiceAccountFrag">
+		<div class="alert alert-light-warning p-2 font-size-sm"><wicket:t>This is a disabled service account</wicket:t></div>
+	</wicket:fragment>
+    <wicket:fragment wicket:id="dateFrag">
+        <h5 class="mt-4 mb-3 d-flex align-items-center">
+            <wicket:svg href="calendar" class="icon mr-2"/> <span wicket:id="date"></span>
+        </h5>
+    </wicket:fragment>
+    <wicket:fragment wicket:id="activityFrag">
+        <div class="ml-4 mt-2">
+            <span wicket:id="time" class="text-monospace"></span>
+            <span wicket:id="description"></span>
+        </div>
+    </wicket:fragment>
+</wicket:panel>

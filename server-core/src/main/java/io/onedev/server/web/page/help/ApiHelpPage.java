@@ -59,7 +59,12 @@ public abstract class ApiHelpPage extends LayoutPage {
 	}
 	
 	protected String getMethodTitle(Method resourceMethod) {
-		return WordUtils.capitalize(WordUtils.uncamel(resourceMethod.getName()));
+		var api = resourceMethod.getAnnotation(Api.class);
+		if (api != null && api.name().length() != 0) {
+			return api.name();
+		} else {
+			return WordUtils.capitalize(WordUtils.uncamel(resourceMethod.getName()));
+		}
 	}
 
 	@Nullable

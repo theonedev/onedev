@@ -153,9 +153,9 @@ import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.page.my.accesstoken.MyAccessTokensPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
+import io.onedev.server.web.page.my.basicsetting.MyBasicSettingPage;
 import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
 import io.onedev.server.web.page.my.gpgkeys.MyGpgKeysPage;
-import io.onedev.server.web.page.my.overview.MyOverviewPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.querywatch.MyQueryWatchesPage;
@@ -906,12 +906,12 @@ public abstract class LayoutPage extends BasePage {
 		}
 
 		WebMarkupContainer item;
-		userInfo.add(item = new ViewStateAwarePageLink<Void>("myOverview", MyOverviewPage.class));
-		if (getPage() instanceof MyOverviewPage)
-			item.add(AttributeAppender.append("class", "active"));
-
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myProfile", MyProfilePage.class));
 		if (getPage() instanceof MyProfilePage)
+			item.add(AttributeAppender.append("class", "active"));
+
+		userInfo.add(item = new ViewStateAwarePageLink<Void>("myBasicSetting", MyBasicSettingPage.class));
+		if (getPage() instanceof MyBasicSettingPage)
 			item.add(AttributeAppender.append("class", "active"));
 
 		if (getLoginUser() != null && !getLoginUser().isServiceAccount()) {
