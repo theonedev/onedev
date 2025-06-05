@@ -147,8 +147,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 		super.onInitialize();
 	
 		Issue issue = getIssue();
-		add(new UserIdentPanel("submitterAvatar", issue.getSubmitter(), Mode.AVATAR));
-		add(new Label("submitterName", issue.getSubmitter().getDisplayName()));
+		add(new UserIdentPanel("submitter", issue.getSubmitter(), Mode.AVATAR_AND_NAME));
 		add(new Label("submitDate", DateUtils.formatAge(issue.getSubmitDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(issue.getSubmitDate()))));
 

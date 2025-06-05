@@ -23,8 +23,7 @@ class IssueChangePanel extends Panel {
 		
 		IssueChange change = getChange();
 
-		add(new UserIdentPanel("avatar", change.getUser(), Mode.AVATAR));
-		add(new Label("name", change.getUser().getDisplayName()));	
+		add(new UserIdentPanel("user", change.getUser(), Mode.AVATAR_AND_NAME));
 		add(new Label("description", change.getData().getActivity()));
 		
 		add(new Label("age", DateUtils.formatAge(change.getDate()))

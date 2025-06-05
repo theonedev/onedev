@@ -39,8 +39,7 @@ class IssueWorkPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new UserIdentPanel("avatar", getWork().getUser(), Mode.AVATAR));
-		add(new Label("name", getWork().getUser().getDisplayName()));	
+		add(new UserIdentPanel("user", getWork().getUser(), Mode.AVATAR_AND_NAME));
 		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
 		add(new Label("workingPeriod", timeTrackingSetting.formatWorkingPeriod(getWork().getMinutes())));	
 		add(new Label("age", DateUtils.formatAge(getWork().getDate()))

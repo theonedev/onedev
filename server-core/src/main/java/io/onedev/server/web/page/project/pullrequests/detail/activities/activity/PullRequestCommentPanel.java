@@ -54,7 +54,7 @@ class PullRequestCommentPanel extends Panel {
 		super.onInitialize();
 
 		add(new UserIdentPanel("avatar", getComment().getUser(), Mode.AVATAR));
-		add(new Label("name", getComment().getUser().getDisplayName()));
+		add(new UserIdentPanel("name", getComment().getUser(), Mode.NAME));
 		add(new Label("age", DateUtils.formatAge(getComment().getDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getDate()))));
 		

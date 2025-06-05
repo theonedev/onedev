@@ -64,9 +64,14 @@ public class UserIdentPanel extends GenericPanel<User> {
 	@Override
 	protected void onComponentTag(ComponentTag tag) {
 		super.onComponentTag(tag);
-		tag.setName("a");
-		var url = RequestCycle.get().urlFor(UserProfilePage.class, UserProfilePage.paramsOf(getUser()));
-		tag.put("href", url.toString());
+		if (getUser().getId() > 0) {
+			tag.setName("a");
+			tag.put("onclick", "event.stopPropagation()");
+			var url = RequestCycle.get().urlFor(UserProfilePage.class, UserProfilePage.paramsOf(getUser()));
+			tag.put("href", url.toString());
+		} else {
+			tag.setName("span");
+		}
 	}
 
 	@Override

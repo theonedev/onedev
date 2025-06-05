@@ -1634,8 +1634,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		PullRequest request = getPullRequest();
 
 		var descriptionContainer = new WebMarkupContainer("description");
-		descriptionContainer.add(new UserIdentPanel("submitterAvatar", request.getSubmitter(), Mode.AVATAR));
-		descriptionContainer.add(new Label("submitterName", request.getSubmitter().getDisplayName()));
+		descriptionContainer.add(new UserIdentPanel("submitter", request.getSubmitter(), Mode.AVATAR_AND_NAME));
 		descriptionContainer.add(new Label("submitDate", DateUtils.formatAge(request.getSubmitDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(request.getSubmitDate()))));
 		

@@ -77,11 +77,13 @@ public class PersonIdentPanel extends Panel {
 	@Override
 	protected void onComponentTag(ComponentTag tag) {
 		super.onComponentTag(tag);
-		tag.setName("a");
 		var user = userModel.getObject();
-		if (user != null) {
+		if (user != null && user.getId() > 0) {
+			tag.setName("a");
 			var url = RequestCycle.get().urlFor(UserProfilePage.class, UserProfilePage.paramsOf(user));
 			tag.put("href", url.toString());		
+		} else {
+			tag.setName("span");
 		}
 	}
 
