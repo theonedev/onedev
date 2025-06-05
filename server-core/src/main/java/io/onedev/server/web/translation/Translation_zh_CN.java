@@ -52,8 +52,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"按 <span class='keycap'>Tab</span> 或 <span class='keycap'>Enter</span> 完成。");
 		m.put("<span class='keycap'>Tab</span> to complete.", "按 <span class='keycap'>Tab</span> 完成。");
 		m.put("<span wicket:id=\"activityCount\"></span> activities", "<span wicket:id=\"activityCount\"></span> 个活动");
-		m.put("<span wicket:id=\"submitterName\" class=\"user\"></span> opened <span wicket:id=\"submitDate\"></span>", 
-			"<span wicket:id=\"submitterName\" class=\"user\"></span> 于 <span wicket:id=\"submitDate\"></span> 创建");
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java pattern</a> is expected here", 
 			"这里需要一个 <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java 正则表达式</a>");
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
@@ -287,6 +285,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Base Query", "基础查询");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Base64 编码的 PEM 格式，以 -----BEGIN CERTIFICATE----- 开头，以 -----END CERTIFICATE----- 结尾");
+		m.put("Basic Settings", "基本设置");
 		m.put("Batch Edit All Queried Issues", "批量编辑所有查询的工单");
 		m.put("Batch Edit Selected Issues", "批量编辑选定的工单");
 		m.put("Batch Editing {0} Issues", "批量编辑 {0} 个工单");
@@ -3225,6 +3224,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("User Match Criteria", "用户匹配条件");
 		m.put("User Name", "用户名");
 		m.put("User Principal Name", "用户主体名称");
+		m.put("User Profile", "用户概况");
 		m.put("User SSH Key Attribute", "用户 SSH 密钥属性");
 		m.put("User Search Bases", "用户搜索基础");
 		m.put("User Search Filter", "用户搜索过滤器");
@@ -3509,8 +3509,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Basic Settings", "基本设置");
-		m.put("User Profile", "用户概况");
+		m.put("My Basic Settings", "我的基本设置");
+		m.put("Target branch will be fast-forwarded to source branch", "目标分支将被 fast-forward 到源分支");
+		m.put("Source branch commits will be rebased onto target branch", "源分支提交将 rebase 到目标分支");
+		m.put("opened <span wicket:id=\"submitDate\"></span>", "于 <span wicket:id=\"submitDate\"></span> 创建");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");
@@ -3572,6 +3574,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Squash all commits from source branch into a single commit in target branch", "将源分支的所有提交压缩成一个提交，并添加到目标分支");
 		m.put("Rebase all commits from source branch onto target branch", "将源分支的所有提交 Rebase 到目标分支");
 		m.put("Closed", "关闭");
+		m.put("Create Merge Commit", "创建合并提交");
+		m.put("Create Merge Commit If Necessary", "仅当必要时创建合并提交");
+		m.put("Squash Source Branch Commits", "压缩源分支提交");
+		m.put("Rebase Source Branch Commits", "重置源分支提交");
 	}
 		
 	@Override

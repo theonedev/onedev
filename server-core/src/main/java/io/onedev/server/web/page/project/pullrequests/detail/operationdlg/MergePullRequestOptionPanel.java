@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.pullrequests.detail.operationdlg;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
+import static io.onedev.server.web.translation.Translation._T;
 
 import io.onedev.server.web.util.editbean.CommitMessageBean;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -37,9 +38,9 @@ public abstract class MergePullRequestOptionPanel extends ObsoleteUpdateAwarePan
 			if (commitMessage == null)
 				commitMessage = request.getDefaultMergeCommitMessage();
 		} else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) {
-			description = "Source branch commits will be rebased onto target branch";
+			description = _T("Source branch commits will be rebased onto target branch");
 		} else if (mergePreview.getMergeCommitHash().equals(mergePreview.getHeadCommitHash())) {
-			description = "Source branch commits will be fast-forwarded to target branch";
+			description = _T("Target branch will be fast-forwarded to source branch");
 		} else {
 			commitMessage = request.getDefaultMergeCommitMessage();
 		}
@@ -64,7 +65,7 @@ public abstract class MergePullRequestOptionPanel extends ObsoleteUpdateAwarePan
 
 	@Override
 	protected String getTitle() {
-		return getPullRequest().getMergeStrategy().toString();
+		return _T(getPullRequest().getMergeStrategy().toString());
 	}
 
 }
