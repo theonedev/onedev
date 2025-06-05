@@ -208,8 +208,6 @@ public abstract class BasePage extends WebPage {
 				translations.put("{0}d", _T("{0}d"));
 				translations.put("{0}s", _T("{0}s"));
 				
-				getSession().setMetaData(REMOVE_AUTOSAVE_KEYS, null);
-
 				try {
 					response.render(OnDomReadyHeaderItem.forScript(
 						String.format("onedev.server.onDomReady('%s', '%s', %s, %s, %s);",
@@ -222,6 +220,7 @@ public abstract class BasePage extends WebPage {
 					throw new RuntimeException(e);
 				}
 				response.render(OnLoadHeaderItem.forScript("onedev.server.onWindowLoad();"));
+				getSession().setMetaData(REMOVE_AUTOSAVE_KEYS, null);
 			}
 
 		});

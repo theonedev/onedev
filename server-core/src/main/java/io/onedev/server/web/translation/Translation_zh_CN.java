@@ -1482,6 +1482,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Multiple On the Other Side", "多行在另一侧");
 		m.put("Must not be empty", "不能为空");
 		m.put("My Access Tokens", "我的访问令牌");
+		m.put("My Basic Settings", "我的基本设置");
 		m.put("My Email Addresses", "我的电子邮件地址");
 		m.put("My GPG Keys", "我的 GPG 密钥");
 		m.put("My Profile", "我的个人资料");
@@ -2510,6 +2511,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Source Path", "源路径");
 		m.put("Source branch already exists", "源分支已存在");
 		m.put("Source branch already merged into target branch", "源分支已合并到目标分支");
+		m.put("Source branch commits will be rebased onto target branch", "源分支提交将 rebase 到目标分支");
 		m.put("Source branch is default branch", "源分支是默认分支");
 		m.put("Source branch is outdated", "源分支已过时");
 		m.put("Source branch no longer exists", "源分支不再存在");
@@ -2950,6 +2952,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Target Project", "目标项目");
 		m.put("Target branch no longer exists", "目标分支不再存在");
 		m.put("Target branch was fast-forwarded to source branch", "目标分支已 fast-forward 到源分支");
+		m.put("Target branch will be fast-forwarded to source branch", "目标分支将被 fast-forward 到源分支");
 		m.put("Target or source branch is updated. Please try again", "目标或源分支已更新，请重试");
 		m.put("Task List", "任务列表");
 		m.put("Task list", "任务列表");
@@ -3453,6 +3456,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("new field", "新字段");
 		m.put("on file {0}", "在文件 {0} 上");
 		m.put("opened", "已创建");
+		m.put("opened <span wicket:id=\"submitDate\"></span>", "于 <span wicket:id=\"submitDate\"></span> 创建");
 		m.put("or match another value", "或匹配另一个值");
 		m.put("outdated", "过时");
 		m.put("packages", "包");
@@ -3509,10 +3513,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("My Basic Settings", "我的基本设置");
-		m.put("Target branch will be fast-forwarded to source branch", "目标分支将被 fast-forward 到源分支");
-		m.put("Source branch commits will be rebased onto target branch", "源分支提交将 rebase 到目标分支");
-		m.put("opened <span wicket:id=\"submitDate\"></span>", "于 <span wicket:id=\"submitDate\"></span> 创建");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");

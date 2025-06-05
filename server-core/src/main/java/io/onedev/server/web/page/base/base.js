@@ -736,18 +736,20 @@ onedev.server = {
 	},
 
 	setupTippy: function() {
-		function doSetup($container) {
+		function doSetup(container) {
 			setTimeout(function() {
-				tippy($container[0].querySelectorAll('[data-tippy-content]'), {
-					delay: [500, 0],
-					placement: 'auto'
-				});
+				if (container === document || document.body.contains(container)) {
+					tippy(container.querySelectorAll('[data-tippy-content]'), {
+						delay: [500, 0],
+						placement: 'auto'
+					});
+				}
 			}, 100);
 		}	
 		$(document).on("afterElementReplace", function(event, componentId) {
-			doSetup($("#" + componentId));
+			doSetup(document.getElementById(componentId));
 		});
-		doSetup($(document));
+		doSetup(document);
 	},
 
 	perfectScrollbar: {
