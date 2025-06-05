@@ -11,8 +11,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -25,7 +23,6 @@ public class Input implements Serializable {
 
 	private final String name;
 	
-	@XStreamOmitField
 	private final String type;
 	
 	private final List<String> values;

@@ -21,7 +21,7 @@ public class TestPage extends BasePage {
 		add(new Link<Void>("test") {
 
 			@Override
-			public void onClick() {				
+			public void onClick() {		
 			}
 
 		});

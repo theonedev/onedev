@@ -7987,4 +7987,97 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate202(File dataDir, Stack<Integer> versions) {
+		var fieldTypes = new HashMap<String, String>();
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element fieldSpecElement : valueElement.element("fieldSpecs").elements()) {
+								var name = fieldSpecElement.elementText("name").trim();
+								switch (fieldSpecElement.getName()) {
+									case "io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField":
+										fieldTypes.put(name, InputSpec.ENUMERATION);
+										break;
+									case "io.onedev.server.model.support.issue.field.spec.IntegerField":
+										fieldTypes.put(name, InputSpec.INTEGER);
+										break;
+									case "io.onedev.server.model.support.issue.field.spec.FloatField":
+										fieldTypes.put(name, InputSpec.FLOAT);
+										break;
+									case "io.onedev.server.model.support.issue.field.spec.BooleanField":
+										fieldTypes.put(name, InputSpec.BOOLEAN);
+										break;
+									case "io.onedev.server.model.support.issue.field.spec.DateField":
+										fieldTypes.put(name, InputSpec.DATE);
+										break;
+									case "io.onedev.server.model.support.issue.field.spec.DateTimeField":
+										fieldTypes.put(name, InputSpec.DATE_TIME);
+										break;
+									case "io.onedev.server.model.support.issue.field.spec.SecretField":
+										fieldTypes.put(name, InputSpec.SECRET);
+										break;
+									case "io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField":
+										fieldTypes.put(name, InputSpec.USER);
+										break;
+									case "io.onedev.server.model.support.issue.field.spec.GroupChoiceField":
+										fieldTypes.put(name, InputSpec.GROUP);
+										break;
+									case "io.onedev.server.model.support.issue.field.spec.BuildChoiceField":
+										fieldTypes.put(name, InputSpec.BUILD);
+										break;
+									case "io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField":
+										fieldTypes.put(name, InputSpec.PULL_REQUEST);
+										break;
+									case "io.onedev.server.model.support.issue.field.spec.CommitField":
+										fieldTypes.put(name, InputSpec.COMMIT);
+										break;
+									case "io.onedev.server.model.support.issue.field.spec.IssueChoiceField":
+										fieldTypes.put(name, InputSpec.ISSUE);
+										break;
+									case "io.onedev.server.model.support.issue.field.spec.IterationChoiceField":
+										fieldTypes.put(name, InputSpec.ITERATION);
+										break;
+									case "io.onedev.server.model.support.issue.field.spec.TextField":
+										fieldTypes.put(name, InputSpec.TEXT);
+										break;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					Element dataElement = element.element("data");
+					var dataClass = dataElement.attributeValue("class");
+					if (dataClass.contains("IssueBatchUpdateData") || dataClass.contains("IssueFieldChangeData")
+							|| dataClass.contains("IssueStateChangeData")) {
+						for (Element entryElement : dataElement.element("oldFields").elements()) {
+							var inputElement = entryElement.element("io.onedev.server.util.Input");
+							var nameElement = inputElement.element("name");
+							if (nameElement != null) 
+								inputElement.addElement("type").setText(fieldTypes.getOrDefault(nameElement.getText().trim(), "Unknown"));
+						}
+						for (Element entryElement : dataElement.element("newFields").elements()) {
+							var inputElement = entryElement.element("io.onedev.server.util.Input");
+							var nameElement = inputElement.element("name");
+							if (nameElement != null) 
+								inputElement.addElement("type").setText(fieldTypes.getOrDefault(nameElement.getText().trim(), "Unknown"));
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

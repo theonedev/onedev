@@ -886,6 +886,12 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 							return 1;
 						else if (result < 0)
 							return -1;
+						else if (o1.getValue() != null && o2.getValue() != null)
+							return o1.getValue().compareTo(o2.getValue());
+						else if (o1.getValue() != null && o2.getValue() == null)
+							return -1;
+						else if (o1.getValue() == null && o2.getValue() != null)
+							return 1;
 						else
 							return 0;
 					});
