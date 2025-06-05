@@ -3227,7 +3227,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("User Match Criteria", "用户匹配条件");
 		m.put("User Name", "用户名");
 		m.put("User Principal Name", "用户主体名称");
-		m.put("User Profile", "用户概况");
+		m.put("User Profile", "用户个人资料");
 		m.put("User SSH Key Attribute", "用户 SSH 密钥属性");
 		m.put("User Search Bases", "用户搜索基础");
 		m.put("User Search Filter", "用户搜索过滤器");
