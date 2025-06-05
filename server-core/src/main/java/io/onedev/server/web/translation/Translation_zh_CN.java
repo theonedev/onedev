@@ -2077,8 +2077,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Private Key Secret", "私钥密钥");
 		m.put("Privilege", "权限");
 		m.put("Privilege Settings", "权限设置");
-		m.put("Profile", "基本信息");
-		m.put("Profile updated", "配置已更新");
+		m.put("Profile", "个人资料");
+		m.put("Basic settings updated", "基本设置已更新");
 		m.put("Programming language", "编程语言");
 		m.put("Project", "项目");
 		m.put("Project \"{0}\" deleted", "项目 \"{0}\" 已删除");

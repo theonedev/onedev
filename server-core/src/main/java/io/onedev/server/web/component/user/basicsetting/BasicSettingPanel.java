@@ -78,7 +78,7 @@ public class BasicSettingPanel extends GenericPanel<User> {
 				
 				if (editor.isValid()) {
 					getUserManager().update(user, oldName);
-					Session.get().success(_T("Profile updated"));
+					Session.get().success(_T("Basic settings updated"));
 					setResponsePage(getPage().getClass(), getPage().getPageParameters());
 				}
 			}

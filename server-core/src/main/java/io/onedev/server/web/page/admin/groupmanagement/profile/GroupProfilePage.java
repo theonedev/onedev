@@ -75,7 +75,7 @@ public class GroupProfilePage extends GroupPage {
 				if (editor.isValid()) {
 					groupManager.update(group, oldName);
 					setResponsePage(GroupProfilePage.class, GroupProfilePage.paramsOf(group));
-					Session.get().success(_T("Profile updated"));
+					Session.get().success(_T("Basic settings updated"));
 				}
 			}
 			
