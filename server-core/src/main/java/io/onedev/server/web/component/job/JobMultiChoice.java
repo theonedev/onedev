@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.job;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -20,9 +22,9 @@ public class JobMultiChoice extends Select2MultiChoice<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		if (isRequired())
-			getSettings().setPlaceholder("Choose jobs...");
+			getSettings().setPlaceholder(_T("Choose jobs..."));
 		else
-			getSettings().setPlaceholder("Not specified");
+			getSettings().setPlaceholder(_T("Not specified"));
 		getSettings().setFormatResult("onedev.server.choiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.choiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.choiceFormatter.escapeMarkup");

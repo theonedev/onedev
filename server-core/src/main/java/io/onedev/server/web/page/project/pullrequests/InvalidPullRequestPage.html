@@ -2,29 +2,29 @@
 	<div class="card m-2 m-sm-5">
 		<div class="card-body">
 			<h2>
-				Some related commits of the pull request are missing
+				<wicket:t>Some related commits of the pull request are missing</wicket:t>
 			</h2>
 			<p>
-			This might happen when project points to a wrong git repository, or these commits are garbage collected. 
+			<wicket:t>This might happen when project points to a wrong git repository, or these commits are garbage collected.</wicket:t>
 			</p>
 			<div class="bg-light rounded p-4 mb-5">
-				<div class="h6 mb-2">Missing Commits</div>
+				<div class="h6 mb-2"><wicket:t>Missing Commits</wicket:t></div>
 				<div wicket:id="missingCommits" class="text-monospace font-size-sm mb-4"></div>
-				<div class="h6 mb-2">Pull Request Branches</div>
+				<div class="h6 mb-2"><wicket:t>Pull Request Branches</wicket:t></div>
 				<div wicket:id="requestBranches" class="mb-4"></div>
-				<div class="h6 mb-2">Pull Request Title</div>
+				<div class="h6 mb-2"><wicket:t>Pull Request Title</wicket:t></div>
 				<div wicket:id="requestTitle"></div>
 				<wicket:enclosure child="requestDescription">
-					<div class="h6 mb-2">Pull Request Description</div>
+					<div class="h6 mb-2"><wicket:t>Pull Request Description</wicket:t></div>
 					<div wicket:id="requestDescription"></div>
 				</wicket:enclosure>
 			</div>
-			<a wicket:id="delete" class="btn btn-danger">Delete Pull Request</a>	
+			<a wicket:id="delete" class="btn btn-danger"><wicket:t>Delete Pull Request</wicket:t></a>	
 		</div>
 	</div>
 	<wicket:fragment wicket:id="projectTitleFrag">
 		<span class="d-flex align-items-center">
-			<a wicket:id="pullRequests" class="text-nowrap">Pull Requests</a> 
+			<a wicket:id="pullRequests" class="text-nowrap"><wicket:t>Pull Requests</wicket:t></a> 
 			<span class="dot"></span>
 			<span wicket:id="pullRequestNumber"></span>
 		</span>

@@ -10,7 +10,7 @@ import java.util.TimeZone;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.Application;
 import org.joda.time.format.ISODateTimeFormat;
 import org.ocpsoft.prettytime.PrettyTime;
 
@@ -41,11 +41,14 @@ public class DateUtils {
 			"4 weeks ago", "last month", "1 month 2 days ago", "last year", "1 year ago"); 
 	
     public static String formatAge(Date date) {
-    	return new PrettyTime(WebSession.get().getLocale()).format(date);
+		if (Application.exists())
+    		return new PrettyTime(WebSession.get().getLocale()).format(date);
+		else
+			return new PrettyTime().format(date);
     }
 
 	public static ZoneId getZoneId() {
-		if (RequestCycle.get() != null) {
+		if (Application.exists()) {
 			ZoneId zoneId = WebSession.get().getZoneId();
 			if (zoneId == null)
 				zoneId = ZoneId.systemDefault();

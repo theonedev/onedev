@@ -14,22 +14,22 @@
 			</div>
 			<div class="mb-4">
 				<a wicket:id="showSavedQueries" class="show-saved-queries text-gray d-inline-block mb-2 mr-4 text-nowrap">
-					<wicket:svg href="eye" class="icon"></wicket:svg> Show Saved Queries
+					<wicket:svg href="eye" class="icon"></wicket:svg> <wicket:t>Show Saved Queries</wicket:t>
 				</a>
 				<a wicket:id="saveQuery" class="save-query text-gray d-inline-block mb-2 mr-4 text-nowrap">
-					<wicket:svg href="save" class="icon"></wicket:svg> Save Query
+					<wicket:svg href="save" class="icon"></wicket:svg> <wicket:t>Save Query</wicket:t>
 				</a>
 				<a wicket:id="filter" class="filter text-gray mr-4 mb-2 d-inline-block text-nowrap">
-					<wicket:svg href="filter" class="icon"></wicket:svg> Filter
+					<wicket:svg href="filter" class="icon"></wicket:svg> <wicket:t>Filter</wicket:t>
 				</a>
 				<a wicket:id="orderBy" class="order-by text-gray mr-4 mb-2 d-inline-block text-nowrap">
-					<wicket:svg href="sort" class="icon"></wicket:svg> Order By
+					<wicket:svg href="sort" class="icon"></wicket:svg> <wicket:t>Order By</wicket:t>
 				</a>
 				<a wicket:id="operations" class="operations text-gray mr-4 mb-2 d-inline-block text-nowrap">
-					<wicket:svg href="ellipsis-circle" class="icon"></wicket:svg> Operations
+					<wicket:svg href="ellipsis-circle" class="icon"></wicket:svg> <wicket:t>Operations</wicket:t>
 				</a>
 				<a wicket:id="listParams" class="list-params text-gray d-inline-block mr-4 mb-2 d-none d-xl-inline text-nowrap">
-					<wicket:svg href="select" class="icon"></wicket:svg> Display Params
+					<wicket:svg href="select" class="icon"></wicket:svg> <wicket:t>Display Params</wicket:t>
 				</a>
 				<span wicket:id="extraActions"></span>
 				<span wicket:id="count" class="float-right text-gray"></span>
@@ -62,7 +62,7 @@
 		<div class="build-list-params">
 			<form wicket:id="form">
 				<div class="modal-header">
-					<h5 id="modal-title" class="modal-title">Params to Display</h5>
+					<h5 id="modal-title" class="modal-title"><wicket:t>Params to Display</wicket:t></h5>
 					<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 				</div>
 				<div class="modal-body">
@@ -70,8 +70,8 @@
 				</div>
 				<div class="modal-footer">
 					<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" t:value="Save">
-					<button wicket:id="useDefault" class="btn btn-primary">Use Default</button>
-					<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+					<button wicket:id="useDefault" class="btn btn-primary"><wicket:t>Use Default</wicket:t></button>
+					<a wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></a>
 				</div>
 			</form>
 		</div>

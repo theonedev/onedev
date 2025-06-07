@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.job;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
 
 import org.apache.wicket.model.IModel;
@@ -21,9 +23,9 @@ public class JobSingleChoice extends Select2Choice<String> {
 		
 		getSettings().setAllowClear(!isRequired());
 		if (isRequired())
-			getSettings().setPlaceholder("Choose job...");
+			getSettings().setPlaceholder(_T("Choose job..."));
 		else
-			getSettings().setPlaceholder("Not specified");
+			getSettings().setPlaceholder(_T("Not specified"));
 		getSettings().setFormatResult("onedev.server.choiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.choiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.choiceFormatter.escapeMarkup");

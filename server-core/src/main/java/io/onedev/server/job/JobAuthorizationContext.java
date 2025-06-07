@@ -1,5 +1,8 @@
 package io.onedev.server.job;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.Stack;
 
 import org.apache.shiro.subject.Subject;
@@ -68,7 +71,7 @@ public class JobAuthorizationContext {
 			String secretValue = getSecretValue(accessTokenSecret);
 			var accessToken = OneDev.getInstance(AccessTokenManager.class).findByValue(secretValue);
 			if (accessToken == null)
-				throw new ExplicitException("Invalid access token");
+				throw new ExplicitException(MessageFormat.format(_T("Invalid access token: {0}"), secretValue));
 			return accessToken.asSubject();
 		} else {
 			return SecurityUtils.asAnonymous();
@@ -105,8 +108,8 @@ public class JobAuthorizationContext {
 					}
 				}
 			}
-			throw new ExplicitException(String.format(
-					"No authorized job secret found (project: %s, job secret: %s)",
+			throw new ExplicitException(MessageFormat.format(
+					_T("No authorized job secret found (project: {0}, job secret: {1})"),
 					project.getPath(), secretName));
 		}
 	}

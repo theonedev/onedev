@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.job;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
@@ -118,7 +120,7 @@ abstract class BuildOptionContentPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				if (selectedRefNames.isEmpty()) {
-					refNamesView.error("At least one branch or tag should be selected");
+					refNamesView.error(_T("At least one branch or tag should be selected"));
 					target.add(form);
 				} else {
 					onSave(target, selectedRefNames, paramBean);

@@ -30,6 +30,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"<a wicket:id=\"author\" class=\"name link-gray\"></a> 于 <span wicket:id=\"date\"></span> 提交");
 		m.put("<a wicket:id=\"author\" class=\"name link-gray\"></a> committed with <a wicket:id=\"committer\" class=\"name link-gray\"></a> <span wicket:id=\"date\"></span>", 
 			"<a wicket:id=\"author\" class=\"name link-gray\"></a> 于 <span wicket:id=\"date\"></span> 由 <a wicket:id=\"committer\" class=\"name link-gray\"></a> 提交");
+		m.put("<a wicket:id=\"dependents\"><span wicket:id=\"label\"></span></a> depends on me", "<a wicket:id=\"dependents\"><span wicket:id=\"label\"></span></a> 依赖于我");
 		m.put("<a wicket:id=\"removePassword\">Remove password</a> to force the user to authenticate via external system", 
 			"<a wicket:id=\"removePassword\">移除密码</a> 以强制用户通过外部系统进行身份验证");
 		m.put("<a wicket:id=\"verifyRecoveryCode\">Verify by recovery code</a> if you can not access your TOTP authenticator", 
@@ -221,8 +222,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Arbitrary type", "任意类型");
 		m.put("Archived", "已归档");
 		m.put("Arguments", "参数");
-		m.put("Artifacts", "构件");
-		m.put("Artifacts to Retrieve", "要检索的构件");
+		m.put("Artifacts", "制品");
+		m.put("Artifacts to Retrieve", "要检索的制品");
 		m.put("Ascending", "升序");
 		m.put("Assignees", "分配给");
 		m.put("Assignees Issue Field", "受让人工单字段");
@@ -230,6 +231,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Assignees have code write permission and will be responsible for merging the pull request", 
 			"分配人员具有代码写入权限，并负责合并合并请求");
 		m.put("Asymmetric", "非对称");
+		m.put("At least one branch or tag should be selected", "至少选择一个分支或标签");
 		m.put("At least one choice need to be specified", "至少需要指定一个选项");
 		m.put("At least one email address should be configured, please add a new one first", "至少应配置一个电子邮件地址，请先添加一个新地址");
 		m.put("At least one email address should be specified", "至少需要指定一个电子邮件地址");
@@ -346,7 +348,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Browse code", "浏览代码");
 		m.put("Bug Report", "错误报告");
 		m.put("Build", "构建");
-		m.put("Build Artifact Storage", "构建构件存储");
+		m.put("Build #{0} already finished", "构建 #{0} 已完成");
+		m.put("Build #{0} deleted", "构建 #{0} 已删除");
+		m.put("Build #{0} not finished yet", "构建 #{0} 未完成");
+		m.put("Build Artifact Storage", "构建制品存储");
 		m.put("Build Commit", "构建提交");
 		m.put("Build Context", "构建上下文");
 		m.put("Build Description", "构建描述");
@@ -356,6 +361,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Build Management", "构建管理");
 		m.put("Build Notification", "构建通知");
 		m.put("Build Number", "构建编号");
+		m.put("Build On Behalf Of", "构建代表");
 		m.put("Build Path", "构建路径");
 		m.put("Build Preservation", "构建保留策略");
 		m.put("Build Preservations", "构建保留策略");
@@ -363,6 +369,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Build Preserve Rules", "构建保留规则");
 		m.put("Build Provider", "构建提供者");
 		m.put("Build Spec", "构建规范");
+		m.put("Build Statistics", "构建统计");
 		m.put("Build Version", "构建版本");
 		m.put("Build Volume Storage Class", "构建卷存储类");
 		m.put("Build Volume Storage Size", "构建卷存储大小");
@@ -380,6 +387,11 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Build number", "构建编号");
 		m.put("Build required for deletion. Submit pull request instead", "需要构建才能删除。请提交合并请求");
 		m.put("Build required for this change. Submit pull request instead", "需要构建才能更改。请提交合并请求");
+		m.put("Build spec not defined", "构建规范未定义");
+		m.put("Build spec not defined (import project: {0}, import revision: {1})", "构建规范未定义（导入项目：{0}，导入版本：{1}）");
+		m.put("Build spec not found in commit of this build", "构建规范未在构建提交中找到");
+		m.put("Build statistics is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"构建统计是企业版功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
 		m.put("Build version", "构建版本");
 		m.put("Build with Persistent Volume", "使用持久卷构建");
 		m.put("Builds", "构建");
@@ -424,9 +436,13 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Can not use current or descendant project as parent", "不能使用当前或子项目作为父项目");
 		m.put("Can only compare with common ancestor when different projects are involved", "跨项目比较时只能使用共同祖先");
 		m.put("Cancel", "取消");
+		m.put("Cancel All Queried Builds", "取消所有查询的构建");
+		m.put("Cancel Selected Builds", "取消选定的构建");
 		m.put("Cancel invitation", "取消邀请");
+		m.put("Cancel request submitted", "取消请求已提交");
 		m.put("Cancel this build", "取消此构建");
 		m.put("Cancelled", "已取消");
+		m.put("Cancelled By", "已取消");
 		m.put("Certificates to Trust", "信任的证书");
 		m.put("Change", "更改");
 		m.put("Change Detection Excludes", "变更检测排除项");
@@ -437,6 +453,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Change to another field", "更改为其他字段");
 		m.put("Change to another state", "更改为其他状态");
 		m.put("Change to another value", "更改为其他值");
+		m.put("Changes", "更改");
 		m.put("Changes since last review", "上次审查后的更改");
 		m.put("Changes since last visit", "自上次访问以来的更改");
 		m.put("Changes since this action", "此操作后的变更");
@@ -483,9 +500,12 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Choose YouTrack project to import issues from", "选择要导入工单的 YouTrack 项目");
 		m.put("Choose issue...", "选择工单...");
 		m.put("Choose iterations...", "选择迭代...");
+		m.put("Choose job...", "选择任务...");
+		m.put("Choose jobs...", "选择任务...");
 		m.put("Choose project", "选择项目");
 		m.put("Choose repository", "选择仓库");
 		m.put("Choose...", "选择...");
+		m.put("Circular build spec imports ({0})", "循环构建规范导入（{0}）");
 		m.put("Click to select a commit, or shift-click to select multiple commit", "点击选择一个提交，或按住 Shift 点击选择多个提交");
 		m.put("Click to show comment of marked text", "点击显示标记文本的评论");
 		m.put("Click to show issue details", "点击显示工单详情");
@@ -522,6 +542,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Code Search", "代码搜索");
 		m.put("Code clone or download", "克隆或下载代码");
 		m.put("Code comment", "代码评论");
+		m.put("Code comment #{0} deleted", "代码评论 #{0} 已删除");
 		m.put("Code comment administrative permission inside a project, including batch operations over multiple code comments", 
 			"项目内的代码评论管理权限，包括对多个代码评论的批量操作");
 		m.put("Code commit", "代码提交");
@@ -535,6 +556,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Color", "颜色");
 		m.put("Commands", "命令");
 		m.put("Comment", "评论");
+		m.put("Comment Content", "评论内容");
+		m.put("Comment on File", "评论文件");
 		m.put("Comment too long", "评论过长");
 		m.put("Commented code is outdated", "注释的代码已过时");
 		m.put("Commented on file \"{0}\" in project \"{1}\"", "在项目 \"{1}\" 的文件 \"{0}\" 上评论");
@@ -560,6 +583,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Commit history of current path", "当前路径的提交历史");
 		m.put("Commit index version", "提交索引版本");
 		m.put("Commit not exist or access denied", "提交不存在或访问被拒绝");
+		m.put("Commit of the build is missing", "构建的提交缺失");
 		m.put("Commit signature required but no GPG signing key specified", "提交签名需要但未指定 GPG 签名密钥");
 		m.put("Commit suggestion", "提交建议");
 		m.put("Commits", "提交");
@@ -698,7 +722,11 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Delete All Queried Projects", "删除所有查询到的项目");
 		m.put("Delete All Queried Pull Requests", "删除所有查询到的合并请求");
 		m.put("Delete All Queried Users", "删除所有查询到的用户");
+		m.put("Delete Build", "删除构建");
+		m.put("Delete Comment", "删除评论");
+		m.put("Delete Pull Request", "删除合并请求");
 		m.put("Delete Selected", "删除选中的");
+		m.put("Delete Selected Builds", "删除选定的构建");
 		m.put("Delete Selected Comments", "删除选中的评论");
 		m.put("Delete Selected Issues", "删除选定的工单");
 		m.put("Delete Selected Memberships", "删除选定的成员");
@@ -735,6 +763,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Dependency Management", "依赖管理");
 		m.put("Dependency job finished", "依赖任务已完成");
 		m.put("Dependent Fields", "依赖字段");
+		m.put("Depends on <a wicket:id=\"dependencies\"><span wicket:id=\"label\"></span></a>", "依赖于 <a wicket:id=\"dependencies\"><span wicket:id=\"label\"></span></a>");
 		m.put("Descending", "降序");
 		m.put("Description", "描述");
 		m.put("Description Templates", "描述模板");
@@ -769,16 +798,20 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Display Fields", "显示字段");
 		m.put("Display Links", "显示链接");
 		m.put("Display Months", "显示月份");
+		m.put("Display Params", "显示参数");
 		m.put("Do Not Retrieve Groups", "不获取用户组");
 		m.put("Do not ignore", "不要忽略");
 		m.put("Do not retrieve", "不检索");
 		m.put("Do not retrieve groups", "不检索组");
 		m.put("Do you really want to cancel invitation to \"{0}\"?", "您真的要取消邀请 \"{0}\" 吗？");
+		m.put("Do you really want to cancel this build?", "您确定要取消此构建吗？");
 		m.put("Do you really want to change target branch to {0}?", "确定要将目标分支更改为 {0} 吗？");
 		m.put("Do you really want to delete \"{0}\"?", "您真的要删除 \"{0}\" 吗？");
 		m.put("Do you really want to delete board \"{0}\"?", "您确定要删除看板 \"{0}\" 吗？");
+		m.put("Do you really want to delete build #{0}?", "您确定要删除构建 #{0} 吗？");
 		m.put("Do you really want to delete group \"{0}\"?", "您真的要删除组 \"{0}\" 吗？");
 		m.put("Do you really want to delete iteration \"{0}\"?", "您确定要删除迭代 \"{0}\" 吗？");
+		m.put("Do you really want to delete pull request #{0}?", "您确定要删除合并请求 #{0} 吗？");
 		m.put("Do you really want to delete role \"{0}\"?", "确定要删除角色 \"{0}\" 吗？");
 		m.put("Do you really want to delete selected query watches?", "您真的要删除选中的查询订阅吗？");
 		m.put("Do you really want to delete tag {0}?", "确定要删除标签 {0} 吗？");
@@ -786,10 +819,13 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Do you really want to delete this SSH key?", "您确定要删除此 SSH 密钥吗？");
 		m.put("Do you really want to delete this access token?", "您确定要删除此访问令牌吗？");
 		m.put("Do you really want to delete this board?", "您确定要删除此看板吗？");
+		m.put("Do you really want to delete this build?", "您确定要删除此构建吗？");
 		m.put("Do you really want to delete this code comment and all its replies?", "您真的要删除此代码评论及其所有回复吗？");
 		m.put("Do you really want to delete this code comment?", "您真的要删除此代码评论吗？");
+		m.put("Do you really want to delete this directory?", "您确定要删除此目录吗？");
 		m.put("Do you really want to delete this email address?", "您真的要删除这个电子邮件地址吗？");
 		m.put("Do you really want to delete this field?", "您真的要删除这个字段吗？");
+		m.put("Do you really want to delete this file?", "您确定要删除此文件吗？");
 		m.put("Do you really want to delete this issue?", "您真的要删除这个工单吗？");
 		m.put("Do you really want to delete this privilege?", "确定要删除此权限吗？");
 		m.put("Do you really want to delete this pull request?", "确定要删除此合并请求吗？");
@@ -797,6 +833,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Do you really want to delete timesheet \"{0}\"?", "您真的要删除时间表 \"{0}\" 吗？");
 		m.put("Do you really want to discard batched suggestions?", "您真的要丢弃批量建议吗？");
 		m.put("Do you really want to enable this account?", "您真的要启用此账户吗？");
+		m.put("Do you really want to rebuild?", "您确定要重建此构建吗？");
 		m.put("Do you really want to remove password of this user?", "您真的要删除此用户的密码吗？");
 		m.put("Do you really want to remove the issue from iteration \"{0}\"?", "您真的要从迭代 \"{0}\" 中移除这个工单吗？");
 		m.put("Do you really want to remove this account?", "您确定要删除此账户吗？");
@@ -819,6 +856,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Due Date Issue Field", "截止日期工单字段");
 		m.put("Due date", "截止日期");
 		m.put("Duplicate authorizations found: {0}", "找到重复的授权：{0}");
+		m.put("Duration", "持续时间");
 		m.put("Durations", "持续时间");
 		m.put("ESLint Report", "ESLint 报告");
 		m.put("Edit", "编辑");
@@ -912,6 +950,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Error reverting on {0}: Merge conflicts detected", "revert 到 {0} 时出错：合并冲突检测到");
 		m.put("Error reverting on {0}: {1}", "revert 到 {0} 时出错：{1}");
 		m.put("Error validating auto merge commit message: {0}", "验证自动合并提交信息时出错：{0}");
+		m.put("Error validating build spec (location: {0}, error message: {1})", "验证构建规范时发生错误（位置：{0}，错误消息：{1}）");
+		m.put("Error validating build spec: {0}", "验证构建规范时发生错误：{0}");
 		m.put("Error validating commit message of \"{0}\": {1}", "验证提交信息 \"{0}\" 时出错：{1}");
 		m.put("Error validating commit message of <a href=\"{0}\" class='text-monospace font-size-sm'>{1}</a>: {2}", 
 			"验证提交信息 <a href=\"{0}\" class='text-monospace font-size-sm'>{1}</a> 时出错：{2}");
@@ -962,6 +1002,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Fail build if there are vulnerabilities with or severer than specified severity level. Note that this only takes effect if build is not failed by other steps", 
 			"如果存在或严重性高于指定严重性级别的漏洞，则失败构建。注意：此选项仅在构建未被其他步骤失败时生效");
 		m.put("Failed", "失败");
+		m.put("Failed to validate build spec import. Check server log for details", "无法验证构建规范导入。请检查服务器日志");
 		m.put("Field Bean", "字段 Bean");
 		m.put("Field Instance", "字段实例");
 		m.put("Field Name", "字段名称");
@@ -1011,6 +1052,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Fix Undefined Field Values", "修复未定义的字段值");
 		m.put("Fix Undefined Fields", "修复未定义的字段");
 		m.put("Fix Undefined States", "修复未定义的状态");
+		m.put("Fixed Issues", "已修复的工单");
 		m.put("Fixing Builds", "修复构建");
 		m.put("Fixing Commits", "修复提交");
 		m.put("Fixing...", "修复中...");
@@ -1024,6 +1066,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"对于从默认分支无法到达的构建提交，应该指定一个具有管理工单权限的访问令牌作为任务密钥");
 		m.put("For docker aware executors, this path is inside container, and accepts both absolute path and relative path (relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>). For shell related executors which runs on host machine directly, only relative path is accepted", 
 			"对于 docker 感知执行器，此路径在容器内，并接受绝对路径和相对路径（相对于 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>）。对于直接在主机机器上运行的 shell 相关执行器，只接受相对路径");
+		m.put("For each selected branch/tag, a separate build will be generated with branch/tag set to corresponding value", 
+			"对于每个选定的分支/标签，将生成一个单独的构建，分支/标签设置为相应的值");
 		m.put("Force", "强制");
 		m.put("Forgot Password?", "忘记密码？");
 		m.put("Fork now", "立即分叉");
@@ -1239,6 +1283,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Insert this image", "插入此图片");
 		m.put("Install Subscription Key", "安装订阅密钥");
 		m.put("Integer", "整数");
+		m.put("Interactive web shell access to running jobs is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"交互式 Web shell 访问运行中的任务是企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
 		m.put("Interpreter", "解释器");
 		m.put("Invalid PCRE syntax", "无效的 PCRE 语法");
 		m.put("Invalid credentials", "无效的凭据");
@@ -1349,6 +1395,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Jest Coverage Report", "Jest 覆盖率报告");
 		m.put("Jest Test Report", "Jest 测试报告");
 		m.put("Job", "任务");
+		m.put("Job \"{0}\" associated with the build not found.", "与构建关联的任务 \"{0}\" 未找到。");
 		m.put("Job Dependencies", "任务依赖");
 		m.put("Job Dependency", "任务依赖");
 		m.put("Job Executor", "任务执行器");
@@ -1404,6 +1451,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Labels can be defined in Administration / Label Management", "标签可以在管理 / 标签管理中定义");
 		m.put("Language", "语言");
 		m.put("Last Finished of Specified Job", "指定任务的最后完成");
+		m.put("Last Modified", "最后修改");
+		m.put("Last Update", "最后更新");
 		m.put("Last commit", "最后提交");
 		m.put("Last commit hash", "最后提交哈希");
 		m.put("Last commit index version", "最后提交索引版本");
@@ -1433,6 +1482,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Load Keys", "加载密钥");
 		m.put("Loading emojis...", "加载表情符号...");
 		m.put("Loading...", "加载...");
+		m.put("Log", "日志");
 		m.put("Log Work", "记录工作");
 		m.put("Log work", "记录工作");
 		m.put("Login Name", "登录名称");
@@ -1457,6 +1507,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Mail service not configured", "邮件服务未配置");
 		m.put("Malformed %sbase query", "解析%s基准查询时出错");
 		m.put("Malformed %squery", "解析%s查询时出错");
+		m.put("Malformed build spec (import project: {0}, import revision: {1})", "构建规范格式错误（导入项目：{0}，导入版本：{1}）");
 		m.put("Malformed email address", "格式错误的电子邮件地址");
 		m.put("Malformed query", "查询语法错误");
 		m.put("Manage Job", "管理任务");
@@ -1503,6 +1554,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Microsoft 365", "Microsoft 365");
 		m.put("Microsoft Entra ID", "Microsoft Entra ID");
 		m.put("Min Value", "最小值");
+		m.put("Missing Commit", "缺失提交");
+		m.put("Missing Commits", "缺失提交");
 		m.put("Month", "月");
 		m.put("Months", "月");
 		m.put("Months to Display", "显示的月数");
@@ -1516,6 +1569,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("More operations", "更多操作");
 		m.put("Most branch coverage", "最小的分支覆盖率");
 		m.put("Most line coverage", "最小的行覆盖率");
+		m.put("Most probably there are import errors in the <a wicket:id=\"buildSpec\">build spec</a>", 
+			"最有可能的是<a wicket:id=\"buildSpec\">构建规范</a>中存在导入错误");
 		m.put("Mount Docker Sock", "挂载 Docker Sock");
 		m.put("Move All Queried Issues To...", "移动所有查询的工单到...");
 		m.put("Move All Queried Projects To...", "移动所有查询的项目到...");
@@ -1592,6 +1647,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("No aggregation", "无聚合");
 		m.put("No any", "无任何");
 		m.put("No applicable transitions or no permission to transit", "没有适用的转换或没有权限转换");
+		m.put("No artifacts published", "没有发布制品");
 		m.put("No branch to cherry-pick to", "没有分支可以 cherry-pick");
 		m.put("No branch to revert on", "没有分支可以 revert");
 		m.put("No branches Found", "未找到分支");
@@ -1649,6 +1705,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("No pull requests to discard", "没有要放弃的合并请求");
 		m.put("No pull requests to set as read", "没有要设置为已读的合并请求");
 		m.put("No pull requests to watch/unwatch", "没有要监视/取消监视的合并请求");
+		m.put("No refs to build on behalf of", "没有要构建的引用");
 		m.put("No required services", "无所需服务");
 		m.put("No secret config", "无秘密配置");
 		m.put("No services defined", "未定义服务");
@@ -1700,6 +1757,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Ok", "确定");
 		m.put("Old Name", "旧名称");
 		m.put("Old Password", "旧密码");
+		m.put("On Behalf Of", "代表");
 		m.put("On Branches", "在分支上");
 		m.put("OneDev Issue Field", "OneDev 工单字段");
 		m.put("OneDev Issue Link", "OneDev 工单链接");
@@ -1788,7 +1846,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Optionally specify a date field to hold due date information.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"可选择指定一个日期字段来保存截止日期信息。<br><b>注意：</b>如果这里没有合适的选项，您可以自定义 OneDev 工单字段");
 		m.put("Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to put retrieved artifacts. Leave empty to use job workspace itself", 
-			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作空间</a> 的路径来放置检索的构件。留空则使用任务工作空间本身");
+			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作空间</a> 的路径来放置检索的制品。留空则使用任务工作空间本身");
 		m.put("Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume is only used to hold temporary build files", 
 			"可选择指定一个存储类来动态分配构建卷。留空则使用默认存储类。<b class='text-warning'>注意：</b>存储类的回收策略应设置为 <code>Delete</code>，因为该卷仅用于保存临时构建文件");
 		m.put("Optionally specify a working period field to hold estimated time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
@@ -1808,7 +1866,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"可选择指定适用于提交消息页脚检查的提交类型（按 ENTER 添加值）。留空则适用于所有类型");
 		m.put("Optionally specify arguments to run above image", "可选择指定运行上述镜像的参数");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
-			"可选择指定从依赖项检索到 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作空间</a> 的构件。只能检索已发布的构件（通过构件发布步骤）。留空则不检索任何构件");
+			"可选择指定从依赖项检索到 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作空间</a> 的制品。只能检索已发布的制品（通过制品发布步骤）。留空则不检索任何制品");
 		m.put("Optionally specify authorized executor for this job. Leave empty to use first applicable executor (or use auto-discovered executor if no executors are defined)", 
 			"可选择指定此任务的授权执行器。留空则使用第一个适用的执行器（如果未定义执行器，则使用自动发现的执行器）");
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
@@ -1886,7 +1944,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/scanner/secret/#configuration' target='_blank'>secret config</a>", 
 			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作空间</a> 的路径，用作 trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/scanner/secret/#configuration' target='_blank'>密钥配置</a>");
 		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to publish artifacts from. Leave empty to use job workspace itself", 
-			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作空间</a> 的路径来发布构件。留空则使用任务工作空间本身");
+			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作空间</a> 的路径来发布制品。留空则使用任务工作空间本身");
 		m.put("Optionally specify platform to pull, for instance <tt>linux/amd64</tt>. Leave empty to pull all platforms in image", 
 			"可选择指定要拉取的平台，例如 <tt>linux/amd64</tt>。留空则拉取镜像中的所有平台");
 		m.put("Optionally specify project to show builds of. Leave empty to show builds of all projects with permissions", 
@@ -1910,7 +1968,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Optionally specify revision to create branch from. Leave empty to create from build commit", 
 			"可选择指定用于创建分支的修订版本。留空则从构建提交创建");
 		m.put("Optionally specify separate directory to store build artifacts. Non-absolute directory is considered to be relative to site directory", 
-			"可选择指定单独的目录来存储构建构件。非绝对目录被视为相对于站点目录");
+			"可选择指定单独的目录来存储构建制品。非绝对目录被视为相对于站点目录");
 		m.put("Optionally specify separate directory to store git lfs files. Non-absolute directory is considered to be relative to site directory", 
 			"可选择指定单独的目录来存储 git lfs 文件。非绝对目录被视为相对于站点目录");
 		m.put("Optionally specify separate directory to store package files. Non-absolute directory is considered to be relative to site directory", 
@@ -2004,6 +2062,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Parameter Specs", "参数");
 		m.put("Params", "参数");
 		m.put("Params & Triggers", "参数与触发器");
+		m.put("Params to Display", "显示参数");
 		m.put("Parent Bean", "父Bean");
 		m.put("Parent OneDev Project", "父OneDev项目");
 		m.put("Parent Project", "父项目");
@@ -2052,6 +2111,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Physical memory in mega bytes", "物理内存（兆字节）");
 		m.put("Pick Existing", "选择现有");
 		m.put("Pin this issue", "置顶此工单");
+		m.put("Pipeline", "流水线");
 		m.put("Plain text expected", "需要纯文本");
 		m.put("Platform", "平台");
 		m.put("Platforms", "平台");
@@ -2073,6 +2133,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Please resolve undefined states below. Note that if you select to delete an undefined state, all issues with that state will be deleted", 
 			"请解决以下未定义的状态。请注意，如果您选择删除未定义的状态，所有具有该状态的工单都将被删除");
 		m.put("Please select branches to create pull request", "请选择分支创建合并请求");
+		m.put("Please select builds to cancel", "请选择要取消的构建");
+		m.put("Please select builds to delete", "请选择要删除的构建");
+		m.put("Please select builds to re-run", "请选择要重新运行的构建");
 		m.put("Please select comments to delete", "请选择要删除的评论");
 		m.put("Please select comments to set resolved", "请选择要设置为已解决的评论");
 		m.put("Please select comments to set unresolved", "请选择要设置为未解决的评论");
@@ -2185,12 +2248,15 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Publish Unit Test Report Step", "发布单元测试报告步骤");
 		m.put("Pull Image", "拉取镜像");
 		m.put("Pull Request", "合并请求");
+		m.put("Pull Request Branches", "合并请求分支");
+		m.put("Pull Request Description", "合并请求描述");
 		m.put("Pull Request Filter", "合并请求过滤");
 		m.put("Pull Request Management", "合并请求管理");
 		m.put("Pull Request Markdown Report", "合并请求 Markdown 报告");
 		m.put("Pull Request Notification", "合并请求通知");
 		m.put("Pull Request Notification Unsubscribed", "合并请求通知退订");
 		m.put("Pull Request Statistics", "合并请求统计");
+		m.put("Pull Request Title", "合并请求标题");
 		m.put("Pull Requests", "合并请求");
 		m.put("Pull docker image as OCI layout via crane. This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor", 
 			"此步骤需要由服务器 docker 执行器、远程 docker 执行器或 Kubernetes 执行器执行");
@@ -2256,15 +2322,22 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Query/order packages", "查询/排序包");
 		m.put("Query/order projects", "查询/排序项目");
 		m.put("Query/order pull requests", "查询/排序合并请求");
+		m.put("Queueing Takes", "排队中");
 		m.put("Quick Search", "快速搜索");
 		m.put("Quote", "引用");
 		m.put("RESTful API", "RESTful API");
+		m.put("Ran On Agent", "在代理上运行");
+		m.put("Re-run All Queried Builds", "重新运行所有查询的构建");
+		m.put("Re-run Selected Builds", "重新运行选定的构建");
+		m.put("Re-run request submitted", "重新运行请求已提交");
 		m.put("Re-run this build", "重新运行此构建");
 		m.put("Read", "读取");
 		m.put("Read body", "读取正文");
 		m.put("Readiness Check Command", "准备检查命令");
+		m.put("Really want to delete this code comment?", "您确定要删除此代码评论吗？");
 		m.put("Rebase", "变基");
 		m.put("Rebase source branch commits", "Rebase 源分支上的提交");
+		m.put("Rebuild manually", "手动重建");
 		m.put("Receive Posted Email", "接收已发布邮件");
 		m.put("Receivers", "接收者");
 		m.put("Recovery code", "恢复代码");
@@ -2339,6 +2412,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Resource Settings", "资源设置");
 		m.put("Restore Source Branch", "恢复源分支");
 		m.put("Restored source branch", "已恢复源分支");
+		m.put("Resubmitted manually", "手动重新提交");
+		m.put("Retried At", "重试于");
 		m.put("Retrieve Groups", "检索组");
 		m.put("Retrieve LFS Files", "检索 LFS 文件");
 		m.put("Retrieve Submodules", "检索子模块");
@@ -2391,6 +2466,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Run trivy rootfs scanner to scan various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>. It can only be executed by a docker aware executor and is recommended to run against staging area of your project", 
 			"运行 trivy 根文件系统扫描器扫描各种 <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>分布文件</a>。它只能由 docker 感知执行器执行，建议在项目暂存区域运行。");
 		m.put("Running", "运行中");
+		m.put("Running Takes", "运行中");
 		m.put("SMTP Host", "SMTP 主机");
 		m.put("SMTP Password", "SMTP 密码");
 		m.put("SMTP User", "SMTP 用户");
@@ -2435,6 +2511,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Select", "选择");
 		m.put("Select Branch to Cherry Pick to", "选择分支进行 cherry-pick");
 		m.put("Select Branch to Revert on", "选择分支进行 revert");
+		m.put("Select Branch/Tag", "选择分支/标签");
 		m.put("Select Existing", "选择已有");
 		m.put("Select Project", "选择项目");
 		m.put("Select iteration to schedule issues into", "选择迭代调度问题");
@@ -2560,6 +2637,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Single sign on via twitch.tv", "通过 twitch.tv 单点登录");
 		m.put("Site", "站点");
 		m.put("Site Publish Enabled", "站点发布已启用");
+		m.put("Size", "大小");
 		m.put("Size invalid", "大小无效");
 		m.put("Slack Notifications", "Slack 通知");
 		m.put("Smtp Ssl Setting", "SMTP SSL 设置");
@@ -2568,6 +2646,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Some one changed the content you are editing. Reload the page and try again.", "有人修改了您正在编辑的内容。重新加载页面并重试。");
 		m.put("Some other pull requests are opening to this branch", "其他合并请求正在打开此分支");
 		m.put("Some projects might be hidden due to permission policy", "由于权限策略，某些项目可能被隐藏");
+		m.put("Some related commits of the code comment is missing", "与代码评论相关的提交缺失");
+		m.put("Some related commits of the pull request are missing", "与合并请求相关的提交缺失");
 		m.put("Some required builds not passed", "一些必需的构建未通过");
 		m.put("Sort", "排序");
 		m.put("Source", "源");
@@ -2602,6 +2682,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"指定 <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> 的值是具有代码写入权限的访问令牌。提交、问题和合并请求也将以访问令牌所有者的名义创建");
 		m.put("Specify <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json output file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with clippy json output option, for instance <code>cargo clippy --message-format json>check-result.json</code>. Use * or ? for pattern match", 
 			"指定 <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json 输出文件相对 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>。此文件可以通过 clippy json 输出选项生成，例如 <code>cargo clippy --message-format json>check-result.json</code>。使用 * 或 ? 进行模式匹配");
+		m.put("Specify Build Options", "指定构建选项");
 		m.put("Specify CPD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/cpd.xml</tt>. Use * or ? for pattern match", 
 			"指定 CPD 结果 xml 文件相对 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>，例如 <tt>target/cpd.xml</tt>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify Commit Message", "指定提交消息");
@@ -2955,6 +3036,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Statistics", "统计");
 		m.put("Stats", "统计");
 		m.put("Stats Group", "统计组");
+		m.put("Status", "状态");
 		m.put("Step", "步骤");
 		m.put("Step Template", "步骤模板");
 		m.put("Step Templates", "步骤模板");
@@ -2969,7 +3051,12 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Storage not found", "未找到存储");
 		m.put("Stored with Git LFS", "使用 Git LFS 存储");
 		m.put("Subject", "主题");
+		m.put("Submit Reason", "提交原因");
+		m.put("Submitted After", "提交后");
+		m.put("Submitted At", "提交于");
+		m.put("Submitted Before", "提交前");
 		m.put("Submitted By", "提交者");
+		m.put("Submitted manually", "手动构建");
 		m.put("Submitter", "提交者");
 		m.put("Subscription Key", "订阅密钥");
 		m.put("Subscription Management", "订阅管理");
@@ -3090,6 +3177,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"此密钥用于在项目层次结构中下载和上传缓存（按顺序从当前项目搜索到根项目）");
 		m.put("This key or one of its subkey is already in use", "此密钥或其子密钥已被使用");
 		m.put("This line has confusable unicode character modification", "此行有可疑的 Unicode 字符修改");
+		m.put("This might happen when project points to a wrong git repository, or the commit is garbage collected.", 
+			"这可能发生在项目指向错误的 git 仓库，或者这些提交被垃圾回收。");
+		m.put("This might happen when project points to a wrong git repository, or these commits are garbage collected.", 
+			"这可能发生在项目指向错误的 git 仓库，或者这些提交被垃圾回收。");
 		m.put("This name has already been used by another board", "此名称已被另一个看板使用");
 		m.put("This name has already been used by another group", "此名称已被另一个组使用");
 		m.put("This name has already been used by another issue board in the project", "此名称已被项目中的另一个工单看板使用");
@@ -3097,6 +3188,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("This name has already been used by another role", "此名称已被另一个角色使用");
 		m.put("This name has already been used by another role.", "此名称已被另一个角色使用。");
 		m.put("This operation is disallowed by branch protection rule", "此操作被分支保护规则禁止");
+		m.put("This page lists changes since previous build on <a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">same stream</a>", 
+			"此页面列出了自上一个构建以来的更改，在 <a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">相同流</a> 上");
 		m.put("This page lists recent commits fixing the issue", "此页面列出了修复工单的最近提交");
 		m.put("This permission enables one to access confidential issues", "此权限允许访问机密工单");
 		m.put("This permission enables one to schedule issues into iterations", "此权限允许将工单调度到迭代中");
@@ -3121,6 +3214,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"此步骤设置 Renovate 缓存。如果需要使用，请将其放置在 Renovate 步骤之前");
 		m.put("This step sets up trivy db cache to speed up various scanner steps. Place it before scanner steps if you want to use it", 
 			"此步骤设置 trivy 数据库缓存以加速各种扫描步骤。如果需要使用，请将其放置在扫描步骤之前");
+		m.put("This tab shows the pipeline containing current build. Check <a href=\"https://robinshen.medium.com/understanding-onedev-pipeline-db0bb0e54aa7\" target=\"_blank\">this article</a> to understand how build pipeline works", 
+			"此标签显示包含当前构建的流水线。请查看 <a href=\"https://robinshen.medium.com/understanding-onedev-pipeline-db0bb0e54aa7\" target=\"_blank\">这篇文章</a> 以了解流水线的工作原理");
 		m.put("This trigger will only be applicable if tagged commit is reachable from branches specified here. Multiple branches should be separated with spaces. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all branches", 
 			"此触发器仅在标记的提交可从此处指定的分支访问时适用。多个分支应以空格分隔。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。以 '-' 为前缀表示排除。留空表示匹配所有分支");
 		m.put("This user is authenticating via external system.", "此用户通过外部系统进行身份验证。");
@@ -3191,15 +3286,19 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"为增强安全性，您的账户已强制启用两阶段验证。请按照以下步骤进行设置");
 		m.put("Two-factor authentication is now configured", "两阶段验证现已配置完成");
 		m.put("Type", "类型");
+		m.put("Type <code>yes</code> below to cancel all queried builds", "在下面输入 <code>yes</code> 以取消所有查询的构建");
+		m.put("Type <code>yes</code> below to cancel selected builds", "在下面输入 <code>yes</code> 以取消选定的构建");
 		m.put("Type <code>yes</code> below to confirm deleting all queried users", "在下方输入 <code>yes</code> 确认删除所有查询的用户");
 		m.put("Type <code>yes</code> below to confirm deleting selected users", "在下方输入 <code>yes</code> 确认删除选定的用户");
 		m.put("Type <code>yes</code> below to copy all queried issues to project \"{0}\"", "在下方输入 <code>yes</code> 以将所有查询的工单复制到项目 \"{0}\"");
 		m.put("Type <code>yes</code> below to copy selected issues to project \"{0}\"", "在下方输入 <code>yes</code> 以将选定的工单复制到项目 \"{0}\"");
+		m.put("Type <code>yes</code> below to delete all queried builds", "在下面输入 <code>yes</code> 以删除所有查询的构建");
 		m.put("Type <code>yes</code> below to delete all queried comments", "在下面输入 <code>yes</code> 以删除所有查询的评论");
 		m.put("Type <code>yes</code> below to delete all queried issues", "在下方输入 <code>yes</code> 以删除所有查询的工单");
 		m.put("Type <code>yes</code> below to delete all queried memberships", "在下方输入 <code>yes</code> 删除所有查询的成员");
 		m.put("Type <code>yes</code> below to delete all queried projects", "在下方输入 <code>yes</code> 以删除所有查询到的项目");
 		m.put("Type <code>yes</code> below to delete all queried pull requests", "在下方输入 <code>yes</code> 以删除所有查询的合并请求");
+		m.put("Type <code>yes</code> below to delete selected builds", "在下面输入 <code>yes</code> 以删除选定的构建");
 		m.put("Type <code>yes</code> below to delete selected comments", "在下方输入 <code>yes</code> 以删除选中的评论");
 		m.put("Type <code>yes</code> below to delete selected issues", "在下方输入 <code>yes</code> 以删除选定的工单");
 		m.put("Type <code>yes</code> below to delete selected memberships", "在下方输入 <code>yes</code> 删除选定的成员");
@@ -3211,6 +3310,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Type <code>yes</code> below to move all queried projects to be under \"{0}\"", "在下方输入 <code>yes</code> 以将所有查询到的项目移动到 \"{0}\" 下");
 		m.put("Type <code>yes</code> below to move selected issues to project \"{0}\"", "在下方输入 <code>yes</code> 以将选定的工单移动到项目 \"{0}\"");
 		m.put("Type <code>yes</code> below to move selected projects to be under \"{0}\"", "在下方输入 <code>yes</code> 以将选中的项目移动到 \"{0}\" 下");
+		m.put("Type <code>yes</code> below to re-run all queried builds", "在下面输入 <code>yes</code> 以重新运行所有查询的构建");
+		m.put("Type <code>yes</code> below to re-run selected builds", "在下面输入 <code>yes</code> 以重新运行选定的构建");
 		m.put("Type <code>yes</code> below to set all queried as root projects", "在下方输入 <code>yes</code> 以将所有查询到的项目设置为根项目");
 		m.put("Type <code>yes</code> below to set selected as root projects", "在下方输入 <code>yes</code> 以将选中的项目设置为根项目");
 		m.put("Type password here", "在此输入密码");
@@ -3224,9 +3325,14 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Unable to create protected tag", "无法创建受保护的标签");
 		m.put("Unable to diff as some line is too long.", "无法比较，因为某些行太长");
 		m.put("Unable to diff as the file is too large.", "无法比较，因为文件太大");
+		m.put("Unable to find build #{0} in project {1}", "在项目 {1} 中找不到构建 #{0}");
+		m.put("Unable to find commit to import build spec (import project: {0}, import revision: {1})", 
+			"无法找到要导入的构建规范的提交（导入项目：{0}，导入版本：{1}）");
 		m.put("Unable to find issue #{0} in project {1}", "在项目 {1} 中找不到工单 #{0}");
+		m.put("Unable to find project to import build spec: {0}", "无法找到要导入的构建规范的项目：{0}");
 		m.put("Unable to find pull request #{0} in project {1}", "在项目 {1} 中找不到合并请求 #{0}");
 		m.put("Unable to find timesheet: ", "找不到时间表：");
+		m.put("Unable to import build spec (import project: {0}, import revision: {1}): {2}", "无法导入构建规范（导入项目：{0}，导入版本：{1}）：{2}");
 		m.put("Unable to notify user as mail service is not configured", "无法通知用户，因为邮件服务未配置");
 		m.put("Unable to send verification email as mail service is not configured yet", "无法发送验证电子邮件，因为邮件服务未配置");
 		m.put("Unauthorize this user", "取消此用户的授权");
@@ -3472,6 +3578,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("before specified date", "在指定日期之前");
 		m.put("branch the build commit is merged into", "构建提交合并到的分支");
 		m.put("branch the job is running against", "任务运行的分支");
+		m.put("branch {0}", "分支 {0}");
 		m.put("branches", "分支");
 		m.put("builds", "构建");
 		m.put("choose a color for this state", "选择一个颜色");
@@ -3504,11 +3611,13 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("find issue by number", "通过编号查找工单");
 		m.put("find pull request by number", "通过编号查找合并请求");
 		m.put("find pull request with this number", "查找具有此编号的合并请求");
+		m.put("found 1 build", "找到 1 个构建");
 		m.put("found 1 comment", "找到 1 条评论");
 		m.put("found 1 issue", "找到 1 个工单");
 		m.put("found 1 project", "找到 1 个项目");
 		m.put("found 1 pull request", "找到 1 个合并请求");
 		m.put("found 1 user", "找到 1 个用户");
+		m.put("found {0} builds", "找到 {0} 个构建");
 		m.put("found {0} comments", "找到 {0} 条评论");
 		m.put("found {0} issues", "找到 {0} 个工单");
 		m.put("found {0} projects", "找到 {0} 个项目");
@@ -3541,6 +3650,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("month:Nov", "十一月");
 		m.put("month:Oct", "十月");
 		m.put("month:Sep", "九月");
+		m.put("n/a", "不适用");
 		m.put("new field", "新字段");
 		m.put("on file {0}", "在文件 {0} 上");
 		m.put("opened", "已创建");
@@ -3563,6 +3673,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("space", "空格");
 		m.put("submit", "提交");
 		m.put("tag the job is running against", "任务运行的标签");
+		m.put("tag {0}", "标签 {0}");
 		m.put("tags", "标签");
 		m.put("time aggregation link", "时间聚合链接");
 		m.put("touching specified path", "涉及指定路径");
@@ -3584,6 +3695,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{0} ahead", "{0} 领先");
 		m.put("{0} behind", "{0} 落后");
 		m.put("{0} branches", "{0} 个分支");
+		m.put("{0} build(s)", "{0} 个构建");
 		m.put("{0} child projects", "{0} 个子项目");
 		m.put("{0} commits", "{0} 个提交");
 		m.put("{0} commits ahead of base branch", "{0} 个提交领先于基准分支");
@@ -3601,7 +3713,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("logged work", "已花费");
+		m.put("Invalid access token: {0}", "无效的访问令牌：{0}");
+		m.put("No authorized job secret found (project: {0}, job secret: {1})", "未找到授权的任务密钥（项目：{0}，任务密钥：{1}）");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");

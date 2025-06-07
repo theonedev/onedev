@@ -2,23 +2,23 @@
 	<div class="card m-2 m-sm-5">
 		<div class="card-body">
 			<h2 class="text-danger">
-				Commit of the build is missing
+				<wicket:t>Commit of the build is missing</wicket:t>
 			</h2>
 			<p>
-			This might happen when project points to a wrong git repository, or the commit is garbage collected. 
+			<wicket:t>This might happen when project points to a wrong git repository, or the commit is garbage collected.</wicket:t>
 			</p>
 			<div class="bg-light rounded p-4 mb-5">
-				<div class="h6 mb-2">Missing Commit</div>
+				<div class="h6 mb-2"><wicket:t>Missing Commit</wicket:t></div>
 				<div wicket:id="missingCommit" class="text-monospace font-size-sm mb-4"></div>
-				<div class="h6 mb-2">Job Name</div>
+				<div class="h6 mb-2"><wicket:t>Job Name</wicket:t></div>
 				<div wicket:id="jobName"></div>
 			</div>
-			<a wicket:id="delete" class="btn btn-danger">Delete Build</a>	
+			<a wicket:id="delete" class="btn btn-danger"><wicket:t>Delete Build</wicket:t></a>	
 		</div>
 	</div>
 	<wicket:fragment wicket:id="projectTitleFrag">
 		<span class="d-flex align-items-center">
-			<a wicket:id="builds" class="text-nowrap">Builds</a> 
+			<a wicket:id="builds" class="text-nowrap"><wicket:t>Builds</wicket:t></a> 
 			<span class="dot"></span>
 			<span wicket:id="buildNumber"></span>
 		</span>

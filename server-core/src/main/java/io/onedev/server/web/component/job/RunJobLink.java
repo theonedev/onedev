@@ -27,6 +27,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.eclipse.jgit.lib.ObjectId;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -105,7 +108,7 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 							for (String refName : selectedRefNames) {
 								builds.add(getJobManager().submit(getProject(), commitId, job.getName(),
 										paramMap, refName, SecurityUtils.getAuthUser(),
-										getPullRequest(), null, "Submitted manually"));
+										getPullRequest(), null, _T("Submitted manually")));
 							}
 							if (builds.size() == 1)
 								setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(builds.iterator().next()));
@@ -113,7 +116,7 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 								close();
 							for (var build: builds) {
 								if (build.isFinished())
-									getJobManager().resubmit(build, "Rebuild manually");
+									getJobManager().resubmit(build, _T("Rebuild manually"));
 							}
 						}
 
@@ -136,17 +139,17 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 				} else {
 					Build build = getJobManager().submit(getProject(), commitId, job.getName(),
 							new HashMap<>(), refNames.iterator().next(),
-							SecurityUtils.getAuthUser(), getPullRequest(), null, "Submitted manually");
+							SecurityUtils.getAuthUser(), getPullRequest(), null, _T("Submitted manually"));
 					setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
 					if (build.isFinished())
-						getJobManager().resubmit(build, "Rebuild manually");
+						getJobManager().resubmit(build, _T("Rebuild manually"));
 				}
 			} else {
 				new MessageModal(target) {
 
 					@Override
 					protected Component newMessageContent(String componentId) {
-						return new Label(componentId, "No refs to build on behalf of");
+						return new Label(componentId, _T("No refs to build on behalf of"));
 					}
 
 				};

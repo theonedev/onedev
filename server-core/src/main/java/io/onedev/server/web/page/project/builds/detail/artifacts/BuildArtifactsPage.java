@@ -45,6 +45,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -95,8 +97,8 @@ public class BuildArtifactsPage extends BuildDetailPage {
 		
 		List<IColumn<Pair<String, ArtifactInfo>, Void>> columns = new ArrayList<>();
 		
-		columns.add(new TreeColumn<>(Model.of("Name")));
-		columns.add(new AbstractColumn<>(Model.of("Size")) {
+		columns.add(new TreeColumn<>(Model.of(_T("Name"))));
+		columns.add(new AbstractColumn<>(Model.of(_T("Size"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Pair<String, ArtifactInfo>>> cellItem, String componentId, IModel<Pair<String, ArtifactInfo>> rowModel) {
@@ -111,7 +113,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			}
 
 		});
-		columns.add(new AbstractColumn<>(Model.of("Last Modified")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Last Modified"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Pair<String, ArtifactInfo>>> cellItem, String componentId, IModel<Pair<String, ArtifactInfo>> rowModel) {
@@ -132,9 +134,9 @@ public class BuildArtifactsPage extends BuildDetailPage {
 							super.updateAjaxAttributes(attributes);
 							String confirmMessage;
 							if (rowModel.getObject().getRight() instanceof DirectoryInfo)
-								confirmMessage = "Do you really want to delete this directory?";
+								confirmMessage = _T("Do you really want to delete this directory?");
 							else
-								confirmMessage = "Do you really want to delete this file?";
+								confirmMessage = _T("Do you really want to delete this file?");
 							attributes.getAjaxCallListeners().add(new ConfirmClickListener(confirmMessage));
 						}
 

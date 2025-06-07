@@ -3,6 +3,7 @@ package io.onedev.server.web.component.build.list;
 import static io.onedev.server.model.Build.SORT_FIELDS;
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -261,9 +262,9 @@ public abstract class BuildListPanel extends Panel {
 				if (!isEnabled()) 
 					tag.append("class", "disabled", " ");
 				if (!querySubmitted)
-					tag.put("title", "Query not submitted");
+					tag.put("data-tippy-content", _T("Query not submitted"));
 				else if (queryModel.getObject() == null)
-					tag.put("title", "Can not save malformed query");
+					tag.put("data-tippy-content", _T("Can not save malformed query"));
 			}
 
 			@Override
@@ -283,7 +284,7 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Cancel Selected Builds";
+						return _T("Cancel Selected Builds");
 					}
 					
 					@Override
@@ -298,7 +299,7 @@ public abstract class BuildListPanel extends Panel {
 								for (IModel<Build> each: selectionColumn.getSelections()) {
 									Build build = each.getObject();
 									if (build.isFinished()) {
-										errorMessage = "Build #" + build.getNumber() + " already finished";
+										errorMessage = MessageFormat.format(_T("Build #{0} already finished"), build.getNumber());
 										break;
 									} 
 								}
@@ -312,12 +313,12 @@ public abstract class BuildListPanel extends Panel {
 										protected void onConfirm(AjaxRequestTarget target) {
 											for (IModel<Build> each: selectionColumn.getSelections()) 
 												OneDev.getInstance(JobManager.class).cancel(each.getObject());
-											Session.get().success("Cancel request submitted");
+											Session.get().success(_T("Cancel request submitted"));
 										}
 										
 										@Override
 										protected String getConfirmMessage() {
-											return "Type <code>yes</code> below to cancel selected builds";
+											return _T("Type <code>yes</code> below to cancel selected builds");
 										}
 										
 										@Override
@@ -342,7 +343,7 @@ public abstract class BuildListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select builds to cancel");
+									tag.put("data-tippy-content", _T("Please select builds to cancel"));
 								}
 							}
 							
@@ -355,7 +356,7 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Re-run Selected Builds";
+						return _T("Re-run Selected Builds");
 					}
 					
 					@Override
@@ -370,7 +371,7 @@ public abstract class BuildListPanel extends Panel {
 								for (IModel<Build> each: selectionColumn.getSelections()) {
 									Build build = each.getObject();
 									if (!build.isFinished()) {
-										errorMessage = "Build #" + build.getNumber() + " not finished yet";
+										errorMessage = MessageFormat.format(_T("Build #{0} not finished yet"), build.getNumber());
 										break;
 									} 
 								}
@@ -386,12 +387,12 @@ public abstract class BuildListPanel extends Panel {
 												Build build = each.getObject();
 												OneDev.getInstance(JobManager.class).resubmit(build, "Resubmitted manually");
 											}
-											Session.get().success("Re-run request submitted");
+											Session.get().success(_T("Re-run request submitted"));
 										}
 										
 										@Override
 										protected String getConfirmMessage() {
-											return "Type <code>yes</code> below to re-run selected builds";
+											return _T("Type <code>yes</code> below to re-run selected builds");
 										}
 										
 										@Override
@@ -416,7 +417,7 @@ public abstract class BuildListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select builds to re-run");
+									tag.put("data-tippy-content", _T("Please select builds to re-run"));
 								}
 							}
 							
@@ -429,7 +430,7 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Delete Selected Builds";
+						return _T("Delete Selected Builds");
 					}
 					
 					@Override
@@ -455,7 +456,7 @@ public abstract class BuildListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete selected builds";
+										return _T("Type <code>yes</code> below to delete selected builds");
 									}
 									
 									@Override
@@ -479,7 +480,7 @@ public abstract class BuildListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select builds to delete");
+									tag.put("data-tippy-content", _T("Please select builds to delete"));
 								}
 							}
 							
@@ -492,7 +493,7 @@ public abstract class BuildListPanel extends Panel {
 					
 					@Override
 					public String getLabel() {
-						return "Cancel All Queried Builds";
+						return _T("Cancel All Queried Builds");
 					}
 					
 					@Override
@@ -508,7 +509,7 @@ public abstract class BuildListPanel extends Panel {
 								for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) { 
 									Build build = it.next();
 									if (build.isFinished()) {
-										errorMessage = "Build #" + build.getNumber() + " already finished";
+										errorMessage = MessageFormat.format(_T("Build #{0} already finished"), build.getNumber());
 										break;
 									}
 								}
@@ -522,12 +523,12 @@ public abstract class BuildListPanel extends Panel {
 										protected void onConfirm(AjaxRequestTarget target) {
 											for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) 
 												OneDev.getInstance(JobManager.class).cancel(it.next());
-											Session.get().success("Cancel request submitted");
+											Session.get().success(_T("Cancel request submitted"));
 										}
 										
 										@Override
 										protected String getConfirmMessage() {
-											return "Type <code>yes</code> below to cancel all queried builds";
+											return _T("Type <code>yes</code> below to cancel all queried builds");
 										}
 										
 										@Override
@@ -565,7 +566,7 @@ public abstract class BuildListPanel extends Panel {
 					
 					@Override
 					public String getLabel() {
-						return "Re-run All Queried Builds";
+						return _T("Re-run All Queried Builds");
 					}
 					
 					@Override
@@ -581,7 +582,7 @@ public abstract class BuildListPanel extends Panel {
 								for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) { 
 									Build build = it.next();
 									if (!build.isFinished()) {
-										errorMessage = "Build #" + build.getNumber() + " not finished yet";
+										errorMessage = MessageFormat.format(_T("Build #{0} not finished yet"), build.getNumber());
 										break;
 									}
 								}
@@ -595,12 +596,12 @@ public abstract class BuildListPanel extends Panel {
 										protected void onConfirm(AjaxRequestTarget target) {
 											for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) 
 												OneDev.getInstance(JobManager.class).resubmit(it.next(), "Resubmitted manually");
-											Session.get().success("Re-run request submitted");
+											Session.get().success(_T("Re-run request submitted"));
 										}
 										
 										@Override
 										protected String getConfirmMessage() {
-											return "Type <code>yes</code> below to re-run all queried builds";
+											return _T("Type <code>yes</code> below to re-run all queried builds");
 										}
 										
 										@Override
@@ -667,7 +668,7 @@ public abstract class BuildListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete all queried builds";
+										return _T("Type <code>yes</code> below to delete all queried builds");
 									}
 									
 									@Override
@@ -985,9 +986,9 @@ public abstract class BuildListPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return "found " + dataProvider.size() + " builds";
+					return MessageFormat.format(_T("found {0} builds"), dataProvider.size());
 				else
-					return "found 1 build";					
+					return _T("found 1 build");					
 			}
 		}) {
 			@Override
@@ -1048,7 +1049,7 @@ public abstract class BuildListPanel extends Panel {
 		if (getProject() != null && SecurityUtils.canManageBuilds(getProject())) 
 			columns.add(selectionColumn = new SelectionColumn<Build, Void>());
 		
-		columns.add(new AbstractColumn<>(Model.of("Build")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Build"))) {
 
 			@Override
 			public String getCssClass() {
@@ -1104,7 +1105,7 @@ public abstract class BuildListPanel extends Panel {
 		});
 		
 		if (showRef) {
-			columns.add(new AbstractColumn<>(Model.of("On Behalf Of")) {
+			columns.add(new AbstractColumn<>(Model.of(_T("On Behalf Of"))) {
 
 				@Override
 				public String getCssClass() {
@@ -1121,7 +1122,7 @@ public abstract class BuildListPanel extends Panel {
 							Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
 							PageParameters params = PullRequestActivitiesPage.paramsOf(build.getRequest());
 							Link<Void> link = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, params);
-							link.add(new Label("label", "pull request #" + build.getRequest().getNumber()));
+							link.add(new Label("label", MessageFormat.format(_T("pull request #{0}"), build.getRequest().getNumber())));
 							fragment.add(link);
 							cellItem.add(fragment);
 						} else if (build.getBranch() != null) {
@@ -1132,7 +1133,7 @@ public abstract class BuildListPanel extends Panel {
 							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(),
 									new BlobIdent(revision, null, FileMode.TREE.getBits()));
 							Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
-							link.add(new Label("label", "branch " + build.getBranch()));
+							link.add(new Label("label", MessageFormat.format(_T("branch {0}"), build.getBranch())));
 							fragment.add(link);
 							cellItem.add(fragment);
 						} else if (build.getTag() != null) {
@@ -1143,7 +1144,7 @@ public abstract class BuildListPanel extends Panel {
 							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(),
 									new BlobIdent(revision, null, FileMode.TREE.getBits()));
 							Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
-							link.add(new Label("label", "tag " + build.getTag()));
+							link.add(new Label("label", MessageFormat.format(_T("tag {0}"), build.getTag())));
 							fragment.add(link);
 							cellItem.add(fragment);
 						} else if (build.getRefName().equals(REF_TOD)) {
@@ -1153,15 +1154,15 @@ public abstract class BuildListPanel extends Panel {
 						}
 					} else {
 						if (build.getRequest() != null)
-							cellItem.add(new Label(componentId, "pull request #" + build.getRequest().getNumber()));
+							cellItem.add(new Label(componentId, MessageFormat.format(_T("pull request #{0}"), build.getRequest().getNumber())));
 						else if (build.getBranch() != null)
-							cellItem.add(new Label(componentId, "branch " + build.getBranch()));
+							cellItem.add(new Label(componentId, MessageFormat.format(_T("branch {0}"), build.getBranch())));
 						else if (build.getTag() != null)
-							cellItem.add(new Label(componentId, "tag " + build.getTag()));
+							cellItem.add(new Label(componentId, MessageFormat.format(_T("tag {0}"), build.getTag())));
 						else if (build.getRefName().equals(REF_TOD))
 							cellItem.add(new Label(componentId, "tod"));
 						else
-							cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
+							cellItem.add(new Label(componentId, "<i>" + _T("n/a") + "</i>").setEscapeModelStrings(false));
 					}
 				}
 			});
@@ -1182,14 +1183,14 @@ public abstract class BuildListPanel extends Panel {
 					if (param != null && build.isParamVisible(paramName))
 						cellItem.add(new ParamValuesLabel(componentId, param));
 					else
-						cellItem.add(new Label(componentId, "<i>Unspecified</i>").setEscapeModelStrings(false));
+						cellItem.add(new Label(componentId, "<i>" + _T("Unspecified") + "</i>").setEscapeModelStrings(false));
 				}
 
 			});
 		}
 
 		if (showDuration) {
-			columns.add(new AbstractColumn<>(Model.of("Duration")) {
+			columns.add(new AbstractColumn<>(Model.of(_T("Duration"))) {
 
 				@Override
 				public String getCssClass() {
@@ -1215,7 +1216,7 @@ public abstract class BuildListPanel extends Panel {
 			});
 		}
 
-		columns.add(new AbstractColumn<>(Model.of("Last Update")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Last Update"))) {
 
 			@Override
 			public String getCssClass() {
@@ -1232,7 +1233,7 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getObject() {
-						return rowModel.getObject().getStatus().toString();
+						return _T(rowModel.getObject().getStatus().toString());
 					}
 
 				}) {
@@ -1287,7 +1288,7 @@ public abstract class BuildListPanel extends Panel {
 					
 					@Override
 					protected String getTitle() {
-						return "Select Branch/Tag";
+						return _T("Select Branch/Tag");
 					}
 
 					@Override

@@ -157,9 +157,10 @@ public class Import implements Serializable, Validatable {
 			try {
 				subject = JobAuthorizationContext.get().getSubject(getAccessTokenSecret());
 			} catch (ExplicitException e) {
-				throw new ExplicitException(String.format(
-						"Unable to import build spec (import project: %s, import revision: %s): %s",
-						projectPath, revision, e.getMessage()));
+				var errorMessage = MessageFormat.format(
+						_T("Unable to import build spec (import project: {0}, import revision: {1}): {2}"),
+						projectPath, revision, e.getMessage());
+				throw new ExplicitException(errorMessage);
 			}
 			if (!subject.isPermitted(new ProjectPermission(project, new ReadCode())) 
 					&& !project.isPermittedByLoginUser(new ReadCode())) {
@@ -173,12 +174,14 @@ public class Import implements Serializable, Validatable {
 			try {
 				buildSpec = project.getBuildSpec(commit);
 			} catch (BuildSpecParseException e) {
-				String errorMessage = String.format("Malformed build spec (import project: %s, import revision: %s)", 
+				String errorMessage = MessageFormat.format(
+						_T("Malformed build spec (import project: {0}, import revision: {1})"), 
 						projectPath, revision);
 				throw new ExplicitException(errorMessage);
 			}
 			if (buildSpec == null) {
-				String errorMessage = String.format("Build spec not defined (import project: %s, import revision: %s)", 
+				String errorMessage = MessageFormat.format(
+						_T("Build spec not defined (import project: {0}, import revision: {1})"), 
 						projectPath, revision);
 				throw new ExplicitException(errorMessage);
 			}
@@ -194,7 +197,8 @@ public class Import implements Serializable, Validatable {
 			if (importChain.get().contains(commit.name())) {
 				List<String> circular = new ArrayList<>(importChain.get());
 				circular.add(commit.name());
-				String errorMessage = "Circular build spec imports (" + circular + ")";
+				String errorMessage = MessageFormat.format(
+						_T("Circular build spec imports ({0})"), circular);
 				context.disableDefaultConstraintViolation();
 				context.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
 				return false;
@@ -230,7 +234,7 @@ public class Import implements Serializable, Validatable {
 			String message = e.getMessage();
 			if (message == null) {
 				logger.error("Error validating build spec import", e);
-				message = "Failed to validate build spec import. Check server log for details";
+				message = _T("Failed to validate build spec import. Check server log for details");
 			}
 			context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
@@ -241,7 +245,7 @@ public class Import implements Serializable, Validatable {
 		if (project == null) {
 			project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
 			if (project == null)
-				throw new ExplicitException("Unable to find project to import build spec: " + projectPath);
+				throw new ExplicitException(MessageFormat.format( _T("Unable to find project to import build spec: {0}"), projectPath));
 		}
 		return project;
 	}
@@ -250,7 +254,8 @@ public class Import implements Serializable, Validatable {
 		if (commit == null) {
 			commit = getProject().getRevCommit(revision, false);
 			if (commit == null) {
-				String errorMessage = String.format("Unable to find commit to import build spec (import project: %s, import revision: %s)",
+				String errorMessage = MessageFormat.format(
+						_T("Unable to find commit to import build spec (import project: {0}, import revision: {1})"),
 						projectPath, revision);
 				throw new ExplicitException(errorMessage);
 			}

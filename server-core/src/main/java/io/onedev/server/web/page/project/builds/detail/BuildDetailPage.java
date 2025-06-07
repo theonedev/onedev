@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.builds.detail;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -137,7 +138,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				Long buildNumber = params.get(PARAM_BUILD).toLong();
 				Build build = OneDev.getInstance(BuildManager.class).find(getProject(), buildNumber);
 				if (build == null)
-					throw new EntityNotFoundException("Unable to find build #" + buildNumber + " in project " + getProject());
+					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find build #{0} in project {1}"), buildNumber, getProject()));
 				else if (!build.getProject().equals(getProject()))
 					throw new RestartResponseException(getPageClass(), paramsOf(build));
 				else
@@ -244,11 +245,11 @@ public abstract class BuildDetailPage extends ProjectPage
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to rebuild?"));
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to rebuild?")));
 					}
 
 					private void resubmit(Serializable paramBean) {
-						OneDev.getInstance(JobManager.class).resubmit(getBuild(), "Resubmitted manually");
+						OneDev.getInstance(JobManager.class).resubmit(getBuild(), _T("Resubmitted manually"));
 						setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild()));
 					}
 
@@ -272,13 +273,13 @@ public abstract class BuildDetailPage extends ProjectPage
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to cancel this build?"));
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to cancel this build?")));
 					}
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						OneDev.getInstance(JobManager.class).cancel(getBuild());
-						getSession().success("Cancel request submitted");
+						getSession().success(_T("Cancel request submitted"));
 					}
 
 					@Override
@@ -305,8 +306,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 								@Override
 								protected Component newMessageContent(String componentId) {
-									return new Label(componentId, "Interactive web shell access to running jobs " +
-											"is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days").setEscapeModelStrings(false);
+									return new Label(componentId, _T("Interactive web shell access to running jobs is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days")).setEscapeModelStrings(false);
 								}
 							};
 						}
@@ -381,7 +381,13 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 		};
 		
-		jobNotFoundContainer.add(new Label("jobName", getBuild().getJobName()));
+		jobNotFoundContainer.add(new Label("message", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return MessageFormat.format(_T("Job \"{0}\" associated with the build not found."), getBuild().getJobName());
+			}
+		}));
 		jobNotFoundContainer.add(new BuildSpecLink("buildSpec", getBuild().getCommitId()) {
 
 			@Override
@@ -475,7 +481,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				List<Tab> tabs = new ArrayList<>();
 
 				if (SecurityUtils.canAccessLog(getBuild())) {
-					tabs.add(new BuildTab(Model.of("Log"), BuildLogPage.class, BuildLogPage.paramsOf(getBuild())) {
+					tabs.add(new BuildTab(Model.of(_T("Log")), BuildLogPage.class, BuildLogPage.paramsOf(getBuild())) {
 
 						@Override
 						protected Component renderOptions(String componentId) {
@@ -487,10 +493,10 @@ public abstract class BuildDetailPage extends ProjectPage
 				}
 
 				if (SecurityUtils.canAccessPipeline(getBuild())) 
-					tabs.add(new BuildTab(Model.of("Pipeline"), BuildPipelinePage.class, BuildPipelinePage.paramsOf(getBuild())));
+					tabs.add(new BuildTab(Model.of(_T("Pipeline")), BuildPipelinePage.class, BuildPipelinePage.paramsOf(getBuild())));
 				
 				if (SecurityUtils.canManageBuild(getBuild()) || getBuild().getRootArtifacts().size() != 0) {
-					tabs.add(new BuildTab(Model.of("Artifacts"), BuildArtifactsPage.class, BuildArtifactsPage.paramsOf(getBuild())));
+					tabs.add(new BuildTab(Model.of(_T("Artifacts")), BuildArtifactsPage.class, BuildArtifactsPage.paramsOf(getBuild())));
 				}
 
 				var packSupports = new ArrayList<>(OneDev.getExtensions(PackSupport.class));
@@ -517,10 +523,10 @@ public abstract class BuildDetailPage extends ProjectPage
 				}
 				
 				var params = FixedIssuesPage.paramsOf(getBuild(), getProject().getHierarchyDefaultFixedIssueQuery(getBuild().getJobName()));
-				tabs.add(new BuildTab(Model.of("Fixed Issues"), FixedIssuesPage.class, params));
+				tabs.add(new BuildTab(Model.of(_T("Fixed Issues")), FixedIssuesPage.class, params));
 
 				if (SecurityUtils.canReadCode(getProject()))
-					tabs.add(new BuildTab(Model.of("Changes"), BuildChangesPage.class, BuildChangesPage.paramsOf(getBuild())));
+					tabs.add(new BuildTab(Model.of(_T("Changes")), BuildChangesPage.class, BuildChangesPage.paramsOf(getBuild())));
 
 				List<BuildTabContribution> contributions = new ArrayList<>(OneDev.getExtensions(BuildTabContribution.class));
 				contributions.sort(Comparator.comparing(BuildTabContribution::getOrder));
@@ -561,7 +567,7 @@ public abstract class BuildDetailPage extends ProjectPage
 							public void onClick() {
 								OneDev.getInstance(BuildManager.class).delete(getBuild());
 								
-								Session.get().success("Build #" + getBuild().getNumber() + " deleted");
+								Session.get().success(MessageFormat.format(_T("Build #{0} deleted"), getBuild().getNumber()));
 								
 								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Build.class);
 								if (redirectUrlAfterDelete != null)
@@ -570,7 +576,7 @@ public abstract class BuildDetailPage extends ProjectPage
 									setResponsePage(ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject()));
 							}
 							
-						}.add(new ConfirmClickModifier("Do you really want to delete this build?"));
+						}.add(new ConfirmClickModifier(_T("Do you really want to delete this build?")));
 					}
 					
 				};

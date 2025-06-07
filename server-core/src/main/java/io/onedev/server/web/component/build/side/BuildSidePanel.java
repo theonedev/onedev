@@ -1,6 +1,35 @@
 package io.onedev.server.web.component.build.side;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
+
 import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
@@ -35,30 +64,6 @@ import io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSp
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.editbean.LabelsBean;
-import org.apache.wicket.Component;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.FileMode;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 public abstract class BuildSidePanel extends Panel {
 
@@ -423,7 +428,7 @@ public abstract class BuildSidePanel extends Panel {
 		Link<Void> dependentsLink = new BookmarkablePageLink<Void>("dependents", BuildListPage.class, 
 				BuildListPage.paramsOf(query, 0));
 		dependentsLink.setVisible(!getBuild().getDependents().isEmpty());
-		dependentsLink.add(new Label("label", getBuild().getDependents().size() + " build(s)"));
+		dependentsLink.add(new Label("label", MessageFormat.format(_T("{0} build(s)"), getBuild().getDependents().size())));
 		
 		dependencesContainer.add(dependentsLink);
 		
@@ -431,7 +436,7 @@ public abstract class BuildSidePanel extends Panel {
 		Link<Void> dependenciesLink = new BookmarkablePageLink<Void>("dependencies", BuildListPage.class, 
 				BuildListPage.paramsOf(query, 0));
 		dependenciesLink.setVisible(!getBuild().getDependencies().isEmpty());
-		dependenciesLink.add(new Label("label", getBuild().getDependencies().size() + " build(s)"));
+		dependenciesLink.add(new Label("label", MessageFormat.format(_T("{0} build(s)"), getBuild().getDependencies().size())));
 		dependencesContainer.add(dependenciesLink);
 		
 		WebMarkupContainer comma = new WebMarkupContainer("comma");

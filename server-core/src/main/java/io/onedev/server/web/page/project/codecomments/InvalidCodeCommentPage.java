@@ -1,6 +1,9 @@
 package io.onedev.server.web.page.project.codecomments;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
+
+import java.text.MessageFormat;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -73,7 +76,7 @@ public class InvalidCodeCommentPage extends ProjectPage {
 			public void onClick() {
 				OneDev.getInstance(CodeCommentManager.class).delete(getCodeComment());
 				
-				Session.get().success("Code comment #" + getCodeComment().getId() + " deleted");
+				Session.get().success(MessageFormat.format(_T("Code comment #{0} deleted"), getCodeComment().getId()));
 				
 				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(CodeComment.class);
 				if (redirectUrlAfterDelete != null)
@@ -89,7 +92,7 @@ public class InvalidCodeCommentPage extends ProjectPage {
 				setVisible(SecurityUtils.canManageCodeComments(getCodeComment().getProject()));
 			}
 			
-		}.add(new ConfirmClickModifier("Really want to delete this code comment?")));
+		}.add(new ConfirmClickModifier(_T("Really want to delete this code comment?"))));
 	}
 	
 	public static PageParameters paramsOf(CodeComment codeComment) {

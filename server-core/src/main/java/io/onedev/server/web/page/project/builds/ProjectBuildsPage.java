@@ -34,6 +34,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -257,12 +260,12 @@ public class ProjectBuildsPage extends ProjectPage {
 	
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Builds");
+		return new Label(componentId, _T("Builds"));
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		return "Builds - " + getProject().getPath();
+		return _T("Builds") + " - " + getProject().getPath();
 	}
 	
 }

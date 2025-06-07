@@ -1,7 +1,10 @@
 package io.onedev.server.web.page.project.pullrequests;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
+
+import java.text.MessageFormat;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -80,7 +83,7 @@ public class InvalidPullRequestPage extends ProjectPage {
 			public void onClick() {
 				OneDev.getInstance(PullRequestManager.class).delete(getPullRequest());
 				
-				Session.get().success("Pull request #" + getPullRequest().getNumber() + " deleted");
+				Session.get().success(MessageFormat.format(_T("Pull request #{0} deleted"), getPullRequest().getNumber()));
 				
 				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(PullRequest.class);
 				if (redirectUrlAfterDelete != null)
@@ -95,7 +98,7 @@ public class InvalidPullRequestPage extends ProjectPage {
 				setVisible(SecurityUtils.canManageProject(getPullRequest().getTargetProject()));
 			}
 			
-		}.add(new ConfirmClickModifier("Do you really want to delete pull request #" + getPullRequest().getNumber() + "?")));
+		}.add(new ConfirmClickModifier(MessageFormat.format(_T("Do you really want to delete pull request #{0}?"), getPullRequest().getNumber()))));
 	}
 
 	public static PageParameters paramsOf(PullRequest request) {
