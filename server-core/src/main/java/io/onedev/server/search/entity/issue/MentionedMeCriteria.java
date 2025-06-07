@@ -1,5 +1,7 @@
 package io.onedev.server.search.entity.issue;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -30,7 +32,7 @@ public class MentionedMeCriteria extends Criteria<Issue> {
 					builder.equal(mention.get(IssueMention.PROP_USER), User.get())));
 			return builder.exists(mentionQuery);
 		} else {
-			throw new ExplicitException("Please login to perform this query");
+			throw new ExplicitException(_T("Please login to perform this query"));
 		}
 	}
 
@@ -39,7 +41,7 @@ public class MentionedMeCriteria extends Criteria<Issue> {
 		if (User.get() != null)
 			return issue.getMentions().stream().anyMatch(it->it.getUser().equals(User.get()));
 		else
-			throw new ExplicitException("Please login to perform this query");
+			throw new ExplicitException(_T("Please login to perform this query"));
 	}
 
 	@Override

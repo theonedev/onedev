@@ -230,9 +230,9 @@ public class EditableUtils {
 	public static String getGroupedType(Class<?> clazz) {
 		Editable editable = clazz.getAnnotation(Editable.class);
 		if (editable != null && editable.group().length() != 0)
-			return editable.group() + " / " + getDisplayName(clazz);
+			return _T(editable.group()) + " / " + _T(getDisplayName(clazz));
 		else
-			return getDisplayName(clazz);
+			return _T(getDisplayName(clazz));
 	}
 	
 }

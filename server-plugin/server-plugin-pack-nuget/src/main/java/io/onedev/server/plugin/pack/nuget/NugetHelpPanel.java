@@ -8,6 +8,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import static io.onedev.server.plugin.pack.nuget.NugetPackService.SERVICE_ID;
+import static io.onedev.server.web.translation.Translation._T;
 
 public class NugetHelpPanel extends Panel {
 	
@@ -31,8 +32,8 @@ public class NugetHelpPanel extends Panel {
 			@Override
 			protected String load() {
 				return "" +
-						"# Use job token to tell OneDev the build pushing the package\n" +
-						"# Job secret 'access-token' should be defined in project build setting as an access token with package write permission\n\n" +
+						"# " + _T("Use job token to tell OneDev the build pushing the package") + "\n" +
+						"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package write permission") + "\n\n" +
 						"dotnet nuget add source --name onedev --username @job_token@ --password @secret:access-token@ --store-password-in-clear-text " + registryUrl;
 			}
 

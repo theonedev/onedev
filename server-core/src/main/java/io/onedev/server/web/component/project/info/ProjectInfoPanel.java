@@ -1,23 +1,15 @@
 package io.onedev.server.web.component.project.info;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.replica.ProjectReplica;
-import io.onedev.server.search.entity.project.ProjectQuery;
-import io.onedev.server.search.entity.project.ProjectQueryLexer;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ParsedEmailAddress;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.project.forkoption.ForkOptionPanel;
-import io.onedev.server.web.page.project.ProjectListPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -38,16 +30,26 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unbescape.html.HtmlEscape;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static io.onedev.server.replica.ProjectReplica.Type.REDUNDANT;
-import static java.util.Comparator.comparingInt;
-import static org.unbescape.html.HtmlEscape.escapeHtml5;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.replica.ProjectReplica;
+import io.onedev.server.search.entity.project.ProjectQuery;
+import io.onedev.server.search.entity.project.ProjectQueryLexer;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ParsedEmailAddress;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
+import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.project.forkoption.ForkOptionPanel;
+import io.onedev.server.web.page.project.ProjectListPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 
 public abstract class ProjectInfoPanel extends Panel {
 
@@ -99,7 +101,7 @@ public abstract class ProjectInfoPanel extends Panel {
 				+ Criteria.quote(getProject().getPath());
 		PageParameters params = ProjectListPage.paramsOf(query, 0, getProject().getForks().size());
 		Link<Void> forksLink = new BookmarkablePageLink<Void>("forks", ProjectListPage.class, params);
-		forksLink.add(new Label("label", getProject().getForks().size() + " forks"));
+		forksLink.add(new Label("label", MessageFormat.format(_T("{0} forks"), getProject().getForks().size())));
 		forkInfo.add(forksLink);
 		
 		ModalLink forkNow = new ModalLink("forkNow") {
@@ -187,8 +189,8 @@ public abstract class ProjectInfoPanel extends Panel {
 				for (var server: getClusterManager().getServerAddresses()) 
 					orders.put(server, index++);					
 				return replicas.stream()
-						.filter(it -> orders.containsKey(it.getKey()) && (it.getValue().getType() != REDUNDANT || it.getKey().equals(activeServer)))
-						.sorted(comparingInt(o -> orders.get(o.getKey())))
+						.filter(it -> orders.containsKey(it.getKey()) && (it.getValue().getType() != ProjectReplica.Type.REDUNDANT || it.getKey().equals(activeServer)))
+						.sorted(Comparator.comparingInt(o -> orders.get(o.getKey())))
 						.collect(Collectors.toList());
 			}
 		}) {
@@ -197,14 +199,14 @@ public abstract class ProjectInfoPanel extends Panel {
 			protected void populateItem(ListItem<Map.Entry<String, ProjectReplica>> item) {
 				var server = item.getModelObject().getKey();
 				var replica = item.getModelObject().getValue();
-				var escapedServer = escapeHtml5(server + " (" + getClusterManager().getServerName(server) + ")");
+				var escapedServer = HtmlEscape.escapeHtml5(server + " (" + getClusterManager().getServerName(server) + ")");
 				String serverInfo;
 				if (server.equals(activeServer)) 
-					serverInfo = escapedServer + " <span class='badge badge-sm badge-info ml-1'>active</span>";
+					serverInfo = escapedServer + " <span class='badge badge-sm badge-info ml-1'>" + _T("active") + "</span>";
 				else if (replica.getVersion() == latestVersion)
-					serverInfo = escapedServer + " <span class='badge badge-sm badge-success ml-1'>up to date</span>";
+					serverInfo = escapedServer + " <span class='badge badge-sm badge-success ml-1'>" + _T("up to date") + "</span>";
 				else
-					serverInfo = escapedServer + " <span class='badge badge-sm badge-warning ml-1'>outdated</span>";
+					serverInfo = escapedServer + " <span class='badge badge-sm badge-warning ml-1'>" + _T("outdated") + "</span>";
 				item.add(new Label("server", serverInfo).setEscapeModelStrings(false));
 				
 				var projectId = getProject().getId();
@@ -216,11 +218,11 @@ public abstract class ProjectInfoPanel extends Panel {
 							try {
 								getProjectManager().requestToSyncReplica(projectId, activeServer);
 							} catch (Exception e) {
-								logger.error("Error requestig to sync replica of project with id '" + projectId + "'", e);
+								logger.error(MessageFormat.format("Error requestig to sync replica of project with id \"{0}\"", projectId), e);
 							}
 							return null;
 						});
-						Session.get().success("Sync requested. Please check status after a while");
+						Session.get().success(_T("Sync requested. Please check status after a while"));
 					}
 
 					@Override

@@ -2,6 +2,7 @@ package io.onedev.server.web.component.pack.side;
 
 import static io.onedev.server.search.commit.Revision.Type.COMMIT;
 import static io.onedev.server.search.entity.issue.IssueQuery.merge;
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 import java.util.List;
@@ -143,7 +144,7 @@ public abstract class PackSidePanel extends Panel {
 
 					@Override
 					protected String getPlaceholder() {
-						return "Fixed issues since...";
+						return _T("Fixed issues since...");
 					}
 				});
 			} else {
@@ -162,7 +163,7 @@ public abstract class PackSidePanel extends Panel {
 
 					@Override
 					protected String getPlaceholder() {
-						return "Changes since...";
+						return _T("Code changes since...");
 					}
 				});
 			} else {

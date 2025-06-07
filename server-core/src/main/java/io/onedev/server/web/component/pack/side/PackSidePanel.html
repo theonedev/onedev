@@ -2,19 +2,19 @@
 	<div class="pack-side">
         <div class="properties">
         	<div>
-        		<div class="name">Published By</div>
+        		<div class="name"><wicket:t>Published By</wicket:t></div>
         		<div class="value">
 					<a wicket:id="publisher" class="text-break"></a>
         		</div>
         	</div>
 			<div>
-				<div class="name">Published At</div>
+				<div class="name"><wicket:t>Published At</wicket:t></div>
 				<div class="value">
 					<span wicket:id="publishDate"></span>
 				</div>
 			</div>
 			<div>
-				<div class="name">Total Size</div>
+				<div class="name"><wicket:t>Total Size</wicket:t></div>
 				<div class="value">
 					<span wicket:id="totalSize"></span>
 				</div>
@@ -32,15 +32,15 @@
 		</wicket:enclosure>
 		<div wicket:id="labels" class="labels">
 			<div wicket:id="head" class="d-flex align-items-center justify-content-between mb-3">
-				<span class="font-weight-bolder">Labels</span>
+				<span class="font-weight-bolder"><wicket:t>Labels</wicket:t></span>
 				<wicket:svg href="gear" class="icon icon-sm"></wicket:svg>
 			</div>
 			<div wicket:id="body" class="body d-flex align-items-center"></div>
-			<span wicket:id="labelsHelp" class="form-text font-size-sm text-muted"><wicket:svg href="bulb" class="icon icon-sm"/> Labels can be defined in Administration / Label Management</span>
+			<span wicket:id="labelsHelp" class="form-text font-size-sm text-muted"><wicket:svg href="bulb" class="icon icon-sm"/> <wicket:t>Labels can be defined in Administration / Label Management</wicket:t></span>
 		</div>
 		<wicket:enclosure child="delete">
 			<div class="actions">
-				<a wicket:id="delete" class="delete btn btn-light-danger">Delete</a>
+				<a wicket:id="delete" class="delete btn btn-light-danger"><wicket:t>Delete</wicket:t></a>
 			</div>
 		</wicket:enclosure>
 	</div>

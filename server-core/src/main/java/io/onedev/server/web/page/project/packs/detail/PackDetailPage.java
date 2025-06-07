@@ -1,5 +1,24 @@
 package io.onedev.server.web.page.project.packs.detail;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PackManager;
 import io.onedev.server.model.Pack;
@@ -20,21 +39,6 @@ import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.flow.RedirectToUrlException;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import java.util.List;
 
 public class PackDetailPage extends ProjectPage {
 	
@@ -80,7 +84,7 @@ public class PackDetailPage extends ProjectPage {
 		super.onInitialize();
 		
 		add(new Label("reference", getPack().getReference(false)));
-		add(new Label("type", "(" + getPack().getType() + ")"));
+		add(new Label("type", "(" + _T(getPack().getType()) + ")"));
 
 		add(new SideInfoLink("moreInfo"));
 				
@@ -105,7 +109,7 @@ public class PackDetailPage extends ProjectPage {
 							public void onClick() {
 								getPackManager().delete(getPack());
 
-								Session.get().success("Package " + getPack().getReference(false) + " deleted");
+								Session.get().success(MessageFormat.format(_T("Package {0} deleted"), getPack().getReference(false)));
 
 								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Pack.class);
 								if (redirectUrlAfterDelete != null)
@@ -114,7 +118,7 @@ public class PackDetailPage extends ProjectPage {
 									setResponsePage(ProjectPacksPage.class, ProjectPacksPage.paramsOf(getProject()));
 							}
 
-						}.add(new ConfirmClickModifier("Do you really want to delete this package?"));
+						}.add(new ConfirmClickModifier(_T("Do you really want to delete this package?")));
 					}
 
 				};
@@ -122,7 +126,7 @@ public class PackDetailPage extends ProjectPage {
 
 			@Override
 			protected Component newTitle(String componentId) {
-				return new EntityNavPanel<Pack>(componentId, "package") {
+				return new EntityNavPanel<Pack>(componentId, _T("package")) {
 
 					@Override
 					protected EntityQuery<Pack> parse(String queryString, Project project) {

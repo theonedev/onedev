@@ -231,7 +231,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 			@Override
 			public String getObject() {
-				return buildModel.getObject().getStatus().toString();
+				return _T(buildModel.getObject().getStatus().toString());
 			}
 			
 		}));
@@ -526,7 +526,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				tabs.add(new BuildTab(Model.of(_T("Fixed Issues")), FixedIssuesPage.class, params));
 
 				if (SecurityUtils.canReadCode(getProject()))
-					tabs.add(new BuildTab(Model.of(_T("Changes")), BuildChangesPage.class, BuildChangesPage.paramsOf(getBuild())));
+					tabs.add(new BuildTab(Model.of(_T("Code Changes")), BuildChangesPage.class, BuildChangesPage.paramsOf(getBuild())));
 
 				List<BuildTabContribution> contributions = new ArrayList<>(OneDev.getExtensions(BuildTabContribution.class));
 				contributions.sort(Comparator.comparing(BuildTabContribution::getOrder));

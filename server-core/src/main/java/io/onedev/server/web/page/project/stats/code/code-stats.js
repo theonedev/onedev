@@ -14,11 +14,11 @@ onedev.server.codeStats = {
 		return localDate.year()%100 + "-" + localDate.monthValue() + "-" + localDate.dayOfMonth();
 	},
 	contribs: {
-		onDomReady : function(overallContributions, topContributorsDataUrl, userCardCallback, darkMode) {
+		onDomReady : function(overallContributions, topContributorsDataUrl, userCardCallback, darkMode, translations) {
 			var $contribs = $(".code-contribs");
 			var $overall = $contribs.find(".overall");
 			if (Object.keys(overallContributions).length === 0) {
-				$overall.html("<div class='no-data'>No data</div>");
+				$overall.html("<div class='no-data'>" + translations.noData + "</div>");
 				return;
 			}
 			
@@ -194,13 +194,32 @@ onedev.server.codeStats = {
 							}
 							
 							function renderContributor($container, contributor, index) {
+								function createAuthorLink() {
+									var $link = $("<a class='user'></a>");
+									if (contributor.authorProfileUrl)
+										$link.attr("href", contributor.authorProfileUrl);
+									else
+										$link.css("cursor", "default");	
+									return $link;
+								}
 								var $contrib = $("<div class='contrib border rounded p-3 mb-5'></div>");
 								$container.append($contrib);
 								var $head = $("<div class='head d-flex align-items-center'></div>");
 								$contrib.append($head);
 								var $left = $("<div class='mr-3 d-flex align-items-center'></div>");
 								$head.append($left);
-								$left.append("<a class='user mr-3'><img class='avatar' src='" + contributor.authorAvatarUrl + "'></img></a>");
+								var $avatarLink = createAuthorLink();
+								$avatarLink.addClass("mr-3");
+								$avatarLink.append("<img class='avatar' src='" + contributor.authorAvatarUrl + "'></img>");
+								$left.append($avatarLink);
+								
+								var $userInfo = $("<div></div>");
+								$left.append($userInfo);
+								var $nameDiv = $("<div class='font-weight-bold'></div>");
+								$nameLink = createAuthorLink();
+								$nameLink.append(contributor.authorName);
+								$nameDiv.append($nameLink);
+								$userInfo.append($nameDiv);
 
 								var alignment = {targetX: 0, targetY: 0, x: 0, y: 100, offset: 8};
 								$left.find("a.user").hover(function() {
@@ -212,14 +231,10 @@ onedev.server.codeStats = {
 									userCardCallback(contributor.authorName, contributor.authorEmailAddress);
 									return $card;
 								}, alignment);
-								
-								var $userInfo = $("<div></div>");
-								$left.append($userInfo);
-								
-								$userInfo.append("<div class='font-weight-bold'>" + contributor.authorName + "</div>");
+
 								var $totalContribution = $("<div class='total-contribution font-size-sm'></div>");
 								$userInfo.append($totalContribution);
-								$totalContribution.append("<a href='" + contributor.commitsUrl + "' class='commits mr-2'>" + contributor.totalCommits + " commits</a>");
+								$totalContribution.append("<a href='" + contributor.commitsUrl + "' class='commits mr-2'>" + contributor.totalCommits + " " + translations.commits + "</a>");
 								$totalContribution.append("<span class='additions mr-2'>" + contributor.totalAdditions + " ++</span>");
 								$totalContribution.append("<span class='deletions'>" + contributor.totalDeletions + " --</span>");
 								$head.append("<div class='ml-auto font-size-h6 font-weight-bold'>#" + (index + 1) + "</div>");
@@ -337,12 +352,12 @@ onedev.server.codeStats = {
 	},
 	
 	sourceLines: {
-		onDomReady: function(lineIncrements, defaultBranch, darkMode) {
+		onDomReady: function(lineIncrements, defaultBranch, darkMode, translations) {
 			var numOfTopLanguages = 10;
 			
 			var $chart = $(".source-lines>.chart");
 			if (lineIncrements.length == 0) {
-				$chart.append("<div class='no-data'>No data</div>");
+				$chart.append("<div class='no-data'>" + translations.noData + "</div>");
 				return;
 			}
 			
@@ -403,9 +418,9 @@ onedev.server.codeStats = {
 			var useKilo;
 			var title;
 			if (defaultBranch != null)
-				title = "SLOC on " + defaultBranch;
+				title = translations.sloc.replace("{0}", defaultBranch);
 			else
-				title = "No default branch";
+				title = translations.noDefaultBranch;
 			var option = {
 				title: {
 					text: title,

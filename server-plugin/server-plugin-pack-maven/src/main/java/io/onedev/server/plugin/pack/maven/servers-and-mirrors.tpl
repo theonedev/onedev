@@ -1,7 +1,7 @@
 <servers>
   <server>
     <id>onedev</id>
-    <!-- Make sure the account has package ${permission} permission over the project -->
+    <!-- maven:has-permission-notice -->
     <username>onedev_account_name</username>
     <password>onedev_password_or_access_token</password>
   </server>
@@ -9,7 +9,7 @@
 <%
 if (url.startsWith("http:") && permission.equals("read")) {
 print """
-<!-- Add below to allow accessing via http protocol in new Maven versions -->
+<!-- maven:allow-http-notice -->
 <mirrors>
   <mirror>
     <id>maven-default-http-blocker</id>

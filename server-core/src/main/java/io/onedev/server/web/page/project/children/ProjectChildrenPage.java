@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.children;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 
 import javax.annotation.Nullable;
@@ -106,12 +108,12 @@ public class ProjectChildrenPage extends ProjectPage {
 	
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Child Projects");
+		return new Label(componentId, _T("Child Projects"));
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		return "Child Projects - " + getProject().getPath();
+		return _T("Child Projects") + " - " + getProject().getPath();
 	}
 
 	@Override

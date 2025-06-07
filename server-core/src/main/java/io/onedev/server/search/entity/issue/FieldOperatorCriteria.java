@@ -13,6 +13,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.nio.channels.IllegalSelectorException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,12 +49,12 @@ public class FieldOperatorCriteria extends FieldCriteria {
 			if (User.get() != null) 
 				return builder.equal(valueAttribute, User.get().getName());
 			else 
-				throw new ExplicitException("Please login to perform this query");
+				throw new ExplicitException(_T("Please login to perform this query"));
 		} else if (operator == IssueQueryLexer.IsNotMe) {
 			if (User.get() != null) {
 				return builder.not(builder.equal(valueAttribute, User.get().getName()));
 			} else {
-				throw new ExplicitException("Please login to perform this query");
+				throw new ExplicitException(_T("Please login to perform this query"));
 			}
 		} else if (operator == IssueQueryLexer.IsCurrent) {
 			if (getFieldSpec() instanceof BuildChoiceField) {
@@ -61,7 +64,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 							builder.equal(projectAttribute, build.getProject()),
 							builder.equal(valueAttribute, String.valueOf(build.getNumber())));
 				} else {
-					throw new ExplicitException("No current build in query context");
+					throw new ExplicitException(_T("No current build in query context"));
 				}
 			} else if (getFieldSpec() instanceof PullRequestChoiceField) {
 				PullRequest request = PullRequest.get();
@@ -70,7 +73,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 							builder.equal(projectAttribute, request.getTargetProject()),
 							builder.equal(valueAttribute, String.valueOf(request.getNumber())));
 				} else {
-					throw new ExplicitException("No current pull request in query context");
+					throw new ExplicitException(_T("No current pull request in query context"));
 				}
 			} else if (getFieldSpec() instanceof CommitField) {
 				ProjectScopedCommit commit = ProjectScopedCommit.get();
@@ -79,7 +82,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 							builder.equal(projectAttribute, commit.getProject()),
 							builder.equal(valueAttribute, commit.getCommitId().name()));
 				} else {
-					throw new ExplicitException("No current commit in query context");
+					throw new ExplicitException(_T("No current commit in query context"));
 				}
 			} else {
 				throw new IllegalStateException();
@@ -97,7 +100,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 						return builder.disjunction();
 					}
 				} else {
-					throw new ExplicitException("No current build in query context");
+					throw new ExplicitException(_T("No current build in query context"));
 				}
 			} else {
 				throw new IllegalStateException();
@@ -124,7 +127,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 				else 
 					return Objects.equals(fieldValue, userName);
 			} else {
-				throw new ExplicitException("Please login to perform this query");
+				throw new ExplicitException(_T("Please login to perform this query"));
 			}
 		} else if (operator == IssueQueryLexer.IsCurrent) {
 			if (getFieldSpec() instanceof BuildChoiceField) {
@@ -132,19 +135,19 @@ public class FieldOperatorCriteria extends FieldCriteria {
 				if (build != null) 
 					return build.getProject().equals(issue.getProject()) && build.getId().toString().equals(fieldValue);
 				else  
-					throw new ExplicitException("No build in query context");
+					throw new ExplicitException(_T("No build in query context"));
 			} else if (getFieldSpec() instanceof PullRequestChoiceField) {
 				PullRequest request = PullRequest.get();
 				if (request != null) 
 					return request.getTargetProject().equals(issue.getProject()) && request.getId().toString().equals(fieldValue);
 				else  
-					throw new ExplicitException("No pull request in query context");
+					throw new ExplicitException(_T("No pull request in query context"));
 			} else if (getFieldSpec() instanceof CommitField) {
 				ProjectScopedCommit commit = ProjectScopedCommit.get();
 				if (commit != null) 
 					return commit.getProject().equals(issue.getProject()) && commit.getCommitId().name().equals(fieldValue);
 				else  
-					throw new ExplicitException("No commit in query context");
+					throw new ExplicitException(_T("No commit in query context"));
 			} else {
 				throw new IllegalStateException();
 			}
@@ -157,7 +160,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 								.stream()
 								.anyMatch(it->it.equals(fieldValue));
 				} else {
-					throw new ExplicitException("No build in query context");
+					throw new ExplicitException(_T("No build in query context"));
 				}
 			} else {
 				throw new IllegalStateException();

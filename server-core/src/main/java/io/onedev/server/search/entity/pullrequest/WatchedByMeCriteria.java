@@ -13,6 +13,7 @@ import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.WatchedByMe;
+import static io.onedev.server.web.translation.Translation._T;
 
 public class WatchedByMeCriteria extends Criteria<PullRequest> {
 
@@ -24,7 +25,7 @@ public class WatchedByMeCriteria extends Criteria<PullRequest> {
 		if (user != null) 
 			return getCriteria(user).getPredicate(projectScope, query, from, builder);
 		else 
-			throw new ExplicitException("Please login to perform this query");
+			throw new ExplicitException(_T("Please login to perform this query"));
 	}
 
 	@Override
@@ -33,7 +34,7 @@ public class WatchedByMeCriteria extends Criteria<PullRequest> {
 		if (user != null)
 			return getCriteria(user).matches(request);
 		else
-			throw new ExplicitException("Please login to perform this query");
+			throw new ExplicitException(_T("Please login to perform this query"));
 	}
 	
 	private Criteria<PullRequest> getCriteria(User user) {

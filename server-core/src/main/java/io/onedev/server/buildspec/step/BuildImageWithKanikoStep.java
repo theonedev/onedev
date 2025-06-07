@@ -167,7 +167,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		
 	}
 
-	@Editable(order=100, name="Push to Container registry")
+	@Editable(order=100, name="Push to container registry")
 	public static class RegistryOutput implements Output {
 
 		private static final long serialVersionUID = 1L;

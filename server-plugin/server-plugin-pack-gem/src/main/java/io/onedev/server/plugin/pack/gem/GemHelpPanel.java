@@ -1,6 +1,7 @@
 package io.onedev.server.plugin.pack.gem;
 
 import static io.onedev.server.plugin.pack.gem.GemPackService.SERVICE_ID;
+import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
@@ -34,8 +35,8 @@ public class GemHelpPanel extends Panel {
 		var jobCommands = "" +
 				"mkdir -p $HOME/.gem\n" +
 				"\n" +
-				"# Use job token to tell OneDev the build publishing the package\n" +
-				"# Job secret 'access-token' should be defined in project build setting as an access token with package write permission\n\n" +
+				"# " + _T("Use job token to tell OneDev the build publishing the package") + "\n" +
+				"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package write permission") + "\n\n" +
 				"cat << EOF > $HOME/.gem/credentials\n" +
 				"---\n" +
 				registryUrl + ": Bearer @job_token@:@secret:access-token@\n" +

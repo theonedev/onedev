@@ -33,6 +33,7 @@ import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
+import io.onedev.server.web.page.user.profile.UserProfilePage;
 import io.onedev.server.xodus.CommitInfoManager;
 
 class TopContributorsResource extends AbstractResource {
@@ -91,8 +92,9 @@ class TopContributorsResource extends AbstractResource {
 					AuthorCriteria authorCriteria;
 					EmailAddress emailAddress = emailAddressManager.findByValue(author.getEmailAddress());
 					if (emailAddress != null && emailAddress.isVerified()) {
-						authorCriteria = new AuthorCriteria(Lists.newArrayList(
-								"@" + emailAddress.getOwner().getName()));
+						var user = emailAddress.getOwner();
+						authorCriteria = new AuthorCriteria(Lists.newArrayList("@" + user.getName()));
+						contributorData.put("authorProfileUrl", RequestCycle.get().urlFor(UserProfilePage.class, UserProfilePage.paramsOf(user)));
 					} else {
 						authorCriteria = new AuthorCriteria(Lists.newArrayList(
 								author.getName() + " <" + author.getEmailAddress() + ">"

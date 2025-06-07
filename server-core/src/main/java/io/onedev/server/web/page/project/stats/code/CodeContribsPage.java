@@ -1,13 +1,11 @@
 package io.onedev.server.web.page.project.stats.code;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.onedev.server.OneDev;
-import io.onedev.server.git.GitContribution;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.component.user.card.PersonCardPanel;
-import io.onedev.server.xodus.CommitInfoManager;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -20,8 +18,15 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.PersonIdent;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.git.GitContribution;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.user.card.PersonCardPanel;
+import io.onedev.server.xodus.CommitInfoManager;
 
 public class CodeContribsPage extends CodeStatsPage {
 
@@ -42,7 +47,7 @@ public class CodeContribsPage extends CodeStatsPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		if (getProject().getDefaultBranch() != null)
-			add(new Label("note", "Contributions to " + getProject().getDefaultBranch() + " branch, excluding merge commits"));
+			add(new Label("note", MessageFormat.format(_T("Contributions to {0} branch, excluding merge commits"), getProject().getDefaultBranch())));
 		else
 			add(new WebMarkupContainer("note").setVisible(false));
 		add(new WebMarkupContainer(USER_CARD_ID).setOutputMarkupId(true));
@@ -81,23 +86,26 @@ public class CodeContribsPage extends CodeStatsPage {
 		
 		PageParameters params = TopContributorsResource.paramsOf(getProject()); 
 		String topContributorsUrl = urlFor(new TopContributorsResourceReference(), params).toString();
-		String jsonOfData;
+		var mapper = OneDev.getInstance(ObjectMapper.class);
 		try {
-			jsonOfData = OneDev.getInstance(ObjectMapper.class).writeValueAsString(data);
+			var jsonOfData = mapper.writeValueAsString(data);
+			var translations = new HashMap<String, String>();
+			translations.put("commits", _T("commits"));
+			translations.put("noData", _T("No data"));
+			var jsonOfTranslations = mapper.writeValueAsString(translations);			
+			CharSequence callback = userCardBehavior.getCallbackFunction(
+					CallbackParameter.explicit("name"), CallbackParameter.explicit("emailAddress"));
+			String script = String.format("onedev.server.codeStats.contribs.onDomReady(%s, '%s', %s, %b, %s);", 
+					jsonOfData, topContributorsUrl, callback, isDarkMode(), jsonOfTranslations);
+			response.render(OnDomReadyHeaderItem.forScript(script));
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
-		}
-		
-		CharSequence callback = userCardBehavior.getCallbackFunction(
-				CallbackParameter.explicit("name"), CallbackParameter.explicit("emailAddress"));
-		String script = String.format("onedev.server.codeStats.contribs.onDomReady(%s, '%s', %s, %b);", 
-				jsonOfData, topContributorsUrl, callback, isDarkMode());
-		response.render(OnDomReadyHeaderItem.forScript(script));
+		}	
 	}
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Code Contribution Statistics");
+		return new Label(componentId, _T("Code Contribution Statistics"));
 	}
 
 }

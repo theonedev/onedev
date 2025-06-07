@@ -1,18 +1,20 @@
 package io.onedev.server.plugin.pack.maven;
 
-import com.google.common.io.Resources;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.Model;
+import static io.onedev.server.util.GroovyUtils.evalTemplate;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
-import static io.onedev.server.util.GroovyUtils.evalTemplate;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.Model;
+
+import com.google.common.io.Resources;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
 
 public class MavenHelpPanel extends Panel {
 	
@@ -36,14 +38,8 @@ public class MavenHelpPanel extends Panel {
 			URL tplUrl = Resources.getResource(MavenHelpPanel.class, "repositories.tpl");
 			String template = Resources.toString(tplUrl, StandardCharsets.UTF_8);
 			add(new CodeSnippetPanel("pom", Model.of(evalTemplate(template, bindings))));
-
-			tplUrl = Resources.getResource(MavenHelpPanel.class, "servers-and-mirrors.tpl");
-			template = Resources.toString(tplUrl, StandardCharsets.UTF_8);
-			add(new CodeSnippetPanel("settings", Model.of(evalTemplate(template, bindings))));
-
-			tplUrl = Resources.getResource(MavenHelpPanel.class, "job-commands.tpl");
-			template = Resources.toString(tplUrl, StandardCharsets.UTF_8);
-			add(new CodeSnippetPanel("jobCommands", Model.of(evalTemplate(template, bindings))));
+			add(new CodeSnippetPanel("settings", Model.of(evalTemplate(MavenPackSupport.getServersAndMirrorsTemplate(), bindings))));
+			add(new CodeSnippetPanel("jobCommands", Model.of(evalTemplate(MavenPackSupport.getJobCommandsTemplate(), bindings))));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

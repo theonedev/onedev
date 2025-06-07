@@ -1,16 +1,27 @@
 package io.onedev.server.plugin.pack.maven;
 
-import com.google.common.io.Resources;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PackBlobManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Pack;
-import io.onedev.server.model.PackBlob;
-import io.onedev.server.model.PackBlobReference;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import static io.onedev.server.plugin.pack.maven.MavenPackService.FILE_METADATA;
+import static io.onedev.server.plugin.pack.maven.MavenPackService.NONE;
+import static io.onedev.server.util.GroovyUtils.evalTemplate;
+import static io.onedev.server.web.translation.Translation._T;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -32,21 +43,18 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.unbescape.html.HtmlEscape;
 
-import javax.ws.rs.core.MediaType;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import com.google.common.io.Resources;
 
-import static io.onedev.server.plugin.pack.maven.MavenPackService.FILE_METADATA;
-import static io.onedev.server.plugin.pack.maven.MavenPackService.NONE;
-import static io.onedev.server.util.GroovyUtils.evalTemplate;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.commons.lang3.StringUtils.substringAfter;
-import static org.apache.commons.lang3.StringUtils.substringBefore;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PackBlobManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Pack;
+import io.onedev.server.model.PackBlob;
+import io.onedev.server.model.PackBlobReference;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
 
 public class MavenPackPanel extends GenericPanel<Pack> {
 	
@@ -72,7 +80,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 				var bytes = readBlob(packBlob);
 				add(new CodeSnippetPanel("content", Model.of(new String(bytes, UTF_8))));
 			} else {
-				add(new Label("content", "Plugin metadata not found")
+				add(new Label("content", _T("Plugin metadata not found"))
 						.add(AttributeAppender.append("class", "alert alert-notice alert-light-warning")));
 			}
 		} else {
@@ -128,16 +136,9 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 
 					try {
 						var template = Resources.toString(tplUrl, UTF_8);
-						usageFrag.add(new CodeSnippetPanel("pom", 
-								Model.of(evalTemplate(template, bindings))));
-
-						tplUrl = Resources.getResource(MavenPackPanel.class, "servers-and-mirrors.tpl");
-						template = Resources.toString(tplUrl, StandardCharsets.UTF_8);
-						usageFrag.add(new CodeSnippetPanel("settings", Model.of(evalTemplate(template, bindings))));
-
-						tplUrl = Resources.getResource(MavenPackPanel.class, "job-commands.tpl");
-						template = Resources.toString(tplUrl, StandardCharsets.UTF_8);
-						usageFrag.add(new CodeSnippetPanel("jobCommands", Model.of(evalTemplate(template, bindings))));
+						usageFrag.add(new CodeSnippetPanel("pom", Model.of(evalTemplate(template, bindings))));
+						usageFrag.add(new CodeSnippetPanel("settings", Model.of(evalTemplate(MavenPackSupport.getServersAndMirrorsTemplate(), bindings))));
+						usageFrag.add(new CodeSnippetPanel("jobCommands", Model.of(evalTemplate(MavenPackSupport.getJobCommandsTemplate(), bindings))));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -153,7 +154,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 
 			List<IColumn<String, Void>> columns = new ArrayList<>();
 
-			columns.add(new AbstractColumn<>(Model.of("Published File")) {
+			columns.add(new AbstractColumn<>(Model.of(_T("Published File"))) {
 
 				@Override
 				public void populateItem(Item<ICellPopulator<String>> cellItem,
@@ -196,7 +197,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 
 			});
 
-			columns.add(new AbstractColumn<>(Model.of("Size")) {
+			columns.add(new AbstractColumn<>(Model.of(_T("Size"))) {
 
 				public void populateItem(Item<ICellPopulator<String>> cellItem,
 										 String componentId, IModel<String> rowModel) {

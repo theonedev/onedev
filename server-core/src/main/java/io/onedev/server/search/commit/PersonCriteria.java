@@ -12,6 +12,8 @@ import io.onedev.commons.utils.match.WildcardUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +50,7 @@ public abstract class PersonCriteria extends CommitCriteria {
 						persons.add("<" + it.getValue() + ">");
 					});
 				} else {
-					throw new ExplicitException("Please login to perform this query");
+					throw new ExplicitException(_T("Please login to perform this query"));
 				}
 			} else if (value.startsWith("@")) {
 				String userName = value.substring(1);
@@ -73,7 +75,7 @@ public abstract class PersonCriteria extends CommitCriteria {
 			if (value == null) { // authored by me
 				User user = User.get();
 				if (user == null) {
-					throw new ExplicitException("Please login to perform this query");
+					throw new ExplicitException(_T("Please login to perform this query"));
 				} else if (user.getEmailAddresses().stream()
 						.anyMatch(it-> it.isVerified() && it.getValue().equalsIgnoreCase(personEmail))) { 
 					return true;

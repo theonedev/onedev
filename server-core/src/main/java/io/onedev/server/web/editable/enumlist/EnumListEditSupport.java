@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.enumlist;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
@@ -14,6 +16,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
+import io.onedev.server.web.util.TextUtils;
 
 public class EnumListEditSupport implements EditSupport {
 
@@ -35,9 +38,9 @@ public class EnumListEditSupport implements EditSupport {
 						            String content = "";
 						            for (Enum<?> each: model.getObject()) {
 						            	if (content.length() == 0)
-						            		content += each.toString();
+						            		content += _T(TextUtils.getDisplayValue(each));
 						            	else
-						            		content += ", " + each.toString();
+						            		content += ", " + _T(TextUtils.getDisplayValue(each));
 						            }
 						            return new Label(id, content);
 						        } else { 

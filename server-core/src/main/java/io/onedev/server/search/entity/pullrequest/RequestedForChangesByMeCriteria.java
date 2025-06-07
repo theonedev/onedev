@@ -1,5 +1,7 @@
 package io.onedev.server.search.entity.pullrequest;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -22,7 +24,7 @@ public class RequestedForChangesByMeCriteria extends Criteria<PullRequest> {
 		if (user != null) 
 			return getCriteria(user).getPredicate(projectScope, query, from, builder);
 		else 
-			throw new ExplicitException("Please login to perform this query");
+			throw new ExplicitException(_T("Please login to perform this query"));
 	}
 
 	@Override
@@ -31,7 +33,7 @@ public class RequestedForChangesByMeCriteria extends Criteria<PullRequest> {
 		if (user != null)
 			return getCriteria(user).matches(request);
 		else 
-			throw new ExplicitException("Please login to perform this query");
+			throw new ExplicitException(_T("Please login to perform this query"));
 	}
 	
 	private Criteria<PullRequest> getCriteria(User user) {

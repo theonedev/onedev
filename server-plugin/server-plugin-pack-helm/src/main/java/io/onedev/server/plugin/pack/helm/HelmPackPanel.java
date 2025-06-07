@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.pack.helm;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,8 +36,8 @@ public class HelmPackPanel extends GenericPanel<Pack> {
 			@Override
 			protected String load() {
 				return "" +
-						"# Use job token to tell OneDev the build using the package\n" +
-						"# Job secret 'access-token' should be defined in project build setting as an access token with package read permission\n" +
+						"# " + _T("Use job token to tell OneDev the build using the package") + "\n" +
+						"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package read permission") + "\n" +
 						"helm install " + getPack().getName() + " --username @job_token@ --password @secret:access-token@ " + registryUrl + "/" + getPack().getName() + "-" +getPack().getVersion() + ".tgz";
 			}
 			

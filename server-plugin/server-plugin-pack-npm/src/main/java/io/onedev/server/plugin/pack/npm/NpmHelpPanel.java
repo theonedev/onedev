@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 
 public class NpmHelpPanel extends Panel {
@@ -33,10 +34,10 @@ public class NpmHelpPanel extends Panel {
 			protected String load() {
 				var registryUrl = getServerUrl() + "/" + projectPath + "/~npm/";
 				return "" +
-						"# Use @@ to reference scope in job commands to avoid being interpreted as variable\n\n" +
+						"# " + _T("Use @@ to reference scope in job commands to avoid being interpreted as variable") + "\n\n" +
 						"npm config set @@myscope:registry " + registryUrl + "\n\n" +
-						"# Use job token to tell OneDev the build publishing the package\n" +
-						"# Job secret 'access-token' should be defined in project build setting as an access token with package write permission\n\n" +
+						"# " + _T("Use job token to tell OneDev the build publishing the package") + "\n" +
+						"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package write permission") + "\n\n" +
 						"npm config set -- '" + substringAfter(registryUrl, ":") + ":_authToken' \"@job_token@:@secret:access-token@\"\n\n" +
 						"npm publish";
 			}

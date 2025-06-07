@@ -15,6 +15,7 @@ import org.apache.wicket.model.Model;
 
 import java.io.IOException;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 
@@ -46,14 +47,14 @@ public class NpmPackPanel extends GenericPanel<Pack> {
 				if (getPack().getName().contains("/")) {
 					var scope = substringBefore(getPack().getName(), "/");
 					registryConfig = "" +
-							"# Use @@ to reference scope in job commands to avoid being interpreted as variable\n" +
+							"# " + _T("Use @@ to reference scope in job commands to avoid being interpreted as variable") + "\n" +
 							"npm config set @" + scope + ":registry " + registryUrl + "\n\n";
 				} else {
 					registryConfig = "npm config set registry " + registryUrl + "\n\n";
 				}
 				return registryConfig +
-						"# Use job token to tell OneDev the build using the package\n" +
-						"# Job secret 'access-token' should be defined in project build setting as an access token with package read permission\n" +
+						"# " + _T("Use job token to tell OneDev the build using the package") + "\n" +
+						"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package read permission") + "\n" +
 						"npm config set -- '" + substringAfter(registryUrl, ":") + ":_authToken' \"@job_token@:@secret:access-token@\"\n\n" +
 						"npm install";
 			}

@@ -15,6 +15,8 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -49,8 +51,8 @@ public class PypiPackPanel extends GenericPanel<Pack> {
 		indexUrl = protocol + "://@job_token@:@secret:access-token@@@" + UrlUtils.getServer(serverUrl)
 				+ "/" + getPack().getProject().getPath() + "/~" + PypiPackService.SERVICE_ID + "/simple/";
 		var jobCommands = "" +
-				"# Use job token to tell OneDev the build using the package\n" +
-				"# Job secret 'access-token' should be defined in project build setting as an access token with package read permission\n\n" +
+				"# " + _T("Use job token to tell OneDev the build using the package") + "\n" +
+				"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package read permission") + "\n\n" +
 				"python3 -m pip install --extra-index-url " + indexUrl;
 		if (protocol.equals("http"))		
 			jobCommands += " --trusted-host " + host;

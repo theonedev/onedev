@@ -7,7 +7,7 @@
 					<span wicket:id="labels"></span>
 				</div>
 				<div class="font-size-sm">
-					<span wicket:id="id"></span><span wicket:id="key"></span><wicket:enclosure child="forkedFrom">, forked from <a wicket:id="forkedFrom"></a></wicket:enclosure>
+					<span wicket:id="id"></span><span wicket:id="key"></span><wicket:enclosure child="forkedFrom">, <wicket:t>forked from <a wicket:id="forkedFrom"></a></wicket:t></wicket:enclosure>
 				</div>
 			</div>
 			<wicket:enclosure child="forkInfo">
@@ -22,12 +22,12 @@
 		<wicket:enclosure child="serviceDesk">
 		<div class="mt-2">
 		<a wicket:id="serviceDesk"><wicket:svg href="mail" class="icon"></wicket:svg> <span wicket:id="label"></span></a>
-		<div class="font-size-sm mt-1 text-muted">Issues can be created in this project by sending email to this address</div>
+		<div class="font-size-sm mt-1 text-muted"><wicket:t>Issues can be created in this project by sending email to this address</wicket:t></div>
 		</div>
 		</wicket:enclosure>
 		<div wicket:id="description" class="mt-4"></div>
 		<wicket:enclosure child="replicas">
-			<div class="font-weight-bolder font-size-lg mt-4 mb-2">Replicas</div>
+			<div class="font-weight-bolder font-size-lg mt-4 mb-2"><wicket:t>Replicas</wicket:t></div>
 			<table class="table mb-0">
 				<tbody>
 				<tr wicket:id="replicas">

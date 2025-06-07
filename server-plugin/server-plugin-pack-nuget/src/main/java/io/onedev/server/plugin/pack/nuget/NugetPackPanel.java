@@ -9,6 +9,8 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.nio.charset.StandardCharsets;
 
 public class NugetPackPanel extends GenericPanel<Pack> {
@@ -29,8 +31,8 @@ public class NugetPackPanel extends GenericPanel<Pack> {
 			@Override
 			protected String load() {
 				return "" +
-						"# Use job token to tell OneDev the build using the package\n" +
-						"# Job secret 'access-token' should be defined in project build setting as an access token with package read permission\n" +
+						"# " + _T("Use job token to tell OneDev the build using the package") + "\n" +
+						"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package read permission") + "\n" +
 						"dotnet nuget add source --name onedev --username @job_token@ --password @secret:access-token@ --store-password-in-clear-text " + registryUrl;
 			}
 			

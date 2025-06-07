@@ -8,6 +8,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,9 +36,7 @@ public class PolymorphicPropertyViewer extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String displayName = EditableUtils.getDisplayName(propertyValue.getClass());
-		
-		add(new Label("type", displayName));
+		add(new Label("type", _T(EditableUtils.getDisplayName(propertyValue.getClass()))));
 		add(new Label("typeDescription", new AbstractReadOnlyModel<String>() {
 
 			@Override

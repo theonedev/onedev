@@ -1,5 +1,7 @@
 package io.onedev.server.search.entity.codecomment;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -30,7 +32,7 @@ public class RepliedByMeCriteria extends Criteria<CodeComment> {
 					builder.equal(reply.get(CodeCommentReply.PROP_USER), User.get())));
 			return builder.exists(replyQuery);
 		} else {
-			throw new ExplicitException("Please login to perform this query");
+			throw new ExplicitException(_T("Please login to perform this query"));
 		}
 	}
 
@@ -39,7 +41,7 @@ public class RepliedByMeCriteria extends Criteria<CodeComment> {
 		if (User.get() != null)
 			return comment.getReplies().stream().anyMatch(it->it.getUser().equals(User.get()));
 		else
-			throw new ExplicitException("Please login to perform this query");
+			throw new ExplicitException(_T("Please login to perform this query"));
 	}
 
 	@Override

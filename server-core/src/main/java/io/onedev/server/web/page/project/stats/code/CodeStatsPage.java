@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.stats.code;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -28,8 +30,8 @@ public abstract class CodeStatsPage extends ProjectPage {
 		
 		var tabs = new ArrayList<PageTab>();
 		var params = paramsOf(getProject());
-		tabs.add(new PageTab(Model.of("Contributions"), CodeContribsPage.class, params));
-		tabs.add(new PageTab(Model.of("Source Lines"), SourceLinesPage.class, params));
+		tabs.add(new PageTab(Model.of(_T("Contributions")), CodeContribsPage.class, params));
+		tabs.add(new PageTab(Model.of(_T("Source Lines")), SourceLinesPage.class, params));
 		add(new Tabbable("tabs", tabs));
 	}
 	
@@ -46,7 +48,7 @@ public abstract class CodeStatsPage extends ProjectPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Code Statistics - " + getProject().getPath();
+		return _T("Code Statistics") + " - " + getProject().getPath();
 	}
 
 	@Override

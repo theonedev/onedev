@@ -2,6 +2,7 @@ package io.onedev.server.web.component.pack.list;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -137,7 +138,7 @@ public abstract class PackListPanel extends Panel {
 				error(e.getMessage());
 				return null;
 			} else {
-				info("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and \"Type\" is \"NPM\"");
+				info(_T("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and \"Type\" is \"NPM\""));
 				parsedQuery = new PackQuery(new FuzzyCriteria(queryString));
 			}
 		}
@@ -229,9 +230,9 @@ public abstract class PackListPanel extends Panel {
 				if (!isEnabled()) 
 					tag.append("class", "disabled", " ");
 				if (!querySubmitted)
-					tag.put("title", "Query not submitted");
+					tag.put("data-tippy-content", _T("Query not submitted"));
 				else if (queryModel.getObject() == null)
-					tag.put("title", "Can not save malformed query");
+					tag.put("data-tippy-content", _T("Can not save malformed query"));
 			}
 
 			@Override
@@ -251,7 +252,7 @@ public abstract class PackListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Delete Selected Packages";
+						return _T("Delete Selected Packages");
 					}
 					
 					@Override
@@ -277,7 +278,7 @@ public abstract class PackListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete selected packages";
+										return _T("Type <code>yes</code> below to delete selected packages");
 									}
 									
 									@Override
@@ -301,7 +302,7 @@ public abstract class PackListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select packages to delete");
+									tag.put("data-tippy-content", _T("Please select packages to delete"));
 								}
 							}
 							
@@ -343,7 +344,7 @@ public abstract class PackListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete all queried packages";
+										return _T("Type <code>yes</code> below to delete all queried packages");
 									}
 									
 									@Override
@@ -367,7 +368,7 @@ public abstract class PackListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No packages to delete");
+									tag.put("data-tippy-content", _T("No packages to delete"));
 								}
 							}
 							
@@ -459,7 +460,7 @@ public abstract class PackListPanel extends Panel {
 					help = newHelpPanel(id);
 					help.add(AttributeAppender.append("class", "pack-publish-help"));
 				} else {
-					help = new Label(id, "Please switch to packages page of a particular project for the instructions");
+					help = new Label(id, _T("Please switch to packages page of a particular project for the instructions"));
 					help.add(AttributeAppender.append("class", "p-3"));
 				}
 				return help;
@@ -521,9 +522,9 @@ public abstract class PackListPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return "found " + dataProvider.size() + " packages";
+					return MessageFormat.format(_T("found {0} packages"), dataProvider.size());
 				else
-					return "found 1 package";
+					return _T("found 1 package");
 			}
 		}) {
 			@Override
@@ -593,7 +594,7 @@ public abstract class PackListPanel extends Panel {
 		if (getProject() != null && SecurityUtils.canWritePack(getProject())) 
 			columns.add(selectionColumn = new SelectionColumn<>());
 
-		columns.add(new AbstractColumn<>(Model.of("Package")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Package"))) {
 
 			@Override
 			public String getCssClass() {
@@ -636,7 +637,7 @@ public abstract class PackListPanel extends Panel {
 		});
 		
 		if (showType) {
-			columns.add(new AbstractColumn<>(Model.of("Type")) {
+			columns.add(new AbstractColumn<>(Model.of(_T("Type"))) {
 
 				@Override
 				public String getCssClass() {
@@ -645,12 +646,12 @@ public abstract class PackListPanel extends Panel {
 
 				@Override
 				public void populateItem(Item<ICellPopulator<Pack>> cellItem, String componentId, IModel<Pack> rowModel) {
-					cellItem.add(new Label(componentId, rowModel.getObject().getType()));
+					cellItem.add(new Label(componentId, _T(rowModel.getObject().getType())));
 				}
 			});
 		}
 
-		columns.add(new AbstractColumn<>(Model.of("Last Published")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Last Published"))) {
 
 			@Override
 			public String getCssClass() {
@@ -663,7 +664,7 @@ public abstract class PackListPanel extends Panel {
 			}
 		});
 
-		columns.add(new AbstractColumn<>(Model.of("Total Size")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Total Size"))) {
 
 			@Override
 			public String getCssClass() {
@@ -695,7 +696,7 @@ public abstract class PackListPanel extends Panel {
 		packSupports.sort(Comparator.comparing(PackSupport::getOrder));
 		List<Tab> tabs = new ArrayList<>();
 		for (var packSupport: packSupports) {
-			tabs.add(new AjaxActionTab(Model.of(packSupport.getPackType()), Model.of(packSupport.getPackIcon())) {
+			tabs.add(new AjaxActionTab(Model.of(_T(packSupport.getPackType())), Model.of(packSupport.getPackIcon())) {
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 					var helpContent = packSupport.renderHelp("content", getProject())	;

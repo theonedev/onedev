@@ -1,5 +1,7 @@
 package io.onedev.server.search.entity.project;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -21,7 +23,7 @@ public class OwnedByMeCriteria extends OwnedByCriteria {
 		if (User.get() != null)
 			return new OwnedByUserCriteria(User.get()).getPredicate(projectScope, query, from, builder);
 		else
-			throw new ExplicitException("Please login to perform this query");
+			throw new ExplicitException(_T("Please login to perform this query"));
 	}
 
 	@Override
@@ -34,7 +36,7 @@ public class OwnedByMeCriteria extends OwnedByCriteria {
 		if (User.get() != null)
 			return new OwnedByUserCriteria(User.get()).matches(project);
 		else
-			throw new ExplicitException("Please login to perform this query");
+			throw new ExplicitException(_T("Please login to perform this query"));
 	}
 
 	@Override

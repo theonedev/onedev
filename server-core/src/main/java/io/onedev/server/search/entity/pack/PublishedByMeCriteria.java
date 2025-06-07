@@ -1,5 +1,7 @@
 package io.onedev.server.search.entity.pack;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -23,7 +25,7 @@ public class PublishedByMeCriteria extends PublishedByCriteria {
 			Path<User> attribute = from.get(Pack.PROP_USER);
 			return builder.equal(attribute, User.get());
 		} else {
-			throw new ExplicitException("Please login to perform this query");
+			throw new ExplicitException(_T("Please login to perform this query"));
 		}
 	}
 
@@ -37,7 +39,7 @@ public class PublishedByMeCriteria extends PublishedByCriteria {
 		if (User.get() != null)
 			return User.get().equals(pack.getUser());
 		else
-			throw new ExplicitException("Please login to perform this query");
+			throw new ExplicitException(_T("Please login to perform this query"));
 	}
 
 	@Override

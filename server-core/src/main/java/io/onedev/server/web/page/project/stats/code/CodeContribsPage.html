@@ -8,13 +8,13 @@
 		<div class="d-flex align-items-center mb-4">
 			<span class="date-range mr-3 font-size-h5"></span>
 			<select class="contrib-type custom-select form-control ml-auto">
-				<option>Commits</option>
-				<option>Additions</option>
-				<option>Deletions</option>
+				<option value="Commits"><wicket:t>Commits</wicket:t></option>
+				<option value="Additions"><wicket:t>Additions</wicket:t></option>
+				<option value="Deletions"><wicket:t>Deletions</wicket:t></option>
 			</select>
 		</div>
 		<div class="overall chart border p-4 rounded mb-4"></div>
 		<div class="top-contributors"></div>
 	</div>
 	<div wicket:id="userCard" class="user-card-content"></div>
-</wicket:extend>
+</wicket:extend>	

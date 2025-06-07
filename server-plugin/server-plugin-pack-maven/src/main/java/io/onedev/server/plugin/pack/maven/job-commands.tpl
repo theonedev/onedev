@@ -3,16 +3,16 @@ cat << EOF > settings.xml
   <servers>
     <server>
       <id>onedev</id>
-      <!-- Use job token as user name so that OneDev can know which build is ${permission.equals("write")? "deploying": "using"} packages -->
+      <!-- maven:job-token-notice -->
       <username>@job_token@</username>
-      <!-- Job secret 'access-token' should be defined in project build setting as an access token with package ${permission} permission -->
+      <!-- maven:access-token-notice -->
       <password>@secret:access-token@</password>
     </server>
   </servers>
 <%
 if (url.startsWith("http:") && permission.equals("read")) {
 print """
-  <!-- Add below to allow accessing via http protocol in new Maven versions -->
+  <!-- maven:allow-http-notice -->
   <mirrors>
     <mirror>
       <id>maven-default-http-blocker</id>
