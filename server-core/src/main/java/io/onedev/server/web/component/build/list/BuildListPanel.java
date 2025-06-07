@@ -552,7 +552,7 @@ public abstract class BuildListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No builds to cancel");
+									tag.put("data-tippy-content", _T("No builds to cancel"));
 								}
 							}
 							
@@ -625,7 +625,7 @@ public abstract class BuildListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No builds to re-run");
+									tag.put("data-tippy-content", _T("No builds to re-run"));
 								}
 							}
 							
@@ -691,7 +691,7 @@ public abstract class BuildListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No builds to delete");
+									tag.put("data-tippy-content", _T("No builds to delete"));
 								}
 							}
 							

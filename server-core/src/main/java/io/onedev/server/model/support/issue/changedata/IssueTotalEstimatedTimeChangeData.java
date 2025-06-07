@@ -52,9 +52,9 @@ public class IssueTotalEstimatedTimeChangeData extends IssueChangeData {
 	public ActivityDetail getActivityDetail() {
 		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
 		Map<String, String> oldFieldValues = new HashMap<>();
-		oldFieldValues.put("Total Estimated Time", timeTrackingSetting.formatWorkingPeriod(oldValue));
+		oldFieldValues.put("Total Estimated Time", timeTrackingSetting.formatWorkingPeriod(oldValue, true));
 		Map<String, String> newFieldValues = new HashMap<>();
-		newFieldValues.put("Total Estimated Time", timeTrackingSetting.formatWorkingPeriod(newValue));
+		newFieldValues.put("Total Estimated Time", timeTrackingSetting.formatWorkingPeriod(newValue, true));
 		return ActivityDetail.compare(oldFieldValues, newFieldValues, true);
 	}
 	

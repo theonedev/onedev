@@ -2,6 +2,7 @@ package io.onedev.server.web.component.iteration;
 
 import static io.onedev.server.util.DateUtils.formatDate;
 import static io.onedev.server.util.DateUtils.toDate;
+import static io.onedev.server.web.translation.Translation._T;
 import static java.time.LocalDate.ofEpochDay;
 
 import java.time.LocalDate;
@@ -27,15 +28,15 @@ public class IterationDateLabel extends Label {
 				Iteration iteration = iterationIModel.getObject();
 				if (iteration.getStartDay() != null && iteration.getDueDay() != null) {
 					return ""
-							+ "<span title='Start date'>" + formatDate(toDate(ofEpochDay(iteration.getStartDay()).atStartOfDay())) + "</span>" 
+							+ "<span data-tippy-content='" + _T("Start date") + "'>" + formatDate(toDate(ofEpochDay(iteration.getStartDay()).atStartOfDay())) + "</span>" 
 							+ " " + arrow + " "  
-							+ "<span title='Due date'>" + formatDate(toDate(ofEpochDay(iteration.getDueDay()).atStartOfDay())) + "</span>";
+							+ "<span data-tippy-content='" + _T("Due date") + "'>" + formatDate(toDate(ofEpochDay(iteration.getDueDay()).atStartOfDay())) + "</span>";
 				} else if (iteration.getStartDay() != null) {
-					return "<span title='Start date'>" + formatDate(toDate(ofEpochDay(iteration.getStartDay()).atStartOfDay())) + "</span> " + arrow;
+					return "<span data-tippy-content='" + _T("Start date") + "'>" + formatDate(toDate(ofEpochDay(iteration.getStartDay()).atStartOfDay())) + "</span> " + arrow;
 				} else if (iteration.getDueDay() != null) {
-					return arrow + " <span title='Due date'>" + formatDate(toDate(ofEpochDay(iteration.getDueDay()).atStartOfDay())) + "</span>";
+					return arrow + " <span data-tippy-content='" + _T("Due date") + "'>" + formatDate(toDate(ofEpochDay(iteration.getDueDay()).atStartOfDay())) + "</span>";
 				} else {
-					return "<i> No start/due date</i>";
+					return "<i>" + _T("No start/due date") + "</i>";
 				}
 			}
 			

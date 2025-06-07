@@ -31,7 +31,7 @@ public class WorkingPeriodPropertyEditor extends PropertyEditor<Integer> {
 		
 		String period;
 		if (getModelObject() != null) 
-			period = getTimeTrackingSetting().formatWorkingPeriod(getModelObject()).toString();
+			period = getTimeTrackingSetting().formatWorkingPeriod(getModelObject(), false);
 		else
 			period = null;
 		input = new TextField<>("input", Model.of(period));

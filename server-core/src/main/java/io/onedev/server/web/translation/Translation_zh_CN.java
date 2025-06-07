@@ -93,10 +93,13 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Add Issue...", "添加工单...");
 		m.put("Add Issues to Iteration", "将工单添加到迭代");
 		m.put("Add New", "添加");
+		m.put("Add New Board", "新建看板");
 		m.put("Add New Email Address", "添加新电子邮件地址");
+		m.put("Add New Timesheet", "新建时间表");
 		m.put("Add SSH key", "添加 SSH 密钥");
 		m.put("Add SSO provider", "添加 SSO 提供者");
 		m.put("Add Spent Time", "添加已用时间");
+		m.put("Add Timesheet", "新建时间表");
 		m.put("Add a GPG Public Key", "添加一个 GPG 公钥");
 		m.put("Add a SSH Key", "添加 SSH 密钥");
 		m.put("Add after", "添加到后面");
@@ -156,6 +159,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Alert Settings", "提醒设置");
 		m.put("Alerts", "提醒");
 		m.put("All", "全部");
+		m.put("All Issues", "所有工单");
 		m.put("All accessible", "所有可访问的");
 		m.put("All builds", "所有构建");
 		m.put("All changes", "所有更改");
@@ -274,8 +278,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Avatar", "头像");
 		m.put("Avatar Service Url", "头像服务地址");
 		m.put("Avatar and name", "头像和名称");
-		m.put("Backlog", "待办事项");
-		m.put("Backlog Base Query", "待办基础查询");
+		m.put("Backlog", "待办");
+		m.put("Backlog Base Query", "待办工单基础查询");
 		m.put("Backup", "备份");
 		m.put("Backup Schedule", "备份计划");
 		m.put("Backup Setting", "备份设置");
@@ -286,6 +290,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Base64 编码的 PEM 格式，以 -----BEGIN CERTIFICATE----- 开头，以 -----END CERTIFICATE----- 结尾");
 		m.put("Basic Settings", "基本设置");
+		m.put("Basic settings updated", "基本设置已更新");
 		m.put("Batch Edit All Queried Issues", "批量编辑所有查询的工单");
 		m.put("Batch Edit Selected Issues", "批量编辑选定的工单");
 		m.put("Batch Editing {0} Issues", "批量编辑 {0} 个工单");
@@ -380,6 +385,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Builds", "构建");
 		m.put("Buildx Builder", "Buildx构建器");
 		m.put("Built In Fields Bean", "内建字段Bean");
+		m.put("Burndown", "燃尽图");
 		m.put("Burndown chart", "燃尽图");
 		m.put("Button Image Url", "按钮图像地址");
 		m.put("By Group", "按组");
@@ -410,6 +416,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Can not delete yourself", "不能删除自己");
 		m.put("Can not disable root account", "不能禁用根账户");
 		m.put("Can not disable yourself", "不能禁用自己");
+		m.put("Can not find issue board: ", "找不到工单看板：");
 		m.put("Can not link to self", "不能链接到自己");
 		m.put("Can not move project \"{0}\" to be under itself or its descendants", "不能将项目 \"{0}\" 移动到其自身或其子项目下");
 		m.put("Can not perform this operation now", "当前无法执行此操作");
@@ -495,6 +502,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Close", "关闭");
 		m.put("Close Iteration", "关闭迭代");
 		m.put("Close this iteration", "关闭此迭代");
+		m.put("Closed", "已关闭");
 		m.put("Closed Issue State", "已关闭的工单状态");
 		m.put("Closest due date", "最近的截止日期");
 		m.put("Clover Coverage Report", "Clover 覆盖率报告");
@@ -609,6 +617,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Create Child Projects", "创建子项目");
 		m.put("Create Group", "创建组");
 		m.put("Create Issue", "创建工单");
+		m.put("Create Iteration", "创建迭代");
 		m.put("Create New", "新建");
 		m.put("Create New File", "创建新文件");
 		m.put("Create Project", "创建项目");
@@ -659,6 +668,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Default Fixed Issue Filters", "默认已修复工单过滤器");
 		m.put("Default Fixed Issue Filters Bean", "默认已修复工单过滤器 Bean");
 		m.put("Default Group", "默认分组");
+		m.put("Default Issue Boards", "默认工单看板");
 		m.put("Default Merge Strategy", "默认合并策略");
 		m.put("Default Multi Value Provider", "默认多值提供器");
 		m.put("Default Project", "默认项目");
@@ -674,6 +684,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"默认角色影响系统中所有用户获得的默认权限。实际的默认权限将是该项目及其所有父项目中的默认角色所包含的<b class='text-warning'>所有权限</b>");
 		m.put("Define all custom issue fields here. Each project can decide to use all or a subset of these fields via its issue transition setting. <b class=\"text-warning\">NOTE: </b> Newly defined fields by default only appear in new issues. Batch edit existing issues from issue list page if you want them to have these new fields", 
 			"在此处定义所有自定义工单字段。每个项目可以通过其工单状态设置决定使用所有或这些字段的一个子集。<b class=\"text-warning\">注意：</b> 默认情况下，新定义的字段仅出现在新工单中。如果您希望这些新字段出现在现有工单中，请从工单列表页面批量编辑这些工单");
+		m.put("Define default issue boards for all projects here. A certain project can override this setting to define its own issue boards.", 
+			"在此定义所有项目的默认工单看板。特定项目可以覆盖此设置以定义其自己的工单看板。");
 		m.put("Delay for the first retry in seconds. Delay of subsequent retries will be calculated using an exponential back-off based on this value", 
 			"首次重试的延迟时间（秒）。后续重试的延迟时间将基于该值进行指数退避计算");
 		m.put("Delete", "删除");
@@ -720,7 +732,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Deletions", "删除数");
 		m.put("Denied", "拒绝");
 		m.put("Dependencies & Services", "依赖与服务");
+		m.put("Dependency Management", "依赖管理");
 		m.put("Dependency job finished", "依赖任务已完成");
+		m.put("Dependent Fields", "依赖字段");
 		m.put("Descending", "降序");
 		m.put("Description", "描述");
 		m.put("Description Templates", "描述模板");
@@ -762,13 +776,16 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Do you really want to cancel invitation to \"{0}\"?", "您真的要取消邀请 \"{0}\" 吗？");
 		m.put("Do you really want to change target branch to {0}?", "确定要将目标分支更改为 {0} 吗？");
 		m.put("Do you really want to delete \"{0}\"?", "您真的要删除 \"{0}\" 吗？");
+		m.put("Do you really want to delete board \"{0}\"?", "您确定要删除看板 \"{0}\" 吗？");
 		m.put("Do you really want to delete group \"{0}\"?", "您真的要删除组 \"{0}\" 吗？");
+		m.put("Do you really want to delete iteration \"{0}\"?", "您确定要删除迭代 \"{0}\" 吗？");
 		m.put("Do you really want to delete role \"{0}\"?", "确定要删除角色 \"{0}\" 吗？");
 		m.put("Do you really want to delete selected query watches?", "您真的要删除选中的查询订阅吗？");
 		m.put("Do you really want to delete tag {0}?", "确定要删除标签 {0} 吗？");
 		m.put("Do you really want to delete this GPG key?", "您确定要删除此 GPG 密钥吗？");
 		m.put("Do you really want to delete this SSH key?", "您确定要删除此 SSH 密钥吗？");
 		m.put("Do you really want to delete this access token?", "您确定要删除此访问令牌吗？");
+		m.put("Do you really want to delete this board?", "您确定要删除此看板吗？");
 		m.put("Do you really want to delete this code comment and all its replies?", "您真的要删除此代码评论及其所有回复吗？");
 		m.put("Do you really want to delete this code comment?", "您真的要删除此代码评论吗？");
 		m.put("Do you really want to delete this email address?", "您真的要删除这个电子邮件地址吗？");
@@ -777,6 +794,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Do you really want to delete this privilege?", "确定要删除此权限吗？");
 		m.put("Do you really want to delete this pull request?", "确定要删除此合并请求吗？");
 		m.put("Do you really want to delete this reply?", "您真的要删除此回复吗？");
+		m.put("Do you really want to delete timesheet \"{0}\"?", "您真的要删除时间表 \"{0}\" 吗？");
 		m.put("Do you really want to discard batched suggestions?", "您真的要丢弃批量建议吗？");
 		m.put("Do you really want to enable this account?", "您真的要启用此账户吗？");
 		m.put("Do you really want to remove password of this user?", "您真的要删除此用户的密码吗？");
@@ -799,12 +817,14 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Dry Run", "试运行");
 		m.put("Due Date", "截止日期");
 		m.put("Due Date Issue Field", "截止日期工单字段");
+		m.put("Due date", "截止日期");
 		m.put("Duplicate authorizations found: {0}", "找到重复的授权：{0}");
 		m.put("Durations", "持续时间");
 		m.put("ESLint Report", "ESLint 报告");
 		m.put("Edit", "编辑");
 		m.put("Edit Avatar", "编辑头像");
 		m.put("Edit Estimated Time", "编辑预计时间");
+		m.put("Edit Iteration", "编辑迭代");
 		m.put("Edit My Avatar", "编辑我的头像");
 		m.put("Edit Source", "编辑源码");
 		m.put("Edit Timesheet", "编辑工时表");
@@ -886,6 +906,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Error cherry-picking to {0}: Merge conflicts detected", "cherry-pick 到 {0} 时出错：合并冲突检测到");
 		m.put("Error cherry-picking to {0}: {1}", "cherry-pick 到 {0} 时出错：{1}");
 		m.put("Error executing task", "执行任务时发生错误");
+		m.put("Error parsing %sbase query: ", "解析%s基准查询时出错：");
+		m.put("Error parsing %squery: ", "解析%s查询时出错：");
 		m.put("Error parsing build spec", "解析构建规范时出错");
 		m.put("Error reverting on {0}: Merge conflicts detected", "revert 到 {0} 时出错：合并冲突检测到");
 		m.put("Error reverting on {0}: {1}", "revert 到 {0} 时出错：{1}");
@@ -897,6 +919,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Estimated Time Edit Bean", "预计时间编辑 Bean");
 		m.put("Estimated Time Issue Field", "预计时间工单字段");
 		m.put("Estimated Time:", "预计时间");
+		m.put("Estimated time", "预计时间");
 		m.put("Estimated/Spent time. Click for details", "预计/已用时间。点击查看详情");
 		m.put("Evaluate script to get choices", "运行脚本以获取选项");
 		m.put("Evaluate script to get default value", "运行脚本以获取默认值");
@@ -924,6 +947,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Expire Date", "过期日期");
 		m.put("Expired", "已过期");
 		m.put("Explicit SSL (StartTLS)", "显式 SSL (StartTLS)");
+		m.put("Export", "导出");
 		m.put("Export All Queried Issues To...", "导出所有查询的工单到...");
 		m.put("Export CSV", "导出 CSV");
 		m.put("Export XLSX", "导出 XLSX");
@@ -962,12 +986,14 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Files to Be Analyzed", "要分析的文件");
 		m.put("Filter", "过滤");
 		m.put("Filter Issues", "过滤工单");
+		m.put("Filter backlog issues", "过滤待办工单");
 		m.put("Filter branches...", "过滤分支...");
 		m.put("Filter by name", "按名称过滤");
 		m.put("Filter by name or email address", "按名称或电子邮件地址过滤");
 		m.put("Filter by name...", "按名称过滤...");
 		m.put("Filter by path", "按路径过滤");
 		m.put("Filter by test suite", "按测试套件筛选");
+		m.put("Filter issues", "过滤工单");
 		m.put("Filter roles", "过滤角色");
 		m.put("Filter tags...", "过滤标签...");
 		m.put("Filter targets", "筛选目标");
@@ -1103,6 +1129,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Group created", "组已创建");
 		m.put("Groups", "组");
 		m.put("Groups Claim", "组声明");
+		m.put("Guide Line", "引导线");
 		m.put("HTTP(S)", "HTTP(S)");
 		m.put("HTTP(S) Clone URL", "HTTP(S) 克隆 URL");
 		m.put("Has Owner Permissions", "有所有者权限");
@@ -1124,7 +1151,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("IMAP User", "IMAP 用户");
 		m.put("IMPORTANT:", "重要：");
 		m.put("Id", "ID");
-		m.put("Identify Field", "识别字段");
+		m.put("Identify Field", "区分字段");
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
 			"如果启用，在用户有权限的情况下，源分支将在合并合并请求后自动删除");
 		m.put("If specified, OneDev will only display iterations with this prefix", "如果指定，OneDev 将只显示具有此前缀的迭代");
@@ -1197,6 +1224,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Incompatibilities", "不兼容性");
 		m.put("Indicator", "指示器");
 		m.put("Inherit from parent", "从父级继承");
+		m.put("Inherited", "继承");
 		m.put("Input Spec", "输入规范");
 		m.put("Input URL", "输入 URL");
 		m.put("Input allowed CORS origin, hit ENTER to add", "输入允许的 CORS 来源，按回车键添加");
@@ -1230,6 +1258,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Is Site Admin", "是否为站点管理员");
 		m.put("Issue", "工单");
 		m.put("Issue #{0} deleted", "工单 #{0} 已删除");
+		m.put("Issue Board", "看板");
+		m.put("Issue Boards", "工单看板");
 		m.put("Issue Close States", "工单关闭状态");
 		m.put("Issue Creation Setting", "工单创建设置");
 		m.put("Issue Creation Settings", "工单创建设置");
@@ -1258,6 +1288,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Issue State Mapping", "工单状态映射");
 		m.put("Issue State Mappings", "工单状态映射");
 		m.put("Issue Statistics", "工单统计");
+		m.put("Issue Stats", "工单统计");
 		m.put("Issue Status Mapping", "工单状态映射");
 		m.put("Issue Status Mappings", "工单状态映射");
 		m.put("Issue Stopwatch Overdue", "工单计时器超时");
@@ -1271,9 +1302,11 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Issue administrative permission inside a project, including batch operations over multiple issues", 
 			"工单管理权限，包括对多个工单的批量操作");
 		m.put("Issue already linked", "工单已链接");
+		m.put("Issue count", "工单数量");
 		m.put("Issue in state", "工单状态");
 		m.put("Issue list", "工单列表");
 		m.put("Issue management not enabled in this project", "工单管理未启用此项目");
+		m.put("Issue management permission required to move issues", "移动工单需要管理员权限");
 		m.put("Issue not exist or access denied", "工单不存在或访问被拒绝");
 		m.put("Issue number", "工单编号");
 		m.put("Issue query watch only affects new issues. To manage watch status of existing issues in batch, filter issues by watch status in issues page, and then take appropriate action", 
@@ -1290,11 +1323,20 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Issues moved", "工单已移动");
 		m.put("Italic", "斜体");
 		m.put("Iteration", "迭代");
+		m.put("Iteration \"{0}\" closed", "迭代 \"{0}\" 已关闭");
+		m.put("Iteration \"{0}\" deleted", "迭代 \"{0}\" 已删除");
+		m.put("Iteration \"{0}\" is closed", "迭代 \"{0}\" 已关闭");
+		m.put("Iteration \"{0}\" is reopened", "迭代 \"{0}\" 已重新打开");
+		m.put("Iteration \"{0}\" reopened", "迭代 \"{0}\" 已重新打开");
 		m.put("Iteration Edit Bean", "迭代编辑Bean");
 		m.put("Iteration Name", "迭代名称");
 		m.put("Iteration Names", "迭代名称");
 		m.put("Iteration Prefix", "迭代前缀");
 		m.put("Iteration list", "迭代列表");
+		m.put("Iteration saved", "迭代已保存");
+		m.put("Iteration spans too long to show burndown chart", "迭代时间跨度太长，无法显示燃尽图");
+		m.put("Iteration start and due date should be specified to show burndown chart", "迭代开始和截止日期应指定以显示燃尽图");
+		m.put("Iteration start date should be before due date", "迭代开始日期应早于截止日期");
 		m.put("Iterations", "迭代");
 		m.put("Iterations Bean", "迭代Bean");
 		m.put("JIRA Issue Priority", "JIRA 工单优先级");
@@ -1413,6 +1455,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Mail Service Bean", "邮件服务Bean");
 		m.put("Mail service", "邮件服务");
 		m.put("Mail service not configured", "邮件服务未配置");
+		m.put("Malformed %sbase query", "解析%s基准查询时出错");
+		m.put("Malformed %squery", "解析%s查询时出错");
 		m.put("Malformed email address", "格式错误的电子邮件地址");
 		m.put("Malformed query", "查询语法错误");
 		m.put("Manage Job", "管理任务");
@@ -1524,11 +1568,14 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Named Query", "命名查询");
 		m.put("Network Options", "网络选项");
 		m.put("Never expire", "永不过期");
+		m.put("New Board", "新建看板");
 		m.put("New Invitation Bean", "新邀请Bean");
+		m.put("New Issue", "新工单");
 		m.put("New Password", "新密码");
 		m.put("New State", "新状态");
 		m.put("New User Bean", "新用户Bean");
 		m.put("New Value", "新值");
+		m.put("New issue board created", "新建工单看板");
 		m.put("New user created", "新用户创建成功");
 		m.put("New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting", 
 			"新版本可用。红色表示安全/关键更新，黄色表示错误修复，蓝色表示功能更新。点击查看更改。可在系统设置中禁用");
@@ -1549,6 +1596,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("No branch to revert on", "没有分支可以 revert");
 		m.put("No branches Found", "未找到分支");
 		m.put("No branches found", "未找到分支");
+		m.put("No builds", "没有构建");
+		m.put("No builds to cancel", "没有构建可以取消");
+		m.put("No builds to delete", "没有构建可以删除");
+		m.put("No builds to re-run", "没有构建可以重新运行");
 		m.put("No comment", "无评论");
 		m.put("No comments to delete", "没有要删除的评论");
 		m.put("No comments to set as read", "没有要设置为已读的评论");
@@ -1571,6 +1622,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("No ignored licenses", "无忽略的许可证");
 		m.put("No image attachments", "没有图片附件");
 		m.put("No imports defined", "无导入");
+		m.put("No issue boards defined", "未定义工单看板");
 		m.put("No issues in iteration", "迭代中没有工单");
 		m.put("No issues to copy", "没有工单可复制");
 		m.put("No issues to delete", "没有工单可删除");
@@ -1600,14 +1652,17 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("No required services", "无所需服务");
 		m.put("No secret config", "无秘密配置");
 		m.put("No services defined", "未定义服务");
+		m.put("No start/due date", "无开始/截止日期");
 		m.put("No step templates defined", "未定义步骤模板");
 		m.put("No tags found", "未找到标签");
+		m.put("No timesheets defined", "未定义时间表");
 		m.put("No users to delete", "没有要删除的用户");
 		m.put("No users to disable", "没有要禁用的用户");
 		m.put("No users to enable", "没有要启用的用户");
 		m.put("No valid query to show progress", "没有有效的查询来显示进度");
 		m.put("No valid signature for head commit", "头部提交没有有效的签名");
 		m.put("No valid signature for head commit of target branch", "目标分支的最新提交没有有效签名");
+		m.put("No value", "未指定值");
 		m.put("No verified primary email address", "没有验证的主电子邮件地址");
 		m.put("Node Selector", "节点选择器");
 		m.put("Node Selector Entry", "节点选择器条目");
@@ -1625,6 +1680,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Not specified", "未指定");
 		m.put("Note", "备注");
 		m.put("Nothing to preview", "没有预览内容");
+		m.put("Notification", "通知");
 		m.put("Notifications", "通知");
 		m.put("Notify Build Events", "通知构建事件");
 		m.put("Notify Code Comment Events", "通知代码评论事件");
@@ -1991,6 +2047,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"执行模糊查询。使用 '~' 包围搜索文本以添加更多条件，例如：~text to search~ author(robin)");
 		m.put("Permanent link", "永久链接");
 		m.put("Permanent link of this selection", "此选择的永久链接");
+		m.put("Permission denied", "权限不足");
 		m.put("Permission will be checked upon actual operation", "权限将在实际操作时检查");
 		m.put("Physical memory in mega bytes", "物理内存（兆字节）");
 		m.put("Pick Existing", "选择现有");
@@ -2056,6 +2113,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Preset Commit Message", "预设提交信息");
 		m.put("Preset commit message updated", "预设提交信息已更新");
 		m.put("Press 'y' to get permalink", "按 'y' 获取永久链接");
+		m.put("Prev", "上一");
 		m.put("Prevent Creation", "防止创建");
 		m.put("Prevent Deletion", "防止删除");
 		m.put("Prevent Forced Push", "防止强制推送");
@@ -2078,7 +2136,6 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Privilege", "权限");
 		m.put("Privilege Settings", "权限设置");
 		m.put("Profile", "个人资料");
-		m.put("Basic settings updated", "基本设置已更新");
 		m.put("Programming language", "编程语言");
 		m.put("Project", "项目");
 		m.put("Project \"{0}\" deleted", "项目 \"{0}\" 已删除");
@@ -2121,6 +2178,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"此步骤调用 docker builder prune 命令来删除服务器 docker 执行器或远程 docker 执行器中指定的 buildx 构建器缓存");
 		m.put("Public", "公开");
 		m.put("Public Role", "公共角色");
+		m.put("Publish", "发布");
 		m.put("Publish Coverage Report Step", "发布覆盖率报告步骤");
 		m.put("Publish Problem Report Step", "发布问题报告步骤");
 		m.put("Publish Report Step", "发布报告步骤");
@@ -2230,6 +2288,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Registry Login", "注册登录");
 		m.put("Registry Logins", "注册登录");
 		m.put("Registry Url", "注册 URL");
+		m.put("Remaining time", "剩余时间");
 		m.put("Remember Me", "记住我");
 		m.put("Remote Docker Executor", "远程 Docker 执行器");
 		m.put("Remote Machine", "远程机器");
@@ -2257,6 +2316,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Replied to comment on file \"{0}\" in project \"{1}\"", "在项目 \"{1}\" 的文件 \"{0}\" 上回复评论");
 		m.put("Reply", "回复");
 		m.put("Report Name", "报告名称");
+		m.put("Repository Sync", "仓库同步");
 		m.put("Request For Changes", "请求更改");
 		m.put("Request Scopes", "请求范围");
 		m.put("Request review", "请求审查");
@@ -2369,6 +2429,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Secret Config File", "密钥配置文件");
 		m.put("Secret Setting", "密钥设置");
 		m.put("Security", "安全");
+		m.put("Security & Compliance", "安全与合规");
 		m.put("Security Setting", "安全设置");
 		m.put("Security Settings", "安全设置");
 		m.put("Select", "选择");
@@ -2458,6 +2519,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Shell", "Shell");
 		m.put("Show Branch/Tag", "显示分支/标签");
 		m.put("Show Build Status", "显示构建状态");
+		m.put("Show Closed", "显示已关闭");
 		m.put("Show Code Stats", "显示代码统计");
 		m.put("Show Condition", "显示条件");
 		m.put("Show Conditionally", "显示条件");
@@ -2468,6 +2530,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Show Package Stats", "显示包统计");
 		m.put("Show Pull Request Stats", "显示合并请求统计");
 		m.put("Show Saved Queries", "显示保存的查询");
+		m.put("Show States By", "显示状态");
 		m.put("Show Works Of", "显示工作量");
 		m.put("Show changes", "显示变更");
 		m.put("Show commented code snippet", "显示注释的代码片段");
@@ -2506,6 +2569,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Some other pull requests are opening to this branch", "其他合并请求正在打开此分支");
 		m.put("Some projects might be hidden due to permission policy", "由于权限策略，某些项目可能被隐藏");
 		m.put("Some required builds not passed", "一些必需的构建未通过");
+		m.put("Sort", "排序");
 		m.put("Source", "源");
 		m.put("Source Docker Image", "Docker 镜像源");
 		m.put("Source Path", "源路径");
@@ -2857,6 +2921,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"指定每周的工作天数。这将影响工作周期的解析和显示。例如，如果此属性设置为 <tt>5</tt>，则 <tt>1w</tt> 等同于 <tt>5d</tt>");
 		m.put("Specify working hours per day. This will affect parsing and displaying of working periods. For instance <tt>1d</tt> is the same as <tt>8h</tt> if this property is set to <tt>8</tt>", 
 			"指定每天的工作小时数。这将影响工作周期的解析和显示。例如，如果此属性设置为 <tt>8</tt>，则 <tt>1d</tt> 等同于 <tt>8h</tt>");
+		m.put("Spent", "已花费");
 		m.put("Spent Time", "已用时间");
 		m.put("Spent Time Issue Field", "工单耗时字段");
 		m.put("Spent Time:", "已用时间");
@@ -2875,8 +2940,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Start At", "开始于");
 		m.put("Start Date", "开始日期");
 		m.put("Start Page", "起始页面");
+		m.put("Start date", "开始日期");
 		m.put("Start to watch once I am involved", "一旦我参与，开始观察");
 		m.put("Start work", "开始工作");
+		m.put("Start/Due Date", "开始/截止日期");
 		m.put("State", "状态");
 		m.put("State Durations", "状态持续时间");
 		m.put("State Frequencies", "状态频率");
@@ -2966,6 +3033,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Test Settings", "测试设置");
 		m.put("Text", "文本");
 		m.put("The URL of the server endpoint that will receive the webhook POST requests", "接收 Webhook POST 请求的服务器端点 URL");
+		m.put("The first board will be the default board", "第一个看板将成为默认看板");
+		m.put("The first timesheet will be the default timesheet", "第一个时间表将成为默认时间表");
 		m.put("The permission to access build log", "访问构建日志的权限");
 		m.put("The permission to access build pipeline", "访问构建流水线的权限");
 		m.put("The permission to run job manually. It also implies the permission to access build log, build pipeline and all published reports", 
@@ -2983,6 +3052,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"这些认证器通常在您的手机上运行，例如 Google Authenticator、Microsoft Authenticator、Authy、1Password 等");
 		m.put("This <span wicket:id=\"elementTypeName\"></span> is imported from <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a>", 
 			"此 <span wicket:id=\"elementTypeName\"></span> 是从 <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a> 导入的");
+		m.put("This Month", "本月");
+		m.put("This Week", "本周");
 		m.put("This account is disabled", "此账户已禁用");
 		m.put("This address should be <code>verified sender</code> in SendGrid and will be used as sender address of various email notifications. One can also reply to this address to post issue or pull request comments if <code>Receive Posted Email</code> option is enabled below", 
 			"此地址应在 SendGrid 中为 <code>已验证的发送者</code>，将用作各种电子邮件通知的发送者地址。如果下面启用了 <code>接收已发布电子邮件</code> 选项，用户也可以回复此地址以发布工单或合并请求评论");
@@ -3019,11 +3090,14 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"此密钥用于在项目层次结构中下载和上传缓存（按顺序从当前项目搜索到根项目）");
 		m.put("This key or one of its subkey is already in use", "此密钥或其子密钥已被使用");
 		m.put("This line has confusable unicode character modification", "此行有可疑的 Unicode 字符修改");
+		m.put("This name has already been used by another board", "此名称已被另一个看板使用");
 		m.put("This name has already been used by another group", "此名称已被另一个组使用");
+		m.put("This name has already been used by another issue board in the project", "此名称已被项目中的另一个工单看板使用");
 		m.put("This name has already been used by another project", "此名称已被其他项目使用");
 		m.put("This name has already been used by another role", "此名称已被另一个角色使用");
 		m.put("This name has already been used by another role.", "此名称已被另一个角色使用。");
 		m.put("This operation is disallowed by branch protection rule", "此操作被分支保护规则禁止");
+		m.put("This page lists recent commits fixing the issue", "此页面列出了修复工单的最近提交");
 		m.put("This permission enables one to access confidential issues", "此权限允许访问机密工单");
 		m.put("This permission enables one to schedule issues into iterations", "此权限允许将工单调度到迭代中");
 		m.put("This property is imported from {0}", "此属性是从 {0} 导入的");
@@ -3053,6 +3127,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("This user is authenticating via internal database.", "此用户通过内部数据库进行身份验证。");
 		m.put("This user is currently authenticating via external system. Setting password will switch to use internal database", 
 			"该用户当前通过外部系统进行身份验证。设置密码将切换到使用内部数据库");
+		m.put("This will discard all project specific boards, do you want to continue?", "这将丢弃所有项目特定的看板，您确定要继续吗？");
 		m.put("Threads", "线程");
 		m.put("Time Estimate Issue Field", "工单时间估算字段");
 		m.put("Time Range", "时间范围");
@@ -3071,6 +3146,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("To States", "到状态");
 		m.put("To authenticate via internal database, <a wicket:id=\"setPasswordForUser\">set password for user</a> or <a wicket:id=\"tellUserToResetPassword\">tell user to reset password</a>", 
 			"通过内部数据库进行身份验证，<a wicket:id=\"setPasswordForUser\">设置用户密码</a> 或 <a wicket:id=\"tellUserToResetPassword\">告诉用户重置密码</a>");
+		m.put("To avoid duplication, estimated/remaining time showing here does not include those aggregated from \"{0}\"", 
+			"为避免重复，此处显示的估计/剩余时间不包括从 \"{0}\" 聚合的时间");
+		m.put("To avoid duplication, spent time showing here does not include those aggregated from \"{0}\"", 
+			"为避免重复，这里显示的时间不包括从 \"{0}\" 聚合的时间");
 		m.put("Toggle change history", "切换更改历史");
 		m.put("Toggle comments", "切换评论");
 		m.put("Toggle commits", "切换提交");
@@ -3089,6 +3168,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Total estimated time", "总预计时间");
 		m.put("Total spent time", "总已用时间");
 		m.put("Total spent time / total estimated time", "总已用时间 / 总预计时间");
+		m.put("Total time", "总时间");
 		m.put("Total:", "总计");
 		m.put("Touched File", "触及的文件");
 		m.put("Touched Files", "触及的文件");
@@ -3146,6 +3226,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Unable to diff as the file is too large.", "无法比较，因为文件太大");
 		m.put("Unable to find issue #{0} in project {1}", "在项目 {1} 中找不到工单 #{0}");
 		m.put("Unable to find pull request #{0} in project {1}", "在项目 {1} 中找不到合并请求 #{0}");
+		m.put("Unable to find timesheet: ", "找不到时间表：");
 		m.put("Unable to notify user as mail service is not configured", "无法通知用户，因为邮件服务未配置");
 		m.put("Unable to send verification email as mail service is not configured yet", "无法发送验证电子邮件，因为邮件服务未配置");
 		m.put("Unauthorize this user", "取消此用户的授权");
@@ -3154,6 +3235,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Undefined Field Resolution", "未定义字段解析");
 		m.put("Undefined Field Value Resolution", "未定义字段值解析");
 		m.put("Undefined State Resolution", "未定义状态解析");
+		m.put("Undefined custom field: ", "未定义自定义字段：");
 		m.put("Under which condition this step should run. <b>Successful</b> means all non-optional steps running before this step are successful", 
 			"在什么条件下应运行此步骤。<b>成功</b>表示在此步骤之前运行的所有非可选步骤都已成功");
 		m.put("Unexpected setting: {0}", "未知设置：{0}");
@@ -3165,6 +3247,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Unpin this issue", "取消置顶此工单");
 		m.put("Unresolved", "未解决");
 		m.put("Unresolved comment on file \"{0}\" in project \"{1}\"", "将项目 \"{1}\" 的文件 \"{0}\" 上的评论标记为未解决");
+		m.put("Unscheduled", "未计划");
+		m.put("Unscheduled Issues", "未计划工单");
 		m.put("Unspecified", "未指定");
 		m.put("Unsupported", "不支持");
 		m.put("Unverified", "未验证");
@@ -3199,6 +3283,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Use '\\' to escape quotes", "使用 '\\' 转义引号");
 		m.put("Use Avatar Service", "使用头像服务");
 		m.put("Use Default", "使用默认");
+		m.put("Use Default Boards", "使用默认看板");
 		m.put("Use For Git Operations", "用于 Git 操作");
 		m.put("Use Git in System Path", "使用系统路径中的 Git");
 		m.put("Use Hours And Minutes Only", "仅使用小时和分钟");
@@ -3241,6 +3326,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Users deleted successfully", "用户删除成功");
 		m.put("Users disabled successfully", "用户禁用成功");
 		m.put("Users enabled successfully", "用户启用成功");
+		m.put("Utilities", "工具");
 		m.put("Valid signature required for head commit of this branch per branch protection rule", 
 			"此分支的头部提交需要有效的签名，受分支保护规则限制");
 		m.put("Value", "值");
@@ -3381,6 +3467,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("artifacts", "制品");
 		m.put("assign to me", "分配给我");
 		m.put("authored by", "作者是");
+		m.put("backlog ", "待办");
 		m.put("base", "基准");
 		m.put("before specified date", "在指定日期之前");
 		m.put("branch the build commit is merged into", "构建提交合并到的分支");
@@ -3430,6 +3517,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("has any value of", "具有下列任何值");
 		m.put("head", "头部");
 		m.put("ineffective", "无效");
+		m.put("inherited", "继承");
 		m.put("is empty", "为空");
 		m.put("is not empty", "不为空");
 		m.put("issue:Number", "工单号");
@@ -3513,6 +3601,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
+		m.put("logged work", "已花费");
 
 		// Manually added keys
 		m.put("Create Administrator Account", "创建管理员账户");

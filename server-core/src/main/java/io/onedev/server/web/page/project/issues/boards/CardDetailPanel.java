@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.issues.boards;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -116,7 +118,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		});
 		
 		List<Tab> tabs = new ArrayList<>();
-		tabs.add(new AjaxActionTab(Model.of("Activities")) {
+		tabs.add(new AjaxActionTab(Model.of(_T("Activities"))) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -134,7 +136,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		
 		if (!getIssue().getFixCommits(false).isEmpty()) {
 			if (SecurityUtils.canReadCode(getIssue().getProject())) {
-				tabs.add(new AjaxActionTab(Model.of("Fixing Commits")) {
+				tabs.add(new AjaxActionTab(Model.of(_T("Fixing Commits"))) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -146,7 +148,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 					
 				});
 				if (!getIssue().getPullRequests().isEmpty()) {
-					tabs.add(new AjaxActionTab(Model.of("Pull Requests")) {
+					tabs.add(new AjaxActionTab(Model.of(_T("Pull Requests"))) {
 
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -166,7 +168,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 				}
 			}
 			
-			tabs.add(new AjaxActionTab(Model.of("Fixing Builds")) {
+			tabs.add(new AjaxActionTab(Model.of(_T("Fixing Builds"))) {
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -191,7 +193,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			});
 			
 			if (getIssue().isConfidential() && SecurityUtils.canModifyIssue(getIssue())) {
-				tabs.add(new AjaxActionTab(Model.of("Authorizations")) {
+				tabs.add(new AjaxActionTab(Model.of(_T("Authorizations"))) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -232,7 +234,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 							@Override
 							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this issue?"));
+								attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to delete this issue?")));
 							}
 
 							@Override

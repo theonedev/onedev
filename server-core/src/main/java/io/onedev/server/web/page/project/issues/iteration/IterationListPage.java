@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.issues.iteration;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.annotation.Nullable;
 
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -93,12 +95,12 @@ public class IterationListPage extends ProjectPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Iterations");
+		return new Label(componentId, _T("Iterations"));
 	}
 
 	@Override
 	protected String getPageTitle() {
-		return "Iterations - " + getProject().getPath();
+		return _T("Iterations") + " - " + getProject().getPath();
 	}
 	
 	@Override

@@ -42,6 +42,7 @@ import java.util.List;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsEmpty;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsNot;
 import static io.onedev.server.security.SecurityUtils.canManageIssues;
+import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 abstract class BacklogColumnPanel extends AbstractColumnPanel {
@@ -160,7 +161,7 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				if (!canManageIssues(getProject()))
-					throw new UnauthorizedException("Permission denied");
+					throw new UnauthorizedException(_T("Permission denied"));
 				
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				var issueId = params.getParameterValue("issueId").toLong();

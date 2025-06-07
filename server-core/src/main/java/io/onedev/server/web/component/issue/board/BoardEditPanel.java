@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.issue.board;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -67,11 +69,11 @@ public abstract class BoardEditPanel extends Panel {
 					BoardSpec oldBoard = boards.get(boardIndex);
 					if (!board.getName().equals(oldBoard.getName()) && getBoard(board.getName()) != null) {
 						editor.error(new Path(new PathNode.Named("name")), 
-								"This name has already been used by another board");
+								_T("This name has already been used by another board"));
 					}
 				} else if (getBoard(board.getName()) != null) {
 					editor.error(new Path(new PathNode.Named("name")),
-							"This name has already been used by another board");
+							_T("This name has already been used by another board"));
 				}
 				if (editor.isValid()) {
 					board.populateColumns();

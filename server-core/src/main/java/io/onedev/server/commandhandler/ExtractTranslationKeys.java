@@ -116,6 +116,9 @@ public class ExtractTranslationKeys extends CommandHandler {
 									var editable = clazz.getAnnotation(Editable.class);
 									if (editable != null) {
 										extractedTranslationKeys.add(EditableUtils.getDisplayName(clazz));
+										var group = EditableUtils.getGroup(clazz);
+										if (group != null)
+											extractedTranslationKeys.add(group);
 										var description = editable.description();
 										if (description.length() != 0) {
 											extractedTranslationKeys.add(description);

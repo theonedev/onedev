@@ -1,8 +1,13 @@
 package io.onedev.server.web.page.project.issues.iteration;
 
-import io.onedev.server.model.Iteration;
-import io.onedev.server.model.Project;
-import io.onedev.server.web.component.iteration.burndown.IterationBurndownPanel;
+import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.getChoices;
+import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.getDefault;
+
+import java.io.Serializable;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -11,12 +16,10 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.List;
-
-import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.getChoices;
-import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.getDefault;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.model.Project;
+import io.onedev.server.web.component.iteration.burndown.BurndownIndicators;
+import io.onedev.server.web.component.iteration.burndown.IterationBurndownPanel;
 
 public class IterationBurndownPage extends IterationDetailPage {
 
@@ -56,7 +59,7 @@ public class IterationBurndownPage extends IterationDetailPage {
 
 			@Override
 			public Object getDisplayValue(String object) {
-				return object;
+				return BurndownIndicators.getDisplayName(object);
 			}
 
 			@Override

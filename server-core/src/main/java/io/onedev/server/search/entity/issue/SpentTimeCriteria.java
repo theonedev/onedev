@@ -60,7 +60,7 @@ public class SpentTimeCriteria extends Criteria<Issue> {
 		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
 		return quote(NAME_SPENT_TIME) + " "
 				+ IssueQuery.getRuleName(operator) + " "
-				+ quote(timeTrackingSetting.formatWorkingPeriod(value));
+				+ quote(timeTrackingSetting.formatWorkingPeriod(value, false));
 	}
 
 	@Override

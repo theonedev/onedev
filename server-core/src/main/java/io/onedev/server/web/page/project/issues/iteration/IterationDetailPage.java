@@ -32,6 +32,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -117,8 +119,8 @@ public abstract class IterationDetailPage extends ProjectPage {
 
 		List<Tab> tabs = new ArrayList<>();
 		var params = paramsOf(getProject(), getIteration());
-		tabs.add(new PageTab(Model.of("Issues"), IterationIssuesPage.class, params));
-		tabs.add(new PageTab(Model.of("Burndown"), IterationBurndownPage.class, params));
+		tabs.add(new PageTab(Model.of(_T("Issues")), IterationIssuesPage.class, params));
+		tabs.add(new PageTab(Model.of(_T("Burndown")), IterationBurndownPage.class, params));
 		
 		add(new Tabbable("iterationTabs", tabs).setOutputMarkupId(true));
 	}
@@ -152,7 +154,7 @@ public abstract class IterationDetailPage extends ProjectPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return "Iteration " +  getIteration().getName() + " - " + getProject().getPath();
+		return _T("Iteration") + " " +  getIteration().getName() + " - " + getProject().getPath();
 	}
 	
 	@Override

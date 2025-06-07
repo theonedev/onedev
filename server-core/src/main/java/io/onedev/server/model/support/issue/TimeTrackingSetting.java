@@ -170,20 +170,20 @@ public class TimeTrackingSetting implements Serializable {
 		}
 	}
 
-	public String formatWorkingPeriod(int minutes) {
+	public String formatWorkingPeriod(int minutes, boolean translate) {
 		if (useHoursAndMinutesOnly) {
 			int hours = minutes / 60;
 			minutes = minutes % 60;
 
 			StringBuilder builder = new StringBuilder();
 			if (hours != 0)
-				builder.append(MessageFormat.format(_T("{0}h"), hours)).append(" ");
+				builder.append(MessageFormat.format(translate? _T("{0}h"): "{0}h", hours)).append(" ");
 			if (minutes != 0)
-				builder.append(MessageFormat.format(_T("{0}m"), minutes));
+				builder.append(MessageFormat.format(translate? _T("{0}m"): "{0}m", minutes));
 	
 			String formatted = builder.toString().trim();
 			if (formatted.length() == 0)
-				formatted = MessageFormat.format(_T("{0}h"), 0);
+				formatted = MessageFormat.format(translate? _T("{0}h"): "{0}h", 0);
 			return formatted;	
 		} else {
 			int weeks = minutes / (60 * hoursPerDay * daysPerWeek);
@@ -195,17 +195,17 @@ public class TimeTrackingSetting implements Serializable {
 	
 			StringBuilder builder = new StringBuilder();
 			if (weeks != 0)
-				builder.append(MessageFormat.format(_T("{0}w"), weeks)).append(" ");
+				builder.append(MessageFormat.format(translate? _T("{0}w"): "{0}w", weeks)).append(" ");
 			if (days != 0)
-				builder.append(MessageFormat.format(_T("{0}d"), days)).append(" ");
+				builder.append(MessageFormat.format(translate? _T("{0}d"): "{0}d", days)).append(" ");
 			if (hours != 0)
-				builder.append(MessageFormat.format(_T("{0}h"), hours)).append(" ");
+				builder.append(MessageFormat.format(translate? _T("{0}h"): "{0}h", hours)).append(" ");
 			if (minutes != 0)
-				builder.append(MessageFormat.format(_T("{0}m"), minutes));
+				builder.append(MessageFormat.format(translate? _T("{0}m"): "{0}m", minutes));
 	
 			String formatted = builder.toString().trim();
 			if (formatted.length() == 0)
-				formatted = MessageFormat.format(_T("{0}h"), 0);
+				formatted = MessageFormat.format(translate? _T("{0}h"): "{0}h", 0);
 			return formatted;	
 		}
 	}

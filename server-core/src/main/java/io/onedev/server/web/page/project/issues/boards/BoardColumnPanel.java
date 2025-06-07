@@ -63,6 +63,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.*;
 import static io.onedev.server.security.SecurityUtils.canManageIssues;
+import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 abstract class BoardColumnPanel extends AbstractColumnPanel {
@@ -249,7 +250,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 			if (fieldSpec != null) 
 				title = "<i>" + HtmlEscape.escapeHtml5(fieldSpec.getNameOfEmptyValue()) + "</i>";
 			else
-				title = "<i>No value</i>";
+				title = "<i>" + _T("No value") + "</i>";
 		}
 
 		WebMarkupContainer head = new WebMarkupContainer("head");
@@ -347,7 +348,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				if (!canManageIssues(getProject()))
-					throw new UnauthorizedException("Permission denied");
+					throw new UnauthorizedException(_T("Permission denied"));
 				
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				var issueId = params.getParameterValue("issueId").toLong();
@@ -432,7 +433,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 					} else {
 						FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 						if (fieldSpec == null)
-							throw new ExplicitException("Undefined custom field: " + fieldName);
+							throw new ExplicitException(_T("Undefined custom field: ") + fieldName);
 
 						Serializable fieldBean = issue.getFieldBean(FieldUtils.getFieldBeanClass(), true);
 						BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
@@ -495,7 +496,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 								}
 
 							}
-							new DependentFieldsEditor(target, fieldBean, propertyNames, false, "Dependent Fields");
+							new DependentFieldsEditor(target, fieldBean, propertyNames, false, _T("Dependent Fields"));
 						} else {
 							getIssueChangeManager().changeFields(issue, fieldValues);
 							cardListPanel.onCardDropped(target, issueId, cardIndex, true);

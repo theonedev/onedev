@@ -29,7 +29,7 @@ public class WorkingPeriodEditSupport implements EditSupport {
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null) {
 									var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
-									return new Label(id, timeTrackingSetting.formatWorkingPeriod(model.getObject()));
+									return new Label(id, timeTrackingSetting.formatWorkingPeriod(model.getObject(), true));
 								} else { 
 									return new EmptyValueLabel(id) {
 

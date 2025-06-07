@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.issues.boards;
 import static io.onedev.server.security.SecurityUtils.canAccessIssue;
 import static io.onedev.server.security.SecurityUtils.canManageIssues;
 import static io.onedev.server.security.SecurityUtils.getAuthUser;
+import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 
 import java.util.Collections;
@@ -359,7 +360,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 						Hibernate.initialize(iteration);
 					send(getPage(), Broadcast.BREADTH, new IssueDragging(target, issue));
 				} else {
-					Session.get().warn("Issue management permission required to move issues");
+					Session.get().warn(_T("Issue management permission required to move issues"));
 				}
 			}
 			

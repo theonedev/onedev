@@ -5,7 +5,9 @@ import static io.onedev.server.web.component.iteration.burndown.BurndownIndicato
 import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.ISSUE_COUNT;
 import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.REMAINING_TIME;
 import static io.onedev.server.web.component.iteration.burndown.BurndownIndicators.getDefault;
+import static io.onedev.server.web.translation.Translation._T;
 
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -58,12 +60,12 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 		if (getIteration().getStartDay() != null && getIteration().getDueDay() != null) {
 			if (getIteration().getStartDay() < getIteration().getDueDay()) {
 				if (getIteration().getDueDay() - getIteration().getStartDay() >= MAX_DAYS) 
-					message = "Iteration spans too long to show burndown chart";						
+					message = _T("Iteration spans too long to show burndown chart");						
 			} else {
-				message = "Iteration start date should be before due date";
+				message = _T("Iteration start date should be before due date");
 			}
 		} else {
-			message = "Iteration start and due date should be specified to show burndown chart";
+			message = _T("Iteration start and due date should be specified to show burndown chart");
 		}
 		if (message != null) {
 			var fragment = new Fragment("content", "messageFrag", this);
@@ -144,7 +146,7 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 						guidelineYAxisValues.add(initialIssueMetric);
 					}
 
-					lines.add(new Line("Guide Line", guidelineYAxisValues, "#7E8299", null, "dashed"));
+					lines.add(new Line(_T("Guide Line"), guidelineYAxisValues, "#7E8299", null, "dashed"));
 
 					String yAxisValueFormatter;
 					if (getIndicator().equals(REMAINING_TIME) || getIndicator().equals(ESTIMATED_TIME)) {
@@ -169,7 +171,7 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 				@Override
 				public String getObject() {
 					if (aggregationLink != null && (getIndicator().equals(ESTIMATED_TIME) || getIndicator().equals(REMAINING_TIME)))
-						return"To avoid duplication, estimated/remaining time showing here does not include those aggregated from '" + aggregationLink + "'";
+						return MessageFormat.format(_T("To avoid duplication, estimated/remaining time showing here does not include those aggregated from \"{0}\""), aggregationLink);
 					else
 						return null;
 				}

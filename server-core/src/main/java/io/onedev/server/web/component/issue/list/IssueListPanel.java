@@ -685,8 +685,8 @@ public abstract class IssueListPanel extends Panel {
 								}
 								if (withTimeTracking) {
 									if (issue.getProject().isTimeTracking() && issue.getTotalEstimatedTime() != 0) {
-										worksheet.value(rowIndex, colIndex++, timeTrackingSetting.formatWorkingPeriod(issue.getTotalEstimatedTime()));
-										worksheet.value(rowIndex, colIndex++, timeTrackingSetting.formatWorkingPeriod(issue.getTotalSpentTime()));
+										worksheet.value(rowIndex, colIndex++, timeTrackingSetting.formatWorkingPeriod(issue.getTotalEstimatedTime(), true));
+										worksheet.value(rowIndex, colIndex++, timeTrackingSetting.formatWorkingPeriod(issue.getTotalSpentTime(), true));
 									} else {
 										colIndex++;
 										colIndex++;
@@ -769,8 +769,8 @@ public abstract class IssueListPanel extends Panel {
 								
 								if (withTimeTracking) {
 									if (issue.getProject().isTimeTracking() && issue.getTotalEstimatedTime() != 0) {
-										row.add(timeTrackingSetting.formatWorkingPeriod(issue.getTotalEstimatedTime()));
-										row.add(timeTrackingSetting.formatWorkingPeriod(issue.getTotalSpentTime()));
+										row.add(timeTrackingSetting.formatWorkingPeriod(issue.getTotalEstimatedTime(), true));
+										row.add(timeTrackingSetting.formatWorkingPeriod(issue.getTotalSpentTime(), true));
 									} else {
 										row.add("");
 										row.add("");

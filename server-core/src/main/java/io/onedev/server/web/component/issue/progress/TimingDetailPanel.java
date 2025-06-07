@@ -48,37 +48,37 @@ abstract class TimingDetailPanel extends Panel {
 			var fragment = new Fragment("content", "aggregationFrag", this);
 
 			int estimatedTime = getIssue().getTotalEstimatedTime();
-			fragment.add(new Label("estimatedTime", timeTrackingSetting.formatWorkingPeriod(estimatedTime)));
-			fragment.add(new Label("ownEstimatedTime", timeTrackingSetting.formatWorkingPeriod(getIssue().getOwnEstimatedTime())));
+			fragment.add(new Label("estimatedTime", timeTrackingSetting.formatWorkingPeriod(estimatedTime, true)));
+			fragment.add(new Label("ownEstimatedTime", timeTrackingSetting.formatWorkingPeriod(getIssue().getOwnEstimatedTime(), true)));
 			fragment.add(newEstimatedTimeEditLink("editOwnEstimatedTime"));
 			
 			int aggregatedTime = getTimeTrackingManager().aggregateSourceLinkEstimatedTime(getIssue(), timeAggregationLink);
 			aggregatedTime += getTimeTrackingManager().aggregateTargetLinkEstimatedTime(getIssue(), timeAggregationLink);
 			
 			fragment.add(new Label("estimatedTimeAggregationLink", timeAggregationLink));
-			fragment.add(new Label("aggregatedEstimatedTime", timeTrackingSetting.formatWorkingPeriod(aggregatedTime)));
+			fragment.add(new Label("aggregatedEstimatedTime", timeTrackingSetting.formatWorkingPeriod(aggregatedTime, true)));
 
 			int spentTime = getIssue().getTotalSpentTime();
-			fragment.add(new Label("spentTime", timeTrackingSetting.formatWorkingPeriod(spentTime)));
-			fragment.add(new Label("ownSpentTime", timeTrackingSetting.formatWorkingPeriod(getIssue().getOwnSpentTime())));
+			fragment.add(new Label("spentTime", timeTrackingSetting.formatWorkingPeriod(spentTime, true)));
+			fragment.add(new Label("ownSpentTime", timeTrackingSetting.formatWorkingPeriod(getIssue().getOwnSpentTime(), true)));
 			fragment.add(newLogWorkLink("logWork"));
 			fragment.add(newStartWorkLink("startWork"));
 			
 			aggregatedTime = getTimeTrackingManager().aggregateSourceLinkSpentTime(getIssue(), timeAggregationLink);
 			aggregatedTime += getTimeTrackingManager().aggregateTargetLinkSpentTime(getIssue(), timeAggregationLink);
 			fragment.add(new Label("spentTimeAggregationLink", timeAggregationLink));
-			fragment.add(new Label("aggregatedSpentTime", timeTrackingSetting.formatWorkingPeriod(aggregatedTime)));
+			fragment.add(new Label("aggregatedSpentTime", timeTrackingSetting.formatWorkingPeriod(aggregatedTime, true)));
 			
 			add(fragment);
 		} else {
 			var fragment = new Fragment("content", "noAggregationFrag", this);
 			
 			int estimatedTime = getIssue().getTotalEstimatedTime();
-			fragment.add(new Label("estimatedTime", timeTrackingSetting.formatWorkingPeriod(estimatedTime)));
+			fragment.add(new Label("estimatedTime", timeTrackingSetting.formatWorkingPeriod(estimatedTime, true)));
 			fragment.add(newEstimatedTimeEditLink("editEstimatedTime"));
 
 			int spentTime = getIssue().getTotalSpentTime();
-			fragment.add(new Label("spentTime", timeTrackingSetting.formatWorkingPeriod(spentTime)));
+			fragment.add(new Label("spentTime", timeTrackingSetting.formatWorkingPeriod(spentTime, true)));
 			fragment.add(newLogWorkLink("logWork"));
 			fragment.add(newStartWorkLink("startWork"));
 			

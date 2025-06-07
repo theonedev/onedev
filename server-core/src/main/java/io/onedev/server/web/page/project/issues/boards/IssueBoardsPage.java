@@ -1,5 +1,46 @@
 package io.onedev.server.web.page.project.issues.boards;
 
+import static io.onedev.server.model.Issue.NAME_BOARD_POSITION;
+import static io.onedev.server.web.translation.Translation._T;
+import static java.util.stream.Collectors.toList;
+
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.feedback.IFeedbackMessageFilter;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IterationManager;
@@ -32,43 +73,6 @@ import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.page.project.issues.iteration.IterationBurndownPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.editbean.IterationEditBean;
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.feedback.IFeedbackMessageFilter;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-
-import static io.onedev.server.model.Issue.NAME_BOARD_POSITION;
-import static java.util.stream.Collectors.toList;
 
 public class IssueBoardsPage extends ProjectIssuesPage {
 
@@ -139,9 +143,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			query = IssueQuery.parse(getProject(), queryString, option, true);
 		} catch (Exception e) {
 			if (e instanceof ExplicitException)
-				contentFrag.error(new QueryParseMessage(backlog, "Error parsing %squery: " + e.getMessage()));
+				contentFrag.error(new QueryParseMessage(backlog, _T("Error parsing %squery: ") + e.getMessage()));
 			else
-				contentFrag.error(new QueryParseMessage(backlog, "Malformed %squery"));
+				contentFrag.error(new QueryParseMessage(backlog, _T("Malformed %squery")));
 			return null;
 		}
 
@@ -150,9 +154,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			baseQuery = IssueQuery.parse(getProject(), baseQueryString, option, true);
 		} catch (Exception e) {
 			if (e instanceof ExplicitException)
-				contentFrag.error(new QueryParseMessage(backlog, "Error parsing %sbase query: " + e.getMessage()));
+				contentFrag.error(new QueryParseMessage(backlog, _T("Error parsing %sbase query: ") + e.getMessage()));
 			else
-				contentFrag.error(new QueryParseMessage(backlog, "Malformed %sbase query"));
+				contentFrag.error(new QueryParseMessage(backlog, _T("Malformed %sbase query")));
 			return null;
 		}
 		query = IssueQuery.merge(baseQuery, query);
@@ -172,7 +176,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		if (StringUtils.isNotBlank(boardName)) {
 			boardIndex = BoardSpec.getBoardIndex(boards, boardName);
 			if (boardIndex == -1)
-				throw new ExplicitException("Can not find issue board: " + boardName);
+				throw new ExplicitException(_T("Can not find issue board: ") + boardName);
 		} else {
 			boardIndex = 0;
 		}
@@ -295,7 +299,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									&& getProject().getIssueSetting().getBoardSpecs() != null);
 						}
 						
-					}.add(new ConfirmClickModifier("This will discard all project specific boards, do you want to continue?")));
+					}.add(new ConfirmClickModifier(_T("This will discard all project specific boards, do you want to continue?"))));
 					
 					menuFragment.add(new ListView<BoardSpec>("boards", boards) {
 
@@ -363,7 +367,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									setResponsePage(IssueBoardsPage.class, params);
 								}
 
-							}.add(new ConfirmClickModifier("Do you really want to delete board '" + item.getModelObject().getName() + "'?") ));
+							}.add(new ConfirmClickModifier(MessageFormat.format(_T("Do you really want to delete board \"{0}\"?"), item.getModelObject().getName()))));
 						}
 						
 					});
@@ -437,10 +441,10 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 					super.onInitialize();
 					
 					if (getIterationSelection() instanceof IterationSelection.All) {
-						add(new Label("label", "<i>All</i>").setEscapeModelStrings(false));
+						add(new Label("label", "<i>" + _T("All") + "</i>").setEscapeModelStrings(false));
 						add(AttributeAppender.append("class", "btn-outline-secondary btn-hover-primary"));
 					} else if (getIterationSelection() instanceof IterationSelection.Unscheduled) {
-						add(new Label("label", "<i>Unscheduled</i>").setEscapeModelStrings(false));
+						add(new Label("label", "<i>" + _T("Unscheduled") + "</i>").setEscapeModelStrings(false));
 						add(AttributeAppender.append("class", "btn-outline-secondary btn-hover-primary"));
 					} else {
 						var iteration = getIterationSelection().getIteration();
@@ -493,9 +497,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							}
 							dropdown.close();
 							if (iteration.isClosed())
-								Session.get().success("Iteration '" + iteration.getName() + "' is closed");
+								Session.get().success(MessageFormat.format(_T("Iteration \"{0}\" is closed"), iteration.getName()));
 							else
-								Session.get().success("Iteration '" + iteration.getName() + "' is reopened");
+								Session.get().success(MessageFormat.format(_T("Iteration \"{0}\" is reopened"), iteration.getName()));
 						}
 						
 						@Override
@@ -568,7 +572,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									public void onClick(AjaxRequestTarget target) {
 										dropdown.close();
 										
-										new BeanEditModalPanel<>(target, bean, "Edit Iteration") {
+										new BeanEditModalPanel<>(target, bean, _T("Edit Iteration")) {
 
 											@Override
 											protected String onSave(AjaxRequestTarget target, IterationEditBean bean) {
@@ -590,7 +594,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 										super.updateAjaxAttributes(attributes);
 										attributes.getAjaxCallListeners().add(new ConfirmClickListener(
-												"Do you really want to delete iteration '" + item.getModelObject().getName() + "'?"));
+												MessageFormat.format(_T("Do you really want to delete iteration \"{0}\"?"), item.getModelObject().getName())));
 									}
 									
 									@Override
@@ -606,7 +610,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 										} else {
 											getIterationManager().delete(iteration);
 										}
-										Session.get().success("Iteration '" + iteration.getName() + "' deleted");
+										Session.get().success(MessageFormat.format(_T("Iteration \"{0}\" deleted"), iteration.getName()));
 									}
 
 								});
@@ -663,7 +667,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						public void onClick(AjaxRequestTarget target) {
 							dropdown.close();
 							var bean = IterationEditBean.ofNew(getProject(), getBoard().getIterationPrefix());
-							new BeanEditModalPanel<>(target, bean, "Create Iteration") {
+							new BeanEditModalPanel<>(target, bean, _T("Create Iteration")) {
 
 								@Override
 								protected String onSave(AjaxRequestTarget target, IterationEditBean bean) {
@@ -732,9 +736,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			});
 			
 			if (backlog)
-				queryInput.add(AttributeAppender.append("placeholder", "Filter backlog issues"));
+				queryInput.add(AttributeAppender.append("placeholder", _T("Filter backlog issues")));
 			else
-				queryInput.add(AttributeAppender.append("placeholder", "Filter issues"));
+				queryInput.add(AttributeAppender.append("placeholder", _T("Filter issues")));
 				
 			form.add(queryInput);
 			
@@ -980,19 +984,19 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 		@Override
 		public String toString() {
-			return String.format(template, backlog?"backlog ":"");
+			return String.format(template, backlog?_T("backlog "):"");
 		}
 		
 	}
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Issue Boards");
+		return new Label(componentId, _T("Issue Boards"));
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		return "Issue Boards - " + getProject().getPath();
+		return _T("Issue Boards") + " - " + getProject().getPath();
 	}
 	
 	@Override

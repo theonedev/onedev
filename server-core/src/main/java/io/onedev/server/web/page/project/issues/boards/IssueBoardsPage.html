@@ -9,7 +9,7 @@
 						<span wicket:id="label"></span>
 						<wicket:svg href="arrow" class="icon rotate-90 ml-1"></wicket:svg>
 					</a>
-					<a wicket:id="backlog" t:data-tippy-content="Show issues not scheduled into current iteration" class="bg-white backlog btn btn-outline-secondary btn-hover-primary text-nowrap"><wicket:svg href="inbox" class="icon mr-2"></wicket:svg> Backlog</a>
+					<a wicket:id="backlog" t:data-tippy-content="Show issues not scheduled into current iteration" class="bg-white backlog btn btn-outline-secondary btn-hover-primary text-nowrap"><wicket:svg href="inbox" class="icon mr-2"></wicket:svg> <wicket:t>Backlog</wicket:t></a>
 					<a wicket:id="iteration" t:data-tippy-content="Iteration" class="iteration-selector btn text-nowrap bg-white">
 						<wicket:svg href="iteration" class="icon mr-2"></wicket:svg>
 						<span wicket:id="label"></span>
@@ -35,20 +35,20 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="noBoardsFrag">
 		<div class="alert alert-outline-secondary bg-white shadow no-boards">
-			<span class="mr-3">No issue boards defined</span> 
-			<a wicket:id="newBoard" class="mr-3"><wicket:svg href="plus" class="icon mr-1"></wicket:svg>Add New</a>
-			<a wicket:id="useDefault"><wicket:svg href="undo" class="icon"></wicket:svg>Use Default</a>
+			<span class="mr-3"><wicket:t>No issue boards defined</wicket:t></span> 
+			<a wicket:id="newBoard" class="mr-3"><wicket:svg href="plus" class="icon mr-1"></wicket:svg><wicket:t>Add New</wicket:t></a>
+			<a wicket:id="useDefault"><wicket:svg href="undo" class="icon"></wicket:svg><wicket:t>Use Default</wicket:t></a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="boardMenuFrag">
 		<div class="board-menu p-4">
-			<div class="text-muted mb-3"><wicket:svg href="bulb" class="icon"/> The first board will be the default board</div>
+			<div class="text-muted mb-3"><wicket:svg href="bulb" class="icon"/> <wicket:t>The first board will be the default board</wicket:t></div>
 			<table class="boards table">
 				<tr wicket:id="boards" class="board">
 					<td class="name">
 						<span wicket:id="dragIndicator" class="drag-indicator"><wicket:svg href="grip" class="icon"/></span>			
 						<a wicket:id="select" class="select"><span wicket:id="name"></span></a>
-						<span wicket:id="default" class="badge badge-sm badge-light-info ml-2">default</span>
+						<span wicket:id="default" class="badge badge-sm badge-light-info ml-2"><wicket:t>default</wicket:t></span>
 					</td>
 					<td wicket:id="actions" class="actions text-right">
 						<a wicket:id="edit" class="btn btn-icon btn-xs btn-light btn-hover-primary mr-1" t:data-tippy-content="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
@@ -57,8 +57,8 @@
 					</td>
 				</tr>
 			</table>
-			<a wicket:id="newBoard" class="btn btn-light btn-hover-primary btn-sm btn-block new-board"><wicket:svg href="plus" class="icon mr-2"></wicket:svg> Add New Board</a>
-			<a wicket:id="useDefault" class="btn btn-light btn-hover-primary btn-sm btn-block use-global"><wicket:svg href="undo" class="icon mr-2"></wicket:svg> Use Default Boards</a>
+			<a wicket:id="newBoard" class="btn btn-light btn-hover-primary btn-sm btn-block new-board"><wicket:svg href="plus" class="icon mr-2"></wicket:svg> <wicket:t>Add New Board</wicket:t></a>
+			<a wicket:id="useDefault" class="btn btn-light btn-hover-primary btn-sm btn-block use-global"><wicket:svg href="undo" class="icon mr-2"></wicket:svg> <wicket:t>Use Default Boards</wicket:t></a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="iterationMenuFrag">
@@ -68,7 +68,7 @@
 				<tr wicket:id="iterations" class="iteration">
 					<td class="name text-nowrap">
 						<a wicket:id="select"><span wicket:id="name"></span></a> 
-						<span wicket:id="inherited" class="ml-2 badge badge-info badge-sm">Inherited</span>
+						<span wicket:id="inherited" class="ml-2 badge badge-info badge-sm"><wicket:t>Inherited</wicket:t></span>
 						<a wicket:id="burndown" t:data-tippy-content="Burndown chart" class="ml-2"><wicket:svg href="burndown" class="icon"/></a>
 					</td>
 					<td class="status text-nowrap">
@@ -83,18 +83,18 @@
 				</tr>
 			</table>
 			</wicket:enclosure>
-			<a wicket:id="showClosed" class="show-closed btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="double-arrow" class="icon rotate-90 mr-2"></wicket:svg> Show Closed</a>
-			<a wicket:id="unscheduled" class="no-iteration btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="inbox" class="icon mr-2"></wicket:svg> Unscheduled Issues</a>
-			<a wicket:id="all" class="all btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="all" class="icon mr-2"></wicket:svg> All Issues</a>
-			<a wicket:id="newIteration" class="new-iterations btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="plus" class="icon mr-2"></wicket:svg> Create Iteration</a>
+			<a wicket:id="showClosed" class="show-closed btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="double-arrow" class="icon rotate-90 mr-2"></wicket:svg> <wicket:t>Show Closed</wicket:t></a>
+			<a wicket:id="unscheduled" class="no-iteration btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="inbox" class="icon mr-2"></wicket:svg> <wicket:t>Unscheduled Issues</wicket:t></a>
+			<a wicket:id="all" class="all btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="all" class="icon mr-2"></wicket:svg> <wicket:t>All Issues</wicket:t></a>
+			<a wicket:id="newIteration" class="new-iterations btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="plus" class="icon mr-2"></wicket:svg> <wicket:t>Create Iteration</wicket:t></a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="iterationActionsFrag">
-		<a wicket:id="close" class="action">Close</a>
-		<a wicket:id="reopen" class="action">Reopen</a>
+		<a wicket:id="close" class="action"><wicket:t>Close</wicket:t></a>
+		<a wicket:id="reopen" class="action"><wicket:t>Reopen</wicket:t></a>
 		<span class="dot mx-2"></span>
-		<a wicket:id="edit" class="action">Edit</a>
+		<a wicket:id="edit" class="action"><wicket:t>Edit</wicket:t></a>
 		<span class="dot mx-2"></span>
-		<a wicket:id="delete" class="action">Delete</a>
+		<a wicket:id="delete" class="action"><wicket:t>Delete</wicket:t></a>
 	</wicket:fragment>
 </wicket:extend>

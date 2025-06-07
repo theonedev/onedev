@@ -1,5 +1,11 @@
 package io.onedev.server.web.component.iteration.burndown;
 
+import static io.onedev.server.web.translation.Translation._T;
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.SettingManager;
@@ -7,11 +13,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.web.util.WicketUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 public class BurndownIndicators {
 
@@ -45,6 +46,18 @@ public class BurndownIndicators {
 			return REMAINING_TIME;
 		else
 			return ISSUE_COUNT;
+	}
+	
+	public static String getDisplayName(String indicator) {
+		if (indicator.equals(REMAINING_TIME)) {
+			return _T("Remaining time");
+		} else if (indicator.equals(ESTIMATED_TIME)) {
+			return _T("Estimated time");
+		} else if (indicator.equals(ISSUE_COUNT)) {
+			return _T("Issue count");
+		} else {
+			return indicator;
+		}
 	}
 	
 }

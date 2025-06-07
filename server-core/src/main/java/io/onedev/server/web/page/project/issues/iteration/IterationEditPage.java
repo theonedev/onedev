@@ -11,6 +11,9 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.editbean.IterationEditBean;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.basic.Label;
@@ -60,7 +63,7 @@ public class IterationEditPage extends ProjectPage {
 				
 				bean.update(getIteration());
 				OneDev.getInstance(IterationManager.class).createOrUpdate(getIteration());
-				Session.get().success("Iteration saved");
+				Session.get().success(_T("Iteration saved"));
 				setResponsePage(IterationIssuesPage.class, 
 						IterationIssuesPage.paramsOf(getIteration().getProject(), getIteration(), null));
 				

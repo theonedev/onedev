@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.iteration.list;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -217,7 +219,7 @@ public class IterationListPanel extends GenericPanel<Project> {
 		
 		List<IColumn<Iteration, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<>(Model.of("Name")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Name"))) {
 
 			@Override
 			public String getCssClass() {
@@ -256,7 +258,7 @@ public class IterationListPanel extends GenericPanel<Project> {
 
 		});
 
-		columns.add(new AbstractColumn<>(Model.of("Start/Due Date")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Start/Due Date"))) {
 
 			@Override
 			public String getCssClass() {
@@ -271,7 +273,7 @@ public class IterationListPanel extends GenericPanel<Project> {
 
 		});
 
-		columns.add(new AbstractColumn<>(Model.of("Description")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Description"))) {
 
 			@Override
 			public String getCssClass() {
@@ -286,7 +288,7 @@ public class IterationListPanel extends GenericPanel<Project> {
 
 		});
 		
-		columns.add(new AbstractColumn<>(Model.of("Issue Stats")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Issue Stats"))) {
 
 			@Override
 			public String getCssClass() {

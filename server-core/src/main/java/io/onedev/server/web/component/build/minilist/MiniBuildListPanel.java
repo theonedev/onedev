@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.build.minilist;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -76,7 +78,7 @@ public class MiniBuildListPanel extends GenericPanel<List<Build>> {
 			});
 			add(fragment);
 		} else {
-			add(new Label("content", "No builds").add(AttributeAppender.append("class", "no-builds font-italic mx-5 my-4 text-nowrap")));
+			add(new Label("content", _T("No builds")).add(AttributeAppender.append("class", "no-builds font-italic mx-5 my-4 text-nowrap")));
 		}
 	}
 

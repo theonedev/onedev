@@ -17,6 +17,8 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
 
 abstract class NewBoardPanel extends Panel {
@@ -47,7 +49,7 @@ abstract class NewBoardPanel extends Panel {
 				int indexWithSameName = BoardSpec.getBoardIndex(boards, newBoard.getName());
 				if (indexWithSameName != -1) {
 					editor.error(new Path(new PathNode.Named("name")),
-							"This name has already been used by another issue board in the project");
+							_T("This name has already been used by another issue board in the project"));
 				} 
 				if (editor.isValid()){
 					newBoard.populateColumns();
@@ -55,7 +57,7 @@ abstract class NewBoardPanel extends Panel {
 					boards.add(newBoard);
 					getProject().getIssueSetting().setBoardSpecs(boards);
 					OneDev.getInstance(ProjectManager.class).update(getProject());
-					Session.get().success("New issue board created");
+					Session.get().success(_T("New issue board created"));
 					onBoardCreated(target, newBoard);
 				} else {
 					target.add(NewBoardPanel.this);

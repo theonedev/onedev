@@ -1,5 +1,9 @@
 package io.onedev.server.web.component.iteration.actions;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -35,7 +39,7 @@ public abstract class IterationActionsPanel extends GenericPanel<Iteration> {
 				getIterationManager().createOrUpdate(getIteration());
 				target.add(IterationActionsPanel.this);
 				onUpdated(target);
-				getSession().success("Iteratioin '" + getIteration().getName() + "' reopened");
+				getSession().success(MessageFormat.format(_T("Iteration \"{0}\" reopened"), getIteration().getName()));
 			}
 
 			@Override
@@ -60,7 +64,7 @@ public abstract class IterationActionsPanel extends GenericPanel<Iteration> {
 				getIterationManager().createOrUpdate(getIteration());
 				target.add(IterationActionsPanel.this);
 				onUpdated(target);
-				getSession().success("Iteration '" + getIteration().getName() + "' closed");
+				getSession().success(MessageFormat.format(_T("Iteration \"{0}\" closed"), getIteration().getName()));
 			}
 
 		});
@@ -74,7 +78,7 @@ public abstract class IterationActionsPanel extends GenericPanel<Iteration> {
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
 				attributes.getAjaxCallListeners().add(new ConfirmClickListener(
-						"Do you really want to delete iteration '" + getIteration().getName() + "'?"));
+						MessageFormat.format(_T("Do you really want to delete iteration \"{0}\"?"), getIteration().getName())));
 			}
 			
 			@Override
@@ -82,7 +86,7 @@ public abstract class IterationActionsPanel extends GenericPanel<Iteration> {
 				getIterationManager().delete(getIteration());
 				target.add(IterationActionsPanel.this);
 				onDeleted(target);
-				getSession().success("Iteration '" + getIteration().getName() + "' deleted");
+				getSession().success(MessageFormat.format(_T("Iteration \"{0}\" deleted"), getIteration().getName()));
 			}
 
 		});		

@@ -4,11 +4,11 @@
 			<div class="card-body">
 				<div class="d-flex mb-4 align-items-center flex-wrap">
 					<div wicket:id="name" class="name mr-3 font-weight-bold font-size-h6"></div>
-					<div wicket:id="inherited" class="badge badge-sm badge-info mr-3">Inherited</div>
+					<div wicket:id="inherited" class="badge badge-sm badge-info mr-3"><wicket:t>Inherited</wicket:t></div>
 					<div wicket:id="status" class="status mr-3"></div>
 					<div wicket:id="dates" class="dates mr-3"></div>
 					<div wicket:id="actions" class="actions mr-3"></div>
-					<a wicket:id="create" class="mr-3">Create</a>
+					<a wicket:id="create" class="mr-3"><wicket:t>Create</wicket:t></a>
 				</div>
 				<div wicket:id="description" class="mt-4 mb-2 alert alert-light"></div>
 				<ul wicket:id="iterationTabs" class="tabs nav nav-tabs nav-tabs-line nav-bold mb-5"></ul>
@@ -18,7 +18,7 @@
 	</div>
 	<wicket:fragment wicket:id="projectTitleFrag">
 		<span class="d-flex align-items-center">
-			<a wicket:id="iterations">Iterations</a>
+			<a wicket:id="iterations"><wicket:t>Iterations</wicket:t></a>
 			<span class="dot"></span>
 			<span wicket:id="iterationName" class="text-truncated"></span>
 		</span>
