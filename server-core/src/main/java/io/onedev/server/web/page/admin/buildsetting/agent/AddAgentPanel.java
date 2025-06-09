@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +36,7 @@ class AddAgentPanel extends Panel {
 
 		List<Tab> tabs = new ArrayList<>();
 		
-		tabs.add(new AjaxActionTab(Model.of("Run via Docker Container")) {
+		tabs.add(new AjaxActionTab(Model.of(_T("Run via Docker Container"))) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -44,7 +46,7 @@ class AddAgentPanel extends Panel {
 			}
 			
 		});
-		tabs.add(new AjaxActionTab(Model.of("Run on Bare Metal/Virtual Machine")) {
+		tabs.add(new AjaxActionTab(Model.of(_T("Run on Bare Metal/Virtual Machine"))) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {

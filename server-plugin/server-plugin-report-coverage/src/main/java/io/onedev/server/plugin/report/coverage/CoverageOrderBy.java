@@ -1,7 +1,5 @@
 package io.onedev.server.plugin.report.coverage;
 
-import io.onedev.commons.utils.StringUtils;
-
 enum CoverageOrderBy {
 	DEFAULT {
 
@@ -44,10 +42,6 @@ enum CoverageOrderBy {
 		
 	}; 
 	
-	public String getDisplayName() {
-		return StringUtils.capitalize(name().replace('_', ' ').toLowerCase());
-	}
-
 	public abstract int compare(Coverage obj1, Coverage obj2);
 	
 }

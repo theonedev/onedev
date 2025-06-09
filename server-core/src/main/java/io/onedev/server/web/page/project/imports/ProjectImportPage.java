@@ -1,5 +1,18 @@
 package io.onedev.server.web.page.project.imports;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.imports.ProjectImporter;
@@ -11,14 +24,6 @@ import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.wizard.WizardPanel;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.ProjectListPage;
-import org.apache.wicket.Component;
-import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 public class ProjectImportPage extends LayoutPage {
 
@@ -73,7 +78,7 @@ public class ProjectImportPage extends LayoutPage {
 					
 					@Override
 					protected String getTitle() {
-						return "Importing from " + importer.getName();
+						return MessageFormat.format(_T("Importing from {0}"), importer.getName());
 					}
 
 					@Override
@@ -93,7 +98,7 @@ public class ProjectImportPage extends LayoutPage {
 					
 					@Override
 					protected String getTitle() {
-						return "Test importing from " + importer.getName();
+						return MessageFormat.format(_T("Test importing from {0}"), importer.getName());
 					}
 
 					@Override
@@ -117,7 +122,7 @@ public class ProjectImportPage extends LayoutPage {
 	
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Importing projects from " + importer.getName());
+		return new Label(componentId, MessageFormat.format(_T("Importing projects from {0}"), importer.getName()));
 	}
 	
 	public static PageParameters paramsOf(String importer) {

@@ -4,6 +4,8 @@ import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PA
 import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.text.MessageFormat;
+
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -178,7 +180,7 @@ public class LoginPage extends SimplePage {
 			ExternalLink ssoButton = new ExternalLink(ssoButtonsView.newChildId(), 
 					Model.of(serverUrl + "/" + MOUNT_PATH + "/" + STAGE_INITIATE + "/" + connector.getName()));
 			ssoButton.add(new ExternalImage("image", connector.getButtonImageUrl()));
-			ssoButton.add(new Label("label", "Login with " + connector.getName()));
+			ssoButton.add(new Label("label", MessageFormat.format(_T("Login with {0}"), connector.getName())));
 			ssoButtonsView.add(ssoButton);
 		}
 		fragment.add(ssoButtonsView.setVisible(!settingManager.getSsoConnectors().isEmpty()));

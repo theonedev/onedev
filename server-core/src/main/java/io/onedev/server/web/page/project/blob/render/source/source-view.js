@@ -277,7 +277,7 @@ onedev.server.sourceView = {
 					sanitize: false, 
 					placement: "top",
 					container: ".source-view>.code",
-					content: onedev.server.codeProblem.renderProblems(problems),
+					content: onedev.server.codeProblem.renderProblems(problems, onedev.server.sourceView.translations),
 					template: `<div data-line='${line}' class='popover problem-popover'><div class='arrow'></div><div class='popover-body'></div></div>`
 				}).on("shown.bs.popover", function() {
 					var $currentPopover = $(".problem-popover[data-line='" + line + "']");
@@ -297,6 +297,10 @@ onedev.server.sourceView = {
 							}
 						});
 					});
+					tippy($currentPopover[0].querySelectorAll('[data-tippy-content]'), {
+						delay: [500, 0],
+						placement: 'auto'
+					});			
 				}).data("popoverInited", true);				
 			}
 		});
@@ -424,7 +428,7 @@ onedev.server.sourceView = {
 		});
 		if (loggedIn) {
 			let svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#comment'/></svg>`;
-			$content.append(`<a class='comment'>${svg} ${onedev.server.sourceView.translations["add-comment"]}</a>`);
+			$content.append(`<a class='comment'>${svg} ${onedev.server.sourceView.translations["add-selection-comment"]}</a>`);
 			$content.children("a.comment").click(function() {
 				if (onedev.server.sourceView.confirmUnsavedChanges()) {
 					$(".selection-popover").remove();

@@ -11,7 +11,8 @@ onedev.server.pieChart = {
 			for (var i in pieSlices) {
 				chartColors.push(pieSlices[i].color);
 				chartData.push({
-					name: pieSlices[i].name, 
+					name: pieSlices[i].name,
+					displayName: pieSlices[i].displayName,
 					value: pieSlices[i].value
 				})
 				pieSelections[pieSlices[i].name] = pieSlices[i].selected;
@@ -20,7 +21,9 @@ onedev.server.pieChart = {
 			chart.setOption({
 				color: chartColors,
 	            tooltip: {  
-	                formatter: "{b}",
+	                formatter: function(params) {
+	                	return params.data.displayName;
+	                },
 					textStyle: {
 						color: darkMode? 'white': '#535370'
 					},
@@ -33,11 +36,15 @@ onedev.server.pieChart = {
 					x: "center",
 					formatter: function(name) {
 						var value = 0;
+						var displayName = "";
 			            for (var i = 0; i < chartData.length; i++) {
-			              	if (chartData[i].name == name) 
+			              	if (chartData[i].name == name) {
 			              		value = chartData[i].value;
+			              		displayName = chartData[i].displayName;
+			              		break;
+			              	}
 			            }
-			            return `${name}  ${value}`;
+			            return `${displayName}  ${value}`;
 			        },
 					textStyle: {
 						color: darkMode?'#cdcdde':'#3F4254'

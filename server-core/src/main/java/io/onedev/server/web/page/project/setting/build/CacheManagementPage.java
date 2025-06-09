@@ -1,16 +1,13 @@
 package io.onedev.server.web.page.project.setting.build;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.JobCacheManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.JobCache;
-import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
-import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
+import static io.onedev.server.model.JobCache.PROP_PROJECT;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -32,11 +29,17 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import static io.onedev.server.model.JobCache.PROP_PROJECT;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.JobCacheManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.JobCache;
+import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 
 public class CacheManagementPage extends ProjectBuildSettingPage {
 	
@@ -68,7 +71,7 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 
 		List<IColumn<JobCache, Void>> columns = new ArrayList<>();
 
-		columns.add(new AbstractColumn<>(Model.of("Key")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Key"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobCache>> cellItem, String componentId, IModel<JobCache> rowModel) {
@@ -76,7 +79,7 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 			}
 		});
 		
-		columns.add(new AbstractColumn<>(Model.of("Size")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Size"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobCache>> cellItem, String componentId,
@@ -86,12 +89,12 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 				if (cacheSize != null)
 					cellItem.add(new Label(componentId, FileUtils.byteCountToDisplaySize(cacheSize)));
 				else 
-					cellItem.add(new Label(componentId, "<i class='text-danger'>File missing or obsolete</i>").setEscapeModelStrings(false));
+					cellItem.add(new Label(componentId, "<i class='text-danger'>" + _T("File missing or obsolete") + "</i>").setEscapeModelStrings(false));
 			}
 
 		});
 
-		columns.add(new AbstractColumn<>(Model.of("Last Accessed")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Last Accessed"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobCache>> cellItem, String componentId,
@@ -114,7 +117,7 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 					public void onClick(AjaxRequestTarget target) {
 						var cache = rowModel.getObject();
 						getCacheManager().delete(cache);
-						Session.get().success("Cache '" + cache.getKey() + "' deleted");
+						Session.get().success(MessageFormat.format(_T("Job cache \"{0}\" deleted"), cache.getKey()));
 						target.add(cachesTable);
 					}
 					
@@ -187,7 +190,7 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Job Cache Management");
+		return new Label(componentId, _T("Job Cache Management"));
 	}
 	
 	private JobCacheManager getCacheManager() {

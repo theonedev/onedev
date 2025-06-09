@@ -18,12 +18,14 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public abstract class AbstractTemplatePage extends AdministrationPage {
 
-	protected final String GROOVY_TEMPLATE_LINK = "<a href='https://docs.groovy-lang.org/latest/html/api/groovy/text/SimpleTemplateEngine.html' target='_blank'>Groovy simple template</a>";
+	protected static final String GROOVY_TEMPLATE_LINK = "<a href='https://docs.groovy-lang.org/latest/html/api/groovy/text/SimpleTemplateEngine.html' target='_blank'>Groovy simple template</a>";
 
 	public AbstractTemplatePage(PageParameters params) {
 		super(params);
@@ -50,7 +52,7 @@ public abstract class AbstractTemplatePage extends AdministrationPage {
 				super.onSubmit();
 				
 				getSettingManager().saveEmailTemplates(templates);
-				getSession().success("Template saved");
+				getSession().success(_T("Template saved"));
 			}
 			
 		};
@@ -61,7 +63,7 @@ public abstract class AbstractTemplatePage extends AdministrationPage {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to use default template?"));
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to use default template?")));
 			}
 
 			@Override
@@ -107,10 +109,10 @@ public abstract class AbstractTemplatePage extends AdministrationPage {
 		StringBuilder builder = new StringBuilder(helpText);
 		if (!builder.toString().endsWith("."))
 			builder.append(".");
-		builder.append(" When evaluating this template, below variables will be available:<ul class='mb-0'>");
+		builder.append(" " + _T("When evaluating this template, below variables will be available:") + "<ul class='mb-0'>");
 		
 		var currentVariableHelp = new LinkedHashMap<String, String>();
-		currentVariableHelp.put("htmlVersion", "true for html version, false for text version");
+		currentVariableHelp.put("htmlVersion", _T("true for html version, false for text version"));
 		currentVariableHelp.putAll(variableHelp);
 		
 		for (Map.Entry<String, String> entry: currentVariableHelp.entrySet())

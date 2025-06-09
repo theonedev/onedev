@@ -1,17 +1,20 @@
 package io.onedev.server.plugin.report.unittest;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
 import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
+import io.onedev.server.web.util.TextUtils;
 
 class TestStatusBadge extends Label {
 	
 	private final Status status;
 	
 	public TestStatusBadge(String id, Status status) {
-		super(id, status.name().toLowerCase().replace("_", " "));
+		super(id, _T(TextUtils.getDisplayValue(status)));
 		this.status = status;
 	}
 

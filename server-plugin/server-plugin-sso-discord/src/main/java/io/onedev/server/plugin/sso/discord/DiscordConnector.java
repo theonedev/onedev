@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.sso.discord;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -108,7 +110,7 @@ public class DiscordConnector extends SsoConnector {
 					throw new RuntimeException(e);
 				}
 			} else {
-				throw new AuthenticationException("Invalid state response");
+				throw new AuthenticationException(_T("Invalid state response"));
 			}
 		} else {
 			throw new AuthenticationException(codeResponse.getError());
@@ -137,7 +139,7 @@ public class DiscordConnector extends SsoConnector {
 				String email = (String) userObject.get("email");
 				
 				if (StringUtils.isBlank(email))
-					throw new AuthenticationException("A public email is required");
+					throw new AuthenticationException(_T("A public email is required"));
 				
 				if (bCheckGuilds) {
 					UserGuildsResponse guildsResponse = apiRequest.getUserGuilds(accessTokenResponse);
@@ -146,10 +148,10 @@ public class DiscordConnector extends SsoConnector {
 						JSONObject serverInfo = guildsResponse.getServerInfo(getServerId());
 						
 						if (serverInfo == null) {
-							throw new AuthenticationException("You are not member of discord server");
+							throw new AuthenticationException(_T("You are not member of discord server"));
 						}
 					} else {
-						throw new AuthenticationException("Unable to get guilds info");
+						throw new AuthenticationException(_T("Unable to get guilds info"));
 					}
 				}
 				
@@ -180,7 +182,7 @@ public class DiscordConnector extends SsoConnector {
 		Request metadata = (Request) Session.get().getAttribute(SESSION_ATTR_API_REQUEST);
 		
 		if (metadata == null) {
-			throw new AuthenticationException("Unsolicited discord api response");
+			throw new AuthenticationException(_T("Unsolicited discord api response"));
 		}
 		
 		return metadata;

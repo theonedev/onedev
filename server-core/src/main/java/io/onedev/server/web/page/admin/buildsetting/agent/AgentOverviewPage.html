@@ -1,16 +1,16 @@
 <wicket:extend xmlns:wicket="http://www.w3.org/1999/html">
 	<div class="mb-5">
 		<a wicket:id="pauseOrResume" class="btn btn-light-primary mr-2"><span wicket:id="label"></span></a>
-		<a wicket:id="restart" class="btn btn-light-primary mr-2">Restart</a>
-		<a wicket:id="remove" class="btn btn-light-danger mr-2">Remove</a>
+		<a wicket:id="restart" class="btn btn-light-primary mr-2"><wicket:t>Restart</wicket:t></a>
+		<a wicket:id="remove" class="btn btn-light-danger mr-2"><wicket:t>Remove</wicket:t></a>
 	</div>
 	<table class="table mb-5">
 		<thead>
-			<th>Name</th>
-			<th class="d-none d-xl-table-cell">IP Address</th>
-			<th class="d-none d-xl-table-cell">OS Version</th>
-			<th class="d-none d-xl-table-cell">OS Arch</th>
-			<th>Status</th>
+			<th><wicket:t>Name</wicket:t></th>
+			<th class="d-none d-xl-table-cell"><wicket:t>IP Address</wicket:t></th>
+			<th class="d-none d-xl-table-cell"><wicket:t>OS Version</wicket:t></th>
+			<th class="d-none d-xl-table-cell"><wicket:t>OS Arch</wicket:t></th>
+			<th><wicket:t>Status</wicket:t></th>
 		</thead>
 		<tbody>
 			<tr>
@@ -36,7 +36,7 @@
 		</tbody>
 	</table>
 	<div class="mb-4">
-		<span class="font-weight-bold">Access Token: </span>
+		<span class="font-weight-bold"><wicket:t>Access Token</wicket:t>: </span>
 		<span wicket:id="accessToken" class="text-monospace font-size-sm mr-2"></span> 
 		<a wicket:id="copyAccessToken" t:data-tippy-content="copy"><wicket:svg href="copy" class="icon mr-1"/></a>
 		<a wicket:id="regenerateAccessToken" t:data-tippy-content="Regenerate"><wicket:svg href="refresh2" class="icon"/></a>
@@ -49,12 +49,12 @@
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="offlineHasAttributesFrag">
-		<div class="mb-3 font-weight-bold">Attributes (can only be edited when agent is online)</div>
+		<div class="mb-3 font-weight-bold"><wicket:t>Attributes (can only be edited when agent is online)</wicket:t></div>
 		<div class="border rounded">
 		<table class="table mb-0">
 			<thead>
-				<th>Name</th>
-				<th>Value</th>
+				<th><wicket:t>Name</wicket:t></th>
+				<th><wicket:t>Value</wicket:t></th>
 			</thead>
 			<tbody>
 				<tr wicket:id="attributes">
@@ -66,6 +66,6 @@
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="offlineNoAttributesFrag">
-		<div class="alert alert-notice alert-light-warning">No attributes defined (can only be edited when agent is online)</div>
+		<div class="alert alert-notice alert-light-warning"><wicket:t>No attributes defined (can only be edited when agent is online)</wicket:t></div>
 	</wicket:fragment>
 </wicket:extend>

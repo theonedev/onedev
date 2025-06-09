@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.report.coverage;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
@@ -22,7 +24,7 @@ import org.apache.wicket.model.IModel;
 
 			@Override
 			public String getObject() {
-				return "Branches " + getCoverageInfo().getBranchPercentage() + "%";
+				return _T("Branches") + " " + getCoverageInfo().getBranchPercentage() + "%";
 			}
 			
 		}));
@@ -41,7 +43,7 @@ import org.apache.wicket.model.IModel;
 
 			@Override
 			public String getObject() {
-				return "Lines " + getCoverageInfo().getLinePercentage() + "%";
+				return _T("Lines") + " " + getCoverageInfo().getLinePercentage() + "%";
 			}
 			
 		}));

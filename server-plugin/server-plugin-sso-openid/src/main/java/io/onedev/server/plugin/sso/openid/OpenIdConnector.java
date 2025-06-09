@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.sso.openid;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -161,7 +163,7 @@ public class OpenIdConnector extends SsoConnector {
 				String state = (String) Session.get().getAttribute(SESSION_ATTR_STATE);
 				
 				if (state == null || !state.equals(authenticationSuccessResponse.getState().getValue()))
-					throw new AuthenticationException("Unsolicited OIDC authentication response");
+					throw new AuthenticationException(_T("Unsolicited OIDC authentication response"));
 				
 				AuthorizationGrant codeGrant = new AuthorizationCodeGrant(
 						authenticationSuccessResponse.getAuthorizationCode(), getCallbackUri());
@@ -217,15 +219,15 @@ public class OpenIdConnector extends SsoConnector {
 			JWTClaimsSet claims = idToken.getJWTClaimsSet();
 			
 			if (!claims.getIssuer().equals(getCachedProviderMetadata().getIssuer()))
-				throw new AuthenticationException("Inconsistent issuer in provider metadata and ID token");
+				throw new AuthenticationException(_T("Inconsistent issuer in provider metadata and ID token"));
 			
 			DateTime now = new DateTime();
 			
 			if (claims.getIssueTime() != null && claims.getIssueTime().after(now.plusSeconds(10).toDate()))
-				throw new AuthenticationException("Invalid issue date of ID token");
+				throw new AuthenticationException(_T("Invalid issue date of ID token"));
 			
 			if (claims.getExpirationTime() != null && now.toDate().after(claims.getExpirationTime()))
-				throw new AuthenticationException("ID token was expired");
+				throw new AuthenticationException(_T("ID token was expired"));
 
 			String subject = claims.getSubject();
 			String email = claims.getStringClaim("email");
@@ -255,12 +257,12 @@ public class OpenIdConnector extends SsoConnector {
 				if (httpResponse.getStatusCode() == HTTPResponse.SC_OK) {
 					JSONObject json = httpResponse.getBodyAsJSONObject();
 					if (!subject.equals(json.get("sub")))
-						throw new AuthenticationException("OIDC error: Inconsistent sub in ID token and userinfo");
+						throw new AuthenticationException(_T("OIDC error: Inconsistent sub in ID token and userinfo"));
 
 					if (email == null) 
 						email = getStringValue(json.get("email"));
 					if (email == null)
-						throw new AuthenticationException("OIDC error: No email claim returned");
+						throw new AuthenticationException(_T("OIDC error: No email claim returned"));
 
 					if (userName == null) 
 						userName = getStringValue(json.get("preferred_username"));
@@ -277,7 +279,7 @@ public class OpenIdConnector extends SsoConnector {
 							for (Object group: jsonArray)
 								groups.add((String) group);
 						} else {
-							logger.warn("No groups claim returned");
+							logger.warn(_T("No groups claim returned"));
 						}
 					}
 				} else {
@@ -365,7 +367,7 @@ public class OpenIdConnector extends SsoConnector {
 					json.get("userinfo_endpoint").asText());
 		} catch (IOException | URISyntaxException e) {
 			if (e.getMessage() != null) {
-				logger.error("Error discovering OIDC metadata", e);
+				logger.error(_T("Error discovering OIDC metadata"), e);
 				throw new AuthenticationException(e.getMessage());
 			} else {
 				throw new RuntimeException(e);
@@ -377,7 +379,7 @@ public class OpenIdConnector extends SsoConnector {
 	protected ProviderMetadata getCachedProviderMetadata() {
 		ProviderMetadata metadata = (ProviderMetadata) Session.get().getAttribute(SESSION_ATTR_PROVIDER_METADATA);
 		if (metadata == null)
-			throw new AuthenticationException("Unsolicited OIDC response");
+			throw new AuthenticationException(_T("Unsolicited OIDC response"));
 		return metadata;
 	}
 	

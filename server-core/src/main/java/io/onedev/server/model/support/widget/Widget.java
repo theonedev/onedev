@@ -22,7 +22,7 @@ public class Widget implements Serializable {
 	
 	private int bottom;
 
-	@Editable(order=100, name="Tabs")
+	@Editable(order=100, name="widget:Tabs")
 	@Size(min=1, message = "At least one tab should be added")
 	public List<WidgetTab<TabState>> getTabs() {
 		return tabs;

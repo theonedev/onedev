@@ -1,5 +1,8 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -82,7 +85,7 @@ class AgentListPanel extends Panel {
 					error(e.getMessage());
 					return null;
 				} else {
-					info("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and online");
+					info(_T("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and online"));
 					return new AgentQuery(new FuzzyCriteria(queryString));
 				}
 			}
@@ -185,9 +188,9 @@ class AgentListPanel extends Panel {
 				if (!isEnabled()) 
 					tag.append("class", "disabled", " ");
 				if (!querySubmitted)
-					tag.put("title", "Query not submitted");
+					tag.put("data-tippy-content", _T("Query not submitted"));
 				else if (queryModel.getObject() == null)
-					tag.put("title", "Can not save malformed query");
+					tag.put("data-tippy-content", _T("Can not save malformed query"));
 			}
 
 			@Override
@@ -278,7 +281,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Pause Selected Agents";
+						return _T("Pause Selected Agents");
 					}
 					
 					@Override
@@ -293,7 +296,7 @@ class AgentListPanel extends Panel {
 								target.add(countLabel);
 								target.add(body);
 								selectionColumn.getSelections().clear();
-								Session.get().success("Paused selected agents");
+								Session.get().success(_T("Paused selected agents"));
 							}
 							
 							@Override
@@ -308,7 +311,7 @@ class AgentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select agents to pause");
+									tag.put("data-tippy-content", _T("Please select agents to pause"));
 								}
 							}
 							
@@ -321,7 +324,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Resume Selected Agents";
+						return _T("Resume Selected Agents");
 					}
 					
 					@Override
@@ -336,7 +339,7 @@ class AgentListPanel extends Panel {
 								target.add(countLabel);
 								target.add(body);
 								selectionColumn.getSelections().clear();
-								Session.get().success("Resumed selected agents");
+								Session.get().success(_T("Resumed selected agents"));
 							}
 							
 							@Override
@@ -351,7 +354,7 @@ class AgentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select agents to resume");
+									tag.put("data-tippy-content", _T("Please select agents to resume"));
 								}
 							}
 							
@@ -364,7 +367,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Restart Selected Agents";
+						return _T("Restart Selected Agents");
 					}
 					
 					@Override
@@ -384,12 +387,12 @@ class AgentListPanel extends Panel {
 										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
-										Session.get().success("Restart command issued to selected agents");
+										Session.get().success(_T("Restart command issued to selected agents"));
 									}
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to restart selected agents";
+										return _T("Type <code>yes</code> below to restart selected agents");
 									}
 									
 									@Override
@@ -412,7 +415,7 @@ class AgentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select agents to restart");
+									tag.put("data-tippy-content", _T("Please select agents to restart"));
 								}
 							}
 							
@@ -425,7 +428,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Remove Selected Agents";
+						return _T("Remove Selected Agents");
 					}
 					
 					@Override
@@ -449,7 +452,7 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Removed selected agents. Type <code>yes</code> below to confirm";
+										return _T("Removed selected agents. Type <code>yes</code> below to confirm");
 									}
 									
 									@Override
@@ -473,7 +476,7 @@ class AgentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select agents to remove");
+									tag.put("data-tippy-content", _T("Please select agents to remove"));
 								}
 							}
 							
@@ -486,7 +489,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Pause All Queried Agents";
+						return _T("Pause All Queried Agents");
 					}
 					
 					@Override
@@ -508,12 +511,12 @@ class AgentListPanel extends Panel {
 										dataProvider.detach();
 										target.add(countLabel);
 										target.add(body);
-										Session.get().success("Paused all queried agents");
+										Session.get().success(_T("Paused all queried agents"));
 									}
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to pause all queried agents";
+										return _T("Type <code>yes</code> below to pause all queried agents");
 									}
 									
 									@Override
@@ -537,7 +540,7 @@ class AgentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No agents to pause");
+									tag.put("data-tippy-content", _T("No agents to pause"));
 								}
 							}
 							
@@ -550,7 +553,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Resume All Queried Agents";
+						return _T("Resume All Queried Agents");
 					}
 					
 					@Override
@@ -572,12 +575,12 @@ class AgentListPanel extends Panel {
 										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
-										Session.get().success("Resumed all queried agents");
+										Session.get().success(_T("Resumed all queried agents"));
 									}
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to resume all queried agents";
+										return _T("Type <code>yes</code> below to resume all queried agents");
 									}
 									
 									@Override
@@ -601,7 +604,7 @@ class AgentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No agents to resume");
+									tag.put("data-tippy-content", _T("No agents to resume"));
 								}
 							}
 							
@@ -614,7 +617,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Restart All Queried Agents";
+						return _T("Restart All Queried Agents");
 					}
 					
 					@Override
@@ -636,12 +639,12 @@ class AgentListPanel extends Panel {
 										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
-										Session.get().success("Restart command issued to all queried agents");
+										Session.get().success(_T("Restart command issued to all queried agents"));
 									}
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to restart all queried agents";
+										return _T("Type <code>yes</code> below to restart all queried agents");
 									}
 									
 									@Override
@@ -665,7 +668,7 @@ class AgentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No agents to restart");
+									tag.put("data-tippy-content", _T("No agents to restart"));
 								}
 							}
 							
@@ -678,7 +681,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Remove All Queried Agents";
+						return _T("Remove All Queried Agents");
 					}
 					
 					@Override
@@ -704,7 +707,7 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Removed all queried agents. Type <code>yes</code> below to confirm";
+										return _T("Removed all queried agents. Type <code>yes</code> below to confirm");
 									}
 									
 									@Override
@@ -728,7 +731,7 @@ class AgentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No agents to remove");
+									tag.put("data-tippy-content", _T("No agents to remove"));
 								}
 							}
 							
@@ -791,9 +794,9 @@ class AgentListPanel extends Panel {
 			@Override
 			public String getObject() {
 				if (dataProvider.size() > 1)
-					return "found " + dataProvider.size() + " agents";
+					return MessageFormat.format(_T("found {0} agents"), dataProvider.size());
 				else
-					return "found 1 agent";
+					return _T("found 1 agent");
 			}
 		}) {
 			@Override
@@ -853,7 +856,7 @@ class AgentListPanel extends Panel {
 		
 		columns.add(selectionColumn = new SelectionColumn<Agent, Void>());
 		
-		columns.add(new AbstractColumn<>(Model.of("Name")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Agent>> cellItem, String componentId, IModel<Agent> rowModel) {
@@ -869,7 +872,7 @@ class AgentListPanel extends Panel {
 
 		});
 		
-		columns.add(new AbstractColumn<>(Model.of("IP Address")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("IP Address"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Agent>> cellItem, String componentId, IModel<Agent> rowModel) {
@@ -884,7 +887,7 @@ class AgentListPanel extends Panel {
 
 		});
 		
-		columns.add(new AbstractColumn<>(Model.of("Status")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Status"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Agent>> cellItem, String componentId, IModel<Agent> rowModel) {

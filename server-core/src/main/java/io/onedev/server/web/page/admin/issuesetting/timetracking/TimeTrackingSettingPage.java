@@ -4,6 +4,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.basic.Label;
@@ -28,7 +31,7 @@ public class TimeTrackingSettingPage extends IssueSettingPage {
 				var issueSetting = getSettingManager().getIssueSetting();
 				issueSetting.setTimeTrackingSetting(timeTrackingSetting);
 				getSettingManager().saveIssueSetting(issueSetting);
-				Session.get().success("Time tracking settings have been saved");
+				Session.get().success(_T("Time tracking settings have been saved"));
 			}
 		};
 		form.add(BeanContext.edit("editor", timeTrackingSetting));
@@ -41,7 +44,7 @@ public class TimeTrackingSettingPage extends IssueSettingPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "<span class='text-truncate'>Time Tracking Settings</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-truncate'>" + _T("Time Tracking Settings") + "</span>").setEscapeModelStrings(false);
 	}
 	
 }

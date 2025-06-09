@@ -25,6 +25,9 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,8 +67,8 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 		super.onInitialize();
 		
 		List<Tab> tabs = new ArrayList<>();
-		tabs.add(new UnitReportTab("Test Suites", UnitTestSuitesPage.class));
-		tabs.add(new UnitReportTab("Test Cases", UnitTestCasesPage.class));
+		tabs.add(new UnitReportTab(_T("Test Suites"), UnitTestSuitesPage.class));
+		tabs.add(new UnitReportTab(_T("Test Cases"), UnitTestCasesPage.class));
 		
 		add(new Tabbable("reportTabs", tabs));
 	}

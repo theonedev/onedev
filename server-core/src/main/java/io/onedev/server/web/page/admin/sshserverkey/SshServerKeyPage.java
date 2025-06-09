@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.sshserverkey;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -34,11 +36,11 @@ public class SshServerKeyPage extends AdministrationPage {
 			public void onSubmit() {
 				super.onSubmit();
 				OneDev.getInstance(SettingManager.class).saveSshSetting(sshSetting);
-				getSession().success("SSH settings have been saved and SSH server restarted");
+				getSession().success(_T("SSH settings have been saved and SSH server restarted"));
 				setResponsePage(SshServerKeyPage.class);
 			}
 			
-		}.add(new ConfirmClickModifier("This will restart SSH server. Do you want to continue?")));
+		}.add(new ConfirmClickModifier(_T("This will restart SSH server. Do you want to continue?"))));
 		
         form.add(BeanContext.edit("editor", sshSetting));
         
@@ -49,10 +51,10 @@ public class SshServerKeyPage extends AdministrationPage {
 				sshSetting.setPemPrivateKey(SshKeyUtils.generatePEMPrivateKey());
 				OneDev.getInstance(SettingManager.class).saveSshSetting(sshSetting);
 				setResponsePage(SshServerKeyPage.class);
-	            getSession().success("Private key regenerated and SSH server restarted");
+	            getSession().success(_T("Private key regenerated and SSH server restarted"));
 			}
         	
-        }.add(new ConfirmClickModifier("This will restart SSH server. Do you want to continue?")));
+        }.add(new ConfirmClickModifier(_T("This will restart SSH server. Do you want to continue?"))));
 		
         form.setOutputMarkupId(true);
         add(form);
@@ -60,7 +62,7 @@ public class SshServerKeyPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "SSH Server Key");
+		return new Label(componentId, _T("SSH Server Key"));
 	}
     
 }

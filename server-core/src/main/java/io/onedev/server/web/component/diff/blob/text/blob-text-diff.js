@@ -786,7 +786,7 @@ onedev.server.blobTextDiff = {
 				$(".selection-popover").remove();
 			});
 			if (loggedIn) {
-				$content.append(`<a class='comment'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#comment'/></svg> ${onedev.server.blobTextDiff.translations["add-comment"]}</a>`);
+				$content.append(`<a class='comment'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#comment'/></svg> ${onedev.server.blobTextDiff.translations["add-selection-comment"]}</a>`);
 				$content.children("a.comment").click(function() {
 					if (onedev.server.blobTextDiff.confirmUnsavedChanges($container)) {
 						$container.data("callback")("addComment", markRange.leftSide, 
@@ -1097,7 +1097,7 @@ onedev.server.blobTextDiff = {
 					sanitize: false, 
 					placement: "top", 
 					container: $container,
-					content: onedev.server.codeProblem.renderProblems(problems),
+					content: onedev.server.codeProblem.renderProblems(problems, onedev.server.blobTextDiff.translations),
 					template: `<div data-line='${line}' class='${oldOrNew} popover problem-popover'><div class='arrow'></div><div class='popover-body'></div></div>`
 				}).on("shown.bs.popover", function() {
 					var $currentPopover = $(`.problem-popover.${oldOrNew}[data-line='${line}']`);
@@ -1116,6 +1116,10 @@ onedev.server.blobTextDiff = {
 										range.toRow, range.toColumn);
 							}
 						});
+					});
+					tippy($currentPopover[0].querySelectorAll('[data-tippy-content]'), {
+						delay: [500, 0],
+						placement: 'auto'
 					});
 				}).data("popoverInited", true);				
 			}			

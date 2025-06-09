@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.setting.build;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 
 import org.apache.wicket.Component;
@@ -33,7 +35,7 @@ public class BuildPreservationsPage extends ProjectBuildSettingPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				getSession().success("Build preserve rules saved");
+				getSession().success(_T("Build preserve rules saved"));
 				getProject().getBuildSetting().setBuildPreservations(bean.getBuildPreservations());
 				OneDev.getInstance(ProjectManager.class).update(getProject());
 				setResponsePage(BuildPreservationsPage.class, 
@@ -48,7 +50,7 @@ public class BuildPreservationsPage extends ProjectBuildSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Build Preserve Rules");
+		return new Label(componentId, _T("Build Preserve Rules"));
 	}
 
 }

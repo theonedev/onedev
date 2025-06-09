@@ -16,6 +16,8 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
 
 public class BranchProtectionsPage extends ProjectSettingPage {
@@ -122,7 +124,7 @@ public class BranchProtectionsPage extends ProjectSettingPage {
 	
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Branch Protection");
+		return new Label(componentId, _T("Branch Protection"));
 	}
 	
 }

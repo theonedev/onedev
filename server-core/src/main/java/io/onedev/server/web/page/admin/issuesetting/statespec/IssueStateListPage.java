@@ -103,19 +103,19 @@ public class IssueStateListPage extends IssueSettingPage {
 
 		});		
 		
-		columns.add(new AbstractColumn<>(Model.of("Name")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
 				StateSpec state = rowModel.getObject();
 				String html = HtmlEscape.escapeHtml5(state.getName());
 				if (cellItem.findParent(LoopItem.class).getIndex() == 0)
-					html += " <span class='badge badge-light-info badge-sm ml-2'>initial</span>";
+					html += " <span class='badge badge-light-info badge-sm ml-2'>" + _T("initial") + "</span>";
 				cellItem.add(new Label(componentId, html).setEscapeModelStrings(false));
 			}
 		});		
 		
-		columns.add(new AbstractColumn<>(Model.of("Color")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Color"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
@@ -126,7 +126,7 @@ public class IssueStateListPage extends IssueSettingPage {
 
 		});		
 		
-		columns.add(new AbstractColumn<>(Model.of("Description")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Description"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
@@ -182,7 +182,7 @@ public class IssueStateListPage extends IssueSettingPage {
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this state?"));
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to delete this state?")));
 					}
 
 					@Override
@@ -236,7 +236,7 @@ public class IssueStateListPage extends IssueSettingPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Issue States");
+		return new Label(componentId, _T("Issue States"));
 	}
 	
 }

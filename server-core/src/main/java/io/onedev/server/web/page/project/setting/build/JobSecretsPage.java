@@ -1,17 +1,13 @@
 package io.onedev.server.web.page.project.setting.build;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.build.JobSecret;
-import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.sortable.SortBehavior;
-import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.svg.SpriteImage;
+import static io.onedev.server.web.translation.Translation._T;
+import static java.util.stream.Collectors.toList;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -32,11 +28,18 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.build.JobSecret;
+import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
 
 public class JobSecretsPage extends ProjectBuildSettingPage {
 	
@@ -54,13 +57,13 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		String note = String.format("<svg class='icon mr-2'><use xlink:href='%s'/></svg> " +
+		String note = String.format(_T("<svg class='icon mr-2'><use xlink:href='%s'/></svg> " +
 						"Define job secrets to be used in build spec. Secrets with <b>same name</b> " +
 						"can be defined. For a particular name, the first " +
 						"authorized secret with that name will be used (search in current " +
 						"project first, then search in parent projects). Note that secret " +
 						"value containing line breaks or less than <b>%d</b> characters will " +
-						"not be masked in build log",
+						"not be masked in build log"),
 				SpriteImage.getVersionedHref("bulb"), SecretInput.MASK.length());
 		add(new Label("secretsNote", note).setEscapeModelStrings(false));
 
@@ -106,7 +109,7 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 				add(new Label("label", new AbstractReadOnlyModel<String>() {
 					@Override
 					public String getObject() {
-						return showArchived? "Hide Archived": "Show Archived";
+						return showArchived? _T("Hide Archived"): _T("Show Archived");
 					}
 				}));
 			}
@@ -151,7 +154,7 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 
 		});
 
-		columns.add(new AbstractColumn<>(Model.of("Name")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobSecret>> cellItem, String componentId,
@@ -165,7 +168,7 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 
 		});
 		
-		columns.add(new AbstractColumn<>(Model.of("Authorization")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Authorization"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobSecret>> cellItem, String componentId,
@@ -173,7 +176,7 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 				if (rowModel.getObject().getAuthorization() != null)
 					cellItem.add(new Label(componentId, rowModel.getObject().getAuthorization()));
 				else
-					cellItem.add(new Label(componentId, "<i>Any job</i>").setEscapeModelStrings(false));
+					cellItem.add(new Label(componentId, "<i>" + _T("Any job") + "</i>").setEscapeModelStrings(false));
 			}
 
 		});
@@ -226,7 +229,7 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						String message = "Do you really want to delete secret '" + rowModel.getObject().getName() + "'?";
+						String message = MessageFormat.format(_T("Do you really want to delete job secret \"{0}\"?"), rowModel.getObject().getName());
 						attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
 					}
 
@@ -234,7 +237,7 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 					public void onClick(AjaxRequestTarget target) {
 						getProject().getBuildSetting().getJobSecrets().remove(index);
 						OneDev.getInstance(ProjectManager.class).update(getProject());
-						Session.get().success("Secret '" + rowModel.getObject().getName() + "' deleted");
+						Session.get().success(MessageFormat.format(_T("Job secret \"{0}\" deleted"), rowModel.getObject().getName()));
 						target.add(toggleArchiveButton);
 						target.add(secretsTable);
 					}
@@ -293,7 +296,7 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Job Secrets");
+		return new Label(componentId, _T("Job Secrets"));
 	}
 
 }

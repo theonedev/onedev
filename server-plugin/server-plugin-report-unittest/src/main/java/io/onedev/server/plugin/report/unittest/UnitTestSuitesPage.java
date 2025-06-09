@@ -1,23 +1,19 @@
 package io.onedev.server.plugin.report.unittest;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.PatternSetAssistBehavior;
-import io.onedev.server.web.component.NoRecordsPlaceholder;
-import io.onedev.server.web.component.chart.pie.PieChartPanel;
-import io.onedev.server.web.component.chart.pie.PieSlice;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
-import io.onedev.server.web.util.SuggestionUtils;
+import static io.onedev.server.web.translation.Translation._T;
+import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.toSet;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -39,13 +35,26 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
 
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
-import static java.util.Comparator.comparingInt;
-import static java.util.stream.Collectors.toSet;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.server.model.Build;
+import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
+import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.behavior.PatternSetAssistBehavior;
+import io.onedev.server.web.component.NoRecordsPlaceholder;
+import io.onedev.server.web.component.chart.pie.PieChartPanel;
+import io.onedev.server.web.component.chart.pie.PieSlice;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
+import io.onedev.server.web.util.SuggestionUtils;
+import io.onedev.server.web.util.TextUtils;
 
 public class UnitTestSuitesPage extends UnitTestReportPage {
 
@@ -81,7 +90,7 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 			state.statuses = new HashSet<>();
 			if (params.get(PARAM_STATUS).toString().length() != 0) {
 				for (StringValue each : params.getValues(PARAM_STATUS))
-					state.statuses.add(Status.valueOf(each.toString().toUpperCase()));
+					state.statuses.add(Status.valueOf(each.toString()));
 			}
 		}
 		updateActualStatuses();
@@ -117,7 +126,7 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 		state = (State) data;
 		namePatterns = parseNamePatterns();
 		if (namePatterns == null)
-			form.error("Malformed name filter");
+			form.error(_T("Malformed name filter"));
 		updateActualStatuses();
 		target.add(form);
 		target.add(summary);
@@ -161,8 +170,8 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 				@Override
 				protected List<String> getHints(TerminalExpect terminalExpect) {
 					return Lists.newArrayList(
-							"Path containing spaces or starting with dash needs to be quoted",
-							"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
+							_T("Path containing spaces or starting with dash needs to be quoted"),
+							_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude")
 					);
 				}
 
@@ -176,7 +185,7 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 					pushState(target);
 					namePatterns = parseNamePatterns();
 					if (namePatterns == null)
-						form.error("Malformed name filter");
+						form.error(_T("Malformed name filter"));
 					updateActualStatuses();
 					target.add(feedback);
 					target.add(summary);
@@ -202,7 +211,7 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 					pushState(target);
 					namePatterns = parseNamePatterns();
 					if (namePatterns == null)
-						form.error("Malformed name filter");
+						form.error(_T("Malformed name filter"));
 					updateActualStatuses();
 					target.add(feedback);
 					target.add(summary);
@@ -214,7 +223,7 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 			fragment.add(form);
 
 			if (namePatterns == null)
-				form.error("Malformed name filter");
+				form.error(_T("Malformed name filter"));
 
 			fragment.add(summary = new PieChartPanel("summary", new LoadableDetachableModel<List<PieSlice>>() {
 
@@ -225,7 +234,7 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 						for (Status status: Status.values()) {
 							int numOfTestSuites = getReport().getTestSuites(
 									namePatterns.orNull(), Sets.newHashSet(status)).size();
-							slices.add(new PieSlice(status.name().toLowerCase().replace("_", " "),
+							slices.add(new PieSlice(status.name(), _T(TextUtils.getDisplayValue(status)),
 									numOfTestSuites, status.getColor(), state.actualStatuses.contains(status)));
 						}
 						return slices;
@@ -238,7 +247,7 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 
 				@Override
 				protected void onSelectionChange(AjaxRequestTarget target, String sliceName) {
-					Status status = Status.valueOf(sliceName.replace(' ', '_').toUpperCase());
+					Status status = Status.valueOf(sliceName);
 					if (state.actualStatuses.contains(status))
 						state.actualStatuses.remove(status);
 					else
@@ -357,7 +366,7 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 		if (state.statuses != null) {
 			if (!state.statuses.isEmpty()) {
 				for (Status status: state.statuses)
-					params.add(PARAM_STATUS, status.name().toLowerCase());
+					params.add(PARAM_STATUS, status.name());
 			} else {
 				params.add(PARAM_STATUS, "");
 			}

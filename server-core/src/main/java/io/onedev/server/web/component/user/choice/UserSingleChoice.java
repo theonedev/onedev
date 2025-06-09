@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.user.choice;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -20,9 +22,9 @@ public class UserSingleChoice extends Select2Choice<User> {
 		super.onInitialize();
 		getSettings().setAllowClear(!isRequired());
 		if (isRequired())
-			getSettings().setPlaceholder("Choose a user...");
+			getSettings().setPlaceholder(_T("Choose a user..."));
 		else
-			getSettings().setPlaceholder("Not specified");
+			getSettings().setPlaceholder(_T("Not specified"));
 		getSettings().setFormatResult("onedev.server.userChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.userChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.userChoiceFormatter.escapeMarkup");

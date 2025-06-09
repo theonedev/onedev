@@ -1,5 +1,8 @@
 package io.onedev.server.model.support.issue.transitionspec;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -260,9 +263,9 @@ public class ManualSpec extends TransitionSpec {
 	@Override
 	public String getTriggerDescription() {
 		if (authorizedRoles.isEmpty())
-			return "transit manually by any user";
+			return _T("transit manually by any user");
 		else
-			return "transit manually by any user of roles " + authorizedRoles;
+			return MessageFormat.format(_T("transit manually by any user of roles \"{0}\""), authorizedRoles);
 	}
 	
 }

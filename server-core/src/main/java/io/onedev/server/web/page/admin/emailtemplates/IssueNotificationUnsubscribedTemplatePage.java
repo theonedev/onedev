@@ -2,7 +2,9 @@ package io.onedev.server.web.page.admin.emailtemplates;
 
 import static io.onedev.server.model.support.administration.emailtemplates.EmailTemplates.DEFAULT_ISSUE_NOTIFICATION_UNSUBSCRIBED;
 import static io.onedev.server.model.support.administration.emailtemplates.EmailTemplates.PROP_ISSUE_NOTIFICATION_UNSUBSCRIBED;
+import static io.onedev.server.web.translation.Translation._T;
 
+import java.text.MessageFormat;
 import java.util.Map;
 
 import org.apache.wicket.Component;
@@ -29,19 +31,18 @@ public class IssueNotificationUnsubscribedTemplatePage extends AbstractTemplateP
 
 	@Override
 	protected String getHelpText() {
-		return "A " + GROOVY_TEMPLATE_LINK + " used as body of feedback email when unsubscribed " +
-				"from issue notification";
+		return MessageFormat.format(_T("A {0} used as body of feedback email when unsubscribed from issue notification"), GROOVY_TEMPLATE_LINK);
 	}
 
 	@Override
 	protected Map<String, String> getVariableHelp() {
 		return CollectionUtils.newLinkedHashMap("issue", 
-				"represents the unsubscribed <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/Issue.java' target='_blank'>issue</a>");
+				_T("represents the unsubscribed <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/Issue.java' target='_blank'>issue</a>"));
 	}
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Issue Notification Unsubscribed Template");
+		return new Label(componentId, _T("Issue Notification Unsubscribed Template"));
 	}
 
 }

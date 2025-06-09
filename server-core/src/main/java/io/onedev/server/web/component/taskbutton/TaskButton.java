@@ -1,5 +1,36 @@
 package io.onedev.server.web.component.taskbutton;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.attributes.IAjaxCallListener;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.joda.time.DateTime;
+import org.quartz.ScheduleBuilder;
+import org.quartz.SimpleScheduleBuilder;
+
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
@@ -15,26 +46,6 @@ import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.attributes.IAjaxCallListener;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.joda.time.DateTime;
-import org.quartz.ScheduleBuilder;
-import org.quartz.SimpleScheduleBuilder;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.*;
-import java.util.concurrent.*;
 
 public abstract class TaskButton extends AjaxButton {
 
@@ -58,7 +69,7 @@ public abstract class TaskButton extends AjaxButton {
 	}
 	
 	protected String getTitle() {
-		return WordUtils.uncamel(getId());
+		return _T(StringUtils.capitalize(WordUtils.uncamel(getId()).toLowerCase()));
 	}
 	
 	@Override
@@ -126,7 +137,6 @@ public abstract class TaskButton extends AjaxButton {
 	
 	protected void submitTask(AjaxRequestTarget target) {
 		String path = getPath();
-		String title = getTitle().toLowerCase();
 		
 		ExecutorService executorService = OneDev.getInstance(ExecutorService.class);
 		List<JobLogEntryEx> messages = new ArrayList<>();
@@ -200,7 +210,7 @@ public abstract class TaskButton extends AjaxButton {
 
 			@Override
 			protected Component newContent(String id) {
-				return new TaskFeedbackPanel(id, _T(StringUtils.capitalize(title))) {
+				return new TaskFeedbackPanel(id, getTitle()) {
 
 					@Override
 					protected void onClose(AjaxRequestTarget target) {

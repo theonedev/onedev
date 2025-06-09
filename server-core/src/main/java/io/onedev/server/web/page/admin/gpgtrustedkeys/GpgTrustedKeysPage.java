@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.gpgtrustedkeys;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -89,7 +91,7 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 		                if (bean.getKeyIds().stream().anyMatch(it-> setting.getTrustedSignatureVerificationKey(it) != null)) {
 							editor.error(
 									new Path(new PathNode.Named(BaseGpgKey.PROP_CONTENT)), 
-									"This key or one of its sub key is already added");
+									_T("This key or one of its sub key is already added"));
 							target.add(form);
 		                } else {
 			                setting.getEncodedTrustedKeys().put(bean.getKeyIds().get(0), bean.getContent());
@@ -126,7 +128,7 @@ public class GpgTrustedKeysPage extends AdministrationPage {
         
 		List<IColumn<Long, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<Long, Void>(Model.of("Key ID")) {
+		columns.add(new AbstractColumn<Long, Void>(Model.of(_T("Key ID"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Long>> cellItem, String componentId,
@@ -137,7 +139,7 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 			
 		});
 		
-		columns.add(new AbstractColumn<Long, Void>(Model.of("Email Addresses")) {
+		columns.add(new AbstractColumn<Long, Void>(Model.of(_T("Email Addresses"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Long>> cellItem, String componentId,
@@ -149,7 +151,7 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 			
 		});
 		
-		columns.add(new AbstractColumn<Long, Void>(Model.of("Sub Keys")) {
+		columns.add(new AbstractColumn<Long, Void>(Model.of(_T("Sub Keys"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Long>> cellItem, String componentId,
@@ -164,7 +166,7 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 				if (subKeyIds.length() != 0)
 					cellItem.add(new MultilineLabel(componentId, subKeyIds));
 				else
-					cellItem.add(new Label(componentId, "<i>None</i>").setEscapeModelStrings(false));
+					cellItem.add(new Label(componentId, "<i>" + _T("None") + "</i>").setEscapeModelStrings(false));
 			}
 
 			@Override
@@ -189,14 +191,14 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 						setting.getEncodedTrustedKeys().remove(rowModel.getObject());
 						setting.encodedTrustedKeysUpdated();
 						getSettingManager().saveGpgSetting(setting);
-						Session.get().success("GPG key deleted");
+						Session.get().success(_T("GPG key deleted"));
 						target.add(trustedKeysTable);
 					}
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						String message = "Do you really want to delete this GPG key?";
+						String message = _T("Do you really want to delete this GPG key?");
 						attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
 					}
 
@@ -250,7 +252,7 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 	
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "GPG Trusted Keys");
+		return new Label(componentId, _T("GPG Trusted Keys"));
 	}
 
 }

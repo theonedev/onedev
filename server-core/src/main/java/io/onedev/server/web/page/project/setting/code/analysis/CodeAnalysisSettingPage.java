@@ -1,6 +1,9 @@
 package io.onedev.server.web.page.project.setting.code.analysis;
 
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.basic.Label;
@@ -38,7 +41,7 @@ public class CodeAnalysisSettingPage extends ProjectSettingPage {
 				getProject().setCodeAnalysisSetting(bean);
 				OneDev.getInstance(ProjectManager.class).update(getProject());
 				setResponsePage(CodeAnalysisSettingPage.class, CodeAnalysisSettingPage.paramsOf(getProject()));
-				Session.get().success("Code analysis settings updated");
+				Session.get().success(_T("Code analysis settings updated"));
 			}
 			
 		};
@@ -49,7 +52,7 @@ public class CodeAnalysisSettingPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "<span class='text-truncate'>Code Analysis Settings</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-truncate'>" + _T("Code Analysis Settings") + "</span>").setEscapeModelStrings(false);
 	}
 
 	@Override

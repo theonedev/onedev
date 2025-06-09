@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.ssosetting;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
@@ -57,7 +59,7 @@ public class SsoProcessPage extends BasePage {
 					.orElse(null);
 			
 			if (connector == null) 
-				throw new AuthenticationException("Unable to find SSO connector: " + connectorName);
+				throw new AuthenticationException(_T("Unable to find SSO connector: ") + connectorName);
 			
 			if (stage.equals(STAGE_INITIATE)) {
 				String redirectUrlAfterLogin;
@@ -74,7 +76,7 @@ public class SsoProcessPage extends BasePage {
 				
 				String redirectUrlAfterLogin = (String) Session.get().getAttribute(SESSION_ATTR_REDIRECT_URL);
 				if (StringUtils.isBlank(redirectUrlAfterLogin))
-					throw new AuthenticationException("unsolicited OIDC authentication response");
+					throw new AuthenticationException(_T("Unsolicited OIDC authentication response"));
 				
 				WebSession.get().login(authenticated);
 

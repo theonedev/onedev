@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.blob;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -71,7 +73,7 @@ public abstract class BlobPicker extends DropdownLink {
 				
 			};
 		} else {
-			return new Label(id, "Project or revision not specified yet").add(AttributeAppender.append("class", "m-3 text-danger font-italic"));
+			return new Label(id, _T("Project or revision not specified yet")).add(AttributeAppender.append("class", "m-3 text-danger font-italic"));
 		}
 	}
 
@@ -92,10 +94,10 @@ public abstract class BlobPicker extends DropdownLink {
 					+ "  <svg class='icon rotate-90'><use xlink:href='%s'/></svg>"
 					+ "</span>", 
 					"<svg class='icon'><use xlink:href='" + SpriteImage.getVersionedHref(IconScope.class, "file") + "'/></svg>", 
-					blobPath!=null?HtmlEscape.escapeHtml5(blobPath):"Choose file", 
+					blobPath!=null?HtmlEscape.escapeHtml5(blobPath):_T("Choose file"), 
 					SpriteImage.getVersionedHref(IconScope.class, "arrow")));
 		} else {
-			return Model.of("<i>Select project and revision first</i>");
+			return Model.of("<i>" + _T("Select project and revision first") + "</i>");
 		}
 	}
 	

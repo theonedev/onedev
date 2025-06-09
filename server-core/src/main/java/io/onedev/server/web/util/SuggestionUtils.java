@@ -1,11 +1,13 @@
 package io.onedev.server.web.util;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static java.util.Collections.sort;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -570,7 +572,7 @@ public class SuggestionUtils {
 			var suggestContent = extPrefix + ext;
 			var index = suggestContent.indexOf(pattern);
 			if (index != -1)
-				suggestions.add(new InputSuggestion(suggestContent, -1, "files with ext '" + ext + "'", new LinearRange(index, index + pattern.length())));
+				suggestions.add(new InputSuggestion(suggestContent, -1, MessageFormat.format(_T("files with ext \"{0}\""), ext), new LinearRange(index, index + pattern.length())));
 		}
 		return suggestions;
 	}

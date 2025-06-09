@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.performancesetting;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -29,7 +31,7 @@ public class PerformanceSettingPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				OneDev.getInstance(SettingManager.class).savePerformanceSetting(performanceSetting);
-				getSession().success("Performance settings have been saved");
+				getSession().success(_T("Performance settings have been saved"));
 				
 				setResponsePage(PerformanceSettingPage.class);
 			}
@@ -42,7 +44,7 @@ public class PerformanceSettingPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Performance Settings");
+		return new Label(componentId, _T("Performance Settings"));
 	}
 
 }

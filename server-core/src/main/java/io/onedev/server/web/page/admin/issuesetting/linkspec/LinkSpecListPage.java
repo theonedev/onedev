@@ -29,6 +29,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,7 +93,7 @@ public class LinkSpecListPage extends IssueSettingPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<LinkSpec, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<LinkSpec, Void>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<LinkSpec>> cellItem, String componentId, IModel<LinkSpec> rowModel) {
@@ -100,7 +102,7 @@ public class LinkSpecListPage extends IssueSettingPage {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<LinkSpec, Void>(Model.of("Name On the Other Side")) {
+		columns.add(new AbstractColumn<LinkSpec, Void>(Model.of(_T("Name On the Other Side"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<LinkSpec>> cellItem, String componentId, IModel<LinkSpec> rowModel) {
@@ -144,7 +146,7 @@ public class LinkSpecListPage extends IssueSettingPage {
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this link?"));
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to delete this link?")));
 					}
 
 					@Override
@@ -212,7 +214,7 @@ public class LinkSpecListPage extends IssueSettingPage {
 	
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Issue Links");
+		return new Label(componentId, _T("Issue Links"));
 	}
 	
 }

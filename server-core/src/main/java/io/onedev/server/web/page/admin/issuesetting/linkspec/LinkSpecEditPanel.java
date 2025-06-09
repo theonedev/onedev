@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.issuesetting.linkspec;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -91,7 +93,7 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 				super.onSubmit(target, form);
 
 				if (getSpec().getOpposite() != null && getSpec().getName().equals(getSpec().getOpposite().getName())) {
-					String errorMessage = "Name and name on the other side should be different";
+					String errorMessage = _T("Name and name on the other side should be different");
 					editor.error(new Path(new PathNode.Named("name")), errorMessage);
 					editor.error(new Path(new PathNode.Named("opposite"), new PathNode.Named("name")), errorMessage);
 					target.add(form);
@@ -100,13 +102,13 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 					LinkSpec specWithSameName = manager.find(getSpec().getName());
 					if (getSpec().isNew() && specWithSameName != null 
 							|| !getSpec().isNew() && specWithSameName != null && !specWithSameName.equals(getSpec())) {
-						editor.error(new Path(new PathNode.Named("name")), "Name already used by another link");
+						editor.error(new Path(new PathNode.Named("name")), _T("Name already used by another link"));
 						target.add(form);
 					} else if (getSpec().getOpposite() != null) {
 						specWithSameName = manager.find(getSpec().getOpposite().getName());
 						if (getSpec().isNew() && specWithSameName != null 
 								|| !getSpec().isNew() && specWithSameName != null && !specWithSameName.equals(getSpec())) {
-							String errorMessage = "Name already used by another link";
+							String errorMessage = _T("Name already used by another link");
 							editor.error(new Path(new PathNode.Named("opposite"), new PathNode.Named("name")), errorMessage);
 							target.add(form);
 						} else {

@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.project.choice;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -22,9 +24,9 @@ public class ProjectMultiChoice extends Select2MultiChoice<Project> {
 	protected void onInitialize() {
 		super.onInitialize();
 		if (isRequired())
-			getSettings().setPlaceholder("Choose projects...");
+			getSettings().setPlaceholder(_T("Choose projects..."));
 		else
-			getSettings().setPlaceholder("Not specified");
+			getSettings().setPlaceholder(_T("Not specified"));
 		getSettings().setFormatResult("onedev.server.projectChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.projectChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.projectChoiceFormatter.escapeMarkup");

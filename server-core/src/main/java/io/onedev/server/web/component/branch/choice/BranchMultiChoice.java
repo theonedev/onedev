@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.branch.choice;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -21,9 +23,9 @@ public class BranchMultiChoice extends Select2MultiChoice<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		if (isRequired())
-			getSettings().setPlaceholder("Choose branches...");
+			getSettings().setPlaceholder(_T("Choose branches..."));
 		else
-			getSettings().setPlaceholder("Not specified");
+			getSettings().setPlaceholder(_T("Not specified"));
 		getSettings().setFormatResult("onedev.server.branchChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.branchChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.branchChoiceFormatter.escapeMarkup");

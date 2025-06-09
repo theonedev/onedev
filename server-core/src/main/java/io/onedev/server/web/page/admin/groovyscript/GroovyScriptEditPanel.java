@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.groovyscript;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -79,11 +81,11 @@ abstract class GroovyScriptEditPanel extends Panel {
 					GroovyScript oldScript = getScripts().get(scriptIndex);
 					if (!script.getName().equals(oldScript.getName()) && getScript(script.getName()) != null) {
 						editor.error(new Path(new PathNode.Named("name")),
-								"This name has already been used by another script");
+								_T("This name has already been used by another script"));
 					}
 				} else if (getScript(script.getName()) != null) {
 					editor.error(new Path(new PathNode.Named("name")),
-							"This name has already been used by another script");
+							_T("This name has already been used by another script"));
 				}
 
 				if (editor.isValid()) {

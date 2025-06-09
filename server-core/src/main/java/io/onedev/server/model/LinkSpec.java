@@ -61,7 +61,7 @@ public class LinkSpec extends AbstractEntity {
 		this.name = name;
 	}
 
-	@Editable(order=150, name="Multiple", description="Whether or not multiple issues can be linked")
+	@Editable(order=150, name="link:Multiple", description="Whether or not multiple issues can be linked")
 	public boolean isMultiple() {
 		return multiple;
 	}

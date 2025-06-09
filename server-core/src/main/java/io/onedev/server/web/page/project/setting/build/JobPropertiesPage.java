@@ -14,6 +14,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import java.util.List;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 
 public class JobPropertiesPage extends ProjectBuildSettingPage {
@@ -40,7 +41,7 @@ public class JobPropertiesPage extends ProjectBuildSettingPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				getSession().success("Job properties saved");
+				getSession().success(_T("Job properties saved"));
 				getProject().getBuildSetting().setJobProperties(bean.getProperties());
 				OneDev.getInstance(ProjectManager.class).update(getProject());
 				bean.setProperties(getDisplayProperties());
@@ -59,7 +60,7 @@ public class JobPropertiesPage extends ProjectBuildSettingPage {
 				add(new Label("label", new AbstractReadOnlyModel<String>() {
 					@Override
 					public String getObject() {
-						return showArchived? "Hide Archived": "Show Archived";
+						return showArchived? _T("Hide Archived"): _T("Show Archived");
 					}
 				}));
 			}
@@ -92,7 +93,7 @@ public class JobPropertiesPage extends ProjectBuildSettingPage {
 	
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Job Properties");
+		return new Label(componentId, _T("Job Properties"));
 	}
 
 }

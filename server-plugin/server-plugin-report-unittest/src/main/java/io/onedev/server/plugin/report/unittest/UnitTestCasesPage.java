@@ -1,5 +1,6 @@
 package io.onedev.server.plugin.report.unittest;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toSet;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
@@ -52,6 +53,7 @@ import io.onedev.server.web.component.chart.pie.PieChartPanel;
 import io.onedev.server.web.component.chart.pie.PieSlice;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.util.SuggestionUtils;
+import io.onedev.server.web.util.TextUtils;
 
 public class UnitTestCasesPage extends UnitTestReportPage {
 
@@ -95,7 +97,7 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 			state.statuses = new HashSet<>();
 			if (params.get(PARAM_STATUS).toString().length() != 0) {
 				for (StringValue each : params.getValues(PARAM_STATUS))
-					state.statuses.add(Status.valueOf(each.toString().toUpperCase()));
+					state.statuses.add(Status.valueOf(each.toString()));
 			}
 		}
 		updateActualStatuses();
@@ -133,10 +135,10 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 		state = (State) data;
 		testSuitePatterns = parseTestSuitePatterns();
 		if (testSuitePatterns == null)
-			testSuiteForm.error("Malformed test suite filter");			
+			testSuiteForm.error(_T("Malformed test suite filter"));			
 		namePatterns = parseNamePatterns();
 		if (namePatterns == null)
-			nameForm.error("Malformed name filter");
+			nameForm.error(_T("Malformed name filter"));
 		updateActualStatuses();
 		target.add(testSuiteForm);
 		target.add(nameForm);
@@ -182,8 +184,8 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 				@Override
 				protected List<String> getHints(TerminalExpect terminalExpect) {
 					return Lists.newArrayList(
-							"Path containing spaces or starting with dash needs to be quoted",
-							"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
+							_T("Path containing spaces or starting with dash needs to be quoted"),
+							_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude")
 					);
 				}
 
@@ -197,7 +199,7 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 					pushState(target);
 					testSuitePatterns = parseTestSuitePatterns();
 					if (testSuitePatterns == null)
-						testSuiteForm.error("Malformed test suite filter");
+						testSuiteForm.error(_T("Malformed test suite filter"));
 					updateActualStatuses();
 					target.add(testSuiteFeedback);
 					target.add(summary);
@@ -223,7 +225,7 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 					pushState(target);
 					testSuitePatterns = parseTestSuitePatterns();
 					if (testSuitePatterns == null)
-						testSuiteForm.error("Malformed test suite filter");
+						testSuiteForm.error(_T("Malformed test suite filter"));
 					updateActualStatuses();
 					target.add(testSuiteFeedback);
 					target.add(summary);
@@ -265,8 +267,8 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 				@Override
 				protected List<String> getHints(TerminalExpect terminalExpect) {
 					return Lists.newArrayList(
-							"Path containing spaces or starting with dash needs to be quoted",
-							"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
+							_T("Path containing spaces or starting with dash needs to be quoted"),
+							_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude")
 					);
 				}
 
@@ -280,7 +282,7 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 					pushState(target);
 					namePatterns = parseNamePatterns();
 					if (namePatterns == null)
-						nameForm.error("Malformed name filter");						
+						nameForm.error(_T("Malformed name filter"));						
 					updateActualStatuses();
 					target.add(nameFeedback);
 					target.add(summary);
@@ -306,7 +308,7 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 					pushState(target);
 					namePatterns = parseNamePatterns();
 					if (namePatterns == null)
-						nameForm.error("Malformed name filter");
+						nameForm.error(_T("Malformed name filter"));
 					updateActualStatuses();
 					target.add(nameFeedback);
 					target.add(summary);
@@ -318,9 +320,9 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 			fragment.add(nameForm);
 
 			if (testSuitePatterns == null)
-				testSuiteForm.error("Malformed test suite filter");
+				testSuiteForm.error(_T("Malformed test suite filter"));
 			if (namePatterns == null)
-				nameForm.error("Malformed name filter");
+				nameForm.error(_T("Malformed name filter"));
 
 			fragment.add(summary = new PieChartPanel("summary", new LoadableDetachableModel<List<PieSlice>>() {
 
@@ -331,7 +333,7 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 						for (Status status: Status.values()) {
 							int numOfTestCases = getReport().getTestCases(
 									testSuitePatterns.orNull(), namePatterns.orNull(), Sets.newHashSet(status)).size();
-							slices.add(new PieSlice(status.name().toLowerCase().replace("_", " "),
+							slices.add(new PieSlice(status.name(), _T(TextUtils.getDisplayValue(status)),
 									numOfTestCases, status.getColor(), state.actualStatuses.contains(status)));
 						}
 						return slices;
@@ -344,7 +346,7 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 
 				@Override
 				protected void onSelectionChange(AjaxRequestTarget target, String sliceName) {
-					Status status = Status.valueOf(sliceName.toUpperCase().replace(" ", "_"));
+					Status status = Status.valueOf(sliceName);
 					if (state.actualStatuses.contains(status))
 						state.actualStatuses.remove(status);
 					else
@@ -484,7 +486,7 @@ public class UnitTestCasesPage extends UnitTestReportPage {
 		if (state.statuses != null) {
 			if (!state.statuses.isEmpty()) {
 				for (Status status: state.statuses)
-					params.add(PARAM_STATUS, status.name().toLowerCase());
+					params.add(PARAM_STATUS, status.name());
 			} else {
 				params.add(PARAM_STATUS, "");
 			}

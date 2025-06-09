@@ -977,17 +977,20 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		else
 			markRange = markRange.normalize(blob.getText().getLines());
 		
-		var translations = Map.of(
-			"perma-link", _T("Permanent link of this selection"), 
-			"copy-to-clipboard", _T("Copy selected text to clipboard"), 
-			"add-comment", _T("Add comment on this selection"), 
-			"login-to-comment", _T("Login to comment on selection"),
-			"covered-by-tests", _T("Covered by tests"),
-			"not-covered-by-any-test", _T("Not covered by any test"),
-			"partially-covered-by-some-tests", _T("Partially covered by some tests"),
-			"unsaved-changes-prompt", _T("There are unsaved changes, discard and continue?"),
-			"show-comment", _T("Click to show comment of marked text"),
-			"loading", _T("Loading..."));
+		var translations = new HashMap<String, String>();
+		translations.put("perma-link", _T("Permanent link of this selection"));
+		translations.put("copy-to-clipboard", _T("Copy selected text to clipboard"));
+		translations.put("add-selection-comment", _T("Add comment on this selection"));
+		translations.put("login-to-comment", _T("Login to comment on selection"));
+		translations.put("covered-by-tests", _T("Covered by tests"));
+		translations.put("not-covered-by-any-test", _T("Not covered by any test"));
+		translations.put("partially-covered-by-some-tests", _T("Partially covered by some tests"));
+		translations.put("unsaved-changes-prompt", _T("There are unsaved changes, discard and continue?"));
+		translations.put("show-comment", _T("Click to show comment of marked text"));
+		translations.put("loading", _T("Loading..."));
+		for (var severity: CodeProblem.Severity.values())
+			translations.put(severity.name(), _T("severity:" + severity.name()));
+		translations.put("add-problem-comment", _T("Add comment"));
 
 		String script = String.format("onedev.server.sourceView.onDomReady("
 				+ "'%s', '%s', %s, %s, '%s', '%s', %s, %s, %s, %s, '%s', %s, %s);", 

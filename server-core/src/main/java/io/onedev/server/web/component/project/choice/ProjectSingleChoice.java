@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.project.choice;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -20,9 +22,9 @@ public class ProjectSingleChoice extends Select2Choice<Project> {
 		super.onInitialize();
 		getSettings().setAllowClear(!isRequired());
 		if (isRequired())
-			getSettings().setPlaceholder("Choose a project...");
+			getSettings().setPlaceholder(_T("Choose a project..."));
 		else
-			getSettings().setPlaceholder("Not specified");
+			getSettings().setPlaceholder(_T("Not specified"));
 		getSettings().setFormatResult("onedev.server.projectChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.projectChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.projectChoiceFormatter.escapeMarkup");

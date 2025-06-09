@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.issuesetting.statespec;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -78,11 +80,11 @@ abstract class StateEditPanel extends Panel {
 					StateSpec oldState = getSetting().getStateSpecs().get(stateIndex);
 					if (!state.getName().equals(oldState.getName()) && getSetting().getStateSpec(state.getName()) != null) {
 						editor.error(new Path(new PathNode.Named("name")),
-								"This name has already been used by another state");
+								_T("This name has already been used by another state"));
 					}
 				} else if (getSetting().getStateSpec(state.getName()) != null) {
 					editor.error(new Path(new PathNode.Named("name")),
-							"This name has already been used by another state");
+							_T("This name has already been used by another state"));
 				}
 
 				if (editor.isValid()) {

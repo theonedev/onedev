@@ -6,9 +6,12 @@ import io.onedev.server.model.LabelSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.Comparator;
 
@@ -39,6 +42,7 @@ public class LabelManagementPage extends AdministrationPage {
 				super.onSubmit();
 				getLabelManager().sync(bean.getLabels());
 				setResponsePage(LabelManagementPage.class);
+				Session.get().success(_T("Labels have been updated"));
 			}
 			
 		};
@@ -50,7 +54,7 @@ public class LabelManagementPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new org.apache.wicket.markup.html.basic.Label(componentId, "Labels");
+		return new org.apache.wicket.markup.html.basic.Label(componentId, _T("Labels"));
 	}
 
 }

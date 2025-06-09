@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.setting.authorization;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -83,7 +85,7 @@ public class GroupAuthorizationsPage extends ProjectSettingPage {
 						}
 					}
 					if (!canManageProject) {
-						error("Unable to apply change as otherwise you will not be able to manage this project");
+						error(_T("Unable to apply change as otherwise you will not be able to manage this project"));
 						return;
 					}
 				}				
@@ -92,7 +94,7 @@ public class GroupAuthorizationsPage extends ProjectSettingPage {
 				Collection<GroupAuthorization> authorizations = new ArrayList<>();
 				for (GroupAuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
 					if (!groupNames.add(authorizationBean.getGroupName())) {
-						error("Duplicate authorizations found: " + authorizationBean.getGroupName());
+						error(_T("Duplicate authorizations found: ") + authorizationBean.getGroupName());
 						return;
 					} else {
 						var group = getGroupManager().find(authorizationBean.getGroupName());
@@ -107,7 +109,7 @@ public class GroupAuthorizationsPage extends ProjectSettingPage {
 				}
 				
 				getGroupAuthorizationManager().syncAuthorizations(getProject(), authorizations);
-				Session.get().success("Group authorizations updated");
+				Session.get().success(_T("Group authorizations updated"));
 			}
 			
 		};
@@ -130,7 +132,7 @@ public class GroupAuthorizationsPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Group Authorizations");
+		return new Label(componentId, _T("Group Authorizations"));
 	}
 	
 }

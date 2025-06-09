@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.sso.openid;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -85,7 +87,7 @@ public class GitHubConnector extends OpenIdConnector {
 							}
 						}
 						if (StringUtils.isBlank(email))
-							throw new AuthenticationException("A verified primary email address is required");
+							throw new AuthenticationException(_T("A verified primary email address is required"));
 					} else {
 						throw buildException(UserInfoErrorResponse.parse(httpResponse).getErrorObject());
 					}

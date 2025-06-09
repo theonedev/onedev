@@ -1,6 +1,22 @@
 package io.onedev.server.web.page.project.issues.imports;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.text.MessageFormat;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import com.google.common.collect.Lists;
+
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.imports.IssueImporter;
@@ -18,17 +34,6 @@ import io.onedev.server.web.component.wizard.WizardPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
-import org.apache.wicket.Component;
-import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import java.io.Serializable;
 
 public class IssueImportPage<Where extends Serializable, What extends Serializable, How extends Serializable> extends ProjectPage {
 
@@ -87,7 +92,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 					
 					@Override
 					protected String getTitle() {
-						return "Importing from " + importer.getName();
+						return MessageFormat.format(_T("Importing from {0}"), importer.getName());
 					}
 
 					@Override
@@ -107,7 +112,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 					
 					@Override
 					protected String getTitle() {
-						return "Test importing from " + importer.getName();
+						return MessageFormat.format(_T("Test importing from {0}"), importer.getName());
 					}
 
 					@Override
@@ -132,7 +137,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 	
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Importing Issues from " + importer.getName());
+		return new Label(componentId, MessageFormat.format(_T("Importing Issues from {0}"), importer.getName()));
 	}
 	
 	public static PageParameters paramsOf(Project project, String importer) {

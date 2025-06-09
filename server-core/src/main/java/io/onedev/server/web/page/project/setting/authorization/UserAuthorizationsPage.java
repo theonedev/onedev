@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.setting.authorization;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -90,7 +92,7 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 						}
 					}
 					if (!canManageProject) {
-						error("Unable to apply change as otherwise you will not be able to manage this project");
+						error(_T("Unable to apply change as otherwise you will not be able to manage this project"));
 						return;
 					}
 				}
@@ -98,7 +100,7 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 				Collection<UserAuthorization> authorizations = new ArrayList<>();
 				for (UserAuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
 					if (!userNames.add(authorizationBean.getUserName())) {
-						error("Duplicate authorizations found: " + authorizationBean.getUserName());
+						error(_T("Duplicate authorizations found: ") + authorizationBean.getUserName());
 						return;
 					} else {
 						var user = getUserManager().findByName(authorizationBean.getUserName());
@@ -113,7 +115,7 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 				}
 				
 				getUserAuthorizationManager().syncAuthorizations(getProject(), authorizations);
-				Session.get().success("User authorizations updated");
+				Session.get().success(_T("User authorizations updated"));
 			}
 			
 		};
@@ -136,7 +138,7 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "User Authorizations");
+		return new Label(componentId, _T("User Authorizations"));
 	}
 	
 }

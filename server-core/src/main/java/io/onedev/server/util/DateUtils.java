@@ -1,5 +1,8 @@
 package io.onedev.server.util;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -18,6 +21,7 @@ import com.google.common.collect.Lists;
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.web.WebSession;
 
@@ -114,7 +118,10 @@ public class DateUtils {
     }
 	
     public static String formatDuration(long durationMillis) {
-		return KubernetesHelper.formatDuration(durationMillis);
+		var duration = KubernetesHelper.formatDuration(durationMillis);
+		var number = StringUtils.substringBefore(duration, " ");
+		var unit = StringUtils.substringAfter(duration, " ");		
+		return MessageFormat.format(_T("{0} " + unit), number);
     }
     
 	public static Date parseISO8601Date(String dateString) {

@@ -96,7 +96,7 @@ public class DefaultBoardListPage extends IssueSettingPage {
 			
 		});		
 
-		columns.add(new AbstractColumn<BoardSpec, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<BoardSpec, Void>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<BoardSpec>> cellItem, String componentId, IModel<BoardSpec> rowModel) {
@@ -104,7 +104,7 @@ public class DefaultBoardListPage extends IssueSettingPage {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<BoardSpec, Void>(Model.of("Columns")) {
+		columns.add(new AbstractColumn<BoardSpec, Void>(Model.of(_T("Columns"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<BoardSpec>> cellItem, String componentId, IModel<BoardSpec> rowModel) {
@@ -114,7 +114,7 @@ public class DefaultBoardListPage extends IssueSettingPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<BoardSpec, Void>(Model.of("Identify Field")) {
+		columns.add(new AbstractColumn<BoardSpec, Void>(Model.of(_T("Identify Field"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<BoardSpec>> cellItem, String componentId, IModel<BoardSpec> rowModel) {

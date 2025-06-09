@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.report.unittest;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -15,7 +17,7 @@ public class UnitTestStatsPage extends BuildMetricStatsPage<UnitTestMetric> {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Unit Test Statistics");
+		return new Label(componentId, _T("Unit Test Statistics"));
 	}
 
 }

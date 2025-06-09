@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.groupchoice;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Collection;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -21,9 +23,9 @@ public class GroupSingleChoice extends Select2Choice<Group> {
 
 		getSettings().setAllowClear(!isRequired());
 		if (isRequired())
-			getSettings().setPlaceholder("Choose group...");
+			getSettings().setPlaceholder(_T("Choose group..."));
 		else
-			getSettings().setPlaceholder("Not specified");
+			getSettings().setPlaceholder(_T("Not specified"));
 		getSettings().setFormatResult("onedev.server.groupChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.groupChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.groupChoiceFormatter.escapeMarkup");

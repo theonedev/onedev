@@ -1,5 +1,8 @@
 package io.onedev.server.model.support.issue.transitionspec;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +46,7 @@ public class IssueStateTransitedSpec extends AutoSpec {
 
 	@Override
 	public String getTriggerDescription() {
-		return "state of other issue is transited to " + states;
+		return MessageFormat.format(_T("state of other issue is transited to \"{0}\""), states);
 	}
 	
 }

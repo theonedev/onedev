@@ -15,6 +15,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -95,12 +98,12 @@ public class ServerInformationPage extends ServerDetailPage {
 
 	private static ServerInformation getServerInformation() {
 		var serverInformation = new ServerInformation();
-		serverInformation.properties.put("System Date", DateUtils.formatDateTime(new Date()));
-		serverInformation.properties.put("OS", System.getProperty("os.name") + " " + System.getProperty("os.version") + ", " + System.getProperty("os.arch"));
-		serverInformation.properties.put("OS User Name", System.getProperty("user.name"));
-		serverInformation.properties.put("JVM", System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + ", " + System.getProperty("java.vm.vendor"));
-		serverInformation.properties.put("Total Heap Memory", String.valueOf(Runtime.getRuntime().maxMemory() / 1024 / 1024) + " MB");
-		serverInformation.properties.put("Used Heap Memory", String.valueOf((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB");
+		serverInformation.properties.put(_T("System Date"), DateUtils.formatDateTime(new Date()));
+		serverInformation.properties.put(_T("OS"), System.getProperty("os.name") + " " + System.getProperty("os.version") + ", " + System.getProperty("os.arch"));
+		serverInformation.properties.put(_T("OS User Name"), System.getProperty("user.name"));
+		serverInformation.properties.put(_T("JVM"), System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + ", " + System.getProperty("java.vm.vendor"));
+		serverInformation.properties.put(_T("Total Heap Memory"), String.valueOf(Runtime.getRuntime().maxMemory() / 1024 / 1024) + " MB");
+		serverInformation.properties.put(_T("Used Heap Memory"), String.valueOf((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB");
 		serverInformation.memoryUsage = (int)((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())*1.0
 				/ Runtime.getRuntime().maxMemory() * 100) + "%";
 		return serverInformation;
@@ -117,7 +120,7 @@ public class ServerInformationPage extends ServerDetailPage {
 
 	@Override
 	protected String newTopbarTitle() {
-		return "Server Information";
+		return _T("Server Information");
 	}
 
 	private static class ServerInformation implements Serializable {

@@ -18,6 +18,8 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
 
 public class JobExecutorsPage extends AdministrationPage {
@@ -137,7 +139,7 @@ public class JobExecutorsPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Job Executors");
+		return new Label(componentId, _T("Job Executors"));
 	}
 
 }

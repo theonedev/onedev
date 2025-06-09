@@ -4,6 +4,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -27,7 +30,7 @@ public class AlertSettingPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				OneDev.getInstance(SettingManager.class).saveAlertSetting(alertSetting);
-				getSession().success("Alert settings have been updated");
+				getSession().success(_T("Alert settings have been updated"));
 				
 				setResponsePage(AlertSettingPage.class);
 			}
@@ -40,7 +43,7 @@ public class AlertSettingPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Alert Settings");
+		return new Label(componentId, _T("Alert Settings"));
 	}
 
 }

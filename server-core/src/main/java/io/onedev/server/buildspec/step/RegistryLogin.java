@@ -23,7 +23,7 @@ public class RegistryLogin implements Serializable {
 	
 	private String passwordSecret;
 
-	@Editable(order=100, placeholder="Docker hub", displayPlaceholderAsValue =true, description="Specify registry url. Leave empty for official registry")
+	@Editable(order=100, placeholder="Docker Hub", displayPlaceholderAsValue =true, description="Specify registry url. Leave empty for official registry")
 	@Interpolative(variableSuggester = "suggestVariables")
 	public String getRegistryUrl() {
 		return registryUrl;

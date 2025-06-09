@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.groovyscript;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -105,21 +107,21 @@ public class GroovyScriptListPage extends AdministrationPage {
 
 		});		
 		
-		columns.add(new AbstractColumn<>(Model.of("Name")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getName()));
 			}
 		});
-		columns.add(new AbstractColumn<>(Model.of("Can Be Used By Jobs")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Can Be Used By Jobs"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
-				cellItem.add(new Label(componentId, TextUtils.getDisplayValue(rowModel.getObject().isCanBeUsedByBuildJobs())));
+				cellItem.add(new Label(componentId, _T(TextUtils.getDisplayValue(rowModel.getObject().isCanBeUsedByBuildJobs()))));
 			}
 		});
-		columns.add(new AbstractColumn<>(Model.of("Job Authorization")) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Job Authorization"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
@@ -128,9 +130,9 @@ public class GroovyScriptListPage extends AdministrationPage {
 					if (script.getAuthorization() != null)
 						cellItem.add(new Label(componentId, script.getAuthorization()));
 					else
-						cellItem.add(new Label(componentId, "<i>Any job</i>").setEscapeModelStrings(false));
+						cellItem.add(new Label(componentId, "<i>" + _T("Any job") + "</i>").setEscapeModelStrings(false));
 				} else {
-					cellItem.add(new Label(componentId, "<i>N/A</i>").setEscapeModelStrings(false));
+					cellItem.add(new Label(componentId, "<i>" + _T("N/A") + "</i>").setEscapeModelStrings(false));
 				}
 			}
 		});
@@ -173,7 +175,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this script?"));
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to delete this script?")));
 					}
 
 					@Override
@@ -224,7 +226,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 	
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Groovy Scripts");
+		return new Label(componentId, _T("Groovy Scripts"));
 	}
 	
 }

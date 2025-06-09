@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -70,7 +72,7 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete unused tokens?"));
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to delete unused tokens?")));
 			}
 
 			@Override
@@ -90,7 +92,7 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 		
 		List<IColumn<AgentToken, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<AgentToken, Void>(Model.of("Value")) {
+		columns.add(new AbstractColumn<AgentToken, Void>(Model.of(_T("Value"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<AgentToken>> cellItem, String componentId,

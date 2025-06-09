@@ -2,12 +2,12 @@
 	<div class="card">
 		<div class="card-body">
 			<wicket:enclosure child="leadServer">
-				<div class="alert alert-light-warning mb-5">If enabled, scheduled backup will run on lead server which is <span wicket:id="leadServer"></span> currently</div>
+				<div class="alert alert-light-warning mb-5"><wicket:t>If enabled, scheduled backup will run on lead server which is <span wicket:id="leadServer"></span> currently</wicket:t></div>
 			</wicket:enclosure>
 			<form wicket:id="backupSetting" class="leave-confirm">
 				<div wicket:id="editor" class="mb-4"></div>
 				<input type="submit" class="btn btn-primary dirty-aware mr-1" t:value="Save Settings">
-				<a wicket:id="backupNow" class="btn btn-light-primary">Backup Now</a>
+				<a wicket:id="backupNow" class="btn btn-light-primary"><wicket:t>Backup Now</wicket:t></a>
 			</form>
 		</div>
 	</div>

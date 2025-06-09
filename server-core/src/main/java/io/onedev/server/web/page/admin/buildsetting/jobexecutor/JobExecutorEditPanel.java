@@ -26,6 +26,9 @@ import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
@@ -94,11 +97,11 @@ abstract class JobExecutorEditPanel extends Panel {
 					JobExecutor oldExecutor = executors.get(executorIndex);
 					if (!executor.getName().equals(oldExecutor.getName()) && getExecutor(executor.getName()) != null) {
 						editor.error(new Path(new PathNode.Named("executor"), new PathNode.Named("name")),
-								"This name has already been used by another job executor");
+								_T("This name has already been used by another job executor"));
 					}
 				} else if (getExecutor(executor.getName()) != null) {
 					editor.error(new Path(new PathNode.Named("executor"), new PathNode.Named("name")),
-							"This name has already been used by another job executor");
+							_T("This name has already been used by another job executor"));
 				}
 				
 				if (editor.isValid()) {
@@ -202,7 +205,7 @@ abstract class JobExecutorEditPanel extends Panel {
 			@Override
 			protected TaskResult runTask(TaskLogger logger) {
 				((Testable)bean.getExecutor()).test(testData, logger);
-				return new TaskResult(true, new PlainMessage("Job executor tested successfully"));
+				return new TaskResult(true, new PlainMessage(_T("Job executor tested successfully")));
 			}
 
 		};		

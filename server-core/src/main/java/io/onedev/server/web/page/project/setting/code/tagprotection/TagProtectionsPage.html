@@ -2,9 +2,9 @@
 	<div class="tag-protections">
 		<div class="alert alert-notice bg-white shadow mb-5 text-gray">
 			<wicket:svg href="bulb" class="icon mr-2"></wicket:svg>
-			Define tag protection rules. Rules defined in parent project are considered
+			<wicket:t>Define tag protection rules. Rules defined in parent project are considered
 			to be defined after rules defined here. For a given tag and user, the first
-			matching rule will take effect
+			matching rule will take effect</wicket:t>
 		</div>
 		
 		<div class="body">
@@ -19,7 +19,7 @@
 	<wicket:fragment wicket:id="editNewFrag">
 		<div class="protection card">
 			<div class="card-header">
-				<div class="card-title">Edit Rule</div>
+				<div class="card-title"><wicket:t>Edit Rule</wicket:t></div>
 			</div>
 			<div class="card-body">
 				<div wicket:id="editor"></div>
@@ -30,7 +30,7 @@
 		<div class="card">
 			<div class="card-header">
 				<div class="card-title">
-					<a wicket:id="link" class="d-flex align-items-center add-new"><wicket:svg href="plus-circle-o" class="icon align-middle mr-2"></wicket:svg> <span>Add Rule</span></a>
+					<a wicket:id="link" class="d-flex align-items-center add-new"><wicket:svg href="plus-circle-o" class="icon align-middle mr-2"></wicket:svg> <span><wicket:t>Add Rule</wicket:t></span></a>
 				</div>
 			</div>
 		</div>

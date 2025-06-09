@@ -5,6 +5,9 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.issue.CommitMessageFixPatterns;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -29,7 +32,7 @@ public class CommitMessageFixPatternsPage extends IssueSettingPage {
 				super.onSubmit();
 				getSetting().setCommitMessageFixPatterns(patterns);
 				getSettingManager().saveIssueSetting(getSetting());
-				Session.get().success("Setting updated");
+				Session.get().success(_T("Settings updated"));
 			}
 		};
 		form.add(new FencedFeedbackPanel("feedback", form));
@@ -43,7 +46,7 @@ public class CommitMessageFixPatternsPage extends IssueSettingPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "<span class='text-truncate'>Commit Message Fix Patterns</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-truncate'>" + _T("Commit Message Fix Patterns") + "</span>").setEscapeModelStrings(false);
 	}
 	
 }

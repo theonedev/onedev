@@ -12,6 +12,8 @@
  */
 package io.onedev.server.web.component.select2;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.Collection;
 import java.util.Collections;
 
@@ -52,7 +54,7 @@ public class Select2Choice<T> extends AbstractSelect2Choice<T, T> {
 	protected void onInitialize() {
 		super.onInitialize();
 		if (isRequired())
-			getSettings().setPlaceholder("Select below...");
+			getSettings().setPlaceholder(_T("Select below..."));
 		else
 			getSettings().setPlaceholder("");
 	}

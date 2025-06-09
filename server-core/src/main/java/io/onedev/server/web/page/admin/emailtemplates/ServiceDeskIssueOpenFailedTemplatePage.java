@@ -2,7 +2,9 @@ package io.onedev.server.web.page.admin.emailtemplates;
 
 import static io.onedev.server.model.support.administration.emailtemplates.EmailTemplates.DEFAULT_SERVICE_DESK_ISSUE_OPEN_FAILED;
 import static io.onedev.server.model.support.administration.emailtemplates.EmailTemplates.PROP_SERVICE_DESK_ISSUE_OPEN_FAILED;
+import static io.onedev.server.web.translation.Translation._T;
 
+import java.text.MessageFormat;
 import java.util.Map;
 
 import org.apache.wicket.Component;
@@ -29,19 +31,18 @@ public class ServiceDeskIssueOpenFailedTemplatePage extends AbstractTemplatePage
 
 	@Override
 	protected String getHelpText() {
-		return "A " + GROOVY_TEMPLATE_LINK + " used as body of feedback email when failed to open issue " +
-				"via service desk";
+		return MessageFormat.format(_T("A {0} used as body of feedback email when failed to open issue via service desk"), GROOVY_TEMPLATE_LINK);
 	}
 
 	@Override
 	protected Map<String, String> getVariableHelp() {
 		return CollectionUtils.newLinkedHashMap("exception", 
-				"represents the exception encountered when open issue via service desk");
+				_T("represents the exception encountered when open issue via service desk"));
 	}
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Service Desk Issue Open Failed Template");
+		return new Label(componentId, _T("Service Desk Issue Open Failed Template"));
 	}
 
 }

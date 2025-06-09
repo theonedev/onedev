@@ -27,6 +27,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -217,7 +220,7 @@ public class AgentListPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Agents");
+		return new Label(componentId, _T("Agents"));
 	}
 
 }

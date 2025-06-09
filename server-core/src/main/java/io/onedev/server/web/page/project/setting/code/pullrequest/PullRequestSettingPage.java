@@ -10,6 +10,9 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.basic.Label;
@@ -36,7 +39,7 @@ public class PullRequestSettingPage extends ProjectSettingPage {
 				getProject().setPullRequestSetting(bean);
 				OneDev.getInstance(ProjectManager.class).update(getProject());
 				setResponsePage(PullRequestSettingPage.class, PullRequestSettingPage.paramsOf(getProject()));
-				Session.get().success("Pull request settings updated");
+				Session.get().success(_T("Pull request settings updated"));
 			}
 			
 		};
@@ -47,7 +50,7 @@ public class PullRequestSettingPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "<span class='text-truncate'>Pull Request Settings</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-truncate'>" + _T("Pull Request Settings") + "</span>").setEscapeModelStrings(false);
 	}
 
 	@Override

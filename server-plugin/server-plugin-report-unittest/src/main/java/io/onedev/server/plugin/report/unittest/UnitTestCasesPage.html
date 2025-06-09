@@ -28,7 +28,7 @@
 		<div wicket:id="summary" class="summary"></div>
 		<wicket:enclosure child="longestDurationFirst">
 		<div class="d-flex align-items-center mb-2">
-			<span class="ml-auto mr-3 font-weight-bold">Longest Duration First</span>
+			<span class="ml-auto mr-3 font-weight-bold"><wicket:t>Longest Duration First</wicket:t></span>
 			<span class="switch switch-sm switch-primary">
 				<label>
 					<input wicket:id="longestDurationFirst" type="checkbox"> 
@@ -67,7 +67,7 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="invalidFrag">
 		<div class="alert alert-notice alert-light-warning">
-			Report format changed. You may re-run this build to generate the report in new format
+			<wicket:t>Report format changed. You may re-run this build to generate the report in new format</wicket:t>
 		</div>
 	</wicket:fragment>
 </wicket:extend>

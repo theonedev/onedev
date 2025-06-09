@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.ssosetting;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -107,7 +109,7 @@ public class SsoConnectorListPage extends AdministrationPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<SsoConnector, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<SsoConnector, Void>(Model.of(_T("Name"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<SsoConnector>> cellItem, String componentId, IModel<SsoConnector> rowModel) {
@@ -115,7 +117,7 @@ public class SsoConnectorListPage extends AdministrationPage {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<SsoConnector, Void>(Model.of("Callback URL")) {
+		columns.add(new AbstractColumn<SsoConnector, Void>(Model.of(_T("Callback URL"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<SsoConnector>> cellItem, String componentId, IModel<SsoConnector> rowModel) {
@@ -165,7 +167,7 @@ public class SsoConnectorListPage extends AdministrationPage {
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this connector?"));
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to delete this connector?")));
 					}
 
 					@Override
@@ -231,7 +233,7 @@ public class SsoConnectorListPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "<span class='text-truncate'>Single Sign On</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-truncate'>" + _T("Single Sign On") + "</span>").setEscapeModelStrings(false);
 	}
 	
 }

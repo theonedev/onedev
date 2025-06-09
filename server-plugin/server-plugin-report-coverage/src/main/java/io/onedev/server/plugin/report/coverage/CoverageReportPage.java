@@ -1,30 +1,17 @@
 package io.onedev.server.plugin.report.coverage;
 
-import com.google.common.collect.Lists;
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.exception.ExceptionUtils;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.Build;
-import io.onedev.commons.utils.match.Matcher;
-import io.onedev.commons.utils.match.StringMatcher;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.PatternSetAssistBehavior;
-import io.onedev.server.web.component.NoRecordsPlaceholder;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
-import io.onedev.server.web.util.SuggestionUtils;
+import static io.onedev.server.web.translation.Translation._T;
+import static java.util.stream.Collectors.toList;
+
+import java.io.File;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.Callable;
+
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.SerializationException;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -51,15 +38,33 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
-import javax.annotation.Nullable;
-import java.io.File;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.Callable;
+import com.google.common.collect.Lists;
 
-import static java.util.stream.Collectors.toList;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.StringMatcher;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.exception.ExceptionUtils;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.model.Build;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.behavior.PatternSetAssistBehavior;
+import io.onedev.server.web.component.NoRecordsPlaceholder;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
+import io.onedev.server.web.util.SuggestionUtils;
+import io.onedev.server.web.util.TextUtils;
 
 public class CoverageReportPage extends BuildReportPage {
 
@@ -127,7 +132,7 @@ public class CoverageReportPage extends BuildReportPage {
 			if (getGroupCoverage() != null)
 				fragment.add(new Label("coverageTitle", getGroupCoverage().getName()));
 			else
-				fragment.add(new Label("coverageTitle", "Overall"));
+				fragment.add(new Label("coverageTitle", _T("Overall")));
 
 			fragment.add(new CoveragePanel<>("coverages", new LoadableDetachableModel<>() {
 
@@ -146,9 +151,9 @@ public class CoverageReportPage extends BuildReportPage {
 				@Override
 				public String getObject() {
 					if (getGroupCoverage() != null)
-						return "Files";
+						return _T("Files");
 					else
-						return "Groups";
+						return _T("Groups");
 				}
 
 			}));
@@ -177,9 +182,9 @@ public class CoverageReportPage extends BuildReportPage {
 				@Override
 				public String getObject() {
 					if (getGroupCoverage() != null)
-						return "Filter files...";
+						return _T("Filter files...");
 					else
-						return "Filter groups...";
+						return _T("Filter groups...");
 				}
 
 			}));
@@ -199,8 +204,8 @@ public class CoverageReportPage extends BuildReportPage {
 				@Override
 				protected List<String> getHints(TerminalExpect terminalExpect) {
 					return Lists.newArrayList(
-							"Name containing spaces or starting with dash needs to be quoted",
-							"Use '*' or '?' for wildcard match. Prefix with '-' to exclude"
+							_T("Name containing spaces or starting with dash needs to be quoted"),
+							_T("Use '*' or '?' for wildcard match. Prefix with '-' to exclude")
 					);
 				}
 
@@ -226,7 +231,7 @@ public class CoverageReportPage extends BuildReportPage {
 
 						@Override
 						public String getLabel() {
-							return orderBy.getDisplayName();
+							return TextUtils.getDisplayValue(orderBy);
 						}
 
 						@Override
@@ -368,7 +373,7 @@ public class CoverageReportPage extends BuildReportPage {
 				filterPatterns = com.google.common.base.Optional.of(PatternSet.parse(state.filter.toLowerCase()));
 			} catch (Exception e) {
 				filterPatterns = null;
-				form.error("Malformed filter");
+				form.error(_T("Malformed filter"));
 			}
 		} else {
 			filterPatterns = com.google.common.base.Optional.absent();

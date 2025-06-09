@@ -94,6 +94,13 @@ public class Translation extends TranslationResourceBundle {
 		m.put("week:Tue", "Tue");
 		m.put("week:Wed", "Wed");
 		m.put("issue:Number", "Number");
+		m.put("link:Multiple", "Multiple");
+		m.put("cluster:lead", "lead");
+		m.put("widget:Tabs", "Tabs");
+		m.put("severity:CRITICAL", "Critical");
+		m.put("severity:HIGH", "High");
+		m.put("severity:MEDIUM", "Medium");
+		m.put("severity:LOW", "Low");
 	}
 
 	@Override

@@ -17,6 +17,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -54,7 +56,7 @@ public class DatabaseBackupPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				OneDev.getInstance(SettingManager.class).saveBackupSetting(backupSettingHolder.getBackupSetting());
-				getSession().success("Backup settings updated");
+				getSession().success(_T("Backup settings updated"));
 				
 				setResponsePage(DatabaseBackupPage.class);
 			}
@@ -95,7 +97,7 @@ public class DatabaseBackupPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Database Backup");
+		return new Label(componentId, _T("Database Backup"));
 	}
 
 }

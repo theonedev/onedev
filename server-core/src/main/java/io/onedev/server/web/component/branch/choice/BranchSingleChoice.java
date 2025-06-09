@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.branch.choice;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -22,9 +24,9 @@ public class BranchSingleChoice extends Select2Choice<String> {
 		
 		getSettings().setAllowClear(!isRequired());
 		if (isRequired())
-			getSettings().setPlaceholder("Choose branch...");
+			getSettings().setPlaceholder(_T("Choose branch..."));
 		else
-			getSettings().setPlaceholder("Not specified");
+			getSettings().setPlaceholder(_T("Not specified"));
 		getSettings().setFormatResult("onedev.server.branchChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.branchChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.branchChoiceFormatter.escapeMarkup");

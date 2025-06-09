@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.pullrequest.choice;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
@@ -18,9 +20,9 @@ public class PullRequestSingleChoice extends Select2Choice<PullRequest> {
 		super.onInitialize();
 		getSettings().setAllowClear(!isRequired());
 		if (isRequired())
-			getSettings().setPlaceholder("Choose pull request...");
+			getSettings().setPlaceholder(_T("Choose pull request..."));
 		else
-			getSettings().setPlaceholder("Not specified");
+			getSettings().setPlaceholder(_T("Not specified"));
 		getSettings().setFormatResult("onedev.server.pullRequestChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.pullRequestChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.pullRequestChoiceFormatter.escapeMarkup");

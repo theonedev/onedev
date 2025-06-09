@@ -1,16 +1,19 @@
 package io.onedev.server.model.support.issue.transitionspec;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.IssueQuery;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.IssueQuery;
-import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable(order=400, name="Build is successful")
@@ -94,14 +97,14 @@ public class BuildSuccessfulSpec extends AutoSpec {
 	public String getTriggerDescription() {
 		if (jobNames != null) {
 			if (branches != null)
-				return "build is successful for jobs '" + jobNames + "' on branches '" + branches + "'";
+				return MessageFormat.format(_T("build is successful for jobs \"{0}\" on branches \"{1}\""), jobNames, branches);
 			else
-				return "build is successful for jobs '" + jobNames + "' on any branch";
+				return MessageFormat.format(_T("build is successful for jobs \"{0}\" on any branch"), jobNames);
 		} else {
 			if (branches != null)
-				return "build is successful for any job on branches '" + branches + "'";
+				return MessageFormat.format(_T("build is successful for any job on branches \"{0}\""), branches);
 			else
-				return "build is successful for any job and branch";
+				return _T("build is successful for any job and branch");
 		}
 	}
 	

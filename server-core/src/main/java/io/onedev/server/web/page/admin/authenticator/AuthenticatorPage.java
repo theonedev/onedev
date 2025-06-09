@@ -26,6 +26,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 
 public class AuthenticatorPage extends AdministrationPage {
@@ -52,10 +54,16 @@ public class AuthenticatorPage extends AdministrationPage {
 				super.onSubmit();
 				
 				OneDev.getInstance(SettingManager.class).saveAuthenticator(bean.getAuthenticator());
-				getSession().success("External authenticator settings saved");
+				getSession().success(_T("External authenticator settings saved"));
 			}
 			
 		};
+		var fullNameLabel = _T("Full Name");
+		var emailLabel = _T("Email");
+		var groupsLabel = _T("Groups");
+		var sshKeysLabel = _T("Number of SSH Keys");
+		var testSuccessfulLabel = _T("Test successful: authentication passed");
+		var testSuccessfulWithInfoLabel = _T("Test successful: authentication passed with below information retrieved:");
 		TaskButton testButton = new TaskButton("test") {
 
 			@Override
@@ -136,31 +144,29 @@ public class AuthenticatorPage extends AdministrationPage {
 						new UsernamePasswordToken(token.getUserName(), token.getPassword()));
 				StringBuilder retrievedInfoBuilder = new StringBuilder();
 				if (authenticated.getFullName() != null) {
-					retrievedInfoBuilder.append("Full Name: ")
+					retrievedInfoBuilder.append(fullNameLabel + ": ")
 							.append(authenticated.getFullName())
 							.append("<br>");
 				}
 				if (authenticated.getEmail() != null) {
-					retrievedInfoBuilder.append("Email: ")
+					retrievedInfoBuilder.append(emailLabel + ": ")
 							.append(authenticated.getEmail())
 							.append("<br>");
 				}
 				if (authenticated.getGroupNames() != null) {
-					retrievedInfoBuilder.append("Groups: ")
+					retrievedInfoBuilder.append(groupsLabel + ": ")
 							.append(Joiner.on(", ").join(authenticated.getGroupNames()))
 							.append("<br>");
 				}
 				if (authenticated.getSshKeys() != null) {
-					retrievedInfoBuilder.append("Number of SSH Keys: ").append(authenticated.getSshKeys().size())
+					retrievedInfoBuilder.append(sshKeysLabel + ": ").append(authenticated.getSshKeys().size())
 							.append("<br>");
 				}
-				StringBuilder messageBuilder = 
-						new StringBuilder("Test successful: authentication passed");
-				if (retrievedInfoBuilder.length() != 0) {
-					messageBuilder.append(" with below information retrieved:<br>")
-							.append(retrievedInfoBuilder);
-				} 
-				return new TaskResult(true, new HtmlMessgae(messageBuilder.toString()));
+				
+				if (retrievedInfoBuilder.length() != 0) 
+					return new TaskResult(true, new HtmlMessgae(testSuccessfulWithInfoLabel + "<br>" + retrievedInfoBuilder));
+				else 
+					return new TaskResult(true, new HtmlMessgae(testSuccessfulLabel));
 			}
 
 		};
@@ -189,7 +195,7 @@ public class AuthenticatorPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "External Authenticator");
+		return new Label(componentId, _T("External Authenticator"));
 	}
 
 }

@@ -20,6 +20,8 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.*;
 
 public class AgentOverviewPage extends AgentDetailPage {
@@ -42,10 +44,10 @@ public class AgentOverviewPage extends AgentDetailPage {
 			public void onClick() {
 				getAgentManager().restart(getAgent());
 				setResponsePage(AgentOverviewPage.class, AgentOverviewPage.paramsOf(getAgent()));
-				Session.get().success("Restart command issued");
+				Session.get().success(_T("Restart command issued"));
 			}
 			
-		}.add(new ConfirmClickModifier("Do you really want to restart this agent?")));
+		}.add(new ConfirmClickModifier(_T("Do you really want to restart this agent?"))));
 		
 		add(new Link<Void>("remove") {
 
@@ -53,10 +55,10 @@ public class AgentOverviewPage extends AgentDetailPage {
 			public void onClick() {
 				getAgentManager().delete(getAgent());
 				setResponsePage(AgentListPage.class);
-				Session.get().success("Agent removed");
+				Session.get().success(_T("Agent removed"));
 			}
 
-		}.add(new ConfirmClickModifier("Do you really want to remove this agent?")));
+		}.add(new ConfirmClickModifier(_T("Do you really want to remove this agent?"))));
 		
 		add(new Link<Void>("pauseOrResume") {
 
@@ -67,7 +69,7 @@ public class AgentOverviewPage extends AgentDetailPage {
 
 					@Override
 					public String getObject() {
-						return getAgent().isPaused()?"Resume":"Pause";
+						return getAgent().isPaused()?_T("Resume"):_T("Pause");
 					}
 					
 				}));
@@ -112,7 +114,7 @@ public class AgentOverviewPage extends AgentDetailPage {
 				token.setValue(UUID.randomUUID().toString());
 				OneDev.getInstance(AgentTokenManager.class).createOrUpdate(token);
 				OneDev.getInstance(AgentManager.class).disconnect(getAgent().getId());
-				Session.get().success("Access token regenerated, make sure to update the token at agent side");
+				Session.get().success(_T("Access token regenerated, make sure to update the token at agent side"));
 				setResponsePage(AgentOverviewPage.class, paramsOf(getAgent()));
 			}
 		});
@@ -133,7 +135,7 @@ public class AgentOverviewPage extends AgentDetailPage {
 						attributeMap.put(attribute.getName(), attribute.getValue());
 					OneDev.getInstance(AgentAttributeManager.class).syncAttributes(getAgent(), attributeMap);
 					getAgentManager().attributesUpdated(getAgent());
-					Session.get().success("Attributes saved");
+					Session.get().success(_T("Attributes saved"));
 				}
 				
 			};

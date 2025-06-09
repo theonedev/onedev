@@ -31,6 +31,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.MetricIndicator;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.translation.Translation;
 import io.onedev.server.web.util.TextUtils;
@@ -125,21 +126,21 @@ public class ExtractTranslationKeys extends CommandHandler {
 										}
 									}
 									for (var method : clazz.getDeclaredMethods()) {
-										var annotation = method.getAnnotation(Editable.class);
-										if (annotation != null) {
+										editable = method.getAnnotation(Editable.class);
+										if (editable != null) {
 											extractedTranslationKeys.add(EditableUtils.getDisplayName(method));
 											var group = EditableUtils.getGroup(method);
 											if (group != null)
 												extractedTranslationKeys.add(group);
-											var description = annotation.description();
+											var description = editable.description();
 											if (description.length() != 0) {
 												extractedTranslationKeys.add(description);
 											}
-											var placeholder = annotation.placeholder();
+											var placeholder = editable.placeholder();
 											if (placeholder.length() != 0) {
 												extractedTranslationKeys.add(placeholder);
 											}
-											var rootPlaceholder = annotation.rootPlaceholder();
+											var rootPlaceholder = editable.rootPlaceholder();
 											if (rootPlaceholder.length() != 0) {
 												extractedTranslationKeys.add(rootPlaceholder);
 											}
@@ -155,6 +156,13 @@ public class ExtractTranslationKeys extends CommandHandler {
 										var size = method.getAnnotation(Size.class);
 										if (size != null && size.message().length() != 0) {
 											extractedTranslationKeys.add(size.message());
+										}
+										var metricIndicator = method.getAnnotation(MetricIndicator.class);
+										if (metricIndicator != null) {
+											if (metricIndicator.name().length() != 0)
+												extractedTranslationKeys.add(metricIndicator.name());
+											if (metricIndicator.group().length() != 0)
+												extractedTranslationKeys.add(metricIndicator.group());
 										}
 									}
 									if (clazz.isEnum()) {

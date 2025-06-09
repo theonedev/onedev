@@ -1,5 +1,9 @@
 package io.onedev.server.model.support.issue.transitionspec;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+
 import javax.validation.constraints.Min;
 
 import io.onedev.server.annotation.Editable;
@@ -23,7 +27,7 @@ public class NoActivitySpec extends AutoSpec {
 	
 	@Override
 	public String getTriggerDescription() {
-		return "no activity for " + days + " days"; 
+		return MessageFormat.format(_T("no activity for {0} days"), days); 
 	}
 	
 }

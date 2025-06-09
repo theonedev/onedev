@@ -2,17 +2,17 @@
 	<div class="card service-desk-setting">
 		<div class="card-body">
 			<div class="alert alert-light alert-notice">
-			<p>The service desk feature enables user to create issues by sending emails to OneDev. Issues can be discussed over 
-			email completely, without the need of logging to OneDev. 
-			<p>System email address defined in mail setting should be 
+			<p><wicket:t>The service desk feature enables user to create issues by sending emails to OneDev. Issues can be discussed over 
+			email completely, without the need of logging to OneDev.</wicket:t>
+			<p><wicket:t>System email address defined in mail setting should be 
 			used as recipient of such email, and project name may be appended to this address using to indicate where to create issues. 
 			For instance, if system email address 
 			is specified as <tt>support@example.com</tt>, sending email to <tt>support+myproject@example.com</tt> will create 
 			issue in <tt>myproject</tt>. If project name is not appended, OneDev will look up the project using 
-			project designation information below
-			<p class="text-info mb-0"> <b>NOTE: </b> Service desk only takes effect if <a wicket:id="mailService">mail service</a> is defined and its 
+			project designation information below</wicket:t>
+			<p class="text-info mb-0"> <wicket:t><b>NOTE: </b> Service desk only takes effect if <a wicket:id="mailService">mail service</a> is defined and its 
 			<tt>check incoming email</tt> option is enabled. Also <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>sub addressing</a>
-			needs to be enabled for the system email address. Check <a href="https://medium.com/p/e56d62c27e57" target='_blank'>this tutorial</a> for details
+			needs to be enabled for the system email address. Check <a href="https://medium.com/p/e56d62c27e57" target='_blank'>this tutorial</a> for details</wicket:t>
 			</div>
 			<form wicket:id="form" class="leave-confirm">
 				<div wicket:id="editor" class="mb-4"></div>

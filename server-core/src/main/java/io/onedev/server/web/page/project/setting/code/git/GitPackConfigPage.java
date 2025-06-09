@@ -12,6 +12,9 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.basic.Label;
@@ -58,7 +61,7 @@ public class GitPackConfigPage extends ProjectSettingPage {
 				}
 				
 				setResponsePage(GitPackConfigPage.class, GitPackConfigPage.paramsOf(getProject()));
-				Session.get().success("Git pack config updated");
+				Session.get().success(_T("Git pack config updated"));
 			}
 			
 		};
@@ -69,7 +72,7 @@ public class GitPackConfigPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "<span class='text-truncate'>Git Pack Config</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-truncate'>" + _T("Git Pack Config") + "</span>").setEscapeModelStrings(false);
 	}
 
 	@Override

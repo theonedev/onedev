@@ -1,18 +1,18 @@
 <wicket:panel>
 	<div wicket:id="term" class="form-group">
-		<label class="control-label">Search For <span class="text-danger">*</span></label>
+		<label class="control-label"><wicket:t>Search For</wicket:t> <span class="text-danger">*</span></label>
 		<input wicket:id="term" name="searchFor" class="form-control" type="text">
 		<div wicket:id="feedback" class="mt-2"></div>
 	</div>
 	<div class="form-group">
 		<div class="checkbox-inline">
-			<label class="checkbox"><input wicket:id="regex" type="checkbox"> Regular Expression</label>
-			<label class="checkbox"><input wicket:id="wholeWord" type="checkbox"> Whole Word</label>
-			<label class="checkbox"><input wicket:id="caseSensitive" type="checkbox"> Case Sensitive</label>
+			<label class="checkbox"><input wicket:id="regex" type="checkbox"> <wicket:t>Regular Expression</wicket:t></label>
+			<label class="checkbox"><input wicket:id="wholeWord" type="checkbox"> <wicket:t>Whole Word</wicket:t></label>
+			<label class="checkbox"><input wicket:id="caseSensitive" type="checkbox"> <wicket:t>Case Sensitive</wicket:t></label>
 		</div>
 	</div>
 	<div class="form-group">
-		<label class="control-label">File Name Patterns (separated by comma)</label>
+		<label class="control-label"><wicket:t>File Name Patterns (separated by comma)</wicket:t></label>
 		<input wicket:id="fileNames" class="form-control" type="text" t:placeholder="File name patterns such as *.java, *.c">
 	</div>
 </wicket:panel>

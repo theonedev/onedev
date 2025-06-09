@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.systemsetting;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
@@ -40,7 +42,7 @@ public class SystemSettingPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				OneDev.getInstance(SettingManager.class).saveSystemSetting(systemSetting);
-				getSession().success("System settings have been saved");
+				getSession().success(_T("System settings have been saved"));
 				
 				setResponsePage(SystemSettingPage.class);
 			}
@@ -63,7 +65,7 @@ public class SystemSettingPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "System Settings");
+		return new Label(componentId, _T("System Settings"));
 	}
 
 }

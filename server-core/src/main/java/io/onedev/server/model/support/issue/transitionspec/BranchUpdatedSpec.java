@@ -1,14 +1,17 @@
 package io.onedev.server.model.support.issue.transitionspec;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.IssueQuery;
 import io.onedev.server.annotation.Patterns;
+import io.onedev.server.model.Project;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable(order=500, name="Code is committed")
@@ -59,9 +62,9 @@ public class BranchUpdatedSpec extends AutoSpec {
 	@Override
 	public String getTriggerDescription() {
 		if (branches != null)
-			return "code is committed to branches '" + branches + "'";
+			return MessageFormat.format(_T("code is committed to branches \"{0}\""), branches);
 		else
-			return "code is committed to any branch";
+			return _T("code is committed to any branch");
 	}
 	
 }

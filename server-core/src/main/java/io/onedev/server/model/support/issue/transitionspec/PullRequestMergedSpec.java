@@ -1,5 +1,9 @@
 package io.onedev.server.model.support.issue.transitionspec;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+
 import io.onedev.server.annotation.Editable;
 
 @Editable(order=250, name="Pull request is merged")
@@ -10,9 +14,9 @@ public class PullRequestMergedSpec extends PullRequestSpec {
 	@Override
 	public String getTriggerDescription() {
 		if (getBranches() != null)
-			return "pull request to branches '" + getBranches() + "' is merged";
+			return MessageFormat.format(_T("pull request to branches \"{0}\" is merged"), getBranches());
 		else
-			return "pull request to any branch is merged";
+			return _T("pull request to any branch is merged");
 	}
 
 }

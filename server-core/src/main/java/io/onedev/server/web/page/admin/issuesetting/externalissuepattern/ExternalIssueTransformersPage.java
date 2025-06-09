@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.issuesetting.externalissuepattern;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -32,7 +34,7 @@ public class ExternalIssueTransformersPage extends IssueSettingPage {
 				super.onSubmit();
 				getSetting().setExternalIssueTransformers(transformers);
 				getSettingManager().saveIssueSetting(getSetting());
-				Session.get().success("Setting updated");
+				Session.get().success(_T("Settings updated"));
 			}
 		};
 		form.add(new FencedFeedbackPanel("feedback", form));
@@ -46,7 +48,7 @@ public class ExternalIssueTransformersPage extends IssueSettingPage {
 
     @Override
     protected Component newTopbarTitle(String componentId) {
-        return new Label(componentId, "External Issue Transformers");
+        return new Label(componentId, _T("External Issue Transformers"));
     }
 
 } 

@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static io.onedev.server.web.util.StatsGroup.BY_DAY;
 import static java.util.Comparator.comparingInt;
 
@@ -93,7 +94,7 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 			parsedQuery = BuildMetricQuery.parse(getProject(), query);
 		} catch (Exception e) {
 			parsedQuery = null;
-			form.error("Malformed query");
+			form.error(_T("Malformed query"));
 		}
 	}
 	
@@ -234,11 +235,11 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 							var yAxisValues = normalizedData.stream()
 									.map(it->it.getRight().get(finalLineIndex))
 									.collect(Collectors.toList());
-							lines.add(new Line(name, yAxisValues, indicator.color(), null, null));
+							lines.add(new Line(_T(name), yAxisValues, indicator.color(), null, null));
 							lineIndex++;
 						}
 
-						serieses.add(new LineSeries(groupName, xAxisValues, lines, valueFormatter, minValue, maxValue));
+						serieses.add(new LineSeries(_T(groupName), xAxisValues, lines, valueFormatter, minValue, maxValue));
 					}
 				}
 				return serieses;

@@ -1,34 +1,19 @@
 package io.onedev.server.plugin.report.problem;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.LockUtils;
-import io.onedev.commons.utils.PlanarRange;
-import io.onedev.commons.utils.match.Matcher;
-import io.onedev.commons.utils.match.PathMatcher;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.codequality.BlobTarget;
-import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.codequality.CodeProblem.Severity;
-import io.onedev.server.codequality.ProblemTarget;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.exception.ExceptionUtils;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.Build;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.PatternSetAssistBehavior;
-import io.onedev.server.web.component.NoRecordsPlaceholder;
-import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderer;
-import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
-import io.onedev.server.web.util.SuggestionUtils;
+import static io.onedev.server.web.translation.Translation._T;
+import static java.util.stream.Collectors.toList;
+
+import java.io.File;
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.Callable;
+
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.SerializationException;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -56,16 +41,36 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
-import javax.annotation.Nullable;
-import java.io.File;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.concurrent.Callable;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 
-import static java.util.stream.Collectors.toList;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.PlanarRange;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.codequality.BlobTarget;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.CodeProblem.Severity;
+import io.onedev.server.codequality.ProblemTarget;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.exception.ExceptionUtils;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.model.Build;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.behavior.PatternSetAssistBehavior;
+import io.onedev.server.web.component.NoRecordsPlaceholder;
+import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
+import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
+import io.onedev.server.web.util.SuggestionUtils;
 
 public class ProblemReportPage extends BuildReportPage {
 
@@ -141,8 +146,8 @@ public class ProblemReportPage extends BuildReportPage {
 				@Override
 				protected List<String> getHints(TerminalExpect terminalExpect) {
 					return Lists.newArrayList(
-							"Target containing spaces or starting with dash needs to be quoted",
-							"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
+							_T("Target containing spaces or starting with dash needs to be quoted"),
+							_T("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude")
 					);
 				}
 
@@ -257,7 +262,7 @@ public class ProblemReportPage extends BuildReportPage {
 							.setVisible(groupKey instanceof BlobTarget.GroupKey));
 
 					item.add(new Label("tooManyProblems",
-							"Too many problems, displaying first " + MAX_PROBLEMS_TO_DISPLAY) {
+							MessageFormat.format(_T("Too many problems, displaying first {0}"), MAX_PROBLEMS_TO_DISPLAY)) {
 
 						@Override
 						protected void onConfigure() {
@@ -310,7 +315,7 @@ public class ProblemReportPage extends BuildReportPage {
 						@Override
 						protected void populateItem(ListItem<CodeProblem> item) {
 							CodeProblem problem = item.getModelObject();
-							var severityLabel = new Label("severity", problem.getSeverity().name());
+							var severityLabel = new Label("severity", _T("severity:" + problem.getSeverity().name()));
 							item.add(severityLabel);
 							if (problem.getSeverity() == Severity.CRITICAL || problem.getSeverity() == Severity.HIGH)
 								severityLabel.add(AttributeAppender.append("class", "badge-danger"));
@@ -400,7 +405,7 @@ public class ProblemReportPage extends BuildReportPage {
 				targetNamePatterns = Optional.of(PatternSet.parse(keyName.toLowerCase()));
 			} catch (Exception e) {
 				keyName = null;
-				form.error("Malformed filter");
+				form.error(_T("Malformed filter"));
 			}
 		} else {
 			targetNamePatterns = Optional.absent();
@@ -414,7 +419,7 @@ public class ProblemReportPage extends BuildReportPage {
 	}
 	
 	protected String describe(PlanarRange range) {
-		return "Line: " + (range.getFromRow()+1) + " - " + (range.getToRow()+1);
+		return _T("Line: ") + (range.getFromRow()+1) + " - " + (range.getToRow()+1);
 	}
 	
 	public static PageParameters paramsOf(Build build, String reportName, @Nullable String file) {

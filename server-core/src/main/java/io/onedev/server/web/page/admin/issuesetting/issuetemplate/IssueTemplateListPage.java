@@ -33,6 +33,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.unbescape.html.HtmlEscape;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,7 +102,7 @@ public class IssueTemplateListPage extends IssueSettingPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<IssueTemplate, Void>(Model.of("Applicable Issues")) {
+		columns.add(new AbstractColumn<IssueTemplate, Void>(Model.of(_T("Applicable Issues"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<IssueTemplate>> cellItem, String componentId, IModel<IssueTemplate> rowModel) {
@@ -151,7 +153,7 @@ public class IssueTemplateListPage extends IssueSettingPage {
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this template?"));
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to delete this template?")));
 					}
 
 					@Override
@@ -208,7 +210,7 @@ public class IssueTemplateListPage extends IssueSettingPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "<span class='text-truncate'>Issue Description Templates</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-truncate'>" + _T("Issue Description Templates") + "</span>").setEscapeModelStrings(false);
 	}
 	
 }

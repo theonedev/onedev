@@ -1,11 +1,33 @@
 package io.onedev.server.web.page.admin.mailservice;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.UUID;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.mail.MessagingException;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.visit.IVisitor;
+
 import com.google.common.collect.Sets;
+
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.SubscriptionRequired;
-import io.onedev.server.mail.MailManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.mail.MailManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ParsedEmailAddress;
@@ -19,22 +41,6 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.util.WicketUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.visit.IVisitor;
-
-import javax.mail.MessagingException;
-import java.io.Serializable;
-import java.util.UUID;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class MailServicePage extends AdministrationPage {
 	
@@ -62,7 +68,7 @@ public class MailServicePage extends AdministrationPage {
 				super.onSubmit();
 				
 				getSettingManager().saveMailService(bean.getMailService());
-				getSession().success("Mail service settings saved");
+				getSession().success(_T("Mail service settings saved"));
 			}
 
 			@Override
@@ -77,6 +83,13 @@ public class MailServicePage extends AdministrationPage {
 			}
 		};
 		
+		var sendingMailText = _T("Sending test mail to {0}...");
+		var waitingMailText = _T("Waiting for test mail to come back...");
+		var receivedMailText = _T("Received test mail");
+		var mailSentText = _T("Test mail has been sent to {0}, please check your mail box");
+		var primaryMailNotSpecifiedText = _T("Primary email address of your account is not specified yet");
+		var mailServiceWorkingText = _T("Great, your mail service configuration is working");
+
 		TaskButton testButton = new TaskButton("test") {
 
 			@Override
@@ -126,13 +139,13 @@ public class MailServicePage extends AdministrationPage {
 
 						var systemAddress = ParsedEmailAddress.parse(mailService.getSystemAddress());
 						String subAddressed = systemAddress.getSubaddress(MailManager.TEST_SUB_ADDRESS);
-						logger.log("Sending test mail to " + subAddressed + "...");
+						logger.log(MessageFormat.format(sendingMailText, subAddressed));
 						mailService.sendMail(Sets.newHashSet(subAddressed), Sets.newHashSet(), 
 								Sets.newHashSet(), uuid, "[Test] Test Email From OneDev", 
 								"This is a test email from OneDev", null, 
 								null, null, true);
 
-						logger.log("Waiting for test mail to come back...");
+						logger.log(waitingMailText);
 
 						try {
 							futureRef.get().get();
@@ -144,9 +157,9 @@ public class MailServicePage extends AdministrationPage {
 							throw new RuntimeException(e);
 						}
 
-						logger.log("Received test mail");
+						logger.log(receivedMailText);
 
-						return new TaskResult(true, new PlainMessage("Great, your mail service configuration is working"));
+						return new TaskResult(true, new PlainMessage(mailServiceWorkingText));
 					} else {
 						var emailAddress = SecurityUtils.getAuthUser().getPrimaryEmailAddress();
 						if (emailAddress != null) {
@@ -154,9 +167,9 @@ public class MailServicePage extends AdministrationPage {
 							mailService.sendMail(Sets.newHashSet(emailAddress.getValue()),
 									Sets.newHashSet(), Sets.newHashSet(), "[Test] Test Email From OneDev",
 									body, body, null, null, null, true);
-							return new TaskResult(true, new PlainMessage("Test mail has been sent to " + emailAddress.getValue() + ", please check your mail box"));
+							return new TaskResult(true, new PlainMessage(MessageFormat.format(mailSentText, emailAddress.getValue())));
 						} else {
-							return new TaskResult(false, new PlainMessage("Primary email address of your account is not specified yet"));
+							return new TaskResult(false, new PlainMessage(primaryMailNotSpecifiedText));
 						}
 					}
 				});
@@ -188,7 +201,7 @@ public class MailServicePage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Mail Service");
+		return new Label(componentId, _T("Mail Service"));
 	}
 
 }

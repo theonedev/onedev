@@ -2,7 +2,7 @@
 	<div class="card gpg-trusted-keys">
 		<div class="card-body">
 			<div class="alert alert-light alert-notice mb-4">
-				Add GPG public keys to be trusted here. Commits signed with trusted keys will be shown as verified. 
+				<wicket:t>Add GPG public keys to be trusted here. Commits signed with trusted keys will be shown as verified.</wicket:t>
 			</div>
 			<a wicket:id="newKey" class="btn btn-primary btn-icon mb-4" t:data-tippy-content="Add GPG key"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 			<table wicket:id="keys" class="table table-hover"></table>
@@ -14,7 +14,7 @@
 	<wicket:fragment wicket:id="addKeyFrag">
 		<div class="add-gpg-trusted-key">
 			<div class="modal-header">
-				<h5 class="modal-title">Add a GPG Public Key</h5>
+				<h5 class="modal-title"><wicket:t>Add a GPG Public Key</wicket:t></h5>
 				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 			</div>
 			<form wicket:id="form">
@@ -23,7 +23,7 @@
 				</div>
 				<div class="modal-footer">
 					<input wicket:id="add" type="submit" class="btn btn-primary dirty-aware" t:value="Add">
-					<button wicket:id="cancel" type="button" class="btn btn-secondary">Cancel</button>
+					<button wicket:id="cancel" type="button" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></button>
 				</div>
 			</form>
 		</div>

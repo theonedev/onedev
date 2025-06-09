@@ -1,13 +1,11 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.model.Agent;
-import io.onedev.server.web.component.tabbable.PageTab;
-import io.onedev.server.web.component.tabbable.Tab;
-import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.page.admin.AdministrationPage;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -17,8 +15,14 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.model.Agent;
+import io.onedev.server.web.component.tabbable.PageTab;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.page.admin.AdministrationPage;
 
 public abstract class AgentDetailPage extends AdministrationPage {
 
@@ -34,7 +38,7 @@ public abstract class AgentDetailPage extends AdministrationPage {
 		Agent agent = OneDev.getInstance(AgentManager.class).findByName(agentName);
 		
 		if (agent == null) 
-			throw new ExplicitException("Unable to find agent " + agentName);
+			throw new ExplicitException(MessageFormat.format(_T("Unable to find agent {0}"), agentName));
 		
 		Long agentId = agent.getId();
 		
@@ -57,9 +61,9 @@ public abstract class AgentDetailPage extends AdministrationPage {
 		
 		List<Tab> tabs = new ArrayList<>();
 		
-		tabs.add(new PageTab(Model.of("Overview"), AgentOverviewPage.class, AgentOverviewPage.paramsOf(getAgent())));
-		tabs.add(new PageTab(Model.of("Builds"), AgentBuildsPage.class, AgentBuildsPage.paramsOf(getAgent())));
-		tabs.add(new PageTab(Model.of("Log"), AgentLogPage.class, AgentLogPage.paramsOf(getAgent())));
+		tabs.add(new PageTab(Model.of(_T("Overview")), AgentOverviewPage.class, AgentOverviewPage.paramsOf(getAgent())));
+		tabs.add(new PageTab(Model.of(_T("Builds")), AgentBuildsPage.class, AgentBuildsPage.paramsOf(getAgent())));
+		tabs.add(new PageTab(Model.of(_T("Log")), AgentLogPage.class, AgentLogPage.paramsOf(getAgent())));
 		
 		add(new Tabbable("agentTabs", tabs).setOutputMarkupId(true));
 	}

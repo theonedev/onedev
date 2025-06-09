@@ -1,5 +1,32 @@
 package io.onedev.server.web.page.admin.issuesetting.transitionspec;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.list.LoopItem;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.data.IDataProvider;
+import org.apache.wicket.markup.repeater.data.ListDataProvider;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
@@ -14,25 +41,6 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.*;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.list.LoopItem;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.markup.repeater.data.IDataProvider;
-import org.apache.wicket.markup.repeater.data.ListDataProvider;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class StateTransitionListPage extends IssueSettingPage {
 
@@ -105,20 +113,20 @@ public class StateTransitionListPage extends IssueSettingPage {
 				TransitionSpec transition = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "descriptionFrag", StateTransitionListPage.this);
 				if (transition.getFromStates().isEmpty())
-					fragment.add(new Label("fromStates", "[Any state]"));
+					fragment.add(new Label("fromStates", _T("[Any state]")));
 				else					
 					fragment.add(new Label("fromStates", "[" + StringUtils.join(transition.getFromStates(), ",") + "]"));
 				if (transition.getToStates().isEmpty())
-					fragment.add(new Label("toStates", "[Any state]"));
+					fragment.add(new Label("toStates", _T("[Any state]")));
 				else
 					fragment.add(new Label("toStates", "[" + StringUtils.join(transition.getToStates(), ",") + "]"));
 
-				fragment.add(new Label("when", "When " + transition.getTriggerDescription()));
+				fragment.add(new Label("when", MessageFormat.format(_T("When {0}"), transition.getTriggerDescription())));
 
 				if (transition.getIssueQuery() != null)
-					fragment.add(new Label("applicable", "For issues matching: " + transition.getIssueQuery()));
+					fragment.add(new Label("applicable", _T("For issues matching: ") + transition.getIssueQuery()));
 				else
-					fragment.add(new Label("applicable", "For all issues"));
+					fragment.add(new Label("applicable", _T("For all issues")));
 
 				cellItem.add(fragment);
 			}
@@ -162,7 +170,7 @@ public class StateTransitionListPage extends IssueSettingPage {
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this transition?"));
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to delete this transition?")));
 					}
 
 					@Override
@@ -213,7 +221,7 @@ public class StateTransitionListPage extends IssueSettingPage {
 	
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "<span class='text-truncate'>Issue State Transitions</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-truncate'>" + _T("Issue State Transitions") + "</span>").setEscapeModelStrings(false);
 	}
 	
 }

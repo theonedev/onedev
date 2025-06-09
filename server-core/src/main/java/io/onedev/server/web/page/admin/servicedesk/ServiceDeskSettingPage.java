@@ -6,6 +6,9 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.mailservice.MailServicePage;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -37,7 +40,7 @@ public class ServiceDeskSettingPage extends AdministrationPage {
 				super.onSubmit();
 				
 				OneDev.getInstance(SettingManager.class).saveServiceDeskSetting(serviceDeskSettingHolder.getServiceDeskSetting());
-				getSession().success("Service desk settings have been saved");
+				getSession().success(_T("Service desk settings have been saved"));
 			}
 			
 		};
@@ -52,7 +55,7 @@ public class ServiceDeskSettingPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Service Desk Settings");
+		return new Label(componentId, _T("Service Desk Settings"));
 	}
 
 }

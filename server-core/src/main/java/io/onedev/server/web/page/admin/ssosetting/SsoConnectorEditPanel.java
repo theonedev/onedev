@@ -19,6 +19,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
 
 abstract class SsoConnectorEditPanel extends Panel {
@@ -77,11 +80,11 @@ abstract class SsoConnectorEditPanel extends Panel {
 					if (!bean.getConnector().getName().equals(oldConnector.getName()) 
 							&& getConnector(bean.getConnector().getName()) != null) {
 						editor.error(new Path(new PathNode.Named("connector"), new PathNode.Named("name")),
-								"This name has already been used by another provider");
+								_T("This name has already been used by another provider"));
 					}
 				} else if (getConnector(bean.getConnector().getName()) != null) {
 					editor.error(new Path(new PathNode.Named("connector"), new PathNode.Named("name")),
-							"This name has already been used by another provider");
+							_T("This name has already been used by another provider"));
 				}
 
 				if (editor.isValid()) {

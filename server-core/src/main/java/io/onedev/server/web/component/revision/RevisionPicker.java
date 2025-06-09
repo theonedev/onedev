@@ -120,7 +120,7 @@ public abstract class RevisionPicker extends DropdownLink {
 					label, 
 					SpriteImage.getVersionedHref(IconScope.class, "arrow")));
 		} else {
-			return Model.of("<i>Select project first</i>");
+			return Model.of("<i>" + _T("Select project first") + "</i>");
 		}
 	}
 

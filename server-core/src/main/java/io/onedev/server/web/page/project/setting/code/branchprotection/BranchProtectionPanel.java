@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.setting.code.branchprotection;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -57,7 +59,7 @@ abstract class BranchProtectionPanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this protection?"));
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to delete this protection?")));
 			}
 
 			@Override

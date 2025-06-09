@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.setting.webhook;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 
 import org.apache.wicket.Component;
@@ -34,7 +36,7 @@ public class WebHooksPage extends ProjectSettingPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				getSession().success("Web hooks saved");
+				getSession().success(_T("Web hooks saved"));
 				getProject().setWebHooks(bean.getWebHooks());
 				OneDev.getInstance(ProjectManager.class).update(getProject());
 				setResponsePage(WebHooksPage.class, WebHooksPage.paramsOf(getProject()));
@@ -48,7 +50,7 @@ public class WebHooksPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Web Hooks");
+		return new Label(componentId, _T("Web Hooks"));
 	}
 
 }

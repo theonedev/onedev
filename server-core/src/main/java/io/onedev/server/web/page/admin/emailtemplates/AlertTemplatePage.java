@@ -5,9 +5,11 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import java.text.MessageFormat;
 import java.util.Map;
 
 import static io.onedev.server.model.support.administration.emailtemplates.EmailTemplates.*;
+import static io.onedev.server.web.translation.Translation._T;
 
 public class AlertTemplatePage extends AbstractTemplatePage {
 
@@ -27,19 +29,19 @@ public class AlertTemplatePage extends AbstractTemplatePage {
 
 	@Override
 	protected String getHelpText() {
-		return "A " + GROOVY_TEMPLATE_LINK + " used as body of system alert email";
+		return MessageFormat.format(_T("A {0} used as body of system alert email"), GROOVY_TEMPLATE_LINK);
 	}
 
 	@Override
 	protected Map<String, String> getVariableHelp() {
 		return CollectionUtils.newLinkedHashMap(
-				"alert", "<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/Alert.java'>alert</a> to display",
-				"serverUrl", "root url of OneDev server");
+				"alert", _T("<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/Alert.java'>alert</a> to display"),
+				"serverUrl", _T("root url of OneDev server"));
 	}
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "System Alert Template");
+		return new Label(componentId, _T("System Alert Template"));
 	}
 
 }

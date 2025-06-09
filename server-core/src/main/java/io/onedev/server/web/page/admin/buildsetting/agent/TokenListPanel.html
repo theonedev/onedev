@@ -1,15 +1,15 @@
 <wicket:panel>
 	<div class="p-5 token-list">
-		<h6 class="text-center mb-4">Available Agent Tokens</h6>
+		<h6 class="text-center mb-4"><wicket:t>Available Agent Tokens</wicket:t></h6>
 		<div class="alert alert-light alert-notice mb-5">
-			Agent tokens are used to authorize agents. It should be configured via environment variable 
+			<wicket:t>Agent tokens are used to authorize agents. It should be configured via environment variable 
 			<tt>agentToken</tt> if agent runs as docker container, or property <tt>agentToken</tt> in 
 			file <tt>&lt;agent dir&gt;/conf/agent.properties</tt> if agent runs on bare metal/virtual machine. 
-			A token will be in-use and removed from this list if agent using it connects to server
+			A token will be in-use and removed from this list if agent using it connects to server</wicket:t>
 		</div>
 		<div class="mb-4">
-			<a wicket:id="addNew" class="btn btn-primary mr-2">Generate New</a>
-			<a wicket:id="deleteAll" class="btn btn-danger">Delete All</a>
+			<a wicket:id="addNew" class="btn btn-primary mr-2"><wicket:t>Generate New</wicket:t></a>
+			<a wicket:id="deleteAll" class="btn btn-danger"><wicket:t>Delete All</wicket:t></a>
 		</div>
 		<table wicket:id="tokens" class="table"></table>
 	</div>

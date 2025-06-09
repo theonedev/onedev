@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.securitysetting;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -29,7 +31,7 @@ public class SecuritySettingPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				OneDev.getInstance(SettingManager.class).saveSecuritySetting(securitySetting);
-				getSession().success("Security settings have been updated");
+				getSession().success(_T("Security settings have been updated"));
 				
 				setResponsePage(SecuritySettingPage.class);
 			}
@@ -42,7 +44,7 @@ public class SecuritySettingPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Security Settings");
+		return new Label(componentId, _T("Security Settings"));
 	}
 
 }

@@ -4,6 +4,9 @@ import io.onedev.server.web.component.issue.workflowreconcile.WorkflowReconcileP
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
@@ -41,6 +44,6 @@ public class CheckIssueIntegrityPage extends IssueSettingPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Check Issue Integrity");
+		return new Label(componentId, _T("Check Issue Integrity"));
 	}
 }

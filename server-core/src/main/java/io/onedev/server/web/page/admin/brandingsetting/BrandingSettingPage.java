@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.brandingsetting;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -94,7 +96,7 @@ public class BrandingSettingPage extends AdministrationPage {
 					var bytes = getLogoBytes(bean.getDarkLogoData());
 					getClusterManager().runOnAllServers(new UpdateLogoTask(bytes, true));
 				}
-				Session.get().success("Branding settings updated");
+				Session.get().success(_T("Branding settings updated"));
 			}
 		};
 		add(form);
@@ -109,7 +111,7 @@ public class BrandingSettingPage extends AdministrationPage {
 				getClusterManager().runOnAllServers(new UpdateLogoTask(null, false));
 				getClusterManager().runOnAllServers(new UpdateLogoTask(null, true));
 				setResponsePage(BrandingSettingPage.class);
-				Session.get().success("Default branding settings restored");
+				Session.get().success(_T("Default branding settings restored"));
 			}
 
 			@Override
@@ -124,7 +126,7 @@ public class BrandingSettingPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Branding");
+		return new Label(componentId, _T("Branding"));
 	}
 	
 	private SettingManager getSettingManager() {

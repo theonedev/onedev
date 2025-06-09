@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.setting.build;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 
 import org.apache.wicket.Component;
@@ -33,7 +35,7 @@ public class DefaultFixedIssueFiltersPage extends ProjectBuildSettingPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				getSession().success("Default fixed issue filters saved");
+				getSession().success(_T("Default fixed issue filters saved"));
 				getProject().getBuildSetting().setDefaultFixedIssueFilters(bean.getDefaultFixedIssueFilters());
 				OneDev.getInstance(ProjectManager.class).update(getProject());
 				setResponsePage(DefaultFixedIssueFiltersPage.class, 
@@ -48,7 +50,7 @@ public class DefaultFixedIssueFiltersPage extends ProjectBuildSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Default Fixed Issue Filters");
+		return new Label(componentId, _T("Default Fixed Issue Filters"));
 	}
 
 }

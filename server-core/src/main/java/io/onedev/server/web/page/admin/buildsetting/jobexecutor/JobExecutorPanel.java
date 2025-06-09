@@ -14,6 +14,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.List;
 
 abstract class JobExecutorPanel extends Panel {
@@ -63,7 +65,7 @@ abstract class JobExecutorPanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this executor?"));
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener(_T("Do you really want to delete this executor?")));
 			}
 
 			@Override

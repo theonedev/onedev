@@ -414,7 +414,7 @@ public class BlobTextDiffPanel extends Panel {
 		translations.put("unable-to-comment", _T("Unable to comment"));
 		translations.put("perma-link", _T("Permanent link of this selection")); 
 		translations.put("copy-to-clipboard", _T("Copy selected text to clipboard")); 
-		translations.put("add-comment", _T("Add comment on this selection")); 
+		translations.put("add-selection-comment", _T("Add comment on this selection")); 
 		translations.put("login-to-comment", _T("Login to comment on selection"));
 		translations.put("covered-by-tests", _T("Covered by tests"));
 		translations.put("not-covered-by-any-test", _T("Not covered by any test"));
@@ -423,6 +423,9 @@ public class BlobTextDiffPanel extends Panel {
 		translations.put("show-comment", _T("Click to show comment of marked text"));
 		translations.put("loading", _T("Loading..."));
 		translations.put("invalid-selection", _T("Invalid selection, click for details"));
+		for (var severity: CodeProblem.Severity.values())
+			translations.put(severity.name(), _T("severity:" + severity.name()));
+		translations.put("add-problem-comment", _T("Add comment"));
 
 		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s);", 
 				getMarkupId(), symbolTooltip.getMarkupId(), 

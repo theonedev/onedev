@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.setting.avatar;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
@@ -84,7 +86,7 @@ public class AvatarEditPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Edit Avatar").add(AttributeAppender.replace("class", "text-truncate"));
+		return new Label(componentId, _T("Edit Avatar")).add(AttributeAppender.replace("class", "text-truncate"));
 	}
 	
 }

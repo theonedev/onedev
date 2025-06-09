@@ -1,11 +1,13 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -13,8 +15,7 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-
-import com.google.common.collect.Lists;
+import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
@@ -47,6 +48,10 @@ class AgentFilterPanel extends FilterEditPanel<Agent> {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		var statusChoices = new LinkedHashMap<String, String>();
+		statusChoices.put("Online", _T("Online"));
+		statusChoices.put("Offline", _T("Offline"));
+
         var statusChoice = new StringSingleChoice("status", new IModel<String>() {
 
 			@Override
@@ -76,13 +81,8 @@ class AgentFilterPanel extends FilterEditPanel<Agent> {
 				getModel().setObject(query);
 			}
 
-		}, new LoadableDetachableModel<List<String>>() {
+		}, Model.ofList(new ArrayList<>(statusChoices.keySet())), Model.ofMap(statusChoices), false);
 
-			@Override
-			protected List<String> load() {
-				return Lists.newArrayList("Online", "Offline");
-			}
-		}, false);
 		statusChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 
 			@Override
