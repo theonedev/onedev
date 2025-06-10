@@ -21,10 +21,11 @@ public class Translation extends TranslationResourceBundle {
 	private static final Map<String, String> m = new HashMap<>();
 
 	public static String _T(String key) {
-		if (Application.exists()) 
+		if (Application.exists()) {
 			return Localizer.get().getString("t: " + key, null);
-		else 
+		} else {
 			return key;
+		}
 	}
 	
 	public static void watchUpdate(Class<? extends TranslationResourceBundle> translationClass, Runnable onUpdate) {

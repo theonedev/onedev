@@ -6,7 +6,7 @@ Git Server with CI/CD, Kanban, and Packages
 https://onedev.io
 
 ### Documentation 
-https://docs.onedev.io/installation-guide/deploy-into-k8s
+https://docs.onedev.io/installation-guide/deploy-to-k8s
 
 ### Chart Values
 https://code.onedev.io/onedev/server/~files/main/server-product/helm/values.yaml

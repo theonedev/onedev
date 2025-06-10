@@ -838,7 +838,7 @@ public abstract class LayoutPage extends BasePage {
 
 					@Override
 					public String getLabel() {
-						return "简体中文 (wip)";
+						return "简体中文";
 					}
 
 					@Override
