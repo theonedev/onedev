@@ -5,7 +5,14 @@ import java.util.Map;
 
 public class Translation_zh_CN extends TranslationResourceBundle {
 
-	private static final Map<String, String> m = new HashMap<>();
+	private static final Map<String, String> m = new HashMap<>() {
+
+		@Override
+		public String put(String key, String value) {
+			return super.put(key, value.replace("docs.onedev.io", "docs.onedev.io/zh-Hans"));
+		}
+
+	};
 
 	static {
 		init();
@@ -42,7 +49,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to verify email for", 
 			"验证邮箱的 <a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">用户</a>");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid and katex support</a>.", 
-			"可使用 <a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub 风格的 markdown</a>，并支持 <a href=\"https://docs.onedev.io/zh-Hans/appendix/markdown-syntax\" target=\"_blank\">mermaid 和 katex</a>。");
+			"可使用 <a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub 风格的 markdown</a>，并支持 <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid 和 katex</a>。");
 		m.put("<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>event object</a> triggering the notification", 
 			"触发通知的 <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>事件对象</a>");
 		m.put("<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/Alert.java'>alert</a> to display", 
@@ -65,14 +72,14 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("<b class='text-danger'>NOTE: </b>SendGrid integration is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"<b class='text-danger'>注意：</b>SendGrid 集成是企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
 		m.put("<b class='text-warning'>NOTE: </b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>Time tracking</a> is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"<b class='text-warning'>注意：</b><a href='https://docs.onedev.io/zh-Hans/tutorials/issue/time-tracking' target='_blank'>时间跟踪</a>是企业版功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
+			"<b class='text-warning'>注意：</b><a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>时间跟踪</a>是企业版功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
 		m.put("<b>NOTE: </b> Service desk only takes effect if <a wicket:id=\"mailService\">mail service</a> is defined and its <tt>check incoming email</tt> option is enabled. Also <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>sub addressing</a> needs to be enabled for the system email address. Check <a href=\"https://medium.com/p/e56d62c27e57\" target='_blank'>this tutorial</a> for details", 
 			"<b>注意：</b> 服务台仅在 <a wicket:id=\"mailService\">邮件服务</a> 定义且 <tt>检查收件邮箱</tt> 选项启用时生效。此外，系统邮箱地址需要启用 <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>子地址</a>。请查看 <a href=\"https://medium.com/p/e56d62c27e57\" target='_blank'>此教程</a> 获取详细信息");
 		m.put("<b>NOTE:</b> Batch editing issues will not cause state transitions of other issues even if transition rule matches", 
 			"<b>注意：</b> 批量编辑工单不会导致其他工单的状态转换，即使匹配转换规则");
 		m.put("<b>Project Owner</b> is a built-in role with full permission over projects", "<b>项目所有者</b>是一个内置角色，拥有项目的所有权限");
 		m.put("<b>Tips: </b> Type <tt>@</tt> to <a href='https://docs.onedev.io/appendix/job-variables' target='_blank' tabindex='-1'>insert variable</a>. Use <tt>@@</tt> for literal <tt>@</tt>", 
-			"<b>提示: </b> 输入 <tt>@</tt> <a href='https://docs.onedev.io/zh-Hans/appendix/job-variables' target='_blank' tabindex='-1'>插入变量</a>。使用 <tt>@@</tt> 插入字符 <tt>@</tt>");
+			"<b>提示: </b> 输入 <tt>@</tt> <a href='https://docs.onedev.io/appendix/job-variables' target='_blank' tabindex='-1'>插入变量</a>。使用 <tt>@@</tt> 插入字符 <tt>@</tt>");
 		m.put("<div><span>Search Files</span> <span class='font-size-sm text-muted'>in default branch</span></div>", 
 			"<div><span>搜索文件</span> <span class='font-size-sm text-muted'>在默认分支中</span></div>");
 		m.put("<div><span>Search Symbols</span> <span class='font-size-sm text-muted'>in default branch</span></div>", 
@@ -489,7 +496,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("By User", "按用户");
 		m.put("By day", "按日");
 		m.put("By default code is cloned via an auto-generated credential, which only has read permission over current project. In case the job needs to <a href='https://docs.onedev.io/tutorials/cicd/commit-and-push' target='_blank'>push code to server</a>, you should supply custom credential with appropriate permissions here", 
-			"默认情况下，代码通过自动生成的凭证进行克隆，该凭证仅对当前项目具有读取权限。如需让任务<a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/commit-and-push' target='_blank'>推送代码到服务器</a>，请在此提供具有相应权限的自定义凭证");
+			"默认情况下，代码通过自动生成的凭证进行克隆，该凭证仅对当前项目具有读取权限。如需让任务<a href='https://docs.onedev.io/tutorials/cicd/commit-and-push' target='_blank'>推送代码到服务器</a>，请在此提供具有相应权限的自定义凭证");
 		m.put("By default issues of parent and child projects will also be listed. Use query <code>&quot;Project&quot; is current</code> to show issues only belong to this project", 
 			"默认情况下，父项目和子项目的工单也会被列出。使用查询 <code>&quot;Project&quot; is current</code> 来只显示属于此项目的工单");
 		m.put("By month", "按月");
@@ -552,9 +559,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Check <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHub's guide</a> on how to generate and use GPG keys to sign your commits", 
 			"检查 <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHub 的指南</a> 如何生成和使用 GPG 密钥来签署您的提交");
 		m.put("Check <a href=\"https://docs.onedev.io/administration-guide/agent-management\" target=\"_blank\">agent management</a> for details, including instructions on how to run agent as service", 
-			"查看 <a href=\"https://docs.onedev.io/zh-Hans/administration-guide/agent-management\" target=\"_blank\">代理管理</a> 了解更多详细信息，包括如何作为服务运行代理的说明");
+			"查看 <a href=\"https://docs.onedev.io/administration-guide/agent-management\" target=\"_blank\">代理管理</a> 了解更多详细信息，包括如何作为服务运行代理的说明");
 		m.put("Check <a href=\"https://docs.onedev.io/administration-guide/agent-management\" target=\"_blank\">agent management</a> for details, including list of supported environment variables", 
-			"查看 <a href=\"https://docs.onedev.io/zh-Hans/administration-guide/agent-management\" target=\"_blank\">代理管理</a> 了解更多详细信息，包括支持的环境变量列表");
+			"查看 <a href=\"https://docs.onedev.io/administration-guide/agent-management\" target=\"_blank\">代理管理</a> 了解更多详细信息，包括支持的环境变量列表");
 		m.put("Check Commit Message Footer", "检查提交消息尾部");
 		m.put("Check Incoming Email", "检查接收的电子邮件");
 		m.put("Check Issue Integrity", "检查工单完整性");
@@ -1086,9 +1093,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Empty file removed.", "空文件已删除");
 		m.put("Enable", "启用");
 		m.put("Enable <a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>time tracking</a> for this project to track progress and generate timesheets", 
-			"为此项目启用<a href='https://docs.onedev.io/zh-Hans/tutorials/issue/time-tracking' target='_blank'>时间跟踪</a>以跟踪进度并生成时间表");
+			"为此项目启用<a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>时间跟踪</a>以跟踪进度并生成时间表");
 		m.put("Enable <a href='https://docs.onedev.io/tutorials/package/working-with-packages' target='_blank'>package management</a> for this project", 
-			"为此项目启用<a href='https://docs.onedev.io/zh-Hans/tutorials/package/working-with-packages' target='_blank'>包管理</a>");
+			"为此项目启用<a href='https://docs.onedev.io/tutorials/package/working-with-packages' target='_blank'>包管理</a>");
 		m.put("Enable Account Self Removal", "启用账户自删除");
 		m.put("Enable Account Self Sign-Up", "启用账户自注册");
 		m.put("Enable All Queried Users", "启用所有查询的用户");
@@ -1281,7 +1288,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("For build commit not reachable from default branch, a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> should be specified as access token with manage issue permission", 
 			"对于从默认分支无法到达的构建提交，应该指定一个具有管理工单权限的访问令牌作为任务密钥");
 		m.put("For docker aware executors, this path is inside container, and accepts both absolute path and relative path (relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>). For shell related executors which runs on host machine directly, only relative path is accepted", 
-			"对于 docker 相关执行器，此路径在容器内，并接受绝对路径和相对路径（相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>job workspace</a>）。对于直接在主机机器上运行的 shell 相关执行器，只接受相对路径");
+			"对于 docker 相关执行器，此路径在容器内，并接受绝对路径和相对路径（相对于 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>）。对于直接在主机机器上运行的 shell 相关执行器，只接受相对路径");
 		m.put("For each build, OneDev calculates a list of fixed issues since previous build automatically. This setting provides a default query to further filter/order this list. For a given job, the first matching entry will be used.", 
 			"对于每个构建，OneDev 自动计算自上一个构建以来的固定工单列表。此设置提供默认查询以进一步过滤/排序此列表。对于给定的任务，第一个匹配的条目将被使用。");
 		m.put("For each selected branch/tag, a separate build will be generated with branch/tag set to corresponding value", 
@@ -1370,27 +1377,27 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Groovy Script", "Groovy 脚本");
 		m.put("Groovy Scripts", "Groovy 脚本");
 		m.put("Groovy script to be evaluated. It should return a <i>Date</i> value. Check <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> for details", 
-			"Groovy 脚本应该返回一个 <i>Date</i> 值。请参阅 <a href='https://docs.onedev.io/zh-Hans/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
+			"Groovy 脚本应该返回一个 <i>Date</i> 值。请参阅 <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
 		m.put("Groovy script to be evaluated. It should return a <i>Float</i> value. Check <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> for details", 
-			"Groovy 脚本应该返回一个 <i>Float</i> 值。请参阅 <a href='https://docs.onedev.io/zh-Hans/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
+			"Groovy 脚本应该返回一个 <i>Float</i> 值。请参阅 <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
 		m.put("Groovy script to be evaluated. It should return a <i>Integer</i> value. Check <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> for details", 
-			"Groovy 脚本应该返回一个 <i>Integer</i> 值。请参阅 <a href='https://docs.onedev.io/zh-Hans/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
+			"Groovy 脚本应该返回一个 <i>Integer</i> 值。请参阅 <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
 		m.put("Groovy script to be evaluated. It should return a <i>String</i> value. Check <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> for details", 
-			"Groovy 脚本应该返回一个 <i>String</i> 值。请参阅 <a href='https://docs.onedev.io/zh-Hans/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
+			"Groovy 脚本应该返回一个 <i>String</i> 值。请参阅 <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
 		m.put("Groovy script to be evaluated. It should return a <i>boolean</i> value. Check <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> for details", 
-			"Groovy 脚本应该返回一个 <i>boolean</i> 值。请参阅 <a href='https://docs.onedev.io/zh-Hans/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
+			"Groovy 脚本应该返回一个 <i>boolean</i> 值。请参阅 <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
 		m.put("Groovy script to be evaluated. It should return a <i>string</i> value. Check <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> for details", 
-			"Groovy 脚本应该返回一个 <i>string</i> 值。请参阅 <a href='https://docs.onedev.io/zh-Hans/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
+			"Groovy 脚本应该返回一个 <i>string</i> 值。请参阅 <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
 		m.put("Groovy script to be evaluated. It should return name of a group. Check <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> for details", 
-			"Groovy 脚本应该返回一个组名。请参阅 <a href='https://docs.onedev.io/zh-Hans/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
+			"Groovy 脚本应该返回一个组名。请参阅 <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
 		m.put("Groovy script to be evaluated. It should return string or list of string. Check <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> for details", 
-			"Groovy 脚本应该返回一个字符串或字符串列表。请参阅 <a href='https://docs.onedev.io/zh-Hans/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
+			"Groovy 脚本应该返回一个字符串或字符串列表。请参阅 <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
 		m.put("Groovy script to be evaluated. The return value should be a list of group facade object to be used as choices. Check <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> for details", 
-			"Groovy 脚本应该返回一个组 facade 对象列表，用于作为选择。请参阅 <a href='https://docs.onedev.io/zh-Hans/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
+			"Groovy 脚本应该返回一个组 facade 对象列表，用于作为选择。请参阅 <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
 		m.put("Groovy script to be evaluated. The return value should be a list of user login names to be used as choices. Check <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> for details", 
-			"Groovy 脚本应该返回一个用户登录名列表，用于作为选择。请参阅 <a href='https://docs.onedev.io/zh-Hans/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
+			"Groovy 脚本应该返回一个用户登录名列表，用于作为选择。请参阅 <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
 		m.put("Groovy script to be evaluated. The return value should be a value to color map, for instance:<br><code>return [\"Successful\":\"#00ff00\", \"Failed\":\"#ff0000\"]</code>, Use <tt>null</tt> if the value does not have a color. Check <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> for details", 
-			"Groovy 脚本应该返回一个值到颜色的映射，例如：<br><code>return [\"Successful\":\"#00ff00\", \"Failed\":\"#ff0000\"]</code>，如果值没有颜色，请使用 <tt>null</tt>。请参阅 <a href='https://docs.onedev.io/zh-Hans/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
+			"Groovy 脚本应该返回一个值到颜色的映射，例如：<br><code>return [\"Successful\":\"#00ff00\", \"Failed\":\"#ff0000\"]</code>，如果值没有颜色，请使用 <tt>null</tt>。请参阅 <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> 了解更多详情");
 		m.put("Groovy scripts", "Groovy 脚本");
 		m.put("Group", "组");
 		m.put("Group \"{0}\" deleted", "组 \"{0}\" 已删除");
@@ -1497,9 +1504,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Imports", "导入");
 		m.put("In Projects", "在项目中");
 		m.put("In case IMAP host certificate is self-signed or its CA root is not accepted, you may tell OneDev to bypass certificate check. <b class='text-danger'>WARNING: </b> In an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the certificate into OneDev</a> instead", 
-			"如果 IMAP 主机证书是自签名的或其 CA 根证书不被接受，您可以告诉 OneDev 绕过证书检查。<b class='text-danger'>警告：</b> 在不受信任的网络中，这可能会导致中间人攻击，您应该<a href='https://docs.onedev.io/zh-Hans/administration-guide/trust-self-signed-certificates#在服务器上信任自签名证书' target='_blank'>将证书导入 OneDev</a> 而不是");
+			"如果 IMAP 主机证书是自签名的或其 CA 根证书不被接受，您可以告诉 OneDev 绕过证书检查。<b class='text-danger'>警告：</b> 在不受信任的网络中，这可能会导致中间人攻击，您应该<a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>将证书导入 OneDev</a> 而不是");
 		m.put("In case SMTP host certificate is self-signed or its CA root is not accepted, you may tell OneDev to bypass certificate check. <b class='text-danger'>WARNING: </b> In an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the certificate into OneDev</a> instead", 
-			"如果 SMTP 主机证书是自签名的或其 CA 根证书不被接受，您可以告诉 OneDev 绕过证书检查。<b class='text-danger'>警告：</b> 在不受信任的网络中，这可能会导致中间人攻击，您应该<a href='https://docs.onedev.io/zh-Hans/administration-guide/trust-self-signed-certificates#在服务器上信任自签名证书' target='_blank'>将证书导入 OneDev</a> 而不是");
+			"如果 SMTP 主机证书是自签名的或其 CA 根证书不被接受，您可以告诉 OneDev 绕过证书检查。<b class='text-danger'>警告：</b> 在不受信任的网络中，这可能会导致中间人攻击，您应该<a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>将证书导入 OneDev</a> 而不是");
 		m.put("In case cache is not hit via above key, OneDev will loop through load keys defined here in order until a matching cache is found in project hierarchy. A cache is considered matching if its key is prefixed with the load key. If multiple caches matches, the most recent cache will be returned", 
 			"如果缓存未通过上述密钥命中，OneDev 将按顺序遍历此处定义的加载密钥，直到在项目层次结构中找到匹配的缓存。如果多个缓存匹配，将返回最新的缓存。");
 		m.put("In case cache needs to be uploaded, this property specifies target project for the upload. Leave empty for current project", 
@@ -2042,7 +2049,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("No packages to delete", "没有可删除的包");
 		m.put("No parent", "无父级");
 		m.put("No previous successful build on <a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">same stream</a> to calculate fixed issues since", 
-			"还没有<a href=\"https://docs.onedev.io/zh-Hans/concepts#构建流\" class=\"link-primary\" target=\"_blank\">相同流上的</a>成功构建，所以无法计算修复的工单");
+			"还没有<a href=\"https://docs.onedev.io/concepts#构建流\" class=\"link-primary\" target=\"_blank\">相同流上的</a>成功构建，所以无法计算修复的工单");
 		m.put("No projects found", "没有找到项目");
 		m.put("No projects to delete", "没有要删除的项目");
 		m.put("No projects to modify", "没有要修改的项目");
@@ -2124,7 +2131,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("OneDev Issue Link", "OneDev 工单链接");
 		m.put("OneDev Issue State", "OneDev 工单状态");
 		m.put("OneDev analyzes repository files for code search, line statistics, and code contribution statistics. This setting tells which files should be analyzed, and expects space-separated <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path patterns</a>. A pattern can be excluded by prefixing with '-', for instance <code>-**/vendors/**</code> will exclude all files with vendors in path. <b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder <code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>. The repository will be re-analyzed when server is started", 
-			"OneDev 分析仓库文件以进行代码搜索、行统计和代码贡献统计。此设置告诉要分析哪些文件，并期望以空格分隔的 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径模式</a>。可以通过在前面添加 '-' 来排除某个模式，例如 <code>-**/vendors/**</code> 将排除所有包含 vendors 的路径。<b>注意：</b> 更改此设置仅影响新提交。要将更改应用到历史提交，请停止服务器并删除 <a href='https://docs.onedev.io/zh-Hans/concepts#项目存储' target='_blank'>项目存储目录</a> 下的 <code>index</code> 和 <code>info/commit</code> 文件夹。当服务器启动时，仓库将重新分析");
+			"OneDev 分析仓库文件以进行代码搜索、行统计和代码贡献统计。此设置告诉要分析哪些文件，并期望以空格分隔的 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径模式</a>。可以通过在前面添加 '-' 来排除某个模式，例如 <code>-**/vendors/**</code> 将排除所有包含 vendors 的路径。<b>注意：</b> 更改此设置仅影响新提交。要将更改应用到历史提交，请停止服务器并删除 <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>项目存储目录</a> 下的 <code>index</code> 和 <code>info/commit</code> 文件夹。当服务器启动时，仓库将重新分析");
 		m.put("OneDev configures git hooks to communicate with itself via curl", "OneDev 配置 git 钩子以通过 curl 与自身通信");
 		m.put("OneDev needs to search and determine user DN, as well as searching user group information if group retrieval is enabled. Tick this option and specify 'manager' DN and password if these operations needs to be authenticated", 
 			"OneDev 需要搜索和确定用户 DN，以及在启用组获取时搜索用户组信息。如果这些操作需要认证，请勾选此选项并指定 'manager' DN 和密码");
@@ -2177,7 +2184,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Optionally specifies name of the attribute inside the user LDAP entry whose value will be taken as user full name. This field is normally set to <i>displayName</i> according to RFC 2798. If left empty, full name of the user will not be retrieved", 
 			"可选择指定用户 LDAP 条目中属性的名称，其值将被用作用户全名。此字段通常设置为 <i>displayName</i> 根据 RFC 2798。如果留空，用户的全名将不会被获取");
 		m.put("Optionally specify <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as GitHub access token. This is used to retrieve release notes of dependencies hosted on GitHub, and the authenticated access will get a higher rate limit", 
-			"可选择指定 <a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 用作 GitHub 访问令牌。这用于获取托管在 GitHub 上的依赖项的发布说明，并且经过身份验证的访问将获得更高的速率限制");
+			"可选择指定 <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 用作 GitHub 访问令牌。这用于获取托管在 GitHub 上的依赖项的发布说明，并且经过身份验证的访问将获得更高的速率限制");
 		m.put("Optionally specify <a href='https://github.com/GoogleContainerTools/kaniko?tab=readme-ov-file#additional-flags' target='_blank'>additional options</a> of kaniko", 
 			"可选择为 kaniko 指定 <a href='https://github.com/GoogleContainerTools/kaniko?tab=readme-ov-file#additional-flags' target='_blank'>附加选项</a>");
 		m.put("Optionally specify <a href='https://github.com/google/go-containerregistry/blob/main/cmd/crane/doc/crane_pull.md' target='_blank'>additional options</a> of crane", 
@@ -2189,7 +2196,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Optionally specify <span class='text-info'>comma separated</span> platforms to scan, for instance <tt>linux/amd64,linux/arm64</tt>. Leave empty to scan all platforms in OCI layout", 
 			"可选择指定 <span class='text-info'>逗号分隔</span> 的平台，例如 <tt>linux/amd64,linux/arm64</tt>。留空则扫描 OCI 布局中的所有平台");
 		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
-			"可选择指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>任务工作区</a> 的 Dockerfile。留空则使用上面指定的构建路径下的文件 <tt>Dockerfile</tt>");
+			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a> 的 Dockerfile。留空则使用上面指定的构建路径下的文件 <tt>Dockerfile</tt>");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "可选择指定用于 Renovate CLI 的 JavaScript 配置");
 		m.put("Optionally specify SSH root URL, which will be used to construct project clone url via SSH protocol. Leave empty to derive from server url", 
 			"可选择指定 SSH 根 URL，用于通过 SSH 协议构造项目克隆 URL。留空则从服务器 URL 推导");
@@ -2204,11 +2211,11 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"可选择指定基础查询以过滤/排序待办事项列表中的工单。待办事项是那些不与当前迭代关联的工单");
 		m.put("Optionally specify a base query to filter/order issues of the board", "可选择指定基础查询以过滤/排序看板中的工单");
 		m.put("Optionally specify a cron expression to schedule database auto-backup. The cron expression format is <em>&lt;seconds&gt; &lt;minutes&gt; &lt;hours&gt; &lt;day-of-month&gt; &lt;month&gt; &lt;day-of-week&gt;</em>.For example, <em>0 0 1 * * ?</em> means 1:00am every day. For details of the format, refer to <a href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format' target='_blank'>Quartz tutorial</a>.The backup files will be placed into <em>db-backup</em> folder under OneDev installation directory. In case multiple servers connect to form a cluster, auto-backup takes place on the <a href='https://docs.onedev.io/concepts#lead-server' target='_blank'>lead server</a>. Leave this property empty if you do not want to enable database auto backup.", 
-			"可选择指定一个 cron 表达式来调度数据库自动备份。cron 表达式格式为 <em>&lt;秒&gt; &lt;分钟&gt; &lt;小时&gt; &lt;日期&gt; &lt;月份&gt; &lt;星期&gt;</em>。例如，<em>0 0 1 * * ?</em> 表示每天凌晨 1 点。有关格式的详细信息，请参阅 <a href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format' target='_blank'>Quartz 教程</a>。备份文件将放置在 OneDev 安装目录下的 <em>db-backup</em> 文件夹中。如果多个服务器连接形成集群，自动备份将在 <a href='https://docs.onedev.io/zh-Hans/concepts#主服务器' target='_blank'>主服务器</a> 上进行。如果不想启用数据库自动备份，请将此属性留空。");
+			"可选择指定一个 cron 表达式来调度数据库自动备份。cron 表达式格式为 <em>&lt;秒&gt; &lt;分钟&gt; &lt;小时&gt; &lt;日期&gt; &lt;月份&gt; &lt;星期&gt;</em>。例如，<em>0 0 1 * * ?</em> 表示每天凌晨 1 点。有关格式的详细信息，请参阅 <a href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format' target='_blank'>Quartz 教程</a>。备份文件将放置在 OneDev 安装目录下的 <em>db-backup</em> 文件夹中。如果多个服务器连接形成集群，自动备份将在 <a href='https://docs.onedev.io/concepts#lead-server' target='_blank'>主服务器</a> 上进行。如果不想启用数据库自动备份，请将此属性留空。");
 		m.put("Optionally specify a date field to hold due date information.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"可选择指定一个日期字段来保存截止日期信息。<br><b>注意：</b>如果这里没有合适的选项，您可以自定义 OneDev 工单字段");
 		m.put("Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to put retrieved artifacts. Leave empty to use job workspace itself", 
-			"可选择指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的路径来放置获取的制品。留空则使用任务工作区本身");
+			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的路径来放置获取的制品。留空则使用任务工作区本身");
 		m.put("Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume is only used to hold temporary build files", 
 			"可选择指定一个存储类来动态分配构建卷。留空则使用默认存储类。<b class='text-warning'>注意：</b>存储类的回收策略应设置为 <code>Delete</code>，因为该卷仅用于保存临时构建文件");
 		m.put("Optionally specify a working period field to hold estimated time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
@@ -2228,7 +2235,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"可选择指定适用于提交消息页脚检查的提交类型（按 ENTER 添加值）。留空则适用于所有类型");
 		m.put("Optionally specify arguments to run above image", "可选择指定运行上述镜像的参数");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
-			"可选择指定从依赖项拷贝到 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的制品。只能拷贝已发布的制品（通过制品发布步骤）。留空则不拷贝任何制品");
+			"可选择指定从依赖项拷贝到 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的制品。只能拷贝已发布的制品（通过制品发布步骤）。留空则不拷贝任何制品");
 		m.put("Optionally specify authorized executor for this job. Leave empty to use first applicable executor (or use auto-discovered executor if no executors are defined)", 
 			"可选择指定此任务的授权执行器。留空则使用第一个适用的执行器（如果未定义执行器，则使用自动发现的执行器）");
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
@@ -2237,9 +2244,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Optionally specify branches/users/groups allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
 			"可选择指定允许访问此密钥的分支/用户/组。如果留空，任何任务都可以访问此密钥，包括通过外部合并请求触发的任务");
 		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. Leave empty to use job workspace itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
-			"可选择指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>任务工作区</a> 的构建上下文路径。留空则使用任务工作区本身。除非使用选项 <code>--dockerfile</code> 指定不同位置，否则文件 <code>Dockerfile</code> 应存在于构建上下文目录中");
+			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a> 的构建上下文路径。留空则使用任务工作区本身。除非使用选项 <code>--dockerfile</code> 指定不同位置，否则文件 <code>Dockerfile</code> 应存在于构建上下文目录中");
 		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. Leave empty to use job workspace itself", 
-			"可选择指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>任务工作区</a> 的构建路径。留空则使用任务工作区本身");
+			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a> 的构建路径。留空则使用任务工作区本身");
 		m.put("Optionally specify cluster role the job pods service account binding to. This is necessary if you want to do things such as running other Kubernetes pods in job command", 
 			"可选择指定任务 pod 服务账户绑定的集群角色。如果要执行诸如在任务命令中运行其他 Kubernetes pod 之类的操作，这是必需的");
 		m.put("Optionally specify comma separated licenses to be ignored", "可选择指定要忽略的以逗号分隔的许可证");
@@ -2270,7 +2277,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Optionally specify environment variables of the service", "可选择指定服务的环境变量");
 		m.put("Optionally specify estimated time.", "可选择指定估计时间。");
 		m.put("Optionally specify files relative to cache path to ignore when detect cache changes. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple files should be separated by space, and single file containing space should be quoted", 
-			"可选择指定相对于缓存路径的文件，在检测缓存更改时忽略。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。多个文件应以空格分隔，包含空格的单个文件应加引号");
+			"可选择指定相对于缓存路径的文件，在检测缓存更改时忽略。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。多个文件应以空格分隔，包含空格的单个文件应加引号");
 		m.put("Optionally specify group search base if you want to retrieve group membership information of the user. For example: <i>cn=Users, dc=example, dc=com</i>. To give appropriate permissions to a Active Directory group, a OneDev group with same name should be defined. Leave empty to manage group memberships at OneDev side", 
 			"如果要获取用户的组成员资格信息，可选择指定组搜索根节点。例如：<i>cn=Users, dc=example, dc=com</i>。要给 Active Directory 组适当的权限，应定义一个同名的 OneDev 组。留空则在 OneDev 端管理组成员资格");
 		m.put("Optionally specify issue links allowed to edit", "可选择指定允许编辑的工单链接");
@@ -2299,14 +2306,14 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Optionally specify options passed to renovate cli. Multiple options should be separated by space, and single option containing spaces should be quoted", 
 			"可选择指定传递给 renovate cli 的选项。多个选项应以空格分隔，包含空格的单个选项应加引号");
 		m.put("Optionally specify osv scanner <a href='https://google.github.io/osv-scanner/configuration/' target='_blank'>config file</a> under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. You may ignore particular vulnerabilities via this file", 
-			"可选择在 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>任务工作区</a> 下指定 osv 扫描器 <a href='https://google.github.io/osv-scanner/configuration/' target='_blank'>配置文件</a>。您可以通过此文件忽略特定漏洞");
+			"可选择在 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a> 下指定 osv 扫描器 <a href='https://google.github.io/osv-scanner/configuration/' target='_blank'>配置文件</a>。您可以通过此文件忽略特定漏洞");
 		m.put("Optionally specify path protection rules", "可选择指定路径保护规则");
 		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>ignore file</a>", 
-			"可选择指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的路径，用作 trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>忽略文件</a>");
+			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的路径，用作 trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>忽略文件</a>");
 		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/scanner/secret/#configuration' target='_blank'>secret config</a>", 
-			"可选择指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的路径，用作 trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/scanner/secret/#configuration' target='_blank'>密钥配置</a>");
+			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的路径，用作 trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/scanner/secret/#configuration' target='_blank'>密钥配置</a>");
 		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to publish artifacts from. Leave empty to use job workspace itself", 
-			"可选择指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的路径来发布制品。留空则使用任务工作区本身");
+			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的路径来发布制品。留空则使用任务工作区本身");
 		m.put("Optionally specify platform to pull, for instance <tt>linux/amd64</tt>. Leave empty to pull all platforms in image", 
 			"可选择指定要拉取的平台，例如 <tt>linux/amd64</tt>。留空则拉取镜像中的所有平台");
 		m.put("Optionally specify project to show builds of. Leave empty to show builds of all projects with permissions", 
@@ -2321,11 +2328,11 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"可选择指定注册表登录信息，以覆盖任务执行器中定义的登录信息。对于内置注册表，使用 <code>@server_url@</code> 作为注册表 URL，<code>@job_token@</code> 作为用户名，以及访问令牌密钥作为密码密钥");
 		m.put("Optionally specify relative directory to put uploaded files", "可选地指定要上传的文件的相对目录");
 		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to clone code into. Leave empty to use job workspace itself", 
-			"可选择指定 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 下的相对路径，用于克隆代码。留空则使用任务工作区本身");
+			"可选择指定 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 下的相对路径，用于克隆代码。留空则使用任务工作区本身");
 		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to scan. Leave empty to use job workspace itself", 
-			"可选择指定 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 下的相对路径进行扫描。留空则使用任务工作区本身");
+			"可选择指定 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 下的相对路径进行扫描。留空则使用任务工作区本身");
 		m.put("Optionally specify relative paths under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to scan dependency vulnerabilities. Multiple paths can be specified and should be separated with space. Leave empty to use job workspace itself", 
-			"可选择指定 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 下的相对路径，用于扫描依赖项漏洞。可以指定多个路径，应以空格分隔。留空则使用任务工作区本身");
+			"可选择指定 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 下的相对路径，用于扫描依赖项漏洞。可以指定多个路径，应以空格分隔。留空则使用任务工作区本身");
 		m.put("Optionally specify required reviewers for changes of specified branch", "可选择为指定分支的更改指定所需的审阅者");
 		m.put("Optionally specify revision to create branch from. Leave empty to create from build commit", 
 			"可选择指定用于创建分支的修订版本。留空则从构建提交创建");
@@ -2338,29 +2345,29 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are only supported by docker aware executors (server docker executor, remote docker executor, or kubernetes executor)", 
 			"可选择指定此任务所需的服务。<b class='text-warning'>注意：</b> 服务仅由支持 docker 的执行器（服务器 docker 执行器、远程 docker 执行器或 kubernetes 执行器）支持");
 		m.put("Optionally specify space-separated branches applicable for this transition. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all", 
-			"可选择指定适用于此转换的以空格分隔的分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有");
+			"可选择指定适用于此转换的以空格分隔的分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有");
 		m.put("Optionally specify space-separated branches applicable for this trigger. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for default branch", 
-			"可选择指定适用于此触发器的以空格分隔的分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则为默认分支");
+			"可选择指定适用于此触发器的以空格分隔的分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则为默认分支");
 		m.put("Optionally specify space-separated branches to check. Use '**' or '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all branches", 
-			"可选择指定以空格分隔的要检查的分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有分支");
+			"可选择指定以空格分隔的要检查的分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有分支");
 		m.put("Optionally specify space-separated files to check. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all files", 
-			"可选择指定以空格分隔的要检查的文件。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有文件");
+			"可选择指定以空格分隔的要检查的文件。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有文件");
 		m.put("Optionally specify space-separated jobs applicable for this transition. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all", 
 			"可选择指定适用于此转换的以空格分隔的任务。使用 '*' 或 '?' 进行通配符匹配。前缀 '-' 表示排除。留空则匹配所有");
 		m.put("Optionally specify space-separated projects applicable for this trigger. This is useful for instance when you want to prevent the job from being triggered in forked projects. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all projects", 
-			"可选择指定适用于此触发器的以空格分隔的项目。例如，当您想要防止任务在分叉项目中被触发时，这非常有用。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有项目");
+			"可选择指定适用于此触发器的以空格分隔的项目。例如，当您想要防止任务在分叉项目中被触发时，这非常有用。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有项目");
 		m.put("Optionally specify space-separated projects to search in. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to search in all projects with code read permission", 
-			"可选择指定要搜索的以空格分隔的项目。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则搜索所有具有代码读取权限的项目");
+			"可选择指定要搜索的以空格分隔的项目。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则搜索所有具有代码读取权限的项目");
 		m.put("Optionally specify space-separated reports. Use '*' or '?' for wildcard match. Prefix with '-' to exclude", 
 			"可选择指定以空格分隔的报告。使用 '*' 或 '?' 进行通配符匹配。前缀 '-' 表示排除");
 		m.put("Optionally specify space-separated service images applicable for this locator. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all", 
-			"可选择指定适用于此定位器的以空格分隔的服务镜像。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有");
+			"可选择指定适用于此定位器的以空格分隔的服务镜像。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有");
 		m.put("Optionally specify space-separated service names applicable for this locator. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all", 
 			"可选择指定适用于此定位器的以空格分隔的服务名称。使用 '*' 或 '?' 进行通配符匹配。前缀 '-' 表示排除。留空则匹配所有");
 		m.put("Optionally specify space-separated tags to check. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all tags", 
-			"可选择指定要检查的以空格分隔的标签。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有标签");
+			"可选择指定要检查的以空格分隔的标签。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有标签");
 		m.put("Optionally specify space-separated target branches of the pull requests to check. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all branches", 
-			"可选择指定要检查的以空格分隔的合并请求的目标分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有分支");
+			"可选择指定要检查的以空格分隔的合并请求的目标分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有分支");
 		m.put("Optionally specify the OpenID claim to retrieve groups of authenticated user. Depending on the provider, you may need to request additional scopes above to make this claim available", 
 			"可选择指定要获取已认证用户的组。根据提供商，您可能需要请求额外的范围以使此声明可用");
 		m.put("Optionally specify the maximum value allowed.", "可选择指定允许的最大值");
@@ -2756,9 +2763,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Ref", "引用");
 		m.put("Ref Name", "引用名称");
 		m.put("Refer to this <a href='https://docs.onedev.io/tutorials/security/sso-with-github' target='_blank'>tutorial</a> for an example setup", 
-			"参考此<a href='https://docs.onedev.io/zh-Hans/tutorials/security/sso-with-github' target='_blank'>教程</a>获取示例设置");
+			"参考此<a href='https://docs.onedev.io/tutorials/security/sso-with-github' target='_blank'>教程</a>获取示例设置");
 		m.put("Refer to this <a href='https://docs.onedev.io/tutorials/security/sso-with-okta' target='_blank'>tutorial</a> for an example setup", 
-			"参考此<a href='https://docs.onedev.io/zh-Hans/tutorials/security/sso-with-okta' target='_blank'>教程</a>获取示例设置");
+			"参考此<a href='https://docs.onedev.io/tutorials/security/sso-with-okta' target='_blank'>教程</a>获取示例设置");
 		m.put("Reference", "引用");
 		m.put("Reference Build", "引用构建");
 		m.put("Reference Issue", "引用工单");
@@ -2896,7 +2903,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Run osv scanner to scan vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
 			"运行 OSV 扫描器扫描各种 <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>锁定文件</a> 中的漏洞。它只能由 docker 感知执行器执行。");
 		m.put("Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKSPACE</code>. <b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote docker executor", 
-			"运行指定的 docker 容器。<a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>Job workspace</a> 挂载到容器中，其路径放置在环境变量 <code>ONEDEV_WORKSPACE</code> 中。<b class='text-warning'>注意：</b> 此步骤只能由服务器 docker 执行器或远程 docker 执行器执行");
+			"运行指定的 docker 容器。<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> 挂载到容器中，其路径放置在环境变量 <code>ONEDEV_WORKSPACE</code> 中。<b class='text-warning'>注意：</b> 此步骤只能由服务器 docker 执行器或远程 docker 执行器执行");
 		m.put("Run specified step template", "运行指定的步骤模板");
 		m.put("Run this job", "运行此任务");
 		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>It can only be executed by docker aware executor.", 
@@ -3032,7 +3039,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Set up discord notification settings. Settings will be inherited by child projects, and can be overridden by defining settings with same webhook url", 
 			"设置 Discord 通知设置。设置将继承给子项目，并可以通过定义具有相同 Webhook URL 的设置来覆盖");
 		m.put("Set up job cache to speed up job execution. Check <a href='https://docs.onedev.io/tutorials/cicd/job-cache' target='_blank'>this tutorial</a> on how to use job cache", 
-			"设置任务缓存以加快任务执行。检查<a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/job-cache' target='_blank'>此教程</a>了解如何使用任务缓存");
+			"设置任务缓存以加快任务执行。检查<a href='https://docs.onedev.io/tutorials/cicd/job-cache' target='_blank'>此教程</a>了解如何使用任务缓存");
 		m.put("Set up ntfy.sh notification settings. Settings will be inherited by child projects, and can be overridden by defining settings with same webhook url", 
 			"设置 ntfy.sh 通知设置。设置将继承给子项目，并可以通过定义具有相同 Webhook URL 的设置来覆盖");
 		m.put("Set up slack notification settings. Settings will be inherited by child projects, and can be overridden by defining settings with same webhook url", 
@@ -3123,9 +3130,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Specified default value", "指定默认值");
 		m.put("Specified fields", "指定字段");
 		m.put("Specifies LDAP URL of the Active Directory server, for example: <i>ldap://ad-server</i>, or <i>ldaps://ad-server</i>. In case your ldap server is using a self-signed certificate for ldaps connection, you will need to <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates' target='_blank'>configure OneDev to trust the certificate</a>", 
-			"指定 Active Directory 服务器的 LDAP URL，例如：<i>ldap://ad-server</i> 或 <i>ldaps://ad-server</i>。如果您的 LDAP 服务器使用自签名证书进行 ldaps 连接，您需要<a href='https://docs.onedev.io/zh-Hans/administration-guide/trust-self-signed-certificates' target='_blank'>配置 OneDev 信任证书</a>");
+			"指定 Active Directory 服务器的 LDAP URL，例如：<i>ldap://ad-server</i> 或 <i>ldaps://ad-server</i>。如果您的 LDAP 服务器使用自签名证书进行 ldaps 连接，您需要<a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates' target='_blank'>配置 OneDev 信任证书</a>");
 		m.put("Specifies LDAP URL, for example: <i>ldap://localhost</i>, or <i>ldaps://localhost</i>. In caseyour ldap server is using a self-signed certificate for ldaps connection, you will need to <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates' target='_blank'>configure OneDev to trust the certificate</a>", 
-			"指定 LDAP URL，例如：<i>ldap://localhost</i> 或 <i>ldaps://localhost</i>。如果您的 LDAP 服务器使用自签名证书进行 ldaps 连接，您需要<a href='https://docs.onedev.io/zh-Hans/administration-guide/trust-self-signed-certificates' target='_blank'>配置 OneDev 信任证书</a>");
+			"指定 LDAP URL，例如：<i>ldap://localhost</i> 或 <i>ldaps://localhost</i>。如果您的 LDAP 服务器使用自签名证书进行 ldaps 连接，您需要<a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates' target='_blank'>配置 OneDev 信任证书</a>");
 		m.put("Specifies base nodes for user search. For example: <i>ou=users, dc=example, dc=com</i>", 
 			"指定一个或多个用于用户搜索的根节点。例如：<i>ou=users, dc=example, dc=com</i>");
 		m.put("Specifies name of the attribute inside the user LDAP entry whose value contains distinguished names of belonging groups. For instance some LDAP servers uses attribute <i>memberOf</i> to list groups", 
@@ -3134,46 +3141,46 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Specifies the attribute containing group name inside the found group LDAP entry. Value of this attribute will be mapped to a OneDev group. This attribute is normally set to <i>cn</i>", 
 			"指定在找到的组 LDAP 条目中包含组名称的属性。此属性的值将映射到 OneDev 组。此属性通常设置为 <i>cn</i>");
 		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
-			"指定 .net TRX 测试结果文件相对 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>job workspace</a>，例如 <tt>TestResults/*.trx</tt>。使用 * 或 ? 进行模式匹配");
+			"指定 .net TRX 测试结果文件相对 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>，例如 <tt>TestResults/*.trx</tt>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is access token with code write permission over above projects. Commits, issues, and pull requests will also be created under name of the access token owner", 
-			"指定 <a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 的值是具有代码写入权限的访问令牌。提交、问题和合并请求也将以访问令牌所有者的名义创建");
+			"指定 <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 的值是具有代码写入权限的访问令牌。提交、问题和合并请求也将以访问令牌所有者的名义创建");
 		m.put("Specify <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json output file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with clippy json output option, for instance <code>cargo clippy --message-format json>check-result.json</code>. Use * or ? for pattern match", 
-			"指定 <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json 输出文件相对 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>job workspace</a>。此文件可以通过 clippy json 输出选项生成，例如 <code>cargo clippy --message-format json>check-result.json</code>。使用 * 或 ? 进行模式匹配");
+			"指定 <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json 输出文件相对 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>。此文件可以通过 clippy json 输出选项生成，例如 <code>cargo clippy --message-format json>check-result.json</code>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify Build Options", "指定构建选项");
 		m.put("Specify CPD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/cpd.xml</tt>. Use * or ? for pattern match", 
-			"指定 CPD 结果 xml 文件相对 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>job workspace</a>，例如 <tt>target/cpd.xml</tt>。使用 * 或 ? 进行模式匹配");
+			"指定 CPD 结果 xml 文件相对 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>，例如 <tt>target/cpd.xml</tt>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify Commit Message", "指定提交消息");
 		m.put("Specify ESLint report file in checkstyle format under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with ESLint option <tt>'-f checkstyle'</tt> and <tt>'-o'</tt>. Use * or ? for pattern match", 
-			"指定 ESLint 报告文件在 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>job workspace</a> 中以 checkstyle 格式生成。此文件可以通过 ESLint 选项 <tt>'-f checkstyle'</tt> 和 <tt>'-o'</tt> 生成。使用 * 或 ? 进行模式匹配");
+			"指定 ESLint 报告文件在 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> 中以 checkstyle 格式生成。此文件可以通过 ESLint 选项 <tt>'-f checkstyle'</tt> 和 <tt>'-o'</tt> 生成。使用 * 或 ? 进行模式匹配");
 		m.put("Specify GitHub API url, for instance <tt>https://api.github.com</tt>", "指定 GitHub API URL，例如 <tt>https://api.github.com</tt>");
 		m.put("Specify GitLab API url, for instance <tt>https://gitlab.example.com/api/v4</tt>", "指定 GitLab API URL，例如 <tt>https://gitlab.example.com/api/v4</tt>");
 		m.put("Specify Gitea API url, for instance <tt>https://gitea.example.com/api/v1</tt>", "指定 Gitea API URL，例如 <tt>https://gitea.example.com/api/v1</tt>");
 		m.put("Specify GoogleTest XML result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This report can be generated with environment variable <tt>GTEST_OUTPUT</tt> when running tests, For instance, <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>. Use * or ? for pattern match", 
-			"指定 GoogleTest XML 结果文件相对 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>job workspace</a>。此报告可以通过在运行测试时使用环境变量 <tt>GTEST_OUTPUT</tt> 生成，例如 <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>。使用 * 或 ? 进行模式匹配");
+			"指定 GoogleTest XML 结果文件相对 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>。此报告可以通过在运行测试时使用环境变量 <tt>GTEST_OUTPUT</tt> 生成，例如 <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify IMAP user name.<br><b class='text-danger'>NOTE: </b> This account should be able to receive emails sent to system email address specified above", 
 			"指定 IMAP 用户名。<br><b class='text-danger'>注意：</b> 此帐户应能够接收发送到上面指定的系统电子邮件地址的电子邮件");
 		m.put("Specify JUnit test result file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>target/surefire-reports/TEST-*.xml</tt>. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>job workspace</a> 的 JUnit XML 格式测试结果文件，例如 <tt>target/surefire-reports/TEST-*.xml</tt>。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> 的 JUnit XML 格式测试结果文件，例如 <tt>target/surefire-reports/TEST-*.xml</tt>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify JaCoCo coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/site/jacoco/jacoco.xml</tt>. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>job workspace</a> 的 JaCoCo 覆盖率 xml 报告文件，例如 <tt>target/site/jacoco/jacoco.xml</tt>。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> 的 JaCoCo 覆盖率 xml 报告文件，例如 <tt>target/site/jacoco/jacoco.xml</tt>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify Jest coverage report file in clover format relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>coverage/clover.xml</tt>. This file can be generated with Jest option <tt>'--coverage'</tt>. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>job workspace</a> 的 clover 格式 Jest 覆盖率报告文件，例如 <tt>coverage/clover.xml</tt>。此文件可以通过 Jest 选项 <tt>'--coverage'</tt> 生成。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> 的 clover 格式 Jest 覆盖率报告文件，例如 <tt>coverage/clover.xml</tt>。此文件可以通过 Jest 选项 <tt>'--coverage'</tt> 生成。使用 * 或 ? 进行模式匹配");
 		m.put("Specify Jest test result file in json format relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated via Jest option <tt>'--json'</tt> and <tt>'--outputFile'</tt>. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>job workspace</a> 的 json 格式 Jest 测试结果文件。此文件可以通过 Jest 选项 <tt>'--json'</tt> 和 <tt>'--outputFile'</tt> 生成。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> 的 json 格式 Jest 测试结果文件。此文件可以通过 Jest 选项 <tt>'--json'</tt> 和 <tt>'--outputFile'</tt> 生成。使用 * 或 ? 进行模式匹配");
 		m.put("Specify OCI layout directory of the image to scan. This directory can be generated via build image step or pull image step. It should be relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"指定要扫描的镜像的 OCI 布局目录。此目录可以通过构建镜像步骤或拉取镜像步骤生成。它应该相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>job workspace</a>");
+			"指定要扫描的镜像的 OCI 布局目录。此目录可以通过构建镜像步骤或拉取镜像步骤生成。它应该相对于 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>");
 		m.put("Specify OCI layout directory relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to push from", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>job workspace</a> 的 OCI 布局目录以推送");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> 的 OCI 布局目录以推送");
 		m.put("Specify OpenID scopes to request", "指定要请求的 OpenID 作用域");
 		m.put("Specify PMD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/pmd.xml</tt>. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>job workspace</a> 的 PMD 结果 xml 文件，例如 <tt>target/pmd.xml</tt>。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> 的 PMD 结果 xml 文件，例如 <tt>target/pmd.xml</tt>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify PowerShell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>.<br><b class='text-warning'>NOTE: </b> OneDev checks exit code of the script to determine if step is successful. Since PowerShell always exit with 0 even if there are script errors, you should handle errors in the script and exit with non-zero code, or add line <code>$ErrorActionPreference = &quot;Stop&quot;</code> at start of your script<br>", 
-			"指定在 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>job workspace</a> 下执行的 PowerShell 命令。<br><b class='text-warning'>注意：</b> OneDev 检查脚本的退出代码以确定步骤是否成功。由于 PowerShell 即使有脚本错误也总是以 0 退出，您应该在脚本中处理错误并以非零代码退出，或在脚本开头添加行 <code>$ErrorActionPreference = &quot;Stop&quot;</code><br>");
+			"指定在 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> 下执行的 PowerShell 命令。<br><b class='text-warning'>注意：</b> OneDev 检查脚本的退出代码以确定步骤是否成功。由于 PowerShell 即使有脚本错误也总是以 0 退出，您应该在脚本中处理错误并以非零代码退出，或在脚本开头添加行 <code>$ErrorActionPreference = &quot;Stop&quot;</code><br>");
 		m.put("Specify Roslynator diagnostics output file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with <i>-o</i> option. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>job workspace</a> 的 XML 格式 Roslynator 诊断输出文件。此文件可以通过 <i>-o</i> 选项生成。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> 的 XML 格式 Roslynator 诊断输出文件。此文件可以通过 <i>-o</i> 选项生成。使用 * 或 ? 进行模式匹配");
 		m.put("Specify Shell/Batch Commands to Run", "指定要运行的 Shell/Batch 命令");
 		m.put("Specify SpotBugs result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/spotbugsXml.xml</tt>. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>job workspace</a> 的 SpotBugs 结果 xml 文件，例如 <tt>target/spotbugsXml.xml</tt>。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> 的 SpotBugs 结果 xml 文件，例如 <tt>target/spotbugsXml.xml</tt>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify URL of remote git repository. Only http/https protocol is supported", "指定远程 git 仓库的 URL。仅支持 http/https 协议");
 		m.put("Specify YouTrack login name. This account should have permission to:<ul><li>Read full information and issues of the projects you want to import<li>Read issue tags<li>Read user basic information</ul>", 
 			"指定 YouTrack 登录名。此账户应具有以下权限：<ul><li>读取您要导入的项目的完整信息和工单<li>读取工单标签<li>读取用户基本信息</ul>");
@@ -3185,30 +3192,30 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Specify a <a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'>regular expression</a> before issue number", 
 			"指定一个 <a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'>正则表达式</a> 在工单号之前");
 		m.put("Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as SSH private key", 
-			"指定一个 <a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 作为 SSH 私钥");
+			"指定一个 <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 作为 SSH 私钥");
 		m.put("Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token", 
-			"指定一个 <a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 作为访问令牌");
+			"指定一个 <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 作为访问令牌");
 		m.put("Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token to import build spec from above project if its code is not publicly accessible", 
-			"指定一个 <a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 作为访问令牌以从上述项目导入构建规范，如果其代码不是公开可访问的");
+			"指定一个 <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 作为访问令牌以从上述项目导入构建规范，如果其代码不是公开可访问的");
 		m.put("Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as password or access token of the registry", 
-			"指定一个 <a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 作为密码或访问令牌的注册表");
+			"指定一个 <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 作为密码或访问令牌的注册表");
 		m.put("Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as password or access token to access remote repository", 
-			"指定一个 <a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 作为访问远程仓库的密码或访问令牌");
+			"指定一个 <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 作为访问远程仓库的密码或访问令牌");
 		m.put("Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as private key for SSH authentication. <b class='text-info'>NOTE:</b> Private key with passphrase is not supported", 
-			"指定一个 <a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 作为 SSH 认证的私钥。<b class='text-info'>注意：</b>不支持带密码短语的私钥");
+			"指定一个 <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 作为 SSH 认证的私钥。<b class='text-info'>注意：</b>不支持带密码短语的私钥");
 		m.put("Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as private key of above user for SSH authentication. <b class='text-info'>NOTE:</b> Private key with passphrase is not supported", 
-			"指定一个 <a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 作为上述用户 SSH 认证的私钥。<b class='text-info'>注意：</b>不支持带密码短语的私钥");
+			"指定一个 <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a> 作为上述用户 SSH 认证的私钥。<b class='text-info'>注意：</b>不支持带密码短语的私钥");
 		m.put("Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is an access token with management permission for above project. Note that access token is not required if sync to current or child project and build commit is reachable from default branch", 
-			"指定一个 <a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a>，其值是具有上述项目管理权限的访问令牌。注意，如果同步到当前或子项目且构建提交可从默认分支访问，则不需要访问令牌");
+			"指定一个 <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a>，其值是具有上述项目管理权限的访问令牌。注意，如果同步到当前或子项目且构建提交可从默认分支访问，则不需要访问令牌");
 		m.put("Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is an access token with upload cache permission for above project. Note that this property is not required if upload cache to current or child project and build commit is reachable from default branch", 
-			"指定一个 <a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a>，其值是具有上述项目上传缓存权限的访问令牌。注意，如果上传缓存到当前或子项目且构建提交可从默认分支访问，则不需要此属性");
+			"指定一个 <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>任务密钥</a>，其值是具有上述项目上传缓存权限的访问令牌。注意，如果上传缓存到当前或子项目且构建提交可从默认分支访问，则不需要此属性");
 		m.put("Specify a <a target='_blank' href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format'>cron schedule</a> to fire the job automatically. <b class='text-info'>Note:</b> To save resource, seconds in cron expression will be ignored, and the minimum schedule interval is one minute", 
 			"指定一个 <a target='_blank' href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format'>cron 计划</a>以自动触发任务。<b class='text-info'>注意：</b>为节省资源，cron 表达式中的秒数将被忽略，最小调度间隔为一分钟");
 		m.put("Specify a Docker Image to Test Against", "指定要测试的 Docker 镜像");
 		m.put("Specify a custom field of Enum type", "指定枚举类型的自定义字段");
 		m.put("Specify a default query to filter/order fixed issues of specified jobs", "指定用于过滤/排序指定任务修复工单的默认查询");
 		m.put("Specify a file relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to write checksum into", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>job workspace</a> 的文件以写入校验和");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> 的文件以写入校验和");
 		m.put("Specify a multi-value user field to hold assignees information.<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"指定一个多值用户字段以保存受理人信息。<b>注意：</b>如果这里没有合适的选项，您可以自定义 OneDev 工单字段");
 		m.put("Specify a multi-value user field to hold assignees information.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
@@ -3235,16 +3242,16 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Specify an email address sharing same inbox as the system email address in mail setting definition. Emails sent to this address will be created as issues in this project. The default value takes form of <tt>&lt;system email address name&gt;+&lt;project path&gt;@&lt;system email address domain&gt;</tt>", 
 			"指定一个与邮件设置定义中的系统电子邮件地址共享同一收件箱的电子邮件地址。发送到此地址的电子邮件将在此项目中创建为工单。默认值采用以下形式：<tt>&lt;系统电子邮件地址名称&gt;+&lt;项目路径&gt;@&lt;系统电子邮件地址域名&gt;</tt>");
 		m.put("Specify applicable projects for above option. Multiple projects should be separated by space. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for all projects", 
-			"指定上述选项适用的项目。多个项目应以空格分隔。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空表示所有项目");
+			"指定上述选项适用的项目。多个项目应以空格分隔。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空表示所有项目");
 		m.put("Specify applicable projects separated by space. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for all projects", 
-			"指定以空格分隔的适用项目。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空表示所有项目");
+			"指定以空格分隔的适用项目。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空表示所有项目");
 		m.put("Specify application (client) ID of the app registered in Entra ID", "指定在 Entra ID 中注册的应用程序（客户端）ID");
 		m.put("Specify arguments for imagetools. For instance <code>create -t myorg/myrepo:1.0.0 myorg/myrepo@&lt;arm64 manifest digest&gt; myorg/myrepo@&lt;amd64 manifest digest&gt;</code>", 
 			"指定 imagetools 的参数。例如 <code>create -t myorg/myrepo:1.0.0 myorg/myrepo@&lt;arm64 清单摘要&gt; myorg/myrepo@&lt;amd64 清单摘要&gt;</code>");
 		m.put("Specify artifacts to retrieve into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved.", 
-			"指定要拷贝到 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的制品。只能拷贝已发布的制品（通过制品发布步骤）。");
+			"指定要拷贝到 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的制品。只能拷贝已发布的制品（通过制品发布步骤）。");
 		m.put("Specify at least 10 alphanumeric chars to be used as secret, and then add an inbound parse entry at SendGrid side:<ul><li><code>Destination URL</code> should be set to <i>&lt;OneDev root url&gt;/~sendgrid/&lt;secret&gt;</i>, for instance, <i>https://onedev.example.com/~sendgrid/1234567890</i>. Note that in production environment, <a href='https://docs.onedev.io/administration-guide/https-setup' target='_blank'>https should be enabled</a> to protect the secret</li><li><code>Receiving domain</code> should be the same as domain part of system email address specified above</li><li>Option <code>POST the raw, full MIME message</code> is enabled</li></ul>", 
-			"指定至少 10 个字母数字字符作为密钥，然后在 SendGrid 端添加入站解析条目：<ul><li><code>目标 URL</code> 应设置为 <i>&lt;OneDev 根 URL&gt;/~sendgrid/&lt;密钥&gt;</i>，例如 <i>https://onedev.example.com/~sendgrid/1234567890</i>。注意在生产环境中，应<a href='https://docs.onedev.io/zh-Hans/administration-guide/https-setup' target='_blank'>启用 https</a> 以保护密钥</li><li><code>接收域名</code> 应与上面指定的系统电子邮件地址的域名部分相同</li><li>启用选项 <code>POST 原始完整 MIME 消息</code></li></ul>");
+			"指定至少 10 个字母数字字符作为密钥，然后在 SendGrid 端添加入站解析条目：<ul><li><code>目标 URL</code> 应设置为 <i>&lt;OneDev 根 URL&gt;/~sendgrid/&lt;密钥&gt;</i>，例如 <i>https://onedev.example.com/~sendgrid/1234567890</i>。注意在生产环境中，应<a href='https://docs.onedev.io/administration-guide/https-setup' target='_blank'>启用 https</a> 以保护密钥</li><li><code>接收域名</code> 应与上面指定的系统电子邮件地址的域名部分相同</li><li>启用选项 <code>POST 原始完整 MIME 消息</code></li></ul>");
 		m.put("Specify base nodes for user search. For example: <i>cn=Users, dc=example, dc=com</i>", 
 			"指定用户搜索的基础节点。例如：<i>cn=Users, dc=example, dc=com</i>");
 		m.put("Specify branch to commit suggested change", "指定要提交建议更改的分支");
@@ -3257,12 +3264,12 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Specify certificates to trust if you are using self-signed certificates for your docker registries", 
 			"如果您对 Docker 注册表使用自签名证书，请指定要信任的证书");
 		m.put("Specify checkstyle result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/checkstyle-result.xml</tt>. Refer to <a href='https://checkstyle.org/'>checkstyle documentation</a> on how to generate the result xml file. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的 checkstyle 结果 xml 文件，例如 <tt>target/checkstyle-result.xml</tt>。参考 <a href='https://checkstyle.org/'>checkstyle 文档</a> 了解如何生成结果 xml 文件。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的 checkstyle 结果 xml 文件，例如 <tt>target/checkstyle-result.xml</tt>。参考 <a href='https://checkstyle.org/'>checkstyle 文档</a> 了解如何生成结果 xml 文件。使用 * 或 ? 进行模式匹配");
 		m.put("Specify client secret of the app registered in Entra ID", "指定在 Entra ID 中注册的应用程序的客户端密钥");
 		m.put("Specify clover coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/site/clover/clover.xml</tt>. Refer to <a href='https://openclover.org/documentation'>OpenClover documentation</a> on how to generate clover xml file. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的 clover 覆盖率 xml 报告文件，例如 <tt>target/site/clover/clover.xml</tt>。参考 <a href='https://openclover.org/documentation'>OpenClover 文档</a> 了解如何生成 clover xml 文件。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的 clover 覆盖率 xml 报告文件，例如 <tt>target/site/clover/clover.xml</tt>。参考 <a href='https://openclover.org/documentation'>OpenClover 文档</a> 了解如何生成 clover xml 文件。使用 * 或 ? 进行模式匹配");
 		m.put("Specify cobertura coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/site/cobertura/coverage.xml</tt>. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的 cobertura 覆盖率 xml 报告文件，例如 <tt>target/site/cobertura/coverage.xml</tt>。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的 cobertura 覆盖率 xml 报告文件，例如 <tt>target/site/cobertura/coverage.xml</tt>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify color of the state for displaying purpose", "指定状态的显示颜色");
 		m.put("Specify columns of the board. Each column corresponds to a value of the issue field specified above", 
 			"指定看板的列。每列对应于上面指定的工单字段的一个值");
@@ -3276,7 +3283,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Specify container image to execute commands inside", "指定用于执行命令的容器镜像");
 		m.put("Specify container image to run", "指定要运行的容器镜像");
 		m.put("Specify cppcheck xml result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with cppcheck xml output option, for instance <code>cppcheck src --xml 2>check-result.xml</code>. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的 cppcheck xml 结果文件。此文件可以通过 cppcheck xml 输出选项生成，例如 <code>cppcheck src --xml 2>check-result.xml</code>。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的 cppcheck xml 结果文件。此文件可以通过 cppcheck xml 输出选项生成，例如 <code>cppcheck src --xml 2>check-result.xml</code>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify cpu request for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"指定使用此执行器的每个任务/服务的 CPU 请求。查看 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes 资源管理</a> 了解详情");
 		m.put("Specify default assignees of pull requests submitted to this project. Only users with the write code permission to the project can be selected", 
@@ -3286,10 +3293,10 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"指定目标，例如 <tt>registry-server:5000/myorg/myrepo:latest</tt>。如果要推送到内置注册表，请确保使用与系统设置中服务器 URL 指定的<b>相同主机</b>，或者简单地使用格式 <tt>@server@/&lt;项目路径&gt;/&lt;仓库名称&gt;:&lt;标签名称&gt;</tt>。多个目标应以空格分隔");
 		m.put("Specify directory (tenant) ID of the app registered in Entra ID", "指定在 Entra ID 中注册的应用程序的目录（租户）ID");
 		m.put("Specify directory relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to store OCI layout", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>任务工作区</a> 的目录以存储 OCI 布局");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a> 的目录以存储 OCI 布局");
 		m.put("Specify docker image of the service", "指定服务的 Docker 镜像");
 		m.put("Specify dockerx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
-			"指定用于构建 Docker 镜像的 dockerx 构建器。如果不存在，OneDev 将自动创建构建器。查看<a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/insecure-docker-registry' target='_blank'>此教程</a>了解如何自定义构建器，例如允许发布到不安全的注册表");
+			"指定用于构建 Docker 镜像的 dockerx 构建器。如果不存在，OneDev 将自动创建构建器。查看<a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>此教程</a>了解如何自定义构建器，例如允许发布到不安全的注册表");
 		m.put("Specify email addresses to send invitations, with one per line", "指定要发送邀请的电子邮件地址，每行一个");
 		m.put("Specify estimated time <b class='text-warning'>only for this issue</b>, not counting \"{0}\"", 
 			"指定预计时间 <b class='text-warning'>仅针对此工单</b>，不包括 \"{0}\"");
@@ -3298,9 +3305,9 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Specify fields to be displayed in the issue list", "指定要在工单列表中显示的字段");
 		m.put("Specify fields to display in board card", "指定在看板卡片中显示的字段");
 		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be published. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 要发布的文件。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 要发布的文件。使用 * 或 ? 进行模式匹配");
 		m.put("Specify files to create md5 checksum from. Multiple files should be separated by space. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> patterns accepted. Non-absolute file is considered to be relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"指定要创建 md5 校验和的文件。多个文件应以空格分隔。接受 <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> 模式。非绝对路径文件被视为相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>任务工作区</a>");
+			"指定要创建 md5 校验和的文件。多个文件应以空格分隔。接受 <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> 模式。非绝对路径文件被视为相对于 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a>");
 		m.put("Specify files under above directory to be published. Use * or ? for pattern match", 
 			"指定要发布的上述目录下的文件。使用 * 或 ? 进行模式匹配");
 		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> <code>index.html</code> should be included in these files to be served as site start page", 
@@ -3346,7 +3353,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"指定管理器 DN 以将 OneDev 自身认证到 Active Directory。管理器 DN 应以 <i>&lt;账户名&gt;@&lt;域名&gt;</i> 的形式指定，例如：<i>manager@example.com</i>");
 		m.put("Specify manager DN to authenticate OneDev itself to LDAP server", "指定用于 OneDev 向 LDAP 服务器进行身份验证的管理者 DN");
 		m.put("Specify markdown file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be published", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的 markdown 文件以进行发布");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的 markdown 文件以进行发布");
 		m.put("Specify max git LFS file size in mega bytes", "指定 Git LFS 文件的最大大小（以兆字节为单位）");
 		m.put("Specify max number of CPU intensive tasks the server can run concurrently, such as Git repository pull/push, repository index, etc.", 
 			"指定服务器可并发运行的 CPU 密集型任务的最大数量，例如 Git 仓库拉取/推送、仓库索引等");
@@ -3363,7 +3370,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Specify memory request for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"指定使用此执行器的每个任务/服务的内存请求。详情请查看 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes 资源管理</a>");
 		m.put("Specify mypy output file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated by redirecting mypy output <b>without option '--pretty'</b>, for instance <code>mypy --exclude=.git --exclude=.venv . > mypy-output</code>. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的 mypy 输出文件。此文件可通过重定向 mypy 输出生成，且<b>不使用 '--pretty' 选项</b>，例如 <code>mypy --exclude=.git --exclude=.venv . > mypy-output</code>。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的 mypy 输出文件。此文件可通过重定向 mypy 输出生成，且<b>不使用 '--pretty' 选项</b>，例如 <code>mypy --exclude=.git --exclude=.venv . > mypy-output</code>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify name of the branch", "指定分支名称");
 		m.put("Specify name of the environment variable", "指定环境变量名称");
 		m.put("Specify name of the iteration", "指定迭代名称");
@@ -3386,44 +3393,44 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Specify projects", "指定项目");
 		m.put("Specify projects to update dependencies. Leave empty for current project", "指定要更新依赖的项目。留空表示当前项目");
 		m.put("Specify pylint json result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with pylint json output format option, for instance <code>--exit-zero --output-format=json:pylint-result.json</code>. Note that we do not fail pylint command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的 pylint JSON 结果文件。此文件可使用 pylint JSON 输出格式选项生成，例如 <code>--exit-zero --output-format=json:pylint-result.json</code>。注意，违反规则时我们不会使 pylint 命令失败，因为此步骤将根据配置的阈值使构建失败。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的 pylint JSON 结果文件。此文件可使用 pylint JSON 输出格式选项生成，例如 <code>--exit-zero --output-format=json:pylint-result.json</code>。注意，违反规则时我们不会使 pylint 命令失败，因为此步骤将根据配置的阈值使构建失败。使用 * 或 ? 进行模式匹配");
 		m.put("Specify registry logins if necessary. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token for password", 
 			"如有必要，指定注册表登录信息。对于内置注册表，使用 <code>@server_url@</code> 作为注册表 URL，<code>@job_token@</code> 作为用户名，访问令牌作为密码");
 		m.put("Specify registry url. Leave empty for official registry", "指定注册表 URL。留空表示官方注册表");
 		m.put("Specify relative path under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to store OCI layout", 
-			"指定在 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>任务工作区</a> 下存储 OCI 布局的相对路径");
+			"指定在 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a> 下存储 OCI 布局的相对路径");
 		m.put("Specify repositories", "指定仓库");
 		m.put("Specify required reviewers if specified path is changed. Note that the user submitting the change is considered to reviewed the change automatically", 
 			"指定更改指定路径时所需的审阅者。注意，提交更改的用户被视为已自动审阅该更改");
 		m.put("Specify root URL to access this server", "指定访问此服务器的根 URL");
 		m.put("Specify ruff json result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with ruff json output format option, for instance <code>--exit-zero --output-format json --output-file ruff-result.json</code>. Note that we do not fail ruff command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的 ruff JSON 结果文件。此文件可使用 ruff JSON 输出格式选项生成，例如 <code>--exit-zero --output-format json --output-file ruff-result.json</code>。注意，违反规则时我们不会使 ruff 命令失败，因为此步骤将根据配置的阈值使构建失败。使用 * 或 ? 进行模式匹配");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的 ruff JSON 结果文件。此文件可使用 ruff JSON 输出格式选项生成，例如 <code>--exit-zero --output-format json --output-file ruff-result.json</code>。注意，违反规则时我们不会使 ruff 命令失败，因为此步骤将根据配置的阈值使构建失败。使用 * 或 ? 进行模式匹配");
 		m.put("Specify shell commands (on Linux/Unix) or batch commands (on Windows) to execute under the <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"指定在 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>任务工作区</a> 下执行的 shell 命令（在 Linux/Unix 上）或批处理命令（在 Windows 上）");
+			"指定在 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a> 下执行的 shell 命令（在 Linux/Unix 上）或批处理命令（在 Windows 上）");
 		m.put("Specify shell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"指定在 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>任务工作区</a> 下执行的 shell 命令");
+			"指定在 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a> 下执行的 shell 命令");
 		m.put("Specify shell to be used", "指定要使用的 shell");
 		m.put("Specify source param for SCP command, for instance <code>app.tar.gz</code>", "指定 SCP 命令的源参数，例如 <code>app.tar.gz</code>");
 		m.put("Specify space separated refs to pull from remote. '*' can be used in ref name for wildcard match<br><b class='text-danger'>NOTE:</b> branch/tag protection rule will be ignored when update branches/tags via this step", 
 			"指定从远程拉取的以空格分隔的引用。引用名称中可使用 '*' 进行通配符匹配<br><b class='text-danger'>注意：</b> 通过此步骤更新分支/标签时，将忽略分支/标签保护规则");
 		m.put("Specify space-separated branches to be protected. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude", 
-			"指定要保护的以空格分隔的分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。以 '-' 为前缀表示排除");
+			"指定要保护的以空格分隔的分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。以 '-' 为前缀表示排除");
 		m.put("Specify space-separated jobs. Use '*' or '?' for wildcard match. Prefix with '-' to exclude", 
 			"指定以空格分隔的任务。使用 '*' 或 '?' 进行通配符匹配。以 '-' 为前缀表示排除");
 		m.put("Specify space-separated jobs. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. <b class='text-danger'>NOTE: </b> Permission to access build artifacts will be granted implicitly in matched jobs even if no other permissions are specified here", 
 			"指定以空格分隔的任务。使用 '*' 或 '?' 进行通配符匹配。以 '-' 为前缀表示排除。<b class='text-danger'>注意：</b> 即使此处未指定其他权限，匹配的任务也将隐式授予访问构建产物的权限");
 		m.put("Specify space-separated paths to be protected. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude", 
-			"指定要保护的以空格分隔的路径。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。以 '-' 为前缀表示排除");
+			"指定要保护的以空格分隔的路径。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。以 '-' 为前缀表示排除");
 		m.put("Specify space-separated projects applicable for this entry. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all projects", 
 			"指定适用于此条目的以空格分隔的项目。使用 '*' 或 '?' 进行通配符匹配。以 '-' 为前缀表示排除。留空表示匹配所有项目");
 		m.put("Specify space-separated sender email addresses applicable for this entry. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all senders", 
 			"指定适用于此条目的以空格分隔的发送者电子邮件地址。使用 '*' 或 '?' 进行通配符匹配。以 '-' 为前缀表示排除。留空表示匹配所有发送者");
 		m.put("Specify space-separated tags to be protected. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude", 
-			"指定要保护的以空格分隔的标签。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。以 '-' 为前缀表示排除");
+			"指定要保护的以空格分隔的标签。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。以 '-' 为前缀表示排除");
 		m.put("Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance: <tt>manual/index.md</tt>", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的报告起始页面，例如：<tt>manual/index.md</tt>");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的报告起始页面，例如：<tt>manual/index.md</tt>");
 		m.put("Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance: api/index.html", 
-			"指定相对于 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a> 的报告起始页面，例如：api/index.html");
+			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的报告起始页面，例如：api/index.html");
 		m.put("Specify storage size to request for the build volume. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
 			"指定为构建卷请求的存储大小。大小应符合 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes 资源容量格式</a>，例如 <i>10Gi</i>");
 		m.put("Specify tab width used to calculate column value of found problems in provided report", 
@@ -3503,7 +3510,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Step {0} of {1}: ", "步骤 {0}/{1}：");
 		m.put("Steps", "步骤");
 		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>", 
-			"步骤将在同一节点上按顺序执行，共享同一 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区'>任务工作区</a>");
+			"步骤将在同一节点上按顺序执行，共享同一 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a>");
 		m.put("Stop work", "停止工作");
 		m.put("Stopwatch Overdue", "秒表逾期");
 		m.put("Storage Setting", "存储设置");
@@ -3697,7 +3704,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("This name has already been used by another state", "此名称已被另一个状态使用");
 		m.put("This operation is disallowed by branch protection rule", "此操作被分支保护规则禁止");
 		m.put("This page lists changes since previous build on <a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">same stream</a>", 
-			"此页面列出了自上一个构建以来的更改，在 <a href=\"https://docs.onedev.io/zh-Hans/concepts#构建流\" class=\"link-primary\" target=\"_blank\">相同流</a> 上");
+			"此页面列出了自上一个构建以来的更改，在 <a href=\"https://docs.onedev.io/concepts#构建流\" class=\"link-primary\" target=\"_blank\">相同流</a> 上");
 		m.put("This page lists recent commits fixing the issue", "此页面列出了修复工单的最近提交");
 		m.put("This permission enables one to access confidential issues", "此权限允许访问机密工单");
 		m.put("This permission enables one to schedule issues into iterations", "此权限允许将工单调度到迭代中");
@@ -3706,7 +3713,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("This report will be displayed in pull request overview page if build is triggered by pull request", 
 			"如果构建由合并请求触发，此报告将显示在合并请求概览页面中");
 		m.put("This server is currently accessed via http protocol, please configure your docker daemon or buildx builder to <a href=\"https://docs.onedev.io/tutorials/cicd/insecure-docker-registry\" target=\"_blank\">work with insecure registry</a>", 
-			"当前服务器通过 http 协议访问，请配置您的 docker 守护进程或 buildx 构建器以 <a href=\"https://docs.onedev.io/zh-Hans/tutorials/cicd/insecure-docker-registry\" target=\"_blank\">发布镜像到不安全注册表</a>");
+			"当前服务器通过 http 协议访问，请配置您的 docker 守护进程或 buildx 构建器以 <a href=\"https://docs.onedev.io/tutorials/cicd/insecure-docker-registry\" target=\"_blank\">发布镜像到不安全注册表</a>");
 		m.put("This shows average duration of different states over time", "显示不同状态的平均持续时间");
 		m.put("This shows average duration of merged pull requests over time", "此图表显示合并请求的平均持续时间");
 		m.put("This shows number of <b>new</b> issues in different states over time", "显示不同状态的新工单数量");
@@ -3714,7 +3721,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("This shows number of open and merged pull requests over time", "此图表显示打开和合并的合并请求的数量");
 		m.put("This step can only be executed by a docker aware executor", "此步骤只能由支持 Docker 的执行器执行");
 		m.put("This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"此步骤只能由支持 Docker 的执行器执行。它在 <a href='https://docs.onedev.io/zh-Hans/concepts#任务工作区' target='_blank'>任务工作区</a> 下运行");
+			"此步骤只能由支持 Docker 的执行器执行。它在 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a> 下运行");
 		m.put("This step publishes specified files to be served as project web site. Project web site can be accessed publicly via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>", 
 			"此步骤发布指定文件作为项目网站。项目网站可以通过 <code>http://&lt;onedev 基础 url&gt;/path/to/project/~site</code> 公开访问");
 		m.put("This step pulls specified refs from remote. For security reason, it is only allowed to run from default branch", 
@@ -3729,7 +3736,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("This tab shows the pipeline containing current build. Check <a href=\"https://robinshen.medium.com/understanding-onedev-pipeline-db0bb0e54aa7\" target=\"_blank\">this article</a> to understand how build pipeline works", 
 			"此标签显示包含当前构建的流水线。请查看 <a href=\"https://robinshen.medium.com/understanding-onedev-pipeline-db0bb0e54aa7\" target=\"_blank\">这篇文章</a> 以了解流水线的工作原理");
 		m.put("This trigger will only be applicable if tagged commit is reachable from branches specified here. Multiple branches should be separated with spaces. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all branches", 
-			"此触发器仅在标记的提交可从此处指定的分支访问时适用。多个分支应以空格分隔。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。以 '-' 为前缀表示排除。留空表示匹配所有分支");
+			"此触发器仅在标记的提交可从此处指定的分支访问时适用。多个分支应以空格分隔。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。以 '-' 为前缀表示排除。留空表示匹配所有分支");
 		m.put("This user is authenticating via external system.", "此用户通过外部系统进行身份验证。");
 		m.put("This user is authenticating via internal database.", "此用户通过内部数据库进行身份验证。");
 		m.put("This user is currently authenticating via external system. Setting password will switch to use internal database", 
@@ -3923,11 +3930,11 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Use '*' for wildcard match", "使用 '*' 进行通配符匹配");
 		m.put("Use '*' or '?' for wildcard match. Prefix with '-' to exclude", "使用 '*' 或 '?' 进行通配符匹配。前缀 '-' 排除");
 		m.put("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>", 
-			"使用 '**'、'*' 或 '?' 进行<a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>");
+			"使用 '**'、'*' 或 '?' 进行<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>");
 		m.put("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude", 
-			"使用 '**', '*' 或 '?' 进行 <a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀为 '-' 以排除");
+			"使用 '**', '*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀为 '-' 以排除");
 		m.put("Use '**', '*', or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>", 
-			"使用 '**'、'*' 或 '?' 进行<a href='https://docs.onedev.io/zh-Hans/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>");
+			"使用 '**'、'*' 或 '?' 进行<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>");
 		m.put("Use '\\' to escape brackets", "使用 '\\' 转义括号");
 		m.put("Use '\\' to escape quotes", "使用 '\\' 转义引号");
 		m.put("Use @@ to reference scope in job commands to avoid being interpreted as variable", "使用 @@ 引用任务命令中的范围以避免被解释为变量");
@@ -4090,7 +4097,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Whether or not to retrieve groups of login user. Make sure to add groups claim via token configuration of the app registered in Entra ID if this option is enabled. The groups claim should return group id (the default option) via various token types in this case", 
 			"是否查询登录用户的组。如果启用此选项，请确保通过在 Entra ID 中注册的应用程序的令牌配置添加组声明。在这种情况下，组声明应通过各种令牌类型返回组 ID（默认选项）");
 		m.put("Whether or not to retrieve submodules. Refer to <a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on how to set up clone credential above to retrieve submodules", 
-			"是否获取子模块。请参阅 <a href='https://docs.onedev.io/zh-Hans/tutorials/cicd/clone-submodules' target='_blank'>此教程</a>，了解如何设置上述克隆凭据以获取子模块");
+			"是否获取子模块。请参阅 <a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>此教程</a>，了解如何设置上述克隆凭据以获取子模块");
 		m.put("Whether or not to run this step inside container", "是否在容器内运行此步骤");
 		m.put("Whether or not to scan recursively in above paths", "是否在上述路径中递归扫描");
 		m.put("Whether or not to send notifications for events generated by yourself", "是否为自身生成的事件发送通知");
@@ -4178,7 +4185,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("committed by", "提交者是");
 		m.put("common", "公共");
 		m.put("common ancestor", "共同祖先");
-		m.put("container-image", "容器镜像");
+		m.put("container:image", "容器镜像");
 		m.put("copy", "复制");
 		m.put("ctrl-k to show command palette", "ctrl-k 显示命令面板");
 		m.put("curl Command Line", "curl 命令行");
@@ -4234,8 +4241,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("log", "日志");
 		m.put("manage job", "管理任务");
 		m.put("may not be empty", "不能为空");
-		m.put("md:heading", "标题");
-		m.put("md:image", "图片");
+		m.put("markdown:heading", "标题");
+		m.put("markdown:image", "图片");
 		m.put("merged", "已合并");
 		m.put("month:Apr", "四月");
 		m.put("month:Aug", "八月");

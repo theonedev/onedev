@@ -33,7 +33,7 @@ import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.MetricIndicator;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.translation.Translation;
+import io.onedev.server.web.translation.Translation_zh_CN;
 import io.onedev.server.web.util.TextUtils;
 
 @Singleton
@@ -61,7 +61,7 @@ public class ExtractTranslationKeys extends CommandHandler {
 	private static final Pattern TRANSLATION_PATTERN = Pattern.compile(
 			"m\\s*\\.\\s*put\\s*\\(\\s*\"((?:[^\"\\\\]|\\\\.)*)\"\\s*,\\s*\"((?:[^\"\\\\]|\\\\.)*)\"\\s*\\)\\s*;");
 
-	private static final String TRANSLATE_PLACEHOLDER = "**** translate this ****";
+	static final String TRANSLATE_PLACEHOLDER = "**** translate key ****";
 
 	@Inject
 	public ExtractTranslationKeys(HibernateConfig hibernateConfig) {
@@ -201,13 +201,9 @@ public class ExtractTranslationKeys extends CommandHandler {
 						}
 					});
 
-			for (var file : new File(projectDir,
-					"server-core/src/main/java/" + Translation.class.getPackageName().replace(".", "/")).listFiles()) {
-				if (file.getName().startsWith(Translation.class.getSimpleName() + "_")) {
-					var content = updateTranslationKeys(Files.readString(file.toPath()), extractedTranslationKeys);
-					Files.writeString(file.toPath(), content);
-				}
-			}
+			var file = new File(projectDir, "server-core/src/main/java/" + Translation_zh_CN.class.getName().replace(".", "/"));
+			var content = updateTranslationKeys(Files.readString(file.toPath()), extractedTranslationKeys);
+			Files.writeString(file.toPath(), content);
 		} catch (Throwable e) {
 			logger.error("Error extracting translation keys", e);
 			System.exit(1);
@@ -290,7 +286,7 @@ public class ExtractTranslationKeys extends CommandHandler {
 		if (value != null)
 			value = escapeJava(value, LEVEL_1_BASIC_ESCAPE_SET);
 		else
-			value = "**** translate this ****";
+			value = TRANSLATE_PLACEHOLDER;
 		translations.append("\t\tm.put(\"" + key + "\", ");
 		if (key.length() > 80)
 			translations.append("\n\t\t\t");

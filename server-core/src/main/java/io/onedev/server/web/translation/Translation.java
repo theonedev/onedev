@@ -72,9 +72,9 @@ public class Translation extends TranslationResourceBundle {
 
 	private static void init() {
 		m.clear();
-		m.put("md:heading", "Heading");
-		m.put("md:image", "Image");
-		m.put("container-image", "Image");
+		m.put("markdown:heading", "Heading");
+		m.put("markdown:image", "Image");
+		m.put("container:image", "Image");
 		m.put("month:Apr", "Apr");
 		m.put("month:Aug", "Aug");
 		m.put("month:Dec", "Dec");
