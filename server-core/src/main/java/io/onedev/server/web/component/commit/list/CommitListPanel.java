@@ -2,6 +2,7 @@ package io.onedev.server.web.component.commit.list;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,8 +47,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,12 +115,11 @@ public abstract class CommitListPanel extends Panel {
 
 		private List<RevCommit> separateByDate(List<RevCommit> commits) {
 			List<RevCommit> separated = new ArrayList<>();
-			DateTime groupTime = null;
+			LocalDate groupDate = null;
 			for (RevCommit commit: commits) {
-				DateTime commitTime = new DateTime(commit.getCommitterIdent().getWhen()).withZone(DateTimeZone.forID(DateUtils.getZoneId().getId()));
-				if (groupTime == null || commitTime.getYear() != groupTime.getYear() 
-						|| commitTime.getDayOfYear() != groupTime.getDayOfYear()) {
-					groupTime = commitTime;
+				var commitDate = DateUtils.toLocalDate(commit.getCommitterIdent().getWhen());
+				if (groupDate == null || commitDate.toEpochDay() != groupDate.toEpochDay()) {
+					groupDate = commitDate;
 					separated.add(null);
 				} 
 				separated.add(commit);

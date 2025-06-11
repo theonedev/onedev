@@ -83,11 +83,11 @@ public class ExtractTranslationKeysTest {
                                 + "\t\t//  Extracted  keys\n"
                                 + "\t\tm.put(\"message1\", \"消息$100\");\n"
                                 + "\n"
-                                + "\t\tm.put(\"message2\", \n\t\t\"**** translate this ****\");\n"
+                                + "\t\tm.put(\"message2\", \n\t\t\"**** translate key ****\");\n"
                                 + "\n"
                                 + "\t\t\t//  Manually added  keys";
                 assertEquals(
-                                "\n\t\t//  Extracted  keys\n\t\tm.put(\"message1\", \"消息$100\");\n\t\tm.put(\"message2\", \"**** translate this ****\");\n\t\tm.put(\"message3\", \"**** translate this ****\");\n\n\t\t\t//  Manually added  keys",
+                                "\n\t\t//  Extracted  keys\n\t\tm.put(\"message1\", \"消息$100\");\n\t\tm.put(\"message2\", \"**** translate key ****\");\n\t\tm.put(\"message3\", \"**** translate key ****\");\n\n\t\t\t//  Manually added  keys",
                                 ExtractTranslationKeys.updateTranslationKeys(content,
                                                 List.of("message1", "message2", "message3")));
         }
