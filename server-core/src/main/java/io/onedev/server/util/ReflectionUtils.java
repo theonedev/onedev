@@ -248,7 +248,8 @@ public class ReflectionUtils {
 	 * @throws
 	 * 			RuntimeException if no static method matching specified name and parameters
 	 */
-	public static Object invokeStaticMethod(Class<?> clazz, String methodName, Object...params) {
+	@SuppressWarnings("unchecked")
+	public static <T> T invokeStaticMethod(Class<?> clazz, String methodName, Object...params) {
 		Class<?>[] paramTypes = new Class<?>[params.length];
 		
 		for (int i = 0; i < params.length; i++) 
@@ -260,7 +261,7 @@ public class ReflectionUtils {
 	    }
 	    method.setAccessible(true);
         try {
-			return method.invoke(null, params);
+			return (T) method.invoke(null, params);
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
 		}

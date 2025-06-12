@@ -1,7 +1,7 @@
 <wicket:panel>
 	<div class="quick-search">
 		<div class="modal-header">
-			<h5 class="modal-title">File and Symbol Search <span class="text-muted font-size-sm">in current commit</span></h5>
+			<h5 class="modal-title"><wicket:t>File and Symbol Search</wicket:t> <span class="text-muted font-size-sm"><wicket:t>in current commit</wicket:t></span></h5>
 			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 		</div>
 		<div class="modal-body">
@@ -23,13 +23,13 @@
 					<wicket:enclosure child="moreSymbolHits">
 					<li class="hit selectable more-matches">
 						<a wicket:id="moreSymbolHits">
-							<wicket:svg href="hand" class="icon"></wicket:svg> Show more
+							<wicket:svg href="hand" class="icon"></wicket:svg> <wicket:t>Show more</wicket:t>
 						</a>
 					</li>
 					</wicket:enclosure>
 				</ul>
 				</wicket:enclosure>
-				<div wicket:id="noMatches" class="no-matches alert alert-notice alert-light-warning">No any matches</div>
+				<div wicket:id="noMatches" class="no-matches alert alert-notice alert-light-warning"><wicket:t>No any matches</wicket:t></div>
 			</div>
 		</div>
 	</div>

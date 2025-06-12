@@ -1,7 +1,7 @@
 <wicket:panel>
 	<form wicket:id="form" class="advanced-search">
 		<div class="modal-header">
-			<h5 class="modal-title">Advanced Search <span class="text-muted font-size-sm">in current commit</span></h5>
+			<h5 class="modal-title"><wicket:t>Advanced Search</wicket:t> <span class="text-muted font-size-sm"><wicket:t>in current commit</wicket:t></span></h5>
 			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 		</div>
 		<div class="modal-body">
@@ -9,13 +9,13 @@
 			<div wicket:id="option"></div>
 			<wicket:enclosure child="insideCurrentDir">
 				<div class="form-group">
-					<label class="checkbox"><input wicket:id="insideCurrentDir" type="checkbox"> Search inside current tree</label>
+					<label class="checkbox"><input wicket:id="insideCurrentDir" type="checkbox"> <wicket:t>Search inside current tree</wicket:t></label>
 				</div>
 			</wicket:enclosure>
 		</div>
 		<div class="modal-footer">
-			<button wicket:id="search" class="btn btn-primary">Search</button>
-			<button wicket:id="cancel" class="btn btn-secondary">Cancel</button>
+			<button wicket:id="search" class="btn btn-primary"><wicket:t>Search</wicket:t></button>
+			<button wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></button>
 		</div>
 	</form>
 </wicket:panel>

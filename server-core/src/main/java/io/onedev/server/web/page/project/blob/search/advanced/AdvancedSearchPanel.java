@@ -33,6 +33,9 @@ import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.ObjectId;
 
 import javax.annotation.Nullable;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -103,7 +106,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 		});
 		
 		List<Tab> tabs = new ArrayList<Tab>();
-		tabs.add(new AjaxActionTab(Model.of("Text")) {
+		tabs.add(new AjaxActionTab(Model.of(_T("Text"))) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -113,7 +116,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 			
 		}.setSelected(option instanceof TextQueryOption));
 		
-		tabs.add(new AjaxActionTab(Model.of("Files")) {
+		tabs.add(new AjaxActionTab(Model.of(_T("Files"))) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -123,7 +126,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 			
 		}.setSelected(option instanceof FileQueryOption));
 		
-		tabs.add(new AjaxActionTab(Model.of("Symbols")) {
+		tabs.add(new AjaxActionTab(Model.of(_T("Symbols"))) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {

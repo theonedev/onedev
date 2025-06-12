@@ -180,17 +180,6 @@ public abstract class LayoutPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		WebRequest webRequest = (WebRequest) RequestCycle.get().getRequest();
-		Cookie languageCookie = webRequest.getCookie(COOKIE_LANGUAGE);
-		if (languageCookie != null) {
-			String language = languageCookie.getValue();
-			if (Locale.SIMPLIFIED_CHINESE.getLanguage().equals(language)) {
-				Session.get().setLocale(Locale.SIMPLIFIED_CHINESE);
-			} else {
-				Session.get().setLocale(Locale.ENGLISH);
-			}
-		}
-
 		WebMarkupContainer sidebar = new WebMarkupContainer("sidebar");
 
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
@@ -798,12 +787,13 @@ public abstract class LayoutPage extends BasePage {
 
 		topbar.add(new MenuLink("languageSelector") {
 
-			private void setLanguageCookie(String language) {
-				Cookie cookie = new Cookie(COOKIE_LANGUAGE, language);
+			private void switchLanguage(Locale locale) {
+				Cookie cookie = new Cookie(COOKIE_LANGUAGE, locale.toLanguageTag());
 				cookie.setPath("/");
 				cookie.setMaxAge(Integer.MAX_VALUE);
 				HttpServletResponse response = (HttpServletResponse) RequestCycle.get().getResponse().getContainerResponse();
 				response.addCookie(cookie);
+				setResponsePage(getPageClass(), getPageParameters());
 			}
 
 			@Override
@@ -827,9 +817,7 @@ public abstract class LayoutPage extends BasePage {
 
 							@Override
 							public void onClick() {
-								Session.get().setLocale(Locale.ENGLISH);
-								setLanguageCookie(Locale.ENGLISH.getLanguage());
-								setResponsePage(getPageClass(), getPageParameters());
+								switchLanguage(Locale.ENGLISH);
 							}
 						};
 					}
@@ -838,12 +826,12 @@ public abstract class LayoutPage extends BasePage {
 
 					@Override
 					public String getLabel() {
-						return "简体中文";
+						return "Deutsch";
 					}
 
 					@Override
 					public boolean isSelected() {
-						return Locale.SIMPLIFIED_CHINESE.getLanguage().equals(Session.get().getLocale().getLanguage());
+						return Locale.GERMAN.getLanguage().equals(Session.get().getLocale().getLanguage());
 					}
 
 					@Override
@@ -852,13 +840,177 @@ public abstract class LayoutPage extends BasePage {
 
 							@Override
 							public void onClick() {
-								Session.get().setLocale(Locale.SIMPLIFIED_CHINESE);
-								setLanguageCookie(Locale.SIMPLIFIED_CHINESE.getLanguage());
-								setResponsePage(getPageClass(), getPageParameters());
+								switchLanguage(Locale.GERMAN);
 							}
 						};
 					}
 				});
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Français";
+					}
+
+					@Override
+					public boolean isSelected() {
+						return Locale.FRENCH.getLanguage().equals(Session.get().getLocale().getLanguage());
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new Link<Void>(id) {
+
+							@Override
+							public void onClick() {
+								switchLanguage(Locale.FRENCH);
+							}
+						};
+					}
+				});
+				
+				var spanish = Locale.forLanguageTag("es");
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Español";
+					}
+
+					@Override
+					public boolean isSelected() {
+						return spanish.getLanguage().equals(Session.get().getLocale().getLanguage());
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new Link<Void>(id) {
+
+							@Override
+							public void onClick() {
+								switchLanguage(spanish);
+							}
+						};
+					}
+				});
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Italiano";
+					}
+
+					@Override
+					public boolean isSelected() {
+						return Locale.ITALIAN.getLanguage().equals(Session.get().getLocale().getLanguage());
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new Link<Void>(id) {
+
+							@Override
+							public void onClick() {
+								switchLanguage(Locale.ITALIAN);
+							}
+						};
+					}
+				});
+
+				var portuguese = Locale.forLanguageTag("pt");
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Português";
+					}
+
+					@Override
+					public boolean isSelected() {
+						return portuguese.getLanguage().equals(Session.get().getLocale().getLanguage());
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new Link<Void>(id) {
+
+							@Override
+							public void onClick() {
+								switchLanguage(portuguese);
+							}
+						};
+					}
+				});
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "中文";
+					}
+
+					@Override
+					public boolean isSelected() {
+						return Locale.CHINESE.getLanguage().equals(Session.get().getLocale().getLanguage());
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new Link<Void>(id) {
+
+							@Override
+							public void onClick() {
+								switchLanguage(Locale.CHINESE);
+							}
+						};
+					}
+				});
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "日本語";
+					}
+
+					@Override
+					public boolean isSelected() {
+						return Locale.JAPANESE.getLanguage().equals(Session.get().getLocale().getLanguage());
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new Link<Void>(id) {
+
+							@Override
+							public void onClick() {
+								switchLanguage(Locale.JAPANESE);
+							}
+						};
+					}
+				});
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "한국어";
+					}
+
+					@Override
+					public boolean isSelected() {
+						return Locale.KOREAN.getLanguage().equals(Session.get().getLocale().getLanguage());
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new Link<Void>(id) {
+
+							@Override
+							public void onClick() {
+								switchLanguage(Locale.KOREAN);
+							}
+						};
+					}
+				});
+
 				return menuItems;
 			}
 		});

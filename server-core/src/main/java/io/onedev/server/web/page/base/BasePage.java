@@ -120,13 +120,13 @@ public abstract class BasePage extends WebPage {
 		Cookie languageCookie = webRequest.getCookie(COOKIE_LANGUAGE);
 		if (languageCookie != null) {
 			String language = languageCookie.getValue();
-			if (Locale.SIMPLIFIED_CHINESE.getLanguage().equals(language)) {
-				Session.get().setLocale(Locale.SIMPLIFIED_CHINESE);
-			} else {
+			if (language != null)
+				Session.get().setLocale(Locale.forLanguageTag(language));
+			else
 				Session.get().setLocale(Locale.ENGLISH);
-			}
+		} else {
+			Session.get().setLocale(Locale.ENGLISH);
 		}
-	
 	}
 
 	public boolean isDarkMode() {

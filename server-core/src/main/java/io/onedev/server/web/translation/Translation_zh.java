@@ -3,7 +3,7 @@ package io.onedev.server.web.translation;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Translation_zh_CN extends TranslationResourceBundle {
+public class Translation_zh extends TranslationResourceBundle {
 
 	private static final Map<String, String> m = new HashMap<>() {
 
@@ -15,16 +15,15 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 	};
 
 	static {
-		init();
-		Translation.watchUpdate(Translation_zh_CN.class, () -> {
-			init();
+		init(m);
+		Translation.watchUpdate(Translation_zh.class, () -> {
+			init(m);
 		});
 	}
 
-	private static void init() {
+	@SystemPrompt("You are good at translating from English to Simplified Chinese in DevOps software area.")
+	public static void init(Map<String, String> m) {
 		m.clear();
-
-		// Extracted keys
 		m.put(" Project path can be omitted if reference from current project", "如果从当前项目引用，则可以省略项目路径");
 		m.put("'..' is not allowed in the directory", "'..' 不允许在目录中使用");
 		m.put("(* = any string, ? = any character)", "(* = 任意字符串, ? = 任意字符)");
@@ -173,6 +172,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Add after", "添加到后面");
 		m.put("Add agent", "添加代理");
 		m.put("Add all cards to specified iteration", "将所有卡片添加到指定迭代");
+		m.put("Add all commits from source branch to target branch with a merge commit", "将源分支的所有提交添加到目标分支，并创建合并提交");
 		m.put("Add assignee...", "添加分配人员...");
 		m.put("Add before", "添加到前面");
 		m.put("Add below to allow accessing via http protocol in new Maven versions", "添加以下内容以在新 Maven 版本中允许通过 http 协议访问");
@@ -502,6 +502,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("By month", "按月");
 		m.put("By week", "按周");
 		m.put("Bypass Certificate Check", "绕过证书检查");
+		m.put("CANCELLED", "已取消");
 		m.put("CORS Allowed Origins", "CORS 允许的来源");
 		m.put("CPD Report", "CPD 报告");
 		m.put("CPU", "CPU");
@@ -638,7 +639,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Close", "关闭");
 		m.put("Close Iteration", "关闭迭代");
 		m.put("Close this iteration", "关闭此迭代");
-		m.put("Closed", "已关闭");
+		m.put("Closed", "关闭");
 		m.put("Closed Issue State", "已关闭的工单状态");
 		m.put("Closest due date", "最近的截止日期");
 		m.put("Clover Coverage Report", "Clover 覆盖率报告");
@@ -749,6 +750,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Connector", "连接器");
 		m.put("Contact Email", "联系邮箱");
 		m.put("Contact Name", "联系人");
+		m.put("Container Image", "容器镜像");
+		m.put("Container Image(s)", "容器镜像");
 		m.put("Container default", "容器默认");
 		m.put("Content", "内容");
 		m.put("Content is identical", "内容相同");
@@ -773,6 +776,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Cpu Limit", "CPU 限制");
 		m.put("Cpu Request", "CPU 请求");
 		m.put("Create", "创建");
+		m.put("Create Administrator Account", "创建管理员账户");
 		m.put("Create Branch", "创建分支");
 		m.put("Create Branch Bean", "创建分支 Bean");
 		m.put("Create Branch Bean With Revision", "带版本的创建分支 Bean");
@@ -781,6 +785,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Create Group", "创建组");
 		m.put("Create Issue", "创建工单");
 		m.put("Create Iteration", "创建迭代");
+		m.put("Create Merge Commit", "创建合并提交");
+		m.put("Create Merge Commit If Necessary", "仅当必要时创建合并提交");
 		m.put("Create New", "新建");
 		m.put("Create New File", "创建新文件");
 		m.put("Create Project", "创建项目");
@@ -817,6 +823,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Current platform", "当前平台");
 		m.put("Current project", "当前项目");
 		m.put("Custom Linux Shell", "自定义 Linux Shell");
+		m.put("DISCARDED", "已放弃");
 		m.put("Dashboard Share Bean", "仪表盘共享 Bean");
 		m.put("Dashboard name", "仪表板名称");
 		m.put("Dashboards", "仪表盘");
@@ -966,6 +973,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Display Params", "显示参数");
 		m.put("Do Not Retrieve Groups", "不获取用户组");
 		m.put("Do not ignore", "不要忽略");
+		m.put("Do not ignore whitespace", "不忽略空白");
 		m.put("Do not retrieve", "不获取");
 		m.put("Do not retrieve groups", "不获取组");
 		m.put("Do you really want to cancel invitation to \"{0}\"?", "您真的要取消邀请 \"{0}\" 吗？");
@@ -1195,10 +1203,12 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("External Authenticator", "外部认证器");
 		m.put("External Issue Transformers", "外部工单转换");
 		m.put("External Participants", "外部参与者");
+		m.put("External System", "外部系统");
 		m.put("External authenticator settings saved", "外部认证器设置已保存");
 		m.put("External participants do not have accounts and involve in the issue via email", "外部参与者没有账户，通过电子邮件参与工单");
 		m.put("Extract the package into a folder. <b class=\"text-danger\">Warning:</b> On Mac OS X, do not extract to Mac managed folders such as Downloads, Desktop, Documents; otherwise you may encounter permission issues starting agent", 
 			"将包提取到文件夹中。<b class=\"text-danger\">警告：</b> 在 Mac OS X 上，不要提取到 Mac 管理的文件夹，如 Downloads、Desktop、Documents；否则您可能会遇到启动代理的权限问题");
+		m.put("FAILED", "失败");
 		m.put("Fail Threshold", "失败阈值");
 		m.put("Fail build if there are vulnerabilities with or severer than specified severity level", 
 			"如果存在或严重性高于指定严重性级别的漏洞，则失败构建");
@@ -1243,6 +1253,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Filter files...", "过滤文件...");
 		m.put("Filter groups...", "过滤组...");
 		m.put("Filter issues", "过滤工单");
+		m.put("Filter pull requests", "过滤合并请求");
 		m.put("Filter roles", "过滤角色");
 		m.put("Filter tags...", "过滤标签...");
 		m.put("Filter targets", "筛选目标");
@@ -1421,6 +1432,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Has Owner Permissions", "有所有者权限");
 		m.put("Has Running Builds", "有运行中的构建");
 		m.put("Heap Memory Usage", "堆内存使用情况");
+		m.put("Helm(s)", "Helm");
 		m.put("Help", "帮助");
 		m.put("Hide", "隐藏");
 		m.put("Hide Archived", "隐藏已归档");
@@ -1464,11 +1476,15 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Ignore File", "忽略文件");
 		m.put("Ignore activities irrelevant to me", "忽略与我无关的活动");
 		m.put("Ignore all", "忽略所有");
+		m.put("Ignore all whitespace", "忽略所有空白");
 		m.put("Ignore change", "忽略更改");
+		m.put("Ignore change whitespace", "忽略空白变化");
 		m.put("Ignore leading", "忽略前缀");
+		m.put("Ignore leading whitespace", "忽略开始的空白");
 		m.put("Ignore this field", "忽略此字段");
 		m.put("Ignore this param", "忽略此参数");
 		m.put("Ignore trailing", "忽略后缀");
+		m.put("Ignore trailing whitespace", "忽略结束的空白");
 		m.put("Ignored Licenses", "忽略的许可证");
 		m.put("Image", "容器镜像");
 		m.put("Image Labels", "镜像标签");
@@ -1548,6 +1564,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Integer", "整数");
 		m.put("Interactive web shell access to running jobs is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"交互式 Web shell 访问运行中的任务是企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
+		m.put("Internal Database", "内部数据库");
 		m.put("Interpreter", "解释器");
 		m.put("Invalid PCRE syntax", "无效的 PCRE 语法");
 		m.put("Invalid access token: {0}", "无效的访问令牌：{0}");
@@ -1811,6 +1828,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Longest Duration First", "最长持续时间优先");
 		m.put("Low", "低");
 		m.put("Low Severity", "轻微");
+		m.put("MERGED", "已合并");
 		m.put("MS Teams Notifications", "MS Teams 通知");
 		m.put("Mail Service", "邮件服务");
 		m.put("Mail Service Bean", "邮件服务Bean");
@@ -1856,6 +1874,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Markdown", "Markdown");
 		m.put("Markdown Report", "Markdown 报告");
 		m.put("Markdown from file", "Markdown（基于文件）");
+		m.put("Maven(s)", "Maven");
 		m.put("Max Code Search Entries", "最大代码搜索条目");
 		m.put("Max Commit Message Line Length", "最大提交消息行长度");
 		m.put("Max Git LFS File Size (MB)", "最大 Git LFS 文件大小 (MB)");
@@ -1921,6 +1940,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("My SSH Keys", "我的 SSH 密钥");
 		m.put("Mypy Report", "Mypy 报告");
 		m.put("N/A", "不适用");
+		m.put("NPM(s)", "NPM");
 		m.put("Name", "名称");
 		m.put("Name Of Empty Value", "空值的名称");
 		m.put("Name On the Other Side", "另一侧的名称");
@@ -1958,6 +1978,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Named Pull Request Query", "命名合并请求查询");
 		m.put("Named Query", "命名查询");
 		m.put("Network Options", "网络选项");
+		m.put("Never", "从不");
 		m.put("Never expire", "永不过期");
 		m.put("New Board", "新建看板");
 		m.put("New Invitation Bean", "新邀请Bean");
@@ -2105,6 +2126,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Notify Pull Request Events", "通知合并请求");
 		m.put("Notify Users", "通知用户");
 		m.put("Ntfy.sh Notifications", "Ntfy.sh 通知");
+		m.put("NuGet(s)", "NuGet");
 		m.put("NuSpec", "NuSpec");
 		m.put("Number of CPU Cores", "CPU 核心数");
 		m.put("Number of SSH Keys", "SSH 密钥数量");
@@ -2116,6 +2138,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("OCI Layout Directory", "OCI 布局目录");
 		m.put("OIDC error: Inconsistent sub in ID token and userinfo", "ID 令牌中的 sub 与用户信息中的 sub 不一致");
 		m.put("OIDC error: No email claim returned", "没有返回邮箱声明");
+		m.put("OPEN", "打开");
 		m.put("OS", "操作系统");
 		m.put("OS Arch", "操作系统架构");
 		m.put("OS User Name", "操作系统用户名");
@@ -2138,6 +2161,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("OneDev requires git command line to manage repositories. The minimum required version is 2.11.1. Also make sure that git-lfs is installed if you want to retrieve LFS files in build job", 
 			"OneDev 需要 git 命令行来管理仓库。最低要求版本为 2.11.1。另外，如果要在构建任务中获取 LFS 文件，请确保安装了 git-lfs");
 		m.put("Online", "在线");
+		m.put("Only create merge commit if target branch can not be fast-forwarded to source branch", 
+			"仅当目标分支不能 fast-forward 到源分支时才创建合并提交");
 		m.put("Only projects manageable by access token owner can be authorized", "只有受访问令牌所有者管理的项目才能被授权");
 		m.put("Open", "打开");
 		m.put("Open new pull request", "创建新的合并请求");
@@ -2412,6 +2437,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Own:", "自身");
 		m.put("Ownered By", "拥有者");
 		m.put("PEM private key begins with '-----BEGIN RSA PRIVATE KEY-----'", "PEM 私钥以 '-----BEGIN RSA PRIVATE KEY-----' 开头");
+		m.put("PENDING", "待定");
 		m.put("PMD Report", "PMD 报告");
 		m.put("Pack", "包");
 		m.put("Pack Notification", "包通知");
@@ -2724,6 +2750,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"此步骤需要由服务器 docker 执行器、远程 docker 执行器或 Kubernetes 执行器执行");
 		m.put("Push to Remote", "推送至远程");
 		m.put("Push to container registry", "推送至容器注册表");
+		m.put("PyPI(s)", "PyPI");
 		m.put("Pylint Report", "Pylint 报告");
 		m.put("Queries", "查询");
 		m.put("Query", "查询");
@@ -2752,6 +2779,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Readiness Check Command", "准备检查命令");
 		m.put("Really want to delete this code comment?", "您确定要删除此代码评论吗？");
 		m.put("Rebase", "变基");
+		m.put("Rebase Source Branch Commits", "重置源分支提交");
+		m.put("Rebase all commits from source branch onto target branch", "将源分支的所有提交 Rebase 到目标分支");
 		m.put("Rebase source branch commits", "Rebase 源分支上的提交");
 		m.put("Rebuild manually", "手动重建");
 		m.put("Receive Posted Email", "接收已发布邮件");
@@ -2878,6 +2907,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Roles", "角色");
 		m.put("Root Projects", "根项目");
 		m.put("Roslynator Report", "Roslynator 报告");
+		m.put("RubyGems(s)", "RubyGems");
 		m.put("Ruff Report", "Ruff 报告");
 		m.put("Rule will apply if user operating the tag matches criteria specified here", "规则将在用户操作标签时应用此处指定的条件");
 		m.put("Rule will apply only if the user changing the branch matches criteria specified here", 
@@ -2929,6 +2959,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("SSH key deleted", "SSH 密钥已删除");
 		m.put("SSH settings have been saved and SSH server restarted", "SSH 设置已保存并重启 SSH 服务器");
 		m.put("SSL Setting", "SSL 设置");
+		m.put("SUCCESSFUL", "成功");
 		m.put("Save", "保存");
 		m.put("Save Query", "保存查询");
 		m.put("Save Query Bean", "保存查询 Bean");
@@ -2991,6 +3022,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Server Id", "服务器 ID");
 		m.put("Server Information", "服务器信息");
 		m.put("Server Log", "服务器日志");
+		m.put("Server Setup", "服务器设置");
 		m.put("Server Shell Executor", "服务器 Shell 执行器");
 		m.put("Server URL", "服务器 URL");
 		m.put("Server fingerprint", "服务器指纹");
@@ -3181,6 +3213,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Specify Shell/Batch Commands to Run", "指定要运行的 Shell/Batch 命令");
 		m.put("Specify SpotBugs result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/spotbugsXml.xml</tt>. Use * or ? for pattern match", 
 			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> 的 SpotBugs 结果 xml 文件，例如 <tt>target/spotbugsXml.xml</tt>。使用 * 或 ? 进行模式匹配");
+		m.put("Specify System Settings", "指定系统设置");
 		m.put("Specify URL of remote git repository. Only http/https protocol is supported", "指定远程 git 仓库的 URL。仅支持 http/https 协议");
 		m.put("Specify YouTrack login name. This account should have permission to:<ul><li>Read full information and issues of the projects you want to import<li>Read issue tags<li>Read user basic information</ul>", 
 			"指定 YouTrack 登录名。此账户应具有以下权限：<ul><li>读取您要导入的项目的完整信息和工单<li>读取工单标签<li>读取用户基本信息</ul>");
@@ -3476,6 +3509,8 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Split", "拆分");
 		m.put("Split view", "分割视图");
 		m.put("SpotBugs Report", "SpotBugs 报告");
+		m.put("Squash Source Branch Commits", "压缩源分支提交");
+		m.put("Squash all commits from source branch into a single commit in target branch", "将源分支的所有提交压缩成一个提交，并添加到目标分支");
 		m.put("Squash source branch commits", "Squash 源分支上的提交");
 		m.put("Ssh", "SSH");
 		m.put("Ssh Key", "SSH 密钥");
@@ -3569,6 +3604,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"邮件设置中定义的系统邮箱地址应作为此类邮件的收件人，并且可以使用项目名称附加到此地址以指示创建工单的位置。例如，如果系统邮箱地址指定为 <tt>support@example.com</tt>，发送邮件到 <tt>support+myproject@example.com</tt> 将在 <tt>myproject</tt> 中创建工单。如果未附加项目名称，OneDev 将使用下面的项目指定信息查找项目");
 		m.put("System settings have been saved", "系统设置已保存");
 		m.put("System uuid", "系统 UUID");
+		m.put("TIMED_OUT", "已超时");
 		m.put("TRX Report (.net unit test)", "TRX 报告（.NET 单元测试）");
 		m.put("Tab Width", "制表符宽度");
 		m.put("Tag", "标签");
@@ -3594,6 +3630,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Target or source branch is updated. Please try again", "目标或源分支已更新，请重试");
 		m.put("Task List", "任务列表");
 		m.put("Task list", "任务列表");
+		m.put("Tell user to reset password", "告诉用户重置密码");
 		m.put("Template Name", "模板名称");
 		m.put("Template saved", "模板已保存");
 		m.put("Terminal close", "终端关闭");
@@ -3890,6 +3927,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 			"在什么条件下应运行此步骤。<b>成功</b>表示在此步骤之前运行的所有非可选步骤都已成功");
 		m.put("Unexpected setting: {0}", "未知设置：{0}");
 		m.put("Unified", "统一");
+		m.put("Unified view", "统一视图");
 		m.put("Unit Test Statistics", "单元测试统计");
 		m.put("Unlimited", "无限制");
 		m.put("Unlink this issue", "取消链接此工单");
@@ -4015,6 +4053,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Volume Mounts", "卷挂载");
 		m.put("Vote", "投票");
 		m.put("Votes", "投票");
+		m.put("WAITING", "等待");
 		m.put("WARNING:", "警告：");
 		m.put("Waiting", "等待");
 		m.put("Waiting for approvals", "等待审批");
@@ -4122,6 +4161,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("Workflow reconciliation completed", "工单工作流一致性检查完成");
 		m.put("Working Directory", "工作目录");
 		m.put("Write", "写入");
+		m.put("Yes", "是");
 		m.put("You are not member of discord server", "您不是 discord 服务器的成员");
 		m.put("You are rebasing source branch on top of target branch", "您正在将源分支 rebase 到目标分支之上");
 		m.put("You are viewing a subset of all changes. <a wicket:id=\"fullChanges\" class=\"link-primary ml-2\">show all changes</a>", 
@@ -4155,6 +4195,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("access [{0}]", "访问 [{0}]");
 		m.put("active", "活跃");
 		m.put("add another order", "添加另一个排序");
+		m.put("adding .onedev-buildspec.yml", "添加 .onedev-buildspec.yml");
 		m.put("after specified date", "在指定日期之后");
 		m.put("an <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>object</a> holding unsubscribe information.  A <code>null</code> value means that the notification can not be unsubscribed", 
 			"一个包含取消订阅信息的 <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>对象</a>。<code>null</code> 值表示该通知无法取消订阅");
@@ -4170,6 +4211,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("branch the job is running against", "任务运行的分支");
 		m.put("branch {0}", "分支 {0}");
 		m.put("branches", "分支");
+		m.put("build", "构建");
 		m.put("build is successful for any job and branch", "任何任务和分支的构建都成功");
 		m.put("build is successful for any job on branches \"{0}\"", "分支 \"{0}\" 上的任何任务构建都成功");
 		m.put("build is successful for jobs \"{0}\" on any branch", "任何分支上的任务 \"{0}\" 构建都成功");
@@ -4178,6 +4220,7 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("choose a color for this state", "选择一个颜色");
 		m.put("cluster:lead", "主节点");
 		m.put("cmd-k to show command palette", "cmd-k 显示命令面板");
+		m.put("code commit", "代码提交");
 		m.put("code is committed to any branch", "代码提交到任何分支");
 		m.put("code is committed to branches \"{0}\"", "代码提交到分支 \"{0}\"");
 		m.put("commit message contains", "提交信息包含");
@@ -4234,15 +4277,17 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("initial", "初始");
 		m.put("is empty", "为空");
 		m.put("is not empty", "不为空");
+		m.put("issue", "工单");
 		m.put("issue:Number", "工单号");
 		m.put("issues", "工单");
+		m.put("job", "任务");
 		m.put("lines", "行");
 		m.put("link:Multiple", "允许链接多个工单");
 		m.put("log", "日志");
 		m.put("manage job", "管理任务");
-		m.put("may not be empty", "不能为空");
 		m.put("markdown:heading", "标题");
 		m.put("markdown:image", "图片");
+		m.put("may not be empty", "不能为空");
 		m.put("merged", "已合并");
 		m.put("month:Apr", "四月");
 		m.put("month:Aug", "八月");
@@ -4265,12 +4310,16 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("or match another value", "或匹配另一个值");
 		m.put("order more", "订购更多");
 		m.put("outdated", "过时");
+		m.put("pack", "包");
 		m.put("package", "包");
 		m.put("packages", "包");
 		m.put("personal", "个人");
 		m.put("pipeline", "流水线");
 		m.put("project of the running job", "任务运行的项目");
+		m.put("property", "属性");
+		m.put("pull request", "合并请求");
 		m.put("pull request #{0}", "合并请求 #{0}");
+		m.put("pull request and code review", "合并请求和代码评审");
 		m.put("pull request to any branch is discarded", "任何分支的合并请求被放弃");
 		m.put("pull request to any branch is merged", "任何分支的合并请求被合并");
 		m.put("pull request to any branch is opened", "任何分支的合并请求被创建");
@@ -4303,9 +4352,14 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("run job", "运行任务");
 		m.put("search in this revision will be accurate after indexed", "索引完成后，在当前版本中的搜索将更准确");
 		m.put("service", "服务");
+		m.put("severity:CRITICAL", "非常严重");
+		m.put("severity:HIGH", "严重");
+		m.put("severity:LOW", "轻微");
+		m.put("severity:MEDIUM", "中度");
 		m.put("skipped {0} lines", "跳过 {0} 行");
 		m.put("space", "空格");
 		m.put("state of other issue is transited to \"{0}\"", "其他工单的状态转换到 \"{0}\"");
+		m.put("step template", "步骤模板");
 		m.put("submit", "提交");
 		m.put("tag the job is running against", "任务运行的标签");
 		m.put("tag {0}", "标签 {0}");
@@ -4343,11 +4397,19 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{0} commits", "{0} 个提交");
 		m.put("{0} commits ahead of base branch", "{0} 个提交领先于基准分支");
 		m.put("{0} commits behind of base branch", "{0} 个提交落后于基准分支");
+		m.put("{0} day", "{0} 天");
+		m.put("{0} days", "{0} 天");
 		m.put("{0} edited {1}", "{0} 编辑于 {1}");
 		m.put("{0} files", "{0} 个文件");
 		m.put("{0} forks", "{0} 个分叉");
+		m.put("{0} hour", "{0} 小时");
+		m.put("{0} hours", "{0} 小时");
 		m.put("{0} inaccessible activities", "{0} 个无权查看的活动");
+		m.put("{0} minute", "{0} 分钟");
+		m.put("{0} minutes", "{0} 分钟");
 		m.put("{0} reviewed", "{0} 已审查");
+		m.put("{0} second", "{0} 秒");
+		m.put("{0} seconds", "{0} 秒");
 		m.put("{0} tags", "{0} 个标签");
 		m.put("{0}d", "{0} 天");
 		m.put("{0}h", "{0} 小时");
@@ -4357,84 +4419,11 @@ public class Translation_zh_CN extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-
-		// Manually added keys
-		m.put("Create Administrator Account", "创建管理员账户");
-		m.put("Server Setup", "服务器设置");	
-		m.put("Specify System Settings", "指定系统设置");
-		m.put("adding .onedev-buildspec.yml", "添加 .onedev-buildspec.yml");
-		m.put("WAITING", "等待");
-		m.put("PENDING", "待定");
-		m.put("FAILED", "失败");
-		m.put("CANCELLED", "已取消");
-		m.put("TIMED_OUT", "已超时");
-		m.put("SUCCESSFUL", "成功");		
-		m.put("OPEN", "打开");
-		m.put("MERGED", "已合并");
-		m.put("DISCARDED", "已放弃");
-		m.put("Container Image(s)", "容器镜像");
-		m.put("Container Image", "容器镜像");
-		m.put("RubyGems(s)", "RubyGems");
-		m.put("NPM(s)", "NPM");
-		m.put("Maven(s)", "Maven");
-		m.put("NuGet(s)", "NuGet");
-		m.put("PyPI(s)", "PyPI");
-		m.put("Helm(s)", "Helm");
-		m.put("job", "任务");
-		m.put("service", "服务");
-		m.put("step template", "步骤模板");
-		m.put("property", "属性");		
-		m.put("Successful", "成功");
-		m.put("Always", "总是");
-		m.put("Never", "从不");
-		m.put("Yes", "是");
-		m.put("Security & Compliance", "安全与合规");
-		m.put("Dependency Management", "依赖管理");
-		m.put("Publish", "发布");
-		m.put("Repository Sync", "仓库同步");
-		m.put("Utilities", "工具");
-		m.put("Docker Image", "Docker 镜像");
-		m.put("Unified view", "统一视图");
-		m.put("Split view", "分割视图");
-		m.put("Ignore all whitespace", "忽略所有空白");
-		m.put("Ignore change whitespace", "忽略空白变化");
-		m.put("Ignore leading whitespace", "忽略开始的空白");
-		m.put("Ignore trailing whitespace", "忽略结束的空白");
-		m.put("Do not ignore whitespace", "不忽略空白");
-		m.put("Internal Database", "内部数据库");
-		m.put("External System", "外部系统");
-		m.put("Tell user to reset password", "告诉用户重置密码");
-		m.put("Commits are taken from default branch of non-forked repositories", "代码提交取自非分叉仓库的默认分支");
-		m.put("issue", "工单");
-		m.put("pull request", "合并请求");
-		m.put("build", "构建");
-		m.put("pack", "包");
-		m.put("code commit", "代码提交");
-		m.put("pull request and code review", "合并请求和代码评审");
-		m.put("Filter pull requests", "过滤合并请求");
-		m.put("Filter issues", "过滤工单");
-		m.put("Add all commits from source branch to target branch with a merge commit", "将源分支的所有提交添加到目标分支，并创建合并提交");
-		m.put("Only create merge commit if target branch can not be fast-forwarded to source branch", "仅当目标分支不能 fast-forward 到源分支时才创建合并提交");
-		m.put("Squash all commits from source branch into a single commit in target branch", "将源分支的所有提交压缩成一个提交，并添加到目标分支");
-		m.put("Rebase all commits from source branch onto target branch", "将源分支的所有提交 Rebase 到目标分支");
-		m.put("Closed", "关闭");
-		m.put("Create Merge Commit", "创建合并提交");
-		m.put("Create Merge Commit If Necessary", "仅当必要时创建合并提交");
-		m.put("Squash Source Branch Commits", "压缩源分支提交");
-		m.put("Rebase Source Branch Commits", "重置源分支提交");
-		m.put("Test", "测试");
-		m.put("severity:CRITICAL", "非常严重");
-		m.put("severity:HIGH", "严重");
-		m.put("severity:MEDIUM", "中度");
-		m.put("severity:LOW", "轻微");
-		m.put("{0} seconds", "{0} 秒");
-		m.put("{0} minutes", "{0} 分钟");
-		m.put("{0} hours", "{0} 小时");
-		m.put("{0} days", "{0} 天");
-		m.put("{0} second", "{0} 秒");
-		m.put("{0} minute", "{0} 分钟");
-		m.put("{0} hour", "{0} 小时");
-		m.put("{0} day", "{0} 天");
+		m.put("File and Symbol Search", "文件和符号搜索");
+		m.put("No any matches", "没有任何匹配项");
+		m.put("Search inside current tree", "在当前树内搜索");
+		m.put("Show more", "显示更多");
+		m.put("in current commit", "在当前提交中");
 	}
 		
 	@Override

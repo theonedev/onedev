@@ -4,6 +4,8 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -64,14 +66,101 @@ public class Translation extends TranslationResourceBundle {
 	}
 
 	static {
-		init();
+		init(m);
 		Translation.watchUpdate(Translation.class, () -> {
-			init();
+			init(m);
 		});
 	}
 
-	private static void init() {
+	public static Set<String> getExtraKeys() {
+		var extraKeys = new TreeSet<String>();
+
+		extraKeys.add("Create Administrator Account");
+		extraKeys.add("Server Setup");
+		extraKeys.add("Specify System Settings");
+		extraKeys.add("adding .onedev-buildspec.yml");
+		extraKeys.add("WAITING");
+		extraKeys.add("PENDING");
+		extraKeys.add("FAILED");
+		extraKeys.add("Create Administrator Account");
+		extraKeys.add("Server Setup");	
+		extraKeys.add("Specify System Settings");
+		extraKeys.add("adding .onedev-buildspec.yml");
+		extraKeys.add("WAITING");
+		extraKeys.add("PENDING");
+		extraKeys.add("FAILED");
+		extraKeys.add("CANCELLED");
+		extraKeys.add("TIMED_OUT");
+		extraKeys.add("SUCCESSFUL");		
+		extraKeys.add("OPEN");
+		extraKeys.add("MERGED");
+		extraKeys.add("DISCARDED");
+		extraKeys.add("Container Image(s)");
+		extraKeys.add("Container Image");
+		extraKeys.add("RubyGems(s)");
+		extraKeys.add("NPM(s)");
+		extraKeys.add("Maven(s)");
+		extraKeys.add("NuGet(s)");
+		extraKeys.add("PyPI(s)");
+		extraKeys.add("Helm(s)");
+		extraKeys.add("job");
+		extraKeys.add("service");
+		extraKeys.add("step template");
+		extraKeys.add("property");		
+		extraKeys.add("Successful");
+		extraKeys.add("Always");
+		extraKeys.add("Never");
+		extraKeys.add("Yes");
+		extraKeys.add("Security & Compliance");
+		extraKeys.add("Dependency Management");
+		extraKeys.add("Publish");
+		extraKeys.add("Repository Sync");
+		extraKeys.add("Utilities");
+		extraKeys.add("Docker Image");
+		extraKeys.add("Unified view");
+		extraKeys.add("Split view");
+		extraKeys.add("Ignore all whitespace");
+		extraKeys.add("Ignore change whitespace");
+		extraKeys.add("Ignore leading whitespace");
+		extraKeys.add("Ignore trailing whitespace");
+		extraKeys.add("Do not ignore whitespace");
+		extraKeys.add("Internal Database");
+		extraKeys.add("External System");
+		extraKeys.add("Tell user to reset password");
+		extraKeys.add("Commits are taken from default branch of non-forked repositories");
+		extraKeys.add("issue");
+		extraKeys.add("pull request");
+		extraKeys.add("build");
+		extraKeys.add("pack");
+		extraKeys.add("code commit");
+		extraKeys.add("pull request and code review");
+		extraKeys.add("Filter pull requests");
+		extraKeys.add("Filter issues");
+		extraKeys.add("Add all commits from source branch to target branch with a merge commit");
+		extraKeys.add("Only create merge commit if target branch can not be fast-forwarded to source branch");
+		extraKeys.add("Squash all commits from source branch into a single commit in target branch");
+		extraKeys.add("Rebase all commits from source branch onto target branch");
+		extraKeys.add("Closed");
+		extraKeys.add("Create Merge Commit");
+		extraKeys.add("Create Merge Commit If Necessary");
+		extraKeys.add("Squash Source Branch Commits");
+		extraKeys.add("Rebase Source Branch Commits");
+		extraKeys.add("Test");
+		extraKeys.add("{0} seconds");
+		extraKeys.add("{0} minutes");
+		extraKeys.add("{0} hours");
+		extraKeys.add("{0} days");
+		extraKeys.add("{0} second");
+		extraKeys.add("{0} minute");
+		extraKeys.add("{0} hour");
+		extraKeys.add("{0} day");		
+		
+		return extraKeys;
+	}
+	
+	public static void init(Map<String, String> m) {
 		m.clear();
+
 		m.put("markdown:heading", "Heading");
 		m.put("markdown:image", "Image");
 		m.put("container:image", "Image");
