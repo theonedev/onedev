@@ -2,6 +2,8 @@ package io.onedev.server.web.translation;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,13 +12,16 @@ import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.IMarkupFragment;
-import org.apache.wicket.markup.Markup;
+import org.apache.wicket.markup.MarkupParser;
+import org.apache.wicket.markup.MarkupResourceStream;
 import org.apache.wicket.markup.MarkupStream;
 import org.apache.wicket.markup.WicketTag;
 import org.apache.wicket.markup.html.TransparentWebMarkupContainer;
 import org.apache.wicket.markup.parser.filter.WicketTagIdentifier;
 import org.apache.wicket.markup.resolver.IComponentResolver;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.util.resource.ResourceStreamNotFoundException;
+import org.apache.wicket.util.resource.StringResourceStream;
 
 import com.google.common.base.Preconditions;
 
@@ -70,7 +75,15 @@ public class TranslationResolver implements IComponentResolver {
 							}
 							var prefix = k.substring(0, index1 + 1 + index11);
 							var suffix = k.substring(index1 + 2 + index22, k.length());
-							return Markup.of(prefix + _T(normalizedInnerHtml) + suffix);
+							try {
+								var stringResourceStream = new StringResourceStream(prefix + _T(normalizedInnerHtml) + suffix);
+								stringResourceStream.setCharset(StandardCharsets.UTF_8);
+								MarkupParser markupParser = new MarkupParser(new MarkupResourceStream(stringResourceStream));
+								markupParser.setWicketNamespace("wicket");
+								return markupParser.parse();
+							} catch (IOException | ResourceStreamNotFoundException e) {
+								throw new RuntimeException(e);
+							}
 						} else {
 							return markup;
 						}
