@@ -136,6 +136,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Access token regenerated, make sure to update the token at agent side", "Token di accesso rigenerato, assicurati di aggiornare il token sul lato agente");
 		m.put("Account Email", "Email dell'account");
 		m.put("Account Name", "Nome dell'account");
+		m.put("Account set up successfully", "Account configurato con successo");
 		m.put("Active Directory", "Active Directory");
 		m.put("Active Since", "Attivo da");
 		m.put("Activities", "Attività");
@@ -232,6 +233,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Alerts", "Avvisi");
 		m.put("All", "Tutti");
 		m.put("All Issues", "Tutti i problemi");
+		m.put("All RESTful Resources", "Tutte le risorse RESTful");
 		m.put("All accessible", "Tutti accessibili");
 		m.put("All builds", "Tutte le build");
 		m.put("All changes", "Tutte le modifiche");
@@ -254,6 +256,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Always", "Sempre");
 		m.put("Always Pull Image", "Scarica sempre immagine");
 		m.put("An issue already linked for {0}. Unlink it first", "Un problema è già collegato per {0}. Scollegalo prima");
+		m.put("An unexpected exception occurred", "Si è verificata un'eccezione imprevista");
 		m.put("And configure auth token of the registry", "E configura il token di autenticazione del registro");
 		m.put("Another pull request already open for this change", "Un'altra pull request già aperta per questa modifica");
 		m.put("Any agent", "Qualsiasi agente");
@@ -357,6 +360,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Avatar", "Avatar");
 		m.put("Avatar Service Url", "URL del servizio avatar");
 		m.put("Avatar and name", "Avatar e nome");
+		m.put("Back To Home", "Torna alla Home");
 		m.put("Backlog", "Backlog");
 		m.put("Backlog Base Query", "Query di base del backlog");
 		m.put("Backup", "Backup");
@@ -520,6 +524,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Can not link to self", "Non è possibile collegarsi a se stessi");
 		m.put("Can not move project \"{0}\" to be under itself or its descendants", "Non è possibile spostare il progetto \"{0}\" sotto se stesso o i suoi discendenti");
 		m.put("Can not perform this operation now", "Non è possibile eseguire questa operazione ora");
+		m.put("Can not reset password for service account or disabled user", "Impossibile reimpostare la password per account di servizio o utente disabilitato");
+		m.put("Can not reset password for user authenticating via external system", "Impossibile reimpostare la password per utente che si autentica tramite sistema esterno");
 		m.put("Can not save malformed query", "Non è possibile salvare una query malformata");
 		m.put("Can not use current or descendant project as parent", "Non è possibile utilizzare il progetto corrente o un discendente come genitore");
 		m.put("Can only compare with common ancestor when different projects are involved", "È possibile confrontare solo con un antenato comune quando sono coinvolti progetti diversi");
@@ -747,6 +753,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Container Image(s)", "Immagine(i) del Container");
 		m.put("Container default", "Container predefinito");
 		m.put("Content", "Contenuto");
+		m.put("Content Type", "Tipo di Contenuto");
 		m.put("Content is identical", "Il contenuto è identico");
 		m.put("Continue to add other user after create", "Continua ad aggiungere altri utenti dopo la creazione");
 		m.put("Contributed settings", "Impostazioni Contribuite");
@@ -1078,6 +1085,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Either target branch or source branch has new commits just now, please re-check.", "Il branch di destinazione o il branch sorgente ha nuovi commit appena ora, per favore ricontrolla.");
 		m.put("Email", "Email");
 		m.put("Email Address", "Indirizzo Email");
+		m.put("Email Address Verification", "Verifica Indirizzo Email");
 		m.put("Email Addresses", "Indirizzi Email");
 		m.put("Email Templates", "Modelli Email");
 		m.put("Email Verification", "Verifica Email");
@@ -1086,6 +1094,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Email address already in use: {0}", "Indirizzo email già in uso: {0}");
 		m.put("Email address already invited: {0}", "Indirizzo email già invitato: {0}");
 		m.put("Email address already used by another user", "Indirizzo email già utilizzato da un altro utente");
+		m.put("Email address already used: ", "Indirizzo email già utilizzato:");
 		m.put("Email address to verify", "Indirizzo email da verificare");
 		m.put("Email addresses with <span class=\"badge badge-warning badge-sm\">ineffective</span> mark are those not belong to or not verified by key owner", 
 			"Gli indirizzi email con il <span class=\"badge badge-warning badge-sm\">inefficace</span> segno sono quelli che non appartengono o non sono verificati dal proprietario della chiave");
@@ -1123,10 +1132,13 @@ public class Translation_it extends TranslationResourceBundle {
 			"Abilita questa opzione per elaborare commenti su problemi o pull request inviati via email. <b class='text-danger'>NOTA:</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>Il sub addressing</a> deve essere abilitato per l'indirizzo email di sistema sopra, poiché OneDev lo utilizza per tracciare contesti di problemi e pull request");
 		m.put("Enable to allow to upload build cache generated during CI/CD job. Uploaded cache can be used by subsequent builds of the project as long as cache key matches", 
 			"Abilita per consentire il caricamento della cache di build generata durante il lavoro CI/CD. La cache caricata può essere utilizzata dalle build successive del progetto finché la chiave della cache corrisponde");
+		m.put("End Point", "Punto di Accesso");
 		m.put("Enforce Conventional Commits", "Imponi Commit Convenzionali");
 		m.put("Enforce Two-factor Authentication", "Imponi Autenticazione a Due Fattori");
+		m.put("Enter New Password", "Inserisci Nuova Password");
 		m.put("Enter description here", "Inserisci qui la descrizione");
 		m.put("Enter your details to login to your account", "Inserisci i tuoi dati per accedere al tuo account");
+		m.put("Enter your user name or email to reset password", "Inserisci il tuo nome utente o email per reimpostare la password");
 		m.put("Entries", "Voci");
 		m.put("Entry", "Voce");
 		m.put("Enumeration", "Enumerazione");
@@ -1138,6 +1150,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Error calculating commits: check log for details", "Errore nel calcolo dei commit: controlla il log per i dettagli");
 		m.put("Error cherry-picking to {0}: Merge conflicts detected", "Errore nel cherry-picking su {0}: Rilevati conflitti di merge");
 		m.put("Error cherry-picking to {0}: {1}", "Errore nel cherry-picking su {0}: {1}");
+		m.put("Error detail of content type &quot;text/plain&quot;", "Dettaglio errore del tipo di contenuto &quot;text/plain&quot;");
 		m.put("Error discovering OIDC metadata", "Errore nella scoperta dei metadati OIDC");
 		m.put("Error executing task", "Errore nell'esecuzione del compito");
 		m.put("Error parsing %sbase query: ", "Errore nell'analisi della query %sbase:");
@@ -1166,6 +1179,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Ever Used Since", "Mai Usato Da");
 		m.put("Everything inside this project and all child projects will be deleted and can not be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"Tutto all'interno di questo progetto e tutti i progetti figli saranno eliminati e non potranno essere recuperati, per favore digita il percorso del progetto <code>{0}</code> qui sotto per confermare l'eliminazione.");
+		m.put("Example", "Esempio");
 		m.put("Example Plugin Setting", "Esempio di Impostazione Plugin");
 		m.put("Example Property", "Esempio di Proprietà");
 		m.put("Exclude Param Combos", "Escludi Combinazioni di Parametri");
@@ -1209,6 +1223,7 @@ public class Translation_it extends TranslationResourceBundle {
 			"Fallisci la build se ci sono vulnerabilità con livello di gravità specificato o superiore. Nota che questo ha effetto solo se la build non è fallita per altri passaggi");
 		m.put("Failed", "Fallito");
 		m.put("Failed to validate build spec import. Check server log for details", "Fallito nella validazione dell'importazione della specifica di build. Controlla il log del server per i dettagli");
+		m.put("Failed to verify your email address", "Verifica del tuo indirizzo email fallita");
 		m.put("Field Bean", "Bean del Campo");
 		m.put("Field Instance", "Istanza del Campo");
 		m.put("Field Name", "Nome Campo");
@@ -1306,6 +1321,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Force", "Forza");
 		m.put("Force Garbage Collection", "Forza Raccolta Garbage");
 		m.put("Forgot Password?", "Password Dimenticata?");
+		m.put("Forgotten Password?", "Password Dimenticata?");
 		m.put("Fork Project", "Fork Progetto");
 		m.put("Fork now", "Fai un Fork ora");
 		m.put("Forks Of", "Fork di");
@@ -1376,6 +1392,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Global Pack Setting", "Impostazione di Pacchetto Globale");
 		m.put("Global Views", "Viste Globali");
 		m.put("Gmail", "Gmail");
+		m.put("Go Back", "Torna Indietro");
 		m.put("Google Test Report", "Rapporto Test Google");
 		m.put("Gpg", "Gpg");
 		m.put("Gpg Key", "Chiave Gpg");
@@ -1444,6 +1461,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("How to Publish", "Come pubblicare");
 		m.put("Html Report", "Report HTML");
 		m.put("Html Report Publish Enabled", "Pubblicazione del report HTML abilitata");
+		m.put("Http Method", "Metodo Http");
+		m.put("I didn't eat it. I swear!", "Non l'ho mangiato. Lo giuro!");
 		m.put("ID token was expired", "Il token ID è scaduto");
 		m.put("IMAP Host", "Host IMAP");
 		m.put("IMAP Password", "Password IMAP");
@@ -1518,6 +1537,8 @@ public class Translation_it extends TranslationResourceBundle {
 			"Nel caso in cui il certificato host IMAP sia autofirmato o la sua radice CA non sia accettata, puoi dire a OneDev di ignorare il controllo del certificato. <b class='text-danger'>ATTENZIONE: </b> In una rete non affidabile, ciò potrebbe portare ad un attacco man-in-the-middle, e dovresti <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>importare il certificato in OneDev</a> invece");
 		m.put("In case SMTP host certificate is self-signed or its CA root is not accepted, you may tell OneDev to bypass certificate check. <b class='text-danger'>WARNING: </b> In an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the certificate into OneDev</a> instead", 
 			"Nel caso in cui il certificato host SMTP sia autofirmato o la sua radice CA non sia accettata, puoi dire a OneDev di ignorare il controllo del certificato. <b class='text-danger'>ATTENZIONE: </b> In una rete non affidabile, ciò potrebbe portare ad un attacco man-in-the-middle, e dovresti <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>importare il certificato in OneDev</a> invece");
+		m.put("In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, you will need to authenticate by providing user name and password (or access token) via http basic auth header", 
+			"Nel caso in cui l'accesso anonimo sia disabilitato o l'utente anonimo non abbia abbastanza permessi per un'operazione di risorsa, sarà necessario autenticarsi fornendo nome utente e password (o token di accesso) tramite l'intestazione di autenticazione di base http");
 		m.put("In case cache is not hit via above key, OneDev will loop through load keys defined here in order until a matching cache is found in project hierarchy. A cache is considered matching if its key is prefixed with the load key. If multiple caches matches, the most recent cache will be returned", 
 			"Nel caso in cui la cache non venga colpita tramite la chiave sopra, OneDev scorrerà le chiavi di caricamento definite qui in ordine fino a trovare una cache corrispondente nella gerarchia del progetto. Una cache è considerata corrispondente se la sua chiave è prefissata con la chiave di caricamento. Se più cache corrispondono, verrà restituita la cache più recente");
 		m.put("In case cache needs to be uploaded, this property specifies target project for the upload. Leave empty for current project", 
@@ -1566,12 +1587,15 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Invalid credentials", "Credenziali non valide");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "Intervallo di date non valido, previsto \"yyyy-MM-dd to yyyy-MM-dd\"");
 		m.put("Invalid email address: {0}", "Indirizzo email non valido: {0}");
+		m.put("Invalid invitation code", "Codice di invito non valido");
 		m.put("Invalid issue date of ID token", "Data di emissione del token ID non valida");
 		m.put("Invalid issue number: {0}", "Numero di emissione non valido: {0}");
 		m.put("Invalid pull request number: {0}", "Numero di pull request non valido: {0}");
 		m.put("Invalid request path", "Percorso della richiesta non valido");
 		m.put("Invalid selection, click for details", "Selezione non valida, clicca per dettagli");
 		m.put("Invalid state response", "Risposta di stato non valida");
+		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
+			"Stato non valido. Assicurati di visitare OneDev utilizzando l'url del server specificato nelle impostazioni di sistema");
 		m.put("Invalid subscription key", "Chiave di abbonamento non valida");
 		m.put("Invalid working period", "Periodo di lavoro non valido");
 		m.put("Invitation sent to \"{0}\"", "Invito inviato a \"{0}\"");
@@ -2081,12 +2105,14 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("No pull requests to watch/unwatch", "Nessuna pull request da osservare/non osservare");
 		m.put("No refs to build on behalf of", "Nessun ref su cui costruire per conto di");
 		m.put("No required services", "Nessun servizio richiesto");
+		m.put("No response body", "Nessun corpo di risposta");
 		m.put("No secret config", "Nessuna configurazione segreta");
 		m.put("No services defined", "Nessun servizio definito");
 		m.put("No start/due date", "Nessuna data di inizio/scadenza");
 		m.put("No step templates defined", "Nessun modello di step definito");
 		m.put("No tags found", "Nessun tag trovato");
 		m.put("No timesheets defined", "Nessun foglio ore definito");
+		m.put("No user found with login name or email: ", "Nessun utente trovato con nome di login o email:");
 		m.put("No users to delete", "Nessun utente da eliminare");
 		m.put("No users to disable", "Nessun utente da disabilitare");
 		m.put("No users to enable", "Nessun utente da abilitare");
@@ -2137,6 +2163,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("OCI Layout Directory", "Directory Layout OCI");
 		m.put("OIDC error: Inconsistent sub in ID token and userinfo", "Errore OIDC: Sub incoerente nel token ID e userinfo");
 		m.put("OIDC error: No email claim returned", "Errore OIDC: Nessuna dichiarazione email restituita");
+		m.put("OOPS! There Is An Error", "OOPS! C'è un errore");
 		m.put("OPEN", "APERTA");
 		m.put("OS", "Sistema Operativo");
 		m.put("OS Arch", "Architettura OS");
@@ -2176,6 +2203,9 @@ public class Translation_it extends TranslationResourceBundle {
 			"La chiave pubblica OpenSSH inizia con 'ssh-rsa', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521', 'ssh-ed25519', 'sk-ecdsa-sha2-nistp256@openssh.com' o 'sk-ssh-ed25519@openssh.com'");
 		m.put("Opened issue \"{0}\" ({1})", "Problema aperto \"{0}\" ({1})");
 		m.put("Opened pull request \"{0}\" ({1})", "Pull request aperta \"{0}\" ({1})");
+		m.put("Operation", "Operazione");
+		m.put("Operation Failed", "Operazione Fallita");
+		m.put("Operation Successful", "Operazione Riuscita");
 		m.put("Operations", "Operazioni");
 		m.put("Optional", "Opzionale");
 		m.put("Optionally Specify project to create issue in. Leave empty to create in current project", 
@@ -2451,6 +2481,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Package list", "Elenco Pacchetti");
 		m.put("Package {0} deleted", "Pacchetto {0} eliminato");
 		m.put("Packages", "Pacchetti");
+		m.put("Page Not Found", "Pagina Non Trovata");
 		m.put("Page is in error, reload to recover", "La pagina è in errore, ricarica per recuperare");
 		m.put("Param Instance", "Istanza Parametro");
 		m.put("Param Instances", "Istanze Parametro");
@@ -2459,6 +2490,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Param Name", "Nome Parametro");
 		m.put("Param Spec", "Specifica Parametro");
 		m.put("Param Spec Bean", "Bean Specifica Parametro");
+		m.put("Parameter", "Parametro");
 		m.put("Parameter Specs", "Specifiche Parametro");
 		m.put("Params", "Parametri");
 		m.put("Params & Triggers", "Parametri & Trigger");
@@ -2479,11 +2511,13 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Password Reset Template", "Template Reset Password");
 		m.put("Password Secret", "Password Segreta");
 		m.put("Password and its confirmation should be identical.", "La password e la sua conferma devono essere identiche.");
+		m.put("Password changed. Please login with your new password", "Password cambiata. Effettua il login con la tua nuova password");
 		m.put("Password has been changed", "La password è stata cambiata");
 		m.put("Password has been removed", "La password è stata rimossa");
 		m.put("Password has been set", "La password è stata impostata");
 		m.put("Password or Access Token for Remote Repository", "Password o Token di Accesso per Repository Remoto");
 		m.put("Password reset request has been sent", "La richiesta di reset della password è stata inviata");
+		m.put("Password reset url is invalid or obsolete", "L'url per reimpostare la password non è valido o è obsoleto");
 		m.put("Paste subscription key here", "Incolla qui la chiave di abbonamento");
 		m.put("Path containing spaces or starting with dash needs to be quoted", "Il percorso contenente spazi o che inizia con un trattino deve essere racchiuso tra virgolette");
 		m.put("Path placeholder", "Segnaposto Percorso");
@@ -2524,6 +2558,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Pick Existing", "Seleziona esistente");
 		m.put("Pin this issue", "Fissa questa issue");
 		m.put("Pipeline", "Pipeline");
+		m.put("Placeholder", "Segnaposto");
 		m.put("Plain text expected", "Testo semplice previsto");
 		m.put("Platform", "Piattaforma");
 		m.put("Platforms", "Piattaforme");
@@ -2531,6 +2566,7 @@ public class Translation_it extends TranslationResourceBundle {
 			"Si prega di <a wicket:id=\"download\" class=\"font-weight-bolder\">scaricare</a> i codici di recupero qui sotto e di mantenerli segreti. Questi codici possono essere utilizzati per fornire accesso temporaneo al tuo account nel caso in cui non sia possibile accedere all'applicazione di autenticazione. Non saranno <b>MAI</b> visualizzati di nuovo");
 		m.put("Please Confirm", "Si prega di confermare");
 		m.put("Please Note", "Si prega di notare");
+		m.put("Please check your email for password reset instructions", "Controlla la tua email per le istruzioni di reimpostazione della password");
 		m.put("Please choose revision to create branch from", "Si prega di scegliere la revisione da cui creare il branch");
 		m.put("Please configure <a wicket:id=\"mailSetting\">mail setting</a> first", "Si prega di configurare prima <a wicket:id=\"mailSetting\">l'impostazione della mail</a>");
 		m.put("Please confirm", "Si prega di confermare");
@@ -2609,6 +2645,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Primary", "Primario");
 		m.put("Primary <a wicket:id=\"noPrimaryAddressLink\">email address</a> not specified", "Indirizzo email <a wicket:id=\"noPrimaryAddressLink\">primario</a> non specificato");
 		m.put("Primary Email", "Email primaria");
+		m.put("Primary email address not specified", "Indirizzo email principale non specificato");
 		m.put("Primary email address of your account is not specified yet", "L'indirizzo email principale del tuo account non è ancora specificato");
 		m.put("Primary email address will be used to receive notifications, show gravatar (if enabled) etc.", 
 			"L'indirizzo email principale verrà utilizzato per ricevere notifiche, mostrare il gravatar (se abilitato), ecc.");
@@ -2754,6 +2791,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Pylint Report", "Report Pylint");
 		m.put("Queries", "Query");
 		m.put("Query", "Query");
+		m.put("Query Parameters", "Parametri di Query");
 		m.put("Query Watches", "Osservazioni delle query");
 		m.put("Query commits", "Query dei commit");
 		m.put("Query not submitted", "Query non inviata");
@@ -2769,6 +2807,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Quick Search", "Ricerca rapida");
 		m.put("Quote", "Citazione");
 		m.put("RESTful API", "API RESTful");
+		m.put("RESTful API Help", "Guida API RESTful");
 		m.put("Ran On Agent", "Eseguito sull'agente");
 		m.put("Re-run All Queried Builds", "Riesegui tutte le build interrogate");
 		m.put("Re-run Selected Builds", "Riesegui le build selezionate");
@@ -2848,6 +2887,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Report format changed. You may re-run this build to generate the report in new format", 
 			"Formato del report modificato. Puoi rieseguire questa build per generare il report nel nuovo formato");
 		m.put("Repository Sync", "Sincronizzazione del repository");
+		m.put("Request Body", "Corpo della Richiesta");
 		m.put("Request For Changes", "Richiesta di modifiche");
 		m.put("Request Scopes", "Ambiti di richiesta");
 		m.put("Request Trial Subscription", "Richiedi abbonamento di prova");
@@ -2860,15 +2900,21 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Require Autentication", "Richiedi autenticazione");
 		m.put("Require Strict Pull Request Builds", "Richiedi build rigorose per le richieste di pull");
 		m.put("Require Successful", "Richiedi successo");
+		m.put("Required", "Richiesto");
 		m.put("Required Builds", "Build richieste");
 		m.put("Required Reviewers", "Revisori richiesti");
 		m.put("Required Services", "Servizi richiesti");
 		m.put("Resend Verification Email", "Reinvia email di verifica");
 		m.put("Resend invitation", "Reinvia invito");
+		m.put("Reset", "Reimposta");
 		m.put("Resolution", "Risoluzione");
 		m.put("Resolved", "Risolto");
 		m.put("Resolved comment on file \"{0}\" in project \"{1}\"", "Commento risolto sul file \"{0}\" nel progetto \"{1}\"");
+		m.put("Resource", "Risorsa");
 		m.put("Resource Settings", "Impostazioni delle risorse");
+		m.put("Resources", "Risorse");
+		m.put("Response", "Risposta");
+		m.put("Response Body", "Corpo della Risposta");
 		m.put("Restart", "Riavvia");
 		m.put("Restart All Queried Agents", "Riavvia tutti gli agenti richiesti");
 		m.put("Restart Selected Agents", "Riavvia gli agenti selezionati");
@@ -3063,6 +3109,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Set Up Cache", "Configura cache");
 		m.put("Set Up Renovate Cache", "Configura cache di Renovate");
 		m.put("Set Up Trivy Cache", "Configura cache di Trivy");
+		m.put("Set Up Your Account", "Configura il Tuo Account");
 		m.put("Set as Private", "Imposta come privato");
 		m.put("Set as Public", "Imposta come pubblico");
 		m.put("Set reviewed", "Imposta come revisionato");
@@ -3098,6 +3145,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Show Description", "Mostra descrizione");
 		m.put("Show Duration", "Mostra durata");
 		m.put("Show Emojis", "Mostra emoji");
+		m.put("Show Error Detail", "Mostra Dettaglio Errore");
 		m.put("Show Issue Status", "Mostra stato delle problematiche");
 		m.put("Show Package Stats", "Mostra statistiche dei pacchetti");
 		m.put("Show Pull Request Stats", "Mostra statistiche delle pull request");
@@ -3541,6 +3589,9 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Stats", "Statistiche");
 		m.put("Stats Group", "Gruppo di Statistiche");
 		m.put("Status", "Stato");
+		m.put("Status Code", "Codice di Stato");
+		m.put("Status code", "Codice di stato");
+		m.put("Status code other than 200 indicating the error type", "Codice di stato diverso da 200 che indica il tipo di errore");
 		m.put("Step", "Passaggio");
 		m.put("Step Template", "Template del Passaggio");
 		m.put("Step Templates", "Template dei Passaggi");
@@ -3589,6 +3640,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Symbol Name", "Nome Simbolo");
 		m.put("Symbol name", "Nome simbolo");
 		m.put("Symbols", "Simboli");
+		m.put("Sync Replica Status and Back to Home", "Sincronizza Stato Replica e Torna alla Home");
 		m.put("Sync Repository", "Sincronizza Repository");
 		m.put("Sync Timing of All Queried Issues", "Sincronizza Tempistica di Tutte le Questioni Interrogate");
 		m.put("Sync Timing of Selected Issues", "Sincronizza Tempistica delle Questioni Selezionate");
@@ -3655,6 +3707,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("The URL of the server endpoint that will receive the webhook POST requests", "L'URL del server endpoint che riceverà le richieste POST del webhook");
 		m.put("The first board will be the default board", "La prima bacheca sarà la bacheca predefinita");
 		m.put("The first timesheet will be the default timesheet", "Il primo timesheet sarà il timesheet predefinito");
+		m.put("The object you are deleting/disabling is still being used", "L'oggetto che stai eliminando/disabilitando è ancora in uso");
+		m.put("The password reset url is invalid or obsolete", "L'url per reimpostare la password non è valido o è obsoleto");
 		m.put("The permission to access build log", "Il permesso di accedere al log di build");
 		m.put("The permission to access build pipeline", "Il permesso di accedere alla pipeline di build");
 		m.put("The permission to run job manually. It also implies the permission to access build log, build pipeline and all published reports", 
@@ -3672,6 +3726,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Then upload package to the repository with twine", "Quindi carica il pacchetto nel repository con twine");
 		m.put("There are <a wicket:id=\"openRequests\">open pull requests</a> against branch <span wicket:id=\"branch\"></span>. These pull requests will be discarded if the branch is deleted.", 
 			"Ci sono <a wicket:id=\"openRequests\">richieste di pull aperte</a> contro il ramo <span wicket:id=\"branch\"></span>. Queste richieste di pull saranno scartate se il ramo viene eliminato.");
+		m.put("There are incompatibilities since your upgraded version", "Ci sono incompatibilità dalla tua versione aggiornata");
 		m.put("There are merge conflicts", "Ci sono conflitti di merge");
 		m.put("There are merge conflicts.", "Ci sono conflitti di merge.");
 		m.put("There are merge conflicts. You can still create the pull request though", "Ci sono conflitti di merge. Puoi comunque creare la richiesta di pull");
@@ -3692,6 +3747,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("This change is squashed/rebased onto base branch via pull request {0}", "Questa modifica è stata compressa/ribasata sul ramo base tramite la richiesta di pull {0}");
 		m.put("This change needs to be verified by some jobs. Submit pull request instead", "Questa modifica deve essere verificata da alcuni job. Invia una richiesta di pull invece");
 		m.put("This commit is rebased", "Questo commit è stato ribasato");
+		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
+			"Questa data utilizza il <a href=\"https://www.w3.org/TR/NOTE-datetime\">formato ISO 8601</a>");
 		m.put("This email address is being used", "Questo indirizzo email è già in uso");
 		m.put("This executor runs build jobs as docker containers on OneDev server", "Questo executor esegue i lavori di build come container docker sul server OneDev");
 		m.put("This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>", 
@@ -3897,6 +3954,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Type to filter", "Digita per filtrare");
 		m.put("Type to filter...", "Digita per filtrare...");
 		m.put("URL", "URL");
+		m.put("Unable To Delete/Disable Right Now", "Impossibile Eliminare/Disabilitare Ora");
 		m.put("Unable to apply change as otherwise you will not be able to manage this project", "Impossibile applicare la modifica poiché altrimenti non potrai gestire questo progetto");
 		m.put("Unable to change password as you are authenticating via external system", "Impossibile cambiare la password poiché stai autenticandoti tramite un sistema esterno");
 		m.put("Unable to comment", "Impossibile commentare");
@@ -3917,6 +3975,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Unable to get guilds info", "Impossibile ottenere informazioni sulle gilde");
 		m.put("Unable to import build spec (import project: {0}, import revision: {1}): {2}", "Impossibile importare la specifica di build (progetto di importazione: {0}, revisione di importazione: {1}): {2}");
 		m.put("Unable to notify user as mail service is not configured", "Impossibile notificare l'utente poiché il servizio di posta non è configurato");
+		m.put("Unable to send password reset email as mail service is not configured", "Impossibile inviare email di reimpostazione password poiché il servizio di posta non è configurato");
 		m.put("Unable to send verification email as mail service is not configured yet", "Impossibile inviare l'email di verifica poiché il servizio di posta non è ancora configurato");
 		m.put("Unauthorize this user", "Revoca autorizzazione a questo utente");
 		m.put("Unauthorized", "Non autorizzato");
@@ -4186,6 +4245,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("YouTrack Password or Access Token", "Password o Token di Accesso di YouTrack");
 		m.put("YouTrack Project", "Progetto di YouTrack");
 		m.put("YouTrack Projects to Import", "Progetti di YouTrack da Importare");
+		m.put("Your email address is now verified", "Il tuo indirizzo email è ora verificato");
+		m.put("Your primary email address is not verified", "Il tuo indirizzo email principale non è verificato");
 		m.put("[Any state]", "[Qualsiasi stato]");
 		m.put("[Reset Password] Please Reset Your OneDev Password", "[Reset Password] Per favore reimposta la tua password di OneDev");
 		m.put("a boolean indiciating whether or not topic comment can be created directly by replying the email", 
@@ -4219,6 +4280,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("build is successful for jobs \"{0}\" on any branch", "la build è riuscita per i lavori \"{0}\" su qualsiasi branch");
 		m.put("build is successful for jobs \"{0}\" on branches \"{1}\"", "la build è riuscita per i lavori \"{0}\" sui branch \"{1}\"");
 		m.put("builds", "builds");
+		m.put("cURL Example", "Esempio cURL");
 		m.put("choose a color for this state", "scegli un colore per questo stato");
 		m.put("cluster:lead", "lead");
 		m.put("cmd-k to show command palette", "cmd-k per mostrare la palette dei comandi");
@@ -4389,6 +4451,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("week:Tue", "Mar");
 		m.put("week:Wed", "Mer");
 		m.put("widget:Tabs", "Tab");
+		m.put("you may show this page later via incompatibilities link in help menu", "puoi mostrare questa pagina più tardi tramite il link delle incompatibilità nel menu di aiuto");
 		m.put("{0} Month(s)", "{0} Mese/i");
 		m.put("{0} activities on {1}", "{0} attività su {1}");
 		m.put("{0} additions & {1} deletions", "{0} aggiunte & {1} eliminazioni");
@@ -4422,69 +4485,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Account set up successfully", "Account configurato con successo");
-		m.put("All RESTful Resources", "Tutte le risorse RESTful");
-		m.put("An unexpected exception occurred", "Si è verificata un'eccezione imprevista");
-		m.put("Back To Home", "Torna alla Home");
-		m.put("Can not reset password for service account or disabled user", "Impossibile reimpostare la password per account di servizio o utente disabilitato");
-		m.put("Can not reset password for user authenticating via external system", "Impossibile reimpostare la password per utente che si autentica tramite sistema esterno");
-		m.put("Content Type", "Tipo di Contenuto");
-		m.put("Email Address Verification", "Verifica Indirizzo Email");
-		m.put("Email address already used: ", "Indirizzo email già utilizzato:");
-		m.put("End Point", "Punto di Accesso");
-		m.put("Enter New Password", "Inserisci Nuova Password");
-		m.put("Enter your user name or email to reset password", "Inserisci il tuo nome utente o email per reimpostare la password");
-		m.put("Error detail of content type &quot;text/plain&quot;", "Dettaglio errore del tipo di contenuto &quot;text/plain&quot;");
-		m.put("Example", "Esempio");
-		m.put("Failed to verify your email address", "Verifica del tuo indirizzo email fallita");
-		m.put("Forgotten Password?", "Password Dimenticata?");
-		m.put("Go Back", "Torna Indietro");
-		m.put("Http Method", "Metodo Http");
-		m.put("I didn't eat it. I swear!", "Non l'ho mangiato. Lo giuro!");
-		m.put("In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, you will need to authenticate by providing user name and password (or access token) via http basic auth header", 
-			"Nel caso in cui l'accesso anonimo sia disabilitato o l'utente anonimo non abbia abbastanza permessi per un'operazione di risorsa, sarà necessario autenticarsi fornendo nome utente e password (o token di accesso) tramite l'intestazione di autenticazione di base http");
-		m.put("Invalid invitation code", "Codice di invito non valido");
-		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
-			"Stato non valido. Assicurati di visitare OneDev utilizzando l'url del server specificato nelle impostazioni di sistema");
-		m.put("No response body", "Nessun corpo di risposta");
-		m.put("No user found with login name or email: ", "Nessun utente trovato con nome di login o email:");
-		m.put("OOPS! There Is An Error", "OOPS! C'è un errore");
-		m.put("Operation", "Operazione");
-		m.put("Operation Failed", "Operazione Fallita");
-		m.put("Operation Successful", "Operazione Riuscita");
-		m.put("Page Not Found", "Pagina Non Trovata");
-		m.put("Parameter", "Parametro");
-		m.put("Password changed. Please login with your new password", "Password cambiata. Effettua il login con la tua nuova password");
-		m.put("Password reset url is invalid or obsolete", "L'url per reimpostare la password non è valido o è obsoleto");
-		m.put("Placeholder", "Segnaposto");
-		m.put("Please check your email for password reset instructions", "Controlla la tua email per le istruzioni di reimpostazione della password");
-		m.put("Primary email address not specified", "Indirizzo email principale non specificato");
-		m.put("Query Parameters", "Parametri di Query");
-		m.put("RESTful API Help", "Guida API RESTful");
-		m.put("Request Body", "Corpo della Richiesta");
-		m.put("Required", "Richiesto");
-		m.put("Reset", "Reimposta");
-		m.put("Resource", "Risorsa");
-		m.put("Resources", "Risorse");
-		m.put("Response", "Risposta");
-		m.put("Response Body", "Corpo della Risposta");
-		m.put("Set Up Your Account", "Configura il Tuo Account");
-		m.put("Show Error Detail", "Mostra Dettaglio Errore");
-		m.put("Status Code", "Codice di Stato");
-		m.put("Status code", "Codice di stato");
-		m.put("Status code other than 200 indicating the error type", "Codice di stato diverso da 200 che indica il tipo di errore");
-		m.put("Sync Replica Status and Back to Home", "Sincronizza Stato Replica e Torna alla Home");
-		m.put("The object you are deleting/disabling is still being used", "L'oggetto che stai eliminando/disabilitando è ancora in uso");
-		m.put("The password reset url is invalid or obsolete", "L'url per reimpostare la password non è valido o è obsoleto");
-		m.put("There are incompatibilities since your upgraded version", "Ci sono incompatibilità dalla tua versione aggiornata");
-		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
-			"Questa data utilizza il <a href=\"https://www.w3.org/TR/NOTE-datetime\">formato ISO 8601</a>");
-		m.put("Unable To Delete/Disable Right Now", "Impossibile Eliminare/Disabilitare Ora");
-		m.put("Unable to send password reset email as mail service is not configured", "Impossibile inviare email di reimpostazione password poiché il servizio di posta non è configurato");
-		m.put("Your email address is now verified", "Il tuo indirizzo email è ora verificato");
-		m.put("Your primary email address is not verified", "Il tuo indirizzo email principale non è verificato");
-		m.put("cURL Example", "Esempio cURL");
-		m.put("you may show this page later via incompatibilities link in help menu", "puoi mostrare questa pagina più tardi tramite il link delle incompatibilità nel menu di aiuto");
 	}
 		
 	@Override

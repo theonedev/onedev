@@ -143,6 +143,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Access token regenerated, make sure to update the token at agent side", "访问令牌已重新生成，请确保在代理端更新令牌");
 		m.put("Account Email", "账户邮箱");
 		m.put("Account Name", "账户名称");
+		m.put("Account set up successfully", "账户设置成功");
 		m.put("Active Directory", "Active Directory");
 		m.put("Active Since", "活跃起");
 		m.put("Activities", "活动");
@@ -239,6 +240,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Alerts", "提醒");
 		m.put("All", "全部");
 		m.put("All Issues", "所有工单");
+		m.put("All RESTful Resources", "所有RESTful资源");
 		m.put("All accessible", "所有可访问的");
 		m.put("All builds", "所有构建");
 		m.put("All changes", "所有更改");
@@ -261,6 +263,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Always", "总是");
 		m.put("Always Pull Image", "始终拉取镜像");
 		m.put("An issue already linked for {0}. Unlink it first", "已链接到 {0}。先取消链接");
+		m.put("An unexpected exception occurred", "发生意外异常");
 		m.put("And configure auth token of the registry", "并配置注册表的授权令牌");
 		m.put("Another pull request already open for this change", "另一个合并请求已为此更改打开");
 		m.put("Any agent", "任何代理");
@@ -364,6 +367,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Avatar", "头像");
 		m.put("Avatar Service Url", "头像服务地址");
 		m.put("Avatar and name", "头像和名称");
+		m.put("Back To Home", "返回主页");
 		m.put("Backlog", "待办");
 		m.put("Backlog Base Query", "待办工单基础查询");
 		m.put("Backup", "备份");
@@ -527,6 +531,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Can not link to self", "不能链接到自己");
 		m.put("Can not move project \"{0}\" to be under itself or its descendants", "不能将项目 \"{0}\" 移动到其自身或其子项目下");
 		m.put("Can not perform this operation now", "当前无法执行此操作");
+		m.put("Can not reset password for service account or disabled user", "无法重置服务账户或禁用用户的密码");
+		m.put("Can not reset password for user authenticating via external system", "无法重置通过外部系统认证的用户密码");
 		m.put("Can not save malformed query", "无法保存格式错误的查询");
 		m.put("Can not use current or descendant project as parent", "不能使用当前或子项目作为父项目");
 		m.put("Can only compare with common ancestor when different projects are involved", "跨项目比较时只能使用共同祖先");
@@ -754,6 +760,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Container Image(s)", "容器镜像");
 		m.put("Container default", "容器默认");
 		m.put("Content", "内容");
+		m.put("Content Type", "内容类型");
 		m.put("Content is identical", "内容相同");
 		m.put("Continue to add other user after create", "创建后继续添加其他用户");
 		m.put("Contributed settings", "贡献的设置");
@@ -1085,6 +1092,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Either target branch or source branch has new commits just now, please re-check.", "目标分支或源分支有新的提交，请重新检查。");
 		m.put("Email", "邮箱");
 		m.put("Email Address", "邮箱地址");
+		m.put("Email Address Verification", "邮箱地址验证");
 		m.put("Email Addresses", "电子邮件地址");
 		m.put("Email Templates", "邮件模板");
 		m.put("Email Verification", "邮件验证");
@@ -1093,6 +1101,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Email address already in use: {0}", "电子邮件地址已被使用: {0}");
 		m.put("Email address already invited: {0}", "电子邮件地址已被邀请: {0}");
 		m.put("Email address already used by another user", "电子邮件地址已被另一个用户使用");
+		m.put("Email address already used: ", "邮箱地址已被使用：");
 		m.put("Email address to verify", "待验证的邮箱地址");
 		m.put("Email addresses with <span class=\"badge badge-warning badge-sm\">ineffective</span> mark are those not belong to or not verified by key owner", 
 			"带有 <span class=\"badge badge-warning badge-sm\">无效</span> 标记的电子邮件地址是那些不属于或未被密钥所有者验证的电子邮件地址");
@@ -1130,10 +1139,13 @@ public class Translation_zh extends TranslationResourceBundle {
 			"启用此选项以处理通过电子邮件发布的工单或合并请求评论。<b class='text-danger'>注意：</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>子地址</a> 需要为上述系统电子邮件地址启用，因为 OneDev 使用它来跟踪工单和合并请求上下文");
 		m.put("Enable to allow to upload build cache generated during CI/CD job. Uploaded cache can be used by subsequent builds of the project as long as cache key matches", 
 			"启用此选项以允许上传在 CI/CD 任务期间生成的构建缓存。上传的缓存可以被项目后续的构建使用，只要缓存密钥匹配");
+		m.put("End Point", "端点");
 		m.put("Enforce Conventional Commits", "强制执行 Conventional Commits");
 		m.put("Enforce Two-factor Authentication", "强制执行两阶段认证");
+		m.put("Enter New Password", "输入新密码");
 		m.put("Enter description here", "输入描述");
 		m.put("Enter your details to login to your account", "输入您的详细信息登录到您的账户");
+		m.put("Enter your user name or email to reset password", "输入您的用户名或邮箱以重置密码");
 		m.put("Entries", "条目");
 		m.put("Entry", "条目");
 		m.put("Enumeration", "枚举");
@@ -1145,6 +1157,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Error calculating commits: check log for details", "计算提交时出错：请检查日志");
 		m.put("Error cherry-picking to {0}: Merge conflicts detected", "cherry-pick 到 {0} 时出错：合并冲突检测到");
 		m.put("Error cherry-picking to {0}: {1}", "cherry-pick 到 {0} 时出错：{1}");
+		m.put("Error detail of content type &quot;text/plain&quot;", "内容类型为\"text/plain\"的错误详情");
 		m.put("Error discovering OIDC metadata", "发现 OIDC 元数据时出错");
 		m.put("Error executing task", "执行任务时发生错误");
 		m.put("Error parsing %sbase query: ", "解析%s基准查询时出错：");
@@ -1173,6 +1186,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Ever Used Since", "上次使用时间");
 		m.put("Everything inside this project and all child projects will be deleted and can not be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"此项目及其所有子项目将被删除且无法恢复，请在下方输入项目路径 <code>{0}</code> 以确认删除。");
+		m.put("Example", "示例");
 		m.put("Example Plugin Setting", "示例插件设置");
 		m.put("Example Property", "示例属性");
 		m.put("Exclude Param Combos", "排除参数组合");
@@ -1216,6 +1230,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"如果存在或严重性高于指定严重性级别的漏洞，则失败构建。注意：此选项仅在构建未被其他步骤失败时生效");
 		m.put("Failed", "失败");
 		m.put("Failed to validate build spec import. Check server log for details", "无法验证构建规范导入。请检查服务器日志");
+		m.put("Failed to verify your email address", "未能验证您的邮箱地址");
 		m.put("Field Bean", "字段 Bean");
 		m.put("Field Instance", "字段实例");
 		m.put("Field Name", "字段名称");
@@ -1313,6 +1328,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Force", "强制");
 		m.put("Force Garbage Collection", "强制垃圾回收");
 		m.put("Forgot Password?", "忘记密码？");
+		m.put("Forgotten Password?", "忘记密码？");
 		m.put("Fork Project", "分叉项目");
 		m.put("Fork now", "立即分叉");
 		m.put("Forks Of", "分叉");
@@ -1383,6 +1399,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Global Pack Setting", "全局打包设置");
 		m.put("Global Views", "全局视图");
 		m.put("Gmail", "Gmail");
+		m.put("Go Back", "返回");
 		m.put("Google Test Report", "Google 测试报告");
 		m.put("Gpg", "Gpg");
 		m.put("Gpg Key", "Gpg 密钥");
@@ -1451,6 +1468,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("How to Publish", "如何发布");
 		m.put("Html Report", "HTML 报告");
 		m.put("Html Report Publish Enabled", "HTML 报告发布启用");
+		m.put("Http Method", "Http方法");
+		m.put("I didn't eat it. I swear!", "我没吃它。我发誓！");
 		m.put("ID token was expired", "ID 令牌已过期");
 		m.put("IMAP Host", "IMAP 主机");
 		m.put("IMAP Password", "IMAP 密码");
@@ -1525,6 +1544,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"如果 IMAP 主机证书是自签名的或其 CA 根证书不被接受，您可以告诉 OneDev 绕过证书检查。<b class='text-danger'>警告：</b> 在不受信任的网络中，这可能会导致中间人攻击，您应该<a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>将证书导入 OneDev</a> 而不是");
 		m.put("In case SMTP host certificate is self-signed or its CA root is not accepted, you may tell OneDev to bypass certificate check. <b class='text-danger'>WARNING: </b> In an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the certificate into OneDev</a> instead", 
 			"如果 SMTP 主机证书是自签名的或其 CA 根证书不被接受，您可以告诉 OneDev 绕过证书检查。<b class='text-danger'>警告：</b> 在不受信任的网络中，这可能会导致中间人攻击，您应该<a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>将证书导入 OneDev</a> 而不是");
+		m.put("In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, you will need to authenticate by providing user name and password (or access token) via http basic auth header", 
+			"如果匿名访问被禁用或匿名用户没有足够的权限进行资源操作，您需要通过http基本认证头提供用户名和密码（或访问令牌）进行认证");
 		m.put("In case cache is not hit via above key, OneDev will loop through load keys defined here in order until a matching cache is found in project hierarchy. A cache is considered matching if its key is prefixed with the load key. If multiple caches matches, the most recent cache will be returned", 
 			"如果缓存未通过上述密钥命中，OneDev 将按顺序遍历此处定义的加载密钥，直到在项目层次结构中找到匹配的缓存。如果多个缓存匹配，将返回最新的缓存。");
 		m.put("In case cache needs to be uploaded, this property specifies target project for the upload. Leave empty for current project", 
@@ -1573,12 +1594,15 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Invalid credentials", "无效的凭据");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "无效的日期范围，期望 \"yyyy-MM-dd to yyyy-MM-dd\"");
 		m.put("Invalid email address: {0}", "无效的电子邮件地址: {0}");
+		m.put("Invalid invitation code", "无效的邀请代码");
 		m.put("Invalid issue date of ID token", "ID 令牌的发行日期无效");
 		m.put("Invalid issue number: {0}", "无效的工单编号: {0}");
 		m.put("Invalid pull request number: {0}", "无效的合并请求编号：{0}");
 		m.put("Invalid request path", "无效的请求路径");
 		m.put("Invalid selection, click for details", "无效的选择，点击查看详情");
 		m.put("Invalid state response", "状态响应无效");
+		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
+			"无效的状态。请确保您使用系统设置中指定的服务器URL访问OneDev");
 		m.put("Invalid subscription key", "无效的订阅密钥");
 		m.put("Invalid working period", "无效的工作时间");
 		m.put("Invitation sent to \"{0}\"", "邀请已发送至 \"{0}\"");
@@ -2088,12 +2112,14 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No pull requests to watch/unwatch", "没有要监视/取消监视的合并请求");
 		m.put("No refs to build on behalf of", "没有要构建的引用");
 		m.put("No required services", "无所需服务");
+		m.put("No response body", "无响应体");
 		m.put("No secret config", "无秘密配置");
 		m.put("No services defined", "未定义服务");
 		m.put("No start/due date", "无开始/截止日期");
 		m.put("No step templates defined", "未定义步骤模板");
 		m.put("No tags found", "未找到标签");
 		m.put("No timesheets defined", "未定义时间表");
+		m.put("No user found with login name or email: ", "未找到登录名或邮箱为的用户：");
 		m.put("No users to delete", "没有要删除的用户");
 		m.put("No users to disable", "没有要禁用的用户");
 		m.put("No users to enable", "没有要启用的用户");
@@ -2144,6 +2170,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("OCI Layout Directory", "OCI 布局目录");
 		m.put("OIDC error: Inconsistent sub in ID token and userinfo", "ID 令牌中的 sub 与用户信息中的 sub 不一致");
 		m.put("OIDC error: No email claim returned", "没有返回邮箱声明");
+		m.put("OOPS! There Is An Error", "哎呀！发生错误");
 		m.put("OPEN", "打开");
 		m.put("OS", "操作系统");
 		m.put("OS Arch", "操作系统架构");
@@ -2183,6 +2210,9 @@ public class Translation_zh extends TranslationResourceBundle {
 			"OpenSSH 公钥以 'ssh-rsa'、'ecdsa-sha2-nistp256'、'ecdsa-sha2-nistp384'、'ecdsa-sha2-nistp521'、'ssh-ed25519'、'sk-ecdsa-sha2-nistp256@openssh.com' 或 'sk-ssh-ed25519@openssh.com' 开头");
 		m.put("Opened issue \"{0}\" ({1})", "创建工单 \"{0}\"（{1}）");
 		m.put("Opened pull request \"{0}\" ({1})", "创建合并请求 \"{0}\"（{1}）");
+		m.put("Operation", "操作");
+		m.put("Operation Failed", "操作失败");
+		m.put("Operation Successful", "操作成功");
 		m.put("Operations", "操作");
 		m.put("Optional", "可选");
 		m.put("Optionally Specify project to create issue in. Leave empty to create in current project", 
@@ -2458,6 +2488,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Package list", "包列表");
 		m.put("Package {0} deleted", "包 {0} 已删除");
 		m.put("Packages", "包");
+		m.put("Page Not Found", "页面未找到");
 		m.put("Page is in error, reload to recover", "页面发生错误，请刷新页面");
 		m.put("Param Instance", "参数实例");
 		m.put("Param Instances", "参数实例");
@@ -2466,6 +2497,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Param Name", "参数名称");
 		m.put("Param Spec", "参数");
 		m.put("Param Spec Bean", "参数Bean");
+		m.put("Parameter", "参数");
 		m.put("Parameter Specs", "参数");
 		m.put("Params", "参数");
 		m.put("Params & Triggers", "参数与触发器");
@@ -2486,11 +2518,13 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Password Reset Template", "密码重置模板");
 		m.put("Password Secret", "密码密钥");
 		m.put("Password and its confirmation should be identical.", "密码和其确认应相同。");
+		m.put("Password changed. Please login with your new password", "密码已更改。请使用新密码登录");
 		m.put("Password has been changed", "密码已更改");
 		m.put("Password has been removed", "密码已删除");
 		m.put("Password has been set", "密码已设置");
 		m.put("Password or Access Token for Remote Repository", "密码或远程仓库的访问令牌");
 		m.put("Password reset request has been sent", "密码重置请求已发送");
+		m.put("Password reset url is invalid or obsolete", "密码重置URL无效或已过期");
 		m.put("Paste subscription key here", "在此粘贴订阅密钥");
 		m.put("Path containing spaces or starting with dash needs to be quoted", "路径包含空格或以破折号开头时需要用引号括起来");
 		m.put("Path placeholder", "路径占位符");
@@ -2531,6 +2565,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Pick Existing", "选择现有");
 		m.put("Pin this issue", "置顶此工单");
 		m.put("Pipeline", "流水线");
+		m.put("Placeholder", "占位符");
 		m.put("Plain text expected", "需要纯文本");
 		m.put("Platform", "平台");
 		m.put("Platforms", "平台");
@@ -2538,6 +2573,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"请<a wicket:id=\"download\" class=\"font-weight-bolder\">下载</a>下方的恢复代码并妥善保管。这些代码可用于在您无法访问认证应用程序时提供一次性账户访问权限。它们<b>不会</b>再次显示");
 		m.put("Please Confirm", "请确认");
 		m.put("Please Note", "请注意");
+		m.put("Please check your email for password reset instructions", "请检查您的邮箱以获取密码重置说明");
 		m.put("Please choose revision to create branch from", "请选择要从中创建分支的版本");
 		m.put("Please configure <a wicket:id=\"mailSetting\">mail setting</a> first", "请先配置 <a wicket:id=\"mailSetting\">邮件设置</a>");
 		m.put("Please confirm", "请确认");
@@ -2616,6 +2652,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Primary", "主要");
 		m.put("Primary <a wicket:id=\"noPrimaryAddressLink\">email address</a> not specified", "未指定主 <a wicket:id=\"noPrimaryAddressLink\">电子邮件地址</a>");
 		m.put("Primary Email", "主电子邮件");
+		m.put("Primary email address not specified", "未指定主要邮箱地址");
 		m.put("Primary email address of your account is not specified yet", "您的账户尚未指定主要电子邮件地址");
 		m.put("Primary email address will be used to receive notifications, show gravatar (if enabled) etc.", 
 			"主电子邮件地址将用于接收通知、显示 Gravatar（如果启用）等。");
@@ -2761,6 +2798,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Pylint Report", "Pylint 报告");
 		m.put("Queries", "查询");
 		m.put("Query", "查询");
+		m.put("Query Parameters", "查询参数");
 		m.put("Query Watches", "订阅的查询");
 		m.put("Query commits", "查询提交");
 		m.put("Query not submitted", "查询未提交");
@@ -2776,6 +2814,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Quick Search", "快速搜索");
 		m.put("Quote", "引用");
 		m.put("RESTful API", "RESTful API");
+		m.put("RESTful API Help", "RESTful API帮助");
 		m.put("Ran On Agent", "在代理上运行");
 		m.put("Re-run All Queried Builds", "重新运行所有查询的构建");
 		m.put("Re-run Selected Builds", "重新运行选定的构建");
@@ -2855,6 +2894,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Report format changed. You may re-run this build to generate the report in new format", 
 			"报告格式已更改。您可以重新运行此构建以生成新格式的报告");
 		m.put("Repository Sync", "仓库同步");
+		m.put("Request Body", "请求体");
 		m.put("Request For Changes", "请求更改");
 		m.put("Request Scopes", "请求范围");
 		m.put("Request Trial Subscription", "申请试用订阅");
@@ -2867,15 +2907,21 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Require Autentication", "要求认证");
 		m.put("Require Strict Pull Request Builds", "要求严格合并请求构建");
 		m.put("Require Successful", "要求成功");
+		m.put("Required", "必需");
 		m.put("Required Builds", "要求构建");
 		m.put("Required Reviewers", "要求审查者");
 		m.put("Required Services", "所需服务");
 		m.put("Resend Verification Email", "重新发送验证电子邮件");
 		m.put("Resend invitation", "重新发送邀请");
+		m.put("Reset", "重置");
 		m.put("Resolution", "解决");
 		m.put("Resolved", "已解决");
 		m.put("Resolved comment on file \"{0}\" in project \"{1}\"", "将项目 \"{1}\" 的文件 \"{0}\" 上的评论标记为已解决");
+		m.put("Resource", "资源");
 		m.put("Resource Settings", "资源设置");
+		m.put("Resources", "资源");
+		m.put("Response", "响应");
+		m.put("Response Body", "响应体");
 		m.put("Restart", "重启");
 		m.put("Restart All Queried Agents", "重启所有查询的代理");
 		m.put("Restart Selected Agents", "重启选定的代理");
@@ -3070,6 +3116,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Set Up Cache", "设置缓存");
 		m.put("Set Up Renovate Cache", "设置 Renovate 缓存");
 		m.put("Set Up Trivy Cache", "设置 Trivy 缓存");
+		m.put("Set Up Your Account", "设置您的账户");
 		m.put("Set as Private", "设为私有");
 		m.put("Set as Public", "设为公开");
 		m.put("Set reviewed", "设置为已审阅");
@@ -3105,6 +3152,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Show Description", "显示描述");
 		m.put("Show Duration", "显示持续时间");
 		m.put("Show Emojis", "显示表情符号");
+		m.put("Show Error Detail", "显示错误详情");
 		m.put("Show Issue Status", "显示问题状态");
 		m.put("Show Package Stats", "显示包统计");
 		m.put("Show Pull Request Stats", "显示合并请求统计");
@@ -3548,6 +3596,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Stats", "统计");
 		m.put("Stats Group", "统计组");
 		m.put("Status", "状态");
+		m.put("Status Code", "状态码");
+		m.put("Status code", "状态码");
+		m.put("Status code other than 200 indicating the error type", "非200的状态码表示错误类型");
 		m.put("Step", "步骤");
 		m.put("Step Template", "步骤模板");
 		m.put("Step Templates", "步骤模板");
@@ -3596,6 +3647,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Symbol Name", "符号名");
 		m.put("Symbol name", "符号名称");
 		m.put("Symbols", "符号");
+		m.put("Sync Replica Status and Back to Home", "同步副本状态并返回主页");
 		m.put("Sync Repository", "同步仓库");
 		m.put("Sync Timing of All Queried Issues", "同步所有查询的工单的时间");
 		m.put("Sync Timing of Selected Issues", "同步选定的工单的时间");
@@ -3662,6 +3714,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("The URL of the server endpoint that will receive the webhook POST requests", "接收 Webhook POST 请求的服务器端点 URL");
 		m.put("The first board will be the default board", "第一个看板将成为默认看板");
 		m.put("The first timesheet will be the default timesheet", "第一个时间表将成为默认时间表");
+		m.put("The object you are deleting/disabling is still being used", "您正在删除/禁用的对象仍在使用中");
+		m.put("The password reset url is invalid or obsolete", "密码重置URL无效或已过期");
 		m.put("The permission to access build log", "访问构建日志的权限");
 		m.put("The permission to access build pipeline", "访问构建流水线的权限");
 		m.put("The permission to run job manually. It also implies the permission to access build log, build pipeline and all published reports", 
@@ -3679,6 +3733,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Then upload package to the repository with twine", "然后通过命令步骤上传包到仓库");
 		m.put("There are <a wicket:id=\"openRequests\">open pull requests</a> against branch <span wicket:id=\"branch\"></span>. These pull requests will be discarded if the branch is deleted.", 
 			"分支 <span wicket:id=\"branch\"></span> 有 <a wicket:id=\"openRequests\">打开的合并请求</a>。如果分支被删除，这些合并请求将被丢弃。");
+		m.put("There are incompatibilities since your upgraded version", "由于您的版本升级，存在不兼容性");
 		m.put("There are merge conflicts", "存在合并冲突");
 		m.put("There are merge conflicts.", "有合并冲突。");
 		m.put("There are merge conflicts. You can still create the pull request though", "有合并冲突。您仍然可以创建合并请求");
@@ -3699,6 +3754,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This change is squashed/rebased onto base branch via pull request {0}", "此变更已通过合并请求 {0} squash/rebase 到基准分支");
 		m.put("This change needs to be verified by some jobs. Submit pull request instead", "此更改需要由某些任务验证。请提交合并请求");
 		m.put("This commit is rebased", "此提交已变基");
+		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
+			"此日期使用<a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601格式</a>");
 		m.put("This email address is being used", "此电子邮件地址正在使用");
 		m.put("This executor runs build jobs as docker containers on OneDev server", "此执行器在 OneDev 服务器上以 Docker 容器运行构建任务");
 		m.put("This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>", 
@@ -3904,6 +3961,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Type to filter", "过滤");
 		m.put("Type to filter...", "输入以筛选...");
 		m.put("URL", "URL");
+		m.put("Unable To Delete/Disable Right Now", "目前无法删除/禁用");
 		m.put("Unable to apply change as otherwise you will not be able to manage this project", "无法应用更改，否则您将无法管理此项目");
 		m.put("Unable to change password as you are authenticating via external system", "无法更改密码，因为您正在通过外部系统进行认证");
 		m.put("Unable to comment", "无法添加评论");
@@ -3924,6 +3982,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Unable to get guilds info", "无法获取 guilds 信息");
 		m.put("Unable to import build spec (import project: {0}, import revision: {1}): {2}", "无法导入构建规范（导入项目：{0}，导入版本：{1}）：{2}");
 		m.put("Unable to notify user as mail service is not configured", "无法通知用户，因为邮件服务未配置");
+		m.put("Unable to send password reset email as mail service is not configured", "由于邮件服务未配置，无法发送密码重置邮件");
 		m.put("Unable to send verification email as mail service is not configured yet", "无法发送验证电子邮件，因为邮件服务未配置");
 		m.put("Unauthorize this user", "取消此用户的授权");
 		m.put("Unauthorized", "未授权");
@@ -4193,6 +4252,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("YouTrack Password or Access Token", "YouTrack 密码或访问令牌");
 		m.put("YouTrack Project", "YouTrack 项目");
 		m.put("YouTrack Projects to Import", "要导入的 YouTrack 项目");
+		m.put("Your email address is now verified", "您的邮箱地址已验证");
+		m.put("Your primary email address is not verified", "您的主要邮箱地址未验证");
 		m.put("[Any state]", "[任何状态]");
 		m.put("[Reset Password] Please Reset Your OneDev Password", "[重置密码] 请重置您的 OneDev 密码");
 		m.put("a boolean indiciating whether or not topic comment can be created directly by replying the email", 
@@ -4226,6 +4287,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("build is successful for jobs \"{0}\" on any branch", "任何分支上的任务 \"{0}\" 构建都成功");
 		m.put("build is successful for jobs \"{0}\" on branches \"{1}\"", "分支 \"{1}\" 上的任务 \"{0}\" 构建都成功");
 		m.put("builds", "构建");
+		m.put("cURL Example", "cURL示例");
 		m.put("choose a color for this state", "选择一个颜色");
 		m.put("cluster:lead", "主节点");
 		m.put("cmd-k to show command palette", "cmd-k 显示命令面板");
@@ -4396,6 +4458,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("week:Tue", "周二");
 		m.put("week:Wed", "周三");
 		m.put("widget:Tabs", "标签页");
+		m.put("you may show this page later via incompatibilities link in help menu", "您可以稍后通过帮助菜单中的不兼容性链接显示此页面");
 		m.put("{0} Month(s)", "{0} 个月");
 		m.put("{0} activities on {1}", "{1} 有 {0} 个活动");
 		m.put("{0} additions & {1} deletions", "{0} 个添加，{1} 个删除");
@@ -4429,69 +4492,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Account set up successfully", "账户设置成功");
-		m.put("All RESTful Resources", "所有RESTful资源");
-		m.put("An unexpected exception occurred", "发生意外异常");
-		m.put("Back To Home", "返回主页");
-		m.put("Can not reset password for service account or disabled user", "无法重置服务账户或禁用用户的密码");
-		m.put("Can not reset password for user authenticating via external system", "无法重置通过外部系统认证的用户密码");
-		m.put("Content Type", "内容类型");
-		m.put("Email Address Verification", "邮箱地址验证");
-		m.put("Email address already used: ", "邮箱地址已被使用：");
-		m.put("End Point", "端点");
-		m.put("Enter New Password", "输入新密码");
-		m.put("Enter your user name or email to reset password", "输入您的用户名或邮箱以重置密码");
-		m.put("Error detail of content type &quot;text/plain&quot;", "内容类型为\"text/plain\"的错误详情");
-		m.put("Example", "示例");
-		m.put("Failed to verify your email address", "未能验证您的邮箱地址");
-		m.put("Forgotten Password?", "忘记密码？");
-		m.put("Go Back", "返回");
-		m.put("Http Method", "Http方法");
-		m.put("I didn't eat it. I swear!", "我没吃它。我发誓！");
-		m.put("In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, you will need to authenticate by providing user name and password (or access token) via http basic auth header", 
-			"如果匿名访问被禁用或匿名用户没有足够的权限进行资源操作，您需要通过http基本认证头提供用户名和密码（或访问令牌）进行认证");
-		m.put("Invalid invitation code", "无效的邀请代码");
-		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
-			"无效的状态。请确保您使用系统设置中指定的服务器URL访问OneDev");
-		m.put("No response body", "无响应体");
-		m.put("No user found with login name or email: ", "未找到登录名或邮箱为的用户：");
-		m.put("OOPS! There Is An Error", "哎呀！发生错误");
-		m.put("Operation", "操作");
-		m.put("Operation Failed", "操作失败");
-		m.put("Operation Successful", "操作成功");
-		m.put("Page Not Found", "页面未找到");
-		m.put("Parameter", "参数");
-		m.put("Password changed. Please login with your new password", "密码已更改。请使用新密码登录");
-		m.put("Password reset url is invalid or obsolete", "密码重置URL无效或已过期");
-		m.put("Placeholder", "占位符");
-		m.put("Please check your email for password reset instructions", "请检查您的邮箱以获取密码重置说明");
-		m.put("Primary email address not specified", "未指定主要邮箱地址");
-		m.put("Query Parameters", "查询参数");
-		m.put("RESTful API Help", "RESTful API帮助");
-		m.put("Request Body", "请求体");
-		m.put("Required", "必需");
-		m.put("Reset", "重置");
-		m.put("Resource", "资源");
-		m.put("Resources", "资源");
-		m.put("Response", "响应");
-		m.put("Response Body", "响应体");
-		m.put("Set Up Your Account", "设置您的账户");
-		m.put("Show Error Detail", "显示错误详情");
-		m.put("Status Code", "状态码");
-		m.put("Status code", "状态码");
-		m.put("Status code other than 200 indicating the error type", "非200的状态码表示错误类型");
-		m.put("Sync Replica Status and Back to Home", "同步副本状态并返回主页");
-		m.put("The object you are deleting/disabling is still being used", "您正在删除/禁用的对象仍在使用中");
-		m.put("The password reset url is invalid or obsolete", "密码重置URL无效或已过期");
-		m.put("There are incompatibilities since your upgraded version", "由于您的版本升级，存在不兼容性");
-		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
-			"此日期使用<a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601格式</a>");
-		m.put("Unable To Delete/Disable Right Now", "目前无法删除/禁用");
-		m.put("Unable to send password reset email as mail service is not configured", "由于邮件服务未配置，无法发送密码重置邮件");
-		m.put("Your email address is now verified", "您的邮箱地址已验证");
-		m.put("Your primary email address is not verified", "您的主要邮箱地址未验证");
-		m.put("cURL Example", "cURL示例");
-		m.put("you may show this page later via incompatibilities link in help menu", "您可以稍后通过帮助菜单中的不兼容性链接显示此页面");		
 	}
 		
 	@Override

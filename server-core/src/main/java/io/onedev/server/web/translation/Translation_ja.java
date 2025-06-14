@@ -136,6 +136,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Access token regenerated, make sure to update the token at agent side", "アクセストークンが再生成されました。エージェント側でトークンを更新することを確認してください");
 		m.put("Account Email", "アカウントメール");
 		m.put("Account Name", "アカウント名");
+		m.put("Account set up successfully", "アカウントが正常に設定されました");
 		m.put("Active Directory", "Active Directory");
 		m.put("Active Since", "アクティブ開始日");
 		m.put("Activities", "アクティビティ");
@@ -232,6 +233,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Alerts", "アラート");
 		m.put("All", "すべて");
 		m.put("All Issues", "すべての課題");
+		m.put("All RESTful Resources", "すべてのRESTfulリソース");
 		m.put("All accessible", "すべてアクセス可能");
 		m.put("All builds", "すべてのビルド");
 		m.put("All changes", "すべての変更");
@@ -254,6 +256,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Always", "常に");
 		m.put("Always Pull Image", "常にイメージをプル");
 		m.put("An issue already linked for {0}. Unlink it first", "{0}に既にリンクされた課題があります。まずリンクを解除してください");
+		m.put("An unexpected exception occurred", "予期しない例外が発生しました");
 		m.put("And configure auth token of the registry", "そしてレジストリの認証トークンを設定");
 		m.put("Another pull request already open for this change", "この変更に対するプルリクエストはすでに開かれています");
 		m.put("Any agent", "任意のエージェント");
@@ -357,6 +360,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Avatar", "アバター");
 		m.put("Avatar Service Url", "アバターサービスURL");
 		m.put("Avatar and name", "アバターと名前");
+		m.put("Back To Home", "ホームに戻る");
 		m.put("Backlog", "バックログ");
 		m.put("Backlog Base Query", "バックログ基本クエリ");
 		m.put("Backup", "バックアップ");
@@ -520,6 +524,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Can not link to self", "自己リンクはできません");
 		m.put("Can not move project \"{0}\" to be under itself or its descendants", "プロジェクト\"{0}\"を自身またはその子孫の下に移動することはできません");
 		m.put("Can not perform this operation now", "現在この操作を実行することはできません");
+		m.put("Can not reset password for service account or disabled user", "サービスアカウントまたは無効なユーザーのパスワードをリセットできません");
+		m.put("Can not reset password for user authenticating via external system", "外部システムで認証するユーザーのパスワードをリセットできません");
 		m.put("Can not save malformed query", "不正なクエリを保存することはできません");
 		m.put("Can not use current or descendant project as parent", "現在のプロジェクトまたは子孫プロジェクトを親として使用することはできません");
 		m.put("Can only compare with common ancestor when different projects are involved", "異なるプロジェクトが関与している場合、共通の祖先との比較のみ可能です");
@@ -747,6 +753,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Container Image(s)", "コンテナイメージ(s)");
 		m.put("Container default", "コンテナデフォルト");
 		m.put("Content", "コンテンツ");
+		m.put("Content Type", "コンテンツタイプ");
 		m.put("Content is identical", "コンテンツは同一です");
 		m.put("Continue to add other user after create", "作成後に他のユーザーを追加し続ける");
 		m.put("Contributed settings", "寄与された設定");
@@ -1078,6 +1085,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Either target branch or source branch has new commits just now, please re-check.", "ターゲットブランチまたはソースブランチに新しいコミットが今追加されました。再確認してください。");
 		m.put("Email", "メール");
 		m.put("Email Address", "メールアドレス");
+		m.put("Email Address Verification", "メールアドレスの確認");
 		m.put("Email Addresses", "メールアドレス");
 		m.put("Email Templates", "メールテンプレート");
 		m.put("Email Verification", "メール認証");
@@ -1086,6 +1094,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Email address already in use: {0}", "既に使用されているメールアドレス：{0}");
 		m.put("Email address already invited: {0}", "既に招待されているメールアドレス：{0}");
 		m.put("Email address already used by another user", "別のユーザーによって既に使用されているメールアドレス");
+		m.put("Email address already used: ", "メールアドレスは既に使用されています:");
 		m.put("Email address to verify", "認証するメールアドレス");
 		m.put("Email addresses with <span class=\"badge badge-warning badge-sm\">ineffective</span> mark are those not belong to or not verified by key owner", 
 			"<span class=\"badge badge-warning badge-sm\">無効</span> のマークが付いたメールアドレスは、キー所有者に属していないか、認証されていないものです。");
@@ -1123,10 +1132,13 @@ public class Translation_ja extends TranslationResourceBundle {
 			"メール経由で投稿された問題やプルリクエストのコメントを処理するにはこれを有効にします。<b class='text-danger'>注意:</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>サブアドレス</a>を上記のシステムメールアドレスに対して有効にする必要があります。OneDevはこれを使用して問題やプルリクエストのコンテキストを追跡します");
 		m.put("Enable to allow to upload build cache generated during CI/CD job. Uploaded cache can be used by subsequent builds of the project as long as cache key matches", 
 			"CI/CDジョブ中に生成されたビルドキャッシュをアップロードできるようにするにはこれを有効にします。アップロードされたキャッシュは、キャッシュキーが一致する限りプロジェクトの後続のビルドで使用できます");
+		m.put("End Point", "エンドポイント");
 		m.put("Enforce Conventional Commits", "従来のコミットを強制する");
 		m.put("Enforce Two-factor Authentication", "二要素認証を強制する");
+		m.put("Enter New Password", "新しいパスワードを入力");
 		m.put("Enter description here", "ここに説明を入力してください");
 		m.put("Enter your details to login to your account", "アカウントにログインするための詳細を入力してください");
+		m.put("Enter your user name or email to reset password", "パスワードをリセットするには、ユーザー名またはメールを入力してください");
 		m.put("Entries", "エントリ");
 		m.put("Entry", "エントリ");
 		m.put("Enumeration", "列挙");
@@ -1138,6 +1150,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Error calculating commits: check log for details", "コミットの計算中にエラーが発生しました: 詳細はログを確認してください");
 		m.put("Error cherry-picking to {0}: Merge conflicts detected", "{0}へのチェリーピック中にエラーが発生しました: マージコンフリクトが検出されました");
 		m.put("Error cherry-picking to {0}: {1}", "{0}へのチェリーピック中にエラーが発生しました: {1}");
+		m.put("Error detail of content type &quot;text/plain&quot;", "コンテンツタイプ&quot;text/plain&quot;のエラー詳細");
 		m.put("Error discovering OIDC metadata", "OIDCメタデータの検出中にエラーが発生しました");
 		m.put("Error executing task", "タスクの実行中にエラーが発生しました");
 		m.put("Error parsing %sbase query: ", "%sbaseクエリの解析中にエラーが発生しました:");
@@ -1166,6 +1179,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Ever Used Since", "使用開始日");
 		m.put("Everything inside this project and all child projects will be deleted and can not be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"このプロジェクト内のすべての内容とすべての子プロジェクトが削除され、復元できなくなります。削除を確認するには、以下にプロジェクトパス<code>{0}</code>を入力してください。");
+		m.put("Example", "例");
 		m.put("Example Plugin Setting", "プラグイン設定の例");
 		m.put("Example Property", "プロパティの例");
 		m.put("Exclude Param Combos", "パラメータコンボを除外する");
@@ -1209,6 +1223,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"指定された重大度レベル以上の脆弱性がある場合、ビルドを失敗させる。これは、他のステップによってビルドが失敗していない場合にのみ有効です");
 		m.put("Failed", "失敗しました");
 		m.put("Failed to validate build spec import. Check server log for details", "ビルド仕様のインポートを検証できませんでした。詳細はサーバーログを確認してください");
+		m.put("Failed to verify your email address", "メールアドレスの確認に失敗しました");
 		m.put("Field Bean", "フィールドBean");
 		m.put("Field Instance", "フィールドインスタンス");
 		m.put("Field Name", "フィールド名");
@@ -1306,6 +1321,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Force", "強制");
 		m.put("Force Garbage Collection", "ガベージコレクションを強制");
 		m.put("Forgot Password?", "パスワードを忘れましたか？");
+		m.put("Forgotten Password?", "パスワードを忘れましたか？");
 		m.put("Fork Project", "フォークプロジェクト");
 		m.put("Fork now", "今すぐフォーク");
 		m.put("Forks Of", "フォーク元");
@@ -1376,6 +1392,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Global Pack Setting", "グローバルパック設定");
 		m.put("Global Views", "グローバルビュー");
 		m.put("Gmail", "Gmail");
+		m.put("Go Back", "戻る");
 		m.put("Google Test Report", "Googleテストレポート");
 		m.put("Gpg", "Gpg");
 		m.put("Gpg Key", "Gpgキー");
@@ -1444,6 +1461,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("How to Publish", "公開方法");
 		m.put("Html Report", "HTMLレポート");
 		m.put("Html Report Publish Enabled", "HTMLレポート公開を有効化");
+		m.put("Http Method", "HTTPメソッド");
+		m.put("I didn't eat it. I swear!", "私は食べていません。誓います！");
 		m.put("ID token was expired", "IDトークンが期限切れです");
 		m.put("IMAP Host", "IMAPホスト");
 		m.put("IMAP Password", "IMAPパスワード");
@@ -1518,6 +1537,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"IMAPホスト証明書が自己署名されている場合やCAルートが受け入れられていない場合、OneDevに証明書チェックをバイパスするよう指示できます。<b class='text-danger'>警告: </b>信頼できないネットワークでは、中間者攻撃につながる可能性があるため、代わりに<a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>証明書をOneDevにインポート</a>する必要があります");
 		m.put("In case SMTP host certificate is self-signed or its CA root is not accepted, you may tell OneDev to bypass certificate check. <b class='text-danger'>WARNING: </b> In an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the certificate into OneDev</a> instead", 
 			"SMTPホスト証明書が自己署名されている場合やCAルートが受け入れられていない場合、OneDevに証明書チェックをバイパスするよう指示できます。<b class='text-danger'>警告: </b>信頼できないネットワークでは、中間者攻撃につながる可能性があるため、代わりに<a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>証明書をOneDevにインポート</a>する必要があります");
+		m.put("In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, you will need to authenticate by providing user name and password (or access token) via http basic auth header", 
+			"匿名アクセスが無効になっているか、匿名ユーザーがリソース操作のための十分な権限を持っていない場合、ユーザー名とパスワード（またはアクセストークン）をHTTP基本認証ヘッダーを介して提供して認証する必要があります");
 		m.put("In case cache is not hit via above key, OneDev will loop through load keys defined here in order until a matching cache is found in project hierarchy. A cache is considered matching if its key is prefixed with the load key. If multiple caches matches, the most recent cache will be returned", 
 			"上記のキーでキャッシュがヒットしない場合、OneDevはここで定義されたロードキーを順番にループして、プロジェクト階層内で一致するキャッシュを見つけます。キャッシュはそのキーがロードキーで始まる場合、一致していると見なされます。複数のキャッシュが一致する場合、最も最近のキャッシュが返されます");
 		m.put("In case cache needs to be uploaded, this property specifies target project for the upload. Leave empty for current project", 
@@ -1566,12 +1587,15 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Invalid credentials", "無効な資格情報");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "無効な日付範囲、\"yyyy-MM-dd to yyyy-MM-dd\"を期待しています");
 		m.put("Invalid email address: {0}", "無効なメールアドレス: {0}");
+		m.put("Invalid invitation code", "無効な招待コード");
 		m.put("Invalid issue date of ID token", "IDトークンの発行日が無効です");
 		m.put("Invalid issue number: {0}", "無効な発行番号: {0}");
 		m.put("Invalid pull request number: {0}", "無効なプルリクエスト番号: {0}");
 		m.put("Invalid request path", "無効なリクエストパス");
 		m.put("Invalid selection, click for details", "無効な選択、詳細をクリックしてください");
 		m.put("Invalid state response", "無効な状態応答");
+		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
+			"無効な状態です。システム設定で指定されたサーバーURLを使用してOneDevを訪問していることを確認してください");
 		m.put("Invalid subscription key", "無効なサブスクリプションキー");
 		m.put("Invalid working period", "無効な作業期間");
 		m.put("Invitation sent to \"{0}\"", "\"{0}\"に招待を送信しました");
@@ -2081,12 +2105,14 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No pull requests to watch/unwatch", "ウォッチ/ウォッチ解除するプルリクエストなし");
 		m.put("No refs to build on behalf of", "代理でビルドする参照なし");
 		m.put("No required services", "必要なサービスなし");
+		m.put("No response body", "レスポンスボディなし");
 		m.put("No secret config", "シークレット設定なし");
 		m.put("No services defined", "定義されたサービスなし");
 		m.put("No start/due date", "開始/期限日なし");
 		m.put("No step templates defined", "定義されたステップテンプレートなし");
 		m.put("No tags found", "タグが見つかりません");
 		m.put("No timesheets defined", "定義されたタイムシートなし");
+		m.put("No user found with login name or email: ", "ログイン名またはメールでユーザーが見つかりません:");
 		m.put("No users to delete", "削除するユーザーなし");
 		m.put("No users to disable", "無効化するユーザーなし");
 		m.put("No users to enable", "有効化するユーザーなし");
@@ -2137,6 +2163,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("OCI Layout Directory", "OCIレイアウトディレクトリ");
 		m.put("OIDC error: Inconsistent sub in ID token and userinfo", "OIDCエラー: IDトークンとユーザー情報のサブが一致しません");
 		m.put("OIDC error: No email claim returned", "OIDCエラー: メールクレームが返されません");
+		m.put("OOPS! There Is An Error", "おっと！エラーがあります");
 		m.put("OPEN", "オープン");
 		m.put("OS", "OS");
 		m.put("OS Arch", "OSアーキテクチャ");
@@ -2176,6 +2203,9 @@ public class Translation_ja extends TranslationResourceBundle {
 			"OpenSSH公開鍵は「ssh-rsa」、「ecdsa-sha2-nistp256」、「ecdsa-sha2-nistp384」、「ecdsa-sha2-nistp521」、「ssh-ed25519」、「sk-ecdsa-sha2-nistp256@openssh.com」、または「sk-ssh-ed25519@openssh.com」で始まります");
 		m.put("Opened issue \"{0}\" ({1})", "課題「{0}」({1})を開きました");
 		m.put("Opened pull request \"{0}\" ({1})", "プルリクエスト「{0}」({1})を開きました");
+		m.put("Operation", "操作");
+		m.put("Operation Failed", "操作に失敗しました");
+		m.put("Operation Successful", "操作が成功しました");
 		m.put("Operations", "操作");
 		m.put("Optional", "オプション");
 		m.put("Optionally Specify project to create issue in. Leave empty to create in current project", 
@@ -2451,6 +2481,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Package list", "パッケージリスト");
 		m.put("Package {0} deleted", "パッケージ {0} が削除されました");
 		m.put("Packages", "パッケージ");
+		m.put("Page Not Found", "ページが見つかりません");
 		m.put("Page is in error, reload to recover", "ページにエラーがあります。リロードして回復してください");
 		m.put("Param Instance", "パラメータインスタンス");
 		m.put("Param Instances", "パラメータインスタンス");
@@ -2459,6 +2490,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Param Name", "パラメータ名");
 		m.put("Param Spec", "パラメータ仕様");
 		m.put("Param Spec Bean", "パラメータ仕様Bean");
+		m.put("Parameter", "パラメータ");
 		m.put("Parameter Specs", "パラメータ仕様");
 		m.put("Params", "パラメータ");
 		m.put("Params & Triggers", "パラメータとトリガー");
@@ -2479,11 +2511,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Password Reset Template", "パスワードリセットテンプレート");
 		m.put("Password Secret", "パスワードシークレット");
 		m.put("Password and its confirmation should be identical.", "パスワードとその確認は同一である必要があります。");
+		m.put("Password changed. Please login with your new password", "パスワードが変更されました。新しいパスワードでログインしてください");
 		m.put("Password has been changed", "パスワードが変更されました");
 		m.put("Password has been removed", "パスワードが削除されました");
 		m.put("Password has been set", "パスワードが設定されました");
 		m.put("Password or Access Token for Remote Repository", "リモートリポジトリのパスワードまたはアクセストークン");
 		m.put("Password reset request has been sent", "パスワードリセットリクエストが送信されました");
+		m.put("Password reset url is invalid or obsolete", "パスワードリセットURLが無効または古くなっています");
 		m.put("Paste subscription key here", "ここにサブスクリプションキーを貼り付けてください");
 		m.put("Path containing spaces or starting with dash needs to be quoted", "スペースを含むパスまたはダッシュで始まるパスは引用符で囲む必要があります");
 		m.put("Path placeholder", "パスプレースホルダー");
@@ -2524,6 +2558,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Pick Existing", "既存を選択");
 		m.put("Pin this issue", "この問題をピン留め");
 		m.put("Pipeline", "パイプライン");
+		m.put("Placeholder", "プレースホルダー");
 		m.put("Plain text expected", "プレーンテキストが期待されます");
 		m.put("Platform", "プラットフォーム");
 		m.put("Platforms", "プラットフォーム");
@@ -2531,6 +2566,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"以下のリカバリーコードを<a wicket:id=\"download\" class=\"font-weight-bolder\">ダウンロード</a>して秘密に保管してください。これらのコードは、認証アプリケーションにアクセスできない場合にアカウントへの一時的なアクセスを提供するために使用できます。これらは<b>再表示されません</b>");
 		m.put("Please Confirm", "確認してください");
 		m.put("Please Note", "注意してください");
+		m.put("Please check your email for password reset instructions", "パスワードリセットの指示についてはメールを確認してください");
 		m.put("Please choose revision to create branch from", "ブランチを作成するためのリビジョンを選択してください");
 		m.put("Please configure <a wicket:id=\"mailSetting\">mail setting</a> first", "まず<a wicket:id=\"mailSetting\">メール設定</a>を構成してください");
 		m.put("Please confirm", "確認してください");
@@ -2609,6 +2645,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Primary", "プライマリ");
 		m.put("Primary <a wicket:id=\"noPrimaryAddressLink\">email address</a> not specified", "プライマリ<a wicket:id=\"noPrimaryAddressLink\">メールアドレス</a>が指定されていません");
 		m.put("Primary Email", "プライマリメール");
+		m.put("Primary email address not specified", "プライマリメールアドレスが指定されていません");
 		m.put("Primary email address of your account is not specified yet", "アカウントの主メールアドレスはまだ指定されていません");
 		m.put("Primary email address will be used to receive notifications, show gravatar (if enabled) etc.", 
 			"主メールアドレスは通知の受信、Gravatarの表示（有効化されている場合）などに使用されます");
@@ -2754,6 +2791,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Pylint Report", "Pylintレポート");
 		m.put("Queries", "クエリ");
 		m.put("Query", "クエリ");
+		m.put("Query Parameters", "クエリパラメータ");
 		m.put("Query Watches", "クエリウォッチ");
 		m.put("Query commits", "クエリコミット");
 		m.put("Query not submitted", "クエリが送信されていません");
@@ -2769,6 +2807,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Quick Search", "クイック検索");
 		m.put("Quote", "引用");
 		m.put("RESTful API", "RESTful API");
+		m.put("RESTful API Help", "RESTful APIヘルプ");
 		m.put("Ran On Agent", "エージェントで実行");
 		m.put("Re-run All Queried Builds", "クエリされたすべてのビルドを再実行");
 		m.put("Re-run Selected Builds", "選択されたビルドを再実行");
@@ -2848,6 +2887,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Report format changed. You may re-run this build to generate the report in new format", 
 			"レポート形式が変更されました。このビルドを再実行して新しい形式でレポートを生成できます");
 		m.put("Repository Sync", "リポジトリ同期");
+		m.put("Request Body", "リクエストボディ");
 		m.put("Request For Changes", "変更のリクエスト");
 		m.put("Request Scopes", "リクエストスコープ");
 		m.put("Request Trial Subscription", "試用版サブスクリプションをリクエスト");
@@ -2860,15 +2900,21 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Require Autentication", "認証が必要");
 		m.put("Require Strict Pull Request Builds", "厳密なプルリクエストビルドが必要");
 		m.put("Require Successful", "成功が必要");
+		m.put("Required", "必須");
 		m.put("Required Builds", "必要なビルド");
 		m.put("Required Reviewers", "必要なレビュアー");
 		m.put("Required Services", "必要なサービス");
 		m.put("Resend Verification Email", "確認メールを再送信");
 		m.put("Resend invitation", "招待を再送信");
+		m.put("Reset", "リセット");
 		m.put("Resolution", "解決");
 		m.put("Resolved", "解決済み");
 		m.put("Resolved comment on file \"{0}\" in project \"{1}\"", "プロジェクト\"{1}\"のファイル\"{0}\"に対するコメントを解決しました");
+		m.put("Resource", "リソース");
 		m.put("Resource Settings", "リソース設定");
+		m.put("Resources", "リソース");
+		m.put("Response", "レスポンス");
+		m.put("Response Body", "レスポンスボディ");
 		m.put("Restart", "再起動");
 		m.put("Restart All Queried Agents", "すべてのクエリ済みエージェントを再起動");
 		m.put("Restart Selected Agents", "選択したエージェントを再起動");
@@ -3063,6 +3109,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Set Up Cache", "キャッシュを設定");
 		m.put("Set Up Renovate Cache", "Renovateキャッシュを設定");
 		m.put("Set Up Trivy Cache", "Trivyキャッシュを設定");
+		m.put("Set Up Your Account", "アカウントを設定する");
 		m.put("Set as Private", "非公開として設定");
 		m.put("Set as Public", "公開として設定");
 		m.put("Set reviewed", "レビュー済みとして設定");
@@ -3098,6 +3145,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Show Description", "説明を表示");
 		m.put("Show Duration", "期間を表示");
 		m.put("Show Emojis", "絵文字を表示");
+		m.put("Show Error Detail", "エラー詳細を表示");
 		m.put("Show Issue Status", "課題ステータスを表示");
 		m.put("Show Package Stats", "パッケージ統計を表示");
 		m.put("Show Pull Request Stats", "プルリクエスト統計を表示");
@@ -3541,6 +3589,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Stats", "統計情報");
 		m.put("Stats Group", "統計グループ");
 		m.put("Status", "ステータス");
+		m.put("Status Code", "ステータスコード");
+		m.put("Status code", "ステータスコード");
+		m.put("Status code other than 200 indicating the error type", "エラータイプを示す200以外のステータスコード");
 		m.put("Step", "ステップ");
 		m.put("Step Template", "ステップテンプレート");
 		m.put("Step Templates", "ステップテンプレート");
@@ -3589,6 +3640,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Symbol Name", "シンボル名");
 		m.put("Symbol name", "シンボル名");
 		m.put("Symbols", "シンボル");
+		m.put("Sync Replica Status and Back to Home", "レプリカステータスを同期してホームに戻る");
 		m.put("Sync Repository", "リポジトリを同期");
 		m.put("Sync Timing of All Queried Issues", "すべてのクエリされた課題の同期タイミング");
 		m.put("Sync Timing of Selected Issues", "選択された課題の同期タイミング");
@@ -3655,6 +3707,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("The URL of the server endpoint that will receive the webhook POST requests", "WebhookのPOSTリクエストを受信するサーバーエンドポイントのURL");
 		m.put("The first board will be the default board", "最初のボードがデフォルトボードになります");
 		m.put("The first timesheet will be the default timesheet", "最初のタイムシートがデフォルトタイムシートになります");
+		m.put("The object you are deleting/disabling is still being used", "削除/無効化しようとしているオブジェクトはまだ使用されています");
+		m.put("The password reset url is invalid or obsolete", "パスワードリセットURLが無効または古くなっています");
 		m.put("The permission to access build log", "ビルドログにアクセスする権限");
 		m.put("The permission to access build pipeline", "ビルドパイプラインにアクセスする権限");
 		m.put("The permission to run job manually. It also implies the permission to access build log, build pipeline and all published reports", 
@@ -3672,6 +3726,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Then upload package to the repository with twine", "twineを使用してリポジトリにパッケージをアップロードしてください");
 		m.put("There are <a wicket:id=\"openRequests\">open pull requests</a> against branch <span wicket:id=\"branch\"></span>. These pull requests will be discarded if the branch is deleted.", 
 			"ブランチ<span wicket:id=\"branch\"></span>に対して<a wicket:id=\"openRequests\">オープンなプルリクエスト</a>があります。このブランチが削除されると、これらのプルリクエストは破棄されます。");
+		m.put("There are incompatibilities since your upgraded version", "アップグレードされたバージョンには互換性の問題があります");
 		m.put("There are merge conflicts", "マージコンフリクトがあります");
 		m.put("There are merge conflicts.", "マージコンフリクトがあります。");
 		m.put("There are merge conflicts. You can still create the pull request though", "マージコンフリクトがあります。ただし、プルリクエストを作成することは可能です");
@@ -3692,6 +3747,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("This change is squashed/rebased onto base branch via pull request {0}", "この変更はプルリクエスト{0}を介してベースブランチにスカッシュ/リベースされました");
 		m.put("This change needs to be verified by some jobs. Submit pull request instead", "この変更はいくつかのジョブによって確認される必要があります。代わりにプルリクエストを送信してください");
 		m.put("This commit is rebased", "このコミットはリベースされました");
+		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
+			"この日付は<a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601形式</a>を使用しています");
 		m.put("This email address is being used", "このメールアドレスは使用されています");
 		m.put("This executor runs build jobs as docker containers on OneDev server", "このエグゼキュータは、OneDevサーバー上でDockerコンテナとしてビルドジョブを実行します");
 		m.put("This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>", 
@@ -3897,6 +3954,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Type to filter", "フィルターするために入力してください");
 		m.put("Type to filter...", "フィルターするために入力してください...");
 		m.put("URL", "URL");
+		m.put("Unable To Delete/Disable Right Now", "今すぐ削除/無効化できません");
 		m.put("Unable to apply change as otherwise you will not be able to manage this project", "このプロジェクトを管理できなくなるため、変更を適用できません");
 		m.put("Unable to change password as you are authenticating via external system", "外部システムを介して認証しているため、パスワードを変更できません");
 		m.put("Unable to comment", "コメントできません");
@@ -3917,6 +3975,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Unable to get guilds info", "ギルド情報を取得できません");
 		m.put("Unable to import build spec (import project: {0}, import revision: {1}): {2}", "ビルド仕様をインポートできません (インポートプロジェクト: {0}, インポートリビジョン: {1}): {2}");
 		m.put("Unable to notify user as mail service is not configured", "メールサービスが構成されていないため、ユーザーに通知できません");
+		m.put("Unable to send password reset email as mail service is not configured", "メールサービスが設定されていないため、パスワードリセットメールを送信できません");
 		m.put("Unable to send verification email as mail service is not configured yet", "メールサービスがまだ構成されていないため、確認メールを送信できません");
 		m.put("Unauthorize this user", "このユーザーの認証を解除する");
 		m.put("Unauthorized", "認証されていません");
@@ -4186,6 +4245,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("YouTrack Password or Access Token", "YouTrackパスワードまたはアクセストークン");
 		m.put("YouTrack Project", "YouTrackプロジェクト");
 		m.put("YouTrack Projects to Import", "インポートするYouTrackプロジェクト");
+		m.put("Your email address is now verified", "メールアドレスが確認されました");
+		m.put("Your primary email address is not verified", "プライマリメールアドレスが確認されていません");
 		m.put("[Any state]", "[任意の状態]");
 		m.put("[Reset Password] Please Reset Your OneDev Password", "[パスワードリセット] OneDevパスワードをリセットしてください");
 		m.put("a boolean indiciating whether or not topic comment can be created directly by replying the email", 
@@ -4219,6 +4280,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("build is successful for jobs \"{0}\" on any branch", "ジョブ「{0}」で任意のブランチでビルドが成功");
 		m.put("build is successful for jobs \"{0}\" on branches \"{1}\"", "ジョブ「{0}」でブランチ「{1}」でビルドが成功");
 		m.put("builds", "ビルド");
+		m.put("cURL Example", "cURLの例");
 		m.put("choose a color for this state", "この状態の色を選択してください");
 		m.put("cluster:lead", "リード");
 		m.put("cmd-k to show command palette", "cmd-kでコマンドパレットを表示");
@@ -4389,6 +4451,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("week:Tue", "火");
 		m.put("week:Wed", "水");
 		m.put("widget:Tabs", "タブ");
+		m.put("you may show this page later via incompatibilities link in help menu", "ヘルプメニューの互換性リンクから後でこのページを表示できます");
 		m.put("{0} Month(s)", "{0} ヶ月");
 		m.put("{0} activities on {1}", "{0} の活動 {1} において");
 		m.put("{0} additions & {1} deletions", "{0} 追加 & {1} 削除");
@@ -4422,69 +4485,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Account set up successfully", "アカウントが正常に設定されました");
-		m.put("All RESTful Resources", "すべてのRESTfulリソース");
-		m.put("An unexpected exception occurred", "予期しない例外が発生しました");
-		m.put("Back To Home", "ホームに戻る");
-		m.put("Can not reset password for service account or disabled user", "サービスアカウントまたは無効なユーザーのパスワードをリセットできません");
-		m.put("Can not reset password for user authenticating via external system", "外部システムで認証するユーザーのパスワードをリセットできません");
-		m.put("Content Type", "コンテンツタイプ");
-		m.put("Email Address Verification", "メールアドレスの確認");
-		m.put("Email address already used: ", "メールアドレスは既に使用されています:");
-		m.put("End Point", "エンドポイント");
-		m.put("Enter New Password", "新しいパスワードを入力");
-		m.put("Enter your user name or email to reset password", "パスワードをリセットするには、ユーザー名またはメールを入力してください");
-		m.put("Error detail of content type &quot;text/plain&quot;", "コンテンツタイプ&quot;text/plain&quot;のエラー詳細");
-		m.put("Example", "例");
-		m.put("Failed to verify your email address", "メールアドレスの確認に失敗しました");
-		m.put("Forgotten Password?", "パスワードを忘れましたか？");
-		m.put("Go Back", "戻る");
-		m.put("Http Method", "HTTPメソッド");
-		m.put("I didn't eat it. I swear!", "私は食べていません。誓います！");
-		m.put("In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, you will need to authenticate by providing user name and password (or access token) via http basic auth header", 
-			"匿名アクセスが無効になっているか、匿名ユーザーがリソース操作のための十分な権限を持っていない場合、ユーザー名とパスワード（またはアクセストークン）をHTTP基本認証ヘッダーを介して提供して認証する必要があります");
-		m.put("Invalid invitation code", "無効な招待コード");
-		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
-			"無効な状態です。システム設定で指定されたサーバーURLを使用してOneDevを訪問していることを確認してください");
-		m.put("No response body", "レスポンスボディなし");
-		m.put("No user found with login name or email: ", "ログイン名またはメールでユーザーが見つかりません:");
-		m.put("OOPS! There Is An Error", "おっと！エラーがあります");
-		m.put("Operation", "操作");
-		m.put("Operation Failed", "操作に失敗しました");
-		m.put("Operation Successful", "操作が成功しました");
-		m.put("Page Not Found", "ページが見つかりません");
-		m.put("Parameter", "パラメータ");
-		m.put("Password changed. Please login with your new password", "パスワードが変更されました。新しいパスワードでログインしてください");
-		m.put("Password reset url is invalid or obsolete", "パスワードリセットURLが無効または古くなっています");
-		m.put("Placeholder", "プレースホルダー");
-		m.put("Please check your email for password reset instructions", "パスワードリセットの指示についてはメールを確認してください");
-		m.put("Primary email address not specified", "プライマリメールアドレスが指定されていません");
-		m.put("Query Parameters", "クエリパラメータ");
-		m.put("RESTful API Help", "RESTful APIヘルプ");
-		m.put("Request Body", "リクエストボディ");
-		m.put("Required", "必須");
-		m.put("Reset", "リセット");
-		m.put("Resource", "リソース");
-		m.put("Resources", "リソース");
-		m.put("Response", "レスポンス");
-		m.put("Response Body", "レスポンスボディ");
-		m.put("Set Up Your Account", "アカウントを設定する");
-		m.put("Show Error Detail", "エラー詳細を表示");
-		m.put("Status Code", "ステータスコード");
-		m.put("Status code", "ステータスコード");
-		m.put("Status code other than 200 indicating the error type", "エラータイプを示す200以外のステータスコード");
-		m.put("Sync Replica Status and Back to Home", "レプリカステータスを同期してホームに戻る");
-		m.put("The object you are deleting/disabling is still being used", "削除/無効化しようとしているオブジェクトはまだ使用されています");
-		m.put("The password reset url is invalid or obsolete", "パスワードリセットURLが無効または古くなっています");
-		m.put("There are incompatibilities since your upgraded version", "アップグレードされたバージョンには互換性の問題があります");
-		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
-			"この日付は<a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601形式</a>を使用しています");
-		m.put("Unable To Delete/Disable Right Now", "今すぐ削除/無効化できません");
-		m.put("Unable to send password reset email as mail service is not configured", "メールサービスが設定されていないため、パスワードリセットメールを送信できません");
-		m.put("Your email address is now verified", "メールアドレスが確認されました");
-		m.put("Your primary email address is not verified", "プライマリメールアドレスが確認されていません");
-		m.put("cURL Example", "cURLの例");
-		m.put("you may show this page later via incompatibilities link in help menu", "ヘルプメニューの互換性リンクから後でこのページを表示できます");
 	}
 		
 	@Override

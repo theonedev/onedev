@@ -136,6 +136,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Access token regenerated, make sure to update the token at agent side", "액세스 토큰이 재생성되었습니다. 에이전트 측에서 토큰을 업데이트해야 합니다");
 		m.put("Account Email", "계정 이메일");
 		m.put("Account Name", "계정 이름");
+		m.put("Account set up successfully", "계정이 성공적으로 설정되었습니다");
 		m.put("Active Directory", "액티브 디렉토리");
 		m.put("Active Since", "활성화된 이후");
 		m.put("Activities", "활동");
@@ -232,6 +233,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Alerts", "알림들");
 		m.put("All", "전체");
 		m.put("All Issues", "모든 이슈");
+		m.put("All RESTful Resources", "모든 RESTful 리소스");
 		m.put("All accessible", "모든 접근 가능");
 		m.put("All builds", "모든 빌드");
 		m.put("All changes", "모든 변경 사항");
@@ -254,6 +256,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Always", "항상");
 		m.put("Always Pull Image", "항상 이미지 가져오기");
 		m.put("An issue already linked for {0}. Unlink it first", "{0}에 대해 이미 연결된 이슈가 있습니다. 먼저 연결을 해제하세요");
+		m.put("An unexpected exception occurred", "예기치 않은 예외가 발생했습니다");
 		m.put("And configure auth token of the registry", "레지스트리의 인증 토큰을 구성하세요");
 		m.put("Another pull request already open for this change", "이 변경에 대한 다른 풀 요청이 이미 열려 있습니다");
 		m.put("Any agent", "모든 에이전트");
@@ -357,6 +360,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Avatar", "아바타");
 		m.put("Avatar Service Url", "아바타 서비스 URL");
 		m.put("Avatar and name", "아바타와 이름");
+		m.put("Back To Home", "홈으로 돌아가기");
 		m.put("Backlog", "백로그");
 		m.put("Backlog Base Query", "백로그 기본 쿼리");
 		m.put("Backup", "백업");
@@ -520,6 +524,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Can not link to self", "자기 자신과 연결할 수 없습니다");
 		m.put("Can not move project \"{0}\" to be under itself or its descendants", "프로젝트 \"{0}\"를 자신 또는 하위 프로젝트 아래로 이동할 수 없습니다");
 		m.put("Can not perform this operation now", "지금 이 작업을 수행할 수 없습니다");
+		m.put("Can not reset password for service account or disabled user", "서비스 계정 또는 비활성화된 사용자의 비밀번호를 재설정할 수 없습니다");
+		m.put("Can not reset password for user authenticating via external system", "외부 시스템을 통해 인증하는 사용자의 비밀번호를 재설정할 수 없습니다");
 		m.put("Can not save malformed query", "잘못된 쿼리를 저장할 수 없습니다");
 		m.put("Can not use current or descendant project as parent", "현재 또는 하위 프로젝트를 부모로 사용할 수 없습니다");
 		m.put("Can only compare with common ancestor when different projects are involved", "다른 프로젝트가 포함된 경우 공통 조상과만 비교할 수 있습니다");
@@ -747,6 +753,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Container Image(s)", "컨테이너 이미지(들)");
 		m.put("Container default", "컨테이너 기본값");
 		m.put("Content", "내용");
+		m.put("Content Type", "콘텐츠 유형");
 		m.put("Content is identical", "내용이 동일합니다");
 		m.put("Continue to add other user after create", "생성 후 다른 사용자를 계속 추가하세요");
 		m.put("Contributed settings", "기여된 설정");
@@ -1078,6 +1085,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Either target branch or source branch has new commits just now, please re-check.", "대상 브랜치 또는 소스 브랜치에 방금 새로운 커밋이 추가되었습니다. 다시 확인하세요.");
 		m.put("Email", "이메일");
 		m.put("Email Address", "이메일 주소");
+		m.put("Email Address Verification", "이메일 주소 확인");
 		m.put("Email Addresses", "이메일 주소들");
 		m.put("Email Templates", "이메일 템플릿");
 		m.put("Email Verification", "이메일 인증");
@@ -1086,6 +1094,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Email address already in use: {0}", "이미 사용 중인 이메일 주소: {0}");
 		m.put("Email address already invited: {0}", "이미 초대된 이메일 주소: {0}");
 		m.put("Email address already used by another user", "다른 사용자가 이미 사용 중인 이메일 주소");
+		m.put("Email address already used: ", "이미 사용된 이메일 주소:");
 		m.put("Email address to verify", "인증할 이메일 주소");
 		m.put("Email addresses with <span class=\"badge badge-warning badge-sm\">ineffective</span> mark are those not belong to or not verified by key owner", 
 			"<span class=\"badge badge-warning badge-sm\">비효과적</span> 표시가 있는 이메일 주소는 키 소유자에 속하지 않거나 인증되지 않은 주소입니다.");
@@ -1123,10 +1132,13 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이메일을 통해 게시된 이슈 또는 풀 리퀘스트 댓글을 처리하려면 이를 활성화합니다. <b class='text-danger'>참고:</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>서브 어드레싱</a>이 위 시스템 이메일 주소에 대해 활성화되어야 합니다. OneDev는 이를 사용하여 이슈 및 풀 리퀘스트 컨텍스트를 추적합니다");
 		m.put("Enable to allow to upload build cache generated during CI/CD job. Uploaded cache can be used by subsequent builds of the project as long as cache key matches", 
 			"CI/CD 작업 중 생성된 빌드 캐시를 업로드할 수 있도록 허용하려면 이를 활성화합니다. 업로드된 캐시는 캐시 키가 일치하는 한 프로젝트의 후속 빌드에서 사용할 수 있습니다");
+		m.put("End Point", "엔드 포인트");
 		m.put("Enforce Conventional Commits", "컨벤션 커밋을 강제합니다");
 		m.put("Enforce Two-factor Authentication", "이중 인증을 강제합니다");
+		m.put("Enter New Password", "새 비밀번호 입력");
 		m.put("Enter description here", "여기에 설명을 입력하세요");
 		m.put("Enter your details to login to your account", "계정에 로그인하려면 세부 정보를 입력하세요");
+		m.put("Enter your user name or email to reset password", "비밀번호를 재설정하려면 사용자 이름 또는 이메일을 입력하세요");
 		m.put("Entries", "항목들");
 		m.put("Entry", "항목");
 		m.put("Enumeration", "열거형");
@@ -1138,6 +1150,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Error calculating commits: check log for details", "커밋 계산 오류: 세부 사항은 로그를 확인하세요");
 		m.put("Error cherry-picking to {0}: Merge conflicts detected", "{0}로 체리픽킹 오류: 병합 충돌이 감지되었습니다");
 		m.put("Error cherry-picking to {0}: {1}", "{0}로 체리픽킹 오류: {1}");
+		m.put("Error detail of content type &quot;text/plain&quot;", "콘텐츠 유형 &quot;text/plain&quot;의 오류 세부 정보");
 		m.put("Error discovering OIDC metadata", "OIDC 메타데이터 검색 오류");
 		m.put("Error executing task", "작업 실행 오류");
 		m.put("Error parsing %sbase query: ", "%s기본 쿼리 구문 분석 오류:");
@@ -1166,6 +1179,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Ever Used Since", "이후로 사용됨");
 		m.put("Everything inside this project and all child projects will be deleted and can not be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"이 프로젝트와 모든 하위 프로젝트 내의 모든 것이 삭제되며 복구할 수 없습니다. 삭제를 확인하려면 아래에 프로젝트 경로 <code>{0}</code>를 입력하세요");
+		m.put("Example", "예제");
 		m.put("Example Plugin Setting", "예제 플러그인 설정");
 		m.put("Example Property", "예제 속성");
 		m.put("Exclude Param Combos", "매개변수 조합 제외");
@@ -1209,6 +1223,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"지정된 심각도 수준 이상의 취약점이 있는 경우 빌드를 실패로 처리합니다. 이는 빌드가 다른 단계에 의해 실패하지 않은 경우에만 적용됩니다");
 		m.put("Failed", "실패함");
 		m.put("Failed to validate build spec import. Check server log for details", "빌드 사양 가져오기 유효성 검사 실패. 서버 로그에서 세부 사항을 확인하세요");
+		m.put("Failed to verify your email address", "이메일 주소를 확인하지 못했습니다");
 		m.put("Field Bean", "필드 빈");
 		m.put("Field Instance", "필드 인스턴스");
 		m.put("Field Name", "필드 이름");
@@ -1306,6 +1321,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Force", "강제");
 		m.put("Force Garbage Collection", "강제 가비지 컬렉션");
 		m.put("Forgot Password?", "비밀번호를 잊으셨나요?");
+		m.put("Forgotten Password?", "비밀번호를 잊으셨나요?");
 		m.put("Fork Project", "프로젝트 포크");
 		m.put("Fork now", "지금 포크하기");
 		m.put("Forks Of", "포크된 프로젝트");
@@ -1376,6 +1392,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Global Pack Setting", "글로벌 팩 설정");
 		m.put("Global Views", "글로벌 보기");
 		m.put("Gmail", "지메일");
+		m.put("Go Back", "돌아가기");
 		m.put("Google Test Report", "구글 테스트 보고서");
 		m.put("Gpg", "Gpg");
 		m.put("Gpg Key", "Gpg 키");
@@ -1444,6 +1461,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("How to Publish", "게시 방법");
 		m.put("Html Report", "HTML 보고서");
 		m.put("Html Report Publish Enabled", "HTML 보고서 게시 활성화");
+		m.put("Http Method", "Http 메서드");
+		m.put("I didn't eat it. I swear!", "나는 그것을 먹지 않았어. 맹세해!");
 		m.put("ID token was expired", "ID 토큰이 만료되었습니다");
 		m.put("IMAP Host", "IMAP 호스트");
 		m.put("IMAP Password", "IMAP 비밀번호");
@@ -1518,6 +1537,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"IMAP 호스트 인증서가 자체 서명되었거나 CA 루트가 허용되지 않는 경우, OneDev에 인증서 검사를 우회하도록 지시할 수 있습니다. <b class='text-danger'>경고: </b> 신뢰할 수 없는 네트워크에서는 중간자 공격으로 이어질 수 있으므로 대신 <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>OneDev에 인증서를 가져오십시오</a>");
 		m.put("In case SMTP host certificate is self-signed or its CA root is not accepted, you may tell OneDev to bypass certificate check. <b class='text-danger'>WARNING: </b> In an untrusted network, this may lead to man-in-the-middle attack, and you should <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>import the certificate into OneDev</a> instead", 
 			"SMTP 호스트 인증서가 자체 서명되었거나 CA 루트가 허용되지 않는 경우, OneDev에 인증서 검사를 우회하도록 지시할 수 있습니다. <b class='text-danger'>경고: </b> 신뢰할 수 없는 네트워크에서는 중간자 공격으로 이어질 수 있으므로 대신 <a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>OneDev에 인증서를 가져오십시오</a>");
+		m.put("In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, you will need to authenticate by providing user name and password (or access token) via http basic auth header", 
+			"익명 액세스가 비활성화되었거나 익명 사용자가 리소스 작업에 대한 충분한 권한이 없는 경우, 사용자 이름과 비밀번호(또는 액세스 토큰)를 제공하여 http 기본 인증 헤더를 통해 인증해야 합니다");
 		m.put("In case cache is not hit via above key, OneDev will loop through load keys defined here in order until a matching cache is found in project hierarchy. A cache is considered matching if its key is prefixed with the load key. If multiple caches matches, the most recent cache will be returned", 
 			"위 키를 통해 캐시가 적중되지 않는 경우, OneDev는 프로젝트 계층에서 정의된 로드 키를 순서대로 반복하여 일치하는 캐시를 찾습니다. 캐시는 키가 로드 키로 시작하는 경우 일치하는 것으로 간주됩니다. 여러 캐시가 일치하면 가장 최근의 캐시가 반환됩니다");
 		m.put("In case cache needs to be uploaded, this property specifies target project for the upload. Leave empty for current project", 
@@ -1566,12 +1587,15 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Invalid credentials", "잘못된 자격 증명");
 		m.put("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"", "잘못된 날짜 범위, \"yyyy-MM-dd to yyyy-MM-dd\" 형식이어야 합니다");
 		m.put("Invalid email address: {0}", "잘못된 이메일 주소: {0}");
+		m.put("Invalid invitation code", "초대 코드가 유효하지 않습니다");
 		m.put("Invalid issue date of ID token", "ID 토큰의 발행 날짜가 잘못되었습니다");
 		m.put("Invalid issue number: {0}", "잘못된 발행 번호: {0}");
 		m.put("Invalid pull request number: {0}", "잘못된 풀 리퀘스트 번호: {0}");
 		m.put("Invalid request path", "잘못된 요청 경로");
 		m.put("Invalid selection, click for details", "잘못된 선택, 세부 정보 확인 클릭");
 		m.put("Invalid state response", "잘못된 상태 응답");
+		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
+			"유효하지 않은 상태입니다. 시스템 설정에 지정된 서버 URL을 사용하여 OneDev를 방문하고 있는지 확인하세요");
 		m.put("Invalid subscription key", "잘못된 구독 키");
 		m.put("Invalid working period", "잘못된 작업 기간");
 		m.put("Invitation sent to \"{0}\"", "\"{0}\"로 초대장이 발송되었습니다");
@@ -2081,12 +2105,14 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No pull requests to watch/unwatch", "관찰/관찰 취소할 풀 리퀘스트 없음");
 		m.put("No refs to build on behalf of", "대신 빌드할 참조 없음");
 		m.put("No required services", "필수 서비스 없음");
+		m.put("No response body", "응답 본문 없음");
 		m.put("No secret config", "비밀 구성 없음");
 		m.put("No services defined", "정의된 서비스 없음");
 		m.put("No start/due date", "시작/마감일 없음");
 		m.put("No step templates defined", "정의된 단계 템플릿 없음");
 		m.put("No tags found", "태그 없음");
 		m.put("No timesheets defined", "정의된 근무 시간표 없음");
+		m.put("No user found with login name or email: ", "로그인 이름 또는 이메일로 사용자를 찾을 수 없습니다:");
 		m.put("No users to delete", "삭제할 사용자 없음");
 		m.put("No users to disable", "비활성화할 사용자 없음");
 		m.put("No users to enable", "활성화할 사용자 없음");
@@ -2137,6 +2163,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("OCI Layout Directory", "OCI 레이아웃 디렉토리");
 		m.put("OIDC error: Inconsistent sub in ID token and userinfo", "OIDC 오류: ID 토큰과 사용자 정보의 하위가 일치하지 않음");
 		m.put("OIDC error: No email claim returned", "OIDC 오류: 이메일 클레임이 반환되지 않음");
+		m.put("OOPS! There Is An Error", "이런! 오류가 발생했습니다");
 		m.put("OPEN", "열림");
 		m.put("OS", "운영 체제");
 		m.put("OS Arch", "운영 체제 아키텍처");
@@ -2176,6 +2203,9 @@ public class Translation_ko extends TranslationResourceBundle {
 			"OpenSSH 공개 키는 'ssh-rsa', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521', 'ssh-ed25519', 'sk-ecdsa-sha2-nistp256@openssh.com', 또는 'sk-ssh-ed25519@openssh.com'으로 시작합니다");
 		m.put("Opened issue \"{0}\" ({1})", "열린 이슈 \"{0}\" ({1})");
 		m.put("Opened pull request \"{0}\" ({1})", "열린 풀 리퀘스트 \"{0}\" ({1})");
+		m.put("Operation", "작업");
+		m.put("Operation Failed", "작업 실패");
+		m.put("Operation Successful", "작업 성공");
 		m.put("Operations", "작업");
 		m.put("Optional", "선택 사항");
 		m.put("Optionally Specify project to create issue in. Leave empty to create in current project", 
@@ -2451,6 +2481,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Package list", "패키지 목록");
 		m.put("Package {0} deleted", "패키지 {0}이 삭제되었습니다.");
 		m.put("Packages", "패키지들");
+		m.put("Page Not Found", "페이지를 찾을 수 없습니다");
 		m.put("Page is in error, reload to recover", "페이지에 오류가 있습니다. 복구하려면 다시 로드하십시오.");
 		m.put("Param Instance", "매개변수 인스턴스");
 		m.put("Param Instances", "매개변수 인스턴스들");
@@ -2459,6 +2490,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Param Name", "매개변수 이름");
 		m.put("Param Spec", "매개변수 사양");
 		m.put("Param Spec Bean", "매개변수 사양 빈");
+		m.put("Parameter", "매개변수");
 		m.put("Parameter Specs", "매개변수 사양들");
 		m.put("Params", "매개변수들");
 		m.put("Params & Triggers", "매개변수 및 트리거");
@@ -2479,11 +2511,13 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Password Reset Template", "비밀번호 재설정 템플릿");
 		m.put("Password Secret", "비밀번호 비밀");
 		m.put("Password and its confirmation should be identical.", "비밀번호와 확인 비밀번호는 동일해야 합니다.");
+		m.put("Password changed. Please login with your new password", "비밀번호가 변경되었습니다. 새 비밀번호로 로그인하세요");
 		m.put("Password has been changed", "비밀번호가 변경되었습니다.");
 		m.put("Password has been removed", "비밀번호가 제거되었습니다.");
 		m.put("Password has been set", "비밀번호가 설정되었습니다.");
 		m.put("Password or Access Token for Remote Repository", "원격 저장소를 위한 비밀번호 또는 액세스 토큰");
 		m.put("Password reset request has been sent", "비밀번호 재설정 요청이 전송되었습니다.");
+		m.put("Password reset url is invalid or obsolete", "비밀번호 재설정 URL이 유효하지 않거나 오래되었습니다");
 		m.put("Paste subscription key here", "구독 키를 여기에 붙여넣으십시오.");
 		m.put("Path containing spaces or starting with dash needs to be quoted", "공백이 포함되거나 대시로 시작하는 경로는 따옴표로 묶어야 합니다.");
 		m.put("Path placeholder", "경로 자리표시자");
@@ -2524,6 +2558,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Pick Existing", "기존 항목 선택");
 		m.put("Pin this issue", "이 이슈를 고정");
 		m.put("Pipeline", "파이프라인");
+		m.put("Placeholder", "플레이스홀더");
 		m.put("Plain text expected", "일반 텍스트 예상됨");
 		m.put("Platform", "플랫폼");
 		m.put("Platforms", "플랫폼들");
@@ -2531,6 +2566,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"아래 복구 코드를 <a wicket:id=\"download\" class=\"font-weight-bolder\">다운로드</a>하고 비밀로 유지하세요. 이 코드는 인증 애플리케이션에 접근할 수 없는 경우 계정에 일회성 접근을 제공하는 데 사용됩니다. 이 코드는 <b>다시 표시되지 않습니다</b>");
 		m.put("Please Confirm", "확인해주세요");
 		m.put("Please Note", "참고해주세요");
+		m.put("Please check your email for password reset instructions", "비밀번호 재설정 지침을 이메일로 확인하세요");
 		m.put("Please choose revision to create branch from", "브랜치를 생성할 리비전을 선택해주세요");
 		m.put("Please configure <a wicket:id=\"mailSetting\">mail setting</a> first", "먼저 <a wicket:id=\"mailSetting\">메일 설정</a>을 구성해주세요");
 		m.put("Please confirm", "확인해주세요");
@@ -2609,6 +2645,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Primary", "기본");
 		m.put("Primary <a wicket:id=\"noPrimaryAddressLink\">email address</a> not specified", "기본 <a wicket:id=\"noPrimaryAddressLink\">이메일 주소</a>가 지정되지 않았습니다");
 		m.put("Primary Email", "기본 이메일");
+		m.put("Primary email address not specified", "기본 이메일 주소가 지정되지 않았습니다");
 		m.put("Primary email address of your account is not specified yet", "계정의 기본 이메일 주소가 아직 지정되지 않았습니다");
 		m.put("Primary email address will be used to receive notifications, show gravatar (if enabled) etc.", 
 			"기본 이메일 주소는 알림을 받거나, gravatar를 표시하는 데 사용됩니다 (활성화된 경우)");
@@ -2754,6 +2791,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Pylint Report", "Pylint 보고서");
 		m.put("Queries", "쿼리들");
 		m.put("Query", "쿼리");
+		m.put("Query Parameters", "쿼리 매개변수");
 		m.put("Query Watches", "쿼리 감시");
 		m.put("Query commits", "쿼리 커밋");
 		m.put("Query not submitted", "쿼리가 제출되지 않음");
@@ -2769,6 +2807,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Quick Search", "빠른 검색");
 		m.put("Quote", "인용");
 		m.put("RESTful API", "RESTful API");
+		m.put("RESTful API Help", "RESTful API 도움말");
 		m.put("Ran On Agent", "에이전트에서 실행됨");
 		m.put("Re-run All Queried Builds", "쿼리된 모든 빌드 다시 실행");
 		m.put("Re-run Selected Builds", "선택된 빌드 다시 실행");
@@ -2848,6 +2887,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Report format changed. You may re-run this build to generate the report in new format", 
 			"보고서 형식이 변경되었습니다. 새 형식으로 보고서를 생성하려면 이 빌드를 다시 실행하십시오");
 		m.put("Repository Sync", "저장소 동기화");
+		m.put("Request Body", "요청 본문");
 		m.put("Request For Changes", "변경 요청");
 		m.put("Request Scopes", "요청 범위");
 		m.put("Request Trial Subscription", "체험 구독 요청");
@@ -2860,15 +2900,21 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Require Autentication", "인증 필요");
 		m.put("Require Strict Pull Request Builds", "엄격한 풀 리퀘스트 빌드 필요");
 		m.put("Require Successful", "성공 필요");
+		m.put("Required", "필수");
 		m.put("Required Builds", "필수 빌드");
 		m.put("Required Reviewers", "필수 리뷰어");
 		m.put("Required Services", "필수 서비스");
 		m.put("Resend Verification Email", "확인 이메일 다시 보내기");
 		m.put("Resend invitation", "초대 다시 보내기");
+		m.put("Reset", "재설정");
 		m.put("Resolution", "해결");
 		m.put("Resolved", "해결됨");
 		m.put("Resolved comment on file \"{0}\" in project \"{1}\"", "프로젝트 \"{1}\"의 파일 \"{0}\"에 대한 댓글을 해결했습니다");
+		m.put("Resource", "리소스");
 		m.put("Resource Settings", "리소스 설정");
+		m.put("Resources", "리소스들");
+		m.put("Response", "응답");
+		m.put("Response Body", "응답 본문");
 		m.put("Restart", "재시작");
 		m.put("Restart All Queried Agents", "모든 조회된 에이전트 재시작");
 		m.put("Restart Selected Agents", "선택된 에이전트 재시작");
@@ -3063,6 +3109,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Set Up Cache", "캐시 설정");
 		m.put("Set Up Renovate Cache", "Renovate 캐시 설정");
 		m.put("Set Up Trivy Cache", "Trivy 캐시 설정");
+		m.put("Set Up Your Account", "계정을 설정하세요");
 		m.put("Set as Private", "비공개로 설정");
 		m.put("Set as Public", "공개로 설정");
 		m.put("Set reviewed", "검토됨으로 설정");
@@ -3098,6 +3145,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Show Description", "설명 보기");
 		m.put("Show Duration", "기간 보기");
 		m.put("Show Emojis", "이모지 보기");
+		m.put("Show Error Detail", "오류 세부 정보 표시");
 		m.put("Show Issue Status", "이슈 상태 보기");
 		m.put("Show Package Stats", "패키지 통계 보기");
 		m.put("Show Pull Request Stats", "풀 리퀘스트 통계 보기");
@@ -3541,6 +3589,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Stats", "통계");
 		m.put("Stats Group", "통계 그룹");
 		m.put("Status", "상태");
+		m.put("Status Code", "상태 코드");
+		m.put("Status code", "상태 코드");
+		m.put("Status code other than 200 indicating the error type", "오류 유형을 나타내는 200이 아닌 상태 코드");
 		m.put("Step", "단계");
 		m.put("Step Template", "단계 템플릿");
 		m.put("Step Templates", "단계 템플릿들");
@@ -3589,6 +3640,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Symbol Name", "심볼 이름");
 		m.put("Symbol name", "심볼 이름");
 		m.put("Symbols", "심볼");
+		m.put("Sync Replica Status and Back to Home", "복제본 상태 동기화 및 홈으로 돌아가기");
 		m.put("Sync Repository", "저장소 동기화");
 		m.put("Sync Timing of All Queried Issues", "조회된 모든 이슈의 동기화 타이밍");
 		m.put("Sync Timing of Selected Issues", "선택된 이슈의 동기화 타이밍");
@@ -3655,6 +3707,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("The URL of the server endpoint that will receive the webhook POST requests", "웹훅 POST 요청을 받을 서버 엔드포인트의 URL");
 		m.put("The first board will be the default board", "첫 번째 보드가 기본 보드가 됩니다");
 		m.put("The first timesheet will be the default timesheet", "첫 번째 타임시트가 기본 타임시트가 됩니다");
+		m.put("The object you are deleting/disabling is still being used", "삭제/비활성화하려는 객체가 여전히 사용 중입니다");
+		m.put("The password reset url is invalid or obsolete", "비밀번호 재설정 URL이 유효하지 않거나 오래되었습니다");
 		m.put("The permission to access build log", "빌드 로그에 접근할 권한");
 		m.put("The permission to access build pipeline", "빌드 파이프라인에 접근할 권한");
 		m.put("The permission to run job manually. It also implies the permission to access build log, build pipeline and all published reports", 
@@ -3672,6 +3726,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Then upload package to the repository with twine", "twine을 사용하여 저장소에 패키지를 업로드하세요");
 		m.put("There are <a wicket:id=\"openRequests\">open pull requests</a> against branch <span wicket:id=\"branch\"></span>. These pull requests will be discarded if the branch is deleted.", 
 			"브랜치 <span wicket:id=\"branch\"></span>에 대해 <a wicket:id=\"openRequests\">열린 풀 요청</a>이 있습니다. 브랜치가 삭제되면 이러한 풀 요청은 폐기됩니다.");
+		m.put("There are incompatibilities since your upgraded version", "업그레이드된 버전 이후로 호환되지 않는 부분이 있습니다");
 		m.put("There are merge conflicts", "병합 충돌이 있습니다");
 		m.put("There are merge conflicts.", "병합 충돌이 있습니다.");
 		m.put("There are merge conflicts. You can still create the pull request though", "병합 충돌이 있습니다. 그래도 풀 요청을 생성할 수 있습니다");
@@ -3692,6 +3747,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("This change is squashed/rebased onto base branch via pull request {0}", "이 변경 사항은 풀 요청 {0}을 통해 기본 브랜치에 스쿼시/리베이스되었습니다");
 		m.put("This change needs to be verified by some jobs. Submit pull request instead", "이 변경 사항은 일부 작업에 의해 확인되어야 합니다. 대신 풀 요청을 제출하세요");
 		m.put("This commit is rebased", "이 커밋은 리베이스되었습니다");
+		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
+			"이 날짜는 <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 형식</a>을 사용합니다");
 		m.put("This email address is being used", "이 이메일 주소는 사용 중입니다");
 		m.put("This executor runs build jobs as docker containers on OneDev server", "이 실행자는 OneDev 서버에서 Docker 컨테이너로 빌드 작업을 실행합니다");
 		m.put("This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>", 
@@ -3897,6 +3954,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Type to filter", "필터링하려면 입력하세요");
 		m.put("Type to filter...", "필터링하려면 입력하세요...");
 		m.put("URL", "URL");
+		m.put("Unable To Delete/Disable Right Now", "지금 삭제/비활성화할 수 없습니다");
 		m.put("Unable to apply change as otherwise you will not be able to manage this project", "이 변경을 적용할 수 없습니다. 그렇지 않으면 이 프로젝트를 관리할 수 없게 됩니다");
 		m.put("Unable to change password as you are authenticating via external system", "외부 시스템을 통해 인증 중이므로 비밀번호를 변경할 수 없습니다");
 		m.put("Unable to comment", "댓글을 작성할 수 없습니다");
@@ -3917,6 +3975,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Unable to get guilds info", "길드 정보를 가져올 수 없습니다");
 		m.put("Unable to import build spec (import project: {0}, import revision: {1}): {2}", "빌드 사양을 가져올 수 없습니다 (가져올 프로젝트: {0}, 가져올 리비전: {1}): {2}");
 		m.put("Unable to notify user as mail service is not configured", "메일 서비스가 구성되지 않아 사용자를 알릴 수 없습니다");
+		m.put("Unable to send password reset email as mail service is not configured", "메일 서비스가 구성되지 않아 비밀번호 재설정 이메일을 보낼 수 없습니다");
 		m.put("Unable to send verification email as mail service is not configured yet", "메일 서비스가 아직 구성되지 않아 확인 이메일을 보낼 수 없습니다");
 		m.put("Unauthorize this user", "이 사용자를 인증 해제하세요");
 		m.put("Unauthorized", "권한 없음");
@@ -4186,6 +4245,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("YouTrack Password or Access Token", "YouTrack 비밀번호 또는 액세스 토큰");
 		m.put("YouTrack Project", "YouTrack 프로젝트");
 		m.put("YouTrack Projects to Import", "YouTrack 가져올 프로젝트");
+		m.put("Your email address is now verified", "이메일 주소가 이제 확인되었습니다");
+		m.put("Your primary email address is not verified", "기본 이메일 주소가 확인되지 않았습니다");
 		m.put("[Any state]", "[어떤 상태든]");
 		m.put("[Reset Password] Please Reset Your OneDev Password", "[비밀번호 재설정] OneDev 비밀번호를 재설정하세요");
 		m.put("a boolean indiciating whether or not topic comment can be created directly by replying the email", 
@@ -4219,6 +4280,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("build is successful for jobs \"{0}\" on any branch", "브랜치에 관계없이 작업 \"{0}\"에서 빌드가 성공적임");
 		m.put("build is successful for jobs \"{0}\" on branches \"{1}\"", "브랜치 \"{1}\"에서 작업 \"{0}\"의 빌드가 성공적임");
 		m.put("builds", "빌드들");
+		m.put("cURL Example", "cURL 예제");
 		m.put("choose a color for this state", "이 상태에 대한 색상을 선택하세요");
 		m.put("cluster:lead", "리드");
 		m.put("cmd-k to show command palette", "cmd-k를 눌러 명령 팔레트를 표시하세요");
@@ -4389,6 +4451,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("week:Tue", "화");
 		m.put("week:Wed", "수");
 		m.put("widget:Tabs", "탭");
+		m.put("you may show this page later via incompatibilities link in help menu", "도움말 메뉴의 호환성 링크를 통해 나중에 이 페이지를 표시할 수 있습니다");
 		m.put("{0} Month(s)", "{0} 개월");
 		m.put("{0} activities on {1}", "{1}에서 {0} 활동");
 		m.put("{0} additions & {1} deletions", "{0} 추가 및 {1} 삭제");
@@ -4422,69 +4485,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Account set up successfully", "계정이 성공적으로 설정되었습니다");
-		m.put("All RESTful Resources", "모든 RESTful 리소스");
-		m.put("An unexpected exception occurred", "예기치 않은 예외가 발생했습니다");
-		m.put("Back To Home", "홈으로 돌아가기");
-		m.put("Can not reset password for service account or disabled user", "서비스 계정 또는 비활성화된 사용자의 비밀번호를 재설정할 수 없습니다");
-		m.put("Can not reset password for user authenticating via external system", "외부 시스템을 통해 인증하는 사용자의 비밀번호를 재설정할 수 없습니다");
-		m.put("Content Type", "콘텐츠 유형");
-		m.put("Email Address Verification", "이메일 주소 확인");
-		m.put("Email address already used: ", "이미 사용된 이메일 주소:");
-		m.put("End Point", "엔드 포인트");
-		m.put("Enter New Password", "새 비밀번호 입력");
-		m.put("Enter your user name or email to reset password", "비밀번호를 재설정하려면 사용자 이름 또는 이메일을 입력하세요");
-		m.put("Error detail of content type &quot;text/plain&quot;", "콘텐츠 유형 &quot;text/plain&quot;의 오류 세부 정보");
-		m.put("Example", "예제");
-		m.put("Failed to verify your email address", "이메일 주소를 확인하지 못했습니다");
-		m.put("Forgotten Password?", "비밀번호를 잊으셨나요?");
-		m.put("Go Back", "돌아가기");
-		m.put("Http Method", "Http 메서드");
-		m.put("I didn't eat it. I swear!", "나는 그것을 먹지 않았어. 맹세해!");
-		m.put("In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, you will need to authenticate by providing user name and password (or access token) via http basic auth header", 
-			"익명 액세스가 비활성화되었거나 익명 사용자가 리소스 작업에 대한 충분한 권한이 없는 경우, 사용자 이름과 비밀번호(또는 액세스 토큰)를 제공하여 http 기본 인증 헤더를 통해 인증해야 합니다");
-		m.put("Invalid invitation code", "초대 코드가 유효하지 않습니다");
-		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
-			"유효하지 않은 상태입니다. 시스템 설정에 지정된 서버 URL을 사용하여 OneDev를 방문하고 있는지 확인하세요");
-		m.put("No response body", "응답 본문 없음");
-		m.put("No user found with login name or email: ", "로그인 이름 또는 이메일로 사용자를 찾을 수 없습니다:");
-		m.put("OOPS! There Is An Error", "이런! 오류가 발생했습니다");
-		m.put("Operation", "작업");
-		m.put("Operation Failed", "작업 실패");
-		m.put("Operation Successful", "작업 성공");
-		m.put("Page Not Found", "페이지를 찾을 수 없습니다");
-		m.put("Parameter", "매개변수");
-		m.put("Password changed. Please login with your new password", "비밀번호가 변경되었습니다. 새 비밀번호로 로그인하세요");
-		m.put("Password reset url is invalid or obsolete", "비밀번호 재설정 URL이 유효하지 않거나 오래되었습니다");
-		m.put("Placeholder", "플레이스홀더");
-		m.put("Please check your email for password reset instructions", "비밀번호 재설정 지침을 이메일로 확인하세요");
-		m.put("Primary email address not specified", "기본 이메일 주소가 지정되지 않았습니다");
-		m.put("Query Parameters", "쿼리 매개변수");
-		m.put("RESTful API Help", "RESTful API 도움말");
-		m.put("Request Body", "요청 본문");
-		m.put("Required", "필수");
-		m.put("Reset", "재설정");
-		m.put("Resource", "리소스");
-		m.put("Resources", "리소스들");
-		m.put("Response", "응답");
-		m.put("Response Body", "응답 본문");
-		m.put("Set Up Your Account", "계정을 설정하세요");
-		m.put("Show Error Detail", "오류 세부 정보 표시");
-		m.put("Status Code", "상태 코드");
-		m.put("Status code", "상태 코드");
-		m.put("Status code other than 200 indicating the error type", "오류 유형을 나타내는 200이 아닌 상태 코드");
-		m.put("Sync Replica Status and Back to Home", "복제본 상태 동기화 및 홈으로 돌아가기");
-		m.put("The object you are deleting/disabling is still being used", "삭제/비활성화하려는 객체가 여전히 사용 중입니다");
-		m.put("The password reset url is invalid or obsolete", "비밀번호 재설정 URL이 유효하지 않거나 오래되었습니다");
-		m.put("There are incompatibilities since your upgraded version", "업그레이드된 버전 이후로 호환되지 않는 부분이 있습니다");
-		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
-			"이 날짜는 <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 형식</a>을 사용합니다");
-		m.put("Unable To Delete/Disable Right Now", "지금 삭제/비활성화할 수 없습니다");
-		m.put("Unable to send password reset email as mail service is not configured", "메일 서비스가 구성되지 않아 비밀번호 재설정 이메일을 보낼 수 없습니다");
-		m.put("Your email address is now verified", "이메일 주소가 이제 확인되었습니다");
-		m.put("Your primary email address is not verified", "기본 이메일 주소가 확인되지 않았습니다");
-		m.put("cURL Example", "cURL 예제");
-		m.put("you may show this page later via incompatibilities link in help menu", "도움말 메뉴의 호환성 링크를 통해 나중에 이 페이지를 표시할 수 있습니다");
 	}
 		
 	@Override
