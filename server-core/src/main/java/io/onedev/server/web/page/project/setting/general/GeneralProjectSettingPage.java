@@ -12,6 +12,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -28,6 +29,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BaseAuthorizationManager;
 import io.onedev.server.entitymanager.ProjectLabelManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
@@ -59,8 +61,8 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 				PROP_DESCRIPTION, PROP_CODE_MANAGEMENT, PROP_PACK_MANAGEMENT, 
 				PROP_ISSUE_MANAGEMENT, PROP_TIME_TRACKING);
 		
-		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
-		defaultRoleBean.setRole(getProject().getDefaultRole());
+		DefaultRolesBean defaultRolesBean = new DefaultRolesBean();
+		defaultRolesBean.setRoles(getProject().getBaseAuthorizations().stream().map(it->it.getRole()).collect(Collectors.toList()));
 		
 		LabelsBean labelsBean = LabelsBean.of(getProject());
 		
@@ -86,7 +88,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 
 		}, properties, false);
 		
-		BeanEditor defaultRoleEditor = BeanContext.edit("defaultRoleEditor", defaultRoleBean);		
+		BeanEditor defaultRoleEditor = BeanContext.edit("defaultRoleEditor", defaultRolesBean);		
 		BeanEditor labelsEditor = BeanContext.edit("labelsEditor", labelsBean);
 		BeanEditor parentEditor = BeanContext.edit("parentEditor", parentBean);
 		
@@ -143,13 +145,14 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 						}
 					}
 					if (editor.isValid()) {
-						project.setDefaultRole(defaultRoleBean.getRole());
 						OneDev.getInstance(TransactionManager.class).run(new Runnable() {
 
 							@Override
 							public void run() {
+								var project = getProject();
 								getProjectManager().update(project);
-								OneDev.getInstance(ProjectLabelManager.class).sync(getProject(), labelsBean.getLabels());
+								OneDev.getInstance(BaseAuthorizationManager.class).syncRoles(project, defaultRolesBean.getRoles());
+								OneDev.getInstance(ProjectLabelManager.class).sync(project, labelsBean.getLabels());
 							}
 							
 						});

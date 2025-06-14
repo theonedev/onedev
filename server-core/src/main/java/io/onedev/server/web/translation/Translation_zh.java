@@ -846,8 +846,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Default Multi Value Provider", "默认多值提供器");
 		m.put("Default Project", "默认项目");
 		m.put("Default Project Setting", "默认项目设置");
-		m.put("Default Role", "默认角色");
-		m.put("Default Role Bean", "默认角色 Bean");
+		m.put("Default Roles", "默认角色");
+		m.put("Default Roles Bean", "默认角色 Bean");
 		m.put("Default Value", "默认值");
 		m.put("Default Value Provider", "默认值提供器");
 		m.put("Default Values", "默认值");
@@ -855,8 +855,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Default branding settings restored", "已恢复默认品牌设置");
 		m.put("Default fixed issue filters saved", "默认固定工单过滤器已保存");
 		m.put("Default merge strategy", "默认合并策略");
-		m.put("Default role affects default permissions granted to everyone in the system. The actual default permissions will be <b class='text-warning'>all permissions</b> contained in default roles of this project and all its parent projects", 
-			"默认角色影响系统中所有用户获得的默认权限。实际的默认权限将是该项目及其所有父项目中的默认角色所包含的<b class='text-warning'>所有权限</b>");
+		m.put("Default roles affect default permissions granted to everyone in the system. The actual default permissions will be <b class='text-warning'>all permissions</b> contained in default roles of this project and all its parent projects", 
+			"默认角色影响系统中每个人的默认权限。实际的默认权限将是该项目及其所有父项目中默认角色包含的<b class='text-warning'>所有权限</b>");
 		m.put("Define all custom issue fields here. Each project can decide to use all or a subset of these fields via its issue transition setting. <b class=\"text-warning\">NOTE: </b> Newly defined fields by default only appear in new issues. Batch edit existing issues from issue list page if you want them to have these new fields", 
 			"在此处定义所有自定义工单字段。每个项目可以通过其工单状态设置决定使用所有或这些字段的一个子集。<b class=\"text-warning\">注意：</b> 默认情况下，新定义的字段仅出现在新工单中。如果您希望这些新字段出现在现有工单中，请从工单列表页面批量编辑这些工单");
 		m.put("Define all custom issue states here. The first state will be used as initial state of created issues", 
@@ -1234,6 +1234,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("File Patterns", "文件模式");
 		m.put("File Protection", "文件保护");
 		m.put("File Protections", "文件保护");
+		m.put("File and Symbol Search", "文件和符号搜索");
 		m.put("File changes", "文件更改");
 		m.put("File is too large to edit here", "文件太大，无法在此编辑");
 		m.put("File missing or obsolete", "文件缺失或过时");
@@ -1312,6 +1313,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Force", "强制");
 		m.put("Force Garbage Collection", "强制垃圾回收");
 		m.put("Forgot Password?", "忘记密码？");
+		m.put("Fork Project", "分叉项目");
 		m.put("Fork now", "立即分叉");
 		m.put("Forks Of", "分叉");
 		m.put("Frequencies", "频率");
@@ -1462,10 +1464,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
 			"如果启用，在用户有权限的情况下，源分支将在合并合并请求后自动删除");
 		m.put("If specified, OneDev will only display iterations with this prefix", "如果指定，OneDev 将只显示具有此前缀的迭代");
-		m.put("If specified, all public and internal projects imported from GitLab will use this as default role. Private projects are not affected", 
-			"如果指定，所有从 GitLab 导入的公共和内部项目将使用此作为默认角色。私有项目不受影响");
-		m.put("If specified, all public repositories imported from GitHub will use this as default role. Private repositories are not affected", 
-			"如果指定，所有从 GitHub 导入的公共仓库将使用此作为默认角色。私有仓库不受影响");
+		m.put("If specified, all public and internal projects imported from GitLab will use these as default roles. Private projects are not affected", 
+			"如果指定，从 GitLab 导入的所有公共和内部项目将使用这些作为默认角色。私人项目不受影响");
+		m.put("If specified, all public repositories imported from GitHub will use these as default roles. Private repositories are not affected", 
+			"如果指定，从 GitHub 导入的所有公共仓库将使用这些作为默认角色。私人仓库不受影响");
 		m.put("If specified, total estimated/spent time of an issue will also include linked issues of this type", 
 			"如果指定，工单的预计/已用时间也将包括此类型的链接工单");
 		m.put("If this option is enabled, git lfs command needs to be installed on OneDev server (even this step runs on other node)", 
@@ -1988,6 +1990,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("New User Bean", "新用户Bean");
 		m.put("New Value", "新值");
 		m.put("New issue board created", "新建工单看板");
+		m.put("New project created", "新项目已创建");
 		m.put("New user created", "新用户创建成功");
 		m.put("New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting", 
 			"新版本可用。红色表示安全/关键更新，黄色表示错误修复，蓝色表示功能更新。点击查看更改。可在系统设置中禁用");
@@ -2007,6 +2010,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No agents to resume", "没有要恢复的任务代理");
 		m.put("No aggregation", "无聚合");
 		m.put("No any", "无任何");
+		m.put("No any matches", "没有任何匹配项");
 		m.put("No applicable transitions or no permission to transit", "没有适用的转换或没有权限转换");
 		m.put("No artifacts published", "没有发布制品");
 		m.put("No attributes defined (can only be edited when agent is online)", "没有定义属性（仅当代理在线时可编辑）");
@@ -2033,7 +2037,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No data", "没有数据");
 		m.put("No default branch", "没有默认分支");
 		m.put("No default group", "无默认组");
-		m.put("No default role", "无默认角色");
+		m.put("No default roles", "没有默认角色");
 		m.put("No default value", "无默认值");
 		m.put("No description", "无描述");
 		m.put("No diffs", "没有差异");
@@ -2104,6 +2108,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Not Active Since", "不活跃起");
 		m.put("Not Used Since", "未使用时间");
 		m.put("Not assigned", "未分配");
+		m.put("Not authorized to create project under \"{0}\"", "无权限在 \"{0}\" 下创建项目");
+		m.put("Not authorized to create root project", "无权限创建根项目");
 		m.put("Not authorized to move project under this parent", "无权将项目移动到此父项目下");
 		m.put("Not authorized to set as root project", "无权设置为根项目");
 		m.put("Not covered", "未覆盖");
@@ -2642,6 +2648,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Project Replicas", "项目副本");
 		m.put("Project authorizations updated", "项目授权已更新");
 		m.put("Project does not have any code yet", "项目还没有代码");
+		m.put("Project forked", "项目已分叉");
 		m.put("Project id", "项目 ID");
 		m.put("Project list", "项目列表");
 		m.put("Project manage privilege required to delete \"{0}\"", "删除 \"{0}\" 需要项目管理员权限");
@@ -2669,7 +2676,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"此步骤调用 docker builder prune 命令来删除服务器 docker 执行器或远程 docker 执行器中指定的 buildx 构建器缓存");
 		m.put("Public", "公开");
 		m.put("Public Key", "公钥");
-		m.put("Public Role", "公共角色");
+		m.put("Public Roles", "公共角色");
 		m.put("Publish", "发布");
 		m.put("Publish Coverage Report Step", "发布覆盖率报告步骤");
 		m.put("Publish Problem Report Step", "发布问题报告步骤");
@@ -2980,6 +2987,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Search branch", "搜索分支");
 		m.put("Search files, symbols and texts", "搜索文件、符号和文本");
 		m.put("Search for", "搜索");
+		m.put("Search inside current tree", "在当前树内搜索");
 		m.put("Search is too general", "搜索过于笼统");
 		m.put("Search job", "搜索任务");
 		m.put("Search project", "搜索项目");
@@ -3111,6 +3119,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Show issues in list", "在列表中显示工单");
 		m.put("Show issues not scheduled into current iteration", "显示未安排到当前迭代的工单");
 		m.put("Show matching agents", "显示匹配的代理");
+		m.put("Show more", "显示更多");
 		m.put("Show more lines", "显示更多行");
 		m.put("Show next match", "显示下一个匹配");
 		m.put("Show previous match", "显示上一个匹配");
@@ -4272,6 +4281,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("found {0} users", "找到 {0} 个用户");
 		m.put("has any value of", "具有下列任何值");
 		m.put("head", "头部");
+		m.put("in current commit", "在当前提交中");
 		m.put("ineffective", "无效");
 		m.put("inherited", "继承");
 		m.put("initial", "初始");
@@ -4419,11 +4429,69 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("File and Symbol Search", "文件和符号搜索");
-		m.put("No any matches", "没有任何匹配项");
-		m.put("Search inside current tree", "在当前树内搜索");
-		m.put("Show more", "显示更多");
-		m.put("in current commit", "在当前提交中");
+		m.put("Account set up successfully", "账户设置成功");
+		m.put("All RESTful Resources", "所有RESTful资源");
+		m.put("An unexpected exception occurred", "发生意外异常");
+		m.put("Back To Home", "返回主页");
+		m.put("Can not reset password for service account or disabled user", "无法重置服务账户或禁用用户的密码");
+		m.put("Can not reset password for user authenticating via external system", "无法重置通过外部系统认证的用户密码");
+		m.put("Content Type", "内容类型");
+		m.put("Email Address Verification", "邮箱地址验证");
+		m.put("Email address already used: ", "邮箱地址已被使用：");
+		m.put("End Point", "端点");
+		m.put("Enter New Password", "输入新密码");
+		m.put("Enter your user name or email to reset password", "输入您的用户名或邮箱以重置密码");
+		m.put("Error detail of content type &quot;text/plain&quot;", "内容类型为\"text/plain\"的错误详情");
+		m.put("Example", "示例");
+		m.put("Failed to verify your email address", "未能验证您的邮箱地址");
+		m.put("Forgotten Password?", "忘记密码？");
+		m.put("Go Back", "返回");
+		m.put("Http Method", "Http方法");
+		m.put("I didn't eat it. I swear!", "我没吃它。我发誓！");
+		m.put("In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, you will need to authenticate by providing user name and password (or access token) via http basic auth header", 
+			"如果匿名访问被禁用或匿名用户没有足够的权限进行资源操作，您需要通过http基本认证头提供用户名和密码（或访问令牌）进行认证");
+		m.put("Invalid invitation code", "无效的邀请代码");
+		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
+			"无效的状态。请确保您使用系统设置中指定的服务器URL访问OneDev");
+		m.put("No response body", "无响应体");
+		m.put("No user found with login name or email: ", "未找到登录名或邮箱为的用户：");
+		m.put("OOPS! There Is An Error", "哎呀！发生错误");
+		m.put("Operation", "操作");
+		m.put("Operation Failed", "操作失败");
+		m.put("Operation Successful", "操作成功");
+		m.put("Page Not Found", "页面未找到");
+		m.put("Parameter", "参数");
+		m.put("Password changed. Please login with your new password", "密码已更改。请使用新密码登录");
+		m.put("Password reset url is invalid or obsolete", "密码重置URL无效或已过期");
+		m.put("Placeholder", "占位符");
+		m.put("Please check your email for password reset instructions", "请检查您的邮箱以获取密码重置说明");
+		m.put("Primary email address not specified", "未指定主要邮箱地址");
+		m.put("Query Parameters", "查询参数");
+		m.put("RESTful API Help", "RESTful API帮助");
+		m.put("Request Body", "请求体");
+		m.put("Required", "必需");
+		m.put("Reset", "重置");
+		m.put("Resource", "资源");
+		m.put("Resources", "资源");
+		m.put("Response", "响应");
+		m.put("Response Body", "响应体");
+		m.put("Set Up Your Account", "设置您的账户");
+		m.put("Show Error Detail", "显示错误详情");
+		m.put("Status Code", "状态码");
+		m.put("Status code", "状态码");
+		m.put("Status code other than 200 indicating the error type", "非200的状态码表示错误类型");
+		m.put("Sync Replica Status and Back to Home", "同步副本状态并返回主页");
+		m.put("The object you are deleting/disabling is still being used", "您正在删除/禁用的对象仍在使用中");
+		m.put("The password reset url is invalid or obsolete", "密码重置URL无效或已过期");
+		m.put("There are incompatibilities since your upgraded version", "由于您的版本升级，存在不兼容性");
+		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
+			"此日期使用<a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601格式</a>");
+		m.put("Unable To Delete/Disable Right Now", "目前无法删除/禁用");
+		m.put("Unable to send password reset email as mail service is not configured", "由于邮件服务未配置，无法发送密码重置邮件");
+		m.put("Your email address is now verified", "您的邮箱地址已验证");
+		m.put("Your primary email address is not verified", "您的主要邮箱地址未验证");
+		m.put("cURL Example", "cURL示例");
+		m.put("you may show this page later via incompatibilities link in help menu", "您可以稍后通过帮助菜单中的不兼容性链接显示此页面");		
 	}
 		
 	@Override

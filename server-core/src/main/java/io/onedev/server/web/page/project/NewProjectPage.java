@@ -21,6 +21,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BaseAuthorizationManager;
 import io.onedev.server.entitymanager.ProjectLabelManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
@@ -35,7 +36,7 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.packs.ProjectPacksPage;
-import io.onedev.server.web.page.project.setting.general.DefaultRoleBean;
+import io.onedev.server.web.page.project.setting.general.DefaultRolesBean;
 import io.onedev.server.web.page.project.setting.general.ParentBean;
 import io.onedev.server.web.util.editbean.LabelsBean;
 
@@ -60,7 +61,7 @@ public class NewProjectPage extends LayoutPage {
 				PROP_CODE_MANAGEMENT, PROP_PACK_MANAGEMENT, PROP_ISSUE_MANAGEMENT, 
 				PROP_TIME_TRACKING);
 		
-		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
+		DefaultRolesBean defaultRolesBean = new DefaultRolesBean();
 		LabelsBean labelsBean = new LabelsBean();
 		ParentBean parentBean = new ParentBean();
 		if (parentId != null)
@@ -85,11 +86,11 @@ public class NewProjectPage extends LayoutPage {
 					Project newProject = getProjectManager().setup(projectPath);
 					if (editProject.getKey() != null && getProjectManager().findByKey(editProject.getKey()) != null) {
 						editor.error(new Path(new PathNode.Named(PROP_KEY)),
-								"This key has already been used by another project");
+								_T("This key has already been used by another project"));
 					}
 					if (!newProject.isNew()) {
 						editor.error(new Path(new PathNode.Named(PROP_NAME)),
-								"This name has already been used by another project");
+								_T("This name has already been used by another project"));
 					}
 					if (editor.isValid()) {
 						newProject.setKey(editProject.getKey());
@@ -98,14 +99,14 @@ public class NewProjectPage extends LayoutPage {
 						newProject.setIssueManagement(editProject.isIssueManagement());
 						newProject.setPackManagement(editProject.isPackManagement());
 						newProject.setTimeTracking(editProject.isTimeTracking());
-						newProject.setDefaultRole(defaultRoleBean.getRole());
 						
 						OneDev.getInstance(TransactionManager.class).run(() -> {
 							getProjectManager().create(newProject);
+							OneDev.getInstance(BaseAuthorizationManager.class).syncRoles(newProject, defaultRolesBean.getRoles());
 							OneDev.getInstance(ProjectLabelManager.class).sync(newProject, labelsBean.getLabels());
 						});
 						
-						Session.get().success("New project created");
+						Session.get().success(_T("New project created"));
 						if (newProject.isCodeManagement())
 							setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(newProject));
 						else if (newProject.isIssueManagement())
@@ -126,7 +127,7 @@ public class NewProjectPage extends LayoutPage {
 		};
 		form.add(editor);
 		form.add(labelsEditor);
-		form.add(BeanContext.edit("defaultRoleEditor", defaultRoleBean));
+		form.add(BeanContext.edit("defaultRoleEditor", defaultRolesBean));
 		form.add(parentEditor);
 		add(form);
 	}

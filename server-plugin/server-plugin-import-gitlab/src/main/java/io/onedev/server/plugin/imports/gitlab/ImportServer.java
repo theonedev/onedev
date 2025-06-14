@@ -51,6 +51,7 @@ import io.onedev.server.annotation.Password;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.attachment.AttachmentTooLargeException;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.entitymanager.BaseAuthorizationManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -309,10 +310,6 @@ public class ImportServer implements Serializable, Validatable {
 						project.setDescription(projectNode.get("description").asText(null));
 						project.setIssueManagement(projectNode.get("issues_enabled").asBoolean());
 
-						String visibility = projectNode.get("visibility").asText();
-						if (!visibility.equals("private") && option.getPublicRole() != null)
-							project.setDefaultRole(option.getPublicRole());
-
 						if (project.isNew() || project.getDefaultBranch() == null) {
 							logger.log("Cloning code...");
 							URIBuilder builder = new URIBuilder(projectNode.get("http_url_to_repo").asText());
@@ -340,6 +337,10 @@ public class ImportServer implements Serializable, Validatable {
 						} else {
 							logger.warning("Skipping code clone as the project already has code");
 						}
+
+						String visibility = projectNode.get("visibility").asText();
+						if (!visibility.equals("private") && !option.getPublicRoles().isEmpty())
+							OneDev.getInstance(BaseAuthorizationManager.class).syncRoles(project, option.getPublicRoles());
 
 						if (option.getIssueImportOption() != null) {
 							List<Iteration> iterations = new ArrayList<>();

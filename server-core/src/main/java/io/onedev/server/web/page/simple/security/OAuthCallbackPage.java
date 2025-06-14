@@ -29,8 +29,8 @@ public class OAuthCallbackPage extends SimplePage {
 		code = params.get(PARAM_CODE).toString();
 		
 		if (!state.equals(Session.get().getAttribute("oauthState"))) {
-			throw new ExplicitException("Invalid state. Please make sure you are visiting "
-					+ "OneDev using server url specified in system setting");
+			throw new ExplicitException(_T("Invalid state. Please make sure you are visiting "
+					+ "OneDev using server url specified in system setting"));
 		} else {
 			Session.get().setAttribute("oauthCode", code);
 		}

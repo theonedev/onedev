@@ -79,9 +79,9 @@ public class Role extends AbstractEntity implements BasePermission {
 	@Column(length=65535, nullable=false)
 	private ArrayList<JobPrivilege> jobPrivileges = new ArrayList<>();
 	
-	@OneToMany(mappedBy="defaultRole")
+	@OneToMany(mappedBy="role", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-	private Collection<Project> defaultProjects = new ArrayList<>();
+	private Collection<BaseAuthorization> baseAuthorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="role", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -322,14 +322,14 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.jobPrivileges = (ArrayList<JobPrivilege>) jobPrivileges;
 	}
 
-	public Collection<Project> getDefaultProjects() {
-		return defaultProjects;
+	public Collection<BaseAuthorization> getBaseAuthorizations() {
+		return baseAuthorizations;
 	}
 
-	public void setDefaultProjects(Collection<Project> defaultProjects) {
-		this.defaultProjects = defaultProjects;
+	public void setBaseAuthorizations(Collection<BaseAuthorization> baseAuthorizations) {
+		this.baseAuthorizations = baseAuthorizations;
 	}
-	
+
 	public Collection<LinkAuthorization> getLinkAuthorizations() {
 		return linkAuthorizations;
 	}

@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.simple.security;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
@@ -46,9 +48,9 @@ public class CreateUserFromInvitationPage extends SimplePage {
 			protected UserInvitation load() {
 				UserInvitation invitation = getInvitationManager().findByInvitationCode(invitationCode);
 				if (invitation == null)
-					throw new ExplicitException("Invalid invitation code");
+					throw new ExplicitException(_T("Invalid invitation code"));
 				else if (getEmailAddressManager().findByValue(invitation.getEmailAddress()) != null)
-					throw new ExplicitException("Email address already used: " + invitation.getEmailAddress());
+					throw new ExplicitException(_T("Email address already used: ") + invitation.getEmailAddress());
 				else
 					return invitation;
 			}
@@ -72,7 +74,7 @@ public class CreateUserFromInvitationPage extends SimplePage {
 				User userWithSameName = getUserManager().findByName(newUser.getName());
 				if (userWithSameName != null) {
 					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
-							"Login name already used by another account");
+							_T("Login name already used by another account"));
 				} 
 				
 				if (editor.isValid()){
@@ -95,7 +97,7 @@ public class CreateUserFromInvitationPage extends SimplePage {
 							createMembership(user, defaultLoginGroup);
 					});
 					
-					Session.get().success("Account set up successfully");
+					Session.get().success(_T("Account set up successfully"));
 					SecurityUtils.getSubject().runAs(user.getPrincipals());
 					setResponsePage(MyAvatarPage.class);
 				}
@@ -150,7 +152,7 @@ public class CreateUserFromInvitationPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "Set Up Your Account";
+		return _T("Set Up Your Account");
 	}
 
 	@Override

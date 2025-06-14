@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.simple.security;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
@@ -63,7 +65,7 @@ public class EmailAddressVerificationPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "Email Address Verification";
+		return _T("Email Address Verification");
 	}
 
 	@Override

@@ -25,6 +25,7 @@ import static io.onedev.server.util.DirectoryVersionUtils.readVersion;
 import static io.onedev.server.util.DirectoryVersionUtils.writeVersion;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.server.util.criteria.Criteria.forManyValues;
+import static io.onedev.server.web.translation.Translation._T;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Comparator.naturalOrder;
 import static java.util.stream.Collectors.toList;
@@ -41,6 +42,7 @@ import java.io.InputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.nio.file.Files;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -575,9 +577,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 				child = find(criteria);
 				if (child == null) {
 					if (project == null && !SecurityUtils.canCreateRootProjects())
-						throw new UnauthorizedException("Not authorized to create root project");
+						throw new UnauthorizedException(_T("Not authorized to create root project"));
 					if (project != null && !SecurityUtils.canCreateChildren(project))
-						throw new UnauthorizedException("Not authorized to create project under '" + project.getPath() + "'");
+						throw new UnauthorizedException(MessageFormat.format(_T("Not authorized to create project under \"{0}\""), project.getPath()));
 					child = new Project();
 					child.setName(name);
 					child.setParent(project);

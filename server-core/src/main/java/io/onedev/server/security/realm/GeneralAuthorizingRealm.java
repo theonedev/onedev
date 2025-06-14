@@ -117,7 +117,7 @@ public class GeneralAuthorizingRealm extends AuthorizingRealm {
 						Project project = projectPermission.getProject();
 						Permission privilege = projectPermission.getPrivilege();
 						do {
-							if (project.getDefaultRole() != null && project.getDefaultRole().implies(privilege))
+							if (project.isPermittedByLoginUser(privilege))
 								return true;
 							project = project.getParent();
 						} while (project != null);

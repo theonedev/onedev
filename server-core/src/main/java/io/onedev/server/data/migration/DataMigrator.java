@@ -8080,4 +8080,31 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate203(File dataDir, Stack<Integer> versions) {
+		VersionedXmlDoc baseAuthorizationsDom = new VersionedXmlDoc();
+		Element baseAuthorizationsListElement = baseAuthorizationsDom.addElement("list");		
+		long baseAuthorizationId = 1L;
+		
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var defaultRoleElement = element.element("defaultRole");
+					if (defaultRoleElement != null) {
+						var baseAuthorizationElement = baseAuthorizationsListElement.addElement("io.onedev.server.model.BaseAuthorization");
+						baseAuthorizationElement.addAttribute("revision", "0.0");
+						baseAuthorizationElement.addElement("id").setText(String.valueOf(baseAuthorizationId++));
+						baseAuthorizationElement.addElement("project").setText(element.elementText("id").trim());
+						baseAuthorizationElement.addElement("role").setText(defaultRoleElement.getText().trim());
+						defaultRoleElement.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		if (baseAuthorizationId > 1) {
+			baseAuthorizationsDom.writeToFile(new File(dataDir, "BaseAuthorizations.xml"), false);
+		}
+	}
+
 }

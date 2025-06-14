@@ -347,12 +347,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Project> forks = new ArrayList<>();
     
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=true)
-	@Api(description="This represents default role of the project. Remove this property if the project should not "
-			+ "have a default role when create/update the project. May be null.")
-    private Role defaultRole;
-    
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<BaseAuthorization> baseAuthorizations = new ArrayList<>();
+	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<GroupAuthorization> groupAuthorizations = new ArrayList<>();
@@ -592,21 +590,20 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.outgoingRequests = outgoingRequests;
 	}
 
-	@Nullable
-	public Role getDefaultRole() {
-		return defaultRole;
-	}
-
-	public void setDefaultRole(Role defaultRole) {
-		this.defaultRole = defaultRole;
-	}
-
 	public Collection<GroupAuthorization> getGroupAuthorizations() {
 		return groupAuthorizations;
 	}
 
 	public void setGroupAuthorizations(Collection<GroupAuthorization> groupAuthorizations) {
 		this.groupAuthorizations = groupAuthorizations;
+	}
+
+	public Collection<BaseAuthorization> getBaseAuthorizations() {
+		return baseAuthorizations;
+	}
+
+	public void setBaseAuthorizations(Collection<BaseAuthorization> baseAuthorizations) {
+		this.baseAuthorizations = baseAuthorizations;
 	}
 
 	public Collection<UserAuthorization> getUserAuthorizations() {
@@ -781,7 +778,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public ProjectFacade getFacade() {
 		return new ProjectFacade(getId(), getName(), getKey(), getPath(), getServiceDeskEmailAddress(), 
 				isCodeManagement(), isIssueManagement(), getGitPackConfig(), lastEventDate.getId(), 
-				idOf(getDefaultRole()), idOf(getParent()), idOf(getForkedFrom()));
+				idOf(getParent()), idOf(getForkedFrom()));
 	}
 	
 	/**
@@ -1681,7 +1678,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 	
 	public boolean isPermittedByLoginUser(Permission permission) {
-		return getDefaultRole() != null && getDefaultRole().implies(permission);
+		return getBaseAuthorizations().stream().anyMatch(it->it.getRole().implies(permission));
 	}
 	
 	public LinkedHashMap<String, ContributedProjectSetting> getContributedSettings() {

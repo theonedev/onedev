@@ -1,5 +1,14 @@
 package io.onedev.server.web.component.project.forkoption;
 
+import static io.onedev.server.model.Project.PROP_DESCRIPTION;
+import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT;
+import static io.onedev.server.model.Project.PROP_KEY;
+import static io.onedev.server.model.Project.PROP_NAME;
+import static io.onedev.server.model.Project.PROP_PACK_MANAGEMENT;
+import static io.onedev.server.model.Project.PROP_TIME_TRACKING;
+import static io.onedev.server.web.translation.Translation._T;
+import static java.util.stream.Collectors.toList;
+
 import java.util.Collection;
 
 import org.apache.shiro.authz.UnauthorizedException;
@@ -14,6 +23,7 @@ import org.apache.wicket.model.IModel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BaseAuthorizationManager;
 import io.onedev.server.entitymanager.ProjectLabelManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
@@ -24,11 +34,9 @@ import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.setting.general.DefaultRoleBean;
+import io.onedev.server.web.page.project.setting.general.DefaultRolesBean;
 import io.onedev.server.web.page.project.setting.general.ParentBean;
 import io.onedev.server.web.util.editbean.LabelsBean;
-
-import static io.onedev.server.model.Project.*;
 
 public abstract class ForkOptionPanel extends Panel {
 
@@ -62,8 +70,8 @@ public abstract class ForkOptionPanel extends Panel {
 			parentBean.setParentPath(userName);
 		}
 		
-		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
-		defaultRoleBean.setRole(getProject().getDefaultRole());
+		DefaultRolesBean defaultRolesBean = new DefaultRolesBean();
+		defaultRolesBean.setRoles(getProject().getBaseAuthorizations().stream().map(it->it.getRole()).collect(toList()));
 		
 		LabelsBean labelsBean = LabelsBean.of(getProject());
 		
@@ -71,7 +79,7 @@ public abstract class ForkOptionPanel extends Panel {
 				PROP_PACK_MANAGEMENT, PROP_ISSUE_MANAGEMENT, PROP_TIME_TRACKING);
 		
 		BeanEditor editor = BeanContext.edit("editor", editProject, properties, false);
-		BeanEditor defaultRoleEditor = BeanContext.edit("defaultRoleEditor", defaultRoleBean);
+		BeanEditor defaultRoleEditor = BeanContext.edit("defaultRoleEditor", defaultRolesBean);
 		BeanEditor labelsEditor = BeanContext.edit("labelsEditor", labelsBean);
 		BeanEditor parentEditor = BeanContext.edit("parentEditor", parentBean);
 		
@@ -92,7 +100,7 @@ public abstract class ForkOptionPanel extends Panel {
 				try {
 					if (editProject.getKey() != null && getProjectManager().findByKey(editProject.getKey()) != null) {
 						editor.error(new Path(new PathNode.Named(PROP_KEY)),
-								"This key has already been used by another project");
+								_T("This key has already been used by another project"));
 					}
 					String projectPath = editProject.getName();
 					if (parentBean.getParentPath() != null)
@@ -100,7 +108,7 @@ public abstract class ForkOptionPanel extends Panel {
 					Project newProject = getProjectManager().setup(projectPath);
 					if (!newProject.isNew()) {
 						editor.error(new Path(new PathNode.Named("name")),
-								"This name has already been used by another project");
+								_T("This name has already been used by another project"));
 					} 
 					if (editor.isValid()) {
 						newProject.setForkedFrom(getProject());
@@ -109,16 +117,16 @@ public abstract class ForkOptionPanel extends Panel {
 						newProject.setPackManagement(editProject.isPackManagement());
 						newProject.setIssueManagement(editProject.isIssueManagement());
 						newProject.setTimeTracking(editProject.isTimeTracking());
-						newProject.setDefaultRole(defaultRoleBean.getRole());
 						newProject.setCodeAnalysisSetting(getProject().getCodeAnalysisSetting());
 						newProject.setGitPackConfig(getProject().getGitPackConfig());
 						
 						OneDev.getInstance(TransactionManager.class).run(() -> {
 							getProjectManager().create(newProject);
 							getProjectManager().fork(getProject(), newProject);
+							OneDev.getInstance(BaseAuthorizationManager.class).syncRoles(newProject, defaultRolesBean.getRoles());
 							OneDev.getInstance(ProjectLabelManager.class).sync(newProject, labelsBean.getLabels());
 						});
-						Session.get().success("Project forked");
+						Session.get().success(_T("Project forked"));
 						setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(newProject));
 					} else {
 						target.add(form);

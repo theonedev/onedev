@@ -839,8 +839,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Default Multi Value Provider", "デフォルトの複数値プロバイダー");
 		m.put("Default Project", "デフォルトプロジェクト");
 		m.put("Default Project Setting", "デフォルトプロジェクト設定");
-		m.put("Default Role", "デフォルトロール");
-		m.put("Default Role Bean", "デフォルトロールBean");
+		m.put("Default Roles", "デフォルトの役割");
+		m.put("Default Roles Bean", "デフォルトの役割Bean");
 		m.put("Default Value", "デフォルト値");
 		m.put("Default Value Provider", "デフォルト値プロバイダー");
 		m.put("Default Values", "デフォルト値");
@@ -848,8 +848,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Default branding settings restored", "デフォルトのブランディング設定が復元されました");
 		m.put("Default fixed issue filters saved", "デフォルトの解決済み課題フィルターが保存されました");
 		m.put("Default merge strategy", "デフォルトのマージ戦略");
-		m.put("Default role affects default permissions granted to everyone in the system. The actual default permissions will be <b class='text-warning'>all permissions</b> contained in default roles of this project and all its parent projects", 
-			"デフォルトロールはシステム内の全員に付与されるデフォルト権限に影響します。実際のデフォルト権限はこのプロジェクトおよびその親プロジェクトのデフォルトロールに含まれる<b class='text-warning'>すべての権限</b>になります");
+		m.put("Default roles affect default permissions granted to everyone in the system. The actual default permissions will be <b class='text-warning'>all permissions</b> contained in default roles of this project and all its parent projects", 
+			"デフォルトの役割は、システム内の全員に付与されるデフォルトの権限に影響を与えます。実際のデフォルトの権限は、このプロジェクトとそのすべての親プロジェクトのデフォルトの役割に含まれる<b class='text-warning'>すべての権限</b>になります");
 		m.put("Define all custom issue fields here. Each project can decide to use all or a subset of these fields via its issue transition setting. <b class=\"text-warning\">NOTE: </b> Newly defined fields by default only appear in new issues. Batch edit existing issues from issue list page if you want them to have these new fields", 
 			"ここでカスタム課題フィールドをすべて定義します。各プロジェクトは課題遷移設定を通じてこれらのフィールドをすべて使用するか、またはその一部を使用するかを決定できます。<b class=\"text-warning\">注意: </b>新しく定義されたフィールドはデフォルトで新しい課題にのみ表示されます。課題リストページから既存の課題を一括編集してこれらの新しいフィールドを持たせることができます");
 		m.put("Define all custom issue states here. The first state will be used as initial state of created issues", 
@@ -1227,6 +1227,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("File Patterns", "ファイルパターン");
 		m.put("File Protection", "ファイル保護");
 		m.put("File Protections", "ファイル保護一覧");
+		m.put("File and Symbol Search", "ファイルとシンボル検索");
 		m.put("File changes", "ファイル変更");
 		m.put("File is too large to edit here", "ファイルが大きすぎてここでは編集できません");
 		m.put("File missing or obsolete", "ファイルが欠落しているか廃止されています");
@@ -1305,6 +1306,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Force", "強制");
 		m.put("Force Garbage Collection", "ガベージコレクションを強制");
 		m.put("Forgot Password?", "パスワードを忘れましたか？");
+		m.put("Fork Project", "フォークプロジェクト");
 		m.put("Fork now", "今すぐフォーク");
 		m.put("Forks Of", "フォーク元");
 		m.put("Frequencies", "頻度");
@@ -1455,10 +1457,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
 			"有効化されている場合、プルリクエストをマージした後、ユーザーが権限を持っている場合、ソースブランチは自動的に削除されます");
 		m.put("If specified, OneDev will only display iterations with this prefix", "指定されている場合、OneDevはこのプレフィックスを持つイテレーションのみを表示します");
-		m.put("If specified, all public and internal projects imported from GitLab will use this as default role. Private projects are not affected", 
-			"指定されている場合、GitLabからインポートされたすべての公開および内部プロジェクトはこれをデフォルトの役割として使用します。プライベートプロジェクトは影響を受けません");
-		m.put("If specified, all public repositories imported from GitHub will use this as default role. Private repositories are not affected", 
-			"指定されている場合、GitHubからインポートされたすべての公開リポジトリはこれをデフォルトの役割として使用します。プライベートリポジトリは影響を受けません");
+		m.put("If specified, all public and internal projects imported from GitLab will use these as default roles. Private projects are not affected", 
+			"指定された場合、GitLabからインポートされたすべての公開および内部プロジェクトはこれをデフォルトの役割として使用します。プライベートプロジェクトには影響しません");
+		m.put("If specified, all public repositories imported from GitHub will use these as default roles. Private repositories are not affected", 
+			"指定された場合、GitHubからインポートされたすべての公開リポジトリはこれをデフォルトの役割として使用します。プライベートリポジトリには影響しません");
 		m.put("If specified, total estimated/spent time of an issue will also include linked issues of this type", 
 			"指定されている場合、課題の総推定/消費時間にはこのタイプのリンクされた課題も含まれます");
 		m.put("If this option is enabled, git lfs command needs to be installed on OneDev server (even this step runs on other node)", 
@@ -1981,6 +1983,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("New User Bean", "新しいユーザーBean");
 		m.put("New Value", "新しい値");
 		m.put("New issue board created", "新しい課題ボードが作成されました");
+		m.put("New project created", "新しいプロジェクトが作成されました");
 		m.put("New user created", "新しいユーザーが作成されました");
 		m.put("New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting", 
 			"新しいバージョンが利用可能です。セキュリティ/重要な更新は赤、バグ修正は黄色、機能更新は青です。変更を表示するにはクリックしてください。システム設定で無効化できます。");
@@ -2000,6 +2003,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No agents to resume", "再開するエージェントなし");
 		m.put("No aggregation", "集計なし");
 		m.put("No any", "何もなし");
+		m.put("No any matches", "一致するものがありません");
 		m.put("No applicable transitions or no permission to transit", "適用可能な遷移がないか、遷移する権限がありません");
 		m.put("No artifacts published", "公開されたアーティファクトなし");
 		m.put("No attributes defined (can only be edited when agent is online)", "定義された属性なし（エージェントがオンラインの場合のみ編集可能）");
@@ -2026,7 +2030,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No data", "データなし");
 		m.put("No default branch", "デフォルトブランチなし");
 		m.put("No default group", "デフォルトグループなし");
-		m.put("No default role", "デフォルトロールなし");
+		m.put("No default roles", "デフォルトの役割なし");
 		m.put("No default value", "デフォルト値なし");
 		m.put("No description", "説明なし");
 		m.put("No diffs", "差分なし");
@@ -2097,6 +2101,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Not Active Since", "以降アクティブではありません");
 		m.put("Not Used Since", "以降使用されていません");
 		m.put("Not assigned", "未割り当て");
+		m.put("Not authorized to create project under \"{0}\"", "\"{0}\"の下にプロジェクトを作成する権限がありません");
+		m.put("Not authorized to create root project", "ルートプロジェクトを作成する権限がありません");
 		m.put("Not authorized to move project under this parent", "この親プロジェクトの下にプロジェクトを移動する権限がありません");
 		m.put("Not authorized to set as root project", "ルートプロジェクトとして設定する権限がありません");
 		m.put("Not covered", "カバーされていません");
@@ -2635,6 +2641,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Project Replicas", "プロジェクトレプリカ");
 		m.put("Project authorizations updated", "プロジェクト認可が更新されました");
 		m.put("Project does not have any code yet", "プロジェクトにはまだコードがありません");
+		m.put("Project forked", "プロジェクトがフォークされました");
 		m.put("Project id", "プロジェクトID");
 		m.put("Project list", "プロジェクトリスト");
 		m.put("Project manage privilege required to delete \"{0}\"", "「{0}」を削除するにはプロジェクト管理権限が必要です");
@@ -2662,7 +2669,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"Docker buildxビルダーのイメージキャッシュを削除します。このステップは、サーバーDockerエグゼキューターまたはリモートDockerエグゼキューターで指定されたbuildxビルダーのキャッシュを削除するためにdocker builder pruneコマンドを呼び出します");
 		m.put("Public", "公開");
 		m.put("Public Key", "公開鍵");
-		m.put("Public Role", "公開ロール");
+		m.put("Public Roles", "公開の役割");
 		m.put("Publish", "公開");
 		m.put("Publish Coverage Report Step", "カバレッジレポート公開ステップ");
 		m.put("Publish Problem Report Step", "問題レポート公開ステップ");
@@ -2973,6 +2980,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Search branch", "ブランチを検索");
 		m.put("Search files, symbols and texts", "ファイル、シンボル、テキストを検索");
 		m.put("Search for", "検索対象");
+		m.put("Search inside current tree", "現在のツリー内を検索");
 		m.put("Search is too general", "検索が一般的すぎます");
 		m.put("Search job", "ジョブを検索");
 		m.put("Search project", "プロジェクトを検索");
@@ -3104,6 +3112,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Show issues in list", "リスト内の課題を表示");
 		m.put("Show issues not scheduled into current iteration", "現在のイテレーションにスケジュールされていない課題を表示");
 		m.put("Show matching agents", "一致するエージェントを表示");
+		m.put("Show more", "さらに表示");
 		m.put("Show more lines", "さらに多くの行を表示");
 		m.put("Show next match", "次の一致を表示");
 		m.put("Show previous match", "前の一致を表示");
@@ -4265,6 +4274,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("found {0} users", "{0} ユーザーが見つかりました");
 		m.put("has any value of", "任意の値を持っています");
 		m.put("head", "ヘッド");
+		m.put("in current commit", "現在のコミット内");
 		m.put("ineffective", "無効");
 		m.put("inherited", "継承済み");
 		m.put("initial", "初期");
@@ -4412,11 +4422,69 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("File and Symbol Search", "ファイルとシンボル検索");
-		m.put("No any matches", "一致するものがありません");
-		m.put("Search inside current tree", "現在のツリー内を検索");
-		m.put("Show more", "さらに表示");
-		m.put("in current commit", "現在のコミット内");
+		m.put("Account set up successfully", "アカウントが正常に設定されました");
+		m.put("All RESTful Resources", "すべてのRESTfulリソース");
+		m.put("An unexpected exception occurred", "予期しない例外が発生しました");
+		m.put("Back To Home", "ホームに戻る");
+		m.put("Can not reset password for service account or disabled user", "サービスアカウントまたは無効なユーザーのパスワードをリセットできません");
+		m.put("Can not reset password for user authenticating via external system", "外部システムで認証するユーザーのパスワードをリセットできません");
+		m.put("Content Type", "コンテンツタイプ");
+		m.put("Email Address Verification", "メールアドレスの確認");
+		m.put("Email address already used: ", "メールアドレスは既に使用されています:");
+		m.put("End Point", "エンドポイント");
+		m.put("Enter New Password", "新しいパスワードを入力");
+		m.put("Enter your user name or email to reset password", "パスワードをリセットするには、ユーザー名またはメールを入力してください");
+		m.put("Error detail of content type &quot;text/plain&quot;", "コンテンツタイプ&quot;text/plain&quot;のエラー詳細");
+		m.put("Example", "例");
+		m.put("Failed to verify your email address", "メールアドレスの確認に失敗しました");
+		m.put("Forgotten Password?", "パスワードを忘れましたか？");
+		m.put("Go Back", "戻る");
+		m.put("Http Method", "HTTPメソッド");
+		m.put("I didn't eat it. I swear!", "私は食べていません。誓います！");
+		m.put("In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, you will need to authenticate by providing user name and password (or access token) via http basic auth header", 
+			"匿名アクセスが無効になっているか、匿名ユーザーがリソース操作のための十分な権限を持っていない場合、ユーザー名とパスワード（またはアクセストークン）をHTTP基本認証ヘッダーを介して提供して認証する必要があります");
+		m.put("Invalid invitation code", "無効な招待コード");
+		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
+			"無効な状態です。システム設定で指定されたサーバーURLを使用してOneDevを訪問していることを確認してください");
+		m.put("No response body", "レスポンスボディなし");
+		m.put("No user found with login name or email: ", "ログイン名またはメールでユーザーが見つかりません:");
+		m.put("OOPS! There Is An Error", "おっと！エラーがあります");
+		m.put("Operation", "操作");
+		m.put("Operation Failed", "操作に失敗しました");
+		m.put("Operation Successful", "操作が成功しました");
+		m.put("Page Not Found", "ページが見つかりません");
+		m.put("Parameter", "パラメータ");
+		m.put("Password changed. Please login with your new password", "パスワードが変更されました。新しいパスワードでログインしてください");
+		m.put("Password reset url is invalid or obsolete", "パスワードリセットURLが無効または古くなっています");
+		m.put("Placeholder", "プレースホルダー");
+		m.put("Please check your email for password reset instructions", "パスワードリセットの指示についてはメールを確認してください");
+		m.put("Primary email address not specified", "プライマリメールアドレスが指定されていません");
+		m.put("Query Parameters", "クエリパラメータ");
+		m.put("RESTful API Help", "RESTful APIヘルプ");
+		m.put("Request Body", "リクエストボディ");
+		m.put("Required", "必須");
+		m.put("Reset", "リセット");
+		m.put("Resource", "リソース");
+		m.put("Resources", "リソース");
+		m.put("Response", "レスポンス");
+		m.put("Response Body", "レスポンスボディ");
+		m.put("Set Up Your Account", "アカウントを設定する");
+		m.put("Show Error Detail", "エラー詳細を表示");
+		m.put("Status Code", "ステータスコード");
+		m.put("Status code", "ステータスコード");
+		m.put("Status code other than 200 indicating the error type", "エラータイプを示す200以外のステータスコード");
+		m.put("Sync Replica Status and Back to Home", "レプリカステータスを同期してホームに戻る");
+		m.put("The object you are deleting/disabling is still being used", "削除/無効化しようとしているオブジェクトはまだ使用されています");
+		m.put("The password reset url is invalid or obsolete", "パスワードリセットURLが無効または古くなっています");
+		m.put("There are incompatibilities since your upgraded version", "アップグレードされたバージョンには互換性の問題があります");
+		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
+			"この日付は<a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601形式</a>を使用しています");
+		m.put("Unable To Delete/Disable Right Now", "今すぐ削除/無効化できません");
+		m.put("Unable to send password reset email as mail service is not configured", "メールサービスが設定されていないため、パスワードリセットメールを送信できません");
+		m.put("Your email address is now verified", "メールアドレスが確認されました");
+		m.put("Your primary email address is not verified", "プライマリメールアドレスが確認されていません");
+		m.put("cURL Example", "cURLの例");
+		m.put("you may show this page later via incompatibilities link in help menu", "ヘルプメニューの互換性リンクから後でこのページを表示できます");
 	}
 		
 	@Override

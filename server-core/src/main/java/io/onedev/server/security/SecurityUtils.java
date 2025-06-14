@@ -26,9 +26,9 @@ import io.onedev.commons.loader.AppLoader;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AccessTokenManager;
+import io.onedev.server.entitymanager.BaseAuthorizationManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.AccessToken;
@@ -83,7 +83,6 @@ import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.security.permission.WritePack;
 import io.onedev.server.util.concurrent.PrioritizedCallable;
 import io.onedev.server.util.facade.ProjectCache;
-import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
 
@@ -358,7 +357,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	private static boolean isAssignedDefaultRole(Project project, Role role) {
-		return role.getDefaultProjects().stream().anyMatch(it->it.isSelfOrAncestorOf(project));
+		return role.getBaseAuthorizations().stream().anyMatch(it->it.getProject().isSelfOrAncestorOf(project));
 	}
 	
 	public static boolean canAccessProject(Project project) {
@@ -621,13 +620,10 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
 	private static void addIdsPermittedByDefaultRole(ProjectCache cache, Collection<Long> projectIds,
 											  Permission permission) {
-		var roleManager = OneDev.getInstance(RoleManager.class);
-		for (ProjectFacade project : cache.values()) {
-			if (project.getDefaultRoleId() != null) {
-				Role defaultRole = roleManager.load(project.getDefaultRoleId());
-				if (defaultRole.implies(permission))
-					projectIds.addAll(cache.getSubtreeIds(project.getId()));
-			}
+		var baseAuthorizationManager = OneDev.getInstance(BaseAuthorizationManager.class);
+		for (var authorization: baseAuthorizationManager.query()) {
+			if (authorization.getRole().implies(permission))
+				projectIds.addAll(cache.getSubtreeIds(authorization.getProject().getId()));
 		}
 	}
 	
@@ -702,7 +698,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
 		Project current = project;
 		do {
-			if (current.getDefaultRole() != null && current.getDefaultRole().implies(permission))
+			if (current.isPermittedByLoginUser(permission))
 				return filterApplicableUsers(cache.getUsers(), permission);
 
 			for (UserAuthorization authorization: current.getUserAuthorizations()) {
@@ -774,9 +770,9 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			if (!isAnonymous(principal) || getSettingManager().getSecuritySetting().isEnableAnonymousAccess()) {
 				Project current = project;
 				do {
-					Role defaultRole = current.getDefaultRole();
-					if (defaultRole != null)
-						populateAccessibleJobNames(accessibleJobNames, availableJobNames, defaultRole);
+					for (var authorization: current.getBaseAuthorizations()) {
+						populateAccessibleJobNames(accessibleJobNames, availableJobNames, authorization.getRole());
+					}
 					current = current.getParent();
 				} while (current != null);
 			}
@@ -830,10 +826,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 					}
 				}
 			}
-			if ((!isAnonymous(principal) || getSettingManager().getSecuritySetting().isEnableAnonymousAccess()) 
-					&& project.getDefaultRole() != null) {
-				populateAccessibleReportNames(accessibleReportNames, availableReportNames,
-						project, project.getDefaultRole());
+			if (!isAnonymous(principal) || getSettingManager().getSecuritySetting().isEnableAnonymousAccess()) {
+				for (var authorization: project.getBaseAuthorizations()) {
+					populateAccessibleReportNames(accessibleReportNames, availableReportNames,
+							project, authorization.getRole());
+				}
 			}
 		}
 		return accessibleReportNames;

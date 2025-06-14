@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.simple.error;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.wicket.markup.html.WebComponent;
@@ -29,7 +31,7 @@ public class PageNotFoundErrorPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "Page Not Found";
+		return _T("Page Not Found");
 	}
 
 	@Override
@@ -39,7 +41,7 @@ public class PageNotFoundErrorPage extends SimplePage {
 	
 	@Override
 	protected String getSubTitle() {
-		return "I didn't eat it. I swear!";
+		return _T("I didn't eat it. I swear!");
 	}
 
 }

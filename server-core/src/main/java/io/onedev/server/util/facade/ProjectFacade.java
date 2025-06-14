@@ -23,9 +23,7 @@ public class ProjectFacade extends EntityFacade {
 	private final GitPackConfig gitPackConfig;
 	
 	private final Long lastEventDateId;
-	
-	private final Long defaultRoleId;
-	
+		
 	private final Long parentId;
 
 	private final Long forkedFromId;
@@ -33,8 +31,8 @@ public class ProjectFacade extends EntityFacade {
 	public ProjectFacade(Long id, String name, @Nullable String key, String path,
 						 @Nullable String serviceDeskEmailAddress, boolean codeManagement,
 						 boolean issueManagement, GitPackConfig gitPackConfig,
-						 Long lastEventDateId, @Nullable Long defaultRoleId,
-						 @Nullable Long parentId, @Nullable Long forkedFromId) {
+						 Long lastEventDateId, @Nullable Long parentId, 
+						 @Nullable Long forkedFromId) {
 		super(id);
 		this.name = name;
 		this.key = key;
@@ -44,7 +42,6 @@ public class ProjectFacade extends EntityFacade {
 		this.issueManagement = issueManagement;
 		this.gitPackConfig = gitPackConfig;
 		this.lastEventDateId = lastEventDateId;
-		this.defaultRoleId = defaultRoleId;
 		this.parentId = parentId;	
 		this.forkedFromId = forkedFromId;
 	}
@@ -81,11 +78,6 @@ public class ProjectFacade extends EntityFacade {
 
 	public Long getLastEventDateId() {
 		return lastEventDateId;
-	}
-
-	@Nullable
-	public Long getDefaultRoleId() {
-		return defaultRoleId;
 	}
 
 	@Nullable

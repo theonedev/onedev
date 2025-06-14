@@ -1,3 +1,9 @@
+# 11.11.0
+
+### RESTful API
+
+Project default role is replaced with [base authorization](~help/api/io.onedev.server.rest.resource.BaseAuthorizationResource) to support multiple default role assignment. The defaultRoleId field should be removed when create/update the project resource. 
+
 # 11.8.0
 
 ### Query Syntax

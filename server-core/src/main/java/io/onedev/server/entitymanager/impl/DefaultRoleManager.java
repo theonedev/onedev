@@ -22,7 +22,6 @@ import com.hazelcast.cp.IAtomicLong;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.LinkAuthorizationManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.Listen;
@@ -30,7 +29,6 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.model.LinkSpec;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.role.AllIssueFields;
@@ -64,9 +62,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	private final LinkSpecManager linkSpecManager;
 	
 	private final LinkAuthorizationManager linkAuthorizationManager;
-	
-	private final ProjectManager projectManager;
-	
+		
 	private final ClusterManager clusterManager;
 	
 	private final TransactionManager transactionManager;
@@ -76,13 +72,12 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	@Inject
 	public DefaultRoleManager(Dao dao, SettingManager settingManager, IdManager idManager, 
 							  LinkAuthorizationManager linkAuthorizationManager, 
-							  ProjectManager projectManager, ClusterManager clusterManager, 
-							  TransactionManager transactionManager, LinkSpecManager linkSpecManager) {
+							  ClusterManager clusterManager, TransactionManager transactionManager, 
+							  LinkSpecManager linkSpecManager) {
 		super(dao);
 		this.settingManager = settingManager;
 		this.idManager = idManager;
 		this.linkAuthorizationManager = linkAuthorizationManager;
-		this.projectManager = projectManager;
 		this.clusterManager = clusterManager;
 		this.transactionManager = transactionManager;
 		this.linkSpecManager = linkSpecManager;
@@ -137,14 +132,8 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	public void delete(Role role) {
     	Usage usage = new Usage();
 
-    	usage.add(settingManager.onDeleteRole(role.getName()));
-		
+    	usage.add(settingManager.onDeleteRole(role.getName()));		
 		usage.checkInUse("Role '" + role.getName() + "'");
-		
-		for (Project project: role.getDefaultProjects()) {
-			project.setDefaultRole(null);
-			projectManager.update(project);
-		}
 		dao.remove(role);
 	}
 

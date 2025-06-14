@@ -839,8 +839,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Default Multi Value Provider", "Provider Valore Multiplo Predefinito");
 		m.put("Default Project", "Progetto Predefinito");
 		m.put("Default Project Setting", "Impostazione Progetto Predefinita");
-		m.put("Default Role", "Ruolo Predefinito");
-		m.put("Default Role Bean", "Bean Ruolo Predefinito");
+		m.put("Default Roles", "Ruoli Predefiniti");
+		m.put("Default Roles Bean", "Bean Ruoli Predefiniti");
 		m.put("Default Value", "Valore Predefinito");
 		m.put("Default Value Provider", "Provider Valore Predefinito");
 		m.put("Default Values", "Valori Predefiniti");
@@ -848,8 +848,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Default branding settings restored", "Impostazioni di branding predefinite ripristinate");
 		m.put("Default fixed issue filters saved", "Filtri problemi risolti predefiniti salvati");
 		m.put("Default merge strategy", "Strategia di merge predefinita");
-		m.put("Default role affects default permissions granted to everyone in the system. The actual default permissions will be <b class='text-warning'>all permissions</b> contained in default roles of this project and all its parent projects", 
-			"Il ruolo predefinito influisce sui permessi predefiniti concessi a tutti nel sistema. I permessi predefiniti effettivi saranno <b class='text-warning'>tutti i permessi</b> contenuti nei ruoli predefiniti di questo progetto e di tutti i suoi progetti genitori");
+		m.put("Default roles affect default permissions granted to everyone in the system. The actual default permissions will be <b class='text-warning'>all permissions</b> contained in default roles of this project and all its parent projects", 
+			"I ruoli predefiniti influenzano i permessi predefiniti concessi a tutti nel sistema. I permessi predefiniti effettivi saranno <b class='text-warning'>tutti i permessi</b> contenuti nei ruoli predefiniti di questo progetto e di tutti i suoi progetti genitori");
 		m.put("Define all custom issue fields here. Each project can decide to use all or a subset of these fields via its issue transition setting. <b class=\"text-warning\">NOTE: </b> Newly defined fields by default only appear in new issues. Batch edit existing issues from issue list page if you want them to have these new fields", 
 			"Definisci qui tutti i campi personalizzati dei problemi. Ogni progetto può decidere di utilizzare tutti o un sottoinsieme di questi campi tramite la sua impostazione di transizione dei problemi. <b class=\"text-warning\">NOTA: </b> I campi appena definiti per impostazione predefinita appaiono solo nei nuovi problemi. Modifica in batch i problemi esistenti dalla pagina dell'elenco dei problemi se desideri che abbiano questi nuovi campi");
 		m.put("Define all custom issue states here. The first state will be used as initial state of created issues", 
@@ -1227,6 +1227,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("File Patterns", "Modelli File");
 		m.put("File Protection", "Protezione File");
 		m.put("File Protections", "Protezioni File");
+		m.put("File and Symbol Search", "Ricerca di File e Simboli");
 		m.put("File changes", "modifiche file");
 		m.put("File is too large to edit here", "Il file è troppo grande per essere modificato qui");
 		m.put("File missing or obsolete", "File mancante o obsoleto");
@@ -1305,6 +1306,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Force", "Forza");
 		m.put("Force Garbage Collection", "Forza Raccolta Garbage");
 		m.put("Forgot Password?", "Password Dimenticata?");
+		m.put("Fork Project", "Fork Progetto");
 		m.put("Fork now", "Fai un Fork ora");
 		m.put("Forks Of", "Fork di");
 		m.put("Frequencies", "Frequenze");
@@ -1455,10 +1457,10 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
 			"Se abilitato, il branch sorgente verrà eliminato automaticamente dopo la fusione della pull request se l'utente ha il permesso di farlo");
 		m.put("If specified, OneDev will only display iterations with this prefix", "Se specificato, OneDev mostrerà solo le iterazioni con questo prefisso");
-		m.put("If specified, all public and internal projects imported from GitLab will use this as default role. Private projects are not affected", 
-			"Se specificato, tutti i progetti pubblici e interni importati da GitLab utilizzeranno questo ruolo come predefinito. I progetti privati non sono interessati");
-		m.put("If specified, all public repositories imported from GitHub will use this as default role. Private repositories are not affected", 
-			"Se specificato, tutti i repository pubblici importati da GitHub utilizzeranno questo ruolo come predefinito. I repository privati non sono interessati");
+		m.put("If specified, all public and internal projects imported from GitLab will use these as default roles. Private projects are not affected", 
+			"Se specificato, tutti i progetti pubblici e interni importati da GitLab utilizzeranno questi come ruoli predefiniti. I progetti privati non sono interessati");
+		m.put("If specified, all public repositories imported from GitHub will use these as default roles. Private repositories are not affected", 
+			"Se specificato, tutti i repository pubblici importati da GitHub utilizzeranno questi come ruoli predefiniti. I repository privati non sono interessati");
 		m.put("If specified, total estimated/spent time of an issue will also include linked issues of this type", 
 			"Se specificato, il tempo totale stimato/speso di un problema includerà anche i problemi collegati di questo tipo");
 		m.put("If this option is enabled, git lfs command needs to be installed on OneDev server (even this step runs on other node)", 
@@ -1981,6 +1983,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("New User Bean", "Bean utente nuovo");
 		m.put("New Value", "Nuovo valore");
 		m.put("New issue board created", "Nuova bacheca di issue creata");
+		m.put("New project created", "Nuovo progetto creato");
 		m.put("New user created", "Nuovo utente creato");
 		m.put("New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting", 
 			"Nuova versione disponibile. Rosso per aggiornamenti di sicurezza/critici, giallo per correzioni di bug, blu per aggiornamenti di funzionalità. Clicca per mostrare le modifiche. Disabilita nelle impostazioni di sistema");
@@ -2000,6 +2003,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("No agents to resume", "Nessun agente da riprendere");
 		m.put("No aggregation", "Nessuna aggregazione");
 		m.put("No any", "Nessuno");
+		m.put("No any matches", "Nessuna corrispondenza");
 		m.put("No applicable transitions or no permission to transit", "Nessuna transizione applicabile o nessun permesso per transitare");
 		m.put("No artifacts published", "Nessun artefatto pubblicato");
 		m.put("No attributes defined (can only be edited when agent is online)", "Nessun attributo definito (modificabile solo quando l'agente è online)");
@@ -2026,7 +2030,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("No data", "Nessun dato");
 		m.put("No default branch", "Nessun branch predefinito");
 		m.put("No default group", "Nessun gruppo predefinito");
-		m.put("No default role", "Nessun ruolo predefinito");
+		m.put("No default roles", "Nessun ruolo predefinito");
 		m.put("No default value", "Nessun valore predefinito");
 		m.put("No description", "Nessuna descrizione");
 		m.put("No diffs", "Nessuna differenza");
@@ -2097,6 +2101,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Not Active Since", "Non attivo da");
 		m.put("Not Used Since", "Non utilizzato da");
 		m.put("Not assigned", "Non assegnato");
+		m.put("Not authorized to create project under \"{0}\"", "Non autorizzato a creare un progetto sotto \"{0}\"");
+		m.put("Not authorized to create root project", "Non autorizzato a creare un progetto root");
 		m.put("Not authorized to move project under this parent", "Non autorizzato a spostare il progetto sotto questo genitore");
 		m.put("Not authorized to set as root project", "Non autorizzato a impostare come progetto radice");
 		m.put("Not covered", "Non coperto");
@@ -2635,6 +2641,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Project Replicas", "Repliche del progetto");
 		m.put("Project authorizations updated", "Autorizzazioni del progetto aggiornate");
 		m.put("Project does not have any code yet", "Il progetto non ha ancora alcun codice");
+		m.put("Project forked", "Progetto biforcato");
 		m.put("Project id", "ID del progetto");
 		m.put("Project list", "Elenco dei progetti");
 		m.put("Project manage privilege required to delete \"{0}\"", "Privilegio di gestione del progetto richiesto per eliminare \"{0}\"");
@@ -2662,7 +2669,7 @@ public class Translation_it extends TranslationResourceBundle {
 			"Potare la cache delle immagini del builder docker buildx. Questo passaggio chiama il comando docker builder prune per rimuovere la cache del builder buildx specificato nell'executor docker del server o nell'executor docker remoto");
 		m.put("Public", "Pubblico");
 		m.put("Public Key", "Chiave pubblica");
-		m.put("Public Role", "Ruolo pubblico");
+		m.put("Public Roles", "Ruoli Pubblici");
 		m.put("Publish", "Pubblica");
 		m.put("Publish Coverage Report Step", "Passaggio di pubblicazione del rapporto di copertura");
 		m.put("Publish Problem Report Step", "Passaggio di pubblicazione del rapporto dei problemi");
@@ -2973,6 +2980,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Search branch", "Cerca branch.");
 		m.put("Search files, symbols and texts", "Cerca file, simboli e testi.");
 		m.put("Search for", "Cerca per.");
+		m.put("Search inside current tree", "Cerca all'interno dell'albero corrente");
 		m.put("Search is too general", "La ricerca è troppo generica.");
 		m.put("Search job", "Cerca lavoro.");
 		m.put("Search project", "Cerca progetto.");
@@ -3104,6 +3112,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Show issues in list", "Mostra problematiche nella lista");
 		m.put("Show issues not scheduled into current iteration", "Mostra problematiche non pianificate nell'iterazione corrente");
 		m.put("Show matching agents", "Mostra agenti corrispondenti");
+		m.put("Show more", "Mostra di più");
 		m.put("Show more lines", "Mostra più righe");
 		m.put("Show next match", "Mostra corrispondenza successiva");
 		m.put("Show previous match", "Mostra corrispondenza precedente");
@@ -4265,6 +4274,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("found {0} users", "trovati {0} utenti");
 		m.put("has any value of", "ha qualsiasi valore di");
 		m.put("head", "testa");
+		m.put("in current commit", "nel commit corrente");
 		m.put("ineffective", "inefficace");
 		m.put("inherited", "ereditato");
 		m.put("initial", "iniziale");
@@ -4412,11 +4422,69 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("File and Symbol Search", "Ricerca di File e Simboli");
-		m.put("No any matches", "Nessuna corrispondenza");
-		m.put("Search inside current tree", "Cerca all'interno dell'albero corrente");
-		m.put("Show more", "Mostra di più");
-		m.put("in current commit", "nel commit corrente");
+		m.put("Account set up successfully", "Account configurato con successo");
+		m.put("All RESTful Resources", "Tutte le risorse RESTful");
+		m.put("An unexpected exception occurred", "Si è verificata un'eccezione imprevista");
+		m.put("Back To Home", "Torna alla Home");
+		m.put("Can not reset password for service account or disabled user", "Impossibile reimpostare la password per account di servizio o utente disabilitato");
+		m.put("Can not reset password for user authenticating via external system", "Impossibile reimpostare la password per utente che si autentica tramite sistema esterno");
+		m.put("Content Type", "Tipo di Contenuto");
+		m.put("Email Address Verification", "Verifica Indirizzo Email");
+		m.put("Email address already used: ", "Indirizzo email già utilizzato:");
+		m.put("End Point", "Punto di Accesso");
+		m.put("Enter New Password", "Inserisci Nuova Password");
+		m.put("Enter your user name or email to reset password", "Inserisci il tuo nome utente o email per reimpostare la password");
+		m.put("Error detail of content type &quot;text/plain&quot;", "Dettaglio errore del tipo di contenuto &quot;text/plain&quot;");
+		m.put("Example", "Esempio");
+		m.put("Failed to verify your email address", "Verifica del tuo indirizzo email fallita");
+		m.put("Forgotten Password?", "Password Dimenticata?");
+		m.put("Go Back", "Torna Indietro");
+		m.put("Http Method", "Metodo Http");
+		m.put("I didn't eat it. I swear!", "Non l'ho mangiato. Lo giuro!");
+		m.put("In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, you will need to authenticate by providing user name and password (or access token) via http basic auth header", 
+			"Nel caso in cui l'accesso anonimo sia disabilitato o l'utente anonimo non abbia abbastanza permessi per un'operazione di risorsa, sarà necessario autenticarsi fornendo nome utente e password (o token di accesso) tramite l'intestazione di autenticazione di base http");
+		m.put("Invalid invitation code", "Codice di invito non valido");
+		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
+			"Stato non valido. Assicurati di visitare OneDev utilizzando l'url del server specificato nelle impostazioni di sistema");
+		m.put("No response body", "Nessun corpo di risposta");
+		m.put("No user found with login name or email: ", "Nessun utente trovato con nome di login o email:");
+		m.put("OOPS! There Is An Error", "OOPS! C'è un errore");
+		m.put("Operation", "Operazione");
+		m.put("Operation Failed", "Operazione Fallita");
+		m.put("Operation Successful", "Operazione Riuscita");
+		m.put("Page Not Found", "Pagina Non Trovata");
+		m.put("Parameter", "Parametro");
+		m.put("Password changed. Please login with your new password", "Password cambiata. Effettua il login con la tua nuova password");
+		m.put("Password reset url is invalid or obsolete", "L'url per reimpostare la password non è valido o è obsoleto");
+		m.put("Placeholder", "Segnaposto");
+		m.put("Please check your email for password reset instructions", "Controlla la tua email per le istruzioni di reimpostazione della password");
+		m.put("Primary email address not specified", "Indirizzo email principale non specificato");
+		m.put("Query Parameters", "Parametri di Query");
+		m.put("RESTful API Help", "Guida API RESTful");
+		m.put("Request Body", "Corpo della Richiesta");
+		m.put("Required", "Richiesto");
+		m.put("Reset", "Reimposta");
+		m.put("Resource", "Risorsa");
+		m.put("Resources", "Risorse");
+		m.put("Response", "Risposta");
+		m.put("Response Body", "Corpo della Risposta");
+		m.put("Set Up Your Account", "Configura il Tuo Account");
+		m.put("Show Error Detail", "Mostra Dettaglio Errore");
+		m.put("Status Code", "Codice di Stato");
+		m.put("Status code", "Codice di stato");
+		m.put("Status code other than 200 indicating the error type", "Codice di stato diverso da 200 che indica il tipo di errore");
+		m.put("Sync Replica Status and Back to Home", "Sincronizza Stato Replica e Torna alla Home");
+		m.put("The object you are deleting/disabling is still being used", "L'oggetto che stai eliminando/disabilitando è ancora in uso");
+		m.put("The password reset url is invalid or obsolete", "L'url per reimpostare la password non è valido o è obsoleto");
+		m.put("There are incompatibilities since your upgraded version", "Ci sono incompatibilità dalla tua versione aggiornata");
+		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
+			"Questa data utilizza il <a href=\"https://www.w3.org/TR/NOTE-datetime\">formato ISO 8601</a>");
+		m.put("Unable To Delete/Disable Right Now", "Impossibile Eliminare/Disabilitare Ora");
+		m.put("Unable to send password reset email as mail service is not configured", "Impossibile inviare email di reimpostazione password poiché il servizio di posta non è configurato");
+		m.put("Your email address is now verified", "Il tuo indirizzo email è ora verificato");
+		m.put("Your primary email address is not verified", "Il tuo indirizzo email principale non è verificato");
+		m.put("cURL Example", "Esempio cURL");
+		m.put("you may show this page later via incompatibilities link in help menu", "puoi mostrare questa pagina più tardi tramite il link delle incompatibilità nel menu di aiuto");
 	}
 		
 	@Override

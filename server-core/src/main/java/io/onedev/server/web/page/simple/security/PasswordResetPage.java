@@ -78,6 +78,14 @@ public class PasswordResetPage extends SimplePage {
 
 			}).setLabel(Model.of(_T("Login name or email"))).setRequired(true));
 
+			var noUserFoundMessage = _T("No user found with login name or email: ") + loginNameOrEmail;
+			var serviceAccountOrDisabledUserMessage = _T("Can not reset password for service account or disabled user");
+			var authenticatedViaExternalSystemMessage = _T("Can not reset password for user authenticating via external system");
+			var primaryEmailNotSpecifiedMessage = _T("Primary email address not specified");
+			var primaryEmailNotVerifiedMessage = _T("Your primary email address is not verified");
+			var checkMailMessage = _T("Please check your email for password reset instructions");
+			var mailServiceNotConfiguredMessage = _T("Unable to send password reset email as mail service is not configured");
+			
 			form.add(new TaskButton("resettingPassword") {
 
 				@Override
@@ -94,11 +102,11 @@ public class PasswordResetPage extends SimplePage {
 						if (user == null) 
 							user = getUserManager().findByVerifiedEmailAddress(loginNameOrEmail);
 						if (user == null) {
-							throw new ExplicitException("No user found with login name or email: " + loginNameOrEmail);
+							throw new ExplicitException(noUserFoundMessage);
 						} else if (user.isServiceAccount() || user.isDisabled()) {
-							throw new ExplicitException("Can not reset password for service account or disabled user");
+							throw new ExplicitException(serviceAccountOrDisabledUserMessage);
 						} else if (user.getPassword() == null) {
-							throw new ExplicitException("Can not reset password for user authenticating via external system");
+							throw new ExplicitException(authenticatedViaExternalSystemMessage);
 						} else {
 							SettingManager settingManager = OneDev.getInstance(SettingManager.class);
 							if (settingManager.getMailService() != null) {
@@ -122,9 +130,9 @@ public class PasswordResetPage extends SimplePage {
 								} else {
 									EmailAddress emailAddress = user.getPrimaryEmailAddress();
 									if (emailAddress == null)
-										throw new ExplicitException("Primary email address not specified");
+										throw new ExplicitException(primaryEmailNotSpecifiedMessage);
 									else if (!emailAddress.isVerified())
-										throw new ExplicitException("Your primary email address is not verified");
+										throw new ExplicitException(primaryEmailNotVerifiedMessage);
 									else
 										emailAddressValue = emailAddress.getValue();
 								}
@@ -134,9 +142,9 @@ public class PasswordResetPage extends SimplePage {
 										"[Password Reset] You are Requesting to Reset Your OneDev Password",
 										htmlBody, textBody, null, null, null);
 
-								return new TaskResult(true, new PlainMessage("Please check your email for password reset instructions"));
+								return new TaskResult(true, new PlainMessage(checkMailMessage));
 							} else {
-								return new TaskResult(false, new PlainMessage("Unable to send password reset email as mail service is not configured"));
+								return new TaskResult(false, new PlainMessage(mailServiceNotConfiguredMessage));
 							}
 						}
 					});
@@ -168,7 +176,7 @@ public class PasswordResetPage extends SimplePage {
 						user.setPasswordResetCode(null);
 						user.setPassword(OneDev.getInstance(PasswordService.class).encryptPassword(bean.getNewPassword()));
 						getUserManager().update(user, null);
-						Session.get().success("Password changed. Please login with your new password");
+						Session.get().success(_T("Password changed. Please login with your new password"));
 						setResponsePage(LoginPage.class);
 					}
 				};
@@ -183,7 +191,7 @@ public class PasswordResetPage extends SimplePage {
 				});
 				fragment.add(form);
 			} else {
-				throw new ExplicitException("Password reset url is invalid or obsolete");
+				throw new ExplicitException(_T("Password reset url is invalid or obsolete"));
 			}
 		}  
 	}
@@ -195,15 +203,15 @@ public class PasswordResetPage extends SimplePage {
 	@Override
 	protected String getTitle() {
 		if (passwordResetCode == null)
-			return "Forgotten Password?";
+			return _T("Forgotten Password?");
 		else 
-			return "Enter New Password";
+			return _T("Enter New Password");
 	}
 
 	@Override
 	protected String getSubTitle() {
 		if (passwordResetCode == null)
-			return "Enter your user name or email to reset password";
+			return _T("Enter your user name or email to reset password");
 		else 
 			return null;
 	}

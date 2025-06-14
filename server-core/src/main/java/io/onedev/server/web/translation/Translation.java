@@ -45,7 +45,7 @@ public class Translation extends TranslationResourceBundle {
 								var lastModified = classFile.lastModified();
 								if (lastModified != lastModifiedRef.get()) {
 									lastModifiedRef.set(lastModified);
-									Thread.sleep(2000);
+									Thread.sleep(5000);
 									onUpdate.run();
 								}
 							} catch (InterruptedException e) {

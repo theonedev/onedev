@@ -1,11 +1,11 @@
 <wicket:extend>
 	<div wicket:id="successful" class="alert alert-light-success font-size-lg font-weight-bolder">
 		<wicket:svg href="tick-circle" class="icon"/>
-		Your email address is now verified
+		<wicket:t>Your email address is now verified</wicket:t>
 	</div>
 	<div wicket:id="failed" class="alert alert-light-danger">
 		<wicket:svg href="times-circle" class="icon"/>
-		Failed to verify your email address 
+		<wicket:t>Failed to verify your email address</wicket:t>
 	</div>
-	<a wicket:id="goHome" class="btn btn-primary">Back To Home</a>
+	<a wicket:id="goHome" class="btn btn-primary"><wicket:t>Back To Home</wicket:t></a>
 </wicket:extend>

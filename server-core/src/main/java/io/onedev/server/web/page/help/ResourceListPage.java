@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.help;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +68,7 @@ public class ResourceListPage extends ApiHelpPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Resources");
+		return new Label(componentId, _T("Resources"));
 	}
 
 }

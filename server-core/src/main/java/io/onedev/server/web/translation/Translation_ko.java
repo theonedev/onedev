@@ -839,8 +839,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Default Multi Value Provider", "기본 다중 값 제공자");
 		m.put("Default Project", "기본 프로젝트");
 		m.put("Default Project Setting", "기본 프로젝트 설정");
-		m.put("Default Role", "기본 역할");
-		m.put("Default Role Bean", "기본 역할 빈");
+		m.put("Default Roles", "기본 역할");
+		m.put("Default Roles Bean", "기본 역할 빈");
 		m.put("Default Value", "기본값");
 		m.put("Default Value Provider", "기본값 제공자");
 		m.put("Default Values", "기본값들");
@@ -848,8 +848,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Default branding settings restored", "기본 브랜딩 설정 복원됨");
 		m.put("Default fixed issue filters saved", "기본 고정 이슈 필터 저장됨");
 		m.put("Default merge strategy", "기본 병합 전략");
-		m.put("Default role affects default permissions granted to everyone in the system. The actual default permissions will be <b class='text-warning'>all permissions</b> contained in default roles of this project and all its parent projects", 
-			"기본 역할은 시스템의 모든 사용자에게 부여되는 기본 권한에 영향을 미칩니다. 실제 기본 권한은 이 프로젝트와 모든 상위 프로젝트의 기본 역할에 포함된 <b class='text-warning'>모든 권한</b>이 됩니다");
+		m.put("Default roles affect default permissions granted to everyone in the system. The actual default permissions will be <b class='text-warning'>all permissions</b> contained in default roles of this project and all its parent projects", 
+			"기본 역할은 시스템 내 모든 사용자에게 부여되는 기본 권한에 영향을 미칩니다. 실제 기본 권한은 이 프로젝트와 모든 상위 프로젝트의 기본 역할에 포함된 <b class='text-warning'>모든 권한</b>이 될 것입니다");
 		m.put("Define all custom issue fields here. Each project can decide to use all or a subset of these fields via its issue transition setting. <b class=\"text-warning\">NOTE: </b> Newly defined fields by default only appear in new issues. Batch edit existing issues from issue list page if you want them to have these new fields", 
 			"여기에서 모든 사용자 정의 이슈 필드를 정의하세요. 각 프로젝트는 이슈 전환 설정을 통해 이러한 필드의 전체 또는 일부를 사용할지 결정할 수 있습니다. <b class=\"text-warning\">참고: </b> 새로 정의된 필드는 기본적으로 새 이슈에만 나타납니다. 기존 이슈 목록 페이지에서 일괄 편집하여 새 필드를 포함하도록 설정할 수 있습니다");
 		m.put("Define all custom issue states here. The first state will be used as initial state of created issues", 
@@ -1227,6 +1227,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("File Patterns", "파일 패턴");
 		m.put("File Protection", "파일 보호");
 		m.put("File Protections", "파일 보호들");
+		m.put("File and Symbol Search", "파일 및 심볼 검색");
 		m.put("File changes", "파일 변경 사항");
 		m.put("File is too large to edit here", "파일이 너무 커서 여기서 편집할 수 없습니다");
 		m.put("File missing or obsolete", "파일 누락 또는 오래됨");
@@ -1305,6 +1306,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Force", "강제");
 		m.put("Force Garbage Collection", "강제 가비지 컬렉션");
 		m.put("Forgot Password?", "비밀번호를 잊으셨나요?");
+		m.put("Fork Project", "프로젝트 포크");
 		m.put("Fork now", "지금 포크하기");
 		m.put("Forks Of", "포크된 프로젝트");
 		m.put("Frequencies", "빈도");
@@ -1455,9 +1457,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
 			"활성화되면 사용자가 권한이 있는 경우 풀 리퀘스트 병합 후 소스 브랜치가 자동으로 삭제됩니다");
 		m.put("If specified, OneDev will only display iterations with this prefix", "지정된 경우, OneDev는 이 접두사가 있는 반복만 표시합니다");
-		m.put("If specified, all public and internal projects imported from GitLab will use this as default role. Private projects are not affected", 
+		m.put("If specified, all public and internal projects imported from GitLab will use these as default roles. Private projects are not affected", 
 			"지정된 경우, GitLab에서 가져온 모든 공개 및 내부 프로젝트는 이를 기본 역할로 사용합니다. 비공개 프로젝트는 영향을 받지 않습니다");
-		m.put("If specified, all public repositories imported from GitHub will use this as default role. Private repositories are not affected", 
+		m.put("If specified, all public repositories imported from GitHub will use these as default roles. Private repositories are not affected", 
 			"지정된 경우, GitHub에서 가져온 모든 공개 저장소는 이를 기본 역할로 사용합니다. 비공개 저장소는 영향을 받지 않습니다");
 		m.put("If specified, total estimated/spent time of an issue will also include linked issues of this type", 
 			"지정된 경우, 문제의 총 예상/소요 시간에 이 유형의 연결된 문제도 포함됩니다");
@@ -1981,6 +1983,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("New User Bean", "새 사용자 Bean");
 		m.put("New Value", "새 값");
 		m.put("New issue board created", "새 이슈 보드 생성됨");
+		m.put("New project created", "새 프로젝트가 생성되었습니다");
 		m.put("New user created", "새 사용자 생성됨");
 		m.put("New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting", 
 			"새 버전이 사용 가능합니다. 보안/중요 업데이트는 빨간색, 버그 수정은 노란색, 기능 업데이트는 파란색으로 표시됩니다. 변경 사항을 보려면 클릭하세요. 시스템 설정에서 비활성화할 수 있습니다.");
@@ -2000,6 +2003,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No agents to resume", "재개할 에이전트 없음");
 		m.put("No aggregation", "집계 없음");
 		m.put("No any", "없음");
+		m.put("No any matches", "일치하는 항목이 없습니다");
 		m.put("No applicable transitions or no permission to transit", "적용 가능한 전환 없음 또는 전환 권한 없음");
 		m.put("No artifacts published", "게시된 아티팩트 없음");
 		m.put("No attributes defined (can only be edited when agent is online)", "정의된 속성 없음 (에이전트가 온라인 상태일 때만 편집 가능)");
@@ -2026,7 +2030,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No data", "데이터 없음");
 		m.put("No default branch", "기본 브랜치 없음");
 		m.put("No default group", "기본 그룹 없음");
-		m.put("No default role", "기본 역할 없음");
+		m.put("No default roles", "기본 역할 없음");
 		m.put("No default value", "기본값 없음");
 		m.put("No description", "설명 없음");
 		m.put("No diffs", "차이 없음");
@@ -2097,6 +2101,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Not Active Since", "활성 상태가 아닌 이후");
 		m.put("Not Used Since", "사용되지 않은 이후");
 		m.put("Not assigned", "할당되지 않음");
+		m.put("Not authorized to create project under \"{0}\"", "\"{0}\" 아래에 프로젝트를 생성할 권한이 없습니다.");
+		m.put("Not authorized to create root project", "루트 프로젝트를 생성할 권한이 없습니다.");
 		m.put("Not authorized to move project under this parent", "이 부모 아래로 프로젝트를 이동할 권한이 없습니다");
 		m.put("Not authorized to set as root project", "루트 프로젝트로 설정할 권한이 없습니다");
 		m.put("Not covered", "포함되지 않음");
@@ -2635,6 +2641,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Project Replicas", "프로젝트 복제본");
 		m.put("Project authorizations updated", "프로젝트 권한이 업데이트되었습니다");
 		m.put("Project does not have any code yet", "프로젝트에 아직 코드가 없습니다");
+		m.put("Project forked", "프로젝트가 포크되었습니다");
 		m.put("Project id", "프로젝트 ID");
 		m.put("Project list", "프로젝트 목록");
 		m.put("Project manage privilege required to delete \"{0}\"", "\"{0}\"를 삭제하려면 프로젝트 관리 권한이 필요합니다");
@@ -2662,7 +2669,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"도커 buildx 빌더의 이미지 캐시를 정리합니다. 이 단계는 서버 도커 실행자 또는 원격 도커 실행자에서 지정된 buildx 빌더의 캐시를 제거하기 위해 도커 빌더 정리 명령을 호출합니다");
 		m.put("Public", "공개");
 		m.put("Public Key", "공개 키");
-		m.put("Public Role", "공개 역할");
+		m.put("Public Roles", "공개 역할");
 		m.put("Publish", "게시");
 		m.put("Publish Coverage Report Step", "커버리지 보고서 게시 단계");
 		m.put("Publish Problem Report Step", "문제 보고서 게시 단계");
@@ -2973,6 +2980,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Search branch", "브랜치 검색");
 		m.put("Search files, symbols and texts", "파일, 심볼 및 텍스트 검색");
 		m.put("Search for", "검색 대상");
+		m.put("Search inside current tree", "현재 트리 내에서 검색");
 		m.put("Search is too general", "검색이 너무 일반적입니다");
 		m.put("Search job", "작업 검색");
 		m.put("Search project", "프로젝트 검색");
@@ -3104,6 +3112,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Show issues in list", "목록에서 이슈 보기");
 		m.put("Show issues not scheduled into current iteration", "현재 반복에 일정되지 않은 이슈 보기");
 		m.put("Show matching agents", "일치하는 에이전트 보기");
+		m.put("Show more", "더 보기");
 		m.put("Show more lines", "더 많은 줄 보기");
 		m.put("Show next match", "다음 일치 항목 보기");
 		m.put("Show previous match", "이전 일치 항목 보기");
@@ -4265,6 +4274,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("found {0} users", "{0}명의 사용자를 찾았습니다");
 		m.put("has any value of", "값이 존재합니다");
 		m.put("head", "헤드");
+		m.put("in current commit", "현재 커밋에서");
 		m.put("ineffective", "비효율적");
 		m.put("inherited", "상속됨");
 		m.put("initial", "초기");
@@ -4412,11 +4422,69 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("File and Symbol Search", "파일 및 심볼 검색");
-		m.put("No any matches", "일치하는 항목이 없습니다");
-		m.put("Search inside current tree", "현재 트리 내에서 검색");
-		m.put("Show more", "더 보기");
-		m.put("in current commit", "현재 커밋에서");
+		m.put("Account set up successfully", "계정이 성공적으로 설정되었습니다");
+		m.put("All RESTful Resources", "모든 RESTful 리소스");
+		m.put("An unexpected exception occurred", "예기치 않은 예외가 발생했습니다");
+		m.put("Back To Home", "홈으로 돌아가기");
+		m.put("Can not reset password for service account or disabled user", "서비스 계정 또는 비활성화된 사용자의 비밀번호를 재설정할 수 없습니다");
+		m.put("Can not reset password for user authenticating via external system", "외부 시스템을 통해 인증하는 사용자의 비밀번호를 재설정할 수 없습니다");
+		m.put("Content Type", "콘텐츠 유형");
+		m.put("Email Address Verification", "이메일 주소 확인");
+		m.put("Email address already used: ", "이미 사용된 이메일 주소:");
+		m.put("End Point", "엔드 포인트");
+		m.put("Enter New Password", "새 비밀번호 입력");
+		m.put("Enter your user name or email to reset password", "비밀번호를 재설정하려면 사용자 이름 또는 이메일을 입력하세요");
+		m.put("Error detail of content type &quot;text/plain&quot;", "콘텐츠 유형 &quot;text/plain&quot;의 오류 세부 정보");
+		m.put("Example", "예제");
+		m.put("Failed to verify your email address", "이메일 주소를 확인하지 못했습니다");
+		m.put("Forgotten Password?", "비밀번호를 잊으셨나요?");
+		m.put("Go Back", "돌아가기");
+		m.put("Http Method", "Http 메서드");
+		m.put("I didn't eat it. I swear!", "나는 그것을 먹지 않았어. 맹세해!");
+		m.put("In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, you will need to authenticate by providing user name and password (or access token) via http basic auth header", 
+			"익명 액세스가 비활성화되었거나 익명 사용자가 리소스 작업에 대한 충분한 권한이 없는 경우, 사용자 이름과 비밀번호(또는 액세스 토큰)를 제공하여 http 기본 인증 헤더를 통해 인증해야 합니다");
+		m.put("Invalid invitation code", "초대 코드가 유효하지 않습니다");
+		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
+			"유효하지 않은 상태입니다. 시스템 설정에 지정된 서버 URL을 사용하여 OneDev를 방문하고 있는지 확인하세요");
+		m.put("No response body", "응답 본문 없음");
+		m.put("No user found with login name or email: ", "로그인 이름 또는 이메일로 사용자를 찾을 수 없습니다:");
+		m.put("OOPS! There Is An Error", "이런! 오류가 발생했습니다");
+		m.put("Operation", "작업");
+		m.put("Operation Failed", "작업 실패");
+		m.put("Operation Successful", "작업 성공");
+		m.put("Page Not Found", "페이지를 찾을 수 없습니다");
+		m.put("Parameter", "매개변수");
+		m.put("Password changed. Please login with your new password", "비밀번호가 변경되었습니다. 새 비밀번호로 로그인하세요");
+		m.put("Password reset url is invalid or obsolete", "비밀번호 재설정 URL이 유효하지 않거나 오래되었습니다");
+		m.put("Placeholder", "플레이스홀더");
+		m.put("Please check your email for password reset instructions", "비밀번호 재설정 지침을 이메일로 확인하세요");
+		m.put("Primary email address not specified", "기본 이메일 주소가 지정되지 않았습니다");
+		m.put("Query Parameters", "쿼리 매개변수");
+		m.put("RESTful API Help", "RESTful API 도움말");
+		m.put("Request Body", "요청 본문");
+		m.put("Required", "필수");
+		m.put("Reset", "재설정");
+		m.put("Resource", "리소스");
+		m.put("Resources", "리소스들");
+		m.put("Response", "응답");
+		m.put("Response Body", "응답 본문");
+		m.put("Set Up Your Account", "계정을 설정하세요");
+		m.put("Show Error Detail", "오류 세부 정보 표시");
+		m.put("Status Code", "상태 코드");
+		m.put("Status code", "상태 코드");
+		m.put("Status code other than 200 indicating the error type", "오류 유형을 나타내는 200이 아닌 상태 코드");
+		m.put("Sync Replica Status and Back to Home", "복제본 상태 동기화 및 홈으로 돌아가기");
+		m.put("The object you are deleting/disabling is still being used", "삭제/비활성화하려는 객체가 여전히 사용 중입니다");
+		m.put("The password reset url is invalid or obsolete", "비밀번호 재설정 URL이 유효하지 않거나 오래되었습니다");
+		m.put("There are incompatibilities since your upgraded version", "업그레이드된 버전 이후로 호환되지 않는 부분이 있습니다");
+		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
+			"이 날짜는 <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 형식</a>을 사용합니다");
+		m.put("Unable To Delete/Disable Right Now", "지금 삭제/비활성화할 수 없습니다");
+		m.put("Unable to send password reset email as mail service is not configured", "메일 서비스가 구성되지 않아 비밀번호 재설정 이메일을 보낼 수 없습니다");
+		m.put("Your email address is now verified", "이메일 주소가 이제 확인되었습니다");
+		m.put("Your primary email address is not verified", "기본 이메일 주소가 확인되지 않았습니다");
+		m.put("cURL Example", "cURL 예제");
+		m.put("you may show this page later via incompatibilities link in help menu", "도움말 메뉴의 호환성 링크를 통해 나중에 이 페이지를 표시할 수 있습니다");
 	}
 		
 	@Override

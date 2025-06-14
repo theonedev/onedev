@@ -81,9 +81,9 @@ import io.onedev.server.commandhandler.ApplyDatabaseConstraints;
 import io.onedev.server.commandhandler.BackupDatabase;
 import io.onedev.server.commandhandler.CheckDataVersion;
 import io.onedev.server.commandhandler.CleanDatabase;
-import io.onedev.server.commandhandler.Translate;
 import io.onedev.server.commandhandler.ResetAdminPassword;
 import io.onedev.server.commandhandler.RestoreDatabase;
+import io.onedev.server.commandhandler.Translate;
 import io.onedev.server.commandhandler.Upgrade;
 import io.onedev.server.data.DataManager;
 import io.onedev.server.data.DefaultDataManager;
@@ -94,6 +94,7 @@ import io.onedev.server.entitymanager.AgentLastUsedDateManager;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.entitymanager.AlertManager;
+import io.onedev.server.entitymanager.BaseAuthorizationManager;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildLabelManager;
 import io.onedev.server.entitymanager.BuildManager;
@@ -179,6 +180,7 @@ import io.onedev.server.entitymanager.impl.DefaultAgentLastUsedDateManager;
 import io.onedev.server.entitymanager.impl.DefaultAgentManager;
 import io.onedev.server.entitymanager.impl.DefaultAgentTokenManager;
 import io.onedev.server.entitymanager.impl.DefaultAlertManager;
+import io.onedev.server.entitymanager.impl.DefaultBaseAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultBuildDependenceManager;
 import io.onedev.server.entitymanager.impl.DefaultBuildLabelManager;
 import io.onedev.server.entitymanager.impl.DefaultBuildManager;
@@ -561,6 +563,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestCommentRevisionManager.class).to(DefaultPullRequestCommentRevisionManager.class);
 		bind(IssueDescriptionRevisionManager.class).to(DefaultIssueDescriptionRevisionManager.class);
 		bind(PullRequestDescriptionRevisionManager.class).to(DefaultPullRequestDescriptionRevisionManager.class);
+		bind(BaseAuthorizationManager.class).to(DefaultBaseAuthorizationManager.class);
 		
 		bind(WebHookManager.class);
 		

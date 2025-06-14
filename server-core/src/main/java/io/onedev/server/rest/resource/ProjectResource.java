@@ -38,6 +38,7 @@ import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
+import io.onedev.server.model.BaseAuthorization;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
@@ -143,7 +144,17 @@ public class ProjectResource {
 			throw new UnauthorizedException();
     	return project.getForks();
     }
-	
+
+	@Api(order=350, description = "A base authorization corresponds to a default role. It can be added/removed via <a href='/~help/api/io.onedev.server.rest.resource.BaseAuthorizationResource'>base authorizations resource</a>")
+	@Path("/{projectId}/base-authorizations")
+    @GET
+    public Collection<BaseAuthorization> getBaseAuthorizations(@PathParam("projectId") Long projectId) {
+    	Project project = projectManager.load(projectId);
+    	if (!SecurityUtils.canManageProject(project)) 
+			throw new UnauthorizedException();
+    	return project.getBaseAuthorizations();
+    }
+		
 	@Api(order=400)
 	@Path("/{projectId}/group-authorizations")
     @GET
@@ -153,7 +164,7 @@ public class ProjectResource {
 			throw new UnauthorizedException();
     	return project.getGroupAuthorizations();
     }
-	
+
 	@Api(order=500)
 	@Path("/{projectId}/user-authorizations")
     @GET

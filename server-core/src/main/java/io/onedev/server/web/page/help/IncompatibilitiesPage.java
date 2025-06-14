@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.help;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -112,7 +114,7 @@ public class IncompatibilitiesPage extends LayoutPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Incompatibilities");
+		return new Label(componentId, _T("Incompatibilities"));
 	}
 
 }

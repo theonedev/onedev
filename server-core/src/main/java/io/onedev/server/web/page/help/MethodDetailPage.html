@@ -3,18 +3,18 @@
 	<div wicket:id="description" class="alert alert-notice alert-light mb-4"></div>
 	<div class="method-detail border-top pt-3">
 		<dl class="content">
-			<dt>Http Method</dt>
+			<dt><wicket:t>Http Method</wicket:t></dt>
 			<dd wicket:id="method"></dd>
-			<dt>End Point</dt>
+			<dt><wicket:t>End Point</wicket:t></dt>
 			<dd>
 				<div wicket:id="path"></div>
 				<wicket:enclosure child="pathPlaceholders">
 				<table class="table mt-4">
 					<thead>
 						<tr>
-							<td>Placeholder</td>
-							<td>Description</td>
-							<td>Example</td>
+							<td><wicket:t>Placeholder</wicket:t></td>
+							<td><wicket:t>Description</wicket:t></td>
+							<td><wicket:t>Example</wicket:t></td>
 						</tr>
 					</thead>
 					<tbody>
@@ -28,15 +28,15 @@
 				</wicket:enclosure>
 			</dd>
 			<wicket:enclosure child="queryParams">
-			<dt>Query Parameters</dt>
+			<dt><wicket:t>Query Parameters</wicket:t></dt>
 			<dd>
 			<table class="table">
 				<thead>
 					<tr>
-						<td>Parameter</td>
-						<td>Description</td>
-						<td>Required</td>
-						<td>Example</td>
+						<td><wicket:t>Parameter</wicket:t></td>
+						<td><wicket:t>Description</wicket:t></td>
+						<td><wicket:t>Required</wicket:t></td>
+						<td><wicket:t>Example</wicket:t></td>
 					</tr>
 				</thead>
 				<tbody>
@@ -51,49 +51,49 @@
 			</dd>
 			</wicket:enclosure>
 			<wicket:enclosure child="contentType">
-			<dt>Request Body</dt>
+			<dt><wicket:t>Request Body</wicket:t></dt>
 			<dd>
 				<dl>
-					<dt>Content Type</dt>
+					<dt><wicket:t>Content Type</wicket:t></dt>
 					<dd wicket:id="contentType">application/json</dd>
 					<wicket:enclosure child="requestBodyExample">
-						<dt>Example <a wicket:id="copyRequestBodyExample" class="ml-1" t:data-tippy-content="Copy to clipboard"><wicket:svg href="copy" class="icon icon-sm"/></a></dt>
+						<dt><wicket:t>Example</wicket:t> <a wicket:id="copyRequestBodyExample" class="ml-1" t:data-tippy-content="Copy to clipboard"><wicket:svg href="copy" class="icon icon-sm"/></a></dt>
 						<dd wicket:id="requestBodyExample"></dd>
 					</wicket:enclosure>
 				</dl>
 			</dd>
 			</wicket:enclosure>
-			<dt>Response</dt>
+			<dt><wicket:t>Response</wicket:t></dt>
 			<dd>
 				<dl>
-					<dt>Operation Successful</dt>
+					<dt><wicket:t>Operation Successful</wicket:t></dt>
 					<dd>
 						<dl>
-							<dt>Status Code</dt>
+							<dt><wicket:t>Status Code</wicket:t></dt>
 							<dd>200</dd>
-							<dt>Response Body</dt>
+							<dt><wicket:t>Response Body</wicket:t></dt>
 							<dd wicket:id="successResponseBody"></dd>
 						</dl>
 					</dd>
-					<dt>Operation Failed</dt>
+					<dt><wicket:t>Operation Failed</wicket:t></dt>
 					<dd>
 						<dl>
-							<dt>Status code</dt>
-							<dd>Status code other than 200 indicating the error type</dd>
-							<dt>Response Body</dt>
-							<dd>Error detail of content type &quot;text/plain&quot;</dd>
+							<dt><wicket:t>Status code</wicket:t></dt>
+							<dd><wicket:t>Status code other than 200 indicating the error type</wicket:t></dd>
+							<dt><wicket:t>Response Body</wicket:t></dt>
+							<dd><wicket:t>Error detail of content type &quot;text/plain&quot;</wicket:t></dd>
 						</dl>
 					</dd>
 				</dl>
 			</dd>
-			<dt>cURL Example <a wicket:id="copyCurlExample" class="ml-1" t:data-tippy-content="Copy to clipboard"><wicket:svg href="copy" class="icon icon-sm"/></a></dt>
+			<dt><wicket:t>cURL Example</wicket:t> <a wicket:id="copyCurlExample" class="ml-1" t:data-tippy-content="Copy to clipboard"><wicket:svg href="copy" class="icon icon-sm"/></a></dt>
 			<dd>
 				<code wicket:id="curlExample"></code>
 			</dd>
 		</dl>
 	</div>
 	<wicket:fragment wicket:id="topbarTitleFrag">
-		<a wicket:id="resources">Resources</a> 
+		<a wicket:id="resources"><wicket:t>Resources</wicket:t></a> 
 		<span class="dot"></span> 
 		<a wicket:id="resource"><span wicket:id="label"></span></a>
 		<span class="dot"></span> 
@@ -101,10 +101,10 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="hasResponseBodyFrag">
 		<dl>
-			<dt>Content Type</dt>
+			<dt><wicket:t>Content Type</wicket:t></dt>
 			<dd wicket:id="contentType">application/json</dd>
 			<wicket:enclosure child="example">
-				<dt>Example <a wicket:id="copyExample" class="ml-1" t:data-tippy-content="Copy to clipboard"><wicket:svg href="copy" class="icon icon-sm"/></a></dt>
+				<dt><wicket:t>Example</wicket:t> <a wicket:id="copyExample" class="ml-1" t:data-tippy-content="Copy to clipboard"><wicket:svg href="copy" class="icon icon-sm"/></a></dt>
 				<dd wicket:id="example"></dd>
 			</wicket:enclosure>
 		</dl>

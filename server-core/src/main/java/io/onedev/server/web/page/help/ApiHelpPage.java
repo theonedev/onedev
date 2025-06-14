@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.help;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.lang.reflect.Method;
 
 import javax.annotation.Nullable;
@@ -26,12 +28,12 @@ public abstract class ApiHelpPage extends LayoutPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "RESTful API Help";
+		return _T("RESTful API Help");
 	}
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "RESTful API Help");
+		return new Label(componentId, _T("RESTful API Help"));
 	}
 	
 	protected String getResourceTitle(Class<?> resourceClass) {

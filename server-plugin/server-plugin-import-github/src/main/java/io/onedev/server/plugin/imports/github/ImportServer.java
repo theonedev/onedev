@@ -46,6 +46,7 @@ import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.entitymanager.BaseAuthorizationManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -578,9 +579,6 @@ public class ImportServer implements Serializable, Validatable {
 
 						project.setDescription(repoNode.get("description").asText(null));
 						project.setIssueManagement(repoNode.get("has_issues").asBoolean());
-						boolean isPrivate = repoNode.get("private").asBoolean();
-						if (!isPrivate && option.getPublicRole() != null)
-							project.setDefaultRole(option.getPublicRole());
 
 						if (project.isNew() || project.getDefaultBranch() == null) {
 							logger.log("Cloning code...");
@@ -602,6 +600,10 @@ public class ImportServer implements Serializable, Validatable {
 						} else {
 							logger.warning("Skipping code clone as the project already has code");
 						}
+
+						boolean isPrivate = repoNode.get("private").asBoolean();
+						if (!isPrivate && !option.getPublicRoles().isEmpty())
+							OneDev.getInstance(BaseAuthorizationManager.class).syncRoles(project, option.getPublicRoles());
 
 						if (option.getIssueImportOption() != null) {
 							logger.log("Importing milestones...");

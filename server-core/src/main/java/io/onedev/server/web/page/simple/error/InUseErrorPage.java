@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.simple.error;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 
 import javax.servlet.http.HttpServletResponse;
@@ -44,12 +46,12 @@ public class InUseErrorPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "Unable To Delete/Disable Right Now";
+		return _T("Unable To Delete/Disable Right Now");
 	}
 
 	@Override
 	protected String getSubTitle() {
-		return "The object you are deleting/disabling is still being used";
+		return _T("The object you are deleting/disabling is still being used");
 	}
 
 	@Override

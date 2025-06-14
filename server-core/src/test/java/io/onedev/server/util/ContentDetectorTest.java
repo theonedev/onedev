@@ -1,14 +1,14 @@
 package io.onedev.server.util;
 
-import com.google.common.io.Resources;
-import org.junit.Test;
-import org.mozilla.universalchardet.Constants;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+
+import com.google.common.io.Resources;
 
 public class ContentDetectorTest {
 

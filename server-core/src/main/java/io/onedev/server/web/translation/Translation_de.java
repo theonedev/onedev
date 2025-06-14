@@ -13,7 +13,7 @@ public class Translation_de extends TranslationResourceBundle {
 			init(m);
 		});
 	}
-
+	
 	@SystemPrompt("You are good at translating from English to German in DevOps software area.")
 	public static void init(Map<String, String> m) {
 		m.clear();
@@ -839,8 +839,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Default Multi Value Provider", "Standard-Mehrwertanbieter");
 		m.put("Default Project", "Standardprojekt");
 		m.put("Default Project Setting", "Standardprojekteinstellung");
-		m.put("Default Role", "Standardrolle");
-		m.put("Default Role Bean", "Standardrollen-Bean");
+		m.put("Default Roles", "Standardrollen");
+		m.put("Default Roles Bean", "Standardrollen Bean");
 		m.put("Default Value", "Standardwert");
 		m.put("Default Value Provider", "Standardwertanbieter");
 		m.put("Default Values", "Standardwerte");
@@ -848,8 +848,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Default branding settings restored", "Standard-Branding-Einstellungen wiederhergestellt");
 		m.put("Default fixed issue filters saved", "Standard-Filter für behobene Probleme gespeichert");
 		m.put("Default merge strategy", "Standard-Merge-Strategie");
-		m.put("Default role affects default permissions granted to everyone in the system. The actual default permissions will be <b class='text-warning'>all permissions</b> contained in default roles of this project and all its parent projects", 
-			"Die Standardrolle beeinflusst die Standardberechtigungen, die jedem im System gewährt werden. Die tatsächlichen Standardberechtigungen sind <b class='text-warning'>alle Berechtigungen</b>, die in den Standardrollen dieses Projekts und aller übergeordneten Projekte enthalten sind");
+		m.put("Default roles affect default permissions granted to everyone in the system. The actual default permissions will be <b class='text-warning'>all permissions</b> contained in default roles of this project and all its parent projects", 
+			"Standardrollen beeinflussen die Standardberechtigungen, die jedem im System gewährt werden. Die tatsächlichen Standardberechtigungen werden <b class='text-warning'>alle Berechtigungen</b> sein, die in den Standardrollen dieses Projekts und aller übergeordneten Projekte enthalten sind");
 		m.put("Define all custom issue fields here. Each project can decide to use all or a subset of these fields via its issue transition setting. <b class=\"text-warning\">NOTE: </b> Newly defined fields by default only appear in new issues. Batch edit existing issues from issue list page if you want them to have these new fields", 
 			"Definieren Sie hier alle benutzerdefinierten Problemfelder. Jedes Projekt kann entscheiden, ob es alle oder einen Teil dieser Felder über seine Problemübergangseinstellung verwendet. <b class=\"text-warning\">HINWEIS: </b> Neu definierte Felder erscheinen standardmäßig nur in neuen Problemen. Bearbeiten Sie vorhandene Probleme im Batch von der Problemlisten-Seite, wenn Sie möchten, dass sie diese neuen Felder haben");
 		m.put("Define all custom issue states here. The first state will be used as initial state of created issues", 
@@ -1227,6 +1227,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("File Patterns", "Dateimuster");
 		m.put("File Protection", "Dateischutz");
 		m.put("File Protections", "Dateischutzmaßnahmen");
+		m.put("File and Symbol Search", "Datei- und Symbolsuche");
 		m.put("File changes", "Dateiänderungen");
 		m.put("File is too large to edit here", "Datei ist zu groß, um hier bearbeitet zu werden");
 		m.put("File missing or obsolete", "Datei fehlt oder ist veraltet");
@@ -1305,6 +1306,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Force", "Erzwingen");
 		m.put("Force Garbage Collection", "Müllsammlung erzwingen");
 		m.put("Forgot Password?", "Passwort vergessen?");
+		m.put("Fork Project", "Projekt forken");
 		m.put("Fork now", "Jetzt forken");
 		m.put("Forks Of", "Forks von");
 		m.put("Frequencies", "Frequenzen");
@@ -1455,10 +1457,10 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
 			"Wenn aktiviert, wird der Quellzweig automatisch gelöscht, nachdem der Pull-Request zusammengeführt wurde, wenn der Benutzer die Berechtigung dazu hat");
 		m.put("If specified, OneDev will only display iterations with this prefix", "Wenn angegeben, zeigt OneDev nur Iterationen mit diesem Präfix an");
-		m.put("If specified, all public and internal projects imported from GitLab will use this as default role. Private projects are not affected", 
-			"Wenn angegeben, verwenden alle öffentlichen und internen Projekte, die von GitLab importiert wurden, dies als Standardrolle. Private Projekte sind nicht betroffen");
-		m.put("If specified, all public repositories imported from GitHub will use this as default role. Private repositories are not affected", 
-			"Wenn angegeben, verwenden alle öffentlichen Repositories, die von GitHub importiert wurden, dies als Standardrolle. Private Repositories sind nicht betroffen");
+		m.put("If specified, all public and internal projects imported from GitLab will use these as default roles. Private projects are not affected", 
+			"Wenn angegeben, werden alle öffentlichen und internen Projekte, die von GitLab importiert werden, diese als Standardrollen verwenden. Private Projekte sind nicht betroffen");
+		m.put("If specified, all public repositories imported from GitHub will use these as default roles. Private repositories are not affected", 
+			"Wenn angegeben, werden alle öffentlichen Repositories, die von GitHub importiert werden, diese als Standardrollen verwenden. Private Repositories sind nicht betroffen");
 		m.put("If specified, total estimated/spent time of an issue will also include linked issues of this type", 
 			"Wenn angegeben, wird die geschätzte/aufgewendete Gesamtzeit eines Problems auch verknüpfte Probleme dieses Typs einschließen");
 		m.put("If this option is enabled, git lfs command needs to be installed on OneDev server (even this step runs on other node)", 
@@ -1981,6 +1983,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("New User Bean", "Neue Benutzer-Bean");
 		m.put("New Value", "Neuer Wert");
 		m.put("New issue board created", "Neues Issue-Board erstellt");
+		m.put("New project created", "Neues Projekt erstellt");
 		m.put("New user created", "Neuer Benutzer erstellt");
 		m.put("New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting", 
 			"Neue Version verfügbar. Rot für Sicherheits-/kritisches Update, Gelb für Fehlerbehebung, Blau für Funktionsupdate. Klicken, um Änderungen anzuzeigen. Deaktivieren in den Systemeinstellungen");
@@ -2000,6 +2003,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("No agents to resume", "Keine Agenten zum Fortsetzen");
 		m.put("No aggregation", "Keine Aggregation");
 		m.put("No any", "Kein Einziger");
+		m.put("No any matches", "Keine Übereinstimmungen");
 		m.put("No applicable transitions or no permission to transit", "Keine anwendbaren Übergänge oder keine Berechtigung zum Übergang");
 		m.put("No artifacts published", "Keine Artefakte veröffentlicht");
 		m.put("No attributes defined (can only be edited when agent is online)", "Keine Attribute definiert (können nur bearbeitet werden, wenn der Agent online ist)");
@@ -2026,7 +2030,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("No data", "Keine Daten");
 		m.put("No default branch", "Kein Standard-Branch");
 		m.put("No default group", "Keine Standardgruppe");
-		m.put("No default role", "Keine Standardrolle");
+		m.put("No default roles", "Keine Standardrollen");
 		m.put("No default value", "Kein Standardwert");
 		m.put("No description", "Keine Beschreibung");
 		m.put("No diffs", "Keine Unterschiede");
@@ -2097,6 +2101,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Not Active Since", "Nicht aktiv seit");
 		m.put("Not Used Since", "Nicht verwendet seit");
 		m.put("Not assigned", "Nicht zugewiesen");
+		m.put("Not authorized to create project under \"{0}\"", "Nicht berechtigt, ein Projekt unter \"{0}\" zu erstellen");
+		m.put("Not authorized to create root project", "Nicht berechtigt, ein Root-Projekt zu erstellen");
 		m.put("Not authorized to move project under this parent", "Keine Berechtigung, Projekt unter diesem Elternteil zu verschieben");
 		m.put("Not authorized to set as root project", "Keine Berechtigung, als Root-Projekt festzulegen");
 		m.put("Not covered", "Nicht abgedeckt");
@@ -2635,6 +2641,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Project Replicas", "Projekt-Replikate");
 		m.put("Project authorizations updated", "Projekt-Autorisierungen aktualisiert");
 		m.put("Project does not have any code yet", "Projekt hat noch keinen Code");
+		m.put("Project forked", "Projekt geforkt");
 		m.put("Project id", "Projekt-ID");
 		m.put("Project list", "Projektliste");
 		m.put("Project manage privilege required to delete \"{0}\"", "Projekt-Verwaltungsberechtigung erforderlich, um \"{0}\" zu löschen");
@@ -2662,7 +2669,7 @@ public class Translation_de extends TranslationResourceBundle {
 			"Bild-Cache des Docker-Buildx-Builders bereinigen. Dieser Schritt ruft den Docker-Builder-Prune-Befehl auf, um den Cache des angegebenen Buildx-Builders im Server-Docker-Executor oder Remote-Docker-Executor zu entfernen");
 		m.put("Public", "Öffentlich");
 		m.put("Public Key", "Öffentlicher Schlüssel");
-		m.put("Public Role", "Öffentliche Rolle");
+		m.put("Public Roles", "Öffentliche Rollen");
 		m.put("Publish", "Veröffentlichen");
 		m.put("Publish Coverage Report Step", "Schritt zur Veröffentlichung des Abdeckungsberichts");
 		m.put("Publish Problem Report Step", "Schritt zur Veröffentlichung des Problemberichts");
@@ -2973,6 +2980,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Search branch", "Branch suchen");
 		m.put("Search files, symbols and texts", "Dateien, Symbole und Texte durchsuchen");
 		m.put("Search for", "Suchen nach");
+		m.put("Search inside current tree", "Suche im aktuellen Baum");
 		m.put("Search is too general", "Suche ist zu allgemein");
 		m.put("Search job", "Job suchen");
 		m.put("Search project", "Projekt suchen");
@@ -3104,6 +3112,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Show issues in list", "Probleme in der Liste anzeigen");
 		m.put("Show issues not scheduled into current iteration", "Probleme anzeigen, die nicht in die aktuelle Iteration eingeplant sind");
 		m.put("Show matching agents", "Passende Agenten anzeigen");
+		m.put("Show more", "Mehr anzeigen");
 		m.put("Show more lines", "Mehr Zeilen anzeigen");
 		m.put("Show next match", "Nächste Übereinstimmung anzeigen");
 		m.put("Show previous match", "Vorherige Übereinstimmung anzeigen");
@@ -4265,6 +4274,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("found {0} users", "{0} Benutzer gefunden");
 		m.put("has any value of", "hat einen beliebigen Wert von");
 		m.put("head", "Kopf");
+		m.put("in current commit", "im aktuellen Commit");
 		m.put("ineffective", "unwirksam");
 		m.put("inherited", "geerbt");
 		m.put("initial", "initial");
@@ -4412,11 +4422,69 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("File and Symbol Search", "Datei- und Symbolsuche");
-		m.put("No any matches", "Keine Übereinstimmungen");
-		m.put("Search inside current tree", "Suche im aktuellen Baum");
-		m.put("Show more", "Mehr anzeigen");
-		m.put("in current commit", "im aktuellen Commit");
+		m.put("Account set up successfully", "Konto erfolgreich eingerichtet");
+		m.put("All RESTful Resources", "Alle RESTful-Ressourcen");
+		m.put("An unexpected exception occurred", "Es ist eine unerwartete Ausnahme aufgetreten");
+		m.put("Back To Home", "Zurück zur Startseite");
+		m.put("Can not reset password for service account or disabled user", "Passwort kann nicht für Dienstkonto oder deaktivierten Benutzer zurückgesetzt werden");
+		m.put("Can not reset password for user authenticating via external system", "Passwort kann nicht für Benutzer zurückgesetzt werden, der sich über ein externes System authentifiziert");
+		m.put("Content Type", "Inhaltstyp");
+		m.put("Email Address Verification", "E-Mail-Adressüberprüfung");
+		m.put("Email address already used: ", "E-Mail-Adresse bereits verwendet:");
+		m.put("End Point", "Endpunkt");
+		m.put("Enter New Password", "Neues Passwort eingeben");
+		m.put("Enter your user name or email to reset password", "Geben Sie Ihren Benutzernamen oder Ihre E-Mail ein, um das Passwort zurückzusetzen");
+		m.put("Error detail of content type &quot;text/plain&quot;", "Fehlerdetails des Inhaltstyps &quot;text/plain&quot;");
+		m.put("Example", "Beispiel");
+		m.put("Failed to verify your email address", "Fehler bei der Überprüfung Ihrer E-Mail-Adresse");
+		m.put("Forgotten Password?", "Passwort vergessen?");
+		m.put("Go Back", "Zurückgehen");
+		m.put("Http Method", "HTTP-Methode");
+		m.put("I didn't eat it. I swear!", "Ich habe es nicht gegessen. Ich schwöre!");
+		m.put("In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, you will need to authenticate by providing user name and password (or access token) via http basic auth header", 
+			"Falls anonymer Zugriff deaktiviert ist oder der anonyme Benutzer nicht genügend Berechtigungen für eine Ressourcenoperation hat, müssen Sie sich authentifizieren, indem Sie Benutzername und Passwort (oder Zugriffstoken) über den HTTP-Basic-Auth-Header bereitstellen");
+		m.put("Invalid invitation code", "Ungültiger Einladungscode");
+		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
+			"Ungültiger Zustand. Bitte stellen Sie sicher, dass Sie OneDev über die in den Systemeinstellungen angegebene Server-URL besuchen");
+		m.put("No response body", "Kein Antwortinhalt");
+		m.put("No user found with login name or email: ", "Kein Benutzer mit Anmeldenamen oder E-Mail gefunden:");
+		m.put("OOPS! There Is An Error", "OOPS! Es gibt einen Fehler");
+		m.put("Operation", "Operation");
+		m.put("Operation Failed", "Operation fehlgeschlagen");
+		m.put("Operation Successful", "Operation erfolgreich");
+		m.put("Page Not Found", "Seite nicht gefunden");
+		m.put("Parameter", "Parameter");
+		m.put("Password changed. Please login with your new password", "Passwort geändert. Bitte melden Sie sich mit Ihrem neuen Passwort an");
+		m.put("Password reset url is invalid or obsolete", "Passwort-Reset-URL ist ungültig oder veraltet");
+		m.put("Placeholder", "Platzhalter");
+		m.put("Please check your email for password reset instructions", "Bitte überprüfen Sie Ihre E-Mail für Anweisungen zum Zurücksetzen des Passworts");
+		m.put("Primary email address not specified", "Primäre E-Mail-Adresse nicht angegeben");
+		m.put("Query Parameters", "Abfrageparameter");
+		m.put("RESTful API Help", "RESTful API-Hilfe");
+		m.put("Request Body", "Anfrageinhalt");
+		m.put("Required", "Erforderlich");
+		m.put("Reset", "Zurücksetzen");
+		m.put("Resource", "Ressource");
+		m.put("Resources", "Ressourcen");
+		m.put("Response", "Antwort");
+		m.put("Response Body", "Antwortinhalt");
+		m.put("Set Up Your Account", "Richten Sie Ihr Konto ein");
+		m.put("Show Error Detail", "Fehlerdetails anzeigen");
+		m.put("Status Code", "Statuscode");
+		m.put("Status code", "Statuscode");
+		m.put("Status code other than 200 indicating the error type", "Statuscode ungleich 200, der den Fehlertyp angibt");
+		m.put("Sync Replica Status and Back to Home", "Synchronisieren Sie den Replikatstatus und kehren Sie zur Startseite zurück");
+		m.put("The object you are deleting/disabling is still being used", "Das Objekt, das Sie löschen/deaktivieren, wird noch verwendet");
+		m.put("The password reset url is invalid or obsolete", "Die Passwort-Reset-URL ist ungültig oder veraltet");
+		m.put("There are incompatibilities since your upgraded version", "Es gibt Inkompatibilitäten seit Ihrer aktualisierten Version");
+		m.put("This date is using <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601 format</a>", 
+			"Dieses Datum verwendet das <a href=\"https://www.w3.org/TR/NOTE-datetime\">ISO 8601-Format</a>");
+		m.put("Unable To Delete/Disable Right Now", "Kann derzeit nicht gelöscht/deaktiviert werden");
+		m.put("Unable to send password reset email as mail service is not configured", "Passwort-Reset-E-Mail kann nicht gesendet werden, da der Maildienst nicht konfiguriert ist");
+		m.put("Your email address is now verified", "Ihre E-Mail-Adresse ist jetzt verifiziert");
+		m.put("Your primary email address is not verified", "Ihre primäre E-Mail-Adresse ist nicht verifiziert");
+		m.put("cURL Example", "cURL-Beispiel");
+		m.put("you may show this page later via incompatibilities link in help menu", "Sie können diese Seite später über den Inkompatibilitätslink im Hilfemenü anzeigen");		
 	}
 			
 	@Override

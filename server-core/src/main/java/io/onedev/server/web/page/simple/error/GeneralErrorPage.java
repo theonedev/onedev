@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.simple.error;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 import java.io.Serializable;
@@ -56,7 +57,7 @@ public class GeneralErrorPage extends SimplePage {
 			title = response.getBody() != null? response.getBody().getText(): HttpStatus.getMessage(response.getStatus());
 			statusCode = response.getStatus();
 		} else {
-			title = "An unexpected exception occurred";
+			title = _T("An unexpected exception occurred");
 			detailMessage = Throwables.getStackTraceAsString(exception);
 			statusCode = SC_INTERNAL_SERVER_ERROR;
 		}
@@ -81,7 +82,7 @@ public class GeneralErrorPage extends SimplePage {
 					setResponsePage(HomePage.class);
 				}
 				
-			}.setBody(Model.of("Sync Replica Status and Back to Home")));
+			}.setBody(Model.of(_T("Sync Replica Status and Back to Home"))));
 		} else {
 			container.add(new ViewStateAwarePageLink<Void>("home", HomePage.class));
 		}
@@ -121,7 +122,7 @@ public class GeneralErrorPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "OOPS! There Is An Error";
+		return _T("OOPS! There Is An Error");
 	}
 
 	@Override

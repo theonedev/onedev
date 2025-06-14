@@ -44,6 +44,7 @@ import java.util.regex.Matcher;
 
 import static io.onedev.server.web.page.help.ValueInfo.Origin.CREATE_BODY;
 import static io.onedev.server.web.page.help.ValueInfo.Origin.UPDATE_BODY;
+import static io.onedev.server.web.translation.Translation._T;
 
 public class MethodDetailPage extends ApiHelpPage {
 
@@ -293,7 +294,7 @@ public class MethodDetailPage extends ApiHelpPage {
 		});
 		
 		if (method.getReturnType() == Response.class) {
-			add(new Label("successResponseBody", "No response body"));
+			add(new Label("successResponseBody", _T("No response body")));
 		} else {
 			Fragment fragment = new Fragment("successResponseBody", "hasResponseBodyFrag", MethodDetailPage.this);
 			

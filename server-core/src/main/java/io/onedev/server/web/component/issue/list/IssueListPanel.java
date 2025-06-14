@@ -1630,6 +1630,22 @@ public abstract class IssueListPanel extends Panel {
 						return new MenuLink(id) {
 
 							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(issuesTable.getItemCount() != 0);
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("data-tippy-content", _T("No issues to export"));
+								}
+							}
+
+							@Override
 							protected List<MenuItem> getMenuItems(FloatingPanel dropdown2) {
 								var menuItems = new ArrayList<MenuItem>();
 								menuItems.add(new MenuItem() {
@@ -1642,23 +1658,7 @@ public abstract class IssueListPanel extends Panel {
 									@Override
 									public WebMarkupContainer newLink(String id) {
 										return new AjaxLink<Void>(id) {
-				
-											@Override
-											protected void onConfigure() {
-												super.onConfigure();
-												setEnabled(issuesTable.getItemCount() != 0);
-											}
-				
-											@Override
-											protected void onComponentTag(ComponentTag tag) {
-												super.onComponentTag(tag);
-												configure();
-												if (!isEnabled()) {
-													tag.put("disabled", "disabled");
-													tag.put("data-tippy-content", _T("No issues to export"));
-												}
-											}
-				
+											
 											@Override
 											public void onClick(AjaxRequestTarget target) {
 												dropdown.close();
@@ -1680,22 +1680,6 @@ public abstract class IssueListPanel extends Panel {
 									@Override
 									public WebMarkupContainer newLink(String id) {
 										return new AjaxLink<Void>(id) {
-				
-											@Override
-											protected void onConfigure() {
-												super.onConfigure();
-												setEnabled(issuesTable.getItemCount() != 0);
-											}
-				
-											@Override
-											protected void onComponentTag(ComponentTag tag) {
-												super.onComponentTag(tag);
-												configure();
-												if (!isEnabled()) {
-													tag.put("disabled", "disabled");
-													tag.put("data-tippy-content", _T("No issues to export"));
-												}
-											}
 				
 											@Override
 											public void onClick(AjaxRequestTarget target) {

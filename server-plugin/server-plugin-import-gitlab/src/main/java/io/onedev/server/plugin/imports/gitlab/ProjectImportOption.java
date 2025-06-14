@@ -1,42 +1,40 @@
 package io.onedev.server.plugin.imports.gitlab;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.RoleManager;
-import io.onedev.server.model.Role;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.RoleChoice;
+import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.model.Role;
 
 @Editable
 public class ProjectImportOption implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String publicRoleName;
+	private List<String> publicRoleNames = new ArrayList<>();
 	
 	private IssueImportOption issueImportOption;
 	
-	@Editable(order=100, name="Public Role", description="If specified, all public and internal projects imported from GitLab "
-			+ "will use this as default role. Private projects are not affected")
+	@Editable(order=100, name="Public Roles", description="If specified, all public and internal projects imported from GitLab "
+			+ "will use these as default roles. Private projects are not affected")
 	@RoleChoice
-	@Nullable
-	public String getPublicRoleName() {
-		return publicRoleName;
+	public List<String> getPublicRoleNames() {
+		return publicRoleNames;
 	}
 
-	public void setPublicRoleName(String publicRoleName) {
-		this.publicRoleName = publicRoleName;
+	public void setPublicRoleNames(List<String> publicRoleNames) {
+		this.publicRoleNames = publicRoleNames;
 	}
 	
-	@Nullable
-	public Role getPublicRole() {
-		if (publicRoleName != null)
-			return OneDev.getInstance(RoleManager.class).find(publicRoleName);
-		else
-			return null;
+	public List<Role> getPublicRoles() {
+		return publicRoleNames.stream().map(name -> OneDev.getInstance(RoleManager.class).find(name)).collect(Collectors.toList());
 	}
 
 	@Editable(order=200, name="Import Issues")
