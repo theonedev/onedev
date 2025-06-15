@@ -22,8 +22,9 @@ public class Translation_zh extends TranslationResourceBundle {
 	}
 
 	@SystemPrompt("You are good at translating from English to Simplified Chinese in DevOps software area, with below rules:\n" + 
-			"'Issue' should be translated to '工单' or '问题' depending on context\n" + 
-			"'Image' should be translated to '图片' or '镜像' depending on context")
+			"'issue' should be translated to '工单' or '问题' depending on context\n" + 
+			"'image' should be translated to '图片' or '镜像' depending on context\n" + 
+			"'docker aware executor' should be translated to 'docker 相关执行器'")
 	public static void init(Map<String, String> m) {
 		m.clear();
 		m.put(" Project path can be omitted if reference from current project", "如果从当前项目引用，则可以省略项目路径");
@@ -2984,19 +2985,19 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Run job", "运行任务");
 		m.put("Run on Bare Metal/Virtual Machine", "在裸机/虚拟机上运行");
 		m.put("Run osv scanner to scan violated licenses used by various <a href='https://deps.dev/' target='_blank'>dependencies</a>. It can only be executed by docker aware executor.", 
-			"运行 OSV 扫描器扫描各种 <a href='https://deps.dev/' target='_blank'>依赖项</a> 使用的违反许可证。它只能由 docker 感知执行器执行。");
+			"运行 OSV 扫描器扫描各种 <a href='https://deps.dev/' target='_blank'>依赖项</a> 使用的违反许可证。它只能由 dock er执行器执行。");
 		m.put("Run osv scanner to scan vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
-			"运行 OSV 扫描器扫描各种 <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>锁定文件</a> 中的漏洞。它只能由 docker 感知执行器执行。");
+			"运行 OSV 扫描器扫描各种 <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>锁定文件</a> 中的漏洞。它只能由 docker 相关执行器执行。");
 		m.put("Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKSPACE</code>. <b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote docker executor", 
 			"运行指定的 docker 容器。<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> 挂载到容器中，其路径放置在环境变量 <code>ONEDEV_WORKSPACE</code> 中。<b class='text-warning'>注意：</b> 此步骤只能由服务器 docker 执行器或远程 docker 执行器执行");
 		m.put("Run specified step template", "运行指定的步骤模板");
 		m.put("Run this job", "运行此任务");
-		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>It can only be executed by docker aware executor.", 
-			"运行 trivy 容器镜像扫描器扫描指定镜像中的问题。对于漏洞，它检查各种 <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>分布文件</a>。它只能由 docker 感知执行器执行。");
+		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>. It can only be executed by docker aware executor.", 
+			"运行 trivy 容器镜像扫描器以查找指定镜像中的问题。对于漏洞，它会检查各种<a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>分发文件</a>。它只能由 docker 相关执行器执行。");
 		m.put("Run trivy filesystem scanner to scan various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>lock files</a>. It can only be executed by a docker aware executor, and is recommended to run <span class='text-warning'>after dependencies are resolved</span> (npm install or alike). Compared to OSV scanner, its setup is a bit verbose, but can provide more accurate result", 
-			"运行 trivy 文件系统扫描器扫描各种 <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>锁定文件</a>。它只能由 docker 感知执行器执行，建议在 <span class='text-warning'>依赖项解析后</span> 运行（例如 npm install）。与 OSV 扫描器相比，它的设置稍微冗长，但可以提供更准确的结果");
+			"运行 trivy 文件系统扫描器扫描各种 <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>锁定文件</a>。它只能由 docker 相关执行器执行，建议在 <span class='text-warning'>依赖项解析后</span> 运行（例如 npm install）。与 OSV 扫描器相比，它的设置稍微冗长，但可以提供更准确的结果");
 		m.put("Run trivy rootfs scanner to scan various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>. It can only be executed by a docker aware executor and is recommended to run against staging area of your project", 
-			"运行 trivy 根文件系统扫描器扫描各种 <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>分布文件</a>。它只能由 docker 感知执行器执行，建议在项目暂存区域运行。");
+			"运行 trivy 根文件系统扫描器扫描各种 <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>分布文件</a>。它只能由 docker 相关执行器执行，建议在项目暂存区域运行。");
 		m.put("Run via Docker Container", "通过 Docker 容器运行");
 		m.put("Running", "运行中");
 		m.put("Running Takes", "运行中");
