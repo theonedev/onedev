@@ -21,7 +21,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		});
 	}
 
-	@SystemPrompt("You are good at translating from English to Simplified Chinese in DevOps software area.")
+	@SystemPrompt("You are good at translating from English to Simplified Chinese in DevOps software area, with below rules:\n" + 
+			"'Issue' should be translated to '工单' or '问题' depending on context\n" + 
+			"'Image' should be translated to '图片' or '镜像' depending on context")
 	public static void init(Map<String, String> m) {
 		m.clear();
 		m.put(" Project path can be omitted if reference from current project", "如果从当前项目引用，则可以省略项目路径");
