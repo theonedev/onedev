@@ -20,7 +20,9 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.wicket.Application;
 import org.apache.wicket.Component;
+import org.apache.wicket.ThreadContext;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.IAjaxCallListener;
@@ -141,7 +143,8 @@ public abstract class TaskButton extends AjaxButton {
 		ExecutorService executorService = OneDev.getInstance(ExecutorService.class);
 		List<JobLogEntryEx> messages = new ArrayList<>();
 		messages.add(new JobLogEntryEx(new JobLogEntry(new Date(), _T("Please wait..."))));
-		var errorMessage = _T("Error executing task");
+		var application = Application.get();
+		var requestCycle = RequestCycle.get();
 		TaskFuture future = getTaskFutures().put(path, new TaskFuture(executorService.submit(new Callable<TaskResult>() {
 
 			@Override
@@ -167,7 +170,11 @@ public abstract class TaskButton extends AjaxButton {
 						}
 					}
 					
-				};				
+				};		
+				var oldApplication = ThreadContext.getApplication();
+				var oldRequestCycle = ThreadContext.getRequestCycle();
+				ThreadContext.setApplication(application);
+				ThreadContext.setRequestCycle(requestCycle);
 				try {
 					return runTask(logger);
 				} catch (Exception e) {	
@@ -181,7 +188,10 @@ public abstract class TaskButton extends AjaxButton {
 						else								
 							logger.error(null, e);
 					}
-					return new TaskResult(false, new PlainMessage(errorMessage));
+					return new TaskResult(false, new PlainMessage(_T("Error executing task")));
+				} finally {
+					ThreadContext.setApplication(oldApplication);
+					ThreadContext.setRequestCycle(oldRequestCycle);
 				} 
 			}
 			

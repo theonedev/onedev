@@ -58,12 +58,6 @@ public class AuthenticatorPage extends AdministrationPage {
 			}
 			
 		};
-		var fullNameLabel = _T("Full Name");
-		var emailLabel = _T("Email");
-		var groupsLabel = _T("Groups");
-		var sshKeysLabel = _T("Number of SSH Keys");
-		var testSuccessfulLabel = _T("Test successful: authentication passed");
-		var testSuccessfulWithInfoLabel = _T("Test successful: authentication passed with below information retrieved:");
 		TaskButton testButton = new TaskButton("test") {
 
 			@Override
@@ -144,29 +138,29 @@ public class AuthenticatorPage extends AdministrationPage {
 						new UsernamePasswordToken(token.getUserName(), token.getPassword()));
 				StringBuilder retrievedInfoBuilder = new StringBuilder();
 				if (authenticated.getFullName() != null) {
-					retrievedInfoBuilder.append(fullNameLabel + ": ")
+					retrievedInfoBuilder.append(_T("Full Name") + ": ")
 							.append(authenticated.getFullName())
 							.append("<br>");
 				}
 				if (authenticated.getEmail() != null) {
-					retrievedInfoBuilder.append(emailLabel + ": ")
+					retrievedInfoBuilder.append(_T("Email") + ": ")
 							.append(authenticated.getEmail())
 							.append("<br>");
 				}
 				if (authenticated.getGroupNames() != null) {
-					retrievedInfoBuilder.append(groupsLabel + ": ")
+					retrievedInfoBuilder.append(_T("Groups") + ": ")
 							.append(Joiner.on(", ").join(authenticated.getGroupNames()))
 							.append("<br>");
 				}
 				if (authenticated.getSshKeys() != null) {
-					retrievedInfoBuilder.append(sshKeysLabel + ": ").append(authenticated.getSshKeys().size())
+					retrievedInfoBuilder.append(_T("Number of SSH Keys") + ": ").append(authenticated.getSshKeys().size())
 							.append("<br>");
 				}
 				
 				if (retrievedInfoBuilder.length() != 0) 
-					return new TaskResult(true, new HtmlMessgae(testSuccessfulWithInfoLabel + "<br>" + retrievedInfoBuilder));
+					return new TaskResult(true, new HtmlMessgae(_T("Test successful: authentication passed with below information retrieved:") + "<br>" + retrievedInfoBuilder));
 				else 
-					return new TaskResult(true, new HtmlMessgae(testSuccessfulLabel));
+					return new TaskResult(true, new HtmlMessgae(_T("Test successful: authentication passed")));
 			}
 
 		};

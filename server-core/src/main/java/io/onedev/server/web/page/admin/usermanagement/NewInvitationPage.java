@@ -42,14 +42,12 @@ public class NewInvitationPage extends AdministrationPage {
 			Form<?> form = new Form<Void>("form");
 			form.add(BeanContext.edit("editor", bean));
 			form.add(new FencedFeedbackPanel("feedback", form));
-			var sendingMessage = _T("Sending invitation to \"{0}\"...");
-			var sentMessage = _T("Invitations sent");
 			form.add(new TaskButton("invite") {
 
 				@Override
 				protected TaskResult runTask(TaskLogger logger) throws InterruptedException {
 					for (String emailAddress: bean.getListOfEmailAddresses()) {
-						logger.log(MessageFormat.format(sendingMessage, emailAddress));
+						logger.log(MessageFormat.format(_T("Sending invitation to \"{0}\"..."), emailAddress));
 						UserInvitation invitation = new UserInvitation();
 						invitation.setEmailAddress(emailAddress);
 						UserInvitationManager userInvitationManager = OneDev.getInstance(UserInvitationManager.class);
@@ -58,7 +56,7 @@ public class NewInvitationPage extends AdministrationPage {
 						if (Thread.interrupted())
 							throw new InterruptedException();
 					}
-					return new TaskResult(true, new PlainMessage(sentMessage));
+					return new TaskResult(true, new PlainMessage(_T("Invitations sent")));
 				}
 
 				@Override

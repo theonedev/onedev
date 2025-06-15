@@ -77,14 +77,6 @@ public class PasswordResetPage extends SimplePage {
 				}
 
 			}).setLabel(Model.of(_T("Login name or email"))).setRequired(true));
-
-			var noUserFoundMessage = _T("No user found with login name or email: ") + loginNameOrEmail;
-			var serviceAccountOrDisabledUserMessage = _T("Can not reset password for service account or disabled user");
-			var authenticatedViaExternalSystemMessage = _T("Can not reset password for user authenticating via external system");
-			var primaryEmailNotSpecifiedMessage = _T("Primary email address not specified");
-			var primaryEmailNotVerifiedMessage = _T("Your primary email address is not verified");
-			var checkMailMessage = _T("Please check your email for password reset instructions");
-			var mailServiceNotConfiguredMessage = _T("Unable to send password reset email as mail service is not configured");
 			
 			form.add(new TaskButton("resettingPassword") {
 
@@ -102,11 +94,11 @@ public class PasswordResetPage extends SimplePage {
 						if (user == null) 
 							user = getUserManager().findByVerifiedEmailAddress(loginNameOrEmail);
 						if (user == null) {
-							throw new ExplicitException(noUserFoundMessage);
+							throw new ExplicitException(_T("No user found with login name or email: ") + loginNameOrEmail);
 						} else if (user.isServiceAccount() || user.isDisabled()) {
-							throw new ExplicitException(serviceAccountOrDisabledUserMessage);
+							throw new ExplicitException(_T("Can not reset password for service account or disabled user"));
 						} else if (user.getPassword() == null) {
-							throw new ExplicitException(authenticatedViaExternalSystemMessage);
+							throw new ExplicitException(_T("Can not reset password for user authenticating via external system"));
 						} else {
 							SettingManager settingManager = OneDev.getInstance(SettingManager.class);
 							if (settingManager.getMailService() != null) {
@@ -130,9 +122,9 @@ public class PasswordResetPage extends SimplePage {
 								} else {
 									EmailAddress emailAddress = user.getPrimaryEmailAddress();
 									if (emailAddress == null)
-										throw new ExplicitException(primaryEmailNotSpecifiedMessage);
+										throw new ExplicitException(_T("Primary email address not specified"));
 									else if (!emailAddress.isVerified())
-										throw new ExplicitException(primaryEmailNotVerifiedMessage);
+										throw new ExplicitException(_T("Your primary email address is not verified"));
 									else
 										emailAddressValue = emailAddress.getValue();
 								}
@@ -142,9 +134,9 @@ public class PasswordResetPage extends SimplePage {
 										"[Password Reset] You are Requesting to Reset Your OneDev Password",
 										htmlBody, textBody, null, null, null);
 
-								return new TaskResult(true, new PlainMessage(checkMailMessage));
+								return new TaskResult(true, new PlainMessage(_T("Please check your email for password reset instructions")));
 							} else {
-								return new TaskResult(false, new PlainMessage(mailServiceNotConfiguredMessage));
+								return new TaskResult(false, new PlainMessage(_T("Unable to send password reset email as mail service is not configured")));
 							}
 						}
 					});
