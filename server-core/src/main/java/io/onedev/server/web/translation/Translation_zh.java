@@ -24,7 +24,8 @@ public class Translation_zh extends TranslationResourceBundle {
 	@SystemPrompt("You are good at translating from English to Simplified Chinese in DevOps software area, with below rules:\n" + 
 			"'issue' should be translated to '工单' or '问题' depending on context\n" + 
 			"'image' should be translated to '图片' or '镜像' depending on context\n" + 
-			"'docker aware executor' should be translated to 'docker 相关执行器'")
+			"'docker aware executor' should be translated to 'docker 相关执行器'\n" + 
+			"When used together with 'subscription', word 'active' should be translated to '有效'")
 	public static void init(Map<String, String> m) {
 		m.clear();
 		m.put(" Project path can be omitted if reference from current project", "如果从当前项目引用，则可以省略项目路径");
@@ -2070,8 +2071,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No diffs", "没有差异");
 		m.put("No diffs to navigate", "没有差异可导航");
 		m.put("No directories to skip", "无要跳过的目录");
-		m.put("No executors defined. Jobs will use auto-discovered executor with default settings", 
-			"没有定义任务执行器。任务将使用自动发现的执行器，使用默认设置");
 		m.put("No external authenticator", "无外部认证器");
 		m.put("No fields to prompt", "无要提示的字段");
 		m.put("No fields to remove", "无要删除的字段");
@@ -3772,11 +3771,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This field is required", "此字段是必填的");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"此过滤器用于确定当前用户的 LDAP 条目。例如：<i>(&(uid={0})(objectclass=person))</i>。在此示例中，<i>{0}</i> 表示当前用户的登录名");
-		m.put("This installation does not have an active subscription and runs as community edition. To access <a href=\"https://onedev.io/pricing\">enterprise features</a>, an active subscription is required", 
-			"此安装没有活动订阅，以社区版运行。要访问<a href=\"https://onedev.io/pricing\">企业功能</a>，需要活动订阅");
 		m.put("This installation has a trial subscription and is now running as enterprise edition", 
 			"此安装有试用订阅，现在以企业版运行");
-		m.put("This installation has an active subscription and runs as enterprise edition", "此安装有活动订阅，以企业版运行");
 		m.put("This installation has an expired subscription, and runs as community edition", "此安装的订阅已过期，以社区版运行");
 		m.put("This is a Git LFS object, but the storage file is missing", "这是一个 Git LFS 对象，但存储文件缺失");
 		m.put("This is a built-in role and can not be deleted", "这是一个内置角色，无法删除");
@@ -4225,10 +4221,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Will be transcoded to UTF-8", "将被转码为 UTF-8");
 		m.put("Window", "窗口");
 		m.put("Window Memory", "窗口内存");
-		m.put("With current number of users ({0}) in group \"{1}\", the subscription will be active until <b>{2}</b>", 
-			"当前组 \"{1}\" 中的用户数 ({0})，订阅将保持活动状态直到 <b>{2}</b>");
-		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
-			"当前用户数 ({0})，订阅将保持活动状态直到 <b>{1}</b>");
 		m.put("Workflow reconciliation completed", "工单工作流一致性检查完成");
 		m.put("Working Directory", "工作目录");
 		m.put("Write", "写入");
@@ -4495,6 +4487,14 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
+		m.put("No executors defined. Jobs will use auto-discovered executor", "未定义执行器。作业将使用自动发现的执行器");
+		m.put("This installation does not have an active subscription and runs as community edition. To access <a href=\"https://onedev.io/pricing\">enterprise features</a>, an active subscription is required", 
+			"此安装没有有效订阅，并作为社区版运行。要访问<a href=\"https://onedev.io/pricing\">企业功能</a>，需要有效订阅");
+		m.put("This installation has an active subscription and runs as enterprise edition", "此安装有有效订阅，并作为企业版运行");
+		m.put("With current number of users ({0}) in group \"{1}\", the subscription will be active until <b>{2}</b>", 
+			"根据组“{1}”中的当前用户数（{0}），订阅将有效至<b>{2}</b>");
+		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
+			"根据当前用户数（{0}），订阅将有效至<b>{1}</b>");
 	}
 		
 	@Override
