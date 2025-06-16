@@ -538,15 +538,15 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				if (!jobExecutor.isEnabled())
 					throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is disabled");
 				else if (!isApplicable(jobExecutor, build))
-					throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is not authorized for current job");
-				else
+					throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is not applicable for current job");
+				else 
 					return jobExecutor;
 			} else {
 				throw new ExplicitException("Unable to find specified job executor '" + jobExecutorName + "'");
 			}
 		} else {
 			if (!settingManager.getJobExecutors().isEmpty()) {
-				for (JobExecutor executor : settingManager.getJobExecutors()) {
+				for (var executor : settingManager.getJobExecutors()) {
 					if (executor.isEnabled() && isApplicable(executor, build))
 						return executor;
 				}
@@ -555,21 +555,20 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				jobLogger.log("No job executor defined, auto-discovering...");
 				List<JobExecutorDiscoverer> discoverers = new ArrayList<>(OneDev.getExtensions(JobExecutorDiscoverer.class));
 				discoverers.sort(Comparator.comparing(JobExecutorDiscoverer::getOrder));
-				for (JobExecutorDiscoverer discoverer : discoverers) {
+				for (var discoverer : discoverers) {
 					JobExecutor jobExecutor = discoverer.discover();
 					if (jobExecutor != null) {
 						jobExecutor.setName("auto-discovered");
-						jobLogger.log("Discovered job executor type: "
-								+ EditableUtils.getDisplayName(jobExecutor.getClass()));
+						jobLogger.log("Discovered " + EditableUtils.getDisplayName(jobExecutor.getClass()).toLowerCase());
 						return jobExecutor;
 					}
 				}
-				throw new ExplicitException("No job executor discovered");
+				throw new ExplicitException("No applicable job executor discovered");
 			}
 		}
 	}
 
-	private Future<Boolean> execute(Build build) {
+	private Future<Boolean> execute(Build build) {		
 		String jobToken = build.getJobToken();
 		VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 

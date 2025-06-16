@@ -59,7 +59,7 @@ public abstract class JobExecutor implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=30, group = "Privilege Settings", description="Enable this to allow to run site publish step. OneDev will serve project "
+	@Editable(order=30, name="Enable Site Publish", group = "Privilege Settings", description="Enable this to allow to run site publish step. OneDev will serve project "
 			+ "site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs")
 	public boolean isSitePublishEnabled() {
 		return sitePublishEnabled;
@@ -69,7 +69,7 @@ public abstract class JobExecutor implements Serializable {
 		this.sitePublishEnabled = sitePublishEnabled;
 	}
 
-	@Editable(order=40, group = "Privilege Settings", description = "Enable this to allow to run html report publish step. To avoid XSS attach, " +
+	@Editable(order=40, name="Enable Html Report Publish", group = "Privilege Settings", description = "Enable this to allow to run html report publish step. To avoid XSS attack, " +
 			"make sure this executor can only be used by trusted jobs")
 	public boolean isHtmlReportPublishEnabled() {
 		return htmlReportPublishEnabled;
@@ -84,7 +84,7 @@ public abstract class JobExecutor implements Serializable {
 		return WicketUtils.isSubscriptionActive();
 	}
 
-	@Editable(order=10000, placeholder="Any job", description="Optionally specify job requirement of this executor")
+	@Editable(order=10000, name="Applicable Jobs", placeholder="Any job", description="Optionally specify applicable jobs of this executor")
 	@io.onedev.server.annotation.JobMatch(withProjectCriteria = true, withJobCriteria = true)
 	@Nullable
 	public String getJobRequirement() {
@@ -100,7 +100,7 @@ public abstract class JobExecutor implements Serializable {
 	public Usage onDeleteProject(String projectPath) {
 		Usage usage = new Usage();
 		if (jobRequirement != null && JobMatch.parse(jobRequirement, true, true).isUsingProject(projectPath)) {
-			usage.add("job requirement" );
+			usage.add("applicable jobs" );
 		}
 		return usage;
 	}
@@ -116,7 +116,7 @@ public abstract class JobExecutor implements Serializable {
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
 		if (jobRequirement != null && JobMatch.parse(jobRequirement, true, true).isUsingUser(userName)) {
-			usage.add("job requirement");
+			usage.add("applicable jobs");
 		}
 		return usage;
 	}
@@ -132,7 +132,7 @@ public abstract class JobExecutor implements Serializable {
 	public Usage onDeleteGroup(String groupName) {
 		Usage usage = new Usage();
 		if (jobRequirement != null && JobMatch.parse(jobRequirement, true, true).isUsingGroup(groupName)) {
-			usage.add("job requirement");
+			usage.add("applicable jobs");
 		}
 		return usage;
 	}
@@ -141,22 +141,6 @@ public abstract class JobExecutor implements Serializable {
 		if (jobRequirement != null) {
 			JobMatch jobMatch = JobMatch.parse(jobRequirement, true, true);
 			jobMatch.onRenameGroup(oldName, newName);
-			jobRequirement = jobMatch.toString();
-		}
-	}
-
-	public Usage onDeleteRole(String roleName) {
-		Usage usage = new Usage();
-		if (jobRequirement != null && JobMatch.parse(jobRequirement, true, true).isUsingRole(roleName)) {
-			usage.add("job requirement");
-		}
-		return usage;
-	}
-
-	public void onRenameRole(String oldName, String newName) {
-		if (jobRequirement != null) {
-			JobMatch jobMatch = JobMatch.parse(jobRequirement, true, true);
-			jobMatch.onRenameRole(oldName, newName);
 			jobRequirement = jobMatch.toString();
 		}
 	}

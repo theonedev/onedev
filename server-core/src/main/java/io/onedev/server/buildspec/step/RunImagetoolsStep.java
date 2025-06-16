@@ -1,5 +1,13 @@
 package io.onedev.server.buildspec.step;
 
+import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.constraints.NotEmpty;
+
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.RunImagetoolsFacade;
 import io.onedev.k8shelper.StepFacade;
@@ -9,13 +17,6 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-
-import javax.validation.constraints.NotEmpty;
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
-import static java.util.stream.Collectors.toList;
 
 @Editable(order=230, name="Run Buildx Image Tools", group = DOCKER_IMAGE, description="Run docker buildx imagetools " +
 		"command with specified arguments. This step can only be executed by server docker executor " +
@@ -60,5 +61,5 @@ public class RunImagetoolsStep extends Step {
 		var registryLogins = getRegistryLogins().stream().map(it->it.getFacade(build)).collect(toList());
 		return new RunImagetoolsFacade(getArguments(), registryLogins);
 	}
-	
+
 }

@@ -4,8 +4,8 @@ import io.onedev.k8shelper.RegistryLoginFacade;
 
 import java.util.List;
 
-public interface RegistryLoginAware {
+public interface DockerAware {
 	
 	List<RegistryLoginFacade> getRegistryLogins(String jobToken);
-
+	
 }

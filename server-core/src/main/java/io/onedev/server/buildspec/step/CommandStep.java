@@ -146,5 +146,5 @@ public class CommandStep extends Step {
 			return getInterpreter().getExecutable(jobExecutor, jobToken, null, null, new ArrayList<>(), envMap, isUseTTY());
 		}
 	}
-	
+
 }

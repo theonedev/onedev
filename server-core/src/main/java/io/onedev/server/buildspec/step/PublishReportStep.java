@@ -6,12 +6,12 @@ import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.ExecuteCondition;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.annotation.PathSegment;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.PathSegment;
 import io.onedev.server.annotation.Patterns;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.util.patternset.PatternSet;
 
 @Editable
 public abstract class PublishReportStep extends ServerSideStep {

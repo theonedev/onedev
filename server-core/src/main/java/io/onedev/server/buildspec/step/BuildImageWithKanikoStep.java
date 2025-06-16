@@ -10,7 +10,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAware;
+import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -128,8 +128,8 @@ public class BuildImageWithKanikoStep extends CommandStep {
 											   List<RegistryLoginFacade> registryLogins, Map<String, String> envMap, 
 											   boolean useTTY) {
 				var commandsBuilder = new StringBuilder();
-				if (jobExecutor instanceof RegistryLoginAware) {
-					RegistryLoginAware registryLoginAware = (RegistryLoginAware) jobExecutor;
+				if (jobExecutor instanceof DockerAware) {
+					DockerAware registryLoginAware = (DockerAware) jobExecutor;
 					commandsBuilder.append("cat <<EOF>> /kaniko/.docker/config.json\n");
 					var mergedRegistryLogins = merge(registryLogins, registryLoginAware.getRegistryLogins(jobToken));
 					commandsBuilder.append(buildDockerConfig(mergedRegistryLogins)).append("\n");

@@ -1,25 +1,30 @@
 package io.onedev.server.buildspec.step;
 
+import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.UPLOAD_IF_CHANGED;
+import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.UPLOAD_IF_NOT_HIT;
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.SetupCacheFacade;
 import io.onedev.k8shelper.StepFacade;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.ProjectChoice;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.EditContext;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.UPLOAD_IF_CHANGED;
-import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.UPLOAD_IF_NOT_HIT;
-import static java.util.stream.Collectors.toList;
 
 @Editable(order=55, name="Set Up Cache", description = "Set up job cache to speed up job execution. " +
 		"Check <a href='https://docs.onedev.io/tutorials/cicd/job-cache' target='_blank'>this tutorial</a> " +

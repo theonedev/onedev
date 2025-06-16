@@ -1,22 +1,27 @@
 package io.onedev.server.buildspec.step;
 
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.k8shelper.BuildImageFacade;
-import io.onedev.k8shelper.StepFacade;
-import io.onedev.server.annotation.*;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.param.ParamCombination;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
+import static java.util.stream.Collectors.toList;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
-import static java.util.stream.Collectors.toList;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.k8shelper.BuildImageFacade;
+import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.NoSpace;
+import io.onedev.server.annotation.ReservedOptions;
+import io.onedev.server.annotation.SubPath;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.param.ParamCombination;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 @Editable(order=160, name="Build Image", group = DOCKER_IMAGE, description="Build docker image with docker buildx. " +
 		"This step can only be executed by server docker executor or remote docker executor, and it uses the buildx " +

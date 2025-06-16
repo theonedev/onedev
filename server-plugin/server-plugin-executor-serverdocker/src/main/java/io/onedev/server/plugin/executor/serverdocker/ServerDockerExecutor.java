@@ -85,7 +85,7 @@ import io.onedev.server.job.ResourceAllocator;
 import io.onedev.server.job.ServerCacheHelper;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
-import io.onedev.server.model.support.administration.jobexecutor.RegistryLoginAware;
+import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor.TestData;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
@@ -96,7 +96,7 @@ import io.onedev.server.web.util.Testable;
 @Editable(order=ServerDockerExecutor.ORDER, name="Server Docker Executor", 
 		description="This executor runs build jobs as docker containers on OneDev server")
 @ClassValidating
-public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAware, Testable<TestData>, Validatable {
+public class ServerDockerExecutor extends JobExecutor implements DockerAware, Testable<TestData>, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -192,8 +192,8 @@ public class ServerDockerExecutor extends JobExecutor implements RegistryLoginAw
 	@Editable(order=520, group="Privilege Settings", description="Whether or not to mount docker sock into job container to "
 			+ "support docker operations in job commands<br>"
 			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev "
-			+ "by operating the mounted docker sock. You should configure job requirement above to make sure the " +
-			"executor can only be used by trusted jobs if this option is enabled")
+			+ "by operating the mounted docker sock. Make sure this executor can only be used by "
+			+ "trusted jobs if this option is enabled")
 	public boolean isMountDockerSock() {
 		return mountDockerSock;
 	}

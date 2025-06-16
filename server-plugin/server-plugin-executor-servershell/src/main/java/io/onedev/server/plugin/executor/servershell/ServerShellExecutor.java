@@ -65,8 +65,7 @@ import io.onedev.server.web.util.Testable;
 @Editable(order=ServerShellExecutor.ORDER, name="Server Shell Executor", description="" +
 		"This executor runs build jobs with OneDev server's shell facility.<br>" +
 		"<b class='text-danger'>WARNING</b>: Jobs running with this executor has same " +
-		"permission as OneDev server process. Make sure it can only be used by trusted " +
-		"jobs via job requirement setting")
+		"permission as OneDev server process. Make sure it can only be used by trusted jobs")
 public class ServerShellExecutor extends JobExecutor implements Testable<TestData> {
 
 	private static final long serialVersionUID = 1L;

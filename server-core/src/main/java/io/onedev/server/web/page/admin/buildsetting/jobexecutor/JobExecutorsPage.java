@@ -93,7 +93,14 @@ public class JobExecutorsPage extends AdministrationPage {
 		}.items("li.executor").handle(".card-header"));
 		
 		container.add(newAddNewFrag());
-		container.add(new WebMarkupContainer("noExecutors") {
+		container.add(new WebMarkupContainer("withExecutors") {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getSettingManager().getJobExecutors().isEmpty());
+			}
+		});
+		container.add(new WebMarkupContainer("withoutExecutors") {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();

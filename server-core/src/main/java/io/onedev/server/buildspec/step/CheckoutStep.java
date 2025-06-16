@@ -1,5 +1,9 @@
 package io.onedev.server.buildspec.step;
 
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
+
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CheckoutFacade;
 import io.onedev.k8shelper.StepFacade;
@@ -12,9 +16,6 @@ import io.onedev.server.buildspec.job.gitcredential.GitCredential;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-
-import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @Editable(order=50, name="Checkout Code")
 public class CheckoutStep extends Step {

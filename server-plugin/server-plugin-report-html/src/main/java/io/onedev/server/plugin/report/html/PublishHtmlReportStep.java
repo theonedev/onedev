@@ -1,5 +1,13 @@
 package io.onedev.server.plugin.report.html;
 
+import static io.onedev.commons.utils.LockUtils.write;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+import javax.validation.constraints.NotEmpty;
+
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -16,13 +24,6 @@ import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.SessionManager;
-
-import javax.validation.constraints.NotEmpty;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
-import static io.onedev.commons.utils.LockUtils.write;
 
 @Editable(order=1070, group= StepGroup.PUBLISH, name="Html Report")
 public class PublishHtmlReportStep extends PublishReportStep {

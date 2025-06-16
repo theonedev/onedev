@@ -1130,8 +1130,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Enable this if the access token has same permissions as the owner", "如果访问令牌具有与所有者相同的权限，则启用");
 		m.put("Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)", 
 			"启用此选项以在准备好时自动合并合并请求（所有审查者批准，所有必需的任务通过等）");
-		m.put("Enable this to allow to run html report publish step. To avoid XSS attach, make sure this executor can only be used by trusted jobs", 
-			"启用此选项以允许运行 HTML 报告发布步骤。为避免 XSS 附件，请确保此执行器只能由受信任的任务使用");
+		m.put("Enable this to allow to run html report publish step. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
+			"启用此选项以允许运行 HTML 报告发布步骤。为避免 XSS 攻击，请确保此执行器只能由受信任的任务使用");
 		m.put("Enable this to allow to run site publish step. OneDev will serve project site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
 			"启用此选项以允许运行站点发布步骤。OneDev 将按原样提供项目站点文件。为避免 XSS 攻击，请确保此执行器只能由受信任的任务使用");
 		m.put("Enable this to place intermediate files required by job execution on dynamically allocated persistent volume instead of emptyDir", 

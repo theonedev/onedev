@@ -1,5 +1,12 @@
 package io.onedev.server.buildspec.step;
 
+import static io.onedev.server.buildspec.step.StepGroup.PUBLISH;
+
+import java.io.File;
+import java.util.List;
+
+import javax.validation.constraints.NotEmpty;
+
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
@@ -7,7 +14,11 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Patterns;
+import io.onedev.server.annotation.ProjectChoice;
+import io.onedev.server.annotation.SubPath;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -17,12 +28,6 @@ import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.util.patternset.PatternSet;
-
-import javax.validation.constraints.NotEmpty;
-import java.io.File;
-import java.util.List;
-
-import static io.onedev.server.buildspec.step.StepGroup.PUBLISH;
 
 @Editable(order=1060, name="Site", group = PUBLISH, description="This step publishes specified files to be served as project web site. "
 		+ "Project web site can be accessed publicly via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>")
@@ -119,5 +124,5 @@ public class PublishSiteStep extends ServerSideStep {
 			return new ServerStepResult(true);
 		});
 	}
-
+	
 }

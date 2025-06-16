@@ -1,13 +1,14 @@
 package io.onedev.server.buildspec.step;
 
+import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
+
 import io.onedev.k8shelper.PruneBuilderCacheFacade;
 import io.onedev.k8shelper.StepFacade;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ReservedOptions;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-
-import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 
 @Editable(order=260, name="Prune Builder Cache", group = DOCKER_IMAGE, description="" +
 		"Prune image cache of docker buildx builder. This step calls docker builder prune command " +
