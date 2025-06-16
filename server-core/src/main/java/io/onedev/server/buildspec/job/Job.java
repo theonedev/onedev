@@ -136,8 +136,7 @@ public class Job implements NamedElement, Validatable {
 		return new ArrayList<>();
 	}
 
-	@Editable(order=200, placeholderProvider="getJobExecutorPlaceholder", description="Optionally specify executor for this job. " +
-			"Leave empty to use first matching executor (or use auto-discovered executor if no executors are defined)")
+	@Editable(order=200, placeholderProvider="getJobExecutorPlaceholder", description="Optionally specify executor for this job")
 	@Interpolative(literalSuggester="suggestJobExecutors", variableSuggester="suggestVariables")
 	public String getJobExecutor() {
 		return jobExecutor;
@@ -152,7 +151,7 @@ public class Job implements NamedElement, Validatable {
 		if (OneDev.getInstance(SettingManager.class).getJobExecutors().isEmpty())
 			return _T("Auto-discovered executor");
 		else 
-			return _T("First matching executor");
+			return _T("First applicable executor");
 	}
 	
 	@SuppressWarnings("unused")
