@@ -15,6 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,7 +68,7 @@ public class GpgSignatureVerifier implements SignatureVerifier {
 				if (signingKey != null) {
 					if (signingKey.getEmailAddresses() != null 
 							&& !signingKey.getEmailAddresses().contains(emailAddress)) {
-						return new GpgVerificationFailed(signingKey, "Not a verified email of signing GPG key");
+						return new GpgVerificationFailed(signingKey, _T("Not a verified email of signing GPG key"));
 					}
 					signature.init(
 							new JcaPGPContentVerifierBuilderProvider().setProvider(BouncyCastleProvider.PROVIDER_NAME),
@@ -74,17 +77,17 @@ public class GpgSignatureVerifier implements SignatureVerifier {
 					if (signature.verify()) 
 						return new GpgVerificationSuccessful(signingKey);
 					else 
-						return new GpgVerificationFailed(signingKey, "Invalid GPG signature");
+						return new GpgVerificationFailed(signingKey, _T("Invalid GPG signature"));
 				} else {
-					return new GpgVerificationFailed(null, "Signed with an unknown GPG key "
-							+ "(key ID: " + GpgUtils.getKeyIDString(signature.getKeyID()) + ")");
+					return new GpgVerificationFailed(null, _T("Signed with an unknown GPG key ")
+							+ "(" + _T("key ID: ") + GpgUtils.getKeyIDString(signature.getKeyID()) + ")");
 				}
 			} else {
-				return new GpgVerificationFailed(null, "Looks like a GPG signature but without necessary data");
+				return new GpgVerificationFailed(null, _T("Looks like a GPG signature but without necessary data"));
 			}
 		} catch (PGPException e) {
-			logger.error("Error verifying GPG signature", e);
-			return new GpgVerificationFailed(null, "Error verifying GPG signature");
+			logger.error(_T("Error verifying GPG signature"), e);
+			return new GpgVerificationFailed(null, _T("Error verifying GPG signature"));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

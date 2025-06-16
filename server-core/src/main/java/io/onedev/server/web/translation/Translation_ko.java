@@ -1593,6 +1593,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Invalid pull request number: {0}", "잘못된 풀 리퀘스트 번호: {0}");
 		m.put("Invalid request path", "잘못된 요청 경로");
 		m.put("Invalid selection, click for details", "잘못된 선택, 세부 정보 확인 클릭");
+		m.put("Invalid ssh signature", "유효하지 않은 ssh 서명");
 		m.put("Invalid state response", "잘못된 상태 응답");
 		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
 			"유효하지 않은 상태입니다. 시스템 설정에 지정된 서버 URL을 사용하여 OneDev를 방문하고 있는지 확인하세요");
@@ -1764,8 +1765,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Jobs with same sequential group and executor will be executed sequentially. For instance you may specify this property as <tt>@project_path@:prod</tt> for jobs executing by same executor and deploying to prod environment of current project to avoid conflicting deployments", 
 			"동일한 순차 그룹과 실행기를 가진 작업은 순차적으로 실행됩니다. 예를 들어, 동일한 실행기로 실행되고 현재 프로젝트의 프로덕션 환경에 배포하는 작업에 대해 <tt>@project_path@:prod</tt>로 이 속성을 지정하여 충돌하는 배포를 방지할 수 있습니다");
 		m.put("Key", "키");
+		m.put("Key Fingerprint", "키 지문");
 		m.put("Key ID", "키 ID");
 		m.put("Key Secret", "키 비밀");
+		m.put("Key Type", "키 유형");
 		m.put("Kubectl Config File", "Kubectl 구성 파일");
 		m.put("Kubernetes", "쿠버네티스");
 		m.put("Kubernetes Executor", "쿠버네티스 실행기");
@@ -1877,6 +1880,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Malformed filter", "잘못된 필터");
 		m.put("Malformed name filter", "잘못된 이름 필터");
 		m.put("Malformed query", "잘못된 쿼리");
+		m.put("Malformed ssh signature", "잘못된 ssh 서명");
 		m.put("Malformed test suite filter", "잘못된 테스트 스위트 필터");
 		m.put("Manage Job", "작업 관리");
 		m.put("Manager DN", "관리자 DN");
@@ -2060,8 +2064,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No diffs", "차이 없음");
 		m.put("No diffs to navigate", "탐색할 차이 없음");
 		m.put("No directories to skip", "건너뛸 디렉터리 없음");
-		m.put("No executors defined. Jobs will use auto-discovered executor with default settings", 
-			"정의된 실행자 없음. 작업은 기본 설정으로 자동 검색된 실행자를 사용합니다.");
+		m.put("No executors defined. Jobs will use auto-discovered executor", "정의된 실행자가 없습니다. 작업은 자동 검색된 실행자를 사용합니다");
 		m.put("No external authenticator", "외부 인증자 없음");
 		m.put("No fields to prompt", "프롬프트할 필드 없음");
 		m.put("No fields to remove", "제거할 필드 없음");
@@ -2126,6 +2129,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("None", "없음");
 		m.put("Not Active Since", "활성 상태가 아닌 이후");
 		m.put("Not Used Since", "사용되지 않은 이후");
+		m.put("Not a verified email of signing ssh key owner", "서명 ssh 키 소유자의 확인된 이메일이 아님");
 		m.put("Not assigned", "할당되지 않음");
 		m.put("Not authorized to create project under \"{0}\"", "\"{0}\" 아래에 프로젝트를 생성할 권한이 없습니다.");
 		m.put("Not authorized to create root project", "루트 프로젝트를 생성할 권한이 없습니다.");
@@ -2982,8 +2986,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"지정된 Docker 컨테이너를 실행하십시오. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 워크스페이스</a>가 컨테이너에 마운트되고 해당 경로가 환경 변수 <code>ONEDEV_WORKSPACE</code>에 배치됩니다. <b class='text-warning'>참고: </b> 이 단계는 서버 Docker 실행기 또는 원격 Docker 실행기에서만 실행할 수 있습니다");
 		m.put("Run specified step template", "지정된 단계 템플릿 실행");
 		m.put("Run this job", "이 작업 실행");
-		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>It can only be executed by docker aware executor.", 
-			"지정된 이미지에서 문제를 찾기 위해 trivy 컨테이너 이미지 스캐너를 실행합니다. 취약점의 경우 다양한 <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>배포 파일</a>을 확인합니다. Docker를 인식하는 실행자만 실행할 수 있습니다.");
+		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>. It can only be executed by docker aware executor.", 
+			"지정된 이미지에서 문제를 찾기 위해 trivy 컨테이너 이미지 스캐너를 실행합니다. 취약점에 대해서는 다양한 <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>배포 파일</a>을 확인합니다. 이는 도커 인식 실행자에 의해서만 실행될 수 있습니다.");
 		m.put("Run trivy filesystem scanner to scan various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>lock files</a>. It can only be executed by a docker aware executor, and is recommended to run <span class='text-warning'>after dependencies are resolved</span> (npm install or alike). Compared to OSV scanner, its setup is a bit verbose, but can provide more accurate result", 
 			"trivy 파일 시스템 스캐너를 실행하여 다양한 <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>잠금 파일</a>을 스캔합니다. Docker를 인식하는 실행자만 실행할 수 있으며, <span class='text-warning'>종속성이 해결된 후</span>(npm install 등) 실행하는 것이 권장됩니다. OSV 스캐너와 비교하여 설정이 다소 복잡하지만 더 정확한 결과를 제공할 수 있습니다.");
 		m.put("Run trivy rootfs scanner to scan various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>. It can only be executed by a docker aware executor and is recommended to run against staging area of your project", 
@@ -3175,6 +3179,15 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Sign Up!", "회원가입!");
 		m.put("Sign in", "로그인");
 		m.put("Signature required for this change, please generate system GPG signing key first", "이 변경에 서명이 필요합니다. 먼저 시스템 GPG 서명 키를 생성하세요.");
+		m.put("Signature verified successfully with OneDev GPG key", "OneDev GPG 키로 서명이 성공적으로 확인되었습니다");
+		m.put("Signature verified successfully with committer's GPG key", "커미터의 GPG 키로 서명이 성공적으로 확인되었습니다");
+		m.put("Signature verified successfully with committer's SSH key", "커미터의 SSH 키로 서명이 성공적으로 확인되었습니다");
+		m.put("Signature verified successfully with tagger's GPG key", "태거의 GPG 키로 서명이 성공적으로 확인되었습니다");
+		m.put("Signature verified successfully with tagger's SSH key", "태거의 SSH 키로 서명이 성공적으로 확인되었습니다");
+		m.put("Signature verified successfully with trusted GPG key", "신뢰할 수 있는 GPG 키로 서명이 성공적으로 확인되었습니다");
+		m.put("Signed with an unknown ssh key", "알 수 없는 ssh 키로 서명됨");
+		m.put("Signer Email Addresses", "서명자 이메일 주소");
+		m.put("Signing Key ID", "서명 키 ID");
 		m.put("Similar Issues", "유사한 이슈");
 		m.put("Single Sign On", "싱글 사인온");
 		m.put("Single Sign On Provider", "싱글 사인온 제공자");
@@ -3987,6 +4000,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Under which condition this step should run. <b>Successful</b> means all non-optional steps running before this step are successful", 
 			"이 단계가 실행되어야 하는 조건. <b>성공</b>은 이 단계 이전에 실행된 모든 선택적이지 않은 단계가 성공했음을 의미합니다");
 		m.put("Unexpected setting: {0}", "예상치 못한 설정: {0}");
+		m.put("Unexpected ssh signature hash algorithm: ", "예상치 못한 ssh 서명 해시 알고리즘:");
+		m.put("Unexpected ssh signature namespace: ", "예상치 못한 ssh 서명 네임스페이스:");
 		m.put("Unified", "통합됨");
 		m.put("Unified view", "통합 보기");
 		m.put("Unit Test Statistics", "단위 테스트 통계");
@@ -4004,6 +4019,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Unsolicited discord api response", "요청되지 않은 Discord API 응답");
 		m.put("Unspecified", "미지정");
 		m.put("Unsupported", "지원되지 않음");
+		m.put("Unsupported ssh signature algorithm: ", "지원되지 않는 ssh 서명 알고리즘:");
+		m.put("Unsupported ssh signature version: ", "지원되지 않는 ssh 서명 버전:");
 		m.put("Unverified", "검증되지 않음");
 		m.put("Unverified email address is <b>NOT</b> applicable for above functionalities", "검증되지 않은 이메일 주소는 위 기능에 <b>적용되지 않습니다</b>");
 		m.put("Unvote", "투표 취소");
@@ -4485,6 +4502,12 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("Error verifying GPG signature", "GPG 서명 확인 오류");
+		m.put("Invalid GPG signature", "유효하지 않은 GPG 서명");
+		m.put("Looks like a GPG signature but without necessary data", "필요한 데이터가 없는 GPG 서명처럼 보입니다");
+		m.put("Not a verified email of signing GPG key", "GPG 키 서명의 확인된 이메일이 아닙니다");
+		m.put("Signed with an unknown GPG key ", "알 수 없는 GPG 키로 서명됨");
+		m.put("key ID: ", "키 ID:");
 	}
 		
 	@Override

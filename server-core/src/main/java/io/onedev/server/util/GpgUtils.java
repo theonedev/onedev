@@ -71,7 +71,7 @@ public class GpgUtils {
 	}
 
 	public static String getKeyIDString(long keyId) {
-		return Long.toUnsignedString(keyId, 16).toUpperCase();
+		return String.format("%016X", keyId);
 	}
 
 	public static long getKeyID(String keyIdString) {

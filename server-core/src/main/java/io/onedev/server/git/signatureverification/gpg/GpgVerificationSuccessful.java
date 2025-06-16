@@ -10,6 +10,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 
 import static io.onedev.server.util.GpgUtils.getEmailAddresses;
+import static io.onedev.server.web.translation.Translation._T;
 
 public class GpgVerificationSuccessful implements VerificationSuccessful {
 	
@@ -25,13 +26,13 @@ public class GpgVerificationSuccessful implements VerificationSuccessful {
 		String message;
 		if (signingKey.getEmailAddresses() != null) {
 			if (revObject instanceof RevCommit)
-				message = "Signature verified successfully with committer's GPG key";
+				message = _T("Signature verified successfully with committer's GPG key");
 			else
-				message = "Signature verified successfully with tagger's GPG key";
+				message = _T("Signature verified successfully with tagger's GPG key");
 		} else if (getGpgSetting().getTrustedSignatureVerificationKey(publicKey.getKeyID()) != null) {
-			message = "Signature verified successfully with trusted GPG key";
+			message = _T("Signature verified successfully with trusted GPG key");
 		} else {
-			message = "Signature verified successfully with OneDev GPG key";
+			message = _T("Signature verified successfully with OneDev GPG key");
 		}
 		
 		return new GpgVerificationDetailPanel(componentId, true, message, 

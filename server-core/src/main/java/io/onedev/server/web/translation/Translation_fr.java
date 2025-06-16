@@ -1593,6 +1593,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Invalid pull request number: {0}", "Numéro de demande de tirage invalide : {0}");
 		m.put("Invalid request path", "Chemin de requête invalide");
 		m.put("Invalid selection, click for details", "Sélection invalide, cliquez pour plus de détails");
+		m.put("Invalid ssh signature", "Signature ssh invalide");
 		m.put("Invalid state response", "Réponse d'état invalide");
 		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
 			"État invalide. Veuillez vous assurer que vous visitez OneDev en utilisant l'URL du serveur spécifiée dans les paramètres système");
@@ -1764,8 +1765,10 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Jobs with same sequential group and executor will be executed sequentially. For instance you may specify this property as <tt>@project_path@:prod</tt> for jobs executing by same executor and deploying to prod environment of current project to avoid conflicting deployments", 
 			"Les tâches avec le même groupe séquentiel et exécuteur seront exécutées séquentiellement. Par exemple, vous pouvez spécifier cette propriété comme <tt>@project_path@:prod</tt> pour les tâches exécutées par le même exécuteur et déployant dans l'environnement de production du projet actuel afin d'éviter des déploiements conflictuels");
 		m.put("Key", "Clé");
+		m.put("Key Fingerprint", "Empreinte de clé");
 		m.put("Key ID", "ID de clé");
 		m.put("Key Secret", "Secret de clé");
+		m.put("Key Type", "Type de clé");
 		m.put("Kubectl Config File", "Fichier de configuration Kubectl");
 		m.put("Kubernetes", "Kubernetes");
 		m.put("Kubernetes Executor", "Exécuteur Kubernetes");
@@ -1877,6 +1880,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Malformed filter", "Filtre malformé");
 		m.put("Malformed name filter", "Filtre de nom malformé");
 		m.put("Malformed query", "Requête malformée");
+		m.put("Malformed ssh signature", "Signature ssh malformée");
 		m.put("Malformed test suite filter", "Filtre de suite de tests malformé");
 		m.put("Manage Job", "Gérer le Job");
 		m.put("Manager DN", "DN du Manager");
@@ -2060,8 +2064,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("No diffs", "Aucune différence");
 		m.put("No diffs to navigate", "Aucune différence à naviguer");
 		m.put("No directories to skip", "Aucun répertoire à ignorer");
-		m.put("No executors defined. Jobs will use auto-discovered executor with default settings", 
-			"Aucun exécuteur défini. Les tâches utiliseront un exécuteur auto-découvert avec les paramètres par défaut");
+		m.put("No executors defined. Jobs will use auto-discovered executor", "Aucun exécuteur défini. Les tâches utiliseront l'exécuteur découvert automatiquement");
 		m.put("No external authenticator", "Aucun authentificateur externe");
 		m.put("No fields to prompt", "Aucun champ à demander");
 		m.put("No fields to remove", "Aucun champ à supprimer");
@@ -2126,6 +2129,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("None", "Aucun");
 		m.put("Not Active Since", "Non actif depuis");
 		m.put("Not Used Since", "Non utilisé depuis");
+		m.put("Not a verified email of signing ssh key owner", "Pas un email vérifié du propriétaire de la clé ssh de signature");
 		m.put("Not assigned", "Non assigné");
 		m.put("Not authorized to create project under \"{0}\"", "Non autorisé à créer un projet sous \"{0}\"");
 		m.put("Not authorized to create root project", "Non autorisé à créer un projet racine");
@@ -2982,7 +2986,7 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Exécutez le conteneur docker spécifié. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>L'espace de travail du travail</a> est monté dans le conteneur et son chemin est placé dans la variable d'environnement <code>ONEDEV_WORKSPACE</code>. <b class='text-warning'>Remarque : </b> cette étape ne peut être exécutée que par un exécuteur docker serveur ou un exécuteur docker distant");
 		m.put("Run specified step template", "Exécuter le modèle d'étape spécifié");
 		m.put("Run this job", "Exécuter ce travail");
-		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>It can only be executed by docker aware executor.", 
+		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>. It can only be executed by docker aware executor.", 
 			"Exécutez le scanner d'image de conteneur trivy pour trouver des problèmes dans l'image spécifiée. Pour les vulnérabilités, il vérifie divers <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>fichiers de distribution</a>. Il ne peut être exécuté que par un exécuteur compatible avec Docker.");
 		m.put("Run trivy filesystem scanner to scan various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>lock files</a>. It can only be executed by a docker aware executor, and is recommended to run <span class='text-warning'>after dependencies are resolved</span> (npm install or alike). Compared to OSV scanner, its setup is a bit verbose, but can provide more accurate result", 
 			"Exécutez le scanner de système de fichiers trivy pour analyser divers <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>fichiers de verrouillage</a>. Il ne peut être exécuté que par un exécuteur compatible avec Docker et il est recommandé de l'exécuter <span class='text-warning'>après la résolution des dépendances</span> (npm install ou similaire). Comparé au scanner OSV, son installation est un peu plus complexe, mais peut fournir des résultats plus précis.");
@@ -3175,6 +3179,15 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Sign Up!", "S'inscrire !");
 		m.put("Sign in", "Connexion");
 		m.put("Signature required for this change, please generate system GPG signing key first", "Signature requise pour ce changement, veuillez d'abord générer la clé de signature GPG système");
+		m.put("Signature verified successfully with OneDev GPG key", "Signature vérifiée avec succès avec la clé GPG de OneDev");
+		m.put("Signature verified successfully with committer's GPG key", "Signature vérifiée avec succès avec la clé GPG du committer");
+		m.put("Signature verified successfully with committer's SSH key", "Signature vérifiée avec succès avec la clé SSH du committer");
+		m.put("Signature verified successfully with tagger's GPG key", "Signature vérifiée avec succès avec la clé GPG du tagger");
+		m.put("Signature verified successfully with tagger's SSH key", "Signature vérifiée avec succès avec la clé SSH du tagger");
+		m.put("Signature verified successfully with trusted GPG key", "Signature vérifiée avec succès avec une clé GPG de confiance");
+		m.put("Signed with an unknown ssh key", "Signé avec une clé ssh inconnue");
+		m.put("Signer Email Addresses", "Adresses email du signataire");
+		m.put("Signing Key ID", "ID de clé de signature");
 		m.put("Similar Issues", "Problèmes similaires");
 		m.put("Single Sign On", "Authentification unique");
 		m.put("Single Sign On Provider", "Fournisseur d'authentification unique");
@@ -3987,6 +4000,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Under which condition this step should run. <b>Successful</b> means all non-optional steps running before this step are successful", 
 			"Dans quelles conditions cette étape doit-elle s'exécuter. <b>Réussi</b> signifie que toutes les étapes non optionnelles exécutées avant cette étape sont réussies");
 		m.put("Unexpected setting: {0}", "Paramètre inattendu : {0}");
+		m.put("Unexpected ssh signature hash algorithm: ", "Algorithme de hachage de signature ssh inattendu :");
+		m.put("Unexpected ssh signature namespace: ", "Espace de noms de signature ssh inattendu :");
 		m.put("Unified", "Unifié");
 		m.put("Unified view", "Vue unifiée");
 		m.put("Unit Test Statistics", "Statistiques des tests unitaires");
@@ -4004,6 +4019,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Unsolicited discord api response", "Réponse API Discord non sollicitée");
 		m.put("Unspecified", "Non spécifié");
 		m.put("Unsupported", "Non pris en charge");
+		m.put("Unsupported ssh signature algorithm: ", "Algorithme de signature ssh non pris en charge :");
+		m.put("Unsupported ssh signature version: ", "Version de signature ssh non prise en charge :");
 		m.put("Unverified", "Non vérifié");
 		m.put("Unverified email address is <b>NOT</b> applicable for above functionalities", "L'adresse e-mail non vérifiée <b>NE</b> s'applique pas aux fonctionnalités ci-dessus");
 		m.put("Unvote", "Retirer le vote");
@@ -4485,6 +4502,12 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("Error verifying GPG signature", "Erreur de vérification de la signature GPG");
+		m.put("Invalid GPG signature", "Signature GPG invalide");
+		m.put("Looks like a GPG signature but without necessary data", "Ressemble à une signature GPG mais sans les données nécessaires");
+		m.put("Not a verified email of signing GPG key", "Pas un email vérifié de la clé GPG de signature");
+		m.put("Signed with an unknown GPG key ", "Signé avec une clé GPG inconnue");
+		m.put("key ID: ", "ID de clé :");
 	}
 		
 	@Override

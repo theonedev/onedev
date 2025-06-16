@@ -1593,6 +1593,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Invalid pull request number: {0}", "無効なプルリクエスト番号: {0}");
 		m.put("Invalid request path", "無効なリクエストパス");
 		m.put("Invalid selection, click for details", "無効な選択、詳細をクリックしてください");
+		m.put("Invalid ssh signature", "無効なssh署名");
 		m.put("Invalid state response", "無効な状態応答");
 		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
 			"無効な状態です。システム設定で指定されたサーバーURLを使用してOneDevを訪問していることを確認してください");
@@ -1764,8 +1765,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Jobs with same sequential group and executor will be executed sequentially. For instance you may specify this property as <tt>@project_path@:prod</tt> for jobs executing by same executor and deploying to prod environment of current project to avoid conflicting deployments", 
 			"同じ順序グループとエグゼキューターを持つジョブは順次実行されます。例えば、同じエグゼキューターで実行され、現在のプロジェクトの本番環境にデプロイするジョブの競合を避けるために、このプロパティを<tt>@project_path@:prod</tt>として指定することができます");
 		m.put("Key", "キー");
+		m.put("Key Fingerprint", "キーのフィンガープリント");
 		m.put("Key ID", "キーID");
 		m.put("Key Secret", "キーシークレット");
+		m.put("Key Type", "キーの種類");
 		m.put("Kubectl Config File", "Kubectl設定ファイル");
 		m.put("Kubernetes", "Kubernetes");
 		m.put("Kubernetes Executor", "Kubernetesエグゼキューター");
@@ -1877,6 +1880,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Malformed filter", "不正なフィルター");
 		m.put("Malformed name filter", "不正な名前フィルター");
 		m.put("Malformed query", "不正なクエリ");
+		m.put("Malformed ssh signature", "不正な形式のssh署名");
 		m.put("Malformed test suite filter", "不正なテストスイートフィルター");
 		m.put("Manage Job", "ジョブ管理");
 		m.put("Manager DN", "マネージャーDN");
@@ -2060,8 +2064,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No diffs", "差分なし");
 		m.put("No diffs to navigate", "ナビゲートする差分なし");
 		m.put("No directories to skip", "スキップするディレクトリなし");
-		m.put("No executors defined. Jobs will use auto-discovered executor with default settings", 
-			"定義されたエグゼキューターなし。ジョブはデフォルト設定で自動検出されたエグゼキューターを使用します。");
+		m.put("No executors defined. Jobs will use auto-discovered executor", "エグゼキュータが定義されていません。ジョブは自動検出されたエグゼキュータを使用します");
 		m.put("No external authenticator", "外部認証機関なし");
 		m.put("No fields to prompt", "プロンプトするフィールドなし");
 		m.put("No fields to remove", "削除するフィールドなし");
@@ -2126,6 +2129,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("None", "なし");
 		m.put("Not Active Since", "以降アクティブではありません");
 		m.put("Not Used Since", "以降使用されていません");
+		m.put("Not a verified email of signing ssh key owner", "署名sshキー所有者の確認済みメールではありません");
 		m.put("Not assigned", "未割り当て");
 		m.put("Not authorized to create project under \"{0}\"", "\"{0}\"の下にプロジェクトを作成する権限がありません");
 		m.put("Not authorized to create root project", "ルートプロジェクトを作成する権限がありません");
@@ -2982,8 +2986,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"指定されたDockerコンテナを実行します。<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>がコンテナにマウントされ、そのパスが環境変数<code>ONEDEV_WORKSPACE</code>に配置されます。<b class='text-warning'>注意: </b>このステップはサーバーDockerエグゼキューターまたはリモートDockerエグゼキューターによってのみ実行可能です");
 		m.put("Run specified step template", "指定されたステップテンプレートを実行");
 		m.put("Run this job", "このジョブを実行");
-		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>It can only be executed by docker aware executor.", 
-			"指定されたイメージの問題を見つけるために、Trivyコンテナイメージスキャナーを実行します。脆弱性については、さまざまな<a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>配布ファイル</a>をチェックします。Docker対応のエグゼキューターでのみ実行可能です。");
+		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>. It can only be executed by docker aware executor.", 
+			"指定されたイメージの問題を見つけるためにtrivyコンテナイメージスキャナーを実行します。脆弱性については、さまざまな<a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>配布ファイル</a>をチェックします。これはdocker対応のエグゼキュータでのみ実行可能です。");
 		m.put("Run trivy filesystem scanner to scan various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>lock files</a>. It can only be executed by a docker aware executor, and is recommended to run <span class='text-warning'>after dependencies are resolved</span> (npm install or alike). Compared to OSV scanner, its setup is a bit verbose, but can provide more accurate result", 
 			"Trivyファイルシステムスキャナーを実行して、さまざまな<a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>ロックファイル</a>をスキャンします。Docker対応のエグゼキューターでのみ実行可能であり、<span class='text-warning'>依存関係が解決された後</span>（npm installなど）に実行することを推奨します。OSVスキャナーと比較してセットアップが少し冗長ですが、より正確な結果を提供できます。");
 		m.put("Run trivy rootfs scanner to scan various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>. It can only be executed by a docker aware executor and is recommended to run against staging area of your project", 
@@ -3175,6 +3179,15 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Sign Up!", "サインアップ！");
 		m.put("Sign in", "サインイン");
 		m.put("Signature required for this change, please generate system GPG signing key first", "この変更には署名が必要です。まずシステムGPG署名キーを生成してください。");
+		m.put("Signature verified successfully with OneDev GPG key", "OneDev GPGキーで署名が正常に検証されました");
+		m.put("Signature verified successfully with committer's GPG key", "コミッターのGPGキーで署名が正常に検証されました");
+		m.put("Signature verified successfully with committer's SSH key", "コミッターのSSHキーで署名が正常に検証されました");
+		m.put("Signature verified successfully with tagger's GPG key", "タグ付け者のGPGキーで署名が正常に検証されました");
+		m.put("Signature verified successfully with tagger's SSH key", "タグ付け者のSSHキーで署名が正常に検証されました");
+		m.put("Signature verified successfully with trusted GPG key", "信頼されたGPGキーで署名が正常に検証されました");
+		m.put("Signed with an unknown ssh key", "未知のsshキーで署名されました");
+		m.put("Signer Email Addresses", "署名者のメールアドレス");
+		m.put("Signing Key ID", "署名キーID");
 		m.put("Similar Issues", "類似の課題");
 		m.put("Single Sign On", "シングルサインオン");
 		m.put("Single Sign On Provider", "シングルサインオンプロバイダー");
@@ -3987,6 +4000,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Under which condition this step should run. <b>Successful</b> means all non-optional steps running before this step are successful", 
 			"このステップが実行される条件。<b>成功</b>は、このステップの前に実行されるすべての非オプションステップが成功していることを意味します");
 		m.put("Unexpected setting: {0}", "予期しない設定: {0}");
+		m.put("Unexpected ssh signature hash algorithm: ", "予期しないssh署名ハッシュアルゴリズム:");
+		m.put("Unexpected ssh signature namespace: ", "予期しないssh署名ネームスペース:");
 		m.put("Unified", "統一");
 		m.put("Unified view", "統一ビュー");
 		m.put("Unit Test Statistics", "単体テスト統計");
@@ -4004,6 +4019,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Unsolicited discord api response", "未承諾のDiscord API応答");
 		m.put("Unspecified", "未指定");
 		m.put("Unsupported", "非対応");
+		m.put("Unsupported ssh signature algorithm: ", "サポートされていないssh署名アルゴリズム:");
+		m.put("Unsupported ssh signature version: ", "サポートされていないssh署名バージョン:");
 		m.put("Unverified", "未確認");
 		m.put("Unverified email address is <b>NOT</b> applicable for above functionalities", "未確認のメールアドレスは上記の機能には<b>適用されません</b>");
 		m.put("Unvote", "投票を取り消す");
@@ -4485,6 +4502,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("Error verifying GPG signature", "GPG署名の検証エラー");
+		m.put("Invalid GPG signature", "無効なGPG署名");
+		m.put("Looks like a GPG signature but without necessary data", "必要なデータがないGPG署名のようです");
+		m.put("Not a verified email of signing GPG key", "署名GPGキーの確認済みメールではありません");
+		m.put("Signed with an unknown GPG key ", "不明なGPGキーで署名されています");
+		m.put("key ID: ", "キーID:");
 	}
 		
 	@Override

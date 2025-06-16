@@ -1604,6 +1604,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Invalid pull request number: {0}", "无效的合并请求编号：{0}");
 		m.put("Invalid request path", "无效的请求路径");
 		m.put("Invalid selection, click for details", "无效的选择，点击查看详情");
+		m.put("Invalid ssh signature", "无效的 ssh 签名");
 		m.put("Invalid state response", "状态响应无效");
 		m.put("Invalid state. Please make sure you are visiting OneDev using server url specified in system setting", 
 			"无效的状态。请确保您使用系统设置中指定的服务器URL访问OneDev");
@@ -1775,8 +1776,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Jobs with same sequential group and executor will be executed sequentially. For instance you may specify this property as <tt>@project_path@:prod</tt> for jobs executing by same executor and deploying to prod environment of current project to avoid conflicting deployments", 
 			"具有相同顺序组和执行器的任务将按顺序执行。例如，您可以为此属性指定 <tt>@project_path@:prod</tt> 用于执行相同执行器并在当前项目的 prod 环境中部署任务以避免冲突的部署");
 		m.put("Key", "键");
+		m.put("Key Fingerprint", "密钥指纹");
 		m.put("Key ID", "密钥 ID");
 		m.put("Key Secret", "密钥密钥");
+		m.put("Key Type", "密钥类型");
 		m.put("Kubectl Config File", "Kubectl 配置文件");
 		m.put("Kubernetes", "Kubernetes");
 		m.put("Kubernetes Executor", "Kubernetes 执行器");
@@ -1888,6 +1891,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Malformed filter", "格式错误的过滤器");
 		m.put("Malformed name filter", "名称过滤格式错误");
 		m.put("Malformed query", "查询语法错误");
+		m.put("Malformed ssh signature", "格式错误的 ssh 签名");
 		m.put("Malformed test suite filter", "测试套件过滤格式错误");
 		m.put("Manage Job", "管理任务");
 		m.put("Manager DN", "管理员 DN");
@@ -2071,6 +2075,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No diffs", "没有差异");
 		m.put("No diffs to navigate", "没有差异可导航");
 		m.put("No directories to skip", "无要跳过的目录");
+		m.put("No executors defined. Jobs will use auto-discovered executor", "未定义执行器。作业将使用自动发现的执行器");
 		m.put("No external authenticator", "无外部认证器");
 		m.put("No fields to prompt", "无要提示的字段");
 		m.put("No fields to remove", "无要删除的字段");
@@ -2135,6 +2140,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("None", "无");
 		m.put("Not Active Since", "不活跃起");
 		m.put("Not Used Since", "未使用时间");
+		m.put("Not a verified email of signing ssh key owner", "不是签署 ssh 密钥所有者的验证邮箱");
 		m.put("Not assigned", "未分配");
 		m.put("Not authorized to create project under \"{0}\"", "无权限在 \"{0}\" 下创建项目");
 		m.put("Not authorized to create root project", "无权限创建根项目");
@@ -3184,6 +3190,15 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Sign Up!", "注册！");
 		m.put("Sign in", "登录");
 		m.put("Signature required for this change, please generate system GPG signing key first", "需要签名才能更改。请先生成系统 GPG 签名密钥");
+		m.put("Signature verified successfully with OneDev GPG key", "使用 OneDev GPG 密钥成功验证签名");
+		m.put("Signature verified successfully with committer's GPG key", "使用提交者的 GPG 密钥成功验证签名");
+		m.put("Signature verified successfully with committer's SSH key", "使用提交者的 SSH 密钥成功验证签名");
+		m.put("Signature verified successfully with tagger's GPG key", "使用标记者的 GPG 密钥成功验证签名");
+		m.put("Signature verified successfully with tagger's SSH key", "使用标记者的 SSH 密钥成功验证签名");
+		m.put("Signature verified successfully with trusted GPG key", "使用可信 GPG 密钥成功验证签名");
+		m.put("Signed with an unknown ssh key", "使用未知的 ssh 密钥签名");
+		m.put("Signer Email Addresses", "签署者邮箱地址");
+		m.put("Signing Key ID", "签署密钥 ID");
 		m.put("Similar Issues", "相似工单");
 		m.put("Single Sign On", "单点登录");
 		m.put("Single Sign On Provider", "单点登录提供者");
@@ -3771,8 +3786,11 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This field is required", "此字段是必填的");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"此过滤器用于确定当前用户的 LDAP 条目。例如：<i>(&(uid={0})(objectclass=person))</i>。在此示例中，<i>{0}</i> 表示当前用户的登录名");
+		m.put("This installation does not have an active subscription and runs as community edition. To access <a href=\"https://onedev.io/pricing\">enterprise features</a>, an active subscription is required", 
+			"此安装没有有效订阅，并作为社区版运行。要访问<a href=\"https://onedev.io/pricing\">企业功能</a>，需要有效订阅");
 		m.put("This installation has a trial subscription and is now running as enterprise edition", 
 			"此安装有试用订阅，现在以企业版运行");
+		m.put("This installation has an active subscription and runs as enterprise edition", "此安装有有效订阅，并作为企业版运行");
 		m.put("This installation has an expired subscription, and runs as community edition", "此安装的订阅已过期，以社区版运行");
 		m.put("This is a Git LFS object, but the storage file is missing", "这是一个 Git LFS 对象，但存储文件缺失");
 		m.put("This is a built-in role and can not be deleted", "这是一个内置角色，无法删除");
@@ -3993,6 +4011,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Under which condition this step should run. <b>Successful</b> means all non-optional steps running before this step are successful", 
 			"在什么条件下应运行此步骤。<b>成功</b>表示在此步骤之前运行的所有非可选步骤都已成功");
 		m.put("Unexpected setting: {0}", "未知设置：{0}");
+		m.put("Unexpected ssh signature hash algorithm: ", "意外的 ssh 签名哈希算法：");
+		m.put("Unexpected ssh signature namespace: ", "意外的 ssh 签名命名空间：");
 		m.put("Unified", "统一");
 		m.put("Unified view", "统一视图");
 		m.put("Unit Test Statistics", "单元测试统计");
@@ -4010,6 +4030,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Unsolicited discord api response", "未主动请求的 discord api 响应");
 		m.put("Unspecified", "未指定");
 		m.put("Unsupported", "不支持");
+		m.put("Unsupported ssh signature algorithm: ", "不支持的 ssh 签名算法：");
+		m.put("Unsupported ssh signature version: ", "不支持的 ssh 签名版本：");
 		m.put("Unverified", "未验证");
 		m.put("Unverified email address is <b>NOT</b> applicable for above functionalities", "未验证的电子邮件地址不适用于上述功能");
 		m.put("Unvote", "取消投票");
@@ -4221,6 +4243,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Will be transcoded to UTF-8", "将被转码为 UTF-8");
 		m.put("Window", "窗口");
 		m.put("Window Memory", "窗口内存");
+		m.put("With current number of users ({0}) in group \"{1}\", the subscription will be active until <b>{2}</b>", 
+			"根据组“{1}”中的当前用户数（{0}），订阅将有效至<b>{2}</b>");
+		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
+			"根据当前用户数（{0}），订阅将有效至<b>{1}</b>");
 		m.put("Workflow reconciliation completed", "工单工作流一致性检查完成");
 		m.put("Working Directory", "工作目录");
 		m.put("Write", "写入");
@@ -4487,14 +4513,12 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("No executors defined. Jobs will use auto-discovered executor", "未定义执行器。作业将使用自动发现的执行器");
-		m.put("This installation does not have an active subscription and runs as community edition. To access <a href=\"https://onedev.io/pricing\">enterprise features</a>, an active subscription is required", 
-			"此安装没有有效订阅，并作为社区版运行。要访问<a href=\"https://onedev.io/pricing\">企业功能</a>，需要有效订阅");
-		m.put("This installation has an active subscription and runs as enterprise edition", "此安装有有效订阅，并作为企业版运行");
-		m.put("With current number of users ({0}) in group \"{1}\", the subscription will be active until <b>{2}</b>", 
-			"根据组“{1}”中的当前用户数（{0}），订阅将有效至<b>{2}</b>");
-		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
-			"根据当前用户数（{0}），订阅将有效至<b>{1}</b>");
+		m.put("Error verifying GPG signature", "验证 GPG 签名时出错");
+		m.put("Invalid GPG signature", "无效的 GPG 签名");
+		m.put("Looks like a GPG signature but without necessary data", "看起来像 GPG 签名但缺少必要数据");
+		m.put("Not a verified email of signing GPG key", "不是签署 GPG 密钥的已验证电子邮件");
+		m.put("Signed with an unknown GPG key ", "使用未知的 GPG 密钥签名");
+		m.put("key ID: ", "密钥 ID:");
 	}
 		
 	@Override
