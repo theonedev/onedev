@@ -167,5 +167,10 @@ public class SetupCacheStep extends Step {
 				getChangeDetectionExcludes(), getUploadProjectPath(), uploadAccessToken);
 	}
 	
+	@Override
+	public boolean isApplicable(Build build, JobExecutor executor) {
+		return true;
+	}
+
 }
  

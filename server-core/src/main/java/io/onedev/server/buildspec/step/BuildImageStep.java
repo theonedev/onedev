@@ -21,7 +21,9 @@ import io.onedev.server.annotation.SubPath;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.jobexecutor.KubernetesAware;
 
 @Editable(order=160, name="Build Image", group = DOCKER_IMAGE, description="Build docker image with docker buildx. " +
 		"This step can only be executed by server docker executor or remote docker executor, and it uses the buildx " +
@@ -124,6 +126,11 @@ public class BuildImageStep extends Step {
 				registryLogins, getPlatforms(), getMoreOptions());
 	}
 	
+	@Override
+	public boolean isApplicable(Build build, JobExecutor executor) {
+		return executor instanceof DockerAware && !(executor instanceof KubernetesAware);
+	}
+
 	@Editable
 	public static interface Output extends Serializable {
 		

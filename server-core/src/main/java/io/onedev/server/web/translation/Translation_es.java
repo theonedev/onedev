@@ -1119,8 +1119,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Enable this if the access token has same permissions as the owner", "Habilitar esto si el token de acceso tiene los mismos permisos que el propietario");
 		m.put("Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)", 
 			"Habilitar esta opción para fusionar automáticamente la solicitud de extracción cuando esté lista (todos los revisores aprobaron, todos los trabajos requeridos pasaron, etc.)");
-		m.put("Enable this to allow to run html report publish step. To avoid XSS attach, make sure this executor can only be used by trusted jobs", 
-			"Habilitar esto para permitir ejecutar el paso de publicación de informes HTML. Para evitar ataques XSS, asegúrese de que este ejecutor solo pueda ser utilizado por trabajos confiables");
 		m.put("Enable this to allow to run site publish step. OneDev will serve project site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
 			"Habilitar esto para permitir ejecutar el paso de publicación del sitio. OneDev servirá los archivos del sitio del proyecto tal como están. Para evitar ataques XSS, asegúrese de que este ejecutor solo pueda ser utilizado por trabajos confiables");
 		m.put("Enable this to place intermediate files required by job execution on dynamically allocated persistent volume instead of emptyDir", 
@@ -1165,6 +1163,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Error validating commit message of \"{0}\": {1}", "Error al validar el mensaje de commit de \"{0}\": {1}");
 		m.put("Error validating commit message of <a href=\"{0}\" class='text-monospace font-size-sm'>{1}</a>: {2}", 
 			"Error al validar el mensaje de commit de <a href=\"{0}\" class='text-monospace font-size-sm'>{1}</a>: {2}");
+		m.put("Error verifying GPG signature", "Error al verificar la firma GPG");
 		m.put("Estimated Time", "Tiempo Estimado");
 		m.put("Estimated Time Edit Bean", "Bean de Edición de Tiempo Estimado");
 		m.put("Estimated Time Issue Field", "Campo de Problema de Tiempo Estimado");
@@ -1460,7 +1459,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Hours Per Day", "Horas por día");
 		m.put("How to Publish", "Cómo publicar");
 		m.put("Html Report", "Informe HTML");
-		m.put("Html Report Publish Enabled", "Publicación de informe HTML habilitada");
 		m.put("Http Method", "Método Http");
 		m.put("I didn't eat it. I swear!", "No me lo comí. ¡Lo juro!");
 		m.put("ID token was expired", "El token de ID ha expirado");
@@ -1582,6 +1580,7 @@ public class Translation_es extends TranslationResourceBundle {
 			"El acceso interactivo a la shell web para trabajos en ejecución es una característica empresarial. <a href='https://onedev.io/pricing' target='_blank'>Prueba gratis</a> por 30 días");
 		m.put("Internal Database", "Base de datos interna");
 		m.put("Interpreter", "Intérprete");
+		m.put("Invalid GPG signature", "Firma GPG inválida");
 		m.put("Invalid PCRE syntax", "Sintaxis PCRE inválida");
 		m.put("Invalid access token: {0}", "Token de acceso inválido: {0}");
 		m.put("Invalid credentials", "Credenciales inválidas");
@@ -1726,7 +1725,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Job Properties", "Propiedades de Trabajo");
 		m.put("Job Properties Bean", "Bean de Propiedades de Trabajo");
 		m.put("Job Property", "Propiedad de Trabajo");
-		m.put("Job Requirement", "Requisito de Trabajo");
 		m.put("Job Secret", "Secreto de Trabajo");
 		m.put("Job Secret Edit Bean", "Editar Bean de Secreto de Trabajo");
 		m.put("Job Secrets", "Secretos de Trabajo");
@@ -1848,6 +1846,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Long-live refresh token of above account which will be used to generate access token to access office 365 mail server. <b class='text-info'>TIPS: </b> you may use the button at right side of this field to login to your office 365 account and generate refresh token. Note that whenever tenant id, client id, client secret, or user principal name is changed, refresh token should be re-generated", 
 			"Token de actualización de larga duración de la cuenta anterior que se utilizará para generar un token de acceso para acceder al servidor de correo de Office 365. <b class='text-info'>CONSEJOS: </b> puede usar el botón en el lado derecho de este campo para iniciar sesión en su cuenta de Office 365 y generar el token de actualización. Tenga en cuenta que cada vez que se cambie el id del inquilino, el id del cliente, el secreto del cliente o el nombre principal del usuario, se debe regenerar el token de actualización");
 		m.put("Longest Duration First", "Mayor Duración Primero");
+		m.put("Looks like a GPG signature but without necessary data", "Parece una firma GPG pero sin los datos necesarios");
 		m.put("Low", "Bajo");
 		m.put("Low Severity", "Severidad Baja");
 		m.put("MERGED", "FUSIONADO");
@@ -2064,7 +2063,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("No diffs", "No hay diferencias");
 		m.put("No diffs to navigate", "No hay diferencias para navegar");
 		m.put("No directories to skip", "No hay directorios para omitir");
-		m.put("No executors defined. Jobs will use auto-discovered executor", "No hay ejecutores definidos. Los trabajos usarán el ejecutor descubierto automáticamente");
 		m.put("No external authenticator", "No hay autenticador externo");
 		m.put("No fields to prompt", "No hay campos para solicitar");
 		m.put("No fields to remove", "No hay campos para eliminar");
@@ -2129,6 +2127,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("None", "Ninguno");
 		m.put("Not Active Since", "No activo desde");
 		m.put("Not Used Since", "No usado desde");
+		m.put("Not a verified email of signing GPG key", "No es un correo electrónico verificado de la clave GPG de firma");
 		m.put("Not a verified email of signing ssh key owner", "No es un correo electrónico verificado del propietario de la clave ssh de firma");
 		m.put("Not assigned", "No asignado");
 		m.put("Not authorized to create project under \"{0}\"", "No autorizado para crear un proyecto bajo \"{0}\"");
@@ -2294,8 +2293,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Optionally specify arguments to run above image", "Opcionalmente especifique argumentos para ejecutar la imagen anterior.");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
 			"Opcionalmente especifique artefactos para recuperar de la dependencia en el <a href='https://docs.onedev.io/concepts#job-workspace'>espacio de trabajo del trabajo</a>. Solo se pueden recuperar artefactos publicados (a través del paso de publicación de artefactos). Déjelo vacío para no recuperar ningún artefacto.");
-		m.put("Optionally specify authorized executor for this job. Leave empty to use first applicable executor (or use auto-discovered executor if no executors are defined)", 
-			"Opcionalmente especifique el ejecutor autorizado para este trabajo. Déjelo vacío para usar el primer ejecutor aplicable (o use el ejecutor auto-descubierto si no se definen ejecutores).");
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"Opcionalmente especifique roles autorizados para presionar este botón. Si no se especifica, todos los usuarios están permitidos.");
 		m.put("Optionally specify base query of the list", "Opcionalmente especifique la consulta base de la lista.");
@@ -2344,7 +2341,6 @@ public class Translation_es extends TranslationResourceBundle {
 			"Opcionalmente especifique problemas aplicables para esta transición. Déjelo vacío para todos los problemas.");
 		m.put("Optionally specify issues applicable for this transition. Leave empty for all issues. ", 
 			"Opcionalmente especifique problemas aplicables para esta transición. Déjelo vacío para todos los problemas.");
-		m.put("Optionally specify job requirement of this executor", "Opcionalmente especifique el requisito de trabajo de este ejecutor.");
 		m.put("Optionally specify jobs allowed to use this script", "Opcionalmente especifique trabajos permitidos para usar este script.");
 		m.put("Optionally specify memory limit for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"Opcionalmente especifique el límite de memoria para cada trabajo/servicio que use este ejecutor. Consulte <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>gestión de recursos de Kubernetes</a> para más detalles.");
@@ -3185,6 +3181,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Signature verified successfully with tagger's GPG key", "Firma verificada exitosamente con la clave GPG del etiquetador");
 		m.put("Signature verified successfully with tagger's SSH key", "Firma verificada exitosamente con la clave SSH del etiquetador");
 		m.put("Signature verified successfully with trusted GPG key", "Firma verificada exitosamente con la clave GPG de confianza");
+		m.put("Signed with an unknown GPG key ", "Firmado con una clave GPG desconocida");
 		m.put("Signed with an unknown ssh key", "Firmado con una clave ssh desconocida");
 		m.put("Signer Email Addresses", "Direcciones de correo electrónico del firmante");
 		m.put("Signing Key ID", "ID de clave de firma");
@@ -3194,7 +3191,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Single sign on via discord.com", "Inicio de sesión único a través de discord.com");
 		m.put("Single sign on via twitch.tv", "Inicio de sesión único a través de twitch.tv");
 		m.put("Site", "Sitio");
-		m.put("Site Publish Enabled", "Publicación del sitio habilitada");
 		m.put("Size", "Tamaño");
 		m.put("Size invalid", "Tamaño inválido");
 		m.put("Slack Notifications", "Notificaciones de Slack");
@@ -3768,10 +3764,6 @@ public class Translation_es extends TranslationResourceBundle {
 			"Este ejecutor ejecuta trabajos de construcción como contenedores de Docker en máquinas remotas a través de <a href='/~administration/agents' target='_blank'>agentes</a>");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"Este ejecutor ejecuta trabajos de construcción como pods en un clúster de Kubernetes. No se requieren agentes.<b class='text-danger'>Nota:</b> Asegúrese de que la URL del servidor esté especificada correctamente en la configuración del sistema, ya que los pods de trabajo necesitan acceder a ella para descargar el código fuente y los artefactos");
-		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs via job requirement setting", 
-			"Este ejecutor ejecuta trabajos de construcción con la instalación de shell del servidor de OneDev.<br><b class='text-danger'>ADVERTENCIA</b>: Los trabajos que se ejecutan con este ejecutor tienen los mismos permisos que el proceso del servidor de OneDev. Asegúrese de que solo pueda ser utilizado por trabajos confiables mediante la configuración de requisitos de trabajo");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as corresponding agent process. Make sure it can only be used by trusted jobs via job requirement setting", 
-			"Este ejecutor ejecuta trabajos de construcción con la instalación de shell de máquinas remotas a través de <a href='/~administration/agents' target='_blank'>agentes</a><br><b class='text-danger'>ADVERTENCIA</b>: Los trabajos que se ejecutan con este ejecutor tienen los mismos permisos que el proceso del agente correspondiente. Asegúrese de que solo pueda ser utilizado por trabajos confiables mediante la configuración de requisitos de trabajo");
 		m.put("This field is required", "Este campo es obligatorio");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"Este filtro se utiliza para determinar la entrada LDAP del usuario actual. Por ejemplo: <i>(&(uid={0})(objectclass=person))</i>. En este ejemplo, <i>{0}</i> representa el nombre de inicio de sesión del usuario actual.");
@@ -4206,8 +4198,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Whether or not to include this field when issue is initially opened. If not, you may include this field later when issue is transited to other states via issue transition rule", 
 			"Si se debe incluir este campo cuando el problema se abre inicialmente o no. Si no, puedes incluir este campo más tarde cuando el problema se transite a otros estados mediante la regla de transición de problemas");
 		m.put("Whether or not to input and display estimated/spent time in hours/minutes only", "Si se debe ingresar y mostrar el tiempo estimado/gastado solo en horas/minutos o no");
-		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. You should configure job requirement above to make sure the executor can only be used by trusted jobs if this option is enabled", 
-			"Si se debe montar el socket de Docker en el contenedor de trabajo para admitir operaciones de Docker en los comandos de trabajo o no<br><b class='text-danger'>ADVERTENCIA</b>: Los trabajos maliciosos pueden tomar control de todo OneDev operando el socket de Docker montado. Debes configurar el requisito de trabajo anterior para asegurarte de que el ejecutor solo pueda ser utilizado por trabajos confiables si esta opción está habilitada");
 		m.put("Whether or not to pre-populate tag mappings in next page. You may want to disable this if there are too many tags to display", 
 			"Si se deben pre-poblar las asignaciones de etiquetas en la siguiente página o no. Es posible que desees deshabilitar esto si hay demasiadas etiquetas para mostrar");
 		m.put("Whether or not to require this dependency to be successful", "Si se requiere que esta dependencia sea exitosa o no");
@@ -4363,6 +4353,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("issue:Number", "Número");
 		m.put("issues", "problemas");
 		m.put("job", "trabajo");
+		m.put("key ID: ", "ID de clave:");
 		m.put("lines", "líneas");
 		m.put("link:Multiple", "Múltiples");
 		m.put("log", "registro");
@@ -4502,12 +4493,22 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Error verifying GPG signature", "Error al verificar la firma GPG");
-		m.put("Invalid GPG signature", "Firma GPG inválida");
-		m.put("Looks like a GPG signature but without necessary data", "Parece una firma GPG pero sin los datos necesarios");
-		m.put("Not a verified email of signing GPG key", "No es un correo electrónico verificado de la clave GPG de firma");
-		m.put("Signed with an unknown GPG key ", "Firmado con una clave GPG desconocida");
-		m.put("key ID: ", "ID de clave:");
+		m.put("Enable Html Report Publish", "Habilitar la publicación del informe Html");
+		m.put("Enable Site Publish", "Habilitar la publicación del sitio");
+		m.put("Enable this to allow to run html report publish step. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
+			"Habilite esto para permitir ejecutar el paso de publicación del informe html. Para evitar ataques XSS, asegúrese de que este ejecutor solo pueda ser utilizado por trabajos confiables");
+		m.put("No executors defined. Jobs will use auto-discovered executors instead", "No se han definido ejecutores. Los trabajos usarán ejecutores descubiertos automáticamente");
+		m.put("Optionally specify applicable jobs of this executor", "Especifique opcionalmente los trabajos aplicables de este ejecutor");
+		m.put("Optionally specify executor for this job. Leave empty to use auto-discover executor", 
+			"Especifique opcionalmente el ejecutor para este trabajo. Déjelo vacío para usar el ejecutor descubierto automáticamente");
+		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
+			"Especifique opcionalmente el ejecutor para este trabajo. Déjelo vacío para usar el primer ejecutor aplicable");
+		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
+			"Este ejecutor ejecuta trabajos de construcción con la instalación de shell del servidor de OneDev.<br><b class='text-danger'>ADVERTENCIA</b>: Los trabajos que se ejecutan con este ejecutor tienen los mismos permisos que el proceso del servidor de OneDev. Asegúrese de que solo pueda ser utilizado por trabajos confiables");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
+			"Este ejecutor ejecuta trabajos de construcción con la instalación de shell de máquinas remotas a través de <a href='/~administration/agents' target='_blank'>agentes</a><br><b class='text-danger'>ADVERTENCIA</b>: Los trabajos que se ejecutan con este ejecutor tienen los mismos permisos que el proceso del agente de OneDev. Asegúrese de que solo pueda ser utilizado por trabajos confiables");
+		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
+			"Si se debe montar o no el socket de Docker en el contenedor del trabajo para admitir operaciones de Docker en los comandos del trabajo<br><b class='text-danger'>ADVERTENCIA</b>: Los trabajos maliciosos pueden tomar el control de todo OneDev operando el socket de Docker montado. Asegúrese de que este ejecutor solo pueda ser utilizado por trabajos confiables si esta opción está habilitada");
 	}
 		
 	@Override

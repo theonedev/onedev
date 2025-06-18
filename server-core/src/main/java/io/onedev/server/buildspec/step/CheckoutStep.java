@@ -98,4 +98,9 @@ public class CheckoutStep extends Step {
 				cloneCredential.newCloneInfo(build, jobToken), checkoutPath);
 	}
 
+	@Override
+	public boolean isApplicable(Build build, JobExecutor executor) {
+		return true;
+	}
+
 }

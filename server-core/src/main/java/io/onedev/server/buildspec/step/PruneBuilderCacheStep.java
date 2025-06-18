@@ -8,7 +8,9 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ReservedOptions;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.jobexecutor.KubernetesAware;
 
 @Editable(order=260, name="Prune Builder Cache", group = DOCKER_IMAGE, description="" +
 		"Prune image cache of docker buildx builder. This step calls docker builder prune command " +
@@ -34,4 +36,9 @@ public class PruneBuilderCacheStep extends Step {
 		return new PruneBuilderCacheFacade(getOptions());
 	}
 	
+	@Override
+	public boolean isApplicable(Build build, JobExecutor executor) {
+		return executor instanceof DockerAware && !(executor instanceof KubernetesAware);
+	}
+
 }

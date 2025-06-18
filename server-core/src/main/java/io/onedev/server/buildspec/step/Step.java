@@ -67,5 +67,7 @@ public abstract class Step implements Serializable {
 	}
 	
 	public abstract StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination);
-		
+
+    public abstract boolean isApplicable(Build build, JobExecutor executor);
+
 }

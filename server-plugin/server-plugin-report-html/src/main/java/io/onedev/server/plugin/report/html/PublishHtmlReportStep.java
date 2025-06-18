@@ -23,6 +23,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.SessionManager;
 
 @Editable(order=1070, group= StepGroup.PUBLISH, name="Html Report")
@@ -96,4 +97,9 @@ public class PublishHtmlReportStep extends PublishReportStep {
 		return PublishHtmlReportStep.class.getName() + ":"	+ projectId + ":" + buildNumber;
 	}
 	
+	@Override
+	public boolean isApplicable(Build build, JobExecutor executor) {
+		return executor.isHtmlReportPublishEnabled();
+	}
+
 }

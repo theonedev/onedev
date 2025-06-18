@@ -20,7 +20,9 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.jobexecutor.KubernetesAware;
 
 @Editable(order=150, name="Run Docker Container", description="Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> "
 		+ "is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKSPACE</code>. " +
@@ -157,4 +159,9 @@ public class RunContainerStep extends Step {
 				registryLogins, isUseTTY());
 	}
 	
+	@Override
+	public boolean isApplicable(Build build, JobExecutor executor) {
+		return executor instanceof DockerAware && !(executor instanceof KubernetesAware);
+	}
+
 }

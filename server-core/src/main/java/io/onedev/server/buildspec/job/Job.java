@@ -136,7 +136,7 @@ public class Job implements NamedElement, Validatable {
 		return new ArrayList<>();
 	}
 
-	@Editable(order=200, placeholderProvider="getJobExecutorPlaceholder", description="Optionally specify executor for this job")
+	@Editable(order=200, placeholderProvider="getJobExecutorPlaceholder", descriptionProvider="getJobExecutorDescription")
 	@Interpolative(literalSuggester="suggestJobExecutors", variableSuggester="suggestVariables")
 	public String getJobExecutor() {
 		return jobExecutor;
@@ -153,6 +153,14 @@ public class Job implements NamedElement, Validatable {
 		else 
 			return _T("First applicable executor");
 	}
+
+	@SuppressWarnings("unused")
+	private static String getJobExecutorDescription() {
+		if (OneDev.getInstance(SettingManager.class).getJobExecutors().isEmpty())
+			return _T("Optionally specify executor for this job. Leave empty to use auto-discover executor");
+		else 
+			return _T("Optionally specify executor for this job. Leave empty to use first applicable executor");
+	}
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestJobExecutors(String matchWith) {
@@ -166,10 +174,10 @@ public class Job implements NamedElement, Validatable {
 			JobMatchContext context = new JobMatchContext(page.getProject(), branch, null, SecurityUtils.getAuthUser(), jobName);
 			for (JobExecutor executor: OneDev.getInstance(SettingManager.class).getJobExecutors()) {
 				if (executor.isEnabled()) {
-					if (executor.getJobRequirement() == null) {
+					if (executor.getJobMatch() == null) {
 						applicableJobExecutors.add(executor.getName());
 					} else {
-						if (JobMatch.parse(executor.getJobRequirement(), true, true).matches(context))
+						if (JobMatch.parse(executor.getJobMatch(), true, true).matches(context))
 							applicableJobExecutors.add(executor.getName());
 					}
 				}

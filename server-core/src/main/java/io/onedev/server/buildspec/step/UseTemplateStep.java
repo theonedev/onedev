@@ -127,4 +127,18 @@ public class UseTemplateStep extends CompositeStep {
 		return actions;
 	}
 
+	@Override
+	public boolean isApplicable(Build build, JobExecutor executor) {
+		var template = build.getSpec().getStepTemplateMap().get(getTemplateName());
+		if (template != null) {
+			for (var step: template.getSteps()) {
+				if (!step.isApplicable(build, executor))
+					return false;
+			}
+			return true;
+		} else {
+			return true;
+		}
+	}
+
 }

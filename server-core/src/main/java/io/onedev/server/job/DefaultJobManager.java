@@ -142,6 +142,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
@@ -499,9 +500,16 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		listenerRegistry.post(new BuildSubmitted(build));
 	}
 
-	private boolean isApplicable(JobExecutor executor, Build build) {
-		if (executor.getJobRequirement() != null) {
-			JobMatch jobMatch = JobMatch.parse(executor.getJobRequirement(), true, true);
+	private boolean isApplicable(Build build, JobExecutor executor) {
+		if (!build.getJob().getRequiredServices().isEmpty() && !(executor instanceof DockerAware))
+			return false;
+			
+		for (var step: build.getJob().getSteps()) {
+			if (!step.isApplicable(build, executor)) 
+				return false;
+		}
+		if (executor.getJobMatch() != null) {
+			JobMatch jobMatch = JobMatch.parse(executor.getJobMatch(), true, true);
 			PullRequest request = build.getRequest();
 			if (request != null) {
 				if (request.getSource() != null) {
@@ -537,7 +545,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			if (jobExecutor != null) {
 				if (!jobExecutor.isEnabled())
 					throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is disabled");
-				else if (!isApplicable(jobExecutor, build))
+				else if (!isApplicable(build, jobExecutor))
 					throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is not applicable for current job");
 				else 
 					return jobExecutor;
@@ -547,7 +555,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		} else {
 			if (!settingManager.getJobExecutors().isEmpty()) {
 				for (var executor : settingManager.getJobExecutors()) {
-					if (executor.isEnabled() && isApplicable(executor, build))
+					if (executor.isEnabled() && isApplicable(build, executor))
 						return executor;
 				}
 				throw new ExplicitException("No applicable job executor");
@@ -559,11 +567,13 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					JobExecutor jobExecutor = discoverer.discover();
 					if (jobExecutor != null) {
 						jobExecutor.setName("auto-discovered");
-						jobLogger.log("Discovered " + EditableUtils.getDisplayName(jobExecutor.getClass()).toLowerCase());
-						return jobExecutor;
+						if (isApplicable(build, jobExecutor)) {
+							jobLogger.log("Discovered " + EditableUtils.getDisplayName(jobExecutor.getClass()).toLowerCase());
+							return jobExecutor;
+						}
 					}
 				}
-				throw new ExplicitException("No applicable job executor discovered");
+				throw new ExplicitException("No applicable job executor discovered for current job");
 			}
 		}
 	}

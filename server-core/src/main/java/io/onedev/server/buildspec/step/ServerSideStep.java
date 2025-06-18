@@ -42,6 +42,11 @@ public abstract class ServerSideStep extends Step {
 	}
 	
 	public abstract ServerStepResult run(Long buildId, File inputDir, TaskLogger logger);
+
+	@Override
+	public boolean isApplicable(Build build, JobExecutor executor) {
+		return true;
+	}
 	
 	public Collection<String> getPlaceholders() {
 		Collection<String> placeholders = new HashSet<>();

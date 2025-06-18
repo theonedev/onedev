@@ -1119,8 +1119,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Enable this if the access token has same permissions as the owner", "액세스 토큰이 소유자와 동일한 권한을 가진 경우 이를 활성화합니다");
 		m.put("Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)", 
 			"준비되었을 때(모든 리뷰어 승인, 모든 필수 작업 통과 등) 풀 리퀘스트를 자동으로 병합하도록 이 옵션을 활성화합니다");
-		m.put("Enable this to allow to run html report publish step. To avoid XSS attach, make sure this executor can only be used by trusted jobs", 
-			"HTML 보고서 게시 단계를 실행할 수 있도록 허용하려면 이를 활성화합니다. XSS 공격을 방지하려면 이 실행자가 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
 		m.put("Enable this to allow to run site publish step. OneDev will serve project site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
 			"사이트 게시 단계를 실행할 수 있도록 허용하려면 이를 활성화합니다. OneDev는 프로젝트 사이트 파일을 그대로 제공합니다. XSS 공격을 방지하려면 이 실행자가 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
 		m.put("Enable this to place intermediate files required by job execution on dynamically allocated persistent volume instead of emptyDir", 
@@ -1165,6 +1163,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Error validating commit message of \"{0}\": {1}", "\"{0}\"의 커밋 메시지 유효성 검사 오류: {1}");
 		m.put("Error validating commit message of <a href=\"{0}\" class='text-monospace font-size-sm'>{1}</a>: {2}", 
 			"<a href=\"{0}\" class='text-monospace font-size-sm'>{1}</a>의 커밋 메시지 유효성 검사 오류: {2}");
+		m.put("Error verifying GPG signature", "GPG 서명 확인 오류");
 		m.put("Estimated Time", "예상 시간");
 		m.put("Estimated Time Edit Bean", "예상 시간 편집 빈");
 		m.put("Estimated Time Issue Field", "예상 시간 이슈 필드");
@@ -1460,7 +1459,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Hours Per Day", "하루당 시간");
 		m.put("How to Publish", "게시 방법");
 		m.put("Html Report", "HTML 보고서");
-		m.put("Html Report Publish Enabled", "HTML 보고서 게시 활성화");
 		m.put("Http Method", "Http 메서드");
 		m.put("I didn't eat it. I swear!", "나는 그것을 먹지 않았어. 맹세해!");
 		m.put("ID token was expired", "ID 토큰이 만료되었습니다");
@@ -1582,6 +1580,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"실행 중인 작업에 대한 대화형 웹 셸 액세스는 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
 		m.put("Internal Database", "내부 데이터베이스");
 		m.put("Interpreter", "인터프리터");
+		m.put("Invalid GPG signature", "유효하지 않은 GPG 서명");
 		m.put("Invalid PCRE syntax", "잘못된 PCRE 구문");
 		m.put("Invalid access token: {0}", "잘못된 액세스 토큰: {0}");
 		m.put("Invalid credentials", "잘못된 자격 증명");
@@ -1726,7 +1725,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Job Properties", "작업 속성들");
 		m.put("Job Properties Bean", "작업 속성 빈");
 		m.put("Job Property", "작업 속성");
-		m.put("Job Requirement", "작업 요구사항");
 		m.put("Job Secret", "작업 비밀");
 		m.put("Job Secret Edit Bean", "작업 비밀 편집 빈");
 		m.put("Job Secrets", "작업 비밀들");
@@ -1848,6 +1846,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Long-live refresh token of above account which will be used to generate access token to access office 365 mail server. <b class='text-info'>TIPS: </b> you may use the button at right side of this field to login to your office 365 account and generate refresh token. Note that whenever tenant id, client id, client secret, or user principal name is changed, refresh token should be re-generated", 
 			"위 계정의 장기 새로 고침 토큰은 Office 365 메일 서버에 액세스하기 위한 액세스 토큰을 생성하는 데 사용됩니다. <b class='text-info'>팁: </b> 이 필드 오른쪽에 있는 버튼을 사용하여 Office 365 계정에 로그인하고 새로 고침 토큰을 생성할 수 있습니다. 테넌트 ID, 클라이언트 ID, 클라이언트 비밀 또는 사용자 주체 이름이 변경될 때마다 새로 고침 토큰을 다시 생성해야 합니다");
 		m.put("Longest Duration First", "가장 긴 지속 시간 우선");
+		m.put("Looks like a GPG signature but without necessary data", "필요한 데이터가 없는 GPG 서명처럼 보입니다");
 		m.put("Low", "낮음");
 		m.put("Low Severity", "낮은 심각도");
 		m.put("MERGED", "병합됨");
@@ -2064,7 +2063,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No diffs", "차이 없음");
 		m.put("No diffs to navigate", "탐색할 차이 없음");
 		m.put("No directories to skip", "건너뛸 디렉터리 없음");
-		m.put("No executors defined. Jobs will use auto-discovered executor", "정의된 실행자가 없습니다. 작업은 자동 검색된 실행자를 사용합니다");
 		m.put("No external authenticator", "외부 인증자 없음");
 		m.put("No fields to prompt", "프롬프트할 필드 없음");
 		m.put("No fields to remove", "제거할 필드 없음");
@@ -2129,6 +2127,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("None", "없음");
 		m.put("Not Active Since", "활성 상태가 아닌 이후");
 		m.put("Not Used Since", "사용되지 않은 이후");
+		m.put("Not a verified email of signing GPG key", "GPG 키 서명의 확인된 이메일이 아닙니다");
 		m.put("Not a verified email of signing ssh key owner", "서명 ssh 키 소유자의 확인된 이메일이 아님");
 		m.put("Not assigned", "할당되지 않음");
 		m.put("Not authorized to create project under \"{0}\"", "\"{0}\" 아래에 프로젝트를 생성할 권한이 없습니다.");
@@ -2294,8 +2293,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify arguments to run above image", "선택적으로 위 이미지 실행을 위한 인수를 지정하세요.");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
 			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 워크스페이스</a>로 종속 항목에서 검색할 아티팩트를 지정하세요. 게시된 아티팩트(아티팩트 게시 단계에서 게시된 것)만 검색할 수 있습니다. 아티팩트를 검색하지 않으려면 비워 두세요.");
-		m.put("Optionally specify authorized executor for this job. Leave empty to use first applicable executor (or use auto-discovered executor if no executors are defined)", 
-			"선택적으로 이 작업에 대한 권한이 있는 실행자를 지정하세요. 첫 번째 적용 가능한 실행자를 사용하려면 비워 두세요 (또는 실행자가 정의되지 않은 경우 자동 검색된 실행자를 사용하세요).");
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"선택적으로 이 버튼을 누를 수 있는 권한이 있는 역할을 지정하세요. 지정하지 않으면 모든 사용자가 허용됩니다.");
 		m.put("Optionally specify base query of the list", "선택적으로 목록의 기본 쿼리를 지정하세요.");
@@ -2344,7 +2341,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 이 전환에 적용 가능한 문제를 지정하세요. 모든 문제를 지정하려면 비워 두세요.");
 		m.put("Optionally specify issues applicable for this transition. Leave empty for all issues. ", 
 			"선택적으로 이 전환에 적용 가능한 문제를 지정하세요. 모든 문제를 지정하려면 비워 두세요.");
-		m.put("Optionally specify job requirement of this executor", "선택적으로 이 실행자의 작업 요구 사항을 지정하세요.");
 		m.put("Optionally specify jobs allowed to use this script", "선택적으로 이 스크립트를 사용할 수 있는 작업을 지정하세요.");
 		m.put("Optionally specify memory limit for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"선택적으로 이 실행자를 사용하는 각 작업/서비스에 대한 메모리 제한을 지정하세요. 자세한 내용은 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes 리소스 관리</a>를 참조하세요.");
@@ -3185,6 +3181,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Signature verified successfully with tagger's GPG key", "태거의 GPG 키로 서명이 성공적으로 확인되었습니다");
 		m.put("Signature verified successfully with tagger's SSH key", "태거의 SSH 키로 서명이 성공적으로 확인되었습니다");
 		m.put("Signature verified successfully with trusted GPG key", "신뢰할 수 있는 GPG 키로 서명이 성공적으로 확인되었습니다");
+		m.put("Signed with an unknown GPG key ", "알 수 없는 GPG 키로 서명됨");
 		m.put("Signed with an unknown ssh key", "알 수 없는 ssh 키로 서명됨");
 		m.put("Signer Email Addresses", "서명자 이메일 주소");
 		m.put("Signing Key ID", "서명 키 ID");
@@ -3194,7 +3191,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Single sign on via discord.com", "discord.com을 통한 싱글 사인온");
 		m.put("Single sign on via twitch.tv", "twitch.tv를 통한 싱글 사인온");
 		m.put("Site", "사이트");
-		m.put("Site Publish Enabled", "사이트 게시 활성화됨");
 		m.put("Size", "크기");
 		m.put("Size invalid", "크기가 유효하지 않음");
 		m.put("Slack Notifications", "Slack 알림");
@@ -3768,10 +3764,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이 실행자는 <a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신에서 Docker 컨테이너로 빌드 작업을 실행합니다");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"이 실행자는 Kubernetes 클러스터에서 Pod로 빌드 작업을 실행합니다. 에이전트가 필요하지 않습니다.<b class='text-danger'>참고:</b> 작업 Pod가 소스 및 아티팩트를 다운로드하기 위해 시스템 설정에서 서버 URL이 올바르게 지정되었는지 확인하세요");
-		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs via job requirement setting", 
-			"이 실행자는 OneDev 서버의 셸 기능으로 빌드 작업을 실행합니다.<br><b class='text-danger'>경고</b>: 이 실행자로 실행되는 작업은 OneDev 서버 프로세스와 동일한 권한을 가집니다. 작업 요구 사항 설정을 통해 신뢰할 수 있는 작업만 사용할 수 있도록 하세요");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as corresponding agent process. Make sure it can only be used by trusted jobs via job requirement setting", 
-			"이 실행자는 <a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신의 셸 기능으로 빌드 작업을 실행합니다<br><b class='text-danger'>경고</b>: 이 실행자로 실행되는 작업은 해당 에이전트 프로세스와 동일한 권한을 가집니다. 작업 요구 사항 설정을 통해 신뢰할 수 있는 작업만 사용할 수 있도록 하세요");
 		m.put("This field is required", "이 필드는 필수입니다");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"이 필터는 현재 사용자의 LDAP 항목을 결정하는 데 사용됩니다. 예: <i>(&(uid={0})(objectclass=person))</i>. 이 예에서 <i>{0}</i>는 현재 사용자의 로그인 이름을 나타냅니다.");
@@ -4206,8 +4198,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Whether or not to include this field when issue is initially opened. If not, you may include this field later when issue is transited to other states via issue transition rule", 
 			"문제가 처음 열릴 때 이 필드를 포함할지 여부. 포함하지 않을 경우, 문제가 다른 상태로 전환될 때 문제 전환 규칙을 통해 나중에 이 필드를 포함할 수 있습니다");
 		m.put("Whether or not to input and display estimated/spent time in hours/minutes only", "예상/소요 시간을 시간/분 단위로만 입력하고 표시할지 여부");
-		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. You should configure job requirement above to make sure the executor can only be used by trusted jobs if this option is enabled", 
-			"작업 명령에서 Docker 작업을 지원하기 위해 작업 컨테이너에 Docker 소켓을 마운트할지 여부<br><b class='text-danger'>경고</b>: 악성 작업이 마운트된 Docker 소켓을 조작하여 전체 OneDev를 제어할 수 있습니다. 이 옵션이 활성화된 경우, 위의 작업 요구 사항을 구성하여 실행자가 신뢰할 수 있는 작업만 사용할 수 있도록 해야 합니다");
 		m.put("Whether or not to pre-populate tag mappings in next page. You may want to disable this if there are too many tags to display", 
 			"다음 페이지에서 태그 매핑을 미리 채울지 여부. 표시할 태그가 너무 많을 경우 이 옵션을 비활성화할 수 있습니다");
 		m.put("Whether or not to require this dependency to be successful", "이 종속성이 성공해야 하는지 여부");
@@ -4363,6 +4353,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("issue:Number", "번호");
 		m.put("issues", "이슈들");
 		m.put("job", "작업");
+		m.put("key ID: ", "키 ID:");
 		m.put("lines", "라인");
 		m.put("link:Multiple", "다중");
 		m.put("log", "로그");
@@ -4502,12 +4493,22 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Error verifying GPG signature", "GPG 서명 확인 오류");
-		m.put("Invalid GPG signature", "유효하지 않은 GPG 서명");
-		m.put("Looks like a GPG signature but without necessary data", "필요한 데이터가 없는 GPG 서명처럼 보입니다");
-		m.put("Not a verified email of signing GPG key", "GPG 키 서명의 확인된 이메일이 아닙니다");
-		m.put("Signed with an unknown GPG key ", "알 수 없는 GPG 키로 서명됨");
-		m.put("key ID: ", "키 ID:");
+		m.put("Enable Html Report Publish", "HTML 보고서 게시 활성화");
+		m.put("Enable Site Publish", "사이트 게시 활성화");
+		m.put("Enable this to allow to run html report publish step. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
+			"HTML 보고서 게시 단계를 실행할 수 있도록 활성화합니다. XSS 공격을 방지하려면 이 실행자가 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
+		m.put("No executors defined. Jobs will use auto-discovered executors instead", "정의된 실행자가 없습니다. 작업은 자동으로 검색된 실행자를 대신 사용합니다");
+		m.put("Optionally specify applicable jobs of this executor", "선택적으로 이 실행자에 적용 가능한 작업을 지정합니다");
+		m.put("Optionally specify executor for this job. Leave empty to use auto-discover executor", 
+			"선택적으로 이 작업에 대한 실행자를 지정합니다. 비워두면 자동 검색된 실행자를 사용합니다");
+		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
+			"선택적으로 이 작업에 대한 실행자를 지정합니다. 비워두면 첫 번째 적용 가능한 실행자를 사용합니다");
+		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
+			"이 실행자는 OneDev 서버의 셸 기능을 사용하여 빌드 작업을 실행합니다.<br><b class='text-danger'>경고</b>: 이 실행자를 사용하는 작업은 OneDev 서버 프로세스와 동일한 권한을 가집니다. 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
+			"이 실행자는 <a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신의 셸 기능을 사용하여 빌드 작업을 실행합니다<br><b class='text-danger'>경고</b>: 이 실행자를 사용하는 작업은 OneDev 에이전트 프로세스와 동일한 권한을 가집니다. 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
+		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
+			"작업 명령에서 도커 작업을 지원하기 위해 도커 소켓을 작업 컨테이너에 마운트할지 여부<br><b class='text-danger'>경고</b>: 악의적인 작업은 마운트된 도커 소켓을 조작하여 전체 OneDev를 제어할 수 있습니다. 이 옵션이 활성화된 경우 이 실행자가 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
 	}
 		
 	@Override

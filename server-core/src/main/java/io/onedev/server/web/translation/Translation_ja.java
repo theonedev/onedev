@@ -1119,8 +1119,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Enable this if the access token has same permissions as the owner", "アクセス トークンが所有者と同じ権限を持つ場合にこれを有効にする");
 		m.put("Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)", 
 			"このオプションを有効にすると、準備が整ったときにプルリクエストを自動的にマージできます (すべてのレビューアが承認し、すべての必要なジョブが成功するなど)");
-		m.put("Enable this to allow to run html report publish step. To avoid XSS attach, make sure this executor can only be used by trusted jobs", 
-			"HTMLレポート公開ステップを実行できるようにするにはこれを有効にします。XSS攻撃を防ぐため、このエグゼキュータが信頼できるジョブでのみ使用されることを確認してください");
 		m.put("Enable this to allow to run site publish step. OneDev will serve project site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
 			"サイト公開ステップを実行できるようにするにはこれを有効にします。OneDevはプロジェクトサイトファイルをそのまま提供します。XSS攻撃を防ぐため、このエグゼキュータが信頼できるジョブでのみ使用されることを確認してください");
 		m.put("Enable this to place intermediate files required by job execution on dynamically allocated persistent volume instead of emptyDir", 
@@ -1165,6 +1163,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Error validating commit message of \"{0}\": {1}", "\"{0}\"のコミットメッセージの検証中にエラーが発生しました: {1}");
 		m.put("Error validating commit message of <a href=\"{0}\" class='text-monospace font-size-sm'>{1}</a>: {2}", 
 			"<a href=\"{0}\" class='text-monospace font-size-sm'>{1}</a>のコミットメッセージの検証中にエラーが発生しました: {2}");
+		m.put("Error verifying GPG signature", "GPG署名の検証エラー");
 		m.put("Estimated Time", "推定時間");
 		m.put("Estimated Time Edit Bean", "推定時間編集Bean");
 		m.put("Estimated Time Issue Field", "推定時間問題フィールド");
@@ -1460,7 +1459,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Hours Per Day", "1日あたりの時間");
 		m.put("How to Publish", "公開方法");
 		m.put("Html Report", "HTMLレポート");
-		m.put("Html Report Publish Enabled", "HTMLレポート公開を有効化");
 		m.put("Http Method", "HTTPメソッド");
 		m.put("I didn't eat it. I swear!", "私は食べていません。誓います！");
 		m.put("ID token was expired", "IDトークンが期限切れです");
@@ -1582,6 +1580,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"実行中のジョブへのインタラクティブなウェブシェルアクセスはエンタープライズ機能です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料でお試しください</a>");
 		m.put("Internal Database", "内部データベース");
 		m.put("Interpreter", "インタープリター");
+		m.put("Invalid GPG signature", "無効なGPG署名");
 		m.put("Invalid PCRE syntax", "無効なPCRE構文");
 		m.put("Invalid access token: {0}", "無効なアクセス トークン: {0}");
 		m.put("Invalid credentials", "無効な資格情報");
@@ -1726,7 +1725,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Job Properties", "ジョブプロパティ");
 		m.put("Job Properties Bean", "ジョブプロパティビーン");
 		m.put("Job Property", "ジョブプロパティ");
-		m.put("Job Requirement", "ジョブ要件");
 		m.put("Job Secret", "ジョブシークレット");
 		m.put("Job Secret Edit Bean", "ジョブシークレット編集ビーン");
 		m.put("Job Secrets", "ジョブシークレット一覧");
@@ -1848,6 +1846,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Long-live refresh token of above account which will be used to generate access token to access office 365 mail server. <b class='text-info'>TIPS: </b> you may use the button at right side of this field to login to your office 365 account and generate refresh token. Note that whenever tenant id, client id, client secret, or user principal name is changed, refresh token should be re-generated", 
 			"上記アカウントの長期リフレッシュトークンは、Office 365メールサーバーにアクセスするためのアクセストークンを生成するために使用されます。<b class='text-info'>ヒント: </b>このフィールドの右側にあるボタンを使用してOffice 365アカウントにログインし、リフレッシュトークンを生成できます。テナントID、クライアントID、クライアントシークレット、またはユーザープリンシパル名が変更された場合は、リフレッシュトークンを再生成する必要があります");
 		m.put("Longest Duration First", "最長期間優先");
+		m.put("Looks like a GPG signature but without necessary data", "必要なデータがないGPG署名のようです");
 		m.put("Low", "低い");
 		m.put("Low Severity", "低い重大度");
 		m.put("MERGED", "マージ済み");
@@ -2064,7 +2063,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No diffs", "差分なし");
 		m.put("No diffs to navigate", "ナビゲートする差分なし");
 		m.put("No directories to skip", "スキップするディレクトリなし");
-		m.put("No executors defined. Jobs will use auto-discovered executor", "エグゼキュータが定義されていません。ジョブは自動検出されたエグゼキュータを使用します");
 		m.put("No external authenticator", "外部認証機関なし");
 		m.put("No fields to prompt", "プロンプトするフィールドなし");
 		m.put("No fields to remove", "削除するフィールドなし");
@@ -2129,6 +2127,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("None", "なし");
 		m.put("Not Active Since", "以降アクティブではありません");
 		m.put("Not Used Since", "以降使用されていません");
+		m.put("Not a verified email of signing GPG key", "署名GPGキーの確認済みメールではありません");
 		m.put("Not a verified email of signing ssh key owner", "署名sshキー所有者の確認済みメールではありません");
 		m.put("Not assigned", "未割り当て");
 		m.put("Not authorized to create project under \"{0}\"", "\"{0}\"の下にプロジェクトを作成する権限がありません");
@@ -2294,8 +2293,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify arguments to run above image", "オプションで、上記のイメージを実行するための引数を指定してください。");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
 			"オプションで、依存関係から<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に取得するアーティファクトを指定してください。公開されたアーティファクト（アーティファクト公開ステップを介して）だけが取得可能です。アーティファクトを取得しない場合は空のままにしてください。");
-		m.put("Optionally specify authorized executor for this job. Leave empty to use first applicable executor (or use auto-discovered executor if no executors are defined)", 
-			"オプションで、このジョブの認証済みエグゼキューターを指定してください。最初に適用可能なエグゼキューターを使用する場合は空のままにしてください（またはエグゼキューターが定義されていない場合は自動検出されたエグゼキューターを使用します）。");
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"オプションで、このボタンを押すための認証済みロールを指定してください。指定されていない場合、すべてのユーザーが許可されます。");
 		m.put("Optionally specify base query of the list", "オプションで、リストの基本クエリを指定してください。");
@@ -2344,7 +2341,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、この遷移に適用される課題を指定してください。すべての課題に適用する場合は空のままにしてください。");
 		m.put("Optionally specify issues applicable for this transition. Leave empty for all issues. ", 
 			"オプションで、この遷移に適用される課題を指定してください。すべての課題に適用する場合は空のままにしてください。");
-		m.put("Optionally specify job requirement of this executor", "オプションで、このエグゼキューターのジョブ要件を指定してください。");
 		m.put("Optionally specify jobs allowed to use this script", "オプションで、このスクリプトを使用することが許可されているジョブを指定してください。");
 		m.put("Optionally specify memory limit for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"オプションで、このエグゼキューターを使用する各ジョブ/サービスのメモリ制限を指定してください。詳細については<a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetesリソース管理</a>を確認してください。");
@@ -3185,6 +3181,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Signature verified successfully with tagger's GPG key", "タグ付け者のGPGキーで署名が正常に検証されました");
 		m.put("Signature verified successfully with tagger's SSH key", "タグ付け者のSSHキーで署名が正常に検証されました");
 		m.put("Signature verified successfully with trusted GPG key", "信頼されたGPGキーで署名が正常に検証されました");
+		m.put("Signed with an unknown GPG key ", "不明なGPGキーで署名されています");
 		m.put("Signed with an unknown ssh key", "未知のsshキーで署名されました");
 		m.put("Signer Email Addresses", "署名者のメールアドレス");
 		m.put("Signing Key ID", "署名キーID");
@@ -3194,7 +3191,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Single sign on via discord.com", "discord.comを介したシングルサインオン");
 		m.put("Single sign on via twitch.tv", "twitch.tvを介したシングルサインオン");
 		m.put("Site", "サイト");
-		m.put("Site Publish Enabled", "サイト公開が有効");
 		m.put("Size", "サイズ");
 		m.put("Size invalid", "サイズが無効");
 		m.put("Slack Notifications", "Slack通知");
@@ -3768,10 +3764,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"このエグゼキュータは、<a href='/~administration/agents' target='_blank'>エージェント</a>を介してリモートマシン上でDockerコンテナとしてビルドジョブを実行します");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"このエグゼキュータは、Kubernetesクラスター内のPodとしてビルドジョブを実行します。エージェントは不要です。<b class='text-danger'>注意:</b> ジョブPodがソースやアーティファクトをダウンロードするためにサーバーURLがシステム設定で正しく指定されていることを確認してください");
-		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs via job requirement setting", 
-			"このエグゼキュータは、OneDevサーバーのシェル機能を使用してビルドジョブを実行します。<br><b class='text-danger'>警告</b>: このエグゼキュータで実行されるジョブは、OneDevサーバープロセスと同じ権限を持ちます。ジョブ要件設定を通じて信頼できるジョブのみが使用できるようにしてください");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as corresponding agent process. Make sure it can only be used by trusted jobs via job requirement setting", 
-			"このエグゼキュータは、<a href='/~administration/agents' target='_blank'>エージェント</a>を介してリモートマシンのシェル機能を使用してビルドジョブを実行します<br><b class='text-danger'>警告</b>: このエグゼキュータで実行されるジョブは、対応するエージェントプロセスと同じ権限を持ちます。ジョブ要件設定を通じて信頼できるジョブのみが使用できるようにしてください");
 		m.put("This field is required", "このフィールドは必須です");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"このフィルターは現在のユーザーのLDAPエントリを決定するために使用されます。例: <i>(&(uid={0})(objectclass=person))</i>。この例では、<i>{0}</i>は現在のユーザーのログイン名を表します");
@@ -4206,8 +4198,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not to include this field when issue is initially opened. If not, you may include this field later when issue is transited to other states via issue transition rule", 
 			"課題が最初に開かれたときにこのフィールドを含めるかどうか。含めない場合は、課題が課題遷移ルールを介して他の状態に遷移したときに後でこのフィールドを含めることができます");
 		m.put("Whether or not to input and display estimated/spent time in hours/minutes only", "推定時間/消費時間を時間/分単位でのみ入力および表示するかどうか");
-		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. You should configure job requirement above to make sure the executor can only be used by trusted jobs if this option is enabled", 
-			"ジョブコンテナにDockerソックをマウントしてジョブコマンドでDocker操作をサポートするかどうか<br><b class='text-danger'>警告</b>: 悪意のあるジョブがマウントされたDockerソックを操作することでOneDev全体を制御する可能性があります。このオプションを有効にする場合は、上記のジョブ要件を構成して、信頼できるジョブのみがエグゼキューターを使用できるようにする必要があります");
 		m.put("Whether or not to pre-populate tag mappings in next page. You may want to disable this if there are too many tags to display", 
 			"次のページでタグマッピングを事前入力するかどうか。表示するタグが多すぎる場合はこれを無効にすることをお勧めします");
 		m.put("Whether or not to require this dependency to be successful", "この依存関係が成功する必要があるかどうか");
@@ -4363,6 +4353,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("issue:Number", "番号");
 		m.put("issues", "課題");
 		m.put("job", "ジョブ");
+		m.put("key ID: ", "キーID:");
 		m.put("lines", "行");
 		m.put("link:Multiple", "複数");
 		m.put("log", "ログ");
@@ -4502,12 +4493,22 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Error verifying GPG signature", "GPG署名の検証エラー");
-		m.put("Invalid GPG signature", "無効なGPG署名");
-		m.put("Looks like a GPG signature but without necessary data", "必要なデータがないGPG署名のようです");
-		m.put("Not a verified email of signing GPG key", "署名GPGキーの確認済みメールではありません");
-		m.put("Signed with an unknown GPG key ", "不明なGPGキーで署名されています");
-		m.put("key ID: ", "キーID:");
+		m.put("Enable Html Report Publish", "HTMLレポート公開を有効化");
+		m.put("Enable Site Publish", "サイト公開を有効化");
+		m.put("Enable this to allow to run html report publish step. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
+			"HTMLレポート公開ステップを実行できるようにするにはこれを有効化してください。XSS攻撃を防ぐため、このエグゼキュータが信頼できるジョブでのみ使用されることを確認してください");
+		m.put("No executors defined. Jobs will use auto-discovered executors instead", "エグゼキュータが定義されていません。ジョブは自動検出されたエグゼキュータを使用します");
+		m.put("Optionally specify applicable jobs of this executor", "このエグゼキュータに適用可能なジョブを任意で指定してください");
+		m.put("Optionally specify executor for this job. Leave empty to use auto-discover executor", 
+			"このジョブのエグゼキュータを任意で指定してください。空欄の場合、自動検出エグゼキュータを使用します");
+		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
+			"このジョブのエグゼキュータを任意で指定してください。空欄の場合、最初に適用可能なエグゼキュータを使用します");
+		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
+			"このエグゼキュータはOneDevサーバーのシェル機能を使用してビルドジョブを実行します。<br><b class='text-danger'>警告</b>: このエグゼキュータで実行されるジョブはOneDevサーバープロセスと同じ権限を持ちます。信頼できるジョブでのみ使用されることを確認してください");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
+			"このエグゼキュータは<a href='/~administration/agents' target='_blank'>エージェント</a>を介してリモートマシンのシェル機能を使用してビルドジョブを実行します。<br><b class='text-danger'>警告</b>: このエグゼキュータで実行されるジョブはOneDevエージェントプロセスと同じ権限を持ちます。信頼できるジョブでのみ使用されることを確認してください");
+		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
+			"ジョブコマンドでのDocker操作をサポートするために、Dockerソケットをジョブコンテナにマウントするかどうか<br><b class='text-danger'>警告</b>: 悪意のあるジョブがマウントされたDockerソケットを操作することでOneDev全体を制御する可能性があります。このオプションを有効にする場合、このエグゼキュータが信頼できるジョブでのみ使用されることを確認してください");
 	}
 		
 	@Override

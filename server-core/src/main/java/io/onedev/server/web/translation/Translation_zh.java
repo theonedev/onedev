@@ -1176,6 +1176,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Error validating commit message of \"{0}\": {1}", "验证提交信息 \"{0}\" 时出错：{1}");
 		m.put("Error validating commit message of <a href=\"{0}\" class='text-monospace font-size-sm'>{1}</a>: {2}", 
 			"验证提交信息 <a href=\"{0}\" class='text-monospace font-size-sm'>{1}</a> 时出错：{2}");
+		m.put("Error verifying GPG signature", "验证 GPG 签名时出错");
 		m.put("Estimated Time", "预计时间");
 		m.put("Estimated Time Edit Bean", "预计时间编辑 Bean");
 		m.put("Estimated Time Issue Field", "预计时间工单字段");
@@ -1471,7 +1472,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Hours Per Day", "每天小时数");
 		m.put("How to Publish", "如何发布");
 		m.put("Html Report", "HTML 报告");
-		m.put("Html Report Publish Enabled", "HTML 报告发布启用");
 		m.put("Http Method", "Http方法");
 		m.put("I didn't eat it. I swear!", "我没吃它。我发誓！");
 		m.put("ID token was expired", "ID 令牌已过期");
@@ -1593,6 +1593,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"交互式 Web shell 访问运行中的任务是企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
 		m.put("Internal Database", "内部数据库");
 		m.put("Interpreter", "解释器");
+		m.put("Invalid GPG signature", "无效的 GPG 签名");
 		m.put("Invalid PCRE syntax", "无效的 PCRE 语法");
 		m.put("Invalid access token: {0}", "无效的访问令牌：{0}");
 		m.put("Invalid credentials", "无效的凭据");
@@ -1737,7 +1738,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Job Properties", "任务属性");
 		m.put("Job Properties Bean", "任务属性Bean");
 		m.put("Job Property", "任务属性");
-		m.put("Job Requirement", "任务需求");
 		m.put("Job Secret", "任务密钥");
 		m.put("Job Secret Edit Bean", "任务密钥编辑 Bean");
 		m.put("Job Secrets", "任务密钥");
@@ -1859,6 +1859,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Long-live refresh token of above account which will be used to generate access token to access office 365 mail server. <b class='text-info'>TIPS: </b> you may use the button at right side of this field to login to your office 365 account and generate refresh token. Note that whenever tenant id, client id, client secret, or user principal name is changed, refresh token should be re-generated", 
 			"用于生成访问 office 365 邮件服务器访问令牌的长寿命刷新令牌。<b class='text-info'>提示：</b>您可以在此字段右侧的按钮登录到您的 office 365 帐户并生成刷新令牌。请注意，每当 tenant id、client id、client secret 或用户主体名称发生变化时，刷新令牌应重新生成");
 		m.put("Longest Duration First", "最长持续时间优先");
+		m.put("Looks like a GPG signature but without necessary data", "看起来像 GPG 签名但缺少必要数据");
 		m.put("Low", "低");
 		m.put("Low Severity", "轻微");
 		m.put("MERGED", "已合并");
@@ -2075,7 +2076,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No diffs", "没有差异");
 		m.put("No diffs to navigate", "没有差异可导航");
 		m.put("No directories to skip", "无要跳过的目录");
-		m.put("No executors defined. Jobs will use auto-discovered executor", "未定义执行器。作业将使用自动发现的执行器");
 		m.put("No external authenticator", "无外部认证器");
 		m.put("No fields to prompt", "无要提示的字段");
 		m.put("No fields to remove", "无要删除的字段");
@@ -2140,6 +2140,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("None", "无");
 		m.put("Not Active Since", "不活跃起");
 		m.put("Not Used Since", "未使用时间");
+		m.put("Not a verified email of signing GPG key", "不是签署 GPG 密钥的已验证电子邮件");
 		m.put("Not a verified email of signing ssh key owner", "不是签署 ssh 密钥所有者的验证邮箱");
 		m.put("Not assigned", "未分配");
 		m.put("Not authorized to create project under \"{0}\"", "无权限在 \"{0}\" 下创建项目");
@@ -2305,8 +2306,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify arguments to run above image", "可选择指定运行上述镜像的参数");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
 			"可选择指定从依赖项拷贝到 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的制品。只能拷贝已发布的制品（通过制品发布步骤）。留空则不拷贝任何制品");
-		m.put("Optionally specify authorized executor for this job. Leave empty to use first applicable executor (or use auto-discovered executor if no executors are defined)", 
-			"可选择指定此任务的授权执行器。留空则使用第一个适用的执行器（如果未定义执行器，则使用自动发现的执行器）");
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"可选择指定允许按此按钮的授权角色。如果未指定，则允许所有用户");
 		m.put("Optionally specify base query of the list", "可选择指定列表的基本查询");
@@ -2355,7 +2354,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择指定适用于此转换的工单。留空则适用于所有工单");
 		m.put("Optionally specify issues applicable for this transition. Leave empty for all issues. ", 
 			"可选择指定适用于此转换的工单。留空则适用于所有工单。");
-		m.put("Optionally specify job requirement of this executor", "可选择指定此执行器的任务要求");
 		m.put("Optionally specify jobs allowed to use this script", "可选择指定允许使用此脚本的任务");
 		m.put("Optionally specify memory limit for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"可选择为使用此执行器的每个任务/服务指定内存限制。详情请查看 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes 资源管理</a>");
@@ -3196,6 +3194,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Signature verified successfully with tagger's GPG key", "使用标记者的 GPG 密钥成功验证签名");
 		m.put("Signature verified successfully with tagger's SSH key", "使用标记者的 SSH 密钥成功验证签名");
 		m.put("Signature verified successfully with trusted GPG key", "使用可信 GPG 密钥成功验证签名");
+		m.put("Signed with an unknown GPG key ", "使用未知的 GPG 密钥签名");
 		m.put("Signed with an unknown ssh key", "使用未知的 ssh 密钥签名");
 		m.put("Signer Email Addresses", "签署者邮箱地址");
 		m.put("Signing Key ID", "签署密钥 ID");
@@ -3205,7 +3204,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Single sign on via discord.com", "通过 discord.com 单点登录");
 		m.put("Single sign on via twitch.tv", "通过 twitch.tv 单点登录");
 		m.put("Site", "站点");
-		m.put("Site Publish Enabled", "站点发布已启用");
 		m.put("Size", "大小");
 		m.put("Size invalid", "大小无效");
 		m.put("Slack Notifications", "Slack 通知");
@@ -3779,10 +3777,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a> 在远程机器上以 Docker 容器运行构建任务");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"此执行器在 Kubernetes 集群中以 Pod 形式运行构建任务，无需任何代理。<b class='text-danger'>注意：</b> 确保在系统设置中正确指定服务器 URL，因为任务 Pod 需要访问它以下载源代码和产物");
-		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs via job requirement setting", 
-			"此执行器使用 OneDev 服务器的 shell 设施运行构建任务。<br><b class='text-danger'>警告</b>：使用此执行器运行的任务具有与 OneDev 服务器进程相同的权限。确保通过任务要求设置仅允许受信任的任务使用");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as corresponding agent process. Make sure it can only be used by trusted jobs via job requirement setting", 
-			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a> 使用远程机器的 shell 设施运行构建任务。<br><b class='text-danger'>警告</b>：使用此执行器运行的任务具有与相应代理进程相同的权限。确保通过任务要求设置仅允许受信任的任务使用");
 		m.put("This field is required", "此字段是必填的");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"此过滤器用于确定当前用户的 LDAP 条目。例如：<i>(&(uid={0})(objectclass=person))</i>。在此示例中，<i>{0}</i> 表示当前用户的登录名");
@@ -4217,8 +4211,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Whether or not to include this field when issue is initially opened. If not, you may include this field later when issue is transited to other states via issue transition rule", 
 			"在工单首次打开时是否包含此字段。如果不包含，您可以在工单通过工单转换规则转换到其他状态时再包含此字段");
 		m.put("Whether or not to input and display estimated/spent time in hours/minutes only", "是否仅以小时/分钟输入和显示估计/耗费时间");
-		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. You should configure job requirement above to make sure the executor can only be used by trusted jobs if this option is enabled", 
-			"是否将 Docker sock 挂载到任务容器中以支持任务命令中的 Docker 操作<br><b class='text-danger'>警告</b>：恶意任务通过操作挂载的 Docker sock 可以控制整个 OneDev。如果启用此选项，您应配置上述任务要求以确保执行器仅被受信任的任务使用");
 		m.put("Whether or not to pre-populate tag mappings in next page. You may want to disable this if there are too many tags to display", 
 			"是否在下一页预填充标签映射。如果要显示的标签过多，您可能希望禁用此选项");
 		m.put("Whether or not to require this dependency to be successful", "是否要求此依赖成功");
@@ -4374,6 +4366,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("issue:Number", "工单号");
 		m.put("issues", "工单");
 		m.put("job", "任务");
+		m.put("key ID: ", "密钥 ID:");
 		m.put("lines", "行");
 		m.put("link:Multiple", "允许链接多个工单");
 		m.put("log", "日志");
@@ -4513,12 +4506,20 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Error verifying GPG signature", "验证 GPG 签名时出错");
-		m.put("Invalid GPG signature", "无效的 GPG 签名");
-		m.put("Looks like a GPG signature but without necessary data", "看起来像 GPG 签名但缺少必要数据");
-		m.put("Not a verified email of signing GPG key", "不是签署 GPG 密钥的已验证电子邮件");
-		m.put("Signed with an unknown GPG key ", "使用未知的 GPG 密钥签名");
-		m.put("key ID: ", "密钥 ID:");
+		m.put("Enable Html Report Publish", "启用 Html 报告发布");
+		m.put("Enable Site Publish", "启用站点发布");
+		m.put("No executors defined. Jobs will use auto-discovered executors instead", "未定义执行器。作业将使用自动发现的执行器");
+		m.put("Optionally specify applicable jobs of this executor", "可选地指定此执行器适用的作业");
+		m.put("Optionally specify executor for this job. Leave empty to use auto-discover executor", 
+			"可选地为此作业指定执行器。留空以使用自动发现的执行器");
+		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
+			"可选地为此作业指定执行器。留空以使用第一个适用的执行器");
+		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
+			"此执行器使用 OneDev 服务器的 shell 功能运行构建作业。<br><b class='text-danger'>警告</b>：使用此执行器运行的作业具有与 OneDev 服务器进程相同的权限。请确保它仅能被可信的作业使用");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
+			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a>使用远程机器的 shell 功能运行构建作业<br><b class='text-danger'>警告</b>：使用此执行器运行的作业具有与 OneDev 代理进程相同的权限。请确保它仅能被可信的作业使用");
+		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
+			"是否将 docker sock 挂载到作业容器中以支持作业命令中的 docker 操作<br><b class='text-danger'>警告</b>：恶意作业可以通过操作挂载的 docker sock 控制整个 OneDev。请确保如果启用此选项，此执行器仅能被可信的作业使用");
 	}
 		
 	@Override

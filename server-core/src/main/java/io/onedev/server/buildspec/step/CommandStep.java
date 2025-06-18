@@ -21,6 +21,7 @@ import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.EditContext;
 
@@ -145,6 +146,14 @@ public class CommandStep extends Step {
 		} else {
 			return getInterpreter().getExecutable(jobExecutor, jobToken, null, null, new ArrayList<>(), envMap, isUseTTY());
 		}
+	}
+
+	@Override
+	public boolean isApplicable(Build build, JobExecutor executor) {
+		if (isRunInContainer()) 
+			return executor instanceof DockerAware;
+		else 
+			return !(executor instanceof DockerAware);
 	}
 
 }

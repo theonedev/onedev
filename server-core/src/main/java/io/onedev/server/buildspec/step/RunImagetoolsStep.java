@@ -16,7 +16,9 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.jobexecutor.KubernetesAware;
 
 @Editable(order=230, name="Run Buildx Image Tools", group = DOCKER_IMAGE, description="Run docker buildx imagetools " +
 		"command with specified arguments. This step can only be executed by server docker executor " +
@@ -60,6 +62,11 @@ public class RunImagetoolsStep extends Step {
 	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
 		var registryLogins = getRegistryLogins().stream().map(it->it.getFacade(build)).collect(toList());
 		return new RunImagetoolsFacade(getArguments(), registryLogins);
+	}
+
+	@Override
+	public boolean isApplicable(Build build, JobExecutor executor) {
+		return executor instanceof DockerAware && !(executor instanceof KubernetesAware);
 	}
 
 }

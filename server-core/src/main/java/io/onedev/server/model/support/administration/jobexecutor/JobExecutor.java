@@ -34,7 +34,7 @@ public abstract class JobExecutor implements Serializable {
 	
 	private String name;
 	
-	private String jobRequirement;
+	private String jobMatch;
 	
 	private boolean htmlReportPublishEnabled;
 	
@@ -87,61 +87,61 @@ public abstract class JobExecutor implements Serializable {
 	@Editable(order=10000, name="Applicable Jobs", placeholder="Any job", description="Optionally specify applicable jobs of this executor")
 	@io.onedev.server.annotation.JobMatch(withProjectCriteria = true, withJobCriteria = true)
 	@Nullable
-	public String getJobRequirement() {
-		return jobRequirement;
+	public String getJobMatch() {
+		return jobMatch;
 	}
 
-	public void setJobRequirement(String jobRequirement) {
-		this.jobRequirement = jobRequirement;
+	public void setJobMatch(String jobMatch) {
+		this.jobMatch = jobMatch;
 	}
 	
 	public abstract boolean execute(JobContext jobContext, TaskLogger jobLogger);
 
 	public Usage onDeleteProject(String projectPath) {
 		Usage usage = new Usage();
-		if (jobRequirement != null && JobMatch.parse(jobRequirement, true, true).isUsingProject(projectPath)) {
+		if (jobMatch != null && JobMatch.parse(jobMatch, true, true).isUsingProject(projectPath)) {
 			usage.add("applicable jobs" );
 		}
 		return usage;
 	}
 	
 	public void onMoveProject(String oldPath, String newPath) {
-		if (jobRequirement != null) {
-			JobMatch jobMatch = JobMatch.parse(jobRequirement, true, true);
-			jobMatch.onMoveProject(oldPath, newPath);
-			jobRequirement = jobMatch.toString();
+		if (jobMatch != null) {
+			JobMatch parsedJobMatch = JobMatch.parse(jobMatch, true, true);
+			parsedJobMatch.onMoveProject(oldPath, newPath);
+			jobMatch = parsedJobMatch.toString();
 		}
 	}
 
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
-		if (jobRequirement != null && JobMatch.parse(jobRequirement, true, true).isUsingUser(userName)) {
+		if (jobMatch != null && JobMatch.parse(jobMatch, true, true).isUsingUser(userName)) {
 			usage.add("applicable jobs");
 		}
 		return usage;
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
-		if (jobRequirement != null) {
-			JobMatch jobMatch = JobMatch.parse(jobRequirement, true, true);
-			jobMatch.onRenameUser(oldName, newName);
-			jobRequirement = jobMatch.toString();
+		if (jobMatch != null) {
+			JobMatch parsedJobMatch = JobMatch.parse(jobMatch, true, true);
+			parsedJobMatch.onRenameUser(oldName, newName);
+			jobMatch = parsedJobMatch.toString();
 		}
 	}
 
 	public Usage onDeleteGroup(String groupName) {
 		Usage usage = new Usage();
-		if (jobRequirement != null && JobMatch.parse(jobRequirement, true, true).isUsingGroup(groupName)) {
+		if (jobMatch != null && JobMatch.parse(jobMatch, true, true).isUsingGroup(groupName)) {
 			usage.add("applicable jobs");
 		}
 		return usage;
 	}
 
 	public void onRenameGroup(String oldName, String newName) {
-		if (jobRequirement != null) {
-			JobMatch jobMatch = JobMatch.parse(jobRequirement, true, true);
-			jobMatch.onRenameGroup(oldName, newName);
-			jobRequirement = jobMatch.toString();
+		if (jobMatch != null) {
+			JobMatch parsedJobMatch = JobMatch.parse(jobMatch, true, true);
+			parsedJobMatch.onRenameGroup(oldName, newName);
+			jobMatch = parsedJobMatch.toString();
 		}
 	}
 	
