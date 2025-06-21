@@ -1,5 +1,8 @@
 package io.onedev.server.web.component.job.jobinfo;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -37,6 +40,7 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
+import io.onedev.server.web.util.TextUtils;
 
 public abstract class JobInfoButton extends Panel {
 
@@ -96,13 +100,13 @@ public abstract class JobInfoButton extends Panel {
 				Build.Status status = getProject().getCommitStatuses(getCommitId(), null, null).get(getJobName());
 				String title;
 				if (status != null) {
+					String statusText = _T(TextUtils.getDisplayValue(status)).toLowerCase();
 					if (status != Status.SUCCESSFUL)
-						title = "Some builds are "; 
+						title = MessageFormat.format(_T("Some builds are {0}"), statusText); 
 					else
-						title = "Builds are "; 
-					title += status.toString().toLowerCase() + ", click for details";
+						title = MessageFormat.format(_T("Builds are {0}"), statusText); 
 				} else {
-					title = "No builds";
+					title = _T("No builds");
 					cssClasses += " no-builds";
 				}
 				tag.put("class", cssClasses);
