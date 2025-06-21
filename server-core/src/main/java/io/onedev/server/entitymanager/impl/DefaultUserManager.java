@@ -182,7 +182,12 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
-    	
+
+    	query = getSession().createQuery("update PullRequestReaction set user=:unknown where user=:user");
+    	query.setParameter("user", user);
+    	query.setParameter("unknown", getUnknown());
+    	query.executeUpdate();
+		
     	query = getSession().createQuery("update PullRequestChange set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
@@ -192,7 +197,12 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
-    	
+
+    	query = getSession().createQuery("update PullRequestCommentReaction set user=:unknown where user=:user");
+    	query.setParameter("user", user);
+    	query.setParameter("unknown", getUnknown());
+    	query.executeUpdate();
+		
     	query = getSession().createQuery("update CodeComment set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
@@ -222,12 +232,22 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
-    	
+
+    	query = getSession().createQuery("update IssueReaction set user=:unknown where user=:user");
+    	query.setParameter("user", user);
+    	query.setParameter("unknown", getUnknown());
+    	query.executeUpdate();
+		
     	query = getSession().createQuery("update IssueComment set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
+    	query = getSession().createQuery("update IssueCommentReaction set user=:unknown where user=:user");
+    	query.setParameter("user", user);
+    	query.setParameter("unknown", getUnknown());
+    	query.executeUpdate();
+
     	query = getSession().createQuery("update IssueChange set user=:unknown where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
