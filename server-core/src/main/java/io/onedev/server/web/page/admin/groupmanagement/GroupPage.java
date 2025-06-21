@@ -61,7 +61,7 @@ public abstract class GroupPage extends AdministrationPage {
 		List<PageTab> tabs = new ArrayList<>();
 		
 		var params = paramsOf(getGroup());
-		tabs.add(new PageTab(Model.of(_T("Profile")), Model.of("profile"), GroupProfilePage.class, params));
+		tabs.add(new PageTab(Model.of(_T("Basic Settings")), Model.of("info"), GroupProfilePage.class, params));
 		tabs.add(new PageTab(Model.of(_T("Members")), Model.of("members"), GroupMembershipsPage.class, params));
 		tabs.add(new PageTab(Model.of(_T("Authorized Projects")), Model.of("project"), GroupAuthorizationsPage.class, params));
 		

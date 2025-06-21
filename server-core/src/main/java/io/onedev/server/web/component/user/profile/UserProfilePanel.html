@@ -29,7 +29,7 @@
             </div>
             <ul class="detail list-unstyled mb-0">
                 <li wicket:id="activities" class="activity"></li>
-                <li wicket:id="more" class="text-center mt-3"><a wicket:id="link" class="btn btn-primary btn-sm"><wicket:t>More Activities</wicket:t></a></li>
+                <li wicket:id="more" class="mt-3"><a wicket:id="link" class="btn btn-primary btn-sm"><wicket:t>More</wicket:t></a></li>
                 <wicket:enclosure>
                     <li class="activity inaccessibles mt-5"><wicket:svg href="lock" class="icon mr-1"/> <span wicket:id="inaccessibles"></span></li>
                 </wicket:enclosure>
@@ -62,9 +62,9 @@
 		<div class="alert alert-light-warning p-2 font-size-sm"><wicket:t>This is a disabled service account</wicket:t></div>
 	</wicket:fragment>
     <wicket:fragment wicket:id="dateFrag">
-        <h5 class="mt-4 mb-3 d-flex align-items-center">
+        <h6 class="mt-4 mb-3 d-flex align-items-center">
             <wicket:svg href="calendar" class="icon mr-2"/> <span wicket:id="date"></span>
-        </h5>
+        </h6>
     </wicket:fragment>
     <wicket:fragment wicket:id="activityFrag">
         <div class="ml-4 mt-2">

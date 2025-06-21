@@ -14,12 +14,15 @@ import org.apache.wicket.model.IModel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.page.user.UserPage;
 
 public class BasicSettingPanel extends GenericPanel<User> {
 
@@ -61,6 +64,8 @@ public class BasicSettingPanel extends GenericPanel<User> {
 			}
 			
 		}, excludeProperties, true);
+
+		var oldAuditContent = VersionedXmlDoc.fromBean(editor.getPropertyValues()).toXML();
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -77,7 +82,10 @@ public class BasicSettingPanel extends GenericPanel<User> {
 				} 
 				
 				if (editor.isValid()) {
+					var newAuditContent = VersionedXmlDoc.fromBean(editor.getPropertyValues()).toXML();					
 					getUserManager().update(user, oldName);
+					if (getPage() instanceof UserPage)
+						getAuditManager().audit(null, "changed basic settings of account \"" + user.getName() + "\"", oldAuditContent, newAuditContent);
 					Session.get().success(_T("Basic settings updated"));
 					setResponsePage(getPage().getClass(), getPage().getPageParameters());
 				}
@@ -95,4 +103,8 @@ public class BasicSettingPanel extends GenericPanel<User> {
 		return OneDev.getInstance(UserManager.class);
 	}
 
+	private AuditManager getAuditManager() {
+		return OneDev.getInstance(AuditManager.class);
+	}
+	
 }

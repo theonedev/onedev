@@ -20,6 +20,7 @@ import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.PackManager;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
@@ -108,7 +109,9 @@ public class PackDetailPage extends ProjectPage {
 							@Override
 							public void onClick() {
 								getPackManager().delete(getPack());
-
+								var oldAuditContent = VersionedXmlDoc.fromBean(getPack()).toXML();
+								getAuditManager().audit(getPack().getProject(), "deleted package \"" + getPack().getReference(false) + "\"", oldAuditContent, null);
+								
 								Session.get().success(MessageFormat.format(_T("Package {0} deleted"), getPack().getReference(false)));
 
 								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Pack.class);

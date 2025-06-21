@@ -35,6 +35,27 @@ public class SidebarMenu implements Serializable {
 	protected Component newMenuHeader() {
 		return null;
 	}
+
+	public void insertMenuItem(SidebarMenuItem menuItem) {
+		insertMenuItem(menuItems, menuItem);
+	}
+
+	private void insertMenuItem(List<SidebarMenuItem> menuItems, SidebarMenuItem menuItem) {
+		if (menuItem instanceof SidebarMenuItem.SubMenu) {
+			var subMenu = (SidebarMenuItem.SubMenu) menuItem;
+			for (var existingMenuItem: menuItems) {
+				if (existingMenuItem instanceof SidebarMenuItem.SubMenu) {
+					var existingSubMenu = (SidebarMenuItem.SubMenu) existingMenuItem;
+					if (existingSubMenu.getLabel().equals(subMenu.getLabel())) {
+						for (var childMenuItem: subMenu.getMenuItems()) 
+							insertMenuItem(existingSubMenu.getMenuItems(), childMenuItem);
+						return;
+					}
+				}
+			}
+		} 
+		menuItems.add(menuItem);
+	}
 	
 	public static abstract class Header implements Serializable {
 		

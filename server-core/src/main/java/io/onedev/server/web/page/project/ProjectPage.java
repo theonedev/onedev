@@ -194,8 +194,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	
 	@Override
 	protected List<SidebarMenu> getSidebarMenus() {
-		List<SidebarMenu> menus = super.getSidebarMenus();
-		
 		List<SidebarMenuItem> menuItems = new ArrayList<>();
 		
 		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject())) {
@@ -257,13 +255,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					CodeContribsPage.class, CodeContribsPage.paramsOf(getProject()), 
 					Lists.newArrayList(SourceLinesPage.class)));
 		}
-		
-		List<StatisticsMenuContribution> contributions = new ArrayList<>(OneDev.getExtensions(StatisticsMenuContribution.class));
-		contributions.sort(Comparator.comparing(StatisticsMenuContribution::getOrder));
-		
-		for (StatisticsMenuContribution contribution: contributions)
-			statsMenuItems.addAll(contribution.getMenuItems(getProject()));
-		
+				
 		if (!statsMenuItems.isEmpty())
 			menuItems.add(new SidebarMenuItem.SubMenu("stats", _T("Statistics"), statsMenuItems));
 		
@@ -295,10 +287,10 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 				codeSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("Git Pack Config"),
 						GitPackConfigPage.class, GitPackConfigPage.paramsOf(getProject())));
 			}
-			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, _T("Pull Request"),
-					PullRequestSettingPage.class, PullRequestSettingPage.paramsOf(getProject())));
 			
 			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("Code"), codeSettingMenuItems));
+			settingMenuItems.add(new SidebarMenuItem.Page(null, _T("Pull Request"),
+					PullRequestSettingPage.class, PullRequestSettingPage.paramsOf(getProject())));
 			
 			List<SidebarMenuItem> buildSettingMenuItems = new ArrayList<>();
 			
@@ -320,46 +312,9 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 						ServiceDeskSettingPage.class, ServiceDeskSettingPage.paramsOf(getProject())));
 			}
 			
-			List<Class<? extends ContributedProjectSetting>> contributedSettingClasses = new ArrayList<>();
-			for (ProjectSettingContribution contribution:OneDev.getExtensions(ProjectSettingContribution.class)) {
-				for (Class<? extends ContributedProjectSetting> settingClass: contribution.getSettingClasses()) 
-					contributedSettingClasses.add(settingClass);
-			}
-			contributedSettingClasses.sort(Comparator.comparingInt(EditableUtils::getOrder));
-			
-			Map<String, List<SidebarMenuItem>> contributedSettingMenuItems = new HashMap<>();
-			
-			for (var contributedSettingClass: contributedSettingClasses) {
-				var group = EditableUtils.getGroup(contributedSettingClass);
-				if (group == null)
-					group = "";
-				var contributedSettingMenuItemsOfGroup = contributedSettingMenuItems.get(group);
-				if (contributedSettingMenuItemsOfGroup == null) {
-					contributedSettingMenuItemsOfGroup = new ArrayList<>();
-					contributedSettingMenuItems.put(group, contributedSettingMenuItemsOfGroup);
-				}
-				contributedSettingMenuItemsOfGroup.add(new SidebarMenuItem.Page(
-						null,
-						_T(EditableUtils.getDisplayName(contributedSettingClass)),
-						ContributedProjectSettingPage.class,
-						ContributedProjectSettingPage.paramsOf(getProject(), contributedSettingClass)));
-			}
-
 			SidebarMenuItem webHooksItem = new SidebarMenuItem.Page(null, _T("Web Hooks"), 
 					WebHooksPage.class, WebHooksPage.paramsOf(getProject()));			
-			var notificationItems = contributedSettingMenuItems.get("Notification");
-			if (notificationItems == null) 
-				settingMenuItems.add(webHooksItem);
-			else 
-				notificationItems.add(0, webHooksItem);
-			
-			for (var entry: contributedSettingMenuItems.entrySet()) {
-				if (entry.getKey().length() == 0) {
-					settingMenuItems.addAll(entry.getValue());
-				} else {
-					settingMenuItems.add(new SidebarMenuItem.SubMenu(null, _T(entry.getKey()), entry.getValue()));
-				}
-			}
+			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("Notification"), Lists.newArrayList(webHooksItem)));	
 
 			menuItems.add(new SidebarMenuItem.SubMenu("sliders", _T("Settings"), settingMenuItems));
 		}
@@ -380,7 +335,40 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			}
 			
 		};
-		menus.add(new SidebarMenu(menuHeader, menuItems));
+		var menu = new SidebarMenu(menuHeader, menuItems);
+		
+		if (SecurityUtils.canManageProject(getProject())) {
+			List<Class<? extends ContributedProjectSetting>> contributedSettingClasses = new ArrayList<>();
+			for (ProjectSettingContribution contribution:OneDev.getExtensions(ProjectSettingContribution.class)) {
+				for (Class<? extends ContributedProjectSetting> settingClass: contribution.getSettingClasses()) 
+					contributedSettingClasses.add(settingClass);
+			}
+			contributedSettingClasses.sort(Comparator.comparingInt(EditableUtils::getOrder));
+						
+			for (var contributedSettingClass: contributedSettingClasses) {
+				var menuItem = new SidebarMenuItem.Page(
+						null,
+						_T(EditableUtils.getDisplayName(contributedSettingClass)),
+						ContributedProjectSettingPage.class,
+						ContributedProjectSettingPage.paramsOf(getProject(), contributedSettingClass));
+				var group = EditableUtils.getGroup(contributedSettingClass);
+				if (group != null)
+					menu.insertMenuItem(new SidebarMenuItem.SubMenu("sliders", _T("Settings"), Lists.newArrayList(new SidebarMenuItem.SubMenu(null, _T(group), Lists.newArrayList(menuItem)))));
+				else
+					menu.insertMenuItem(new SidebarMenuItem.SubMenu("sliders", _T("Settings"), Lists.newArrayList(menuItem)));
+			}
+		}
+
+		var contributions = new ArrayList<>(OneDev.getExtensions(ProjectMenuContribution.class));
+		contributions.sort(Comparator.comparing(ProjectMenuContribution::getOrder));
+		
+		for (ProjectMenuContribution contribution: contributions) {
+			for (var menuItem: contribution.getMenuItems(getProject())) 
+				menu.insertMenuItem(menuItem);			
+		}
+
+		List<SidebarMenu> menus = super.getSidebarMenus();	
+		menus.add(menu);
 		return menus;
 	}
 

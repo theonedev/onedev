@@ -18,11 +18,13 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.model.Agent;
-import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.InvalidParamException;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.security.SecurityUtils;
 
@@ -37,16 +39,19 @@ public class AgentResource {
 	
 	private final AgentAttributeManager agentAttributeManager;
 	
+	private final AuditManager auditManager;
+	
 	@Inject
-	public AgentResource(AgentManager agentManager, AgentAttributeManager agentAttributeManager) {
+	public AgentResource(AgentManager agentManager, AgentAttributeManager agentAttributeManager, AuditManager auditManager) {
 		this.agentManager = agentManager;
 		this.agentAttributeManager = agentAttributeManager;
+		this.auditManager = auditManager;
 	}
 
 	@Api(order=100)
 	@Path("/{agentId}")
     @GET
-    public Agent getBasicInfo(@PathParam("agentId") Long agentId) {
+    public Agent getAgent(@PathParam("agentId") Long agentId) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
     	return agentManager.load(agentId);
@@ -63,7 +68,7 @@ public class AgentResource {
 	
 	@Api(order=300)
 	@GET
-    public List<Agent> queryBasicInfo(
+    public List<Agent> queryAgents(
     		@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~administration/agents'>agent management page</a>", example="\"Name\" is \"agentName\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
@@ -89,8 +94,12 @@ public class AgentResource {
     	Agent agent = agentManager.load(agentId);
     	if (!agent.isOnline())
     		throw new ExplicitException("Unable to update attributes as agent is offline");
+		var oldAuditContent = VersionedXmlDoc.fromBean(agent.getAttributeMap()).toXML();
 		agentAttributeManager.syncAttributes(agent, attributes);
 		agentManager.attributesUpdated(agent);
+		var newAuditContent = VersionedXmlDoc.fromBean(agent.getAttributeMap()).toXML();
+		auditManager.audit(null, "changed attributes of agent \"" + agent.getName() + "\" via RESTful API", 
+				oldAuditContent, newAuditContent);
 		return Response.ok().build();
     }
 	

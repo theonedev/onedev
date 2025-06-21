@@ -17,18 +17,20 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import io.onedev.server.model.BuildLabel;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildDependence;
+import io.onedev.server.model.BuildLabel;
 import io.onedev.server.model.BuildParam;
-import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.InvalidParamException;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -44,15 +46,18 @@ public class BuildResource {
 
 	private final BuildManager buildManager;
 	
+	private final AuditManager auditManager;
+	
 	@Inject
-	public BuildResource(BuildManager buildManager) {
+	public BuildResource(BuildManager buildManager, AuditManager auditManager) {
 		this.buildManager = buildManager;
+		this.auditManager = auditManager;
 	}
 
 	@Api(order=100)
 	@Path("/{buildId}")
     @GET
-    public Build getBasicInfo(@PathParam("buildId") Long buildId) {
+    public Build getBuild(@PathParam("buildId") Long buildId) {
 		Build build = buildManager.load(buildId);
     	if (!SecurityUtils.canAccessBuild(build)) 
 			throw new UnauthorizedException();
@@ -118,7 +123,7 @@ public class BuildResource {
 	
 	@Api(order=600)
 	@GET
-    public List<Build> queryBasicInfo(
+    public List<Build> queryBuilds(
     		@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~builds'>builds page</a>", example="\"Job\" is \"Release\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
@@ -139,11 +144,13 @@ public class BuildResource {
 	@Api(order=700)
 	@Path("/{buildId}")
     @DELETE
-    public Response delete(@PathParam("buildId") Long buildId) {
+    public Response deleteBuild(@PathParam("buildId") Long buildId) {
     	Build build = buildManager.load(buildId);
     	if (!SecurityUtils.canManageBuild(build))
 			throw new UnauthorizedException();
     	buildManager.delete(build);
+		var oldAuditContent = VersionedXmlDoc.fromBean(build).toXML();
+		auditManager.audit(build.getProject(), "deleted build \"" + build.getReference().toString(build.getProject()) + "\" via RESTful API", oldAuditContent, null);
     	return Response.ok().build();
     }
 	

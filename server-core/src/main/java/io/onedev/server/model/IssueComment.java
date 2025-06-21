@@ -81,7 +81,6 @@ public class IssueComment extends EntityComment {
 		this.revisions = revisions;
 	}
 
-	@Override
 	public IssueCommentFacade getFacade() {
 		return new IssueCommentFacade(getId(), getIssue().getId(), getContent());
 	}

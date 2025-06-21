@@ -28,15 +28,18 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.user.UserPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 
 class CommitQueryWatchesPanel extends GenericPanel<User> {
@@ -77,16 +80,21 @@ class CommitQueryWatchesPanel extends GenericPanel<User> {
 
             @Override
             public void onClick() {
-                for (IModel<QueryInfo> each: selectionColumn.getSelections()) {
-                   var queryInfo = each.getObject();
-                    for (var personalization: getUser().getCommitQueryPersonalizations()) {
-                        if (personalization.getProject().getId().equals(queryInfo.projectId)) {
-                            personalization.getQuerySubscriptions().remove(queryInfo.name);
-                            getCommitQueryPersonalizationManager().createOrUpdate(personalization);
-                        }
-                    }
-                }
-                getUserManager().update(getUser(), null);
+                OneDev.getInstance(TransactionManager.class).run(() -> {
+                    var auditManager = OneDev.getInstance(AuditManager.class);
+                    for (IModel<QueryInfo> each: selectionColumn.getSelections()) {
+                        var queryInfo = each.getObject();
+                         for (var personalization: getUser().getCommitQueryPersonalizations()) {
+                             if (personalization.getProject().getId().equals(queryInfo.projectId)) {
+                                 personalization.getQuerySubscriptions().remove(queryInfo.name);
+                                 getCommitQueryPersonalizationManager().createOrUpdate(personalization);
+                                 if (getPage() instanceof UserPage)
+                                    auditManager.audit(null, "unsubscribed from commit query \"" + queryInfo.name + "\" for account \"" + getUser().getName() + "\" in project \"" + personalization.getProject().getPath() + "\"", null, null);
+                             }
+                         }
+                     }
+                     getUserManager().update(getUser(), null);
+                });
             }
             
             @Override

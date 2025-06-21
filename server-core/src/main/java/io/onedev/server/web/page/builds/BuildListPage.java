@@ -1,11 +1,12 @@
 package io.onedev.server.web.page.builds;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
@@ -16,6 +17,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
@@ -27,14 +29,15 @@ import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
+import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.util.NamedBuildQueriesBean;
-import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 
 public class BuildListPage extends LayoutPage {
 
@@ -86,8 +89,11 @@ public class BuildListPage extends LayoutPage {
 
 			@Override
 			protected void onSaveCommonQueries(ArrayList<NamedBuildQuery> namedQueries) {
+				var oldAuditContent = VersionedXmlDoc.fromBean(getBuildSetting().getNamedQueries()).toXML();
 				getBuildSetting().setNamedQueries(namedQueries);
+				var newAuditContent = VersionedXmlDoc.fromBean(getBuildSetting().getNamedQueries()).toXML();
 				OneDev.getInstance(SettingManager.class).saveBuildSetting(getBuildSetting());
+				getAuditManager().audit(null, "changed build queries", oldAuditContent, newAuditContent);
 			}
 
 		});
@@ -165,13 +171,20 @@ public class BuildListPage extends LayoutPage {
 									protected void onSave(AjaxRequestTarget target, String name) {
 										GlobalBuildSetting buildSetting = getBuildSetting();
 										NamedBuildQuery namedQuery = buildSetting.getNamedQuery(name);
+										String oldAuditContent = null;
+										String verb;
 										if (namedQuery == null) {
 											namedQuery = new NamedBuildQuery(name, query);
 											buildSetting.getNamedQueries().add(namedQuery);
+											verb = "created";
 										} else {
+											oldAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
 											namedQuery.setQuery(query);
+											verb = "changed";
 										}
+										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
 										OneDev.getInstance(SettingManager.class).saveBuildSetting(buildSetting);
+										getAuditManager().audit(null, verb + " build query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}
@@ -233,12 +246,12 @@ public class BuildListPage extends LayoutPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Builds");
+		return new Label(componentId, _T("Builds"));
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		return "Builds - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return _T("Builds") + " - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
 	}
 	
 }

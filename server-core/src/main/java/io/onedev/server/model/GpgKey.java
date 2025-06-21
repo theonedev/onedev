@@ -15,8 +15,9 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import io.onedev.server.model.support.BaseGpgKey;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.model.support.BaseGpgKey;
+import io.onedev.server.rest.annotation.Immutable;
 
 @Editable
 @Entity
@@ -38,6 +39,7 @@ public class GpgKey extends BaseGpgKey {
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(nullable=false)
+    @Immutable
     private User owner;
     
     public long getKeyId() {

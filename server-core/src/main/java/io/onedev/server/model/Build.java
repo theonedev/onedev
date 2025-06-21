@@ -896,7 +896,6 @@ public class Build extends ProjectBelonging
 		return commitsCache.get(sincePrevStatus);
 	}
 	
-	@Override
 	public BuildFacade getFacade() {
 		return new BuildFacade(getId(), getProject().getId(), getNumber(), getCommitHash());
 	}

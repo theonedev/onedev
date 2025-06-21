@@ -29,6 +29,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
@@ -175,8 +176,10 @@ public class StateTransitionListPage extends IssueSettingPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getSetting().getTransitionSpecs().remove(transitionIndex);
+						var transition = getSetting().getTransitionSpecs().remove(transitionIndex);
+						var oldAuditContent = VersionedXmlDoc.fromBean(transition).toXML();
 						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+						getAuditManager().audit(null, "deleted issue transition", oldAuditContent, null);
 						target.add(transitionsTable);
 					}
 
@@ -209,8 +212,11 @@ public class StateTransitionListPage extends IssueSettingPage {
 
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+				var oldAuditContent = VersionedXmlDoc.fromBean(getSetting().getTransitionSpecs()).toXML();
 				CollectionUtils.move(getSetting().getTransitionSpecs(), from.getItemIndex(), to.getItemIndex());
+				var newAuditContent = VersionedXmlDoc.fromBean(getSetting().getTransitionSpecs()).toXML();
 				OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+				getAuditManager().audit(null, "changed order of issue transitions", oldAuditContent, newAuditContent);
 				target.add(transitionsTable);
 			}
 			

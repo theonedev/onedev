@@ -1,5 +1,10 @@
 package io.onedev.server.util.jackson.hibernate;
 
+import java.io.IOException;
+import java.util.Stack;
+
+import org.hibernate.proxy.HibernateProxy;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
@@ -8,13 +13,11 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.BeanDeserializer;
 import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
 import com.google.common.base.Preconditions;
+
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.rest.annotation.Immutable;
-import org.hibernate.proxy.HibernateProxy;
-
-import java.io.IOException;
-import java.util.Stack;
 
 public class EntityDeserializer extends BeanDeserializer {
 
@@ -52,7 +55,7 @@ public class EntityDeserializer extends BeanDeserializer {
 				&& paramsStack.get().peek()[0] instanceof Long) {
 			Long entityId = (Long) paramsStack.get().peek()[0];
 			AbstractEntity entity = dao.load(entityClass, entityId);
-			entity.setOldVersion(entity.getFacade());
+			entity.setOldVersion(VersionedXmlDoc.fromBean(entity));
 
 			Object bean;
 			if (entity instanceof HibernateProxy)

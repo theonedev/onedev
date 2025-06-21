@@ -47,10 +47,13 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.PackManager;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.pack.PackSupport;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -126,6 +129,10 @@ public abstract class PackListPanel extends Panel {
 	private PackManager getPackManager() {
 		return OneDev.getInstance(PackManager.class);
 	}
+
+	private TransactionManager getTransactionManager() {
+		return OneDev.getInstance(TransactionManager.class);
+	}
 	
 	@Nullable
 	private PackQuery parse(@Nullable String queryString, PackQuery baseQuery) {
@@ -172,6 +179,10 @@ public abstract class PackListPanel extends Panel {
 	@Nullable
 	protected QuerySaveSupport getQuerySaveSupport() {
 		return null;
+	}
+
+	private AuditManager getAuditManager() {
+		return OneDev.getInstance(AuditManager.class);
 	}
 	
 	private void doQuery(AjaxRequestTarget target) {
@@ -267,10 +278,16 @@ public abstract class PackListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Pack> packs = new ArrayList<>();
-										for (IModel<Pack> each: selectionColumn.getSelections())
-											packs.add(each.getObject());
-										OneDev.getInstance(PackManager.class).delete(packs);
+										getTransactionManager().run(()-> {
+											Collection<Pack> packs = new ArrayList<>();
+											for (IModel<Pack> each: selectionColumn.getSelections())
+												packs.add(each.getObject());
+											getPackManager().delete(packs);
+											for (var pack: packs) {
+												var oldAuditContent = VersionedXmlDoc.fromBean(pack).toXML();
+												getAuditManager().audit(pack.getProject(), "deleted package \"" + pack.getReference(false) + "\"", oldAuditContent, null);
+											}												
+										});
 										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
@@ -331,11 +348,17 @@ public abstract class PackListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Pack> packs = new ArrayList<>();
-										for (Iterator<Pack> it = (Iterator<Pack>) dataProvider.iterator(0, packsTable.getItemCount()); it.hasNext();) {
-											packs.add(it.next());
-										}
-										OneDev.getInstance(PackManager.class).delete(packs);
+										getTransactionManager().run(()-> {
+											Collection<Pack> packs = new ArrayList<>();
+											for (Iterator<Pack> it = (Iterator<Pack>) dataProvider.iterator(0, packsTable.getItemCount()); it.hasNext();) {
+												packs.add(it.next());
+											}
+											getPackManager().delete(packs);
+											for (var pack: packs) {
+												var oldAuditContent = VersionedXmlDoc.fromBean(pack).toXML();
+												getAuditManager().audit(pack.getProject(), "deleted package \"" + pack.getReference(false) + "\"", oldAuditContent, null);
+											}												
+										});
 										dataProvider.detach();
 										target.add(countLabel);
 										target.add(body);

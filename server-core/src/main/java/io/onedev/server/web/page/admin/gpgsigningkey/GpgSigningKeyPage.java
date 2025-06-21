@@ -65,7 +65,8 @@ public class GpgSigningKeyPage extends AdministrationPage {
 						protected void onConfirm(AjaxRequestTarget target) {
 							GpgSetting setting = getSettingManager().getGpgSetting();
 						    setting.setEncodedSigningKey(null);
-						    getSettingManager().saveGpgSetting(setting);
+						    getSettingManager().saveGpgSetting(setting);		
+							getAuditManager().audit(null, "deleted GPG signing key", null, null);
 							setResponsePage(GpgSigningKeyPage.class);
 						}
 						
@@ -107,6 +108,7 @@ public class GpgSigningKeyPage extends AdministrationPage {
 					GpgSetting setting = getSettingManager().getGpgSetting();
 				    setting.setEncodedSigningKey(baos.toByteArray());
 				    getSettingManager().saveGpgSetting(setting);
+					getAuditManager().audit(null, "generated GPG signing key", null, null);
 					setResponsePage(GpgSigningKeyPage.class);
 				}
 

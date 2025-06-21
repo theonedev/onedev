@@ -88,6 +88,7 @@ public class BrandingSettingPage extends AdministrationPage {
 				setting.setName(bean.getName());
 				setting.setUrl(bean.getUrl());
 				getSettingManager().saveBrandingSetting(setting);
+				getAuditManager().audit(null, "changed branding settings", null, null);
 				if (!bean.getLogoData().equals(getDefaultLogoData(false))) {
 					var bytes = getLogoBytes(bean.getLogoData());
 					getClusterManager().runOnAllServers(new UpdateLogoTask(bytes, false));
@@ -108,6 +109,7 @@ public class BrandingSettingPage extends AdministrationPage {
 				setting.setName(BrandingSetting.DEFAULT_NAME);
 				setting.setUrl(BrandingSetting.DEFAULT_URL);
 				getSettingManager().saveBrandingSetting(setting);
+				getAuditManager().audit(null, "changed branding settings", null, null);
 				getClusterManager().runOnAllServers(new UpdateLogoTask(null, false));
 				getClusterManager().runOnAllServers(new UpdateLogoTask(null, true));
 				setResponsePage(BrandingSettingPage.class);

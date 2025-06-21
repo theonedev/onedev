@@ -54,6 +54,8 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -65,6 +67,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -159,6 +162,18 @@ public abstract class BuildListPanel extends Panel {
 	
 	private BuildManager getBuildManager() {
 		return OneDev.getInstance(BuildManager.class);
+	}
+
+	private ProjectManager getProjectManager() {
+		return OneDev.getInstance(ProjectManager.class);
+	}
+
+	private TransactionManager getTransactionManager() {
+		return OneDev.getInstance(TransactionManager.class);
+	}
+
+	private AuditManager getAuditManager() {
+		return OneDev.getInstance(AuditManager.class);
 	}
 	
 	@Nullable
@@ -445,10 +460,17 @@ public abstract class BuildListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Build> builds = new ArrayList<>();
-										for (IModel<Build> each: selectionColumn.getSelections())
-											builds.add(each.getObject());
-										OneDev.getInstance(BuildManager.class).delete(builds);
+										getTransactionManager().run(()-> {
+											Collection<Build> builds = new ArrayList<>();
+											for (IModel<Build> each: selectionColumn.getSelections())
+												builds.add(each.getObject());
+											getBuildManager().delete(builds);
+											for (var build: builds) {
+												var oldAuditContent = VersionedXmlDoc.fromBean(build).toXML();
+												getAuditManager().audit(build.getProject(), "deleted build \"" + build.getReference().toString(build.getProject()) + "\"", oldAuditContent, null);
+											}												
+										});
+
 										target.add(countLabel);
 										target.add(body);
 										selectionColumn.getSelections().clear();
@@ -655,11 +677,17 @@ public abstract class BuildListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Build> builds = new ArrayList<>();
-										for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) {
-											builds.add(it.next());
-										}
-										OneDev.getInstance(BuildManager.class).delete(builds);
+										getTransactionManager().run(()-> {
+											Collection<Build> builds = new ArrayList<>();
+											for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) {
+												builds.add(it.next());
+											}
+											getBuildManager().delete(builds);
+											for (var build: builds) {
+												var oldAuditContent = VersionedXmlDoc.fromBean(build).toXML();
+												getAuditManager().audit(build.getProject(), "deleted build \"" + build.getReference().toString(build.getProject()) + "\"", oldAuditContent, null);
+											}												
+										});
 										dataProvider.detach();
 										target.add(countLabel);
 										target.add(body);
@@ -763,11 +791,17 @@ public abstract class BuildListPanel extends Panel {
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 						if (getProject() != null) {
+							var oldAuditContent = VersionedXmlDoc.fromBean(getProject().getBuildSetting().getListParams(true)).toXML();
 							getProject().getBuildSetting().setListParams(listParams);
-							OneDev.getInstance(ProjectManager.class).update(getProject());
+							var newAuditContent = VersionedXmlDoc.fromBean(getProject().getBuildSetting().getListParams(true)).toXML();
+							getProjectManager().update(getProject());
+							getAuditManager().audit(getProject(), "changed display params of build list", oldAuditContent, newAuditContent);
 						} else {
+							var oldAuditContent = VersionedXmlDoc.fromBean(getGlobalBuildSetting().getListParams()).toXML();
 							getGlobalBuildSetting().setListParams(listParams);
+							var newAuditContent = VersionedXmlDoc.fromBean(getGlobalBuildSetting().getListParams()).toXML();
 							OneDev.getInstance(SettingManager.class).saveBuildSetting(getGlobalBuildSetting());
+							getAuditManager().audit(null, "changed display params of build list", oldAuditContent, newAuditContent);
 						}
 						setResponsePage(getPage().getClass(), getPage().getPageParameters());
 					}
@@ -779,8 +813,11 @@ public abstract class BuildListPanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						modal.close();
+						var oldAuditContent = VersionedXmlDoc.fromBean(getProject().getBuildSetting().getListParams(true)).toXML();
 						getProject().getBuildSetting().setListParams(null);
-						OneDev.getInstance(ProjectManager.class).update(getProject());
+						var newAuditContent = VersionedXmlDoc.fromBean(getProject().getBuildSetting().getListParams(true)).toXML();
+						getProjectManager().update(getProject());
+						getAuditManager().audit(getProject(), "changed display params of build list", oldAuditContent, newAuditContent);
 						target.add(body);
 					}
 					
@@ -937,9 +974,8 @@ public abstract class BuildListPanel extends Panel {
 
 						@Override
 						protected List<Project> load() {
-							ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new JobPermission(null, new RunJob())));
-							projects.sort(projectManager.cloneCache().comparingPath());
+							projects.sort(getProjectManager().cloneCache().comparingPath());
 							return projects;
 						}
 
@@ -1274,7 +1310,7 @@ public abstract class BuildListPanel extends Panel {
 		new FloatingPanel(target, alignment, true, true, null) {
 
 			private Project getRevisionProject() {
-				return OneDev.getInstance(ProjectManager.class).load(projectId);
+				return getProjectManager().load(projectId);
 			}
 			
 			@Override

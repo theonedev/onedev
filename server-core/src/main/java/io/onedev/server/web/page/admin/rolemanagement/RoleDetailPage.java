@@ -23,6 +23,7 @@ import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.LinkAuthorization;
@@ -97,6 +98,7 @@ public class RoleDetailPage extends AdministrationPage {
 				}
 				
 			});
+			var oldAuditContent = VersionedXmlDoc.fromBean(editor.getPropertyValues()).toXML();
 			
 			Form<?> form = new Form<Void>("form") {
 
@@ -116,6 +118,8 @@ public class RoleDetailPage extends AdministrationPage {
 						for (String linkName: role.getEditableIssueLinks()) 
 							authorizedLinks.add(OneDev.getInstance(LinkSpecManager.class).find(linkName));
 						roleManager.update(role, authorizedLinks, oldName);
+						var newAuditContent = VersionedXmlDoc.fromBean(editor.getPropertyValues()).toXML();
+						getAuditManager().audit(null, "changed role \"" + role.getName() + "\"", oldAuditContent, newAuditContent);
 						setResponsePage(RoleDetailPage.class, RoleDetailPage.paramsOf(role));
 						Session.get().success(MessageFormat.format(_T("Role \"{0}\" updated"), role.getName()));
 					}

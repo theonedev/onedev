@@ -13,11 +13,14 @@ import org.apache.wicket.markup.html.panel.Panel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.AccessTokenManager;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.page.user.UserPage;
 
 abstract class AccessTokenPanel extends Panel {
 	
@@ -49,9 +52,14 @@ abstract class AccessTokenPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				var oldAuditContent = VersionedXmlDoc.fromBean(token).toXML();
 				var token = getToken();
 				token.setValue(CryptoUtils.generateSecret());
+				var newAuditContent = VersionedXmlDoc.fromBean(token).toXML();
 				OneDev.getInstance(AccessTokenManager.class).createOrUpdate(token);
+				if (getPage() instanceof UserPage) {
+					OneDev.getInstance(AuditManager.class).audit(null, "regenerated access token \"" + token.getName() + "\" for account \"" + token.getOwner().getName() + "\"", oldAuditContent, newAuditContent);
+				}
 				target.add(AccessTokenPanel.this);
 				Session.get().success(_T("Access token regenerated successfully"));
 			}

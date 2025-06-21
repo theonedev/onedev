@@ -1,6 +1,25 @@
 package io.onedev.server.model.support.issue;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+
+import org.unbescape.html.HtmlEscape;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
@@ -19,15 +38,12 @@ import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoic
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.component.issue.workflowreconcile.*;
+import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 import io.onedev.server.web.component.stringchoice.StringChoiceProvider;
-import org.unbescape.html.HtmlEscape;
-
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.util.*;
 
 @Editable
 public class BoardSpec implements Serializable {
@@ -52,6 +68,8 @@ public class BoardSpec implements Serializable {
 	
 	private List<String> displayLinks = new ArrayList<>();
 	
+	@XStreamOmitField
+	@JsonIgnore
 	private List<String> editColumns;
 	
 	@Editable(order=100)

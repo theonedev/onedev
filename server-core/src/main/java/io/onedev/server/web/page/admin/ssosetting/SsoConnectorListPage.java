@@ -29,6 +29,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.persistence.TransactionManager;
@@ -172,12 +174,14 @@ public class SsoConnectorListPage extends AdministrationPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						connectors.remove(connectorIndex);
+						var connector = connectors.remove(connectorIndex);
 						OneDev.getInstance(TransactionManager.class).run(new Runnable() {
 
 							@Override
 							public void run() {
 								OneDev.getInstance(SettingManager.class).saveSsoConnectors(connectors);
+								var oldAuditContent = VersionedXmlDoc.fromBean(connector).toXML();
+								OneDev.getInstance(AuditManager.class).audit(null, "deleted sso connector \"" + connector.getName() + "\"", oldAuditContent, null);
 							}
 							
 						});

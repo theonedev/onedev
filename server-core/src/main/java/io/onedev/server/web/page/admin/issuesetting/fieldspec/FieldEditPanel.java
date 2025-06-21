@@ -14,13 +14,15 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -92,8 +94,10 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 				}
 
 				if (editor.isValid()) {
+					String oldAuditContent = null;
 					if (fieldIndex != -1) {
 						FieldSpec oldField = getSetting().getFieldSpecs().get(fieldIndex);
+						oldAuditContent = VersionedXmlDoc.fromBean(oldField).toXML();
 						if (!field.getName().equals(oldField.getName())) {
 							getSetting().setReconciled(false);
 						} else if (oldField instanceof ChoiceField && field instanceof ChoiceField) {
@@ -114,7 +118,10 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 					} else {
 						getSetting().getFieldSpecs().add(field);
 					}
+					var newAuditContent = VersionedXmlDoc.fromBean(field).toXML();
 					OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+					var verb = fieldIndex != -1 ? "changed" : "added";
+					OneDev.getInstance(AuditManager.class).audit(null, verb + " issue field \"" + field.getName() + "\"", oldAuditContent, newAuditContent);
 					onSave(target);
 				} else {
 					target.add(form);

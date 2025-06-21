@@ -1,17 +1,5 @@
 package io.onedev.server.web.page.project.issues.iteration;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IterationManager;
-import io.onedev.server.model.Iteration;
-import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.util.editbean.IterationEditBean;
-
 import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.Component;
@@ -24,6 +12,19 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.IterationManager;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.util.editbean.IterationEditBean;
 
 public class IterationEditPage extends ProjectPage {
 
@@ -39,7 +40,7 @@ public class IterationEditPage extends ProjectPage {
 
 			@Override
 			protected Iteration load() {
-				return OneDev.getInstance(IterationManager.class).load(iterationId);
+				return getIterationManager().load(iterationId);
 			}
 			
 		};
@@ -61,8 +62,11 @@ public class IterationEditPage extends ProjectPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
+				var oldAuditContent = VersionedXmlDoc.fromBean(getIteration()).toXML();
 				bean.update(getIteration());
-				OneDev.getInstance(IterationManager.class).createOrUpdate(getIteration());
+				var newAuditContent = VersionedXmlDoc.fromBean(getIteration()).toXML();
+				getIterationManager().createOrUpdate(getIteration());
+				getAuditManager().audit(getIteration().getProject(), "changed iteration \"" + getIteration().getName() + "\"", oldAuditContent, newAuditContent);
 				Session.get().success(_T("Iteration saved"));
 				setResponsePage(IterationIssuesPage.class, 
 						IterationIssuesPage.paramsOf(getIteration().getProject(), getIteration(), null));
@@ -89,6 +93,10 @@ public class IterationEditPage extends ProjectPage {
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canManageIssues(getProject());
+	}
+
+	private IterationManager getIterationManager() {
+		return OneDev.getInstance(IterationManager.class);
 	}
 
 	@Override

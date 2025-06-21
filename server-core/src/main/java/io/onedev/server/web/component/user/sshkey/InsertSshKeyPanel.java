@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
@@ -18,6 +19,7 @@ import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.page.user.UserPage;
 
 public abstract class InsertSshKeyPanel extends Panel {
 
@@ -51,7 +53,7 @@ public abstract class InsertSshKeyPanel extends Panel {
                 
                 SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
                 SshKey sshKey = (SshKey) editor.getModelObject();
-                sshKey.fingerprint();
+                sshKey.generateFingerprint();
                 
                 if (sshKeyManager.findByFingerprint(sshKey.getFingerprint()) != null) {
 					editor.error(new Path(new PathNode.Named("content")), "This key is already in use");
@@ -60,6 +62,8 @@ public abstract class InsertSshKeyPanel extends Panel {
                     sshKey.setOwner(getUser());
                     sshKey.setCreatedAt(new Date());
                     sshKeyManager.create(sshKey);
+                    if (getPage() instanceof UserPage)
+						OneDev.getInstance(AuditManager.class).audit(null, "added SSH key \"" + sshKey.getFingerprint() + "\" for account \"" + sshKey.getOwner().getName() + "\"", null, null);
                     onSave(target);
                 }
             }

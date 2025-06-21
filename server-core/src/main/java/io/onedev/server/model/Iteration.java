@@ -1,13 +1,28 @@
 package io.onedev.server.model;
 
-import io.onedev.server.rest.annotation.Immutable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.annotation.Nullable;
-import javax.persistence.*;
-import java.util.*;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.annotation.Immutable;
 
 @Entity
 @Table(
@@ -39,11 +54,14 @@ public class Iteration extends AbstractEntity {
 	@Column(nullable=false)
 	private String name;
 	
+	@Api(description="Description of the iteration. May be null")
 	@Column(length=MAX_DESCRIPTION_LEN)
 	private String description;
 	
+	@Api(description="Start of the iteration in epoc day. May be null")
 	private Long startDay;
 	
+	@Api(description="Due of the iteration in epoc day. May be null")
 	private Long dueDay;
 	
 	private boolean closed;

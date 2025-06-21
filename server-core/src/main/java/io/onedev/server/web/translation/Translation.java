@@ -154,6 +154,7 @@ public class Translation extends TranslationResourceBundle {
 		extraKeys.add("{0} minute");
 		extraKeys.add("{0} hour");
 		extraKeys.add("{0} day");		
+		extraKeys.add("Server is Starting...");
 		
 		return extraKeys;
 	}

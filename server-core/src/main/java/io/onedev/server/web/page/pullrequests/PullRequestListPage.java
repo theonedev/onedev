@@ -1,6 +1,23 @@
 package io.onedev.server.web.page.pullrequests;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
@@ -21,18 +38,6 @@ import io.onedev.server.web.util.NamedPullRequestQueriesBean;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.ArrayList;
 
 public class PullRequestListPage extends LayoutPage {
 
@@ -79,8 +84,11 @@ public class PullRequestListPage extends LayoutPage {
 
 			@Override
 			protected void onSaveCommonQueries(ArrayList<NamedPullRequestQuery> queries) {
+				var oldAuditContent = VersionedXmlDoc.fromBean(getPullRequestSetting().getNamedQueries()).toXML();
 				getPullRequestSetting().setNamedQueries(queries);
+				var newAuditContent = VersionedXmlDoc.fromBean(getPullRequestSetting().getNamedQueries()).toXML();
 				OneDev.getInstance(SettingManager.class).savePullRequestSetting(getPullRequestSetting());
+				getAuditManager().audit(null, "changed pull request queries", oldAuditContent, newAuditContent);
 			}
 
 			@Override
@@ -165,13 +173,20 @@ public class PullRequestListPage extends LayoutPage {
 									protected void onSave(AjaxRequestTarget target, String name) {
 										GlobalPullRequestSetting pullRequestSetting = getPullRequestSetting();
 										NamedPullRequestQuery namedQuery = pullRequestSetting.getNamedQuery(name);
+										String oldAuditContent = null;
+										String verb;
 										if (namedQuery == null) {
 											namedQuery = new NamedPullRequestQuery(name, query);
 											pullRequestSetting.getNamedQueries().add(namedQuery);
+											verb = "created";
 										} else {
+											oldAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
 											namedQuery.setQuery(query);
+											verb = "changed";
 										}
+										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
 										OneDev.getInstance(SettingManager.class).savePullRequestSetting(pullRequestSetting);
+										getAuditManager().audit(null, verb + " pull request query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}
@@ -222,7 +237,7 @@ public class PullRequestListPage extends LayoutPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return "Pull Requests - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return _T("Pull Requests") + " - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
 	}
 	
 	public static PageParameters paramsOf(int page) {
@@ -237,7 +252,7 @@ public class PullRequestListPage extends LayoutPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Pull Requests");
+		return new Label(componentId, _T("Pull Requests"));
 	}
 	
 }

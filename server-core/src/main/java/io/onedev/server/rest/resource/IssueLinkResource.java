@@ -32,7 +32,7 @@ public class IssueLinkResource {
 	@Api(order=100)
 	@Path("/{linkId}")
 	@GET
-	public IssueLink get(@PathParam("linkId") Long linkId) {
+	public IssueLink getLink(@PathParam("linkId") Long linkId) {
 		var link = linkManager.load(linkId);
 		if (!canAccessIssue(link.getTarget()) && !canAccessIssue(link.getSource()))
 			throw new UnauthorizedException();
@@ -41,7 +41,7 @@ public class IssueLinkResource {
 	
 	@Api(order=200, description="Create new issue link")
 	@POST
-	public Long create(@NotNull IssueLink link) {
+	public Long createLink(@NotNull IssueLink link) {
 		if (!canEditIssueLink(link.getSource().getProject(), link.getSpec())
 				&& !canEditIssueLink(link.getTarget().getProject(), link.getSpec())) {
 			throw new UnauthorizedException();
@@ -76,7 +76,7 @@ public class IssueLinkResource {
 	@Api(order=300)
 	@Path("/{linkId}")
 	@DELETE
-	public Response delete(@PathParam("linkId") Long linkId) {
+	public Response deleteLink(@PathParam("linkId") Long linkId) {
 		var link = linkManager.load(linkId);
 		if (!canEditIssueLink(link.getSource().getProject(), link.getSpec()) 
 				&& !canEditIssueLink(link.getTarget().getProject(), link.getSpec())) {

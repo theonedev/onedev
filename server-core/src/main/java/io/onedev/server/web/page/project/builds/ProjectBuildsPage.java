@@ -1,8 +1,24 @@
 package io.onedev.server.web.page.project.builds;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.BuildQueryPersonalizationManager;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.BuildQueryPersonalization;
 import io.onedev.server.model.Project;
@@ -21,24 +37,9 @@ import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.NamedBuildQueriesBean;
-import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import javax.annotation.Nullable;
-
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.io.Serializable;
-import java.util.ArrayList;
 
 public class ProjectBuildsPage extends ProjectPage {
 
@@ -92,10 +93,20 @@ public class ProjectBuildsPage extends ProjectPage {
 				return (ArrayList<NamedBuildQuery>) getProject().getBuildSetting().getNamedQueries();
 			}
 
+			private String getAuditContent() {
+				var auditData = getProject().getBuildSetting().getNamedQueries();
+				if (auditData == null) 
+					auditData = getBuildSetting().getNamedQueries();
+				return VersionedXmlDoc.fromBean(auditData).toXML();
+			}
+
 			@Override
 			protected void onSaveCommonQueries(ArrayList<NamedBuildQuery> namedQueries) {
+				var oldAuditContent = getAuditContent();
 				getProject().getBuildSetting().setNamedQueries(namedQueries);
-				OneDev.getInstance(ProjectManager.class).update(getProject());
+				var newAuditContent = getAuditContent();
+				getProjectManager().update(getProject());
+				getAuditManager().audit(getProject(), "changed build queries", oldAuditContent, newAuditContent);
 			}
 
 			@Override
@@ -184,13 +195,20 @@ public class ProjectBuildsPage extends ProjectPage {
 										if (setting.getNamedQueries() == null) 
 											setting.setNamedQueries(new ArrayList<>(getBuildSetting().getNamedQueries()));
 										NamedBuildQuery namedQuery = getProject().getNamedBuildQuery(name);
+										String oldAuditContent = null;
+										String verb;
 										if (namedQuery == null) {
 											namedQuery = new NamedBuildQuery(name, query);
-											setting.getNamedQueries().add(namedQuery);
+											setting.getNamedQueries().add(namedQuery);	
+											verb = "created";
 										} else {
+											oldAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
 											namedQuery.setQuery(query);
+											verb = "changed";
 										}
-										OneDev.getInstance(ProjectManager.class).update(getProject());
+										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
+										getProjectManager().update(getProject());
+										getAuditManager().audit(getProject(), verb + " build query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}

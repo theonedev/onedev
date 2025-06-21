@@ -64,11 +64,17 @@ public class ExampleValuePanel extends Panel {
 				Api api = clazz.getAnnotation(Api.class);
 				if (api == null || !api.internal()) {
 					for (Method method: clazz.getMethods()) {
-						if (AbstractEntity.class.isAssignableFrom(method.getReturnType()) 
-								&& method.getAnnotation(GET.class) != null
+						if (method.getAnnotation(GET.class) != null
 								&& method.getAnnotation(Path.class) != null 
 								&& GET_ENTITY_PATH.matcher(method.getAnnotation(Path.class).value()).matches()) {
-							resourceMap.put(method.getReturnType(), clazz);
+							var returnType = method.getReturnType();
+							if (AbstractEntity.class.isAssignableFrom(returnType)) {
+								resourceMap.put(returnType, clazz);
+							} else {
+								var entityCreate = returnType.getAnnotation(EntityCreate.class);
+								if (entityCreate != null)
+									resourceMap.put(entityCreate.value(), clazz);
+							}
 						}
 					}
 				}

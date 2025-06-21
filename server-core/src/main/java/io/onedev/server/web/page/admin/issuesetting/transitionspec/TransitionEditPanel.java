@@ -14,6 +14,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
@@ -78,11 +80,17 @@ abstract class TransitionEditPanel extends Panel implements InputContext {
 				super.onSubmit(target, form);
 
 				var transition = bean.getTransitionSpec();
-				if (transitionIndex != -1)
-					getSetting().getTransitionSpecs().set(transitionIndex, transition);
-				else 
+				String oldAuditContent = null;
+				if (transitionIndex != -1) {
+					var oldTransition = getSetting().getTransitionSpecs().set(transitionIndex, transition);
+					oldAuditContent = VersionedXmlDoc.fromBean(oldTransition).toXML();
+				} else {
 					getSetting().getTransitionSpecs().add(transition);
+				}
+				var newAuditContent = VersionedXmlDoc.fromBean(transition).toXML();
 				OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+				var verb = transitionIndex != -1 ? "changed" : "added";
+				OneDev.getInstance(AuditManager.class).audit(null, verb + " issue transition", oldAuditContent, newAuditContent);
 				onSave(target);
 			}
 			

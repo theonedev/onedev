@@ -35,7 +35,8 @@ public class SshServerKeyPage extends AdministrationPage {
 			@Override
 			public void onSubmit() {
 				super.onSubmit();
-				OneDev.getInstance(SettingManager.class).saveSshSetting(sshSetting);
+				getSettingManager().saveSshSetting(sshSetting);
+				getAuditManager().audit(null, "changed SSH server key", null, null);
 				getSession().success(_T("SSH settings have been saved and SSH server restarted"));
 				setResponsePage(SshServerKeyPage.class);
 			}
@@ -49,7 +50,8 @@ public class SshServerKeyPage extends AdministrationPage {
 			@Override
 			public void onClick() {
 				sshSetting.setPemPrivateKey(SshKeyUtils.generatePEMPrivateKey());
-				OneDev.getInstance(SettingManager.class).saveSshSetting(sshSetting);
+				getSettingManager().saveSshSetting(sshSetting);
+				getAuditManager().audit(null, "regenerated SSH server key", null, null);
 				setResponsePage(SshServerKeyPage.class);
 	            getSession().success(_T("Private key regenerated and SSH server restarted"));
 			}
@@ -59,6 +61,10 @@ public class SshServerKeyPage extends AdministrationPage {
         form.setOutputMarkupId(true);
         add(form);
     }
+
+	private SettingManager getSettingManager() {
+		return OneDev.getInstance(SettingManager.class);
+	}
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {

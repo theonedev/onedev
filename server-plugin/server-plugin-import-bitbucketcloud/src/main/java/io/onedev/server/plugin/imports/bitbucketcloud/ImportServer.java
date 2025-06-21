@@ -33,6 +33,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.BaseAuthorizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.command.LsRemoteCommand;
@@ -227,8 +229,10 @@ public class ImportServer implements Serializable, Validatable {
 								if (dryRun) {
 									new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
 								} else {
-									if (project.isNew())
+									if (project.isNew()) {
 										projectManager.create(project);
+										OneDev.getInstance(AuditManager.class).audit(project, "created project", null, VersionedXmlDoc.fromBean(project).toXML());
+									}
 									projectManager.clone(project, builder.build().toString());
 								}
 							} finally {

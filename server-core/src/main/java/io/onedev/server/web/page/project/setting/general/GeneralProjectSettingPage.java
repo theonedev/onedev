@@ -29,6 +29,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.BaseAuthorizationManager;
 import io.onedev.server.entitymanager.ProjectLabelManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -88,6 +89,13 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 
 		}, properties, false);
 		
+		var auditData = editor.getPropertyValues();
+		auditData.put("defaultRoles", defaultRolesBean.getRoleNames());
+		auditData.put("labels", labelsBean.getLabels());
+		auditData.put("parent", parentBean.getParentPath());
+
+		var oldAuditContent = VersionedXmlDoc.fromBean(auditData).toXML();		
+
 		BeanEditor defaultRoleEditor = BeanContext.edit("defaultRoleEditor", defaultRolesBean);		
 		BeanEditor labelsEditor = BeanContext.edit("labelsEditor", labelsBean);
 		BeanEditor parentEditor = BeanContext.edit("parentEditor", parentBean);
@@ -152,7 +160,13 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 								var project = getProject();
 								getProjectManager().update(project);
 								OneDev.getInstance(BaseAuthorizationManager.class).syncRoles(project, defaultRolesBean.getRoles());
-								OneDev.getInstance(ProjectLabelManager.class).sync(project, labelsBean.getLabels());
+								OneDev.getInstance(ProjectLabelManager.class).sync(project, labelsBean.getLabels());								
+								var auditData = editor.getPropertyValues();
+								auditData.put("defaultRoles", defaultRolesBean.getRoleNames());
+								auditData.put("labels", labelsBean.getLabels());
+								auditData.put("parent", parentBean.getParentPath());
+								var newAuditContent = VersionedXmlDoc.fromBean(auditData).toXML();
+								getAuditManager().audit(project, "changed general settings", oldAuditContent, newAuditContent);
 							}
 							
 						});
@@ -179,7 +193,14 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 					protected void onConfirm(AjaxRequestTarget target) {
 						Project project = getProject();
 						OneDev.getInstance(ProjectManager.class).delete(project);
+						var oldAuditContent = VersionedXmlDoc.fromBean(project).toXML();
+						if (project.getParent() != null)
+							getAuditManager().audit(project.getParent(), "deleted child project \"" + project.getName() + "\" via RESTful API", oldAuditContent, null);
+						else
+							getAuditManager().audit(null, "deleted root project \"" + project.getName() + "\" via RESTful API", oldAuditContent, null);
+						
 						getSession().success(MessageFormat.format(_T("Project \"{0}\" deleted"), project.getPath()));
+
 						String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Project.class);
 						if (redirectUrlAfterDelete != null)
 							throw new RedirectToUrlException(redirectUrlAfterDelete);

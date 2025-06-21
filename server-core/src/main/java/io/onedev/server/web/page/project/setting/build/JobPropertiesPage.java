@@ -1,9 +1,10 @@
 package io.onedev.server.web.page.project.setting.build;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.support.build.JobProperty;
-import io.onedev.server.web.editable.PropertyContext;
+import static io.onedev.server.web.translation.Translation._T;
+import static java.util.stream.Collectors.toList;
+
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.basic.Label;
@@ -12,10 +13,11 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import java.util.List;
-
-import static io.onedev.server.web.translation.Translation._T;
-import static java.util.stream.Collectors.toList;
+import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.support.build.JobProperty;
+import io.onedev.server.web.editable.PropertyContext;
 
 public class JobPropertiesPage extends ProjectBuildSettingPage {
 	
@@ -31,6 +33,7 @@ public class JobPropertiesPage extends ProjectBuildSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		var oldAuditContent = VersionedXmlDoc.fromBean(getProject().getBuildSetting().getJobProperties()).toXML();
 		var bean = new JobPropertiesBean();
 		bean.setProperties(getDisplayProperties());
 		
@@ -41,12 +44,12 @@ public class JobPropertiesPage extends ProjectBuildSettingPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				getSession().success(_T("Job properties saved"));
 				getProject().getBuildSetting().setJobProperties(bean.getProperties());
+				var newAuditContent = VersionedXmlDoc.fromBean(getProject().getBuildSetting().getJobProperties()).toXML();
 				OneDev.getInstance(ProjectManager.class).update(getProject());
-				bean.setProperties(getDisplayProperties());
-				var editor = PropertyContext.edit("editor", bean, "properties");
-				form.replace(editor);
+				getAuditManager().audit(getProject(), "changed job properties", oldAuditContent, newAuditContent);
+				setResponsePage(JobPropertiesPage.class, JobPropertiesPage.paramsOf(getProject()));
+				getSession().success(_T("Job properties saved"));
 			}
 			
 		};

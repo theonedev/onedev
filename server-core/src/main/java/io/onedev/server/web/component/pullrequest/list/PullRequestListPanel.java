@@ -57,6 +57,8 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
@@ -68,6 +70,7 @@ import io.onedev.server.model.PullRequestLabel;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.LastActivity;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -147,6 +150,10 @@ public abstract class PullRequestListPanel extends Panel {
 
 	private PullRequestManager getPullRequestManager() {
 		return OneDev.getInstance(PullRequestManager.class);		
+	}
+
+	private TransactionManager getTransactionManager() {
+		return OneDev.getInstance(TransactionManager.class);
 	}
 	
 	@Nullable
@@ -415,10 +422,16 @@ public abstract class PullRequestListPanel extends Panel {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											Collection<PullRequest> requests = new ArrayList<>();
-											for (IModel<PullRequest> each : selectionColumn.getSelections())
-												requests.add(each.getObject());
-											OneDev.getInstance(PullRequestManager.class).delete(requests, getProject());
+											getTransactionManager().run(()-> {
+												Collection<PullRequest> requests = new ArrayList<>();
+												for (IModel<PullRequest> each : selectionColumn.getSelections())
+													requests.add(each.getObject());
+												getPullRequestManager().delete(requests, getProject());
+												for (var request: requests) {
+													var oldAuditContent = VersionedXmlDoc.fromBean(request).toXML();
+													getAuditManager().audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
+												}													
+											});
 											target.add(countLabel);
 											target.add(body);
 											selectionColumn.getSelections().clear();
@@ -614,10 +627,16 @@ public abstract class PullRequestListPanel extends Panel {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											Collection<PullRequest> requests = new ArrayList<>();
-											for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
-												requests.add(it.next());
-											OneDev.getInstance(PullRequestManager.class).delete(requests, getProject());
+											getTransactionManager().run(()-> {
+												Collection<PullRequest> requests = new ArrayList<>();
+												for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
+													requests.add(it.next());
+												getPullRequestManager().delete(requests, getProject());
+												for (var request: requests) {
+													var oldAuditContent = VersionedXmlDoc.fromBean(request).toXML();
+													getAuditManager().audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
+												}													
+											});
 											dataProvider.detach();
 											target.add(countLabel);
 											target.add(body);
@@ -1104,6 +1123,10 @@ public abstract class PullRequestListPanel extends Panel {
 	
 	private PullRequestWatchManager getWatchManager() {
 		return OneDev.getInstance(PullRequestWatchManager.class);
+	}
+
+	private AuditManager getAuditManager() {
+		return OneDev.getInstance(AuditManager.class);
 	}
 
 	@Override

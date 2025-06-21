@@ -41,10 +41,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.web.WebConstants;
@@ -223,12 +225,18 @@ public class UserListPage extends AdministrationPage {
 
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									dropdown.close();
-									getUserManager().enable(selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet()));
-									target.add(countLabel);
-									target.add(usersTable);
-									selectionColumn.getSelections().clear();
-									Session.get().success(_T("Users enabled successfully"));
+									getTransactionManager().run(() -> {
+										dropdown.close();
+										var users = selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet());
+										getUserManager().enable(users);
+										for (var user: users) {
+											getAuditManager().audit(null, "enabled account \"" + user.getName() + "\"", null, null);
+										}
+										target.add(countLabel);
+										target.add(usersTable);
+										selectionColumn.getSelections().clear();
+										Session.get().success(_T("Users enabled successfully"));
+									});
 								}
 
 								@Override
@@ -281,11 +289,17 @@ public class UserListPage extends AdministrationPage {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											getUserManager().disable(selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet()));
-											target.add(countLabel);
-											target.add(usersTable);
-											selectionColumn.getSelections().clear();
-											Session.get().success(_T("Users disabled successfully"));
+											getTransactionManager().run(() -> {
+												var users = selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet());
+												getUserManager().disable(users);
+												for (var user: users) {
+													getAuditManager().audit(null, "disabled account \"" + user.getName() + "\"", null, null);
+												}
+												target.add(countLabel);
+												target.add(usersTable);
+												selectionColumn.getSelections().clear();
+												Session.get().success(_T("Users disabled successfully"));
+											});
 										}
 
 										@Override
@@ -353,11 +367,18 @@ public class UserListPage extends AdministrationPage {
 
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										getUserManager().delete(selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet()));
-										target.add(countLabel);
-										target.add(usersTable);
-										selectionColumn.getSelections().clear();
-										Session.get().success(_T("Users deleted successfully"));
+										getTransactionManager().run(() -> {
+											var users = selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet());
+											getUserManager().delete(users);
+											for (var user: users) {
+												var oldAuditContent = VersionedXmlDoc.fromBean(user).toXML();
+												getAuditManager().audit(null, "deleted account \"" + user.getName() + "\"", oldAuditContent, null);
+											}
+											target.add(countLabel);
+											target.add(usersTable);
+											selectionColumn.getSelections().clear();
+											Session.get().success(_T("Users deleted successfully"));
+										});
 									}
 
 									@Override
@@ -408,17 +429,22 @@ public class UserListPage extends AdministrationPage {
 	
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									dropdown.close();
-									Collection<User> users = new ArrayList<>();
-									for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
-										users.add(it.next());
-									getUserManager().enable(users);
-									target.add(usersTable);
-									dataProvider.detach();
-									usersModel.detach();
-									selectionColumn.getSelections().clear();
-
-									Session.get().success(_T("Users enabled successfully"));								
+									getTransactionManager().run(() -> {
+										dropdown.close();
+										Collection<User> users = new ArrayList<>();
+										for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
+											users.add(it.next());
+										getUserManager().enable(users);
+										for (var user: users) {
+											getAuditManager().audit(null, "enabled account \"" + user.getName() + "\"", null, null);
+										}
+										target.add(usersTable);
+										dataProvider.detach();
+										usersModel.detach();
+										selectionColumn.getSelections().clear();
+	
+										Session.get().success(_T("Users enabled successfully"));								
+									});
 								}
 	
 								@Override
@@ -471,16 +497,21 @@ public class UserListPage extends AdministrationPage {
 	
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											Collection<User> users = new ArrayList<>();
-											for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
-												users.add(it.next());
-											getUserManager().disable(users);
-											target.add(usersTable);
-											dataProvider.detach();
-											usersModel.detach();
-											selectionColumn.getSelections().clear();
-	
-											Session.get().success(_T("Users disabled successfully"));
+											getTransactionManager().run(() -> {
+												Collection<User> users = new ArrayList<>();
+												for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
+													users.add(it.next());
+												getUserManager().disable(users);
+												for (var user: users) {
+													getAuditManager().audit(null, "disabled account \"" + user.getName() + "\"", null, null);
+												}
+												target.add(usersTable);
+												dataProvider.detach();
+												usersModel.detach();
+												selectionColumn.getSelections().clear();
+		
+												Session.get().success(_T("Users disabled successfully"));													
+											});
 										}
 	
 										@Override
@@ -549,16 +580,22 @@ public class UserListPage extends AdministrationPage {
 
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<User> users = new ArrayList<>();
-										for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
-											users.add(it.next());
-										getUserManager().delete(users);
-										target.add(usersTable);
-										dataProvider.detach();
-										usersModel.detach();
-										selectionColumn.getSelections().clear();
-
-										Session.get().success(_T("Users deleted successfully"));
+										getTransactionManager().run(() -> {
+											Collection<User> users = new ArrayList<>();
+											for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
+												users.add(it.next());
+											getUserManager().delete(users);
+											for (var user: users) {
+												var oldAuditContent = VersionedXmlDoc.fromBean(user).toXML();
+												getAuditManager().audit(null, "deleted account \"" + user.getName() + "\"", oldAuditContent, null);
+											}											
+											target.add(usersTable);
+											dataProvider.detach();
+											usersModel.detach();
+											selectionColumn.getSelections().clear();
+	
+											Session.get().success(_T("Users deleted successfully"));
+										});
 									}
 
 									@Override
@@ -815,6 +852,10 @@ public class UserListPage extends AdministrationPage {
 	
 	private EmailAddressManager getEmailAddressManager() {
 		return OneDev.getInstance(EmailAddressManager.class);
+	}
+
+	private TransactionManager getTransactionManager() {
+		return OneDev.getInstance(TransactionManager.class);
 	}
 
 	@Override

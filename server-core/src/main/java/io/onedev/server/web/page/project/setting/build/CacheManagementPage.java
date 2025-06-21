@@ -30,6 +30,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.JobCacheManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.JobCache;
@@ -57,12 +58,15 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 		
 		var bean = new CacheSettingBean();
 		bean.setPreserveDays(getProject().getBuildSetting().getCachePreserveDays());
+		var oldAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 		var form = new Form<Void>("cacheSetting") {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
+				var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 				getProject().getBuildSetting().setCachePreserveDays(bean.getPreserveDays());
 				OneDev.getInstance(ProjectManager.class).update(getProject());
+				getAuditManager().audit(getProject(), "changed job cache preserve days", oldAuditContent, newAuditContent);
 			}
 			
 		};

@@ -70,7 +70,6 @@ public class PullRequestComment extends EntityComment {
 		this.revisions = revisions;
 	}
 
-	@Override
 	public PullRequestCommentFacade getFacade() {
 		return new PullRequestCommentFacade(getId(), getRequest().getId(), getContent());
 	}

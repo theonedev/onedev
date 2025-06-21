@@ -54,7 +54,7 @@ public class DefaultSshKeyManager extends BaseEntityManager<SshKey> implements S
 	        sshKey.setContent(content);
 	        sshKey.setOwner(user);
 	        sshKey.setCreatedAt(new Date());
-	        sshKey.fingerprint();
+	        sshKey.generateFingerprint();
 	        syncMap.put(content, sshKey);
     	}
 

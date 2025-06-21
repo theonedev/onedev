@@ -1,11 +1,5 @@
 package io.onedev.server.web.page.admin.issuesetting.commitmessagefixpatterns;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.issue.CommitMessageFixPatterns;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
-
 import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.Component;
@@ -15,8 +9,17 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.issue.CommitMessageFixPatterns;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
+
 public class CommitMessageFixPatternsPage extends IssueSettingPage {
 
+	private String oldAuditContent;
+	
 	public CommitMessageFixPatternsPage(PageParameters params) {
 		super(params);
 	}
@@ -26,12 +29,16 @@ public class CommitMessageFixPatternsPage extends IssueSettingPage {
 		super.onInitialize();
 
 		CommitMessageFixPatterns patterns = getSetting().getCommitMessageFixPatterns();
+		oldAuditContent = VersionedXmlDoc.fromBean(patterns).toXML();
 		Form<?> form = new Form<Void>("form") {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
 				getSetting().setCommitMessageFixPatterns(patterns);
+				var newAuditContent = VersionedXmlDoc.fromBean(patterns).toXML();
 				getSettingManager().saveIssueSetting(getSetting());
+				getAuditManager().audit(null, "changed commit message fix patterns", oldAuditContent, newAuditContent);
+				oldAuditContent = newAuditContent;
 				Session.get().success(_T("Settings updated"));
 			}
 		};

@@ -1,6 +1,23 @@
 package io.onedev.server.web.page.project.commits;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.CommitQueryPersonalization;
@@ -20,21 +37,6 @@ import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.QuerySaveSupport;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import javax.annotation.Nullable;
-
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.io.Serializable;
-import java.util.ArrayList;
 
 public class ProjectCommitsPage extends ProjectPage {
 
@@ -96,8 +98,11 @@ public class ProjectCommitsPage extends ProjectPage {
 
 			@Override
 			protected void onSaveCommonQueries(ArrayList<NamedCommitQuery> projectQueries) {
+				var oldAuditContent = VersionedXmlDoc.fromBean(getProject().getNamedCommitQueries()).toXML();
 				getProject().setNamedCommitQueries(projectQueries);
+				var newAuditContent = VersionedXmlDoc.fromBean(getProject().getNamedCommitQueries()).toXML();
 				OneDev.getInstance(ProjectManager.class).update(getProject());
+				getAuditManager().audit(getProject(), "changed commit queries", oldAuditContent, newAuditContent);
 			}
 
 		});
@@ -157,13 +162,20 @@ public class ProjectCommitsPage extends ProjectPage {
 									@Override
 									protected void onSave(AjaxRequestTarget target, String name) {
 										NamedCommitQuery namedQuery = NamedQuery.find(getProject().getNamedCommitQueries(), name);
+										String oldAuditContent = null;
+										String verb;
 										if (namedQuery == null) {
 											namedQuery = new NamedCommitQuery(name, query);
 											getProject().getNamedCommitQueries().add(namedQuery);
+											verb = "created";
 										} else {
+											oldAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
 											namedQuery.setQuery(query);
+											verb = "changed";
 										}
+										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
 										OneDev.getInstance(ProjectManager.class).update(getProject());
+										getAuditManager().audit(getProject(), verb + " commit query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}

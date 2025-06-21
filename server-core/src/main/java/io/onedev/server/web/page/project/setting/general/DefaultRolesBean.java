@@ -32,7 +32,7 @@ public class DefaultRolesBean implements Serializable {
 	}
 	
 	public void setRoles(List<Role> roles) {
-		roleNames = roles.stream().map(Role::getName).collect(toList());
+		roleNames = roles.stream().map(Role::getName).sorted().collect(toList());
 	}
 	
 	public List<Role> getRoles() {

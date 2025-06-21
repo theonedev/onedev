@@ -1,12 +1,9 @@
 package io.onedev.server.web.page.project.setting.code.tagprotection;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.support.code.TagProtection;
-import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.web.behavior.sortable.SortBehavior;
-import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.page.project.setting.ProjectSettingPage;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -18,9 +15,12 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.List;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.model.support.code.TagProtection;
+import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
 public class TagProtectionsPage extends ProjectSettingPage {
 
@@ -51,15 +51,20 @@ public class TagProtectionsPage extends ProjectSettingPage {
 
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
-						getProject().getTagProtections().remove(item.getIndex());
-						OneDev.getInstance(ProjectManager.class).update(getProject());
+						var protection = getProject().getTagProtections().remove(item.getIndex());
+						var oldAuditContent = VersionedXmlDoc.fromBean(protection).toXML();
+						getProjectManager().update(getProject());
+						getAuditManager().audit(getProject(), "deleted tag protection rule", oldAuditContent, null);
 						target.add(container);
 					}
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, TagProtection protection) {
-						getProject().getTagProtections().set(item.getIndex(), protection);
-						OneDev.getInstance(ProjectManager.class).update(getProject());
+						var oldProtection = getProject().getTagProtections().set(item.getIndex(), protection);
+						var oldAuditContent = VersionedXmlDoc.fromBean(oldProtection).toXML();
+						var newAuditContent = VersionedXmlDoc.fromBean(protection).toXML();
+						getProjectManager().update(getProject());
+						getAuditManager().audit(getProject(), "changed tag protection rule", oldAuditContent, newAuditContent);
 						target.add(container);
 					}
 
@@ -78,8 +83,11 @@ public class TagProtectionsPage extends ProjectSettingPage {
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 				List<TagProtection> protections = getProject().getTagProtections();
+				var oldAuditContent = VersionedXmlDoc.fromBean(protections).toXML();
 				CollectionUtils.move(protections, from.getItemIndex(), to.getItemIndex());
-				OneDev.getInstance(ProjectManager.class).update(getProject());
+				var newAuditContent = VersionedXmlDoc.fromBean(protections).toXML();
+				getProjectManager().update(getProject());
+				getAuditManager().audit(getProject(), "reordered tag protection rules", oldAuditContent, newAuditContent);
 				
 				target.add(container);
 			}
@@ -102,7 +110,9 @@ public class TagProtectionsPage extends ProjectSettingPage {
 					@Override
 					protected void onSave(AjaxRequestTarget target, TagProtection protection) {
 						getProject().getTagProtections().add(protection);
-						OneDev.getInstance(ProjectManager.class).update(getProject());
+						var newAuditContent = VersionedXmlDoc.fromBean(protection).toXML();
+						getProjectManager().update(getProject());
+						getAuditManager().audit(getProject(), "added tag protection rule", null, newAuditContent);
 						container.replace(newAddNewFrag());
 						target.add(container);
 					}

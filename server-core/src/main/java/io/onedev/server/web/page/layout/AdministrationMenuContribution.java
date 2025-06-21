@@ -5,6 +5,8 @@ import java.util.List;
 
 public interface AdministrationMenuContribution extends Serializable {
 	
-	List<SidebarMenuItem> getAdministrationMenuItems();
+	List<SidebarMenuItem> getMenuItems();
+	
+	int getOrder();
 	
 }

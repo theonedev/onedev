@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
@@ -18,6 +17,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -33,8 +33,9 @@ import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.util.NamedProjectQueriesBean;
-import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
+import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 
 public class ProjectListPage extends LayoutPage {
 
@@ -92,8 +93,11 @@ public class ProjectListPage extends LayoutPage {
 
 			@Override
 			protected void onSaveCommonQueries(ArrayList<NamedProjectQuery> namedQueries) {
+				var oldAuditContent = VersionedXmlDoc.fromBean(getProjectSetting().getNamedQueries()).toXML();
 				getProjectSetting().setNamedQueries(namedQueries);
+				var newAuditContent = VersionedXmlDoc.fromBean(getProjectSetting().getNamedQueries()).toXML();
 				OneDev.getInstance(SettingManager.class).saveProjectSetting(getProjectSetting());
+				getAuditManager().audit(null, "changed project queries", oldAuditContent, newAuditContent);
 			}
 
 		});

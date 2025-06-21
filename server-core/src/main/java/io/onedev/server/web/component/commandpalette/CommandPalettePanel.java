@@ -64,15 +64,16 @@ public abstract class CommandPalettePanel extends Panel {
 
 	private static final PatternSet eeUrlPatterns = PatternSet.parse("" +
 			"~dashboards/** ~code-search/** ~administration/settings/storage-setting " +
-			"~administration/cluster ~administration/settings/time-tracking ${project}/~timesheets " +
-			"${project}/~stats/pull-request-duration ${project}/~stats/build-duration ${project}/~stats/build-frequency");
+			"~administration/cluster ~administration/audits ~administration/settings/time-tracking ${project}/~timesheets " +
+			"${project}/~stats/pull-request/duration ${project}/~stats/pull-request/frequency ${project}/~stats/build/duration " + 
+			"${project}/~stats/build/frequency ${project}/~stats/issue/state-frequency ${project}/~stats/issue/state-duration " + 
+			"${project}/~stats/issue/state-trend ${project}/~audits");
 	
 	static {
 		for (IRequestMapper mapper: OneDev.getInstance(WebApplication.class).getRequestMappers())
 			availableUrls.addAll(getMountedPaths(mapper));
 		
-		Collections.sort(availableUrls, (Comparator<String[]>) (o1, o2) -> PathUtils.compare(Arrays.asList(o1), Arrays.asList(o2)));
-		
+		Collections.sort(availableUrls, (Comparator<String[]>) (o1, o2) -> PathUtils.compare(Arrays.asList(o1), Arrays.asList(o2)));		
 	}
 	
 	private static List<String[]> getMountedPaths(IRequestMapper mapper) {

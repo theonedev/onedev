@@ -1,16 +1,24 @@
 package io.onedev.server.rest.resource;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.shiro.authz.UnauthorizedException;
+
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 @Api(order=4700)
 @Path("/code-comments")
@@ -21,15 +29,18 @@ public class CodeCommentResource {
 
 	private final CodeCommentManager commentManager;
 
+	private final AuditManager auditManager;
+
 	@Inject
-	public CodeCommentResource(CodeCommentManager commentManager) {
+	public CodeCommentResource(CodeCommentManager commentManager, AuditManager auditManager) {
 		this.commentManager = commentManager;
+		this.auditManager = auditManager;
 	}
 
 	@Api(order=100)
 	@Path("/{commentId}")
 	@GET
-	public CodeComment get(@PathParam("commentId") Long commentId) {
+	public CodeComment getComment(@PathParam("commentId") Long commentId) {
 		var comment = commentManager.load(commentId);
     	if (!SecurityUtils.canReadCode(comment.getProject()))  
 			throw new UnauthorizedException();
@@ -39,11 +50,13 @@ public class CodeCommentResource {
 	@Api(order=200)
 	@Path("/{commentId}")
 	@DELETE
-	public Response delete(@PathParam("commentId") Long commentId) {
+	public Response deleteComment(@PathParam("commentId") Long commentId) {
 		var comment = commentManager.load(commentId);
     	if (!SecurityUtils.canModifyOrDelete(comment)) 
 			throw new UnauthorizedException();
 		commentManager.delete(comment);
+		var oldAuditContent = VersionedXmlDoc.fromBean(comment).toXML();
+		auditManager.audit(comment.getProject(), "deleted code comment on file \"" + comment.getMark().getPath() + "\" via RESTful API", oldAuditContent, null);
 		return Response.ok().build();
 	}
 	

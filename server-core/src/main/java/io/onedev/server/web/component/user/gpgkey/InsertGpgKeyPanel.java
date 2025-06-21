@@ -14,6 +14,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GpgKeyManager;
 import io.onedev.server.model.EmailAddress;
@@ -24,6 +25,7 @@ import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.page.user.UserPage;
 
 public abstract class InsertGpgKeyPanel extends Panel {
 
@@ -77,6 +79,8 @@ public abstract class InsertGpgKeyPanel extends Panel {
                 	if (!hasErrors) {
                         gpgKey.setCreatedAt(new Date());
                         gpgKeyManager.create(gpgKey);
+                        if (getPage() instanceof UserPage)
+							OneDev.getInstance(AuditManager.class).audit(null, "added GPG key \"" + GpgUtils.getKeyIDString(gpgKey.getKeyId()) + "\" for account \"" + gpgKey.getOwner().getName() + "\"", null, null);
                         onSave(target);
                 	}
                 }

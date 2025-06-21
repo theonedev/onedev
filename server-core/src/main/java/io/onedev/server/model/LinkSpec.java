@@ -96,6 +96,14 @@ public class LinkSpec extends AbstractEntity {
 		return opposite?getOpposite().getName():getName();
 	}
 
+	public String getDisplayName() {
+		if (opposite != null) {
+			return getName() + " - " + getOpposite().getName();
+		} else {
+			return getName();
+		}
+	}
+
 	public int getOrder() {
 		return order;
 	}
@@ -162,7 +170,6 @@ public class LinkSpec extends AbstractEntity {
 		return updaters;
 	}
 
-	@Override
 	public LinkSpecFacade getFacade() {
 		return new LinkSpecFacade(getId(), getName(), getOpposite()!=null?getOpposite().getName():null);
 	}

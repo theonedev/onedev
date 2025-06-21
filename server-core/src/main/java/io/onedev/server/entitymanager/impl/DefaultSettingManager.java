@@ -132,6 +132,11 @@ public class DefaultSettingManager extends BaseEntityManager<Setting>
 	}
 
 	@Override
+	public AuditSetting getAuditSetting() {
+		return (AuditSetting) getSettingValue(Key.AUDIT);
+	}
+
+	@Override
 	public SecuritySetting getSecuritySetting() {
 		return (SecuritySetting) getSettingValue(Key.SECURITY);
 	}
@@ -259,6 +264,12 @@ public class DefaultSettingManager extends BaseEntityManager<Setting>
 	@Override
 	public void saveClusterSetting(ClusterSetting clusterSetting) {
 		saveSetting(Key.CLUSTER_SETTING, clusterSetting);
+	}
+
+	@Transactional
+	@Override
+	public void saveAuditSetting(AuditSetting auditSetting) {
+		saveSetting(Key.AUDIT, auditSetting);
 	}
 	
 	@Transactional

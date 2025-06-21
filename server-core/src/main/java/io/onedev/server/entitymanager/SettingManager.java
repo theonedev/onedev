@@ -83,6 +83,10 @@ public interface SettingManager extends EntityManager<Setting> {
 	ClusterSetting getClusterSetting();
 
 	void saveClusterSetting(ClusterSetting clusterSetting);
+
+	AuditSetting getAuditSetting();
+
+	void saveAuditSetting(AuditSetting auditSetting);
 	
 	SecuritySetting getSecuritySetting();
 	

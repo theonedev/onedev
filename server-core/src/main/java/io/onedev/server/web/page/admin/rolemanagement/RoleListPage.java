@@ -32,6 +32,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Role;
 import io.onedev.server.security.SecurityUtils;
@@ -195,6 +197,8 @@ public class RoleListPage extends AdministrationPage {
 					public void onClick(AjaxRequestTarget target) {
 						Role role = rowModel.getObject();
 						OneDev.getInstance(RoleManager.class).delete(role);
+						var oldAuditContent = VersionedXmlDoc.fromBean(role).toXML();
+						OneDev.getInstance(AuditManager.class).audit(null, "deleted role \"" + role.getName() + "\"", oldAuditContent, null);
 						Session.get().success(MessageFormat.format(_T("Role \"{0}\" deleted"), role.getName()));
 						target.add(rolesTable);
 					}

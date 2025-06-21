@@ -1,6 +1,5 @@
 package io.onedev.server.model;
 
-import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
 import static io.onedev.server.model.Project.PROP_NAME;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
@@ -58,8 +57,6 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -128,7 +125,6 @@ import io.onedev.server.model.support.pack.ProjectPackSetting;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
-import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
@@ -251,17 +247,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
-	@Api(description="Represents the project from which this project is forked. Remove this property if "
-			+ "the project is not a fork when create/update the project. May be null")
 	private Project forkedFrom;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn
-	@Api(description="Represents the parent project. Remove this property if the project does not " +
-			"have a parent project. May be null")
 	private Project parent;
 
-	@JsonIgnore
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(unique=true, nullable=false)
 	private ProjectLastEventDate lastEventDate;
@@ -269,21 +260,15 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Column(nullable=false)
 	private String name;
 	
-	@JsonProperty(access = READ_ONLY)
 	@Column(nullable=false)
 	private String path;
 	
-	@JsonIgnore
 	private int pathLen;
 
-	// SQL Server does not allow duplicate null values for unique column. So we use 
-	// special prefix to indicate null
-	@JsonIgnore
 	@Column(unique=true)
 	private String key;
 	
 	@Column(length=MAX_DESCRIPTION_LEN)
-	@Api(description = "May be null")
 	private String description;
 	
     @OneToMany(mappedBy="project")
@@ -298,23 +283,19 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Pack> packs = new ArrayList<>();
 		
-    @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
 	private ArrayList<BranchProtection> branchProtections = new ArrayList<>();
 	
-    @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
 	private ArrayList<TagProtection> tagProtections = new ArrayList<>();
 
-    @JsonIgnore
     @Lob
     @Column(nullable=false, length=65535)
 	private LinkedHashMap<String, ContributedProjectSetting> contributedSettings = new LinkedHashMap<>();
 	
 	@Column(nullable=false)
-	@JsonProperty(access = READ_ONLY)
 	private Date createDate = new Date();
 	
 	@OneToMany(mappedBy="targetProject", cascade=CascadeType.REMOVE)
@@ -387,6 +368,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Iteration> iterations = new ArrayList<>();
+
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<Audit> audits = new ArrayList<>();
 	
 	private boolean codeManagement = true;
 	
@@ -409,37 +394,30 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Column(unique=true)
 	private String serviceDeskEmailAddress;
 	
-	@JsonIgnore
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ProjectIssueSetting issueSetting = new ProjectIssueSetting();
 	
-	@JsonIgnore
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ProjectBuildSetting buildSetting = new ProjectBuildSetting();
 	
-	@JsonIgnore
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ProjectPullRequestSetting pullRequestSetting = new ProjectPullRequestSetting();
 
-	@JsonIgnore
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ProjectPackSetting packSetting = new ProjectPackSetting();
 	
-	@JsonIgnore
 	@Lob
 	@Column(length=65535)
 	private ArrayList<NamedCommitQuery> namedCommitQueries;
 	
-	@JsonIgnore
 	@Lob
 	@Column(length=65535)
 	private ArrayList<NamedCodeCommentQuery> namedCodeCommentQueries;
 	
-	@JsonIgnore
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ArrayList<WebHook> webHooks = new ArrayList<>();
@@ -774,7 +752,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return blobCache;
 	}
 	
-	@Override
 	public ProjectFacade getFacade() {
 		return new ProjectFacade(getId(), getName(), getKey(), getPath(), getServiceDeskEmailAddress(), 
 				isCodeManagement(), isIssueManagement(), getGitPackConfig(), lastEventDate.getId(), 
@@ -1088,15 +1065,13 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			"the system email address in mail setting definition. Emails sent to this address will be " +
 			"created as issues in this project. The default value takes form of "
 			+ "<tt>&lt;system email address name&gt;+&lt;project path&gt;@&lt;system email address domain&gt;</tt>")
-	@Nullable
-	@JsonProperty
 	@Email
 	@Pattern(regexp = "[^~]+@.+", message = "character '~' not allowed in name part")
 	public String getServiceDeskEmailAddress() {
 		return serviceDeskEmailAddress;
 	}
 
-	public void setServiceDeskEmailAddress(@Nullable String serviceDeskEmailAddress) {
+	public void setServiceDeskEmailAddress(String serviceDeskEmailAddress) {
 		this.serviceDeskEmailAddress = serviceDeskEmailAddress;
 	}
 	
@@ -2040,6 +2015,20 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	public static String decodeFullRepoNameAsPath(String text) {
 		return decodeRepoNameAsPath(replace(text, FAKED_GITHUB_REPO_OWNER + "/", ""));
+	}
+	
+	public static Collection<Project> getIndependents(Collection<Project> projects) {
+		Collection<Project> independents = new HashSet<>(projects);
+		for (Iterator<Project> it = independents.iterator(); it.hasNext(); ) {
+			Project independent = it.next();
+			for (Project each : independents) {
+				if (!each.equals(independent) && each.isSelfOrAncestorOf(independent)) {
+					it.remove();
+					break;
+				}
+			}
+		}
+		return independents;
 	}
 	
 }

@@ -6,7 +6,6 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 
-import io.onedev.server.ServerConfig;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -16,6 +15,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.OneDev;
+import io.onedev.server.ServerConfig;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.web.editable.BeanContext;
@@ -32,6 +33,7 @@ public class SystemSettingPage extends AdministrationPage {
 		super.onInitialize();
 		
 		SystemSetting systemSetting = OneDev.getInstance(SettingManager.class).getSystemSetting();
+		var oldAuditContent = VersionedXmlDoc.fromBean(systemSetting).toXML();
 
 		String ingressUrl = OneDev.getInstance().getIngressUrl();
 		add(new TextField<String>("ingressUrl", Model.of(ingressUrl)).setVisible(ingressUrl != null));
@@ -42,6 +44,9 @@ public class SystemSettingPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				OneDev.getInstance(SettingManager.class).saveSystemSetting(systemSetting);
+				var newAuditContent = VersionedXmlDoc.fromBean(systemSetting).toXML();
+				getAuditManager().audit(null, "changed system settings", oldAuditContent, newAuditContent);
+				
 				getSession().success(_T("System settings have been saved"));
 				
 				setResponsePage(SystemSettingPage.class);

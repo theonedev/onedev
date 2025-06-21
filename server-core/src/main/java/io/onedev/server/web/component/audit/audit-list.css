@@ -1,0 +1,68 @@
+.audit-list>.head>.date-range, .audit-list>.head>.users {
+    width: 30%;
+}
+.audit-list>.head>.action {
+    width: 40%;
+}
+.audit-list .body {
+    position: relative;
+    padding-left: 20px;
+    margin-left: 4px;
+}
+
+.audit-list .body::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--secondary);
+}
+
+.dark-mode .audit-list .body::before {
+    background-color: var(--dark-mode-lighter-dark);
+}
+
+.audit-list .body li {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.audit-list .body li.audit::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--secondary);
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px var(--secondary);
+}
+
+.dark-mode .audit-list .body li.audit::before {
+    background-color: var(--dark-mode-lighter-dark);
+    border-color: var(--dark-mode-darker);
+    box-shadow: 0 0 0 2px var(--dark-mode-lighter-dark);
+}
+
+.audit-list .body li:last-child {
+    margin-bottom: 0;
+}
+
+.audit-list .body li[wicket\:id="more"]::before {
+    background-color: var(--secondary);
+    box-shadow: 0 0 0 2px var(--secondary);
+}
+
+.dark-mode .audit-list .body li[wicket\:id="more"]::before {
+    background-color: var(--dark-mode-lighter-dark);
+    box-shadow: 0 0 0 2px var(--dark-mode-lighter-dark);
+}
+
+.audit-change-detail {
+    max-width: 900px;
+}

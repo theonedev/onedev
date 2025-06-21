@@ -1,14 +1,9 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.BoardSpec;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.List;
+
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -17,9 +12,17 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.List;
+import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.BoardSpec;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 
 abstract class NewBoardPanel extends Panel {
 
@@ -52,11 +55,12 @@ abstract class NewBoardPanel extends Panel {
 							_T("This name has already been used by another issue board in the project"));
 				} 
 				if (editor.isValid()){
-					newBoard.populateColumns();
-					
+					newBoard.populateColumns();					
 					boards.add(newBoard);
 					getProject().getIssueSetting().setBoardSpecs(boards);
+					var newAuditContent = VersionedXmlDoc.fromBean(newBoard).toXML();
 					OneDev.getInstance(ProjectManager.class).update(getProject());
+					OneDev.getInstance(AuditManager.class).audit(getProject(), "created issue board \"" + newBoard.getName() + "\"", null, newAuditContent);
 					Session.get().success(_T("New issue board created"));
 					onBoardCreated(target, newBoard);
 				} else {

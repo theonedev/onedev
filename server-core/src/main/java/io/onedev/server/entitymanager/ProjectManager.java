@@ -1,5 +1,20 @@
 package io.onedev.server.entitymanager;
 
+import java.io.File;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.code.GitPackConfig;
@@ -11,19 +26,6 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.patternset.PatternSet;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-
-import javax.annotation.Nullable;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
 
 public interface ProjectManager extends EntityManager<Project> {
 

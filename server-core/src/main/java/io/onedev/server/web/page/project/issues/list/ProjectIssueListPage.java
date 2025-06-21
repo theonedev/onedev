@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.issues.list;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,10 +37,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueQueryPersonalization;
 import io.onedev.server.model.IssueSchedule;
@@ -359,10 +361,20 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 				return (ArrayList<NamedIssueQuery>) getProject().getIssueSetting().getNamedQueries();
 			}
 
+			private String getAuditContent() {
+				var auditData = getProject().getIssueSetting().getNamedQueries();
+				if (auditData == null) 
+					auditData = getIssueSetting().getNamedQueries();
+				return VersionedXmlDoc.fromBean(auditData).toXML();
+			}
+
 			@Override
 			protected void onSaveCommonQueries(ArrayList<NamedIssueQuery> namedQueries) {
+				var oldAuditContent = getAuditContent();
 				getProject().getIssueSetting().setNamedQueries(namedQueries);
-				OneDev.getInstance(ProjectManager.class).update(getProject());
+				var newAuditContent = getAuditContent();
+				getProjectManager().update(getProject());
+				getAuditManager().audit(getProject(), "changed issue queries", oldAuditContent, newAuditContent);
 			}
 
 			@Override
@@ -465,13 +477,20 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 										if (setting.getNamedQueries() == null) 
 											setting.setNamedQueries(new ArrayList<>(getIssueSetting().getNamedQueries()));
 										NamedIssueQuery namedQuery = getProject().getNamedIssueQuery(name);
+										String oldAuditContent = null;
+										String verb;
 										if (namedQuery == null) {
 											namedQuery = new NamedIssueQuery(name, query);
 											setting.getNamedQueries().add(namedQuery);
+											verb = "created";
 										} else {
+											oldAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
 											namedQuery.setQuery(query);
+											verb = "changed";
 										}
-										OneDev.getInstance(ProjectManager.class).update(getProject());
+										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
+										getProjectManager().update(getProject());
+										getAuditManager().audit(getProject(), verb + " issue query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}
@@ -549,7 +568,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Issues");
+		return new Label(componentId, _T("Issues"));
 	}
 	
 	@Override

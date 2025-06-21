@@ -41,6 +41,7 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
@@ -174,6 +175,10 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
         this.inaccessibleActivityCount = inaccessibleActivityCount;
     }
 
+    private AuditManager getAuditManager() {
+        return OneDev.getInstance(AuditManager.class);
+    }
+
     @Override
     protected void onInitialize() {
         super.onInitialize();
@@ -301,6 +306,7 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
 			@Override
 			public void onClick() {
 				getUserManager().enable(getUser());
+                getAuditManager().audit(null, "enabled account \"" + getUser().getName() + "\"", null, null);
 				Session.get().success("User enabled");
 				setResponsePage(getPage().getClass(), getPage().getPageParameters());
 			}
@@ -318,6 +324,7 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
 			@Override
 			public void onClick() {
 				getUserManager().disable(getUser());
+                getAuditManager().audit(null, "disabled account \"" + getUser().getName() + "\"", null, null);
 				Session.get().success(_T("User disabled"));
 				setResponsePage(getPage().getClass(), getPage().getPageParameters());
 			}
@@ -360,7 +367,7 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
         dateRangePicker.add(new AjaxFormComponentUpdatingBehavior("change") {
             @Override
             protected void onUpdate(AjaxRequestTarget target) {
-                var newPanel = new UserProfilePanel("overview", getModel(), dateRangePicker.getModelObject()) {
+                var newPanel = new UserProfilePanel(UserProfilePanel.this.getId(), getModel(), dateRangePicker.getModelObject()) {
 
                     @Override
                     protected void onDateRangeChanged(AjaxRequestTarget target, DateRange dateRange) {

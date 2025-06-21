@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -33,7 +34,11 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitContribution;
@@ -44,11 +49,13 @@ import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.ProjectLabel;
 import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.model.support.CodeAnalysisSetting;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.WebHook;
 import io.onedev.server.model.support.build.ProjectBuildSetting;
 import io.onedev.server.model.support.code.BranchProtection;
+import io.onedev.server.model.support.code.GitPackConfig;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.pack.ProjectPackSetting;
@@ -56,11 +63,11 @@ import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.InvalidParamException;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.UrlManager;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.xodus.CommitInfoManager;
@@ -79,24 +86,27 @@ public class ProjectResource {
 	private final CommitInfoManager commitInfoManager;
 	
 	private final UrlManager urlManager;
+
+	private final AuditManager auditManager;
 	
 	@Inject
 	public ProjectResource(ProjectManager projectManager, IterationManager iterationManager, 
-			CommitInfoManager commitInfoManager, UrlManager urlManager) {
+			CommitInfoManager commitInfoManager, UrlManager urlManager, AuditManager auditManager) {
 		this.projectManager = projectManager;
 		this.iterationManager = iterationManager;
 		this.commitInfoManager = commitInfoManager;
 		this.urlManager = urlManager;
+		this.auditManager = auditManager;
 	}
 	
 	@Api(order=100)
 	@Path("/{projectId}")
     @GET
-    public Project getBasicInfo(@PathParam("projectId") Long projectId) {
+    public ProjectData getProject(@PathParam("projectId") Long projectId) {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canAccessProject(project))
 			throw new UnauthorizedException();
-    	return project;
+     	return ProjectData.from(project);
     }
 	
 	@Api(order=150)
@@ -121,18 +131,7 @@ public class ProjectResource {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canManageProject(project)) 
 			throw new UnauthorizedException();
-		ProjectSetting setting = new ProjectSetting();
-		setting.branchProtections = project.getBranchProtections();
-		setting.tagProtections = project.getTagProtections();
-		setting.buildSetting = project.getBuildSetting();
-		setting.packSetting = project.getPackSetting();
-		setting.issueSetting = project.getIssueSetting();
-		setting.namedCodeCommentQueries = project.getNamedCodeCommentQueries();
-		setting.namedCommitQueries = project.getNamedCommitQueries();
-		setting.pullRequestSetting = project.getPullRequestSetting();
-		setting.webHooks = project.getWebHooks();
-		setting.contributedSettings.addAll(project.getContributedSettings().values());
-		return setting;
+		return ProjectSetting.from(project);
     }
 	
 	@Api(order=300)
@@ -187,7 +186,7 @@ public class ProjectResource {
 	
 	@Api(order=700)
 	@GET
-    public List<Project> queryBasicInfo(
+    public List<ProjectData> queryProjects(
     		@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~projects'>projects page</a>", example="\"Name\" is \"projectName\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
@@ -202,7 +201,9 @@ public class ProjectResource {
 			throw new InvalidParamException("Error parsing query", e);
 		}
     	
-    	return projectManager.query(parsedQuery, false, offset, count);
+    	return projectManager.query(parsedQuery, false, offset, count).stream()
+    			.map(ProjectData::from)
+    			.collect(Collectors.toList());
     }
 	
 	@Api(order=750)
@@ -268,31 +269,34 @@ public class ProjectResource {
 	
 	@Api(order=800, description="Create new project")
     @POST
-    public Long create(@NotNull @Valid Project project) {
-		Project parent = project.getParent();
+    public Long createProject(@NotNull @Valid ProjectData data) {
+		var project = new Project();
+		data.populate(project, projectManager);
 		
-		checkProjectCreationPermission(parent);
+		checkProjectCreationPermission(project.getParent());
 	
-		if (parent != null && project.isSelfOrAncestorOf(parent)) 
+		if (project.getParent() != null && project.isSelfOrAncestorOf(project.getParent())) 
 			throw new ExplicitException("Can not use current or descendant project as parent");
 		
-		checkProjectNameDuplication(project);
-		
+		checkProjectNameDuplication(project);		
 		projectManager.create(project);
-    	
+
+		auditManager.audit(project, "created project via RESTful API", null, VersionedXmlDoc.fromBean(data).toXML());
+
     	return project.getId();
     }
 
-	@Api(order=850, description="Update projecty basic info of specified id")
+	@Api(order=850, description="Update project")
 	@Path("/{projectId}")
 	@POST
-	public Response updateBasicInfo(@PathParam("projectId") Long projectId, @NotNull @Valid Project project) {
-		Project parent = project.getParent();
-		Long oldParentId;
-		if (project.getOldVersion() != null)
-			oldParentId = ((ProjectFacade) project.getOldVersion()).getParentId();
-		else
-			oldParentId = null;
+	public Response updateProject(@PathParam("projectId") Long projectId, @NotNull @Valid ProjectData data) {
+		Project project = projectManager.load(projectId);
+		var oldAuditContent = VersionedXmlDoc.fromBean(ProjectData.from(project)).toXML();
+
+		data.populate(project, projectManager);
+		
+		Project parent = data.getParentId() != null? projectManager.load(data.getParentId()) : null;
+		Long oldParentId = Project.idOf(project.getParent());
 
 		if (!Objects.equals(oldParentId, Project.idOf(parent))) 
 			checkProjectCreationPermission(parent);
@@ -306,6 +310,8 @@ public class ProjectResource {
 			throw new UnauthorizedException();
 		} else {
 			projectManager.update(project);
+			auditManager.audit(project, "changed project via RESTful API", oldAuditContent, 
+					VersionedXmlDoc.fromBean(ProjectData.from(project)).toXML());
 		}
 
 		return Response.ok().build();
@@ -331,38 +337,33 @@ public class ProjectResource {
 		}
 	}
 	
-	@Api(order=900, description="Update project setting")
+	@Api(order=900, description="Update project settings")
 	@Path("/{projectId}/setting")
     @POST
     public Response updateSetting(@PathParam("projectId") Long projectId, @NotNull ProjectSetting setting) {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canManageProject(project)) 
 			throw new UnauthorizedException();
-		project.setBranchProtections(setting.branchProtections);
-		project.setTagProtections(setting.tagProtections);
-		project.setBuildSetting(setting.buildSetting);
-		project.setPackSetting(setting.packSetting);
-		project.setIssueSetting(setting.issueSetting);
-		project.setNamedCodeCommentQueries(setting.namedCodeCommentQueries);
-		project.setNamedCommitQueries(setting.namedCommitQueries);
-		project.setPullRequestSetting(setting.pullRequestSetting);
-		project.setWebHooks(setting.webHooks);
-		var contributedSettings = new LinkedHashMap<String, ContributedProjectSetting>();
-		for (var contributedSetting: setting.getContributedSettings())
-			contributedSettings.put(contributedSetting.getClass().getName(), contributedSetting);
-		project.setContributedSettings(contributedSettings);
+		var oldAuditContent = VersionedXmlDoc.fromBean(ProjectSetting.from(project)).toXML();
+		setting.populate(project);
 		projectManager.update(project);
+		auditManager.audit(project, "changed project settings via RESTful API", oldAuditContent, VersionedXmlDoc.fromBean(setting).toXML());
+		
 		return Response.ok().build();
     }
 	
 	@Api(order=1000)
 	@Path("/{projectId}")
     @DELETE
-    public Response delete(@PathParam("projectId") Long projectId) {
+    public Response deleteProject(@PathParam("projectId") Long projectId) {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canManageProject(project))
 			throw new UnauthorizedException();
     	projectManager.delete(project);
+		if (project.getParent() != null)
+			auditManager.audit(project.getParent(), "deleted child project \"" + project.getName() + "\" via RESTful API", VersionedXmlDoc.fromBean(ProjectData.from(project)).toXML(), null);
+		else
+			auditManager.audit(null, "deleted root project \"" + project.getName() + "\" via RESTful API", VersionedXmlDoc.fromBean(ProjectData.from(project)).toXML(), null);
     	return Response.ok().build();
     }
 	
@@ -390,6 +391,215 @@ public class ProjectResource {
 			this.ssh = ssh;
 		}
 		
+	}
+
+	@EntityCreate(Project.class)
+	public static class ProjectData implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+		
+		@Api(order = 100, description="Represents the parent project of this project. Remove this property if "
+			+ "the project is a root project when create/update the project. May be null")
+		private Long parentId;
+
+		@Api(order = 150, description="Represents the project from which this project is forked. Remove this property if "
+			+ "the project is not a fork when create/update the project. May be null")
+		private Long forkedFromId;
+
+		@Api(order = 300)
+		private String name;
+
+		@Api(order = 400, description="May be null")
+		private String key;
+
+		@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+		@Api(order = 450)
+		private String path;
+
+		@Api(order = 500, description="May be null")
+		private String description;
+
+		@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+		@Api(order = 550)
+		private Date createDate;
+
+		@Api(order = 600)
+		private boolean codeManagement = true;
+	
+		@Api(order = 650)
+		private boolean packManagement = true;
+		
+		@Api(order = 700)
+		private boolean issueManagement = true;
+	
+		@Api(order = 750)
+		private boolean timeTracking = false;			
+		
+		@Api(order = 800, description = "May be null")
+		private String serviceDeskEmailAddress;
+
+		@Api(order = 850)
+		private GitPackConfig gitPackConfig;
+
+		@Api(order = 900)
+		private CodeAnalysisSetting codeAnalysisSetting;
+		
+		public Long getParentId() {
+			return parentId;
+		}
+
+		public void setParentId(Long parentId) {
+			this.parentId = parentId;
+		}
+
+		public Long getForkedFromId() {
+			return forkedFromId;
+		}
+
+		public void setForkedFromId(Long forkedFromId) {
+			this.forkedFromId = forkedFromId;
+		}
+
+		@NotEmpty
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getKey() {
+			return key;
+		}
+
+		public void setKey(String key) {
+			this.key = key;
+		}
+
+		public String getPath() {
+			return path;
+		}
+
+		public void setPath(String path) {
+			this.path = path;
+		}
+
+		public String getDescription() {
+			return description;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
+		}
+
+		public Date getCreateDate() {
+			return createDate;
+		}
+
+		public void setCreateDate(Date createDate) {
+			this.createDate = createDate;
+		}
+
+		public boolean isCodeManagement() {
+			return codeManagement;
+		}
+
+		public void setCodeManagement(boolean codeManagement) {
+			this.codeManagement = codeManagement;
+		}
+
+		public boolean isPackManagement() {
+			return packManagement;
+		}
+
+		public void setPackManagement(boolean packManagement) {
+			this.packManagement = packManagement;
+		}
+
+		public boolean isIssueManagement() {
+			return issueManagement;
+		}
+
+		public void setIssueManagement(boolean issueManagement) {
+			this.issueManagement = issueManagement;
+		}
+
+		public boolean isTimeTracking() {
+			return timeTracking;
+		}
+
+		public void setTimeTracking(boolean timeTracking) {
+			this.timeTracking = timeTracking;
+		}
+
+		public String getServiceDeskEmailAddress() {
+			return serviceDeskEmailAddress;
+		}
+
+		public void setServiceDeskEmailAddress(String serviceDeskEmailAddress) {
+			this.serviceDeskEmailAddress = serviceDeskEmailAddress;
+		}
+
+		@NotNull
+		public GitPackConfig getGitPackConfig() {
+			return gitPackConfig;
+		}
+
+		public void setGitPackConfig(GitPackConfig gitPackConfig) {
+			this.gitPackConfig = gitPackConfig;
+		}
+
+		@NotNull
+		public CodeAnalysisSetting getCodeAnalysisSetting() {
+			return codeAnalysisSetting;
+		}
+
+		public void setCodeAnalysisSetting(CodeAnalysisSetting codeAnalysisSetting) {
+			this.codeAnalysisSetting = codeAnalysisSetting;
+		}
+
+		public void populate(Project project, ProjectManager projectManager) {
+			if (parentId != null)
+				project.setParent(projectManager.load(getParentId()));
+			else
+				project.setParent(null);
+			if (forkedFromId != null)
+				project.setForkedFrom(projectManager.load(getForkedFromId()));
+			else
+				project.setForkedFrom(null);
+			project.setName(getName());
+			project.setKey(getKey());
+			project.setDescription(getDescription());
+			project.setCodeManagement(isCodeManagement());
+			project.setPackManagement(isPackManagement());
+			project.setIssueManagement(isIssueManagement());
+			project.setTimeTracking(isTimeTracking());
+			project.setServiceDeskEmailAddress(getServiceDeskEmailAddress());
+			project.setGitPackConfig(getGitPackConfig());
+			project.setCodeAnalysisSetting(getCodeAnalysisSetting());
+		}
+
+		public static ProjectData from(Project project) {
+			ProjectData data = new ProjectData();
+			data.setParentId(Project.idOf(project.getParent()));
+			data.setForkedFromId(Project.idOf(project.getForkedFrom()));
+			data.setName(project.getName());
+			data.setKey(project.getKey());
+			data.setPath(project.getPath());
+			data.setDescription(project.getDescription());
+			data.setCreateDate(project.getCreateDate());
+			data.setCodeManagement(project.isCodeManagement());
+			data.setPackManagement(project.isPackManagement());
+			data.setIssueManagement(project.isIssueManagement());
+			data.setTimeTracking(project.isTimeTracking());
+			data.setServiceDeskEmailAddress(project.getServiceDeskEmailAddress());
+			data.setGitPackConfig(project.getGitPackConfig());
+			data.setCodeAnalysisSetting(project.getCodeAnalysisSetting());
+
+			return data;
+		}
+
 	}
 	
 	public static class ProjectSetting implements Serializable {
@@ -496,6 +706,38 @@ public class ProjectResource {
 			this.contributedSettings = contributedSettings;
 		}
 		
+		public void populate(Project project) {
+			project.setBranchProtections(getBranchProtections());
+			project.setTagProtections(getTagProtections());
+			project.setBuildSetting(getBuildSetting());
+			project.setPackSetting(getPackSetting());
+			project.setIssueSetting(getIssueSetting());
+			project.setNamedCodeCommentQueries(getNamedCodeCommentQueries());
+			project.setNamedCommitQueries(getNamedCommitQueries());
+			project.setPullRequestSetting(getPullRequestSetting());
+			project.setWebHooks(getWebHooks());
+			var contributedSettings = new LinkedHashMap<String, ContributedProjectSetting>();
+			for (var contributedSetting: getContributedSettings())
+				contributedSettings.put(contributedSetting.getClass().getName(), contributedSetting);
+			project.setContributedSettings(contributedSettings);
+		}
+
+		public static ProjectSetting from(Project project) {
+			ProjectSetting setting = new ProjectSetting();
+			setting.setBranchProtections(project.getBranchProtections());
+			setting.setTagProtections(project.getTagProtections());
+			setting.setBuildSetting(project.getBuildSetting());
+			setting.setPackSetting(project.getPackSetting());
+			setting.setIssueSetting(project.getIssueSetting());
+			setting.setNamedCodeCommentQueries(project.getNamedCodeCommentQueries());
+			setting.setNamedCommitQueries(project.getNamedCommitQueries());
+			setting.setPullRequestSetting(project.getPullRequestSetting());
+			setting.setWebHooks(project.getWebHooks());
+			setting.getContributedSettings().addAll(project.getContributedSettings().values());
+
+			return setting;
+		}
+
 	}
 	
 }

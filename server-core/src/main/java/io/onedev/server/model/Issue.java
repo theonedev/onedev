@@ -929,7 +929,6 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		return observables;
 	}
 
-	@Override
 	public IssueFacade getFacade() {
 		return new IssueFacade(getId(), getProject().getId(), getNumber());
 	}

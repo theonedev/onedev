@@ -1,6 +1,37 @@
 package io.onedev.server.web.page.admin.issuesetting.statespec;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.list.LoopItem;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.data.IDataProvider;
+import org.apache.wicket.markup.repeater.data.ListDataProvider;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.unbescape.html.HtmlEscape;
+
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
@@ -14,30 +45,6 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.Broadcast;
-import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.*;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.list.LoopItem;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.markup.repeater.data.IDataProvider;
-import org.apache.wicket.markup.repeater.data.ListDataProvider;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.unbescape.html.HtmlEscape;
-
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class IssueStateListPage extends IssueSettingPage {
 
@@ -187,9 +194,11 @@ public class IssueStateListPage extends IssueSettingPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getSetting().getStateSpecs().remove(stateIndex);
+						var state = getSetting().getStateSpecs().remove(stateIndex);
+						var oldAuditContent = VersionedXmlDoc.fromBean(state).toXML();
 						getSetting().setReconciled(false);
 						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+						OneDev.getInstance(AuditManager.class).audit(null, "deleted issue state \"" + state.getName() + "\"", oldAuditContent, null);
 						target.add(statesTable);
 						send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
 					}
@@ -224,9 +233,12 @@ public class IssueStateListPage extends IssueSettingPage {
 
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+				var oldAuditContent = VersionedXmlDoc.fromBean(getSetting().getStateSpecs()).toXML();
 				CollectionUtils.move(getSetting().getStateSpecs(), from.getItemIndex(), to.getItemIndex());
+				var newAuditContent = VersionedXmlDoc.fromBean(getSetting().getStateSpecs()).toXML();
 				getSetting().setReconciled(false);
 				OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+				getAuditManager().audit(null, "changed order of issue states", oldAuditContent, newAuditContent);
 				target.add(statesTable);
 				send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
 			}

@@ -21,6 +21,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.BaseAuthorizationManager;
 import io.onedev.server.entitymanager.ProjectLabelManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -104,6 +106,12 @@ public class NewProjectPage extends LayoutPage {
 							getProjectManager().create(newProject);
 							OneDev.getInstance(BaseAuthorizationManager.class).syncRoles(newProject, defaultRolesBean.getRoles());
 							OneDev.getInstance(ProjectLabelManager.class).sync(newProject, labelsBean.getLabels());
+
+							var auditData = editor.getPropertyValues();
+							auditData.put("parent", parentBean.getParentPath());
+							auditData.put("labels", labelsBean.getLabels());
+							auditData.put("defaultRoles", defaultRolesBean.getRoleNames());
+							OneDev.getInstance(AuditManager.class).audit(newProject, "created project", null, VersionedXmlDoc.fromBean(newProject).toXML());
 						});
 						
 						Session.get().success(_T("New project created"));

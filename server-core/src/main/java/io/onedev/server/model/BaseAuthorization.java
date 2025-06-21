@@ -11,6 +11,8 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import io.onedev.server.rest.annotation.Immutable;
+
 @Entity
 @Table(
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_role_id")},
@@ -27,6 +29,7 @@ public class BaseAuthorization extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Immutable
 	private Project project;
 		
 	@ManyToOne(fetch=FetchType.LAZY)

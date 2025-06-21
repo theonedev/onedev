@@ -1,6 +1,23 @@
 package io.onedev.server.web.page.issues;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
@@ -22,18 +39,6 @@ import io.onedev.server.web.util.NamedIssueQueriesBean;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.ArrayList;
 
 public class IssueListPage extends LayoutPage {
 
@@ -89,8 +94,11 @@ public class IssueListPage extends LayoutPage {
 
 			@Override
 			protected void onSaveCommonQueries(ArrayList<NamedIssueQuery> queries) {
+				var oldAuditContent = VersionedXmlDoc.fromBean(getIssueSetting().getNamedQueries()).toXML();
 				getIssueSetting().setNamedQueries(queries);
+				var newAuditContent = VersionedXmlDoc.fromBean(getIssueSetting().getNamedQueries()).toXML();
 				OneDev.getInstance(SettingManager.class).saveIssueSetting(getIssueSetting());
+				getAuditManager().audit(null, "changed issue queries", oldAuditContent, newAuditContent);
 			}
 
 			@Override
@@ -175,13 +183,20 @@ public class IssueListPage extends LayoutPage {
 									protected void onSave(AjaxRequestTarget target, String name) {
 										GlobalIssueSetting issueSetting = getIssueSetting();
 										NamedIssueQuery namedQuery = issueSetting.getNamedQuery(name);
+										String oldAuditContent = null;
+										String verb;
 										if (namedQuery == null) {
 											namedQuery = new NamedIssueQuery(name, query);
 											issueSetting.getNamedQueries().add(namedQuery);
+											verb = "created";
 										} else {
+											oldAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
 											namedQuery.setQuery(query);
+											verb = "changed";
 										}
+										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
 										OneDev.getInstance(SettingManager.class).saveIssueSetting(issueSetting);
+										getAuditManager().audit(null, verb + " issue query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}
@@ -243,12 +258,12 @@ public class IssueListPage extends LayoutPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Issues");
+		return new Label(componentId, _T("Issues"));
 	}
 	
 	@Override
 	protected String getPageTitle() {
-		return "Issues - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return _T("Issues") + " - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
 	}
 	
 }

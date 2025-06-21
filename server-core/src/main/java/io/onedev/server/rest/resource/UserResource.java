@@ -1,5 +1,6 @@
 package io.onedev.server.rest.resource;
 
+import static io.onedev.server.security.SecurityUtils.getAuthUser;
 import static java.util.stream.Collectors.toList;
 
 import java.io.Serializable;
@@ -30,11 +31,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authc.credential.PasswordService;
-import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.annotation.UserName;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -76,45 +78,48 @@ public class UserResource {
 	private final PasswordService passwordService;
 	
 	private final EmailAddressManager emailAddressManager;
+
+	private final AuditManager auditManager;
 	
 	@Inject
 	public UserResource(UserManager userManager, SshKeyManager sshKeyManager, 
-			PasswordService passwordService, EmailAddressManager emailAddressManager) {
+			PasswordService passwordService, EmailAddressManager emailAddressManager, AuditManager auditManager) {
 		this.userManager = userManager;
 		this.sshKeyManager = sshKeyManager;
 		this.passwordService = passwordService;
 		this.emailAddressManager = emailAddressManager;
+		this.auditManager = auditManager;
 	}
 
-	private BasicSetting getBasicSetting(User user) {
-		var basicSetting = new BasicSetting();
-		basicSetting.setDisabled(user.isDisabled());
-		basicSetting.setServiceAccount(user.isServiceAccount());
-		basicSetting.setName(user.getName());
-		basicSetting.setFullName(user.getFullName());
+	private UserData getData(User user) {
+		var data = new UserData();
+		data.setDisabled(user.isDisabled());
+		data.setServiceAccount(user.isServiceAccount());
+		data.setName(user.getName());
+		data.setFullName(user.getFullName());
 		if (!user.isServiceAccount()) 
-			basicSetting.setNotifyOwnEvents(user.isNotifyOwnEvents());
-		return basicSetting;
+			data.setNotifyOwnEvents(user.isNotifyOwnEvents());
+		return data;
 	}
 
-	@Api(order=100, name="Get Basic Settings")
+	@Api(order=100)
 	@Path("/{userId}")
     @GET
-    public BasicSetting getBasicSetting(@PathParam("userId") Long userId) {
+    public UserData getUser(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
-		return getBasicSetting(user);
+		return getData(user);
     }
 
-	@Api(order=200, name="Get Basic Settings of Current User")
+	@Api(order=200)
 	@Path("/me")
     @GET
-    public BasicSetting getMyBasicSetting() {
-		User user = SecurityUtils.getAuthUser();
+    public UserData getMe() {
+		User user = getAuthUser();
 		if (user == null)
 			throw new UnauthorizedException();
-		return getBasicSetting(user);
+		return getData(user);
     }
 	
 	@Api(order=250)
@@ -122,7 +127,7 @@ public class UserResource {
     @GET
     public Collection<AccessToken> getAccessTokens(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
 		return user.getAccessTokens();
     }
@@ -132,7 +137,7 @@ public class UserResource {
     @GET
     public Collection<EmailAddress> getEmailAddresses(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
 		return user.getEmailAddresses();
     }
@@ -160,7 +165,7 @@ public class UserResource {
     @GET
     public Collection<PullRequestReview> getPullRequestReviews(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getPullRequestReviews();
     }
@@ -170,7 +175,7 @@ public class UserResource {
     @GET
     public Collection<IssueVote> getIssueVotes(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getIssueVotes();
     }
@@ -180,7 +185,7 @@ public class UserResource {
     @GET
     public Collection<IssueWatch> getIssueWatches(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getIssueWatches();
     }
@@ -190,7 +195,7 @@ public class UserResource {
     @GET
     public Collection<BuildQueryPersonalization> getProjectBuildQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getBuildQueryPersonalizations();
     }
@@ -200,7 +205,7 @@ public class UserResource {
     @GET
     public Collection<CodeCommentQueryPersonalization> getProjectCodeCommentQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getCodeCommentQueryPersonalizations();
     }
@@ -210,7 +215,7 @@ public class UserResource {
     @GET
     public Collection<CommitQueryPersonalization> getProjectCommitQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getCommitQueryPersonalizations();
     }
@@ -220,7 +225,7 @@ public class UserResource {
     @GET
     public Collection<IssueQueryPersonalization> getProjecIssueQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getIssueQueryPersonalizations();
     }
@@ -230,7 +235,7 @@ public class UserResource {
     @GET
     public Collection<PullRequestQueryPersonalization> getProjecPullRequestQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getPullRequestQueryPersonalizations();
     }
@@ -240,7 +245,7 @@ public class UserResource {
     @GET
     public Collection<PullRequestAssignment> getPullRequestAssignments(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getPullRequestAssignments();
     }
@@ -250,7 +255,7 @@ public class UserResource {
     @GET
     public Collection<PullRequestWatch> getPullRequestWatches(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getPullRequestWatches();
     }
@@ -260,18 +265,12 @@ public class UserResource {
     @GET
     public Collection<SshKey> getSshKeys(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getSshKeys();
     }
-	
-	@Api(order=1700)
-	@Path("/{userId}/queries-and-watches")
-    @GET
-    public QueriesAndWatches getQueriesAndWatches(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
-			throw new UnauthorizedException();
+
+	private QueriesAndWatches getQueriesAndWatches(User user) {
 		QueriesAndWatches queriesAndWatches = new QueriesAndWatches();
 		queriesAndWatches.buildQuerySubscriptions = user.getBuildQuerySubscriptions();
 		queriesAndWatches.issueQueryWatches = user.getIssueQueryWatches();
@@ -281,24 +280,34 @@ public class UserResource {
 		queriesAndWatches.projectQueries = user.getProjectQueries();
 		queriesAndWatches.pullRequestQueries = user.getPullRequestQueries();
 		return queriesAndWatches;
+	}
+	
+	@Api(order=1700)
+	@Path("/{userId}/queries-and-watches")
+    @GET
+    public QueriesAndWatches getQueriesAndWatches(@PathParam("userId") Long userId) {
+    	User user = userManager.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
+			throw new UnauthorizedException();
+		return getQueriesAndWatches(user);
     }
 	
-	@Api(order=1800, name="Query Basic Settings")
+	@Api(order=1800)
 	@GET
-    public List<BasicSetting> queryBasicSetting(
+    public List<UserData> queryUsers(
     		@QueryParam("term") @Api(description="Any string in login name, full name or email address") String term, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 
-    	return userManager.query(term, offset, count).stream().map(this::getBasicSetting).collect(toList());
+    	return userManager.query(term, offset, count).stream().map(this::getData).collect(toList());
     }
 	
 	@Api(order=1850)
 	@Path("/ids/{name}")
 	@GET
-	public Long getId(@PathParam("name") @Api(description = "Login name of user") String name) {
+	public Long getUserId(@PathParam("name") @Api(description = "Login name of user") String name) {
 		var user = userManager.findByName(name);
 		if (user != null)
 			return user.getId();
@@ -308,87 +317,105 @@ public class UserResource {
 	
 	@Api(order=1900, description="Create new user")
     @POST
-    public Long create(@NotNull @Valid UserCreateData data) {
-		if (SecurityUtils.isAdministrator()) {
-			if (userManager.findByName(data.getName()) != null)
-				throw new ExplicitException("Login name is already used by another user");
-			if (!data.isServiceAccount() && emailAddressManager.findByValue(data.getEmailAddress()) != null)
-				throw new ExplicitException("Email address is already used by another user");
-			
-			User user = new User();
-			user.setServiceAccount(data.isServiceAccount());
-			user.setName(data.getName());
-			user.setFullName(data.getFullName());
-			if (data.isServiceAccount()) {
-				userManager.create(user);
-			} else {
-				user.setNotifyOwnEvents(data.isNotifyOwnEvents());
-				user.setPassword(passwordService.encryptPassword(data.getPassword()));
-				userManager.create(user);
-				EmailAddress emailAddress = new EmailAddress();
-				emailAddress.setGit(true);
-				emailAddress.setPrimary(true);
-				emailAddress.setOwner(user);
-				emailAddress.setValue(data.getEmailAddress());
-				emailAddress.setVerificationCode(null);
-				emailAddressManager.create(emailAddress);
-			}
-			return user.getId();
+    public Long createUser(@NotNull @Valid UserCreateData data) {
+		if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+
+		if (userManager.findByName(data.getName()) != null)
+			throw new ExplicitException("Login name is already used by another user");
+		if (!data.isServiceAccount() && emailAddressManager.findByValue(data.getEmailAddress()) != null)
+			throw new ExplicitException("Email address is already used by another user");
+		
+		User user = new User();
+		user.setServiceAccount(data.isServiceAccount());
+		user.setName(data.getName());
+		user.setFullName(data.getFullName());
+		if (data.isServiceAccount()) {
+			userManager.create(user);
 		} else {
-			throw new UnauthenticatedException();
+			user.setNotifyOwnEvents(data.isNotifyOwnEvents());
+			user.setPassword(passwordService.encryptPassword(data.getPassword()));
+			userManager.create(user);
+			EmailAddress emailAddress = new EmailAddress();
+			emailAddress.setGit(true);
+			emailAddress.setPrimary(true);
+			emailAddress.setOwner(user);
+			emailAddress.setValue(data.getEmailAddress());
+			emailAddress.setVerificationCode(null);
+			emailAddressManager.create(emailAddress);
 		}
+		
+		var newAuditContent = VersionedXmlDoc.fromBean(user).toXML();
+		auditManager.audit(null, "created account \"" + user.getName() + "\" via RESTful API", null, newAuditContent);
+
+		return user.getId();
     }
 	
-	@Api(order=1950, name="Update Basic Settings")
+	@Api(order=1950, name="Update user")
 	@Path("/{userId}")
     @POST
-    public Response updateBasicSetting(@PathParam("userId") Long userId, @NotNull @Valid BasicSettingUpdateData data) {
+    public Response updateUser(@PathParam("userId") Long userId, @NotNull @Valid UserUpdateData data) {
 		User user = userManager.load(userId);
-		if (SecurityUtils.isAdministrator() || user.equals(SecurityUtils.getAuthUser())) { 
-			User existingUser = userManager.findByName(data.getName());
-			if (existingUser != null && !existingUser.equals(user))
-				throw new ExplicitException("Login name is already used by another user");
+		if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
+			throw new UnauthorizedException();
 			
-			String oldName = user.getName();
-			user.setName(data.getName());
-			user.setFullName(data.getFullName());
-			if (!user.isServiceAccount())
-				user.setNotifyOwnEvents(data.isNotifyOwnEvents());
-			userManager.update(user, oldName);
-			return Response.ok().build();
-		} else { 
-			throw new UnauthenticatedException();
+		User existingUser = userManager.findByName(data.getName());
+		if (existingUser != null && !existingUser.equals(user))
+			throw new ExplicitException("Login name is already used by another user");
+
+		var oldData = new UserUpdateData();
+		oldData.setName(user.getName());
+		oldData.setFullName(user.getFullName());
+		oldData.setNotifyOwnEvents(user.isNotifyOwnEvents());
+
+		var oldAuditContent = VersionedXmlDoc.fromBean(oldData).toXML();			
+
+		String oldName = user.getName();
+		user.setName(data.getName());
+		user.setFullName(data.getFullName());
+		if (!user.isServiceAccount())
+			user.setNotifyOwnEvents(data.isNotifyOwnEvents());
+		userManager.update(user, oldName);
+
+		if (!getAuthUser().equals(user)) {
+			var newAuditContent = VersionedXmlDoc.fromBean(data).toXML();
+			auditManager.audit(null, "changed account \"" + user.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
 		}
+		
+		return Response.ok().build();
     }
 
 	@Api(order=1960, description="Disable user")
 	@Path("/{userId}/disable")
     @POST
-    public Response disable(@PathParam("userId") Long userId) {
-		if (SecurityUtils.isAdministrator()) { 	
-			if (userId <= User.ROOT_ID)		
-				throw new BadRequestException("Should only disable normal users");
-			var user = userManager.load(userId);
-			userManager.disable(user);
-			return Response.ok().build();
-		} else { 
-			throw new UnauthenticatedException();
-		}
+    public Response disableUser(@PathParam("userId") Long userId) {
+		if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+		
+		if (userId <= User.ROOT_ID)		
+			throw new BadRequestException("Should only disable normal users");
+		var user = userManager.load(userId);
+		userManager.disable(user);
+
+		auditManager.audit(null, "disabled account \"" + user.getName() + "\" via RESTful API", null, null);
+
+		return Response.ok().build();
     }
 
 	@Api(order=1970, description="Enable user")
 	@Path("/{userId}/enable")
     @POST
-    public Response enable(@PathParam("userId") Long userId) {
-		if (SecurityUtils.isAdministrator()) { 	
-			if (userId <= User.ROOT_ID)		
-				throw new BadRequestException("Should only enable normal users");
-			var user = userManager.load(userId);
-			userManager.enable(user);
-			return Response.ok().build();
-		} else { 
-			throw new UnauthenticatedException();
-		}
+    public Response enableUser(@PathParam("userId") Long userId) {
+		if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+		if (userId <= User.ROOT_ID)		
+			throw new BadRequestException("Should only enable normal users");
+		var user = userManager.load(userId);
+		userManager.enable(user);
+
+		auditManager.audit(null, "enabled account \"" + user.getName() + "\" via RESTful API", null, null);
+
+		return Response.ok().build();
     }
 	
 	@Api(order=2000)
@@ -399,12 +426,14 @@ public class UserResource {
 		if (SecurityUtils.isAdministrator()) {
 			user.setPassword(passwordService.encryptPassword(password));
 			userManager.update(user, null);
+			if (!getAuthUser().equals(user)) 
+				auditManager.audit(null, "changed password of account \"" + user.getName() + "\" via RESTful API", null, null);
 			return Response.ok().build();
 		} else if (user.isDisabled()) {
 			throw new ExplicitException("Can not set password for disabled user");
 		} else if (user.isServiceAccount()) {
 			throw new ExplicitException("Can not set password for service account");
-		} else if (user.equals(SecurityUtils.getAuthUser())) {
+		} else if (user.equals(getAuthUser())) {
 			if (user.getPassword() == null) {
 				throw new ExplicitException("The user is currently authenticated via external system, "
 						+ "please change password there instead");
@@ -422,16 +451,18 @@ public class UserResource {
 	@Path("/{userId}/two-factor-authentication")
 	@DELETE
 	public Response resetTwoFactorAuthentication(@PathParam("userId") Long userId) {
-		User user = userManager.load(userId);
-		if (!SecurityUtils.isAdministrator()) {
+		if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-		} else if (user.isDisabled()) {
+
+		User user = userManager.load(userId);		
+		if (user.isDisabled()) {
 			throw new ExplicitException("Can not reset two factor authentication for disabled user");
 		} else if (user.isServiceAccount()) {
 			throw new ExplicitException("Can not reset two factor authentication for service account");
 		} else {
 			user.setTwoFactorAuthentication(null);
 			userManager.update(user, null);
+			auditManager.audit(null, "reset two factor authentication of account \"" + user.getName() + "\" via RESTful API", null, null);
 			return Response.ok().build();
 		}
 	}
@@ -441,12 +472,16 @@ public class UserResource {
     @POST
     public Response setQueriesAndWatches(@PathParam("userId") Long userId, @NotNull QueriesAndWatches queriesAndWatches) {
     	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser())) 
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
-		else if (user.isDisabled()) 
+
+		if (user.isDisabled()) 
 			throw new ExplicitException("Can not set queries and watches for disabled user");
 		else if (user.isServiceAccount()) 
 			throw new ExplicitException("Can not set queries and watches for service account");
+
+		var oldAuditContent = VersionedXmlDoc.fromBean(getQueriesAndWatches(user)).toXML();
+
 		user.setBuildQuerySubscriptions(queriesAndWatches.buildQuerySubscriptions);
 		user.setIssueQueryWatches(queriesAndWatches.issueQueryWatches);
 		user.setPullRequestQueryWatches(queriesAndWatches.pullRequestQueryWatches);
@@ -456,6 +491,12 @@ public class UserResource {
 		user.setProjectQueries(queriesAndWatches.projectQueries);
 		user.setPullRequestQueries(queriesAndWatches.pullRequestQueries);
 		userManager.update(user, null);
+
+		if (!getAuthUser().equals(user)) {
+			var newAuditContent = VersionedXmlDoc.fromBean(queriesAndWatches).toXML();
+			auditManager.audit(null, "changed queries and watches of account \"" + user.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
+		}
+
 		return Response.ok().build();
     }
 	
@@ -464,36 +505,108 @@ public class UserResource {
 	@POST
 	public Long addSshKey(@PathParam("userId") Long userId, @NotNull String content) {
 		User user = userManager.load(userId);
-		if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getAuthUser()))
+		if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser()))
 			throw new UnauthorizedException();
-		else if (user.isDisabled())
+		
+		if (user.isDisabled())
 			throw new ExplicitException("Can not add ssh key for disabled user");
 
 		SshKey sshKey = new SshKey();
 		sshKey.setContent(content);
 		sshKey.setCreatedAt(new Date());
 		sshKey.setOwner(user);
-		sshKey.fingerprint();
+		sshKey.generateFingerprint();
         
 		sshKeyManager.create(sshKey);
+
+		if (!getAuthUser().equals(user)) {
+			var newAuditContent = VersionedXmlDoc.fromBean(sshKey).toXML();
+			auditManager.audit(null, "added ssh key to account \"" + user.getName() + "\" via RESTful API", null, newAuditContent);
+		}
+
 		return sshKey.getId();
 	}
 	
 	@Api(order=2300)
 	@Path("/{userId}")
     @DELETE
-    public Response delete(@PathParam("userId") Long userId) {
+    public Response deleteUser(@PathParam("userId") Long userId) {
     	if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
+
     	User user = userManager.load(userId);
     	if (user.isRoot())
 			throw new ExplicitException("Root user can not be deleted");
-    	else if (user.equals(SecurityUtils.getAuthUser()))
+    	else if (user.equals(getAuthUser()))
     		throw new ExplicitException("Can not delete yourself");
     	else
     		userManager.delete(user);
+
+		var oldAuditContent = VersionedXmlDoc.fromBean(getData(user)).toXML();
+		auditManager.audit(null, "deleted account \"" + user.getName() + "\" via RESTful API", oldAuditContent, null);
+
     	return Response.ok().build();
     }
+
+	public static class UserData implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+		
+		@Api(order=10, description="Whether or not the user is disabled")
+		private boolean disabled;
+
+		@Api(order=50, description="Whether or not the user is a service account")
+		private boolean serviceAccount;
+
+		@Api(order=100, description="Login name of the user")
+		private String name;
+		
+		@Api(order=200)
+		private String fullName;
+
+		@Api(order=300, description = "Whether or not to notify user on own events. Only meaningful for non service account")
+		private boolean notifyOwnEvents;
+
+		public boolean isDisabled() {
+			return disabled;
+		}
+
+		public void setDisabled(boolean disabled) {
+			this.disabled = disabled;
+		}
+
+		public boolean isServiceAccount() {
+			return serviceAccount;
+		}
+
+		public void setServiceAccount(boolean serviceAccount) {
+			this.serviceAccount = serviceAccount;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getFullName() {
+			return fullName;
+		}
+
+		public void setFullName(String fullName) {
+			this.fullName = fullName;
+		}
+
+		public boolean isNotifyOwnEvents() {
+			return notifyOwnEvents;
+		}
+
+		public void setNotifyOwnEvents(boolean notifyOwnEvents) {
+			this.notifyOwnEvents = notifyOwnEvents;
+		}
+	}
 
 	@EntityCreate(User.class)
 	public static class UserCreateData implements Serializable {
@@ -577,66 +690,7 @@ public class UserResource {
 		}
 	}
 
-	public static class BasicSetting implements Serializable {
-		private static final long serialVersionUID = 1L;
-		
-		@Api(order=10, description="Whether or not the user is disabled")
-		private boolean disabled;
-
-		@Api(order=50, description="Whether or not the user is a service account")
-		private boolean serviceAccount;
-
-		@Api(order=100, description="Login name of the user")
-		private String name;
-		
-		@Api(order=200)
-		private String fullName;
-
-		@Api(order=300, description = "Whether or not to notify user on own events. Only meaningful for non service account")
-		private boolean notifyOwnEvents;
-
-		public boolean isDisabled() {
-			return disabled;
-		}
-
-		public void setDisabled(boolean disabled) {
-			this.disabled = disabled;
-		}
-
-		public boolean isServiceAccount() {
-			return serviceAccount;
-		}
-
-		public void setServiceAccount(boolean serviceAccount) {
-			this.serviceAccount = serviceAccount;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public String getFullName() {
-			return fullName;
-		}
-
-		public void setFullName(String fullName) {
-			this.fullName = fullName;
-		}
-
-		public boolean isNotifyOwnEvents() {
-			return notifyOwnEvents;
-		}
-
-		public void setNotifyOwnEvents(boolean notifyOwnEvents) {
-			this.notifyOwnEvents = notifyOwnEvents;
-		}
-	}
-
-	public static class BasicSettingUpdateData implements Serializable {
+	public static class UserUpdateData implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 		

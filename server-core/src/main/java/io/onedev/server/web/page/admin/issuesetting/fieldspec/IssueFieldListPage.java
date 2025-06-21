@@ -1,6 +1,36 @@
 package io.onedev.server.web.page.admin.issuesetting.fieldspec;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.list.LoopItem;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.data.IDataProvider;
+import org.apache.wicket.markup.repeater.data.ListDataProvider;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -16,30 +46,6 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.event.Broadcast;
-import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.*;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.list.LoopItem;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.markup.repeater.data.IDataProvider;
-import org.apache.wicket.markup.repeater.data.ListDataProvider;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class IssueFieldListPage extends IssueSettingPage {
 
@@ -164,10 +170,12 @@ public class IssueFieldListPage extends IssueSettingPage {
 	
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getSetting().getFieldSpecs().remove(fieldIndex);
+						var field = getSetting().getFieldSpecs().remove(fieldIndex);
+						var oldAuditContent = VersionedXmlDoc.fromBean(field).toXML();
 						getSetting().setReconciled(false);
 						send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
 						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+						getAuditManager().audit(null, "deleted issue field \"" + field.getName() + "\"", oldAuditContent, null);
 						target.add(fieldsTable);
 					}
 					
@@ -202,8 +210,11 @@ public class IssueFieldListPage extends IssueSettingPage {
 
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+				var oldAuditContent = VersionedXmlDoc.fromBean(getSetting().getFieldSpecs()).toXML();
 				CollectionUtils.move(getSetting().getFieldSpecs(), from.getItemIndex(), to.getItemIndex());
+				var newAuditContent = VersionedXmlDoc.fromBean(getSetting().getFieldSpecs()).toXML();
 				OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+				getAuditManager().audit(null, "changed order of issue fields", oldAuditContent, newAuditContent);
 				target.add(fieldsTable);
 			}
 			

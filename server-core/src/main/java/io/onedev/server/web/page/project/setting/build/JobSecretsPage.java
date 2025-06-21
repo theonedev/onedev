@@ -28,9 +28,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.util.CollectionUtils;
@@ -235,8 +234,11 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getProject().getBuildSetting().getJobSecrets().remove(index);
-						OneDev.getInstance(ProjectManager.class).update(getProject());
+						var jobSecrets = getProject().getBuildSetting().getJobSecrets();
+						var jobSecret = jobSecrets.remove(index);
+						var oldAuditContent = VersionedXmlDoc.fromBean(jobSecret).toXML();
+						getProjectManager().update(getProject());
+						getAuditManager().audit(getProject(), "deleted job secret \"" + jobSecret.getName() + "\"", oldAuditContent, null);
 						Session.get().success(MessageFormat.format(_T("Job secret \"{0}\" deleted"), rowModel.getObject().getName()));
 						target.add(toggleArchiveButton);
 						target.add(secretsTable);
@@ -285,8 +287,11 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 				var secrets = getProject().getBuildSetting().getJobSecrets();
+				var oldAuditContent = VersionedXmlDoc.fromBean(secrets).toXML();
 				CollectionUtils.move(secrets, from.getItemIndex(), to.getItemIndex());
-				OneDev.getInstance(ProjectManager.class).update(getProject());
+				var newAuditContent = VersionedXmlDoc.fromBean(secrets).toXML();
+				getProjectManager().update(getProject());
+				getAuditManager().audit(getProject(), "reordered job secrets", oldAuditContent, newAuditContent);
 				target.add(secretsTable);
 			}
 

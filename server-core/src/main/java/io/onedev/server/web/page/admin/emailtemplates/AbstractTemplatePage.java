@@ -1,14 +1,10 @@
 package io.onedev.server.web.page.admin.emailtemplates;
 
-import com.google.common.collect.Lists;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.page.admin.AdministrationPage;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -18,15 +14,23 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import static io.onedev.server.web.translation.Translation._T;
+import com.google.common.collect.Lists;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.page.admin.AdministrationPage;
 
 public abstract class AbstractTemplatePage extends AdministrationPage {
 
 	protected static final String GROOVY_TEMPLATE_LINK = "<a href='https://docs.groovy-lang.org/latest/html/api/groovy/text/SimpleTemplateEngine.html' target='_blank'>Groovy simple template</a>";
 
+	private String oldAuditContent;
+	
 	public AbstractTemplatePage(PageParameters params) {
 		super(params);
 	}
@@ -44,6 +48,7 @@ public abstract class AbstractTemplatePage extends AdministrationPage {
 				.setEscapeModelStrings(false));
 		
 		BeanEditor editor = BeanContext.edit("editor", templates, Lists.newArrayList(getPropertyName()), false);
+		oldAuditContent = getTemplate(templates);
 		
 		Button saveButton = new Button("save") {
 
@@ -51,7 +56,10 @@ public abstract class AbstractTemplatePage extends AdministrationPage {
 			public void onSubmit() {
 				super.onSubmit();
 				
+				var newAuditContent = getTemplate(templates);
 				getSettingManager().saveEmailTemplates(templates);
+				getAuditManager().audit(null, "changed email template \"" + getPropertyName() + "\"", oldAuditContent, newAuditContent);
+				oldAuditContent = newAuditContent;
 				getSession().success(_T("Template saved"));
 			}
 			
@@ -69,7 +77,10 @@ public abstract class AbstractTemplatePage extends AdministrationPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				setTemplate(templates, getDefaultTemplate());
+				var newAuditContent = getTemplate(templates);
 				getSettingManager().saveEmailTemplates(templates);
+				getAuditManager().audit(null, "changed email template \"" + getPropertyName() + "\"", oldAuditContent, newAuditContent);
+				oldAuditContent = newAuditContent;
 				setResponsePage(getPageClass());
 			}
 

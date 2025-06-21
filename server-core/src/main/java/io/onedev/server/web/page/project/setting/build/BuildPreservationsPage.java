@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -27,6 +28,7 @@ public class BuildPreservationsPage extends ProjectBuildSettingPage {
 		
 		BuildPreservationsBean bean = new BuildPreservationsBean();
 		bean.setBuildPreservations(getProject().getBuildSetting().getBuildPreservations());
+		var oldAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 		
 		PropertyEditor<Serializable> editor = PropertyContext.edit("editor", bean, "buildPreservations");
 		
@@ -35,11 +37,13 @@ public class BuildPreservationsPage extends ProjectBuildSettingPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				getSession().success(_T("Build preserve rules saved"));
+				var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 				getProject().getBuildSetting().setBuildPreservations(bean.getBuildPreservations());
 				OneDev.getInstance(ProjectManager.class).update(getProject());
+				getAuditManager().audit(getProject(), "changed build preserve rules", oldAuditContent, newAuditContent);
 				setResponsePage(BuildPreservationsPage.class, 
 						BuildPreservationsPage.paramsOf(getProject()));
+					getSession().success(_T("Build preserve rules saved"));
 			}
 			
 		};

@@ -12,7 +12,7 @@ public class CodeAnalysisSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Api(description = "May be null")
+	@Api(description = "<code>null</code> to inherit from parent project, or all files if no parent")
 	private String analysisFiles;
 	
 	@Editable(order=100, name="Files to Be Analyzed", placeholder="Inherit from parent", rootPlaceholder ="All files", description="OneDev analyzes repository files for code search, "

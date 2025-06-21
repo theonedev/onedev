@@ -117,6 +117,8 @@ import io.onedev.server.StorageManager;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
@@ -256,6 +258,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	private final PackBlobManager packBlobManager;
 	
 	private final ProjectLabelManager labelManager;
+
+	private final AuditManager auditManager;
 	
 	private final Collection<String> reservedNames = Sets.newHashSet("robots.txt", "sitemap.xml", "sitemap.txt",
 			"favicon.ico", "favicon.png", "logo.png", "wicket", "projects");
@@ -282,7 +286,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 								 AttachmentManager attachmentManager, BatchWorkManager batchWorkManager,
 								 VisitInfoManager visitInfoManager, StorageManager storageManager,
 								 PackManager packManager, PackBlobManager packBlobManager, 
-								 ProjectLabelManager labelManager, Set<ProjectNameReservation> nameReservations) {
+								 ProjectLabelManager labelManager, AuditManager auditManager, 
+								 Set<ProjectNameReservation> nameReservations) {
 		super(dao);
 
 		this.commitInfoManager = commitInfoManager;
@@ -308,6 +313,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		this.packManager = packManager;
 		this.packBlobManager = packBlobManager;
 		this.labelManager = labelManager;
+		this.auditManager = auditManager;
 
 		for (ProjectNameReservation reservation : nameReservations)
 			reservedNames.addAll(reservation.getReserved());
@@ -369,8 +375,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public void create(Project project) {
 		Preconditions.checkState(project.isNew());
 		Project parent = project.getParent();
-		if (parent != null && parent.isNew())
+		if (parent != null && parent.isNew()) {
 			create(parent);
+			auditManager.audit(parent, "created project", null, VersionedXmlDoc.fromBean(parent).toXML());
+		}
 		project.setPath(project.calcPath());
 
 		ProjectLastEventDate lastEventDate = new ProjectLastEventDate();
@@ -440,17 +448,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Transactional
 	@Override
 	public void delete(Collection<Project> projects) {
-		Collection<Project> independents = new HashSet<>(projects);
-		for (Iterator<Project> it = independents.iterator(); it.hasNext(); ) {
-			Project independent = it.next();
-			for (Project each : independents) {
-				if (!each.equals(independent) && each.isSelfOrAncestorOf(independent)) {
-					it.remove();
-					break;
-				}
-			}
-		}
-		for (Project independent : independents)
+		for (Project independent : Project.getIndependents(projects))
 			delete(independent);
 	}
 

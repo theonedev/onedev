@@ -1,5 +1,22 @@
 package io.onedev.server.plugin.report.unittest;
 
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.server.model.Build.getProjectRelativeDirPath;
+import static io.onedev.server.plugin.report.unittest.UnitTestReport.CATEGORY;
+import static io.onedev.server.plugin.report.unittest.UnitTestReport.getReportLockName;
+import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import com.google.common.collect.Lists;
+
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
@@ -14,23 +31,10 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.mapper.ProjectPageMapper;
 import io.onedev.server.web.page.layout.SidebarMenuItem;
-import io.onedev.server.web.page.project.StatisticsMenuContribution;
+import io.onedev.server.web.page.project.ProjectMenuContribution;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportTab;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.server.model.Build.getProjectRelativeDirPath;
-import static io.onedev.server.plugin.report.unittest.UnitTestReport.CATEGORY;
-import static io.onedev.server.plugin.report.unittest.UnitTestReport.getReportLockName;
-import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -61,7 +65,7 @@ public class UnitTestModule extends AbstractPluginModule {
 			
 		});
 		
-		contribute(StatisticsMenuContribution.class, new StatisticsMenuContribution() {
+		contribute(ProjectMenuContribution.class, new ProjectMenuContribution() {
 			
 			@Override
 			public List<SidebarMenuItem> getMenuItems(Project project) {
@@ -70,7 +74,7 @@ public class UnitTestModule extends AbstractPluginModule {
 					PageParameters params = UnitTestStatsPage.paramsOf(project);
 					menuItems.add(new SidebarMenuItem.Page(null, "Unit Test", UnitTestStatsPage.class, params));
 				}
-				return menuItems;
+				return Lists.newArrayList(new SidebarMenuItem.SubMenu("stats", _T("Statistics"), menuItems));
 			}
 			
 			@Override

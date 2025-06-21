@@ -45,6 +45,8 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
@@ -357,6 +359,8 @@ public abstract class CodeCommentPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				onDeleteComment(target, getComment());
 				OneDev.getInstance(CodeCommentManager.class).delete(getComment());
+				var oldAuditContent = VersionedXmlDoc.fromBean(getComment()).toXML();
+				OneDev.getInstance(AuditManager.class).audit(getComment().getProject(), "deleted code comment on file \"" + getComment().getMark().getPath() + "\"", oldAuditContent, null);
 			}
 
 			protected void onConfigure() {

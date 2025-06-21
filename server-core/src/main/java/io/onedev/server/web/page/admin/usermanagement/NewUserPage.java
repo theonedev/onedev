@@ -17,6 +17,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -96,6 +97,8 @@ public class NewUserPage extends AdministrationPage {
 								getEmailAddressManager().create(emailAddress);
 								if (defaultLoginGroup != null) 
 									createMembership(user, defaultLoginGroup);
+								var newAuditContent = VersionedXmlDoc.fromBean(user).toXML();
+								getAuditManager().audit(null, "created account \"" + user.getName() + "\"", null, newAuditContent);
 							}
 							
 						});

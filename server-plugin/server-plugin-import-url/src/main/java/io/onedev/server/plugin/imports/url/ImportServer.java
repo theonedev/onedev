@@ -1,5 +1,15 @@
 package io.onedev.server.plugin.imports.url;
 
+import java.io.Serializable;
+import java.net.URISyntaxException;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
+
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.shiro.authz.UnauthorizedException;
+
 import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
@@ -8,6 +18,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.Project;
@@ -17,14 +29,6 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.shiro.authz.UnauthorizedException;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
-import java.net.URISyntaxException;
 
 @Editable
 @ClassValidating
@@ -123,9 +127,10 @@ public class ImportServer implements Serializable, Validatable {
 						if (dryRun) {
 							new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
 						} else {
-							boolean newlyCreated = project.isNew();
-							if (newlyCreated)
+							if (project.isNew()) {
 								getProjectManager().create(project);
+								OneDev.getInstance(AuditManager.class).audit(project, "created project", null, VersionedXmlDoc.fromBean(project).toXML());
+							}
 							getProjectManager().clone(project, builder.build().toString());
 						}
 					} finally {

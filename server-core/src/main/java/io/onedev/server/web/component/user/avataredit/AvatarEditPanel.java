@@ -11,11 +11,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.model.User;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.avatarupload.AvatarFileSelected;
 import io.onedev.server.web.component.avatarupload.AvatarUploadField;
 import io.onedev.server.web.component.user.UserAvatar;
+import io.onedev.server.web.page.user.UserPage;
 
 public class AvatarEditPanel extends GenericPanel<User> {
 	
@@ -33,6 +35,10 @@ public class AvatarEditPanel extends GenericPanel<User> {
 		return getModelObject();
 	}
 	
+	private AuditManager getAuditManager() {
+		return OneDev.getInstance(AuditManager.class);
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -50,6 +56,8 @@ public class AvatarEditPanel extends GenericPanel<User> {
 			@Override
 			public void onClick() {
 				getAvatarManager().useUserAvatar(getUser().getId(), null);
+				if (getPage() instanceof UserPage)
+					getAuditManager().audit(null, "specified to use default avatar for account \"" + getUser().getName() + "\"", null, null);
 				setResponsePage(getPage().getClass(), getPage().getPageParameters());
 			}
 			
@@ -65,6 +73,8 @@ public class AvatarEditPanel extends GenericPanel<User> {
 				super.onSubmit();
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
             	avatarManager.useUserAvatar(getUser().getId(), uploadedAvatarData);
+				if (getPage() instanceof UserPage)
+					getAuditManager().audit(null, "specified to use uploaded avatar for account \"" + getUser().getName() + "\"", null, null);
 				setResponsePage(getPage().getClass(), getPage().getPageParameters());
 			}
 

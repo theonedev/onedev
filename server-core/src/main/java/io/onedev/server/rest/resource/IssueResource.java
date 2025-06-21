@@ -1,10 +1,57 @@
 package io.onedev.server.rest.resource;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.shiro.authz.UnauthorizedException;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.*;
-import io.onedev.server.model.*;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
+import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.IterationManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.IssueLink;
+import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.IssueVote;
+import io.onedev.server.model.IssueWatch;
+import io.onedev.server.model.IssueWork;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
 import io.onedev.server.rest.InvalidParamException;
 import io.onedev.server.rest.annotation.Api;
@@ -16,18 +63,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.web.page.help.ApiHelpUtils;
 import io.onedev.server.web.page.help.ValueInfo;
-import org.apache.shiro.authz.UnauthorizedException;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.Serializable;
-import java.util.*;
 
 @Api(order=2000, description="In most cases, issue resource is operated with issue id, which is different from issue number. "
 		+ "To get issue id of a particular issue number, use the <a href='/~help/api/io.onedev.server.rest.IssueResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
@@ -49,23 +84,26 @@ public class IssueResource {
 	private final ProjectManager projectManager;
 	
 	private final ObjectMapper objectMapper;
+
+	private final AuditManager auditManager;
 	
 	@Inject
 	public IssueResource(SettingManager settingManager, IssueManager issueManager, 
 						 IssueChangeManager issueChangeManager, IterationManager iterationManager, 
-						 ProjectManager projectManager, ObjectMapper objectMapper) {
+						 ProjectManager projectManager, ObjectMapper objectMapper, AuditManager auditManager) {
 		this.settingManager = settingManager;
 		this.issueManager = issueManager;
 		this.issueChangeManager = issueChangeManager;
 		this.iterationManager = iterationManager;
 		this.projectManager = projectManager;
 		this.objectMapper = objectMapper;
+		this.auditManager = auditManager;
 	}
 
 	@Api(order=100)
 	@Path("/{issueId}")
     @GET
-    public Issue getBasicInfo(@PathParam("issueId") Long issueId) {
+    public Issue getIssue(@PathParam("issueId") Long issueId) {
 		Issue issue = issueManager.load(issueId);
     	if (!SecurityUtils.canAccessIssue(issue)) 
 			throw new UnauthorizedException();
@@ -196,7 +234,7 @@ public class IssueResource {
 	
 	@Api(order=900, exampleProvider = "getIssuesExample")
 	@GET
-    public List<Map<String, Object>> query(
+    public List<Map<String, Object>> queryIssues(
     		@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~issues'>issues page</a>", example="\"State\" is \"Open\"") String query,
 			@QueryParam("withFields") @Api(description = "Whether or not to include issue fields. Default to false", example="true") Boolean withFields, 
     		@QueryParam("offset") @Api(example="0") int offset, 
@@ -235,7 +273,7 @@ public class IssueResource {
 	
 	@Api(order=1000)
     @POST
-    public Long create(@NotNull @Valid IssueOpenData data) {
+    public Long createIssue(@NotNull @Valid IssueOpenData data) {
     	User user = SecurityUtils.getUser();
     	
     	Project project = projectManager.load(data.getProjectId());
@@ -384,11 +422,13 @@ public class IssueResource {
 	@Api(order=1600)
 	@Path("/{issueId}")
     @DELETE
-    public Response delete(@PathParam("issueId") Long issueId) {
+    public Response deleteIssue(@PathParam("issueId") Long issueId) {
     	Issue issue = issueManager.load(issueId);
     	if (!SecurityUtils.canManageIssues(issue.getProject()))
 			throw new UnauthorizedException();
-    	issueManager.delete(issue);
+		issueManager.delete(issue);
+		var oldAuditContent = VersionedXmlDoc.fromBean(issue).toXML();
+		auditManager.audit(issue.getProject(), "deleted issue \"" + issue.getReference().toString(issue.getProject()) + "\" via RESTful API", oldAuditContent, null);
     	return Response.ok().build();
     }
 

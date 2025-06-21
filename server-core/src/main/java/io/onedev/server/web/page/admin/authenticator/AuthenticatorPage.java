@@ -1,16 +1,9 @@
 package io.onedev.server.web.page.admin.authenticator;
 
-import com.google.common.base.Joiner;
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.authenticator.Authenticated;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.taskbutton.TaskButton;
-import io.onedev.server.web.component.taskbutton.TaskResult;
-import io.onedev.server.web.component.taskbutton.TaskResult.HtmlMessgae;
-import io.onedev.server.web.editable.*;
-import io.onedev.server.web.page.admin.AdministrationPage;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -26,14 +19,30 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
-import static io.onedev.server.web.translation.Translation._T;
+import com.google.common.base.Joiner;
 
-import java.io.Serializable;
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.authenticator.Authenticated;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.taskbutton.TaskButton;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.component.taskbutton.TaskResult.HtmlMessgae;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.PropertyContext;
+import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.PropertyUpdating;
+import io.onedev.server.web.page.admin.AdministrationPage;
 
 public class AuthenticatorPage extends AdministrationPage {
 
 	private AuthenticationToken token = new AuthenticationToken();
-	
+
+	private String oldAuditContent;
+
 	public AuthenticatorPage(PageParameters params) {
 		super(params);
 	}
@@ -42,8 +51,9 @@ public class AuthenticatorPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		AuthenticatorBean bean = new AuthenticatorBean();
+		AuthenticatorBean bean = new AuthenticatorBean();		
 		bean.setAuthenticator(OneDev.getInstance(SettingManager.class).getAuthenticator());
+		oldAuditContent = VersionedXmlDoc.fromBean(bean.getAuthenticator()).toXML();
 		
 		PropertyEditor<Serializable> editor = 
 				PropertyContext.edit("editor", bean, "authenticator");
@@ -52,8 +62,10 @@ public class AuthenticatorPage extends AdministrationPage {
 			@Override
 			public void onSubmit() {
 				super.onSubmit();
-				
+				var newAuditContent = VersionedXmlDoc.fromBean(bean.getAuthenticator()).toXML();
 				OneDev.getInstance(SettingManager.class).saveAuthenticator(bean.getAuthenticator());
+				getAuditManager().audit(null, "changed external authenticator settings", oldAuditContent, newAuditContent);
+				oldAuditContent = newAuditContent;
 				getSession().success(_T("External authenticator settings saved"));
 			}
 			

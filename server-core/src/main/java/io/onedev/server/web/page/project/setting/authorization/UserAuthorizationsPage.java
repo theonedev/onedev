@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -17,6 +19,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -114,7 +117,12 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 					}
 				}
 				
+				var oldAuditContent = getAuditContent();
 				getUserAuthorizationManager().syncAuthorizations(getProject(), authorizations);
+
+				var newAuditContent = getAuditContent();
+				getAuditManager().audit(getProject(), "changed user authorizations", oldAuditContent, newAuditContent);
+
 				Session.get().success(_T("User authorizations updated"));
 			}
 			
@@ -122,6 +130,14 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 		form.add(new FencedFeedbackPanel("feedback", form));
 		form.add(PropertyContext.edit("editor", authorizationsBean, "authorizations"));
 		add(form);
+	}
+
+	private String getAuditContent() {
+		var auditData = new TreeMap<String, TreeSet<String>>();
+		for (var authorization: getProject().getUserAuthorizations()) {
+			auditData.computeIfAbsent(authorization.getUser().getName(), k -> new TreeSet<>()).add(authorization.getRole().getName());
+		}
+		return VersionedXmlDoc.fromBean(auditData).toXML();
 	}
 
 	private RoleManager getRoleManager() {

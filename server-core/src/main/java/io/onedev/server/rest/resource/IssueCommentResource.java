@@ -47,7 +47,7 @@ public class IssueCommentResource {
 	@Api(order=100)
 	@Path("/{commentId}")
 	@GET
-	public IssueComment get(@PathParam("commentId") Long commentId) {
+	public IssueComment getComment(@PathParam("commentId") Long commentId) {
 		IssueComment comment = commentManager.load(commentId);
     	if (!SecurityUtils.canAccessProject(comment.getIssue().getProject()))  
 			throw new UnauthorizedException();
@@ -56,7 +56,7 @@ public class IssueCommentResource {
 	
 	@Api(order=200, description="Create new issue comment")
 	@POST
-	public Long create(@NotNull IssueComment comment) {
+	public Long createComment(@NotNull IssueComment comment) {
 		if (!canAccessIssue(comment.getIssue()) 
 				|| !isAdministrator() && !comment.getUser().equals(getUser())) {
 			throw new UnauthorizedException();
@@ -68,7 +68,7 @@ public class IssueCommentResource {
 	@Api(order=250, description="Update issue comment of specified id")
 	@Path("/{commentId}")
 	@POST
-	public Response update(@PathParam("commentId") Long commentId, @NotNull String content) {
+	public Response updateComment(@PathParam("commentId") Long commentId, @NotNull String content) {
 		var comment = commentManager.load(commentId);
 		if (!canModifyOrDelete(comment)) 
 			throw new UnauthorizedException();
@@ -91,7 +91,7 @@ public class IssueCommentResource {
 	@Api(order=300)
 	@Path("/{commentId}")
 	@DELETE
-	public Response delete(@PathParam("commentId") Long commentId) {
+	public Response deleteComment(@PathParam("commentId") Long commentId) {
 		IssueComment comment = commentManager.load(commentId);
     	if (!canModifyOrDelete(comment)) 
 			throw new UnauthorizedException();

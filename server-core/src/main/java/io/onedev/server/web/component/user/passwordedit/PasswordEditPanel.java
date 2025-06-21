@@ -1,11 +1,10 @@
 package io.onedev.server.web.component.user.passwordedit;
 
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.editable.BeanContext;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.Session;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -15,10 +14,14 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.HashSet;
-import java.util.Set;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AuditManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.page.user.UserPage;
 
 public class PasswordEditPanel extends GenericPanel<User> {
 	
@@ -47,10 +50,17 @@ public class PasswordEditPanel extends GenericPanel<User> {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				if (getUser().getPassword() != null)
+
+				var auditManager = OneDev.getInstance(AuditManager.class);
+				if (getUser().getPassword() != null) {
+					if (getPage() instanceof UserPage)
+						auditManager.audit(null, "changed password for account \"" + getUser().getName() + "\"", null, null);
 					Session.get().success(_T("Password has been changed"));
-				else
+				} else {
+					if (getPage() instanceof UserPage)
+						auditManager.audit(null, "created password for account \"" + getUser().getName() + "\"", null, null);
 					Session.get().success(_T("Password has been set"));
+				}
 					
 				getUser().setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(bean.getNewPassword()));
 				OneDev.getInstance(UserManager.class).update(getUser(), null);

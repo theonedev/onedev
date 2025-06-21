@@ -1,14 +1,14 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentAttributeManager;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.entitymanager.AgentTokenManager;
-import io.onedev.server.model.AgentAttribute;
-import io.onedev.server.web.component.AgentStatusBadge;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.util.ConfirmClickModifier;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -20,9 +20,16 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.*;
+import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AgentAttributeManager;
+import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.entitymanager.AgentTokenManager;
+import io.onedev.server.model.AgentAttribute;
+import io.onedev.server.web.component.AgentStatusBadge;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.util.ConfirmClickModifier;
 
 public class AgentOverviewPage extends AgentDetailPage {
 
@@ -43,6 +50,7 @@ public class AgentOverviewPage extends AgentDetailPage {
 			@Override
 			public void onClick() {
 				getAgentManager().restart(getAgent());
+				getAuditManager().audit(null, "restarted agent \"" + getAgent().getName() + "\"", null, null);
 				setResponsePage(AgentOverviewPage.class, AgentOverviewPage.paramsOf(getAgent()));
 				Session.get().success(_T("Restart command issued"));
 			}
@@ -54,6 +62,7 @@ public class AgentOverviewPage extends AgentDetailPage {
 			@Override
 			public void onClick() {
 				getAgentManager().delete(getAgent());
+				getAuditManager().audit(null, "removed agent \"" + getAgent().getName() + "\"", null, null);
 				setResponsePage(AgentListPage.class);
 				Session.get().success(_T("Agent removed"));
 			}
@@ -77,10 +86,13 @@ public class AgentOverviewPage extends AgentDetailPage {
 
 			@Override
 			public void onClick() {
-				if (getAgent().isPaused())
+				if (getAgent().isPaused()) {
 					getAgentManager().resume(getAgent());
-				else
+					getAuditManager().audit(null, "resumed agent \"" + getAgent().getName() + "\"", null, null);
+				} else {
 					getAgentManager().pause(getAgent());
+					getAuditManager().audit(null, "paused agent \"" + getAgent().getName() + "\"", null, null);
+				}
 				setResponsePage(AgentOverviewPage.class, AgentOverviewPage.paramsOf(getAgent()));
 			}
 			
@@ -113,6 +125,7 @@ public class AgentOverviewPage extends AgentDetailPage {
 				var token = getAgent().getToken();
 				token.setValue(UUID.randomUUID().toString());
 				OneDev.getInstance(AgentTokenManager.class).createOrUpdate(token);
+				getAuditManager().audit(null, "regenerated access token for agent \"" + getAgent().getName() + "\"", null, null);
 				OneDev.getInstance(AgentManager.class).disconnect(getAgent().getId());
 				Session.get().success(_T("Access token regenerated, make sure to update the token at agent side"));
 				setResponsePage(AgentOverviewPage.class, paramsOf(getAgent()));
@@ -133,7 +146,10 @@ public class AgentOverviewPage extends AgentDetailPage {
 					Map<String, String> attributeMap = new HashMap<>();
 					for (AgentAttribute attribute: bean.getAttributes())
 						attributeMap.put(attribute.getName(), attribute.getValue());
+					var oldAuditContent = VersionedXmlDoc.fromBean(getAgent().getAttributeMap()).toXML();
 					OneDev.getInstance(AgentAttributeManager.class).syncAttributes(getAgent(), attributeMap);
+					var newAuditContent = VersionedXmlDoc.fromBean(getAgent().getAttributeMap()).toXML();
+					getAuditManager().audit(null, "changed attributes of agent \"" + getAgent().getName() + "\"", oldAuditContent, newAuditContent);
 					getAgentManager().attributesUpdated(getAgent());
 					Session.get().success(_T("Attributes saved"));
 				}

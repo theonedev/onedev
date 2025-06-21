@@ -43,8 +43,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.IterationManager;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
@@ -287,8 +287,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 						@Override
 						public void onClick() {
+							var oldAuditContent = VersionedXmlDoc.fromBean(getProject().getIssueSetting().getBoardSpecs()).toXML();
 							getProject().getIssueSetting().setBoardSpecs(null);
-							OneDev.getInstance(ProjectManager.class).update(getProject());
+							var newAuditContent = VersionedXmlDoc.fromBean(getProject().getIssueSetting().getBoardSpecs()).toXML();
+							getProjectManager().update(getProject());
+							getAuditManager().audit(getProject(), "changed issue boards", oldAuditContent, newAuditContent);
 							setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject()));
 						}
 
@@ -354,7 +357,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									BoardSpec currentBoard = getBoard();
 									boards.remove(boardToRemove);
 									getProject().getIssueSetting().setBoardSpecs(boards);
-									OneDev.getInstance(ProjectManager.class).update(getProject());
+									getProjectManager().update(getProject());
+									var oldAuditContent = VersionedXmlDoc.fromBean(boardToRemove).toXML();
+									getAuditManager().audit(getProject(), "deleted issue board \"" + boardToRemove.getName() + "\"", oldAuditContent, null);
 									
 									BoardSpec nextBoard;
 									if (boardToRemove.getName().equals(currentBoard.getName())) 
@@ -378,8 +383,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							@Override
 							protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 								CollectionUtils.move(boards, from.getItemIndex(), to.getItemIndex());
+								var oldAuditContent = VersionedXmlDoc.fromBean(getProject().getIssueSetting().getBoardSpecs()).toXML();
 								getProject().getIssueSetting().setBoardSpecs(boards);
-								OneDev.getInstance(ProjectManager.class).update(getProject());
+								var newAuditContent = VersionedXmlDoc.fromBean(getProject().getIssueSetting().getBoardSpecs()).toXML();
+								getProjectManager().update(getProject());
+								getAuditManager().audit(getProject(), "reordered issue boards", oldAuditContent, newAuditContent);
 								target.add(menuFragment);
 							}
 							
@@ -486,7 +494,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 					}) {
 
-						private void toggleClose(Iteration iteration) {
+						private void toggleClose(Iteration iteration) {							
 							iteration.setClosed(!iteration.isClosed());
 							if (iteration.equals(getIterationSelection().getIteration())) {
 								getIterationManager().createOrUpdate(iteration);
@@ -495,6 +503,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							} else {
 								getIterationManager().createOrUpdate(iteration);
 							}
+							if (iteration.isClosed()) 
+								getAuditManager().audit(iteration.getProject(), "closed iteration \"" + iteration.getName() + "\"", null, null);
+							else
+								getAuditManager().audit(iteration.getProject(), "reopened iteration \"" + iteration.getName() + "\"", null, null);
+
 							dropdown.close();
 							if (iteration.isClosed())
 								Session.get().success(MessageFormat.format(_T("Iteration \"{0}\" is closed"), iteration.getName()));
@@ -577,8 +590,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 											@Override
 											protected String onSave(AjaxRequestTarget target, IterationEditBean bean) {
 												var iteration = item.getModelObject();
+												var oldAuditContent = VersionedXmlDoc.fromBean(iteration).toXML();
 												bean.update(iteration);
+												var newAuditContent = VersionedXmlDoc.fromBean(iteration).toXML();
 												getIterationManager().createOrUpdate(iteration);
+												getAuditManager().audit(iteration.getProject(), "changed iteration \"" + iteration.getName() + "\"", oldAuditContent, newAuditContent);
 												setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
 														getProject(), getBoard(), new IterationSelection.Specified(iteration), 
 														backlog, queryString, backlogQueryString));
@@ -610,6 +626,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 										} else {
 											getIterationManager().delete(iteration);
 										}
+										var oldAuditContent = VersionedXmlDoc.fromBean(iteration).toXML();
+										getAuditManager().audit(iteration.getProject(), "deleted iteration \"" + iteration.getName() + "\"", oldAuditContent, null);
 										Session.get().success(MessageFormat.format(_T("Iteration \"{0}\" deleted"), iteration.getName()));
 									}
 
@@ -675,6 +693,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									iteration.setProject(getProject());
 									bean.update(iteration);
 									getIterationManager().createOrUpdate(iteration);
+									var newAuditContent = VersionedXmlDoc.fromBean(iteration).toXML();
+									getAuditManager().audit(iteration.getProject(), "created iteration \"" + iteration.getName() + "\"", null, newAuditContent);
 									setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
 											getProject(), getBoard(), new IterationSelection.Specified(iteration), 
 											backlog, queryString, backlogQueryString));
@@ -844,8 +864,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 				@Override
 				public void onClick() {
+					var oldAuditContent = VersionedXmlDoc.fromBean(getProject().getIssueSetting().getBoardSpecs()).toXML();
 					getProject().getIssueSetting().setBoardSpecs(null);
-					OneDev.getInstance(ProjectManager.class).update(getProject());
+					var newAuditContent = VersionedXmlDoc.fromBean(getProject().getIssueSetting().getBoardSpecs()).toXML();
+					getProjectManager().update(getProject());
+					getAuditManager().audit(getProject(), "changed issue boards", oldAuditContent, newAuditContent);
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject()));
 				}
 				
@@ -951,12 +974,15 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 		@Override
 		protected Component newContent(String id, ModalPanel modal) {
+			var oldAuditContent = VersionedXmlDoc.fromBean(boards.get(boardIndex)).toXML();
 			return new BoardEditPanel(id, boards, boardIndex) {
 
 				@Override
 				protected void onSave(AjaxRequestTarget target, BoardSpec board) {
 					getProject().getIssueSetting().setBoardSpecs(boards);
-					OneDev.getInstance(ProjectManager.class).update(getProject());
+					var newAuditContent = VersionedXmlDoc.fromBean(board).toXML();
+					getProjectManager().update(getProject());
+					getAuditManager().audit(getProject(), "changed issue board \"" + board.getName() + "\"", oldAuditContent, newAuditContent);
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
 							getProject(), board, getIterationSelection(), backlog, queryString, 
 							backlogQueryString));

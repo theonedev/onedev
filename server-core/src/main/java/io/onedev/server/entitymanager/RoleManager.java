@@ -15,9 +15,9 @@ public interface RoleManager extends EntityManager<Role> {
 	
 	void replicate(Role role);
 	
-	void create(Role role, Collection<LinkSpec> authorizedLinks);
+	void create(Role role, @Nullable Collection<LinkSpec> authorizedLinks);
 	
-	void update(Role role, Collection<LinkSpec> authorizedLinks, @Nullable String oldName);
+	void update(Role role, @Nullable Collection<LinkSpec> authorizedLinks, @Nullable String oldName);
 	
 	@Nullable
 	Role find(String name);

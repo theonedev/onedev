@@ -1,6 +1,20 @@
 package io.onedev.server.web.page.project.setting.servicedesk;
 
+import static io.onedev.server.model.Project.PROP_SERVICE_DESK_EMAIL_ADDRESS;
+
+import java.io.Serializable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.Session;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import com.google.common.collect.Sets;
+
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
@@ -12,17 +26,6 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
-import org.apache.wicket.Component;
-import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import java.io.Serializable;
-
-import static io.onedev.server.model.Project.PROP_SERVICE_DESK_EMAIL_ADDRESS;
 
 public class ServiceDeskSettingPage extends ProjectSettingPage {
 
@@ -36,6 +39,7 @@ public class ServiceDeskSettingPage extends ProjectSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		var oldAuditContent = VersionedXmlDoc.fromBean(getProject().getServiceDeskEmailAddress()).toXML();
 		Form<?> form = new Form<Void>("form") {
 
 			@Override
@@ -51,7 +55,9 @@ public class ServiceDeskSettingPage extends ProjectSettingPage {
 					} 
 				} 
 				if (editor.isValid()) {
+					var newAuditContent = VersionedXmlDoc.fromBean(getProject().getServiceDeskEmailAddress()).toXML();
 					getProjectManager().update(getProject());
+					getAuditManager().audit(getProject(), "changed service desk email address", oldAuditContent, newAuditContent);
 					setResponsePage(ServiceDeskSettingPage.class, ServiceDeskSettingPage.paramsOf(getProject()));
 					Session.get().success("Service desk settings updated");
 				}

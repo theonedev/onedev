@@ -26,6 +26,7 @@ import org.apache.wicket.model.Model;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentTokenManager;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.model.AgentToken;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
@@ -62,6 +63,7 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 			public void onClick(AjaxRequestTarget target) {
 				AgentToken token = new AgentToken();
 				getTokenManager().createOrUpdate(token);
+				getAuditManager().audit(null, "created agent token", null, null);
 				target.add(TokenListPanel.this);
 			}
 			
@@ -78,6 +80,7 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				getTokenManager().deleteUnused();
+				getAuditManager().audit(null, "deleted unused agent tokens", null, null);
 				target.add(TokenListPanel.this);
 				target.add(this);
 			}
@@ -168,6 +171,10 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 
 	private List<AgentToken> getUnusedTokens() {
 		return getModelObject();
+	}
+	
+	private AuditManager getAuditManager() {
+		return OneDev.getInstance(AuditManager.class);
 	}
 	
 }

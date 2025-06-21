@@ -96,15 +96,19 @@
 }
 
 .select2-container-multi .select2-choices .select2-search-field input {
-	height: calc(1.5em + 1.3rem);
+	  height: calc(1.5em + 1.3rem);
     line-height: 1.42857;
 }
 
 .select2-container-multi.form-control-sm .select2-choices .select2-search-field input,
 .input-group-sm .select2-container-multi .select2-choices .select2-search-field input {
-	height: calc(1.35em + 1.1rem + 2px);
+	  height: calc(1.3em + 1.1rem + 1px);
     line-height: 1.35;
-	border-radius: 0.42rem;
+	  border-radius: 0.28rem;
+}
+
+.form-control-sm.select2-container .select2-choice, .form-control-sm.select2-container .select2-choices {
+	  border-radius: 0.28rem;
 }
 
 /**

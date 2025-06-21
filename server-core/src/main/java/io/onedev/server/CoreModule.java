@@ -371,6 +371,7 @@ import io.onedev.server.util.oauth.OAuthTokenManager;
 import io.onedev.server.util.xstream.CollectionConverter;
 import io.onedev.server.util.xstream.HibernateProxyConverter;
 import io.onedev.server.util.xstream.MapConverter;
+import io.onedev.server.util.xstream.ObjectMapperConverter;
 import io.onedev.server.util.xstream.ReflectionConverter;
 import io.onedev.server.util.xstream.StringConverter;
 import io.onedev.server.util.xstream.VersionedDocumentConverter;
@@ -393,7 +394,6 @@ import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
 import io.onedev.server.web.exceptionhandler.PageExpiredExceptionHandler;
-import io.onedev.server.web.page.layout.AdministrationMenuContribution;
 import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
@@ -691,8 +691,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(UploadManager.class).to(DefaultUploadManager.class);
 		
 		bind(TaskButton.TaskFutureManager.class);
-		
-		contribute(AdministrationMenuContribution.class, (AdministrationMenuContribution) ArrayList::new);
 	}
 	
 	private void configureBuild() {
@@ -856,6 +854,7 @@ public class CoreModule extends AbstractPluginModule {
 				xstream.registerConverter(new HibernateProxyConverter(), XStream.PRIORITY_VERY_HIGH);
 				xstream.registerConverter(new CollectionConverter(xstream.getMapper()), XStream.PRIORITY_VERY_HIGH);
 				xstream.registerConverter(new MapConverter(xstream.getMapper()), XStream.PRIORITY_VERY_HIGH);
+				xstream.registerConverter(new ObjectMapperConverter(), XStream.PRIORITY_VERY_HIGH);
 				xstream.registerConverter(new ISO8601DateConverter(), XStream.PRIORITY_VERY_HIGH);
 				xstream.registerConverter(new ISO8601SqlTimestampConverter(), XStream.PRIORITY_VERY_HIGH); 
 				xstream.registerConverter(new ReflectionConverter(xstream.getMapper(), xstream.getReflectionProvider()), 

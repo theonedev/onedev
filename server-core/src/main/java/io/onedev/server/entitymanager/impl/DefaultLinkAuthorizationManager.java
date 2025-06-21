@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.google.common.base.Preconditions;
+
 import io.onedev.server.entitymanager.LinkAuthorizationManager;
 import io.onedev.server.model.LinkAuthorization;
 import io.onedev.server.model.LinkSpec;

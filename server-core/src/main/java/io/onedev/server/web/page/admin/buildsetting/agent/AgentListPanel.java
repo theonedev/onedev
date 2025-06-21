@@ -45,7 +45,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.model.Agent;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -290,13 +292,18 @@ class AgentListPanel extends Panel {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
-								for (var model: selectionColumn.getSelections())
-									getAgentManager().pause(model.getObject());
-								target.add(countLabel);
-								target.add(body);
-								selectionColumn.getSelections().clear();
-								Session.get().success(_T("Paused selected agents"));
+								getTransactionManager().run(() -> {
+									dropdown.close();								
+									for (var model: selectionColumn.getSelections()) {
+										var agent = model.getObject();
+										getAgentManager().pause(agent);	
+										getAuditManager().audit(null, "paused agent \"" + agent.getName() + "\"", null, null);
+									}							
+									target.add(countLabel);
+									target.add(body);
+									selectionColumn.getSelections().clear();
+									Session.get().success(_T("Paused selected agents"));	
+								});
 							}
 							
 							@Override
@@ -333,13 +340,18 @@ class AgentListPanel extends Panel {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
-								for (var model: selectionColumn.getSelections())
-									getAgentManager().resume(model.getObject());
-								target.add(countLabel);
-								target.add(body);
-								selectionColumn.getSelections().clear();
-								Session.get().success(_T("Resumed selected agents"));
+								getTransactionManager().run(() -> {
+									dropdown.close();
+									for (var model: selectionColumn.getSelections()) {
+										var agent = model.getObject();
+										getAgentManager().resume(agent);
+										getAuditManager().audit(null, "resumed agent \"" + agent.getName() + "\"", null, null);
+									}
+									target.add(countLabel);
+									target.add(body);
+									selectionColumn.getSelections().clear();
+									Session.get().success(_T("Resumed selected agents"));
+								});
 							}
 							
 							@Override
@@ -382,12 +394,17 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										for (IModel<Agent> each: selectionColumn.getSelections()) 
-											getAgentManager().restart(each.getObject());
-										target.add(countLabel);
-										target.add(body);
-										selectionColumn.getSelections().clear();
-										Session.get().success(_T("Restart command issued to selected agents"));
+										getTransactionManager().run(() -> {
+											for (IModel<Agent> each: selectionColumn.getSelections()) {
+												var agent = each.getObject();
+												getAgentManager().restart(agent);
+												getAuditManager().audit(null, "restarted agent \"" + agent.getName() + "\"", null, null);
+											}
+											target.add(countLabel);
+											target.add(body);
+											selectionColumn.getSelections().clear();
+											Session.get().success(_T("Restart command issued to selected agents"));
+										});
 									}
 									
 									@Override
@@ -443,11 +460,16 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										for (var model: selectionColumn.getSelections()) 
-											getAgentManager().delete(model.getObject());
-										selectionColumn.getSelections().clear();
-										target.add(countLabel);
-										target.add(body);
+										getTransactionManager().run(() -> {
+											for (var model: selectionColumn.getSelections()) {
+												var agent = model.getObject();
+												getAgentManager().delete(agent);
+												getAuditManager().audit(null, "removed agent \"" + agent.getName() + "\"", null, null);
+											}
+											selectionColumn.getSelections().clear();
+											target.add(countLabel);
+											target.add(body);
+										});
 									}
 									
 									@Override
@@ -505,13 +527,18 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) 
-											getAgentManager().pause(it.next());
-										selectionColumn.getSelections().clear();
-										dataProvider.detach();
-										target.add(countLabel);
-										target.add(body);
-										Session.get().success(_T("Paused all queried agents"));
+										getTransactionManager().run(() -> {
+											for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
+												var agent = it.next();
+												getAgentManager().pause(agent);
+												getAuditManager().audit(null, "paused agent \"" + agent.getName() + "\"", null, null);
+											}
+											selectionColumn.getSelections().clear();
+											dataProvider.detach();
+											target.add(countLabel);
+											target.add(body);
+											Session.get().success(_T("Paused all queried agents"));
+										});
 									}
 									
 									@Override
@@ -569,13 +596,18 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) 
-											getAgentManager().resume(it.next());
-										dataProvider.detach();
-										target.add(countLabel);
-										target.add(body);
-										selectionColumn.getSelections().clear();
-										Session.get().success(_T("Resumed all queried agents"));
+										getTransactionManager().run(() -> {
+											for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
+												var agent = it.next();
+												getAgentManager().resume(agent);
+												getAuditManager().audit(null, "resumed agent \"" + agent.getName() + "\"", null, null);
+											}
+											dataProvider.detach();
+											target.add(countLabel);
+											target.add(body);
+											selectionColumn.getSelections().clear();
+											Session.get().success(_T("Resumed all queried agents"));
+										});
 									}
 									
 									@Override
@@ -633,13 +665,18 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) 
-											getAgentManager().restart(it.next());
-										dataProvider.detach();
-										target.add(countLabel);
-										target.add(body);
-										selectionColumn.getSelections().clear();
-										Session.get().success(_T("Restart command issued to all queried agents"));
+										getTransactionManager().run(() -> {
+											for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
+												var agent = it.next();
+												getAgentManager().restart(agent);
+												getAuditManager().audit(null, "restarted agent \"" + agent.getName() + "\"", null, null);
+											}
+											dataProvider.detach();
+											target.add(countLabel);
+											target.add(body);
+											selectionColumn.getSelections().clear();
+											Session.get().success(_T("Restart command issued to all queried agents"));
+										});
 									}
 									
 									@Override
@@ -697,12 +734,17 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) 
-											getAgentManager().delete(it.next());
-										dataProvider.detach();
-										target.add(countLabel);
-										target.add(body);
-										selectionColumn.getSelections().clear();
+										getTransactionManager().run(() -> {
+											for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
+												var agent = it.next();
+												getAgentManager().delete(agent);
+												getAuditManager().audit(null, "removed agent \"" + agent.getName() + "\"", null, null);
+											}
+											dataProvider.detach();
+											target.add(countLabel);
+											target.add(body);
+											selectionColumn.getSelections().clear();
+										});
 									}
 									
 									@Override
@@ -902,4 +944,12 @@ class AgentListPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 
+	private AuditManager getAuditManager() {
+		return OneDev.getInstance(AuditManager.class);
+	}
+
+	private TransactionManager getTransactionManager() {
+		return OneDev.getInstance(TransactionManager.class);
+	}
+	
 }

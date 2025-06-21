@@ -1,14 +1,19 @@
 package io.onedev.server.web.editable;
 
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.server.annotation.OmitName;
-import io.onedev.server.annotation.SubscriptionRequired;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.EditContext;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.util.PathNode.Named;
-import io.onedev.server.web.util.WicketUtils;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.validation.Validator;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
@@ -25,13 +30,16 @@ import org.apache.wicket.util.convert.ConversionException;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
-import javax.validation.Validator;
-
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.SubscriptionRequired;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.EditContext;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.util.PathNode.Named;
+import io.onedev.server.util.xstream.ObjectMap;
+import io.onedev.server.web.util.WicketUtils;
 
 public class BeanEditor extends ValueEditor<Serializable> {
 	
@@ -52,6 +60,16 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			propertyContexts.put(entry.getKey(), 
 					entry.getValue().stream().map(PropertyContext::of).collect(Collectors.toList()));
 		}
+	}
+
+	public Map<String, Object> getPropertyValues() {
+		var propertyValues = new ObjectMap();
+		for (var entry: propertyContexts.entrySet()) {
+			for (var propertyContext: entry.getValue()) {
+				propertyValues.put(propertyContext.getPropertyName(), propertyContext.getDescriptor().getPropertyValue(getModelObject()));
+			}
+		}
+		return propertyValues;
 	}
 
 	private boolean hasTransitiveDependency(String dependentPropertyName, String dependencyPropertyName, 

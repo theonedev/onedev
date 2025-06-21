@@ -47,7 +47,7 @@ public class ArtifactResource {
 	
 	private final BuildManager buildManager;
 	
-	private final ClusterManager clusterManager;
+	private final ClusterManager clusterManager;	
 	
 	@Inject
 	public ArtifactResource(ProjectManager projectManager, BuildManager buildManager, 

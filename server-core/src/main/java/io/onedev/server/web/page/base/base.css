@@ -313,6 +313,9 @@ a.input-clear {
 	z-index: 10;
 	text-align: center;
 }
+.form-control-sm+a.input-clear {
+	top: 5px;
+}
 a.input-clear .icon {
 	width: 14px;
 	height: 14px;

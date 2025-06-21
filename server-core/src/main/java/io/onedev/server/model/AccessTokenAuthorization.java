@@ -1,9 +1,17 @@
 package io.onedev.server.model;
 
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.persistence.*;
+import io.onedev.server.rest.annotation.Immutable;
 
 @Entity
 @Table(
@@ -21,6 +29,7 @@ public class AccessTokenAuthorization extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Immutable
 	private AccessToken token;
 
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -50,5 +59,5 @@ public class AccessTokenAuthorization extends AbstractEntity {
 	public void setRole(Role role) {
 		this.role = role;
 	}
-	
+		
 }

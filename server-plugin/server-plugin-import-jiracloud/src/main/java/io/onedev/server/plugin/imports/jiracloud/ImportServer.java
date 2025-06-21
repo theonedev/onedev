@@ -55,6 +55,8 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -379,8 +381,10 @@ public class ImportServer implements Serializable, Validatable {
 
 					project.setDescription(projectNode.get("description").asText(null));
 
-					if (!dryRun && project.isNew())
+					if (!dryRun && project.isNew()) {
 						projectManager.create(project);
+						OneDev.getInstance(AuditManager.class).audit(project, "created project", null, VersionedXmlDoc.fromBean(project).toXML());
+					}
 
 					logger.log("Importing issues...");
 					ImportResult currentResult = importIssues(projectNode, project, option, userIds, dryRun, logger);

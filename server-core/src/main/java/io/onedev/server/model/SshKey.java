@@ -1,26 +1,36 @@
 package io.onedev.server.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.annotation.ClassValidating;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Multiline;
-import io.onedev.server.annotation.OmitName;
-import io.onedev.server.ssh.SshKeyUtils;
-import io.onedev.server.validation.Validatable;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+import java.util.Date;
+
+import javax.annotation.Nullable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
+
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.digest.BuiltinDigests;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.annotation.Nullable;
-import javax.persistence.*;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.NotEmpty;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.PublicKey;
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Multiline;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.rest.annotation.Immutable;
+import io.onedev.server.ssh.SshKeyUtils;
+import io.onedev.server.validation.Validatable;
 
 @Editable
 @Entity
@@ -44,6 +54,7 @@ public class SshKey extends AbstractEntity implements Validatable {
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(nullable=false)
+    @Immutable
     private User owner;
 
     @Editable(name="OpenSSH Public Key", placeholder="OpenSSH public key begins with 'ssh-rsa', "
@@ -93,7 +104,7 @@ public class SshKey extends AbstractEntity implements Validatable {
     		return null;
     }
     
-    public void fingerprint() {
+    public void generateFingerprint() {
         try {
             PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
             fingerprint = KeyUtils.getFingerPrint(BuiltinDigests.sha256, pubEntry);

@@ -35,6 +35,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -293,6 +294,9 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 							@Override
 							public void onClick() {
 								getIssueManager().delete(getIssue());
+								var oldAuditContent = VersionedXmlDoc.fromBean(getIssue()).toXML();
+								getAuditManager().audit(getIssue().getProject(), "deleted issue \"" + getIssue().getReference().toString(getIssue().getProject()) + "\"", oldAuditContent, null);
+								
 								Session.get().success(MessageFormat.format(_T("Issue #{0} deleted"), getIssue().getNumber()));
 								
 								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Issue.class);

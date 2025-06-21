@@ -6,7 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import javax.annotation.Nullable;
 import javax.validation.Validator;
 
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -20,9 +19,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.EditableUtils;
@@ -37,6 +38,8 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 	public static final String PARAM_SETTING = "projectSetting";
 	
 	private Class<? extends ContributedProjectSetting> settingClass;
+
+	private String oldAuditContent;
 	
 	public ContributedProjectSettingPage(PageParameters params) {
 		super(params);
@@ -76,14 +79,20 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 				super.onSubmit();
 				
 				Component editor = get("editor");
+				ContributedProjectSetting setting;
 				if (editor instanceof BeanEditor && editor.isVisible()) 
-					getProject().setContributedSetting(settingClass, (ContributedProjectSetting) ((BeanEditor)editor).getModelObject());
+					setting = (ContributedProjectSetting) ((BeanEditor)editor).getModelObject();
 				else 
-					getProject().setContributedSetting(settingClass, null);
+					setting = null;
 				
+				getProject().setContributedSetting(settingClass, setting);
+
+				var newAuditContent = VersionedXmlDoc.fromBean(setting).toXML();
+
 				OneDev.getInstance(ProjectManager.class).update(getProject());
-				
-				getSession().success("Setting has been saved");
+				getAuditManager().audit(getProject(), "changed contributed settings of \"" + settingClass.getName() + "\"", oldAuditContent, newAuditContent);
+
+				getSession().success("Settings have been saved");
 				
 				setResponsePage(ContributedProjectSettingPage.class, paramsOf(getProject(), settingClass));
 			}
@@ -141,7 +150,8 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 			
 		}));
 		
-		Serializable setting = getProject().getContributedSetting(settingClass);
+		var setting = getProject().getContributedSetting(settingClass);
+		oldAuditContent = VersionedXmlDoc.fromBean(setting).toXML();
 		form.add(newBeanEditor(setting));
 		
 		form.add(new FencedFeedbackPanel("feedback", form));

@@ -40,6 +40,7 @@ import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Membership;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.web.WebConstants;
@@ -82,6 +83,18 @@ public class UserMembershipsPage extends UserPage {
 			criteria.setCacheable(true);
 		criteria.add(Restrictions.eq("user", getUser()));
 		return criteria;
+	}
+
+	private MembershipManager getMembershipManager() {
+		return OneDev.getInstance(MembershipManager.class);
+	}
+	
+	private GroupManager getGroupManager() {
+		return OneDev.getInstance(GroupManager.class);
+	}
+	
+	private TransactionManager getTransactionManager() {
+		return OneDev.getInstance(TransactionManager.class);
 	}
 	
 	@Override
@@ -142,12 +155,14 @@ public class UserMembershipsPage extends UserPage {
 			protected void onSelect(AjaxRequestTarget target, Group selection) {
 				Membership membership = new Membership();
 				membership.setUser(getUser());
-				membership.setGroup(OneDev.getInstance(GroupManager.class).load(selection.getId()));
-				OneDev.getInstance(MembershipManager.class).create(membership);
+				membership.setGroup(getGroupManager().load(selection.getId()));
+				getMembershipManager().create(membership);
+				getAuditManager().audit(null, "added account \"" + getUser().getName() + "\" to group \"" + selection.getName() + "\"", null, null);
+
 				target.add(membershipsTable);
 				if (selectionColumn != null)
 					selectionColumn.getSelections().clear();
-				Session.get().success(_T("Group added"));
+				Session.get().success(_T("Added to group"));
 			}
 			
 			@Override
@@ -169,7 +184,7 @@ public class UserMembershipsPage extends UserPage {
 
 					@Override
 					public String getLabel() {
-						return _T("Delete Selected Memberships");
+						return _T("Remove from Selected Groups");
 					}
 
 					@Override
@@ -183,17 +198,22 @@ public class UserMembershipsPage extends UserPage {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Membership> memberships = new ArrayList<>();
-										for (IModel<Membership> each: selectionColumn.getSelections())
-											memberships.add(each.getObject());
-										OneDev.getInstance(MembershipManager.class).delete(memberships);
-										selectionColumn.getSelections().clear();
-										target.add(membershipsTable);
+										getTransactionManager().run(() -> {
+											Collection<Membership> memberships = new ArrayList<>();
+											for (IModel<Membership> each: selectionColumn.getSelections())
+												memberships.add(each.getObject());
+											getMembershipManager().delete(memberships);
+											for (var membership: memberships) {
+												getAuditManager().audit(null, "removed account \"" + getUser().getName() + "\" from group \"" + membership.getGroup().getName() + "\"", null, null);
+											}
+											selectionColumn.getSelections().clear();
+											target.add(membershipsTable);												
+										});
 									}
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete selected memberships";
+										return _T("Type <code>yes</code> below to remove from selected groups");
 									}
 									
 									@Override
@@ -217,7 +237,7 @@ public class UserMembershipsPage extends UserPage {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("data-tippy-content", _T("Please select memberships to delete"));
+									tag.put("data-tippy-content", _T("Please select groups to remove from"));
 								}
 							}
 							
@@ -231,7 +251,7 @@ public class UserMembershipsPage extends UserPage {
 
 					@Override
 					public String getLabel() {
-						return _T("Delete All Queried Memberships");
+						return _T("Remove from All Queried Groups");
 					}
 					
 					@Override
@@ -247,17 +267,22 @@ public class UserMembershipsPage extends UserPage {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Membership> memberships = new ArrayList<>();
-										for (Iterator<Membership> it = (Iterator<Membership>) dataProvider.iterator(0, membershipsTable.getItemCount()); it.hasNext();) 
-											memberships.add(it.next());
-										OneDev.getInstance(MembershipManager.class).delete(memberships);
-										selectionColumn.getSelections().clear();
-										target.add(membershipsTable);
+										getTransactionManager().run(() -> {
+											Collection<Membership> memberships = new ArrayList<>();
+											for (Iterator<Membership> it = (Iterator<Membership>) dataProvider.iterator(0, membershipsTable.getItemCount()); it.hasNext();) 
+												memberships.add(it.next());
+											getMembershipManager().delete(memberships);
+											for (var membership: memberships) {
+												getAuditManager().audit(null, "removed account \"" + getUser().getName() + "\" from group \"" + membership.getGroup().getName() + "\"", null, null);
+											}
+											selectionColumn.getSelections().clear();
+											target.add(membershipsTable);
+										});
 									}
 									
 									@Override
 									protected String getConfirmMessage() {
-										return _T("Type <code>yes</code> below to delete all queried memberships");
+										return _T("Type <code>yes</code> below to remove from all queried groups");
 									}
 									
 									@Override
@@ -280,7 +305,7 @@ public class UserMembershipsPage extends UserPage {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("data-tippy-content", _T("No memberships to delete"));
+									tag.put("data-tippy-content", _T("No groups to remove from"));
 								}
 							}
 							

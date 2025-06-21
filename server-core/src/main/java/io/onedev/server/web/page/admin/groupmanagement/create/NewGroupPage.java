@@ -12,6 +12,8 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.security.SecurityUtils;
@@ -52,6 +54,8 @@ public class NewGroupPage extends AdministrationPage {
 				} 
 				if (editor.isValid()) {
 					groupManager.create(group);
+					var newAuditContent = VersionedXmlDoc.fromBean(group).toXML();
+					OneDev.getInstance(AuditManager.class).audit(null, "created group \"" + group.getName() + "\"", null, newAuditContent);
 					Session.get().success(_T("Group created"));
 					setResponsePage(GroupMembershipsPage.class, GroupMembershipsPage.paramsOf(group));
 				}

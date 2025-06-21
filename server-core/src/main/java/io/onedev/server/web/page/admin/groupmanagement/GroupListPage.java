@@ -33,6 +33,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.security.SecurityUtils;
@@ -202,7 +204,9 @@ public class GroupListPage extends AdministrationPage {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Group group = rowModel.getObject();
+						var oldAuditContent = VersionedXmlDoc.fromBean(group).toXML();
 						OneDev.getInstance(GroupManager.class).delete(group);
+						OneDev.getInstance(AuditManager.class).audit(null, "deleted group \"" + group.getName() + "\"", oldAuditContent, null);
 						Session.get().success(MessageFormat.format(_T("Group \"{0}\" deleted"), group.getName()));
 						target.add(groupsTable);
 					}

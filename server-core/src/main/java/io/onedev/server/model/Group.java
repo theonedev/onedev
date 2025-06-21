@@ -1,5 +1,20 @@
 package io.onedev.server.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.validation.constraints.NotEmpty;
+
+import org.apache.shiro.authz.Permission;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.jetbrains.annotations.Nullable;
+
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.security.permission.BasePermission;
@@ -9,19 +24,6 @@ import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.facade.UserFacade;
-import org.apache.shiro.authz.Permission;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.jetbrains.annotations.Nullable;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.validation.constraints.NotEmpty;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 
 @Entity
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -92,7 +94,7 @@ public class Group extends AbstractEntity implements BasePermission {
 		return !(boolean) EditContext.get().getInputValue("administrator");
 	}
 
-	@Editable(order=300, name="Can Create Root Projects", description="Whether or not to allow creating root projects (project without parent)")
+	@Editable(order=350, name="Can Create Root Projects", description="Whether or not to allow creating root projects (project without parent)")
 	@ShowCondition("isAdministratorDisabled")
 	public boolean isCreateRootProjects() {
 		return createRootProjects;
@@ -145,7 +147,6 @@ public class Group extends AbstractEntity implements BasePermission {
 		return members;
 	}
 
-	@Override
 	public GroupFacade getFacade() {
 		return new GroupFacade(getId(), getName());
 	}

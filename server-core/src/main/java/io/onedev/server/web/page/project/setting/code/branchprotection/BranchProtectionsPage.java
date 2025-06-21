@@ -1,10 +1,9 @@
 package io.onedev.server.web.page.project.setting.code.branchprotection;
 
-import io.onedev.server.model.support.code.BranchProtection;
-import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.web.behavior.sortable.SortBehavior;
-import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.page.project.setting.ProjectSettingPage;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -16,9 +15,12 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.List;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.model.support.code.BranchProtection;
+import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
 public class BranchProtectionsPage extends ProjectSettingPage {
 
@@ -49,15 +51,20 @@ public class BranchProtectionsPage extends ProjectSettingPage {
 
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
-						getProject().getBranchProtections().remove(item.getIndex());
+						var protection = getProject().getBranchProtections().remove(item.getIndex());
+						var oldAuditContent = VersionedXmlDoc.fromBean(protection).toXML();
 						getProjectManager().update(getProject());
+						getAuditManager().audit(getProject(), "deleted branch protection rule", oldAuditContent, null);
 						target.add(container);
 					}
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, BranchProtection protection) {
-						getProject().getBranchProtections().set(item.getIndex(), protection);
+						var oldProtection = getProject().getBranchProtections().set(item.getIndex(), protection);
+						var oldAuditContent = VersionedXmlDoc.fromBean(oldProtection).toXML();
+						var newAuditContent = VersionedXmlDoc.fromBean(protection).toXML();
 						getProjectManager().update(getProject());
+						getAuditManager().audit(getProject(), "changed branch protection rule", oldAuditContent, newAuditContent);
 						target.add(container);
 					}
 
@@ -76,8 +83,11 @@ public class BranchProtectionsPage extends ProjectSettingPage {
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 				List<BranchProtection> protections = getProject().getBranchProtections();
+				var oldAuditContent = VersionedXmlDoc.fromBean(protections).toXML();
 				CollectionUtils.move(protections, from.getItemIndex(), to.getItemIndex());
+				var newAuditContent = VersionedXmlDoc.fromBean(protections).toXML();
 				getProjectManager().update(getProject());
+				getAuditManager().audit(getProject(), "reordered branch protection rules", oldAuditContent, newAuditContent);
 				
 				target.add(container);
 			}
@@ -100,7 +110,9 @@ public class BranchProtectionsPage extends ProjectSettingPage {
 					@Override
 					protected void onSave(AjaxRequestTarget target, BranchProtection protection) {
 						getProject().getBranchProtections().add(protection);
+						var newAuditContent = VersionedXmlDoc.fromBean(protection).toXML();
 						getProjectManager().update(getProject());
+						getAuditManager().audit(getProject(), "created branch protection rule", null, newAuditContent);
 						container.replace(newAddNewFrag());
 						target.add(container);
 					}

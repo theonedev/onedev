@@ -13,6 +13,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
@@ -88,8 +90,10 @@ abstract class StateEditPanel extends Panel {
 				}
 
 				if (editor.isValid()) {
+					String oldAuditContent = null;
 					if (stateIndex != -1) {
 						StateSpec oldState = getSetting().getStateSpecs().get(stateIndex);
+						oldAuditContent = VersionedXmlDoc.fromBean(oldState).toXML();
 						if (!state.getName().equals(oldState.getName())) { 
 							getSetting().setReconciled(false);
 							send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
@@ -98,7 +102,10 @@ abstract class StateEditPanel extends Panel {
 					} else {
 						getSetting().getStateSpecs().add(state);
 					}
+					var newAuditContent = VersionedXmlDoc.fromBean(state).toXML();
 					OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+					var verb = stateIndex != -1 ? "changed" : "added";
+					OneDev.getInstance(AuditManager.class).audit(null, verb + " issue state \"" + state.getName() + "\"", oldAuditContent, newAuditContent);
 					onSave(target);
 				} else {
 					target.add(form);

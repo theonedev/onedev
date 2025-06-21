@@ -8,6 +8,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.web.editable.BeanContext;
@@ -24,6 +25,7 @@ public class SecuritySettingPage extends AdministrationPage {
 		super.onInitialize();
 		
 		SecuritySetting securitySetting = OneDev.getInstance(SettingManager.class).getSecuritySetting();
+		var oldAuditContent = VersionedXmlDoc.fromBean(securitySetting).toXML();
 
 		Form<?> form = new Form<Void>("form") {
 
@@ -31,8 +33,10 @@ public class SecuritySettingPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				OneDev.getInstance(SettingManager.class).saveSecuritySetting(securitySetting);
-				getSession().success(_T("Security settings have been updated"));
-				
+				var newAuditContent = VersionedXmlDoc.fromBean(securitySetting).toXML();
+				getAuditManager().audit(null, "changed security settings", oldAuditContent, newAuditContent);
+
+				getSession().success(_T("Security settings have been updated"));				
 				setResponsePage(SecuritySettingPage.class);
 			}
 			

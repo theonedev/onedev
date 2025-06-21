@@ -29,7 +29,6 @@ import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.AccessTokenCache;
-import io.onedev.server.util.facade.AccessTokenFacade;
 
 @Singleton
 public class DefaultAccessTokenManager extends BaseEntityManager<AccessToken> implements AccessTokenManager {
@@ -134,7 +133,7 @@ public class DefaultAccessTokenManager extends BaseEntityManager<AccessToken> im
 	@Listen
 	public void on(EntityPersisted event) {
 		if (event.getEntity() instanceof AccessToken) {
-			var facade = (AccessTokenFacade) event.getEntity().getFacade();
+			var facade = ((AccessToken) event.getEntity()).getFacade();
 			transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
 		}
 	}

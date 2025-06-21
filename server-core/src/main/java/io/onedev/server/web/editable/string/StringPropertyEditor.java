@@ -76,8 +76,7 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 			
 		});
 
-		input.add(newPlaceholderModifier());
-		
+		input.add(newPlaceholderModifier());		
 	}
 
 	@Override

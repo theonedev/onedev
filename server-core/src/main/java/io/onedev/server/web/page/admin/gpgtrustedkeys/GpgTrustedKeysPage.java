@@ -97,6 +97,7 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 			                setting.getEncodedTrustedKeys().put(bean.getKeyIds().get(0), bean.getContent());
 							setting.encodedTrustedKeysUpdated();
 		                	getSettingManager().saveGpgSetting(setting);
+							getAuditManager().audit(null, "added trust GPG key \"" + GpgUtils.getKeyIDString(bean.getKeyIds().get(0)), null, null);
 		                	target.add(trustedKeysTable);
 		                	modal.close();
 		                }
@@ -188,9 +189,11 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						GpgSetting setting = getSettingManager().getGpgSetting();
-						setting.getEncodedTrustedKeys().remove(rowModel.getObject());
+						var keyId = rowModel.getObject();
+						setting.getEncodedTrustedKeys().remove(keyId);
 						setting.encodedTrustedKeysUpdated();
 						getSettingManager().saveGpgSetting(setting);
+						getAuditManager().audit(null, "deleted trust GPG key \"" + GpgUtils.getKeyIDString(keyId), null, null);
 						Session.get().success(_T("GPG key deleted"));
 						target.add(trustedKeysTable);
 					}

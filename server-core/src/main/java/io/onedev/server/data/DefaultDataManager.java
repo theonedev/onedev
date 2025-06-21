@@ -99,6 +99,7 @@ import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.AgentSetting;
 import io.onedev.server.model.support.administration.AlertSetting;
+import io.onedev.server.model.support.administration.AuditSetting;
 import io.onedev.server.model.support.administration.BackupSetting;
 import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.model.support.administration.ClusterSetting;
@@ -896,6 +897,12 @@ public class DefaultDataManager implements DataManager, Serializable {
 			ClusterSetting clusterSetting = new ClusterSetting();
 			clusterSetting.setReplicaCount(1);
 			settingManager.saveClusterSetting(clusterSetting);
+		}
+
+		setting = settingManager.findSetting(Key.AUDIT);
+		if (setting == null) {
+			AuditSetting auditSetting = new AuditSetting();
+			settingManager.saveAuditSetting(auditSetting);
 		}
 		
 		if (roleManager.get(Role.OWNER_ID) == null) {

@@ -13,6 +13,8 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.LinkSpec;
@@ -27,7 +29,7 @@ import io.onedev.server.web.page.admin.AdministrationPage;
 public class NewRolePage extends AdministrationPage {
 
 	private Role role = new Role();
-	
+
 	public NewRolePage(PageParameters params) {
 		super(params);
 	}
@@ -35,31 +37,33 @@ public class NewRolePage extends AdministrationPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
+
 		BeanEditor editor = BeanContext.edit("editor", role);
-		
+
 		Form<?> form = new Form<Void>("form") {
 
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				
+
 				RoleManager roleManager = OneDev.getInstance(RoleManager.class);
 				Role roleWithSameName = roleManager.find(role.getName());
 				if (roleWithSameName != null) {
 					editor.error(new Path(new PathNode.Named("name")),
 							_T("This name has already been used by another role"));
-				} 
+				}
 				if (editor.isValid()) {
 					Collection<LinkSpec> authorizedLinks = new ArrayList<>();
-					for (String linkName: role.getEditableIssueLinks()) 
+					for (String linkName : role.getEditableIssueLinks())
 						authorizedLinks.add(OneDev.getInstance(LinkSpecManager.class).find(linkName));
 					roleManager.create(role, authorizedLinks);
+					var newAuditContent = VersionedXmlDoc.fromBean(editor.getPropertyValues()).toXML();
+					OneDev.getInstance(AuditManager.class).audit(null, "created role \"" + role.getName() + "\"", null, newAuditContent);
 					Session.get().success(_T("Role created"));
 					setResponsePage(RoleListPage.class);
 				}
 			}
-			
+
 		};
 		form.add(editor);
 
@@ -70,12 +74,12 @@ public class NewRolePage extends AdministrationPage {
 	protected boolean isPermitted() {
 		return SecurityUtils.isAdministrator();
 	}
-	
+
 	@Override
 	protected Component newTopbarTitle(String componentId) {
 		Fragment fragment = new Fragment(componentId, "topbarTitleFrag", this);
 		fragment.add(new BookmarkablePageLink<Void>("roles", RoleListPage.class));
 		return fragment;
 	}
-	
+
 }

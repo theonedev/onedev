@@ -43,7 +43,7 @@ public class IssueWorkResource {
 	@Api(order=100)
 	@Path("/{workId}")
 	@GET
-	public IssueWork get(@PathParam("workId") Long workId) {
+	public IssueWork getWork(@PathParam("workId") Long workId) {
 		if (!subscriptionManager.isSubscriptionActive())
 			throw new UnsupportedOperationException("This feature requires an active subscription");
 		IssueWork work = workManager.load(workId);
@@ -54,7 +54,7 @@ public class IssueWorkResource {
 	
 	@Api(order=200, description="Log new issue work")
 	@POST
-	public Long create(@NotNull IssueWork work) {
+	public Long createWork(@NotNull IssueWork work) {
 		if (!subscriptionManager.isSubscriptionActive()) 
 			throw new UnsupportedOperationException("This feature requires an active subscription");
 		if (!work.getIssue().getProject().isTimeTracking())
@@ -72,7 +72,7 @@ public class IssueWorkResource {
 	@Api(order=250, description="Update issue work of specified id")
 	@Path("/{workId}")
 	@POST
-	public Response update(@PathParam("workId") Long workId, @NotNull IssueWork work) {
+	public Response updateWork(@PathParam("workId") Long workId, @NotNull IssueWork work) {
 		if (!canModifyOrDelete(work)) 
 			throw new UnauthorizedException();
 		
@@ -84,7 +84,7 @@ public class IssueWorkResource {
 	@Api(order=300)
 	@Path("/{workId}")
 	@DELETE
-	public Response delete(@PathParam("workId") Long workId) {
+	public Response deleteWork(@PathParam("workId") Long workId) {
 		var work = workManager.load(workId);
 		if (!canModifyOrDelete(work)) 
 			throw new UnauthorizedException();

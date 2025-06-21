@@ -1,24 +1,27 @@
 package io.onedev.server.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.util.facade.EntityFacade;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.proxy.HibernateProxy;
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.annotation.Nullable;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
 
-import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.proxy.HibernateProxy;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.rest.annotation.Api;
 
 @MappedSuperclass
 @JsonIgnoreProperties("handler")
@@ -36,7 +39,7 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 	
 	public static final String PROP_NUMBER = "number";
 	
-	private transient EntityFacade oldVersion;
+	private transient VersionedXmlDoc oldVersion;
 	
 	@Api(order=1)
 	@Id
@@ -117,11 +120,11 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 	}
 
 	@Nullable
-	public EntityFacade getOldVersion() {
+	public VersionedXmlDoc getOldVersion() {
 		return oldVersion;
 	}
 
-	public void setOldVersion(@Nullable EntityFacade oldVersion) {
+	public void setOldVersion(VersionedXmlDoc oldVersion) {
 		this.oldVersion = oldVersion;
 	}
 
@@ -146,10 +149,5 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 			return entity.getId();
 		}
 	}
-	
-	@Nullable
-	public EntityFacade getFacade() {
-		return null;
-	}
-	
+		
 }

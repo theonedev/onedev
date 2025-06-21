@@ -1076,7 +1076,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		return publicEmailAddress.orElse(null);
 	}
 	
-	@Override
 	public UserFacade getFacade() {
 		return new UserFacade(getId(), getName(), getFullName(), isServiceAccount(), isDisabled());
 	}

@@ -1,12 +1,9 @@
 package io.onedev.server.web.page.admin.buildsetting.jobexecutor;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.web.behavior.sortable.SortBehavior;
-import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.page.admin.AdministrationPage;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -18,9 +15,14 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.List;
+import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.page.admin.AdministrationPage;
 
 public class JobExecutorsPage extends AdministrationPage {
 
@@ -55,17 +57,23 @@ public class JobExecutorsPage extends AdministrationPage {
 
 			@Override
 			protected void populateItem(ListItem<JobExecutor> item) {
+				var oldAuditContent = VersionedXmlDoc.fromBean(item.getModelObject()).toXML();
 				item.add(new JobExecutorPanel("executor", executors, item.getIndex()) {
 
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
-						executors.remove(item.getIndex());
+						var executor = executors.remove(item.getIndex());
+						var oldAuditContent = VersionedXmlDoc.fromBean(executor).toXML();
 						getSettingManager().saveJobExecutors(executors);
+						getAuditManager().audit(null, "deleted job executor \"" + executor.getName() + "\"", oldAuditContent, null);
 						target.add(container);
 					}
 
 					@Override
 					protected void onSave(AjaxRequestTarget target) {
+						var executor = executors.get(item.getIndex());
+						var newAuditContent = VersionedXmlDoc.fromBean(executor).toXML();
+						getAuditManager().audit(null, "changed job executor \"" + executor.getName() + "\"", oldAuditContent, newAuditContent);
 						getSettingManager().saveJobExecutors(executors);
 						target.add(container);
 					}
@@ -84,9 +92,11 @@ public class JobExecutorsPage extends AdministrationPage {
 			
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+				var oldAuditContent = VersionedXmlDoc.fromBean(executors).toXML();
 				CollectionUtils.move(executors, from.getItemIndex(), to.getItemIndex());
+				var newAuditContent = VersionedXmlDoc.fromBean(executors).toXML();
 				getSettingManager().saveJobExecutors(executors);
-				
+				getAuditManager().audit(null, "changed order of job executors", oldAuditContent, newAuditContent);			
 				target.add(container);
 			}
 			
@@ -116,7 +126,9 @@ public class JobExecutorsPage extends AdministrationPage {
 					protected void onSave(AjaxRequestTarget target) {
 						getSettingManager().saveJobExecutors(executors);
 						container.replace(newAddNewFrag());
-						
+						var executor = executors.get(executors.size() - 1);
+						var newAuditContent = VersionedXmlDoc.fromBean(executor).toXML();
+						getAuditManager().audit(null, "added job executor \"" + executor.getName() + "\"", null, newAuditContent);
 						target.add(container);
 					}
 

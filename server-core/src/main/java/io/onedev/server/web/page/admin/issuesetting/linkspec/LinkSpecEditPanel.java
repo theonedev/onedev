@@ -14,6 +14,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.util.Path;
@@ -29,6 +31,8 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 	private String oldName;
 	
 	private String oldOppositeName;
+
+	private String oldAuditContent;
 	
 	public LinkSpecEditPanel(String id, IModel<LinkSpec> model) {
 		super(id, model);
@@ -83,7 +87,8 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 			}
 
 		});
-		
+		oldAuditContent = VersionedXmlDoc.fromBean(getSpec()).toXML();
+
 		form.add(editor);
 		
 		form.add(new AjaxButton("save") {
@@ -98,35 +103,44 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 					editor.error(new Path(new PathNode.Named("opposite"), new PathNode.Named("name")), errorMessage);
 					target.add(form);
 				} else {
-					LinkSpecManager manager = OneDev.getInstance(LinkSpecManager.class);
-					LinkSpec specWithSameName = manager.find(getSpec().getName());
+					var linkSpecManager = OneDev.getInstance(LinkSpecManager.class);
+					var auditManager = OneDev.getInstance(AuditManager.class);
+					LinkSpec specWithSameName = linkSpecManager.find(getSpec().getName());
 					if (getSpec().isNew() && specWithSameName != null 
 							|| !getSpec().isNew() && specWithSameName != null && !specWithSameName.equals(getSpec())) {
 						editor.error(new Path(new PathNode.Named("name")), _T("Name already used by another link"));
 						target.add(form);
 					} else if (getSpec().getOpposite() != null) {
-						specWithSameName = manager.find(getSpec().getOpposite().getName());
+						specWithSameName = linkSpecManager.find(getSpec().getOpposite().getName());
 						if (getSpec().isNew() && specWithSameName != null 
 								|| !getSpec().isNew() && specWithSameName != null && !specWithSameName.equals(getSpec())) {
 							String errorMessage = _T("Name already used by another link");
 							editor.error(new Path(new PathNode.Named("opposite"), new PathNode.Named("name")), errorMessage);
 							target.add(form);
 						} else {
+							var newAuditContent = VersionedXmlDoc.fromBean(getSpec()).toXML();
 							if (getSpec().isNew()) {
-								getSpec().setOrder(manager.query().stream().mapToInt(it -> it.getOrder()).max().orElse(0) + 1);
-								manager.create(getSpec());
+								getSpec().setOrder(linkSpecManager.query().stream().mapToInt(it -> it.getOrder()).max().orElse(0) + 1);
+								linkSpecManager.create(getSpec());
+								auditManager.audit(null, "added issue link spec \"" + getSpec().getDisplayName() + "\"", null, newAuditContent);
 							} else {
-								manager.update(getSpec(), oldName, oldOppositeName);
+								linkSpecManager.update(getSpec(), oldName, oldOppositeName);
+								auditManager.audit(null, "changed issue link spec \"" + getSpec().getDisplayName() + "\"", oldAuditContent, newAuditContent);
 							}
+							oldAuditContent = newAuditContent;
 							onSave(target);
 						}
 					} else {
+						var newAuditContent = VersionedXmlDoc.fromBean(getSpec()).toXML();
 						if (getSpec().isNew()) {
-							getSpec().setOrder(manager.query().stream().mapToInt(it -> it.getOrder()).max().orElse(0) + 1);
-							manager.create(getSpec());
+							getSpec().setOrder(linkSpecManager.query().stream().mapToInt(it -> it.getOrder()).max().orElse(0) + 1);
+							linkSpecManager.create(getSpec());
+							auditManager.audit(null, "added issue link spec \"" + getSpec().getDisplayName() + "\"", null, newAuditContent);
 						} else {
-							manager.update(getSpec(), oldName, oldOppositeName);
+							linkSpecManager.update(getSpec(), oldName, oldOppositeName);
+							auditManager.audit(null, "changed issue link spec \"" + getSpec().getDisplayName() + "\"", oldAuditContent, newAuditContent);
 						}
+						oldAuditContent = newAuditContent;
 						onSave(target);
 					}
 				}

@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -16,6 +18,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
@@ -31,6 +34,14 @@ public class UserAuthorizationsPage extends UserPage {
 		super(params);
 		if (getUser().isDisabled())
 			throw new IllegalStateException();
+	}
+
+	private String getAuditContent() {
+		var auditData = new TreeMap<String, TreeSet<String>>();
+		for (var authorization: getUser().getProjectAuthorizations()) {
+			auditData.computeIfAbsent(authorization.getProject().getPath(), k -> new TreeSet<>()).add(authorization.getRole().getName());
+		}
+		return VersionedXmlDoc.fromBean(auditData).toXML();
 	}
 
 	@Override
@@ -75,7 +86,11 @@ public class UserAuthorizationsPage extends UserPage {
 					}
 				}
 				
+				var oldAuditContent = getAuditContent();
 				OneDev.getInstance(UserAuthorizationManager.class).syncAuthorizations(getUser(), authorizations);
+				var newAuditContent = getAuditContent();
+				getAuditManager().audit(null, "changed project authorizations for account \"" + getUser().getName() + "\"", oldAuditContent, newAuditContent);
+
 				Session.get().success(_T("Project authorizations updated"));
 			}
 			

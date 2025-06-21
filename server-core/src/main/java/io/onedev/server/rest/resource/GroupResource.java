@@ -6,7 +6,15 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -14,6 +22,8 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
@@ -21,7 +31,6 @@ import io.onedev.server.model.Membership;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.facade.GroupFacade;
 
 @Api(order=6000)
 @Path("/groups")
@@ -32,15 +41,18 @@ public class GroupResource {
 
 	private final GroupManager groupManager;
 	
+	private final AuditManager auditManager;
+	
 	@Inject
-	public GroupResource(GroupManager groupManager) {
+	public GroupResource(GroupManager groupManager, AuditManager auditManager) {
 		this.groupManager = groupManager;
+		this.auditManager = auditManager;
 	}
 
 	@Api(order=100)
 	@Path("/{groupId}")
     @GET
-    public Group getBasicInfo(@PathParam("groupId") Long groupId) {
+    public Group getGroup(@PathParam("groupId") Long groupId) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
     	return groupManager.load(groupId);
@@ -66,7 +78,7 @@ public class GroupResource {
 	
 	@Api(order=400)
 	@GET
-    public List<Group> queryBasicInfo(@QueryParam("name") String name, @QueryParam("offset") @Api(example="0") int offset, 
+    public List<Group> queryGroups(@QueryParam("name") String name, @QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
@@ -81,7 +93,7 @@ public class GroupResource {
 	@Api(order=450)
 	@Path("/ids/{name}")
 	@GET
-	public Long getId(@PathParam("name") @Api(description = "Group name") String name) {
+	public Long getGroupId(@PathParam("name") @Api(description = "Group name") String name) {
 		var group = groupManager.find(name);
 		if (group != null)
 			return group.getId();
@@ -91,35 +103,42 @@ public class GroupResource {
 
 	@Api(order=500, description="Create new group")
     @POST
-    public Long create(@NotNull Group group) {
+    public Long createGroup(@NotNull Group group) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		
 		groupManager.create(group);
-    		
+		var newAuditContent = VersionedXmlDoc.fromBean(group).toXML();
+		auditManager.audit(null, "created group \"" + group.getName() + "\" via RESTful API", null, newAuditContent);
     	return group.getId();
     }
 
 	@Api(order=550, description="Update group of specified id")
 	@Path("/{groupId}")
 	@POST
-	public Response update(@PathParam("groupId") Long groupId, @NotNull Group group) {
+	public Response updateGroup(@PathParam("groupId") Long groupId, @NotNull Group group) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-		if (group.getOldVersion() != null)
-			groupManager.update(group, ((GroupFacade) group.getOldVersion()).getName());
-		else
-			groupManager.update(group, null);
+		var oldName = group.getOldVersion().getRootElement().elementText(Group.PROP_NAME);
+		groupManager.update(group, oldName);
+
+		var oldAuditContent = group.getOldVersion().toXML();
+		var newAuditContent = VersionedXmlDoc.fromBean(group).toXML();
+		auditManager.audit(null, "changed group \"" + group.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
+
 		return Response.ok().build();
 	}
 	
 	@Api(order=600)
 	@Path("/{groupId}")
     @DELETE
-    public Response delete(@PathParam("groupId") Long groupId) {
+    public Response deleteGroup(@PathParam("groupId") Long groupId) {
     	if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-    	groupManager.delete(groupManager.load(groupId));
+		var group = groupManager.load(groupId);
+    	groupManager.delete(group);
+		var oldAuditContent = VersionedXmlDoc.fromBean(group).toXML();
+		auditManager.audit(null, "deleted group \"" + group.getName() + "\" via RESTful API", oldAuditContent, null);
     	return Response.ok().build();
     }
 	

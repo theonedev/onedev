@@ -27,6 +27,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.util.CollectionUtils;
@@ -180,8 +181,10 @@ public class GroovyScriptListPage extends AdministrationPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						scripts.remove(scriptIndex);
+						var script = scripts.remove(scriptIndex);
+						var oldAuditContent = VersionedXmlDoc.fromBean(script).toXML();
 						OneDev.getInstance(SettingManager.class).saveGroovyScripts(scripts);
+						getAuditManager().audit(null, "deleted groovy script \"" + script.getName() + "\"", oldAuditContent, null);
 						target.add(scriptsTable);
 					}
 

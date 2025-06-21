@@ -1,12 +1,7 @@
 package io.onedev.server.web.page.project.setting.build;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.build.JobSecret;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -14,7 +9,15 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import java.util.List;
+import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.build.JobSecret;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 
 public abstract class JobSecretEditPanel extends Panel {
 	
@@ -62,11 +65,20 @@ public abstract class JobSecretEditPanel extends Panel {
 				super.onSubmit(target, form);
 
 				List<JobSecret> secrets = getProject().getBuildSetting().getJobSecrets();
-				if (index == -1) 
+				String action;
+				String oldAuditContent;
+				if (index == -1) {
 					secrets.add(editingSecret);
-				else 
-					secrets.set(index, editingSecret);
+					action = "created job secret \"" + editingSecret.getName() + "\"";
+					oldAuditContent = null;					
+				} else {
+					var oldSecret = secrets.set(index, editingSecret);
+					action = "changed job secret \"" + editingSecret.getName() + "\"";
+					oldAuditContent = VersionedXmlDoc.fromBean(oldSecret).toXML();
+				}
+				var newAuditContent = VersionedXmlDoc.fromBean(editingSecret).toXML();
 				OneDev.getInstance(ProjectManager.class).update(getProject());
+				OneDev.getInstance(AuditManager.class).audit(getProject(), action, oldAuditContent, newAuditContent);
 				onSaved(target);
 			}
 

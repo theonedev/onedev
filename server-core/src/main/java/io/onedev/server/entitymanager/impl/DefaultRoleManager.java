@@ -112,7 +112,9 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	public void create(Role role, Collection<LinkSpec> authorizedLinks) {
 		Preconditions.checkState(role.isNew());
 		dao.persist(role);
-		linkAuthorizationManager.syncAuthorizations(role, authorizedLinks);
+
+		if (authorizedLinks != null)
+			linkAuthorizationManager.syncAuthorizations(role, authorizedLinks);
 	}
 
 	@Transactional
@@ -122,9 +124,10 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		
 		if (oldName != null && !oldName.equals(role.getName())) 
 			settingManager.onRenameRole(oldName, role.getName());
-		dao.persist(role);
-		
-		linkAuthorizationManager.syncAuthorizations(role, authorizedLinks);
+		dao.persist(role);		
+
+		if (authorizedLinks != null)
+			linkAuthorizationManager.syncAuthorizations(role, authorizedLinks);
 	}
 
 	@Transactional
@@ -343,7 +346,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	@Listen
 	public void on(EntityPersisted event) {
 		if (event.getEntity() instanceof Role) {
-			var facade = (RoleFacade) event.getEntity().getFacade();
+			var facade = ((Role) event.getEntity()).getFacade();
 			transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
 		}
 	}

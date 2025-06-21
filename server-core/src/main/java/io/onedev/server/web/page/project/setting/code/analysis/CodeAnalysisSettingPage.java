@@ -1,7 +1,5 @@
 package io.onedev.server.web.page.project.setting.code.analysis;
 
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-
 import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.Component;
@@ -12,10 +10,12 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.CodeAnalysisSetting;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
@@ -32,14 +32,17 @@ public class CodeAnalysisSettingPage extends ProjectSettingPage {
 		super.onInitialize();
 		
 		CodeAnalysisSetting bean = getProject().getCodeAnalysisSetting();
+		var oldAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 		Form<?> form = new Form<Void>("form") {
 
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
 				
+				var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 				getProject().setCodeAnalysisSetting(bean);
 				OneDev.getInstance(ProjectManager.class).update(getProject());
+				getAuditManager().audit(getProject(), "changed code analysis settings", oldAuditContent, newAuditContent);
 				setResponsePage(CodeAnalysisSettingPage.class, CodeAnalysisSettingPage.paramsOf(getProject()));
 				Session.get().success(_T("Code analysis settings updated"));
 			}

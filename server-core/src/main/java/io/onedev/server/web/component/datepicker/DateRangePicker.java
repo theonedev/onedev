@@ -29,32 +29,39 @@ public class DateRangePicker extends TextField<DateRange> {
     public DateRangePicker(String id, IModel<DateRange> model) {
     	super(id, model);
 
+		setType(DateRange.class);
 		converter = new IConverter<DateRange>() {
 
 			@Override
 			public DateRange convertToObject(String value, Locale locale) throws ConversionException {
-				var errorMessage = _T("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"");
-				if (value.contains(" ")) {
-					try {
-						var fromDate = LocalDate.from(DateUtils.DATE_FORMATTER.parse(StringUtils.substringBefore(value, " ")));
-						var toDate = LocalDate.from(DateUtils.DATE_FORMATTER.parse(StringUtils.substringAfterLast(value, " ")));
-						return new DateRange(fromDate, toDate);
-					} catch (Exception e) {
-						throw new ConversionException(errorMessage);
-					}
+				if (value == null) {
+					return null;
 				} else {
-					try {
-						var date = LocalDate.from(DateUtils.DATE_FORMATTER.parse(value));
-						return new DateRange(date, date);
-					} catch (Exception e) {
-						throw new ConversionException(errorMessage);
+					var errorMessage = _T("Invalid date range, expecting \"yyyy-MM-dd to yyyy-MM-dd\"");
+					if (value.contains(" ")) {
+						try {
+							var fromDate = LocalDate.from(DateUtils.DATE_FORMATTER.parse(StringUtils.substringBefore(value, " ")));
+							var toDate = LocalDate.from(DateUtils.DATE_FORMATTER.parse(StringUtils.substringAfterLast(value, " ")));
+							return new DateRange(fromDate, toDate);
+						} catch (Exception e) {
+							throw new ConversionException(errorMessage);
+						}
+					} else {
+						try {
+							var date = LocalDate.from(DateUtils.DATE_FORMATTER.parse(value));
+							return new DateRange(date, date);
+						} catch (Exception e) {
+							throw new ConversionException(errorMessage);
+						}
 					}
 				}
 			}
 
 			@Override
 			public String convertToString(DateRange value, Locale locale) {
-				if (!value.getFrom().equals(value.getTo()))
+				if (value == null)
+					return null;
+				else if (!value.getFrom().equals(value.getTo()))
 					return value.getFrom().format(DateUtils.DATE_FORMATTER) + " to " + value.getTo().format(DateUtils.DATE_FORMATTER);
 				else
 					return value.getFrom().format(DateUtils.DATE_FORMATTER);

@@ -16,6 +16,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.GroupAuthorizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
@@ -26,6 +27,8 @@ import io.onedev.server.web.util.editbean.ProjectAuthorizationBean;
 import io.onedev.server.web.util.editbean.ProjectAuthorizationsBean;
 
 public class GroupAuthorizationsPage extends GroupPage {
+
+	private String oldAuditContent;
 
 	public GroupAuthorizationsPage(PageParameters params) {
 		super(params);
@@ -48,6 +51,7 @@ public class GroupAuthorizationsPage extends GroupPage {
 			authorizationBean.setRoleNames(entry.getValue());
 			authorizationsBean.getAuthorizations().add(authorizationBean);
 		}
+		oldAuditContent = VersionedXmlDoc.fromBean(authorizationsBean).toXML();
 
 		Form<?> form = new Form<Void>("form") {
 
@@ -73,7 +77,10 @@ public class GroupAuthorizationsPage extends GroupPage {
 					}
 				}
 				
-				OneDev.getInstance(GroupAuthorizationManager.class).syncAuthorizations(getGroup(), authorizations);
+				var newAuditContent = VersionedXmlDoc.fromBean(authorizationsBean).toXML();
+				getGroupAuthorizationManager().syncAuthorizations(getGroup(), authorizations);
+				getAuditManager().audit(null, "changed authorizations of group \"" + getGroup().getName() + "\"", oldAuditContent, newAuditContent);
+				oldAuditContent = newAuditContent;
 				Session.get().success("Project authorizations updated");
 			}
 			
@@ -91,4 +98,8 @@ public class GroupAuthorizationsPage extends GroupPage {
 		return OneDev.getInstance(ProjectManager.class);
 	}
 	
+	private GroupAuthorizationManager getGroupAuthorizationManager() {
+		return OneDev.getInstance(GroupAuthorizationManager.class);
+	}
+
 }

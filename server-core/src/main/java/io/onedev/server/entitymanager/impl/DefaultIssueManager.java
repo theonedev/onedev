@@ -1093,7 +1093,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			Project oldProject = issue.getProject();
 			Project numberScope = targetProject.getForkRoot();
 			Long nextNumber = getNextNumber(numberScope);
-			issue.setOldVersion(issue.getFacade());
 			issue.setProject(targetProject);
 			issue.setNumberScope(numberScope);
 			Long oldNumber = issue.getNumber();

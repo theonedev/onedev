@@ -29,7 +29,7 @@ public class BuildLabelResource {
 	
 	@Api(order=200, description="Create build label")
 	@POST
-	public Long create(@NotNull BuildLabel buildLabel) {
+	public Long createLabel(@NotNull BuildLabel buildLabel) {
 		if (!SecurityUtils.canManageBuild(buildLabel.getBuild()))
 			throw new UnauthorizedException();
 		buildLabelManager.create(buildLabel);
@@ -39,7 +39,7 @@ public class BuildLabelResource {
 	@Api(order=300)
 	@Path("/{buildLabelId}")
 	@DELETE
-	public Response delete(@PathParam("buildLabelId") Long buildLabelId) {
+	public Response deleteLabel(@PathParam("buildLabelId") Long buildLabelId) {
 		BuildLabel buildLabel = buildLabelManager.load(buildLabelId);
 		if (!SecurityUtils.canManageBuild(buildLabel.getBuild()))
 			throw new UnauthorizedException();

@@ -12,6 +12,8 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -37,6 +39,7 @@ public abstract class IterationActionsPanel extends GenericPanel<Iteration> {
 			public void onClick(AjaxRequestTarget target) {
 				getIteration().setClosed(false);
 				getIterationManager().createOrUpdate(getIteration());
+				getAuditManager().audit(getIteration().getProject(), "reopened iteration \"" + getIteration().getName() + "\"", null, null);
 				target.add(IterationActionsPanel.this);
 				onUpdated(target);
 				getSession().success(MessageFormat.format(_T("Iteration \"{0}\" reopened"), getIteration().getName()));
@@ -62,6 +65,7 @@ public abstract class IterationActionsPanel extends GenericPanel<Iteration> {
 			public void onClick(AjaxRequestTarget target) {
 				getIteration().setClosed(true);
 				getIterationManager().createOrUpdate(getIteration());
+				getAuditManager().audit(getIteration().getProject(), "closed iteration \"" + getIteration().getName() + "\"", null, null);
 				target.add(IterationActionsPanel.this);
 				onUpdated(target);
 				getSession().success(MessageFormat.format(_T("Iteration \"{0}\" closed"), getIteration().getName()));
@@ -84,6 +88,8 @@ public abstract class IterationActionsPanel extends GenericPanel<Iteration> {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				getIterationManager().delete(getIteration());
+				var oldAuditContent = VersionedXmlDoc.fromBean(getIteration()).toXML();
+				getAuditManager().audit(getIteration().getProject(), "deleted iteration \"" + getIteration().getName() + "\"", oldAuditContent, null);
 				target.add(IterationActionsPanel.this);
 				onDeleted(target);
 				getSession().success(MessageFormat.format(_T("Iteration \"{0}\" deleted"), getIteration().getName()));
@@ -96,6 +102,10 @@ public abstract class IterationActionsPanel extends GenericPanel<Iteration> {
 	
 	private IterationManager getIterationManager() {
 		return OneDev.getInstance(IterationManager.class);
+	}
+
+	private AuditManager getAuditManager() {
+		return OneDev.getInstance(AuditManager.class);
 	}
 
 	protected abstract void onDeleted(AjaxRequestTarget target);

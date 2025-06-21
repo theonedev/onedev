@@ -29,6 +29,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GpgKeyManager;
 import io.onedev.server.model.EmailAddress;
@@ -37,6 +38,7 @@ import io.onedev.server.util.GpgUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.page.user.UserPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 
 public class GpgKeyListPanel extends GenericPanel<List<GpgKey>> {
@@ -133,8 +135,10 @@ public class GpgKeyListPanel extends GenericPanel<List<GpgKey>> {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						GpgKey GpgKey = rowModel.getObject();
-						OneDev.getInstance(GpgKeyManager.class).delete(GpgKey);
+						GpgKey gpgKey = rowModel.getObject();
+						OneDev.getInstance(GpgKeyManager.class).delete(gpgKey);
+						if (getPage() instanceof UserPage)
+							OneDev.getInstance(AuditManager.class).audit(null, "deleted GPG key \"" + GpgUtils.getKeyIDString(gpgKey.getKeyId()) + "\" for account \"" + gpgKey.getOwner().getName() + "\"", null, null);
 						Session.get().success(_T("GPG key deleted"));
 						target.add(gpgKeysTable);
 					}

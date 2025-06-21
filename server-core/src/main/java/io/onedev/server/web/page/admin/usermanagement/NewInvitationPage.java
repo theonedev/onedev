@@ -15,6 +15,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserInvitationManager;
 import io.onedev.server.model.UserInvitation;
@@ -52,6 +53,7 @@ public class NewInvitationPage extends AdministrationPage {
 						invitation.setEmailAddress(emailAddress);
 						UserInvitationManager userInvitationManager = OneDev.getInstance(UserInvitationManager.class);
 						userInvitationManager.create(invitation);
+						OneDev.getInstance(AuditManager.class).audit(null, "created invitation for \"" + emailAddress + "\"", null, null);
 						userInvitationManager.sendInvitationEmail(invitation);
 						if (Thread.interrupted())
 							throw new InterruptedException();

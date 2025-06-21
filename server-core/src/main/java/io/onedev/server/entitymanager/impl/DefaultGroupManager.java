@@ -190,7 +190,7 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 	@Listen
 	public void on(EntityPersisted event) {
 		if (event.getEntity() instanceof Group) {
-			var facade = (GroupFacade) event.getEntity().getFacade();
+			var facade = ((Group) event.getEntity()).getFacade();
 			transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
 		}
 	}

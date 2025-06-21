@@ -10,11 +10,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.http.Cookie;
@@ -339,37 +337,6 @@ public abstract class LayoutPage extends BasePage {
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, _T("Groovy Scripts"),
 							GroovyScriptListPage.class, new PageParameters()));
 
-					List<Class<? extends ContributedAdministrationSetting>> contributedSettingClasses = new ArrayList<>();
-					for (AdministrationSettingContribution contribution : OneDev.getExtensions(AdministrationSettingContribution.class)) {
-						for (Class<? extends ContributedAdministrationSetting> settingClass : contribution.getSettingClasses())
-							contributedSettingClasses.add(settingClass);
-					}
-					contributedSettingClasses.sort(Comparator.comparingInt(EditableUtils::getOrder));
-
-					Map<String, List<SidebarMenuItem>> contributedMenuItems = new HashMap<>();
-					for (var contributedSettingClass : contributedSettingClasses) {
-						var group = EditableUtils.getGroup(contributedSettingClass);
-						if (group == null)
-							group = "";
-						var contributedMenuItemsOfGroup = contributedMenuItems.get(group);
-						if (contributedMenuItemsOfGroup == null) {
-							contributedMenuItemsOfGroup = new ArrayList<>();
-							contributedMenuItems.put(group, contributedMenuItemsOfGroup);
-						}
-						contributedMenuItemsOfGroup.add(new SidebarMenuItem.Page(
-								null,
-								_T(EditableUtils.getDisplayName(contributedSettingClass)),
-								ContributedAdministrationSettingPage.class,
-								ContributedAdministrationSettingPage.paramsOf(contributedSettingClass)));
-					}
-					for (var entry : contributedMenuItems.entrySet()) {
-						if (entry.getKey().length() == 0) {
-							administrationMenuItems.addAll(entry.getValue());
-						} else {
-							administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, entry.getKey(), entry.getValue()));
-						}
-					}
-
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, _T("Branding"),
 							BrandingSettingPage.class, new PageParameters()));
 
@@ -396,12 +363,42 @@ public abstract class LayoutPage extends BasePage {
 					}
 
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("System Maintenance"), maintenanceMenuItems));
-					for (var contribution: OneDev.getExtensions(AdministrationMenuContribution.class))
-						administrationMenuItems.addAll(contribution.getAdministrationMenuItems());
 
 					menuItems.add(new SidebarMenuItem.SubMenu("gear", _T("Administration"), administrationMenuItems));
 				}
-				menus.add(new SidebarMenu(null, menuItems));
+
+				var menu = new SidebarMenu(null, menuItems);
+
+				if (SecurityUtils.isAdministrator()) {
+					List<Class<? extends ContributedAdministrationSetting>> contributedSettingClasses = new ArrayList<>();
+					for (AdministrationSettingContribution contribution : OneDev.getExtensions(AdministrationSettingContribution.class)) {
+						for (Class<? extends ContributedAdministrationSetting> settingClass : contribution.getSettingClasses())
+							contributedSettingClasses.add(settingClass);
+					}
+					contributedSettingClasses.sort(Comparator.comparingInt(EditableUtils::getOrder));
+
+					for (var contributedSettingClass : contributedSettingClasses) {
+						var menuItem = new SidebarMenuItem.Page(
+							null,
+							_T(EditableUtils.getDisplayName(contributedSettingClass)),
+							ContributedAdministrationSettingPage.class,
+							ContributedAdministrationSettingPage.paramsOf(contributedSettingClass));
+
+						var group = EditableUtils.getGroup(contributedSettingClass);
+						if (group != null) 
+							menu.insertMenuItem(new SidebarMenuItem.SubMenu("gear", _T("Administration"), Lists.newArrayList(new SidebarMenuItem.SubMenu(null, _T(group), Lists.newArrayList(menuItem)))));
+						else
+							menu.insertMenuItem(new SidebarMenuItem.SubMenu("gear", _T("Administration"), Lists.newArrayList(menuItem)));
+					}
+
+					var contributions = new ArrayList<>(OneDev.getExtensions(AdministrationMenuContribution.class));
+					contributions.sort(Comparator.comparing(AdministrationMenuContribution::getOrder));
+					
+					for (AdministrationMenuContribution contribution: contributions) 
+						menu.insertMenuItem(new SidebarMenuItem.SubMenu("gear", _T("Administration"), contribution.getMenuItems()));
+				}
+
+				menus.add(menu);
 				menus.addAll(getSidebarMenus());
 				return menus;
 			}

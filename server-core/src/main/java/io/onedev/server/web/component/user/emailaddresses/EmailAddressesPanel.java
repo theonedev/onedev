@@ -26,6 +26,7 @@ import org.apache.wicket.validation.IValidationError;
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.EmailAddress;
@@ -35,6 +36,7 @@ import io.onedev.server.web.component.EmailAddressVerificationStatusBadge;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.page.user.UserPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 
 public class EmailAddressesPanel extends GenericPanel<User> {
@@ -43,6 +45,10 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 	
 	public EmailAddressesPanel(String id, IModel<User> model) {
 		super(id, model);
+	}
+
+	private AuditManager getAuditManager() {
+		return OneDev.getInstance(AuditManager.class);
 	}
 
 	@Override
@@ -93,7 +99,10 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 										@Override
 										public void onClick() {
-											getEmailAddressManager().setAsPrimary(getEmailAddressManager().load(emailAddressId));
+											var emailAddress = getEmailAddressManager().load(emailAddressId);
+											getEmailAddressManager().setAsPrimary(emailAddress);
+											if (getPage() instanceof UserPage)
+												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as primary for account \"" + getUser().getName() + "\"", null, null);
 										}
 										
 									};
@@ -115,7 +124,10 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 										@Override
 										public void onClick() {
-											getEmailAddressManager().useForGitOperations(getEmailAddressManager().load(emailAddressId));
+											var emailAddress = getEmailAddressManager().load(emailAddressId);
+											getEmailAddressManager().useForGitOperations(emailAddress);
+											if (getPage() instanceof UserPage)
+												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" for git operations for account \"" + getUser().getName() + "\"", null, null);
 										}
 										
 									};
@@ -137,7 +149,10 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 										@Override
 										public void onClick() {
-											getEmailAddressManager().setAsPublic(getEmailAddressManager().load(emailAddressId));
+											var emailAddress = getEmailAddressManager().load(emailAddressId);
+											getEmailAddressManager().setAsPublic(emailAddress);
+											if (getPage() instanceof UserPage)
+												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as public for account \"" + getUser().getName() + "\"", null, null);
 										}
 										
 									};
@@ -158,7 +173,10 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 										@Override
 										public void onClick() {
-											getEmailAddressManager().setAsPrivate(getEmailAddressManager().load(emailAddressId));
+											var emailAddress = getEmailAddressManager().load(emailAddressId);
+											getEmailAddressManager().setAsPrivate(emailAddress);
+											if (getPage() instanceof UserPage)
+												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as private for account \"" + getUser().getName() + "\"", null, null);
 										}
 										
 									};
@@ -210,10 +228,14 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 									@Override
 									public void onClick() {
-										if (hasMultipleEmailAddresses)
-											getEmailAddressManager().delete(getEmailAddressManager().load(emailAddressId));
-										else 
+										if (hasMultipleEmailAddresses) {
+											var emailAddress = getEmailAddressManager().load(emailAddressId);
+											getEmailAddressManager().delete(emailAddress);
+											if (getPage() instanceof UserPage)
+												getAuditManager().audit(null, "deleted email address \"" + emailAddress.getValue() + "\" for account \"" + getUser().getName() + "\"", null, null);
+										} else {
 											Session.get().warn(_T("At least one email address should be configured, please add a new one first"));
+										}
 									}
 
 								};
@@ -252,6 +274,8 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 					if (SecurityUtils.isAdministrator())
 						address.setVerificationCode(null);
 					getEmailAddressManager().create(address);
+					if (getPage() instanceof UserPage)
+						getAuditManager().audit(null, "added email address \"" + address.getValue() + "\" for account \"" + getUser().getName() + "\"", null, null);
 					emailAddressValue = null;
 				}
 			}

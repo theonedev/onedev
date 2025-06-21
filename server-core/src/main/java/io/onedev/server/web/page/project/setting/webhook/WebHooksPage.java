@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -28,7 +29,8 @@ public class WebHooksPage extends ProjectSettingPage {
 
 		WebHooksBean bean = new WebHooksBean();
 		bean.setWebHooks(getProject().getWebHooks());
-		
+		var oldAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
+
 		PropertyEditor<Serializable> editor = PropertyContext.edit("editor", bean, "webHooks");
 		
 		Form<?> form = new Form<Void>("form") {
@@ -36,10 +38,12 @@ public class WebHooksPage extends ProjectSettingPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				getSession().success(_T("Web hooks saved"));
+				var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 				getProject().setWebHooks(bean.getWebHooks());
 				OneDev.getInstance(ProjectManager.class).update(getProject());
+				getAuditManager().audit(getProject(), "changed web hooks", oldAuditContent, newAuditContent);
 				setResponsePage(WebHooksPage.class, WebHooksPage.paramsOf(getProject()));
+				getSession().success(_T("Web hooks saved"));
 			}
 			
 		};

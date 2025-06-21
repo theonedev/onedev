@@ -1,11 +1,51 @@
 package io.onedev.server.rest.resource;
 
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
+import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.joda.time.DateTime;
+
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.model.*;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestAssignment;
+import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.PullRequestLabel;
+import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
+import io.onedev.server.model.PullRequestUpdate;
+import io.onedev.server.model.PullRequestWatch;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
@@ -16,26 +56,6 @@ import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectAndBranch;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jgit.lib.ObjectId;
-import org.joda.time.DateTime;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
-import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 
 @Api(order=3000, description="In most cases, pull request resource is operated with pull request id, which is different from pull request number. "
 		+ "To get pull request id of a particular pull request number, use the <a href='/~help/api/io.onedev.server.rest.PullRequestResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
@@ -53,21 +73,24 @@ public class PullRequestResource {
 	private final UserManager userManager;
 	
 	private final GitService gitService;
+
+	private final AuditManager auditManager;
 	
 	@Inject
 	public PullRequestResource(PullRequestManager pullRequestManager, 
 			PullRequestChangeManager pullRequestChangeManager, 
-			UserManager userManager, GitService gitService) {
+			UserManager userManager, GitService gitService, AuditManager auditManager) {
 		this.pullRequestManager = pullRequestManager;
 		this.pullRequestChangeManager = pullRequestChangeManager;
 		this.userManager = userManager;
 		this.gitService = gitService;
+		this.auditManager = auditManager;
 	}
 
 	@Api(order=100)
 	@Path("/{requestId}")
     @GET
-    public PullRequest getBasicInfo(@PathParam("requestId") Long requestId) {
+    public PullRequest getPullRequest(@PathParam("requestId") Long requestId) {
 		PullRequest pullRequest = pullRequestManager.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
@@ -178,7 +201,7 @@ public class PullRequestResource {
 	
 	@Api(order=1100)
 	@GET
-    public List<PullRequest> queryBasicInfo(
+    public List<PullRequest> queryPullRequests(
     		@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~pulls'>pull requests page</a>", example="to be reviewed by me") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
@@ -198,7 +221,7 @@ public class PullRequestResource {
 
 	@Api(order=1200)
 	@POST
-    public Response create(@NotNull PullRequestOpenData data) {
+    public Response createPullRequest(@NotNull PullRequestOpenData data) {
 		User user = SecurityUtils.getUser();
 		
 		ProjectAndBranch target = new ProjectAndBranch(data.getTargetProjectId(), data.getTargetBranch());
@@ -381,7 +404,7 @@ public class PullRequestResource {
 	@Api(order=1600)
 	@Path("/{requestId}/reopen")
     @POST
-    public Response reopen(@PathParam("requestId") Long requestId, String note) {
+    public Response reopenPullRequest(@PathParam("requestId") Long requestId, String note) {
 		PullRequest request = pullRequestManager.load(requestId);
     	if (!SecurityUtils.canModifyPullRequest(request))
 			throw new UnauthorizedException();
@@ -396,7 +419,7 @@ public class PullRequestResource {
 	@Api(order=1700)
 	@Path("/{requestId}/discard")
     @POST
-    public Response discard(@PathParam("requestId") Long requestId, String note) {
+    public Response discardPullRequest(@PathParam("requestId") Long requestId, String note) {
 		PullRequest request = pullRequestManager.load(requestId);
     	if (!SecurityUtils.canModifyPullRequest(request))
 			throw new UnauthorizedException();
@@ -410,7 +433,7 @@ public class PullRequestResource {
 	@Api(order=1800)
 	@Path("/{requestId}/merge")
     @POST
-    public Response merge(@PathParam("requestId") Long requestId, String note) {
+    public Response mergePullRequest(@PathParam("requestId") Long requestId, String note) {
 		PullRequest request = pullRequestManager.load(requestId);
 		var user = SecurityUtils.getUser();
     	if (!SecurityUtils.canWriteCode(user.asSubject(), request.getProject()))
@@ -471,11 +494,13 @@ public class PullRequestResource {
 	@Api(order=2100)
 	@Path("/{requestId}")
     @DELETE
-    public Response delete(@PathParam("requestId") Long requestId) {
+    public Response deletePullRequest(@PathParam("requestId") Long requestId) {
     	PullRequest pullRequest = pullRequestManager.load(requestId);
     	if (!SecurityUtils.canManagePullRequests(pullRequest.getProject()))
 			throw new UnauthorizedException();
-    	pullRequestManager.delete(pullRequest);
+		var oldAuditContent = VersionedXmlDoc.fromBean(pullRequest).toXML();
+		pullRequestManager.delete(pullRequest);
+		auditManager.audit(pullRequest.getProject(), "deleted pull request via RESTful API", oldAuditContent, null);
     	return Response.ok().build();
     }
 	

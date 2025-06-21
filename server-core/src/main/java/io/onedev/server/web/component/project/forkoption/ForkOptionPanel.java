@@ -23,6 +23,8 @@ import org.apache.wicket.model.IModel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.BaseAuthorizationManager;
 import io.onedev.server.entitymanager.ProjectLabelManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -122,9 +124,16 @@ public abstract class ForkOptionPanel extends Panel {
 						
 						OneDev.getInstance(TransactionManager.class).run(() -> {
 							getProjectManager().create(newProject);
-							getProjectManager().fork(getProject(), newProject);
+							getProjectManager().fork(getProject(), newProject);							
 							OneDev.getInstance(BaseAuthorizationManager.class).syncRoles(newProject, defaultRolesBean.getRoles());
 							OneDev.getInstance(ProjectLabelManager.class).sync(newProject, labelsBean.getLabels());
+
+							var auditData = editor.getPropertyValues();
+							auditData.put("parent", parentBean.getParentPath());
+							auditData.put("forkedFrom", getProject().getPath());
+							auditData.put("defaultRoles", defaultRolesBean.getRoleNames());
+							auditData.put("labels", labelsBean.getLabels());
+							OneDev.getInstance(AuditManager.class).audit(newProject, "created project", null, VersionedXmlDoc.fromBean(auditData).toXML());
 						});
 						Session.get().success(_T("Project forked"));
 						setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(newProject));

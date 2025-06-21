@@ -10,6 +10,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.issue.ExternalIssueTransformers;
 import io.onedev.server.web.editable.BeanContext;
@@ -18,6 +19,8 @@ import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 public class ExternalIssueTransformersPage extends IssueSettingPage {
 
     private static final long serialVersionUID = 1L;
+
+    private String oldAuditContent;
 
     public ExternalIssueTransformersPage(PageParameters params) {
         super(params);
@@ -28,12 +31,16 @@ public class ExternalIssueTransformersPage extends IssueSettingPage {
         super.onInitialize();
 
 		ExternalIssueTransformers transformers = getSetting().getExternalIssueTransformers();
+		oldAuditContent = VersionedXmlDoc.fromBean(transformers).toXML();
 		Form<?> form = new Form<Void>("form") {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
 				getSetting().setExternalIssueTransformers(transformers);
+				var newAuditContent = VersionedXmlDoc.fromBean(transformers).toXML();
 				getSettingManager().saveIssueSetting(getSetting());
+				getAuditManager().audit(null, "changed external issue transformers", oldAuditContent, newAuditContent);
+				oldAuditContent = newAuditContent;
 				Session.get().success(_T("Settings updated"));
 			}
 		};

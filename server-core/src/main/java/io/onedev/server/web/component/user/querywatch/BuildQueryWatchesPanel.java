@@ -28,17 +28,20 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.BuildQueryPersonalizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.user.UserPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 
 class BuildQueryWatchesPanel extends GenericPanel<User> {
@@ -90,20 +93,27 @@ class BuildQueryWatchesPanel extends GenericPanel<User> {
 
             @Override
             public void onClick() {
-                for (IModel<QueryInfo> each: selectionColumn.getSelections()) {
-                   var queryInfo = each.getObject();
-                   if (queryInfo.projectId == null) {
-                        getUser().getBuildQuerySubscriptions().remove(queryInfo.name);
-                   } else {
-                        for (var personalization: getUser().getBuildQueryPersonalizations()) {
-                            if (personalization.getProject().getId().equals(queryInfo.projectId)) {
-                                personalization.getQuerySubscriptions().remove(queryInfo.name);
-                                getBuildQueryPersonalizationManager().createOrUpdate(personalization);
-                            }
+                OneDev.getInstance(TransactionManager.class).run(() -> {
+                    var auditManager = OneDev.getInstance(AuditManager.class);
+                    for (IModel<QueryInfo> each: selectionColumn.getSelections()) {
+                        var queryInfo = each.getObject();
+                        if (queryInfo.projectId == null) {
+                             getUser().getBuildQuerySubscriptions().remove(queryInfo.name);
+                             if (getPage() instanceof UserPage)
+                                auditManager.audit(null, "unsubscribed from build query \"" + queryInfo.name + "\" for account \"" + getUser().getName() + "\"", null, null);
+                        } else {
+                             for (var personalization: getUser().getBuildQueryPersonalizations()) {
+                                 if (personalization.getProject().getId().equals(queryInfo.projectId)) {
+                                     personalization.getQuerySubscriptions().remove(queryInfo.name);
+                                     getBuildQueryPersonalizationManager().createOrUpdate(personalization);
+                                     if (getPage() instanceof UserPage)
+                                        auditManager.audit(null, "unsubscribed from build query \"" + queryInfo.name + "\" for account \"" + getUser().getName() + "\" in project \"" + personalization.getProject().getPath() + "\"", null, null);
+                                 }
+                             }
                         }
-                   }
-                }
-                getUserManager().update(getUser(), null);
+                     }
+                     getUserManager().update(getUser(), null);     
+                });
             }
             
             @Override

@@ -1,5 +1,26 @@
 package io.onedev.server.rest.resource;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.Collection;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.shiro.authz.UnauthorizedException;
+
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.PackManager;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
@@ -10,17 +31,6 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.security.SecurityUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.Collection;
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 @Api(order=4300, name="Package")
 @Path("/packages")
@@ -31,15 +41,18 @@ public class PackResource {
 
 	private final PackManager packManager;
 	
+	private final AuditManager auditManager;
+	
 	@Inject
-	public PackResource(PackManager packManager) {
+	public PackResource(PackManager packManager, AuditManager auditManager) {
 		this.packManager = packManager;
+		this.auditManager = auditManager;
 	}
 
 	@Api(order=100)
 	@Path("/{packId}")
     @GET
-    public Pack getBasicInfo(@PathParam("packId") Long packId) {
+    public Pack getPack(@PathParam("packId") Long packId) {
 		Pack pack = packManager.load(packId);
     	if (!SecurityUtils.canReadPack(pack.getProject())) 
 			throw new UnauthorizedException();
@@ -68,7 +81,7 @@ public class PackResource {
 	
 	@Api(order=600)
 	@GET
-    public List<Pack> queryBasicInfo(
+    public List<Pack> queryPacks(
     		@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~packages'>packages page</a>", example="\"Type\" is \"Container Image\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
@@ -89,11 +102,13 @@ public class PackResource {
 	@Api(order=700)
 	@Path("/{packId}")
     @DELETE
-    public Response delete(@PathParam("packId") Long packId) {
+    public Response deletePack(@PathParam("packId") Long packId) {
     	Pack pack = packManager.load(packId);
     	if (!SecurityUtils.canWritePack(pack.getProject()))
 			throw new UnauthorizedException();
     	packManager.delete(pack);
+		var oldAuditContent = VersionedXmlDoc.fromBean(pack).toXML();
+		auditManager.audit(pack.getProject(), "deleted package \"" + pack.getReference(false) + "\" via RESTful API", oldAuditContent, null);
     	return Response.ok().build();
     }
 	

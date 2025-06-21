@@ -26,6 +26,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.SubscriptionRequired;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.persistence.SessionManager;
@@ -44,6 +45,8 @@ import io.onedev.server.web.util.WicketUtils;
 
 public class MailServicePage extends AdministrationPage {
 	
+	private String oldAuditContent;
+
 	public MailServicePage(PageParameters params) {
 		super(params);
 	}
@@ -58,6 +61,7 @@ public class MailServicePage extends AdministrationPage {
 		
 		MailServiceBean bean = new MailServiceBean();
 		bean.setMailService(getSettingManager().getMailService());
+		oldAuditContent = VersionedXmlDoc.fromBean(bean.getMailService()).toXML();
 		
 		PropertyEditor<Serializable> editor = 
 				PropertyContext.edit("editor", bean, "mailService");
@@ -67,7 +71,10 @@ public class MailServicePage extends AdministrationPage {
 			public void onSubmit() {
 				super.onSubmit();
 				
+				var newAuditContent = VersionedXmlDoc.fromBean(bean.getMailService()).toXML();
 				getSettingManager().saveMailService(bean.getMailService());
+				getAuditManager().audit(null, "changed mail service settings", oldAuditContent, newAuditContent);
+				oldAuditContent = newAuditContent;
 				getSession().success(_T("Mail service settings saved"));
 			}
 

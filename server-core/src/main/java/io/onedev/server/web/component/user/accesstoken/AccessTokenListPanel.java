@@ -15,9 +15,12 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.AccessTokenManager;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.User;
+import io.onedev.server.web.page.user.UserPage;
 
 public abstract class AccessTokenListPanel extends Panel {
 
@@ -50,7 +53,12 @@ public abstract class AccessTokenListPanel extends Panel {
 
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
-						getTokenManager().delete(getToken());
+						var token = getToken();
+						getTokenManager().delete(token);
+						if (getPage() instanceof UserPage) {
+							var oldAuditContent = VersionedXmlDoc.fromBean(token).toXML();
+							getAuditManager().audit(null, "deleted access token \"" + token.getName() + "\" for account \"" + token.getOwner().getName() + "\"", oldAuditContent, null);
+						}
 						target.add(container);
 					}
 
@@ -144,6 +152,10 @@ public abstract class AccessTokenListPanel extends Panel {
 	
 	private AccessTokenManager getTokenManager() {
 		return OneDev.getInstance(AccessTokenManager.class);
+	}
+	
+	private AuditManager getAuditManager() {
+		return OneDev.getInstance(AuditManager.class);
 	}
 	
 }

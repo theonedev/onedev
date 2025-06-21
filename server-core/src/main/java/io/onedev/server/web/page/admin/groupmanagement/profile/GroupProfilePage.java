@@ -14,6 +14,8 @@ import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.util.Path;
@@ -39,6 +41,7 @@ public class GroupProfilePage extends GroupPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		var oldAuditContent = VersionedXmlDoc.fromBean(getGroup()).toXML();
 		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
 
 			@Override
@@ -73,7 +76,9 @@ public class GroupProfilePage extends GroupPage {
 							_T("This name has already been used by another group"));
 				} 
 				if (editor.isValid()) {
+					var newAuditContent = VersionedXmlDoc.fromBean(group).toXML();
 					groupManager.update(group, oldName);
+					OneDev.getInstance(AuditManager.class).audit(null, "changed basic settings of group \"" + group.getName() + "\"", oldAuditContent, newAuditContent);
 					setResponsePage(GroupProfilePage.class, GroupProfilePage.paramsOf(group));
 					Session.get().success(_T("Basic settings updated"));
 				}

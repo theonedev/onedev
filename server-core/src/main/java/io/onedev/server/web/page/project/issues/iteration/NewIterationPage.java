@@ -1,6 +1,14 @@
 package io.onedev.server.web.page.project.issues.iteration;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.Session;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
@@ -11,12 +19,6 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.editbean.IterationEditBean;
-import org.apache.wicket.Component;
-import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 public class NewIterationPage extends ProjectPage {
 
@@ -40,6 +42,8 @@ public class NewIterationPage extends ProjectPage {
 				iteration.setProject(getProject());
 				bean.update(iteration);
 				OneDev.getInstance(IterationManager.class).createOrUpdate(iteration);
+				var newAuditContent = VersionedXmlDoc.fromBean(iteration).toXML();
+				getAuditManager().audit(getProject(), "created iteration \"" + iteration.getName() + "\"", null, newAuditContent);
 				Session.get().success("New iteration created");
 				setResponsePage(IterationIssuesPage.class, IterationIssuesPage.paramsOf(getProject(), iteration, null));
 			}

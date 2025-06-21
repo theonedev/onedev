@@ -29,7 +29,7 @@ public class PackLabelResource {
 	
 	@Api(order=200, description="Create package label")
 	@POST
-	public Long create(@NotNull PackLabel packLabel) {
+	public Long createLabel(@NotNull PackLabel packLabel) {
 		if (!SecurityUtils.canWritePack(packLabel.getPack().getProject()))
 			throw new UnauthorizedException();
 		packLabelManager.create(packLabel);
@@ -39,7 +39,7 @@ public class PackLabelResource {
 	@Api(order=300)
 	@Path("/{packLabelId}")
 	@DELETE
-	public Response delete(@PathParam("packLabelId") Long packLabelId) {
+	public Response deleteLabel(@PathParam("packLabelId") Long packLabelId) {
 		PackLabel buildLabel = packLabelManager.load(packLabelId);
 		if (!SecurityUtils.canWritePack(buildLabel.getPack().getProject()))
 			throw new UnauthorizedException();

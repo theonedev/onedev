@@ -1,6 +1,19 @@
 package io.onedev.server.model.support.administration;
 
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Preconditions;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.annotation.ClassValidating;
@@ -13,16 +26,6 @@ import io.onedev.server.git.location.SystemGit;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.util.WicketUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 @Editable
 @ClassValidating
@@ -47,7 +50,7 @@ public class SystemSetting implements Serializable, Validatable {
 	private GitLocation gitLocation = new SystemGit();
 	
 	private CurlLocation curlLocation = new SystemCurl();
-	
+		
 	private boolean disableAutoUpdateCheck;
 	
 	private boolean disableDashboard;

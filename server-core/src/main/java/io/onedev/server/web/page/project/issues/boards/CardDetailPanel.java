@@ -21,6 +21,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
@@ -240,6 +242,8 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								OneDev.getInstance(IssueManager.class).delete(getIssue());
+								var oldAuditContent = VersionedXmlDoc.fromBean(getIssue()).toXML();
+								OneDev.getInstance(AuditManager.class).audit(getIssue().getProject(), "deleted issue \"" + getIssue().getReference().toString(getIssue().getProject()) + "\"", oldAuditContent, null);
 								onDeletedIssue(target);
 							}
 							

@@ -42,6 +42,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Similarities;
@@ -139,7 +140,7 @@ public class GroupMembershipsPage extends GroupPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				getSettings().setPlaceholder(_T("Add member..."));
+				getSettings().setPlaceholder(_T("Add user to group..."));
 				getSettings().setFormatResult("onedev.server.userChoiceFormatter.formatResult");
 				getSettings().setFormatSelection("onedev.server.userChoiceFormatter.formatSelection");
 				getSettings().setEscapeMarkup("onedev.server.userChoiceFormatter.escapeMarkup");
@@ -149,11 +150,13 @@ public class GroupMembershipsPage extends GroupPage {
 			protected void onSelect(AjaxRequestTarget target, User selection) {
 				Membership membership = new Membership();
 				membership.setGroup(getGroup());
-				membership.setUser(OneDev.getInstance(UserManager.class).load(selection.getId()));
-				OneDev.getInstance(MembershipManager.class).create(membership);
+				var user = getUserManager().load(selection.getId());
+				membership.setUser(user);
+				getMembershipManager().create(membership);
+				getAuditManager().audit(null, "added user \"" + user.getName() + "\" to group \"" + getGroup().getName() + "\"", null, null);
 				target.add(membershipsTable);
 				selectionColumn.getSelections().clear();
-				Session.get().success(_T("Member added"));
+				Session.get().success(_T("User added to group"));
 			}
 			
 			@Override
@@ -181,7 +184,7 @@ public class GroupMembershipsPage extends GroupPage {
 
 					@Override
 					public String getLabel() {
-						return _T("Delete Selected Memberships");
+						return _T("Remove Selected Users from Group");
 					}
 
 					@Override
@@ -195,17 +198,23 @@ public class GroupMembershipsPage extends GroupPage {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Membership> memberships = new ArrayList<>();
-										for (IModel<Membership> each: selectionColumn.getSelections())
-											memberships.add(each.getObject());
-										OneDev.getInstance(MembershipManager.class).delete(memberships);
-										selectionColumn.getSelections().clear();
-										target.add(membershipsTable);
+										getTransactionManager().run(() -> {
+											Collection<Membership> memberships = new ArrayList<>();
+											for (IModel<Membership> each: selectionColumn.getSelections())
+												memberships.add(each.getObject());
+											getMembershipManager().delete(memberships);
+											for (var membership: memberships) {
+												var user = membership.getUser();
+												getAuditManager().audit(null, "removed user \"" + user.getName() + "\" from group \"" + getGroup().getName() + "\"", null, null);
+											}
+											selectionColumn.getSelections().clear();
+											target.add(membershipsTable);
+										});
 									}
 									
 									@Override
 									protected String getConfirmMessage() {
-										return _T("Type <code>yes</code> below to delete selected memberships");
+										return _T("Type <code>yes</code> below to remove selected users from group");
 									}
 									
 									@Override
@@ -229,7 +238,7 @@ public class GroupMembershipsPage extends GroupPage {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("data-tippy-content", _T("Please select memberships to delete"));
+									tag.put("data-tippy-content", _T("Please select users to remove from group"));
 								}
 							}
 							
@@ -243,7 +252,7 @@ public class GroupMembershipsPage extends GroupPage {
 
 					@Override
 					public String getLabel() {
-						return _T("Delete All Queried Memberships");
+						return _T("Remove All Queried Users from Group");
 					}
 					
 					@Override
@@ -259,17 +268,23 @@ public class GroupMembershipsPage extends GroupPage {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Membership> memberships = new ArrayList<>();
-										for (Iterator<Membership> it = (Iterator<Membership>) dataProvider.iterator(0, membershipsTable.getItemCount()); it.hasNext();) 
-											memberships.add(it.next());
-										OneDev.getInstance(MembershipManager.class).delete(memberships);
-										selectionColumn.getSelections().clear();
-										target.add(membershipsTable);
+										getTransactionManager().run(() -> {
+											Collection<Membership> memberships = new ArrayList<>();
+											for (Iterator<Membership> it = (Iterator<Membership>) dataProvider.iterator(0, membershipsTable.getItemCount()); it.hasNext();) 
+												memberships.add(it.next());
+											getMembershipManager().delete(memberships);
+											for (var membership: memberships) {
+												var user = membership.getUser();
+												getAuditManager().audit(null, "removed user \"" + user.getName() + "\" from group \"" + getGroup().getName() + "\"", null, null);
+											}
+											selectionColumn.getSelections().clear();
+											target.add(membershipsTable);
+										});
 									}
 									
 									@Override
 									protected String getConfirmMessage() {
-										return _T("Type <code>yes</code> below to delete all queried memberships");
+										return _T("Type <code>yes</code> below to remove all queried users from group");
 									}
 									
 									@Override
@@ -292,7 +307,7 @@ public class GroupMembershipsPage extends GroupPage {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("data-tippy-content", _T("No memberships to delete"));
+									tag.put("data-tippy-content", _T("No users to remove from group"));
 								}
 							}
 							
@@ -376,6 +391,18 @@ public class GroupMembershipsPage extends GroupPage {
 		
 		add(membershipsTable = new DefaultDataTable<Membership, Void>("memberships", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, null));
+	}
+
+	private TransactionManager getTransactionManager() {
+		return OneDev.getInstance(TransactionManager.class);
+	}
+
+	private MembershipManager getMembershipManager() {
+		return OneDev.getInstance(MembershipManager.class);
+	}
+
+	private UserManager getUserManager() {
+		return OneDev.getInstance(UserManager.class);
 	}
 
 }

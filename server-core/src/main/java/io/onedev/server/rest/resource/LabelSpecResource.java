@@ -1,21 +1,32 @@
 package io.onedev.server.rest.resource;
 
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.shiro.authz.UnauthorizedException;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Restrictions;
+
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.LabelSpecManager;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Restrictions;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.List;
 
 @Api(order=10200)
 @Path("/label-specs")
@@ -26,15 +37,18 @@ public class LabelSpecResource {
 
 	private final LabelSpecManager labelSpecManager;
 	
+	private final AuditManager auditManager;
+	
 	@Inject
-	public LabelSpecResource(LabelSpecManager labelSpecManager) {
+	public LabelSpecResource(LabelSpecManager labelSpecManager, AuditManager auditManager) {
 		this.labelSpecManager = labelSpecManager;
+		this.auditManager = auditManager;
 	}
 
 	@Api(order=100)
 	@Path("/{labelSpecId}")
     @GET
-    public LabelSpec get(@PathParam("labelSpecId") Long labelSpecId) {
+    public LabelSpec getSpec(@PathParam("labelSpecId") Long labelSpecId) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
     	return labelSpecManager.load(labelSpecId);
@@ -42,7 +56,7 @@ public class LabelSpecResource {
 	
 	@Api(order=400)
 	@GET
-    public List<LabelSpec> query(@QueryParam("name") String name, 
+    public List<LabelSpec> querySpecs(@QueryParam("name") String name, 
 								 @QueryParam("offset") @Api(example="0") int offset, 
 								 @QueryParam("count") @Api(example="100") int count) {
 		if (!SecurityUtils.isAdministrator())
@@ -57,31 +71,39 @@ public class LabelSpecResource {
 	
 	@Api(order=500, description="Create new label spec")
     @POST
-    public Long create(@NotNull LabelSpec labelSpec) {
+    public Long createSpec(@NotNull LabelSpec labelSpec) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		
 		labelSpecManager.createOrUpdate(labelSpec);
+		var newAuditContent = VersionedXmlDoc.fromBean(labelSpec).toXML();
+		auditManager.audit(null, "created label spec \"" + labelSpec.getName() + "\" via RESTful API", null, newAuditContent);
     	return labelSpec.getId();
     }
 
 	@Api(order=550, description="Update label spec of specified id")
 	@Path("/{labelSpecId}")
 	@POST
-	public Response update(@PathParam("labelSpecId") Long labelSpecId, @NotNull LabelSpec labelSpec) {
+	public Response updateSpec(@PathParam("labelSpecId") Long labelSpecId, @NotNull LabelSpec labelSpec) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 		labelSpecManager.createOrUpdate(labelSpec);
+		var oldAuditContent = labelSpec.getOldVersion().toXML();
+		var newAuditContent = VersionedXmlDoc.fromBean(labelSpec).toXML();
+		auditManager.audit(null, "changed label spec \"" + labelSpec.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
 		return Response.ok().build();
 	}
 	
 	@Api(order=600)
 	@Path("/{labelSpecId}")
     @DELETE
-    public Response delete(@PathParam("labelSpecId") Long labelSpecId) {
+    public Response deleteSpec(@PathParam("labelSpecId") Long labelSpecId) {
     	if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-    	labelSpecManager.delete(labelSpecManager.load(labelSpecId));
+		var labelSpec = labelSpecManager.load(labelSpecId);
+    	labelSpecManager.delete(labelSpec);
+		var oldAuditContent = VersionedXmlDoc.fromBean(labelSpec).toXML();
+		auditManager.audit(null, "deleted label spec \"" + labelSpec.getName() + "\" via RESTful API", oldAuditContent, null);
     	return Response.ok().build();
     }
 	

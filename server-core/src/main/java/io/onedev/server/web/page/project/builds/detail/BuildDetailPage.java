@@ -42,6 +42,7 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.job.JobAuthorizationContextAware;
@@ -566,6 +567,8 @@ public abstract class BuildDetailPage extends ProjectPage
 							@Override
 							public void onClick() {
 								OneDev.getInstance(BuildManager.class).delete(getBuild());
+								var oldAuditContent = VersionedXmlDoc.fromBean(getBuild()).toXML();
+								getAuditManager().audit(getBuild().getProject(), "deleted build \"" + getBuild().getReference().toString(getBuild().getProject()) + "\"", oldAuditContent, null);
 								
 								Session.get().success(MessageFormat.format(_T("Build #{0} deleted"), getBuild().getNumber()));
 								

@@ -1,24 +1,20 @@
 package io.onedev.server.web.page.admin.issuesetting.issuetemplate;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.IssueTemplate;
-import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.NoRecordsBehavior;
-import io.onedev.server.web.behavior.sortable.SortBehavior;
-import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.*;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -33,10 +29,20 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.unbescape.html.HtmlEscape;
 
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.ArrayList;
-import java.util.List;
+import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.IssueTemplate;
+import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 
 public class IssueTemplateListPage extends IssueSettingPage {
 
@@ -158,8 +164,10 @@ public class IssueTemplateListPage extends IssueSettingPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getSetting().getIssueTemplates().remove(templateIndex);
+						var template = getSetting().getIssueTemplates().remove(templateIndex);
+						var oldAuditContent = VersionedXmlDoc.fromBean(template).toXML();
 						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+						getAuditManager().audit(null, "deleted issue description template", oldAuditContent, null);
 						target.add(templatesTable);
 					}
 					
@@ -194,8 +202,11 @@ public class IssueTemplateListPage extends IssueSettingPage {
 
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+				var oldAuditContent = VersionedXmlDoc.fromBean(getSetting().getIssueTemplates()).toXML();
 				CollectionUtils.move(getSetting().getIssueTemplates(), from.getItemIndex(), to.getItemIndex());
+				var newAuditContent = VersionedXmlDoc.fromBean(getSetting().getIssueTemplates()).toXML();
 				OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+				getAuditManager().audit(null, "changed order of issue description templates", oldAuditContent, newAuditContent);
 				target.add(templatesTable);
 			}
 			

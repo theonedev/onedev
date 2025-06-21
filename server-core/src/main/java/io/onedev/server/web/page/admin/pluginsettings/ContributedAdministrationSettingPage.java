@@ -20,6 +20,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
@@ -33,6 +34,8 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 	public static final String PARAM_SETTING = "administrationSetting";
 	
 	private Class<? extends ContributedAdministrationSetting> settingClass;
+
+	private String oldAuditContent;
 	
 	public ContributedAdministrationSettingPage(PageParameters params) {
 		super(params);
@@ -76,11 +79,18 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 				super.onSubmit();
 				
 				Component editor = get("editor");
-				if (editor instanceof BeanEditor && editor.isVisible())
-					getSettingManager().saveContributedSetting((ContributedAdministrationSetting) ((BeanEditor)editor).getModelObject());
-				else
+
+				String newAuditContent = null;
+				if (editor instanceof BeanEditor && editor.isVisible()) {
+					var setting = (ContributedAdministrationSetting) ((BeanEditor)editor).getModelObject();
+					getSettingManager().saveContributedSetting(setting);
+					newAuditContent = VersionedXmlDoc.fromBean(setting).toXML();
+				} else {
 					getSettingManager().removeContributedSetting(settingClass);
-				
+				}
+				getAuditManager().audit(null, "changed " + EditableUtils.getDisplayName(settingClass).toLowerCase(), 
+						oldAuditContent, newAuditContent);
+
 				getSession().success(_T("Setting has been saved"));
 				
 				setResponsePage(ContributedAdministrationSettingPage.class, paramsOf(settingClass));
@@ -140,6 +150,7 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 		}));
 		
 		Serializable setting = getSettingManager().getContributedSetting(settingClass);
+		oldAuditContent = VersionedXmlDoc.fromBean(setting).toXML();
 		form.add(newBeanEditor(setting));
 		
 		add(form);

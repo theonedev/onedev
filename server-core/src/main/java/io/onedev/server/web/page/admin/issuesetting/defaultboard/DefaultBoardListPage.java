@@ -1,7 +1,34 @@
 package io.onedev.server.web.page.admin.issuesetting.defaultboard;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.list.LoopItem;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.data.IDataProvider;
+import org.apache.wicket.markup.repeater.data.ListDataProvider;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.util.CollectionUtils;
@@ -14,27 +41,6 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.*;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.list.LoopItem;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.markup.repeater.data.IDataProvider;
-import org.apache.wicket.markup.repeater.data.ListDataProvider;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DefaultBoardListPage extends IssueSettingPage {
 
@@ -58,7 +64,9 @@ public class DefaultBoardListPage extends IssueSettingPage {
 					protected void onSave(AjaxRequestTarget target, BoardSpec board) {
 						target.add(boardsTable);
 						modal.close();
+						var newAuditContent = VersionedXmlDoc.fromBean(board).toXML();
 						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+						getAuditManager().audit(null, "added default issue board \"" + board.getName() + "\"", null, newAuditContent);
 					}
 
 					@Override
@@ -140,11 +148,14 @@ public class DefaultBoardListPage extends IssueSettingPage {
 
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
+						var oldAuditContent = VersionedXmlDoc.fromBean(getSetting().getBoardSpecs().get(boardIndex)).toXML();
 						return new BoardEditPanel(id, getSetting().getBoardSpecs(), boardIndex) {
 
 							@Override
 							protected void onSave(AjaxRequestTarget target, BoardSpec board) {
+								var newAuditContent = VersionedXmlDoc.fromBean(board).toXML();
 								OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+								getAuditManager().audit(null, "changed default issue board \"" + board.getName() + "\"", oldAuditContent, newAuditContent);
 								target.add(boardsTable);
 								modal.close();
 							}
@@ -168,8 +179,10 @@ public class DefaultBoardListPage extends IssueSettingPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getSetting().getBoardSpecs().remove(boardIndex);
+						var board = getSetting().getBoardSpecs().remove(boardIndex);
+						var oldAuditContent = VersionedXmlDoc.fromBean(board).toXML();
 						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+						getAuditManager().audit(null, "deleted default issue board \"" + board.getName() + "\"", oldAuditContent, null);
 						target.add(boardsTable);
 					}
 					
@@ -203,8 +216,11 @@ public class DefaultBoardListPage extends IssueSettingPage {
 
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+				var oldAuditContent = VersionedXmlDoc.fromBean(getSetting().getBoardSpecs()).toXML();
 				CollectionUtils.move(getSetting().getBoardSpecs(), from.getItemIndex(), to.getItemIndex());
+				var newAuditContent = VersionedXmlDoc.fromBean(getSetting().getBoardSpecs()).toXML();
 				OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+				getAuditManager().audit(null, "changed order of default issue boards", oldAuditContent, newAuditContent);
 				target.add(boardsTable);
 			}
 			

@@ -1,14 +1,11 @@
 package io.onedev.server.web.page.admin.ssosetting;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.sso.SsoConnector;
-import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -18,11 +15,17 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import javax.annotation.Nullable;
-
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.List;
+import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.sso.SsoConnector;
+import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 
 abstract class SsoConnectorEditPanel extends Panel {
 
@@ -92,10 +95,17 @@ abstract class SsoConnectorEditPanel extends Panel {
 
 						@Override
 						public void run() {
-							if (connectorIndex != -1)  
-								getConnectors().set(connectorIndex, bean.getConnector());
-							else 
+							var auditManager = OneDev.getInstance(AuditManager.class);
+							if (connectorIndex != -1) {
+								var oldConnector = getConnectors().set(connectorIndex, bean.getConnector());
+								var oldAuditContent = VersionedXmlDoc.fromBean(oldConnector).toXML();
+								var newAuditContent = VersionedXmlDoc.fromBean(bean.getConnector()).toXML();
+								auditManager.audit(null, "changed sso connector \"" + bean.getConnector().getName() + "\"", oldAuditContent, newAuditContent);
+							} else {
 								getConnectors().add(bean.getConnector());
+								var newAuditContent = VersionedXmlDoc.fromBean(bean.getConnector()).toXML();
+								auditManager.audit(null, "created sso connector \"" + bean.getConnector().getName() + "\"", null, newAuditContent);
+							}
 							OneDev.getInstance(SettingManager.class).saveSsoConnectors(getConnectors());
 						}
 						

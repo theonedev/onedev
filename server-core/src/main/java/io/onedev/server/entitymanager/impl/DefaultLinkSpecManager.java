@@ -164,7 +164,7 @@ public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implemen
 	@Listen
 	public void on(EntityPersisted event) {
 		if (event.getEntity() instanceof LinkSpec) {
-			var facade = (LinkSpecFacade) event.getEntity().getFacade();
+			var facade = ((LinkSpec) event.getEntity()).getFacade();
 			transactionManager.runAfterCommit(() -> updateCache(facade));
 		}
 	}
@@ -173,7 +173,7 @@ public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implemen
 	@Listen
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof LinkSpec) {
-			var facade = (LinkSpecFacade) event.getEntity().getFacade();
+			var facade = ((LinkSpec) event.getEntity()).getFacade();
 			transactionManager.runAfterCommit(() -> {
 				cache.remove(facade.getId());
 				idCache.remove(facade.getName());

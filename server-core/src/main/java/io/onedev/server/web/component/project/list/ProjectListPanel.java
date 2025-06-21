@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -52,6 +54,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PackManager;
@@ -207,6 +211,10 @@ public class ProjectListPanel extends Panel {
 	private ProjectManager getProjectManager() {
 		return OneDev.getInstance(ProjectManager.class);
 	}
+
+	private AuditManager getAuditManager() {
+		return OneDev.getInstance(AuditManager.class);
+	}
 	
 	@Override
 	protected void onDetach() {
@@ -239,6 +247,16 @@ public class ProjectListPanel extends Panel {
 			target.add(saveQueryLink);
 	}
 	
+	private void auditDeletions(Collection<Project> projects) {
+		for (var project: Project.getIndependents(projects)) {
+			var oldAuditContent = VersionedXmlDoc.fromBean(project).toXML();
+			if (project.getParent() != null)
+				getAuditManager().audit(project.getParent(), "deleted child project \"" + project.getName() + "\"", oldAuditContent, null);
+			else
+				getAuditManager().audit(null, "deleted root project \"" + project.getName() + "\"", oldAuditContent, null);
+		}
+}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -426,7 +444,17 @@ public class ProjectListPanel extends Panel {
 													Collection<Project> projects = new ArrayList<>();
 													for (IModel<Project> each: selectionColumn.getSelections()) 
 														projects.add(each.getObject());
+													Map<Long, String> oldAuditContents = new HashMap<>();
+													for (var project: projects) {
+														oldAuditContents.put(project.getId(), project.getParent()!=null? project.getParent().getPath() : null);
+													}
 													getProjectManager().move(projects, getTargetProject());
+													for (var project: projects) {
+														var oldAuditContent = oldAuditContents.get(project.getId());
+														var newAuditContent = project.getParent()!=null? project.getParent().getPath() : null;
+														if (!Objects.equals(oldAuditContent, newAuditContent))
+															getAuditManager().audit(project, "changed parent", oldAuditContent, newAuditContent);
+													}
 													target.add(countLabel);
 													target.add(body);
 													selectionColumn.getSelections().clear();
@@ -512,7 +540,16 @@ public class ProjectListPanel extends Panel {
 												Collection<Project> projects = new ArrayList<>();
 												for (IModel<Project> each: selectionColumn.getSelections()) 
 													projects.add(each.getObject());
+												Map<Long, String> oldAuditContents = new HashMap<>();
+												for (var project: projects) {
+													oldAuditContents.put(project.getId(), project.getParent()!=null? project.getParent().getPath() : null);
+												}
 												getProjectManager().move(projects, null);
+												for (var project: projects) {
+													var oldAuditContent = oldAuditContents.get(project.getId());
+													if (oldAuditContent != null)
+														getAuditManager().audit(project, "changed parent", oldAuditContent, null);
+												}
 												target.add(countLabel);
 												target.add(body);
 												selectionColumn.getSelections().clear();
@@ -592,6 +629,7 @@ public class ProjectListPanel extends Panel {
 												observables.add(project.getDeleteChangeObservable());
 											}
 											getProjectManager().delete(projects);
+											auditDeletions(projects);
 											selectionColumn.getSelections().clear();
 											target.add(countLabel);
 											target.add(body);
@@ -696,7 +734,17 @@ public class ProjectListPanel extends Panel {
 													Collection<Project> projects = new ArrayList<>();
 													for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) 
 														projects.add(it.next());
+													Map<Long, String> oldAuditContents = new HashMap<>();
+													for (var project: projects) {
+														oldAuditContents.put(project.getId(), project.getParent()!=null? project.getParent().getPath() : null);
+													}	
 													getProjectManager().move(projects, getTargetProject());
+													for (var project: projects) {
+														var oldAuditContent = oldAuditContents.get(project.getId());
+														var newAuditContent = project.getParent()!=null? project.getParent().getPath() : null;
+														if (!Objects.equals(oldAuditContent, newAuditContent))
+															getAuditManager().audit(project, "changed parent", oldAuditContent, newAuditContent);
+													}
 													dataProvider.detach();
 													target.add(countLabel);
 													target.add(body);
@@ -783,7 +831,18 @@ public class ProjectListPanel extends Panel {
 												Collection<Project> projects = new ArrayList<>();
 												for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) 
 													projects.add(it.next());
+												
+												var oldAuditContents = new HashMap<Long, String>();
+												for (var project: projects) {
+													oldAuditContents.put(project.getId(), project.getParent()!=null? project.getParent().getPath() : null);
+												}
 												getProjectManager().move(projects, null);
+												for (var project: projects) {
+													var oldAuditContent = oldAuditContents.get(project.getId());
+													if (oldAuditContent != null)
+														getAuditManager().audit(project, "changed parent", oldAuditContent, null);
+												}
+
 												dataProvider.detach();
 												target.add(countLabel);
 												target.add(body);
@@ -867,6 +926,7 @@ public class ProjectListPanel extends Panel {
 												observables.add(project.getDeleteChangeObservable());
 											}
 											getProjectManager().delete(projects);
+											auditDeletions(projects);
 											dataProvider.detach();
 											selectionColumn.getSelections().clear();
 											target.add(countLabel);

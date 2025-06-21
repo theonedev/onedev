@@ -1,7 +1,23 @@
 package io.onedev.server.web.page.project.pullrequests;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
@@ -25,21 +41,6 @@ import io.onedev.server.web.util.NamedPullRequestQueriesBean;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import javax.annotation.Nullable;
-
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.io.Serializable;
-import java.util.ArrayList;
 
 public class ProjectPullRequestsPage extends ProjectPage {
 
@@ -101,10 +102,20 @@ public class ProjectPullRequestsPage extends ProjectPage {
 					return (ArrayList<NamedPullRequestQuery>) getPullRequestSetting().getNamedQueries();
 			}
 
+			private String getAuditContent() {
+				var auditData = getProject().getPullRequestSetting().getNamedQueries();
+				if (auditData == null) 
+					auditData = getPullRequestSetting().getNamedQueries();
+				return VersionedXmlDoc.fromBean(auditData).toXML();
+			}
+
 			@Override
 			protected void onSaveCommonQueries(ArrayList<NamedPullRequestQuery> namedQueries) {
+				var oldAuditContent = getAuditContent();
 				getProject().getPullRequestSetting().setNamedQueries(namedQueries);
-				OneDev.getInstance(ProjectManager.class).update(getProject());
+				var newAuditContent = getAuditContent();
+				getProjectManager().update(getProject());
+				getAuditManager().audit(getProject(), "changed pull request queries", oldAuditContent, newAuditContent);
 			}
 
 		});
@@ -187,13 +198,20 @@ public class ProjectPullRequestsPage extends ProjectPage {
 										if (setting.getNamedQueries() == null) 
 											setting.setNamedQueries(new ArrayList<>(getPullRequestSetting().getNamedQueries()));
 										NamedPullRequestQuery namedQuery = getProject().getNamedPullRequestQuery(name);
+										String oldAuditContent = null;
+										String verb;
 										if (namedQuery == null) {
 											namedQuery = new NamedPullRequestQuery(name, query);
-											setting.getNamedQueries().add(namedQuery);
+											setting.getNamedQueries().add(namedQuery);	
+											verb = "created";
 										} else {
+											oldAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
 											namedQuery.setQuery(query);
+											verb = "changed";
 										}
-										OneDev.getInstance(ProjectManager.class).update(getProject());
+										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
+										getProjectManager().update(getProject());
+										getAuditManager().audit(getProject(), verb + " pull request query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}

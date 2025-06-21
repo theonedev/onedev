@@ -69,6 +69,7 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
+import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.PullRequestAssignmentManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestLabelManager;
@@ -1194,6 +1195,9 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						public void onClick() {
 							PullRequest request = getPullRequest();
 							getPullRequestManager().delete(request);
+							var oldAuditContent = VersionedXmlDoc.fromBean(request).toXML();
+							getAuditManager().audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
+
 							Session.get().success(MessageFormat.format(_T("Pull request #{0} deleted"), request.getNumber()));
 
 							String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(PullRequest.class);

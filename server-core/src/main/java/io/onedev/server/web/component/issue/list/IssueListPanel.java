@@ -76,6 +76,8 @@ import com.google.common.collect.Sets;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueWatchManager;
@@ -93,6 +95,7 @@ import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -108,6 +111,7 @@ import io.onedev.server.util.LinkDescriptor;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.watch.WatchStatus;
+import io.onedev.server.util.xstream.ObjectMap;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
@@ -190,6 +194,14 @@ public abstract class IssueListPanel extends Panel {
 	
 	private IssueLinkManager getIssueLinkManager() {
 		return OneDev.getInstance(IssueLinkManager.class);
+	}
+
+	private TransactionManager getTransactionManager() {
+		return OneDev.getInstance(TransactionManager.class);
+	}
+
+	private AuditManager getAuditManager() {
+		return OneDev.getInstance(AuditManager.class);
 	}
 	
 	@Override
@@ -528,6 +540,26 @@ public abstract class IssueListPanel extends Panel {
 		
 		add(new ModalLink("fieldsAndLinks") {
 
+			private String getAuditContent(Project project) {
+				var listFields = project.getIssueSetting().getListFields();
+				if (listFields == null)
+					listFields = getGlobalIssueSetting().getListFields();
+				var listLinks = project.getIssueSetting().getListLinks();
+				if (listLinks == null)
+					listLinks = getGlobalIssueSetting().getListLinks();
+				var auditData = new ObjectMap();
+				auditData.put("listFields", listFields);
+				auditData.put("listLinks", listLinks);
+				return VersionedXmlDoc.fromBean(auditData).toXML();
+			}
+
+			private String getAuditContent() {
+				var auditData = new ObjectMap();
+				auditData.put("listFields", getGlobalIssueSetting().getListFields());
+				auditData.put("listLinks", getGlobalIssueSetting().getListLinks());
+				return VersionedXmlDoc.fromBean(auditData).toXML();
+			}
+
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				Fragment fragment = new Fragment(id, "fieldsAndLinksFrag", IssueListPanel.this);
@@ -556,13 +588,19 @@ public abstract class IssueListPanel extends Panel {
 						super.onSubmit(target, form);
 						modal.close();
 						if (getProject() != null) {
+							var oldAuditContent = getAuditContent(getProject());
 							getProject().getIssueSetting().setListFields(bean.getFields());
 							getProject().getIssueSetting().setListLinks(bean.getLinks());
-							OneDev.getInstance(ProjectManager.class).update(getProject());
-						} else {
+							var newAuditContent = getAuditContent(getProject());
+							getProjectManager().update(getProject());
+							getAuditManager().audit(getProject(), "changed display fields/links of issue list", oldAuditContent, newAuditContent);
+						} else {		
+							var oldAuditContent = getAuditContent();					
 							getGlobalIssueSetting().setListFields(bean.getFields());
 							getGlobalIssueSetting().setListLinks(bean.getLinks());
+							var newAuditContent = getAuditContent();
 							OneDev.getInstance(SettingManager.class).saveIssueSetting(getGlobalIssueSetting());
+							getAuditManager().audit(null, "changed display fields/links of issue list", oldAuditContent, newAuditContent);
 						}
 						target.add(body);
 						onDisplayFieldsAndLinksUpdated(target);
@@ -575,9 +613,12 @@ public abstract class IssueListPanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						modal.close();
+						var oldAuditContent = getAuditContent();
 						getProject().getIssueSetting().setListFields(null);
 						getProject().getIssueSetting().setListLinks(null);
-						OneDev.getInstance(ProjectManager.class).update(getProject());
+						var newAuditContent = getAuditContent();
+						getProjectManager().update(getProject());
+						getAuditManager().audit(getProject(), "changed display fields/links of issue list", oldAuditContent, newAuditContent);
 						target.add(body);
 						onDisplayFieldsAndLinksUpdated(target);
 					}
@@ -971,7 +1012,7 @@ public abstract class IssueListPanel extends Panel {
 													Collection<Issue> issues = new ArrayList<>();
 													for (IModel<Issue> each : selectionColumn.getSelections())
 														issues.add(each.getObject());
-													OneDev.getInstance(IssueManager.class).move(issues, getProject(), getTargetProject());
+													getIssueManager().move(issues, getProject(), getTargetProject());
 													setResponsePage(ProjectIssueListPage.class,
 															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
 													Session.get().success(_T("Issues moved"));
@@ -1053,7 +1094,7 @@ public abstract class IssueListPanel extends Panel {
 													Collection<Issue> issues = new ArrayList<>();
 													for (IModel<Issue> each : selectionColumn.getSelections())
 														issues.add(each.getObject());
-													OneDev.getInstance(IssueManager.class).copy(issues, getProject(), getTargetProject());
+													getIssueManager().copy(issues, getProject(), getTargetProject());
 													setResponsePage(ProjectIssueListPage.class,
 															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
 													Session.get().success(_T("Issues copied"));
@@ -1114,10 +1155,16 @@ public abstract class IssueListPanel extends Panel {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											Collection<Issue> issues = new ArrayList<>();
-											for (IModel<Issue> each : selectionColumn.getSelections())
-												issues.add(each.getObject());
-											OneDev.getInstance(IssueManager.class).delete(issues, getProject());
+											getTransactionManager().run(()-> {
+												Collection<Issue> issues = new ArrayList<>();
+												for (IModel<Issue> each : selectionColumn.getSelections())
+													issues.add(each.getObject());
+												getIssueManager().delete(issues, getProject());
+												for (var issue: issues) {
+													var oldAuditContent = VersionedXmlDoc.fromBean(issue).toXML();
+													getAuditManager().audit(issue.getProject(), "deleted issue \"" + issue.getReference().toString(issue.getProject()) + "\"", oldAuditContent, null);
+												}													
+											});
 											selectionColumn.getSelections().clear();
 											target.add(countLabel);
 											target.add(body);
@@ -1474,10 +1521,16 @@ public abstract class IssueListPanel extends Panel {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											Collection<Issue> issues = new ArrayList<>();
-											for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
-												issues.add(it.next());
-											OneDev.getInstance(IssueManager.class).delete(issues, getProject());
+											getTransactionManager().run(()-> {
+												Collection<Issue> issues = new ArrayList<>();
+												for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
+													issues.add(it.next());
+												getIssueManager().delete(issues, getProject());
+												for (var issue: issues) {
+													var oldAuditContent = VersionedXmlDoc.fromBean(issue).toXML();
+													getAuditManager().audit(issue.getProject(), "deleted issue \"" + issue.getReference().toString(issue.getProject()) + "\"", oldAuditContent, null);
+												}													
+											});
 											dataProvider.detach();
 											selectionColumn.getSelections().clear();
 											target.add(countLabel);

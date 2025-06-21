@@ -122,7 +122,6 @@ public class AccessToken extends AbstractEntity implements AuthenticationInfo {
 			return SecurityUtils.asSubject(getPrincipals());
 	}
 
-	@Override
 	public AccessTokenFacade getFacade() {
 		return new AccessTokenFacade(getId(), getOwner().getId(), getName(), getValue(), getExpireDate());
 	}
