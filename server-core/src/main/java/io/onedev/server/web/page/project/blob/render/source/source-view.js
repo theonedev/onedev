@@ -626,7 +626,7 @@ onedev.server.sourceView = {
     				$hashLink.hover(function() {
     					var tooltipId = "blame-message-line-" + $(this).data("line");
     					blameMessageCallback(tooltipId, $(this).data("hash"));
-    					var $tooltip = $("<div class='blame-message'><div class='loading'>${onedev.server.sourceView.translations[\"loading\"]}...</div></div>");
+    					var $tooltip = $(`<div class='blame-message'><div class='loading'>${onedev.server.sourceView.translations["loading"]}...</div></div>`);
     					$tooltip.attr("id", tooltipId);
     					$tooltip.data("trigger", this);
     					$tooltip.data("alignment", alignment);

@@ -759,7 +759,7 @@ onedev.server.blobTextDiff = {
 
 			var tooltipId = "blame-message-" + containerId + "_" + oldLine + "_" + newLine;
 			$container.data("blameMessageCallback")(tooltipId, $(this).data("hash"));
-			var $tooltip = $("<div class='blame-message'><div class='loading'>" + onedev.server.blobTextDiff.translations["loading"] + "</div></div>");
+			var $tooltip = $(`<div class='blame-message'><div class='loading'>${onedev.server.blobTextDiff.translations["loading"]}</div></div>`);
 			$tooltip.attr("id", tooltipId);
 			$tooltip.data("trigger", this);
 			$tooltip.data("alignment", alignment);
