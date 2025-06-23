@@ -360,7 +360,7 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
         dateRangePicker.add(new AjaxFormComponentUpdatingBehavior("change") {
             @Override
             protected void onUpdate(AjaxRequestTarget target) {
-                var newPanel = new UserProfilePanel("overview", getModel(), dateRangePicker.getModelObject()) {
+                var newPanel = new UserProfilePanel(UserProfilePanel.this.getId(), getModel(), dateRangePicker.getModelObject()) {
 
                     @Override
                     protected void onDateRangeChanged(AjaxRequestTarget target, DateRange dateRange) {
