@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
 
 import org.apache.shiro.authz.Permission;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
@@ -92,6 +93,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static final PrincipalCollection PRINCIPALS_ANONYMOUS = 
 			new SimplePrincipalCollection(PRINCIPAL_ANONYMOUS, "");
+	
+	public static void checkPermission(Permission permission) {
+		if (!getSubject().isPermitted(permission))
+			throw new UnauthorizedException();
+	}
 	
 	public static PrincipalCollection asPrincipals(String principal) {
 		return new SimplePrincipalCollection(principal, "");

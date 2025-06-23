@@ -24,6 +24,8 @@ import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ManageProject;
+import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
@@ -57,6 +59,8 @@ public class GroupAuthorizationsPage extends ProjectSettingPage {
 			protected void onSubmit() {
 				super.onSubmit();
 
+				SecurityUtils.checkPermission(new ProjectPermission(getProject(), new ManageProject()));
+				
 				if (getProject().getParent() == null
 						|| !SecurityUtils.canManageProject(getProject().getParent())) {
 					boolean canManageProject = false;
