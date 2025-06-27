@@ -76,7 +76,6 @@ public abstract class ReviewListPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<PullRequestReview> item) {
 				PullRequestReview review = item.getModelObject();
-				var reviewId = review.getId();
 				item.add(new UserIdentPanel("user", review.getUser(), Mode.AVATAR_AND_NAME));
 
 				PullRequest request = getPullRequest();
@@ -85,7 +84,7 @@ public abstract class ReviewListPanel extends Panel {
 
 					@Override
 					protected Status getStatus() {
-						return getReviewManager().load(reviewId).getStatus();
+						return item.getModelObject().getStatus();
 					}
 
 				}.setVisible(!request.isNew()));
@@ -96,7 +95,7 @@ public abstract class ReviewListPanel extends Panel {
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
 
-						PullRequestReview review = getReviewManager().load(reviewId);
+						PullRequestReview review = item.getModelObject();
 						if (!review.getUser().equals(SecurityUtils.getAuthUser())) {
 							attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to "
 									+ "request another review from '" + review.getUser().getDisplayName() + "'?"));
@@ -106,13 +105,13 @@ public abstract class ReviewListPanel extends Panel {
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
-						if (getReviewManager().load(reviewId).getUser().equals(SecurityUtils.getAuthUser()))
+						if (item.getModelObject().getUser().equals(SecurityUtils.getAuthUser()))
 							tag.put("title", "Reset my review");
 					}
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						PullRequestReview review = getReviewManager().load(reviewId);
+						PullRequestReview review = item.getModelObject();
 						review.setStatus(Status.PENDING);
 						OneDev.getInstance(PullRequestReviewManager.class).createOrUpdate(review);
 						notifyPullRequestChange(target);
@@ -122,7 +121,7 @@ public abstract class ReviewListPanel extends Panel {
 					protected void onConfigure() {
 						super.onConfigure();
 
-						PullRequestReview review = getReviewManager().load(reviewId);
+						PullRequestReview review = item.getModelObject();
 						User currentUser = SecurityUtils.getAuthUser();
 						setVisible(!request.isNew()
 								&& request.isOpen()
@@ -138,7 +137,7 @@ public abstract class ReviewListPanel extends Panel {
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
 						if (!getPullRequest().isNew()) {
-							var review = getReviewManager().load(reviewId);
+							var review = item.getModelObject();
 							attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to "
 									+ "remove reviewer '" + review.getUser().getDisplayName() + "'?"));
 						}
@@ -147,7 +146,7 @@ public abstract class ReviewListPanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						PullRequest request = getPullRequest();
-						PullRequestReview review = getReviewManager().load(reviewId);
+						PullRequestReview review = item.getModelObject();
 						review.setStatus(Status.EXCLUDED);
 						OneDev.getInstance(PullRequestManager.class).checkReviews(request, false);
 						User reviewer = review.getUser();
@@ -156,12 +155,10 @@ public abstract class ReviewListPanel extends Panel {
 							if (request.getReview(reviewer).getStatus() != Status.EXCLUDED)
 								reviewerRequired = true;
 						} else if (request.getReview(reviewer).getStatus() == Status.EXCLUDED) {
-							PullRequestReviewManager reviewManager =
-									OneDev.getInstance(PullRequestReviewManager.class);
-							reviewManager.createOrUpdate(review);
+							getReviewManager().createOrUpdate(review);
 							for (PullRequestReview eachReview : request.getReviews()) {
 								if (eachReview.isNew())
-									reviewManager.createOrUpdate(eachReview);
+									getReviewManager().createOrUpdate(eachReview);
 							}
 							notifyPullRequestChange(target);
 						} else {
