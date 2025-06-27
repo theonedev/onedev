@@ -858,7 +858,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 
 			});
 			for (PullRequestReview review: reviews) {
-				if (review.getStatus() == PullRequestReview.Status.EXCLUDED) {
+				if (users.contains(review.getUser()) && review.getStatus() == PullRequestReview.Status.EXCLUDED) {
 					reviewers.add(review.getUser());
 					review.setStatus(PullRequestReview.Status.PENDING);
 					if (reviewers.size() == requiredCount)
