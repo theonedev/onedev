@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
@@ -82,7 +83,6 @@ import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.UploadCache;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.security.permission.WritePack;
-import io.onedev.server.util.concurrent.PrioritizedCallable;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
@@ -588,18 +588,10 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			task.run();
 		};
 	}
-	
-	public static String getPrevPrincipal() {
-		PrincipalCollection prevPrincipals = SecurityUtils.getSubject().getPreviousPrincipals();
-		if (prevPrincipals != null) 
-			return (String) prevPrincipals.getPrimaryPrincipal();
-		else 
-			return PRINCIPAL_ANONYMOUS;
-	}
-	
-	public static <T> PrioritizedCallable<T> inheritSubject(PrioritizedCallable<T> task) {
+
+	public static <T> Callable<T> inheritSubject(Callable<T> task) {
 		Subject subject = SecurityUtils.getSubject();
-		return new PrioritizedCallable<T>(task.getPriority()) {
+		return new Callable<T>() {
 
 			@Override
 			public T call() throws Exception {
@@ -610,6 +602,14 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		};
 	}
 	
+	public static String getPrevPrincipal() {
+		PrincipalCollection prevPrincipals = SecurityUtils.getSubject().getPreviousPrincipals();
+		if (prevPrincipals != null) 
+			return (String) prevPrincipals.getPrimaryPrincipal();
+		else 
+			return PRINCIPAL_ANONYMOUS;
+	}
+		
 	@Nullable
 	public static String getBearerToken(HttpServletRequest request) {
 		String authHeader = request.getHeader(KubernetesHelper.AUTHORIZATION);

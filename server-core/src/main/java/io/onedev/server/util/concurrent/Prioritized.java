@@ -1,6 +1,6 @@
 package io.onedev.server.util.concurrent;
 
-public class Prioritized implements PriorityAware {
+public class Prioritized implements Comparable<Prioritized> {
 
 	private final int priority;
 
@@ -8,13 +8,12 @@ public class Prioritized implements PriorityAware {
 		this.priority = priority;
 	}
 	
-	@Override
 	public int getPriority() {
 		return priority;
 	}
 
 	@Override
-	public int compareTo(PriorityAware o) {
+	public int compareTo(Prioritized o) {
 		return priority - o.getPriority();
 	}
 	

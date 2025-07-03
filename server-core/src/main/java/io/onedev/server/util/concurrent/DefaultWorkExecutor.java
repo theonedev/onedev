@@ -1,17 +1,26 @@
 package io.onedev.server.util.concurrent;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.security.SecurityUtils;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.*;
-import java.util.concurrent.*;
-
-import static java.util.Collections.sort;
-import static java.util.Comparator.comparingInt;
 
 @Singleton
 public class DefaultWorkExecutor implements WorkExecutor {
@@ -20,9 +29,9 @@ public class DefaultWorkExecutor implements WorkExecutor {
 	
 	private final ExecutorService executorService;
 	
-	private final Map<String, Collection<PrioritizedCallable<?>>> runnings = new HashMap<>();
+	private final Map<Key, Collection<Callable<?>>> runnings = new HashMap<>();
 	
-	private final Map<String, Collection<WorkFuture<?>>> waitings = new HashMap<>();
+	private final Map<Key, Collection<WorkFuture<?>>> waitings = new TreeMap<>();
 	
 	@Inject
 	public DefaultWorkExecutor(ExecutorService executorService, SettingManager settingManager) {
@@ -40,40 +49,36 @@ public class DefaultWorkExecutor implements WorkExecutor {
 	}
 
 	private synchronized void check() {
-		if (getConcurrency() > runnings.size()) {
-			Map<String, Integer> averagePriorities = new HashMap<>();
-			for (Map.Entry<String, Collection<WorkFuture<?>>> entry: waitings.entrySet()) {
-				int totalPriorities = 0;
-				for (WorkFuture<?> future: entry.getValue()) 
-					totalPriorities += future.callable.getPriority();
-				averagePriorities.put(entry.getKey(), totalPriorities/entry.getValue().size());
-			}
-			List<String> groupIds = new ArrayList<>(waitings.keySet());
-			sort(groupIds, comparingInt(averagePriorities::get));
-			for (String groupId: groupIds) {
-				Collection<PrioritizedCallable<?>> runningsOfGroup = new ArrayList<>();
-				for (WorkFuture<?> future: waitings.remove(groupId)) {
-					future.runningFuture = call(future.groupId, future.callable);
+		if (getConcurrency() > runnings.size()) {			
+			for (var it = waitings.entrySet().iterator(); it.hasNext();) {
+				var entry = it.next();
+				it.remove();
+
+				var keyRunnings = new ArrayList<Callable<?>>();
+				for (var future: entry.getValue()) {
+					future.runningFuture = call(future.priority, future.groupId, future.callable);
 					notifyAll();
-					runningsOfGroup.add(future.callable);
+					keyRunnings.add(future.callable);
 				}
-				runnings.put(groupId, runningsOfGroup);
+
+				runnings.put(entry.getKey(), keyRunnings);
 				if (runnings.size() == getConcurrency())
 					break;
 			}
 		}
 	}
 	
-	private synchronized <T> Future<T> call(String groupId, PrioritizedCallable<T> callable) {
+	private synchronized <T> Future<T> call(int priority, String groupId, Callable<T> callable) {
 		return executorService.submit(() -> {
 			try {
 				return callable.call();
 			} finally {
 				synchronized (DefaultWorkExecutor.this) {
-					Collection<PrioritizedCallable<?>> runningsOfGroup = runnings.get(groupId);
-					runningsOfGroup.remove(callable);
-					if (runningsOfGroup.isEmpty()) {
-						runnings.remove(groupId);
+					var key = new Key(priority, groupId);
+					var keyRunnings = runnings.get(key);
+					keyRunnings.remove(callable);
+					if (keyRunnings.isEmpty()) {
+						runnings.remove(key);
 						check();
 					}
 				}
@@ -82,16 +87,17 @@ public class DefaultWorkExecutor implements WorkExecutor {
 	}
 	
 	@Override
-	public synchronized <T> Future<T> submit(String groupId, PrioritizedCallable<T> callable) {
+	public synchronized <T> Future<T> submit(int priority, String groupId, Callable<T> callable) {
 		callable = SecurityUtils.inheritSubject(callable);
-		Collection<PrioritizedCallable<?>> runningsOfGroup = runnings.get(groupId);
-		if (runningsOfGroup != null) {
-			runningsOfGroup.add(callable);
-			return call(groupId, callable);
+		var key = new Key(priority, groupId);
+		Collection<Callable<?>> keyRunnings = runnings.get(key);
+		if (keyRunnings != null) {
+			keyRunnings.add(callable);
+			return call(priority, groupId, callable);
 		} else {
-			WorkFuture<T> future = new WorkFuture<T>(groupId, callable);
-			var waitingsOfGroup = waitings.computeIfAbsent(groupId, k -> new ArrayList<>());
-			waitingsOfGroup.add(future);
+			WorkFuture<T> future = new WorkFuture<T>(priority, groupId, callable);
+			var keyWaitings = waitings.computeIfAbsent(key, k -> new ArrayList<>());
+			keyWaitings.add(future);
 			check();
 			return future;
 		}
@@ -99,13 +105,16 @@ public class DefaultWorkExecutor implements WorkExecutor {
 
 	private class WorkFuture<T> implements Future<T> {
 
+		private final int priority;
+		
 		private final String groupId;
 		
-		private final PrioritizedCallable<T> callable;
+		private final Callable<T> callable;
 		
 		private Future<?> runningFuture;
 		
-		public WorkFuture(String groupId, PrioritizedCallable<T> callable) {
+		public WorkFuture(int priority, String groupId, Callable<T> callable) {
+			this.priority = priority;
 			this.groupId = groupId;
 			this.callable = callable;
 		}
@@ -116,11 +125,12 @@ public class DefaultWorkExecutor implements WorkExecutor {
 				if (runningFuture != null) {
 					return runningFuture.cancel(mayInterruptIfRunning);
 				} else {
-					Collection<WorkFuture<?>> waitingsOfGroup = waitings.get(groupId);
-					if (waitingsOfGroup != null) {
-						var cancelled = waitingsOfGroup.remove(this);
-						if (waitingsOfGroup.isEmpty())
-							waitings.remove(groupId);
+					var key = new Key(priority, groupId);
+					var keyWaitings = waitings.get(key);
+					if (keyWaitings != null) {
+						var cancelled = keyWaitings.remove(this);
+						if (keyWaitings.isEmpty())
+							waitings.remove(key);
 						return cancelled;
 					} else {
 						return false;
@@ -135,9 +145,9 @@ public class DefaultWorkExecutor implements WorkExecutor {
 				if (runningFuture != null) {
 					return runningFuture.isCancelled();
 				} else {
-					Collection<WorkFuture<?>> waitingsOfGroup = waitings.get(groupId);
-					if (waitingsOfGroup != null)
-						return !waitingsOfGroup.contains(this);
+					var keyWaitings = waitings.get(new Key(priority, groupId));
+					if (keyWaitings != null)
+						return !keyWaitings.contains(this);
 					else 
 						return true;
 				}
@@ -186,13 +196,13 @@ public class DefaultWorkExecutor implements WorkExecutor {
 	}
 
 	@Override
-	public <T> Future<T> submit(PrioritizedCallable<T> callable) {
-		return submit(UUID.randomUUID().toString(), callable);
+	public <T> Future<T> submit(int priority, Callable<T> callable) {
+		return submit(priority, UUID.randomUUID().toString(), callable);
 	}
 
 	@Override
-	public Future<?> submit(String groupId, PrioritizedRunnable runnable) {
-		return submit(groupId, new PrioritizedCallable<Void>(runnable.getPriority()) {
+	public Future<?> submit(int priority, String groupId, Runnable runnable) {
+		return submit(priority, groupId, new Callable<Void>() {
 
 			@Override
 			public Void call() {
@@ -204,8 +214,48 @@ public class DefaultWorkExecutor implements WorkExecutor {
 	}
 
 	@Override
-	public Future<?> submit(PrioritizedRunnable runnable) {
-		return submit(UUID.randomUUID().toString(), runnable);
+	public Future<?> submit(int priority, Runnable runnable) {
+		return submit(priority, UUID.randomUUID().toString(), runnable);
 	}
+
+	public static class Key implements Comparable<Key> {
+		
+		private final int priority;
+		
+		private final String group;
+		
+		public Key(int priority, String group) {
+			this.priority = priority;
+			this.group = group;
+		}
+		
+		public int getPriority() {
+			return priority;
+		}
+		
+		public String getGroup() {
+			return group;
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if (!(other instanceof Key)) 
+				return false;
+			if (this == other)
+				return true;
+			Key otherKey = (Key) other;
+			return priority == otherKey.priority && group.equals(otherKey.group);
+		}
+	
+		@Override
+		public int hashCode() {
+			return Objects.hash(priority, group);
+		}
+
+		@Override
+		public int compareTo(Key o) {
+			return Integer.compare(priority, o.priority);
+		}		
+	}	
 	
 }
