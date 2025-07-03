@@ -64,24 +64,17 @@ public class ProjectCache extends MapProxy<Long, ProjectFacade> {
 	}
 	
 	public Collection<Long> getSubtreeIds(Long id) {
-		return getSubtreeIds(values(), id);
+		Collection<Long> subtreeIds = Sets.newHashSet(id);
+		var project = get(id);
+		if (project != null) {
+			for (var each: values()) {
+				if (each.getPath().startsWith(project.getPath() + "/"))
+					subtreeIds.add(each.getId());
+			}
+		}
+		return subtreeIds;
 	}
 
-	private Collection<Long> getSubtreeIds(Collection<ProjectFacade> projects, Long id) {
-		Collection<Long> treeIds = Sets.newHashSet(id);
-		for (ProjectFacade facade: projects) {
-			if (id.equals(facade.getParentId()))
-				treeIds.addAll(getSubtreeIds(projects, facade.getId()));
-		}
-		return treeIds;
-	}
-	
-    @Nullable
-    public Long findId(String path) {
-    	ProjectFacade project = findByPath(path);
-    	return project != null? project.getId(): null;
-    }
-    
     @Nullable
     public ProjectFacade findByPath(String path) {
     	for (ProjectFacade project: values()) {

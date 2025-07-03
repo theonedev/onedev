@@ -885,7 +885,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			}
 		}
 	}
-	
+
 	@Listen
 	public void on(ConnectionEvent event) {
 		if (clusterManager.isLeaderServer()) {
@@ -1129,12 +1129,12 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	@Override
 	public Collection<Long> getSubtreeIds(Long projectId) {
-		return cache.getSubtreeIds(projectId);
+		return cache.clone().getSubtreeIds(projectId);
 	}
 
 	@Override
 	public Collection<Long> getPathMatchingIds(PatternSet patternSet) {
-		return cache.getMatchingIds(patternSet);
+		return cache.clone().getMatchingIds(patternSet);
 	}
 
 	@Override
@@ -1199,7 +1199,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Override
 	public Collection<Long> getActiveIds() {
 		var localServer = clusterManager.getLocalServerAddress();
-		return activeServers.project(Map.Entry::getKey, entry -> entry.getValue().equals(localServer));
+		return new HashSet<>(activeServers.project(Map.Entry::getKey, entry -> entry.getValue().equals(localServer)));
 	}
 
 	@Override

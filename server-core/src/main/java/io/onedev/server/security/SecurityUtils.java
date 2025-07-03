@@ -638,7 +638,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		for (Project descendant : project.getDescendants())
 			projectIds.add(descendant.getId());
 	}
-	
+
+	public static Collection<Project> getAuthorizedProjects(ProjectCache cache, BasePermission permission) {
+		return getAuthorizedProjects(cache, getSubject(), permission);
+	}
+
 	public static Collection<Project> getAuthorizedProjects(BasePermission permission) {
 		return getAuthorizedProjects(getSubject(), permission);
 	}
@@ -646,22 +650,27 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	private static SettingManager getSettingManager() {
 		return OneDev.getInstance(SettingManager.class);
 	}
-	
+
 	public static Collection<Project> getAuthorizedProjects(Subject subject, BasePermission permission) {
+		return getAuthorizedProjects(null, subject, permission);
+	}
+
+	public static Collection<Project> getAuthorizedProjects(@Nullable ProjectCache cache, Subject subject, BasePermission permission) {
 		var projectManager = OneDev.getInstance(ProjectManager.class);
 		String principal = (String) subject.getPrincipal();
 		var user = getAuthUser(principal);
 		var accessToken = getAccessToken(principal);
 		if (permission.isApplicable(UserFacade.of(getUser(user, accessToken)))) {
-			ProjectCache cacheClone = projectManager.cloneCache();
+			if (cache == null)
+				cache = projectManager.cloneCache();
 			Collection<Long> authorizedProjectIds = new HashSet<>();
 			if (user != null) {
 				if (user.isRoot() || user.isSystem()) {
-					return cacheClone.getProjects();
+					return cache.getProjects();
 				} else {
 					for (Group group : user.getGroups()) {
 						if (group.isAdministrator())
-							return cacheClone.getProjects();
+							return cache.getProjects();
 						for (GroupAuthorization authorization : group.getAuthorizations()) {
 							if (authorization.getRole().implies(permission))
 								addSubTreeIds(authorizedProjectIds, authorization.getProject());
@@ -681,7 +690,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				}
 			}
 			if (!isAnonymous(principal) || getSettingManager().getSecuritySetting().isEnableAnonymousAccess())
-				addIdsPermittedByDefaultRole(cacheClone, authorizedProjectIds, permission);
+				addIdsPermittedByDefaultRole(cache, authorizedProjectIds, permission);
 			
 			return authorizedProjectIds.stream().map(projectManager::load).collect(toSet());
 		} else {

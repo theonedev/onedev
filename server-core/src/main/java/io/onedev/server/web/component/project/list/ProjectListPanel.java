@@ -117,7 +117,14 @@ public class ProjectListPanel extends Panel {
 	private final IModel<String> queryStringModel;
 	
 	private final int expectedCount;
-	
+
+	private final IModel<ProjectCache> projectCacheModel = new LoadableDetachableModel<ProjectCache>() {
+		@Override
+		protected ProjectCache load() {
+			return getProjectManager().cloneCache();
+		}
+	};
+
 	private final IModel<ProjectQuery> queryModel = new LoadableDetachableModel<>() {
 
 		@Override
@@ -215,6 +222,7 @@ public class ProjectListPanel extends Panel {
 		issueStatsModel.detach();
 		queryStringModel.detach();
 		queryModel.detach();
+		projectCacheModel.detach();
 		super.onDetach();
 	}
 	
@@ -916,9 +924,8 @@ public class ProjectListPanel extends Panel {
 			}
 			
 			private List<Project> getTargetProjects() {
-				ProjectCache cache = getProjectManager().cloneCache();
 				List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new CreateChildren()));
-				projects.sort(cache.comparingPath());
+				projects.sort(projectCacheModel.getObject().comparingPath());
 				return projects;
 			}
 
@@ -1221,7 +1228,7 @@ public class ProjectListPanel extends Panel {
 					fragment.add(new WebMarkupContainer("noStorage"));
 				}
 				
-				List<ProjectFacade> children = getProjectManager().getChildren(projectId);
+				List<ProjectFacade> children = projectCacheModel.getObject().getChildren(projectId);
 				if (!children.isEmpty()) {
 					Fragment childrenFrag = new Fragment("children", "childrenFrag", ProjectListPanel.this);
 					childrenFrag.add(new AjaxLink<Void>("toggle") {
