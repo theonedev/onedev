@@ -108,7 +108,7 @@ public abstract class EntityTextManager<T extends ProjectBelonging> implements S
 
 	protected static final String FIELD_PROJECT_ID = "projectId";
 	
-	private static final int INDEXING_PRIORITY = 100;
+	private static final int PRIORITY = 100;
 	
 	private static final int BATCH_SIZE = 5000;
 	
@@ -325,7 +325,7 @@ public abstract class EntityTextManager<T extends ProjectBelonging> implements S
 			}
 
 		};		
-		batchWorkManager.submit(batchWorker, new IndexWork(INDEXING_PRIORITY));
+		batchWorkManager.submit(batchWorker, new IndexWork(PRIORITY));
 	}	
 	
 	private Query parse(String queryString) {

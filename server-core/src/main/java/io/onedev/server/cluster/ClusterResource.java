@@ -297,7 +297,7 @@ public class ClusterResource {
 			try {
 				File gitDir = projectManager.getGitDir(projectId);
 				if (upload) {
-					workExecutor.submit(GitFilter.PRIORITY, new Runnable() {
+					workExecutor.submit(GitFilter.PACK_PRIORITY, new Runnable() {
 						
 						@Override
 						public void run() {
@@ -306,7 +306,7 @@ public class ClusterResource {
 						
 					}).get();
 				} else {
-					workExecutor.submit(GitFilter.PRIORITY, new Runnable() {
+					workExecutor.submit(GitFilter.PACK_PRIORITY, new Runnable() {
 						
 						@Override
 						public void run() {

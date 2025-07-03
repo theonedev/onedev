@@ -183,7 +183,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 	private static final ByteIterable COMMIT_COUNT_KEY = new StringByteIterable("commitCount");
 
-	private static final int PRIORITY = 100;
+	private static final int COLLECT_PRIORITY = 100;
 
 	private final BatchWorkManager batchWorkManager;
 
@@ -1127,7 +1127,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 				}
 				if (revObj instanceof RevCommit) {
 					RevCommit commit = (RevCommit) revObj;
-					works.add(new CollectingWork(PRIORITY, commit.copy(), 
+					works.add(new CollectingWork(COLLECT_PRIORITY, commit.copy(), 
 							commit.getCommitTime(), ref.getName()));
 				}
 			}
@@ -1186,7 +1186,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 			try (RevWalk revWalk = new RevWalk(repository)) {
 				RevCommit commit = GitUtils.parseCommit(revWalk, event.getNewCommitId());
 				if (commit != null) {
-					CollectingWork work = new CollectingWork(PRIORITY, commit.copy(), 
+					CollectingWork work = new CollectingWork(COLLECT_PRIORITY, commit.copy(), 
 							commit.getCommitTime(), event.getRefName());
 					batchWorkManager.submit(getBatchWorker(event.getProject().getId()), work);
 				}

@@ -82,6 +82,9 @@ import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.artifact.FileInfo;
+import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.concurrent.BatchWorker;
+import io.onedev.server.util.concurrent.Prioritized;
 
 @Singleton
 public class DefaultAttachmentManager implements AttachmentManager, SchedulableTask, Serializable {
@@ -89,6 +92,8 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	private static final Logger logger = LoggerFactory.getLogger(DefaultAttachmentManager.class);
 	
 	private static final long TEMP_PRESERVE_PERIOD = 24*3600*1000L; 
+
+	private static final int HOUSE_KEEPING_PRIORITY = 50;
 	
 	private static final String PERMANENT = "permanent";
 	
@@ -107,6 +112,8 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	private final SettingManager settingManager;
 	
 	private final IssueManager issueManager;
+
+	private final BatchWorkManager batchWorkManager;
 	
     private String taskId;
     
@@ -114,7 +121,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	public DefaultAttachmentManager(Dao dao, TransactionManager transactionManager,
 									TaskScheduler taskScheduler, SettingManager settingManager, 
 									ProjectManager projectManager, ClusterManager clusterManager, 
-									IssueManager issueManager) {
+									IssueManager issueManager, BatchWorkManager batchWorkManager) {
 		this.dao = dao;
 		this.transactionManager = transactionManager;
 		this.taskScheduler = taskScheduler;
@@ -122,6 +129,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		this.projectManager = projectManager;
 		this.clusterManager = clusterManager;
 		this.issueManager = issueManager;
+		this.batchWorkManager = batchWorkManager;
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {
@@ -356,23 +364,29 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 			taskScheduler.unschedule(taskId);
 	}
 
-	@Sessional
 	@Override
 	public void execute() {
-		for (var projectId: projectManager.getActiveIds()) {
-			try {
-				File tempAttachmentBase = new File(projectManager.getAttachmentDir(projectId), TEMP);
-				if (tempAttachmentBase.exists()) {
-					for (File attachmentGroupDir: tempAttachmentBase.listFiles()) {
-						if (System.currentTimeMillis() - attachmentGroupDir.lastModified() > TEMP_PRESERVE_PERIOD) {
-							FileUtils.deleteDir(attachmentGroupDir);
+		batchWorkManager.submit(new BatchWorker("attachment-manager-house-keeping") {
+
+			@Override
+			public void doWorks(List<Prioritized> works) {
+				for (var projectId: projectManager.getActiveIds()) {
+					try {
+						File tempAttachmentBase = new File(projectManager.getAttachmentDir(projectId), TEMP);
+						if (tempAttachmentBase.exists()) {
+							for (File attachmentGroupDir: tempAttachmentBase.listFiles()) {
+								if (System.currentTimeMillis() - attachmentGroupDir.lastModified() > TEMP_PRESERVE_PERIOD) {
+									FileUtils.deleteDir(attachmentGroupDir);
+								}
+							}
 						}
+					} catch (Exception e) {
+						logger.error("Error cleaning up temp attachments", e);
 					}
 				}
-			} catch (Exception e) {
-				logger.error("Error cleaning up temp attachments", e);
 			}
-		}
+
+		}, new Prioritized(HOUSE_KEEPING_PRIORITY));		
 	}
 
 	@Override

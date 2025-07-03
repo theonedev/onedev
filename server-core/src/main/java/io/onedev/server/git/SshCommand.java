@@ -49,7 +49,7 @@ import io.onedev.server.util.concurrent.WorkExecutor;
 
 class SshCommand implements Command, ServerSessionAware {
 	
-	private static final int PRIORITY = 2;
+	private static final int PACK_PRIORITY = 2;
 	
 	private static final int CHANNEL_OPEN_TIMEOUT = 5000;
 	
@@ -142,7 +142,7 @@ class SshCommand implements Command, ServerSessionAware {
 	        String groupId = "git-over-ssh-" + projectFacade.getId() + "-" + principal;
 	        
 	        WorkExecutor workExecutor = OneDev.getInstance(WorkExecutor.class);
-			future = workExecutor.submit(PRIORITY, groupId, new Runnable() {
+			future = workExecutor.submit(PACK_PRIORITY, groupId, new Runnable() {
 				
 				@Override
 				public void run() {

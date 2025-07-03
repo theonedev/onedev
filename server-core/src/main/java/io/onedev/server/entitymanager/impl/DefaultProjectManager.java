@@ -209,6 +209,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	private static final int SYNC_PRIORITY = 20;
 	
+	private static final int HOUSE_KEEPING_PRIORITY = 30;
+	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultProjectManager.class);
 	
 	private final CommitInfoManager commitInfoManager;
@@ -1898,62 +1900,70 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	@Override
 	public void execute() {
-		if (clusterManager.isLeaderServer()) {
-			var newActiveServers = new HashMap<Long, String>();
-			var replicaCount = settingManager.getClusterSetting().getReplicaCount();
-			for (var projectToReplicas: replicas.entrySet()) {
-				var projectId = projectToReplicas.getKey();
-				var replicasOfProject = projectToReplicas.getValue();
-				while (true) {
-					var newReplicasOfProject = new LinkedHashMap<>(replicasOfProject);
-					if (!newReplicasOfProject.isEmpty()) {
-						var activeServer = getActiveServer(projectId, false);
-						var replica = newReplicasOfProject.get(activeServer);
-						if (replica == null || replica.getType() != PRIMARY)
-							newActiveServers.put(projectId, updateActiveServer(projectId, newReplicasOfProject, true));
-						var maxVersion = newReplicasOfProject.values().stream()
-								.map(ProjectReplica::getVersion)
-								.max(naturalOrder())
-								.get();
-						var upToDateReplicaCount = newReplicasOfProject.values().stream()
-								.filter(it -> it.getVersion() == maxVersion && it.getType() != REDUNDANT)
-								.count();
-						if (upToDateReplicaCount >= replicaCount) {
-							var redundantServers = newReplicasOfProject.entrySet().stream()
-									.filter(it -> it.getValue().getType() == REDUNDANT)
-									.map(Map.Entry::getKey)
-									.collect(toList());
-							newReplicasOfProject.keySet().removeAll(redundantServers);
-							if (!newReplicasOfProject.equals(replicasOfProject)) {
-								if (replicas.replace(projectId, replicasOfProject, newReplicasOfProject)) {
-									redundantServers.forEach(it -> clusterManager.submitToServer(it, () -> {
-										markStorageForDelete(projectId);
-										return null;
-									}));									
-									break;
-								} else {
-									replicasOfProject = replicas.get(projectId);
-									if (replicasOfProject == null)
+		batchWorkManager.submit(new BatchWorker("project-manager-house-keeping") {
+
+			@Override
+			public void doWorks(List<Prioritized> works) {
+				if (clusterManager.isLeaderServer()) {
+					var newActiveServers = new HashMap<Long, String>();
+					var replicaCount = settingManager.getClusterSetting().getReplicaCount();
+					for (var projectToReplicas: replicas.entrySet()) {
+						var projectId = projectToReplicas.getKey();
+						var replicasOfProject = projectToReplicas.getValue();
+						while (true) {
+							var newReplicasOfProject = new LinkedHashMap<>(replicasOfProject);
+							if (!newReplicasOfProject.isEmpty()) {
+								var activeServer = getActiveServer(projectId, false);
+								var replica = newReplicasOfProject.get(activeServer);
+								if (replica == null || replica.getType() != PRIMARY)
+									newActiveServers.put(projectId, updateActiveServer(projectId, newReplicasOfProject, true));
+								var maxVersion = newReplicasOfProject.values().stream()
+										.map(ProjectReplica::getVersion)
+										.max(naturalOrder())
+										.get();
+								var upToDateReplicaCount = newReplicasOfProject.values().stream()
+										.filter(it -> it.getVersion() == maxVersion && it.getType() != REDUNDANT)
+										.count();
+								if (upToDateReplicaCount >= replicaCount) {
+									var redundantServers = newReplicasOfProject.entrySet().stream()
+											.filter(it -> it.getValue().getType() == REDUNDANT)
+											.map(Map.Entry::getKey)
+											.collect(toList());
+									newReplicasOfProject.keySet().removeAll(redundantServers);
+									if (!newReplicasOfProject.equals(replicasOfProject)) {
+										if (replicas.replace(projectId, replicasOfProject, newReplicasOfProject)) {
+											redundantServers.forEach(it -> clusterManager.submitToServer(it, () -> {
+												markStorageForDelete(projectId);
+												return null;
+											}));									
+											break;
+										} else {
+											replicasOfProject = replicas.get(projectId);
+											if (replicasOfProject == null)
+												break;
+										}
+									} else {
 										break;
+									}
+								} else {
+									break;
 								}
 							} else {
 								break;
 							}
-						} else {
-							break;
+							try {
+								Thread.sleep(100);
+							} catch (InterruptedException e) {
+								throw new RuntimeException(e);
+							}
 						}
-					} else {
-						break;
 					}
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
+					notifyActiveServerChanged(newActiveServers);
 				}
+		
 			}
-			notifyActiveServerChanged(newActiveServers);
-		}
+
+		}, new Prioritized(HOUSE_KEEPING_PRIORITY));		
 	}
 	
 	private void markStorageForDelete(Long projectId) {
@@ -1968,7 +1978,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	@Override
 	public ScheduleBuilder<?> getScheduleBuilder() {
-		return CronScheduleBuilder.dailyAtHourAndMinute(3, 0);
+		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
 	}
 
 	private static class SyncWork extends Prioritized {

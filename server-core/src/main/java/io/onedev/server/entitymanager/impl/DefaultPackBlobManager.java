@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -78,10 +79,15 @@ import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.Digest;
 import io.onedev.server.util.Pair;
+import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.concurrent.BatchWorker;
+import io.onedev.server.util.concurrent.Prioritized;
 
 @Singleton
 public class DefaultPackBlobManager extends BaseEntityManager<PackBlob> 
 		implements PackBlobManager, Serializable, SchedulableTask {
+	
+	private static final int HOUSE_KEEPING_PRIORITY = 50;
 	
 	private static final String TEMP_BLOB_SUFFIX = ".temp";
 	
@@ -99,18 +105,21 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 	
 	private final StorageManager storageManager;
 	
+	private final BatchWorkManager batchWorkManager;
+	
 	private volatile String taskId;
 	
 	@Inject
 	public DefaultPackBlobManager(Dao dao, ClusterManager clusterManager, ProjectManager projectManager, 
 								  TransactionManager transactionManager, TaskScheduler taskScheduler,
-								  StorageManager storageManager) {
+								  StorageManager storageManager, BatchWorkManager batchWorkManager) {
 		super(dao);
 		this.clusterManager = clusterManager;
 		this.projectManager = projectManager;
 		this.taskScheduler = taskScheduler;
 		this.transactionManager = transactionManager;
 		this.storageManager = storageManager;
+		this.batchWorkManager = batchWorkManager;
 	}
 
 	@Listen
@@ -515,59 +524,66 @@ public class DefaultPackBlobManager extends BaseEntityManager<PackBlob>
 
 	@Override
 	public void execute() {
-		var now = new Date();
-		for (var projectId: projectManager.getActiveIds()) {
-			var project = projectManager.findFacadeById(projectId);			
-			if (project != null) {
-				for (var uploadFile: projectManager.getSubDir(projectId, UPLOADS_DIR).listFiles()) {
-					if (now.getTime() - uploadFile.lastModified() > EXPIRE_MILLIS) 
-						FileUtils.deleteFile(uploadFile);
+		batchWorkManager.submit(new BatchWorker("pack-blob-manager-house-keeping") {
+
+			@Override
+			public void doWorks(List<Prioritized> works) {
+				var now = new Date();
+				for (var projectId: projectManager.getActiveIds()) {
+					var project = projectManager.findFacadeById(projectId);			
+					if (project != null) {
+						for (var uploadFile: projectManager.getSubDir(projectId, UPLOADS_DIR).listFiles()) {
+							if (now.getTime() - uploadFile.lastModified() > EXPIRE_MILLIS) 
+								FileUtils.deleteFile(uploadFile);
+						}
+					}
+				}
+				if (clusterManager.isLeaderServer()) {
+					transactionManager.run(() -> {
+						var builder = getSession().getCriteriaBuilder();
+						var criteriaQuery = builder.createQuery(PackBlob.class);
+						var root = criteriaQuery.from(PackBlob.class);
+						criteriaQuery.select(root);
+						
+						var referenceQuery = criteriaQuery.subquery(PackBlobReference.class);
+						var referenceRoot = referenceQuery.from(PackBlobReference.class);
+						referenceQuery.select(referenceRoot);
+						referenceQuery.where(builder.equal(referenceRoot.get(PROP_PACK_BLOB), root));
+						
+						var expireTime = new DateTime(now).minusMillis(EXPIRE_MILLIS).toDate();
+						criteriaQuery.where(
+								builder.not(builder.exists(referenceQuery)), 
+								builder.lessThan(root.get(PROP_CREATE_DATE), expireTime));
+						
+						for (var packBlob: getSession().createQuery(criteriaQuery).getResultList()) {
+							var projectId = packBlob.getProject().getId();
+							var hash = packBlob.getSha256Hash();
+							projectManager.runOnActiveServer(projectId, () -> {
+								var blobFile = getPackBlobFile(projectId, hash);
+								var deleted = write(getFileLockName(projectId, hash), () -> {
+									if (blobFile.exists()) {
+										FileUtils.deleteFile(blobFile);
+										return true;
+									} else {
+										return false;
+									}
+								});
+								if (deleted)
+									projectManager.directoryModified(projectId, blobFile.getParentFile());
+								return null;
+							});
+							delete(packBlob);
+						}
+					});
 				}
 			}
-		}
-		if (clusterManager.isLeaderServer()) {
-			transactionManager.run(() -> {
-				var builder = getSession().getCriteriaBuilder();
-				var criteriaQuery = builder.createQuery(PackBlob.class);
-				var root = criteriaQuery.from(PackBlob.class);
-				criteriaQuery.select(root);
-				
-				var referenceQuery = criteriaQuery.subquery(PackBlobReference.class);
-				var referenceRoot = referenceQuery.from(PackBlobReference.class);
-				referenceQuery.select(referenceRoot);
-				referenceQuery.where(builder.equal(referenceRoot.get(PROP_PACK_BLOB), root));
-				
-				var expireTime = new DateTime(now).minusMillis(EXPIRE_MILLIS).toDate();
-				criteriaQuery.where(
-						builder.not(builder.exists(referenceQuery)), 
-						builder.lessThan(root.get(PROP_CREATE_DATE), expireTime));
-				
-				for (var packBlob: getSession().createQuery(criteriaQuery).getResultList()) {
-					var projectId = packBlob.getProject().getId();
-					var hash = packBlob.getSha256Hash();
-					projectManager.runOnActiveServer(projectId, () -> {
-						var blobFile = getPackBlobFile(projectId, hash);
-						var deleted = write(getFileLockName(projectId, hash), () -> {
-							if (blobFile.exists()) {
-								FileUtils.deleteFile(blobFile);
-								return true;
-							} else {
-								return false;
-							}
-						});
-						if (deleted)
-							projectManager.directoryModified(projectId, blobFile.getParentFile());
-						return null;
-					});
-					delete(packBlob);
-				}
-			});
-		}
+
+		}, new Prioritized(HOUSE_KEEPING_PRIORITY));		
 	}
 
 	@Override
 	public ScheduleBuilder<?> getScheduleBuilder() {
-		return CronScheduleBuilder.dailyAtHourAndMinute(0, 30);
+		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
