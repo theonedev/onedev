@@ -1129,12 +1129,12 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	@Override
 	public Collection<Long> getSubtreeIds(Long projectId) {
-		return cache.clone().getSubtreeIds(projectId);
+		return cache.getSubtreeIds(projectId);
 	}
 
 	@Override
 	public Collection<Long> getPathMatchingIds(PatternSet patternSet) {
-		return cache.clone().getMatchingIds(patternSet);
+		return cache.getMatchingIds(patternSet);
 	}
 
 	@Override

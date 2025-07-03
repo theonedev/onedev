@@ -45,6 +45,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.timetracking.TimeTrackingManager;
+import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.dropdowntriangleindicator.DropdownTriangleIndicatorCssResourceReference;
@@ -115,6 +116,15 @@ import io.onedev.server.web.util.ProjectAware;
 public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 	protected final IModel<Project> projectModel;
+
+	private final IModel<ProjectCache> projectCacheModel = new LoadableDetachableModel<ProjectCache>() {
+
+		@Override
+		protected ProjectCache load() {
+			return getProjectManager().cloneCache();
+		}
+
+	};
 	
 	public ProjectPage(PageParameters params) {
 		super(params);
@@ -391,6 +401,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	@Override
 	protected void onDetach() {
 		projectModel.detach();
+		projectCacheModel.detach();
 		super.onDetach();
 	}
 
@@ -474,7 +485,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					link.add(new Label("label", project.getName()));
 					item.add(link);
 					
-					List<ProjectFacade> children = getProjectManager().getChildren(project.getId());
+					List<ProjectFacade> children = projectCacheModel.getObject().getChildren(project.getId());
 					if (!children.isEmpty()) {
 						Long projectId = project.getId();
 						item.add(new DropdownLink("children") {
