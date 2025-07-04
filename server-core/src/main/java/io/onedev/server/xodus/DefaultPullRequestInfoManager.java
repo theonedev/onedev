@@ -55,7 +55,9 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 	
 	private static final ByteIterable LAST_PULL_REQUEST_UPDATE_KEY = new StringByteIterable("lastPullRequestUpdate");
 
-	private static final int PRIORITY = 100;
+	private static final int UPDATE_PRIORITY = 100;
+
+	private static final int CHECK_PRIORITY = 200;
 	
 	private final BatchWorkManager batchWorkManager;
 	
@@ -94,7 +96,8 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 	
 	@Sessional
 	protected boolean collect(Long projectId) {
-		logger.debug("Collecting pull request info (project id: {})...", projectId);
+		var projectPath = projectManager.findFacadeById(projectId).getPath();
+		logger.debug("Collecting pull request info (project: {})...", projectPath);
 		
 		Environment env = getEnv(projectId.toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
@@ -121,7 +124,7 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 			if (lastUpdate != null)
 				defaultStore.put(txn, LAST_PULL_REQUEST_UPDATE_KEY, new LongByteIterable(lastUpdate.getId()));
 		});
-		logger.debug("Collected pull request info (project id: {})", projectId);
+		logger.debug("Collected pull request info (project: {})", projectPath);
 		
 		return unprocessedPullRequestUpdates.size() == BATCH_SIZE;
 	}
@@ -148,13 +151,13 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 	@Sessional
 	@Listen
 	public void on(PullRequestOpened event) {
-		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(UPDATE_PRIORITY));
 	}
 	
 	@Sessional
 	@Listen
 	public void on(PullRequestUpdated event) {
-		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(UPDATE_PRIORITY));
 	}
 
 	@Sessional
@@ -162,7 +165,7 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 	public void on(SystemStarted event) {
 		for (var projectId: projectManager.getActiveIds()) {
 			checkVersion(getEnvDir(projectId.toString()));
-			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(CHECK_PRIORITY));
 		}
 	}
 	
@@ -171,7 +174,7 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 	public void on(ActiveServerChanged event) {
 		for (var projectId: event.getProjectIds()) {
 			checkVersion(getEnvDir(projectId.toString()));
-			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(CHECK_PRIORITY));
 		}
 	}
 	

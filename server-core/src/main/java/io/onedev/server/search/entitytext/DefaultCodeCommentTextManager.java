@@ -85,7 +85,7 @@ public class DefaultCodeCommentTextManager extends EntityTextManager<CodeComment
 	@Transactional
 	@Listen
 	public void on(CodeCommentTouched event) {
-		requestToIndex(event.getProject().getId());
+		requestToIndex(event.getProject().getId(), UPDATE_PRIORITY);
 	}
 
 	@Override

@@ -66,9 +66,9 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCodeIndexManager.class);
 
-	private static final int UI_INDEXING_PRIORITY = 10;
+	private static final int UI_PRIORITY = 10;
 	
-	private static final int BACKEND_INDEXING_PRIORITY = 90;
+	private static final int BACKEND_PRIORITY = 150;
 	
 	private static final int DATA_VERSION = 7;
 	
@@ -280,7 +280,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 	}
 	
 	private BatchWorker getBatchWorker(Long projectId) {
-		return new BatchWorker("project-" + projectId + "-indexBlob", 1) {
+		return new BatchWorker("project-" + projectId + "-index-commit", 1) {
 
 			@Override
 			public void doWorks(List<Prioritized> works) {
@@ -307,7 +307,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 				IndexResult indexResult = index(projectManager.getRepository(project.getId()), 
 						commit, writer, searcher, PatternSet.parse(project.findCodeAnalysisPatterns()));
 				writer.commit();
-				logger.debug("Commit indexed (project: {}, commit: {})", project.getPath(), commit.getName());
+				logger.debug("Indexed commit (project: {}, commit: {})", project.getPath(), commit.getName());
 				return indexResult;
 			} catch (Exception e) {
 				writer.rollback();
@@ -383,7 +383,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 		// as many tags might be pushed all at once when the repository is imported 
 		if (event.getRefName().startsWith(Constants.R_HEADS) 
 				&& !event.getNewCommitId().equals(ObjectId.zeroId())) {
-			IndexWork work = new IndexWork(BACKEND_INDEXING_PRIORITY, event.getNewCommitId());
+			IndexWork work = new IndexWork(BACKEND_PRIORITY, event.getNewCommitId());
 			batchWorkManager.submit(getBatchWorker(event.getProject().getId()), work);
 		}
 	}
@@ -415,9 +415,9 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 	public void indexAsync(Long projectId, ObjectId commitId) {
 		int priority;
 		if (RequestCycle.get() != null)
-			priority = UI_INDEXING_PRIORITY;
+			priority = UI_PRIORITY;
 		else
-			priority = BACKEND_INDEXING_PRIORITY;
+			priority = BACKEND_PRIORITY;
 		projectManager.runOnActiveServer(projectId, new ClusterTask<Void>() {
 
 			private static final long serialVersionUID = 1L;

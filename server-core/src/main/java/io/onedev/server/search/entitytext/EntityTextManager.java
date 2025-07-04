@@ -108,7 +108,9 @@ public abstract class EntityTextManager<T extends ProjectBelonging> implements S
 
 	protected static final String FIELD_PROJECT_ID = "projectId";
 	
-	private static final int PRIORITY = 100;
+	protected static final int UPDATE_PRIORITY = 100;
+
+	private static final int CHECK_PRIORITY = 200;
 	
 	private static final int BATCH_SIZE = 5000;
 	
@@ -207,7 +209,7 @@ public abstract class EntityTextManager<T extends ProjectBelonging> implements S
 	@Listen
 	public void on(SystemStarted event) {
 		for (var projectId: projectManager.getActiveIds()) 
-			requestToIndex(projectId);
+			requestToIndex(projectId, CHECK_PRIORITY);
 	}
 	
 	@Listen
@@ -240,7 +242,7 @@ public abstract class EntityTextManager<T extends ProjectBelonging> implements S
 	@Listen
 	public void on(ActiveServerChanged event) {
 		for(var projectId: event.getProjectIds()) 	
-			requestToIndex(projectId);
+			requestToIndex(projectId, CHECK_PRIORITY);
 	}
 	
 	protected <R> R callWithSearcher(Function<IndexSearcher, R> func) {
@@ -261,14 +263,14 @@ public abstract class EntityTextManager<T extends ProjectBelonging> implements S
 		}
 	}
 	
-	protected void requestToIndex(Long projectId) {
-		var batchWorker = new BatchWorker("project-" + projectId + "-indexText-" + entityClass.getSimpleName()) {
+	protected void requestToIndex(Long projectId, int priority) {
+		var batchWorker = new BatchWorker("project-" + projectId + "-index-entity-" + entityClass.getSimpleName()) {
 
 			@Override
 			public void doWorks(List<Prioritized> works) {
 				String entityName = WordUtils.uncamel(entityClass.getSimpleName()).toLowerCase();
 				String projectPath = projectManager.findFacadeById(projectId).getPath();
-				logger.debug("Indexing {} (project: {})", entityName, projectPath);
+				logger.debug("Indexing {} (project: {})...", entityName, projectPath);
 				
 				var touchInfo = callWithSearcher(searcher -> {
 					var touchId = 0L;
@@ -325,7 +327,7 @@ public abstract class EntityTextManager<T extends ProjectBelonging> implements S
 			}
 
 		};		
-		batchWorkManager.submit(batchWorker, new IndexWork(PRIORITY));
+		batchWorkManager.submit(batchWorker, new IndexWork(priority));
 	}	
 	
 	private Query parse(String queryString) {

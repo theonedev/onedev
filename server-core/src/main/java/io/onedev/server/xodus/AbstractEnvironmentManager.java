@@ -51,7 +51,7 @@ public abstract class AbstractEnvironmentManager {
 		if (versionFromFile != getEnvVersion()) {
 			FileUtils.cleanDir(versionFile.getParentFile());
 			FileUtils.writeFile(versionFile, String.valueOf(getEnvVersion()));
-		} 
+		}
 	}
 	
 	protected void writeVersion(File envDir) {

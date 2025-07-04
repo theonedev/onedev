@@ -88,7 +88,7 @@ public class DefaultPullRequestTextManager extends EntityTextManager<PullRequest
 	@Transactional
 	@Listen
 	public void on(PullRequestTouched event) {
-		requestToIndex(event.getProject().getId());
+		requestToIndex(event.getProject().getId(), UPDATE_PRIORITY);
 	}
 
 	@Override

@@ -183,7 +183,9 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 	private static final ByteIterable COMMIT_COUNT_KEY = new StringByteIterable("commitCount");
 
-	private static final int COLLECT_PRIORITY = 100;
+	private static final int UPDATE_PRIORITY = 100;
+
+	private static final int CHECK_PRIORITY = 200;
 
 	private final BatchWorkManager batchWorkManager;
 
@@ -1110,7 +1112,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 		};
 	}
 
-	private void collect(Long projectId) {
+	private void collect(Long projectId, int priority) {
 		List<CollectingWork> works = new ArrayList<>();
 		try (RevWalk revWalk = new RevWalk(projectManager.getRepository(projectId))) {
 			Collection<Ref> refs = new ArrayList<>();
@@ -1127,7 +1129,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 				}
 				if (revObj instanceof RevCommit) {
 					RevCommit commit = (RevCommit) revObj;
-					works.add(new CollectingWork(COLLECT_PRIORITY, commit.copy(), 
+					works.add(new CollectingWork(priority, commit.copy(), 
 							commit.getCommitTime(), ref.getName()));
 				}
 			}
@@ -1150,9 +1152,10 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
+		logger.info("Caching code contribution info...");
 		for (var projectId: projectManager.getActiveIds()) {
 			checkVersion(getEnvDir(projectId.toString()));
-			collect(projectId);
+			collect(projectId, CHECK_PRIORITY);
 
 			Environment env = getEnv(projectId.toString());
 			Store store = getStore(env, DEFAULT_STORE);
@@ -1172,7 +1175,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 	public void on(ActiveServerChanged event) {
 		for (var projectId: event.getProjectIds()) {
 			checkVersion(getEnvDir(projectId.toString()));
-			collect(projectId);
+			collect(projectId, CHECK_PRIORITY);
 		}
 	}
 	
@@ -1186,7 +1189,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 			try (RevWalk revWalk = new RevWalk(repository)) {
 				RevCommit commit = GitUtils.parseCommit(revWalk, event.getNewCommitId());
 				if (commit != null) {
-					CollectingWork work = new CollectingWork(COLLECT_PRIORITY, commit.copy(), 
+					CollectingWork work = new CollectingWork(UPDATE_PRIORITY, commit.copy(), 
 							commit.getCommitTime(), event.getRefName());
 					batchWorkManager.submit(getBatchWorker(event.getProject().getId()), work);
 				}

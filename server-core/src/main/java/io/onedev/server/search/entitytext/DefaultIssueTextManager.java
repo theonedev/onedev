@@ -110,7 +110,7 @@ public class DefaultIssueTextManager extends EntityTextManager<Issue> implements
 	@Transactional
 	@Listen
 	public void on(IssuesTouched event) {
-		requestToIndex(event.getProject().getId());
+		requestToIndex(event.getProject().getId(), UPDATE_PRIORITY);
 	}
 	
 	@Nullable
