@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server-plugin</artifactId>
-		<version>11.11.2</version>
+		<version>11.11.3</version>
 	</parent>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.report.html.HtmlModule</moduleClass>
