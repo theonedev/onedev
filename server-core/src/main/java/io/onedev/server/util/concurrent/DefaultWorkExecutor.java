@@ -18,8 +18,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.Listen;
-import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.security.SecurityUtils;
 
 @Singleton
@@ -38,12 +36,7 @@ public class DefaultWorkExecutor implements WorkExecutor {
 		this.executorService = executorService;
 		this.settingManager = settingManager;
 	}
-	
-	@Listen
-	public void on(SystemSetting event) {
-			
-	}
-	
+		
 	private int getConcurrency() {
 		return settingManager.getPerformanceSetting().getCpuIntensiveTaskConcurrency();
 	}
@@ -254,7 +247,11 @@ public class DefaultWorkExecutor implements WorkExecutor {
 
 		@Override
 		public int compareTo(Key o) {
-			return Integer.compare(priority, o.priority);
+			var result = Integer.compare(priority, o.priority);
+			if (result != 0)
+				return result;
+			else
+				return group.compareTo(o.group);
 		}		
 	}	
 	
