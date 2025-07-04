@@ -1,9 +1,27 @@
 package io.onedev.server.xodus;
 
+import static java.lang.Long.valueOf;
+
+import java.io.File;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.nio.ByteBuffer;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.eclipse.jgit.lib.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.ActiveServerChanged;
@@ -22,20 +40,6 @@ import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
-import org.eclipse.jgit.lib.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.File;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.List;
-
-import static java.lang.Long.valueOf;
 
 @Singleton
 public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager 
@@ -63,12 +67,16 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 	
 	private final ProjectManager projectManager;
 	
+	private final PullRequestManager pullRequestManager;
+	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
 	@Inject
-	public DefaultPullRequestInfoManager(ProjectManager projectManager, PullRequestUpdateManager pullRequestUpdateManager, 
+	public DefaultPullRequestInfoManager(ProjectManager projectManager, PullRequestManager pullRequestManager, 
+										 PullRequestUpdateManager pullRequestUpdateManager, 
 										 BatchWorkManager batchWorkManager) {
 		this.projectManager = projectManager;
+		this.pullRequestManager = pullRequestManager;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.batchWorkManager = batchWorkManager;
 	}
@@ -163,9 +171,12 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		for (var projectId: projectManager.getActiveIds()) {
+		var activeProjectIds = projectManager.getActiveIds();
+		var pullRequestProjectIds = new HashSet<Long>(pullRequestManager.getTargetProjectIds());		
+		for (var projectId: activeProjectIds) {
 			checkVersion(getEnvDir(projectId.toString()));
-			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(CHECK_PRIORITY));
+			if (pullRequestProjectIds.contains(projectId))
+				batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(CHECK_PRIORITY));
 		}
 	}
 	

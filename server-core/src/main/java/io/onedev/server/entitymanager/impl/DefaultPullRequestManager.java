@@ -1194,4 +1194,18 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		
 		return getSession().createQuery(query).getResultList();
 	}
+
+	@Sessional
+	@Override
+	public Collection<Long> getTargetProjectIds() {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
+		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
+		
+		criteriaQuery.select(root.get(PullRequest.PROP_TARGET_PROJECT).get(Project.PROP_ID));
+		criteriaQuery.distinct(true);
+		
+		return getSession().createQuery(criteriaQuery).getResultList();
+	}
+
 }

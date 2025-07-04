@@ -1303,4 +1303,17 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		return getSession().createQuery(query).getResultList();
 	}
 	
+	@Sessional
+	@Override
+	public Collection<Long> getProjectIds() {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
+		Root<Issue> root = criteriaQuery.from(Issue.class);
+		
+		criteriaQuery.select(root.get(Issue.PROP_PROJECT).get(Project.PROP_ID));
+		criteriaQuery.distinct(true);
+		
+		return getSession().createQuery(criteriaQuery).getResultList();
+	}
+
 }

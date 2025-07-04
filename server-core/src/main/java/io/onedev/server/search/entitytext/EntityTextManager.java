@@ -73,7 +73,6 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.ActiveServerChanged;
 import io.onedev.server.event.project.ProjectDeleted;
-import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.model.AbstractEntity;
@@ -110,7 +109,7 @@ public abstract class EntityTextManager<T extends ProjectBelonging> implements S
 	
 	protected static final int UPDATE_PRIORITY = 100;
 
-	private static final int CHECK_PRIORITY = 200;
+	protected static final int CHECK_PRIORITY = 200;
 	
 	private static final int BATCH_SIZE = 5000;
 	
@@ -207,12 +206,6 @@ public abstract class EntityTextManager<T extends ProjectBelonging> implements S
 	}
 
 	@Listen
-	public void on(SystemStarted event) {
-		for (var projectId: projectManager.getActiveIds()) 
-			requestToIndex(projectId, CHECK_PRIORITY);
-	}
-	
-	@Listen
 	public void on(SystemStopped event) {
 		if (searcherManager != null) {
 			try {
@@ -271,7 +264,7 @@ public abstract class EntityTextManager<T extends ProjectBelonging> implements S
 				String entityName = WordUtils.uncamel(entityClass.getSimpleName()).toLowerCase();
 				String projectPath = projectManager.findFacadeById(projectId).getPath();
 				logger.debug("Indexing {} (project: {})...", entityName, projectPath);
-				
+
 				var touchInfo = callWithSearcher(searcher -> {
 					var touchId = 0L;
 					var metaDoc = readMetaDoc(searcher, projectId);

@@ -98,6 +98,8 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	List<Issue> loadIssues(List<Long> issueIds);
 
+	Collection<Long> getProjectIds();
+
 	List<Issue> query(User submitter, Date fromDate, Date toDate);
 	
 }

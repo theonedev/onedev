@@ -30,11 +30,13 @@ import org.apache.lucene.search.Query;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentTouchManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.codecomment.CodeCommentTouched;
+import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
@@ -63,14 +65,17 @@ public class DefaultCodeCommentTextManager extends EntityTextManager<CodeComment
 	
 	private final CodeCommentTouchManager touchManager;
 	
+	private final CodeCommentManager codeCommentManager;
+	
 	@Inject
 	public DefaultCodeCommentTextManager(Dao dao, BatchWorkManager batchWorkManager, UserManager userManager,
 								   TransactionManager transactionManager, ProjectManager projectManager,
 								   ClusterManager clusterManager, SessionManager sessionManager, 
-								   CodeCommentTouchManager touchManager) {
+								   CodeCommentTouchManager touchManager, CodeCommentManager codeCommentManager) {
 		super(dao, batchWorkManager, transactionManager, projectManager, clusterManager, sessionManager);
 		this.userManager = userManager;
 		this.touchManager = touchManager;
+		this.codeCommentManager = codeCommentManager;
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -158,5 +163,14 @@ public class DefaultCodeCommentTextManager extends EntityTextManager<CodeComment
 		} 
 		return false;
 	}
+	
+	@Listen
+	public void on(SystemStarted event) {
+		var activeIds = projectManager.getActiveIds();
+		for (var projectId: codeCommentManager.getProjectIds()) {
+			if (activeIds.contains(projectId)) 
+				requestToIndex(projectId, CHECK_PRIORITY);			
+		}
+	}	
 	
 }

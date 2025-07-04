@@ -1199,7 +1199,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 	
 	@Override
-	public Collection<Long> getActiveIds() {
+	public Set<Long> getActiveIds() {
 		var localServer = clusterManager.getLocalServerAddress();
 		return new HashSet<>(activeServers.project(Map.Entry::getKey, entry -> entry.getValue().equals(localServer)));
 	}
@@ -1975,7 +1975,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			logger.error("Error marking storage directory of project with id '" + projectId + "' for deletion", e);
 		}
 	}
-
+	
 	@Override
 	public ScheduleBuilder<?> getScheduleBuilder() {
 		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);

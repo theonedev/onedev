@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.time.ZoneId;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -283,9 +284,12 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		for (var projectId: projectManager.getActiveIds()) {
+		var activeProjectIds = projectManager.getActiveIds();
+		var issueProjectIds = new HashSet<Long>(issueManager.getProjectIds());		
+		for (var projectId: activeProjectIds) {
 			checkVersion(getEnvDir(projectId.toString()));
-			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(CHECK_PRIORITY));
+			if (issueProjectIds.contains(projectId))
+				batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(CHECK_PRIORITY));
 		}
 	}
 

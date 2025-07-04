@@ -33,11 +33,13 @@ import org.apache.lucene.search.Query;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueTouchManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.issue.IssuesTouched;
+import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.EntityTouch;
@@ -68,15 +70,18 @@ public class DefaultIssueTextManager extends EntityTextManager<Issue> implements
 		
 	private final UserManager userManager;
 	
+	private final IssueManager issueManager;
+	
 	private final IssueTouchManager touchManager;
 	
 	@Inject
 	public DefaultIssueTextManager(Dao dao, BatchWorkManager batchWorkManager, UserManager userManager,
 								   TransactionManager transactionManager, ProjectManager projectManager,
 								   ClusterManager clusterManager, SessionManager sessionManager, 
-								   IssueTouchManager touchManager) {
+								   IssueTouchManager touchManager, IssueManager issueManager) {
 		super(dao, batchWorkManager, transactionManager, projectManager, clusterManager, sessionManager);
 		this.userManager = userManager;
+		this.issueManager = issueManager;
 		this.touchManager = touchManager;
 	}
 
@@ -112,6 +117,15 @@ public class DefaultIssueTextManager extends EntityTextManager<Issue> implements
 	public void on(IssuesTouched event) {
 		requestToIndex(event.getProject().getId(), UPDATE_PRIORITY);
 	}
+
+	@Listen
+	public void on(SystemStarted event) {
+		var activeIds = projectManager.getActiveIds();
+		for (var projectId: issueManager.getProjectIds()) {
+			if (activeIds.contains(projectId))
+				requestToIndex(projectId, CHECK_PRIORITY);			
+		}
+	}	
 	
 	@Nullable
 	private Query buildContentQuery(String escapedQueryString) {

@@ -1112,7 +1112,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 		};
 	}
 
-	private void collect(Long projectId, int priority) {
+	private boolean collect(Long projectId, int priority) {
 		List<CollectingWork> works = new ArrayList<>();
 		try (RevWalk revWalk = new RevWalk(projectManager.getRepository(projectId))) {
 			Collection<Ref> refs = new ArrayList<>();
@@ -1137,10 +1137,15 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 			throw new RuntimeException(e);
 		}
 
-		works.sort(new CommitTimeComparator());
+		if (!works.isEmpty()) {
+			works.sort(new CommitTimeComparator());
 
-		for (CollectingWork work : works)
-			batchWorkManager.submit(getBatchWorker(projectId), work);
+			for (CollectingWork work : works)
+				batchWorkManager.submit(getBatchWorker(projectId), work);
+			return true;
+		} else {
+			return false;
+		}		
 	}
 
 	@Sessional
@@ -1155,18 +1160,17 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 		logger.info("Caching code contribution info...");
 		for (var projectId: projectManager.getActiveIds()) {
 			checkVersion(getEnvDir(projectId.toString()));
-			collect(projectId, CHECK_PRIORITY);
-
-			Environment env = getEnv(projectId.toString());
-			Store store = getStore(env, DEFAULT_STORE);
-
-			env.computeInReadonlyTransaction(txn -> {
-				byte[] bytes = readBytes(store, txn, USERS_KEY);
-				if (bytes != null) 
-					updateContributedProjects(projectId, SerializationUtils.deserialize(bytes));
-				return null;
-			});
-
+			if (collect(projectId, CHECK_PRIORITY)) {
+				Environment env = getEnv(projectId.toString());
+				Store store = getStore(env, DEFAULT_STORE);
+	
+				env.computeInReadonlyTransaction(txn -> {
+					byte[] bytes = readBytes(store, txn, USERS_KEY);
+					if (bytes != null) 
+						updateContributedProjects(projectId, SerializationUtils.deserialize(bytes));
+					return null;
+				});	
+			}
 		}
 	}
 	

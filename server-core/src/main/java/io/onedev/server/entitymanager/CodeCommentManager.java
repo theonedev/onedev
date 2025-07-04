@@ -44,4 +44,6 @@ public interface CodeCommentManager extends EntityManager<CodeComment> {
 
 	void update(CodeComment comment);
 	
+	Collection<Long> getProjectIds();
+	
 }

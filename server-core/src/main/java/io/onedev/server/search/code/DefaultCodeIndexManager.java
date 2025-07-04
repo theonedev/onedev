@@ -391,15 +391,15 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		for (File file: projectManager.getProjectsDir().listFiles()) {
+		for (var file: projectManager.getProjectsDir().listFiles()) {
 			if (!NumberUtils.isDigits(file.getName())) 
 				continue;
-			Long projectId = Long.valueOf(file.getName());
-			File indexDir = projectManager.getIndexDir(projectId);
+			var projectId = Long.valueOf(file.getName());
+			var indexDir = projectManager.getIndexDir(projectId);
 			if (indexDir.exists()) {
-				try (Directory directory = FSDirectory.open(indexDir.toPath())) {
+				try (var directory = FSDirectory.open(indexDir.toPath())) {
 					if (DirectoryReader.indexExists(directory)) {
-						try (IndexReader reader = DirectoryReader.open(directory)) {
+						try (var reader = DirectoryReader.open(directory)) {
 						} catch (IndexFormatTooOldException e) {
 							FileUtils.cleanDir(indexDir);
 						}
