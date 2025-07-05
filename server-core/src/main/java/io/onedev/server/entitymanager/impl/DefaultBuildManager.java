@@ -831,7 +831,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
         jobNames = hazelcastInstance.getMap("jobNames");
 
 		var buildCacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("buildCacheInited");
-		clusterManager.init(buildCacheInited, () -> {
+		clusterManager.initWithLead(buildCacheInited, () -> {
 			Query<?> query = dao.getSession().createQuery("select id, project.id, number, commitHash, jobName from Build");
 			for (Object[] fields : (List<Object[]>) query.list()) {
 				Long buildId = (Long) fields[0];

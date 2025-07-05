@@ -100,7 +100,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		cache = new RoleCache(hazelcastInstance.getMap("roleCache"));
 
 		IAtomicLong cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("roleCacheInited"); 
-		clusterManager.init(cacheInited, () -> {
+		clusterManager.initWithLead(cacheInited, () -> {
 			for (var role: query())
 				cache.put(role.getId(), role.getFacade());
 			return 1L;			

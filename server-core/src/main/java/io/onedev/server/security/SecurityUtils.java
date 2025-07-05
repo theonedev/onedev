@@ -3,7 +3,6 @@ package io.onedev.server.security;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -632,12 +631,6 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				projectIds.addAll(cache.getSubtreeIds(authorization.getProject().getId()));
 		}
 	}
-	
-	private static void addSubTreeIds(Collection<Long> projectIds, Project project) {
-		projectIds.add(project.getId());
-		for (Project descendant : project.getDescendants())
-			projectIds.add(descendant.getId());
-	}
 
 	public static Collection<Project> getAuthorizedProjects(ProjectCache cache, BasePermission permission) {
 		return getAuthorizedProjects(cache, getSubject(), permission);
@@ -673,20 +666,20 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 							return cache.getProjects();
 						for (GroupAuthorization authorization : group.getAuthorizations()) {
 							if (authorization.getRole().implies(permission))
-								addSubTreeIds(authorizedProjectIds, authorization.getProject());
+								authorizedProjectIds.addAll(cache.getSubtreeIds(authorization.getProject().getId()));
 						}
 					}
 
 					for (UserAuthorization authorization : user.getProjectAuthorizations()) {
 						if (authorization.getRole().implies(permission))
-							addSubTreeIds(authorizedProjectIds, authorization.getProject());
+							authorizedProjectIds.addAll(cache.getSubtreeIds(authorization.getProject().getId()));
 					}
 				}
 			}
 			if (accessToken != null) {
 				for (var authorization : accessToken.getAuthorizations()) {
 					if (authorization.getRole().implies(permission))
-						addSubTreeIds(authorizedProjectIds, authorization.getProject());
+						authorizedProjectIds.addAll(cache.getSubtreeIds(authorization.getProject().getId()));
 				}
 			}
 			if (!isAnonymous(principal) || getSettingManager().getSecuritySetting().isEnableAnonymousAccess())
@@ -694,7 +687,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			
 			return authorizedProjectIds.stream().map(projectManager::load).collect(toSet());
 		} else {
-			return new ArrayList<>();
+			return new HashSet<>();
 		}
 	}
 	

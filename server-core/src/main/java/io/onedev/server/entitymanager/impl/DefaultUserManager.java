@@ -424,8 +424,6 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
 		
-		// Use replicated map, otherwise it will be slow to display many user avatars
-		// (in issue list for instance) which will call findFacadeById many times
         cache = new UserCache(hazelcastInstance.getReplicatedMap("userCache"));
 		for (User user: query())
 			cache.put(user.getId(), user.getFacade());

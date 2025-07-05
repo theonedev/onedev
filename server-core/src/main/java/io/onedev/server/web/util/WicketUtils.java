@@ -2,7 +2,9 @@ package io.onedev.server.web.util;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.SubscriptionManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.util.LongRange;
+import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.websocket.PageKey;
@@ -24,6 +26,12 @@ public class WicketUtils {
 	private static class SubscriptionActiveKey extends MetaDataKey<Boolean> {
 		static final SubscriptionActiveKey INSTANCE = new SubscriptionActiveKey();
 	};
+
+	private static class ProjectCacheKey extends MetaDataKey<ProjectCache> {
+
+		static final ProjectCacheKey INSTANCE = new ProjectCacheKey();
+
+	};
 	
 	@Nullable
 	public static BasePage getPage() {
@@ -33,17 +41,35 @@ public class WicketUtils {
 		else 
 			return null;
 	}
+
+	public static ProjectCache getProjectCache() {
+		var projectManager = OneDev.getInstance(ProjectManager.class);
+		var requestCycle = RequestCycle.get();
+		if (requestCycle != null) {
+			var cache = requestCycle.getMetaData(ProjectCacheKey.INSTANCE);
+			if (cache == null) {
+				cache = projectManager.cloneCache();
+				requestCycle.setMetaData(ProjectCacheKey.INSTANCE, cache);
+			}
+			return cache;
+		} else {
+			return projectManager.cloneCache();
+		}
+	}
 	
 	public static boolean isSubscriptionActive() {
+		var subscriptionManager = OneDev.getInstance(SubscriptionManager.class);
 		var requestCycle = RequestCycle.get();
-		if (requestCycle == null)
-			throw new IllegalStateException("No active request cycle");
-		Boolean subscriptionActive = requestCycle.getMetaData(SubscriptionActiveKey.INSTANCE);
-		if (subscriptionActive == null) {
-			subscriptionActive = OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
-			requestCycle.setMetaData(SubscriptionActiveKey.INSTANCE, subscriptionActive);
+		if (requestCycle != null) {
+			var subscriptionActive = requestCycle.getMetaData(SubscriptionActiveKey.INSTANCE);
+			if (subscriptionActive == null) {
+				subscriptionActive = subscriptionManager.isSubscriptionActive();
+				requestCycle.setMetaData(SubscriptionActiveKey.INSTANCE, subscriptionActive);
+			}
+			return subscriptionActive;
+		} else {
+			return subscriptionManager.isSubscriptionActive();
 		}
-		return subscriptionActive;
 	}
 
 	@Nullable

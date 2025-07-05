@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.test;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -21,7 +23,8 @@ public class TestPage extends BasePage {
 		add(new Link<Void>("test") {
 
 			@Override
-			public void onClick() {	
+			public void onClick() {
+				OneDev.getInstance(ProjectManager.class).hasChildren(9L);
 			}
 
 		});

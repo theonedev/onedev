@@ -810,18 +810,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Listen
 	public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-		cache = new ProjectCache(hazelcastInstance.getMap("projectCache"));
-		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("projectCacheInited");		
-		clusterManager.init(cacheInited, () -> {
-			for (Project project : query()) {
-				String path = project.calcPath();
-				if (!path.equals(project.getPath()))
-					project.setPath(path);
-				cache.put(project.getId(), project.getFacade());
-			}
-			return 1L;
-		});			
-		
+		cache = new ProjectCache(hazelcastInstance.getReplicatedMap("projectCache"));
+		for (Project project : query()) {
+			String path = project.calcPath();
+			if (!path.equals(project.getPath()))
+				project.setPath(path);
+			cache.put(project.getId(), project.getFacade());
+		}
+
 		Map<Long, ProjectLastEventDate> lastEventDates = new HashMap<>();
 		for (ProjectLastEventDate lastEventDate : lastEventDateManager.query())
 			lastEventDates.put(lastEventDate.getId(), lastEventDate);
@@ -1162,6 +1158,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Override
 	public List<ProjectFacade> getChildren(Long projectId) {
 		return cache.getChildren(projectId);
+	}
+
+	@Override
+	public boolean hasChildren(Long projectId) {
+		return cache.hasChildren(projectId);
 	}
 
 	@Override

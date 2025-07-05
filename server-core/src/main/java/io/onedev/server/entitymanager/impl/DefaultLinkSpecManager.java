@@ -55,7 +55,7 @@ public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implemen
 		cache = hazelcastInstance.getMap("linkSpecCache");
 		
 		IAtomicLong cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("linkSpecCacheInited");
-		clusterManager.init(cacheInited, () -> {
+		clusterManager.initWithLead(cacheInited, () -> {
 			for (LinkSpec spec : query(true))
 				updateCache(spec.getFacade());
 			return 1L;

@@ -11,7 +11,11 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.util.facade.ProjectCache;
+import io.onedev.server.web.util.WicketUtils;
+import jnr.ffi.annotations.Meta;
 import org.apache.wicket.Component;
+import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -38,7 +42,7 @@ abstract class CardListPanel extends Panel {
 	private RepeatingView cardsView;
 	
 	private InfiniteScrollBehavior behavior;
-	
+
 	public CardListPanel(String id) {
 		super(id);
 	}
@@ -117,7 +121,7 @@ abstract class CardListPanel extends Panel {
 			@Override
 			public Collection<String> findObservables() {
 				Collection<String> observables = new HashSet<>();
-				for (var projectId: getProjectManager().getSubtreeIds(getProject().getId()))
+				for (var projectId: WicketUtils.getProjectCache().getSubtreeIds(getProject().getId()))
 					observables.add(Issue.getListChangeObservable(projectId));
 				for (var ancestor: getProject().getAncestors())
 					observables.add(Issue.getListChangeObservable(ancestor.getId()));
@@ -278,4 +282,5 @@ abstract class CardListPanel extends Panel {
 				getIssue(i).setBoardPosition(basePosition-baseIndex+i);
 		});
 	}
+
 }

@@ -59,7 +59,7 @@ public class DefaultIdManager implements IdManager {
 				for (var persistenceClass: sessionFactoryManager.getMetadata().getEntityBindings()) {
 					Class<?> entityClass = persistenceClass.getMappedClass();
 					var nextId = clusterManager.getHazelcastInstance().getCPSubsystem().getAtomicLong(entityClass.getName());
-					clusterManager.init(nextId, () -> getMaxId(conn, entityClass) + 1);
+					clusterManager.initWithLead(nextId, () -> getMaxId(conn, entityClass) + 1);
 					nextIds.put(entityClass, nextId);
 				}
 				return null;

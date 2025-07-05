@@ -78,6 +78,8 @@ public interface ProjectManager extends EntityManager<Project> {
 	Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> path, String pathPattern);
 		
 	List<ProjectFacade> getChildren(Long projectId);
+
+	boolean hasChildren(Long projectId);
 	
 	void move(Collection<Project> projects, @Nullable Project parent);
 		

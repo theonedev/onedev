@@ -94,19 +94,15 @@ public class ProjectCache extends MapProxy<Long, ProjectFacade> {
 	}
 	
 	public List<ProjectFacade> getChildren(Long id) {
-		return getChildren(values(), id);
-	}
-
-	private List<ProjectFacade> getChildren(Collection<ProjectFacade> projects, Long id) {
 		List<ProjectFacade> children = new ArrayList<>();
-		for (ProjectFacade facade: projects) {
+		for (ProjectFacade facade: values()) {
 			if (id.equals(facade.getParentId()))
 				children.add(facade);
 		}
 		Collections.sort(children, comparing(ProjectFacade::getName));
 		return children;
 	}
-	
+
 	@Override
 	public ProjectCache clone() {
 		return new ProjectCache(new HashMap<>(delegate));
@@ -124,6 +120,14 @@ public class ProjectCache extends MapProxy<Long, ProjectFacade> {
 	
 	public Comparator<Project> comparingPath() {
 		return (o1, o2) -> get(o1.getId()).getPath().compareTo(get(o2.getId()).getPath());		
+	}
+
+	public boolean hasChildren(Long id) {
+		for (var facade: values()) {
+			if (id.equals(facade.getParentId()))
+				return true;
+		}
+		return false;
 	}
 
 }

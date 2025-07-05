@@ -150,7 +150,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		var databasePopulated = clusterManager.getHazelcastInstance().getCPSubsystem().getAtomicLong("databasePopulated");
 		// Do not use database lock as schema update will commit transaction immediately 
 		// in MySQL 
-		clusterManager.init(databasePopulated, () -> {
+		clusterManager.initWithLead(databasePopulated, () -> {
 			try (var conn = dataManager.openConnection()) {
 				callWithTransaction(conn, () -> {
 					dataManager.populateDatabase(conn);

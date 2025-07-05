@@ -33,10 +33,12 @@ public class FuzzyCriteria extends Criteria<CodeComment> {
 
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<CodeComment, CodeComment> from, CriteriaBuilder builder) {
-		if (value.length() == 0)
-			return builder.conjunction();
-		var project = projectScope!=null? projectScope.getProject(): null;
-		commentIds = OneDev.getInstance(CodeCommentTextManager.class).query(project, value, MAX_TEXT_QUERY_COUNT);
+		if (commentIds == null) {
+			if (value.length() == 0)
+				return builder.conjunction();
+			var project = projectScope!=null? projectScope.getProject(): null;
+			commentIds = OneDev.getInstance(CodeCommentTextManager.class).query(project, value, MAX_TEXT_QUERY_COUNT);
+		}
 		if (commentIds.isEmpty())
 			return builder.disjunction();
 		else

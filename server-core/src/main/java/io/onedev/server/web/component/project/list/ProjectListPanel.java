@@ -16,6 +16,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -76,7 +77,6 @@ import io.onedev.server.util.ProjectBuildStatusStat;
 import io.onedev.server.util.ProjectIssueStateStat;
 import io.onedev.server.util.ProjectPackTypeStat;
 import io.onedev.server.util.ProjectPullRequestStatusStat;
-import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
@@ -117,13 +117,6 @@ public class ProjectListPanel extends Panel {
 	private final IModel<String> queryStringModel;
 	
 	private final int expectedCount;
-
-	private final IModel<ProjectCache> projectCacheModel = new LoadableDetachableModel<ProjectCache>() {
-		@Override
-		protected ProjectCache load() {
-			return getProjectManager().cloneCache();
-		}
-	};
 
 	private final IModel<ProjectQuery> queryModel = new LoadableDetachableModel<>() {
 
@@ -222,7 +215,6 @@ public class ProjectListPanel extends Panel {
 		issueStatsModel.detach();
 		queryStringModel.detach();
 		queryModel.detach();
-		projectCacheModel.detach();
 		super.onDetach();
 	}
 	
@@ -925,7 +917,7 @@ public class ProjectListPanel extends Panel {
 			
 			private List<Project> getTargetProjects() {
 				List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new CreateChildren()));
-				projects.sort(projectCacheModel.getObject().comparingPath());
+				projects.sort(WicketUtils.getProjectCache().comparingPath());
 				return projects;
 			}
 
@@ -1228,7 +1220,7 @@ public class ProjectListPanel extends Panel {
 					fragment.add(new WebMarkupContainer("noStorage"));
 				}
 				
-				List<ProjectFacade> children = projectCacheModel.getObject().getChildren(projectId);
+				List<ProjectFacade> children = WicketUtils.getProjectCache().getChildren(projectId);
 				if (!children.isEmpty()) {
 					Fragment childrenFrag = new Fragment("children", "childrenFrag", ProjectListPanel.this);
 					childrenFrag.add(new AjaxLink<Void>("toggle") {
