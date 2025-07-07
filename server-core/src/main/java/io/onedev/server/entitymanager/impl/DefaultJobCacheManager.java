@@ -1,6 +1,47 @@
 package io.onedev.server.entitymanager.impl;
 
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.commons.utils.LockUtils.write;
+import static io.onedev.server.model.JobCache.PROP_ACCESS_DATE;
+import static io.onedev.server.model.JobCache.PROP_KEY;
+import static io.onedev.server.model.JobCache.PROP_PROJECT;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Comparator.comparing;
+
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectStreamException;
+import java.io.OutputStream;
+import java.io.SequenceInputStream;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.exception.ConstraintViolationException;
+import org.joda.time.DateTime;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.ScheduleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Joiner;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
@@ -19,36 +60,17 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.IOUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.exception.ConstraintViolationException;
-import org.joda.time.DateTime;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.ScheduleBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.*;
-import java.util.Date;
-import java.util.List;
-import java.util.function.Consumer;
-
-import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.commons.utils.LockUtils.write;
-import static io.onedev.server.model.JobCache.*;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Comparator.comparing;
+import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.concurrent.BatchWorker;
+import io.onedev.server.util.concurrent.Prioritized;
 
 @Singleton
 public class DefaultJobCacheManager extends BaseEntityManager<JobCache> 
 		implements JobCacheManager, Serializable, SchedulableTask {
 	
 	private static final int CACHE_VERSION = 2;
+
+	private static final int HOUSE_KEEPING_PRIORITY = 50;
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultJobCacheManager.class);
 	
@@ -57,16 +79,19 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 	private final TransactionManager transactionManager;
 	
 	private final TaskScheduler taskScheduler;
+
+	private final BatchWorkManager batchWorkManager;
 	
 	private volatile String taskId;
 	
 	@Inject
 	public DefaultJobCacheManager(Dao dao, ProjectManager projectManager, TransactionManager transactionManager, 
-								  TaskScheduler taskScheduler) {
+								  TaskScheduler taskScheduler, BatchWorkManager batchWorkManager) {
 		super(dao);
 		this.projectManager = projectManager;
 		this.transactionManager = transactionManager;
 		this.taskScheduler = taskScheduler;
+		this.batchWorkManager = batchWorkManager;
 	}
 	
 	@Nullable
@@ -363,28 +388,35 @@ public class DefaultJobCacheManager extends BaseEntityManager<JobCache>
 
 	@Override
 	public void execute() {
-		var now = new DateTime();
-		for (var projectId: projectManager.getActiveIds()) {
-			transactionManager.run(() -> {
-				try {
-					var project = projectManager.load(projectId);
-					var preserveDays = project.getHierarchyCachePreserveDays();
-					var threshold = now.minusDays(preserveDays);
-					var criteria = newCriteria();
-					criteria.add(Restrictions.eq(PROP_PROJECT, project));
-					criteria.add(Restrictions.lt(PROP_ACCESS_DATE, threshold.toDate()));
-					for (var cache: query(criteria))
-						delete(cache);
-				} catch (Exception e) {
-					logger.error("Error cleaning up job caches", e);
+		batchWorkManager.submit(new BatchWorker("job-cache-manager-house-keeping") {
+
+			@Override
+			public void doWorks(List<Prioritized> works) {
+				var now = new DateTime();
+				for (var projectId: projectManager.getActiveIds()) {
+					transactionManager.run(() -> {
+						try {
+							var project = projectManager.load(projectId);
+							var preserveDays = project.getHierarchyCachePreserveDays();
+							var threshold = now.minusDays(preserveDays);
+							var criteria = newCriteria();
+							criteria.add(Restrictions.eq(PROP_PROJECT, project));
+							criteria.add(Restrictions.lt(PROP_ACCESS_DATE, threshold.toDate()));
+							for (var cache: query(criteria))
+								delete(cache);
+						} catch (Exception e) {
+							logger.error("Error cleaning up job caches", e);
+						}
+					});
 				}
-			});
-		}
+			}
+
+		}, new Prioritized(HOUSE_KEEPING_PRIORITY));		
 	}
 
 	@Override
 	public ScheduleBuilder<?> getScheduleBuilder() {
-		return CronScheduleBuilder.dailyAtHourAndMinute(2, 30);
+		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
 	}
 	
 }

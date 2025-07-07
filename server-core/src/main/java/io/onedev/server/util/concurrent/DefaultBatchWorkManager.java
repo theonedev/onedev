@@ -66,7 +66,7 @@ public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
 					works.queued.drainTo(works.working, worker.getMaxBatchSize());
 					if (!works.working.isEmpty()) {
 						double priority = works.working.stream().collect(Collectors.averagingInt(Prioritized::getPriority));
-						workExecutor.submit(new PrioritizedRunnable((int) priority) {
+						workExecutor.submit((int) priority, new Runnable() {
 
 							@Override
 							public void run() {

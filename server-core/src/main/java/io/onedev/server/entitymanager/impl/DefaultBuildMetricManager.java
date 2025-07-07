@@ -161,7 +161,7 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 		reportNames = hazelcastInstance.getMap("buildReportNames");
 		
 		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("buildMetricCacheInited");
-		clusterManager.init(cacheInited, () -> {
+		clusterManager.initWithLead(cacheInited, () -> {
 			EntityManagerFactory emf = dao.getSession().getEntityManagerFactory();
 			for (EntityType<?> entityType: emf.getMetamodel().getEntities()) {
 				Class<?> entityClass = entityType.getJavaType();

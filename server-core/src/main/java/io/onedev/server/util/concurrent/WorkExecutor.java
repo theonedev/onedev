@@ -1,5 +1,6 @@
 package io.onedev.server.util.concurrent;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 /**
@@ -10,11 +11,11 @@ import java.util.concurrent.Future;
  */
 public interface WorkExecutor {
 
-	<T> Future<T> submit(String groupId, PrioritizedCallable<T> callable); 
+	<T> Future<T> submit(int priority, String groupId, Callable<T> callable); 
 	
-	<T> Future<T> submit(PrioritizedCallable<T> callable); 
+	<T> Future<T> submit(int priority, Callable<T> callable); 
 	
-	Future<?> submit(String groupId, PrioritizedRunnable runnable); 
+	Future<?> submit(int priority, String groupId, Runnable runnable); 
 	
-	Future<?> submit(PrioritizedRunnable runnable); 
+	Future<?> submit(int priority, Runnable runnable); 
 }

@@ -33,10 +33,12 @@ import org.apache.lucene.search.Query;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestTouchManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.pullrequest.PullRequestTouched;
+import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -65,15 +67,18 @@ public class DefaultPullRequestTextManager extends EntityTextManager<PullRequest
 	private final UserManager userManager;
 	
 	private final PullRequestTouchManager touchManager;
+
+	private final PullRequestManager pullRequestManager;
 	
 	@Inject
 	public DefaultPullRequestTextManager(Dao dao, BatchWorkManager batchWorkManager, UserManager userManager,
 								   TransactionManager transactionManager, ProjectManager projectManager,
 								   ClusterManager clusterManager, SessionManager sessionManager, 
-								   PullRequestTouchManager touchManager) {
+								   PullRequestTouchManager touchManager, PullRequestManager pullRequestManager) {
 		super(dao, batchWorkManager, transactionManager, projectManager, clusterManager, sessionManager);
 		this.userManager = userManager;
 		this.touchManager = touchManager;
+		this.pullRequestManager = pullRequestManager;
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -88,8 +93,17 @@ public class DefaultPullRequestTextManager extends EntityTextManager<PullRequest
 	@Transactional
 	@Listen
 	public void on(PullRequestTouched event) {
-		requestToIndex(event.getProject().getId());
+		requestToIndex(event.getProject().getId(), UPDATE_PRIORITY);
 	}
+
+	@Listen
+	public void on(SystemStarted event) {
+		var activeIds = projectManager.getActiveIds();
+		for (var projectId: pullRequestManager.getTargetProjectIds()) {
+			if (activeIds.contains(projectId)) 
+				requestToIndex(projectId, CHECK_PRIORITY);			
+		}
+	}	
 
 	@Override
 	protected List<? extends EntityTouch> queryTouchesAfter(Long projectId, Long afterTouchId) {

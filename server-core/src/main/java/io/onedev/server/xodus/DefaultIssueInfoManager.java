@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.time.ZoneId;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +73,9 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 
 	private static final ByteIterable LAST_ISSUE_CHANGE_KEY = new StringByteIterable("lastIssueChange");
 	
-	private static final int PRIORITY = 100;
+	private static final int UPDATE_PRIORITY = 100;
+
+	private static final int CHECK_PRIORITY = 200;
 	
 	private final BatchWorkManager batchWorkManager;
 	
@@ -96,7 +99,7 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 	}
 	
 	private BatchWorker getBatchWorker(Long projectId) {
-		return new BatchWorker("project-" + projectId + "-collectIssueInfo") {
+		return new BatchWorker("project-" + projectId + "-collect-issue-info") {
 
 			@Override
 			public void doWorks(List<Prioritized> works) {
@@ -109,7 +112,8 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 	
 	@Sessional
 	protected boolean collect(Long projectId) {
-		logger.debug("Collecting issue info...");
+		var projectPath = projectManager.findFacadeById(projectId).getPath();
+		logger.debug("Collecting issue info (project: {})...", projectPath);
 		
 		Environment env = getEnv(projectId.toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
@@ -178,7 +182,7 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 				defaultStore.put(txn, LAST_ISSUE_CHANGE_KEY, new LongByteIterable(lastChange.getId()));
 		});
 		
-		logger.debug("Collected issue info");
+		logger.debug("Collected issue info (project: {})", projectPath);
 		
 		return unprocessedIssues.size() == BATCH_SIZE;
 	}
@@ -220,25 +224,25 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 	@Sessional
 	@Listen
 	public void on(IssueOpened event) {
-		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(UPDATE_PRIORITY));
 	}
 
 	@Sessional
 	@Listen
 	public void on(IssuesCopied event) {
-		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(UPDATE_PRIORITY));
 	}
 
 	@Sessional
 	@Listen
 	public void on(IssuesImported event) {
-		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(UPDATE_PRIORITY));
 	}
 
 	@Sessional
 	@Listen
 	public void on(IssueChanged event) {
-		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(UPDATE_PRIORITY));
 	}
 	
 	@Sessional
@@ -274,15 +278,18 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 
 		});
 		
-		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(UPDATE_PRIORITY));
 	}
 
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		for (var projectId: projectManager.getActiveIds()) {
+		var activeProjectIds = projectManager.getActiveIds();
+		var issueProjectIds = new HashSet<Long>(issueManager.getProjectIds());		
+		for (var projectId: activeProjectIds) {
 			checkVersion(getEnvDir(projectId.toString()));
-			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+			if (issueProjectIds.contains(projectId))
+				batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(CHECK_PRIORITY));
 		}
 	}
 
@@ -291,7 +298,7 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager
 	public void on(ActiveServerChanged event) {
 		for (var projectId: event.getProjectIds()) {
 			checkVersion(getEnvDir(projectId.toString()));
-			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(CHECK_PRIORITY));
 		}
 	}
 	

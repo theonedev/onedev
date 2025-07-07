@@ -64,24 +64,17 @@ public class ProjectCache extends MapProxy<Long, ProjectFacade> {
 	}
 	
 	public Collection<Long> getSubtreeIds(Long id) {
-		return getSubtreeIds(values(), id);
+		Collection<Long> subtreeIds = Sets.newHashSet(id);
+		var project = get(id);
+		if (project != null) {
+			for (var each: values()) {
+				if (each.getPath().startsWith(project.getPath() + "/"))
+					subtreeIds.add(each.getId());
+			}
+		}
+		return subtreeIds;
 	}
 
-	private Collection<Long> getSubtreeIds(Collection<ProjectFacade> projects, Long id) {
-		Collection<Long> treeIds = Sets.newHashSet(id);
-		for (ProjectFacade facade: projects) {
-			if (id.equals(facade.getParentId()))
-				treeIds.addAll(getSubtreeIds(projects, facade.getId()));
-		}
-		return treeIds;
-	}
-	
-    @Nullable
-    public Long findId(String path) {
-    	ProjectFacade project = findByPath(path);
-    	return project != null? project.getId(): null;
-    }
-    
     @Nullable
     public ProjectFacade findByPath(String path) {
     	for (ProjectFacade project: values()) {
@@ -101,19 +94,15 @@ public class ProjectCache extends MapProxy<Long, ProjectFacade> {
 	}
 	
 	public List<ProjectFacade> getChildren(Long id) {
-		return getChildren(values(), id);
-	}
-
-	private List<ProjectFacade> getChildren(Collection<ProjectFacade> projects, Long id) {
 		List<ProjectFacade> children = new ArrayList<>();
-		for (ProjectFacade facade: projects) {
+		for (ProjectFacade facade: values()) {
 			if (id.equals(facade.getParentId()))
 				children.add(facade);
 		}
 		Collections.sort(children, comparing(ProjectFacade::getName));
 		return children;
 	}
-	
+
 	@Override
 	public ProjectCache clone() {
 		return new ProjectCache(new HashMap<>(delegate));
@@ -131,6 +120,14 @@ public class ProjectCache extends MapProxy<Long, ProjectFacade> {
 	
 	public Comparator<Project> comparingPath() {
 		return (o1, o2) -> get(o1.getId()).getPath().compareTo(get(o2.getId()).getPath());		
+	}
+
+	public boolean hasChildren(Long id) {
+		for (var facade: values()) {
+			if (id.equals(facade.getParentId()))
+				return true;
+		}
+		return false;
 	}
 
 }

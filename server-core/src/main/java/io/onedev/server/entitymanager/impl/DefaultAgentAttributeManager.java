@@ -46,7 +46,7 @@ public class DefaultAgentAttributeManager extends BaseEntityManager<AgentAttribu
 		var hazelcastInstance = clusterManager.getHazelcastInstance();
 		attributeNames = hazelcastInstance.getMap("agentAttributeNames");
 		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("agentAttributeCacheInited");
-		clusterManager.init(cacheInited, () -> {
+		clusterManager.initWithLead(cacheInited, () -> {
 			Query<?> query = dao.getSession().createQuery("select name from AgentAttribute");
 			for (Object name: query.list())
 				attributeNames.put((String) name, (String) name);

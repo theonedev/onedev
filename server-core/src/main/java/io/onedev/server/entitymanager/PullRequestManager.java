@@ -80,4 +80,6 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 
 	List<PullRequest> query(User submitter, Date fromDate, Date toDate);
 
+    Collection<Long> getTargetProjectIds();
+    
 }

@@ -211,6 +211,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	private static final int SYNC_PRIORITY = 20;
 	
+	private static final int HOUSE_KEEPING_PRIORITY = 30;
+	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultProjectManager.class);
 	
 	private final CommitInfoManager commitInfoManager;
@@ -806,18 +808,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Listen
 	public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-		cache = new ProjectCache(hazelcastInstance.getMap("projectCache"));
-		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("projectCacheInited");		
-		clusterManager.init(cacheInited, () -> {
-			for (Project project : query()) {
-				String path = project.calcPath();
-				if (!path.equals(project.getPath()))
-					project.setPath(path);
-				cache.put(project.getId(), project.getFacade());
-			}
-			return 1L;
-		});			
-		
+		cache = new ProjectCache(hazelcastInstance.getReplicatedMap("projectCache"));
+		for (Project project : query()) {
+			String path = project.calcPath();
+			if (!path.equals(project.getPath()))
+				project.setPath(path);
+			cache.put(project.getId(), project.getFacade());
+		}
+
 		Map<Long, ProjectLastEventDate> lastEventDates = new HashMap<>();
 		for (ProjectLastEventDate lastEventDate : lastEventDateManager.query())
 			lastEventDates.put(lastEventDate.getId(), lastEventDate);
@@ -840,7 +838,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			var projectId = Long.valueOf(projectDir.getName());
 			var project = projects.get(projectId);
 			if (project != null) {
-				logger.debug("Checking project (path: {}, id: {})...", project.getPath(), projectId);
+				logger.debug("Checking project (path: {})...", project.getPath());
 				checkGitDir(projectId);
 				HookUtils.checkHooks(getGitDir(projectId));
 				checkGitConfig(projectId, project.getGitPackConfig());
@@ -883,7 +881,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			}
 		}
 	}
-	
+
 	@Listen
 	public void on(ConnectionEvent event) {
 		if (clusterManager.isLeaderServer()) {
@@ -1161,6 +1159,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 
 	@Override
+	public boolean hasChildren(Long projectId) {
+		return cache.hasChildren(projectId);
+	}
+
+	@Override
 	public ProjectCache cloneCache() {
 		return cache.clone();
 	}
@@ -1195,9 +1198,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 	
 	@Override
-	public Collection<Long> getActiveIds() {
+	public Set<Long> getActiveIds() {
 		var localServer = clusterManager.getLocalServerAddress();
-		return activeServers.project(Map.Entry::getKey, entry -> entry.getValue().equals(localServer));
+		return new HashSet<>(activeServers.project(Map.Entry::getKey, entry -> entry.getValue().equals(localServer)));
 	}
 
 	@Override
@@ -1896,62 +1899,70 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	@Override
 	public void execute() {
-		if (clusterManager.isLeaderServer()) {
-			var newActiveServers = new HashMap<Long, String>();
-			var replicaCount = settingManager.getClusterSetting().getReplicaCount();
-			for (var projectToReplicas: replicas.entrySet()) {
-				var projectId = projectToReplicas.getKey();
-				var replicasOfProject = projectToReplicas.getValue();
-				while (true) {
-					var newReplicasOfProject = new LinkedHashMap<>(replicasOfProject);
-					if (!newReplicasOfProject.isEmpty()) {
-						var activeServer = getActiveServer(projectId, false);
-						var replica = newReplicasOfProject.get(activeServer);
-						if (replica == null || replica.getType() != PRIMARY)
-							newActiveServers.put(projectId, updateActiveServer(projectId, newReplicasOfProject, true));
-						var maxVersion = newReplicasOfProject.values().stream()
-								.map(ProjectReplica::getVersion)
-								.max(naturalOrder())
-								.get();
-						var upToDateReplicaCount = newReplicasOfProject.values().stream()
-								.filter(it -> it.getVersion() == maxVersion && it.getType() != REDUNDANT)
-								.count();
-						if (upToDateReplicaCount >= replicaCount) {
-							var redundantServers = newReplicasOfProject.entrySet().stream()
-									.filter(it -> it.getValue().getType() == REDUNDANT)
-									.map(Map.Entry::getKey)
-									.collect(toList());
-							newReplicasOfProject.keySet().removeAll(redundantServers);
-							if (!newReplicasOfProject.equals(replicasOfProject)) {
-								if (replicas.replace(projectId, replicasOfProject, newReplicasOfProject)) {
-									redundantServers.forEach(it -> clusterManager.submitToServer(it, () -> {
-										markStorageForDelete(projectId);
-										return null;
-									}));									
-									break;
-								} else {
-									replicasOfProject = replicas.get(projectId);
-									if (replicasOfProject == null)
+		batchWorkManager.submit(new BatchWorker("project-manager-house-keeping") {
+
+			@Override
+			public void doWorks(List<Prioritized> works) {
+				if (clusterManager.isLeaderServer()) {
+					var newActiveServers = new HashMap<Long, String>();
+					var replicaCount = settingManager.getClusterSetting().getReplicaCount();
+					for (var projectToReplicas: replicas.entrySet()) {
+						var projectId = projectToReplicas.getKey();
+						var replicasOfProject = projectToReplicas.getValue();
+						while (true) {
+							var newReplicasOfProject = new LinkedHashMap<>(replicasOfProject);
+							if (!newReplicasOfProject.isEmpty()) {
+								var activeServer = getActiveServer(projectId, false);
+								var replica = newReplicasOfProject.get(activeServer);
+								if (replica == null || replica.getType() != PRIMARY)
+									newActiveServers.put(projectId, updateActiveServer(projectId, newReplicasOfProject, true));
+								var maxVersion = newReplicasOfProject.values().stream()
+										.map(ProjectReplica::getVersion)
+										.max(naturalOrder())
+										.get();
+								var upToDateReplicaCount = newReplicasOfProject.values().stream()
+										.filter(it -> it.getVersion() == maxVersion && it.getType() != REDUNDANT)
+										.count();
+								if (upToDateReplicaCount >= replicaCount) {
+									var redundantServers = newReplicasOfProject.entrySet().stream()
+											.filter(it -> it.getValue().getType() == REDUNDANT)
+											.map(Map.Entry::getKey)
+											.collect(toList());
+									newReplicasOfProject.keySet().removeAll(redundantServers);
+									if (!newReplicasOfProject.equals(replicasOfProject)) {
+										if (replicas.replace(projectId, replicasOfProject, newReplicasOfProject)) {
+											redundantServers.forEach(it -> clusterManager.submitToServer(it, () -> {
+												markStorageForDelete(projectId);
+												return null;
+											}));									
+											break;
+										} else {
+											replicasOfProject = replicas.get(projectId);
+											if (replicasOfProject == null)
+												break;
+										}
+									} else {
 										break;
+									}
+								} else {
+									break;
 								}
 							} else {
 								break;
 							}
-						} else {
-							break;
+							try {
+								Thread.sleep(100);
+							} catch (InterruptedException e) {
+								throw new RuntimeException(e);
+							}
 						}
-					} else {
-						break;
 					}
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
+					notifyActiveServerChanged(newActiveServers);
 				}
+		
 			}
-			notifyActiveServerChanged(newActiveServers);
-		}
+
+		}, new Prioritized(HOUSE_KEEPING_PRIORITY));		
 	}
 	
 	private void markStorageForDelete(Long projectId) {
@@ -1963,10 +1974,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			logger.error("Error marking storage directory of project with id '" + projectId + "' for deletion", e);
 		}
 	}
-
+	
 	@Override
 	public ScheduleBuilder<?> getScheduleBuilder() {
-		return CronScheduleBuilder.dailyAtHourAndMinute(3, 0);
+		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
 	}
 
 	private static class SyncWork extends Prioritized {

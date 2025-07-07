@@ -30,7 +30,7 @@ public interface ClusterManager {
 	@Nullable
 	HazelcastInstance getHazelcastInstance();
 	
-	void init(IAtomicLong data, Callable<Long> initializer);
+	void initWithLead(IAtomicLong data, Callable<Long> initializer);
 	
 	<T> T runOnServer(Member server, ClusterTask<T> task);
 	

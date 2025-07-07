@@ -102,6 +102,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.AccessConfidentialIssues;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.IssueTimes;
 import io.onedev.server.util.IterationAndIssueState;
@@ -191,7 +192,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
         ids = hazelcastInstance.getMap("issueIds");
         
 		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("issueCacheInited");
-		clusterManager.init(cacheInited, () -> {
+		clusterManager.initWithLead(cacheInited, () -> {
 			Query<?> query = dao.getSession().createQuery("select id, project.id, number from Issue");
 			for (Object[] fields: (List<Object[]>)query.list()) {
 				Long issueId = (Long) fields[0];
@@ -472,7 +473,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	}
 	
 	private Predicate buildPredicate(CriteriaBuilder builder, From<Issue, Issue> issue, Collection<Long> projectIds) {
-		Collection<Long> allIds = projectManager.getIds();
+		var cache = projectManager.cloneCache();
+		Collection<Long> allIds = cache.keySet();
 		Path<Project> projectPath = issue.get(Issue.PROP_PROJECT);
 		Path<Long> projectIdPath = projectPath.get(Project.PROP_ID);
 		if (SecurityUtils.isAdministrator()) {
@@ -480,12 +482,22 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		} else {
 			Collection<Long> projectIdsWithConfidentialIssuePermission = new ArrayList<>();
 			Collection<Long> projectIdsWithoutConfidentialIssuePermission = new ArrayList<>();
-			for (Long projectId: projectIds) {
-				Project project = projectManager.load(projectId);
-				if (SecurityUtils.canAccessConfidentialIssues(project)) 
-					projectIdsWithConfidentialIssuePermission.add(projectId);
-				else
-					projectIdsWithoutConfidentialIssuePermission.add(projectId);
+			if (projectIds.size() > 500) {
+				var authorizedProjectIds = SecurityUtils.getAuthorizedProjects(cache, new AccessConfidentialIssues()).stream().map(AbstractEntity::getId).collect(toSet());								
+				for (Long projectId: projectIds) {
+					if (authorizedProjectIds.contains(projectId)) 
+						projectIdsWithConfidentialIssuePermission.add(projectId);
+					else
+						projectIdsWithoutConfidentialIssuePermission.add(projectId);
+				}
+			} else {
+				for (Long projectId: projectIds) {
+					Project project = projectManager.load(projectId);
+					if (SecurityUtils.canAccessConfidentialIssues(project)) 
+						projectIdsWithConfidentialIssuePermission.add(projectId);
+					else
+						projectIdsWithoutConfidentialIssuePermission.add(projectId);
+				}
 			}
 			List<Predicate> predicates = new ArrayList<>(); 
 			if (!projectIdsWithConfidentialIssuePermission.isEmpty()) {
@@ -1302,4 +1314,17 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		return getSession().createQuery(query).getResultList();
 	}
 	
+	@Sessional
+	@Override
+	public Collection<Long> getProjectIds() {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
+		Root<Issue> root = criteriaQuery.from(Issue.class);
+		
+		criteriaQuery.select(root.get(Issue.PROP_PROJECT).get(Project.PROP_ID));
+		criteriaQuery.distinct(true);
+		
+		return getSession().createQuery(criteriaQuery).getResultList();
+	}
+
 }

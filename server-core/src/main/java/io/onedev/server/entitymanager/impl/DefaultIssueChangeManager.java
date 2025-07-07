@@ -98,6 +98,7 @@ import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
@@ -114,6 +115,9 @@ import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.concurrent.BatchWorker;
+import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.patternset.PatternSet;
 
@@ -123,8 +127,10 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultIssueChangeManager.class);
 	
+	private static final int NO_ACTIVITY_TRANSITION_PRIORITY = 40;
+
 	private static final int MAX_FIXED_ISSUES = 1000;
-	
+		
 	private final IssueManager issueManager;
 	
 	private final IssueFieldManager issueFieldManager;
@@ -144,6 +150,10 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	private final ClusterManager clusterManager;	
 	
 	private final ReferenceChangeManager entityReferenceManager;
+
+	private final BatchWorkManager batchWorkManager;
+
+	private final TransactionManager transactionManager;
 	
 	private String taskId;
 	
@@ -153,7 +163,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 									 ProjectManager projectManager, ListenerRegistry listenerRegistry, 
 									 TaskScheduler taskScheduler, IssueScheduleManager issueScheduleManager, 
 									 IssueLinkManager issueLinkManager, ClusterManager clusterManager, 
-									 ReferenceChangeManager entityReferenceManager) {
+									 ReferenceChangeManager entityReferenceManager, BatchWorkManager batchWorkManager, 
+									 TransactionManager transactionManager) {
 		super(dao);		
 		this.issueManager = issueManager;
 		this.issueFieldManager = issueFieldManager;
@@ -165,6 +176,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		this.issueLinkManager = issueLinkManager;
 		this.clusterManager = clusterManager;
 		this.entityReferenceManager = entityReferenceManager;
+		this.batchWorkManager = batchWorkManager;
+		this.transactionManager = transactionManager;
 	}
 
 	@Transactional
@@ -701,39 +714,48 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		}
 	}
 
-	@Transactional
 	@Override
 	public void execute() {
-		if (clusterManager.isLeaderServer()) {
-			IssueQueryParseOption option = new IssueQueryParseOption();
-			for (TransitionSpec transition: getTransitionSpecs()) {
-				if (transition instanceof NoActivitySpec) {
-					NoActivitySpec noActivitySpec = (NoActivitySpec) transition;
-					IssueQuery query = IssueQuery.parse(null, noActivitySpec.getIssueQuery(), option, false);
-					List<Criteria<Issue>> criterias = new ArrayList<>();
-					
-					List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
-					for (String fromState: transition.getFromStates()) 
-						fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
-					
-					if (!fromStateCriterias.isEmpty())
-						criterias.add(Criteria.orCriterias(fromStateCriterias));
-					if (query.getCriteria() != null)
-						criterias.add(query.getCriteria());
-					
-					criterias.add(new LastActivityDateCriteria(
-							new DateTime().minusDays(noActivitySpec.getDays()).toDate(), 
-							IssueQueryLexer.IsUntil));
-					
-					query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
-					
-					for (Issue issue: issueManager.query(null, query, true, 0, MAX_VALUE)) {
-						changeState(issue, noActivitySpec.getToState(), new HashMap<>(), 
-								transition.getRemoveFields(), null);
-					}
-				}
+		batchWorkManager.submit(new BatchWorker("no-activity-issue-transition") {
+
+			@Override
+			public void doWorks(List<Prioritized> works) {
+				transactionManager.run(() -> {
+					if (clusterManager.isLeaderServer()) {
+						IssueQueryParseOption option = new IssueQueryParseOption();
+						for (TransitionSpec transition: getTransitionSpecs()) {
+							if (transition instanceof NoActivitySpec) {
+								NoActivitySpec noActivitySpec = (NoActivitySpec) transition;
+								IssueQuery query = IssueQuery.parse(null, noActivitySpec.getIssueQuery(), option, false);
+								List<Criteria<Issue>> criterias = new ArrayList<>();
+								
+								List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
+								for (String fromState: transition.getFromStates()) 
+									fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
+								
+								if (!fromStateCriterias.isEmpty())
+									criterias.add(Criteria.orCriterias(fromStateCriterias));
+								if (query.getCriteria() != null)
+									criterias.add(query.getCriteria());
+								
+								criterias.add(new LastActivityDateCriteria(
+										new DateTime().minusDays(noActivitySpec.getDays()).toDate(), 
+										IssueQueryLexer.IsUntil));
+								
+								query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
+								
+								for (Issue issue: issueManager.query(null, query, true, 0, MAX_VALUE)) {
+									changeState(issue, noActivitySpec.getToState(), new HashMap<>(), 
+											transition.getRemoveFields(), null);
+								}
+							}
+						}
+					}									
+				});
 			}
-		}
+			
+		}, new Prioritized(NO_ACTIVITY_TRANSITION_PRIORITY));
+
 	}
 	
 	@Sessional
@@ -748,7 +770,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 
 	@Override
 	public ScheduleBuilder<?> getScheduleBuilder() {
-		return CronScheduleBuilder.dailyAtHourAndMinute(1, 0);
+		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
 	}
 
 	@Listen

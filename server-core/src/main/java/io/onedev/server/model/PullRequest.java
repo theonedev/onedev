@@ -736,7 +736,7 @@ public class PullRequest extends ProjectBelonging
 			@Override
 			public int compare(PullRequestReview o1, PullRequestReview o2) {
 				if (o1.getId() != null && o2.getId() != null)
-					return o1.getId().compareTo(o1.getId());
+					return o1.getId().compareTo(o2.getId());
 				else
 					return 0;
 			}

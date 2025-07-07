@@ -33,9 +33,11 @@ public class FuzzyCriteria extends Criteria<Issue> {
 
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
-		if (value.length() == 0)
-			return builder.conjunction();
-		issueIds = OneDev.getInstance(IssueTextManager.class).query(projectScope, value, MAX_TEXT_QUERY_COUNT);
+		if (issueIds == null) {
+			if (value.length() == 0)
+				return builder.conjunction();
+			issueIds = OneDev.getInstance(IssueTextManager.class).query(projectScope, value, MAX_TEXT_QUERY_COUNT);
+		}
 		if (issueIds.isEmpty())
 			return builder.disjunction();
 		else

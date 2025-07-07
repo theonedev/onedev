@@ -61,7 +61,7 @@ public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> impl
 		paramNames = hazelcastInstance.getMap("buildParamNames");
 		
 		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("buildParamCacheInited");
-		clusterManager.init(cacheInited, () -> {
+		clusterManager.initWithLead(cacheInited, () -> {
 			Map<Long, Long> projectIds = new HashMap<>();
 			Query<?> query = dao.getSession().createQuery("select id, project.id from Build");
 			for (Object[] fields: (List<Object[]>)query.list())

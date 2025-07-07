@@ -1,6 +1,29 @@
 package io.onedev.server.job;
 
+import static java.lang.Integer.MAX_VALUE;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.quartz.ScheduleBuilder;
+import org.quartz.SimpleScheduleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.hazelcast.core.HazelcastInstance;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.cluster.ClusterManager;
@@ -20,25 +43,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
-import org.quartz.ScheduleBuilder;
-import org.quartz.SimpleScheduleBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import oshi.SystemInfo;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import static java.lang.Integer.MAX_VALUE;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 @Singleton
 public class DefaultResourceAllocator implements ResourceAllocator, Serializable, SchedulableTask {
@@ -227,7 +232,9 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 								int totalConcurrency, int requiredConcurrency) {
 		String allocatedNode = null;
 		var maxScore = 0;
-		for (var node: nodes) {
+		var nodeList = new ArrayList<>(nodes);
+		Collections.shuffle(nodeList);
+		for (var node: nodeList) {
 			var effectiveTotalConcurrency = getEffectiveTotalConcurrency(node, totalConcurrency);
 			var usedConcurrency = concurrencyUsagesCache.get(node + ":" + executorName);
 			if (usedConcurrency == null)

@@ -8131,5 +8131,4 @@ public class DataMigrator {
 
 	private void migrate205(File dataDir, Stack<Integer> versions) {
 	}
-	
 }

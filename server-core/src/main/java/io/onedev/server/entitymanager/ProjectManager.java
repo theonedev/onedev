@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -77,6 +78,8 @@ public interface ProjectManager extends EntityManager<Project> {
 	Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> path, String pathPattern);
 		
 	List<ProjectFacade> getChildren(Long projectId);
+
+	boolean hasChildren(Long projectId);
 	
 	void move(Collection<Project> projects, @Nullable Project parent);
 		
@@ -99,7 +102,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	@Nullable
 	String getActiveServer(Long projectId, boolean mustExist);
 	
-	Collection<Long> getActiveIds();
+	Set<Long> getActiveIds();
 	
 	Map<String, Collection<Long>> groupByActiveServers(Collection<Long> projectIds);
 	

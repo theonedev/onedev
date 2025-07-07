@@ -1,6 +1,23 @@
 package io.onedev.server.web.component.pullrequest.review;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+
 import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
@@ -14,21 +31,6 @@ import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.base.BasePage;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class ReviewListPanel extends Panel {
 
@@ -103,7 +105,7 @@ public abstract class ReviewListPanel extends Panel {
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
-						if (review.getUser().equals(SecurityUtils.getAuthUser()))
+						if (item.getModelObject().getUser().equals(SecurityUtils.getAuthUser()))
 							tag.put("title", "Reset my review");
 					}
 
@@ -135,8 +137,9 @@ public abstract class ReviewListPanel extends Panel {
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
 						if (!getPullRequest().isNew()) {
+							var review = item.getModelObject();
 							attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to "
-									+ "remove reviewer '" + item.getModelObject().getUser().getDisplayName() + "'?"));
+									+ "remove reviewer '" + review.getUser().getDisplayName() + "'?"));
 						}
 					}
 
@@ -152,12 +155,10 @@ public abstract class ReviewListPanel extends Panel {
 							if (request.getReview(reviewer).getStatus() != Status.EXCLUDED)
 								reviewerRequired = true;
 						} else if (request.getReview(reviewer).getStatus() == Status.EXCLUDED) {
-							PullRequestReviewManager reviewManager =
-									OneDev.getInstance(PullRequestReviewManager.class);
-							reviewManager.createOrUpdate(review);
+							getReviewManager().createOrUpdate(review);
 							for (PullRequestReview eachReview : request.getReviews()) {
 								if (eachReview.isNew())
-									reviewManager.createOrUpdate(eachReview);
+									getReviewManager().createOrUpdate(eachReview);
 							}
 							notifyPullRequestChange(target);
 						} else {
@@ -215,6 +216,10 @@ public abstract class ReviewListPanel extends Panel {
 		});
 		
 		setOutputMarkupId(true);
+	}
+
+	private PullRequestReviewManager getReviewManager() {
+		return OneDev.getInstance(PullRequestReviewManager.class);
 	}
 
 	@Override

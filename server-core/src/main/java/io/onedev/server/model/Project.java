@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import static io.onedev.commons.utils.match.WildcardUtils.matchPath;
 import static io.onedev.server.model.Project.PROP_NAME;
+import static io.onedev.server.model.Project.PROP_PATH;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.commons.lang3.StringUtils.replace;
@@ -144,7 +145,8 @@ import io.onedev.server.xodus.CommitInfoManager;
 @Table(
 		indexes={
 				@Index(columnList="o_parent_id"), @Index(columnList="o_forkedFrom_id"),
-				@Index(columnList="o_lastEventDate_id"), @Index(columnList=PROP_NAME)
+				@Index(columnList="o_lastEventDate_id"), @Index(columnList=PROP_NAME), 
+				@Index(columnList=PROP_PATH)
 		}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_parent_id", PROP_NAME})}
 )

@@ -50,7 +50,7 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
 		var hazelcastInstance = clusterManager.getHazelcastInstance();
     	entityIds = hazelcastInstance.getMap("gpgKeyEntityIds");
     	var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("gpgKeyCacheInited");
-		clusterManager.init(cacheInited, () -> {
+		clusterManager.initWithLead(cacheInited, () -> {
 			for (GpgKey key: query()) {
 				for (Long keyId: key.getKeyIds())
 					entityIds.put(keyId, key.getId());

@@ -161,6 +161,9 @@ import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.terminal.WebShell;
 import io.onedev.server.util.CommitAware;
+import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.concurrent.BatchWorker;
+import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.EditableStringTransformer;
@@ -171,6 +174,8 @@ import nl.altindag.ssl.SSLFactory;
 public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource, Serializable {
 
 	private static final int CHECK_INTERVAL = 1000; // check internal in milli-seconds
+
+	private static final int MAINTENANCE_PRIORITY = 50;
 	
 	private static final String TIMEOUT_MESSAGE = "Job execution timed out";
 
@@ -226,6 +231,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final SSLFactory sslFactory;
 
+	private final BatchWorkManager batchWorkManager;
+
 	private volatile Thread thread;
 
 	private final Map<String, JobContext> jobContexts = new ConcurrentHashMap<>();
@@ -247,7 +254,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							 BuildParamManager buildParamManager, ProjectManager projectManager, Validator validator, 
 							 TaskScheduler taskScheduler, ClusterManager clusterManager, CodeIndexManager codeIndexManager, 
 							 PullRequestManager pullRequestManager, IssueManager issueManager, GitService gitService, 
-							 SSLFactory sslFactory, Dao dao) {
+							 SSLFactory sslFactory, Dao dao, BatchWorkManager batchWorkManager) {
 		this.dao = dao;
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
@@ -268,6 +275,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.issueManager = issueManager;
 		this.gitService = gitService;
 		this.sslFactory = sslFactory;
+		this.batchWorkManager = batchWorkManager;
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -1128,18 +1136,26 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			
 			@Override
 			public void execute() {
-				if (clusterManager.isLeaderServer()) {
-					var activeJobTokens = getActiveJobTokens();
-					jobServers.removeAll(it -> !activeJobTokens.contains(it.getKey()));
-				}
+				batchWorkManager.submit(new BatchWorker("job-manager-maintenance") {
+
+					@Override
+					public void doWorks(List<Prioritized> works) {
+						if (clusterManager.isLeaderServer()) {
+							var activeJobTokens = getActiveJobTokens();
+							jobServers.removeAll(it -> !activeJobTokens.contains(it.getKey()));
+						}
+					}
+					
+				}, new Prioritized(MAINTENANCE_PRIORITY));
 			}
 
 			@Override
 			public ScheduleBuilder<?> getScheduleBuilder() {
-				return CronScheduleBuilder.dailyAtHourAndMinute(4, 0);
+				return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
 			}
 			
 		});
+		
 		branchSchedulesTaskId = taskScheduler.schedule(new SchedulableTask() {
 			@Override
 			public void execute() {

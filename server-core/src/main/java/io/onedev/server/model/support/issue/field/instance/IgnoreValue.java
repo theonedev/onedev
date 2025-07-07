@@ -12,7 +12,7 @@ public class IgnoreValue implements ValueProvider {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String DISPLAY_NAME = "Ingore this field";
+	public static final String DISPLAY_NAME = "Ignore this field";
 	
 	@Override
 	public boolean equals(Object other) {

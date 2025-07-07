@@ -70,14 +70,9 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
     @Listen
     public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-        cache = new GroupCache(hazelcastInstance.getMap("groupCache"));
-
-		IAtomicLong cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("groupCacheInited");
-		clusterManager.init(cacheInited, () -> {
-			for (Group group: query())
-				cache.put(group.getId(), group.getFacade());
-			return 1L;
-		});
+        cache = new GroupCache(hazelcastInstance.getReplicatedMap("groupCache"));
+		for (Group group: query())
+			cache.put(group.getId(), group.getFacade());
     }
     
 	@Transactional

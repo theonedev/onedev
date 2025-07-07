@@ -117,6 +117,9 @@ import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.artifact.FileInfo;
+import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.concurrent.BatchWorker;
+import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.web.util.StatsGroup;
@@ -127,6 +130,8 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	private static final int STATUS_QUERY_BATCH = 500;
 	
 	private static final int CLEANUP_BATCH = 5000;
+
+	private static final int HOUSE_KEEPING_PRIORITY = 50;
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultBuildManager.class);
 	
@@ -151,6 +156,8 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	private final Set<BuildStorageSyncer> storageSyncers;
 	
 	private final SequenceGenerator numberGenerator;
+
+	private final BatchWorkManager batchWorkManager;
 	
 	private volatile IMap<Long, BuildFacade> cache;
 	
@@ -164,7 +171,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 							   ProjectManager projectManager, SessionManager sessionManager, 
 							   TransactionManager transactionManager, BuildLabelManager labelManager, 
 							   ClusterManager clusterManager, StorageManager storageManager, 
-							   Set<BuildStorageSyncer> storageSyncers) {
+							   BatchWorkManager batchWorkManager, Set<BuildStorageSyncer> storageSyncers) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
 		this.buildDependenceManager = buildDependenceManager;
@@ -175,6 +182,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		this.labelManager = labelManager;
 		this.clusterManager = clusterManager;
 		this.storageManager = storageManager;
+		this.batchWorkManager = batchWorkManager;
 		this.storageSyncers = storageSyncers;
 
 		numberGenerator = new SequenceGenerator(Build.class, clusterManager, dao);
@@ -749,61 +757,68 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 
 	@Override
 	public void execute() {
-		if (clusterManager.isLeaderServer()) {
-			long maxId = getMaxId();
-			Collection<Long> idsToPreserve = new HashSet<>();
-			
-			sessionManager.run(() -> {
-				for (Project project: projectManager.query()) {
-					logger.debug("Populating preserved build ids of project '" + project.getPath() + "'...");
-					List<BuildPreservation> preservations = project.getHierarchyBuildPreservations();
-					if (preservations.isEmpty()) {
-						idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
-					} else {
-						for (BuildPreservation preservation: preservations) {
-							try {
-								BuildQuery query = BuildQuery.parse(project, preservation.getCondition(), false, false);
-								int count;
-								if (preservation.getCount() != null)
-									count = preservation.getCount();
-								else
-									count = Integer.MAX_VALUE;
-								idsToPreserve.addAll(queryIds(project, query, 0, count));
-							} catch (Exception e) {
-								String message = String.format("Error parsing build preserve condition(project: %s, condition: %s)", 
-										project.getPath(), preservation.getCondition());
-								logger.error(message, e);
+		batchWorkManager.submit(new BatchWorker("build-manager-house-keeping") {
+
+			@Override
+			public void doWorks(List<Prioritized> works) {
+				if (clusterManager.isLeaderServer()) {
+					long maxId = getMaxId();
+					Collection<Long> idsToPreserve = new HashSet<>();
+					
+					sessionManager.run(() -> {
+						for (Project project: projectManager.query()) {
+							logger.debug("Populating preserved build ids of project '" + project.getPath() + "'...");
+							List<BuildPreservation> preservations = project.getHierarchyBuildPreservations();
+							if (preservations.isEmpty()) {
 								idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
+							} else {
+								for (BuildPreservation preservation: preservations) {
+									try {
+										BuildQuery query = BuildQuery.parse(project, preservation.getCondition(), false, false);
+										int count;
+										if (preservation.getCount() != null)
+											count = preservation.getCount();
+										else
+											count = Integer.MAX_VALUE;
+										idsToPreserve.addAll(queryIds(project, query, 0, count));
+									} catch (Exception e) {
+										String message = String.format("Error parsing build preserve condition(project: %s, condition: %s)", 
+												project.getPath(), preservation.getCondition());
+										logger.error(message, e);
+										idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
+									}
+								}
 							}
 						}
-					}
-				}
-			});
+					});
+		
+					EntityCriteria<Build> criteria = newCriteria();
+					AtomicInteger firstResult = new AtomicInteger(0);
+					
+					while (transactionManager.call(() -> {
+						List<Build> builds = query(criteria, firstResult.get(), CLEANUP_BATCH);
+						if (!builds.isEmpty()) {
+							logger.debug("Checking build preservation: {}->{}", 
+									firstResult.get()+1, firstResult.get()+builds.size());
+						}
+						for (Build build: builds) {
+							if (build.isFinished() && build.getId() <= maxId && !idsToPreserve.contains(build.getId())) {
+								logger.debug("Deleting " + build.getReference() + "...");
+								delete(build);
+							}
+						}
+						firstResult.set(firstResult.get() + CLEANUP_BATCH);
+						return builds.size() == CLEANUP_BATCH;
+					})) {}			
+				}		
+			}
 
-			EntityCriteria<Build> criteria = newCriteria();
-			AtomicInteger firstResult = new AtomicInteger(0);
-			
-			while (transactionManager.call(() -> {
-				List<Build> builds = query(criteria, firstResult.get(), CLEANUP_BATCH);
-				if (!builds.isEmpty()) {
-					logger.debug("Checking build preservation: {}->{}", 
-							firstResult.get()+1, firstResult.get()+builds.size());
-				}
-				for (Build build: builds) {
-					if (build.isFinished() && build.getId() <= maxId && !idsToPreserve.contains(build.getId())) {
-						logger.debug("Deleting " + build.getReference() + "...");
-						delete(build);
-					}
-				}
-				firstResult.set(firstResult.get() + CLEANUP_BATCH);
-				return builds.size() == CLEANUP_BATCH;
-			})) {}			
-		}
+		}, new Prioritized(HOUSE_KEEPING_PRIORITY));		
 	}
 
 	@Override
 	public ScheduleBuilder<?> getScheduleBuilder() {
-		return CronScheduleBuilder.dailyAtHourAndMinute(2, 0);
+		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -816,7 +831,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
         jobNames = hazelcastInstance.getMap("jobNames");
 
 		var buildCacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("buildCacheInited");
-		clusterManager.init(buildCacheInited, () -> {
+		clusterManager.initWithLead(buildCacheInited, () -> {
 			Query<?> query = dao.getSession().createQuery("select id, project.id, number, commitHash, jobName from Build");
 			for (Object[] fields : (List<Object[]>) query.list()) {
 				Long buildId = (Long) fields[0];

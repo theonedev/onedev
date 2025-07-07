@@ -100,7 +100,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		cache = new RoleCache(hazelcastInstance.getMap("roleCache"));
 
 		IAtomicLong cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("roleCacheInited"); 
-		clusterManager.init(cacheInited, () -> {
+		clusterManager.initWithLead(cacheInited, () -> {
 			for (var role: query())
 				cache.put(role.getId(), role.getFacade());
 			return 1L;			
@@ -162,7 +162,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	
 	@Transactional
 	public void setupDefaults() {
-		boolean hasAssigneeField = settingManager.getIssueSetting().getFieldSpec("Assignee") != null;
+		boolean hasAssigneesField = settingManager.getIssueSetting().getFieldSpec("Assignees") != null;
 		
 		Role codeWriter = new Role();
 		codeWriter.setName("Code Writer");
@@ -185,9 +185,9 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		codeReader.setPackPrivilege(PackPrivilege.READ);
 		codeReader.setAccessTimeTracking(false);
 		
-		if (hasAssigneeField) {
+		if (hasAssigneesField) {
 			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
-			allfieldsExcept.getExcludeFields().add("Assignee");
+			allfieldsExcept.getExcludeFields().add("Assignees");
 			codeReader.setEditableIssueFields(allfieldsExcept);
 		}
 
@@ -217,9 +217,9 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		packReader.setPackPrivilege(PackPrivilege.READ);
 		packReader.setAccessTimeTracking(false);
 		
-		if (hasAssigneeField) {
+		if (hasAssigneesField) {
 			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
-			allfieldsExcept.getExcludeFields().add("Assignee");
+			allfieldsExcept.getExcludeFields().add("Assignees");
 			packReader.setEditableIssueFields(allfieldsExcept);
 		}
 		
@@ -246,9 +246,9 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		issueReporter.setCodePrivilege(CodePrivilege.NONE);
 		issueReporter.setAccessTimeTracking(false);
 		
-		if (hasAssigneeField) {
+		if (hasAssigneesField) {
 			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
-			allfieldsExcept.getExcludeFields().add("Assignee");
+			allfieldsExcept.getExcludeFields().add("Assignees");
 			issueReporter.setEditableIssueFields(allfieldsExcept);
 		}
 		

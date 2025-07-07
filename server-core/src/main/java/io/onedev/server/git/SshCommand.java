@@ -1,5 +1,35 @@
 package io.onedev.server.git;
 
+import static io.onedev.server.model.Project.decodeFullRepoNameAsPath;
+import static io.onedev.server.security.SecurityUtils.asPrincipals;
+import static io.onedev.server.security.SecurityUtils.asSubject;
+import static io.onedev.server.security.SecurityUtils.asUserPrincipal;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
+
+import java.io.File;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+
+import javax.annotation.Nullable;
+
+import org.apache.shiro.util.ThreadContext;
+import org.apache.sshd.common.channel.ChannelOutputStream;
+import org.apache.sshd.server.Environment;
+import org.apache.sshd.server.ExitCallback;
+import org.apache.sshd.server.channel.ChannelSession;
+import org.apache.sshd.server.command.Command;
+import org.apache.sshd.server.session.ServerSession;
+import org.apache.sshd.server.session.ServerSessionAware;
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.ExecutionResult;
@@ -15,33 +45,11 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.ssh.SshAuthenticator;
 import io.onedev.server.ssh.SshManager;
 import io.onedev.server.util.OutputStreamWrapper;
-import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.concurrent.WorkExecutor;
-import org.apache.shiro.util.ThreadContext;
-import org.apache.sshd.common.channel.ChannelOutputStream;
-import org.apache.sshd.server.Environment;
-import org.apache.sshd.server.ExitCallback;
-import org.apache.sshd.server.channel.ChannelSession;
-import org.apache.sshd.server.command.Command;
-import org.apache.sshd.server.session.ServerSession;
-import org.apache.sshd.server.session.ServerSessionAware;
-import org.eclipse.jgit.transport.RemoteConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.io.*;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-
-import static io.onedev.server.model.Project.decodeFullRepoNameAsPath;
-import static io.onedev.server.security.SecurityUtils.*;
-import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 class SshCommand implements Command, ServerSessionAware {
 	
-	private static final int PRIORITY = 2;
+	private static final int PACK_PRIORITY = 2;
 	
 	private static final int CHANNEL_OPEN_TIMEOUT = 5000;
 	
@@ -134,7 +142,7 @@ class SshCommand implements Command, ServerSessionAware {
 	        String groupId = "git-over-ssh-" + projectFacade.getId() + "-" + principal;
 	        
 	        WorkExecutor workExecutor = OneDev.getInstance(WorkExecutor.class);
-			future = workExecutor.submit(groupId, new PrioritizedRunnable(PRIORITY) {
+			future = workExecutor.submit(PACK_PRIORITY, groupId, new Runnable() {
 				
 				@Override
 				public void run() {

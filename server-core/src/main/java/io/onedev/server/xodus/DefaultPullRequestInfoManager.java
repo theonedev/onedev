@@ -1,9 +1,27 @@
 package io.onedev.server.xodus;
 
+import static java.lang.Long.valueOf;
+
+import java.io.File;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.nio.ByteBuffer;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.eclipse.jgit.lib.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.ActiveServerChanged;
@@ -22,20 +40,6 @@ import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
-import org.eclipse.jgit.lib.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.File;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.List;
-
-import static java.lang.Long.valueOf;
 
 @Singleton
 public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager 
@@ -55,18 +59,24 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 	
 	private static final ByteIterable LAST_PULL_REQUEST_UPDATE_KEY = new StringByteIterable("lastPullRequestUpdate");
 
-	private static final int PRIORITY = 100;
+	private static final int UPDATE_PRIORITY = 100;
+
+	private static final int CHECK_PRIORITY = 200;
 	
 	private final BatchWorkManager batchWorkManager;
 	
 	private final ProjectManager projectManager;
 	
+	private final PullRequestManager pullRequestManager;
+	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
 	@Inject
-	public DefaultPullRequestInfoManager(ProjectManager projectManager, PullRequestUpdateManager pullRequestUpdateManager, 
+	public DefaultPullRequestInfoManager(ProjectManager projectManager, PullRequestManager pullRequestManager, 
+										 PullRequestUpdateManager pullRequestUpdateManager, 
 										 BatchWorkManager batchWorkManager) {
 		this.projectManager = projectManager;
+		this.pullRequestManager = pullRequestManager;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.batchWorkManager = batchWorkManager;
 	}
@@ -94,7 +104,8 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 	
 	@Sessional
 	protected boolean collect(Long projectId) {
-		logger.debug("Collecting pull request info (project id: {})...", projectId);
+		var projectPath = projectManager.findFacadeById(projectId).getPath();
+		logger.debug("Collecting pull request info (project: {})...", projectPath);
 		
 		Environment env = getEnv(projectId.toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
@@ -121,7 +132,7 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 			if (lastUpdate != null)
 				defaultStore.put(txn, LAST_PULL_REQUEST_UPDATE_KEY, new LongByteIterable(lastUpdate.getId()));
 		});
-		logger.debug("Collected pull request info (project id: {})", projectId);
+		logger.debug("Collected pull request info (project: {})", projectPath);
 		
 		return unprocessedPullRequestUpdates.size() == BATCH_SIZE;
 	}
@@ -148,21 +159,24 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 	@Sessional
 	@Listen
 	public void on(PullRequestOpened event) {
-		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(UPDATE_PRIORITY));
 	}
 	
 	@Sessional
 	@Listen
 	public void on(PullRequestUpdated event) {
-		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(UPDATE_PRIORITY));
 	}
 
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		for (var projectId: projectManager.getActiveIds()) {
+		var activeProjectIds = projectManager.getActiveIds();
+		var pullRequestProjectIds = new HashSet<Long>(pullRequestManager.getTargetProjectIds());		
+		for (var projectId: activeProjectIds) {
 			checkVersion(getEnvDir(projectId.toString()));
-			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+			if (pullRequestProjectIds.contains(projectId))
+				batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(CHECK_PRIORITY));
 		}
 	}
 	
@@ -171,7 +185,7 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 	public void on(ActiveServerChanged event) {
 		for (var projectId: event.getProjectIds()) {
 			checkVersion(getEnvDir(projectId.toString()));
-			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(CHECK_PRIORITY));
 		}
 	}
 	

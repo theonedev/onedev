@@ -18,6 +18,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -80,7 +81,6 @@ import io.onedev.server.util.ProjectBuildStatusStat;
 import io.onedev.server.util.ProjectIssueStateStat;
 import io.onedev.server.util.ProjectPackTypeStat;
 import io.onedev.server.util.ProjectPullRequestStatusStat;
-import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
@@ -121,7 +121,7 @@ public class ProjectListPanel extends Panel {
 	private final IModel<String> queryStringModel;
 	
 	private final int expectedCount;
-	
+
 	private final IModel<ProjectQuery> queryModel = new LoadableDetachableModel<>() {
 
 		@Override
@@ -976,9 +976,8 @@ public class ProjectListPanel extends Panel {
 			}
 			
 			private List<Project> getTargetProjects() {
-				ProjectCache cache = getProjectManager().cloneCache();
 				List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new CreateChildren()));
-				projects.sort(cache.comparingPath());
+				projects.sort(WicketUtils.getProjectCache().comparingPath());
 				return projects;
 			}
 
@@ -1281,7 +1280,7 @@ public class ProjectListPanel extends Panel {
 					fragment.add(new WebMarkupContainer("noStorage"));
 				}
 				
-				List<ProjectFacade> children = getProjectManager().getChildren(projectId);
+				List<ProjectFacade> children = WicketUtils.getProjectCache().getChildren(projectId);
 				if (!children.isEmpty()) {
 					Fragment childrenFrag = new Fragment("children", "childrenFrag", ProjectListPanel.this);
 					childrenFrag.add(new AjaxLink<Void>("toggle") {

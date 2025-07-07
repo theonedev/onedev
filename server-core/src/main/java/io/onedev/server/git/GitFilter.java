@@ -55,13 +55,12 @@ import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.OutputStreamWrapper;
-import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.concurrent.WorkExecutor;
 
 @Singleton
 public class GitFilter implements Filter {
 	
-	public static final int PRIORITY = 2;
+	public static final int PACK_PRIORITY = 2;
 	
 	private static final String INFO_REFS = "info/refs";
 	
@@ -177,7 +176,7 @@ public class GitFilter implements Filter {
 			if (activeServer.equals(clusterManager.getLocalServerAddress())) {
 				File gitDir = projectManager.getGitDir(projectId);
 				if (upload) {
-					workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
+					workExecutor.submit(PACK_PRIORITY, new Runnable() {
 						
 						@Override
 						public void run() {
@@ -186,7 +185,7 @@ public class GitFilter implements Filter {
 						
 					}).get();
 				} else {
-					workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
+					workExecutor.submit(PACK_PRIORITY, new Runnable() {
 						
 						@Override
 						public void run() {

@@ -462,8 +462,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					link.add(new Label("label", project.getName()));
 					item.add(link);
 					
-					List<ProjectFacade> children = getProjectManager().getChildren(project.getId());
-					if (!children.isEmpty()) {
+					if (item.getIndex() < getModelObject().size() - 1 || getProjectManager().hasChildren(project.getId())) {
 						Long projectId = project.getId();
 						item.add(new DropdownLink("children") {
 	

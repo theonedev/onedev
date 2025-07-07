@@ -3,17 +3,18 @@ package io.onedev.server.security;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
 
 import org.apache.shiro.authz.Permission;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
@@ -81,7 +82,6 @@ import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.UploadCache;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.security.permission.WritePack;
-import io.onedev.server.util.concurrent.PrioritizedCallable;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
@@ -92,6 +92,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static final PrincipalCollection PRINCIPALS_ANONYMOUS = 
 			new SimplePrincipalCollection(PRINCIPAL_ANONYMOUS, "");
+	
+	public static void checkPermission(Permission permission) {
+		if (!getSubject().isPermitted(permission))
+			throw new UnauthorizedException();
+	}
 	
 	public static PrincipalCollection asPrincipals(String principal) {
 		return new SimplePrincipalCollection(principal, "");
@@ -582,18 +587,10 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			task.run();
 		};
 	}
-	
-	public static String getPrevPrincipal() {
-		PrincipalCollection prevPrincipals = SecurityUtils.getSubject().getPreviousPrincipals();
-		if (prevPrincipals != null) 
-			return (String) prevPrincipals.getPrimaryPrincipal();
-		else 
-			return PRINCIPAL_ANONYMOUS;
-	}
-	
-	public static <T> PrioritizedCallable<T> inheritSubject(PrioritizedCallable<T> task) {
+
+	public static <T> Callable<T> inheritSubject(Callable<T> task) {
 		Subject subject = SecurityUtils.getSubject();
-		return new PrioritizedCallable<T>(task.getPriority()) {
+		return new Callable<T>() {
 
 			@Override
 			public T call() throws Exception {
@@ -604,6 +601,14 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		};
 	}
 	
+	public static String getPrevPrincipal() {
+		PrincipalCollection prevPrincipals = SecurityUtils.getSubject().getPreviousPrincipals();
+		if (prevPrincipals != null) 
+			return (String) prevPrincipals.getPrimaryPrincipal();
+		else 
+			return PRINCIPAL_ANONYMOUS;
+	}
+		
 	@Nullable
 	public static String getBearerToken(HttpServletRequest request) {
 		String authHeader = request.getHeader(KubernetesHelper.AUTHORIZATION);
@@ -626,13 +631,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				projectIds.addAll(cache.getSubtreeIds(authorization.getProject().getId()));
 		}
 	}
-	
-	private static void addSubTreeIds(Collection<Long> projectIds, Project project) {
-		projectIds.add(project.getId());
-		for (Project descendant : project.getDescendants())
-			projectIds.add(descendant.getId());
+
+	public static Collection<Project> getAuthorizedProjects(ProjectCache cache, BasePermission permission) {
+		return getAuthorizedProjects(cache, getSubject(), permission);
 	}
-	
+
 	public static Collection<Project> getAuthorizedProjects(BasePermission permission) {
 		return getAuthorizedProjects(getSubject(), permission);
 	}
@@ -640,46 +643,51 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	private static SettingManager getSettingManager() {
 		return OneDev.getInstance(SettingManager.class);
 	}
-	
+
 	public static Collection<Project> getAuthorizedProjects(Subject subject, BasePermission permission) {
+		return getAuthorizedProjects(null, subject, permission);
+	}
+
+	public static Collection<Project> getAuthorizedProjects(@Nullable ProjectCache cache, Subject subject, BasePermission permission) {
 		var projectManager = OneDev.getInstance(ProjectManager.class);
 		String principal = (String) subject.getPrincipal();
 		var user = getAuthUser(principal);
 		var accessToken = getAccessToken(principal);
 		if (permission.isApplicable(UserFacade.of(getUser(user, accessToken)))) {
-			ProjectCache cacheClone = projectManager.cloneCache();
+			if (cache == null)
+				cache = projectManager.cloneCache();
 			Collection<Long> authorizedProjectIds = new HashSet<>();
 			if (user != null) {
 				if (user.isRoot() || user.isSystem()) {
-					return cacheClone.getProjects();
+					return cache.getProjects();
 				} else {
 					for (Group group : user.getGroups()) {
 						if (group.isAdministrator())
-							return cacheClone.getProjects();
+							return cache.getProjects();
 						for (GroupAuthorization authorization : group.getAuthorizations()) {
 							if (authorization.getRole().implies(permission))
-								addSubTreeIds(authorizedProjectIds, authorization.getProject());
+								authorizedProjectIds.addAll(cache.getSubtreeIds(authorization.getProject().getId()));
 						}
 					}
 
 					for (UserAuthorization authorization : user.getProjectAuthorizations()) {
 						if (authorization.getRole().implies(permission))
-							addSubTreeIds(authorizedProjectIds, authorization.getProject());
+							authorizedProjectIds.addAll(cache.getSubtreeIds(authorization.getProject().getId()));
 					}
 				}
 			}
 			if (accessToken != null) {
 				for (var authorization : accessToken.getAuthorizations()) {
 					if (authorization.getRole().implies(permission))
-						addSubTreeIds(authorizedProjectIds, authorization.getProject());
+						authorizedProjectIds.addAll(cache.getSubtreeIds(authorization.getProject().getId()));
 				}
 			}
 			if (!isAnonymous(principal) || getSettingManager().getSecuritySetting().isEnableAnonymousAccess())
-				addIdsPermittedByDefaultRole(cacheClone, authorizedProjectIds, permission);
+				addIdsPermittedByDefaultRole(cache, authorizedProjectIds, permission);
 			
 			return authorizedProjectIds.stream().map(projectManager::load).collect(toSet());
 		} else {
-			return new ArrayList<>();
+			return new HashSet<>();
 		}
 	}
 	
