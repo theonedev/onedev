@@ -29,7 +29,6 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.security.SecurityUtils;
 
-@Api(order=10100)
 @Path("/agent-tokens")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

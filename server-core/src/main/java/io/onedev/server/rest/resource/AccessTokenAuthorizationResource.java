@@ -26,7 +26,7 @@ import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.model.AccessTokenAuthorization;
 import io.onedev.server.rest.annotation.Api;
 
-@Api(order=9500, description = "This resource manages project authorizations of access tokens. Note that " +
+@Api(description = "This resource manages project authorizations of access tokens. Note that " +
 		"project authorizations will not take effect if option <tt>hasOwnerPermissions</tt> is enabled " +
 		"for associated access token")
 @Path("/access-token-authorizations")

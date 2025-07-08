@@ -20,7 +20,6 @@ import io.onedev.server.model.ProjectLabel;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
-@Api(order=10300)
 @Path("/project-labels")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

@@ -28,7 +28,6 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.security.SecurityUtils;
 
-@Api(order=10000)
 @Path("/agents")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

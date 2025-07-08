@@ -21,7 +21,6 @@ import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
-@Api(order=3100)
 @Path("/pull-request-assignments")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

@@ -24,7 +24,6 @@ import io.onedev.server.model.PullRequestCommentRevision;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
-@Api(order=3200)
 @Path("/pull-request-comments")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

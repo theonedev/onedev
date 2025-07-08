@@ -43,7 +43,6 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 
-@Api(order=10000)
 @Path("/settings")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

@@ -22,7 +22,7 @@ import io.onedev.server.model.BaseAuthorization;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
-@Api(order=7500, description = "This resource manages default roles of project")
+@Api(description = "This resource manages default roles of project")
 @Path("/base-authorizations")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

@@ -31,7 +31,6 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.security.SecurityUtils;
 
-@Api(order=7000)
 @Path("/roles")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

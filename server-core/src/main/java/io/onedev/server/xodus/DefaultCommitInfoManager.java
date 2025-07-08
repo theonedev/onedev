@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
@@ -56,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
+import com.hazelcast.map.EntryProcessor;
 import com.hazelcast.map.IMap;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
@@ -496,13 +498,23 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 	}
 
 	private void updateContributedProjects(Long projectId, Set<NameAndEmail> users) {
-		for (var user: users) {
-			var contributedProjectsOfEmail = contributedProjects.get(user.getEmailAddress());
-			if (contributedProjectsOfEmail == null) 
-				contributedProjectsOfEmail = new HashSet<>();
-			if (contributedProjectsOfEmail.add(projectId))
-				contributedProjects.put(user.getEmailAddress(), contributedProjectsOfEmail);
-		}
+		Set<String> emailAddresses = users.stream()
+				.map(NameAndEmail::getEmailAddress)
+				.collect(toSet());
+		
+		contributedProjects.executeOnKeys(emailAddresses, new EntryProcessor<String, Set<Long>, Object>() {
+			@Override
+			public Object process(IMap.Entry<String, Set<Long>> entry) {
+				Set<Long> contributedProjectsOfEmail = entry.getValue();
+				if (contributedProjectsOfEmail == null) {
+					contributedProjectsOfEmail = new HashSet<>();
+				}
+				if (contributedProjectsOfEmail.add(projectId)) {
+					entry.setValue(contributedProjectsOfEmail);
+				}
+				return null;
+			}
+		});
 	}
 
 	private void collectContributions(Project project, ObjectId commitId) {
@@ -1560,12 +1572,9 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 					.collect(toSet());
 			var cache = projectManager.cloneCache();
 			var projectIds = new HashSet<Long>();
-			for (var emailAddress: emailAddresses) {
-				var projectIdsOfEmailAddress = contributedProjects.get(emailAddress);	
-				if (projectIdsOfEmailAddress != null) {
-					projectIds.addAll(projectIdsOfEmailAddress);
-				}
-			}
+			contributedProjects.getAll(emailAddresses).values().stream()
+				.filter(Objects::nonNull)
+				.forEach(projectIds::addAll);
 			for (var projectId: projectIds) {
 				var project = cache.get(projectId);				
 				if (project != null && project.isCodeManagement() && project.getForkedFromId() == null) {

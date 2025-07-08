@@ -72,7 +72,6 @@ import io.onedev.server.web.UrlManager;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.xodus.CommitInfoManager;
 
-@Api(order=1000)
 @Path("/projects")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

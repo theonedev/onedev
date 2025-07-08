@@ -161,7 +161,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	private volatile IMap<Long, BuildFacade> cache;
 	
-	private volatile Map<Long, Collection<String>> jobNames;
+	private volatile IMap<Long, Collection<String>> jobNames;
 	
 	private volatile String taskId;
 	
@@ -942,12 +942,12 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				});
 	}
 	
-	private void populateJobNames(Long projectId, String jobName) {
-		Collection<String> jobNamesOfProject = jobNames.get(projectId);
-		if (jobNamesOfProject == null) 
-			jobNamesOfProject = new HashSet<>();
-		jobNamesOfProject.add(jobName);
-		jobNames.put(projectId, jobNamesOfProject);
+	private void populateJobNames(Long projectId, String jobName) {		
+		jobNames.compute(projectId, (key, existingJobNames) -> {
+			Collection<String> jobNamesOfProject = existingJobNames != null ? existingJobNames : new HashSet<>();
+			jobNamesOfProject.add(jobName);
+			return jobNamesOfProject;
+		});
 	}
 
 	@Override

@@ -15,7 +15,6 @@ import javax.ws.rs.core.Response;
 
 import static io.onedev.server.security.SecurityUtils.canModifyOrDelete;
 
-@Api(order=2100)
 @Path("/issue-votes")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

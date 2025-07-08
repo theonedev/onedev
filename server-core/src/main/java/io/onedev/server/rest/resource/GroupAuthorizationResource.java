@@ -22,7 +22,6 @@ import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
-@Api(order=9000)
 @Path("/group-authorizations")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

@@ -11,11 +11,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.util.facade.ProjectCache;
-import io.onedev.server.web.util.WicketUtils;
-import jnr.ffi.annotations.Meta;
 import org.apache.wicket.Component;
-import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -26,7 +22,6 @@ import org.apache.wicket.util.visit.IVisitor;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionManager;
@@ -36,6 +31,7 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.WicketUtils;
 
 abstract class CardListPanel extends Panel {
 
@@ -160,11 +156,7 @@ abstract class CardListPanel extends Panel {
 
 		};
 	}
-	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class); 
-	}
-	
+		
 	private IssueManager getIssueManager() {
 		return OneDev.getInstance(IssueManager.class);
 	}

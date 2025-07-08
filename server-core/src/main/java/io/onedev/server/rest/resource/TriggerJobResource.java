@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Api(order=3510, description="This resource provides an alternative way to run job by passing all parameters via url")
+@Api(description="This resource provides an alternative way to run job by passing all parameters via url")
 @Path("/trigger-job")
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.APPLICATION_JSON)

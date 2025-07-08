@@ -27,7 +27,6 @@ import io.onedev.server.model.IssueCommentRevision;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
-@Api(order=2300)
 @Path("/issue-comments")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

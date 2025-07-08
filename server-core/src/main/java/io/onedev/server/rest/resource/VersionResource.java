@@ -11,7 +11,7 @@ import javax.ws.rs.core.MediaType;
 import io.onedev.server.OneDev;
 import io.onedev.server.rest.annotation.Api;
 
-@Api(order=100000, description = "Version info for server and various tools")
+@Api(description = "Version info for server and various tools")
 @Path("/version")
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton

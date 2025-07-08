@@ -15,7 +15,6 @@ import javax.ws.rs.core.Response;
 import static io.onedev.server.security.SecurityUtils.canAccessIssue;
 import static io.onedev.server.security.SecurityUtils.canEditIssueLink;
 
-@Api(order=2400)
 @Path("/issue-links")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

@@ -14,7 +14,6 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.cp.IAtomicLong;
 
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.GroupManager;

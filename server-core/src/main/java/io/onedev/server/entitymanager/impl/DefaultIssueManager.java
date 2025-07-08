@@ -149,7 +149,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final SequenceGenerator numberGenerator;
 	
-	private volatile IMap<String, Long> ids;
+	private volatile IMap<String, Long> idCache;
 	
 	@Inject
 	public DefaultIssueManager(Dao dao, IssueFieldManager fieldManager, TransactionManager transactionManager, 
@@ -189,7 +189,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		logger.info("Caching issue info...");
 
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-        ids = hazelcastInstance.getMap("issueIds");
+        idCache = hazelcastInstance.getMap("issueIds");
         
 		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("issueCacheInited");
 		clusterManager.initWithLead(cacheInited, () -> {
@@ -198,7 +198,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				Long issueId = (Long) fields[0];
 				Long projectId = (Long)fields[1];
 				Long issueNumber = (Long) fields[2];
-				ids.put(getCacheKey(projectId, issueNumber), issueId);
+				idCache.put(getCacheKey(projectId, issueNumber), issueId);
 			}
 			return 1L;
 		});
@@ -927,7 +927,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			Issue issue = (Issue) event.getEntity();
 			var issueKey = getCacheKey(issue);
 			var issueId = issue.getId();
-			transactionManager.runAfterCommit(() -> ids.put(issueKey, issueId));
+			transactionManager.runAfterCommit(() -> idCache.put(issueKey, issueId));
 		}
 	}
 	
@@ -936,7 +936,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Issue) {
 			var cacheKey = getCacheKey((Issue) event.getEntity());
-			transactionManager.runAfterCommit(() -> ids.remove(cacheKey));
+			transactionManager.runAfterCommit(() -> idCache.remove(cacheKey));
 			
 		} else if (event.getEntity() instanceof Project) {
 			Project project = (Project) event.getEntity();
@@ -944,12 +944,12 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	    		numberGenerator.removeNextSequence(project);
 			
 			Long projectId = project.getId();
-			transactionManager.runAfterCommit(() -> ids.removeAll(entry -> entry.getKey().startsWith(projectId + ":")));
+			transactionManager.runAfterCommit(() -> idCache.removeAll(entry -> entry.getKey().startsWith(projectId + ":")));
 		}
 	}
 	
 	private Long getIssueId(Long projectId, Long issueNumber) {
-		return ids.get(getCacheKey(projectId, issueNumber));
+		return idCache.get(getCacheKey(projectId, issueNumber));
 	}
 	
 	@Sessional

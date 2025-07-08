@@ -32,7 +32,7 @@ import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.security.SecurityUtils;
 
-@Api(order=4300, name="Package")
+@Api(name="Package")
 @Path("/packages")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

@@ -41,7 +41,6 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
-@Api(order=1100)
 @Path("/repositories")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

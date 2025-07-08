@@ -64,7 +64,6 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.security.SecurityUtils;
 
-@Api(order=5000)
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

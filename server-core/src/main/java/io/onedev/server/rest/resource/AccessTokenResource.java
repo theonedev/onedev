@@ -30,7 +30,6 @@ import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.AccessTokenAuthorization;
 import io.onedev.server.rest.annotation.Api;
 
-@Api(order=5030)
 @Path("/access-tokens")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

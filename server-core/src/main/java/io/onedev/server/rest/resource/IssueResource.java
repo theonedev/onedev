@@ -64,7 +64,7 @@ import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.web.page.help.ApiHelpUtils;
 import io.onedev.server.web.page.help.ValueInfo;
 
-@Api(order=2000, description="In most cases, issue resource is operated with issue id, which is different from issue number. "
+@Api(description="In most cases, issue resource is operated with issue id, which is different from issue number. "
 		+ "To get issue id of a particular issue number, use the <a href='/~help/api/io.onedev.server.rest.IssueResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
 		+ "instance <code>&quot;Number&quot; is &quot;path/to/project#100&quot;</code> or <code>&quot;Number&quot; is &quot;PROJECTKEY-100&quot;</code>")
 @Path("/issues")
