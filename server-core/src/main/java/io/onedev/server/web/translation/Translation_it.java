@@ -184,7 +184,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Add issue state", "Aggiungi stato del problema");
 		m.put("Add issue state transition", "Aggiungi transizione di stato del problema");
 		m.put("Add link", "Aggiungi collegamento");
-		m.put("Add member...", "Aggiungi membro...");
 		m.put("Add new", "Aggiungi nuovo");
 		m.put("Add new card to this column", "Aggiungi nuova scheda a questa colonna");
 		m.put("Add new file", "Aggiungi nuovo file");
@@ -884,7 +883,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Delete All Queried Builds", "Elimina Tutte le Build Interrogate");
 		m.put("Delete All Queried Comments", "Elimina Tutti i Commenti Interrogati");
 		m.put("Delete All Queried Issues", "Elimina Tutti i Problemi Interrogati");
-		m.put("Delete All Queried Memberships", "Elimina Tutti i Membri Interrogati");
 		m.put("Delete All Queried Packages", "Elimina Tutti i Pacchetti Interrogati");
 		m.put("Delete All Queried Projects", "Elimina Tutti i Progetti Interrogati");
 		m.put("Delete All Queried Pull Requests", "Elimina Tutte le Pull Request Interrogate");
@@ -896,7 +894,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Delete Selected Builds", "Elimina Build Selezionate");
 		m.put("Delete Selected Comments", "Elimina Commenti Selezionati");
 		m.put("Delete Selected Issues", "Elimina Problemi Selezionati");
-		m.put("Delete Selected Memberships", "Elimina Membri Selezionati");
 		m.put("Delete Selected Packages", "Elimina i pacchetti selezionati");
 		m.put("Delete Selected Projects", "Elimina i progetti selezionati");
 		m.put("Delete Selected Pull Requests", "Elimina le richieste di pull selezionate");
@@ -1111,7 +1108,9 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Enable All Queried Users", "Abilita Tutti gli Utenti Interrogati");
 		m.put("Enable Anonymous Access", "Abilita Accesso Anonimo");
 		m.put("Enable Auto Backup", "Abilita Backup Automatico");
+		m.put("Enable Html Report Publish", "Abilita Pubblicazione Report Html");
 		m.put("Enable Selected Users", "Abilita Utenti Selezionati");
+		m.put("Enable Site Publish", "Abilita Pubblicazione Sito");
 		m.put("Enable TTY Mode", "Abilita Modalità TTY");
 		m.put("Enable build support by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "Abilita supporto build tramite <a wicket:id=\"addFile\" class=\"link-primary\"></a>");
 		m.put("Enable if visibility of this field depends on other fields", "Abilita se la visibilità di questo campo dipende da altri campi");
@@ -1119,6 +1118,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Enable this if the access token has same permissions as the owner", "Abilita questa opzione se il token di accesso ha gli stessi permessi del proprietario");
 		m.put("Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)", 
 			"Abilita questa opzione per unire automaticamente la pull request quando pronta (tutti i revisori hanno approvato, tutti i lavori richiesti sono passati, ecc.)");
+		m.put("Enable this to allow to run html report publish step. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
+			"Abilita questa opzione per consentire l'esecuzione del passaggio di pubblicazione del report html. Per evitare attacchi XSS, assicurati che questo executor possa essere utilizzato solo da lavori fidati");
 		m.put("Enable this to allow to run site publish step. OneDev will serve project site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
 			"Abilita questa opzione per consentire l'esecuzione del passaggio di pubblicazione del sito. OneDev servirà i file del sito del progetto così come sono. Per evitare attacchi XSS, assicurati che questo executor possa essere utilizzato solo da lavori fidati");
 		m.put("Enable this to place intermediate files required by job execution on dynamically allocated persistent volume instead of emptyDir", 
@@ -1432,7 +1433,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Group Retrieval", "Recupero Gruppo");
 		m.put("Group Search Base", "Base di Ricerca Gruppo");
 		m.put("Group Search Filter", "Filtro di Ricerca Gruppo");
-		m.put("Group added", "Gruppo aggiunto");
 		m.put("Group authorizations updated", "Autorizzazioni gruppo aggiornate");
 		m.put("Group created", "Gruppo creato");
 		m.put("Groups", "Gruppi");
@@ -1908,7 +1908,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("May not be empty", "Non può essere vuoto");
 		m.put("Medium", "Medio");
 		m.put("Medium Severity", "Gravità Media");
-		m.put("Member added", "Membro aggiunto");
 		m.put("Members", "Membri");
 		m.put("Memory", "Memoria");
 		m.put("Memory Limit", "Limite di memoria");
@@ -1935,7 +1934,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Months", "Mesi");
 		m.put("Months to Display", "Mesi da visualizzare");
 		m.put("More", "Altro");
-		m.put("More Activities", "Altre attività");
 		m.put("More Options", "Altre opzioni");
 		m.put("More Settings", "Altre impostazioni");
 		m.put("More commits", "Altri commit");
@@ -2063,6 +2061,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("No diffs", "Nessuna differenza");
 		m.put("No diffs to navigate", "Nessuna differenza da navigare");
 		m.put("No directories to skip", "Nessuna directory da saltare");
+		m.put("No executors defined. Jobs will use auto-discovered executors instead", "Nessun executor definito. I lavori utilizzeranno executor rilevati automaticamente");
 		m.put("No external authenticator", "Nessun autenticatore esterno");
 		m.put("No fields to prompt", "Nessun campo da richiedere");
 		m.put("No fields to remove", "Nessun campo da rimuovere");
@@ -2086,7 +2085,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("No jobs defined", "Nessun job definito");
 		m.put("No limit", "Nessun limite");
 		m.put("No mail service", "Nessun servizio di posta");
-		m.put("No memberships to delete", "Nessuna appartenenza da eliminare");
 		m.put("No obvious changes", "Nessuna modifica evidente");
 		m.put("No one", "Nessuno");
 		m.put("No packages to delete", "Nessun pacchetto da eliminare");
@@ -2290,6 +2288,7 @@ public class Translation_it extends TranslationResourceBundle {
 			"Specifica facoltativamente il dominio email consentito per gli utenti che si registrano autonomamente. Usa '*' o '?' per la corrispondenza del modello");
 		m.put("Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). Leave empty to all types", 
 			"Specifica facoltativamente i tipi di commit applicabili per il controllo del piè di pagina del messaggio di commit (premi INVIO per aggiungere un valore). Lascia vuoto per tutti i tipi");
+		m.put("Optionally specify applicable jobs of this executor", "Specifica facoltativamente i lavori applicabili di questo executor");
 		m.put("Optionally specify arguments to run above image", "Specifica facoltativamente gli argomenti per eseguire l'immagine sopra");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
 			"Specifica facoltativamente gli artefatti da recuperare dalla dipendenza in <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Possono essere recuperati solo artefatti pubblicati (tramite il passaggio di pubblicazione degli artefatti). Lascia vuoto per non recuperare alcun artefatto");
@@ -2331,6 +2330,10 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Optionally specify environment variables for this step", "Specifica facoltativamente le variabili d'ambiente per questo passaggio");
 		m.put("Optionally specify environment variables of the service", "Specifica facoltativamente le variabili d'ambiente del servizio");
 		m.put("Optionally specify estimated time.", "Specifica facoltativamente il tempo stimato.");
+		m.put("Optionally specify executor for this job. Leave empty to use auto-discover executor", 
+			"Specifica facoltativamente l'executor per questo lavoro. Lascia vuoto per utilizzare l'executor rilevato automaticamente");
+		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
+			"Specifica facoltativamente l'executor per questo lavoro. Lascia vuoto per utilizzare il primo executor applicabile");
 		m.put("Optionally specify files relative to cache path to ignore when detect cache changes. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple files should be separated by space, and single file containing space should be quoted", 
 			"Specifica facoltativamente i file relativi al percorso della cache da ignorare quando si rilevano modifiche alla cache. Usa '**', '*' o '?' per <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>la corrispondenza dei modelli di percorso</a>. Più file dovrebbero essere separati da spazio, e un singolo file contenente spazi dovrebbe essere quotato");
 		m.put("Optionally specify group search base if you want to retrieve group membership information of the user. For example: <i>cn=Users, dc=example, dc=com</i>. To give appropriate permissions to a Active Directory group, a OneDev group with same name should be defined. Leave empty to manage group memberships at OneDev side", 
@@ -2599,7 +2602,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Please select issues to edit", "Si prega di selezionare le issue da modificare");
 		m.put("Please select issues to move", "Si prega di selezionare le issue da spostare");
 		m.put("Please select issues to sync estimated/spent time", "Si prega di selezionare le issue per sincronizzare il tempo stimato/speso");
-		m.put("Please select memberships to delete", "Si prega di selezionare le membership da eliminare");
 		m.put("Please select packages to delete", "Si prega di selezionare i pacchetti da eliminare");
 		m.put("Please select projects to delete", "Si prega di selezionare i progetti da eliminare");
 		m.put("Please select projects to modify", "Si prega di selezionare i progetti da modificare");
@@ -3610,7 +3612,6 @@ public class Translation_it extends TranslationResourceBundle {
 			"I passaggi verranno eseguiti in serie sullo stesso nodo, condividendo lo stesso <a href='https://docs.onedev.io/concepts#job-workspace'>workspace del job</a>");
 		m.put("Stop work", "Ferma il lavoro");
 		m.put("Stopwatch Overdue", "Cronometro Scaduto");
-		m.put("Storage Setting", "Impostazione di Archiviazione");
 		m.put("Storage file missing", "File di archiviazione mancante");
 		m.put("Storage not found", "Archiviazione non trovata");
 		m.put("Stored with Git LFS", "Archiviato con Git LFS");
@@ -3764,6 +3765,10 @@ public class Translation_it extends TranslationResourceBundle {
 			"Questo executor esegue i lavori di build come container docker su macchine remote tramite <a href='/~administration/agents' target='_blank'>agenti</a>");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"Questo executor esegue i lavori di build come pod in un cluster Kubernetes. Non sono richiesti agenti.<b class='text-danger'>Nota:</b> Assicurati che l'URL del server sia specificato correttamente nelle impostazioni di sistema poiché i pod di lavoro devono accedervi per scaricare sorgenti e artefatti");
+		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
+			"Questo executor esegue lavori di build con la funzionalità shell del server OneDev.<br><b class='text-danger'>ATTENZIONE</b>: I lavori eseguiti con questo executor hanno gli stessi permessi del processo del server OneDev. Assicurati che possa essere utilizzato solo da lavori fidati");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
+			"Questo executor esegue lavori di build con la funzionalità shell di macchine remote tramite <a href='/~administration/agents' target='_blank'>agenti</a><br><b class='text-danger'>ATTENZIONE</b>: I lavori eseguiti con questo executor hanno gli stessi permessi del processo dell'agente OneDev. Assicurati che possa essere utilizzato solo da lavori fidati");
 		m.put("This field is required", "Questo campo è obbligatorio");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"Questo filtro viene utilizzato per determinare la voce LDAP per l'utente corrente. Ad esempio: <i>(&(uid={0})(objectclass=person))</i>. In questo esempio, <i>{0}</i> rappresenta il nome di login dell'utente corrente.");
@@ -3930,14 +3935,12 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Type <code>yes</code> below to delete all queried builds", "Digita <code>yes</code> qui sotto per eliminare tutte le build interrogate");
 		m.put("Type <code>yes</code> below to delete all queried comments", "Digita <code>yes</code> qui sotto per eliminare tutti i commenti interrogati");
 		m.put("Type <code>yes</code> below to delete all queried issues", "Digita <code>yes</code> qui sotto per eliminare tutti i problemi interrogati");
-		m.put("Type <code>yes</code> below to delete all queried memberships", "Digita <code>yes</code> qui sotto per eliminare tutte le appartenenze interrogate");
 		m.put("Type <code>yes</code> below to delete all queried packages", "Digita <code>yes</code> qui sotto per eliminare tutti i pacchetti interrogati");
 		m.put("Type <code>yes</code> below to delete all queried projects", "Digita <code>yes</code> qui sotto per eliminare tutti i progetti interrogati");
 		m.put("Type <code>yes</code> below to delete all queried pull requests", "Digita <code>yes</code> qui sotto per eliminare tutte le richieste di pull interrogate");
 		m.put("Type <code>yes</code> below to delete selected builds", "Digita <code>yes</code> qui sotto per eliminare le build selezionate");
 		m.put("Type <code>yes</code> below to delete selected comments", "Digita <code>yes</code> qui sotto per eliminare i commenti selezionati");
 		m.put("Type <code>yes</code> below to delete selected issues", "Digita <code>yes</code> qui sotto per eliminare i problemi selezionati");
-		m.put("Type <code>yes</code> below to delete selected memberships", "Digita <code>yes</code> qui sotto per eliminare le appartenenze selezionate");
 		m.put("Type <code>yes</code> below to delete selected packages", "Digita <code>yes</code> qui sotto per eliminare i pacchetti selezionati");
 		m.put("Type <code>yes</code> below to delete selected projects", "Digita <code>yes</code> qui sotto per eliminare i progetti selezionati");
 		m.put("Type <code>yes</code> below to delete selected pull requests", "Digita <code>yes</code> qui sotto per eliminare le richieste di pull selezionate");
@@ -4198,6 +4201,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Whether or not to include this field when issue is initially opened. If not, you may include this field later when issue is transited to other states via issue transition rule", 
 			"Se includere questo campo quando il problema è inizialmente aperto o meno. In caso contrario, puoi includere questo campo successivamente quando il problema viene transitato ad altri stati tramite regola di transizione del problema");
 		m.put("Whether or not to input and display estimated/spent time in hours/minutes only", "Se inserire e visualizzare il tempo stimato/speso solo in ore/minuti o meno");
+		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
+			"Se montare o meno il socket docker nel container del lavoro per supportare le operazioni docker nei comandi del lavoro<br><b class='text-danger'>ATTENZIONE</b>: I lavori dannosi possono prendere il controllo dell'intero OneDev operando sul socket docker montato. Assicurati che questo executor possa essere utilizzato solo da lavori fidati se questa opzione è abilitata");
 		m.put("Whether or not to pre-populate tag mappings in next page. You may want to disable this if there are too many tags to display", 
 			"Se pre-popolare le mappature dei tag nella pagina successiva o meno. Potresti voler disabilitare questo se ci sono troppi tag da visualizzare");
 		m.put("Whether or not to require this dependency to be successful", "Se richiedere che questa dipendenza abbia successo o meno");
@@ -4493,22 +4498,41 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Enable Html Report Publish", "Abilita Pubblicazione Report Html");
-		m.put("Enable Site Publish", "Abilita Pubblicazione Sito");
-		m.put("Enable this to allow to run html report publish step. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
-			"Abilita questa opzione per consentire l'esecuzione del passaggio di pubblicazione del report html. Per evitare attacchi XSS, assicurati che questo executor possa essere utilizzato solo da lavori fidati");
-		m.put("No executors defined. Jobs will use auto-discovered executors instead", "Nessun executor definito. I lavori utilizzeranno executor rilevati automaticamente");
-		m.put("Optionally specify applicable jobs of this executor", "Specifica facoltativamente i lavori applicabili di questo executor");
-		m.put("Optionally specify executor for this job. Leave empty to use auto-discover executor", 
-			"Specifica facoltativamente l'executor per questo lavoro. Lascia vuoto per utilizzare l'executor rilevato automaticamente");
-		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
-			"Specifica facoltativamente l'executor per questo lavoro. Lascia vuoto per utilizzare il primo executor applicabile");
-		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
-			"Questo executor esegue lavori di build con la funzionalità shell del server OneDev.<br><b class='text-danger'>ATTENZIONE</b>: I lavori eseguiti con questo executor hanno gli stessi permessi del processo del server OneDev. Assicurati che possa essere utilizzato solo da lavori fidati");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
-			"Questo executor esegue lavori di build con la funzionalità shell di macchine remote tramite <a href='/~administration/agents' target='_blank'>agenti</a><br><b class='text-danger'>ATTENZIONE</b>: I lavori eseguiti con questo executor hanno gli stessi permessi del processo dell'agente OneDev. Assicurati che possa essere utilizzato solo da lavori fidati");
-		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
-			"Se montare o meno il socket docker nel container del lavoro per supportare le operazioni docker nei comandi del lavoro<br><b class='text-danger'>ATTENZIONE</b>: I lavori dannosi possono prendere il controllo dell'intero OneDev operando sul socket docker montato. Assicurati che questo executor possa essere utilizzato solo da lavori fidati se questa opzione è abilitata");
+		m.put("Add user to group...", "Aggiungi utente al gruppo...");
+		m.put("Added to group", "Aggiunto al gruppo");
+		m.put("Audit", "Audit");
+		m.put("Audit Log", "Registro di controllo");
+		m.put("Audit Setting", "Impostazione di controllo");
+		m.put("Audit log will be preserved for the specified number of days. This setting applies to all audit events, including system level and project level", 
+			"Il registro di controllo sarà conservato per il numero di giorni specificato. Questa impostazione si applica a tutti gli eventi di controllo, inclusi quelli a livello di sistema e di progetto");
+		m.put("Builds are {0}", "Le build sono {0}");
+		m.put("Events", "Eventi");
+		m.put("Filter actions", "Filtra azioni");
+		m.put("Filter date range", "Filtra intervallo di date");
+		m.put("Filter users", "Filtra utenti");
+		m.put("No audits", "Nessun controllo");
+		m.put("No groups to remove from", "Nessun gruppo da cui rimuovere");
+		m.put("No jobs found", "Nessun job trovato");
+		m.put("No users to remove from group", "Nessun utente da rimuovere dal gruppo");
+		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
+			"Qui vengono visualizzati solo gli eventi di controllo a livello di sistema. Per visualizzare gli eventi di controllo di un progetto specifico, visita la pagina del registro di controllo del progetto");
+		m.put("Please select groups to remove from", "Seleziona i gruppi da cui rimuovere");
+		m.put("Please select users to remove from group", "Seleziona gli utenti da rimuovere dal gruppo");
+		m.put("Remove All Queried Users from Group", "Rimuovi tutti gli utenti interrogati dal gruppo");
+		m.put("Remove Selected Users from Group", "Rimuovi gli utenti selezionati dal gruppo");
+		m.put("Remove from All Queried Groups", "Rimuovi da tutti i gruppi interrogati");
+		m.put("Remove from Selected Groups", "Rimuovi dai gruppi selezionati");
+		m.put("Select Job", "Seleziona job");
+		m.put("Server is Starting...", "Il server si sta avviando...");
+		m.put("Settings saved", "Impostazioni salvate");
+		m.put("Settings saved and project redistribution scheduled", "Impostazioni salvate e ridistribuzione del progetto pianificata");
+		m.put("Some builds are {0}", "Alcune build sono {0}");
+		m.put("Storage Settings", "Impostazioni di archiviazione");
+		m.put("Type <code>yes</code> below to remove all queried users from group", "Digita <code>yes</code> qui sotto per rimuovere tutti gli utenti interrogati dal gruppo");
+		m.put("Type <code>yes</code> below to remove from all queried groups", "Digita <code>yes</code> qui sotto per rimuovere da tutti i gruppi interrogati");
+		m.put("Type <code>yes</code> below to remove from selected groups", "Digita <code>yes</code> qui sotto per rimuovere dai gruppi selezionati");
+		m.put("Type <code>yes</code> below to remove selected users from group", "Digita <code>yes</code> qui sotto per rimuovere gli utenti selezionati dal gruppo");
+		m.put("User added to group", "Utente aggiunto al gruppo");
 	}
 		
 	@Override

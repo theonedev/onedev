@@ -184,7 +184,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Add issue state", "이슈 상태 추가");
 		m.put("Add issue state transition", "이슈 상태 전환 추가");
 		m.put("Add link", "링크 추가");
-		m.put("Add member...", "멤버 추가...");
 		m.put("Add new", "새로 추가");
 		m.put("Add new card to this column", "이 열에 새 카드 추가");
 		m.put("Add new file", "새 파일 추가");
@@ -884,7 +883,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Delete All Queried Builds", "쿼리된 빌드 모두 삭제");
 		m.put("Delete All Queried Comments", "쿼리된 댓글 모두 삭제");
 		m.put("Delete All Queried Issues", "쿼리된 이슈 모두 삭제");
-		m.put("Delete All Queried Memberships", "쿼리된 멤버십 모두 삭제");
 		m.put("Delete All Queried Packages", "쿼리된 패키지 모두 삭제");
 		m.put("Delete All Queried Projects", "쿼리된 프로젝트 모두 삭제");
 		m.put("Delete All Queried Pull Requests", "쿼리된 풀 리퀘스트 모두 삭제");
@@ -896,7 +894,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Delete Selected Builds", "선택된 빌드 삭제");
 		m.put("Delete Selected Comments", "선택된 댓글 삭제");
 		m.put("Delete Selected Issues", "선택된 이슈 삭제");
-		m.put("Delete Selected Memberships", "선택된 멤버십 삭제");
 		m.put("Delete Selected Packages", "선택한 패키지 삭제");
 		m.put("Delete Selected Projects", "선택한 프로젝트 삭제");
 		m.put("Delete Selected Pull Requests", "선택한 풀 리퀘스트 삭제");
@@ -1111,7 +1108,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Enable All Queried Users", "모든 조회된 사용자를 활성화합니다");
 		m.put("Enable Anonymous Access", "익명 액세스를 활성화합니다");
 		m.put("Enable Auto Backup", "자동 백업을 활성화합니다");
+		m.put("Enable Html Report Publish", "HTML 보고서 게시 활성화");
 		m.put("Enable Selected Users", "선택된 사용자를 활성화합니다");
+		m.put("Enable Site Publish", "사이트 게시 활성화");
 		m.put("Enable TTY Mode", "TTY 모드를 활성화합니다");
 		m.put("Enable build support by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "<a wicket:id=\"addFile\" class=\"link-primary\"></a>를 통해 빌드 지원을 활성화합니다");
 		m.put("Enable if visibility of this field depends on other fields", "이 필드의 가시성이 다른 필드에 따라 달라지는 경우 활성화합니다");
@@ -1119,6 +1118,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Enable this if the access token has same permissions as the owner", "액세스 토큰이 소유자와 동일한 권한을 가진 경우 이를 활성화합니다");
 		m.put("Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)", 
 			"준비되었을 때(모든 리뷰어 승인, 모든 필수 작업 통과 등) 풀 리퀘스트를 자동으로 병합하도록 이 옵션을 활성화합니다");
+		m.put("Enable this to allow to run html report publish step. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
+			"HTML 보고서 게시 단계를 실행할 수 있도록 활성화합니다. XSS 공격을 방지하려면 이 실행자가 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
 		m.put("Enable this to allow to run site publish step. OneDev will serve project site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
 			"사이트 게시 단계를 실행할 수 있도록 허용하려면 이를 활성화합니다. OneDev는 프로젝트 사이트 파일을 그대로 제공합니다. XSS 공격을 방지하려면 이 실행자가 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
 		m.put("Enable this to place intermediate files required by job execution on dynamically allocated persistent volume instead of emptyDir", 
@@ -1432,7 +1433,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Group Retrieval", "그룹 검색");
 		m.put("Group Search Base", "그룹 검색 기준");
 		m.put("Group Search Filter", "그룹 검색 필터");
-		m.put("Group added", "그룹이 추가되었습니다");
 		m.put("Group authorizations updated", "그룹 권한 부여가 업데이트되었습니다");
 		m.put("Group created", "그룹이 생성되었습니다");
 		m.put("Groups", "그룹들");
@@ -1908,7 +1908,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("May not be empty", "비어 있을 수 없습니다");
 		m.put("Medium", "중간");
 		m.put("Medium Severity", "중간 심각도");
-		m.put("Member added", "멤버 추가됨");
 		m.put("Members", "멤버들");
 		m.put("Memory", "메모리");
 		m.put("Memory Limit", "메모리 제한");
@@ -1935,7 +1934,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Months", "개월");
 		m.put("Months to Display", "표시할 개월 수");
 		m.put("More", "더 보기");
-		m.put("More Activities", "더 많은 활동");
 		m.put("More Options", "더 많은 옵션");
 		m.put("More Settings", "더 많은 설정");
 		m.put("More commits", "더 많은 커밋");
@@ -2063,6 +2061,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No diffs", "차이 없음");
 		m.put("No diffs to navigate", "탐색할 차이 없음");
 		m.put("No directories to skip", "건너뛸 디렉터리 없음");
+		m.put("No executors defined. Jobs will use auto-discovered executors instead", "정의된 실행자가 없습니다. 작업은 자동으로 검색된 실행자를 대신 사용합니다");
 		m.put("No external authenticator", "외부 인증자 없음");
 		m.put("No fields to prompt", "프롬프트할 필드 없음");
 		m.put("No fields to remove", "제거할 필드 없음");
@@ -2086,7 +2085,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No jobs defined", "정의된 작업 없음");
 		m.put("No limit", "제한 없음");
 		m.put("No mail service", "메일 서비스 없음");
-		m.put("No memberships to delete", "삭제할 멤버십 없음");
 		m.put("No obvious changes", "명확한 변경 사항 없음");
 		m.put("No one", "아무도 없음");
 		m.put("No packages to delete", "삭제할 패키지 없음");
@@ -2290,6 +2288,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 자체 가입 사용자에 대한 허용된 이메일 도메인을 지정하세요. 패턴 매칭을 위해 '*' 또는 '?'를 사용하세요.");
 		m.put("Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). Leave empty to all types", 
 			"선택적으로 커밋 메시지 풋터 확인을 위한 적용 가능한 커밋 유형을 지정하세요 (값을 추가하려면 ENTER를 누르세요). 모든 유형을 지정하려면 비워 두세요.");
+		m.put("Optionally specify applicable jobs of this executor", "선택적으로 이 실행자에 적용 가능한 작업을 지정합니다");
 		m.put("Optionally specify arguments to run above image", "선택적으로 위 이미지 실행을 위한 인수를 지정하세요.");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
 			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 워크스페이스</a>로 종속 항목에서 검색할 아티팩트를 지정하세요. 게시된 아티팩트(아티팩트 게시 단계에서 게시된 것)만 검색할 수 있습니다. 아티팩트를 검색하지 않으려면 비워 두세요.");
@@ -2331,6 +2330,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify environment variables for this step", "선택적으로 이 단계의 환경 변수를 지정하세요.");
 		m.put("Optionally specify environment variables of the service", "선택적으로 서비스의 환경 변수를 지정하세요.");
 		m.put("Optionally specify estimated time.", "선택적으로 예상 시간을 지정하세요.");
+		m.put("Optionally specify executor for this job. Leave empty to use auto-discover executor", 
+			"선택적으로 이 작업에 대한 실행자를 지정합니다. 비워두면 자동 검색된 실행자를 사용합니다");
+		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
+			"선택적으로 이 작업에 대한 실행자를 지정합니다. 비워두면 첫 번째 적용 가능한 실행자를 사용합니다");
 		m.put("Optionally specify files relative to cache path to ignore when detect cache changes. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple files should be separated by space, and single file containing space should be quoted", 
 			"선택적으로 캐시 변경을 감지할 때 무시할 캐시 경로에 상대적인 파일을 지정하세요. <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매칭</a>을 위해 '**', '*' 또는 '?'를 사용하세요. 여러 파일은 공백으로 구분해야 하며, 공백이 포함된 단일 파일은 따옴표로 묶어야 합니다.");
 		m.put("Optionally specify group search base if you want to retrieve group membership information of the user. For example: <i>cn=Users, dc=example, dc=com</i>. To give appropriate permissions to a Active Directory group, a OneDev group with same name should be defined. Leave empty to manage group memberships at OneDev side", 
@@ -2599,7 +2602,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Please select issues to edit", "편집할 이슈를 선택해주세요");
 		m.put("Please select issues to move", "이동할 이슈를 선택해주세요");
 		m.put("Please select issues to sync estimated/spent time", "예상/소요 시간을 동기화할 이슈를 선택해주세요");
-		m.put("Please select memberships to delete", "삭제할 멤버십을 선택해주세요");
 		m.put("Please select packages to delete", "삭제할 패키지를 선택해주세요");
 		m.put("Please select projects to delete", "삭제할 프로젝트를 선택해주세요");
 		m.put("Please select projects to modify", "수정할 프로젝트를 선택해주세요");
@@ -3610,7 +3612,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"단계는 동일한 노드에서 직렬로 실행되며 동일한 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a>을 공유합니다.");
 		m.put("Stop work", "작업 중지");
 		m.put("Stopwatch Overdue", "스톱워치 초과");
-		m.put("Storage Setting", "스토리지 설정");
 		m.put("Storage file missing", "스토리지 파일 누락");
 		m.put("Storage not found", "스토리지를 찾을 수 없음");
 		m.put("Stored with Git LFS", "Git LFS로 저장됨");
@@ -3764,6 +3765,10 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이 실행자는 <a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신에서 Docker 컨테이너로 빌드 작업을 실행합니다");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"이 실행자는 Kubernetes 클러스터에서 Pod로 빌드 작업을 실행합니다. 에이전트가 필요하지 않습니다.<b class='text-danger'>참고:</b> 작업 Pod가 소스 및 아티팩트를 다운로드하기 위해 시스템 설정에서 서버 URL이 올바르게 지정되었는지 확인하세요");
+		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
+			"이 실행자는 OneDev 서버의 셸 기능을 사용하여 빌드 작업을 실행합니다.<br><b class='text-danger'>경고</b>: 이 실행자를 사용하는 작업은 OneDev 서버 프로세스와 동일한 권한을 가집니다. 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
+			"이 실행자는 <a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신의 셸 기능을 사용하여 빌드 작업을 실행합니다<br><b class='text-danger'>경고</b>: 이 실행자를 사용하는 작업은 OneDev 에이전트 프로세스와 동일한 권한을 가집니다. 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
 		m.put("This field is required", "이 필드는 필수입니다");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"이 필터는 현재 사용자의 LDAP 항목을 결정하는 데 사용됩니다. 예: <i>(&(uid={0})(objectclass=person))</i>. 이 예에서 <i>{0}</i>는 현재 사용자의 로그인 이름을 나타냅니다.");
@@ -3930,14 +3935,12 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Type <code>yes</code> below to delete all queried builds", "아래에 <code>yes</code>를 입력하여 모든 조회된 빌드를 삭제하세요");
 		m.put("Type <code>yes</code> below to delete all queried comments", "아래에 <code>yes</code>를 입력하여 모든 조회된 댓글을 삭제하세요");
 		m.put("Type <code>yes</code> below to delete all queried issues", "아래에 <code>yes</code>를 입력하여 모든 조회된 문제를 삭제하세요");
-		m.put("Type <code>yes</code> below to delete all queried memberships", "아래에 <code>yes</code>를 입력하여 모든 조회된 멤버십을 삭제하세요");
 		m.put("Type <code>yes</code> below to delete all queried packages", "아래에 <code>yes</code>를 입력하여 모든 조회된 패키지를 삭제하세요");
 		m.put("Type <code>yes</code> below to delete all queried projects", "아래에 <code>yes</code>를 입력하여 모든 조회된 프로젝트를 삭제하세요");
 		m.put("Type <code>yes</code> below to delete all queried pull requests", "아래에 <code>yes</code>를 입력하여 모든 조회된 풀 리퀘스트를 삭제하세요");
 		m.put("Type <code>yes</code> below to delete selected builds", "아래에 <code>yes</code>를 입력하여 선택된 빌드를 삭제하세요");
 		m.put("Type <code>yes</code> below to delete selected comments", "아래에 <code>yes</code>를 입력하여 선택된 댓글을 삭제하세요");
 		m.put("Type <code>yes</code> below to delete selected issues", "아래에 <code>yes</code>를 입력하여 선택된 문제를 삭제하세요");
-		m.put("Type <code>yes</code> below to delete selected memberships", "아래에 <code>yes</code>를 입력하여 선택된 멤버십을 삭제하세요");
 		m.put("Type <code>yes</code> below to delete selected packages", "아래에 <code>yes</code>를 입력하여 선택된 패키지를 삭제하세요");
 		m.put("Type <code>yes</code> below to delete selected projects", "아래에 <code>yes</code>를 입력하여 선택된 프로젝트를 삭제하세요");
 		m.put("Type <code>yes</code> below to delete selected pull requests", "아래에 <code>yes</code>를 입력하여 선택된 풀 리퀘스트를 삭제하세요");
@@ -4198,6 +4201,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Whether or not to include this field when issue is initially opened. If not, you may include this field later when issue is transited to other states via issue transition rule", 
 			"문제가 처음 열릴 때 이 필드를 포함할지 여부. 포함하지 않을 경우, 문제가 다른 상태로 전환될 때 문제 전환 규칙을 통해 나중에 이 필드를 포함할 수 있습니다");
 		m.put("Whether or not to input and display estimated/spent time in hours/minutes only", "예상/소요 시간을 시간/분 단위로만 입력하고 표시할지 여부");
+		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
+			"작업 명령에서 도커 작업을 지원하기 위해 도커 소켓을 작업 컨테이너에 마운트할지 여부<br><b class='text-danger'>경고</b>: 악의적인 작업은 마운트된 도커 소켓을 조작하여 전체 OneDev를 제어할 수 있습니다. 이 옵션이 활성화된 경우 이 실행자가 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
 		m.put("Whether or not to pre-populate tag mappings in next page. You may want to disable this if there are too many tags to display", 
 			"다음 페이지에서 태그 매핑을 미리 채울지 여부. 표시할 태그가 너무 많을 경우 이 옵션을 비활성화할 수 있습니다");
 		m.put("Whether or not to require this dependency to be successful", "이 종속성이 성공해야 하는지 여부");
@@ -4493,22 +4498,41 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Enable Html Report Publish", "HTML 보고서 게시 활성화");
-		m.put("Enable Site Publish", "사이트 게시 활성화");
-		m.put("Enable this to allow to run html report publish step. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
-			"HTML 보고서 게시 단계를 실행할 수 있도록 활성화합니다. XSS 공격을 방지하려면 이 실행자가 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
-		m.put("No executors defined. Jobs will use auto-discovered executors instead", "정의된 실행자가 없습니다. 작업은 자동으로 검색된 실행자를 대신 사용합니다");
-		m.put("Optionally specify applicable jobs of this executor", "선택적으로 이 실행자에 적용 가능한 작업을 지정합니다");
-		m.put("Optionally specify executor for this job. Leave empty to use auto-discover executor", 
-			"선택적으로 이 작업에 대한 실행자를 지정합니다. 비워두면 자동 검색된 실행자를 사용합니다");
-		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
-			"선택적으로 이 작업에 대한 실행자를 지정합니다. 비워두면 첫 번째 적용 가능한 실행자를 사용합니다");
-		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
-			"이 실행자는 OneDev 서버의 셸 기능을 사용하여 빌드 작업을 실행합니다.<br><b class='text-danger'>경고</b>: 이 실행자를 사용하는 작업은 OneDev 서버 프로세스와 동일한 권한을 가집니다. 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
-			"이 실행자는 <a href='/~administration/agents' target='_blank'>에이전트</a>를 통해 원격 머신의 셸 기능을 사용하여 빌드 작업을 실행합니다<br><b class='text-danger'>경고</b>: 이 실행자를 사용하는 작업은 OneDev 에이전트 프로세스와 동일한 권한을 가집니다. 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
-		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
-			"작업 명령에서 도커 작업을 지원하기 위해 도커 소켓을 작업 컨테이너에 마운트할지 여부<br><b class='text-danger'>경고</b>: 악의적인 작업은 마운트된 도커 소켓을 조작하여 전체 OneDev를 제어할 수 있습니다. 이 옵션이 활성화된 경우 이 실행자가 신뢰할 수 있는 작업에서만 사용되도록 해야 합니다");
+		m.put("Add user to group...", "그룹에 사용자 추가...");
+		m.put("Added to group", "그룹에 추가됨");
+		m.put("Audit", "감사");
+		m.put("Audit Log", "감사 로그");
+		m.put("Audit Setting", "감사 설정");
+		m.put("Audit log will be preserved for the specified number of days. This setting applies to all audit events, including system level and project level", 
+			"감사 로그는 지정된 일수 동안 보존됩니다. 이 설정은 시스템 수준 및 프로젝트 수준을 포함한 모든 감사 이벤트에 적용됩니다");
+		m.put("Builds are {0}", "빌드는 {0} 상태입니다");
+		m.put("Events", "이벤트");
+		m.put("Filter actions", "작업 필터링");
+		m.put("Filter date range", "날짜 범위 필터링");
+		m.put("Filter users", "사용자 필터링");
+		m.put("No audits", "감사 없음");
+		m.put("No groups to remove from", "제거할 그룹이 없습니다");
+		m.put("No jobs found", "작업이 없습니다");
+		m.put("No users to remove from group", "그룹에서 제거할 사용자가 없습니다");
+		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
+			"여기에는 시스템 수준 감사 이벤트만 표시됩니다. 특정 프로젝트의 감사 이벤트를 보려면 프로젝트 감사 로그 페이지를 방문하세요");
+		m.put("Please select groups to remove from", "제거할 그룹을 선택하세요");
+		m.put("Please select users to remove from group", "그룹에서 제거할 사용자를 선택하세요");
+		m.put("Remove All Queried Users from Group", "그룹에서 조회된 모든 사용자 제거");
+		m.put("Remove Selected Users from Group", "그룹에서 선택된 사용자 제거");
+		m.put("Remove from All Queried Groups", "조회된 모든 그룹에서 제거");
+		m.put("Remove from Selected Groups", "선택된 그룹에서 제거");
+		m.put("Select Job", "작업 선택");
+		m.put("Server is Starting...", "서버 시작 중...");
+		m.put("Settings saved", "설정이 저장되었습니다");
+		m.put("Settings saved and project redistribution scheduled", "설정이 저장되었으며 프로젝트 재분배가 예약되었습니다");
+		m.put("Some builds are {0}", "일부 빌드는 {0} 상태입니다");
+		m.put("Storage Settings", "스토리지 설정");
+		m.put("Type <code>yes</code> below to remove all queried users from group", "그룹에서 조회된 모든 사용자를 제거하려면 아래에 <code>yes</code>를 입력하세요");
+		m.put("Type <code>yes</code> below to remove from all queried groups", "조회된 모든 그룹에서 제거하려면 아래에 <code>yes</code>를 입력하세요");
+		m.put("Type <code>yes</code> below to remove from selected groups", "선택된 그룹에서 제거하려면 아래에 <code>yes</code>를 입력하세요");
+		m.put("Type <code>yes</code> below to remove selected users from group", "그룹에서 선택된 사용자를 제거하려면 아래에 <code>yes</code>를 입력하세요");
+		m.put("User added to group", "사용자가 그룹에 추가되었습니다");
 	}
 		
 	@Override

@@ -57,7 +57,7 @@ public class ImportResult {
 		if (hasNotice)
 			feedback.append("</ul>");
 		
-		return feedback.toString();
-		
+		return feedback.toString();		
 	}
+	
 }

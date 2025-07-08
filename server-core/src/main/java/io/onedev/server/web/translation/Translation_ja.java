@@ -184,7 +184,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Add issue state", "課題状態を追加");
 		m.put("Add issue state transition", "課題状態遷移を追加");
 		m.put("Add link", "リンクを追加");
-		m.put("Add member...", "メンバーを追加...");
 		m.put("Add new", "新規追加");
 		m.put("Add new card to this column", "この列に新しいカードを追加");
 		m.put("Add new file", "新しいファイルを追加");
@@ -884,7 +883,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Delete All Queried Builds", "クエリされたビルドをすべて削除");
 		m.put("Delete All Queried Comments", "クエリされたコメントをすべて削除");
 		m.put("Delete All Queried Issues", "クエリされた課題をすべて削除");
-		m.put("Delete All Queried Memberships", "クエリされたメンバーシップをすべて削除");
 		m.put("Delete All Queried Packages", "クエリされたパッケージをすべて削除");
 		m.put("Delete All Queried Projects", "クエリされたプロジェクトをすべて削除");
 		m.put("Delete All Queried Pull Requests", "クエリされたプルリクエストをすべて削除");
@@ -896,7 +894,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Delete Selected Builds", "選択したビルドを削除");
 		m.put("Delete Selected Comments", "選択したコメントを削除");
 		m.put("Delete Selected Issues", "選択した課題を削除");
-		m.put("Delete Selected Memberships", "選択したメンバーシップを削除");
 		m.put("Delete Selected Packages", "選択したパッケージを削除");
 		m.put("Delete Selected Projects", "選択したプロジェクトを削除");
 		m.put("Delete Selected Pull Requests", "選択したプルリクエストを削除");
@@ -1111,7 +1108,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Enable All Queried Users", "すべてのクエリされたユーザーを有効にする");
 		m.put("Enable Anonymous Access", "匿名アクセスを有効にする");
 		m.put("Enable Auto Backup", "自動バックアップを有効にする");
+		m.put("Enable Html Report Publish", "HTMLレポート公開を有効化");
 		m.put("Enable Selected Users", "選択されたユーザーを有効にする");
+		m.put("Enable Site Publish", "サイト公開を有効化");
 		m.put("Enable TTY Mode", "TTYモードを有効にする");
 		m.put("Enable build support by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "<a wicket:id=\"addFile\" class=\"link-primary\"></a>によるビルドサポートを有効にする");
 		m.put("Enable if visibility of this field depends on other fields", "このフィールドの表示が他のフィールドに依存する場合に有効にする");
@@ -1119,6 +1118,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Enable this if the access token has same permissions as the owner", "アクセス トークンが所有者と同じ権限を持つ場合にこれを有効にする");
 		m.put("Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)", 
 			"このオプションを有効にすると、準備が整ったときにプルリクエストを自動的にマージできます (すべてのレビューアが承認し、すべての必要なジョブが成功するなど)");
+		m.put("Enable this to allow to run html report publish step. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
+			"HTMLレポート公開ステップを実行できるようにするにはこれを有効化してください。XSS攻撃を防ぐため、このエグゼキュータが信頼できるジョブでのみ使用されることを確認してください");
 		m.put("Enable this to allow to run site publish step. OneDev will serve project site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
 			"サイト公開ステップを実行できるようにするにはこれを有効にします。OneDevはプロジェクトサイトファイルをそのまま提供します。XSS攻撃を防ぐため、このエグゼキュータが信頼できるジョブでのみ使用されることを確認してください");
 		m.put("Enable this to place intermediate files required by job execution on dynamically allocated persistent volume instead of emptyDir", 
@@ -1432,7 +1433,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Group Retrieval", "グループ取得");
 		m.put("Group Search Base", "グループ検索ベース");
 		m.put("Group Search Filter", "グループ検索フィルター");
-		m.put("Group added", "グループが追加されました");
 		m.put("Group authorizations updated", "グループ認証が更新されました");
 		m.put("Group created", "グループが作成されました");
 		m.put("Groups", "グループ群");
@@ -1908,7 +1908,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("May not be empty", "空であってはなりません");
 		m.put("Medium", "中程度");
 		m.put("Medium Severity", "中程度の重大度");
-		m.put("Member added", "メンバーが追加されました");
 		m.put("Members", "メンバー");
 		m.put("Memory", "メモリ");
 		m.put("Memory Limit", "メモリ制限");
@@ -1935,7 +1934,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Months", "月");
 		m.put("Months to Display", "表示する月数");
 		m.put("More", "もっと見る");
-		m.put("More Activities", "さらに活動を見る");
 		m.put("More Options", "その他のオプション");
 		m.put("More Settings", "その他の設定");
 		m.put("More commits", "さらにコミットを見る");
@@ -2063,6 +2061,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No diffs", "差分なし");
 		m.put("No diffs to navigate", "ナビゲートする差分なし");
 		m.put("No directories to skip", "スキップするディレクトリなし");
+		m.put("No executors defined. Jobs will use auto-discovered executors instead", "エグゼキュータが定義されていません。ジョブは自動検出されたエグゼキュータを使用します");
 		m.put("No external authenticator", "外部認証機関なし");
 		m.put("No fields to prompt", "プロンプトするフィールドなし");
 		m.put("No fields to remove", "削除するフィールドなし");
@@ -2086,7 +2085,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No jobs defined", "定義されたジョブなし");
 		m.put("No limit", "制限なし");
 		m.put("No mail service", "メールサービスなし");
-		m.put("No memberships to delete", "削除するメンバーシップなし");
 		m.put("No obvious changes", "明らかな変更なし");
 		m.put("No one", "誰もいない");
 		m.put("No packages to delete", "削除するパッケージなし");
@@ -2290,6 +2288,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、自己登録ユーザーの許可されたメールドメインを指定してください。パターンマッチには'*'または'?'を使用してください。");
 		m.put("Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). Leave empty to all types", 
 			"オプションで、コミットメッセージフッターのチェックに適用されるコミットタイプを指定してください（ENTERキーを押して値を追加）。すべてのタイプを適用する場合は空のままにしてください。");
+		m.put("Optionally specify applicable jobs of this executor", "このエグゼキュータに適用可能なジョブを任意で指定してください");
 		m.put("Optionally specify arguments to run above image", "オプションで、上記のイメージを実行するための引数を指定してください。");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
 			"オプションで、依存関係から<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に取得するアーティファクトを指定してください。公開されたアーティファクト（アーティファクト公開ステップを介して）だけが取得可能です。アーティファクトを取得しない場合は空のままにしてください。");
@@ -2331,6 +2330,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify environment variables for this step", "オプションで、このステップの環境変数を指定してください。");
 		m.put("Optionally specify environment variables of the service", "オプションで、サービスの環境変数を指定してください。");
 		m.put("Optionally specify estimated time.", "オプションで、推定時間を指定してください。");
+		m.put("Optionally specify executor for this job. Leave empty to use auto-discover executor", 
+			"このジョブのエグゼキュータを任意で指定してください。空欄の場合、自動検出エグゼキュータを使用します");
+		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
+			"このジョブのエグゼキュータを任意で指定してください。空欄の場合、最初に適用可能なエグゼキュータを使用します");
 		m.put("Optionally specify files relative to cache path to ignore when detect cache changes. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple files should be separated by space, and single file containing space should be quoted", 
 			"オプションで、キャッシュ変更を検出する際に無視するキャッシュパスに対する相対ファイルを指定してください。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には'**'、'*'または'?'を使用してください。複数のファイルはスペースで区切る必要があり、スペースを含む単一のファイルは引用符で囲む必要があります。");
 		m.put("Optionally specify group search base if you want to retrieve group membership information of the user. For example: <i>cn=Users, dc=example, dc=com</i>. To give appropriate permissions to a Active Directory group, a OneDev group with same name should be defined. Leave empty to manage group memberships at OneDev side", 
@@ -2599,7 +2602,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Please select issues to edit", "編集する問題を選択してください");
 		m.put("Please select issues to move", "移動する問題を選択してください");
 		m.put("Please select issues to sync estimated/spent time", "推定/使用時間を同期する問題を選択してください");
-		m.put("Please select memberships to delete", "削除するメンバーシップを選択してください");
 		m.put("Please select packages to delete", "削除するパッケージを選択してください");
 		m.put("Please select projects to delete", "削除するプロジェクトを選択してください");
 		m.put("Please select projects to modify", "変更するプロジェクトを選択してください");
@@ -3610,7 +3612,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"ステップは同じノード上で直列に実行され、同じ<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>を共有します。");
 		m.put("Stop work", "作業を停止");
 		m.put("Stopwatch Overdue", "ストップウォッチ期限切れ");
-		m.put("Storage Setting", "ストレージ設定");
 		m.put("Storage file missing", "ストレージファイルが見つかりません");
 		m.put("Storage not found", "ストレージが見つかりません");
 		m.put("Stored with Git LFS", "Git LFSで保存");
@@ -3764,6 +3765,10 @@ public class Translation_ja extends TranslationResourceBundle {
 			"このエグゼキュータは、<a href='/~administration/agents' target='_blank'>エージェント</a>を介してリモートマシン上でDockerコンテナとしてビルドジョブを実行します");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"このエグゼキュータは、Kubernetesクラスター内のPodとしてビルドジョブを実行します。エージェントは不要です。<b class='text-danger'>注意:</b> ジョブPodがソースやアーティファクトをダウンロードするためにサーバーURLがシステム設定で正しく指定されていることを確認してください");
+		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
+			"このエグゼキュータはOneDevサーバーのシェル機能を使用してビルドジョブを実行します。<br><b class='text-danger'>警告</b>: このエグゼキュータで実行されるジョブはOneDevサーバープロセスと同じ権限を持ちます。信頼できるジョブでのみ使用されることを確認してください");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
+			"このエグゼキュータは<a href='/~administration/agents' target='_blank'>エージェント</a>を介してリモートマシンのシェル機能を使用してビルドジョブを実行します。<br><b class='text-danger'>警告</b>: このエグゼキュータで実行されるジョブはOneDevエージェントプロセスと同じ権限を持ちます。信頼できるジョブでのみ使用されることを確認してください");
 		m.put("This field is required", "このフィールドは必須です");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"このフィルターは現在のユーザーのLDAPエントリを決定するために使用されます。例: <i>(&(uid={0})(objectclass=person))</i>。この例では、<i>{0}</i>は現在のユーザーのログイン名を表します");
@@ -3930,14 +3935,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Type <code>yes</code> below to delete all queried builds", "以下に<code>yes</code>と入力して、すべてのクエリされたビルドを削除してください");
 		m.put("Type <code>yes</code> below to delete all queried comments", "以下に<code>yes</code>と入力して、すべてのクエリされたコメントを削除してください");
 		m.put("Type <code>yes</code> below to delete all queried issues", "以下に<code>yes</code>と入力して、すべてのクエリされた課題を削除してください");
-		m.put("Type <code>yes</code> below to delete all queried memberships", "以下に<code>yes</code>と入力して、すべてのクエリされたメンバーシップを削除してください");
 		m.put("Type <code>yes</code> below to delete all queried packages", "以下に<code>yes</code>と入力して、すべてのクエリされたパッケージを削除してください");
 		m.put("Type <code>yes</code> below to delete all queried projects", "以下に<code>yes</code>と入力して、すべてのクエリされたプロジェクトを削除してください");
 		m.put("Type <code>yes</code> below to delete all queried pull requests", "以下に<code>yes</code>と入力して、すべてのクエリされたプルリクエストを削除してください");
 		m.put("Type <code>yes</code> below to delete selected builds", "以下に<code>yes</code>と入力して、選択されたビルドを削除してください");
 		m.put("Type <code>yes</code> below to delete selected comments", "以下に<code>yes</code>と入力して、選択されたコメントを削除してください");
 		m.put("Type <code>yes</code> below to delete selected issues", "以下に<code>yes</code>と入力して、選択された課題を削除してください");
-		m.put("Type <code>yes</code> below to delete selected memberships", "以下に<code>yes</code>と入力して、選択されたメンバーシップを削除してください");
 		m.put("Type <code>yes</code> below to delete selected packages", "以下に<code>yes</code>と入力して、選択されたパッケージを削除してください");
 		m.put("Type <code>yes</code> below to delete selected projects", "以下に<code>yes</code>と入力して、選択されたプロジェクトを削除してください");
 		m.put("Type <code>yes</code> below to delete selected pull requests", "以下に<code>yes</code>と入力して、選択されたプルリクエストを削除してください");
@@ -4198,6 +4201,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not to include this field when issue is initially opened. If not, you may include this field later when issue is transited to other states via issue transition rule", 
 			"課題が最初に開かれたときにこのフィールドを含めるかどうか。含めない場合は、課題が課題遷移ルールを介して他の状態に遷移したときに後でこのフィールドを含めることができます");
 		m.put("Whether or not to input and display estimated/spent time in hours/minutes only", "推定時間/消費時間を時間/分単位でのみ入力および表示するかどうか");
+		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
+			"ジョブコマンドでのDocker操作をサポートするために、Dockerソケットをジョブコンテナにマウントするかどうか<br><b class='text-danger'>警告</b>: 悪意のあるジョブがマウントされたDockerソケットを操作することでOneDev全体を制御する可能性があります。このオプションを有効にする場合、このエグゼキュータが信頼できるジョブでのみ使用されることを確認してください");
 		m.put("Whether or not to pre-populate tag mappings in next page. You may want to disable this if there are too many tags to display", 
 			"次のページでタグマッピングを事前入力するかどうか。表示するタグが多すぎる場合はこれを無効にすることをお勧めします");
 		m.put("Whether or not to require this dependency to be successful", "この依存関係が成功する必要があるかどうか");
@@ -4493,22 +4498,41 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Enable Html Report Publish", "HTMLレポート公開を有効化");
-		m.put("Enable Site Publish", "サイト公開を有効化");
-		m.put("Enable this to allow to run html report publish step. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
-			"HTMLレポート公開ステップを実行できるようにするにはこれを有効化してください。XSS攻撃を防ぐため、このエグゼキュータが信頼できるジョブでのみ使用されることを確認してください");
-		m.put("No executors defined. Jobs will use auto-discovered executors instead", "エグゼキュータが定義されていません。ジョブは自動検出されたエグゼキュータを使用します");
-		m.put("Optionally specify applicable jobs of this executor", "このエグゼキュータに適用可能なジョブを任意で指定してください");
-		m.put("Optionally specify executor for this job. Leave empty to use auto-discover executor", 
-			"このジョブのエグゼキュータを任意で指定してください。空欄の場合、自動検出エグゼキュータを使用します");
-		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
-			"このジョブのエグゼキュータを任意で指定してください。空欄の場合、最初に適用可能なエグゼキュータを使用します");
-		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
-			"このエグゼキュータはOneDevサーバーのシェル機能を使用してビルドジョブを実行します。<br><b class='text-danger'>警告</b>: このエグゼキュータで実行されるジョブはOneDevサーバープロセスと同じ権限を持ちます。信頼できるジョブでのみ使用されることを確認してください");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
-			"このエグゼキュータは<a href='/~administration/agents' target='_blank'>エージェント</a>を介してリモートマシンのシェル機能を使用してビルドジョブを実行します。<br><b class='text-danger'>警告</b>: このエグゼキュータで実行されるジョブはOneDevエージェントプロセスと同じ権限を持ちます。信頼できるジョブでのみ使用されることを確認してください");
-		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
-			"ジョブコマンドでのDocker操作をサポートするために、Dockerソケットをジョブコンテナにマウントするかどうか<br><b class='text-danger'>警告</b>: 悪意のあるジョブがマウントされたDockerソケットを操作することでOneDev全体を制御する可能性があります。このオプションを有効にする場合、このエグゼキュータが信頼できるジョブでのみ使用されることを確認してください");
+		m.put("Add user to group...", "グループにユーザーを追加...");
+		m.put("Added to group", "グループに追加されました");
+		m.put("Audit", "監査");
+		m.put("Audit Log", "監査ログ");
+		m.put("Audit Setting", "監査設定");
+		m.put("Audit log will be preserved for the specified number of days. This setting applies to all audit events, including system level and project level", 
+			"監査ログは指定された日数間保存されます。この設定は、システムレベルおよびプロジェクトレベルを含むすべての監査イベントに適用されます");
+		m.put("Builds are {0}", "ビルドは{0}です");
+		m.put("Events", "イベント");
+		m.put("Filter actions", "アクションをフィルター");
+		m.put("Filter date range", "日付範囲をフィルター");
+		m.put("Filter users", "ユーザーをフィルター");
+		m.put("No audits", "監査なし");
+		m.put("No groups to remove from", "削除するグループがありません");
+		m.put("No jobs found", "ジョブが見つかりません");
+		m.put("No users to remove from group", "グループから削除するユーザーがいません");
+		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
+			"ここにはシステムレベルの監査イベントのみが表示されます。特定のプロジェクトの監査イベントを表示するには、プロジェクト監査ログページをご覧ください");
+		m.put("Please select groups to remove from", "削除するグループを選択してください");
+		m.put("Please select users to remove from group", "グループから削除するユーザーを選択してください");
+		m.put("Remove All Queried Users from Group", "クエリされたすべてのユーザーをグループから削除");
+		m.put("Remove Selected Users from Group", "選択されたユーザーをグループから削除");
+		m.put("Remove from All Queried Groups", "クエリされたすべてのグループから削除");
+		m.put("Remove from Selected Groups", "選択されたグループから削除");
+		m.put("Select Job", "ジョブを選択");
+		m.put("Server is Starting...", "サーバーを起動中...");
+		m.put("Settings saved", "設定を保存しました");
+		m.put("Settings saved and project redistribution scheduled", "設定を保存し、プロジェクトの再分配をスケジュールしました");
+		m.put("Some builds are {0}", "一部のビルドは{0}です");
+		m.put("Storage Settings", "ストレージ設定");
+		m.put("Type <code>yes</code> below to remove all queried users from group", "クエリされたすべてのユーザーをグループから削除するには、以下に<code>yes</code>と入力してください");
+		m.put("Type <code>yes</code> below to remove from all queried groups", "クエリされたすべてのグループから削除するには、以下に<code>yes</code>と入力してください");
+		m.put("Type <code>yes</code> below to remove from selected groups", "選択されたグループから削除するには、以下に<code>yes</code>と入力してください");
+		m.put("Type <code>yes</code> below to remove selected users from group", "選択されたユーザーをグループから削除するには、以下に<code>yes</code>と入力してください");
+		m.put("User added to group", "ユーザーがグループに追加されました");
 	}
 		
 	@Override

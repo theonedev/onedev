@@ -184,7 +184,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Add issue state", "Issue-Status hinzufügen");
 		m.put("Add issue state transition", "Übergang des Issue-Status hinzufügen");
 		m.put("Add link", "Link hinzufügen");
-		m.put("Add member...", "Mitglied hinzufügen...");
 		m.put("Add new", "Neu hinzufügen");
 		m.put("Add new card to this column", "Neue Karte zu dieser Spalte hinzufügen");
 		m.put("Add new file", "Neue Datei hinzufügen");
@@ -884,7 +883,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Delete All Queried Builds", "Alle abgefragten Builds löschen");
 		m.put("Delete All Queried Comments", "Alle abgefragten Kommentare löschen");
 		m.put("Delete All Queried Issues", "Alle abgefragten Probleme löschen");
-		m.put("Delete All Queried Memberships", "Alle abgefragten Mitgliedschaften löschen");
 		m.put("Delete All Queried Packages", "Alle abgefragten Pakete löschen");
 		m.put("Delete All Queried Projects", "Alle abgefragten Projekte löschen");
 		m.put("Delete All Queried Pull Requests", "Alle abgefragten Pull-Requests löschen");
@@ -896,7 +894,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Delete Selected Builds", "Ausgewählte Builds löschen");
 		m.put("Delete Selected Comments", "Ausgewählte Kommentare löschen");
 		m.put("Delete Selected Issues", "Ausgewählte Probleme löschen");
-		m.put("Delete Selected Memberships", "Ausgewählte Mitgliedschaften löschen");
 		m.put("Delete Selected Packages", "Ausgewählte Pakete löschen");
 		m.put("Delete Selected Projects", "Ausgewählte Projekte löschen");
 		m.put("Delete Selected Pull Requests", "Ausgewählte Pull Requests löschen");
@@ -1111,7 +1108,9 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Enable All Queried Users", "Aktivieren Sie alle abgefragten Benutzer");
 		m.put("Enable Anonymous Access", "Aktivieren Sie anonymen Zugriff");
 		m.put("Enable Auto Backup", "Aktivieren Sie die automatische Sicherung");
+		m.put("Enable Html Report Publish", "HTML-Berichtveröffentlichung aktivieren");
 		m.put("Enable Selected Users", "Aktivieren Sie ausgewählte Benutzer");
+		m.put("Enable Site Publish", "Site-Veröffentlichung aktivieren");
 		m.put("Enable TTY Mode", "Aktivieren Sie den TTY-Modus");
 		m.put("Enable build support by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "Aktivieren Sie Build-Unterstützung durch <a wicket:id=\"addFile\" class=\"link-primary\"></a>");
 		m.put("Enable if visibility of this field depends on other fields", "Aktivieren Sie dies, wenn die Sichtbarkeit dieses Feldes von anderen Feldern abhängt");
@@ -1119,6 +1118,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Enable this if the access token has same permissions as the owner", "Aktivieren Sie dies, wenn das Zugriffstoken dieselben Berechtigungen wie der Besitzer hat");
 		m.put("Enable this option to merge the pull request automatically when ready (all reviewers approved, all required jobs passed etc.)", 
 			"Aktivieren Sie diese Option, um den Pull-Request automatisch zu mergen, wenn er bereit ist (alle Gutachter haben zugestimmt, alle erforderlichen Jobs sind abgeschlossen usw.)");
+		m.put("Enable this to allow to run html report publish step. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
+			"Aktivieren Sie dies, um den Schritt zur Veröffentlichung des HTML-Berichts auszuführen. Um XSS-Angriffe zu vermeiden, stellen Sie sicher, dass dieser Executor nur von vertrauenswürdigen Jobs verwendet werden kann");
 		m.put("Enable this to allow to run site publish step. OneDev will serve project site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
 			"Aktivieren Sie dies, um den Site-Veröffentlichungsschritt auszuführen. OneDev wird Projekt-Site-Dateien unverändert bereitstellen. Um XSS-Angriffe zu vermeiden, stellen Sie sicher, dass dieser Executor nur von vertrauenswürdigen Jobs verwendet werden kann");
 		m.put("Enable this to place intermediate files required by job execution on dynamically allocated persistent volume instead of emptyDir", 
@@ -1432,7 +1433,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Group Retrieval", "Gruppenabruf");
 		m.put("Group Search Base", "Gruppensuchbasis");
 		m.put("Group Search Filter", "Gruppensuchfilter");
-		m.put("Group added", "Gruppe hinzugefügt");
 		m.put("Group authorizations updated", "Gruppen-Autorisierungen aktualisiert");
 		m.put("Group created", "Gruppe erstellt");
 		m.put("Groups", "Gruppen");
@@ -1908,7 +1908,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("May not be empty", "Darf nicht leer sein");
 		m.put("Medium", "Mittel");
 		m.put("Medium Severity", "Mittlere Schwere");
-		m.put("Member added", "Mitglied hinzugefügt");
 		m.put("Members", "Mitglieder");
 		m.put("Memory", "Speicher");
 		m.put("Memory Limit", "Speicherlimit");
@@ -1935,7 +1934,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Months", "Monate");
 		m.put("Months to Display", "Anzuzeigende Monate");
 		m.put("More", "Mehr");
-		m.put("More Activities", "Weitere Aktivitäten");
 		m.put("More Options", "Weitere Optionen");
 		m.put("More Settings", "Weitere Einstellungen");
 		m.put("More commits", "Weitere Commits");
@@ -2063,6 +2061,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("No diffs", "Keine Unterschiede");
 		m.put("No diffs to navigate", "Keine Unterschiede zum Navigieren");
 		m.put("No directories to skip", "Keine Verzeichnisse zum Überspringen");
+		m.put("No executors defined. Jobs will use auto-discovered executors instead", "Keine Executor definiert. Jobs verwenden stattdessen automatisch erkannte Executor");
 		m.put("No external authenticator", "Kein externer Authentifikator");
 		m.put("No fields to prompt", "Keine Felder zum Abfragen");
 		m.put("No fields to remove", "Keine Felder zum Entfernen");
@@ -2086,7 +2085,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("No jobs defined", "Keine Jobs definiert");
 		m.put("No limit", "Kein Limit");
 		m.put("No mail service", "Kein Mail-Service");
-		m.put("No memberships to delete", "Keine Mitgliedschaften zum Löschen");
 		m.put("No obvious changes", "Keine offensichtlichen Änderungen");
 		m.put("No one", "Niemand");
 		m.put("No packages to delete", "Keine Pakete zum Löschen");
@@ -2290,6 +2288,7 @@ public class Translation_de extends TranslationResourceBundle {
 			"Optional geben Sie erlaubte E-Mail-Domains für Benutzer mit Selbstanmeldung an. Verwenden Sie '*' oder '?' für Musterabgleich");
 		m.put("Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). Leave empty to all types", 
 			"Optional geben Sie anwendbare Commit-Typen für die Überprüfung der Commit-Nachrichten-Fußzeile an (drücken Sie ENTER, um einen Wert hinzuzufügen). Lassen Sie das Feld leer für alle Typen");
+		m.put("Optionally specify applicable jobs of this executor", "Optional anwendbare Jobs für diesen Executor angeben");
 		m.put("Optionally specify arguments to run above image", "Optional geben Sie Argumente an, um das obige Image auszuführen");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
 			"Optional geben Sie Artefakte an, die aus der Abhängigkeit in den <a href='https://docs.onedev.io/concepts#job-workspace'>Job-Arbeitsbereich</a> abgerufen werden sollen. Nur veröffentlichte Artefakte (über den Artefakt-Veröffentlichungsschritt) können abgerufen werden. Lassen Sie das Feld leer, um keine Artefakte abzurufen");
@@ -2331,6 +2330,10 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Optionally specify environment variables for this step", "Optional geben Sie Umgebungsvariablen für diesen Schritt an");
 		m.put("Optionally specify environment variables of the service", "Optional geben Sie Umgebungsvariablen des Dienstes an");
 		m.put("Optionally specify estimated time.", "Optional geben Sie die geschätzte Zeit an.");
+		m.put("Optionally specify executor for this job. Leave empty to use auto-discover executor", 
+			"Optional Executor für diesen Job angeben. Leer lassen, um automatisch erkannten Executor zu verwenden");
+		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
+			"Optional Executor für diesen Job angeben. Leer lassen, um den ersten anwendbaren Executor zu verwenden");
 		m.put("Optionally specify files relative to cache path to ignore when detect cache changes. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple files should be separated by space, and single file containing space should be quoted", 
 			"Optional geben Sie Dateien relativ zum Cache-Pfad an, die ignoriert werden sollen, wenn Cache-Änderungen erkannt werden. Verwenden Sie '**', '*' oder '?' für <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>Pfad-Wildcard-Abgleich</a>. Mehrere Dateien sollten durch Leerzeichen getrennt werden, und einzelne Dateien, die Leerzeichen enthalten, sollten in Anführungszeichen gesetzt werden");
 		m.put("Optionally specify group search base if you want to retrieve group membership information of the user. For example: <i>cn=Users, dc=example, dc=com</i>. To give appropriate permissions to a Active Directory group, a OneDev group with same name should be defined. Leave empty to manage group memberships at OneDev side", 
@@ -2599,7 +2602,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Please select issues to edit", "Bitte wählen Sie Probleme aus, die bearbeitet werden sollen");
 		m.put("Please select issues to move", "Bitte wählen Sie Probleme aus, die verschoben werden sollen");
 		m.put("Please select issues to sync estimated/spent time", "Bitte wählen Sie Probleme aus, um geschätzte/aufgewendete Zeit zu synchronisieren");
-		m.put("Please select memberships to delete", "Bitte wählen Sie Mitgliedschaften aus, die gelöscht werden sollen");
 		m.put("Please select packages to delete", "Bitte wählen Sie Pakete aus, die gelöscht werden sollen");
 		m.put("Please select projects to delete", "Bitte wählen Sie Projekte aus, die gelöscht werden sollen");
 		m.put("Please select projects to modify", "Bitte wählen Sie Projekte aus, die geändert werden sollen");
@@ -3610,7 +3612,6 @@ public class Translation_de extends TranslationResourceBundle {
 			"Schritte werden seriell auf demselben Knoten ausgeführt und teilen sich denselben <a href='https://docs.onedev.io/concepts#job-workspace'>Job-Arbeitsbereich</a>");
 		m.put("Stop work", "Arbeit beenden");
 		m.put("Stopwatch Overdue", "Stoppuhr überfällig");
-		m.put("Storage Setting", "Speichereinstellung");
 		m.put("Storage file missing", "Speicherdatei fehlt");
 		m.put("Storage not found", "Speicher nicht gefunden");
 		m.put("Stored with Git LFS", "Mit Git LFS gespeichert");
@@ -3764,6 +3765,10 @@ public class Translation_de extends TranslationResourceBundle {
 			"Dieser Executor führt Build-Jobs als Docker-Container auf Remote-Maschinen über <a href='/~administration/agents' target='_blank'>Agents</a> aus");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"Dieser Executor führt Build-Jobs als Pods in einem Kubernetes-Cluster aus. Es werden keine Agents benötigt.<b class='text-danger'>Hinweis:</b> Stellen Sie sicher, dass die Server-URL in den Systemeinstellungen korrekt angegeben ist, da Job-Pods darauf zugreifen müssen, um Quellcode und Artefakte herunterzuladen");
+		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
+			"Dieser Executor führt Build-Jobs mit der Shell-Funktionalität des OneDev-Servers aus.<br><b class='text-danger'>WARNUNG</b>: Jobs, die mit diesem Executor ausgeführt werden, haben dieselben Berechtigungen wie der OneDev-Serverprozess. Stellen Sie sicher, dass er nur von vertrauenswürdigen Jobs verwendet werden kann");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
+			"Dieser Executor führt Build-Jobs mit der Shell-Funktionalität von Remote-Maschinen über <a href='/~administration/agents' target='_blank'>Agents</a> aus.<br><b class='text-danger'>WARNUNG</b>: Jobs, die mit diesem Executor ausgeführt werden, haben dieselben Berechtigungen wie der OneDev-Agent-Prozess. Stellen Sie sicher, dass er nur von vertrauenswürdigen Jobs verwendet werden kann");
 		m.put("This field is required", "Dieses Feld ist erforderlich");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"Dieser Filter wird verwendet, um den LDAP-Eintrag für den aktuellen Benutzer zu bestimmen. Zum Beispiel: <i>(&(uid={0})(objectclass=person))</i>. In diesem Beispiel repräsentiert <i>{0}</i> den Anmeldenamen des aktuellen Benutzers.");
@@ -3930,14 +3935,12 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Type <code>yes</code> below to delete all queried builds", "Geben Sie <code>yes</code> unten ein, um alle abgefragten Builds zu löschen.");
 		m.put("Type <code>yes</code> below to delete all queried comments", "Geben Sie <code>yes</code> unten ein, um alle abgefragten Kommentare zu löschen.");
 		m.put("Type <code>yes</code> below to delete all queried issues", "Geben Sie <code>yes</code> unten ein, um alle abgefragten Probleme zu löschen.");
-		m.put("Type <code>yes</code> below to delete all queried memberships", "Geben Sie <code>yes</code> unten ein, um alle abgefragten Mitgliedschaften zu löschen.");
 		m.put("Type <code>yes</code> below to delete all queried packages", "Geben Sie <code>yes</code> unten ein, um alle abgefragten Pakete zu löschen.");
 		m.put("Type <code>yes</code> below to delete all queried projects", "Geben Sie <code>yes</code> unten ein, um alle abgefragten Projekte zu löschen.");
 		m.put("Type <code>yes</code> below to delete all queried pull requests", "Geben Sie <code>yes</code> unten ein, um alle abgefragten Pull-Requests zu löschen.");
 		m.put("Type <code>yes</code> below to delete selected builds", "Geben Sie <code>yes</code> unten ein, um ausgewählte Builds zu löschen.");
 		m.put("Type <code>yes</code> below to delete selected comments", "Geben Sie <code>yes</code> unten ein, um ausgewählte Kommentare zu löschen.");
 		m.put("Type <code>yes</code> below to delete selected issues", "Geben Sie <code>yes</code> unten ein, um ausgewählte Probleme zu löschen.");
-		m.put("Type <code>yes</code> below to delete selected memberships", "Geben Sie <code>yes</code> unten ein, um ausgewählte Mitgliedschaften zu löschen.");
 		m.put("Type <code>yes</code> below to delete selected packages", "Geben Sie <code>yes</code> unten ein, um ausgewählte Pakete zu löschen.");
 		m.put("Type <code>yes</code> below to delete selected projects", "Geben Sie <code>yes</code> unten ein, um ausgewählte Projekte zu löschen.");
 		m.put("Type <code>yes</code> below to delete selected pull requests", "Geben Sie <code>yes</code> unten ein, um ausgewählte Pull-Requests zu löschen.");
@@ -4198,6 +4201,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Whether or not to include this field when issue is initially opened. If not, you may include this field later when issue is transited to other states via issue transition rule", 
 			"Ob dieses Feld einbezogen werden soll, wenn das Problem ursprünglich geöffnet wird oder nicht. Wenn nicht, können Sie dieses Feld später einbeziehen, wenn das Problem durch eine Problemübergangsregel in andere Zustände überführt wird");
 		m.put("Whether or not to input and display estimated/spent time in hours/minutes only", "Ob geschätzte/aufgewendete Zeit nur in Stunden/Minuten eingegeben und angezeigt werden soll oder nicht");
+		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
+			"Ob der Docker-Sock in den Job-Container eingebunden werden soll, um Docker-Operationen in Job-Befehlen zu unterstützen<br><b class='text-danger'>WARNUNG</b>: Bösartige Jobs können die Kontrolle über das gesamte OneDev übernehmen, indem sie den eingebundenen Docker-Sock verwenden. Stellen Sie sicher, dass dieser Executor nur von vertrauenswürdigen Jobs verwendet werden kann, wenn diese Option aktiviert ist");
 		m.put("Whether or not to pre-populate tag mappings in next page. You may want to disable this if there are too many tags to display", 
 			"Ob Tag-Zuordnungen auf der nächsten Seite vorab ausgefüllt werden sollen oder nicht. Sie möchten dies möglicherweise deaktivieren, wenn zu viele Tags angezeigt werden sollen");
 		m.put("Whether or not to require this dependency to be successful", "Ob diese Abhängigkeit erfolgreich sein muss oder nicht");
@@ -4493,22 +4498,41 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Enable Html Report Publish", "HTML-Berichtveröffentlichung aktivieren");
-		m.put("Enable Site Publish", "Site-Veröffentlichung aktivieren");
-		m.put("Enable this to allow to run html report publish step. To avoid XSS attack, make sure this executor can only be used by trusted jobs", 
-			"Aktivieren Sie dies, um den Schritt zur Veröffentlichung des HTML-Berichts auszuführen. Um XSS-Angriffe zu vermeiden, stellen Sie sicher, dass dieser Executor nur von vertrauenswürdigen Jobs verwendet werden kann");
-		m.put("No executors defined. Jobs will use auto-discovered executors instead", "Keine Executor definiert. Jobs verwenden stattdessen automatisch erkannte Executor");
-		m.put("Optionally specify applicable jobs of this executor", "Optional anwendbare Jobs für diesen Executor angeben");
-		m.put("Optionally specify executor for this job. Leave empty to use auto-discover executor", 
-			"Optional Executor für diesen Job angeben. Leer lassen, um automatisch erkannten Executor zu verwenden");
-		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
-			"Optional Executor für diesen Job angeben. Leer lassen, um den ersten anwendbaren Executor zu verwenden");
-		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
-			"Dieser Executor führt Build-Jobs mit der Shell-Funktionalität des OneDev-Servers aus.<br><b class='text-danger'>WARNUNG</b>: Jobs, die mit diesem Executor ausgeführt werden, haben dieselben Berechtigungen wie der OneDev-Serverprozess. Stellen Sie sicher, dass er nur von vertrauenswürdigen Jobs verwendet werden kann");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
-			"Dieser Executor führt Build-Jobs mit der Shell-Funktionalität von Remote-Maschinen über <a href='/~administration/agents' target='_blank'>Agents</a> aus.<br><b class='text-danger'>WARNUNG</b>: Jobs, die mit diesem Executor ausgeführt werden, haben dieselben Berechtigungen wie der OneDev-Agent-Prozess. Stellen Sie sicher, dass er nur von vertrauenswürdigen Jobs verwendet werden kann");
-		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
-			"Ob der Docker-Sock in den Job-Container eingebunden werden soll, um Docker-Operationen in Job-Befehlen zu unterstützen<br><b class='text-danger'>WARNUNG</b>: Bösartige Jobs können die Kontrolle über das gesamte OneDev übernehmen, indem sie den eingebundenen Docker-Sock verwenden. Stellen Sie sicher, dass dieser Executor nur von vertrauenswürdigen Jobs verwendet werden kann, wenn diese Option aktiviert ist");
+		m.put("Add user to group...", "Benutzer zur Gruppe hinzufügen...");
+		m.put("Added to group", "Zur Gruppe hinzugefügt");
+		m.put("Audit", "Audit");
+		m.put("Audit Log", "Audit-Log");
+		m.put("Audit Setting", "Audit-Einstellung");
+		m.put("Audit log will be preserved for the specified number of days. This setting applies to all audit events, including system level and project level", 
+			"Das Audit-Log wird für die angegebene Anzahl von Tagen aufbewahrt. Diese Einstellung gilt für alle Audit-Ereignisse, einschließlich System- und Projektebene");
+		m.put("Builds are {0}", "Builds sind {0}");
+		m.put("Events", "Ereignisse");
+		m.put("Filter actions", "Aktionen filtern");
+		m.put("Filter date range", "Datumsbereich filtern");
+		m.put("Filter users", "Benutzer filtern");
+		m.put("No audits", "Keine Audits");
+		m.put("No groups to remove from", "Keine Gruppen zum Entfernen");
+		m.put("No jobs found", "Keine Jobs gefunden");
+		m.put("No users to remove from group", "Keine Benutzer zum Entfernen aus der Gruppe");
+		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
+			"Hier werden nur Audit-Ereignisse auf Systemebene angezeigt. Um Audit-Ereignisse für ein bestimmtes Projekt anzuzeigen, besuchen Sie bitte die Audit-Log-Seite des Projekts");
+		m.put("Please select groups to remove from", "Bitte wählen Sie Gruppen zum Entfernen aus");
+		m.put("Please select users to remove from group", "Bitte wählen Sie Benutzer zum Entfernen aus der Gruppe aus");
+		m.put("Remove All Queried Users from Group", "Alle abgefragten Benutzer aus der Gruppe entfernen");
+		m.put("Remove Selected Users from Group", "Ausgewählte Benutzer aus der Gruppe entfernen");
+		m.put("Remove from All Queried Groups", "Aus allen abgefragten Gruppen entfernen");
+		m.put("Remove from Selected Groups", "Aus ausgewählten Gruppen entfernen");
+		m.put("Select Job", "Job auswählen");
+		m.put("Server is Starting...", "Server wird gestartet...");
+		m.put("Settings saved", "Einstellungen gespeichert");
+		m.put("Settings saved and project redistribution scheduled", "Einstellungen gespeichert und Projektumverteilung geplant");
+		m.put("Some builds are {0}", "Einige Builds sind {0}");
+		m.put("Storage Settings", "Speichereinstellungen");
+		m.put("Type <code>yes</code> below to remove all queried users from group", "Geben Sie unten <code>yes</code> ein, um alle abgefragten Benutzer aus der Gruppe zu entfernen");
+		m.put("Type <code>yes</code> below to remove from all queried groups", "Geben Sie unten <code>yes</code> ein, um aus allen abgefragten Gruppen zu entfernen");
+		m.put("Type <code>yes</code> below to remove from selected groups", "Geben Sie unten <code>yes</code> ein, um aus ausgewählten Gruppen zu entfernen");
+		m.put("Type <code>yes</code> below to remove selected users from group", "Geben Sie unten <code>yes</code> ein, um ausgewählte Benutzer aus der Gruppe zu entfernen");
+		m.put("User added to group", "Benutzer zur Gruppe hinzugefügt");
 	}
 			
 	@Override

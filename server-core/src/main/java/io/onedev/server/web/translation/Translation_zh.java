@@ -195,7 +195,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Add issue state", "添加工单状态");
 		m.put("Add issue state transition", "添加工单状态转换");
 		m.put("Add link", "添加链接");
-		m.put("Add member...", "添加成员...");
 		m.put("Add new", "添加");
 		m.put("Add new card to this column", "在此列添加新卡片");
 		m.put("Add new file", "添加新文件");
@@ -895,7 +894,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Delete All Queried Builds", "删除所有查询到的构建");
 		m.put("Delete All Queried Comments", "删除所有查询到的评论");
 		m.put("Delete All Queried Issues", "删除所有查询到的工单");
-		m.put("Delete All Queried Memberships", "删除所有查询到的成员");
 		m.put("Delete All Queried Packages", "删除所有查询到的包");
 		m.put("Delete All Queried Projects", "删除所有查询到的项目");
 		m.put("Delete All Queried Pull Requests", "删除所有查询到的合并请求");
@@ -907,7 +905,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Delete Selected Builds", "删除选定的构建");
 		m.put("Delete Selected Comments", "删除选中的评论");
 		m.put("Delete Selected Issues", "删除选定的工单");
-		m.put("Delete Selected Memberships", "删除选定的成员");
 		m.put("Delete Selected Packages", "删除选中的包");
 		m.put("Delete Selected Projects", "删除选中的项目");
 		m.put("Delete Selected Pull Requests", "删除选定的合并请求");
@@ -1122,7 +1119,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Enable All Queried Users", "启用所有查询的用户");
 		m.put("Enable Anonymous Access", "启用匿名访问");
 		m.put("Enable Auto Backup", "启用自动备份");
+		m.put("Enable Html Report Publish", "启用 Html 报告发布");
 		m.put("Enable Selected Users", "启用选定的用户");
+		m.put("Enable Site Publish", "启用站点发布");
 		m.put("Enable TTY Mode", "启用 TTY 模式");
 		m.put("Enable build support by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "通过 <a wicket:id=\"addFile\" class=\"link-primary\"></a> 启用构建支持");
 		m.put("Enable if visibility of this field depends on other fields", "如果字段的可见性取决于其他字段，则启用");
@@ -1445,7 +1444,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Group Retrieval", "组查询");
 		m.put("Group Search Base", "组搜索根节点");
 		m.put("Group Search Filter", "组搜索过滤器");
-		m.put("Group added", "组已添加");
 		m.put("Group authorizations updated", "组授权已更新");
 		m.put("Group created", "组已创建");
 		m.put("Groups", "组");
@@ -1921,7 +1919,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("May not be empty", "不能为空");
 		m.put("Medium", "中等");
 		m.put("Medium Severity", "中等");
-		m.put("Member added", "成员已添加");
 		m.put("Members", "成员");
 		m.put("Memory", "内存");
 		m.put("Memory Limit", "内存限制");
@@ -1948,7 +1945,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Months", "月");
 		m.put("Months to Display", "显示的月数");
 		m.put("More", "更多");
-		m.put("More Activities", "更多活动");
 		m.put("More Options", "更多选项");
 		m.put("More Settings", "更多设置");
 		m.put("More commits", "更多提交");
@@ -2076,6 +2072,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No diffs", "没有差异");
 		m.put("No diffs to navigate", "没有差异可导航");
 		m.put("No directories to skip", "无要跳过的目录");
+		m.put("No executors defined. Jobs will use auto-discovered executors instead", "未定义执行器。作业将使用自动发现的执行器");
 		m.put("No external authenticator", "无外部认证器");
 		m.put("No fields to prompt", "无要提示的字段");
 		m.put("No fields to remove", "无要删除的字段");
@@ -2099,7 +2096,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No jobs defined", "未定义任务");
 		m.put("No limit", "无限制");
 		m.put("No mail service", "无邮件服务");
-		m.put("No memberships to delete", "没有要删除的成员");
 		m.put("No obvious changes", "无明显改动");
 		m.put("No one", "无任何人");
 		m.put("No packages to delete", "没有可删除的包");
@@ -2303,6 +2299,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择指定允许自行注册用户的电子邮件域名。使用 '*' 或 '?' 进行模式匹配");
 		m.put("Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). Leave empty to all types", 
 			"可选择指定适用于提交消息页脚检查的提交类型（按 ENTER 添加值）。留空则适用于所有类型");
+		m.put("Optionally specify applicable jobs of this executor", "可选地指定此执行器适用的作业");
 		m.put("Optionally specify arguments to run above image", "可选择指定运行上述镜像的参数");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
 			"可选择指定从依赖项拷贝到 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的制品。只能拷贝已发布的制品（通过制品发布步骤）。留空则不拷贝任何制品");
@@ -2344,6 +2341,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify environment variables for this step", "可选择为此步骤指定环境变量");
 		m.put("Optionally specify environment variables of the service", "可选择指定服务的环境变量");
 		m.put("Optionally specify estimated time.", "可选择指定估计时间。");
+		m.put("Optionally specify executor for this job. Leave empty to use auto-discover executor", 
+			"可选地为此作业指定执行器。留空以使用自动发现的执行器");
+		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
+			"可选地为此作业指定执行器。留空以使用第一个适用的执行器");
 		m.put("Optionally specify files relative to cache path to ignore when detect cache changes. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple files should be separated by space, and single file containing space should be quoted", 
 			"可选择指定相对于缓存路径的文件，在检测缓存更改时忽略。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。多个文件应以空格分隔，包含空格的单个文件应加引号");
 		m.put("Optionally specify group search base if you want to retrieve group membership information of the user. For example: <i>cn=Users, dc=example, dc=com</i>. To give appropriate permissions to a Active Directory group, a OneDev group with same name should be defined. Leave empty to manage group memberships at OneDev side", 
@@ -2612,7 +2613,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Please select issues to edit", "请选择要编辑的工单");
 		m.put("Please select issues to move", "请选择要移动的工单");
 		m.put("Please select issues to sync estimated/spent time", "请选择要同步估计/已用时间的工单");
-		m.put("Please select memberships to delete", "请选择要删除的成员");
 		m.put("Please select packages to delete", "请选择要删除的包");
 		m.put("Please select projects to delete", "请选择要删除的项目");
 		m.put("Please select projects to modify", "请选择要修改的项目");
@@ -3623,7 +3623,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"步骤将在同一节点上按顺序执行，共享同一 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a>");
 		m.put("Stop work", "停止工作");
 		m.put("Stopwatch Overdue", "秒表逾期");
-		m.put("Storage Setting", "存储设置");
 		m.put("Storage file missing", "存储文件缺失");
 		m.put("Storage not found", "未找到存储");
 		m.put("Stored with Git LFS", "使用 Git LFS 存储");
@@ -3777,6 +3776,10 @@ public class Translation_zh extends TranslationResourceBundle {
 			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a> 在远程机器上以 Docker 容器运行构建任务");
 		m.put("This executor runs build jobs as pods in a kubernetes cluster. No any agents are required.<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system settings as job pods need to access it to download source and artifacts", 
 			"此执行器在 Kubernetes 集群中以 Pod 形式运行构建任务，无需任何代理。<b class='text-danger'>注意：</b> 确保在系统设置中正确指定服务器 URL，因为任务 Pod 需要访问它以下载源代码和产物");
+		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
+			"此执行器使用 OneDev 服务器的 shell 功能运行构建作业。<br><b class='text-danger'>警告</b>：使用此执行器运行的作业具有与 OneDev 服务器进程相同的权限。请确保它仅能被可信的作业使用");
+		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
+			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a>使用远程机器的 shell 功能运行构建作业<br><b class='text-danger'>警告</b>：使用此执行器运行的作业具有与 OneDev 代理进程相同的权限。请确保它仅能被可信的作业使用");
 		m.put("This field is required", "此字段是必填的");
 		m.put("This filter is used to determine the LDAP entry for current user. For example: <i>(&(uid={0})(objectclass=person))</i>. In this example, <i>{0}</i> represents login name of current user.", 
 			"此过滤器用于确定当前用户的 LDAP 条目。例如：<i>(&(uid={0})(objectclass=person))</i>。在此示例中，<i>{0}</i> 表示当前用户的登录名");
@@ -3943,14 +3946,12 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Type <code>yes</code> below to delete all queried builds", "在下面输入 <code>yes</code> 以删除所有查询的构建");
 		m.put("Type <code>yes</code> below to delete all queried comments", "在下面输入 <code>yes</code> 以删除所有查询的评论");
 		m.put("Type <code>yes</code> below to delete all queried issues", "在下方输入 <code>yes</code> 以删除所有查询的工单");
-		m.put("Type <code>yes</code> below to delete all queried memberships", "在下方输入 <code>yes</code> 删除所有查询的成员");
 		m.put("Type <code>yes</code> below to delete all queried packages", "在下方输入 <code>yes</code> 以删除所有查询到的包");
 		m.put("Type <code>yes</code> below to delete all queried projects", "在下方输入 <code>yes</code> 以删除所有查询到的项目");
 		m.put("Type <code>yes</code> below to delete all queried pull requests", "在下方输入 <code>yes</code> 以删除所有查询的合并请求");
 		m.put("Type <code>yes</code> below to delete selected builds", "在下面输入 <code>yes</code> 以删除选定的构建");
 		m.put("Type <code>yes</code> below to delete selected comments", "在下方输入 <code>yes</code> 以删除选中的评论");
 		m.put("Type <code>yes</code> below to delete selected issues", "在下方输入 <code>yes</code> 以删除选定的工单");
-		m.put("Type <code>yes</code> below to delete selected memberships", "在下方输入 <code>yes</code> 删除选定的成员");
 		m.put("Type <code>yes</code> below to delete selected packages", "在下方输入 <code>yes</code> 以删除选中的包");
 		m.put("Type <code>yes</code> below to delete selected projects", "在下方输入 <code>yes</code> 以删除选中的项目");
 		m.put("Type <code>yes</code> below to delete selected pull requests", "在下方输入 <code>yes</code> 以删除选定的合并请求");
@@ -4211,6 +4212,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Whether or not to include this field when issue is initially opened. If not, you may include this field later when issue is transited to other states via issue transition rule", 
 			"在工单首次打开时是否包含此字段。如果不包含，您可以在工单通过工单转换规则转换到其他状态时再包含此字段");
 		m.put("Whether or not to input and display estimated/spent time in hours/minutes only", "是否仅以小时/分钟输入和显示估计/耗费时间");
+		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
+			"是否将 docker sock 挂载到作业容器中以支持作业命令中的 docker 操作<br><b class='text-danger'>警告</b>：恶意作业可以通过操作挂载的 docker sock 控制整个 OneDev。请确保如果启用此选项，此执行器仅能被可信的作业使用");
 		m.put("Whether or not to pre-populate tag mappings in next page. You may want to disable this if there are too many tags to display", 
 			"是否在下一页预填充标签映射。如果要显示的标签过多，您可能希望禁用此选项");
 		m.put("Whether or not to require this dependency to be successful", "是否要求此依赖成功");
@@ -4506,20 +4509,41 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Enable Html Report Publish", "启用 Html 报告发布");
-		m.put("Enable Site Publish", "启用站点发布");
-		m.put("No executors defined. Jobs will use auto-discovered executors instead", "未定义执行器。作业将使用自动发现的执行器");
-		m.put("Optionally specify applicable jobs of this executor", "可选地指定此执行器适用的作业");
-		m.put("Optionally specify executor for this job. Leave empty to use auto-discover executor", 
-			"可选地为此作业指定执行器。留空以使用自动发现的执行器");
-		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
-			"可选地为此作业指定执行器。留空以使用第一个适用的执行器");
-		m.put("This executor runs build jobs with OneDev server's shell facility.<br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev server process. Make sure it can only be used by trusted jobs", 
-			"此执行器使用 OneDev 服务器的 shell 功能运行构建作业。<br><b class='text-danger'>警告</b>：使用此执行器运行的作业具有与 OneDev 服务器进程相同的权限。请确保它仅能被可信的作业使用");
-		m.put("This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br><b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission as OneDev agent process. Make sure it can only be used by trusted jobs", 
-			"此执行器通过 <a href='/~administration/agents' target='_blank'>代理</a>使用远程机器的 shell 功能运行构建作业<br><b class='text-danger'>警告</b>：使用此执行器运行的作业具有与 OneDev 代理进程相同的权限。请确保它仅能被可信的作业使用");
-		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
-			"是否将 docker sock 挂载到作业容器中以支持作业命令中的 docker 操作<br><b class='text-danger'>警告</b>：恶意作业可以通过操作挂载的 docker sock 控制整个 OneDev。请确保如果启用此选项，此执行器仅能被可信的作业使用");
+		m.put("Add user to group...", "将用户添加到组...");
+		m.put("Added to group", "已添加到组");
+		m.put("Audit", "审计");
+		m.put("Audit Log", "审计日志");
+		m.put("Audit Setting", "审计设置");
+		m.put("Audit log will be preserved for the specified number of days. This setting applies to all audit events, including system level and project level", 
+			"审计日志将保留指定的天数。此设置适用于所有审计事件，包括系统级别和项目级别");
+		m.put("Builds are {0}", "构建是 {0}");
+		m.put("Events", "事件");
+		m.put("Filter actions", "筛选操作");
+		m.put("Filter date range", "筛选日期范围");
+		m.put("Filter users", "筛选用户");
+		m.put("No audits", "无审计记录");
+		m.put("No groups to remove from", "没有可移除的组");
+		m.put("No jobs found", "未找到作业");
+		m.put("No users to remove from group", "没有用户可从组中移除");
+		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
+			"这里只显示系统级别的审计事件。要查看特定项目的审计事件，请访问项目审计日志页面");
+		m.put("Please select groups to remove from", "请选择要移除的组");
+		m.put("Please select users to remove from group", "请选择要从组中移除的用户");
+		m.put("Remove All Queried Users from Group", "从组中移除所有查询的用户");
+		m.put("Remove Selected Users from Group", "移除选定用户从组中");
+		m.put("Remove from All Queried Groups", "从所有查询的组中移除");
+		m.put("Remove from Selected Groups", "从选定的组中移除");
+		m.put("Select Job", "选择作业");
+		m.put("Server is Starting...", "服务器正在启动...");
+		m.put("Settings saved", "设置已保存");
+		m.put("Settings saved and project redistribution scheduled", "设置已保存并已安排项目重新分配");
+		m.put("Some builds are {0}", "某些构建是 {0}");
+		m.put("Storage Settings", "存储设置");
+		m.put("Type <code>yes</code> below to remove all queried users from group", "在下方输入<code>yes</code>以从组中移除所有查询的用户");
+		m.put("Type <code>yes</code> below to remove from all queried groups", "在下方输入<code>yes</code>以从所有查询的组中移除");
+		m.put("Type <code>yes</code> below to remove from selected groups", "在下方输入<code>yes</code>以从选定的组中移除");
+		m.put("Type <code>yes</code> below to remove selected users from group", "在下方输入<code>yes</code>以从组中移除选定用户");
+		m.put("User added to group", "用户已添加到组");
 	}
 		
 	@Override
