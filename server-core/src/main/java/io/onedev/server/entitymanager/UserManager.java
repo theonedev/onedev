@@ -40,7 +40,11 @@ public interface UserManager extends EntityManager<User> {
 	void disable(User user);
 	
 	void disable(Collection<User> users);
+
+	void convertToServiceAccount(User user);
 	
+	void convertToServiceAccounts(Collection<User> users);
+
 	/**
 	 * Find root user in the system. 
 	 * 

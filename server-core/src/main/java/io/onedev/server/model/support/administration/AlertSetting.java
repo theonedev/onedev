@@ -1,21 +1,17 @@
 package io.onedev.server.model.support.administration;
 
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.UserChoice;
-import io.onedev.server.util.usage.Usage;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.UserChoice;
+import io.onedev.server.util.usage.Usage;
 
 @Editable
 public class AlertSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
-	private boolean trialSubscriptionExpireInOneWeekAlerted;
-
-	private boolean trialSubscriptionExpiredAlerted;
 
 	private boolean subscriptionExpireInOneMonthAlerted;
 
@@ -36,22 +32,6 @@ public class AlertSetting implements Serializable {
 		this.notifyUsers = notifyUsers;
 	}
 	
-	public boolean isTrialSubscriptionExpireInOneWeekAlerted() {
-		return trialSubscriptionExpireInOneWeekAlerted;
-	}
-
-	public void setTrialSubscriptionExpireInOneWeekAlerted(boolean trialSubscriptionExpireInOneWeekAlerted) {
-		this.trialSubscriptionExpireInOneWeekAlerted = trialSubscriptionExpireInOneWeekAlerted;
-	}
-
-	public boolean isTrialSubscriptionExpiredAlerted() {
-		return trialSubscriptionExpiredAlerted;
-	}
-
-	public void setTrialSubscriptionExpiredAlerted(boolean trialSubscriptionExpiredAlerted) {
-		this.trialSubscriptionExpiredAlerted = trialSubscriptionExpiredAlerted;
-	}
-
 	public boolean isSubscriptionExpireInOneMonthAlerted() {
 		return subscriptionExpireInOneMonthAlerted;
 	}
@@ -77,8 +57,6 @@ public class AlertSetting implements Serializable {
 	}
 	
 	public void setAlerted(boolean alerted) {
-		trialSubscriptionExpireInOneWeekAlerted = alerted;
-		trialSubscriptionExpiredAlerted = alerted;
 		subscriptionExpireInOneMonthAlerted = alerted;
 		subscriptionExpireInOneWeekAlerted = alerted;
 		subscriptionExpiredAlerted = alerted;

@@ -46,7 +46,7 @@ public class ImportResult {
 		if (!unmappedIssueLabels.isEmpty()) 
 			feedback.append(getEntryFeedback("GitLab issue labels not mapped to OneDev custom field", unmappedIssueLabels));
 		if (!nonExistentLogins.isEmpty()) {
-			feedback.append(getEntryFeedback("GitLab logins without email, or with an email but cannot be mapped to a OneDev account", 
+			feedback.append(getEntryFeedback("GitLab logins not mapped to OneDev account due to missing/unmatched email address", 
 					nonExistentLogins));
 		}
 		if (!tooLargeAttachments.isEmpty()) 
@@ -59,5 +59,5 @@ public class ImportResult {
 		
 		return feedback.toString();		
 	}
-	
+
 }

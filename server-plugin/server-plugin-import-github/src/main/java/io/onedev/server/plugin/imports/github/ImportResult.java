@@ -49,7 +49,7 @@ public class ImportResult {
 					unmappedIssueLabels));
 		}
 		if (!nonExistentLogins.isEmpty()) {
-			feedback.append(getEntryFeedback("GitHub logins without public email or public email can not be mapped to OneDev account", 
+			feedback.append(getEntryFeedback("GitHub logins not mapped to OneDev account due to missing/unmatched public email address", 
 					nonExistentLogins));
 		}
 		

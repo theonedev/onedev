@@ -87,6 +87,7 @@ import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.modal.message.MessageModal;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.editable.EditableUtils;
@@ -451,6 +452,21 @@ public abstract class LayoutPage extends BasePage {
 									menuLink = new ViewStateAwarePageLink<Void>("link", page.getPageClass(), page.getPageParams());
 									menuLink.add(new WebMarkupContainer("arrow").setVisible(false));
 									item.add(new WebMarkupContainer("subMenu").setVisible(false));
+								} else if (menuItem instanceof SidebarMenuItem.SubscriptionRequired) {
+									menuLink = new AjaxLink<Void>("link") {
+										@Override
+										public void onClick(AjaxRequestTarget target) {
+											new MessageModal(target) {
+
+												@Override
+												protected Component newMessageContent(String componentId) {
+													return new Label(componentId, _T("This is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days")).setEscapeModelStrings(false);
+												}
+											};																
+										}
+									};
+									menuLink.add(new WebMarkupContainer("arrow").setVisible(false));
+									item.add(new WebMarkupContainer("subMenu").setVisible(false));
 								} else {
 									SidebarMenuItem.SubMenu subMenu = (SidebarMenuItem.SubMenu) menuItem;
 									menuLink = new WebMarkupContainer("link");
@@ -473,7 +489,10 @@ public abstract class LayoutPage extends BasePage {
 									menuLink.add(new WebMarkupContainer("bullet").add(AttributeAppender.append("class", bulletType)));
 								}
 								menuLink.add(AttributeAppender.append("style", "padding-left: " + (25 + (15 * (nestLevel - 1))) + "px;"));
-								menuLink.add(new Label("label", menuItem.getLabel()));
+								var label = new Label("label", menuItem.getLabel());
+								if (menuItem instanceof SidebarMenuItem.SubscriptionRequired)
+									label.add(AttributeAppender.append("class", "subscription-required"));
+								menuLink.add(label);
 								if (menuItem.isActive())
 									menuLink.add(AttributeAppender.append("class", "active open"));
 								item.add(menuLink);

@@ -38,8 +38,10 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Triple;
+import org.apache.shiro.crypto.AesCipherService;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.digest.BuiltinDigests;
 import org.dom4j.Element;
@@ -56,6 +58,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.Issue;
@@ -8131,4 +8134,29 @@ public class DataMigrator {
 
 	private void migrate205(File dataDir, Stack<Integer> versions) {
 	}
+
+	private void migrate206(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("SYSTEM_UUID")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.setText(OneDev.getInstance(SettingManager.class).encryptUUID(valueElement.getText().trim()));
+						}
+					} else if (key.equals("ALERT")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.element("trialSubscriptionExpireInOneWeekAlerted").detach();
+							valueElement.element("trialSubscriptionExpiredAlerted").detach();
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}		
+	}
+
 }

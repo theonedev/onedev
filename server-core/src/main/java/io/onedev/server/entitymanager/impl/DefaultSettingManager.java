@@ -1,5 +1,27 @@
 package io.onedev.server.entitymanager.impl;
 
+import static io.onedev.server.model.Setting.PROP_KEY;
+import static org.hibernate.criterion.Restrictions.eq;
+
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.Validator;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.shiro.crypto.AesCipherService;
+import org.apache.shiro.crypto.CipherService;
+
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
@@ -9,7 +31,24 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
-import io.onedev.server.model.support.administration.*;
+import io.onedev.server.model.support.administration.AgentSetting;
+import io.onedev.server.model.support.administration.AlertSetting;
+import io.onedev.server.model.support.administration.AuditSetting;
+import io.onedev.server.model.support.administration.BackupSetting;
+import io.onedev.server.model.support.administration.BrandingSetting;
+import io.onedev.server.model.support.administration.ClusterSetting;
+import io.onedev.server.model.support.administration.GlobalBuildSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalPackSetting;
+import io.onedev.server.model.support.administration.GlobalProjectSetting;
+import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
+import io.onedev.server.model.support.administration.GpgSetting;
+import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.model.support.administration.PerformanceSetting;
+import io.onedev.server.model.support.administration.SecuritySetting;
+import io.onedev.server.model.support.administration.ServiceDeskSetting;
+import io.onedev.server.model.support.administration.SshSetting;
+import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -25,23 +64,22 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.Validator;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static io.onedev.server.model.Setting.PROP_KEY;
-import static org.hibernate.criterion.Restrictions.eq;
-
 @Singleton
-public class DefaultSettingManager extends BaseEntityManager<Setting> 
-		implements SettingManager, Serializable {
+public class DefaultSettingManager extends BaseEntityManager<Setting> implements SettingManager, Serializable {
 	
+	private static final byte[] UUID_ENCRYPTION_KEY = new byte[] {
+		(byte)0x5a, (byte)0x1f, (byte)0x9c, (byte)0x7e,
+		(byte)0x3b, (byte)0x44, (byte)0xd2, (byte)0x99,
+		(byte)0x2f, (byte)0xa3, (byte)0x7b, (byte)0xce,
+		(byte)0x1c, (byte)0x58, (byte)0xfa, (byte)0x91,
+		(byte)0x8d, (byte)0x26, (byte)0x74, (byte)0xcb,
+		(byte)0xe2, (byte)0x3d, (byte)0xa4, (byte)0x10,
+		(byte)0x3f, (byte)0xbf, (byte)0x58, (byte)0x60,
+		(byte)0x4b, (byte)0x8c, (byte)0xad, (byte)0xee
+	};
+		
+	private static final CipherService cipherService = new AesCipherService();
+
 	private final Map<Key, Optional<Serializable>> cache = new ConcurrentHashMap<>();
 	
 	private final ClusterManager clusterManager;
@@ -97,7 +135,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting>
 	
 	@Override
 	public String getSystemUUID() {
-		return (String) getSettingValue(Key.SYSTEM_UUID);
+		return new String(cipherService.decrypt(Base64.decodeBase64(((String)getSettingValue(Key.SYSTEM_UUID)).getBytes()), UUID_ENCRYPTION_KEY).getBytes());
 	}
 
 	@Override
@@ -239,7 +277,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting>
 	@Transactional
 	@Override
 	public void saveSystemUUID(String systemUUID) {
-		saveSetting(Key.SYSTEM_UUID, systemUUID);
+		saveSetting(Key.SYSTEM_UUID, encryptUUID(systemUUID));
 	}
 	
 	@Transactional
@@ -578,6 +616,11 @@ public class DefaultSettingManager extends BaseEntityManager<Setting>
 		Usage usage = new Usage();
 		usage.add(getIssueSetting().onDeleteLink(linkName));
 		return usage.prefix("administration");
+	}
+
+	@Override
+	public String encryptUUID(String uuid) {
+		return new String(Base64.encodeBase64(cipherService.encrypt(uuid.getBytes(), UUID_ENCRYPTION_KEY).getBytes()));
 	}
 
 	public Object writeReplace() throws ObjectStreamException {

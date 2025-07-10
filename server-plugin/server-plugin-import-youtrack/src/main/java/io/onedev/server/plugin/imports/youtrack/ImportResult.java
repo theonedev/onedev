@@ -89,7 +89,7 @@ public class ImportResult {
 					unmappedIssueTags));
 		}
 		if (!nonExistentLogins.isEmpty()) {
-			feedback.append(getEntryFeedback("YouTrack logins without email, or with an email but cannot be mapped to a OneDev account", 
+			feedback.append(getEntryFeedback("YouTrack logins not mapped to OneDev account due to missing/unmatched email address", 
 					nonExistentLogins));
 		}
 		if (!tooLargeAttachments.isEmpty()) {

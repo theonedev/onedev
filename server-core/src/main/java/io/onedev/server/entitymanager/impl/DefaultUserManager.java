@@ -344,6 +344,64 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 
 		dao.persist(user);
 	}
+
+	@Transactional
+	@Override
+	public void convertToServiceAccount(User user) {
+		for (var emailAddress: user.getEmailAddresses())
+			dao.remove(emailAddress);
+		for (var visit: user.getDashboardVisits())
+			dao.remove(visit);
+		for (var share: user.getDashboardShares())
+			dao.remove(share);	
+		for (var review: user.getPullRequestReviews())
+			dao.remove(review);
+		for (var assignment: user.getPullRequestAssignments())
+			dao.remove(assignment);
+		for (var watch: user.getPullRequestWatches())
+			dao.remove(watch);
+		for (var watch: user.getIssueWatches())
+			dao.remove(watch);
+		for (var vote: user.getIssueVotes())
+			dao.remove(vote);
+		for (var stopwatch: user.getStopwatches())
+			dao.remove(stopwatch);
+
+		for (var personalization: user.getIssueQueryPersonalizations())
+			dao.remove(personalization);
+		for (var personalization: user.getBuildQueryPersonalizations())
+			dao.remove(personalization);
+		for (var personalization: user.getPackQueryPersonalizations())
+			dao.remove(personalization);
+		for (var personalization: user.getPullRequestQueryPersonalizations())
+			dao.remove(personalization);
+		for (var personalization: user.getCommitQueryPersonalizations())
+			dao.remove(personalization);
+		for (var personalization: user.getCodeCommentQueryPersonalizations())
+			dao.remove(personalization);
+
+		for (var pendingSuggestionApply: user.getPendingSuggestionApplies())
+			dao.remove(pendingSuggestionApply);
+		for (var mention: user.getCodeCommentMentions())
+			dao.remove(mention);
+		for (var mention: user.getIssueMentions())
+			dao.remove(mention);
+		for (var mention: user.getPullRequestMentions())
+			dao.remove(mention);
+
+		user.setPassword(null);
+		user.setPasswordResetCode(null);
+		user.setServiceAccount(true);
+
+		dao.persist(user);		
+	}
+
+	@Transactional
+	@Override
+	public void convertToServiceAccounts(Collection<User> users) {
+		for (var user: users) 
+			convertToServiceAccount(user);
+	}
 	
 	@Transactional
 	@Override

@@ -16,7 +16,7 @@
 		</div>
 		<div class="sidebar-footer">
 			<a wicket:id="productVersion" target="_blank" class="sidebar-version"></a>
-			<a wicket:id="tryEE" href="https://onedev.io/pricing" class="try-ee badge badge-sm" data-tippy-content="Try Enterprise Edition"><wicket:t>Try EE</wicket:t></a>
+			<a wicket:id="tryEE" href="https://onedev.io/pricing" class="try-ee badge badge-sm" t:data-tippy-content="Try Enterprise Edition"><wicket:t>Try EE</wicket:t></a>
 			<div class="dropdown sidebar-help">
 				<a href="#" class="dropdown-toggle no-dropdown-caret" data-toggle="dropdown">
 					<wicket:svg href="question-circle-o" class="icon"></wicket:svg>
@@ -129,7 +129,9 @@
 			<a wicket:id="link" class="menu-link">
 				<svg wicket:id="icon" class="icon menu-icon"></svg>
 				<span wicket:id="bullet" class="menu-bullet"></span>
-				<span wicket:id="label" class="menu-text"></span>
+				<span class="menu-text">
+					<span wicket:id="label"></span>
+				</span>
 				<svg wicket:id="arrow" class="icon menu-arrow"></svg>
 			</a>
 			<div wicket:id="subMenu" class="menu-body"></div>

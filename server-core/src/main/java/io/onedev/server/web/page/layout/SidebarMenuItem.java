@@ -88,6 +88,21 @@ public abstract class SidebarMenuItem implements Serializable {
 		}
 
 	}
+
+	public static class SubscriptionRequired extends SidebarMenuItem {
+
+		private static final long serialVersionUID = 1L;
+		
+		public SubscriptionRequired(String icon, String label) {
+			super(icon, label);
+		}
+				
+		@Override
+		public boolean isActive() {
+			return false;
+		}
+		
+	}	
 	
 	public static class SubMenu extends SidebarMenuItem {
 

@@ -200,4 +200,6 @@ public interface SettingManager extends EntityManager<Setting> {
 
 	Usage onDeleteLink(String linkName);
 	
+	String encryptUUID(String uuid);
+
 }

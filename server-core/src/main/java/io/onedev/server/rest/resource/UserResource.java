@@ -21,6 +21,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -34,6 +35,7 @@ import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.annotation.UserName;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.AuditManager;
@@ -78,15 +80,19 @@ public class UserResource {
 	
 	private final EmailAddressManager emailAddressManager;
 
+	private final SubscriptionManager subscriptionManager;
+
 	private final AuditManager auditManager;
 	
 	@Inject
 	public UserResource(UserManager userManager, SshKeyManager sshKeyManager, 
-			PasswordService passwordService, EmailAddressManager emailAddressManager, AuditManager auditManager) {
+			PasswordService passwordService, EmailAddressManager emailAddressManager, 
+			SubscriptionManager subscriptionManager, AuditManager auditManager) {
 		this.userManager = userManager;
 		this.sshKeyManager = sshKeyManager;
 		this.passwordService = passwordService;
 		this.emailAddressManager = emailAddressManager;
+		this.subscriptionManager = subscriptionManager;
 		this.auditManager = auditManager;
 	}
 
@@ -388,6 +394,8 @@ public class UserResource {
 	@Path("/{userId}/disable")
     @POST
     public Response disableUser(@PathParam("userId") Long userId) {
+		if (!subscriptionManager.isSubscriptionActive())
+			throw new NotAcceptableException("This operation requires active subscription");
 		if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		
@@ -405,6 +413,8 @@ public class UserResource {
 	@Path("/{userId}/enable")
     @POST
     public Response enableUser(@PathParam("userId") Long userId) {
+		if (!subscriptionManager.isSubscriptionActive())
+			throw new NotAcceptableException("This operation requires active subscription");
 		if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		if (userId <= User.ROOT_ID)		
@@ -413,6 +423,24 @@ public class UserResource {
 		userManager.enable(user);
 
 		auditManager.audit(null, "enabled account \"" + user.getName() + "\" via RESTful API", null, null);
+
+		return Response.ok().build();
+    }
+
+	@Api(order=1980, description="Convert to service account")
+	@Path("/{userId}/convert-to-service-account")
+    @POST
+    public Response convertToServiceAccount(@PathParam("userId") Long userId) {
+		if (!subscriptionManager.isSubscriptionActive())
+			throw new NotAcceptableException("This operation requires active subscription");
+		if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+		if (userId <= User.ROOT_ID)		
+			throw new BadRequestException("Should only convert normal users to service accounts");
+		var user = userManager.load(userId);
+		userManager.convertToServiceAccount(user);
+
+		auditManager.audit(null, "converted user \"" + user.getName() + "\" to service account via RESTful API", null, null);
 
 		return Response.ok().build();
     }

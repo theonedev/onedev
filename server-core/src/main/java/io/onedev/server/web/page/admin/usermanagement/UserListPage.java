@@ -335,8 +335,86 @@ public class UserListPage extends AdministrationPage {
 							};
 						}
 
-					});				
+					});		
+					
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return _T("Convert Selected to Service Accounts");
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+									
+									for (var model: selectionColumn.getSelections()) {
+										var user = model.getObject();
+										if (user.isRoot()) {
+											Session.get().error(_T("Can not convert root user to service account"));
+											return;
+										} else if (user.equals(SecurityUtils.getAuthUser())) {
+											Session.get().error(_T("Can not convert yourself to service account"));
+											return;
+										}
+									}
+									
+									new ConfirmModalPanel(target) {
+
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											getTransactionManager().run(() -> {
+												var users = selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet());
+												getUserManager().convertToServiceAccounts(users);
+												for (var user: users) {
+													getAuditManager().audit(null, "converted \"" + user.getName() + "\" to service account", null, null);
+												}
+												target.add(countLabel);
+												target.add(usersTable);
+												selectionColumn.getSelections().clear();
+												Session.get().success(_T("Users converted to service accounts successfully"));
+											});
+										}
+
+										@Override
+										protected String getConfirmMessage() {
+											return _T("Converting to service accounts will remove password, email addresses, all assignments and watches. Type <code>yes</code> to confirm");
+										}
+
+										@Override
+										protected String getConfirmInput() {
+											return "yes";
+										}
+
+									};
+								}
+
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(!selectionColumn.getSelections().isEmpty());
+								}
+
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("data-tippy-content", _T("Please select users to convert to service accounts"));
+									}
+								}
+
+							};
+						}
+
+					});														
 				}
+				
 				menuItems.add(new MenuItem() {
 
 					@Override
@@ -541,6 +619,86 @@ public class UserListPage extends AdministrationPage {
 									if (!isEnabled()) {
 										tag.put("disabled", "disabled");
 										tag.put("data-tippy-content", _T("No users to disable"));
+									}
+								}
+	
+							};
+						}
+	
+					});
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return _T("Convert All Queried to Service Accounts");
+						}
+	
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
+	
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+	
+									for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();) {
+										var user = it.next();
+										if (user.isRoot()) {
+											Session.get().error(_T("Can not convert root user to service account"));
+											return;
+										} else if (user.equals(SecurityUtils.getAuthUser())) {
+											Session.get().error(_T("Can not convert yourself to service account"));
+											return;
+										}
+									}
+									
+									new ConfirmModalPanel(target) {
+	
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											getTransactionManager().run(() -> {
+												Collection<User> users = new ArrayList<>();
+												for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
+													users.add(it.next());
+												getUserManager().convertToServiceAccounts(users);
+												for (var user: users) {
+													getAuditManager().audit(null, "converted user \"" + user.getName() + "\" to service account", null, null);
+												}
+												target.add(usersTable);
+												dataProvider.detach();
+												usersModel.detach();
+												selectionColumn.getSelections().clear();
+		
+												Session.get().success(_T("Users converted to service accounts successfully"));													
+											});
+										}
+	
+										@Override
+										protected String getConfirmMessage() {
+											return _T("Converting to service accounts will remove password, email addresses, all assignments and watches. Type <code>yes</code> to confirm");
+										}
+	
+										@Override
+										protected String getConfirmInput() {
+											return "yes";
+										}
+	
+									};
+								}
+	
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(usersTable.getItemCount() != 0);
+								}
+	
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("data-tippy-content", _T("No users to convert to service accounts"));
 									}
 								}
 	
