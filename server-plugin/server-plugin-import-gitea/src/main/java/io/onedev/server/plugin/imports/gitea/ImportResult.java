@@ -47,7 +47,7 @@ public class ImportResult {
 		if (!unmappedIssueLabels.isEmpty()) 
 			feedback.append(getEntryFeedback("Gitea issue labels not mapped to OneDev custom field", unmappedIssueLabels));
 		if (!nonExistentLogins.isEmpty()) {
-			feedback.append(getEntryFeedback("Gitea logins without email or email can not be mapped to OneDev account", 
+			feedback.append(getEntryFeedback("Gitea logins not mapped to OneDev account due to missing/unmatched email address", 
 					nonExistentLogins));
 		}
 		
