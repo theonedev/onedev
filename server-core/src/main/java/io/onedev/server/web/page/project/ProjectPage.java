@@ -255,9 +255,10 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					CodeContribsPage.class, CodeContribsPage.paramsOf(getProject()), 
 					Lists.newArrayList(SourceLinesPage.class)));
 		}
-				
-		if (!statsMenuItems.isEmpty())
-			menuItems.add(new SidebarMenuItem.SubMenu("stats", _T("Statistics"), statsMenuItems));
+
+		// Add the sub menu even if it is empty as we need to place stats menu in the right place.
+		// Menu items may be added to the sub menu later via contribution
+		menuItems.add(new SidebarMenuItem.SubMenu("stats", _T("Statistics"), statsMenuItems));
 		
 		menuItems.add(new SidebarMenuItem.Page("tree", _T("Child Projects"), 
 				ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(getProject(), null, 0)));
@@ -366,7 +367,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			for (var menuItem: contribution.getMenuItems(getProject())) 
 				menu.insertMenuItem(menuItem);			
 		}
-
+		
 		List<SidebarMenu> menus = super.getSidebarMenus();	
 		menus.add(menu);
 		return menus;

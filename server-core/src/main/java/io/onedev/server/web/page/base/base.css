@@ -844,7 +844,7 @@ span.keycap {
 .community-edition .subscription-required::after {
 	content: "ee";
 	position: absolute;
-	top: -3px;
+	bottom: 8px;
 	right: -18px;
 	font-size: 8px;
 	padding: 0 3px 1px 3px;

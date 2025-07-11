@@ -57,6 +57,18 @@ public class SidebarMenu implements Serializable {
 		menuItems.add(menuItem);
 	}
 	
+	public void cleanup() {
+		for (var it = menuItems.iterator(); it.hasNext();) {
+			var menuItem = it.next();
+			if (menuItem instanceof SidebarMenuItem.SubMenu) {
+				var subMenu = (SidebarMenuItem.SubMenu) menuItem;
+				subMenu.cleanup();
+				if (subMenu.getMenuItems().isEmpty())
+					it.remove();
+			}
+		}
+	}
+	
 	public static abstract class Header implements Serializable {
 		
 		private static final long serialVersionUID = 1L;

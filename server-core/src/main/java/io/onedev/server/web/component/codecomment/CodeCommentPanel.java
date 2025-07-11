@@ -56,6 +56,7 @@ import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.UrlManager;
@@ -357,10 +358,12 @@ public abstract class CodeCommentPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onDeleteComment(target, getComment());
-				OneDev.getInstance(CodeCommentManager.class).delete(getComment());
-				var oldAuditContent = VersionedXmlDoc.fromBean(getComment()).toXML();
-				OneDev.getInstance(AuditManager.class).audit(getComment().getProject(), "deleted code comment on file \"" + getComment().getMark().getPath() + "\"", oldAuditContent, null);
+				OneDev.getInstance(TransactionManager.class).run(() -> {
+					onDeleteComment(target, getComment());
+					var oldAuditContent = VersionedXmlDoc.fromBean(getComment()).toXML();
+					OneDev.getInstance(AuditManager.class).audit(getComment().getProject(), "deleted code comment on file \"" + getComment().getMark().getPath() + "\"", oldAuditContent, null);
+					OneDev.getInstance(CodeCommentManager.class).delete(getComment());	
+				});
 			}
 
 			protected void onConfigure() {

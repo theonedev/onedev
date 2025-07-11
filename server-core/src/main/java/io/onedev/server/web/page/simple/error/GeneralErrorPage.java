@@ -49,7 +49,7 @@ public class GeneralErrorPage extends SimplePage {
 
 	public GeneralErrorPage(Exception exception) {
 		super(new PageParameters());
-		
+				
 		serverNotFound = ExceptionUtils.find(exception, ServerNotFoundException.class) != null;
 		
 		var response = ExceptionUtils.buildResponse(exception);

@@ -123,6 +123,18 @@ public abstract class SidebarMenuItem implements Serializable {
 		public boolean isActive() {
 			return menuItems.stream().anyMatch(it->it.isActive());
 		}
+
+        public void cleanup() {
+			menuItems.removeIf(it -> {
+				if (it instanceof SidebarMenuItem.SubMenu) {
+					var subMenu = (SidebarMenuItem.SubMenu) it;
+					subMenu.cleanup();
+					return subMenu.getMenuItems().isEmpty();
+				} else {
+					return false;
+				}
+			});
+        }
 		
 	}
 

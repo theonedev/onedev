@@ -1119,7 +1119,7 @@ onedev.server.markdown = {
 			if (suggestionCallback) {
 				if ($this.data("suggestionoutdated")) {
 					var icon = "<svg class='icon icon-sm'><use xlink:href='" + onedev.server.icons + "#warning'/></svg>";
-					var $warning = $("<a class='ml-2' disabled='disabled' data-tippy-content='" + onedev.server.markdown.translations["suggestion-outdated"] + "'>" + icon + "</a>");
+					var $warning = $("<a class='ml-2 link-gray' data-tippy-content='" + onedev.server.markdown.translations["suggestion-outdated"] + "'>" + icon + "</a>");
 					$actions.append($warning);
 				} else if ($this.data("suggestionapplyinbatch")) {
 					var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#minus-square'/></svg>";

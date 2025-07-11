@@ -401,6 +401,8 @@ public abstract class LayoutPage extends BasePage {
 
 				menus.add(menu);
 				menus.addAll(getSidebarMenus());
+				menus.removeIf(it -> {it.cleanup(); return it.getMenuItems().isEmpty();});
+				
 				return menus;
 			}
 
