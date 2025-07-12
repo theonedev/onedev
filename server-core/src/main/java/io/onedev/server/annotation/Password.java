@@ -5,11 +5,23 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.METHOD})
+import javax.validation.Constraint;
+import javax.validation.Payload;
+
+import io.onedev.server.validation.validator.PasswordValidator;
+
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy=PasswordValidator.class)
 public @interface Password {
 	
-	boolean needConfirm() default false;
+	String message() default "";
+	
+	Class<?>[] groups() default {};
+	
+	Class<? extends Payload>[] payload() default {};
+	
+	boolean checkPolicy() default false;
 	
 	String autoComplete() default "";
 	

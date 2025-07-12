@@ -16,7 +16,7 @@ public class PasswordResetBean implements Serializable {
 	
 	@Editable(order=200)
 	@OmitName
-	@Password(needConfirm=true)
+	@Password(checkPolicy=true)
 	@NotEmpty
 	public String getNewPassword() {
 		return newPassword;

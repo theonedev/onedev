@@ -566,7 +566,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	 */
 	@Editable(order=150)
 	@ShowCondition("isServiceAccountDisabled")
-	@Password(needConfirm=true, autoComplete="new-password")
+	@Password(checkPolicy=true, autoComplete="new-password")
 	@NotEmpty
 	@Nullable
 	public String getPassword() {

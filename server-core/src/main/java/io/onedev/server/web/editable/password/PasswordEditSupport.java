@@ -15,7 +15,7 @@ public class PasswordEditSupport implements EditSupport {
 		if (descriptor.getPropertyClass() == String.class) {
 			Password password = descriptor.getPropertyGetter().getAnnotation(Password.class);
 			if (password != null) {
-				if (password.needConfirm()) {
+				if (password.checkPolicy()) {
 					return new PropertyContext<String>(descriptor) {
 
 						@Override

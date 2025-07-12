@@ -32,6 +32,8 @@ public class SecuritySetting implements Serializable {
 	
 	private boolean enableSelfDeregister;
 	
+	private PasswordPolicy passwordPolicy;
+
 	private String defaultGroupName;
 	
 	private boolean enforce2FA;
@@ -70,6 +72,15 @@ public class SecuritySetting implements Serializable {
 	@SuppressWarnings("unused")
 	private static boolean isEnableSelfRegisterEnabled() {
 		return (boolean) EditContext.get().getInputValue("enableSelfRegister");
+	}
+
+	@Editable(order=250, name="Enforce Password Policy", description="Enforce password policy for new users")
+	public PasswordPolicy getPasswordPolicy() {
+		return passwordPolicy;
+	}
+
+	public void setPasswordPolicy(PasswordPolicy passwordPolicy) {
+		this.passwordPolicy = passwordPolicy;
 	}
 
 	@Editable(order=300, name="Default Group", description="Optionally add new users to specified default group")

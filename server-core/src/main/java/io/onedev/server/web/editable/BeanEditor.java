@@ -18,6 +18,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.feedback.FeedbackMessage;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -29,6 +30,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
+import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.annotation.OmitName;
@@ -181,7 +183,22 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				descriptionLabel.setOutputMarkupPlaceholderTag(true);
 				add(descriptionLabel);
 				
-				add(new FencedFeedbackPanel("feedback", propertyEditor));
+				add(new FencedFeedbackPanel("feedback", propertyEditor) {
+
+					@Override
+					protected Component newMessageDisplayComponent(String id, FeedbackMessage message) {
+						Component component = super.newMessageDisplayComponent(id, message);
+						if (component instanceof Label) {
+							Label label = (Label) component;
+							String messageText = HtmlEscape.escapeHtml5(message.getMessage().toString());
+							messageText = messageText.replace("\n", "<br>");
+							label.setDefaultModelObject(messageText);
+							label.setEscapeModelStrings(false);
+						}
+						return component;
+					}
+					
+				});
 			}
 
 			@Override

@@ -36,6 +36,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.SubscriptionManager;
+import io.onedev.server.annotation.Password;
 import io.onedev.server.annotation.UserName;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.AuditManager;
@@ -448,7 +449,7 @@ public class UserResource {
 	@Api(order=2000)
 	@Path("/{userId}/password")
     @POST
-    public Response setPassword(@PathParam("userId") Long userId, @NotEmpty String password) {
+    public Response setPassword(@PathParam("userId") Long userId, @Password(checkPolicy=true) @NotEmpty String password) {
     	User user = userManager.load(userId);
 		if (SecurityUtils.isAdministrator()) {
 			user.setPassword(passwordService.encryptPassword(password));
@@ -680,7 +681,8 @@ public class UserResource {
 			this.name = name;
 		}
 
-		@NotEmpty
+		@Password(checkPolicy=true)
+		@NotEmpty		
 		public String getPassword() {
 			return password;
 		}
