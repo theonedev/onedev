@@ -31,6 +31,8 @@ public interface UrlManager {
 	String urlFor(IssueComment comment, boolean withRootUrl);
 	
 	String urlFor(IssueChange change, boolean withRootUrl);
+
+	String urlForAttachment(Project project, String attachmentGroup, String attachmentName, boolean withRootUrl);
 	
 	String urlFor(CodeComment comment, boolean withRootUrl);
 

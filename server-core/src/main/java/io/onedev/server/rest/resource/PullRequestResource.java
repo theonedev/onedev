@@ -3,6 +3,7 @@ package io.onedev.server.rest.resource;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
 import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +30,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.joda.time.DateTime;
 
+import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
@@ -56,6 +58,7 @@ import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectAndBranch;
+import io.onedev.server.web.UrlManager;
 
 @Api(name="Pull Request", description="In most cases, pull request resource is operated with pull request id, which is different from pull request number. "
 		+ "To get pull request id of a particular pull request number, use the <a href='/~help/api/io.onedev.server.rest.PullRequestResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
@@ -75,16 +78,23 @@ public class PullRequestResource {
 	private final GitService gitService;
 
 	private final AuditManager auditManager;
+
+	private final AttachmentManager attachmentManager;
+
+	private final UrlManager urlManager;
 	
 	@Inject
 	public PullRequestResource(PullRequestManager pullRequestManager, 
 			PullRequestChangeManager pullRequestChangeManager, 
-			UserManager userManager, GitService gitService, AuditManager auditManager) {
+			UserManager userManager, GitService gitService, AuditManager auditManager, 
+			AttachmentManager attachmentManager, UrlManager urlManager) {
 		this.pullRequestManager = pullRequestManager;
 		this.pullRequestChangeManager = pullRequestChangeManager;
 		this.userManager = userManager;
 		this.gitService = gitService;
 		this.auditManager = auditManager;
+		this.attachmentManager = attachmentManager;
+		this.urlManager = urlManager;
 	}
 
 	@Api(order=100)
@@ -489,6 +499,21 @@ public class PullRequestResource {
 		
 		pullRequestManager.restoreSourceBranch(request, note);
 		return Response.ok().build();
+    }
+
+	@Api(order=2050, example = "/~downloads/projects/1/attachments/6a5a1a20-c8c0-44a5-a1bb-8a3d2a830094/attachment.txt", 
+			description = "Upload attachment to pull request and get attachment url via response. This url can then be used in pull request description or comment")
+	@Path("/{requestId}/attachments/{preferredAttachmentName}")
+    @POST
+	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    public String uploadAttachment(@PathParam("requestId") Long requestId, @PathParam("preferredAttachmentName") String preferredAttachmentName, InputStream input) {
+		PullRequest request = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canModifyPullRequest(request))
+			throw new UnauthorizedException();
+			
+		var attachmentName = attachmentManager.saveAttachment(request.getProject().getId(), request.getUUID(), preferredAttachmentName, input);
+		var url = urlManager.urlForAttachment(request.getProject(), request.getUUID(), attachmentName, false);
+		return url;
     }
 	
 	@Api(order=2100)

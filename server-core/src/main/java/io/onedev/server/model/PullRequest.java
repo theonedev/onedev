@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.PullRequest.PROP_CLOSE_DAY;
 import static io.onedev.server.model.PullRequest.PROP_CLOSE_MONTH;
@@ -69,6 +70,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
@@ -376,6 +378,7 @@ public class PullRequest extends ProjectBelonging
 	
 	private int eyesCount;
 
+	@JsonProperty(access = READ_ONLY)
 	private int descriptionRevisionCount;
 
 	@Embedded

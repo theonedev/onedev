@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -13,6 +15,8 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.onedev.server.model.support.EntityComment;
 import io.onedev.server.rest.annotation.Immutable;
@@ -38,6 +42,7 @@ public class IssueComment extends EntityComment {
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<IssueCommentRevision> revisions = new ArrayList<>();
 
+	@JsonProperty(access = READ_ONLY)
 	private int revisionCount;
 
 	@Lob

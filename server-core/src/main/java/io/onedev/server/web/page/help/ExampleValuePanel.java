@@ -296,11 +296,15 @@ public class ExampleValuePanel extends Panel {
 	
 	private Fragment newScalarFragment(Serializable value) {
 		Fragment fragment = new Fragment("content", "scalarFrag", this);
-		var valueOrigin = getValueOrigin();
-		if (valueOrigin == CREATE_BODY || valueOrigin == UPDATE_BODY || valueOrigin == READ_BODY)
+		if (findParent(ExampleValuePanel.class) != null) {
 			fragment.add(new Label("value", toJson(value)));
-		else
-			fragment.add(new Label("value", String.valueOf(value)));
+		} else {
+			var valueOrigin = getValueOrigin();
+			if ((valueOrigin == CREATE_BODY || valueOrigin == UPDATE_BODY || valueOrigin == READ_BODY) && (value instanceof Date || value instanceof Enum))
+				fragment.add(new Label("value", toJson(value)));
+			else
+				fragment.add(new Label("value", String.valueOf(value)));
+		}
 			
 		return fragment;
 	}

@@ -10,10 +10,10 @@ public interface AttachmentManager {
 
 	File getAttachmentGroupDir(Long projectId, String attachmentGroup);
 	
-	String saveAttachment(Long projectId, String attachmentGroup, String suggestedAttachmentName, 
+	String saveAttachment(Long projectId, String attachmentGroup, String preferredAttachmentName, 
 			InputStream attachmentStream);
 
-	String saveAttachmentLocal(Long projectId, String attachmentGroup, String suggestedAttachmentName,
+	String saveAttachmentLocal(Long projectId, String attachmentGroup, String preferredAttachmentName,
 						  InputStream attachmentStream);
 	
 	FileInfo getAttachmentInfo(Long projectId, String attachmentGroup, String attachment);

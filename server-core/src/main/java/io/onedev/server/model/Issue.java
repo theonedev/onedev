@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.Issue.PROP_BOARD_POSITION;
 import static io.onedev.server.model.Issue.PROP_COMMENT_COUNT;
@@ -60,6 +61,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -338,6 +340,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	
 	private int progress = -1;
 
+	@JsonProperty(access = READ_ONLY)
 	private int descriptionRevisionCount;
 	
 	@Column(nullable=false)

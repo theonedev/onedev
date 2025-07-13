@@ -1,5 +1,6 @@
 package io.onedev.server.rest.resource;
 
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,6 +34,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
@@ -61,6 +63,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.web.UrlManager;
 import io.onedev.server.web.page.help.ApiHelpUtils;
 import io.onedev.server.web.page.help.ValueInfo;
 
@@ -86,11 +89,17 @@ public class IssueResource {
 	private final ObjectMapper objectMapper;
 
 	private final AuditManager auditManager;
-	
+
+	private final AttachmentManager attachmentManager;
+
+	private final UrlManager urlManager;
+
 	@Inject
 	public IssueResource(SettingManager settingManager, IssueManager issueManager, 
 						 IssueChangeManager issueChangeManager, IterationManager iterationManager, 
-						 ProjectManager projectManager, ObjectMapper objectMapper, AuditManager auditManager) {
+						 ProjectManager projectManager, ObjectMapper objectMapper, 
+						 AuditManager auditManager, AttachmentManager attachmentManager, 
+						 UrlManager urlManager) {
 		this.settingManager = settingManager;
 		this.issueManager = issueManager;
 		this.issueChangeManager = issueChangeManager;
@@ -98,6 +107,8 @@ public class IssueResource {
 		this.projectManager = projectManager;
 		this.objectMapper = objectMapper;
 		this.auditManager = auditManager;
+		this.attachmentManager = attachmentManager;
+		this.urlManager = urlManager;
 	}
 
 	@Api(order=100)
@@ -417,6 +428,21 @@ public class IssueResource {
 		issueChangeManager.changeState(issue, data.getState(), getFieldObjs(issue, data.getFields()), 
 				data.getRemoveFields(), data.getComment());
 		return Response.ok().build();
+    }
+
+	@Api(order=1550, example = "/~downloads/projects/1/attachments/6a5a1a20-c8c0-44a5-a1bb-8a3d2a830094/attachment.txt", 
+			description = "Upload attachment to issue and get attachment url via response. This url can then be used in issue description or comment")
+	@Path("/{issueId}/attachments/{preferredAttachmentName}")
+    @POST
+	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    public String uploadAttachment(@PathParam("issueId") Long issueId, @PathParam("preferredAttachmentName") String preferredAttachmentName, InputStream input) {
+		Issue issue = issueManager.load(issueId);
+    	if (!SecurityUtils.canModifyIssue(issue))
+			throw new UnauthorizedException();
+			
+		var attachmentName = attachmentManager.saveAttachment(issue.getProject().getId(), issue.getUUID(), preferredAttachmentName, input);
+		var url = urlManager.urlForAttachment(issue.getProject(), issue.getUUID(), attachmentName, false);
+		return url;
     }
 	
 	@Api(order=1600)

@@ -12,11 +12,14 @@ import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
+import org.apache.wicket.util.encoding.UrlEncoder;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Singleton
@@ -155,6 +158,13 @@ public class DefaultUrlManager implements UrlManager {
 	@Override
 	public String urlForPullRequest(Project project, Long pullRequestNumber, boolean withRootUrl) {
 		return urlFor(project, withRootUrl) + "/~pulls/" + pullRequestNumber;
+	}
+
+	@Override
+	public String urlForAttachment(Project project, String attachmentGroup, String attachmentName, boolean withRootUrl) {
+		var encodedAttachmentGroup = UrlEncoder.PATH_INSTANCE.encode(attachmentGroup, StandardCharsets.UTF_8);
+		var encodedAttachmentName = UrlEncoder.PATH_INSTANCE.encode(attachmentName, StandardCharsets.UTF_8);
+		return (withRootUrl ? settingManager.getSystemSetting().getServerUrl() : "") + "/~downloads/projects/" + project.getId() + "/attachments/" + encodedAttachmentGroup + "/" + encodedAttachmentName;
 	}
 
 	@Override

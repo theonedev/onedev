@@ -539,11 +539,11 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	}
 
 	@Override
-	public String saveAttachment(Long projectId, String attachmentGroup, String suggestedAttachmentName, 
+	public String saveAttachment(Long projectId, String attachmentGroup, String preferredAttachmentName, 
 			InputStream attachmentStream) {
 		String activeServer = projectManager.getActiveServer(projectId, true);
 		if (activeServer.equals(clusterManager.getLocalServerAddress())) {
-			return saveAttachmentLocal(projectId, attachmentGroup, suggestedAttachmentName, attachmentStream);
+			return saveAttachmentLocal(projectId, attachmentGroup, preferredAttachmentName, attachmentStream);
 		} else {
 			Client client = ClientBuilder.newClient();
 			client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
@@ -553,7 +553,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 						.path("~api/cluster/attachment")
 						.queryParam("projectId", projectId)
 						.queryParam("attachmentGroup", attachmentGroup)
-						.queryParam("suggestedAttachmentName", suggestedAttachmentName);
+						.queryParam("suggestedAttachmentName", preferredAttachmentName);
 				var builder = target.request();
 				builder.header(AUTHORIZATION, BEARER + " " + clusterManager.getCredential());
 
@@ -577,10 +577,10 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	}
 	
 	@Override
-	public String saveAttachmentLocal(Long projectId, String attachmentGroup, String suggestedAttachmentName,
+	public String saveAttachmentLocal(Long projectId, String attachmentGroup, String preferredAttachmentName,
 								 InputStream attachmentStream) {
 		return write(getAttachmentLockName(projectId, attachmentGroup), () -> {
-			var suggestedAttachmentNameCopy = suggestedAttachmentName;
+			var suggestedAttachmentNameCopy = preferredAttachmentName;
 			suggestedAttachmentNameCopy = suggestedAttachmentNameCopy.replace("..", "-");
 			String attachmentName = suggestedAttachmentNameCopy;
 			File attachmentDir = getAttachmentGroupDir(projectId, attachmentGroup);
