@@ -1,7 +1,7 @@
 <wicket:panel>
 	<div class="command-palette">
 		<div class="modal-header">
-			<h5 class="modal-title">Command Palette</h5>
+			<h5 class="modal-title"><wicket:t>Command Palette</wicket:t></h5>
 			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 		</div>
 		<div class="modal-body">
@@ -9,8 +9,8 @@
 				<input wicket:id="input" class="form-control" t:placeholder="Type to filter...">
 				<div class="font-size-sm mt-2 text-muted">
 					<wicket:svg href="bulb" class="icon"/>
-					As long as a feature can be accessed via url, you can input part of the url 
-					to match and jump 
+					<wicket:t>As long as a feature can be accessed via url, you can input part of the url 
+					to match and jump</wicket:t>
 				</div>
 			</div>
 			<div wicket:id="suggestions" class="suggestions mt-3 overflow-auto">
@@ -19,11 +19,11 @@
 					<span wicket:id="hint" class="hint ml-3 text-muted"></span>
 				</a>
 			</div>
-			<div wicket:id="noSuggestions" class="no-suggestions alert alert-notice alert-light-warning mt-4 mb-0">No suggestions</div>
+			<div wicket:id="noSuggestions" class="no-suggestions alert alert-notice alert-light-warning mt-4 mb-0"><wicket:t>No suggestions</wicket:t></div>
 		</div>
 		<div class="modal-footer justify-content-start text-muted">
-			<span class="keycap mr-1">&uarr;</span> <span class="keycap mr-1">&darr;</span> to move 
-			<span class="keycap ml-3 mr-1">esc</span> to close
+			<wicket:t><span class="keycap mr-1">&uarr;</span> <span class="keycap mr-1">&darr;</span> to move</wicket:t>
+			<wicket:t><span class="keycap ml-3 mr-1">esc</span> to close</wicket:t>
 		</div>
 	</div>
 </wicket:panel>

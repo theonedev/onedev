@@ -45,6 +45,8 @@ import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.mapper.ICompoundRequestMapper;
 import org.unbescape.javascript.JavaScriptEscape;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -323,9 +325,9 @@ public abstract class CommandPalettePanel extends Panel {
 				StringBuilder hintBuilder = new StringBuilder();
 
 				if (searchBase != null) 
-					hintBuilder.append("<span class='text-nowrap'><span class='keycap'>Tab</span> to search</span>");
+					hintBuilder.append(_T("<span class='text-nowrap'><span class='keycap'>Tab</span> to search</span>"));
 				if (url != null) 
-					hintBuilder.append("<span class='text-nowrap'><span class='keycap'>Enter</span> to go</span>");
+					hintBuilder.append(_T("<span class='text-nowrap'><span class='keycap'>Enter</span> to go</span>"));
 				
 				if (url != null || searchBase != null)
 					container.add(new Label("label", suggestion.getLabel()));
