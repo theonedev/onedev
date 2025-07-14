@@ -599,9 +599,11 @@ onedev.server.markdown = {
 	    	var inputEl = $input[0];
 	    	
 			inputEl.addEventListener("paste", function(e) {
+				var hasImage = false;
 				for (var i = 0; i < e.clipboardData.items.length; i++) {
 					var item = e.clipboardData.items[i];
 					if (item.type.indexOf("image") != -1) {
+						hasImage = true;
 						var file = item.getAsFile();
 						if (!file.name) {
 							if (item.type.indexOf("png") != -1)
@@ -614,6 +616,9 @@ onedev.server.markdown = {
 						uploadFile(file);
 						break;
 					}
+				}
+				if (hasImage) {
+					e.preventDefault();
 				}
 			});
 			
