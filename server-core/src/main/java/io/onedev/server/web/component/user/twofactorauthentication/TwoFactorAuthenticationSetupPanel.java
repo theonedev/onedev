@@ -97,6 +97,8 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 			
 		});
 		
+		form.add(new Label("secretKey", authentication.getSecretKey()));
+		
 		TextField<String> input = new TextField<String>("passcode", Model.of(""));
 		form.add(input);
 		form.add(new FencedFeedbackPanel("feedback", form));
