@@ -43,6 +43,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -127,6 +128,8 @@ import io.onedev.server.web.component.suggestionapply.SuggestionApplyModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
+import io.onedev.server.web.resource.PatchResource;
+import io.onedev.server.web.resource.PatchResourceReference;
 import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.TextUtils;
@@ -612,6 +615,9 @@ public abstract class RevisionDiffPanel extends Panel {
 					}
 					
 				});
+
+				var params = PatchResource.paramsOf(getProject().getId(), getOldCommitId(), getNewCommitId());
+				add(new ResourceLink<Void>("downloadPatch", new PatchResourceReference(), params));
 			}			
 			
 		}.setOutputMarkupId(true));		

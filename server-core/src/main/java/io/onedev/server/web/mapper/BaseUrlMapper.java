@@ -67,17 +67,6 @@ import io.onedev.server.web.page.admin.usermanagement.InvitationListPage;
 import io.onedev.server.web.page.admin.usermanagement.NewInvitationPage;
 import io.onedev.server.web.page.admin.usermanagement.NewUserPage;
 import io.onedev.server.web.page.admin.usermanagement.UserListPage;
-import io.onedev.server.web.page.user.accesstoken.UserAccessTokensPage;
-import io.onedev.server.web.page.user.avatar.UserAvatarPage;
-import io.onedev.server.web.page.user.basicsetting.UserBasicSettingPage;
-import io.onedev.server.web.page.user.emailaddresses.UserEmailAddressesPage;
-import io.onedev.server.web.page.user.gpgkeys.UserGpgKeysPage;
-import io.onedev.server.web.page.user.membership.UserMembershipsPage;
-import io.onedev.server.web.page.user.password.UserPasswordPage;
-import io.onedev.server.web.page.user.profile.UserProfilePage;
-import io.onedev.server.web.page.user.querywatch.UserQueryWatchesPage;
-import io.onedev.server.web.page.user.sshkeys.UserSshKeysPage;
-import io.onedev.server.web.page.user.twofactorauthentication.UserTwoFactorAuthenticationPage;
 import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.help.MethodDetailPage;
@@ -169,6 +158,17 @@ import io.onedev.server.web.page.simple.security.PasswordResetPage;
 import io.onedev.server.web.page.simple.security.SignUpPage;
 import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
 import io.onedev.server.web.page.test.TestPage;
+import io.onedev.server.web.page.user.accesstoken.UserAccessTokensPage;
+import io.onedev.server.web.page.user.avatar.UserAvatarPage;
+import io.onedev.server.web.page.user.basicsetting.UserBasicSettingPage;
+import io.onedev.server.web.page.user.emailaddresses.UserEmailAddressesPage;
+import io.onedev.server.web.page.user.gpgkeys.UserGpgKeysPage;
+import io.onedev.server.web.page.user.membership.UserMembershipsPage;
+import io.onedev.server.web.page.user.password.UserPasswordPage;
+import io.onedev.server.web.page.user.profile.UserProfilePage;
+import io.onedev.server.web.page.user.querywatch.UserQueryWatchesPage;
+import io.onedev.server.web.page.user.sshkeys.UserSshKeysPage;
+import io.onedev.server.web.page.user.twofactorauthentication.UserTwoFactorAuthenticationPage;
 import io.onedev.server.web.resource.AgentLibResourceReference;
 import io.onedev.server.web.resource.AgentLogResourceReference;
 import io.onedev.server.web.resource.AgentResourceReference;
@@ -176,6 +176,7 @@ import io.onedev.server.web.resource.ArchiveResourceReference;
 import io.onedev.server.web.resource.ArtifactResourceReference;
 import io.onedev.server.web.resource.AttachmentResourceReference;
 import io.onedev.server.web.resource.BuildLogResourceReference;
+import io.onedev.server.web.resource.PatchResourceReference;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 import io.onedev.server.web.resource.ServerLogResourceReference;
 import io.onedev.server.web.resource.SiteFileResourceReference;
@@ -243,10 +244,11 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		
 		// Change AttachmentResource.authorizeGroup accordingly if change attachment url here
 		add(new BaseResourceMapper("~downloads/projects/${project}/attachments/${attachment-group}/${attachment}", 
-				new AttachmentResourceReference()));
-		
+				new AttachmentResourceReference()));		
 		add(new BaseResourceMapper("~downloads/projects/${project}/builds/${build}/artifacts", 
 				new ArtifactResourceReference()));
+		add(new BaseResourceMapper("~downloads/projects/${project}/patch", 
+				new PatchResourceReference()));
 		
 		add(new BaseResourceMapper(SpriteResourceReference.DEFAULT_MOUNT_PATH, 
 				new SpriteResourceReference(IconScope.class)));

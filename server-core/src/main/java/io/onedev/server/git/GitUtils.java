@@ -1,25 +1,36 @@
 package io.onedev.server.git;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.PathUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.git.command.IsAncestorCommand;
-import io.onedev.server.git.exception.ObjectNotFoundException;
-import io.onedev.server.git.exception.ObsoleteCommitException;
-import io.onedev.server.git.exception.RefUpdateException;
-import io.onedev.server.git.service.DiffEntryFacade;
-import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.util.GpgUtils;
+import static org.eclipse.jgit.lib.Constants.R_HEADS;
+import static org.eclipse.jgit.lib.Constants.R_TAGS;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openpgp.*;
+import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPPrivateKey;
+import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
+import org.bouncycastle.openpgp.PGPSignature;
+import org.bouncycastle.openpgp.PGPSignatureGenerator;
+import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -30,11 +41,25 @@ import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.lib.*;
+import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.CommitBuilder;
+import org.eclipse.jgit.lib.GpgSignature;
+import org.eclipse.jgit.lib.ObjectBuilder;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectInserter;
+import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.RefUpdate;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.merge.Merger;
 import org.eclipse.jgit.merge.ResolveMerger;
-import org.eclipse.jgit.revwalk.*;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevObject;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -42,16 +67,22 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.jgit.util.io.NullOutputStream;
 
-import javax.annotation.Nullable;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 
-import static org.eclipse.jgit.lib.Constants.R_HEADS;
-import static org.eclipse.jgit.lib.Constants.R_TAGS;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.PathUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.git.command.IsAncestorCommand;
+import io.onedev.server.git.exception.ObjectNotFoundException;
+import io.onedev.server.git.exception.ObsoleteCommitException;
+import io.onedev.server.git.exception.RefUpdateException;
+import io.onedev.server.git.service.DiffEntryFacade;
+import io.onedev.server.git.service.RefFacade;
+import io.onedev.server.util.GpgUtils;
 
 public class GitUtils {
 
@@ -98,24 +129,46 @@ public class GitUtils {
 		}
 	}
 
-	public static List<DiffEntry> diff(Repository repository, AnyObjectId oldRevId, AnyObjectId newRevId) {
-		List<DiffEntry> diffs = new ArrayList<>();
-		try (DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);
-			 RevWalk revWalk = new RevWalk(repository);
-			 ObjectReader reader = repository.newObjectReader();) {
+	public static void diff(Repository repository, AnyObjectId oldRevId, AnyObjectId newRevId, OutputStream stdout) {
+		try (var diffFormatter = new DiffFormatter(stdout);
+			 var revWalk = new RevWalk(repository);
+			 var reader = repository.newObjectReader()) {
 			diffFormatter.setRepository(repository);
 			diffFormatter.setDetectRenames(true);
 			diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
 
-			CanonicalTreeParser oldTreeParser = new CanonicalTreeParser();
+			var oldTreeParser = new CanonicalTreeParser();
 			if (!oldRevId.equals(ObjectId.zeroId()))
 				oldTreeParser.reset(reader, revWalk.parseCommit(oldRevId).getTree());
 
-			CanonicalTreeParser newTreeParser = new CanonicalTreeParser();
+			var newTreeParser = new CanonicalTreeParser();
 			if (!newRevId.equals(ObjectId.zeroId()))
 				newTreeParser.reset(reader, revWalk.parseCommit(newRevId).getTree());
 
-			for (DiffEntry entry : diffFormatter.scan(oldTreeParser, newTreeParser)) {
+			diffFormatter.format(oldTreeParser, newTreeParser);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static List<DiffEntry> diff(Repository repository, AnyObjectId oldRevId, AnyObjectId newRevId) {
+		List<DiffEntry> diffs = new ArrayList<>();
+		try (var diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);
+			 var revWalk = new RevWalk(repository);
+			 var reader = repository.newObjectReader();) {
+			diffFormatter.setRepository(repository);
+			diffFormatter.setDetectRenames(true);
+			diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+
+			var oldTreeParser = new CanonicalTreeParser();
+			if (!oldRevId.equals(ObjectId.zeroId()))
+				oldTreeParser.reset(reader, revWalk.parseCommit(oldRevId).getTree());
+
+			var newTreeParser = new CanonicalTreeParser();
+			if (!newRevId.equals(ObjectId.zeroId()))
+				newTreeParser.reset(reader, revWalk.parseCommit(newRevId).getTree());
+
+			for (var entry : diffFormatter.scan(oldTreeParser, newTreeParser)) {
 				if (!Objects.equal(entry.getOldPath(), entry.getNewPath())
 						|| !Objects.equal(entry.getOldMode(), entry.getNewMode()) || entry.getOldId() == null
 						|| !entry.getOldId().isComplete() || entry.getNewId() == null || !entry.getNewId().isComplete()

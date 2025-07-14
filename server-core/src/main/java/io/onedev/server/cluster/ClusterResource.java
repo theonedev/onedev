@@ -8,6 +8,7 @@ import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static javax.ws.rs.core.Response.ok;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static org.eclipse.jgit.lib.ObjectId.fromString;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -32,7 +33,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 
 import com.google.common.base.Splitter;
@@ -207,7 +207,7 @@ public class ClusterResource {
 		
 		StreamingOutput os = output -> {
 			Repository repository = projectManager.getRepository(projectId);
-			try (output; InputStream is = GitUtils.getInputStream(repository, ObjectId.fromString(revId), path)) {
+			try (output; InputStream is = GitUtils.getInputStream(repository, fromString(revId), path)) {
 				IOUtils.copy(is, output, BUFFER_SIZE);
 			}
 	   };
@@ -291,34 +291,34 @@ public class ClusterResource {
 		if (!SecurityUtils.isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 		
-		StreamingOutput os = output -> {
-			Map<String, String> hookEnvs = HookUtils.getHookEnvs(projectId, principal);
-			
-			try {
-				File gitDir = projectManager.getGitDir(projectId);
-				if (upload) {
-					workExecutor.submit(GitFilter.PACK_PRIORITY, new Runnable() {
-						
-						@Override
-						public void run() {
-							CommandUtils.uploadPack(gitDir, hookEnvs, protocol, is, output);
-						}
-						
-					}).get();
-				} else {
-					workExecutor.submit(GitFilter.PACK_PRIORITY, new Runnable() {
-						
-						@Override
-						public void run() {
-							CommandUtils.receivePack(gitDir, hookEnvs, protocol, is, output);
-						}
-						
-					}).get();
+			StreamingOutput os = output -> {
+				Map<String, String> hookEnvs = HookUtils.getHookEnvs(projectId, principal);
+				
+				try {
+					File gitDir = projectManager.getGitDir(projectId);
+					if (upload) {
+						workExecutor.submit(GitFilter.PACK_PRIORITY, new Runnable() {
+							
+							@Override
+							public void run() {
+								CommandUtils.uploadPack(gitDir, hookEnvs, protocol, is, output);
+							}
+							
+						}).get();
+					} else {
+						workExecutor.submit(GitFilter.PACK_PRIORITY, new Runnable() {
+							
+							@Override
+							public void run() {
+								CommandUtils.receivePack(gitDir, hookEnvs, protocol, is, output);
+							}
+							
+						}).get();
+					}
+				} catch (InterruptedException | ExecutionException e) {
+					throw new RuntimeException(e);
 				}
-			} catch (InterruptedException | ExecutionException e) {
-				throw new RuntimeException(e);
-			}
-	   };
+		};
 		return ok(os).build();
 	}
 	
