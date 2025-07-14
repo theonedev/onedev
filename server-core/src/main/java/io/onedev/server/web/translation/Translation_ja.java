@@ -21,6 +21,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("'..' is not allowed in the directory", "'..' はディレクトリ内で使用できません");
 		m.put("(* = any string, ? = any character)", "(* = 任意の文字列, ? = 任意の文字)");
 		m.put("(on behalf of <b>{0}</b>)", "(<b>{0}</b> の代理として)");
+		m.put("** Enterprise edition is disabled as the subscription was expired. Renew to enable **", 
+			"** サブスクリプションが期限切れのため、エンタープライズエディションは無効になっています。更新して有効にしてください **");
 		m.put("** Enterprise edition is disabled as the trial subscription was expired, order subscription to enable or contact support@onedev.io if you need to extend your trial **", 
 			"** トライアルサブスクリプションが期限切れのため、エンタープライズ版は無効化されています。有効化するにはサブスクリプションを注文するか、トライアル延長が必要な場合は support@onedev.io にお問い合わせください **");
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
@@ -200,10 +202,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Add to batch to commit with other suggestions later", "後で他の提案と一緒にコミットするためにバッチに追加");
 		m.put("Add to group...", "グループに追加...");
 		m.put("Add to iteration...", "イテレーションに追加...");
+		m.put("Add user to group...", "グループにユーザーを追加...");
 		m.put("Add value", "値を追加");
 		m.put("Add {0}", "{0}を追加");
 		m.put("Added commit \"{0}\" (<i class='text-danger'>missing in repository</i>)", "コミット \"{0}\" を追加 (<i class='text-danger'>リポジトリに存在しない</i>)");
 		m.put("Added commit \"{0}\" ({1})", "コミット \"{0}\" を追加 ({1})");
+		m.put("Added to group", "グループに追加されました");
 		m.put("Additions", "追加");
 		m.put("Administration", "管理");
 		m.put("Administrative permission over a project", "プロジェクトに対する管理権限");
@@ -328,6 +332,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Attributes", "属性");
 		m.put("Attributes (can only be edited when agent is online)", "属性（エージェントがオンラインのときのみ編集可能）");
 		m.put("Attributes saved", "属性が保存されました");
+		m.put("Audit", "監査");
+		m.put("Audit Log", "監査ログ");
+		m.put("Audit Setting", "監査設定");
+		m.put("Audit log will be preserved for the specified number of days. This setting applies to all audit events, including system level and project level", 
+			"監査ログは指定された日数間保存されます。この設定は、システムレベルおよびプロジェクトレベルを含むすべての監査イベントに適用されます");
 		m.put("Auth Source", "認証ソース");
 		m.put("Authenticate to Bitbucket Cloud", "Bitbucket Cloudに認証");
 		m.put("Authenticate to GitHub", "GitHubに認証");
@@ -483,6 +492,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Build version", "ビルドバージョン");
 		m.put("Build with Persistent Volume", "永続ボリュームを使用したビルド");
 		m.put("Builds", "ビルド");
+		m.put("Builds are {0}", "ビルドは{0}です");
 		m.put("Buildx Builder", "Buildxビルダー");
 		m.put("Built In Fields Bean", "組み込みフィールドBean");
 		m.put("Burndown", "バーンダウン");
@@ -514,6 +524,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Can Be Used By Jobs", "ジョブで使用可能");
 		m.put("Can Create Root Projects", "ルートプロジェクトを作成可能");
 		m.put("Can Edit Estimated Time", "推定時間を編集可能");
+		m.put("Can not convert root user to service account", "ルートユーザーをサービスアカウントに変換できません");
+		m.put("Can not convert yourself to service account", "自分自身をサービスアカウントに変換できません");
 		m.put("Can not delete default branch", "デフォルトブランチを削除できません");
 		m.put("Can not delete root account", "ルートアカウントを削除できません");
 		m.put("Can not delete yourself", "自分自身を削除できません");
@@ -758,6 +770,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Contributed settings", "寄与された設定");
 		m.put("Contributions", "寄与");
 		m.put("Contributions to {0} branch, excluding merge commits", "マージコミットを除く{0}ブランチへの寄与");
+		m.put("Convert All Queried to Service Accounts", "すべてのクエリをサービスアカウントに変換");
+		m.put("Convert Selected to Service Accounts", "選択したものをサービスアカウントに変換");
+		m.put("Converting to service accounts will remove password, email addresses, all assignments and watches. Type <code>yes</code> to confirm", 
+			"サービスアカウントに変換すると、パスワード、メールアドレス、すべての割り当てとウォッチが削除されます。確認するには<code>yes</code>と入力してください");
 		m.put("Copy", "コピー");
 		m.put("Copy All Queried Issues To...", "クエリされたすべての課題を...にコピー");
 		m.put("Copy Files with SCP", "SCPでファイルをコピー");
@@ -952,7 +968,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Disable Dashboard", "ダッシュボードを無効化");
 		m.put("Disable Selected Users", "選択したユーザーを無効化");
 		m.put("Disabled", "無効化済み");
-		m.put("Disabled users are excluded from user-month check", "無効化されたユーザーはユーザーモンスチェックから除外されます");
+		m.put("Disabled users and service accounts are excluded from user-month calculation", "無効なユーザーとサービスアカウントはユーザーマンス計算から除外されます");
 		m.put("Disabling account will reset password, clear access tokens, and remove all references from other entities except for past activities. Do you really want to continue?", 
 			"アカウントを無効化すると、パスワードがリセットされ、アクセストークンがクリアされ、過去の活動を除く他のエンティティからのすべての参照が削除されます。本当に続行しますか？");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
@@ -1038,6 +1054,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Download archive of this branch", "このブランチのアーカイブをダウンロード");
 		m.put("Download full log", "完全なログをダウンロード");
 		m.put("Download log", "ログをダウンロード");
+		m.put("Download patch", "パッチをダウンロード");
 		m.put("Download tag archive", "タグアーカイブをダウンロード");
 		m.put("Dry Run", "ドライラン");
 		m.put("Due Date", "期限日");
@@ -1133,7 +1150,9 @@ public class Translation_ja extends TranslationResourceBundle {
 			"CI/CDジョブ中に生成されたビルドキャッシュをアップロードできるようにするにはこれを有効にします。アップロードされたキャッシュは、キャッシュキーが一致する限りプロジェクトの後続のビルドで使用できます");
 		m.put("End Point", "エンドポイント");
 		m.put("Enforce Conventional Commits", "従来のコミットを強制する");
+		m.put("Enforce Password Policy", "パスワードポリシーを強制");
 		m.put("Enforce Two-factor Authentication", "二要素認証を強制する");
+		m.put("Enforce password policy for new users", "新しいユーザーに対してパスワードポリシーを強制");
 		m.put("Enter New Password", "新しいパスワードを入力");
 		m.put("Enter description here", "ここに説明を入力してください");
 		m.put("Enter your details to login to your account", "アカウントにログインするための詳細を入力してください");
@@ -1176,6 +1195,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Evaluate script to get value or secret", "値または秘密を取得するためにスクリプトを評価する");
 		m.put("Evaluate script to get values or secrets", "値または秘密を取得するためにスクリプトを評価する");
 		m.put("Event Types", "イベントタイプ");
+		m.put("Events", "イベント");
 		m.put("Ever Used Since", "使用開始日");
 		m.put("Everything inside this project and all child projects will be deleted and can not be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"このプロジェクト内のすべての内容とすべての子プロジェクトが削除され、復元できなくなります。削除を確認するには、以下にプロジェクトパス<code>{0}</code>を入力してください。");
@@ -1252,6 +1272,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Files to Be Analyzed", "分析対象のファイル");
 		m.put("Filter", "フィルター");
 		m.put("Filter Issues", "問題をフィルター");
+		m.put("Filter actions", "アクションをフィルター");
 		m.put("Filter backlog issues", "バックログの問題をフィルター");
 		m.put("Filter branches...", "ブランチをフィルター...");
 		m.put("Filter by name", "名前でフィルター");
@@ -1259,6 +1280,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Filter by name...", "名前でフィルター...");
 		m.put("Filter by path", "パスでフィルター");
 		m.put("Filter by test suite", "テストスイートでフィルター");
+		m.put("Filter date range", "日付範囲をフィルター");
 		m.put("Filter files...", "ファイルをフィルター...");
 		m.put("Filter groups...", "グループをフィルター...");
 		m.put("Filter issues", "問題をフィルター");
@@ -1266,6 +1288,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Filter roles", "役割をフィルター");
 		m.put("Filter tags...", "タグをフィルター...");
 		m.put("Filter targets", "ターゲットをフィルター");
+		m.put("Filter users", "ユーザーをフィルター");
 		m.put("Filter...", "フィルター...");
 		m.put("Filters", "フィルター一覧");
 		m.put("Find branch", "ブランチを検索");
@@ -1798,7 +1821,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Left", "左");
 		m.put("Less", "少ない");
 		m.put("License Agreement", "ライセンス契約");
-		m.put("License Group:", "ライセンスグループ:");
 		m.put("License Setting", "ライセンス設定");
 		m.put("Licensed To", "ライセンス対象");
 		m.put("Licensed To:", "ライセンス対象:");
@@ -1928,6 +1950,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Microsoft 365", "Microsoft 365");
 		m.put("Microsoft Entra ID", "Microsoft Entra ID");
 		m.put("Min Value", "最小値");
+		m.put("Minimum length of the password", "パスワードの最小長");
 		m.put("Missing Commit", "不足しているコミット");
 		m.put("Missing Commits", "不足しているコミット");
 		m.put("Month", "月");
@@ -2032,6 +2055,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No applicable transitions or no permission to transit", "適用可能な遷移がないか、遷移する権限がありません");
 		m.put("No artifacts published", "公開されたアーティファクトなし");
 		m.put("No attributes defined (can only be edited when agent is online)", "定義された属性なし（エージェントがオンラインの場合のみ編集可能）");
+		m.put("No audits", "監査なし");
 		m.put("No authorized job secret found (project: {0}, job secret: {1})", "認証済みのジョブシークレットが見つかりません（プロジェクト: {0}, ジョブシークレット: {1}）");
 		m.put("No branch to cherry-pick to", "チェリーピックするブランチなし");
 		m.put("No branch to revert on", "リバートするブランチなし");
@@ -2068,6 +2092,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No file attachments", "ファイル添付なし");
 		m.put("No group by", "グループ化なし");
 		m.put("No groups claim returned", "返されたグループクレームなし");
+		m.put("No groups to remove from", "削除するグループがありません");
 		m.put("No ignore file", "無視ファイルなし");
 		m.put("No ignored licenses", "無視されたライセンスなし");
 		m.put("No image attachments", "画像添付なし");
@@ -2083,6 +2108,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No issues to sync estimated/spent time", "推定/使用時間を同期する課題なし");
 		m.put("No issues to watch/unwatch", "ウォッチ/ウォッチ解除する課題なし");
 		m.put("No jobs defined", "定義されたジョブなし");
+		m.put("No jobs found", "ジョブが見つかりません");
 		m.put("No limit", "制限なし");
 		m.put("No mail service", "メールサービスなし");
 		m.put("No obvious changes", "明らかな変更なし");
@@ -2112,9 +2138,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No tags found", "タグが見つかりません");
 		m.put("No timesheets defined", "定義されたタイムシートなし");
 		m.put("No user found with login name or email: ", "ログイン名またはメールでユーザーが見つかりません:");
+		m.put("No users to convert to service accounts", "サービスアカウントに変換するユーザーがいません");
 		m.put("No users to delete", "削除するユーザーなし");
 		m.put("No users to disable", "無効化するユーザーなし");
 		m.put("No users to enable", "有効化するユーザーなし");
+		m.put("No users to remove from group", "グループから削除するユーザーがいません");
 		m.put("No valid query to show progress", "進捗を表示する有効なクエリがありません");
 		m.put("No valid signature for head commit", "ヘッドコミットに有効な署名がありません");
 		m.put("No valid signature for head commit of target branch", "ターゲットブランチのヘッドコミットに有効な署名がありません");
@@ -2191,6 +2219,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Only create merge commit if target branch can not be fast-forwarded to source branch", 
 			"ターゲットブランチがソースブランチに対して高速フォワードできない場合のみマージコミットを作成");
 		m.put("Only projects manageable by access token owner can be authorized", "アクセストークン所有者が管理可能なプロジェクトのみが認可されます");
+		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
+			"ここにはシステムレベルの監査イベントのみが表示されます。特定のプロジェクトの監査イベントを表示するには、プロジェクト監査ログページをご覧ください");
 		m.put("Open", "オープン");
 		m.put("Open new pull request", "新しいプルリクエストを開く");
 		m.put("Open terminal of current running step", "現在実行中のステップのターミナルを開く");
@@ -2451,6 +2481,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify working directory of the container. Leave empty to use default working directory of the container", 
 			"必要に応じてコンテナの作業ディレクトリを指定します。空欄の場合はコンテナのデフォルトの作業ディレクトリが使用されます");
 		m.put("Options", "オプション");
+		m.put("Or manually enter the secret key below in your authenticator app", "または、以下のシークレットキーを認証アプリに手動で入力してください");
 		m.put("Order By", "並び替え");
 		m.put("Order More User Months", "さらに多くのユーザーモンスを注文");
 		m.put("Order Subscription", "サブスクリプションを注文");
@@ -2509,6 +2540,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Passed", "合格");
 		m.put("Password", "パスワード");
 		m.put("Password Edit Bean", "パスワード編集Bean");
+		m.put("Password Must Contain Digit", "パスワードには数字を含める必要があります");
+		m.put("Password Must Contain Lowercase", "パスワードには小文字を含める必要があります");
+		m.put("Password Must Contain Special Character", "パスワードには特殊文字を含める必要があります");
+		m.put("Password Must Contain Uppercase", "パスワードには大文字を含める必要があります");
+		m.put("Password Policy", "パスワードポリシー");
 		m.put("Password Reset", "パスワードリセット");
 		m.put("Password Reset Bean", "パスワードリセットBean");
 		m.put("Password Reset Template", "パスワードリセットテンプレート");
@@ -2521,6 +2557,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Password or Access Token for Remote Repository", "リモートリポジトリのパスワードまたはアクセストークン");
 		m.put("Password reset request has been sent", "パスワードリセットリクエストが送信されました");
 		m.put("Password reset url is invalid or obsolete", "パスワードリセットURLが無効または古くなっています");
+		m.put("PasswordMinimum Length", "パスワードの最小長");
 		m.put("Paste subscription key here", "ここにサブスクリプションキーを貼り付けてください");
 		m.put("Path containing spaces or starting with dash needs to be quoted", "スペースを含むパスまたはダッシュで始まるパスは引用符で囲む必要があります");
 		m.put("Path placeholder", "パスプレースホルダー");
@@ -2597,6 +2634,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Please select comments to set unresolved", "未解決に設定するコメントを選択してください");
 		m.put("Please select different branches", "異なるブランチを選択してください");
 		m.put("Please select fields to update", "更新するフィールドを選択してください");
+		m.put("Please select groups to remove from", "削除するグループを選択してください");
 		m.put("Please select issues to copy", "コピーする問題を選択してください");
 		m.put("Please select issues to delete", "削除する問題を選択してください");
 		m.put("Please select issues to edit", "編集する問題を選択してください");
@@ -2612,8 +2650,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Please select query watches to delete", "削除するクエリウォッチを選択してください");
 		m.put("Please select revision to create tag from", "タグを作成するリビジョンを選択してください");
 		m.put("Please select revisions to compare", "比較するリビジョンを選択してください");
+		m.put("Please select users to convert to service accounts", "サービスアカウントに変換するユーザーを選択してください");
 		m.put("Please select users to disable", "無効化するユーザーを選択してください");
 		m.put("Please select users to enable", "有効化するユーザーを選択してください");
+		m.put("Please select users to remove from group", "グループから削除するユーザーを選択してください");
 		m.put("Please specify file name above before editing content", "コンテンツを編集する前に上記のファイル名を指定してください");
 		m.put("Please switch to packages page of a particular project for the instructions", "特定のプロジェクトのパッケージページに切り替えて指示を確認してください");
 		m.put("Please wait...", "お待ちください...");
@@ -2862,9 +2902,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Remote Url", "リモートURL");
 		m.put("Remove", "削除");
 		m.put("Remove All Queried Agents", "クエリされたすべてのエージェントを削除");
+		m.put("Remove All Queried Users from Group", "クエリされたすべてのユーザーをグループから削除");
 		m.put("Remove Fields", "フィールドを削除");
 		m.put("Remove From Current Iteration", "現在のイテレーションから削除");
 		m.put("Remove Selected Agents", "選択されたエージェントを削除");
+		m.put("Remove Selected Users from Group", "選択されたユーザーをグループから削除");
+		m.put("Remove from All Queried Groups", "クエリされたすべてのグループから削除");
+		m.put("Remove from Selected Groups", "選択されたグループから削除");
 		m.put("Remove from batch", "バッチから削除");
 		m.put("Remove issue from this iteration", "このイテレーションから課題を削除");
 		m.put("Remove this assignee", "この担当者を削除");
@@ -2875,6 +2919,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Removed all queried agents. Type <code>yes</code> below to confirm", "すべてのクエリ済みエージェントを削除しました。確認するには下に<code>yes</code>と入力してください");
 		m.put("Removed selected agents. Type <code>yes</code> below to confirm", "選択したエージェントを削除しました。確認するには下に<code>yes</code>と入力してください");
 		m.put("Rename {0}", "{0}を名前変更");
+		m.put("Renew Subscription", "サブスクリプションを更新");
 		m.put("Renovate CLI Options", "Renovate CLI オプション");
 		m.put("Renovate JavaScript Config", "Renovate JavaScript 設定");
 		m.put("Reopen", "再オープン");
@@ -3045,6 +3090,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Select Branch to Revert on", "リバート先のブランチを選択");
 		m.put("Select Branch/Tag", "ブランチ/タグを選択");
 		m.put("Select Existing", "既存のものを選択");
+		m.put("Select Job", "ジョブを選択");
 		m.put("Select Project", "プロジェクトを選択");
 		m.put("Select below...", "以下を選択...");
 		m.put("Select iteration to schedule issues into", "課題をスケジュールするためのイテレーションを選択");
@@ -3076,6 +3122,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Server URL", "サーバーURL");
 		m.put("Server fingerprint", "サーバーフィンガープリント");
 		m.put("Server host", "サーバーホスト");
+		m.put("Server is Starting...", "サーバーを起動中...");
 		m.put("Server url", "サーバーURL");
 		m.put("Service", "サービス");
 		m.put("Service Account", "サービスアカウント");
@@ -3131,6 +3178,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Setting has been saved", "設定が保存されました");
 		m.put("Settings", "設定");
 		m.put("Settings and permissions of parent project will be inherited by this project", "親プロジェクトの設定と権限がこのプロジェクトに継承されます");
+		m.put("Settings saved", "設定を保存しました");
+		m.put("Settings saved and project redistribution scheduled", "設定を保存し、プロジェクトの再分配をスケジュールしました");
 		m.put("Settings updated", "設定が更新されました");
 		m.put("Share dashboard", "ダッシュボードを共有");
 		m.put("Share with Groups", "グループと共有");
@@ -3198,6 +3247,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Slack Notifications", "Slack通知");
 		m.put("Smtp Ssl Setting", "Smtp SSL設定");
 		m.put("Smtp With Ssl", "Smtp SSL使用");
+		m.put("Some builds are {0}", "一部のビルドは{0}です");
 		m.put("Some jobs are hidden due to permission policy", "許可ポリシーにより一部のジョブが非表示になっています");
 		m.put("Some one changed the content you are editing. Reload the page and try again.", "編集している内容が誰かによって変更されました。ページをリロードして再試行してください。");
 		m.put("Some other pull requests are opening to this branch", "このブランチに対して他のプルリクエストが開かれています");
@@ -3612,6 +3662,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"ステップは同じノード上で直列に実行され、同じ<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>を共有します。");
 		m.put("Stop work", "作業を停止");
 		m.put("Stopwatch Overdue", "ストップウォッチ期限切れ");
+		m.put("Storage Settings", "ストレージ設定");
 		m.put("Storage file missing", "ストレージファイルが見つかりません");
 		m.put("Storage not found", "ストレージが見つかりません");
 		m.put("Stored with Git LFS", "Git LFSで保存");
@@ -3632,6 +3683,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Subscription key installed successfully", "サブスクリプションキーが正常にインストールされました");
 		m.put("Subscription key not applicable: this key is intended to activate a trial subscription", 
 			"サブスクリプションキーが適用されません: このキーは試用サブスクリプションを有効化するためのものです");
+		m.put("Subscription key not applicable: this key is intended to renew a user based subscription", 
+			"サブスクリプションキーは適用されません: このキーはユーザーベースのサブスクリプションを更新するためのものです");
+		m.put("Subscription key not applicable: this key is intended to renew an unlimited users subscription", 
+			"サブスクリプションキーは適用されません: このキーは無制限ユーザーサブスクリプションを更新するためのものです");
 		m.put("Subscription key not applicable: this key is intended to update licensee of an existing subscription", 
 			"サブスクリプションキーが適用されません: このキーは既存のサブスクリプションのライセンシーを更新するためのものです");
 		m.put("Success Rate", "成功率");
@@ -3778,12 +3833,18 @@ public class Translation_ja extends TranslationResourceBundle {
 			"このインストールには試用サブスクリプションがあり、現在エンタープライズエディションとして実行されています");
 		m.put("This installation has an active subscription and runs as enterprise edition", "このインストールにはアクティブなサブスクリプションがあり、エンタープライズエディションとして実行されています");
 		m.put("This installation has an expired subscription, and runs as community edition", "このインストールには期限切れのサブスクリプションがあり、コミュニティエディションとして実行されています");
+		m.put("This installation has an unlimited users subscription and is now running as enterprise edition", 
+			"このインストールは無制限ユーザーサブスクリプションを持ち、現在エンタープライズエディションとして実行されています");
+		m.put("This installation's subscription has expired and is now running as the community edition", 
+			"このインストールのサブスクリプションは期限切れで、現在コミュニティエディションとして実行されています");
 		m.put("This is a Git LFS object, but the storage file is missing", "これはGit LFSオブジェクトですが、ストレージファイルがありません");
 		m.put("This is a built-in role and can not be deleted", "これは組み込みのロールであり、削除することはできません");
 		m.put("This is a disabled service account", "これは無効化されたサービスアカウントです");
 		m.put("This is a layer cache. To use the cache, add below option to your docker buildx command", 
 			"これはレイヤーキャッシュです。キャッシュを使用するには、以下のオプションをDocker buildxコマンドに追加してください");
 		m.put("This is a service account for task automation purpose", "これはタスク自動化目的のサービスアカウントです");
+		m.put("This is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"これはエンタープライズ機能です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料でお試しください</a>");
 		m.put("This key has already been used by another project", "このキーは別のプロジェクトで既に使用されています");
 		m.put("This key is associated with {0}, however it is NOT a verified email address of this user", 
 			"このキーは{0}に関連付けられていますが、このユーザーの確認済みメールアドレスではありません");
@@ -3919,12 +3980,16 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Try EE", "EEを試す");
 		m.put("Try Enterprise Edition", "エンタープライズ版を試す");
 		m.put("Twitch", "Twitch");
+		m.put("Two Factor Authentication", "二要素認証");
 		m.put("Two-factor Authentication", "二要素認証");
+		m.put("Two-factor authentication already set up. <a wicket:id=\"requestToSetupAgain\"><wicket:t>Request to set up again", 
+			"二要素認証はすでに設定されています。<a wicket:id=\"requestToSetupAgain\"><wicket:t>再設定をリクエスト");
 		m.put("Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. If you encounter problems, make sure time of OneDev server and your device running TOTP authenticator is in sync", 
 			"二要素認証が有効です。TOTP認証アプリに表示されるパスコードを入力してください。問題が発生した場合は、OneDevサーバーとTOTP認証アプリを実行しているデバイスの時刻が同期していることを確認してください");
 		m.put("Two-factor authentication is enforced for your account to enhance security. Please follow below procedure to set it up", 
 			"セキュリティを強化するため、アカウントに二要素認証が強制されています。以下の手順に従って設定してください");
 		m.put("Two-factor authentication is now configured", "二要素認証が設定されました");
+		m.put("Two-factor authentication not enabled", "二要素認証が有効になっていません");
 		m.put("Type", "タイプ");
 		m.put("Type <code>yes</code> below to cancel all queried builds", "以下に<code>yes</code>と入力して、すべてのクエリされたビルドをキャンセルしてください");
 		m.put("Type <code>yes</code> below to cancel selected builds", "以下に<code>yes</code>と入力して、選択されたビルドをキャンセルしてください");
@@ -3953,6 +4018,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Type <code>yes</code> below to pause all queried agents", "以下に<code>yes</code>と入力して、すべてのクエリされたエージェントを一時停止してください");
 		m.put("Type <code>yes</code> below to re-run all queried builds", "以下に<code>yes</code>と入力して、すべてのクエリされたビルドを再実行してください");
 		m.put("Type <code>yes</code> below to re-run selected builds", "以下に<code>yes</code>と入力して、選択されたビルドを再実行してください");
+		m.put("Type <code>yes</code> below to remove all queried users from group", "クエリされたすべてのユーザーをグループから削除するには、以下に<code>yes</code>と入力してください");
+		m.put("Type <code>yes</code> below to remove from all queried groups", "クエリされたすべてのグループから削除するには、以下に<code>yes</code>と入力してください");
+		m.put("Type <code>yes</code> below to remove from selected groups", "選択されたグループから削除するには、以下に<code>yes</code>と入力してください");
+		m.put("Type <code>yes</code> below to remove selected users from group", "選択されたユーザーをグループから削除するには、以下に<code>yes</code>と入力してください");
 		m.put("Type <code>yes</code> below to restart all queried agents", "以下に<code>yes</code>と入力して、すべてのクエリされたエージェントを再起動してください");
 		m.put("Type <code>yes</code> below to restart selected agents", "以下に<code>yes</code>と入力して、選択されたエージェントを再起動してください");
 		m.put("Type <code>yes</code> below to resume all queried agents", "以下に<code>yes</code>と入力して、すべてのクエリされたエージェントを再開してください");
@@ -4094,6 +4163,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("User SSH Key Attribute", "ユーザーSSHキー属性");
 		m.put("User Search Bases", "ユーザー検索ベース");
 		m.put("User Search Filter", "ユーザー検索フィルター");
+		m.put("User added to group", "ユーザーがグループに追加されました");
 		m.put("User authorizations updated", "ユーザー認可が更新されました");
 		m.put("User authorized", "ユーザーが認可されました");
 		m.put("User avatar will be requested by appending a hash to this url", "ユーザーアバターは、このURLにハッシュを追加してリクエストされます");
@@ -4102,6 +4172,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("User name", "ユーザー名");
 		m.put("User name already used by another account", "ユーザー名はすでに別のアカウントで使用されています");
 		m.put("Users", "ユーザー");
+		m.put("Users converted to service accounts successfully", "ユーザーがサービスアカウントに正常に変換されました");
 		m.put("Users deleted successfully", "ユーザーが正常に削除されました");
 		m.put("Users disabled successfully", "ユーザーが正常に無効化されました");
 		m.put("Users enabled successfully", "ユーザーが正常に有効化されました");
@@ -4220,15 +4291,18 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not use force option to overwrite changes in case ref updating can not be fast-forwarded", 
 			"参照の更新が高速フォワードできない場合に変更を上書きするために強制オプションを使用するかどうか");
 		m.put("Whether or not user can remove own account", "ユーザーが自分のアカウントを削除できるかどうか");
+		m.put("Whether the password must contain at least one lowercase letter", "パスワードに少なくとも1つの小文字を含める必要があるかどうか");
+		m.put("Whether the password must contain at least one number", "パスワードに少なくとも1つの数字を含める必要があるかどうか");
+		m.put("Whether the password must contain at least one special character", "パスワードに少なくとも1つの特殊文字を含める必要があるかどうか");
+		m.put("Whether the password must contain at least one uppercase letter", "パスワードに少なくとも1つの大文字を含める必要があるかどうか");
 		m.put("Whole Word", "全単語");
 		m.put("Widget", "ウィジェット");
 		m.put("Widget Tab", "ウィジェットタブ");
 		m.put("Widget Timesheet Setting", "ウィジェットタイムシート設定");
+		m.put("Will be prompted to set up two-factor authentication upon next login", "次回のログイン時に二要素認証の設定を求められます");
 		m.put("Will be transcoded to UTF-8", "UTF-8にトランスコードされます");
 		m.put("Window", "ウィンドウ");
 		m.put("Window Memory", "ウィンドウメモリ");
-		m.put("With current number of users ({0}) in group \"{1}\", the subscription will be active until <b>{2}</b>", 
-			"現在のグループ「{1}」のユーザー数（{0}）で、サブスクリプションは<b>{2}</b>まで有効です");
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"現在のユーザー数（{0}）で、サブスクリプションは<b>{1}</b>まで有効です");
 		m.put("Workflow reconciliation completed", "ワークフローの調整が完了しました");
@@ -4498,41 +4572,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Add user to group...", "グループにユーザーを追加...");
-		m.put("Added to group", "グループに追加されました");
-		m.put("Audit", "監査");
-		m.put("Audit Log", "監査ログ");
-		m.put("Audit Setting", "監査設定");
-		m.put("Audit log will be preserved for the specified number of days. This setting applies to all audit events, including system level and project level", 
-			"監査ログは指定された日数間保存されます。この設定は、システムレベルおよびプロジェクトレベルを含むすべての監査イベントに適用されます");
-		m.put("Builds are {0}", "ビルドは{0}です");
-		m.put("Events", "イベント");
-		m.put("Filter actions", "アクションをフィルター");
-		m.put("Filter date range", "日付範囲をフィルター");
-		m.put("Filter users", "ユーザーをフィルター");
-		m.put("No audits", "監査なし");
-		m.put("No groups to remove from", "削除するグループがありません");
-		m.put("No jobs found", "ジョブが見つかりません");
-		m.put("No users to remove from group", "グループから削除するユーザーがいません");
-		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
-			"ここにはシステムレベルの監査イベントのみが表示されます。特定のプロジェクトの監査イベントを表示するには、プロジェクト監査ログページをご覧ください");
-		m.put("Please select groups to remove from", "削除するグループを選択してください");
-		m.put("Please select users to remove from group", "グループから削除するユーザーを選択してください");
-		m.put("Remove All Queried Users from Group", "クエリされたすべてのユーザーをグループから削除");
-		m.put("Remove Selected Users from Group", "選択されたユーザーをグループから削除");
-		m.put("Remove from All Queried Groups", "クエリされたすべてのグループから削除");
-		m.put("Remove from Selected Groups", "選択されたグループから削除");
-		m.put("Select Job", "ジョブを選択");
-		m.put("Server is Starting...", "サーバーを起動中...");
-		m.put("Settings saved", "設定を保存しました");
-		m.put("Settings saved and project redistribution scheduled", "設定を保存し、プロジェクトの再分配をスケジュールしました");
-		m.put("Some builds are {0}", "一部のビルドは{0}です");
-		m.put("Storage Settings", "ストレージ設定");
-		m.put("Type <code>yes</code> below to remove all queried users from group", "クエリされたすべてのユーザーをグループから削除するには、以下に<code>yes</code>と入力してください");
-		m.put("Type <code>yes</code> below to remove from all queried groups", "クエリされたすべてのグループから削除するには、以下に<code>yes</code>と入力してください");
-		m.put("Type <code>yes</code> below to remove from selected groups", "選択されたグループから削除するには、以下に<code>yes</code>と入力してください");
-		m.put("Type <code>yes</code> below to remove selected users from group", "選択されたユーザーをグループから削除するには、以下に<code>yes</code>と入力してください");
-		m.put("User added to group", "ユーザーがグループに追加されました");
 	}
 		
 	@Override

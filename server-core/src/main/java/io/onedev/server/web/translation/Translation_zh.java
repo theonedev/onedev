@@ -25,13 +25,16 @@ public class Translation_zh extends TranslationResourceBundle {
 			"'issue' should be translated to '工单' or '问题' depending on context\n" + 
 			"'image' should be translated to '图片' or '镜像' depending on context\n" + 
 			"'docker aware executor' should be translated to 'docker 相关执行器'\n" + 
-			"When used together with 'subscription', word 'active' should be translated to '有效'")
+			"When used together with 'subscription', word 'active' should be translated to '有效'\n" + 
+			"Two factor authentication should be translated to '两阶段验证'")
 	public static void init(Map<String, String> m) {
 		m.clear();
 		m.put(" Project path can be omitted if reference from current project", "如果从当前项目引用，则可以省略项目路径");
 		m.put("'..' is not allowed in the directory", "'..' 不允许在目录中使用");
 		m.put("(* = any string, ? = any character)", "(* = 任意字符串, ? = 任意字符)");
 		m.put("(on behalf of <b>{0}</b>)", "（代表 <b>{0}</b>）");
+		m.put("** Enterprise edition is disabled as the subscription was expired. Renew to enable **", 
+			"** 企业版已禁用，因为订阅已过期。续订以启用 **");
 		m.put("** Enterprise edition is disabled as the trial subscription was expired, order subscription to enable or contact support@onedev.io if you need to extend your trial **", 
 			"** 企业版已禁用，因为试用订阅已过期，订购订阅以启用或联系 support@onedev.io 如果您需要延长试用期 **");
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
@@ -211,10 +214,12 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Add to batch to commit with other suggestions later", "稍后与其他建议一起提交");
 		m.put("Add to group...", "添加到组...");
 		m.put("Add to iteration...", "添加到迭代...");
+		m.put("Add user to group...", "将用户添加到组...");
 		m.put("Add value", "添加值");
 		m.put("Add {0}", "添加 {0}");
 		m.put("Added commit \"{0}\" (<i class='text-danger'>missing in repository</i>)", "代码提交 \"{0}\"（<i class='text-danger'>仓库中不存在</i>）");
 		m.put("Added commit \"{0}\" ({1})", "代码提交 \"{0}\"（{1}）");
+		m.put("Added to group", "已添加到组");
 		m.put("Additions", "新增");
 		m.put("Administration", "管理");
 		m.put("Administrative permission over a project", "项目的管理权限");
@@ -339,6 +344,11 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Attributes", "属性");
 		m.put("Attributes (can only be edited when agent is online)", "属性（仅当代理在线时可编辑）");
 		m.put("Attributes saved", "属性已保存");
+		m.put("Audit", "审计");
+		m.put("Audit Log", "审计日志");
+		m.put("Audit Setting", "审计设置");
+		m.put("Audit log will be preserved for the specified number of days. This setting applies to all audit events, including system level and project level", 
+			"审计日志将保留指定的天数。此设置适用于所有审计事件，包括系统级别和项目级别");
 		m.put("Auth Source", "认证源");
 		m.put("Authenticate to Bitbucket Cloud", "Bitbucket Cloud 认证");
 		m.put("Authenticate to GitHub", "GitHub 认证");
@@ -494,6 +504,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Build version", "构建版本");
 		m.put("Build with Persistent Volume", "使用持久卷构建");
 		m.put("Builds", "构建");
+		m.put("Builds are {0}", "构建是 {0}");
 		m.put("Buildx Builder", "Buildx构建器");
 		m.put("Built In Fields Bean", "内建字段Bean");
 		m.put("Burndown", "燃尽图");
@@ -525,6 +536,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Can Be Used By Jobs", "可被任务使用");
 		m.put("Can Create Root Projects", "可以创建根项目");
 		m.put("Can Edit Estimated Time", "可以编辑预估时间");
+		m.put("Can not convert root user to service account", "无法将 root 用户转换为服务账户");
+		m.put("Can not convert yourself to service account", "无法将自己转换为服务账户");
 		m.put("Can not delete default branch", "不能删除默认分支");
 		m.put("Can not delete root account", "不能删除根账户");
 		m.put("Can not delete yourself", "不能删除自己");
@@ -769,6 +782,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Contributed settings", "贡献的设置");
 		m.put("Contributions", "贡献");
 		m.put("Contributions to {0} branch, excluding merge commits", "在 {0} 分支上的贡献，不包括合并提交");
+		m.put("Convert All Queried to Service Accounts", "将所有查询的用户转换为服务账户");
+		m.put("Convert Selected to Service Accounts", "将选定的用户转换为服务账户");
+		m.put("Converting to service accounts will remove password, email addresses, all assignments and watches. Type <code>yes</code> to confirm", 
+			"转换为服务账户将移除密码、电子邮件地址、所有分配和关注。输入<code>yes</code>以确认");
 		m.put("Copy", "复制");
 		m.put("Copy All Queried Issues To...", "复制所有查询的工单到...");
 		m.put("Copy Files with SCP", "使用 SCP 复制文件");
@@ -963,7 +980,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Disable Dashboard", "禁用仪表盘");
 		m.put("Disable Selected Users", "禁用选定的用户");
 		m.put("Disabled", "已禁用");
-		m.put("Disabled users are excluded from user-month check", "禁用的用户不计入用户月数检查");
+		m.put("Disabled users and service accounts are excluded from user-month calculation", "禁用的用户和服务账户不计入用户月计算");
 		m.put("Disabling account will reset password, clear access tokens, and remove all references from other entities except for past activities. Do you really want to continue?", 
 			"禁用账户将重置密码，清除访问令牌，并删除除过去活动外的所有其他实体的引用。您真的要继续吗？");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
@@ -1049,6 +1066,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Download archive of this branch", "下载此分支的归档");
 		m.put("Download full log", "下载完整日志");
 		m.put("Download log", "下载日志");
+		m.put("Download patch", "下载补丁");
 		m.put("Download tag archive", "下载标签归档");
 		m.put("Dry Run", "试运行");
 		m.put("Due Date", "截止日期");
@@ -1144,7 +1162,9 @@ public class Translation_zh extends TranslationResourceBundle {
 			"启用此选项以允许上传在 CI/CD 任务期间生成的构建缓存。上传的缓存可以被项目后续的构建使用，只要缓存密钥匹配");
 		m.put("End Point", "端点");
 		m.put("Enforce Conventional Commits", "强制执行 Conventional Commits");
+		m.put("Enforce Password Policy", "强制执行密码策略");
 		m.put("Enforce Two-factor Authentication", "强制执行两阶段认证");
+		m.put("Enforce password policy for new users", "对新用户强制执行密码策略");
 		m.put("Enter New Password", "输入新密码");
 		m.put("Enter description here", "输入描述");
 		m.put("Enter your details to login to your account", "输入您的详细信息登录到您的账户");
@@ -1187,6 +1207,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Evaluate script to get value or secret", "运行脚本以获取值或密钥");
 		m.put("Evaluate script to get values or secrets", "运行脚本以获取值或密钥");
 		m.put("Event Types", "事件类型");
+		m.put("Events", "事件");
 		m.put("Ever Used Since", "上次使用时间");
 		m.put("Everything inside this project and all child projects will be deleted and can not be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"此项目及其所有子项目将被删除且无法恢复，请在下方输入项目路径 <code>{0}</code> 以确认删除。");
@@ -1263,6 +1284,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Files to Be Analyzed", "要分析的文件");
 		m.put("Filter", "过滤");
 		m.put("Filter Issues", "过滤工单");
+		m.put("Filter actions", "筛选操作");
 		m.put("Filter backlog issues", "过滤待办工单");
 		m.put("Filter branches...", "过滤分支...");
 		m.put("Filter by name", "按名称过滤");
@@ -1270,6 +1292,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Filter by name...", "按名称过滤...");
 		m.put("Filter by path", "按路径过滤");
 		m.put("Filter by test suite", "按测试套件筛选");
+		m.put("Filter date range", "筛选日期范围");
 		m.put("Filter files...", "过滤文件...");
 		m.put("Filter groups...", "过滤组...");
 		m.put("Filter issues", "过滤工单");
@@ -1277,6 +1300,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Filter roles", "过滤角色");
 		m.put("Filter tags...", "过滤标签...");
 		m.put("Filter targets", "筛选目标");
+		m.put("Filter users", "筛选用户");
 		m.put("Filter...", "筛选...");
 		m.put("Filters", "过滤器");
 		m.put("Find branch", "查找分支");
@@ -1809,7 +1833,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Left", "左");
 		m.put("Less", "更少");
 		m.put("License Agreement", "许可协议");
-		m.put("License Group:", "许可证组：");
 		m.put("License Setting", "许可证设置");
 		m.put("Licensed To", "授权给");
 		m.put("Licensed To:", "授权给：");
@@ -1939,6 +1962,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Microsoft 365", "Microsoft 365");
 		m.put("Microsoft Entra ID", "Microsoft Entra ID");
 		m.put("Min Value", "最小值");
+		m.put("Minimum length of the password", "密码的最小长度");
 		m.put("Missing Commit", "缺失提交");
 		m.put("Missing Commits", "缺失提交");
 		m.put("Month", "月");
@@ -2043,6 +2067,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No applicable transitions or no permission to transit", "没有适用的转换或没有权限转换");
 		m.put("No artifacts published", "没有发布制品");
 		m.put("No attributes defined (can only be edited when agent is online)", "没有定义属性（仅当代理在线时可编辑）");
+		m.put("No audits", "无审计记录");
 		m.put("No authorized job secret found (project: {0}, job secret: {1})", "未找到授权的任务密钥（项目：{0}，任务密钥：{1}）");
 		m.put("No branch to cherry-pick to", "没有分支可以 cherry-pick");
 		m.put("No branch to revert on", "没有分支可以 revert");
@@ -2079,6 +2104,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No file attachments", "没有文件附件");
 		m.put("No group by", "无分组");
 		m.put("No groups claim returned", "没有返回组声明");
+		m.put("No groups to remove from", "没有可移除的组");
 		m.put("No ignore file", "无忽略文件");
 		m.put("No ignored licenses", "无忽略的许可证");
 		m.put("No image attachments", "没有图片附件");
@@ -2094,6 +2120,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No issues to sync estimated/spent time", "没有工单可同步估计/已用时间");
 		m.put("No issues to watch/unwatch", "没有工单可关注/取消关注");
 		m.put("No jobs defined", "未定义任务");
+		m.put("No jobs found", "未找到作业");
 		m.put("No limit", "无限制");
 		m.put("No mail service", "无邮件服务");
 		m.put("No obvious changes", "无明显改动");
@@ -2123,9 +2150,11 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No tags found", "未找到标签");
 		m.put("No timesheets defined", "未定义时间表");
 		m.put("No user found with login name or email: ", "未找到登录名或邮箱为的用户：");
+		m.put("No users to convert to service accounts", "没有用户可转换为服务账户");
 		m.put("No users to delete", "没有要删除的用户");
 		m.put("No users to disable", "没有要禁用的用户");
 		m.put("No users to enable", "没有要启用的用户");
+		m.put("No users to remove from group", "没有用户可从组中移除");
 		m.put("No valid query to show progress", "没有有效的查询来显示进度");
 		m.put("No valid signature for head commit", "头部提交没有有效的签名");
 		m.put("No valid signature for head commit of target branch", "目标分支的最新提交没有有效签名");
@@ -2202,6 +2231,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Only create merge commit if target branch can not be fast-forwarded to source branch", 
 			"仅当目标分支不能 fast-forward 到源分支时才创建合并提交");
 		m.put("Only projects manageable by access token owner can be authorized", "只有受访问令牌所有者管理的项目才能被授权");
+		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
+			"这里只显示系统级别的审计事件。要查看特定项目的审计事件，请访问项目审计日志页面");
 		m.put("Open", "打开");
 		m.put("Open new pull request", "创建新的合并请求");
 		m.put("Open terminal of current running step", "打开当前运行步骤的终端");
@@ -2462,6 +2493,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify working directory of the container. Leave empty to use default working directory of the container", 
 			"可选择指定容器的默认工作目录。留空则使用容器的默认工作目录");
 		m.put("Options", "选项");
+		m.put("Or manually enter the secret key below in your authenticator app", "或者在您的身份验证应用中手动输入下面的密钥");
 		m.put("Order By", "排序");
 		m.put("Order More User Months", "购买更多用户月数");
 		m.put("Order Subscription", "购买订阅");
@@ -2520,6 +2552,11 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Passed", "通过");
 		m.put("Password", "密码");
 		m.put("Password Edit Bean", "密码编辑 Bean");
+		m.put("Password Must Contain Digit", "密码必须包含数字");
+		m.put("Password Must Contain Lowercase", "密码必须包含小写字母");
+		m.put("Password Must Contain Special Character", "密码必须包含特殊字符");
+		m.put("Password Must Contain Uppercase", "密码必须包含大写字母");
+		m.put("Password Policy", "密码策略");
 		m.put("Password Reset", "密码重置");
 		m.put("Password Reset Bean", "密码重置 Bean");
 		m.put("Password Reset Template", "密码重置模板");
@@ -2532,6 +2569,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Password or Access Token for Remote Repository", "密码或远程仓库的访问令牌");
 		m.put("Password reset request has been sent", "密码重置请求已发送");
 		m.put("Password reset url is invalid or obsolete", "密码重置URL无效或已过期");
+		m.put("PasswordMinimum Length", "密码最小长度");
 		m.put("Paste subscription key here", "在此粘贴订阅密钥");
 		m.put("Path containing spaces or starting with dash needs to be quoted", "路径包含空格或以破折号开头时需要用引号括起来");
 		m.put("Path placeholder", "路径占位符");
@@ -2608,6 +2646,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Please select comments to set unresolved", "请选择要设置为未解决的评论");
 		m.put("Please select different branches", "请选择不同的分支");
 		m.put("Please select fields to update", "请选择要更新的字段");
+		m.put("Please select groups to remove from", "请选择要移除的组");
 		m.put("Please select issues to copy", "请选择要复制的工单");
 		m.put("Please select issues to delete", "请选择要删除的工单");
 		m.put("Please select issues to edit", "请选择要编辑的工单");
@@ -2623,8 +2662,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Please select query watches to delete", "请选择要删除的查询订阅");
 		m.put("Please select revision to create tag from", "请选择要从中创建标签的版本");
 		m.put("Please select revisions to compare", "请选择要比较的版本");
+		m.put("Please select users to convert to service accounts", "请选择要转换为服务账户的用户");
 		m.put("Please select users to disable", "请选择要禁用的用户");
 		m.put("Please select users to enable", "请选择要启用的用户");
+		m.put("Please select users to remove from group", "请选择要从组中移除的用户");
 		m.put("Please specify file name above before editing content", "请在编辑内容之前指定文件名");
 		m.put("Please switch to packages page of a particular project for the instructions", "请切换到特定项目的包页面以查看说明");
 		m.put("Please wait...", "请稍候...");
@@ -2873,9 +2914,13 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Remote Url", "远程 URL");
 		m.put("Remove", "删除");
 		m.put("Remove All Queried Agents", "删除所有查询的代理");
+		m.put("Remove All Queried Users from Group", "从组中移除所有查询的用户");
 		m.put("Remove Fields", "删除字段");
 		m.put("Remove From Current Iteration", "从当前迭代中删除");
 		m.put("Remove Selected Agents", "删除选定的代理");
+		m.put("Remove Selected Users from Group", "移除选定用户从组中");
+		m.put("Remove from All Queried Groups", "从所有查询的组中移除");
+		m.put("Remove from Selected Groups", "从选定的组中移除");
 		m.put("Remove from batch", "从批量中删除");
 		m.put("Remove issue from this iteration", "从此迭代中移除工单");
 		m.put("Remove this assignee", "移除此指派人");
@@ -2886,6 +2931,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Removed all queried agents. Type <code>yes</code> below to confirm", "已删除所有查询的代理。在下面输入 <code>yes</code> 确认");
 		m.put("Removed selected agents. Type <code>yes</code> below to confirm", "已删除选定的代理。在下面输入 <code>yes</code> 确认");
 		m.put("Rename {0}", "重命名 {0}");
+		m.put("Renew Subscription", "续订订阅");
 		m.put("Renovate CLI Options", "Renovate CLI 选项");
 		m.put("Renovate JavaScript Config", "Renovate JavaScript 配置");
 		m.put("Reopen", "重新打开");
@@ -3056,6 +3102,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Select Branch to Revert on", "选择分支进行 revert");
 		m.put("Select Branch/Tag", "选择分支/标签");
 		m.put("Select Existing", "选择已有");
+		m.put("Select Job", "选择作业");
 		m.put("Select Project", "选择项目");
 		m.put("Select below...", "从下面选择...");
 		m.put("Select iteration to schedule issues into", "选择迭代调度问题");
@@ -3087,6 +3134,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Server URL", "服务器 URL");
 		m.put("Server fingerprint", "服务器指纹");
 		m.put("Server host", "服务器主机");
+		m.put("Server is Starting...", "服务器正在启动...");
 		m.put("Server url", "服务器 URL");
 		m.put("Service", "服务");
 		m.put("Service Account", "服务帐户");
@@ -3142,6 +3190,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Setting has been saved", "设置已保存");
 		m.put("Settings", "设置");
 		m.put("Settings and permissions of parent project will be inherited by this project", "父项目的设置和权限将继承给此项目");
+		m.put("Settings saved", "设置已保存");
+		m.put("Settings saved and project redistribution scheduled", "设置已保存并已安排项目重新分配");
 		m.put("Settings updated", "设置已更新");
 		m.put("Share dashboard", "共享仪表板");
 		m.put("Share with Groups", "与组共享");
@@ -3209,6 +3259,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Slack Notifications", "Slack 通知");
 		m.put("Smtp Ssl Setting", "SMTP SSL 设置");
 		m.put("Smtp With Ssl", "SMTP SSL");
+		m.put("Some builds are {0}", "某些构建是 {0}");
 		m.put("Some jobs are hidden due to permission policy", "由于权限策略，部分任务被隐藏");
 		m.put("Some one changed the content you are editing. Reload the page and try again.", "有人修改了您正在编辑的内容。重新加载页面并重试。");
 		m.put("Some other pull requests are opening to this branch", "其他合并请求正在打开此分支");
@@ -3623,6 +3674,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"步骤将在同一节点上按顺序执行，共享同一 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a>");
 		m.put("Stop work", "停止工作");
 		m.put("Stopwatch Overdue", "秒表逾期");
+		m.put("Storage Settings", "存储设置");
 		m.put("Storage file missing", "存储文件缺失");
 		m.put("Storage not found", "未找到存储");
 		m.put("Stored with Git LFS", "使用 Git LFS 存储");
@@ -3643,6 +3695,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Subscription key installed successfully", "订阅密钥安装成功");
 		m.put("Subscription key not applicable: this key is intended to activate a trial subscription", 
 			"订阅密钥不适用：此密钥用于激活试用订阅");
+		m.put("Subscription key not applicable: this key is intended to renew a user based subscription", 
+			"订阅密钥不适用：此密钥用于续订基于用户的订阅");
+		m.put("Subscription key not applicable: this key is intended to renew an unlimited users subscription", 
+			"订阅密钥不适用：此密钥用于续订无限用户订阅");
 		m.put("Subscription key not applicable: this key is intended to update licensee of an existing subscription", 
 			"订阅密钥不适用：此密钥用于更新现有订阅的被许可人");
 		m.put("Success Rate", "成功率");
@@ -3789,12 +3845,18 @@ public class Translation_zh extends TranslationResourceBundle {
 			"此安装有试用订阅，现在以企业版运行");
 		m.put("This installation has an active subscription and runs as enterprise edition", "此安装有有效订阅，并作为企业版运行");
 		m.put("This installation has an expired subscription, and runs as community edition", "此安装的订阅已过期，以社区版运行");
+		m.put("This installation has an unlimited users subscription and is now running as enterprise edition", 
+			"此安装具有无限用户订阅，现在以企业版运行");
+		m.put("This installation's subscription has expired and is now running as the community edition", 
+			"此安装的订阅已过期，现在以社区版运行");
 		m.put("This is a Git LFS object, but the storage file is missing", "这是一个 Git LFS 对象，但存储文件缺失");
 		m.put("This is a built-in role and can not be deleted", "这是一个内置角色，无法删除");
 		m.put("This is a disabled service account", "这是一个已禁用的服务账户");
 		m.put("This is a layer cache. To use the cache, add below option to your docker buildx command", 
 			"这是一个层缓存。要使用缓存，请将以下选项添加到您的 docker buildx 命令中");
 		m.put("This is a service account for task automation purpose", "这是一个用于任务自动化的服务账户");
+		m.put("This is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"这是一个企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
 		m.put("This key has already been used by another project", "此键已被其他项目使用");
 		m.put("This key is associated with {0}, however it is NOT a verified email address of this user", 
 			"此密钥与 {0} 相关联，然而它不是此用户的已验证电子邮件地址");
@@ -3964,6 +4026,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Type <code>yes</code> below to pause all queried agents", "在下面输入 <code>yes</code> 确认暂停所有查询的代理");
 		m.put("Type <code>yes</code> below to re-run all queried builds", "在下面输入 <code>yes</code> 以重新运行所有查询的构建");
 		m.put("Type <code>yes</code> below to re-run selected builds", "在下面输入 <code>yes</code> 以重新运行选定的构建");
+		m.put("Type <code>yes</code> below to remove all queried users from group", "在下方输入<code>yes</code>以从组中移除所有查询的用户");
+		m.put("Type <code>yes</code> below to remove from all queried groups", "在下方输入<code>yes</code>以从所有查询的组中移除");
+		m.put("Type <code>yes</code> below to remove from selected groups", "在下方输入<code>yes</code>以从选定的组中移除");
+		m.put("Type <code>yes</code> below to remove selected users from group", "在下方输入<code>yes</code>以从组中移除选定用户");
 		m.put("Type <code>yes</code> below to restart all queried agents", "在下面输入 <code>yes</code> 确认重启所有查询的代理");
 		m.put("Type <code>yes</code> below to restart selected agents", "在下面输入 <code>yes</code> 确认重启选定的代理");
 		m.put("Type <code>yes</code> below to resume all queried agents", "在下面输入 <code>yes</code> 确认恢复所有查询的代理");
@@ -4105,6 +4171,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("User SSH Key Attribute", "用户 SSH 密钥属性");
 		m.put("User Search Bases", "用户搜索根节点");
 		m.put("User Search Filter", "用户搜索过滤器");
+		m.put("User added to group", "用户已添加到组");
 		m.put("User authorizations updated", "用户授权已更新");
 		m.put("User authorized", "用户已授权");
 		m.put("User avatar will be requested by appending a hash to this url", "用户头像将通过在此 URL 后附加哈希值来请求");
@@ -4113,6 +4180,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("User name", "用户名");
 		m.put("User name already used by another account", "用户名已被另一个账户使用");
 		m.put("Users", "用户");
+		m.put("Users converted to service accounts successfully", "用户成功转换为服务账户");
 		m.put("Users deleted successfully", "用户删除成功");
 		m.put("Users disabled successfully", "用户禁用成功");
 		m.put("Users enabled successfully", "用户启用成功");
@@ -4231,6 +4299,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Whether or not use force option to overwrite changes in case ref updating can not be fast-forwarded", 
 			"在引用更新无法快进的情况下，是否使用强制选项覆盖更改");
 		m.put("Whether or not user can remove own account", "用户是否可以删除自己的账户");
+		m.put("Whether the password must contain at least one lowercase letter", "密码是否必须至少包含一个小写字母");
+		m.put("Whether the password must contain at least one number", "密码是否必须至少包含一个数字");
+		m.put("Whether the password must contain at least one special character", "密码是否必须至少包含一个特殊字符");
+		m.put("Whether the password must contain at least one uppercase letter", "密码是否必须至少包含一个大写字母");
 		m.put("Whole Word", "全词");
 		m.put("Widget", "小组件");
 		m.put("Widget Tab", "小组件 Tab");
@@ -4238,8 +4310,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Will be transcoded to UTF-8", "将被转码为 UTF-8");
 		m.put("Window", "窗口");
 		m.put("Window Memory", "窗口内存");
-		m.put("With current number of users ({0}) in group \"{1}\", the subscription will be active until <b>{2}</b>", 
-			"根据组“{1}”中的当前用户数（{0}），订阅将有效至<b>{2}</b>");
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"根据当前用户数（{0}），订阅将有效至<b>{1}</b>");
 		m.put("Workflow reconciliation completed", "工单工作流一致性检查完成");
@@ -4509,41 +4579,11 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Add user to group...", "将用户添加到组...");
-		m.put("Added to group", "已添加到组");
-		m.put("Audit", "审计");
-		m.put("Audit Log", "审计日志");
-		m.put("Audit Setting", "审计设置");
-		m.put("Audit log will be preserved for the specified number of days. This setting applies to all audit events, including system level and project level", 
-			"审计日志将保留指定的天数。此设置适用于所有审计事件，包括系统级别和项目级别");
-		m.put("Builds are {0}", "构建是 {0}");
-		m.put("Events", "事件");
-		m.put("Filter actions", "筛选操作");
-		m.put("Filter date range", "筛选日期范围");
-		m.put("Filter users", "筛选用户");
-		m.put("No audits", "无审计记录");
-		m.put("No groups to remove from", "没有可移除的组");
-		m.put("No jobs found", "未找到作业");
-		m.put("No users to remove from group", "没有用户可从组中移除");
-		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
-			"这里只显示系统级别的审计事件。要查看特定项目的审计事件，请访问项目审计日志页面");
-		m.put("Please select groups to remove from", "请选择要移除的组");
-		m.put("Please select users to remove from group", "请选择要从组中移除的用户");
-		m.put("Remove All Queried Users from Group", "从组中移除所有查询的用户");
-		m.put("Remove Selected Users from Group", "移除选定用户从组中");
-		m.put("Remove from All Queried Groups", "从所有查询的组中移除");
-		m.put("Remove from Selected Groups", "从选定的组中移除");
-		m.put("Select Job", "选择作业");
-		m.put("Server is Starting...", "服务器正在启动...");
-		m.put("Settings saved", "设置已保存");
-		m.put("Settings saved and project redistribution scheduled", "设置已保存并已安排项目重新分配");
-		m.put("Some builds are {0}", "某些构建是 {0}");
-		m.put("Storage Settings", "存储设置");
-		m.put("Type <code>yes</code> below to remove all queried users from group", "在下方输入<code>yes</code>以从组中移除所有查询的用户");
-		m.put("Type <code>yes</code> below to remove from all queried groups", "在下方输入<code>yes</code>以从所有查询的组中移除");
-		m.put("Type <code>yes</code> below to remove from selected groups", "在下方输入<code>yes</code>以从选定的组中移除");
-		m.put("Type <code>yes</code> below to remove selected users from group", "在下方输入<code>yes</code>以从组中移除选定用户");
-		m.put("User added to group", "用户已添加到组");
+		m.put("Two Factor Authentication", "两阶段验证");
+		m.put("Two-factor authentication already set up. <a wicket:id=\"requestToSetupAgain\"><wicket:t>Request to set up again", 
+			"两阶段验证已设置。<a wicket:id=\"requestToSetupAgain\"><wicket:t>请求重新设置");
+		m.put("Two-factor authentication not enabled", "两阶段验证未启用");
+		m.put("Will be prompted to set up two-factor authentication upon next login", "下次登录时将提示设置两阶段验证");
 	}
 		
 	@Override

@@ -21,6 +21,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("'..' is not allowed in the directory", "'..' non è consentito nella directory");
 		m.put("(* = any string, ? = any character)", "(* = qualsiasi stringa, ? = qualsiasi carattere)");
 		m.put("(on behalf of <b>{0}</b>)", "(per conto di <b>{0}</b>)");
+		m.put("** Enterprise edition is disabled as the subscription was expired. Renew to enable **", 
+			"** L'edizione Enterprise è disabilitata poiché l'abbonamento è scaduto. Rinnova per abilitare **");
 		m.put("** Enterprise edition is disabled as the trial subscription was expired, order subscription to enable or contact support@onedev.io if you need to extend your trial **", 
 			"** L'edizione Enterprise è disabilitata poiché l'abbonamento di prova è scaduto, ordina un abbonamento per abilitarla o contatta support@onedev.io se hai bisogno di estendere la prova **");
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
@@ -200,10 +202,12 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Add to batch to commit with other suggestions later", "Aggiungi al batch per il commit con altre proposte più tardi");
 		m.put("Add to group...", "Aggiungi al gruppo...");
 		m.put("Add to iteration...", "Aggiungi all'iterazione...");
+		m.put("Add user to group...", "Aggiungi utente al gruppo...");
 		m.put("Add value", "Aggiungi valore");
 		m.put("Add {0}", "Aggiungi {0}");
 		m.put("Added commit \"{0}\" (<i class='text-danger'>missing in repository</i>)", "Commit aggiunto \"{0}\" (<i class='text-danger'>mancante nel repository</i>)");
 		m.put("Added commit \"{0}\" ({1})", "Commit aggiunto \"{0}\" ({1})");
+		m.put("Added to group", "Aggiunto al gruppo");
 		m.put("Additions", "Aggiunte");
 		m.put("Administration", "Amministrazione");
 		m.put("Administrative permission over a project", "Permesso amministrativo su un progetto");
@@ -328,6 +332,11 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Attributes", "Attributi");
 		m.put("Attributes (can only be edited when agent is online)", "Attributi (modificabili solo quando l'agente è online)");
 		m.put("Attributes saved", "Attributi salvati");
+		m.put("Audit", "Audit");
+		m.put("Audit Log", "Registro di controllo");
+		m.put("Audit Setting", "Impostazione di controllo");
+		m.put("Audit log will be preserved for the specified number of days. This setting applies to all audit events, including system level and project level", 
+			"Il registro di controllo sarà conservato per il numero di giorni specificato. Questa impostazione si applica a tutti gli eventi di controllo, inclusi quelli a livello di sistema e di progetto");
 		m.put("Auth Source", "Sorgente di autenticazione");
 		m.put("Authenticate to Bitbucket Cloud", "Autenticati su Bitbucket Cloud");
 		m.put("Authenticate to GitHub", "Autenticati su GitHub");
@@ -483,6 +492,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Build version", "Versione della build");
 		m.put("Build with Persistent Volume", "Build con Volume Persistente");
 		m.put("Builds", "Build");
+		m.put("Builds are {0}", "Le build sono {0}");
 		m.put("Buildx Builder", "Buildx Builder");
 		m.put("Built In Fields Bean", "Bean dei campi integrati");
 		m.put("Burndown", "Burndown");
@@ -514,6 +524,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Can Be Used By Jobs", "Può essere utilizzato dai job");
 		m.put("Can Create Root Projects", "Può creare progetti root");
 		m.put("Can Edit Estimated Time", "Può modificare il tempo stimato");
+		m.put("Can not convert root user to service account", "Impossibile convertire l'utente root in account di servizio");
+		m.put("Can not convert yourself to service account", "Impossibile convertirti in account di servizio");
 		m.put("Can not delete default branch", "Non è possibile eliminare il branch predefinito");
 		m.put("Can not delete root account", "Non è possibile eliminare l'account root");
 		m.put("Can not delete yourself", "Non è possibile eliminare te stesso");
@@ -758,6 +770,10 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Contributed settings", "Impostazioni Contribuite");
 		m.put("Contributions", "Contributi");
 		m.put("Contributions to {0} branch, excluding merge commits", "Contributi al branch {0}, esclusi i commit di merge");
+		m.put("Convert All Queried to Service Accounts", "Converti Tutti i Richiesti in Account di Servizio");
+		m.put("Convert Selected to Service Accounts", "Converti Selezionati in Account di Servizio");
+		m.put("Converting to service accounts will remove password, email addresses, all assignments and watches. Type <code>yes</code> to confirm", 
+			"Convertire in account di servizio rimuoverà password, indirizzi email, tutte le assegnazioni e le osservazioni. Digita <code>yes</code> per confermare");
 		m.put("Copy", "Copia");
 		m.put("Copy All Queried Issues To...", "Copia Tutti i Problemi Interrogati In...");
 		m.put("Copy Files with SCP", "Copia File con SCP");
@@ -952,7 +968,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Disable Dashboard", "Disabilita la dashboard");
 		m.put("Disable Selected Users", "Disabilita gli utenti selezionati");
 		m.put("Disabled", "Disabilitato");
-		m.put("Disabled users are excluded from user-month check", "Gli utenti disabilitati sono esclusi dal controllo utenti-mese");
+		m.put("Disabled users and service accounts are excluded from user-month calculation", "Gli utenti disabilitati e gli account di servizio sono esclusi dal calcolo utente-mese");
 		m.put("Disabling account will reset password, clear access tokens, and remove all references from other entities except for past activities. Do you really want to continue?", 
 			"Disabilitare l'account reimposterà la password, cancellerà i token di accesso e rimuoverà tutti i riferimenti da altre entità, eccetto le attività passate. Vuoi davvero continuare?");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
@@ -1038,6 +1054,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Download archive of this branch", "Scarica l'archivio di questo branch");
 		m.put("Download full log", "Scarica il log completo");
 		m.put("Download log", "Scarica il log");
+		m.put("Download patch", "Scarica patch");
 		m.put("Download tag archive", "Scarica l'archivio del tag");
 		m.put("Dry Run", "Esecuzione simulata");
 		m.put("Due Date", "Data di scadenza");
@@ -1133,7 +1150,9 @@ public class Translation_it extends TranslationResourceBundle {
 			"Abilita per consentire il caricamento della cache di build generata durante il lavoro CI/CD. La cache caricata può essere utilizzata dalle build successive del progetto finché la chiave della cache corrisponde");
 		m.put("End Point", "Punto di Accesso");
 		m.put("Enforce Conventional Commits", "Imponi Commit Convenzionali");
+		m.put("Enforce Password Policy", "Imponi Politica della Password");
 		m.put("Enforce Two-factor Authentication", "Imponi Autenticazione a Due Fattori");
+		m.put("Enforce password policy for new users", "Imponi politica della password per i nuovi utenti");
 		m.put("Enter New Password", "Inserisci Nuova Password");
 		m.put("Enter description here", "Inserisci qui la descrizione");
 		m.put("Enter your details to login to your account", "Inserisci i tuoi dati per accedere al tuo account");
@@ -1176,6 +1195,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Evaluate script to get value or secret", "Valuta script per ottenere valore o segreto");
 		m.put("Evaluate script to get values or secrets", "Valuta script per ottenere valori o segreti");
 		m.put("Event Types", "Tipi di Evento");
+		m.put("Events", "Eventi");
 		m.put("Ever Used Since", "Mai Usato Da");
 		m.put("Everything inside this project and all child projects will be deleted and can not be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"Tutto all'interno di questo progetto e tutti i progetti figli saranno eliminati e non potranno essere recuperati, per favore digita il percorso del progetto <code>{0}</code> qui sotto per confermare l'eliminazione.");
@@ -1252,6 +1272,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Files to Be Analyzed", "File da Analizzare");
 		m.put("Filter", "Filtro");
 		m.put("Filter Issues", "Filtra Problemi");
+		m.put("Filter actions", "Filtra azioni");
 		m.put("Filter backlog issues", "Filtra problemi arretrati");
 		m.put("Filter branches...", "Filtra rami...");
 		m.put("Filter by name", "Filtra per nome");
@@ -1259,6 +1280,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Filter by name...", "Filtra per nome...");
 		m.put("Filter by path", "Filtra per percorso");
 		m.put("Filter by test suite", "Filtra per suite di test");
+		m.put("Filter date range", "Filtra intervallo di date");
 		m.put("Filter files...", "Filtra file...");
 		m.put("Filter groups...", "Filtra gruppi...");
 		m.put("Filter issues", "Filtra problemi");
@@ -1266,6 +1288,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Filter roles", "Filtra ruoli");
 		m.put("Filter tags...", "Filtra tag...");
 		m.put("Filter targets", "Filtra obiettivi");
+		m.put("Filter users", "Filtra utenti");
 		m.put("Filter...", "Filtra...");
 		m.put("Filters", "Filtri");
 		m.put("Find branch", "Trova ramo");
@@ -1798,7 +1821,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Left", "Sinistra");
 		m.put("Less", "Meno");
 		m.put("License Agreement", "Accordo di Licenza");
-		m.put("License Group:", "Gruppo di Licenza:");
 		m.put("License Setting", "Impostazione della Licenza");
 		m.put("Licensed To", "Licenziato a");
 		m.put("Licensed To:", "Licenziato a:");
@@ -1928,6 +1950,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Microsoft 365", "Microsoft 365");
 		m.put("Microsoft Entra ID", "Microsoft Entra ID");
 		m.put("Min Value", "Valore minimo");
+		m.put("Minimum length of the password", "Lunghezza minima della password");
 		m.put("Missing Commit", "Commit mancante");
 		m.put("Missing Commits", "Commit mancanti");
 		m.put("Month", "Mese");
@@ -2032,6 +2055,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("No applicable transitions or no permission to transit", "Nessuna transizione applicabile o nessun permesso per transitare");
 		m.put("No artifacts published", "Nessun artefatto pubblicato");
 		m.put("No attributes defined (can only be edited when agent is online)", "Nessun attributo definito (modificabile solo quando l'agente è online)");
+		m.put("No audits", "Nessun controllo");
 		m.put("No authorized job secret found (project: {0}, job secret: {1})", "Nessun segreto autorizzato trovato (progetto: {0}, segreto: {1})");
 		m.put("No branch to cherry-pick to", "Nessun branch su cui effettuare il cherry-pick");
 		m.put("No branch to revert on", "Nessun branch su cui effettuare il revert");
@@ -2068,6 +2092,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("No file attachments", "Nessun allegato di file");
 		m.put("No group by", "Nessun raggruppamento");
 		m.put("No groups claim returned", "Nessuna rivendicazione di gruppi restituita");
+		m.put("No groups to remove from", "Nessun gruppo da cui rimuovere");
 		m.put("No ignore file", "Nessun file di ignoranza");
 		m.put("No ignored licenses", "Nessuna licenza ignorata");
 		m.put("No image attachments", "Nessun allegato di immagine");
@@ -2083,6 +2108,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("No issues to sync estimated/spent time", "Nessun problema da sincronizzare tempo stimato/speso");
 		m.put("No issues to watch/unwatch", "Nessun problema da osservare/non osservare");
 		m.put("No jobs defined", "Nessun job definito");
+		m.put("No jobs found", "Nessun job trovato");
 		m.put("No limit", "Nessun limite");
 		m.put("No mail service", "Nessun servizio di posta");
 		m.put("No obvious changes", "Nessuna modifica evidente");
@@ -2112,9 +2138,11 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("No tags found", "Nessun tag trovato");
 		m.put("No timesheets defined", "Nessun foglio ore definito");
 		m.put("No user found with login name or email: ", "Nessun utente trovato con nome di login o email:");
+		m.put("No users to convert to service accounts", "Nessun utente da convertire in account di servizio");
 		m.put("No users to delete", "Nessun utente da eliminare");
 		m.put("No users to disable", "Nessun utente da disabilitare");
 		m.put("No users to enable", "Nessun utente da abilitare");
+		m.put("No users to remove from group", "Nessun utente da rimuovere dal gruppo");
 		m.put("No valid query to show progress", "Nessuna query valida per mostrare il progresso");
 		m.put("No valid signature for head commit", "Nessuna firma valida per il commit principale");
 		m.put("No valid signature for head commit of target branch", "Nessuna firma valida per il commit principale del branch di destinazione");
@@ -2191,6 +2219,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Only create merge commit if target branch can not be fast-forwarded to source branch", 
 			"Crea il commit di merge solo se il branch di destinazione non può essere avanzato velocemente al branch sorgente");
 		m.put("Only projects manageable by access token owner can be authorized", "Solo i progetti gestibili dal proprietario del token di accesso possono essere autorizzati");
+		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
+			"Qui vengono visualizzati solo gli eventi di controllo a livello di sistema. Per visualizzare gli eventi di controllo di un progetto specifico, visita la pagina del registro di controllo del progetto");
 		m.put("Open", "Apri");
 		m.put("Open new pull request", "Apri nuova pull request");
 		m.put("Open terminal of current running step", "Apri terminale del passo corrente in esecuzione");
@@ -2451,6 +2481,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Optionally specify working directory of the container. Leave empty to use default working directory of the container", 
 			"Specifica facoltativamente la directory di lavoro del container. Lascia vuoto per utilizzare la directory di lavoro predefinita del container");
 		m.put("Options", "Opzioni");
+		m.put("Or manually enter the secret key below in your authenticator app", "Oppure inserisci manualmente la chiave segreta qui sotto nella tua app di autenticazione");
 		m.put("Order By", "Ordina Per");
 		m.put("Order More User Months", "Ordina Più Mesi Utente");
 		m.put("Order Subscription", "Ordina Abbonamento");
@@ -2509,6 +2540,11 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Passed", "Superato");
 		m.put("Password", "Password");
 		m.put("Password Edit Bean", "Bean Modifica Password");
+		m.put("Password Must Contain Digit", "La password deve contenere una cifra");
+		m.put("Password Must Contain Lowercase", "La password deve contenere una lettera minuscola");
+		m.put("Password Must Contain Special Character", "La password deve contenere un carattere speciale");
+		m.put("Password Must Contain Uppercase", "La password deve contenere una lettera maiuscola");
+		m.put("Password Policy", "Politica della Password");
 		m.put("Password Reset", "Reset Password");
 		m.put("Password Reset Bean", "Bean Reset Password");
 		m.put("Password Reset Template", "Template Reset Password");
@@ -2521,6 +2557,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Password or Access Token for Remote Repository", "Password o Token di Accesso per Repository Remoto");
 		m.put("Password reset request has been sent", "La richiesta di reset della password è stata inviata");
 		m.put("Password reset url is invalid or obsolete", "L'url per reimpostare la password non è valido o è obsoleto");
+		m.put("PasswordMinimum Length", "Lunghezza Minima della Password");
 		m.put("Paste subscription key here", "Incolla qui la chiave di abbonamento");
 		m.put("Path containing spaces or starting with dash needs to be quoted", "Il percorso contenente spazi o che inizia con un trattino deve essere racchiuso tra virgolette");
 		m.put("Path placeholder", "Segnaposto Percorso");
@@ -2597,6 +2634,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Please select comments to set unresolved", "Si prega di selezionare i commenti da impostare come non risolti");
 		m.put("Please select different branches", "Si prega di selezionare branch diversi");
 		m.put("Please select fields to update", "Si prega di selezionare i campi da aggiornare");
+		m.put("Please select groups to remove from", "Seleziona i gruppi da cui rimuovere");
 		m.put("Please select issues to copy", "Si prega di selezionare le issue da copiare");
 		m.put("Please select issues to delete", "Si prega di selezionare le issue da eliminare");
 		m.put("Please select issues to edit", "Si prega di selezionare le issue da modificare");
@@ -2612,8 +2650,10 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Please select query watches to delete", "Si prega di selezionare le query osservate da eliminare");
 		m.put("Please select revision to create tag from", "Si prega di selezionare la revisione da cui creare il tag");
 		m.put("Please select revisions to compare", "Si prega di selezionare le revisioni da confrontare");
+		m.put("Please select users to convert to service accounts", "Seleziona gli utenti da convertire in account di servizio");
 		m.put("Please select users to disable", "Si prega di selezionare gli utenti da disabilitare");
 		m.put("Please select users to enable", "Si prega di selezionare gli utenti da abilitare");
+		m.put("Please select users to remove from group", "Seleziona gli utenti da rimuovere dal gruppo");
 		m.put("Please specify file name above before editing content", "Si prega di specificare il nome del file sopra prima di modificare il contenuto");
 		m.put("Please switch to packages page of a particular project for the instructions", "Si prega di passare alla pagina dei pacchetti di un progetto specifico per le istruzioni");
 		m.put("Please wait...", "Attendere prego...");
@@ -2862,9 +2902,13 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Remote Url", "URL remoto");
 		m.put("Remove", "Rimuovi");
 		m.put("Remove All Queried Agents", "Rimuovi tutti gli agenti interrogati");
+		m.put("Remove All Queried Users from Group", "Rimuovi tutti gli utenti interrogati dal gruppo");
 		m.put("Remove Fields", "Rimuovi campi");
 		m.put("Remove From Current Iteration", "Rimuovi dall'iterazione corrente");
 		m.put("Remove Selected Agents", "Rimuovi agenti selezionati");
+		m.put("Remove Selected Users from Group", "Rimuovi gli utenti selezionati dal gruppo");
+		m.put("Remove from All Queried Groups", "Rimuovi da tutti i gruppi interrogati");
+		m.put("Remove from Selected Groups", "Rimuovi dai gruppi selezionati");
 		m.put("Remove from batch", "Rimuovi dal batch");
 		m.put("Remove issue from this iteration", "Rimuovi il problema da questa iterazione");
 		m.put("Remove this assignee", "Rimuovi questo assegnatario");
@@ -2875,6 +2919,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Removed all queried agents. Type <code>yes</code> below to confirm", "Rimossi tutti gli agenti richiesti. Digita <code>yes</code> qui sotto per confermare");
 		m.put("Removed selected agents. Type <code>yes</code> below to confirm", "Rimossi gli agenti selezionati. Digita <code>yes</code> qui sotto per confermare");
 		m.put("Rename {0}", "Rinomina {0}");
+		m.put("Renew Subscription", "Rinnova Abbonamento");
 		m.put("Renovate CLI Options", "Opzioni CLI di Renovate");
 		m.put("Renovate JavaScript Config", "Configurazione JavaScript di Renovate");
 		m.put("Reopen", "Riapri");
@@ -3045,6 +3090,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Select Branch to Revert on", "Seleziona branch per effettuare il revert.");
 		m.put("Select Branch/Tag", "Seleziona branch/tag.");
 		m.put("Select Existing", "Seleziona esistente.");
+		m.put("Select Job", "Seleziona job");
 		m.put("Select Project", "Seleziona progetto.");
 		m.put("Select below...", "Seleziona sotto...");
 		m.put("Select iteration to schedule issues into", "Seleziona iterazione per pianificare i problemi.");
@@ -3076,6 +3122,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Server URL", "URL del server.");
 		m.put("Server fingerprint", "Fingerprint del server.");
 		m.put("Server host", "Host del server.");
+		m.put("Server is Starting...", "Il server si sta avviando...");
 		m.put("Server url", "URL del server.");
 		m.put("Service", "Servizio.");
 		m.put("Service Account", "Account di servizio.");
@@ -3131,6 +3178,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Setting has been saved", "L'impostazione è stata salvata");
 		m.put("Settings", "Impostazioni");
 		m.put("Settings and permissions of parent project will be inherited by this project", "Le impostazioni e i permessi del progetto padre saranno ereditati da questo progetto");
+		m.put("Settings saved", "Impostazioni salvate");
+		m.put("Settings saved and project redistribution scheduled", "Impostazioni salvate e ridistribuzione del progetto pianificata");
 		m.put("Settings updated", "Impostazioni aggiornate");
 		m.put("Share dashboard", "Condividi dashboard");
 		m.put("Share with Groups", "Condividi con gruppi");
@@ -3198,6 +3247,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Slack Notifications", "Notifiche Slack");
 		m.put("Smtp Ssl Setting", "Impostazione Smtp Ssl");
 		m.put("Smtp With Ssl", "Smtp con Ssl");
+		m.put("Some builds are {0}", "Alcune build sono {0}");
 		m.put("Some jobs are hidden due to permission policy", "Alcuni job sono nascosti a causa della politica dei permessi");
 		m.put("Some one changed the content you are editing. Reload the page and try again.", "Qualcuno ha modificato il contenuto che stai modificando. Ricarica la pagina e riprova.");
 		m.put("Some other pull requests are opening to this branch", "Altre pull request sono aperte per questo branch");
@@ -3612,6 +3662,7 @@ public class Translation_it extends TranslationResourceBundle {
 			"I passaggi verranno eseguiti in serie sullo stesso nodo, condividendo lo stesso <a href='https://docs.onedev.io/concepts#job-workspace'>workspace del job</a>");
 		m.put("Stop work", "Ferma il lavoro");
 		m.put("Stopwatch Overdue", "Cronometro Scaduto");
+		m.put("Storage Settings", "Impostazioni di archiviazione");
 		m.put("Storage file missing", "File di archiviazione mancante");
 		m.put("Storage not found", "Archiviazione non trovata");
 		m.put("Stored with Git LFS", "Archiviato con Git LFS");
@@ -3632,6 +3683,10 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Subscription key installed successfully", "Chiave di abbonamento installata con successo");
 		m.put("Subscription key not applicable: this key is intended to activate a trial subscription", 
 			"Chiave di abbonamento non applicabile: questa chiave è destinata ad attivare un abbonamento di prova");
+		m.put("Subscription key not applicable: this key is intended to renew a user based subscription", 
+			"Chiave di abbonamento non applicabile: questa chiave è destinata a rinnovare un abbonamento basato su utenti");
+		m.put("Subscription key not applicable: this key is intended to renew an unlimited users subscription", 
+			"Chiave di abbonamento non applicabile: questa chiave è destinata a rinnovare un abbonamento per utenti illimitati");
 		m.put("Subscription key not applicable: this key is intended to update licensee of an existing subscription", 
 			"Chiave di abbonamento non applicabile: questa chiave è destinata ad aggiornare il licenziatario di un abbonamento esistente");
 		m.put("Success Rate", "Tasso di Successo");
@@ -3778,12 +3833,18 @@ public class Translation_it extends TranslationResourceBundle {
 			"Questa installazione ha un abbonamento di prova ed è attualmente in esecuzione come edizione enterprise");
 		m.put("This installation has an active subscription and runs as enterprise edition", "Questa installazione ha un abbonamento attivo e funziona come edizione enterprise");
 		m.put("This installation has an expired subscription, and runs as community edition", "Questa installazione ha un abbonamento scaduto e funziona come edizione comunitaria");
+		m.put("This installation has an unlimited users subscription and is now running as enterprise edition", 
+			"Questa installazione ha un abbonamento per utenti illimitati ed è ora in esecuzione come edizione enterprise");
+		m.put("This installation's subscription has expired and is now running as the community edition", 
+			"L'abbonamento di questa installazione è scaduto ed è ora in esecuzione come edizione community");
 		m.put("This is a Git LFS object, but the storage file is missing", "Questo è un oggetto Git LFS, ma il file di archiviazione è mancante");
 		m.put("This is a built-in role and can not be deleted", "Questo è un ruolo integrato e non può essere eliminato");
 		m.put("This is a disabled service account", "Questo è un account di servizio disabilitato");
 		m.put("This is a layer cache. To use the cache, add below option to your docker buildx command", 
 			"Questo è un cache di livello. Per utilizzare il cache, aggiungi l'opzione seguente al tuo comando docker buildx");
 		m.put("This is a service account for task automation purpose", "Questo è un account di servizio per scopi di automazione delle attività");
+		m.put("This is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"Questa è una funzionalità enterprise. <a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
 		m.put("This key has already been used by another project", "Questa chiave è già stata utilizzata da un altro progetto");
 		m.put("This key is associated with {0}, however it is NOT a verified email address of this user", 
 			"Questa chiave è associata a {0}, tuttavia NON è un indirizzo email verificato di questo utente");
@@ -3919,12 +3980,16 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Try EE", "Prova EE");
 		m.put("Try Enterprise Edition", "Prova Enterprise Edition");
 		m.put("Twitch", "Twitch");
+		m.put("Two Factor Authentication", "Autenticazione a Due Fattori");
 		m.put("Two-factor Authentication", "Autenticazione a due fattori");
+		m.put("Two-factor authentication already set up. <a wicket:id=\"requestToSetupAgain\"><wicket:t>Request to set up again", 
+			"Autenticazione a due fattori già configurata. <a wicket:id=\"requestToSetupAgain\"><wicket:t>Richiedi di configurare di nuovo");
 		m.put("Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. If you encounter problems, make sure time of OneDev server and your device running TOTP authenticator is in sync", 
 			"L'autenticazione a due fattori è abilitata. Inserisci il codice visualizzato sul tuo autenticatore TOTP. Se riscontri problemi, assicurati che l'orario del server OneDev e del tuo dispositivo con l'autenticatore TOTP siano sincronizzati");
 		m.put("Two-factor authentication is enforced for your account to enhance security. Please follow below procedure to set it up", 
 			"L'autenticazione a due fattori è obbligatoria per il tuo account per migliorare la sicurezza. Segui la procedura qui sotto per configurarla");
 		m.put("Two-factor authentication is now configured", "L'autenticazione a due fattori è ora configurata");
+		m.put("Two-factor authentication not enabled", "Autenticazione a due fattori non abilitata");
 		m.put("Type", "Tipo");
 		m.put("Type <code>yes</code> below to cancel all queried builds", "Digita <code>yes</code> qui sotto per annullare tutte le build interrogate");
 		m.put("Type <code>yes</code> below to cancel selected builds", "Digita <code>yes</code> qui sotto per annullare le build selezionate");
@@ -3953,6 +4018,10 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Type <code>yes</code> below to pause all queried agents", "Digita <code>yes</code> qui sotto per mettere in pausa tutti gli agenti interrogati");
 		m.put("Type <code>yes</code> below to re-run all queried builds", "Digita <code>yes</code> qui sotto per rieseguire tutte le build interrogate");
 		m.put("Type <code>yes</code> below to re-run selected builds", "Digita <code>yes</code> qui sotto per rieseguire le build selezionate");
+		m.put("Type <code>yes</code> below to remove all queried users from group", "Digita <code>yes</code> qui sotto per rimuovere tutti gli utenti interrogati dal gruppo");
+		m.put("Type <code>yes</code> below to remove from all queried groups", "Digita <code>yes</code> qui sotto per rimuovere da tutti i gruppi interrogati");
+		m.put("Type <code>yes</code> below to remove from selected groups", "Digita <code>yes</code> qui sotto per rimuovere dai gruppi selezionati");
+		m.put("Type <code>yes</code> below to remove selected users from group", "Digita <code>yes</code> qui sotto per rimuovere gli utenti selezionati dal gruppo");
 		m.put("Type <code>yes</code> below to restart all queried agents", "Digita <code>yes</code> qui sotto per riavviare tutti gli agenti interrogati");
 		m.put("Type <code>yes</code> below to restart selected agents", "Digita <code>yes</code> qui sotto per riavviare gli agenti selezionati");
 		m.put("Type <code>yes</code> below to resume all queried agents", "Digita <code>yes</code> qui sotto per riprendere tutti gli agenti interrogati");
@@ -4094,6 +4163,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("User SSH Key Attribute", "Attributo chiave SSH utente");
 		m.put("User Search Bases", "Basi di ricerca utente");
 		m.put("User Search Filter", "Filtro di ricerca utente");
+		m.put("User added to group", "Utente aggiunto al gruppo");
 		m.put("User authorizations updated", "Autorizzazioni utente aggiornate");
 		m.put("User authorized", "Utente autorizzato");
 		m.put("User avatar will be requested by appending a hash to this url", "L'avatar utente sarà richiesto aggiungendo un hash a questo url");
@@ -4102,6 +4172,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("User name", "Nome utente");
 		m.put("User name already used by another account", "Nome utente già utilizzato da un altro account");
 		m.put("Users", "Utenti");
+		m.put("Users converted to service accounts successfully", "Utenti convertiti in account di servizio con successo");
 		m.put("Users deleted successfully", "Utenti eliminati con successo");
 		m.put("Users disabled successfully", "Utenti disabilitati con successo");
 		m.put("Users enabled successfully", "Utenti abilitati con successo");
@@ -4220,15 +4291,18 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Whether or not use force option to overwrite changes in case ref updating can not be fast-forwarded", 
 			"Se utilizzare l'opzione forza per sovrascrivere le modifiche nel caso in cui l'aggiornamento del riferimento non possa essere avanzato rapidamente o meno");
 		m.put("Whether or not user can remove own account", "Se l'utente può rimuovere il proprio account o meno");
+		m.put("Whether the password must contain at least one lowercase letter", "Se la password deve contenere almeno una lettera minuscola");
+		m.put("Whether the password must contain at least one number", "Se la password deve contenere almeno un numero");
+		m.put("Whether the password must contain at least one special character", "Se la password deve contenere almeno un carattere speciale");
+		m.put("Whether the password must contain at least one uppercase letter", "Se la password deve contenere almeno una lettera maiuscola");
 		m.put("Whole Word", "Parola Intera");
 		m.put("Widget", "Widget");
 		m.put("Widget Tab", "Scheda Widget");
 		m.put("Widget Timesheet Setting", "Impostazione del Foglio Orario Widget");
+		m.put("Will be prompted to set up two-factor authentication upon next login", "Sarà richiesto di configurare l'autenticazione a due fattori al prossimo accesso");
 		m.put("Will be transcoded to UTF-8", "Sarà transcodificato in UTF-8");
 		m.put("Window", "Finestra");
 		m.put("Window Memory", "Memoria Finestra");
-		m.put("With current number of users ({0}) in group \"{1}\", the subscription will be active until <b>{2}</b>", 
-			"Con il numero attuale di utenti ({0}) nel gruppo \"{1}\", l'abbonamento sarà attivo fino al <b>{2}</b>");
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"Con il numero attuale di utenti ({0}), l'abbonamento sarà attivo fino al <b>{1}</b>");
 		m.put("Workflow reconciliation completed", "Riconciliazione del flusso di lavoro completata");
@@ -4498,41 +4572,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Add user to group...", "Aggiungi utente al gruppo...");
-		m.put("Added to group", "Aggiunto al gruppo");
-		m.put("Audit", "Audit");
-		m.put("Audit Log", "Registro di controllo");
-		m.put("Audit Setting", "Impostazione di controllo");
-		m.put("Audit log will be preserved for the specified number of days. This setting applies to all audit events, including system level and project level", 
-			"Il registro di controllo sarà conservato per il numero di giorni specificato. Questa impostazione si applica a tutti gli eventi di controllo, inclusi quelli a livello di sistema e di progetto");
-		m.put("Builds are {0}", "Le build sono {0}");
-		m.put("Events", "Eventi");
-		m.put("Filter actions", "Filtra azioni");
-		m.put("Filter date range", "Filtra intervallo di date");
-		m.put("Filter users", "Filtra utenti");
-		m.put("No audits", "Nessun controllo");
-		m.put("No groups to remove from", "Nessun gruppo da cui rimuovere");
-		m.put("No jobs found", "Nessun job trovato");
-		m.put("No users to remove from group", "Nessun utente da rimuovere dal gruppo");
-		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
-			"Qui vengono visualizzati solo gli eventi di controllo a livello di sistema. Per visualizzare gli eventi di controllo di un progetto specifico, visita la pagina del registro di controllo del progetto");
-		m.put("Please select groups to remove from", "Seleziona i gruppi da cui rimuovere");
-		m.put("Please select users to remove from group", "Seleziona gli utenti da rimuovere dal gruppo");
-		m.put("Remove All Queried Users from Group", "Rimuovi tutti gli utenti interrogati dal gruppo");
-		m.put("Remove Selected Users from Group", "Rimuovi gli utenti selezionati dal gruppo");
-		m.put("Remove from All Queried Groups", "Rimuovi da tutti i gruppi interrogati");
-		m.put("Remove from Selected Groups", "Rimuovi dai gruppi selezionati");
-		m.put("Select Job", "Seleziona job");
-		m.put("Server is Starting...", "Il server si sta avviando...");
-		m.put("Settings saved", "Impostazioni salvate");
-		m.put("Settings saved and project redistribution scheduled", "Impostazioni salvate e ridistribuzione del progetto pianificata");
-		m.put("Some builds are {0}", "Alcune build sono {0}");
-		m.put("Storage Settings", "Impostazioni di archiviazione");
-		m.put("Type <code>yes</code> below to remove all queried users from group", "Digita <code>yes</code> qui sotto per rimuovere tutti gli utenti interrogati dal gruppo");
-		m.put("Type <code>yes</code> below to remove from all queried groups", "Digita <code>yes</code> qui sotto per rimuovere da tutti i gruppi interrogati");
-		m.put("Type <code>yes</code> below to remove from selected groups", "Digita <code>yes</code> qui sotto per rimuovere dai gruppi selezionati");
-		m.put("Type <code>yes</code> below to remove selected users from group", "Digita <code>yes</code> qui sotto per rimuovere gli utenti selezionati dal gruppo");
-		m.put("User added to group", "Utente aggiunto al gruppo");
 	}
 		
 	@Override

@@ -21,6 +21,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("'..' is not allowed in the directory", "'..'은 디렉토리에서 허용되지 않습니다");
 		m.put("(* = any string, ? = any character)", "(* = 임의의 문자열, ? = 임의의 문자)");
 		m.put("(on behalf of <b>{0}</b>)", "(<b>{0}</b>를 대신하여)");
+		m.put("** Enterprise edition is disabled as the subscription was expired. Renew to enable **", 
+			"** 구독이 만료되어 엔터프라이즈 에디션이 비활성화되었습니다. 활성화하려면 갱신하세요 **");
 		m.put("** Enterprise edition is disabled as the trial subscription was expired, order subscription to enable or contact support@onedev.io if you need to extend your trial **", 
 			"** 엔터프라이즈 에디션은 체험 구독이 만료되어 비활성화되었습니다. 활성화하려면 구독을 주문하거나 체험 연장을 원하시면 support@onedev.io로 문의하세요 **");
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
@@ -200,10 +202,12 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Add to batch to commit with other suggestions later", "나중에 다른 제안과 함께 커밋할 배치에 추가");
 		m.put("Add to group...", "그룹에 추가...");
 		m.put("Add to iteration...", "반복에 추가...");
+		m.put("Add user to group...", "그룹에 사용자 추가...");
 		m.put("Add value", "값 추가");
 		m.put("Add {0}", "{0} 추가");
 		m.put("Added commit \"{0}\" (<i class='text-danger'>missing in repository</i>)", "커밋 \"{0}\" 추가 (<i class='text-danger'>저장소에 없음</i>)");
 		m.put("Added commit \"{0}\" ({1})", "커밋 \"{0}\" 추가 ({1})");
+		m.put("Added to group", "그룹에 추가됨");
 		m.put("Additions", "추가 사항");
 		m.put("Administration", "관리");
 		m.put("Administrative permission over a project", "프로젝트에 대한 관리 권한");
@@ -328,6 +332,11 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Attributes", "속성");
 		m.put("Attributes (can only be edited when agent is online)", "속성(에이전트가 온라인 상태일 때만 편집 가능)");
 		m.put("Attributes saved", "속성 저장됨");
+		m.put("Audit", "감사");
+		m.put("Audit Log", "감사 로그");
+		m.put("Audit Setting", "감사 설정");
+		m.put("Audit log will be preserved for the specified number of days. This setting applies to all audit events, including system level and project level", 
+			"감사 로그는 지정된 일수 동안 보존됩니다. 이 설정은 시스템 수준 및 프로젝트 수준을 포함한 모든 감사 이벤트에 적용됩니다");
 		m.put("Auth Source", "인증 소스");
 		m.put("Authenticate to Bitbucket Cloud", "Bitbucket Cloud에 인증");
 		m.put("Authenticate to GitHub", "GitHub에 인증");
@@ -483,6 +492,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Build version", "빌드 버전");
 		m.put("Build with Persistent Volume", "Persistent Volume을 사용하는 빌드");
 		m.put("Builds", "빌드들");
+		m.put("Builds are {0}", "빌드는 {0} 상태입니다");
 		m.put("Buildx Builder", "Buildx 빌더");
 		m.put("Built In Fields Bean", "내장 필드 빈");
 		m.put("Burndown", "번다운");
@@ -514,6 +524,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Can Be Used By Jobs", "작업에서 사용할 수 있음");
 		m.put("Can Create Root Projects", "루트 프로젝트 생성 가능");
 		m.put("Can Edit Estimated Time", "예상 시간 수정 가능");
+		m.put("Can not convert root user to service account", "루트 사용자를 서비스 계정으로 변환할 수 없습니다");
+		m.put("Can not convert yourself to service account", "자신을 서비스 계정으로 변환할 수 없습니다");
 		m.put("Can not delete default branch", "기본 브랜치를 삭제할 수 없습니다");
 		m.put("Can not delete root account", "루트 계정을 삭제할 수 없습니다");
 		m.put("Can not delete yourself", "자신을 삭제할 수 없습니다");
@@ -758,6 +770,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Contributed settings", "기여된 설정");
 		m.put("Contributions", "기여");
 		m.put("Contributions to {0} branch, excluding merge commits", "머지 커밋을 제외한 {0} 브랜치에 대한 기여");
+		m.put("Convert All Queried to Service Accounts", "모든 조회된 항목을 서비스 계정으로 변환");
+		m.put("Convert Selected to Service Accounts", "선택된 항목을 서비스 계정으로 변환");
+		m.put("Converting to service accounts will remove password, email addresses, all assignments and watches. Type <code>yes</code> to confirm", 
+			"서비스 계정으로 변환하면 비밀번호, 이메일 주소, 모든 할당 및 감시가 제거됩니다. 확인하려면 <code>yes</code>를 입력하세요");
 		m.put("Copy", "복사");
 		m.put("Copy All Queried Issues To...", "쿼리된 모든 이슈를 복사하여...");
 		m.put("Copy Files with SCP", "SCP로 파일 복사");
@@ -952,7 +968,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Disable Dashboard", "대시보드 비활성화");
 		m.put("Disable Selected Users", "선택한 사용자 비활성화");
 		m.put("Disabled", "비활성화됨");
-		m.put("Disabled users are excluded from user-month check", "비활성화된 사용자는 사용자-월 확인에서 제외됩니다");
+		m.put("Disabled users and service accounts are excluded from user-month calculation", "비활성화된 사용자 및 서비스 계정은 사용자-월 계산에서 제외됩니다");
 		m.put("Disabling account will reset password, clear access tokens, and remove all references from other entities except for past activities. Do you really want to continue?", 
 			"계정을 비활성화하면 비밀번호가 재설정되고, 액세스 토큰이 삭제되며, 과거 활동을 제외한 다른 엔티티에서 모든 참조가 제거됩니다. 계속하시겠습니까?");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
@@ -1038,6 +1054,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Download archive of this branch", "이 브랜치의 아카이브를 다운로드하세요.");
 		m.put("Download full log", "전체 로그를 다운로드하세요.");
 		m.put("Download log", "로그를 다운로드하세요.");
+		m.put("Download patch", "패치 다운로드");
 		m.put("Download tag archive", "태그 아카이브를 다운로드하세요.");
 		m.put("Dry Run", "드라이 런");
 		m.put("Due Date", "마감일");
@@ -1133,7 +1150,9 @@ public class Translation_ko extends TranslationResourceBundle {
 			"CI/CD 작업 중 생성된 빌드 캐시를 업로드할 수 있도록 허용하려면 이를 활성화합니다. 업로드된 캐시는 캐시 키가 일치하는 한 프로젝트의 후속 빌드에서 사용할 수 있습니다");
 		m.put("End Point", "엔드 포인트");
 		m.put("Enforce Conventional Commits", "컨벤션 커밋을 강제합니다");
+		m.put("Enforce Password Policy", "비밀번호 정책 시행");
 		m.put("Enforce Two-factor Authentication", "이중 인증을 강제합니다");
+		m.put("Enforce password policy for new users", "새 사용자에 대한 비밀번호 정책 시행");
 		m.put("Enter New Password", "새 비밀번호 입력");
 		m.put("Enter description here", "여기에 설명을 입력하세요");
 		m.put("Enter your details to login to your account", "계정에 로그인하려면 세부 정보를 입력하세요");
@@ -1176,6 +1195,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Evaluate script to get value or secret", "값 또는 비밀을 얻기 위해 스크립트를 평가합니다");
 		m.put("Evaluate script to get values or secrets", "값 또는 비밀들을 얻기 위해 스크립트를 평가합니다");
 		m.put("Event Types", "이벤트 유형들");
+		m.put("Events", "이벤트");
 		m.put("Ever Used Since", "이후로 사용됨");
 		m.put("Everything inside this project and all child projects will be deleted and can not be recovered, please type project path <code>{0}</code> below to confirm deletion.", 
 			"이 프로젝트와 모든 하위 프로젝트 내의 모든 것이 삭제되며 복구할 수 없습니다. 삭제를 확인하려면 아래에 프로젝트 경로 <code>{0}</code>를 입력하세요");
@@ -1252,6 +1272,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Files to Be Analyzed", "분석할 파일들");
 		m.put("Filter", "필터");
 		m.put("Filter Issues", "문제 필터링");
+		m.put("Filter actions", "작업 필터링");
 		m.put("Filter backlog issues", "백로그 문제 필터링");
 		m.put("Filter branches...", "브랜치 필터링...");
 		m.put("Filter by name", "이름으로 필터링");
@@ -1259,6 +1280,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Filter by name...", "이름으로 필터링...");
 		m.put("Filter by path", "경로로 필터링");
 		m.put("Filter by test suite", "테스트 스위트로 필터링");
+		m.put("Filter date range", "날짜 범위 필터링");
 		m.put("Filter files...", "파일 필터링...");
 		m.put("Filter groups...", "그룹 필터링...");
 		m.put("Filter issues", "문제 필터링");
@@ -1266,6 +1288,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Filter roles", "역할 필터링");
 		m.put("Filter tags...", "태그 필터링...");
 		m.put("Filter targets", "대상 필터링");
+		m.put("Filter users", "사용자 필터링");
 		m.put("Filter...", "필터링...");
 		m.put("Filters", "필터들");
 		m.put("Find branch", "브랜치 찾기");
@@ -1798,7 +1821,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Left", "왼쪽");
 		m.put("Less", "적음");
 		m.put("License Agreement", "라이선스 계약");
-		m.put("License Group:", "라이선스 그룹:");
 		m.put("License Setting", "라이선스 설정");
 		m.put("Licensed To", "라이선스 사용자");
 		m.put("Licensed To:", "라이선스 사용자:");
@@ -1928,6 +1950,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Microsoft 365", "Microsoft 365");
 		m.put("Microsoft Entra ID", "Microsoft Entra ID");
 		m.put("Min Value", "최소 값");
+		m.put("Minimum length of the password", "비밀번호의 최소 길이");
 		m.put("Missing Commit", "누락된 커밋");
 		m.put("Missing Commits", "누락된 커밋들");
 		m.put("Month", "월");
@@ -2032,6 +2055,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No applicable transitions or no permission to transit", "적용 가능한 전환 없음 또는 전환 권한 없음");
 		m.put("No artifacts published", "게시된 아티팩트 없음");
 		m.put("No attributes defined (can only be edited when agent is online)", "정의된 속성 없음 (에이전트가 온라인 상태일 때만 편집 가능)");
+		m.put("No audits", "감사 없음");
 		m.put("No authorized job secret found (project: {0}, job secret: {1})", "승인된 작업 비밀 없음 (프로젝트: {0}, 작업 비밀: {1})");
 		m.put("No branch to cherry-pick to", "체리픽할 브랜치 없음");
 		m.put("No branch to revert on", "되돌릴 브랜치 없음");
@@ -2068,6 +2092,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No file attachments", "파일 첨부 없음");
 		m.put("No group by", "그룹화 없음");
 		m.put("No groups claim returned", "반환된 그룹 클레임 없음");
+		m.put("No groups to remove from", "제거할 그룹이 없습니다");
 		m.put("No ignore file", "무시 파일 없음");
 		m.put("No ignored licenses", "무시된 라이선스 없음");
 		m.put("No image attachments", "이미지 첨부 없음");
@@ -2083,6 +2108,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No issues to sync estimated/spent time", "예상/소요 시간을 동기화할 이슈 없음");
 		m.put("No issues to watch/unwatch", "관찰/관찰 취소할 이슈 없음");
 		m.put("No jobs defined", "정의된 작업 없음");
+		m.put("No jobs found", "작업이 없습니다");
 		m.put("No limit", "제한 없음");
 		m.put("No mail service", "메일 서비스 없음");
 		m.put("No obvious changes", "명확한 변경 사항 없음");
@@ -2112,9 +2138,11 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No tags found", "태그 없음");
 		m.put("No timesheets defined", "정의된 근무 시간표 없음");
 		m.put("No user found with login name or email: ", "로그인 이름 또는 이메일로 사용자를 찾을 수 없습니다:");
+		m.put("No users to convert to service accounts", "서비스 계정으로 변환할 사용자가 없습니다");
 		m.put("No users to delete", "삭제할 사용자 없음");
 		m.put("No users to disable", "비활성화할 사용자 없음");
 		m.put("No users to enable", "활성화할 사용자 없음");
+		m.put("No users to remove from group", "그룹에서 제거할 사용자가 없습니다");
 		m.put("No valid query to show progress", "진행 상황을 표시할 유효한 쿼리가 없습니다");
 		m.put("No valid signature for head commit", "헤드 커밋에 대한 유효한 서명이 없습니다");
 		m.put("No valid signature for head commit of target branch", "대상 브랜치의 헤드 커밋에 대한 유효한 서명이 없습니다");
@@ -2191,6 +2219,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Only create merge commit if target branch can not be fast-forwarded to source branch", 
 			"대상 브랜치를 소스 브랜치로 빠르게 병합할 수 없는 경우에만 병합 커밋 생성");
 		m.put("Only projects manageable by access token owner can be authorized", "액세스 토큰 소유자가 관리할 수 있는 프로젝트만 승인 가능");
+		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
+			"여기에는 시스템 수준 감사 이벤트만 표시됩니다. 특정 프로젝트의 감사 이벤트를 보려면 프로젝트 감사 로그 페이지를 방문하세요");
 		m.put("Open", "열기");
 		m.put("Open new pull request", "새 풀 리퀘스트 열기");
 		m.put("Open terminal of current running step", "현재 실행 중인 단계의 터미널 열기");
@@ -2451,6 +2481,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify working directory of the container. Leave empty to use default working directory of the container", 
 			"선택적으로 컨테이너의 작업 디렉토리를 지정하십시오. 컨테이너의 기본 작업 디렉토리를 사용하려면 비워두십시오.");
 		m.put("Options", "옵션");
+		m.put("Or manually enter the secret key below in your authenticator app", "또는 아래의 비밀 키를 인증 앱에 수동으로 입력하세요");
 		m.put("Order By", "정렬 기준");
 		m.put("Order More User Months", "더 많은 사용자 월 정렬");
 		m.put("Order Subscription", "구독 정렬");
@@ -2509,6 +2540,11 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Passed", "통과됨");
 		m.put("Password", "비밀번호");
 		m.put("Password Edit Bean", "비밀번호 편집 빈");
+		m.put("Password Must Contain Digit", "비밀번호는 숫자를 포함해야 합니다");
+		m.put("Password Must Contain Lowercase", "비밀번호는 소문자를 포함해야 합니다");
+		m.put("Password Must Contain Special Character", "비밀번호는 특수 문자를 포함해야 합니다");
+		m.put("Password Must Contain Uppercase", "비밀번호는 대문자를 포함해야 합니다");
+		m.put("Password Policy", "비밀번호 정책");
 		m.put("Password Reset", "비밀번호 재설정");
 		m.put("Password Reset Bean", "비밀번호 재설정 빈");
 		m.put("Password Reset Template", "비밀번호 재설정 템플릿");
@@ -2521,6 +2557,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Password or Access Token for Remote Repository", "원격 저장소를 위한 비밀번호 또는 액세스 토큰");
 		m.put("Password reset request has been sent", "비밀번호 재설정 요청이 전송되었습니다.");
 		m.put("Password reset url is invalid or obsolete", "비밀번호 재설정 URL이 유효하지 않거나 오래되었습니다");
+		m.put("PasswordMinimum Length", "비밀번호 최소 길이");
 		m.put("Paste subscription key here", "구독 키를 여기에 붙여넣으십시오.");
 		m.put("Path containing spaces or starting with dash needs to be quoted", "공백이 포함되거나 대시로 시작하는 경로는 따옴표로 묶어야 합니다.");
 		m.put("Path placeholder", "경로 자리표시자");
@@ -2597,6 +2634,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Please select comments to set unresolved", "미해결 상태로 설정할 댓글을 선택해주세요");
 		m.put("Please select different branches", "다른 브랜치를 선택해주세요");
 		m.put("Please select fields to update", "업데이트할 필드를 선택해주세요");
+		m.put("Please select groups to remove from", "제거할 그룹을 선택하세요");
 		m.put("Please select issues to copy", "복사할 이슈를 선택해주세요");
 		m.put("Please select issues to delete", "삭제할 이슈를 선택해주세요");
 		m.put("Please select issues to edit", "편집할 이슈를 선택해주세요");
@@ -2612,8 +2650,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Please select query watches to delete", "삭제할 쿼리 관찰을 선택해주세요");
 		m.put("Please select revision to create tag from", "태그를 생성할 리비전을 선택해주세요");
 		m.put("Please select revisions to compare", "비교할 리비전을 선택해주세요");
+		m.put("Please select users to convert to service accounts", "서비스 계정으로 변환할 사용자를 선택하세요");
 		m.put("Please select users to disable", "비활성화할 사용자를 선택해주세요");
 		m.put("Please select users to enable", "활성화할 사용자를 선택해주세요");
+		m.put("Please select users to remove from group", "그룹에서 제거할 사용자를 선택하세요");
 		m.put("Please specify file name above before editing content", "내용을 편집하기 전에 위에 파일 이름을 지정해주세요");
 		m.put("Please switch to packages page of a particular project for the instructions", "특정 프로젝트의 패키지 페이지로 이동하여 지침을 확인해주세요");
 		m.put("Please wait...", "잠시 기다려주세요...");
@@ -2862,9 +2902,13 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Remote Url", "원격 URL");
 		m.put("Remove", "제거");
 		m.put("Remove All Queried Agents", "쿼리된 모든 에이전트 제거");
+		m.put("Remove All Queried Users from Group", "그룹에서 조회된 모든 사용자 제거");
 		m.put("Remove Fields", "필드 제거");
 		m.put("Remove From Current Iteration", "현재 반복에서 제거");
 		m.put("Remove Selected Agents", "선택된 에이전트 제거");
+		m.put("Remove Selected Users from Group", "그룹에서 선택된 사용자 제거");
+		m.put("Remove from All Queried Groups", "조회된 모든 그룹에서 제거");
+		m.put("Remove from Selected Groups", "선택된 그룹에서 제거");
 		m.put("Remove from batch", "배치에서 제거");
 		m.put("Remove issue from this iteration", "이 반복에서 이슈 제거");
 		m.put("Remove this assignee", "이 담당자 제거");
@@ -2875,6 +2919,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Removed all queried agents. Type <code>yes</code> below to confirm", "모든 조회된 에이전트를 제거했습니다. 아래에 <code>yes</code>를 입력하여 확인하십시오");
 		m.put("Removed selected agents. Type <code>yes</code> below to confirm", "선택된 에이전트를 제거했습니다. 아래에 <code>yes</code>를 입력하여 확인하십시오");
 		m.put("Rename {0}", "{0} 이름 변경");
+		m.put("Renew Subscription", "구독 갱신");
 		m.put("Renovate CLI Options", "Renovate CLI 옵션");
 		m.put("Renovate JavaScript Config", "Renovate JavaScript 설정");
 		m.put("Reopen", "다시 열기");
@@ -3045,6 +3090,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Select Branch to Revert on", "되돌릴 브랜치 선택");
 		m.put("Select Branch/Tag", "브랜치/태그 선택");
 		m.put("Select Existing", "기존 항목 선택");
+		m.put("Select Job", "작업 선택");
 		m.put("Select Project", "프로젝트 선택");
 		m.put("Select below...", "아래 선택...");
 		m.put("Select iteration to schedule issues into", "이슈를 일정에 추가할 반복 선택");
@@ -3076,6 +3122,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Server URL", "서버 URL");
 		m.put("Server fingerprint", "서버 지문");
 		m.put("Server host", "서버 호스트");
+		m.put("Server is Starting...", "서버 시작 중...");
 		m.put("Server url", "서버 URL");
 		m.put("Service", "서비스");
 		m.put("Service Account", "서비스 계정");
@@ -3131,6 +3178,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Setting has been saved", "설정이 저장되었습니다");
 		m.put("Settings", "설정");
 		m.put("Settings and permissions of parent project will be inherited by this project", "상위 프로젝트의 설정과 권한이 이 프로젝트에 상속됩니다");
+		m.put("Settings saved", "설정이 저장되었습니다");
+		m.put("Settings saved and project redistribution scheduled", "설정이 저장되었으며 프로젝트 재분배가 예약되었습니다");
 		m.put("Settings updated", "설정이 업데이트되었습니다");
 		m.put("Share dashboard", "대시보드 공유");
 		m.put("Share with Groups", "그룹과 공유");
@@ -3198,6 +3247,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Slack Notifications", "Slack 알림");
 		m.put("Smtp Ssl Setting", "Smtp Ssl 설정");
 		m.put("Smtp With Ssl", "Smtp Ssl 사용");
+		m.put("Some builds are {0}", "일부 빌드는 {0} 상태입니다");
 		m.put("Some jobs are hidden due to permission policy", "권한 정책으로 인해 일부 작업이 숨겨져 있습니다");
 		m.put("Some one changed the content you are editing. Reload the page and try again.", "편집 중인 내용이 다른 사람에 의해 변경되었습니다. 페이지를 새로고침하고 다시 시도하세요.");
 		m.put("Some other pull requests are opening to this branch", "이 브랜치로 열려 있는 다른 풀 리퀘스트가 있습니다");
@@ -3612,6 +3662,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"단계는 동일한 노드에서 직렬로 실행되며 동일한 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a>을 공유합니다.");
 		m.put("Stop work", "작업 중지");
 		m.put("Stopwatch Overdue", "스톱워치 초과");
+		m.put("Storage Settings", "스토리지 설정");
 		m.put("Storage file missing", "스토리지 파일 누락");
 		m.put("Storage not found", "스토리지를 찾을 수 없음");
 		m.put("Stored with Git LFS", "Git LFS로 저장됨");
@@ -3632,6 +3683,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Subscription key installed successfully", "구독 키가 성공적으로 설치됨");
 		m.put("Subscription key not applicable: this key is intended to activate a trial subscription", 
 			"구독 키가 적용되지 않음: 이 키는 체험 구독을 활성화하기 위한 것입니다.");
+		m.put("Subscription key not applicable: this key is intended to renew a user based subscription", 
+			"구독 키가 적용되지 않음: 이 키는 사용자 기반 구독을 갱신하기 위한 것입니다");
+		m.put("Subscription key not applicable: this key is intended to renew an unlimited users subscription", 
+			"구독 키가 적용되지 않음: 이 키는 무제한 사용자 구독을 갱신하기 위한 것입니다");
 		m.put("Subscription key not applicable: this key is intended to update licensee of an existing subscription", 
 			"구독 키가 적용되지 않음: 이 키는 기존 구독의 라이센시를 업데이트하기 위한 것입니다.");
 		m.put("Success Rate", "성공률");
@@ -3778,12 +3833,18 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이 설치는 체험 구독을 가지고 있으며 현재 엔터프라이즈 에디션으로 실행 중입니다");
 		m.put("This installation has an active subscription and runs as enterprise edition", "이 설치는 활성 구독을 가지고 있으며 엔터프라이즈 에디션으로 실행됩니다");
 		m.put("This installation has an expired subscription, and runs as community edition", "이 설치는 구독이 만료되었으며 커뮤니티 에디션으로 실행됩니다");
+		m.put("This installation has an unlimited users subscription and is now running as enterprise edition", 
+			"이 설치는 무제한 사용자 구독을 가지고 있으며 현재 엔터프라이즈 에디션으로 실행 중입니다");
+		m.put("This installation's subscription has expired and is now running as the community edition", 
+			"이 설치의 구독이 만료되어 현재 커뮤니티 에디션으로 실행 중입니다");
 		m.put("This is a Git LFS object, but the storage file is missing", "이것은 Git LFS 객체이지만 저장 파일이 누락되었습니다");
 		m.put("This is a built-in role and can not be deleted", "이것은 내장된 역할이며 삭제할 수 없습니다");
 		m.put("This is a disabled service account", "이것은 비활성화된 서비스 계정입니다");
 		m.put("This is a layer cache. To use the cache, add below option to your docker buildx command", 
 			"이것은 레이어 캐시입니다. 캐시를 사용하려면 아래 옵션을 Docker buildx 명령에 추가하세요");
 		m.put("This is a service account for task automation purpose", "이것은 작업 자동화를 위한 서비스 계정입니다");
+		m.put("This is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"이것은 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
 		m.put("This key has already been used by another project", "이 키는 이미 다른 프로젝트에서 사용되었습니다");
 		m.put("This key is associated with {0}, however it is NOT a verified email address of this user", 
 			"이 키는 {0}와 연결되어 있지만 이 사용자의 확인된 이메일 주소가 아닙니다");
@@ -3919,12 +3980,16 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Try EE", "EE 체험하기");
 		m.put("Try Enterprise Edition", "엔터프라이즈 에디션 체험하기");
 		m.put("Twitch", "Twitch");
+		m.put("Two Factor Authentication", "이중 인증");
 		m.put("Two-factor Authentication", "이중 인증");
+		m.put("Two-factor authentication already set up. <a wicket:id=\"requestToSetupAgain\"><wicket:t>Request to set up again", 
+			"이중 인증이 이미 설정되었습니다. <a wicket:id=\"requestToSetupAgain\"><wicket:t>다시 설정 요청");
 		m.put("Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. If you encounter problems, make sure time of OneDev server and your device running TOTP authenticator is in sync", 
 			"이중 인증이 활성화되었습니다. TOTP 인증기에 표시된 암호를 입력하세요. 문제가 발생하면 OneDev 서버와 TOTP 인증기를 실행 중인 장치의 시간이 동기화되어 있는지 확인하세요");
 		m.put("Two-factor authentication is enforced for your account to enhance security. Please follow below procedure to set it up", 
 			"보안을 강화하기 위해 계정에 이중 인증이 적용됩니다. 아래 절차를 따라 설정하세요");
 		m.put("Two-factor authentication is now configured", "이중 인증이 이제 구성되었습니다");
+		m.put("Two-factor authentication not enabled", "이중 인증이 활성화되지 않음");
 		m.put("Type", "유형");
 		m.put("Type <code>yes</code> below to cancel all queried builds", "아래에 <code>yes</code>를 입력하여 모든 조회된 빌드를 취소하세요");
 		m.put("Type <code>yes</code> below to cancel selected builds", "아래에 <code>yes</code>를 입력하여 선택된 빌드를 취소하세요");
@@ -3953,6 +4018,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Type <code>yes</code> below to pause all queried agents", "아래에 <code>yes</code>를 입력하여 모든 조회된 에이전트를 일시 중지하세요");
 		m.put("Type <code>yes</code> below to re-run all queried builds", "아래에 <code>yes</code>를 입력하여 모든 조회된 빌드를 다시 실행하세요");
 		m.put("Type <code>yes</code> below to re-run selected builds", "아래에 <code>yes</code>를 입력하여 선택된 빌드를 다시 실행하세요");
+		m.put("Type <code>yes</code> below to remove all queried users from group", "그룹에서 조회된 모든 사용자를 제거하려면 아래에 <code>yes</code>를 입력하세요");
+		m.put("Type <code>yes</code> below to remove from all queried groups", "조회된 모든 그룹에서 제거하려면 아래에 <code>yes</code>를 입력하세요");
+		m.put("Type <code>yes</code> below to remove from selected groups", "선택된 그룹에서 제거하려면 아래에 <code>yes</code>를 입력하세요");
+		m.put("Type <code>yes</code> below to remove selected users from group", "그룹에서 선택된 사용자를 제거하려면 아래에 <code>yes</code>를 입력하세요");
 		m.put("Type <code>yes</code> below to restart all queried agents", "아래에 <code>yes</code>를 입력하여 모든 조회된 에이전트를 재시작하세요");
 		m.put("Type <code>yes</code> below to restart selected agents", "아래에 <code>yes</code>를 입력하여 선택된 에이전트를 재시작하세요");
 		m.put("Type <code>yes</code> below to resume all queried agents", "아래에 <code>yes</code>를 입력하여 모든 조회된 에이전트를 다시 시작하세요");
@@ -4094,6 +4163,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("User SSH Key Attribute", "사용자 SSH 키 속성");
 		m.put("User Search Bases", "사용자 검색 기준");
 		m.put("User Search Filter", "사용자 검색 필터");
+		m.put("User added to group", "사용자가 그룹에 추가되었습니다");
 		m.put("User authorizations updated", "사용자 인증 업데이트됨");
 		m.put("User authorized", "사용자 인증됨");
 		m.put("User avatar will be requested by appending a hash to this url", "이 URL에 해시를 추가하여 사용자 아바타 요청");
@@ -4102,6 +4172,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("User name", "사용자 이름");
 		m.put("User name already used by another account", "사용자 이름이 이미 다른 계정에서 사용 중입니다");
 		m.put("Users", "사용자들");
+		m.put("Users converted to service accounts successfully", "사용자가 서비스 계정으로 성공적으로 변환되었습니다");
 		m.put("Users deleted successfully", "사용자가 성공적으로 삭제되었습니다");
 		m.put("Users disabled successfully", "사용자가 성공적으로 비활성화되었습니다");
 		m.put("Users enabled successfully", "사용자가 성공적으로 활성화되었습니다");
@@ -4220,15 +4291,18 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Whether or not use force option to overwrite changes in case ref updating can not be fast-forwarded", 
 			"참조 업데이트가 빠르게 진행될 수 없는 경우 변경 사항을 덮어쓰도록 강제 옵션을 사용할지 여부");
 		m.put("Whether or not user can remove own account", "사용자가 자신의 계정을 제거할 수 있는지 여부");
+		m.put("Whether the password must contain at least one lowercase letter", "비밀번호에 최소한 하나의 소문자가 포함되어야 하는지 여부");
+		m.put("Whether the password must contain at least one number", "비밀번호에 최소한 하나의 숫자가 포함되어야 하는지 여부");
+		m.put("Whether the password must contain at least one special character", "비밀번호에 최소한 하나의 특수 문자가 포함되어야 하는지 여부");
+		m.put("Whether the password must contain at least one uppercase letter", "비밀번호에 최소한 하나의 대문자가 포함되어야 하는지 여부");
 		m.put("Whole Word", "전체 단어");
 		m.put("Widget", "위젯");
 		m.put("Widget Tab", "위젯 탭");
 		m.put("Widget Timesheet Setting", "위젯 타임시트 설정");
+		m.put("Will be prompted to set up two-factor authentication upon next login", "다음 로그인 시 이중 인증 설정을 요청받게 됩니다");
 		m.put("Will be transcoded to UTF-8", "UTF-8로 트랜스코딩됩니다");
 		m.put("Window", "창");
 		m.put("Window Memory", "창 메모리");
-		m.put("With current number of users ({0}) in group \"{1}\", the subscription will be active until <b>{2}</b>", 
-			"현재 그룹 \"{1}\"의 사용자 수 ({0})로 구독은 <b>{2}</b>까지 활성화됩니다");
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"현재 사용자 수 ({0})로 구독은 <b>{1}</b>까지 활성화됩니다");
 		m.put("Workflow reconciliation completed", "워크플로우 조정 완료");
@@ -4498,41 +4572,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Add user to group...", "그룹에 사용자 추가...");
-		m.put("Added to group", "그룹에 추가됨");
-		m.put("Audit", "감사");
-		m.put("Audit Log", "감사 로그");
-		m.put("Audit Setting", "감사 설정");
-		m.put("Audit log will be preserved for the specified number of days. This setting applies to all audit events, including system level and project level", 
-			"감사 로그는 지정된 일수 동안 보존됩니다. 이 설정은 시스템 수준 및 프로젝트 수준을 포함한 모든 감사 이벤트에 적용됩니다");
-		m.put("Builds are {0}", "빌드는 {0} 상태입니다");
-		m.put("Events", "이벤트");
-		m.put("Filter actions", "작업 필터링");
-		m.put("Filter date range", "날짜 범위 필터링");
-		m.put("Filter users", "사용자 필터링");
-		m.put("No audits", "감사 없음");
-		m.put("No groups to remove from", "제거할 그룹이 없습니다");
-		m.put("No jobs found", "작업이 없습니다");
-		m.put("No users to remove from group", "그룹에서 제거할 사용자가 없습니다");
-		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
-			"여기에는 시스템 수준 감사 이벤트만 표시됩니다. 특정 프로젝트의 감사 이벤트를 보려면 프로젝트 감사 로그 페이지를 방문하세요");
-		m.put("Please select groups to remove from", "제거할 그룹을 선택하세요");
-		m.put("Please select users to remove from group", "그룹에서 제거할 사용자를 선택하세요");
-		m.put("Remove All Queried Users from Group", "그룹에서 조회된 모든 사용자 제거");
-		m.put("Remove Selected Users from Group", "그룹에서 선택된 사용자 제거");
-		m.put("Remove from All Queried Groups", "조회된 모든 그룹에서 제거");
-		m.put("Remove from Selected Groups", "선택된 그룹에서 제거");
-		m.put("Select Job", "작업 선택");
-		m.put("Server is Starting...", "서버 시작 중...");
-		m.put("Settings saved", "설정이 저장되었습니다");
-		m.put("Settings saved and project redistribution scheduled", "설정이 저장되었으며 프로젝트 재분배가 예약되었습니다");
-		m.put("Some builds are {0}", "일부 빌드는 {0} 상태입니다");
-		m.put("Storage Settings", "스토리지 설정");
-		m.put("Type <code>yes</code> below to remove all queried users from group", "그룹에서 조회된 모든 사용자를 제거하려면 아래에 <code>yes</code>를 입력하세요");
-		m.put("Type <code>yes</code> below to remove from all queried groups", "조회된 모든 그룹에서 제거하려면 아래에 <code>yes</code>를 입력하세요");
-		m.put("Type <code>yes</code> below to remove from selected groups", "선택된 그룹에서 제거하려면 아래에 <code>yes</code>를 입력하세요");
-		m.put("Type <code>yes</code> below to remove selected users from group", "그룹에서 선택된 사용자를 제거하려면 아래에 <code>yes</code>를 입력하세요");
-		m.put("User added to group", "사용자가 그룹에 추가되었습니다");
 	}
 		
 	@Override
