@@ -84,7 +84,8 @@ public class DefaultReviewedDiffManager extends BaseEntityManager<ReviewedDiff>
 
 	@Listen
 	public void on(SystemStopping event) {
-		taskScheduler.unschedule(taskId);
+		if (taskId != null) 
+			taskScheduler.unschedule(taskId);
 	}
 
 	@Override
