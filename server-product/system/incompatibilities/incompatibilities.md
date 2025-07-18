@@ -1,3 +1,9 @@
+# 12.0.1
+
+### RESTful API
+
+Only authenticated users can now query user id and role id
+
 # 11.11.0
 
 ### RESTful API
