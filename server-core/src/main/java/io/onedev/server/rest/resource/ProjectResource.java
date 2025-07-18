@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.Id;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -397,6 +398,10 @@ public class ProjectResource {
 
 		private static final long serialVersionUID = 1L;
 		
+		@Api(order=50)
+		@Id
+		private Long id;
+		
 		@Api(order = 100, description="Represents the parent project of this project. Remove this property if "
 			+ "the project is a root project when create/update the project. May be null")
 		private Long parentId;
@@ -443,6 +448,14 @@ public class ProjectResource {
 		@Api(order = 900)
 		private CodeAnalysisSetting codeAnalysisSetting;
 		
+		public Long getId() {
+			return id;
+		}
+
+		public void setId(Long id) {
+			this.id = id;
+		}
+
 		public Long getParentId() {
 			return parentId;
 		}
@@ -581,6 +594,7 @@ public class ProjectResource {
 
 		public static ProjectData from(Project project) {
 			ProjectData data = new ProjectData();
+			data.setId(project.getId());
 			data.setParentId(Project.idOf(project.getParent()));
 			data.setForkedFromId(Project.idOf(project.getForkedFrom()));
 			data.setName(project.getName());
