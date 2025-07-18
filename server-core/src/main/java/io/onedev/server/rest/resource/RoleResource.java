@@ -17,6 +17,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
@@ -78,6 +79,9 @@ public class RoleResource {
 	@Path("/ids/{name}")
 	@GET
 	public Long getRoleId(@PathParam("name") String name) {
+		if (SecurityUtils.getAuthUser() == null)
+			throw new UnauthenticatedException();
+
 		var role = roleManager.find(name);
 		if (role != null)
 			return role.getId();

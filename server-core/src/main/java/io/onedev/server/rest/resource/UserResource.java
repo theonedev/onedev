@@ -32,6 +32,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authc.credential.PasswordService;
+import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
@@ -314,6 +315,9 @@ public class UserResource {
 	@Path("/ids/{name}")
 	@GET
 	public Long getUserId(@PathParam("name") @Api(description = "Login name of user") String name) {
+		if (SecurityUtils.getAuthUser() == null)
+			throw new UnauthenticatedException();
+
 		var user = userManager.findByName(name);
 		if (user != null)
 			return user.getId();

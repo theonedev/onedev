@@ -16,6 +16,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
@@ -48,8 +49,9 @@ public class LabelSpecResource {
 	@Path("/{labelSpecId}")
     @GET
     public LabelSpec getSpec(@PathParam("labelSpecId") Long labelSpecId) {
-    	if (!SecurityUtils.isAdministrator()) 
-			throw new UnauthorizedException();
+		if (SecurityUtils.getAuthUser() == null)
+			throw new UnauthenticatedException();
+		
     	return labelSpecManager.load(labelSpecId);
     }
 	
@@ -58,9 +60,9 @@ public class LabelSpecResource {
     public List<LabelSpec> querySpecs(@QueryParam("name") String name, 
 								 @QueryParam("offset") @Api(example="0") int offset, 
 								 @QueryParam("count") @Api(example="100") int count) {
-		if (!SecurityUtils.isAdministrator())
-			throw new UnauthorizedException();
-
+		if (SecurityUtils.getAuthUser() == null)
+			throw new UnauthenticatedException();
+						
 		EntityCriteria<LabelSpec> criteria = EntityCriteria.of(LabelSpec.class);
 		if (name != null) 
 			criteria.add(Restrictions.ilike("name", name.replace('*', '%'), MatchMode.EXACT));
