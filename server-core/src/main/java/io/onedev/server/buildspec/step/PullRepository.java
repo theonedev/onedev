@@ -58,8 +58,7 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
 
 @Editable(order=1070, name="Pull from Remote", group=StepGroup.REPOSITORY_SYNC, description=""
-		+ "This step pulls specified refs from remote. For security reason, it is only allowed "
-		+ "to run from default branch")
+		+ "This step pulls specified refs from remote")
 public class PullRepository extends SyncRepository {
 
 	private static final long serialVersionUID = 1L;
