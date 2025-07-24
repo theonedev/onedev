@@ -13,6 +13,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotEmpty;
@@ -46,7 +47,7 @@ public class TriggerJobResource {
 	private static final String DESCRIPTION = "Trigger specified job. Query parameters other than listed below "
 			+ "will be interpreted as job params";
 	
-	private static final String REF_DESCRIPTION = "Either branch or tag should be specified, but not both";
+	private static final String REF_DESCRIPTION = "Specify branch or tag to be triggered against. If none specified, default branch will be used";
 	
 	private static final String ACCESS_TOKEN_DESCRIPTION = "OneDev access token with permission to trigger the job";
 	
@@ -67,8 +68,8 @@ public class TriggerJobResource {
 	@GET
     public Long triggerJobViaGet(
     		@Api(description="Path of the project") @QueryParam(PARAM_PROJECT) @NotEmpty String projectPath, 
-    		@Api(description=REF_DESCRIPTION) @QueryParam(PARAM_BRANCH) String branch, 
-    		@Api(description=REF_DESCRIPTION) @QueryParam(PARAM_TAG) String tag, 
+    		@Api(description=REF_DESCRIPTION) @QueryParam(PARAM_BRANCH) @Nullable String branch, 
+    		@Api(description=REF_DESCRIPTION) @QueryParam(PARAM_TAG) @Nullable String tag, 
     		@QueryParam(PARAM_JOB) @NotEmpty String job, 
     		@Api(description=ACCESS_TOKEN_DESCRIPTION) @QueryParam(PARAM_ACCESS_TOKEN) @NotEmpty String accessToken, 
     		@Context UriInfo uriInfo) {
@@ -79,15 +80,15 @@ public class TriggerJobResource {
 	@POST
     public Long triggerJobViaPost(
     		@Api(description="Path of the project") @QueryParam(PARAM_PROJECT) @NotEmpty String projectPath, 
-    		@Api(description=REF_DESCRIPTION) @QueryParam(PARAM_BRANCH) String branch, 
-    		@Api(description=REF_DESCRIPTION) @QueryParam(PARAM_TAG) String tag, 
+    		@Api(description=REF_DESCRIPTION) @QueryParam(PARAM_BRANCH) @Nullable String branch, 
+    		@Api(description=REF_DESCRIPTION) @QueryParam(PARAM_TAG) @Nullable String tag, 
     		@QueryParam(PARAM_JOB) @NotEmpty String job,
 			@Api(description=ACCESS_TOKEN_DESCRIPTION) @QueryParam(PARAM_ACCESS_TOKEN) @NotEmpty String accessToken, 
     		@Context UriInfo uriInfo) {
 		return triggerJob(projectPath, branch, tag, job, accessToken, uriInfo);
     }
 
-    private Long triggerJob(String projectPath, String branch, String tag, String job,
+    private Long triggerJob(String projectPath, @Nullable String branch, @Nullable String tag, String job,
 							String accessTokenValue, UriInfo uriInfo) {
 		Project project = projectManager.findByPath(projectPath);
 		if (project == null)
@@ -102,17 +103,16 @@ public class TriggerJobResource {
 			if (!SecurityUtils.canRunJob(project, job))		
 				throw new UnauthorizedException();
 
-			if (StringUtils.isBlank(branch) && StringUtils.isBlank(tag)) 
-				throw new InvalidParamException("Either branch or tag should be specified");
-				
 			if (StringUtils.isNotBlank(branch) && StringUtils.isNotBlank(tag)) 
 				throw new InvalidParamException("Either branch or tag should be specified, but not both");
 			
 			String refName;
 			if (branch != null)
 				refName = GitUtils.branch2ref(branch);
-			else 
+			else if (tag != null)
 				refName = GitUtils.tag2ref(tag);
+			else
+				refName = GitUtils.branch2ref(project.getDefaultBranch());
 			
 			RevCommit commit = project.getRevCommit(refName, false);
 			if (commit == null)
