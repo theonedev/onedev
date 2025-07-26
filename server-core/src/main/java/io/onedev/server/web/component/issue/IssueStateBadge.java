@@ -51,7 +51,7 @@ public class IssueStateBadge extends Label {
 			String fontColor = ColorUtils.isLight(stateSpec.getColor())?"#333":"#f9f9f9";
 			String style = String.format("background-color: %s; color: %s;", stateSpec.getColor(), fontColor);
 			tag.put("style", style);
-			tag.put("title", "State");
+			tag.put("data-tippy-content", "State");
 		}
 	}
 

@@ -355,7 +355,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 					} 
 					valueContainer.add(label);
 				}
-				valueContainer.add(AttributeAppender.append("title", getField().getName()));
+				valueContainer.add(AttributeAppender.append("data-tippy-content", getField().getName()));
 			}
 			fragment.add(valuesView);
 			link.add(fragment);
@@ -371,7 +371,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 			displayValue = HtmlEscape.escapeHtml5(displayValue);
 			Label label = new Label("content", "<i class='mb-2 mr-2'>" + displayValue + "</i>");
 			label.setEscapeModelStrings(false);
-			label.add(AttributeAppender.append("title", getField().getName()));
+			label.add(AttributeAppender.append("data-tippy-content", getField().getName()));
 			link.add(label);
 			add(AttributeAppender.append("class", "undefined"));
 		} else {
