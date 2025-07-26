@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -37,6 +38,9 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.http.WebRequest;
+import org.apache.wicket.request.http.WebResponse;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
@@ -85,6 +89,8 @@ import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.DeleteCallback;
 
 public abstract class IssuePrimaryPanel extends Panel {
+
+	private static final String COOKIE_LINK_ISSUE_TAB = "linkIssue.tab";
 
 	private final IModel<List<LinkSpec>> linkSpecsModel = new LoadableDetachableModel<>() {
 		@Override
@@ -444,28 +450,63 @@ public abstract class IssuePrimaryPanel extends Panel {
 					var form = new Form<Void>("form");
 					frag.add(form);
 
+					// Read cookie to determine which tab to show initially
+					WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+					Cookie cookie = request.getCookie(COOKIE_LINK_ISSUE_TAB);
+					String selectedTab = cookie != null ? cookie.getValue() : "create";
+					
 					List<Tab> tabs = new ArrayList<>();
 					
-					tabs.add(new AjaxActionTab(Model.of(_T("Create New"))) {
+					AjaxActionTab createNewTab = new AjaxActionTab(Model.of(_T("Create New"))) {
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 							issuePopulator = newCreateNewPanel("tabContent");
 							form.replace(issuePopulator);
 							target.add(issuePopulator);
+							
+							// Save cookie
+							WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+							Cookie cookie = new Cookie(COOKIE_LINK_ISSUE_TAB, "create");
+							cookie.setPath("/");
+							cookie.setMaxAge(Integer.MAX_VALUE);
+							response.addCookie(cookie);
 						}
-					});
+					};
+					tabs.add(createNewTab);
 					
-					tabs.add(new AjaxActionTab(Model.of(_T("Select Existing"))) {
+					AjaxActionTab selectExistingTab = new AjaxActionTab(Model.of(_T("Select Existing"))) {
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
 							issuePopulator = newLinkExistingPanel("tabContent");
 							form.replace(issuePopulator);
 							target.add(issuePopulator);
+							
+							// Save cookie
+							WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+							Cookie cookie = new Cookie(COOKIE_LINK_ISSUE_TAB, "select");
+							cookie.setPath("/");
+							cookie.setMaxAge(Integer.MAX_VALUE);
+							response.addCookie(cookie);
 						}
-					});
+					};
+					tabs.add(selectExistingTab);
+					
+					// Set the active tab based on cookie
+					if ("select".equals(selectedTab)) {
+						selectExistingTab.setSelected(true);
+					} else {
+						createNewTab.setSelected(true);
+					}
 					
 					form.add(new Tabbable("tabs", tabs));
-					form.add(issuePopulator = newCreateNewPanel("tabContent"));
+					
+					// Set initial tab content based on cookie
+					if ("select".equals(selectedTab)) {
+						issuePopulator = newLinkExistingPanel("tabContent");
+					} else {
+						issuePopulator = newCreateNewPanel("tabContent");
+					}
+					form.add(issuePopulator);
 
 					form.add(new Label("title", MessageFormat.format(_T("Add {0}"), linkName)));
 
