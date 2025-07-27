@@ -1,23 +1,28 @@
 package io.onedev.server.mcp;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.onedev.commons.utils.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import io.onedev.server.util.IOUtils;
 
 /**
  * Example MCP (Model Context Protocol) Server Servlet
@@ -30,16 +35,19 @@ import java.util.concurrent.ConcurrentHashMap;
  * 
  * The MCP server provides access to OneDev server information and basic operations.
  */
+@Singleton 
 public class MCPServerServlet extends HttpServlet {
     
     private static final Logger logger = LoggerFactory.getLogger(MCPServerServlet.class);
     
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
     
     // In-memory storage for demo purposes
     private final Map<String, JsonNode> resources = new ConcurrentHashMap<>();
     
-    public MCPServerServlet() {
+    @Inject
+    public MCPServerServlet(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         // Initialize with some example resources
         initializeExampleResources();
     }
@@ -71,27 +79,29 @@ public class MCPServerServlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         
         try {
-            // Read request body
-            StringBuilder requestBody = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    requestBody.append(line);
-                }
-            }
-            
-            JsonNode requestNode = objectMapper.readTree(requestBody.toString());
+            var os = new ByteArrayOutputStream();
+            try (var is = request.getInputStream()) {
+                IOUtils.copy(is, os, IOUtils.BUFFER_SIZE);
+            }                    
+
+            System.out.println(os.toString(StandardCharsets.UTF_8));
+                        
+            JsonNode requestNode = objectMapper.readTree(os.toString(StandardCharsets.UTF_8));
             String method = requestNode.get("method").asText();
             JsonNode params = requestNode.get("params");
-            String id = requestNode.get("id").asText();
+            Long id = requestNode.has("id")?requestNode.get("id").asLong():null;
             
             JsonNode result = handleRequest(method, params);
             
             // Send response
             ObjectNode responseNode = objectMapper.createObjectNode();
             responseNode.put("jsonrpc", "2.0");
-            responseNode.put("id", id);
+            
+            if (id != null) 
+                responseNode.put("id", id);
             responseNode.set("result", result);
+            
+            System.out.println(objectMapper.writeValueAsString(responseNode));
             
             try (PrintWriter writer = response.getWriter()) {
                 writer.write(objectMapper.writeValueAsString(responseNode));
@@ -107,6 +117,8 @@ public class MCPServerServlet extends HttpServlet {
         switch (method) {
             case "initialize":
                 return handleInitialize(params);
+            case "notifications/initialized":
+                return handleNotificationInitialized(params);
             case "resources/list":
                 return handleListResources(params);
             case "resources/read":
@@ -123,10 +135,22 @@ public class MCPServerServlet extends HttpServlet {
     private JsonNode handleInitialize(JsonNode params) {
         ObjectNode result = objectMapper.createObjectNode();
         result.put("protocolVersion", "2024-11-05");
-        result.put("capabilities", objectMapper.createObjectNode());
-        result.put("serverInfo", objectMapper.createObjectNode()
+        
+        // Declare server capabilities
+        ObjectNode capabilities = objectMapper.createObjectNode();
+        capabilities.set("tools", objectMapper.createObjectNode());
+        capabilities.set("resources", objectMapper.createObjectNode());
+        result.set("capabilities", capabilities);
+        
+        result.set("serverInfo", objectMapper.createObjectNode()
                 .put("name", "OneDev MCP Server")
                 .put("version", "1.0.0"));
+        return result;
+    }
+    
+    private JsonNode handleNotificationInitialized(JsonNode params) {
+        ObjectNode result = objectMapper.createObjectNode();
+        result.put("status", "initialized");
         return result;
     }
     
@@ -170,20 +194,34 @@ public class MCPServerServlet extends HttpServlet {
         ObjectNode serverStatusTool = objectMapper.createObjectNode();
         serverStatusTool.put("name", "getServerStatus");
         serverStatusTool.put("description", "Get the current status of the OneDev server");
-        serverStatusTool.set("inputSchema", objectMapper.createObjectNode());
+        
+        // Input schema for getServerStatus 
+        ObjectNode serverStatusInputSchema = objectMapper.createObjectNode();
+        serverStatusInputSchema.put("type", "object");
+        ObjectNode properties = objectMapper.createObjectNode();
+        serverStatusInputSchema.set("properties", properties);
+        serverStatusTool.set("inputSchema", serverStatusInputSchema);
+        
         toolsArray.add(serverStatusTool);
         
         ObjectNode createResourceTool = objectMapper.createObjectNode();
         createResourceTool.put("name", "createResource");
         createResourceTool.put("description", "Create a new resource");
-        ObjectNode inputSchema = objectMapper.createObjectNode();
-        inputSchema.put("type", "object");
-        ObjectNode properties = objectMapper.createObjectNode();
-        properties.put("uri", objectMapper.createObjectNode().put("type", "string"));
-        properties.put("content", objectMapper.createObjectNode().put("type", "object"));
-        inputSchema.set("properties", properties);
-        inputSchema.set("required", objectMapper.createArrayNode().add("uri").add("content"));
-        createResourceTool.set("inputSchema", inputSchema);
+        
+        // Input schema for createResource
+        ObjectNode createResourceInputSchema = objectMapper.createObjectNode();
+        createResourceInputSchema.put("type", "object");
+        properties = objectMapper.createObjectNode();
+        properties.set("uri", objectMapper.createObjectNode()
+                .put("type", "string")
+                .put("description", "URI identifier for the new resource"));
+        properties.set("content", objectMapper.createObjectNode()
+                .put("type", "object")
+                .put("description", "Content object to store in the resource"));
+        createResourceInputSchema.set("properties", properties);
+        createResourceInputSchema.set("required", objectMapper.createArrayNode().add("uri").add("content"));
+        createResourceTool.set("inputSchema", createResourceInputSchema);
+                        
         toolsArray.add(createResourceTool);
         
         ObjectNode result = objectMapper.createObjectNode();
@@ -194,23 +232,35 @@ public class MCPServerServlet extends HttpServlet {
     private JsonNode handleCallTool(JsonNode params) {
         String name = params.get("name").asText();
         JsonNode arguments = params.get("arguments");
-        
+
+        JsonNode toolResult;
         switch (name) {
             case "getServerStatus":
-                return handleGetServerStatus(arguments);
+                toolResult = handleGetServerStatus(arguments);
+                break;
             case "createResource":
-                return handleCreateResource(arguments);
+                toolResult = handleCreateResource(arguments);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown tool: " + name);
         }
+        
+        // Format the response according to MCP specification
+        ObjectNode result = objectMapper.createObjectNode();
+        ArrayNode contentArray = objectMapper.createArrayNode();
+        
+        ObjectNode contentItem = objectMapper.createObjectNode();
+        contentItem.put("type", "text");
+        contentItem.put("text", toolResult.toString());
+        contentArray.add(contentItem);
+        
+        result.set("content", contentArray);
+        return result;
     }
-    
+
     private JsonNode handleGetServerStatus(JsonNode arguments) {
         ObjectNode result = objectMapper.createObjectNode();
         result.put("status", "running");
-        result.put("uptime", System.currentTimeMillis());
-        result.put("memoryUsage", Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
-        result.put("totalMemory", Runtime.getRuntime().totalMemory());
         return result;
     }
     
@@ -251,65 +301,10 @@ public class MCPServerServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        response.setContentType("text/html");
-        response.setCharacterEncoding("UTF-8");
-        
-        try (PrintWriter writer = response.getWriter()) {
-            writer.write("<!DOCTYPE html>\n" +
-                "<html>\n" +
-                "<head>\n" +
-                "    <title>OneDev MCP Server</title>\n" +
-                "    <style>\n" +
-                "        body { font-family: Arial, sans-serif; margin: 40px; }\n" +
-                "        .container { max-width: 800px; margin: 0 auto; }\n" +
-                "        .endpoint { background: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 5px; }\n" +
-                "        .method { font-weight: bold; color: #0066cc; }\n" +
-                "        .description { margin-top: 10px; color: #666; }\n" +
-                "    </style>\n" +
-                "</head>\n" +
-                "<body>\n" +
-                "    <div class=\"container\">\n" +
-                "        <h1>OneDev MCP Server</h1>\n" +
-                "        <p>This is an example Model Context Protocol (MCP) server for OneDev.</p>\n" +
-                "        \n" +
-                "        <div class=\"endpoint\">\n" +
-                "            <div class=\"method\">POST /mcp</div>\n" +
-                "            <div class=\"description\">\n" +
-                "                Main MCP endpoint that handles all protocol requests including:\n" +
-                "                <ul>\n" +
-                "                    <li>initialize - Initialize the MCP connection</li>\n" +
-                "                    <li>resources/list - List available resources</li>\n" +
-                "                    <li>resources/read - Read a specific resource</li>\n" +
-                "                    <li>tools/list - List available tools</li>\n" +
-                "                    <li>tools/call - Call a specific tool</li>\n" +
-                "                </ul>\n" +
-                "            </div>\n" +
-                "        </div>\n" +
-                "        \n" +
-                "        <h2>Available Resources</h2>\n" +
-                "        <ul>\n" +
-                "            <li><code>server:info</code> - Basic server information</li>\n" +
-                "            <li><code>server:config</code> - Server configuration</li>\n" +
-                "        </ul>\n" +
-                "        \n" +
-                "        <h2>Available Tools</h2>\n" +
-                "        <ul>\n" +
-                "            <li><code>getServerStatus</code> - Get current server status</li>\n" +
-                "            <li><code>createResource</code> - Create a new resource</li>\n" +
-                "        </ul>\n" +
-                "        \n" +
-                "        <h2>Example Request</h2>\n" +
-                "        <pre>\n" +
-                "{\n" +
-                "  \"jsonrpc\": \"2.0\",\n" +
-                "  \"id\": 1,\n" +
-                "  \"method\": \"resources/list\",\n" +
-                "  \"params\": {}\n" +
-                "}\n" +
-                "        </pre>\n" +
-                "    </div>\n" +
-                "</body>\n" +
-                "</html>");
+        response.setContentType("text/plain");
+        try (var os = response.getOutputStream()) {
+            os.println("OneDev MCP server");
         }
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 } 

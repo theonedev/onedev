@@ -1,5 +1,22 @@
 package io.onedev.server.product;
 
+import java.io.File;
+import java.util.EnumSet;
+
+import javax.inject.Inject;
+import javax.servlet.DispatcherType;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
+
+import org.apache.shiro.web.env.EnvironmentLoader;
+import org.apache.shiro.web.env.EnvironmentLoaderListener;
+import org.apache.shiro.web.servlet.ShiroFilter;
+import org.apache.wicket.protocol.http.WicketServlet;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.servlet.ServletContainer;
+
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.OneDev;
 import io.onedev.server.agent.ServerSocketServlet;
@@ -11,26 +28,12 @@ import io.onedev.server.git.hook.GitPreReceiveCallback;
 import io.onedev.server.jetty.ClasspathAssetServlet;
 import io.onedev.server.jetty.FileAssetServlet;
 import io.onedev.server.jetty.ServletConfigurator;
+import io.onedev.server.mcp.MCPServerServlet;
 import io.onedev.server.security.CorsFilter;
 import io.onedev.server.security.DefaultWebEnvironment;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.img.ImageScope;
 import io.onedev.server.web.websocket.WebSocketManager;
-import org.apache.shiro.web.env.EnvironmentLoader;
-import org.apache.shiro.web.env.EnvironmentLoaderListener;
-import org.apache.shiro.web.servlet.ShiroFilter;
-import org.apache.wicket.protocol.http.WicketServlet;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.glassfish.jersey.servlet.ServletContainer;
-
-import javax.inject.Inject;
-import javax.servlet.DispatcherType;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
-import java.io.File;
-import java.util.EnumSet;
 
 public class ProductServletConfigurator implements ServletConfigurator {
 
@@ -57,13 +60,16 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	private final WebSocketManager webSocketManager;
 	
 	private final ServerSocketServlet serverServlet;
+
+	private final MCPServerServlet mcpServerServlet;
 	
 	@Inject
 	public ProductServletConfigurator(ShiroFilter shiroFilter, CorsFilter corsFilter,
 									  GitFilter gitFilter, GitLfsFilter gitLfsFilter, GitPreReceiveCallback preReceiveServlet,
 									  GitPostReceiveCallback postReceiveServlet, WicketServlet wicketServlet,
 									  WebSocketManager webSocketManager, ServletContainer jerseyServlet,
-									  ServerSocketServlet serverServlet, GoGetFilter goGetFilter) {
+									  ServerSocketServlet serverServlet, GoGetFilter goGetFilter, 
+									  MCPServerServlet mcpServerServlet) {
 		this.corsFilter = corsFilter;
 		this.shiroFilter = shiroFilter;
         this.gitFilter = gitFilter;
@@ -75,6 +81,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		this.jerseyServlet = jerseyServlet;
 		this.serverServlet = serverServlet;
 		this.goGetFilter = goGetFilter;
+		this.mcpServerServlet = mcpServerServlet;
 	}
 	
 	@Override
@@ -159,6 +166,10 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 		context.addServlet(new ServletHolder(jerseyServlet), "/~api/*");	
 		context.addServlet(new ServletHolder(serverServlet), "/~server");
+
+		var mcpServletHolder = new ServletHolder(mcpServerServlet);
+		context.addServlet(mcpServletHolder, "/~mcp");
+		context.addServlet(mcpServletHolder, "/~mcp/*");
 	}
 	
 }
