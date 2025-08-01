@@ -12,6 +12,8 @@ import io.onedev.server.jetty.ServerConfigurator;
 
 public class ProductConfigurator implements ServerConfigurator {
 
+	private static final int REQUEST_HEADER_SIZE = 16*1024;
+	
 	private ServerConfig serverConfig;
 	
 	@Inject
@@ -25,7 +27,8 @@ public class ProductConfigurator implements ServerConfigurator {
 		connector.setHost(serverConfig.getHttpHost());
 		connector.setPort(serverConfig.getHttpPort());
 		HttpConfiguration configuration = new HttpConfiguration();
-		configuration.setRequestHeaderSize(16*1024);
+		configuration.setRequestHeaderSize(REQUEST_HEADER_SIZE);
+		configuration.setSendServerVersion(false);
 		connector.addConnectionFactory(new HttpConnectionFactory(configuration));
 		server.addConnector(connector);
 	}
