@@ -36,11 +36,7 @@ public abstract class ServerSideStep extends Step {
 	protected PatternSet getFiles() {
 		return new PatternSet(new HashSet<>(), new HashSet<>());
 	}
-	
-	public boolean requireCommitIndex() {
-		return false;
-	}
-	
+		
 	public abstract ServerStepResult run(Long buildId, File inputDir, TaskLogger logger);
 
 	@Override

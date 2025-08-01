@@ -1,5 +1,21 @@
 package io.onedev.server.plugin.report.jacoco;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.constraints.NotEmpty;
+
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -10,24 +26,16 @@ import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CoverageStatus;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.coverage.*;
-import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.plugin.report.coverage.Coverage;
+import io.onedev.server.plugin.report.coverage.CoverageReport;
+import io.onedev.server.plugin.report.coverage.CoverageStats;
+import io.onedev.server.plugin.report.coverage.FileCoverage;
+import io.onedev.server.plugin.report.coverage.GroupCoverage;
+import io.onedev.server.plugin.report.coverage.PublishCoverageReportStep;
 import io.onedev.server.util.XmlUtils;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
-
-import javax.validation.constraints.NotEmpty;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Editable(order=10000, group=StepGroup.PUBLISH, name="JaCoCo Coverage Report")
 public class PublishJacocoReportStep extends PublishCoverageReportStep {
@@ -55,11 +63,6 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 	}
 
 	@Override
-	public boolean requireCommitIndex() {
-		return true;
-	}
-
-	@Override
 	protected CoverageReport process(Build build, File inputDir, TaskLogger logger) {
 		int baseLen = inputDir.getAbsolutePath().length() + 1;
 		SAXReader reader = new SAXReader();
@@ -70,7 +73,9 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 		
 		Map<String, Map<Integer, CoverageStatus>> coverageStatuses = new HashMap<>();
 		
-		CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
+		var projectManager = OneDev.getInstance(ProjectManager.class);
+		var repository = projectManager.getRepository(build.getProject().getId());
+		var blobPaths = GitUtils.getBlobPaths(repository, build.getCommitId());
 		for (File file: getPatternSet().listFiles(inputDir)) {
 			String relativePath = file.getAbsolutePath().substring(baseLen);
 			logger.log("Processing JaCoCo report '" + relativePath + "'...");
@@ -86,8 +91,13 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 					for (Element fileElement: packageElement.elements("sourcefile")) {
 						String fileName = fileElement.attributeValue("name");
 						var fileCoverageInfo = getCoverageInfo(fileElement);
-						String blobPath = searchManager.findBlobPathBySuffix(build.getProject(), build.getCommitId(), 
-								packageName + "/" + fileName);
+						String blobPath = null;
+						for (var eachBlobPath: blobPaths) {
+							if (eachBlobPath.endsWith(packageName + "/" + fileName)) {
+								blobPath = eachBlobPath;
+								break;
+							}
+						}
 						if (blobPath != null) {
 							fileCoverages.add(new FileCoverage(blobPath, fileCoverageInfo));
 							Map<Integer, CoverageStatus> coverageStatusesOfFile = new HashMap<>();

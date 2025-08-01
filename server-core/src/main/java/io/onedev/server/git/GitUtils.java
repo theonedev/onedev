@@ -196,6 +196,24 @@ public class GitUtils {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	public static Collection<String> getBlobPaths(Repository repository, ObjectId commitId) {
+		Collection<String> blobPaths = new HashSet<>();
+		try (RevWalk revWalk = new RevWalk(repository);
+			 TreeWalk treeWalk = new TreeWalk(repository)) {
+			RevCommit commit = revWalk.parseCommit(commitId);
+			treeWalk.addTree(commit.getTree());
+			treeWalk.setRecursive(true);
+			treeWalk.setFilter(TreeFilter.ANY_DIFF);
+			
+			while (treeWalk.next()) {
+				blobPaths.add(treeWalk.getPathString());
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return blobPaths;
+	}
 
 	@Nullable
 	public static RevCommit getLastCommit(Repository repository) {

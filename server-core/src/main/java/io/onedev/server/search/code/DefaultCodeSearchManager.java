@@ -1,6 +1,51 @@
 package io.onedev.server.search.code;
 
+import static io.onedev.server.search.code.FieldConstants.BLOB_HASH;
+import static io.onedev.server.search.code.FieldConstants.BLOB_INDEX_VERSION;
+import static io.onedev.server.search.code.FieldConstants.BLOB_PATH;
+import static io.onedev.server.search.code.FieldConstants.BLOB_SYMBOL_LIST;
+
+import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.nio.channels.ClosedByInterruptException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.BinaryDocValues;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.LeafReaderContext;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.CollectionTerminatedException;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.ScoreMode;
+import org.apache.lucene.search.SearcherManager;
+import org.apache.lucene.search.SimpleCollector;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.BytesRef;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.TreeWalk;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
+
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
 import io.onedev.commons.loader.ManagedSerializedForm;
@@ -17,38 +62,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.hit.SymbolHit;
 import io.onedev.server.search.code.query.BlobQuery;
-import io.onedev.server.search.code.query.FileQuery;
 import io.onedev.server.search.code.query.SymbolQuery;
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.index.BinaryDocValues;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.LeafReaderContext;
-import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.*;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.BytesRef;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.nio.channels.ClosedByInterruptException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static io.onedev.server.search.code.FieldConstants.*;
 
 @Singleton
 public class DefaultCodeSearchManager implements CodeSearchManager, Serializable {
@@ -318,29 +332,6 @@ public class DefaultCodeSearchManager implements CodeSearchManager, Serializable
 		}
 	}
 
-	@Nullable
-	@Override
-	public String findBlobPathBySuffix(Project project, ObjectId commit, String blobPathSuffix) {
-		var fileName = blobPathSuffix;
-		var lastIndex = fileName.lastIndexOf('/');
-		if (lastIndex != -1)
-			fileName = fileName.substring(lastIndex + 1);
-		
-		var query = new FileQuery.Builder(fileName).caseSensitive(true).count(MAX_BLOB_PATH_QUERY_COUNT).build();
-		String blobPath = null;
-		for (QueryHit hit: search(project, commit, query)) {
-			if (hit.getBlobPath().endsWith(blobPathSuffix)) {
-				if (blobPath == null) {
-					blobPath = hit.getBlobPath();
-				} else {
-					blobPath = null;
-					break;
-				}
-			}
-		}
-		return blobPath;
-	}
-	
 	@Nullable
 	@Override
 	public SymbolHit findPrimarySymbol(Project project, ObjectId commitId, String symbolFQN, String fqnSeparator) {

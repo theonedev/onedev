@@ -52,11 +52,6 @@ public class PublishTRXReportStep extends PublishUnitTestReportStep {
 	}
 
 	@Override
-	public boolean requireCommitIndex() {
-		return true;
-	}
-
-	@Override
 	protected UnitTestReport process(Build build, File inputDir, TaskLogger logger) {
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);

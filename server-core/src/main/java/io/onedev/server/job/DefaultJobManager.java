@@ -149,7 +149,6 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.search.code.CodeIndexManager;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
@@ -224,8 +223,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private final Validator validator;
 
 	private final ClusterManager clusterManager;
-
-	private final CodeIndexManager codeIndexManager;
 	
 	private final GitService gitService;
 	
@@ -252,7 +249,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							 ListenerRegistry listenerRegistry, SettingManager settingManager, TransactionManager transactionManager, 
 							 LogManager logManager, ExecutorService executorService, SessionManager sessionManager, 
 							 BuildParamManager buildParamManager, ProjectManager projectManager, Validator validator, 
-							 TaskScheduler taskScheduler, ClusterManager clusterManager, CodeIndexManager codeIndexManager, 
+							 TaskScheduler taskScheduler, ClusterManager clusterManager, 
 							 PullRequestManager pullRequestManager, IssueManager issueManager, GitService gitService, 
 							 SSLFactory sslFactory, Dao dao, BatchWorkManager batchWorkManager) {
 		this.dao = dao;
@@ -269,7 +266,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.projectManager = projectManager;
 		this.validator = validator;
 		this.taskScheduler = taskScheduler;
-		this.codeIndexManager = codeIndexManager;
 		this.clusterManager = clusterManager;
 		this.pullRequestManager = pullRequestManager;
 		this.issueManager = issueManager;
@@ -1551,20 +1547,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				if (actions != null) {
 					ServerSideFacade serverSideFacade = (ServerSideFacade) LeafFacade.of(actions, stepPosition);
 					var serverSideStep = (ServerSideStep) serverSideFacade.getStep();
-					var transformedServerSideStep = new EditableStringTransformer(t -> replacePlaceholders(t, placeholderValues)).transformProperties(serverSideStep, Interpolative.class);
-
-					if (transformedServerSideStep.requireCommitIndex()) {
-						logger.log("Waiting for commit to be indexed...");
-						codeIndexManager.indexAsync(jobContext.getProjectId(), jobContext.getCommitId());
-						while (!codeIndexManager.isIndexed(jobContext.getProjectId(), jobContext.getCommitId())) {
-							try {
-								Thread.sleep(1000);
-							} catch (InterruptedException e) {
-								throw new RuntimeException(e);
-							}
-						}
-					}
-					
+					var transformedServerSideStep = new EditableStringTransformer(t -> replacePlaceholders(t, placeholderValues)).transformProperties(serverSideStep, Interpolative.class);					
 					return transformedServerSideStep.run(jobContext.getBuildId(), inputDir, logger);
 				} else {
 					throw new IllegalStateException("Job actions not found");
