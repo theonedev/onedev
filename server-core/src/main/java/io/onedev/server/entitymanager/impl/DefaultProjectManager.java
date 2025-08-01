@@ -5,7 +5,6 @@ import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
 import static io.onedev.server.git.CommandUtils.callWithClusterCredential;
 import static io.onedev.server.git.GitUtils.getDefaultBranch;
-import static io.onedev.server.git.GitUtils.getLastCommit;
 import static io.onedev.server.git.GitUtils.getReachableCommits;
 import static io.onedev.server.git.GitUtils.isValid;
 import static io.onedev.server.git.GitUtils.setDefaultBranch;
@@ -87,7 +86,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
@@ -160,7 +158,7 @@ import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.ProjectLastEventDate;
+import io.onedev.server.model.ProjectLastActivityDate;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
@@ -383,8 +381,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		}
 		project.setPath(project.calcPath());
 
-		ProjectLastEventDate lastEventDate = new ProjectLastEventDate();
-		project.setLastEventDate(lastEventDate);
+		ProjectLastActivityDate lastEventDate = new ProjectLastActivityDate();
+		project.setLastActivityDate(lastEventDate);
 		lastEventDateManager.create(lastEventDate);
 		dao.persist(project);
 
@@ -519,7 +517,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			packBlobManager.delete(packBlob);
 
 		dao.remove(project);
-		lastEventDateManager.delete(project.getLastEventDate());
+		lastEventDateManager.delete(project.getLastActivityDate());
 
 		synchronized (repositoryCache) {
 			Repository repository = repositoryCache.remove(project.getId());
@@ -622,7 +620,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Transactional
 	@Override
 	public void fork(Project from, Project to) {
-		to.getLastEventDate().setCommit(from.getLastEventDate().getCommit());
 		Long fromId = from.getId();
 		String fromPath = from.getPath();
 		Long toId = to.getId();
@@ -816,8 +813,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			cache.put(project.getId(), project.getFacade());
 		}
 
-		Map<Long, ProjectLastEventDate> lastEventDates = new HashMap<>();
-		for (ProjectLastEventDate lastEventDate : lastEventDateManager.query())
+		Map<Long, ProjectLastActivityDate> lastEventDates = new HashMap<>();
+		for (ProjectLastActivityDate lastEventDate : lastEventDateManager.query())
 			lastEventDates.put(lastEventDate.getId(), lastEventDate);
 
 		logger.info("Checking projects...");
@@ -842,16 +839,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 				checkGitDir(projectId);
 				HookUtils.checkHooks(getGitDir(projectId));
 				checkGitConfig(projectId, project.getGitPackConfig());
-
-				if (project.isCodeManagement()) {
-					ProjectLastEventDate lastEventDate = lastEventDates.get(project.getLastEventDateId());
-					RevCommit lastCommit = getLastCommit(getRepository(projectId));
-					if (lastCommit != null) {
-						var lastCommitDate = lastCommit.getCommitterIdent().getWhen();
-						if (lastEventDate.getCommit() == null || lastEventDate.getCommit().before(lastCommitDate))
-							lastEventDate.setCommit(lastCommitDate);
-					}
-				}
 				
 				LinkedHashMap<String, ProjectReplica> newReplicasOfProject;
 				var replica = new ProjectReplica();
@@ -877,7 +864,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 						throw new RuntimeException(e);
 					}
 				}
-				updateActiveServer(projectId, newReplicasOfProject, false);
+				updateActiveServer(projectId, newReplicasOfProject, false);				
 			}
 		}
 	}
@@ -1062,16 +1049,16 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		for (var order: orders) {
 			if (order.getExpression() instanceof SingularAttributePath) {
 				var expr = (SingularAttributePath) order.getExpression();
-				if (expr.getAttribute().getName().equals(ProjectLastEventDate.PROP_ACTIVITY) 
+				if (expr.getAttribute().getName().equals(ProjectLastActivityDate.PROP_VALUE) 
 						&& expr.getPathSource() instanceof SingularAttributePath 
-						&& ((SingularAttributePath) expr.getPathSource()).getAttribute().getName().equals(Project.PROP_LAST_EVENT_DATE)) {
+						&& ((SingularAttributePath) expr.getPathSource()).getAttribute().getName().equals(Project.PROP_LAST_ACTIVITY_DATE)) {
 					found = true;
 					break;
 				}
 			}
 		}
 		if (!found)
-			orders.add(builder.desc(ProjectQuery.getPath(root, Project.PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_ACTIVITY)));	
+			orders.add(builder.desc(ProjectQuery.getPath(root, Project.PROP_LAST_ACTIVITY_DATE + "." + ProjectLastActivityDate.PROP_VALUE)));	
 		
 		query.orderBy(orders);
 

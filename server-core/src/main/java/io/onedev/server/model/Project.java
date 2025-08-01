@@ -145,7 +145,7 @@ import io.onedev.server.xodus.CommitInfoManager;
 @Table(
 		indexes={
 				@Index(columnList="o_parent_id"), @Index(columnList="o_forkedFrom_id"),
-				@Index(columnList="o_lastEventDate_id"), @Index(columnList=PROP_NAME), 
+				@Index(columnList="o_lastActivityDate_id"), @Index(columnList=PROP_NAME), 
 				@Index(columnList=PROP_PATH)
 		}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_parent_id", PROP_NAME})}
@@ -187,10 +187,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String PROP_FORKED_FROM = "forkedFrom";
 	
 	public static final String NAME_LAST_ACTIVITY_DATE = "Last Activity Date";
-
-	public static final String NAME_LAST_COMMIT_DATE = "Last Commit Date";
 	
-	public static final String PROP_LAST_EVENT_DATE = "lastEventDate";
+	public static final String PROP_LAST_ACTIVITY_DATE = "lastActivityDate";
 	
 	public static final String NAME_LABEL = "Label";
 	
@@ -219,7 +217,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private static final String FAKED_GITHUB_REPO_OWNER = "faked-owner-of-onedev-project";
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_NAME, NAME_KEY, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_EMAIL_ADDRESS, NAME_ID, NAME_DESCRIPTION, NAME_LAST_ACTIVITY_DATE, NAME_LAST_COMMIT_DATE);
+			NAME_NAME, NAME_KEY, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_EMAIL_ADDRESS, NAME_ID, NAME_DESCRIPTION, NAME_LAST_ACTIVITY_DATE);
 
 	public static final Map<String, SortField<Project>> SORT_FIELDS = new LinkedHashMap<>();
 	static {
@@ -228,8 +226,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		SORT_FIELDS.put(NAME_NAME, new SortField<>(PROP_NAME));
 		SORT_FIELDS.put(NAME_KEY, new SortField<>(PROP_KEY));
 		SORT_FIELDS.put(NAME_SERVICE_DESK_EMAIL_ADDRESS, new SortField<>(PROP_SERVICE_DESK_EMAIL_ADDRESS));
-		SORT_FIELDS.put(NAME_LAST_ACTIVITY_DATE, new SortField<>(PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_ACTIVITY, DESCENDING));
-		SORT_FIELDS.put(NAME_LAST_COMMIT_DATE, new SortField<>(PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_COMMIT, DESCENDING));
+		SORT_FIELDS.put(NAME_LAST_ACTIVITY_DATE, new SortField<>(PROP_LAST_ACTIVITY_DATE + "." + ProjectLastActivityDate.PROP_VALUE, DESCENDING));
 	}
 	
 	static ThreadLocal<Stack<Project>> stack = ThreadLocal.withInitial(() -> new Stack<>());
@@ -257,7 +254,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(unique=true, nullable=false)
-	private ProjectLastEventDate lastEventDate;
+	private ProjectLastActivityDate lastActivityDate;
 
 	@Column(nullable=false)
 	private String name;
@@ -546,12 +543,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.createDate = createDate;
 	}
 
-	public ProjectLastEventDate getLastEventDate() {
-		return lastEventDate;
+	public ProjectLastActivityDate getLastActivityDate() {
+		return lastActivityDate;
 	}
 
-	public void setLastEventDate(ProjectLastEventDate lastEventDate) {
-		this.lastEventDate = lastEventDate;
+	public void setLastActivityDate(ProjectLastActivityDate lastActivityDate) {
+		this.lastActivityDate = lastActivityDate;
 	}
 
 	public Collection<PullRequest> getIncomingRequests() {
@@ -756,7 +753,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	public ProjectFacade getFacade() {
 		return new ProjectFacade(getId(), getName(), getKey(), getPath(), getServiceDeskEmailAddress(), 
-				isCodeManagement(), isIssueManagement(), getGitPackConfig(), lastEventDate.getId(), 
+				isCodeManagement(), isIssueManagement(), getGitPackConfig(), lastActivityDate.getId(), 
 				idOf(getParent()), idOf(getForkedFrom()));
 	}
 	

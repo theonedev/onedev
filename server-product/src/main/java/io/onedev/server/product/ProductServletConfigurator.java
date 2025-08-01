@@ -167,9 +167,9 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		context.addServlet(new ServletHolder(jerseyServlet), "/~api/*");	
 		context.addServlet(new ServletHolder(serverServlet), "/~server");
 
-		var mcpServletHolder = new ServletHolder(mcpServerServlet);
-		context.addServlet(mcpServletHolder, "/~mcp");
-		context.addServlet(mcpServletHolder, "/~mcp/*");
+		//var mcpServletHolder = new ServletHolder(mcpServerServlet);
+		//context.addServlet(mcpServletHolder, "/~mcp");
+		//context.addServlet(mcpServletHolder, "/~mcp/*");
 	}
 	
 }

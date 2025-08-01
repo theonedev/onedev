@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
@@ -31,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -57,8 +57,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
-import com.hazelcast.map.EntryProcessor;
-import com.hazelcast.map.IMap;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
@@ -81,7 +79,6 @@ import io.onedev.server.event.project.ActiveServerChanged;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.issue.IssueCommitsAttached;
 import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
 import io.onedev.server.git.GitUtils;
@@ -211,9 +208,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 	private final Map<Long, Integer> totalCommitCountCache = new ConcurrentHashMap<>();
 
-	private final Map<Long, List<NameAndEmail>> usersCache = new ConcurrentHashMap<>();
-
-	private volatile IMap<String, Set<Long>> contributedProjects;
+	private final Map<Long, Pair<Set<NameAndEmail>, Set<String>>> usersCache = new ConcurrentHashMap<>();
 
 	@Inject
 	public DefaultCommitInfoManager(ProjectManager projectManager, 
@@ -257,6 +252,19 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 		Repository repository = projectManager.getRepository(project.getId());
 
 		Pair<byte[], ObjectId> result = env.computeInTransaction(txn -> {
+			var users = usersCache.get(project.getId());
+			if (users == null) {
+				byte[] userBytes = readBytes(defaultStore, txn, USERS_KEY);
+				if (userBytes != null) {
+					Set<NameAndEmail> nameAndEmails = SerializationUtils.deserialize(userBytes);
+					users = new Pair<>(nameAndEmails,
+							nameAndEmails.stream().map(NameAndEmail::getEmailAddress).collect(Collectors.toSet()));
+				} else {
+					users = new Pair<>(new HashSet<>(), new HashSet<>());
+				}
+				usersCache.put(project.getId(), users);
+			}
+
 			ByteIterable commitKey = new CommitByteIterable(commitId);
 			byte[] commitBytes = readBytes(commitsStore, txn, commitKey);
 
@@ -288,12 +296,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 				Map<Long, Integer> commitCountCache = new HashMap<>();
 
-				Set<NameAndEmail> users;
-				byte[] userBytes = readBytes(defaultStore, txn, USERS_KEY);
-				if (userBytes != null)
-					users = SerializationUtils.deserialize(userBytes);
-				else
-					users = new HashSet<>();
+				var users = usersCache.get(project.getId());				
 				var usersChanged = new AtomicBoolean(false);
 
 				new ElementPumper<LogCommit>() {
@@ -384,14 +387,16 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 							}
 							
 							if (currentCommit.getCommitter() != null) {
-								if (users.add(new NameAndEmail(currentCommit.getCommitter())))
+								if (users.getLeft().add(new NameAndEmail(currentCommit.getCommitter())))
 									usersChanged.set(true);
+								users.getRight().add(currentCommit.getCommitter().getEmailAddress());
 							}
 
 							if (currentCommit.getAuthor() != null) {
 								NameAndEmail nameAndEmail = new NameAndEmail(currentCommit.getAuthor());
-								if (users.add(nameAndEmail))
+								if (users.getLeft().add(nameAndEmail))
 									usersChanged.set(true);
+								users.getRight().add(nameAndEmail.getEmailAddress());
 
 								ByteIterable authorKey = new ArrayByteIterable(SerializationUtils.serialize(nameAndEmail));
 								int userIndex = readInt(userToIndexStore, txn, authorKey, -1);
@@ -475,10 +480,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 				writeInt(defaultStore, txn, NEXT_PATH_INDEX_KEY, nextIndex.path);
 
 				if (usersChanged.get()) {
-					userBytes = SerializationUtils.serialize((Serializable) users);
+					var userBytes = SerializationUtils.serialize((Serializable) users.getLeft());
 					defaultStore.put(txn, USERS_KEY, new ArrayByteIterable(userBytes));
-					usersCache.remove(project.getId());
-					updateContributedProjects(project.getId(), users);
 				}
 
 				for (Map.Entry<Long, Integer> entry : commitCountCache.entrySet())
@@ -495,26 +498,6 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 		}
 
 		logger.debug("Collected commit information (project: {}, ref: {})", project.getPath(), refName);
-	}
-
-	private void updateContributedProjects(Long projectId, Set<NameAndEmail> users) {
-		Set<String> emailAddresses = users.stream()
-				.map(NameAndEmail::getEmailAddress)
-				.collect(toSet());
-		
-		contributedProjects.executeOnKeys(emailAddresses, new EntryProcessor<String, Set<Long>, Object>() {
-			@Override
-			public Object process(IMap.Entry<String, Set<Long>> entry) {
-				Set<Long> contributedProjectsOfEmail = entry.getValue();
-				if (contributedProjectsOfEmail == null) {
-					contributedProjectsOfEmail = new HashSet<>();
-				}
-				if (contributedProjectsOfEmail.add(projectId)) {
-					entry.setValue(contributedProjectsOfEmail);
-				}
-				return null;
-			}
-		});
 	}
 
 	private void collectContributions(Project project, ObjectId commitId) {
@@ -908,25 +891,14 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 
 			@Override
 			public List<NameAndEmail> call() {
-				List<NameAndEmail> users = usersCache.get(projectId);
-				if (users == null) {
-					Environment env = getEnv(projectId.toString());
-					Store store = getStore(env, DEFAULT_STORE);
-
-					users = env.computeInReadonlyTransaction(txn -> {
-						byte[] bytes = readBytes(store, txn, USERS_KEY);
-						if (bytes != null) {
-							List<NameAndEmail> innerUsers =
-									new ArrayList<>(SerializationUtils.deserialize(bytes));
-							Collections.sort(innerUsers);
-							return innerUsers;
-						} else {
-							return new ArrayList<>();
-						}
-					});
-					usersCache.put(projectId, users);
+				var users = usersCache.get(projectId);
+				if (users != null) {
+					var sortedUsers = new ArrayList<>(users.getLeft());
+					Collections.sort(sortedUsers);
+					return sortedUsers;
+				} else {
+					return new ArrayList<>();
 				}
-				return users;
 			}
 
 		});
@@ -1112,8 +1084,37 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 				sessionManager.run(() -> {
 					Project project = projectManager.load(projectId);
 					List<CollectingWork> collectingWorks = new ArrayList<>();
-					for (Object work : works)
-						collectingWorks.add((CollectingWork) work);
+					for (Object work : works) {
+						if (work instanceof CollectingWork) {
+							collectingWorks.add((CollectingWork) work);
+						} else if (work instanceof CheckingWork) {
+							try (RevWalk revWalk = new RevWalk(projectManager.getRepository(projectId))) {
+								Collection<Ref> refs = new ArrayList<>();
+								refs.addAll(projectManager.getRepository(projectId).getRefDatabase()
+										.getRefsByPrefix(Constants.R_HEADS));
+								refs.addAll(projectManager.getRepository(projectId).getRefDatabase()
+										.getRefsByPrefix(Constants.R_TAGS));
+
+								for (Ref ref : refs) {
+									RevObject revObj;
+									try {
+										revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));
+									} catch (MissingObjectException e) {
+										var message = String.format("%s (project id: %d, ref: %s)", e.getMessage(),
+												projectId, ref.getName());
+										throw new ExplicitException(message);
+									}
+									if (revObj instanceof RevCommit) {
+										RevCommit commit = (RevCommit) revObj;
+										collectingWorks.add(new CollectingWork(CHECK_PRIORITY, commit.copy(),
+												commit.getCommitTime(), ref.getName()));
+									}
+								}
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						}
+					}
 					collectingWorks.sort(new CommitTimeComparator());
 
 					for (CollectingWork work : collectingWorks)
@@ -1124,65 +1125,12 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 		};
 	}
 
-	private boolean collect(Long projectId, int priority) {
-		List<CollectingWork> works = new ArrayList<>();
-		try (RevWalk revWalk = new RevWalk(projectManager.getRepository(projectId))) {
-			Collection<Ref> refs = new ArrayList<>();
-			refs.addAll(projectManager.getRepository(projectId).getRefDatabase().getRefsByPrefix(Constants.R_HEADS));
-			refs.addAll(projectManager.getRepository(projectId).getRefDatabase().getRefsByPrefix(Constants.R_TAGS));
-
-			for (Ref ref : refs) {
-				RevObject revObj;
-				try {
-					revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));
-				} catch (MissingObjectException e) {
-					var message = String.format("%s (project id: %d, ref: %s)", e.getMessage(), projectId, ref.getName());
-					throw new ExplicitException(message);
-				}
-				if (revObj instanceof RevCommit) {
-					RevCommit commit = (RevCommit) revObj;
-					works.add(new CollectingWork(priority, commit.copy(), 
-							commit.getCommitTime(), ref.getName()));
-				}
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-
-		if (!works.isEmpty()) {
-			works.sort(new CommitTimeComparator());
-
-			for (CollectingWork work : works)
-				batchWorkManager.submit(getBatchWorker(projectId), work);
-			return true;
-		} else {
-			return false;
-		}		
-	}
-
-	@Sessional
-	@Listen
-	public void on(SystemStarting event) {
-		contributedProjects = clusterManager.getHazelcastInstance().getMap("contributedProjects");
-	}
-
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		logger.info("Caching code contribution info...");
 		for (var projectId: projectManager.getActiveIds()) {
 			checkVersion(getEnvDir(projectId.toString()));
-			if (collect(projectId, CHECK_PRIORITY)) {
-				Environment env = getEnv(projectId.toString());
-				Store store = getStore(env, DEFAULT_STORE);
-	
-				env.computeInReadonlyTransaction(txn -> {
-					byte[] bytes = readBytes(store, txn, USERS_KEY);
-					if (bytes != null) 
-						updateContributedProjects(projectId, SerializationUtils.deserialize(bytes));
-					return null;
-				});	
-			}
+			batchWorkManager.submit(getBatchWorker(projectId), new CheckingWork(CHECK_PRIORITY));
 		}
 	}
 	
@@ -1191,7 +1139,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 	public void on(ActiveServerChanged event) {
 		for (var projectId: event.getProjectIds()) {
 			checkVersion(getEnvDir(projectId.toString()));
-			collect(projectId, CHECK_PRIORITY);
+			batchWorkManager.submit(getBatchWorker(projectId), new CheckingWork(CHECK_PRIORITY));
 		}
 	}
 	
@@ -1256,6 +1204,14 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 			}
 
 		});
+	}
+
+	static class CheckingWork extends Prioritized {
+
+		public CheckingWork(int priority) {
+			super(priority);
+		}
+
 	}
 
 	static class CollectingWork extends Prioritized {
@@ -1564,53 +1520,54 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager
 	@Sessional
 	@Override
 	public Map<Long, Map<ObjectId, Long>> getUserCommits(User user, Date fromDate, Date toDate) {		
+		var emailAddresses = user.getEmailAddresses().stream()
+				.filter(it -> it.isVerified())
+				.map(it -> it.getValue())
+				.collect(toSet());
+						
 		var userCommits = new HashMap<Long, Map<ObjectId, Long>>();
-		if (contributedProjects != null) {
-			var emailAddresses = user.getEmailAddresses().stream()
-					.filter(it -> it.isVerified())
-					.map(it -> it.getValue())
-					.collect(toSet());
-			var cache = projectManager.cloneCache();
-			var projectIds = new HashSet<Long>();
-			contributedProjects.getAll(emailAddresses).values().stream()
-				.filter(Objects::nonNull)
-				.forEach(projectIds::addAll);
-			for (var projectId: projectIds) {
-				var project = cache.get(projectId);				
-				if (project != null && project.isCodeManagement() && project.getForkedFromId() == null) {
-					var activeServer = projectManager.getActiveServer(projectId, false);
-					if (activeServer != null) {
-						userCommits.put(projectId, clusterManager.runOnServer(activeServer, new ClusterTask<>() {
+		Map<String, Map<Long, Map<ObjectId, Long>>> result = clusterManager.runOnAllServers(new ClusterTask<>() {
 
-							private static final long serialVersionUID = 1L;
-				
-							@Override
-							public Map<ObjectId, Long> call() {
-								Environment env = getEnv(projectId.toString());
-								Store userCommitsStore = getStore(env, USER_COMMITS_STORE);
-				
-								return env.computeInReadonlyTransaction(new TransactionalComputable<Map<ObjectId, Long>>() {
-				
-									@Override
-									public Map<ObjectId, Long> compute(Transaction txn) {
-										var userCommits = new HashMap<ObjectId, Long>();
-										for (var emailAddress: emailAddresses) {
-											deserializeUserCommits(readBytes(userCommitsStore, txn, new StringByteIterable(emailAddress))).entrySet().forEach(it -> {
-												if (it.getValue() >= fromDate.getTime() && it.getValue() <= toDate.getTime())
-													userCommits.put(it.getKey(), it.getValue());
-											});
-										}
-										return userCommits;
+			@Override
+			public Map<Long, Map<ObjectId, Long>> call() {
+				var localServer = clusterManager.getLocalServerAddress();
+				var userCommits = new HashMap<Long, Map<ObjectId, Long>>();
+				for (var entry: usersCache.entrySet()) {
+					var projectId = entry.getKey();					
+					if (localServer.equals(projectManager.getActiveServer(projectId, false)) 
+							&& emailAddresses.stream().anyMatch(entry.getValue().getRight()::contains)) {
+						var project = projectManager.findFacade(projectId);
+						if (project != null && project.isCodeManagement() && project.getForkedFromId() == null) {
+							Environment env = getEnv(projectId.toString());
+							Store userCommitsStore = getStore(env, USER_COMMITS_STORE);
+
+							userCommits.put(projectId, env.computeInReadonlyTransaction(new TransactionalComputable<Map<ObjectId, Long>>() {
+
+								@Override
+								public Map<ObjectId, Long> compute(Transaction txn) {
+									var userCommits = new HashMap<ObjectId, Long>();
+									for (var emailAddress : emailAddresses) {
+										deserializeUserCommits(
+												readBytes(userCommitsStore, txn, new StringByteIterable(emailAddress)))
+												.entrySet().forEach(it -> {
+													if (it.getValue() >= fromDate.getTime()
+															&& it.getValue() <= toDate.getTime())
+														userCommits.put(it.getKey(), it.getValue());
+												});
 									}
-				
-								});
-							}
-				
-						}));	
+									return userCommits;
+								}
+
+							}));
+						}
 					}
 				}
+				return userCommits;
 			}
-		}
+
+		});
+		for (var entry: result.entrySet()) 
+			userCommits.putAll(entry.getValue());
 		return userCommits;
 	}	
 

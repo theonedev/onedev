@@ -182,10 +182,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 									break;
 								case IsUntil:
 								case IsSince:
-									if (fieldName.equals(Project.NAME_LAST_ACTIVITY_DATE))
-										criterias.add(new LastActivityDateCriteria(value, operator));
-									else
-										criterias.add(new CommitDateCriteria(value, operator));
+									criterias.add(new LastActivityDateCriteria(value, operator));
 									break;
 								default:
 									throw new ExplicitException("Unexpected operator " + getRuleName(operator));
@@ -272,7 +269,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 			case IsUntil:
 			case IsSince:
 				if (!fieldName.equals(Project.NAME_LAST_ACTIVITY_DATE)
-						&& !fieldName.equals(Project.NAME_LAST_COMMIT_DATE)) {
+						&& !fieldName.equals(Project.NAME_LAST_ACTIVITY_DATE)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;

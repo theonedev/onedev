@@ -1,10 +1,10 @@
 package io.onedev.server.entitymanager;
 
-import io.onedev.server.model.ProjectLastEventDate;
+import io.onedev.server.model.ProjectLastActivityDate;
 import io.onedev.server.persistence.dao.EntityManager;
 
-public interface ProjectLastEventDateManager extends EntityManager<ProjectLastEventDate> {
+public interface ProjectLastEventDateManager extends EntityManager<ProjectLastActivityDate> {
 
-	void create(ProjectLastEventDate lastEventDate);
+	void create(ProjectLastActivityDate lastEventDate);
 	
 }

@@ -1,55 +1,23 @@
 package io.onedev.server.search.code;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import io.onedev.commons.jsymbol.Symbol;
-import io.onedev.commons.jsymbol.SymbolExtractor;
-import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
-import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.project.CommitIndexed;
-import io.onedev.server.event.project.RefUpdated;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.util.ContentDetector;
-import io.onedev.server.util.IndexResult;
-import io.onedev.server.util.concurrent.BatchWorkManager;
-import io.onedev.server.util.concurrent.BatchWorker;
-import io.onedev.server.util.concurrent.Prioritized;
-import io.onedev.commons.utils.match.Matcher;
-import io.onedev.commons.utils.match.PathMatcher;
-import io.onedev.server.util.patternset.PatternSet;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.SerializationUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.lucene.document.*;
-import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.index.*;
-import org.apache.lucene.index.IndexWriterConfig.OpenMode;
-import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.*;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.BytesRef;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.eclipse.jgit.lib.*;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.treewalk.filter.TreeFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static io.onedev.server.search.code.FieldConstants.BLOB_HASH;
+import static io.onedev.server.search.code.FieldConstants.BLOB_INDEX_VERSION;
+import static io.onedev.server.search.code.FieldConstants.BLOB_NAME;
+import static io.onedev.server.search.code.FieldConstants.BLOB_PATH;
+import static io.onedev.server.search.code.FieldConstants.BLOB_PRIMARY_SYMBOLS;
+import static io.onedev.server.search.code.FieldConstants.BLOB_SECONDARY_SYMBOLS;
+import static io.onedev.server.search.code.FieldConstants.BLOB_SYMBOL_LIST;
+import static io.onedev.server.search.code.FieldConstants.BLOB_TEXT;
+import static io.onedev.server.search.code.FieldConstants.COMMIT_HASH;
+import static io.onedev.server.search.code.FieldConstants.COMMIT_INDEX_VERSION;
+import static io.onedev.server.search.code.FieldConstants.LAST_COMMIT;
+import static io.onedev.server.search.code.FieldConstants.LAST_COMMIT_HASH;
+import static io.onedev.server.search.code.FieldConstants.LAST_COMMIT_INDEX_VERSION;
+import static io.onedev.server.search.code.FieldConstants.META;
+import static io.onedev.server.search.code.IndexConstants.MAX_INDEXABLE_BLOB_SIZE;
+import static io.onedev.server.search.code.IndexConstants.MAX_INDEXABLE_LINE_LEN;
+import static io.onedev.server.search.code.IndexConstants.NGRAM_SIZE;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectStreamException;
@@ -58,8 +26,70 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.onedev.server.search.code.FieldConstants.*;
-import static io.onedev.server.search.code.IndexConstants.*;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.SerializationUtils;
+import org.apache.lucene.document.BinaryDocValuesField;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexFormatTooOldException;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.index.LeafReaderContext;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.ScoreMode;
+import org.apache.lucene.search.SimpleCollector;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.BytesRef;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.TreeFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+
+import io.onedev.commons.jsymbol.Symbol;
+import io.onedev.commons.jsymbol.SymbolExtractor;
+import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
+import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.CommitIndexed;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.model.Project;
+import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.util.ContentDetector;
+import io.onedev.server.util.IndexResult;
+import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.concurrent.BatchWorker;
+import io.onedev.server.util.concurrent.Prioritized;
+import io.onedev.server.util.patternset.PatternSet;
 
 @Singleton
 public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
@@ -319,7 +349,8 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 	}
 	
 	private IndexResult doIndex(Project project, ObjectId commit) {
-		try (Directory directory = FSDirectory.open(projectManager.getIndexDir(project.getId()).toPath())) {
+		var indexDir = projectManager.getIndexDir(project.getId());
+		try (Directory directory = FSDirectory.open(indexDir.toPath())) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
 					IndexSearcher searcher = new IndexSearcher(reader);
@@ -327,6 +358,9 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 						return new IndexResult(0, 0);
 					else
 						return doIndex(project, commit, directory, searcher);
+				} catch (IndexFormatTooOldException e) {
+					FileUtils.cleanDir(indexDir);
+					return doIndex(project, commit, directory, null);
 				}
 			} else {
 				return doIndex(project, commit, directory, null);
@@ -364,6 +398,9 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 						try (IndexReader reader = DirectoryReader.open(directory)) {
 							IndexSearcher searcher = new IndexSearcher(reader);
 							return getIndexVersion().equals(getCommitIndexVersion(searcher, commitId));
+						} catch (IndexFormatTooOldException e) {
+							FileUtils.cleanDir(indexDir);
+							return false;
 						}
 					} else {
 						return false;
@@ -374,41 +411,6 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 			}
 			
 		});
-	}
-
-	@Sessional
-	@Listen
-	public void on(RefUpdated event) {
-		// only index branches at back end, tags will be indexed on demand from GUI 
-		// as many tags might be pushed all at once when the repository is imported 
-		if (event.getRefName().startsWith(Constants.R_HEADS) 
-				&& !event.getNewCommitId().equals(ObjectId.zeroId())) {
-			IndexWork work = new IndexWork(BACKEND_PRIORITY, event.getNewCommitId());
-			batchWorkManager.submit(getBatchWorker(event.getProject().getId()), work);
-		}
-	}
-
-	@Sessional
-	@Listen
-	public void on(SystemStarted event) {
-		for (var file: projectManager.getProjectsDir().listFiles()) {
-			if (!NumberUtils.isDigits(file.getName())) 
-				continue;
-			var projectId = Long.valueOf(file.getName());
-			var indexDir = projectManager.getIndexDir(projectId);
-			if (indexDir.exists()) {
-				try (var directory = FSDirectory.open(indexDir.toPath())) {
-					if (DirectoryReader.indexExists(directory)) {
-						try (var reader = DirectoryReader.open(directory)) {
-						} catch (IndexFormatTooOldException e) {
-							FileUtils.cleanDir(indexDir);
-						}
-					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
 	}
 	
 	@Override

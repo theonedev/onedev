@@ -8159,4 +8159,26 @@ public class DataMigrator {
 		}		
 	}
 
+	private void migrate207(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("lastEventDate").setName("lastActivityDate");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("ProjectLastEventDates.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.setName("io.onedev.server.model.ProjectLastActivityDate");
+					var commitElement = element.element("commit");
+					if (commitElement != null) 
+						commitElement.detach();
+					element.element("activity").setName("value");
+				}
+				dom.writeToFile(new File(dataDir, file.getName().replace("ProjectLastEventDates", "ProjectLastActivityDates")), false);
+			}
+		}
+	}
+
 }

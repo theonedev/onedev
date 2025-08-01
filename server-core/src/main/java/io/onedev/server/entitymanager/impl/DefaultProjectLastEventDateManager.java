@@ -7,7 +7,7 @@ import io.onedev.server.event.project.ProjectCreated;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.ProjectLastEventDate;
+import io.onedev.server.model.ProjectLastActivityDate;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -17,7 +17,7 @@ import javax.inject.Singleton;
 import java.util.Date;
 
 @Singleton
-public class DefaultProjectLastEventDateManager extends BaseEntityManager<ProjectLastEventDate> implements ProjectLastEventDateManager {
+public class DefaultProjectLastEventDateManager extends BaseEntityManager<ProjectLastActivityDate> implements ProjectLastEventDateManager {
 
 	@Inject
 	public DefaultProjectLastEventDateManager(Dao dao) {
@@ -29,18 +29,17 @@ public class DefaultProjectLastEventDateManager extends BaseEntityManager<Projec
 	public void on(ProjectEvent event) {
 		Project project = event.getProject();
 		if (event instanceof RefUpdated) {
-			project.getLastEventDate().setActivity(new Date());
-			project.getLastEventDate().setCommit(new Date());
+			project.getLastActivityDate().setValue(new Date());
 		} else if (!(event instanceof ProjectCreated) 
 				&& event.getUser() != null 
 				&& !event.getUser().isSystem()) {
-			project.getLastEventDate().setActivity(new Date());
+			project.getLastActivityDate().setValue(new Date());
 		}
 	}
 	
 	@Transactional
 	@Override
-	public void create(ProjectLastEventDate lastEventDate) {
+	public void create(ProjectLastActivityDate lastEventDate) {
 		Preconditions.checkState(lastEventDate.isNew());
 		dao.persist(lastEventDate);
 	}
