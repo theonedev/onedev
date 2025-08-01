@@ -44,6 +44,18 @@ containers:
     - name: max_memory_percent
       value: "{{ .Values.onedev.jvm.maxMemoryPercent }}"
 {{- end }}
+{{- if .Values.onedev.jvm.threadStackSize }}
+    - name: thread_stack_size
+      value: "{{ .Values.onedev.jvm.threadStackSize }}"
+{{- end }}
+{{- if .Values.onedev.hibernate.queryPlanCacheMaxSize }}
+    - name: hibernate_query_plan_cache_max_size
+      value: "{{ .Values.onedev.hibernate.queryPlanCacheMaxSize }}"
+{{- end }}
+{{- if .Values.onedev.hibernate.queryPlanParameterMetadataMaxSize }}
+    - name: hibernate_query_plan_parameter_metadata_max_size
+      value: "{{ .Values.onedev.hibernate.queryPlanParameterMetadataMaxSize }}"
+{{- end }}
 {{- if .Values.onedev.initSettings.user }}
     - name: initial_user
       value: {{ .Values.onedev.initSettings.user }}

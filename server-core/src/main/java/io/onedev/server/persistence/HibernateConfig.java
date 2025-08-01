@@ -23,7 +23,8 @@ public class HibernateConfig extends Properties {
 			DIALECT, DRIVER, URL, USER, PASS, "hibernate.hikari.leakDetectionThreshold",
 			"hibernate.hikari.maxLifetime", "hibernate.hikari.connectionTimeout",
 			"hibernate.hikari.maximumPoolSize", "hibernate.hikari.validationTimeout",
-			"hibernate.show_sql"
+			"hibernate.show_sql", "hibernate.query.plan_cache_max_size",
+			"hibernate.query.plan_parameter_metadata_max_size"
 	};
 	
 	private volatile String clusterCredential; 

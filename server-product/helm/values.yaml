@@ -25,6 +25,10 @@ onedev:
     secretName: "onedev-trustcerts"
   jvm:
     maxMemoryPercent: "50"
+    threadStackSize: "1024k"
+  hibernate:
+    queryPlanCacheMaxSize: "2048"
+    queryPlanParameterMetadataMaxSize: "128"
   # Specify OneDev Server initial settings to avoid manual setup
   initSettings:
     # onedev.initSettings.user -- Administrator username. Leave empty to prompt
