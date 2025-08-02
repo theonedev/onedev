@@ -127,7 +127,7 @@ public class PullRequest extends ProjectBelonging
 		implements AttachmentStorageSupport, LabelSupport<PullRequestLabel> {
 
 	private static final long serialVersionUID = 1L;
-	
+		
 	public static final int MAX_TITLE_LEN = 255;
 	
 	public static final int MAX_DESCRIPTION_LEN = 100000;
@@ -1178,6 +1178,9 @@ public class PullRequest extends ProjectBelonging
     	String checkError = getCheckError();
     	if (checkError != null)
     		return MessageFormat.format(_T("Pull request is in error: {0}"), checkError);
+		if (isWorkInProgress())
+			return _T("Pull request is work in progress");
+			
     	MergePreview preview = checkMergePreview();
     	if (preview == null)
     		return _T("Merge preview not calculated yet");
@@ -1376,4 +1379,9 @@ public class PullRequest extends ProjectBelonging
 		this.eyesCount = eyesCount;
 	}
 	
+	public boolean isWorkInProgress() {
+		var lowerTitle = title.toLowerCase();
+		return lowerTitle.startsWith("wip") || lowerTitle.startsWith("[wip]");
+	}
+
 }

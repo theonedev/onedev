@@ -618,6 +618,15 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 
 		});
+		summaryContainer.add(new WebMarkupContainer("workInProgress") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().isOpen() && getPullRequest().isWorkInProgress());
+			}
+
+		});
 		summaryContainer.add(new WebMarkupContainer("requestedForChanges") {
 
 			@Override

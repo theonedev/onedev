@@ -74,6 +74,9 @@
 						<div wicket:id="noValidCommitSignature" class="no-valid-commit-signature text-warning">
 							<wicket:svg href="times-circle" class="icon"></wicket:svg> <wicket:t>Pull request can not be merged now as valid signature is required for head commit</wicket:t>
 						</div>
+						<div wicket:id="workInProgress" class="work-in-progress text-warning">
+							<wicket:svg href="clock" class="icon"></wicket:svg> <wicket:t>Pull request is still a work in progress</wicket:t>
+						</div>
 						<div wicket:id="requestedForChanges" class="requested-for-changes text-warning">
 							<wicket:svg href="diff" class="icon"></wicket:svg> <wicket:t>Pull request can not be merged now as it was <a class="more-info d-inline link-primary">requested for changes</a></wicket:t>
 						</div>
