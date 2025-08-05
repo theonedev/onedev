@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -140,6 +142,22 @@ public class BuildResource {
     	
     	return buildManager.query(null, parsedQuery, false, offset, count);
     }
+
+	@Api(order = 650)
+	@Path("/{buildId}/description")
+	@POST
+	public Response setDescription(@PathParam("buildId") Long buildId, String description) {
+		Build build = buildManager.load(buildId);
+		if (!SecurityUtils.canManageBuild(build))
+			throw new UnauthorizedException();
+		var oldDescription = build.getDescription();
+		if (!Objects.equals(oldDescription, description)) {
+			build.setDescription(description);
+			buildManager.update(build);
+			auditManager.audit(build.getProject(), "updated description of build \"" + build.getReference().toString(build.getProject()) + "\" via RESTful API", oldDescription, description);
+		}
+		return Response.ok().build();
+	}
 	
 	@Api(order=700)
 	@Path("/{buildId}")
