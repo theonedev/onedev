@@ -28,7 +28,6 @@ import io.onedev.server.git.hook.GitPreReceiveCallback;
 import io.onedev.server.jetty.ClasspathAssetServlet;
 import io.onedev.server.jetty.FileAssetServlet;
 import io.onedev.server.jetty.ServletConfigurator;
-import io.onedev.server.mcp.MCPServerServlet;
 import io.onedev.server.security.CorsFilter;
 import io.onedev.server.security.DefaultWebEnvironment;
 import io.onedev.server.web.asset.icon.IconScope;
@@ -60,16 +59,13 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	private final WebSocketManager webSocketManager;
 	
 	private final ServerSocketServlet serverServlet;
-
-	private final MCPServerServlet mcpServerServlet;
 	
 	@Inject
 	public ProductServletConfigurator(ShiroFilter shiroFilter, CorsFilter corsFilter,
 									  GitFilter gitFilter, GitLfsFilter gitLfsFilter, GitPreReceiveCallback preReceiveServlet,
 									  GitPostReceiveCallback postReceiveServlet, WicketServlet wicketServlet,
 									  WebSocketManager webSocketManager, ServletContainer jerseyServlet,
-									  ServerSocketServlet serverServlet, GoGetFilter goGetFilter, 
-									  MCPServerServlet mcpServerServlet) {
+									  ServerSocketServlet serverServlet, GoGetFilter goGetFilter) {
 		this.corsFilter = corsFilter;
 		this.shiroFilter = shiroFilter;
         this.gitFilter = gitFilter;
@@ -81,7 +77,6 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		this.jerseyServlet = jerseyServlet;
 		this.serverServlet = serverServlet;
 		this.goGetFilter = goGetFilter;
-		this.mcpServerServlet = mcpServerServlet;
 	}
 	
 	@Override
@@ -166,10 +161,6 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 		context.addServlet(new ServletHolder(jerseyServlet), "/~api/*");	
 		context.addServlet(new ServletHolder(serverServlet), "/~server");
-
-		//var mcpServletHolder = new ServletHolder(mcpServerServlet);
-		//context.addServlet(mcpServletHolder, "/~mcp");
-		//context.addServlet(mcpServletHolder, "/~mcp/*");
 	}
 	
 }
