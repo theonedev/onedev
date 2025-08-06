@@ -163,6 +163,7 @@ import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
+import io.onedev.server.util.concurrent.WorkExecutor;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.EditableStringTransformer;
@@ -173,6 +174,8 @@ import nl.altindag.ssl.SSLFactory;
 public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource, Serializable {
 
 	private static final int CHECK_INTERVAL = 1000; // check internal in milli-seconds
+
+	private static final int CACHE_SCHEDULE_PRIORITY = 10;
 
 	private static final int MAINTENANCE_PRIORITY = 50;
 	
@@ -230,6 +233,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	private final BatchWorkManager batchWorkManager;
 
+	private final WorkExecutor workExecutor;
+
 	private volatile Thread thread;
 
 	private final Map<String, JobContext> jobContexts = new ConcurrentHashMap<>();
@@ -251,7 +256,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							 BuildParamManager buildParamManager, ProjectManager projectManager, Validator validator, 
 							 TaskScheduler taskScheduler, ClusterManager clusterManager, 
 							 PullRequestManager pullRequestManager, IssueManager issueManager, GitService gitService, 
-							 SSLFactory sslFactory, Dao dao, BatchWorkManager batchWorkManager) {
+							 SSLFactory sslFactory, Dao dao, BatchWorkManager batchWorkManager, WorkExecutor workExecutor) {
 		this.dao = dao;
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
@@ -272,6 +277,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.gitService = gitService;
 		this.sslFactory = sslFactory;
 		this.batchWorkManager = batchWorkManager;
+		this.workExecutor = workExecutor;
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -1112,21 +1118,24 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 	
-	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		for (var projectId: projectManager.getActiveIds()) {
-			var project = projectManager.load(projectId);
-			var repository = projectManager.getRepository(projectId);
-			try {
-				for (var ref: repository.getRefDatabase().getRefsByPrefix(R_HEADS)) {
-					var branch = GitUtils.ref2branch(ref.getName());
-					cacheBranchSchedules(project, branch, ref.getObjectId());
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
+		workExecutor.submit(CACHE_SCHEDULE_PRIORITY, () -> {
+			sessionManager.run(() -> {
+				for (var projectId : projectManager.getActiveIds()) {
+					var project = projectManager.load(projectId);
+					var repository = projectManager.getRepository(projectId);
+					try {
+						for (var ref : repository.getRefDatabase().getRefsByPrefix(R_HEADS)) {
+							var branch = GitUtils.ref2branch(ref.getName());
+							cacheBranchSchedules(project, branch, ref.getObjectId());
+						}
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}				
+			});
+		});
 		
 		maintenanceTaskId = taskScheduler.schedule(new SchedulableTask() {
 			
