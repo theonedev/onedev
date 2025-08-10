@@ -111,10 +111,9 @@ public abstract class TransitionMenuLink extends MenuLink {
 										}
 
 										@Override
-										protected void onTransit(AjaxRequestTarget target, Map<String, Object> fieldValues,
-																 String comment) {
+										protected void onTransit(AjaxRequestTarget target, Map<String, Object> fieldValues, String comment) {
 											IssueChangeManager manager = OneDev.getInstance(IssueChangeManager.class);
-											manager.changeState(getIssue(), toState, fieldValues, transition.getRemoveFields(), comment);
+											manager.changeState(getIssue(), toState, fieldValues, transition.getPromptFields(), transition.getRemoveFields(), comment);
 											((BasePage)getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(true));
 											modal.close();
 										}

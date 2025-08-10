@@ -51,7 +51,7 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	void removeSchedule(Issue issue, Iteration iteration);
 	
 	void changeState(Issue issue, String state, Map<String, Object> fieldValues, 
-			Collection<String> removeFields, @Nullable String comment);
+			Collection<String> promptFields, Collection<String> removeFields, @Nullable String comment);
 	
 	void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, @Nullable Boolean confidential,
                      @Nullable Collection<Iteration> iterations, Map<String, Object> fieldValues, 

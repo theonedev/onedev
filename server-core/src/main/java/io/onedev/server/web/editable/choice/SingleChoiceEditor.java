@@ -60,8 +60,8 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 			@Override
 			protected Map<String, String> load() {
 				ComponentContext componentContext = new ComponentContext(SingleChoiceEditor.this);				
-				ComponentContext.push(componentContext);
 				if (getChoiceProvider().displayNames().length() != 0) {
+					ComponentContext.push(componentContext);
 					try {
 						return (Map<String, String>) ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().displayNames());
 					} finally {
@@ -79,8 +79,8 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 			@Override
 			protected Map<String, String> load() {
 				ComponentContext componentContext = new ComponentContext(SingleChoiceEditor.this);				
-				ComponentContext.push(componentContext);
 				if (getChoiceProvider().descriptions().length() != 0) {
+					ComponentContext.push(componentContext);
 					try {
 						return (Map<String, String>) ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().descriptions());
 					} finally {

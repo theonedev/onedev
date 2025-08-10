@@ -51,7 +51,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.rest.InvalidParamException;
+import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.resource.support.RestConstants;
@@ -217,13 +217,13 @@ public class PullRequestResource {
     		@QueryParam("count") @Api(example="100") int count) {
 
 		if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new InvalidParamsException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	PullRequestQuery parsedQuery;
 		try {
 			parsedQuery = PullRequestQuery.parse(null, query, true);
 		} catch (Exception e) {
-			throw new InvalidParamException("Error parsing query", e);
+			throw new InvalidParamsException("Error parsing query", e);
 		}
     	
     	return pullRequestManager.query(null, parsedQuery, false, offset, count);
@@ -241,18 +241,18 @@ public class PullRequestResource {
 			throw new UnauthorizedException();
 		
 		if (target.equals(source))
-			throw new InvalidParamException("Source and target are the same");
+			throw new InvalidParamsException("Source and target are the same");
 		
 		PullRequest request = pullRequestManager.findOpen(target, source);
 		if (request != null)
-			throw new InvalidParamException("Another pull request already opened for this change");
+			throw new InvalidParamsException("Another pull request already opened for this change");
 		
 		request = pullRequestManager.findEffective(target, source);
 		if (request != null) { 
 			if (request.isOpen())
-				throw new InvalidParamException("Another pull request already opened for this change");
+				throw new InvalidParamsException("Another pull request already opened for this change");
 			else
-				throw new InvalidParamException("Change already merged");
+				throw new InvalidParamsException("Change already merged");
 		}
 
 		request = new PullRequest();
@@ -261,7 +261,7 @@ public class PullRequestResource {
 				source.getProject(), source.getObjectId());
 		
 		if (baseCommitId == null)
-			throw new InvalidParamException("No common base for target and source");
+			throw new InvalidParamsException("No common base for target and source");
 
 		request.setTitle(data.getTitle());
 		request.setTarget(target);
@@ -276,7 +276,7 @@ public class PullRequestResource {
 			request.setMergeStrategy(request.getProject().findDefaultPullRequestMergeStrategy());
 		
 		if (request.getBaseCommitHash().equals(source.getObjectName())) 
-			throw new InvalidParamException("Change already merged");
+			throw new InvalidParamsException("Change already merged");
 
 		PullRequestUpdate update = new PullRequestUpdate();
 		update.setDate(new DateTime(request.getSubmitDate()).plusSeconds(1).toDate());

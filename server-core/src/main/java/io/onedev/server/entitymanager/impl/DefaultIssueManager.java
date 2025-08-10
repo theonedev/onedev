@@ -241,7 +241,10 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		lastActivity.setDescription("opened");
 		lastActivity.setDate(issue.getSubmitDate());
 		issue.setLastActivity(lastActivity);
-		
+
+		issue.addMissingFields(settingManager.getIssueSetting().getPromptFieldsUponIssueOpen(issue.getProject()));
+		issue.checkEmptyFields();
+
 		dao.persist(issue);
 		
 		fieldManager.saveFields(issue);

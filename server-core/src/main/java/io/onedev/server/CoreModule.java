@@ -71,6 +71,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.OsInfo;
+import io.onedev.server.ai.McpHelperResource;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.attachment.DefaultAttachmentManager;
 import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
@@ -647,6 +648,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(FilterChainConfigurator.class, filterChainManager -> filterChainManager.createChain("/~api/**", "noSessionCreation, authcBasic, authcBearer"));
 		contribute(JerseyConfigurator.class, resourceConfig -> resourceConfig.packages(ProjectResource.class.getPackage().getName()));
 		contribute(JerseyConfigurator.class, resourceConfig -> resourceConfig.register(ClusterResource.class));
+		contribute(JerseyConfigurator.class, resourceConfig -> resourceConfig.register(McpHelperResource.class));
 	}
 
 	private void configureWeb() {

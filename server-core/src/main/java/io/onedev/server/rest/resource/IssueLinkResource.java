@@ -1,19 +1,28 @@
 package io.onedev.server.rest.resource;
 
-import io.onedev.server.entitymanager.IssueLinkManager;
-import io.onedev.server.model.IssueLink;
-import io.onedev.server.rest.annotation.Api;
-import org.apache.shiro.authz.UnauthorizedException;
+import static io.onedev.server.security.SecurityUtils.canAccessIssue;
+import static io.onedev.server.security.SecurityUtils.canEditIssueLink;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.NotAcceptableException;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static io.onedev.server.security.SecurityUtils.canAccessIssue;
-import static io.onedev.server.security.SecurityUtils.canEditIssueLink;
+import org.apache.shiro.authz.UnauthorizedException;
+
+import io.onedev.server.entitymanager.IssueLinkManager;
+import io.onedev.server.exception.LinkValidationException;
+import io.onedev.server.model.IssueLink;
+import io.onedev.server.rest.annotation.Api;
 
 @Path("/issue-links")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -41,31 +50,17 @@ public class IssueLinkResource {
 	@Api(order=200, description="Create new issue link")
 	@POST
 	public Long createLink(@NotNull IssueLink link) {
+		if (!canAccessIssue(link.getSource()) || !canAccessIssue(link.getTarget()))
+			throw new UnauthorizedException("No permission to access specified issues");
 		if (!canEditIssueLink(link.getSource().getProject(), link.getSpec())
-				&& !canEditIssueLink(link.getTarget().getProject(), link.getSpec())) {
-			throw new UnauthorizedException();
+				|| !canEditIssueLink(link.getTarget().getProject(), link.getSpec())) {
+			throw new UnauthorizedException("No permission to add specified link for specified issues");
+
 		}
-		if (link.getSource().equals(link.getTarget()))
-			throw new BadRequestException("Can not link to self");
-		if (link.getSpec().getOpposite() != null) {
-			if (link.getSource().getTargetLinks().stream().anyMatch(it -> it.getSpec().equals(link.getSpec()) && it.getTarget().equals(link.getTarget())))
-				throw new BadRequestException("Source issue already linked to target issue via specified link spec");
-			if (!link.getSpec().isMultiple() && link.getSource().getTargetLinks().stream().anyMatch(it -> it.getSpec().equals(link.getSpec())))
-				throw new BadRequestException("Link spec is not multiple and the source issue is already linked to another issue via this link spec");
-			if (!link.getSpec().getParsedIssueQuery(link.getSource().getProject()).matches(link.getTarget()))
-				throw new BadRequestException("Link spec not allowed to link to the target issue");
-			if (!link.getSpec().getOpposite().isMultiple() && link.getTarget().getSourceLinks().stream().anyMatch(it -> it.getSpec().equals(link.getSpec())))
-				throw new BadRequestException("Opposite side of link spec is not multiple and the target issue is already linked to another issue via this link spec");
-			if (!link.getSpec().getOpposite().getParsedIssueQuery(link.getSource().getProject()).matches(link.getSource()))
-				throw new BadRequestException("Opposite side of link spec not allowed to link to the source issue");
-		} else {
-			if (link.getSource().getLinks().stream().anyMatch(it -> it.getSpec().equals(link.getSpec()) && it.getLinked(link.getSource()).equals(link.getTarget()))) 
-				throw new BadRequestException("Specified issues already linked via specified link spec");
-			if (!link.getSpec().isMultiple() && link.getSource().getLinks().stream().anyMatch(it -> it.getSpec().equals(link.getSpec())))
-				throw new BadRequestException("Link spec is not multiple and source issue is already linked to another issue via this link spec");
-			var parsedIssueQuery = link.getSpec().getParsedIssueQuery(link.getSource().getProject());
-			if (!parsedIssueQuery.matches(link.getSource()) || !parsedIssueQuery.matches(link.getTarget())) 
-				throw new BadRequestException("Link spec not allowed to link specified issues");
+		try {
+			link.validate();
+		} catch (LinkValidationException e) {
+			throw new NotAcceptableException(e.getMessage());
 		}
 				
 		linkManager.create(link);

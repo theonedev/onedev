@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -55,9 +56,9 @@ public class IssueWorkResource {
 	@POST
 	public Long createWork(@NotNull IssueWork work) {
 		if (!subscriptionManager.isSubscriptionActive()) 
-			throw new UnsupportedOperationException("This feature requires an active subscription");
+			throw new NotAcceptableException("This feature requires an active subscription");
 		if (!work.getIssue().getProject().isTimeTracking())
-			throw new UnsupportedOperationException("Time tracking not enabled for project");
+			throw new NotAcceptableException("Time tracking not enabled for project");
 		
     	if (!SecurityUtils.canAccessIssue(work.getIssue()) 
 				|| !SecurityUtils.isAdministrator() && !work.getUser().equals(SecurityUtils.getAuthUser())) {

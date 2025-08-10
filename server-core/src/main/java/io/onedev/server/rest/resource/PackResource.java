@@ -26,7 +26,7 @@ import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.PackBlobReference;
 import io.onedev.server.model.PackLabel;
-import io.onedev.server.rest.InvalidParamException;
+import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.pack.PackQuery;
@@ -87,13 +87,13 @@ public class PackResource {
     		@QueryParam("count") @Api(example="100") int count) {
 
 		if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new InvalidParamsException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	PackQuery parsedQuery;
 		try {
 			parsedQuery = PackQuery.parse(null, query, true);
 		} catch (Exception e) {
-			throw new InvalidParamException("Error parsing query", e);
+			throw new InvalidParamsException("Error parsing query", e);
 		}
     	
     	return packManager.query(null, parsedQuery, false, offset, count);

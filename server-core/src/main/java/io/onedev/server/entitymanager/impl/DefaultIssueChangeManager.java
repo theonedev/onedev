@@ -41,6 +41,7 @@ import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueDescriptionRevisionManager;
@@ -86,6 +87,7 @@ import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTotalEstimatedTimeChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTotalSpentTimeChangeData;
+import io.onedev.server.model.support.issue.field.EmptyFieldsException;
 import io.onedev.server.model.support.issue.transitionspec.BranchUpdatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.BuildSuccessfulSpec;
 import io.onedev.server.model.support.issue.transitionspec.IssueStateTransitedSpec;
@@ -112,7 +114,6 @@ import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
-import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.concurrent.BatchWorkManager;
@@ -377,13 +378,14 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			create(change, null, sendNotifications);
 		}
 	}
-	
+
 	@Transactional
 	@Override
 	public void changeFields(Issue issue, Map<String, Object> fieldValues) {
 		Map<String, Input> prevFields = issue.getFieldInputs(); 
 		issue.setFieldValues(fieldValues);
-		if (!prevFields.equals(issue.getFieldInputs())) {
+		issue.checkEmptyFields();
+		if (!prevFields.equals(issue.getFieldInputs())) {			
 			issueFieldManager.saveFields(issue);
 			
 			IssueChange change = new IssueChange();
@@ -397,14 +399,16 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Transactional
 	@Override
 	public void changeState(Issue issue, String state, Map<String, Object> fieldValues, 
-			Collection<String> removeFields, @Nullable String comment) {
+			Collection<String> promptFields, Collection<String> removeFields, @Nullable String comment) {
 		String prevState = issue.getState();
 		Map<String, Input> prevFields = issue.getFieldInputs();
 		
 		issue.setState(state);
 		issue.removeFields(removeFields);
 		issue.setFieldValues(fieldValues);
-		
+		issue.addMissingFields(promptFields);
+		issue.checkEmptyFields();
+				
 		issueFieldManager.saveFields(issue);
 		
 		IssueChange change = new IssueChange();
@@ -436,6 +440,12 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				issueScheduleManager.syncIterations(issue, iterations);
 			
 			issue.setFieldValues(fieldValues);
+			try {
+				issue.checkEmptyFields();
+			} catch (EmptyFieldsException e) {
+				Collection<String> emptyFields = e.getEmptyFields();
+				throw new EmptyFieldsException("The following fields must be set for issue " + issue.getReference().toString(issue.getProject()) + ": " + String.join(", ", emptyFields), emptyFields);
+			}
 			issueFieldManager.saveFields(issue);
 
 			if (!prevState.equals(issue.getState()) 
@@ -496,7 +506,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 									String message = "State changed as issue " + issue.getReference().toString(each.getProject()) 
 											+ " transited to '" + issue.getState() + "'";
 									changeState(each, issueStateTransitedSpec.getToState(), new HashMap<>(), 
-											transition.getRemoveFields(), message);
+											new ArrayList<>(), transition.getRemoveFields(), message);
 								}
 							} finally {
 								Issue.pop();
@@ -545,7 +555,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 							for (Issue issue: issueManager.query(projectScope, query, true, 0, MAX_VALUE)) {
 								String message = "State changed as build " + build.getReference().toString(issue.getProject()) + " is successful";
 								changeState(issue, buildSuccessfulSpec.getToState(), new HashMap<>(), 
-										transition.getRemoveFields(), message);
+										new ArrayList<>(), transition.getRemoveFields(), message);
 							}
 						} finally {
 							Build.pop();
@@ -585,8 +595,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 						try {
 							for (Issue issue: issueManager.query(projectScope, query, true, 0, MAX_VALUE)) {
 								String statusName = request.getStatus().toString().toLowerCase();
-								changeState(issue, pullRequestSpec.getToState(), new HashMap<>(), 
-										transition.getRemoveFields(), 
+								changeState(issue, pullRequestSpec.getToState(), new HashMap<>(), new ArrayList<>(), transition.getRemoveFields(), 
 										"State changed as pull request " + request.getReference().toString(issue.getProject()) + " is " + statusName);
 							}
 						} finally {
@@ -697,8 +706,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 										String commitFQN = commit.name();
 										if (!project.equals(issue.getProject()))
 											commitFQN = project.getPath() + ":" + commitFQN;
-										changeState(issue, branchUpdatedSpec.getToState(), new HashMap<>(),
-												transition.getRemoveFields(),
+										changeState(issue, branchUpdatedSpec.getToState(), new HashMap<>(), new ArrayList<>(), transition.getRemoveFields(),
 												"State changed as code fixing the issue is committed (" + commitFQN + ")");
 									}
 								}
@@ -745,7 +753,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 								query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
 								
 								for (Issue issue: issueManager.query(null, query, true, 0, MAX_VALUE)) {
-									changeState(issue, noActivitySpec.getToState(), new HashMap<>(), 
+									changeState(issue, noActivitySpec.getToState(), new HashMap<>(), new ArrayList<>(), 
 											transition.getRemoveFields(), null);
 								}
 							}

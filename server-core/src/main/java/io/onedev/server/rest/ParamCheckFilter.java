@@ -45,12 +45,12 @@ public class ParamCheckFilter implements ContainerRequestFilter {
 			Set<String> suppliedQueryParams = new HashSet<>(uriInfo.getQueryParameters().keySet());
 			suppliedQueryParams.removeAll(definedQueryParams);
 			if (!suppliedQueryParams.isEmpty()) 
-				throw new InvalidParamException("Unexpected query params: " + suppliedQueryParams);
+				throw new InvalidParamsException("Unexpected query params: " + suppliedQueryParams);
 		}
 
 		requiredQueryParams.removeAll(uriInfo.getQueryParameters().keySet());
 		if (!requiredQueryParams.isEmpty()) 
-			throw new InvalidParamException("Missing query params: " + requiredQueryParams);
+			throw new InvalidParamsException("Missing query params: " + requiredQueryParams);
 	}
 
 	public static boolean isRequired(Parameter param) {

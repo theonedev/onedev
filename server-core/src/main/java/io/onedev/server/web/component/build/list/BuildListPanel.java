@@ -54,6 +54,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.BuildManager;
@@ -77,7 +78,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.RunJob;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.Input;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.BuildQueryBehavior;

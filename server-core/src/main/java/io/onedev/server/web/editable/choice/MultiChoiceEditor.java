@@ -62,8 +62,8 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 			@Override
 			protected Map<String, String> load() {
 				ComponentContext componentContext = new ComponentContext(MultiChoiceEditor.this);				
-				ComponentContext.push(componentContext);
 				if (getChoiceProvider().displayNames().length() != 0) {
+					ComponentContext.push(componentContext);
 					try {
 						return (Map<String, String>) ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().displayNames());
 					} finally {
@@ -81,8 +81,8 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 			@Override
 			protected Map<String, String> load() {
 				ComponentContext componentContext = new ComponentContext(MultiChoiceEditor.this);				
-				ComponentContext.push(componentContext);
 				if (getChoiceProvider().descriptions().length() != 0) {
+					ComponentContext.push(componentContext);
 					try {
 						return (Map<String, String>) ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().descriptions());
 					} finally {

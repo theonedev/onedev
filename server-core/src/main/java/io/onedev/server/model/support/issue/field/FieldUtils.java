@@ -1,6 +1,7 @@
 package io.onedev.server.model.support.issue.field;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +10,9 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.validation.ValidationException;
+import javax.ws.rs.BadRequestException;
 
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.MetaDataKey;
@@ -20,16 +23,16 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.model.support.issue.field.spec.SecretField;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.instance.FieldInstance;
 import io.onedev.server.model.support.issue.field.instance.SpecifiedValue;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.SecretField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
@@ -103,8 +106,9 @@ public class FieldUtils {
 		return null;
 	}
 	
-	public static Map<String, Object> getFieldValues(ComponentContext context, Serializable fieldBean, Collection<String> fieldNames) {
-		ComponentContext.push(context);
+	public static Map<String, Object> getFieldValues(@Nullable ComponentContext context, Serializable fieldBean, Collection<String> fieldNames) {
+		if (context != null)
+			ComponentContext.push(context);
 		try {
 			Map<String, Object> fieldValues = new HashMap<>();
 			BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
@@ -117,7 +121,8 @@ public class FieldUtils {
 			
 			return fieldValues;
 		} finally {
-			ComponentContext.pop();
+			if (context != null)
+				ComponentContext.pop();
 		}
 	}
 	
@@ -170,6 +175,30 @@ public class FieldUtils {
 				throw new ValidationException("Duplicate field: " + field.getName());
 		}
 		validateFieldMap(fieldSpecs, fieldMap);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> getFieldValues(Project project, Map<String, Serializable> fieldEdits) {
+		var settingManager = OneDev.getInstance(SettingManager.class);
+		var issueSetting = settingManager.getIssueSetting();
+		Map<String, Object> fieldValues = new HashMap<>();
+		for (Map.Entry<String, Serializable> entry : fieldEdits.entrySet()) {
+			var fieldName = entry.getKey();
+			var fieldSpec = issueSetting.getFieldSpec(fieldName);
+			if (fieldSpec == null)
+				throw new BadRequestException("Undefined field: " + fieldName);
+			if (!SecurityUtils.canEditIssueField(project, fieldName))
+				throw new UnauthorizedException("No permission to edit field: " + fieldName);
+
+			List<String> values = new ArrayList<>();
+			if (entry.getValue() instanceof String) {
+				values.add((String) entry.getValue());
+			} else if (entry.getValue() instanceof Collection) {
+				values.addAll((Collection<String>) entry.getValue());
+			}
+			fieldValues.put(entry.getKey(), fieldSpec.convertToObject(values));
+		}
+		return fieldValues;
 	}
 
 	public static boolean isFieldVisible(BeanDescriptor beanDescriptor, Serializable fieldBean, String fieldName) {

@@ -427,7 +427,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 							};
 						} else {
 							getIssueChangeManager().changeState(issue, getColumn(),
-									new HashMap<>(), transitionRef.get().getRemoveFields(), null);
+									new HashMap<>(), transitionRef.get().getPromptFields(), transitionRef.get().getRemoveFields(), null);
 							cardListPanel.onCardDropped(target, issueId, cardIndex, true);
 						}
 					} else {

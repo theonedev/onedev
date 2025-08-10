@@ -6,7 +6,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.rest.InvalidParamException;
+import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -92,11 +92,11 @@ public class TriggerJobResource {
 							String accessTokenValue, UriInfo uriInfo) {
 		Project project = projectManager.findByPath(projectPath);
 		if (project == null)
-			throw new InvalidParamException("Project not found: " + projectPath);
+			throw new InvalidParamsException("Project not found: " + projectPath);
 
 		var accessToken = accessTokenManager.findByValue(accessTokenValue);
 		if (accessToken == null)
-			throw new InvalidParamException("Invalid access token");
+			throw new InvalidParamsException("Invalid access token");
 		
 		ThreadContext.bind(accessToken.asSubject());
 		try {
@@ -104,7 +104,7 @@ public class TriggerJobResource {
 				throw new UnauthorizedException();
 
 			if (StringUtils.isNotBlank(branch) && StringUtils.isNotBlank(tag)) 
-				throw new InvalidParamException("Either branch or tag should be specified, but not both");
+				throw new InvalidParamsException("Either branch or tag should be specified, but not both");
 			
 			String refName;
 			if (branch != null)
@@ -116,7 +116,7 @@ public class TriggerJobResource {
 			
 			RevCommit commit = project.getRevCommit(refName, false);
 			if (commit == null)
-				throw new InvalidParamException("Ref not found: " + refName);
+				throw new InvalidParamsException("Ref not found: " + refName);
 			
 			Map<String, List<String>> jobParams = new HashMap<>();
 			for (Map.Entry<String, List<String>> entry: uriInfo.getQueryParameters().entrySet()) {

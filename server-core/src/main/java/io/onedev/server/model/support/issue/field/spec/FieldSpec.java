@@ -1,32 +1,40 @@
 package io.onedev.server.model.support.issue.field.spec;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+
+import org.apache.wicket.MarkupContainer;
+
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.FieldName;
 import io.onedev.server.annotation.Multiline;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ShowCondition;
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ValueIsNotAnyOf;
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ValueIsOneOf;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.annotation.FieldName;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
-import org.apache.wicket.MarkupContainer;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import java.util.*;
 
 @Editable
 public abstract class FieldSpec extends InputSpec {
@@ -361,6 +369,11 @@ public abstract class FieldSpec extends InputSpec {
 		onDeleteProject(usage, projectPath);
 		
 		return usage.prefix("custom field '" + getName() + "'");
+	}
+
+	public boolean isApplicable(Project project) {
+		var matcher = new PathMatcher();
+		return getApplicableProjects() == null || PatternSet.parse(getApplicableProjects()).matches(matcher, project.getPath());		
 	}
 	
 	protected void onDeleteProject(Usage usage, String projectPath) {

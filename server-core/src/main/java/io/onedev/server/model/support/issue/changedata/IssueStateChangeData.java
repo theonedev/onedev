@@ -3,8 +3,8 @@ package io.onedev.server.model.support.issue.changedata;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.Input;
 
 public class IssueStateChangeData extends IssueFieldChangeData {
 

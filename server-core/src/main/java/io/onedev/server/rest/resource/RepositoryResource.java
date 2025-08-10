@@ -15,7 +15,7 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.rest.InvalidParamException;
+import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.FileCreateOrUpdateRequest;
 import io.onedev.server.rest.resource.support.FileEditRequest;
@@ -138,7 +138,7 @@ public class RepositoryResource {
 		if (!SecurityUtils.canWriteCode(project)) 
 			throw new UnauthorizedException();
 		else if (project.getBranchRef(request.getBranchName()) != null) 
-			throw new InvalidParamException("Branch '" + request.getBranchName() + "' already exists");
+			throw new InvalidParamsException("Branch '" + request.getBranchName() + "' already exists");
 		else if (project.getBranchProtection(request.getBranchName(), user).isPreventCreation()) 
 			throw new ExplicitException("Branch creation prohibited by branch protection rule");
 		
@@ -217,7 +217,7 @@ public class RepositoryResource {
 		}
 
 		if (project.getTagRef(request.getTagName()) != null) {
-			throw new InvalidParamException("Tag '" + request.getTagName() + "' already exists");
+			throw new InvalidParamsException("Tag '" + request.getTagName() + "' already exists");
 		} else {
 			User user = SecurityUtils.getUser();
 			gitService.createTag(project, request.getTagName(), request.getRevision(), user.asPerson(), 
@@ -257,13 +257,13 @@ public class RepositoryResource {
 		}
 		
     	if (count > MAX_COMMITS)
-    		throw new InvalidParamException("Count should not be greater than " + MAX_COMMITS);
+    		throw new InvalidParamsException("Count should not be greater than " + MAX_COMMITS);
 
     	CommitQuery parsedQuery;
 		try {
 			parsedQuery = CommitQuery.parse(project, query, true);
 		} catch (Exception e) {
-			throw new InvalidParamException("Error parsing query", e);
+			throw new InvalidParamsException("Error parsing query", e);
 		}
     	
 		RevListOptions options = new RevListOptions();
@@ -311,7 +311,7 @@ public class RepositoryResource {
 		BlobIdent blobIdent = new BlobIdent(project, revisionAndPathSegments);
 
 		if (!blobIdent.isTree()) {
-			throw new InvalidParamException("Specified path is not a directory: " + blobIdent.path);
+			throw new InvalidParamsException("Specified path is not a directory: " + blobIdent.path);
 		}
 
 		ObjectId revId = project.getObjectId(blobIdent.revision, true);
@@ -343,7 +343,7 @@ public class RepositoryResource {
 		BlobIdent blobIdent = new BlobIdent(project, revisionAndPathSegments);
 
 		if (!blobIdent.isFile()) {
-			throw new InvalidParamException("Specified path is not a file: " + blobIdent.path);
+			throw new InvalidParamsException("Specified path is not a file: " + blobIdent.path);
 		}
 
 		Blob blob = project.getBlob(blobIdent, true);
@@ -375,14 +375,14 @@ public class RepositoryResource {
 			revisionAndPath = RevisionAndPath.parse(project, revisionAndPathSegments);
 			RefFacade ref = project.getBranchRef(revisionAndPath.getRevision());
 			if (ref == null) 
-				throw new InvalidParamException("Not a branch: " + revisionAndPath.getRevision());
+				throw new InvalidParamsException("Not a branch: " + revisionAndPath.getRevision());
 			refName = ref.getName();
 			oldCommitId = ref.getObjectId();
 			if (revisionAndPath.getPath() == null)
-				throw new InvalidParamException("Branch and file should be specified");
+				throw new InvalidParamsException("Branch and file should be specified");
 		} else {
 			if (revisionAndPathSegments.size() < 2)
-				throw new InvalidParamException("Branch and file should be specified");
+				throw new InvalidParamsException("Branch and file should be specified");
 			revisionAndPath = new RevisionAndPath(
 					revisionAndPathSegments.get(0), 
 					StringUtils.join(revisionAndPathSegments.subList(1, revisionAndPathSegments.size())));

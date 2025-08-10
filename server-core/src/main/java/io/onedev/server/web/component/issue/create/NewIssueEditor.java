@@ -108,7 +108,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
 		Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
 
-		Collection<String> fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(getProject());
+		var fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(getProject());
 		issue.setFieldValues(FieldUtils.getFieldValues(new ComponentContext(this), fieldBean, 
 				FieldUtils.getEditableFields(getProject(), fieldNames)));
 		
@@ -409,7 +409,8 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		issue.setConfidential(confidentialInput.getConvertedInput());
 		
 		fieldEditor.convertInput();
-		Collection<String> fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(getProject());
+		
+		var fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(getProject());
 		issue.setFieldValues(FieldUtils.getFieldValues(fieldEditor.newComponentContext(), 
 				fieldEditor.getConvertedInput(), fieldNames));
 		

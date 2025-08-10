@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.model.Iteration;
-import io.onedev.server.util.Input;
 
 public class IssueBatchUpdateData extends IssueFieldChangeData {
 

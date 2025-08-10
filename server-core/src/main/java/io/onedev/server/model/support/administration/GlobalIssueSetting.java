@@ -1,6 +1,7 @@
 package io.onedev.server.model.support.administration;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -17,8 +18,6 @@ import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.match.Matcher;
-import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
@@ -41,9 +40,9 @@ import io.onedev.server.model.support.issue.transitionspec.BranchUpdatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.IssueStateTransitedSpec;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
 import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
+import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
-import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -750,17 +749,31 @@ public class GlobalIssueSetting implements Serializable {
 		}
 		return null;
 	}
-	
-	public Collection<String> getPromptFieldsUponIssueOpen(Project project) {
-		Matcher matcher = new PathMatcher();
-		return getFieldSpecs().stream()
-				.filter(it->it.isPromptUponIssueOpen() && (it.getApplicableProjects() == null || PatternSet.parse(it.getApplicableProjects()).matches(matcher, project.getPath())))
-				.map(it->it.getName())
-				.collect(Collectors.toList());
-	}
-	
+		
 	public int getStateOrdinal(String state) {
 		return getStateSpecs().indexOf(getStateSpec(state));
+	}
+
+	public ManualSpec getManualSpec(Issue issue, String state) {
+		for (var transition: getTransitionSpecs()) {
+			if (transition instanceof ManualSpec) {
+				var manualSpec = (ManualSpec) transition;
+				if (manualSpec.canTransit(issue, state) && manualSpec.isAuthorized(issue)) {
+					return manualSpec;
+				}
+			}
+		}
+		var message = MessageFormat.format(
+				"No applicable manual transition spec found for current user (issue: {0}, from state: {1}, to state: {2})",
+				issue.getReference().toString(), issue.getState(), state);
+		throw new InvalidParamsException(message);
+	}
+
+	public Collection<String> getPromptFieldsUponIssueOpen(Project project) {
+		return getFieldSpecs().stream()
+				.filter(it -> it.isPromptUponIssueOpen() && it.isApplicable(project))
+				.map(it -> it.getName())
+				.collect(Collectors.toList());		
 	}
 	
 }

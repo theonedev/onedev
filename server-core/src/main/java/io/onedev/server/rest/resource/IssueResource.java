@@ -20,6 +20,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -34,6 +35,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.SubscriptionManager;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.AuditManager;
@@ -54,8 +56,10 @@ import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.field.EmptyFieldsException;
+import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
-import io.onedev.server.rest.InvalidParamException;
+import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.resource.support.RestConstants;
@@ -94,12 +98,14 @@ public class IssueResource {
 
 	private final UrlManager urlManager;
 
+	private final SubscriptionManager subscriptionManager;
+
 	@Inject
 	public IssueResource(SettingManager settingManager, IssueManager issueManager, 
 						 IssueChangeManager issueChangeManager, IterationManager iterationManager, 
 						 ProjectManager projectManager, ObjectMapper objectMapper, 
 						 AuditManager auditManager, AttachmentManager attachmentManager, 
-						 UrlManager urlManager) {
+						 UrlManager urlManager, SubscriptionManager subscriptionManager) {
 		this.settingManager = settingManager;
 		this.issueManager = issueManager;
 		this.issueChangeManager = issueChangeManager;
@@ -109,6 +115,7 @@ public class IssueResource {
 		this.auditManager = auditManager;
 		this.attachmentManager = attachmentManager;
 		this.urlManager = urlManager;
+		this.subscriptionManager = subscriptionManager;
 	}
 
 	@Api(order=100)
@@ -252,14 +259,14 @@ public class IssueResource {
     		@QueryParam("count") @Api(example="100") int count) {
 		
     	if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new InvalidParamsException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	IssueQuery parsedQuery;
 		try {
 			IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
 			parsedQuery = IssueQuery.parse(null, query, option, true);
 		} catch (Exception e) {
-			throw new InvalidParamException("Error parsing query", e);
+			throw new InvalidParamsException("Error parsing query", e);
 		}
 
 		var typeReference = new TypeReference<Map<String, Object>>() {};		
@@ -291,8 +298,17 @@ public class IssueResource {
     	if (!SecurityUtils.canAccessProject(project))
 			throw new UnauthorizedException();
 
-		if (!data.getIterationIds().isEmpty() && !SecurityUtils.canScheduleIssues(project))
-			throw new UnauthorizedException("No permission to schedule issue");
+		if (data.getIterationIds() != null && !data.getIterationIds().isEmpty() && !SecurityUtils.canScheduleIssues(project))
+			throw new UnauthorizedException("No permission to schedule issue. Remove iterationIds if you want to create issue without scheduling it.");
+
+		if (data.getOwnEstimatedTime() != null) {
+ 			if (!subscriptionManager.isSubscriptionActive())			
+				throw new NotAcceptableException("An active subscription is required for this feature");
+			if (!project.isTimeTracking())
+				throw new NotAcceptableException("Time tracking needs to be enabled for the project");
+			if (!SecurityUtils.canScheduleIssues(project))
+				throw new UnauthorizedException("Issue schedule permission required to set own estimated time. Remove ownEstimatedTime if you want to create issue without setting own estimated time.");
+		}
 
 		var issueSetting = settingManager.getIssueSetting();
 		
@@ -304,20 +320,29 @@ public class IssueResource {
 		issue.setSubmitDate(new Date());
 		issue.setSubmitter(user);
 		issue.setState(issueSetting.getInitialStateSpec().getName());
-		issue.setOwnEstimatedTime(data.getOwnEstimatedTime());
+		if (data.getOwnEstimatedTime() != null)
+			issue.setOwnEstimatedTime(data.getOwnEstimatedTime());
 
-		for (Long iterationId : data.getIterationIds()) {
-			Iteration iteration = iterationManager.load(iterationId);
-			if (!iteration.getProject().isSelfOrAncestorOf(project))
-				throw new BadRequestException("Iteration is not defined in project hierarchy of the issue");
-			IssueSchedule schedule = new IssueSchedule();
-			schedule.setIssue(issue);
-			schedule.setIteration(iteration);
-			issue.getSchedules().add(schedule);
+		if (data.getIterationIds() != null) {
+			for (Long iterationId : data.getIterationIds()) {
+				Iteration iteration = iterationManager.load(iterationId);
+				if (!iteration.getProject().isSelfOrAncestorOf(project))
+					throw new BadRequestException("Iteration is not defined in project hierarchy of the issue");
+				IssueSchedule schedule = new IssueSchedule();
+				schedule.setIssue(issue);
+				schedule.setIteration(iteration);
+				issue.getSchedules().add(schedule);
+			}
 		}
 
-		issue.setFieldValues(getFieldObjs(issue, data.fields));		
-		issueManager.open(issue);
+		issue.setFieldValues(FieldUtils.getFieldValues(project, data.fields));
+
+		try {
+			issueManager.open(issue);
+		} catch (EmptyFieldsException e) {
+			throw new InvalidParamsException(e.getMessage());
+		}
+
 		return issue.getId();
     }
 	
@@ -357,11 +382,15 @@ public class IssueResource {
 	@Api(order=1275)
 	@Path("/{issueId}/own-estimated-time")
 	@POST
-	public Response setOwnEstimatedTime(@PathParam("issueId") Long issueId, int hours) {
+	public Response setOwnEstimatedTime(@PathParam("issueId") Long issueId, int minutes) {
 		Issue issue = issueManager.load(issueId);
+		if (!subscriptionManager.isSubscriptionActive())
+			throw new NotAcceptableException("An active subscription is required for this feature");
+		if (!issue.getProject().isTimeTracking())
+			throw new NotAcceptableException("Time tracking needs to be enabled for the project");
 		if (!SecurityUtils.canScheduleIssues(issue.getProject()))
-			throw new UnauthorizedException();
-		issueChangeManager.changeOwnEstimatedTime(issue, hours);
+			throw new UnauthorizedException("Issue schedule permission required to set own estimated time");
+		issueChangeManager.changeOwnEstimatedTime(issue, minutes);
 		return Response.ok().build();
 	}
 	
@@ -371,13 +400,13 @@ public class IssueResource {
     public Response setIterations(@PathParam("issueId") Long issueId, List<Long> iterationIds) {
 		Issue issue = issueManager.load(issueId);
     	if (!SecurityUtils.canScheduleIssues(issue.getProject()))
-			throw new UnauthorizedException("No permission to schedule issue");
+			throw new UnauthorizedException("Issue schedule permission required to set iterations");
 		
     	Collection<Iteration> iterations = new HashSet<>();
     	for (Long iterationId: iterationIds) {
     		Iteration iteration = iterationManager.load(iterationId);
 	    	if (!iteration.getProject().isSelfOrAncestorOf(issue.getProject()))
-	    		throw new InvalidParamException("Iteration is not defined in project hierarchy of the issue");
+	    		throw new InvalidParamsException("Iteration is not defined in project hierarchy of the issue");
 	    	iterations.add(iteration);
     	}
     	
@@ -399,7 +428,11 @@ public class IssueResource {
 			throw new UnauthorizedException();
 		}
 
-		issueChangeManager.changeFields(issue, getFieldObjs(issue, fields));
+		try {
+			issueChangeManager.changeFields(issue, FieldUtils.getFieldValues(issue.getProject(), fields));
+		} catch (EmptyFieldsException e) {
+			throw new InvalidParamsException(e.getMessage());
+		}
 		return Response.ok().build();
     }
 
@@ -409,24 +442,20 @@ public class IssueResource {
 		example.put("field2", new String[]{"value1", "value2"});
 		return example;
 	}
-	
+
 	@Api(order=1500)
 	@Path("/{issueId}/state-transitions")
     @POST
     public Response transitState(@PathParam("issueId") Long issueId, @NotNull @Valid StateTransitionData data) {
 		Issue issue = issueManager.load(issueId);
-		var applicableTransitions = new ArrayList<ManualSpec>();
-		for (var transition: settingManager.getIssueSetting().getTransitionSpecs()) {
-			if (transition instanceof ManualSpec && ((ManualSpec)transition).canTransit(issue, data.getState())) 
-				applicableTransitions.add((ManualSpec) transition);
-		}
-		if (applicableTransitions.isEmpty()) 
-			throw new BadRequestException("No applicable transition spec for: " + issue.getState() + "->" + data.getState());
-		if (applicableTransitions.stream().noneMatch(it->it.isAuthorized(issue)))
-			throw new UnauthorizedException();
+		ManualSpec transition = settingManager.getIssueSetting().getManualSpec(issue, data.getState());
     	
-		issueChangeManager.changeState(issue, data.getState(), getFieldObjs(issue, data.getFields()), 
-				data.getRemoveFields(), data.getComment());
+		var fieldValues = FieldUtils.getFieldValues(issue.getProject(), data.getFields());
+		try {
+			issueChangeManager.changeState(issue, data.getState(), fieldValues, transition.getPromptFields(), transition.getRemoveFields(), data.getComment());
+		} catch (EmptyFieldsException e) {
+			throw new InvalidParamsException(e.getMessage());
+		}
 		return Response.ok().build();
     }
 
@@ -457,29 +486,6 @@ public class IssueResource {
 		auditManager.audit(issue.getProject(), "deleted issue \"" + issue.getReference().toString(issue.getProject()) + "\" via RESTful API", oldAuditContent, null);
     	return Response.ok().build();
     }
-
-	@SuppressWarnings("unchecked")
-	private Map<String, Object> getFieldObjs(Issue issue, Map<String, Serializable> fields) {
-		var issueSetting = settingManager.getIssueSetting();
-		Map<String, Object> fieldObjs = new HashMap<>();
-		for (Map.Entry<String, Serializable> entry: fields.entrySet()) {
-			var fieldName = entry.getKey();
-			var fieldSpec = issueSetting.getFieldSpec(fieldName);
-			if (fieldSpec == null)
-				throw new BadRequestException("Undefined field: " + fieldName);
-			if (!SecurityUtils.canEditIssueField(issue.getProject(), fieldName))
-				throw new UnauthorizedException("No permission to edit field: " + fieldName);
-
-			List<String> values = new ArrayList<>();
-			if (entry.getValue() instanceof String) {
-				values.add((String) entry.getValue());
-			} else if (entry.getValue() instanceof Collection) {
-				values.addAll((Collection<String>) entry.getValue());
-			}
-			fieldObjs.put(entry.getKey(), fieldSpec.convertToObject(values));
-		}
-		return fieldObjs;
-	}
 	
 	@EntityCreate(Issue.class)
 	public static class IssueOpenData implements Serializable {
@@ -498,8 +504,8 @@ public class IssueResource {
 		@Api(order=400)
 		private boolean confidential;
 		
-		@Api(order=450, description = "Own estimated time in hours")
-		private int ownEstimatedTime;
+		@Api(order=450, description = "Own estimated time in minutes. Only be used when subscription is active and time tracking is enabled")
+		private Integer ownEstimatedTime;
 		
 		@Api(order=500)
 		private List<Long> iterationIds = new ArrayList<>();
@@ -541,11 +547,11 @@ public class IssueResource {
 			this.confidential = confidential;
 		}
 
-		public int getOwnEstimatedTime() {
+		public Integer getOwnEstimatedTime() {
 			return ownEstimatedTime;
 		}
 
-		public void setOwnEstimatedTime(int ownEstimatedTime) {
+		public void setOwnEstimatedTime(Integer ownEstimatedTime) {
 			this.ownEstimatedTime = ownEstimatedTime;
 		}
 		
@@ -581,10 +587,7 @@ public class IssueResource {
 		
 		@Api(order=200, exampleProvider = "getFieldsExample")
 		private Map<String, Serializable> fields = new HashMap<>();
-		
-		@Api(order=300)
-		private Collection<String> removeFields = new HashSet<>();
-		
+				
 		@Api(order=400)
 		private String comment;
 
@@ -604,15 +607,6 @@ public class IssueResource {
 
 		public void setFields(Map<String, Serializable> fields) {
 			this.fields = fields;
-		}
-
-		@NotNull
-		public Collection<String> getRemoveFields() {
-			return removeFields;
-		}
-
-		public void setRemoveFields(Collection<String> removeFields) {
-			this.removeFields = removeFields;
 		}
 
 		public String getComment() {

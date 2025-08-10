@@ -1,4 +1,4 @@
-package io.onedev.server.util;
+package io.onedev.server.buildspecmodel.inputspec;
 
 import java.io.Serializable;
 import java.util.List;
@@ -11,8 +11,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 
 public class Input implements Serializable {
@@ -82,7 +80,7 @@ public class Input implements Serializable {
 				else 
 					displayValue = "" + getValues();
 				
-				logger.error("Error converting field value (field: {}, value: {}, error: {})", 
+				logger.error("Error converting input (name: {}, value: {}, error: {})", 
 						getName(), displayValue, e.getMessage());
 				return null;
 			}

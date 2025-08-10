@@ -23,7 +23,7 @@ import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.model.Agent;
-import io.onedev.server.rest.InvalidParamException;
+import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -78,7 +78,7 @@ public class AgentResource {
 		try {
 			parsedQuery = AgentQuery.parse(query, false);
 		} catch (Exception e) {
-			throw new InvalidParamException("Error parsing query", e);
+			throw new InvalidParamsException("Error parsing query", e);
 		}
     	
     	return agentManager.query(parsedQuery, offset, count);

@@ -24,7 +24,7 @@ import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentToken;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.rest.InvalidParamException;
+import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.security.SecurityUtils;
@@ -76,7 +76,7 @@ public class AgentTokenResource {
 			throw new UnauthorizedException();
 		
     	if (count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new InvalidParamsException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
 		EntityCriteria<AgentToken> criteria = EntityCriteria.of(AgentToken.class);
 		

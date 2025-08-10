@@ -1,6 +1,7 @@
 package io.onedev.server.event.project.issue;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
@@ -8,7 +9,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.util.CommitAware;
-import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;

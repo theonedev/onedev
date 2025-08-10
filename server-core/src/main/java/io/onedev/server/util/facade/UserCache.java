@@ -36,7 +36,7 @@ public class UserCache extends MapProxy<Long, UserFacade> {
 	@Nullable
 	public UserFacade findByFullName(String fullName) {
 		for (UserFacade facade: values()) {
-			if (fullName.equals(facade.getFullName()))
+			if (fullName.equalsIgnoreCase(facade.getFullName()))
 				return facade;
 		}
 		return null;

@@ -50,6 +50,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.field.EmptyFieldsException;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -311,8 +312,14 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						
 						Map<String, Object> fieldValues = FieldUtils.getFieldValues(customFieldsEditor.newComponentContext(), 
 								customFieldsBean, selectedFields);
-						OneDev.getInstance(IssueChangeManager.class).batchUpdate(
-								getIssueIterator(), state, confidential, iterations, fieldValues, comment, sendNotifications);
+						try {
+							OneDev.getInstance(IssueChangeManager.class).batchUpdate(
+									getIssueIterator(), state, confidential, iterations, fieldValues, comment, sendNotifications);
+						} catch (EmptyFieldsException e) {
+							form.error(e.getMessage());
+							target.add(form);
+							return;
+						}
 						onUpdated(target);
 					}
 					

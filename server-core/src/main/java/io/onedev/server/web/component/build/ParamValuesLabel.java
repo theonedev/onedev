@@ -7,9 +7,9 @@ import org.apache.wicket.model.Model;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.Input;
 
 public class ParamValuesLabel extends Label {
 

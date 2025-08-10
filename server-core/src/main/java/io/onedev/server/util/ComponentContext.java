@@ -39,7 +39,7 @@ public class ComponentContext implements Serializable {
 
 	@Nullable
 	public static ComponentContext get() {
-		if (!stack.get().isEmpty()) { 
+		if (!stack.get().isEmpty()) { 			
 			return stack.get().peek();
 		} else {
 			Page page = WicketUtils.getPage();
