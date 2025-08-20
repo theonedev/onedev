@@ -81,11 +81,16 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("<div><span>Search Text</span> <span class='font-size-sm text-muted'>in default branch</span></div>", 
 			"<div><span>Buscar Texto</span> <span class='font-size-sm text-muted'>no branch padrão</span></div>");
 		m.put("<i>No Name</i>", "<i>Sem Nome</i>");
+		m.put("<span class=\"keycap ml-3 mr-1\">esc</span> to close", "<span class=\"keycap ml-3 mr-1\">esc</span> para fechar");
+		m.put("<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> to move", 
+			"<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> para mover");
 		m.put("<span class=\"keycap mr-1\">&uarr;</span><span class=\"keycap\">&darr;</span> to navigate. <span class=\"keycap\">Esc</span> to close", 
 			"<span class=\"keycap mr-1\">&uarr;</span><span class=\"keycap\">&darr;</span> para navegar. <span class=\"keycap\">Esc</span> para fechar");
 		m.put("<span class='keycap'>Tab</span> or <span class='keycap'>Enter</span> to complete.", 
 			"<span class='keycap'>Tab</span> ou <span class='keycap'>Enter</span> para completar.");
 		m.put("<span class='keycap'>Tab</span> to complete.", "<span class='keycap'>Tab</span> para completar.");
+		m.put("<span class='text-nowrap'><span class='keycap'>Enter</span> to go</span>", "<span class='text-nowrap'><span class='keycap'>Enter</span> para ir</span>");
+		m.put("<span class='text-nowrap'><span class='keycap'>Tab</span> to search</span>", "<span class='text-nowrap'><span class='keycap'>Tab</span> para pesquisar</span>");
 		m.put("<span wicket:id=\"activityCount\"></span> activities", "<span wicket:id=\"activityCount\"></span> atividades");
 		m.put("<svg class='icon mr-2'><use xlink:href='%s'/></svg> Define job secrets to be used in build spec. Secrets with <b>same name</b> can be defined. For a particular name, the first authorized secret with that name will be used (search in current project first, then search in parent projects). Note that secret value containing line breaks or less than <b>%d</b> characters will not be masked in build log", 
 			"<svg class='icon mr-2'><use xlink:href='%s'/></svg> Defina segredos de trabalho para serem usados na especificação de build. Segredos com <b>mesmo nome</b> podem ser definidos. Para um nome específico, o primeiro segredo autorizado com esse nome será usado (busca primeiro no projeto atual, depois nos projetos pai). Note que valores de segredos contendo quebras de linha ou menos de <b>%d</b> caracteres não serão mascarados no log de build");
@@ -264,6 +269,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Another pull request already open for this change", "Já existe uma solicitação de pull aberta para esta alteração");
 		m.put("Any agent", "Qualquer agente");
 		m.put("Any branch", "Qualquer branch");
+		m.put("Any commit message", "Qualquer mensagem de commit");
 		m.put("Any domain", "Qualquer domínio");
 		m.put("Any file", "Qualquer arquivo");
 		m.put("Any issue", "Qualquer problema");
@@ -281,6 +287,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Applicable Branches", "Branches aplicáveis");
 		m.put("Applicable Builds", "Builds aplicáveis");
 		m.put("Applicable Code Comments", "Comentários de código aplicáveis");
+		m.put("Applicable Commit Messages", "Mensagens de Commit Aplicáveis");
 		m.put("Applicable Commits", "Commits aplicáveis");
 		m.put("Applicable Images", "Imagens aplicáveis");
 		m.put("Applicable Issues", "Problemas aplicáveis");
@@ -303,6 +310,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Arguments", "Argumentos");
 		m.put("Artifacts", "Artefatos");
 		m.put("Artifacts to Retrieve", "Artefatos para recuperar");
+		m.put("As long as a feature can be accessed via url, you can input part of the url to match and jump", 
+			"Desde que uma funcionalidade possa ser acessada via url, você pode inserir parte da url para corresponder e pular");
 		m.put("Ascending", "Ascendente");
 		m.put("Assignees", "Atribuídos");
 		m.put("Assignees Issue Field", "Campo de problema dos atribuídos");
@@ -692,6 +701,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Collapse all", "Colapsar tudo");
 		m.put("Color", "Cor");
 		m.put("Columns", "Colunas");
+		m.put("Command Palette", "Paleta de Comandos");
 		m.put("Commands", "Comandos");
 		m.put("Comment", "Comentário");
 		m.put("Comment Content", "Conteúdo do Comentário");
@@ -2135,6 +2145,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("No services defined", "Sem serviços definidos");
 		m.put("No start/due date", "Sem data de início/vencimento");
 		m.put("No step templates defined", "Sem modelos de etapa definidos");
+		m.put("No suggestions", "Sem sugestões");
 		m.put("No tags found", "Sem tags encontradas");
 		m.put("No timesheets defined", "Sem folhas de ponto definidas");
 		m.put("No user found with login name or email: ", "Nenhum usuário encontrado com nome de login ou email:");
@@ -2437,6 +2448,8 @@ public class Translation_pt extends TranslationResourceBundle {
 			"Opcionalmente especifique branches separados por espaço aplicáveis para este gatilho. Use '**', '*' ou '?' para <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>correspondência de curinga de caminho</a>. Prefixe com '-' para excluir. Deixe vazio para o branch padrão");
 		m.put("Optionally specify space-separated branches to check. Use '**' or '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all branches", 
 			"Opcionalmente especifique branches separados por espaço para verificar. Use '**' ou '*' ou '?' para <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>correspondência de curinga de caminho</a>. Prefixe com '-' para excluir. Deixe vazio para corresponder a todos os branches");
+		m.put("Optionally specify space-separated commit messages applicable for this transition. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all", 
+			"Opcionalmente, especifique mensagens de commit separadas por espaço aplicáveis para esta transição. Use '*' ou '?' para correspondência curinga. Prefixe com '-' para excluir. Deixe vazio para corresponder a todos");
 		m.put("Optionally specify space-separated files to check. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all files", 
 			"Opcionalmente especifique arquivos separados por espaço para verificar. Use '**', '*' ou '?' para <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>correspondência de curinga de caminho</a>. Prefixe com '-' para excluir. Deixe vazio para corresponder a todos os arquivos");
 		m.put("Optionally specify space-separated jobs applicable for this transition. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all", 
@@ -2669,6 +2682,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Post Url", "URL de Postagem");
 		m.put("PowerShell", "PowerShell");
 		m.put("Prefix Pattern", "Padrão de Prefixo");
+		m.put("Prefix the title with <code>WIP</code> or <code>[WIP]</code> to mark the pull request as work in progress", 
+			"Prefixe o título com <code>WIP</code> ou <code>[WIP]</code> para marcar o pull request como trabalho em andamento");
 		m.put("Prepend", "Adicionar ao Início");
 		m.put("Preserve Days", "Preservar Dias");
 		m.put("Preset Commit Message", "Mensagem de Commit Pré-definida");
@@ -2807,6 +2822,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Pull request is in error: {0}", "Pull request está com erro: {0}");
 		m.put("Pull request is merged", "Pull request foi mesclado");
 		m.put("Pull request is opened", "Pull request foi aberto");
+		m.put("Pull request is still a work in progress", "O pull request ainda está em andamento");
+		m.put("Pull request is work in progress", "O pull request está em andamento");
 		m.put("Pull request list", "Lista de pull requests");
 		m.put("Pull request merge", "Mesclar pull request");
 		m.put("Pull request not exist or access denied", "Pull request não existe ou acesso negado");
@@ -3891,8 +3908,7 @@ public class Translation_pt extends TranslationResourceBundle {
 			"Esta etapa só pode ser executada por um executor compatível com Docker. Ela é executada sob <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>espaço de trabalho do trabalho</a>");
 		m.put("This step publishes specified files to be served as project web site. Project web site can be accessed publicly via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>", 
 			"Esta etapa publica os arquivos especificados para serem servidos como site web do projeto. O site web do projeto pode ser acessado publicamente via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>");
-		m.put("This step pulls specified refs from remote. For security reason, it is only allowed to run from default branch", 
-			"Esta etapa puxa refs especificados do remoto. Por razões de segurança, só é permitido executar a partir do branch padrão");
+		m.put("This step pulls specified refs from remote", "Esta etapa puxa refs especificadas do remoto");
 		m.put("This step pushes current commit to same ref on remote", "Esta etapa empurra o commit atual para o mesmo ref no remoto");
 		m.put("This step sets up Renovate cache. Place it before Renovate step if you want to use it", 
 			"Esta etapa configura o cache do Renovate. Coloque-a antes da etapa do Renovate se quiser usá-lo");
@@ -4371,8 +4387,10 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("cluster:lead", "líder");
 		m.put("cmd-k to show command palette", "cmd-k para mostrar o painel de comandos");
 		m.put("code commit", "commit de código");
-		m.put("code is committed to any branch", "código é commitado em qualquer branch");
+		m.put("code is committed", "o código está comprometido");
 		m.put("code is committed to branches \"{0}\"", "código é commitado nos branches \"{0}\"");
+		m.put("code is committed to branches \"{0}\" with message \"{1}\"", "o código está comprometido nos branches \"{0}\" com a mensagem \"{1}\"");
+		m.put("code is committed with message \"{0}\"", "o código está comprometido com a mensagem \"{0}\"");
 		m.put("commit message contains", "mensagem de commit contém");
 		m.put("commits", "commits");
 		m.put("committed by", "commitado por");

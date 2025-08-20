@@ -93,11 +93,16 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("<div><span>Search Text</span> <span class='font-size-sm text-muted'>in default branch</span></div>", 
 			"<div><span>搜索文本</span> <span class='font-size-sm text-muted'>在默认分支中</span></div>");
 		m.put("<i>No Name</i>", "<i>无名称</i>");
+		m.put("<span class=\"keycap ml-3 mr-1\">esc</span> to close", "<span class=\"keycap ml-3 mr-1\">esc</span> 关闭");
+		m.put("<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> to move", 
+			"<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> 移动");
 		m.put("<span class=\"keycap mr-1\">&uarr;</span><span class=\"keycap\">&darr;</span> to navigate. <span class=\"keycap\">Esc</span> to close", 
 			"按 <span class=\"keycap mr-1\">&uarr;</span><span class=\"keycap\">&darr;</span> 导航。按 <span class=\"keycap\">Esc</span> 关闭");
 		m.put("<span class='keycap'>Tab</span> or <span class='keycap'>Enter</span> to complete.", 
 			"按 <span class='keycap'>Tab</span> 或 <span class='keycap'>Enter</span> 完成。");
 		m.put("<span class='keycap'>Tab</span> to complete.", "按 <span class='keycap'>Tab</span> 完成。");
+		m.put("<span class='text-nowrap'><span class='keycap'>Enter</span> to go</span>", "<span class='text-nowrap'><span class='keycap'>Enter</span> 进入</span>");
+		m.put("<span class='text-nowrap'><span class='keycap'>Tab</span> to search</span>", "<span class='text-nowrap'><span class='keycap'>Tab</span> 搜索</span>");
 		m.put("<span wicket:id=\"activityCount\"></span> activities", "<span wicket:id=\"activityCount\"></span> 个活动");
 		m.put("<svg class='icon mr-2'><use xlink:href='%s'/></svg> Define job secrets to be used in build spec. Secrets with <b>same name</b> can be defined. For a particular name, the first authorized secret with that name will be used (search in current project first, then search in parent projects). Note that secret value containing line breaks or less than <b>%d</b> characters will not be masked in build log", 
 			"<svg class='icon mr-2'><use xlink:href='%s'/></svg> 定义要在构建规范中使用的任务密钥。可以定义具有<b>相同名称</b>的密钥。对于特定名称，将使用具有该名称的第一个授权密钥（首先在当前项目中搜索，然后在父项目中搜索）。注意，包含换行符或少于<b>%d</b>个字符的密钥值在构建日志中不会被屏蔽");
@@ -276,6 +281,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Another pull request already open for this change", "另一个合并请求已为此更改打开");
 		m.put("Any agent", "任何代理");
 		m.put("Any branch", "任何分支");
+		m.put("Any commit message", "任何提交信息");
 		m.put("Any domain", "任何域");
 		m.put("Any file", "任何文件");
 		m.put("Any issue", "任何工单");
@@ -293,6 +299,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Applicable Branches", "适用分支");
 		m.put("Applicable Builds", "适用构建");
 		m.put("Applicable Code Comments", "适用代码评论");
+		m.put("Applicable Commit Messages", "适用的提交信息");
 		m.put("Applicable Commits", "适用提交");
 		m.put("Applicable Images", "适用镜像");
 		m.put("Applicable Issues", "适用工单");
@@ -315,6 +322,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Arguments", "参数");
 		m.put("Artifacts", "制品");
 		m.put("Artifacts to Retrieve", "要获取的制品");
+		m.put("As long as a feature can be accessed via url, you can input part of the url to match and jump", 
+			"只要功能可以通过 url 访问，您可以输入部分 url 进行匹配和跳转");
 		m.put("Ascending", "升序");
 		m.put("Assignees", "分配给");
 		m.put("Assignees Issue Field", "受让人工单字段");
@@ -704,6 +713,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Collapse all", "全部折叠");
 		m.put("Color", "颜色");
 		m.put("Columns", "列");
+		m.put("Command Palette", "命令面板");
 		m.put("Commands", "命令");
 		m.put("Comment", "评论");
 		m.put("Comment Content", "评论内容");
@@ -2147,6 +2157,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No services defined", "未定义服务");
 		m.put("No start/due date", "无开始/截止日期");
 		m.put("No step templates defined", "未定义步骤模板");
+		m.put("No suggestions", "没有建议");
 		m.put("No tags found", "未找到标签");
 		m.put("No timesheets defined", "未定义时间表");
 		m.put("No user found with login name or email: ", "未找到登录名或邮箱为的用户：");
@@ -2449,6 +2460,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择指定适用于此触发器的以空格分隔的分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则为默认分支");
 		m.put("Optionally specify space-separated branches to check. Use '**' or '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all branches", 
 			"可选择指定以空格分隔的要检查的分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有分支");
+		m.put("Optionally specify space-separated commit messages applicable for this transition. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all", 
+			"可选地指定适用于此转换的以空格分隔的提交信息。使用 '*' 或 '?' 进行通配符匹配。以 '-' 为前缀排除。留空以匹配所有");
 		m.put("Optionally specify space-separated files to check. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all files", 
 			"可选择指定以空格分隔的要检查的文件。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有文件");
 		m.put("Optionally specify space-separated jobs applicable for this transition. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all", 
@@ -2681,6 +2694,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Post Url", "发布 URL");
 		m.put("PowerShell", "PowerShell");
 		m.put("Prefix Pattern", "前缀模式");
+		m.put("Prefix the title with <code>WIP</code> or <code>[WIP]</code> to mark the pull request as work in progress", 
+			"在标题前加上 <code>WIP</code> 或 <code>[WIP]</code> 以标记拉取请求为进行中的工作");
 		m.put("Prepend", "前缀");
 		m.put("Preserve Days", "保留天数");
 		m.put("Preset Commit Message", "预设提交信息");
@@ -2819,6 +2834,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Pull request is in error: {0}", "合并请求处于错误状态: {0}");
 		m.put("Pull request is merged", "合并请求被合并");
 		m.put("Pull request is opened", "合并请求被打开");
+		m.put("Pull request is still a work in progress", "拉取请求仍在进行中");
+		m.put("Pull request is work in progress", "拉取请求正在进行中");
 		m.put("Pull request list", "合并请求列表");
 		m.put("Pull request merge", "合并请求合并");
 		m.put("Pull request not exist or access denied", "合并请求不存在或访问被拒绝");
@@ -3903,8 +3920,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"此步骤只能由支持 Docker 的执行器执行。它在 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a> 下运行");
 		m.put("This step publishes specified files to be served as project web site. Project web site can be accessed publicly via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>", 
 			"此步骤发布指定文件作为项目网站。项目网站可以通过 <code>http://&lt;onedev 基础 url&gt;/path/to/project/~site</code> 公开访问");
-		m.put("This step pulls specified refs from remote. For security reason, it is only allowed to run from default branch", 
-			"此步骤从远程拉取指定引用。出于安全原因，仅允许从默认分支运行");
+		m.put("This step pulls specified refs from remote", "此步骤从远程拉取指定的引用");
 		m.put("This step pushes current commit to same ref on remote", "此步骤将当前提交推送至远程的同一引用");
 		m.put("This step sets up Renovate cache. Place it before Renovate step if you want to use it", 
 			"此步骤设置 Renovate 缓存。如果需要使用，请将其放置在 Renovate 步骤之前");
@@ -3992,12 +4008,16 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Try EE", "试用企业版");
 		m.put("Try Enterprise Edition", "试用企业版");
 		m.put("Twitch", "Twitch");
+		m.put("Two Factor Authentication", "两阶段验证");
 		m.put("Two-factor Authentication", "两阶段验证");
+		m.put("Two-factor authentication already set up. <a wicket:id=\"requestToSetupAgain\"><wicket:t>Request to set up again", 
+			"两阶段验证已设置。<a wicket:id=\"requestToSetupAgain\"><wicket:t>请求重新设置");
 		m.put("Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. If you encounter problems, make sure time of OneDev server and your device running TOTP authenticator is in sync", 
 			"两阶段验证已启用。请输入显示在您的 TOTP 身份验证器上的代码。如果您遇到问题，请确保 OneDev 服务器和您的设备运行 TOTP 身份验证器的时间同步");
 		m.put("Two-factor authentication is enforced for your account to enhance security. Please follow below procedure to set it up", 
 			"为增强安全性，您的账户已强制启用两阶段验证。请按照以下步骤进行设置");
 		m.put("Two-factor authentication is now configured", "两阶段验证现已配置完成");
+		m.put("Two-factor authentication not enabled", "两阶段验证未启用");
 		m.put("Type", "类型");
 		m.put("Type <code>yes</code> below to cancel all queried builds", "在下面输入 <code>yes</code> 以取消所有查询的构建");
 		m.put("Type <code>yes</code> below to cancel selected builds", "在下面输入 <code>yes</code> 以取消选定的构建");
@@ -4307,6 +4327,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Widget", "小组件");
 		m.put("Widget Tab", "小组件 Tab");
 		m.put("Widget Timesheet Setting", "小组件时间表设置");
+		m.put("Will be prompted to set up two-factor authentication upon next login", "下次登录时将提示设置两阶段验证");
 		m.put("Will be transcoded to UTF-8", "将被转码为 UTF-8");
 		m.put("Window", "窗口");
 		m.put("Window Memory", "窗口内存");
@@ -4378,8 +4399,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("cluster:lead", "主节点");
 		m.put("cmd-k to show command palette", "cmd-k 显示命令面板");
 		m.put("code commit", "代码提交");
-		m.put("code is committed to any branch", "代码提交到任何分支");
+		m.put("code is committed", "代码已提交");
 		m.put("code is committed to branches \"{0}\"", "代码提交到分支 \"{0}\"");
+		m.put("code is committed to branches \"{0}\" with message \"{1}\"", "代码已提交到分支 \"{0}\"，提交信息为 \"{1}\"");
+		m.put("code is committed with message \"{0}\"", "代码已提交，提交信息为 \"{0}\"");
 		m.put("commit message contains", "提交信息包含");
 		m.put("commits", "提交");
 		m.put("committed by", "提交者是");
@@ -4579,11 +4602,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Two Factor Authentication", "两阶段验证");
-		m.put("Two-factor authentication already set up. <a wicket:id=\"requestToSetupAgain\"><wicket:t>Request to set up again", 
-			"两阶段验证已设置。<a wicket:id=\"requestToSetupAgain\"><wicket:t>请求重新设置");
-		m.put("Two-factor authentication not enabled", "两阶段验证未启用");
-		m.put("Will be prompted to set up two-factor authentication upon next login", "下次登录时将提示设置两阶段验证");
 	}
 		
 	@Override

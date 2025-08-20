@@ -81,11 +81,16 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("<div><span>Search Text</span> <span class='font-size-sm text-muted'>in default branch</span></div>", 
 			"<div><span>テキストを検索</span> <span class='font-size-sm text-muted'>デフォルトブランチ内</span></div>");
 		m.put("<i>No Name</i>", "<i>名前なし</i>");
+		m.put("<span class=\"keycap ml-3 mr-1\">esc</span> to close", "<span class=\"keycap ml-3 mr-1\">esc</span> で閉じる");
+		m.put("<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> to move", 
+			"<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> で移動");
 		m.put("<span class=\"keycap mr-1\">&uarr;</span><span class=\"keycap\">&darr;</span> to navigate. <span class=\"keycap\">Esc</span> to close", 
 			"<span class=\"keycap mr-1\">&uarr;</span><span class=\"keycap\">&darr;</span> でナビゲートします。<span class=\"keycap\">Esc</span> で閉じます");
 		m.put("<span class='keycap'>Tab</span> or <span class='keycap'>Enter</span> to complete.", 
 			"<span class='keycap'>Tab</span> または <span class='keycap'>Enter</span> で完了します。");
 		m.put("<span class='keycap'>Tab</span> to complete.", "<span class='keycap'>Tab</span> で完了します。");
+		m.put("<span class='text-nowrap'><span class='keycap'>Enter</span> to go</span>", "<span class='text-nowrap'><span class='keycap'>Enter</span> で進む</span>");
+		m.put("<span class='text-nowrap'><span class='keycap'>Tab</span> to search</span>", "<span class='text-nowrap'><span class='keycap'>Tab</span> で検索</span>");
 		m.put("<span wicket:id=\"activityCount\"></span> activities", "<span wicket:id=\"activityCount\"></span> アクティビティ");
 		m.put("<svg class='icon mr-2'><use xlink:href='%s'/></svg> Define job secrets to be used in build spec. Secrets with <b>same name</b> can be defined. For a particular name, the first authorized secret with that name will be used (search in current project first, then search in parent projects). Note that secret value containing line breaks or less than <b>%d</b> characters will not be masked in build log", 
 			"<svg class='icon mr-2'><use xlink:href='%s'/></svg> ビルド仕様で使用するジョブシークレットを定義します。同じ<b>名前</b>のシークレットを定義できます。特定の名前については、その名前で最初に認可されたシークレットが使用されます（まず現在のプロジェクトで検索し、次に親プロジェクトで検索します）。行の改行を含むか、<b>%d</b>文字未満のシークレット値はビルドログでマスクされませんので注意してください");
@@ -264,6 +269,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Another pull request already open for this change", "この変更に対するプルリクエストはすでに開かれています");
 		m.put("Any agent", "任意のエージェント");
 		m.put("Any branch", "任意のブランチ");
+		m.put("Any commit message", "任意のコミットメッセージ");
 		m.put("Any domain", "任意のドメイン");
 		m.put("Any file", "任意のファイル");
 		m.put("Any issue", "任意の課題");
@@ -281,6 +287,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Applicable Branches", "適用可能なブランチ");
 		m.put("Applicable Builds", "適用可能なビルド");
 		m.put("Applicable Code Comments", "適用可能なコードコメント");
+		m.put("Applicable Commit Messages", "適用可能なコミットメッセージ");
 		m.put("Applicable Commits", "適用可能なコミット");
 		m.put("Applicable Images", "適用可能な画像");
 		m.put("Applicable Issues", "適用可能な課題");
@@ -303,6 +310,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Arguments", "引数");
 		m.put("Artifacts", "アーティファクト");
 		m.put("Artifacts to Retrieve", "取得するアーティファクト");
+		m.put("As long as a feature can be accessed via url, you can input part of the url to match and jump", 
+			"機能がURLでアクセス可能であれば、URLの一部を入力して一致させてジャンプできます");
 		m.put("Ascending", "昇順");
 		m.put("Assignees", "担当者");
 		m.put("Assignees Issue Field", "担当者課題フィールド");
@@ -692,6 +701,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Collapse all", "すべて折りたたむ");
 		m.put("Color", "色");
 		m.put("Columns", "列");
+		m.put("Command Palette", "コマンドパレット");
 		m.put("Commands", "コマンド");
 		m.put("Comment", "コメント");
 		m.put("Comment Content", "コメント内容");
@@ -2135,6 +2145,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No services defined", "定義されたサービスなし");
 		m.put("No start/due date", "開始/期限日なし");
 		m.put("No step templates defined", "定義されたステップテンプレートなし");
+		m.put("No suggestions", "提案はありません");
 		m.put("No tags found", "タグが見つかりません");
 		m.put("No timesheets defined", "定義されたタイムシートなし");
 		m.put("No user found with login name or email: ", "ログイン名またはメールでユーザーが見つかりません:");
@@ -2437,6 +2448,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、このトリガーに適用されるスペース区切りのブランチを指定してください。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には'**'、'*'または'?'を使用してください。'-'で除外を指定してください。デフォルトブランチの場合は空のままにしてください。");
 		m.put("Optionally specify space-separated branches to check. Use '**' or '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all branches", 
 			"オプションで、チェックするスペース区切りのブランチを指定してください。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には'**'、'*'または'?'を使用してください。'-'で除外を指定してください。すべてのブランチに一致する場合は空のままにしてください。");
+		m.put("Optionally specify space-separated commit messages applicable for this transition. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all", 
+			"この遷移に適用可能なスペース区切りのコミットメッセージを任意で指定します。ワイルドカードマッチには '*' または '?' を使用します。除外するには '-' をプレフィックスに付けます。すべてに一致させるには空のままにします");
 		m.put("Optionally specify space-separated files to check. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all files", 
 			"オプションで、チェックするスペース区切りのファイルを指定してください。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には'**'、'*'または'?'を使用してください。'-'で除外を指定してください。すべてのファイルに一致する場合は空のままにしてください。");
 		m.put("Optionally specify space-separated jobs applicable for this transition. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all", 
@@ -2669,6 +2682,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Post Url", "投稿URL");
 		m.put("PowerShell", "PowerShell");
 		m.put("Prefix Pattern", "プレフィックスパターン");
+		m.put("Prefix the title with <code>WIP</code> or <code>[WIP]</code> to mark the pull request as work in progress", 
+			"プルリクエストを作業中としてマークするには、タイトルに <code>WIP</code> または <code>[WIP]</code> を付けてください");
 		m.put("Prepend", "追加");
 		m.put("Preserve Days", "保持日数");
 		m.put("Preset Commit Message", "プリセットコミットメッセージ");
@@ -2807,6 +2822,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Pull request is in error: {0}", "プルリクエストにエラーがあります: {0}");
 		m.put("Pull request is merged", "プルリクエストがマージされました");
 		m.put("Pull request is opened", "プルリクエストがオープンされました");
+		m.put("Pull request is still a work in progress", "プルリクエストはまだ作業中です");
+		m.put("Pull request is work in progress", "プルリクエストは作業中です");
 		m.put("Pull request list", "プルリクエスト一覧");
 		m.put("Pull request merge", "プルリクエストのマージ");
 		m.put("Pull request not exist or access denied", "プルリクエストが存在しないか、アクセスが拒否されました");
@@ -3891,8 +3908,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"このステップはDocker対応エグゼキュータによってのみ実行可能です。<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>で実行されます");
 		m.put("This step publishes specified files to be served as project web site. Project web site can be accessed publicly via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>", 
 			"このステップは指定されたファイルをプロジェクトウェブサイトとして公開します。プロジェクトウェブサイトは<code>http://&lt;onedev base url&gt;/path/to/project/~site</code>で公開アクセス可能です");
-		m.put("This step pulls specified refs from remote. For security reason, it is only allowed to run from default branch", 
-			"このステップはリモートから指定されたリファレンスをプルします。セキュリティ上の理由から、デフォルトブランチからのみ実行が許可されています");
+		m.put("This step pulls specified refs from remote", "このステップでは、指定されたリファレンスをリモートからプルします");
 		m.put("This step pushes current commit to same ref on remote", "このステップは現在のコミットをリモートの同じリファレンスにプッシュします");
 		m.put("This step sets up Renovate cache. Place it before Renovate step if you want to use it", 
 			"このステップはRenovateキャッシュをセットアップします。Renovateステップの前に配置すると使用できます");
@@ -4371,8 +4387,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("cluster:lead", "リード");
 		m.put("cmd-k to show command palette", "cmd-kでコマンドパレットを表示");
 		m.put("code commit", "コードコミット");
-		m.put("code is committed to any branch", "任意のブランチにコードがコミットされる");
+		m.put("code is committed", "コードがコミットされました");
 		m.put("code is committed to branches \"{0}\"", "ブランチ「{0}」にコードがコミットされる");
+		m.put("code is committed to branches \"{0}\" with message \"{1}\"", "コードがブランチ \"{0}\" にメッセージ \"{1}\" でコミットされました");
+		m.put("code is committed with message \"{0}\"", "コードがメッセージ \"{0}\" でコミットされました");
 		m.put("commit message contains", "コミットメッセージに含まれる");
 		m.put("commits", "コミット");
 		m.put("committed by", "作成者");

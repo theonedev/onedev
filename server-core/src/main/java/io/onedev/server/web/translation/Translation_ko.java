@@ -81,11 +81,16 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("<div><span>Search Text</span> <span class='font-size-sm text-muted'>in default branch</span></div>", 
 			"<div><span>텍스트 검색</span> <span class='font-size-sm text-muted'>기본 브랜치에서</span></div>");
 		m.put("<i>No Name</i>", "<i>이름 없음</i>");
+		m.put("<span class=\"keycap ml-3 mr-1\">esc</span> to close", "<span class=\"keycap ml-3 mr-1\">esc</span> 닫기");
+		m.put("<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> to move", 
+			"<span class=\"keycap mr-1\">&uarr;</span> <span class=\"keycap mr-1\">&darr;</span> 이동");
 		m.put("<span class=\"keycap mr-1\">&uarr;</span><span class=\"keycap\">&darr;</span> to navigate. <span class=\"keycap\">Esc</span> to close", 
 			"<span class=\"keycap mr-1\">&uarr;</span><span class=\"keycap\">&darr;</span>로 탐색합니다. <span class=\"keycap\">Esc</span>로 닫습니다");
 		m.put("<span class='keycap'>Tab</span> or <span class='keycap'>Enter</span> to complete.", 
 			"<span class='keycap'>Tab</span> 또는 <span class='keycap'>Enter</span>로 완료합니다.");
 		m.put("<span class='keycap'>Tab</span> to complete.", "<span class='keycap'>Tab</span>으로 완료합니다.");
+		m.put("<span class='text-nowrap'><span class='keycap'>Enter</span> to go</span>", "<span class='text-nowrap'><span class='keycap'>Enter</span> 이동</span>");
+		m.put("<span class='text-nowrap'><span class='keycap'>Tab</span> to search</span>", "<span class='text-nowrap'><span class='keycap'>Tab</span> 검색</span>");
 		m.put("<span wicket:id=\"activityCount\"></span> activities", "<span wicket:id=\"activityCount\"></span> 활동");
 		m.put("<svg class='icon mr-2'><use xlink:href='%s'/></svg> Define job secrets to be used in build spec. Secrets with <b>same name</b> can be defined. For a particular name, the first authorized secret with that name will be used (search in current project first, then search in parent projects). Note that secret value containing line breaks or less than <b>%d</b> characters will not be masked in build log", 
 			"<svg class='icon mr-2'><use xlink:href='%s'/></svg> 빌드 사양에서 사용할 작업 비밀을 정의하세요. <b>같은 이름</b>의 비밀을 정의할 수 있습니다. 특정 이름에 대해, 해당 이름으로 승인된 첫 번째 비밀이 사용됩니다(현재 프로젝트에서 먼저 검색한 후 상위 프로젝트에서 검색). 비밀 값에 줄 바꿈이 포함되거나 <b>%d</b>자 미만인 경우 빌드 로그에서 마스킹되지 않습니다");
@@ -264,6 +269,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Another pull request already open for this change", "이 변경에 대한 다른 풀 요청이 이미 열려 있습니다");
 		m.put("Any agent", "모든 에이전트");
 		m.put("Any branch", "모든 브랜치");
+		m.put("Any commit message", "커밋 메시지");
 		m.put("Any domain", "모든 도메인");
 		m.put("Any file", "모든 파일");
 		m.put("Any issue", "모든 이슈");
@@ -281,6 +287,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Applicable Branches", "적용 가능한 브랜치");
 		m.put("Applicable Builds", "적용 가능한 빌드");
 		m.put("Applicable Code Comments", "적용 가능한 코드 댓글");
+		m.put("Applicable Commit Messages", "적용 가능한 커밋 메시지");
 		m.put("Applicable Commits", "적용 가능한 커밋");
 		m.put("Applicable Images", "적용 가능한 이미지");
 		m.put("Applicable Issues", "적용 가능한 이슈");
@@ -303,6 +310,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Arguments", "인수");
 		m.put("Artifacts", "아티팩트");
 		m.put("Artifacts to Retrieve", "검색할 아티팩트");
+		m.put("As long as a feature can be accessed via url, you can input part of the url to match and jump", 
+			"기능이 URL을 통해 접근 가능하면 URL의 일부를 입력하여 일치하고 이동할 수 있습니다");
 		m.put("Ascending", "오름차순");
 		m.put("Assignees", "담당자");
 		m.put("Assignees Issue Field", "담당자 이슈 필드");
@@ -692,6 +701,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Collapse all", "모두 축소");
 		m.put("Color", "색상");
 		m.put("Columns", "열");
+		m.put("Command Palette", "명령 팔레트");
 		m.put("Commands", "명령어");
 		m.put("Comment", "댓글");
 		m.put("Comment Content", "댓글 내용");
@@ -2135,6 +2145,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No services defined", "정의된 서비스 없음");
 		m.put("No start/due date", "시작/마감일 없음");
 		m.put("No step templates defined", "정의된 단계 템플릿 없음");
+		m.put("No suggestions", "제안 없음");
 		m.put("No tags found", "태그 없음");
 		m.put("No timesheets defined", "정의된 근무 시간표 없음");
 		m.put("No user found with login name or email: ", "로그인 이름 또는 이메일로 사용자를 찾을 수 없습니다:");
@@ -2437,6 +2448,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 이 트리거에 적용 가능한 공백으로 구분된 브랜치를 지정하세요. <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매칭</a>을 위해 '**', '*' 또는 '?'를 사용하세요. 제외하려면 '-'로 접두어를 붙이세요. 기본 브랜치에 대해 비워 두세요.");
 		m.put("Optionally specify space-separated branches to check. Use '**' or '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all branches", 
 			"선택적으로 확인할 공백으로 구분된 브랜치를 지정하세요. <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매칭</a>을 위해 '**', '*' 또는 '?'를 사용하세요. 제외하려면 '-'로 접두어를 붙이세요. 모든 브랜치를 일치시키려면 비워 두세요.");
+		m.put("Optionally specify space-separated commit messages applicable for this transition. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all", 
+			"이 전환에 적용 가능한 공백으로 구분된 커밋 메시지를 선택적으로 지정하십시오. 와일드카드 일치를 위해 '*' 또는 '?'를 사용하십시오. 제외하려면 '-'로 시작하십시오. 모두 일치시키려면 비워 두십시오");
 		m.put("Optionally specify space-separated files to check. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all files", 
 			"선택적으로 확인할 공백으로 구분된 파일을 지정하세요. <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매칭</a>을 위해 '**', '*' 또는 '?'를 사용하세요. 제외하려면 '-'로 접두어를 붙이세요. 모든 파일을 일치시키려면 비워 두세요.");
 		m.put("Optionally specify space-separated jobs applicable for this transition. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all", 
@@ -2669,6 +2682,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Post Url", "게시 URL");
 		m.put("PowerShell", "PowerShell");
 		m.put("Prefix Pattern", "접두사 패턴");
+		m.put("Prefix the title with <code>WIP</code> or <code>[WIP]</code> to mark the pull request as work in progress", 
+			"제목에 <code>WIP</code> 또는 <code>[WIP]</code>를 접두사로 추가하여 풀 리퀘스트를 진행 중인 작업으로 표시하십시오");
 		m.put("Prepend", "앞에 추가");
 		m.put("Preserve Days", "보존 일수");
 		m.put("Preset Commit Message", "미리 설정된 커밋 메시지");
@@ -2807,6 +2822,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Pull request is in error: {0}", "풀 리퀘스트 오류 발생: {0}");
 		m.put("Pull request is merged", "풀 리퀘스트가 병합됨");
 		m.put("Pull request is opened", "풀 리퀘스트가 열림");
+		m.put("Pull request is still a work in progress", "풀 리퀘스트가 아직 진행 중입니다");
+		m.put("Pull request is work in progress", "풀 리퀘스트가 진행 중입니다");
 		m.put("Pull request list", "풀 리퀘스트 목록");
 		m.put("Pull request merge", "풀 리퀘스트 병합");
 		m.put("Pull request not exist or access denied", "풀 리퀘스트가 존재하지 않거나 접근이 거부됨");
@@ -3891,8 +3908,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이 단계는 Docker를 인식하는 실행자만 실행할 수 있습니다. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 워크스페이스</a>에서 실행됩니다");
 		m.put("This step publishes specified files to be served as project web site. Project web site can be accessed publicly via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>", 
 			"이 단계는 지정된 파일을 프로젝트 웹 사이트로 제공하도록 게시합니다. 프로젝트 웹 사이트는 <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>를 통해 공개적으로 액세스할 수 있습니다");
-		m.put("This step pulls specified refs from remote. For security reason, it is only allowed to run from default branch", 
-			"이 단계는 원격에서 지정된 참조를 가져옵니다. 보안상의 이유로 기본 브랜치에서만 실행이 허용됩니다");
+		m.put("This step pulls specified refs from remote", "이 단계는 원격에서 지정된 참조를 가져옵니다");
 		m.put("This step pushes current commit to same ref on remote", "이 단계는 현재 커밋을 원격의 동일한 참조로 푸시합니다");
 		m.put("This step sets up Renovate cache. Place it before Renovate step if you want to use it", 
 			"이 단계는 Renovate 캐시를 설정합니다. Renovate 단계를 사용하려면 이 단계를 그 전에 배치하세요");
@@ -4371,8 +4387,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("cluster:lead", "리드");
 		m.put("cmd-k to show command palette", "cmd-k를 눌러 명령 팔레트를 표시하세요");
 		m.put("code commit", "코드 커밋");
-		m.put("code is committed to any branch", "어떤 브랜치에 코드가 커밋됨");
+		m.put("code is committed", "코드가 커밋되었습니다");
 		m.put("code is committed to branches \"{0}\"", "브랜치 \"{0}\"에 코드가 커밋됨");
+		m.put("code is committed to branches \"{0}\" with message \"{1}\"", "코드가 \"{0}\" 브랜치에 \"{1}\" 메시지로 커밋되었습니다");
+		m.put("code is committed with message \"{0}\"", "코드가 \"{0}\" 메시지로 커밋되었습니다");
 		m.put("commit message contains", "커밋 메시지 포함");
 		m.put("commits", "커밋들");
 		m.put("committed by", "작성자");

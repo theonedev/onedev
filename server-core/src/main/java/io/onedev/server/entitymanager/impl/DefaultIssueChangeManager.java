@@ -648,8 +648,11 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				ProjectScope projectScope = new ProjectScope(project, true, true);
 				Map<Long, RevCommit> fixedIssueIds = new HashMap<>();
 				Repository repository = projectManager.getRepository(projectId);
+				String commitMessage;
 				try (RevWalk revWalk = new RevWalk(repository)) {
-					revWalk.markStart(revWalk.lookupCommit(newCommitId));
+					var newCommit = revWalk.parseCommit(newCommitId);
+					commitMessage = newCommit.getFullMessage();
+					revWalk.markStart(newCommit);
 					if (oldCommitId.equals(ObjectId.zeroId())) {
 						/*
 						 * In case a new branch is pushed, we only process new commits not in any existing branches
@@ -672,13 +675,16 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 					}
 				} 
 				
-				IssueQueryParseOption option = new IssueQueryParseOption().withCurrentCommitCriteria(true);
-				for (TransitionSpec transition: getTransitionSpecs()) {
+				var option = new IssueQueryParseOption().withCurrentCommitCriteria(true);
+				for (var transition: getTransitionSpecs()) {
 					if (transition instanceof BranchUpdatedSpec) {
-						BranchUpdatedSpec branchUpdatedSpec = (BranchUpdatedSpec) transition;
-						String branches = branchUpdatedSpec.getBranches();
-						Matcher matcher = new PathMatcher();
-						if (branches == null || PatternSet.parse(branches).matches(matcher, branchName)) {
+						var branchUpdatedSpec = (BranchUpdatedSpec) transition;
+						var branches = branchUpdatedSpec.getBranches();
+						var commitMessages = branchUpdatedSpec.getCommitMessages();
+						var branchMatcher = new PathMatcher();
+						var commitMessagesMatcher = new StringMatcher();
+						if ((branches == null || PatternSet.parse(branches).matches(branchMatcher, branchName))
+								&& (commitMessages == null || PatternSet.parse(commitMessages).matches(commitMessagesMatcher, commitMessage))) {
 							IssueQuery query = IssueQuery.parse(project, branchUpdatedSpec.getIssueQuery(), option, true);
 							List<Criteria<Issue>> criterias = new ArrayList<>();
 							

@@ -21,6 +21,8 @@ public class BranchUpdatedSpec extends AutoSpec {
 
 	private String branches;
 
+	private String commitMessages;	
+
 	public BranchUpdatedSpec() {
 		setIssueQuery(io.onedev.server.search.entity.issue.IssueQuery
 				.getRuleName(IssueQueryLexer.FixedInCurrentCommit));		
@@ -38,6 +40,17 @@ public class BranchUpdatedSpec extends AutoSpec {
 		this.branches = branches;
 	}
 	
+	@Editable(order = 300, name = "Applicable Commit Messages", placeholder = "Any commit message", description = "Optionally specify space-separated commit messages "
+			+ "applicable for this transition. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all")
+	@Patterns
+	public String getCommitMessages() {
+		return commitMessages;
+	}
+
+	public void setCommitMessages(String commitMessages) {
+		this.commitMessages = commitMessages;
+	}
+
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestBranches(String matchWith) {
 		Project project = Project.get();
@@ -61,10 +74,19 @@ public class BranchUpdatedSpec extends AutoSpec {
 	
 	@Override
 	public String getTriggerDescription() {
-		if (branches != null)
-			return MessageFormat.format(_T("code is committed to branches \"{0}\""), branches);
-		else
-			return _T("code is committed to any branch");
+		if (branches != null) {
+			if (commitMessages != null) {
+				return MessageFormat.format(_T("code is committed to branches \"{0}\" with message \"{1}\""), branches, commitMessages);
+			} else {
+				return MessageFormat.format(_T("code is committed to branches \"{0}\""), branches);
+			}
+		} else {
+			if (commitMessages != null) {
+				return MessageFormat.format(_T("code is committed with message \"{0}\""), commitMessages);
+			} else {
+				return _T("code is committed");
+			}
+		}
 	}
 	
 }
