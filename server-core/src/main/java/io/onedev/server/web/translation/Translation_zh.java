@@ -9,7 +9,8 @@ public class Translation_zh extends TranslationResourceBundle {
 
 		@Override
 		public String put(String key, String value) {
-			return super.put(key, value.replace("docs.onedev.io", "docs.onedev.io/zh-Hans"));
+			//return super.put(key, value.replace("docs.onedev.io", "docs.onedev.io/zh-Hans"));
+			return super.put(key, value);
 		}
 
 	};
