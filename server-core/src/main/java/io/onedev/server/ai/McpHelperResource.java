@@ -2,6 +2,7 @@ package io.onedev.server.ai;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -27,6 +29,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,19 +43,27 @@ import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueWorkManager;
 import io.onedev.server.entitymanager.IterationManager;
+import io.onedev.server.entitymanager.LabelSpecManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.exception.LinkValidationException;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.Iteration;
+import io.onedev.server.model.LabelSpec;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestAssignment;
+import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.EmptyFieldsException;
 import io.onedev.server.model.support.issue.field.FieldUtils;
@@ -66,6 +77,7 @@ import io.onedev.server.model.support.issue.field.spec.IntegerField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
+import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
@@ -74,6 +86,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScope;
 
 @Api(internal = true)
@@ -107,13 +120,20 @@ public class McpHelperResource {
 
     private final SubscriptionManager subscriptionManager;
 
+    private final PullRequestManager pullRequestManager;
+
+    private final GitService gitService;
+
+    private final LabelSpecManager labelSpecManager;
+
     @Inject
     public McpHelperResource(ObjectMapper objectMapper, SettingManager settingManager, 
             UserManager userManager, IssueManager issueManager, ProjectManager projectManager, 
             LinkSpecManager linkSpecManager, IssueCommentManager issueCommentManager, 
             IterationManager iterationManager, SubscriptionManager subscriptionManager, 
             IssueChangeManager issueChangeManager, IssueLinkManager issueLinkManager, 
-            IssueWorkManager issueWorkManager) {
+            IssueWorkManager issueWorkManager, PullRequestManager pullRequestManager, 
+            GitService gitService, LabelSpecManager labelSpecManager) {
         this.objectMapper = objectMapper;
         this.settingManager = settingManager;
         this.issueManager = issueManager;
@@ -126,6 +146,9 @@ public class McpHelperResource {
         this.issueChangeManager = issueChangeManager;
         this.issueLinkManager = issueLinkManager;
         this.issueWorkManager = issueWorkManager;
+        this.pullRequestManager = pullRequestManager;
+        this.gitService = gitService;
+        this.labelSpecManager = labelSpecManager;
     }
 
     private String getIssueQueryStringDescription() {
@@ -396,26 +419,26 @@ public class McpHelperResource {
 
             inputSchemas.put("createIssue", createIssueInputSchema);
 
-            var updateIssueInputSchema = new HashMap<String, Object>();
-            var updateIssueProperties = new HashMap<String, Object>();
-            updateIssueProperties.put("issueReference", Map.of(
+            var editIssueInputSchema = new HashMap<String, Object>();
+            var editIssueProperties = new HashMap<String, Object>();
+            editIssueProperties.put("issueReference", Map.of(
                 "type", "string",
                 "description", "reference of the issue to update"));
-            updateIssueProperties.put("title", Map.of(
+            editIssueProperties.put("title", Map.of(
                     "type", "string",
                     "description", "title of the issue"));
-            updateIssueProperties.put("description", Map.of(
+            editIssueProperties.put("description", Map.of(
                     "type", "string",
                     "description", "description of the issue"));
-            updateIssueProperties.put("confidential", Map.of(
+            editIssueProperties.put("confidential", Map.of(
                     "type", "boolean",
                     "description", "whether the issue is confidential"));
 
             if (SecurityUtils.canScheduleIssues(currentProject)) {
-                updateIssueProperties.put("iterations", getArrayProperties("iterations to schedule the issue in"));
+                editIssueProperties.put("iterations", getArrayProperties("iterations to schedule the issue in"));
 
                 if (subscriptionManager.isSubscriptionActive() && currentProject.isTimeTracking()) {
-                    updateIssueProperties.put("ownEstimatedTime", Map.of(
+                    editIssueProperties.put("ownEstimatedTime", Map.of(
                             "type", "integer",
                             "description", "Estimated time in hours for this issue only (not including linked issues)"));
                 }
@@ -426,15 +449,15 @@ public class McpHelperResource {
                     var paramName = getToolParamName(field.getName());
 
                     var fieldProperties = getFieldProperties(field);
-                    updateIssueProperties.put(paramName, fieldProperties);
+                    editIssueProperties.put(paramName, fieldProperties);
                }
             }
 
-            updateIssueInputSchema.put("Type", "object");
-            updateIssueInputSchema.put("Properties", updateIssueProperties);
-            updateIssueInputSchema.put("Required", List.of("issueReference"));
+            editIssueInputSchema.put("Type", "object");
+            editIssueInputSchema.put("Properties", editIssueProperties);
+            editIssueInputSchema.put("Required", List.of("issueReference"));
 
-            inputSchemas.put("updateIssue", updateIssueInputSchema);            
+            inputSchemas.put("editIssue", editIssueInputSchema);            
 
             var toStates = new HashSet<String>();
             for (var transition: settingManager.getIssueSetting().getTransitionSpecs()) {
@@ -504,6 +527,82 @@ public class McpHelperResource {
 
                 inputSchemas.put("linkIssues", linkInputSchema);
             }
+
+            var createPullRequestInputSchema = new HashMap<String, Object>();
+            var createPullRequestProperties = new HashMap<String, Object>();            
+            createPullRequestProperties.put("title", Map.of(
+                    "type", "string",
+                    "description", "Title of the pull request"));
+            createPullRequestProperties.put("description", Map.of(
+                    "type", "string",
+                    "description", "Description of the pull request"));
+            createPullRequestProperties.put("baseBranch", Map.of(
+                    "type", "string",
+                    "description", "A branch in current project to be used as base branch of the pull request"));
+            createPullRequestProperties.put("headBranch", Map.of(
+                    "type", "string",
+                    "description", "A branch in current project to be used as head branch of the pull request"));
+            createPullRequestProperties.put("mergeStrategy", Map.of(
+                    "type", "string",
+                    "description", "Merge strategy of the pull request. Must be one of: " + 
+                        Arrays.stream(MergeStrategy.values()).map(Enum::name).collect(Collectors.joining(", "))));
+            createPullRequestProperties.put("reviewers", Map.of(
+                    "type", "array",
+                    "items", Map.of("type", "string"),
+                    "uniqueItems", true,
+                    "description", "Reviewers of the pull request. Expects user login names"));
+            createPullRequestProperties.put("assignees", Map.of(
+                    "type", "array",
+                    "items", Map.of("type", "string"),
+                    "uniqueItems", true,
+                    "description", "Assignees of the pull request. Expects user login names"));
+
+            createPullRequestInputSchema.put("Type", "object");
+            createPullRequestInputSchema.put("Properties", createPullRequestProperties);
+            createPullRequestInputSchema.put("Required", List.of("title", "baseBranch", "headBranch"));
+
+            inputSchemas.put("createPullRequest", createPullRequestInputSchema);
+
+            var editPullRequestInputSchema = new HashMap<String, Object>();
+            var editPullRequestProperties = new HashMap<String, Object>();
+            editPullRequestProperties.put("pullRequestReference", Map.of(
+                    "type", "string",
+                    "description", "Reference of the pull request to edit"));
+            editPullRequestProperties.put("title", Map.of(
+                    "type", "string",
+                    "description", "Title of the pull request"));
+            editPullRequestProperties.put("description", Map.of(
+                    "type", "string",
+                    "description", "Description of the pull request"));
+            editPullRequestProperties.put("mergeStrategy", Map.of(
+                    "type", "string",
+                    "description", "Merge strategy of the pull request. Must be one of: " +
+                            Arrays.stream(MergeStrategy.values()).map(Enum::name).collect(Collectors.joining(", "))));
+            editPullRequestProperties.put("reviewers", Map.of(
+                    "type", "array",
+                    "items", Map.of("type", "string"),
+                    "uniqueItems", true,
+                    "description", "Reviewers of the pull request. Expects user login names"));
+            editPullRequestProperties.put("assignees", Map.of(
+                    "type", "array",
+                    "items", Map.of("type", "string"),
+                    "uniqueItems", true,
+                    "description", "Assignees of the pull request. Expects user login names"));
+
+            var labelSpecs = labelSpecManager.query();
+            if (!labelSpecs.isEmpty()) {
+                editPullRequestProperties.put("labels", Map.of(
+                    "type", "array",
+                    "items", Map.of("type", "string"),
+                    "uniqueItems", true,
+                    "description", "Labels of the pull request. Must be one or more of: " + String.join(", ", labelSpecs.stream().map(LabelSpec::getName).collect(Collectors.toList()))));
+            }
+
+            editPullRequestInputSchema.put("Type", "object");
+            editPullRequestInputSchema.put("Properties", editPullRequestProperties);
+            editPullRequestInputSchema.put("Required", List.of("pullRequestReference"));
+
+            inputSchemas.put("editPullRequest", editPullRequestInputSchema);
 
             return inputSchemas;
         } finally {
@@ -589,6 +688,7 @@ public class McpHelperResource {
             throw new UnauthenticatedException();
 
         User user;                
+        userName = StringUtils.trimToNull(userName);
         if (userName != null) {
             user = userManager.findByName(userName);
             if (user == null)
@@ -746,7 +846,7 @@ public class McpHelperResource {
 
         var currentProject = getProject(currentProjectPath);
 
-        normalizeData(data);
+        normalizeIssueData(data);
 
         var issueSetting = settingManager.getIssueSetting();
 
@@ -804,9 +904,9 @@ public class McpHelperResource {
         return "Created issue " + issue.getReference().toString(currentProject);
     }
 
-    @Path("/update-issue")
+    @Path("/edit-issue")
     @POST
-    public String updateIssue(@QueryParam("currentProject") @NotNull String currentProjectPath, 
+    public String editIssue(@QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference, @NotNull Map<String, Serializable> data) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
@@ -817,7 +917,7 @@ public class McpHelperResource {
         if (!SecurityUtils.canModifyIssue(issue))
             throw new UnauthorizedException();
 
-        normalizeData(data);
+        normalizeIssueData(data);
 
         var title = (String) data.remove("title");
         if (title != null) 
@@ -886,7 +986,7 @@ public class McpHelperResource {
         var currentProject = getProject(currentProjectPath);
 
         var issue = getIssue(currentProject, issueReference);
-        normalizeData(data);
+        normalizeIssueData(data);
         var state = (String) data.remove("state");
         if (state == null)
             throw new InvalidParamsException("state is required");
@@ -947,7 +1047,7 @@ public class McpHelperResource {
     @POST
     public String logWork(@QueryParam("currentProject") @NotNull String currentProjectPath, 
             @QueryParam("reference") @NotNull String issueReference, 
-            @QueryParam("spentHours") int spentHours, @Nullable String comment) {
+            @QueryParam("spentHours") int spentHours, String comment) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
         var currentProject = getProject(currentProjectPath);
@@ -969,7 +1069,7 @@ public class McpHelperResource {
         return "Work logged for issue " + issueReference;
     }
 
-    private void normalizeData(Map<String, Serializable> data) {
+    private void normalizeIssueData(Map<String, Serializable> data) {
         for (var entry: data.entrySet()) {
             if (entry.getValue() instanceof String) 
                 entry.setValue(StringUtils.trimToNull((String) entry.getValue()));
@@ -982,5 +1082,124 @@ public class McpHelperResource {
             }
         }        
     }    
-            
+
+    @Path("/create-pull-request")
+    @POST
+    public String createPullRequest(@QueryParam("currentProject") @NotNull String currentProjectPath,
+                @NotNull Map<String, Serializable> data) {
+        if (SecurityUtils.getAuthUser() == null)
+            throw new UnauthenticatedException();
+        var currentProject = getProject(currentProjectPath);        
+        if (!SecurityUtils.canReadCode(currentProject))
+            throw new UnauthorizedException("No permission to read code of project: " + currentProjectPath);
+
+        normalizePullRequestData(data);
+
+        var baseBranch = (String) data.remove("baseBranch");
+        var headBranch = (String) data.remove("headBranch");
+
+        var target = new ProjectAndBranch(currentProject, baseBranch);
+        var source = new ProjectAndBranch(currentProject, headBranch);
+
+        if (target.equals(source))
+            throw new InvalidParamsException("Base and head branches are the same");
+
+        PullRequest request = pullRequestManager.findOpen(target, source);
+        if (request != null)
+            throw new InvalidParamsException("Another pull request already opened for this change");
+
+        request = pullRequestManager.findEffective(target, source);
+        if (request != null) {
+            if (request.isOpen())
+                throw new InvalidParamsException("Another pull request already opened for this change");
+            else
+                throw new InvalidParamsException("Change already merged");
+        }
+
+        request = new PullRequest();
+        ObjectId baseCommitId = gitService.getMergeBase(
+                target.getProject(), target.getObjectId(),
+                source.getProject(), source.getObjectId());
+
+        if (baseCommitId == null)
+            throw new InvalidParamsException("No common base for base and head branches");
+
+        request.setTitle((String) data.remove("title"));
+        request.setTarget(target);
+        request.setSource(source);
+        request.setSubmitter(SecurityUtils.getAuthUser());
+        request.setBaseCommitHash(baseCommitId.name());
+        request.setDescription((String) data.remove("description"));
+
+        var mergeStrategyName = (String) data.remove("mergeStrategy");
+        if (mergeStrategyName != null) 
+            request.setMergeStrategy(MergeStrategy.valueOf(mergeStrategyName));
+        else
+            request.setMergeStrategy(request.getProject().findDefaultPullRequestMergeStrategy());
+
+        if (request.getBaseCommitHash().equals(source.getObjectName()))
+            throw new InvalidParamsException("Change already merged");
+
+        PullRequestUpdate update = new PullRequestUpdate();
+        
+        update.setDate(Date.from(request.getSubmitDate().toInstant().plusSeconds(1)));
+        update.setRequest(request);
+        update.setHeadCommitHash(source.getObjectName());
+        update.setTargetHeadCommitHash(request.getTarget().getObjectName());
+        request.getUpdates().add(update);
+
+        pullRequestManager.checkReviews(request, false);
+
+        @SuppressWarnings("unchecked")
+        var reviewerNames = (List<String>) data.remove("reviewers");
+        if (reviewerNames != null) {
+            for (var reviewerName : reviewerNames) {
+                User reviewer = userManager.findByName(reviewerName);
+                if (reviewer == null)
+                    throw new NotFoundException("Reviewer not found: " + reviewerName);
+                if (reviewer.equals(request.getSubmitter()))
+                    throw new InvalidParamsException("Pull request submitter can not be reviewer");
+
+                if (request.getReview(reviewer) == null) {
+                    PullRequestReview review = new PullRequestReview();
+                    review.setRequest(request);
+                    review.setUser(reviewer);
+                    request.getReviews().add(review);
+                }
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        var assigneeNames = (List<String>) data.remove("assignees");
+        if (assigneeNames != null) {
+            for (var assigneeName : assigneeNames) {
+                User assignee = userManager.findByName(assigneeName);
+                if (assignee == null)
+                    throw new NotFoundException("Assignee not found: " + assigneeName);
+                PullRequestAssignment assignment = new PullRequestAssignment();
+                assignment.setRequest(request);
+                assignment.setUser(assignee);
+                request.getAssignments().add(assignment);
+            }
+        } else {
+            for (var assignee : target.getProject().findDefaultPullRequestAssignees()) {
+                PullRequestAssignment assignment = new PullRequestAssignment();
+                assignment.setRequest(request);
+                assignment.setUser(assignee);
+                request.getAssignments().add(assignment);
+            }
+        }
+
+        pullRequestManager.open(request);
+
+        return "Created pull request " + request.getReference().toString(currentProject);        
+    }
+    
+    private void normalizePullRequestData(Map<String, Serializable> data) {
+        for (var entry : data.entrySet()) {
+            if (entry.getValue() instanceof String)
+                entry.setValue(StringUtils.trimToNull((String) entry.getValue()));
+        }
+    }
+
 }
