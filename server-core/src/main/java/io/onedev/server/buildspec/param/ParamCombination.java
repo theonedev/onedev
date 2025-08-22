@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.buildspecmodel.inputspec.Input;
+import io.onedev.server.util.Input;
 
 public class ParamCombination implements Serializable {
 

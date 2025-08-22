@@ -32,7 +32,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.Hibernate;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
@@ -41,6 +40,7 @@ import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkDescriptor;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;

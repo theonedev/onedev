@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -21,6 +20,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.Input;
 
 public class IssueFieldChangeData extends IssueChangeData {
 

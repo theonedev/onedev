@@ -46,7 +46,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueVoteManager;
 import io.onedev.server.entitymanager.IssueWatchManager;
@@ -64,6 +63,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
