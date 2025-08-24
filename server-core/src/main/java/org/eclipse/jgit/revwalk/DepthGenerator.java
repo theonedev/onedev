@@ -97,12 +97,6 @@ class DepthGenerator extends Generator {
 			pending.unpop(c);
 		}
 
-		// Mark DEEPEN_NOT on all deepen-not commits and their ancestors.
-		// TODO(jonathantanmy): This implementation is somewhat
-		// inefficient in that any "deepen-not <ref>" in the request
-		// results in all commits reachable from that ref being parsed
-		// and marked, even if the commit topology is such that it is
-		// not necessary.
 		for (ObjectId oid : w.getDeepenNots()) {
 			RevCommit c;
 			try {

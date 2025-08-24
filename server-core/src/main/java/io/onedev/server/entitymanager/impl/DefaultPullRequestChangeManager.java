@@ -95,8 +95,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 	@Transactional
 	@Override
 	public void changeAutoMerge(PullRequest request, AutoMerge autoMerge) {
-		if (request.getAutoMerge().isEnabled() && !autoMerge.isEnabled() 
-				|| !request.getAutoMerge().isEnabled() && autoMerge.isEnabled()) {
+		if (request.getAutoMerge().isEnabled() != autoMerge.isEnabled()) {
 			PullRequestChange change = new PullRequestChange();
 			change.setDate(new Date());
 			change.setRequest(request);

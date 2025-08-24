@@ -124,7 +124,6 @@ public class ClusterSessionDataStore extends AbstractSessionDataStore {
 	@Override
 	public boolean exists(String id)
 			throws Exception {
-		//TODO find way to do query without pulling in whole session data
 		SessionData sd = load(id);
 		if (sd == null)
 			return false;

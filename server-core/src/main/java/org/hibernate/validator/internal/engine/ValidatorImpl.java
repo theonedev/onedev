@@ -936,11 +936,6 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 			Group group) {
 		Contracts.assertNotNull( executableMetaData, "executableMetaData may not be null" );
 
-		// TODO GM: define behavior with respect to redefined default sequences. Should only the
-		// sequence from the validated bean be honored or also default sequence definitions up in
-		// the inheritance tree?
-		// For now a redefined default sequence will only be considered if specified at the bean
-		// hosting the validated itself, but no other default sequence from parent types
 		if ( group.isDefaultGroup() ) {
 			Iterator<Sequence> defaultGroupSequence = validationContext.getRootBeanMetaData().getDefaultValidationSequence( validationContext.getRootBean() );
 
@@ -1109,16 +1104,9 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 		}
 	}
 
-	//TODO GM: if possible integrate with validateParameterForGroup()
 	private <T> void validateReturnValueForGroup(BaseBeanValidationContext<T> validationContext, ExecutableMetaData executableMetaData, T bean, Object value,
 			Group group) {
 		Contracts.assertNotNull( executableMetaData, "executableMetaData may not be null" );
-
-		// TODO GM: define behavior with respect to redefined default sequences. Should only the
-		// sequence from the validated bean be honored or also default sequence definitions up in
-		// the inheritance tree?
-		// For now a redefined default sequence will only be considered if specified at the bean
-		// hosting the validated itself, but no other default sequence from parent types
 
 		if ( group.isDefaultGroup() ) {
 			Iterator<Sequence> defaultGroupSequence = validationContext.getRootBeanMetaData().getDefaultValidationSequence( bean );
@@ -1191,7 +1179,6 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 					throw LOG.getInvalidPropertyPathException( validationContext.getRootBeanClass(), propertyPath.asString() );
 				}
 
-				// TODO which cascadable???
 				value = getCascadableValue( validationContext, value, propertyMetaData.getCascadables().iterator().next() );
 				if ( value == null ) {
 					throw LOG.getUnableToReachPropertyToValidateException( validationContext.getRootBean(), propertyPath );

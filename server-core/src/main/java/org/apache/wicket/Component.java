@@ -491,8 +491,7 @@ public abstract class Component
 	 * <li>MetaDataEntry (optionally {@link MetaDataEntry}[] if more metadata entries are present) *
 	 * <li>{@link Behavior}(s) added to component. The behaviors are not stored in separate array,
 	 * they are part of the {@link #data} array (this is in order to save the space of the pointer
-	 * to an empty array as most components have no behaviours). - FIXME - explain why - is this
-	 * correct?
+	 * to an empty array as most components have no behaviours). 
 	 * </ul>
 	 * If there is only one attribute set (i.e. model or MetaDataEntry([]) or one behavior), the
 	 * #data object points directly to value of that attribute. Otherwise the data is of type
@@ -2980,10 +2979,6 @@ public abstract class Component
 	{
 		Args.notEmpty(markupId, "markupId");
 
-		// TODO check if an automatic id has already been generated or getmarkupid() called
-		// previously and throw an illegalstateexception because something else might be depending
-		// on previous id
-
 		setMarkupIdImpl(markupId);
 		return this;
 	}
@@ -3594,12 +3589,6 @@ public abstract class Component
 		}
 	}
 
-	/**
-	 * TODO WICKET-NG rename to something more useful - like componentChanged(), this method used to
-	 * be called with a Change object
-	 * 
-	 * Adds state change to page.
-	 */
 	protected final void addStateChange()
 	{
 		checkHierarchyChange(this);

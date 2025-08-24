@@ -18,6 +18,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -30,6 +31,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.joda.time.DateTime;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.AuditManager;
@@ -287,20 +289,22 @@ public class PullRequestResource {
 
 		pullRequestManager.checkReviews(request, false);
 		
-		for (Long reviewerId: data.getReviewerIds()) {
-			User reviewer = userManager.load(reviewerId);
-			if (reviewer.equals(request.getSubmitter())) 
-				return Response.status(NOT_ACCEPTABLE).entity("Pull request submitter can not be reviewer").build();
-			
-			if (request.getReview(reviewer) == null) {
-				PullRequestReview review = new PullRequestReview();
-				review.setRequest(request);
-				review.setUser(reviewer);
-				request.getReviews().add(review);
+		if (data.getReviewerIds() != null) {
+			for (Long reviewerId: data.getReviewerIds()) {
+				User reviewer = userManager.load(reviewerId);
+				if (reviewer.equals(request.getSubmitter())) 
+					return Response.status(NOT_ACCEPTABLE).entity("Pull request submitter can not be reviewer").build();
+				
+				if (request.getReview(reviewer) == null) {
+					PullRequestReview review = new PullRequestReview();
+					review.setRequest(request);
+					review.setUser(reviewer);
+					request.getReviews().add(review);
+				}
 			}
 		}
 
-		if (!data.getAssigneeIds().isEmpty()) {
+		if (data.getAssigneeIds() != null && !data.getAssigneeIds().isEmpty()) {
 			for (Long assigneeId : data.getAssigneeIds()) {
 				PullRequestAssignment assignment = new PullRequestAssignment();
 				assignment.setRequest(request);
@@ -349,66 +353,37 @@ public class PullRequestResource {
 		PullRequest request = pullRequestManager.load(requestId);
     	if (!SecurityUtils.canModifyPullRequest(request))
 			throw new UnauthorizedException();
+		if (!request.isOpen())
+			throw new NotAcceptableException("Pull request is closed");
 		pullRequestChangeManager.changeMergeStrategy(request, mergeStrategy);
 		return Response.ok().build();
     }
 	
-	@Nullable
-	private Response checkAutoMergeCommitMessage(User user, PullRequest request,AutoMergeData data) {
-		if (request.isMergeCommitMessageRequired()) {
-			var branchProtection = request.getProject().getBranchProtection(request.getTargetBranch(), user);
-			var errorMessage = branchProtection.checkCommitMessage(data.getCommitMessage(), request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
-			if (errorMessage != null)
-				return Response.status(NOT_ACCEPTABLE).entity("Error validating auto merge commit message: " + errorMessage).build();
-		}
-		return null;		
-	}
-
 	@Api(order=1550)
 	@Path("/{requestId}/auto-merge")
 	@POST
 	public Response setAutoMerge(@PathParam("requestId") Long requestId, @NotNull AutoMergeData data) {
 		var user = SecurityUtils.getUser();
 		PullRequest request = pullRequestManager.load(requestId);
-		if (request.isOpen()) {
-			if (request.getAutoMerge().isEnabled()) {
-				if (SecurityUtils.canManagePullRequests(request.getProject())
-						|| user != null && user.equals(request.getAutoMerge().getUser())) {
-					var autoMerge = new AutoMerge();
-					autoMerge.setEnabled(data.isEnabled());
-					autoMerge.setUser(user);
-					var response = checkAutoMergeCommitMessage(user, request, data);
-					if (response != null)
-						return response;
-					autoMerge.setCommitMessage(data.getCommitMessage());
-					pullRequestChangeManager.changeAutoMerge(request, autoMerge);
-				} else {
-					throw new UnauthorizedException();
-				}
-			} else if (SecurityUtils.canWriteCode(request.getProject())) {
-				if (data.isEnabled()) {
-					if (request.checkMerge() == null) {
-						pullRequestManager.merge(user, request, data.getCommitMessage());
-					} else {
-						var autoMerge = new AutoMerge();
-						autoMerge.setEnabled(true);
-						autoMerge.setUser(user);
-						var response = checkAutoMergeCommitMessage(user, request, data);
-						if (response != null)
-							return response;
-						autoMerge.setCommitMessage(data.getCommitMessage());
-						pullRequestChangeManager.changeAutoMerge(request, autoMerge);
-					}
-				} else {
-					return Response.status(NOT_ACCEPTABLE).entity("Auto merge already disabled").build();
-				}
-			} else {
-				throw new UnauthorizedException();
-			}
-			return Response.ok().build();
-		} else {
-			return Response.status(NOT_ACCEPTABLE).entity("Pull request is closed").build();
-		}
+		if (!SecurityUtils.canModifyPullRequest(request) || !SecurityUtils.canWriteCode(request.getProject()))
+			throw new UnauthorizedException();
+		if (!request.isOpen())
+			throw new NotAcceptableException("Pull request is closed");
+
+		if (data.isEnabled() && request.checkMerge() == null)
+			throw new NotAcceptableException("This pull request is not eligible for auto-merge, as it can be merged directly now");
+
+		var autoMerge = new AutoMerge();
+		autoMerge.setEnabled(data.isEnabled());
+		autoMerge.setCommitMessage(StringUtils.trimToNull(data.getCommitMessage()));
+		autoMerge.setUser(user);
+		var errorMessage = request.checkMergeCommitMessage(user, request, autoMerge.getCommitMessage());
+		if (errorMessage != null)
+			throw new NotAcceptableException("Error validating auto merge commit message: " + errorMessage);
+
+		pullRequestChangeManager.changeAutoMerge(request, autoMerge);
+
+		return Response.ok().build();
 	}
 	
 	@Api(order=1600)
@@ -637,6 +612,7 @@ public class PullRequestResource {
 		
 		private boolean enabled;
 		
+		@Api(description="Preset commit message for auto merge. Leave empty to use default commit message")
 		private String commitMessage;
 
 		public boolean isEnabled() {
@@ -647,6 +623,7 @@ public class PullRequestResource {
 			this.enabled = enabled;
 		}
 
+		@Nullable
 		public String getCommitMessage() {
 			return commitMessage;
 		}

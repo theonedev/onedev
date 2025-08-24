@@ -10,20 +10,19 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pullrequest.PullRequestReviewRequested;
 import io.onedev.server.event.project.pullrequest.PullRequestReviewerRemoved;
+import io.onedev.server.exception.ReviewRejectException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
-import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
@@ -86,7 +85,8 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 	public void review(PullRequest request, boolean approved, String note) {
 		User user = SecurityUtils.getAuthUser();
 		PullRequestReview review = request.getReview(user);
-		Preconditions.checkState(review != null && review.getStatus() == PullRequestReview.Status.PENDING);
+		if (review == null || review.getStatus() == PullRequestReview.Status.EXCLUDED)
+			throw new ReviewRejectException("You are not reviewer of this pull request");
 		if (approved)
 			review.setStatus(PullRequestReview.Status.APPROVED);
 		else

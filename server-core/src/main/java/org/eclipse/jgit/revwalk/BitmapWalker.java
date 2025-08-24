@@ -162,7 +162,6 @@ public final class BitmapWalker {
 				// In this situation, skip the relevant "start" and move on
 				// to the next one.
 				//
-				// TODO(czhen): Make findObjectsWalk resume the walk instead
 				// once RevWalk and ObjectWalk support that.
 			}
 		}

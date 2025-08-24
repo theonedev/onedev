@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -30,6 +31,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,11 +48,18 @@ import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.entitymanager.LabelSpecManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestAssignmentManager;
+import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.entitymanager.PullRequestCommentManager;
+import io.onedev.server.entitymanager.PullRequestLabelManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.IssueReference;
+import io.onedev.server.entityreference.PullRequestReference;
 import io.onedev.server.exception.LinkValidationException;
+import io.onedev.server.exception.ReviewRejectException;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
@@ -62,6 +71,7 @@ import io.onedev.server.model.LabelSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
+import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
@@ -77,17 +87,22 @@ import io.onedev.server.model.support.issue.field.spec.IntegerField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
+import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
 import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.web.UrlManager;
 
 @Api(internal = true)
 @Path("/mcp-helper")
@@ -122,9 +137,21 @@ public class McpHelperResource {
 
     private final PullRequestManager pullRequestManager;
 
+    private final PullRequestChangeManager pullRequestChangeManager;
+
+    private final PullRequestAssignmentManager pullRequestAssignmentManager;
+
+    private final PullRequestReviewManager pullRequestReviewManager;
+
+    private final PullRequestLabelManager pullRequestLabelManager;
+
+    private final PullRequestCommentManager pullRequestCommentManager;
+
     private final GitService gitService;
 
     private final LabelSpecManager labelSpecManager;
+
+    private final UrlManager urlManager;
 
     @Inject
     public McpHelperResource(ObjectMapper objectMapper, SettingManager settingManager, 
@@ -133,7 +160,11 @@ public class McpHelperResource {
             IterationManager iterationManager, SubscriptionManager subscriptionManager, 
             IssueChangeManager issueChangeManager, IssueLinkManager issueLinkManager, 
             IssueWorkManager issueWorkManager, PullRequestManager pullRequestManager, 
-            GitService gitService, LabelSpecManager labelSpecManager) {
+            PullRequestChangeManager pullRequestChangeManager, GitService gitService, 
+            LabelSpecManager labelSpecManager, PullRequestReviewManager pullRequestReviewManager, 
+            PullRequestAssignmentManager pullRequestAssignmentManager, 
+            PullRequestLabelManager pullRequestLabelManager, UrlManager urlManager,
+            PullRequestCommentManager pullRequestCommentManager) {
         this.objectMapper = objectMapper;
         this.settingManager = settingManager;
         this.issueManager = issueManager;
@@ -147,8 +178,14 @@ public class McpHelperResource {
         this.issueLinkManager = issueLinkManager;
         this.issueWorkManager = issueWorkManager;
         this.pullRequestManager = pullRequestManager;
+        this.pullRequestChangeManager = pullRequestChangeManager;
+        this.pullRequestAssignmentManager = pullRequestAssignmentManager;
+        this.pullRequestReviewManager = pullRequestReviewManager;
         this.gitService = gitService;
         this.labelSpecManager = labelSpecManager;
+        this.pullRequestLabelManager = pullRequestLabelManager;
+        this.urlManager = urlManager;
+        this.pullRequestCommentManager = pullRequestCommentManager;
     }
 
     private String getIssueQueryStringDescription() {
@@ -241,15 +278,15 @@ public class McpHelperResource {
             orderFields.append("- ").append(field).append("\n");
         }
 
-        return
+        var description = 
                 "A query string is one of below criteria:\n" +
-                "- Issue with specified number in form of: \"Number\" is \"#<issue number>\", or in form of: \"Number\" is \"<project key>-<issue number>\" (quotes are required)\n" +
-                "- Text based criteria in form of: ~<containing text>~\n" +
-                "- State criteria in form of: \"State\" is \"<state name>\" (quotes are required), where <state name> is one of below:\n" +
+                "- issue with specified number in form of: \"Number\" is \"#<issue number>\", or in form of: \"Number\" is \"<project key>-<issue number>\" (quotes are required)\n" +
+                "- criteria to check if title/description/comment contains specified text in form of: ~<containing text>~\n" +
+                "- state criteria in form of: \"State\" is \"<state name>\" (quotes are required), where <state name> is one of below:\n" +
                 stateNames + 
                 fieldCriterias + 
                 linkCriterias + 
-                "- submitter criteria in form of: \"Submitter\" is \"<login name of a user>\" (quotes are required)\n" +
+                "- submitted by specified user criteria in form of: submitted by \"<login name of a user>\" (quotes are required)\n" +
                 "- submitted by current user criteria in form of: submitted by me (quotes are required)\n" +
                 "- submitted before certain date criteria in form of: \"Submit Date\" is until \"<date>\" (quotes are required), where <date> is of format YYYY-MM-DD HH:mm\n" +
                 "- submitted after certain date criteria in form of: \"Submit Date\" is since \"<date>\" (quotes are required), where <date> is of format YYYY-MM-DD HH:mm\n" +
@@ -264,7 +301,71 @@ public class McpHelperResource {
                 "And can optionally add order clause at end of query string in form of: order by \"<field1>\" <asc|desc>,\"<field2>\" <asc|desc>,... (quotes are required), where <field> is one of below:\n" +
                 orderFields + 
                 "\n" +
-                "Leave empty to search all issues";
+                "Leave empty to list all accessible issues";
+
+        return HtmlEscape.escapeHtml5(description);
+    }
+
+    private String getPullRequestQueryStringDescription() {
+        var orderFields = new StringBuilder();
+        for (var field : PullRequest.SORT_FIELDS.keySet()) {
+            orderFields.append("- ").append(field).append("\n");
+        }
+
+        var labelNames = labelSpecManager.query().stream().map(LabelSpec::getName).collect(Collectors.joining(", "));
+        var mergeStrategyNames = Arrays.stream(MergeStrategy.values()).map(MergeStrategy::name).collect(Collectors.joining(", "));
+
+        var description = 
+                "A query string is one of below criteria:\n" +
+                "- pull request with specified number in form of: \"Number\" is \"#<pull request number>\", or in form of: \"Number\" is \"<project key>-<pull request number>\" (quotes are required)\n" +
+                "- criteria to check if title/description/comment contains specified text in form of: ~<containing text>~\n" +
+                "- open criteria in form of: open\n" +
+                "- merged criteria in form of: merged\n" +
+                "- discarded criteria in form of: discarded\n" +
+                "- source branch criteria in form of: \"Source Branch\" is \"<branch name>\" (quotes are required)\n" +
+                "- target branch criteria in form of: \"Target Branch\" is \"<branch name>\" (quotes are required)\n" +
+                "- merge strategy criteria in form of: \"Merge Strategy\" is \"<merge strategy>\" (quotes are required), where <merge strategy> is one of: " + mergeStrategyNames + "\n" +
+                "- label criteria in form of: \"Label\" is \"<label name>\" (quotes are required), where <label name> is one of: " + labelNames + "\n" +
+                "- ready to merge criteria in form of: ready to merge\n" +
+                "- waiting for someone to review criteria in form of: has pending reviews\n" +
+                "- some builds are unsuccessful criteria in form of: has unsuccessful builds\n" +
+                "- some builds are not finished criteria in form of: has unfinished builds\n" +
+                "- has merge conflicts criteria in form of: has merge conflicts\n" +
+                "- assigned to specified user criteria in form of: assigned to \"<login name of a user>\" (quotes are required)\n" +
+                "- approved by specified user criteria in form of: approved by \"<login name of a user>\" (quotes are required)\n" +
+                "- to be reviewed by specified user criteria in form of: to be reviewed by \"<login name of a user>\" (quotes are required)\n" +
+                "- to be changed by specified user criteria in form of: to be changed by \"<login name of a user>\" (quotes are required)\n" +
+                "- to be merged by specified user criteria in form of: to be merged by \"<login name of a user>\" (quotes are required)\n" +
+                "- requested for changes by specified user in form of: requested for changes by \"<login name of a user>\" (quotes are required)\n" +
+                "- need action of specified user criteria in form of: need action by \"<login name of a user>\" (quotes are required)\n" +
+                "- assigned to current user criteria in form of: assigned to me\n" +
+                "- approved by current user criteria in form of: approved by me\n" +
+                "- to be reviewed by current user criteria in form of: to be reviewed by me\n" +
+                "- to be changed by current user criteria in form of: to be changed by me\n" +
+                "- to be merged by current user criteria in form of: to be merged by me\n" +
+                "- requested for changes by current user in form of: requested for changes by me\n" +
+                "- requested for changes by any user criteria in form of: someone requested for changes\n" +
+                "- need action of current user criteria in form of: need my action\n" +
+                "- submitted by specified user criteria in form of: submitted by \"<login name of a user>\" (quotes are required)\n" +
+                "- submitted by current user criteria in form of: submitted by me (quotes are required)\n" +
+                "- submitted before certain date criteria in form of: \"Submit Date\" is until \"<date>\" (quotes are required), where <date> is of format YYYY-MM-DD HH:mm\n" +
+                "- submitted after certain date criteria in form of: \"Submit Date\" is since \"<date>\" (quotes are required), where <date> is of format YYYY-MM-DD HH:mm\n" +
+                "- updated before certain date criteria in form of: \"Last Activity Date\" is until \"<date>\" (quotes are required), where <date> is of format YYYY-MM-DD HH:mm\n" +
+                "- updated after certain date criteria in form of: \"Last Activity Date\" is since \"<date>\" (quotes are required), where <date> is of format YYYY-MM-DD HH:mm\n" +
+                "- closed (merged or discarded) before certain date criteria in form of: \"Close Date\" is until \"<date>\" (quotes are required), where <date> is of format YYYY-MM-DD HH:mm\n" +
+                "- closed (merged or discarded) after certain date criteria in form of: \"Close Date\" is since \"<date>\" (quotes are required), where <date> is of format YYYY-MM-DD HH:mm\n" +
+                "- includes specified issue criteria in form of: includes issue \"<issue reference>\" (quotes are required)\n" +
+                "- includes specified commit criteria in form of: includes commit \"<commit hash>\" (quotes are required)\n" +                
+                "- and criteria in form of <criteria1> and <criteria2>\n" +
+                "- or criteria in form of <criteria1> or <criteria2>. Note that \"and criteria\" takes precedence over \"or criteria\", use braces to group \"or criteria\" like \"(criteria1 or criteria2) and criteria3\" if you want to override precedence\n" +
+                "- not criteria in form of not(<criteria>)\n" +
+                "\n" +
+                "And can optionally add order clause at end of query string in form of: order by \"<field1>\" <asc|desc>,\"<field2>\" <asc|desc>,... (quotes are required), where <field> is one of below:\n" +
+                orderFields +
+                "\n" +
+                "Leave empty to list all pull requests";
+
+        return HtmlEscape.escapeHtml5(description);
     }
 
     private String getToolParamName(String fieldName) {
@@ -326,6 +427,8 @@ public class McpHelperResource {
                         "Expects unix timestamp in milliseconds since epoch");
         }
 
+        fieldDescription = HtmlEscape.escapeHtml5(fieldDescription);
+        
         var fieldProperties = new HashMap<String, Object>();
         if (field.isAllowMultiple()) {
             fieldProperties.putAll(getArrayProperties(fieldDescription));
@@ -528,6 +631,25 @@ public class McpHelperResource {
                 inputSchemas.put("linkIssues", linkInputSchema);
             }
 
+            var queryPullRequestsInputSchema = new HashMap<String, Object>();
+            var queryPullRequestsProperties = new HashMap<String, Object>();
+
+            queryPullRequestsProperties.put("query", Map.of(
+                    "type", "string",
+                    "description", getPullRequestQueryStringDescription()));
+            queryPullRequestsProperties.put("offset", Map.of(
+                    "type", "integer",
+                    "description", "start position for the query (optional, defaults to 0)"));
+            queryPullRequestsProperties.put("count", Map.of(
+                    "type", "integer",
+                    "description", "number of pull requests to return (optional, defaults to 25, max 100)"));
+
+            queryPullRequestsInputSchema.put("Type", "object");
+            queryPullRequestsInputSchema.put("Properties", queryPullRequestsProperties);
+            queryPullRequestsInputSchema.put("Required", new ArrayList<>());
+
+            inputSchemas.put("queryPullRequests", queryPullRequestsInputSchema);
+
             var createPullRequestInputSchema = new HashMap<String, Object>();
             var createPullRequestProperties = new HashMap<String, Object>();            
             createPullRequestProperties.put("title", Map.of(
@@ -536,12 +658,12 @@ public class McpHelperResource {
             createPullRequestProperties.put("description", Map.of(
                     "type", "string",
                     "description", "Description of the pull request"));
-            createPullRequestProperties.put("baseBranch", Map.of(
+            createPullRequestProperties.put("targetBranch", Map.of(
                     "type", "string",
-                    "description", "A branch in current project to be used as base branch of the pull request"));
-            createPullRequestProperties.put("headBranch", Map.of(
+                    "description", "A branch in current project to be used as target branch of the pull request"));
+            createPullRequestProperties.put("sourceBranch", Map.of(
                     "type", "string",
-                    "description", "A branch in current project to be used as head branch of the pull request"));
+                    "description", "A branch in current project to be used as source branch of the pull request"));
             createPullRequestProperties.put("mergeStrategy", Map.of(
                     "type", "string",
                     "description", "Merge strategy of the pull request. Must be one of: " + 
@@ -557,9 +679,19 @@ public class McpHelperResource {
                     "uniqueItems", true,
                     "description", "Assignees of the pull request. Expects user login names"));
 
+            var labelSpecs = labelSpecManager.query();
+            if (!labelSpecs.isEmpty()) {
+                createPullRequestProperties.put("labels", Map.of(
+                        "type", "array",
+                        "items", Map.of("type", "string"),
+                        "uniqueItems", true,
+                        "description", "Labels of the pull request. Must be one or more of: " + String.join(", ",
+                                labelSpecs.stream().map(LabelSpec::getName).collect(Collectors.toList()))));
+            }
+
             createPullRequestInputSchema.put("Type", "object");
             createPullRequestInputSchema.put("Properties", createPullRequestProperties);
-            createPullRequestInputSchema.put("Required", List.of("title", "baseBranch", "headBranch"));
+            createPullRequestInputSchema.put("Required", List.of("title", "targetBranch", "sourceBranch"));
 
             inputSchemas.put("createPullRequest", createPullRequestInputSchema);
 
@@ -578,18 +710,23 @@ public class McpHelperResource {
                     "type", "string",
                     "description", "Merge strategy of the pull request. Must be one of: " +
                             Arrays.stream(MergeStrategy.values()).map(Enum::name).collect(Collectors.joining(", "))));
-            editPullRequestProperties.put("reviewers", Map.of(
-                    "type", "array",
-                    "items", Map.of("type", "string"),
-                    "uniqueItems", true,
-                    "description", "Reviewers of the pull request. Expects user login names"));
             editPullRequestProperties.put("assignees", Map.of(
                     "type", "array",
                     "items", Map.of("type", "string"),
                     "uniqueItems", true,
                     "description", "Assignees of the pull request. Expects user login names"));
 
-            var labelSpecs = labelSpecManager.query();
+            editPullRequestProperties.put("addReviewers", Map.of(
+                    "type", "array",
+                    "items", Map.of("type", "string"),
+                    "uniqueItems", true,
+                    "description", "Request review from specified users. Expects user login names"));
+            editPullRequestProperties.put("removeReviewers", Map.of(
+                    "type", "array",
+                    "items", Map.of("type", "string"),
+                    "uniqueItems", true,
+                    "description", "Remove specified reviewers. Expects user login names"));
+
             if (!labelSpecs.isEmpty()) {
                 editPullRequestProperties.put("labels", Map.of(
                     "type", "array",
@@ -597,6 +734,13 @@ public class McpHelperResource {
                     "uniqueItems", true,
                     "description", "Labels of the pull request. Must be one or more of: " + String.join(", ", labelSpecs.stream().map(LabelSpec::getName).collect(Collectors.toList()))));
             }
+
+            editPullRequestProperties.put("autoMerge", Map.of(
+                    "type", "boolean",
+                    "description", "Whether to enable auto merge"));
+            editPullRequestProperties.put("autoMergeCommitMessage", Map.of(
+                    "type", "string",
+                    "description", "Preset commit message for auto merge"));
 
             editPullRequestInputSchema.put("Type", "object");
             editPullRequestInputSchema.put("Properties", editPullRequestProperties);
@@ -668,8 +812,7 @@ public class McpHelperResource {
                     var argumentMap = new HashMap<String, Object>();
                     argumentMap.put("name", paramName);
                     argumentMap.put("required", !field.isAllowEmpty());
-                    if (description != null)
-                        argumentMap.put("description", description);
+                    argumentMap.put("description", HtmlEscape.escapeHtml5(description));
                     createIssueArguments.add(argumentMap);
                 }
             }
@@ -753,6 +896,7 @@ public class McpHelperResource {
             for (var entry: issue.getFieldInputs().entrySet()) {
                 issueMap.put(entry.getKey(), entry.getValue().getValues());
             }
+            issueMap.put("link", urlManager.urlFor(issue, true));
             issues.add(issueMap);
         }
         return issues;
@@ -771,19 +915,32 @@ public class McpHelperResource {
     }
 
     private Map<String, Object> getIssueMap(Project currentProject, Issue issue) {
-        var typeReference = new TypeReference<Map<String, Object>>() {};
+        var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
         var issueMap = objectMapper.convertValue(issue, typeReference);
+        issueMap.remove("id");
+        issueMap.remove("stateOrdinal");
+        issueMap.remove("uuid");
+        issueMap.remove("messageId");
+        issueMap.remove("pinDate");
+        issueMap.remove("boardPosition");
+        issueMap.remove("numberScopeId");
         issueMap.put("reference", issue.getReference().toString(currentProject));
         issueMap.remove("submitterId");
-        issueMap.put("Submitter", issue.getSubmitter().getName());
+        issueMap.put("submitter", issue.getSubmitter().getName());
         issueMap.remove("projectId");
         issueMap.put("Project", issue.getProject().getPath());
+        issueMap.remove("lastActivity");
+        for (var it = issueMap.entrySet().iterator(); it.hasNext();) {
+            var entry = it.next();
+            if (entry.getKey().endsWith("Count"))
+                it.remove();
+        }
         return issueMap;
     }
     
-    @Path("/get-issue-detail")
+    @Path("/get-issue")
     @GET
-    public Map<String, Object> getIssueDetail(@QueryParam("currentProject") @NotNull String currentProjectPath, 
+    public Map<String, Object> getIssue(@QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
@@ -796,8 +953,6 @@ public class McpHelperResource {
             issueMap.put(entry.getKey(), entry.getValue().getValues());
         }
         
-        issueMap.put("comments", issue.getComments());
-
         Map<String, Collection<String>> linkedIssues = new HashMap<>();
         for (var link: issue.getTargetLinks()) {
             linkedIssues.computeIfAbsent(link.getSpec().getName(), k -> new ArrayList<>())
@@ -813,8 +968,30 @@ public class McpHelperResource {
             }
         }
         issueMap.putAll(linkedIssues);
+        issueMap.put("link", urlManager.urlFor(issue, true));
 
         return issueMap;
+    }
+
+    @Path("/get-issue-comments")
+    @GET
+    public List<Map<String, Object>> getIssueComments(@QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String issueReference) {
+        if (SecurityUtils.getAuthUser() == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var issue = getIssue(currentProject, issueReference);
+                
+        var comments = new ArrayList<Map<String, Object>>();
+        for (var comment : issue.getComments()) {
+            var commentMap = new HashMap<String, Object>();
+            commentMap.put("user", comment.getUser().getName());
+            commentMap.put("date", comment.getDate());
+            commentMap.put("content", comment.getContent());
+            comments.add(commentMap);
+        }
+        return comments;
     }
 
     @Path("/add-issue-comment")
@@ -834,7 +1011,7 @@ public class McpHelperResource {
         comment.setDate(new Date());
         issueCommentManager.create(comment);
 
-        return "Commented on issue " + issueReference;
+        return "Commented on issue " + issueReference + ": " + urlManager.urlFor(comment, true);
     }
 
     @Path("/create-issue")
@@ -901,7 +1078,7 @@ public class McpHelperResource {
             throw new InvalidParamsException("Missing parameters: " + String.join(", ", e.getEmptyFields()));
         }
 
-        return "Created issue " + issue.getReference().toString(currentProject);
+        return "Created issue " + issue.getReference().toString(currentProject) + ": " + urlManager.urlFor(issue, true);
     }
 
     @Path("/edit-issue")
@@ -973,7 +1150,7 @@ public class McpHelperResource {
             }
         }
 
-        return "Updated issue " + issueReference;
+        return "Edited issue " + issueReference + ": " + urlManager.urlFor(issue, true);
     }
 
     @Path("/transit-issue")
@@ -1000,7 +1177,11 @@ public class McpHelperResource {
         } catch (EmptyFieldsException e) {
             throw new InvalidParamsException("Missing parameters: " + String.join(", ", e.getEmptyFields()));
         }
-        return "Issue " + issueReference + " transited to state \"" + state + "\"";
+        var feedback = "Issue " + issueReference + " transited to state \"" + state + "\": " + urlManager.urlFor(issue, true);
+        var stateDescription = settingManager.getIssueSetting().getStateSpec(state).getDescription();
+        if (stateDescription != null)
+            feedback += "\n\n" + stateDescription;
+        return feedback;
     }
 
     @Path("/link-issues")
@@ -1039,7 +1220,7 @@ public class McpHelperResource {
         }
         issueLinkManager.create(link);
 
-        return "Issue " + targetReference + " added as \"" + linkName + "\" of " + sourceReference;
+        return "Issue " + targetReference + " added as \"" + linkName + "\" of " + sourceReference + ": " + urlManager.urlFor(sourceIssue, true);
     }
 
     @Path("/log-work")
@@ -1066,7 +1247,7 @@ public class McpHelperResource {
         work.setMinutes(spentHours * 60);
         work.setNote(StringUtils.trimToNull(comment));
         issueWorkManager.createOrUpdate(work);
-        return "Work logged for issue " + issueReference;
+        return "Work logged for issue " + issueReference + ": " + urlManager.urlFor(issue, true);
     }
 
     private void normalizeIssueData(Map<String, Serializable> data) {
@@ -1083,6 +1264,214 @@ public class McpHelperResource {
         }        
     }    
 
+    private Map<String, Object> getPullRequestMap(Project currentProject, PullRequest pullRequest) {
+        var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
+        var pullRequestMap = objectMapper.convertValue(pullRequest, typeReference);
+        pullRequestMap.remove("id");
+        pullRequestMap.remove("uuid");
+        pullRequestMap.remove("baseCommitHash");
+        pullRequestMap.remove("buildCommitHash");
+        pullRequestMap.remove("submitTimeGroups");
+        pullRequestMap.remove("closeTimeGroups");
+        pullRequestMap.remove("checkError");
+        pullRequestMap.remove("numberScopeId");
+        pullRequestMap.put("reference", pullRequest.getReference().toString(currentProject));
+        pullRequestMap.remove("submitterId");
+        pullRequestMap.put("submitter", pullRequest.getSubmitter().getName());
+        pullRequestMap.remove("targetProjectId");        
+        pullRequestMap.put("targetProject", pullRequest.getTarget().getProject().getPath());
+        pullRequestMap.remove("sourceProjectId");
+        if (pullRequest.getSourceProject() != null)
+            pullRequestMap.put("sourceProject", pullRequest.getSourceProject().getPath());
+        pullRequestMap.remove("codeCommentsUpdateDate");
+        pullRequestMap.remove("lastActivity");
+        for (var it = pullRequestMap.entrySet().iterator(); it.hasNext();) {
+            var entry = it.next();
+            if (entry.getKey().endsWith("Count"))
+                it.remove();
+        }
+        return pullRequestMap;
+    }
+
+    @Path("/query-pull-requests")
+    @GET
+    public List<Map<String, Object>> queryPullRequests(@QueryParam("currentProject") @NotNull String currentProjectPath, 
+            @QueryParam("query") String query, @QueryParam("offset") int offset, @QueryParam("count") int count) {
+        if (SecurityUtils.getAuthUser() == null)
+            throw new UnauthenticatedException();
+
+        if (!SecurityUtils.canReadCode(getProject(currentProjectPath)))
+            throw new UnauthorizedException("Code read permission required to query pull requests");
+
+        if (count > RestConstants.MAX_PAGE_SIZE)
+            throw new InvalidParamsException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+
+        var currentProject = getProject(currentProjectPath);
+
+        EntityQuery<PullRequest> parsedQuery;
+        if (query != null) {
+            parsedQuery = PullRequestQuery.parse(currentProject, query, true);
+        } else {
+            parsedQuery = new PullRequestQuery();
+        }
+
+        var pullRequests = new ArrayList<Map<String, Object>>();
+        for (var pullRequest : pullRequestManager.query(currentProject, parsedQuery, false, offset, count)) {
+            var pullRequestMap = getPullRequestMap(currentProject, pullRequest);
+            pullRequestMap.put("link", urlManager.urlFor(pullRequest, true));
+            pullRequests.add(pullRequestMap);
+        }
+        return pullRequests;
+    }
+
+    @Path("/get-pull-request")
+    @GET
+    public Map<String, Object> getPullRequest(@QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String pullRequestReference) {
+        if (SecurityUtils.getAuthUser() == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+                
+        var pullRequestMap = getPullRequestMap(currentProject, pullRequest);        
+        pullRequestMap.put("assignees", pullRequest.getAssignees().stream().map(it->it.getName()).collect(Collectors.toList()));
+        var reviews = new ArrayList<Map<String, Object>>();
+        for (var review : pullRequest.getReviews()) {
+            if (review.getStatus() == PullRequestReview.Status.EXCLUDED)
+                continue;
+            var reviewMap = new HashMap<String, Object>();
+            reviewMap.put("reviewer", review.getUser().getName());
+            reviewMap.put("status", review.getStatus());
+            reviews.add(reviewMap);
+        }
+        pullRequestMap.put("reviews", reviews);
+        pullRequestMap.put("labels", pullRequest.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
+        pullRequestMap.put("link", urlManager.urlFor(pullRequest, true));
+
+        return pullRequestMap;
+    }
+
+    @Path("/get-pull-request-comments")
+    @GET
+    public List<Map<String, Object>> getPullRequestComments(@QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String pullRequestReference) {
+        if (SecurityUtils.getAuthUser() == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+                
+        var comments = new ArrayList<Map<String, Object>>();
+        for (var comment : pullRequest.getComments()) {
+            var commentMap = new HashMap<String, Object>();
+            commentMap.put("user", comment.getUser().getName());
+            commentMap.put("date", comment.getDate());
+            commentMap.put("content", comment.getContent());
+            comments.add(commentMap);
+        }
+        return comments;
+    }
+
+    @Path("/get-pull-request-code-comments")
+    @GET
+    public List<Map<String, Object>> getPullRequestCodeComments(@QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String pullRequestReference) {
+        if (SecurityUtils.getAuthUser() == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+                
+        var comments = new ArrayList<Map<String, Object>>();
+        for (var comment : pullRequest.getCodeComments()) {
+            var commentMap = new HashMap<String, Object>();
+            commentMap.put("user", comment.getUser().getName());
+            commentMap.put("date", comment.getCreateDate());
+            commentMap.put("file", comment.getMark().getPath());
+            commentMap.put("content", comment.getContent());
+            commentMap.put("replies", comment.getReplies().size());
+            commentMap.put("status", comment.isResolved()?"resolved":"unresolved");
+            commentMap.put("link", urlManager.urlFor(comment, true));
+            comments.add(commentMap);
+        }
+        return comments;
+    }
+
+    @Path("/get-pull-request-checkout-instruction")
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getPullRequestCheckoutInstruction(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String pullRequestReference) {
+        var user = SecurityUtils.getAuthUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+        String localBranch;
+        String remoteBranch;
+        if (currentProject.equals(pullRequest.getSourceProject()) && pullRequest.isOpen()) {
+            localBranch = pullRequest.getSourceBranch();
+            remoteBranch = pullRequest.getSourceBranch();
+        } else {
+            localBranch = "pr-" + pullRequest.getNumber();
+            remoteBranch = null;
+        }
+
+        var checkoutInstruction = new StringBuilder();
+        checkoutInstruction.append("1. Fetch commit " + pullRequest.getLatestUpdate().getHeadCommitHash() + "\n");
+        checkoutInstruction.append("2. If local branch " + localBranch + " does not exist, create it off above commit; otherwise fastforward it to above commit\n");
+        if (remoteBranch != null) 
+            checkoutInstruction.append("3. Set up above local branch to track remote branch " + remoteBranch + ". Make sure the remote tracking branch is reset to above commit\n");
+        return checkoutInstruction.toString();
+    }
+
+    @Path("/get-pull-request-patch-info")
+    @GET
+    public Map<String, String> getPullRequestPatchInfo(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String pullRequestReference, 
+                @QueryParam("sinceLastReview") boolean sinceLastReview) {
+        var user = SecurityUtils.getAuthUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+        var oldCommitHash = pullRequest.getBaseCommitHash();
+        if (sinceLastReview) {
+            Date sinceDate = null;
+            for (var change: pullRequest.getChanges()) {
+                if ((sinceDate == null || change.getDate().after(sinceDate)) 
+                        && change.getUser().equals(user)
+                        && (change.getData() instanceof PullRequestApproveData || change.getData() instanceof PullRequestRequestedForChangesData)) {
+                    sinceDate = change.getDate();
+                }
+            }
+            for (var comment: pullRequest.getComments()) {
+                if ((sinceDate == null || comment.getDate().after(sinceDate)) 
+                        && comment.getUser().equals(user)) {
+                    sinceDate = comment.getDate();
+                }
+            }
+            if (sinceDate != null) {
+                for (PullRequestUpdate update: pullRequest.getSortedUpdates()) {
+                    if (update.getDate().before(sinceDate))
+                        oldCommitHash = update.getHeadCommitHash();
+                }
+            }
+        }
+        var newCommitHash = pullRequest.getLatestUpdate().getHeadCommitHash();
+        var comparisonBase = pullRequestManager.getComparisonBase(
+            pullRequest, ObjectId.fromString(oldCommitHash), ObjectId.fromString(newCommitHash));
+
+        var patchInfo = new HashMap<String, String>();
+        patchInfo.put("projectId", currentProject.getId().toString());
+        patchInfo.put("oldCommitHash", comparisonBase.name());
+        patchInfo.put("newCommitHash", newCommitHash);        
+        return patchInfo;
+    }
+
     @Path("/create-pull-request")
     @POST
     public String createPullRequest(@QueryParam("currentProject") @NotNull String currentProjectPath,
@@ -1095,14 +1484,14 @@ public class McpHelperResource {
 
         normalizePullRequestData(data);
 
-        var baseBranch = (String) data.remove("baseBranch");
-        var headBranch = (String) data.remove("headBranch");
+        var targetBranch = (String) data.remove("targetBranch");
+        var sourceBranch = (String) data.remove("sourceBranch");
 
-        var target = new ProjectAndBranch(currentProject, baseBranch);
-        var source = new ProjectAndBranch(currentProject, headBranch);
+        var target = new ProjectAndBranch(currentProject, targetBranch);
+        var source = new ProjectAndBranch(currentProject, sourceBranch);
 
         if (target.equals(source))
-            throw new InvalidParamsException("Base and head branches are the same");
+            throw new InvalidParamsException("Target and source branches are the same");
 
         PullRequest request = pullRequestManager.findOpen(target, source);
         if (request != null)
@@ -1122,7 +1511,7 @@ public class McpHelperResource {
                 source.getProject(), source.getObjectId());
 
         if (baseCommitId == null)
-            throw new InvalidParamsException("No common base for base and head branches");
+            throw new InvalidParamsException("No common base for source and target branches");
 
         request.setTitle((String) data.remove("title"));
         request.setTarget(target);
@@ -1192,7 +1581,197 @@ public class McpHelperResource {
 
         pullRequestManager.open(request);
 
-        return "Created pull request " + request.getReference().toString(currentProject);        
+        return "Created pull request " + request.getReference().toString(currentProject) + ": " + urlManager.urlFor(request, true);        
+    }
+
+    private PullRequest getPullRequest(Project currentProject, String referenceString) {
+        var requestReference = PullRequestReference.of(referenceString, currentProject);
+        var request = pullRequestManager.find(requestReference.getProject(), requestReference.getNumber());
+        if (request != null) {
+            if (!SecurityUtils.canReadCode(request.getProject()))
+                throw new UnauthorizedException("No permission to access pull request: " + referenceString);
+            return request;
+        } else {
+            throw new NotFoundException("Pull request not found: " + referenceString);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Path("/edit-pull-request")
+    @POST
+    public String editPullRequest(@QueryParam("currentProject") @NotNull String currentProjectPath,
+            @QueryParam("reference") @NotNull String requestReference, @NotNull Map<String, Serializable> data) {
+        var user = SecurityUtils.getAuthUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+        var currentProject = getProject(currentProjectPath);
+        var request = getPullRequest(currentProject, requestReference);
+
+        if (!SecurityUtils.canModifyPullRequest(request))
+            throw new UnauthorizedException("No permission to edit pull request: " + requestReference);
+
+        normalizePullRequestData(data);
+
+        var title = (String) data.remove("title");
+        if (title != null) 
+            pullRequestChangeManager.changeTitle(request, title);
+
+        if (data.containsKey("description")) 
+            pullRequestChangeManager.changeDescription(request, (String) data.remove("description"));
+
+        var labelNames = (List<String>) data.remove("labels");
+        if (labelNames != null) {
+            try {
+                pullRequestLabelManager.sync(request, labelNames);
+            } catch (EntityNotFoundException e) {
+                throw new NotFoundException(e.getMessage());
+            }
+        }
+
+        var mergeStrategyName = (String) data.remove("mergeStrategy");
+        if (mergeStrategyName != null) {
+            if (!request.isOpen())
+                throw new NotAcceptableException("Pull request is closed");
+            pullRequestChangeManager.changeMergeStrategy(request, MergeStrategy.valueOf(mergeStrategyName));
+        }
+
+        var assigneeNames = (List<String>) data.remove("assignees");
+        if (assigneeNames != null) {                        
+            if (!request.isOpen())
+                throw new NotAcceptableException("Pull request is closed");
+            for (var assigneeName : assigneeNames) {
+                User assignee = userManager.findByName(assigneeName);
+                if (assignee == null)
+                    throw new NotFoundException("Assignee not found: " + assigneeName);
+                if (request.getAssignments().stream().noneMatch(it -> it.getUser().equals(assignee))) {
+                    PullRequestAssignment assignment = new PullRequestAssignment();
+                    assignment.setRequest(request);
+                    assignment.setUser(assignee);
+                    pullRequestAssignmentManager.create(assignment);
+                }
+            }
+            for (var assignee : request.getAssignments()) {
+                if (assigneeNames.stream().noneMatch(it -> it.equals(assignee.getUser().getName()))) {
+                    pullRequestAssignmentManager.delete(assignee);
+                }
+            }
+        }
+
+        var addReviewerNames = (List<String>) data.remove("addReviewers");
+        if (addReviewerNames != null) {
+            if (!request.isOpen())
+                throw new NotAcceptableException("Pull request is closed");
+            for (var reviewerName : addReviewerNames) {
+                User reviewer = userManager.findByName(reviewerName);
+                if (reviewer == null)
+                    throw new NotFoundException("Reviewer not found: " + reviewerName);
+                var review = request.getReview(reviewer);
+                if (review == null) {
+                    review = new PullRequestReview();
+                    review.setRequest(request);
+                    review.setUser(reviewer);
+                    request.getReviews().add(review);
+                    pullRequestReviewManager.createOrUpdate(review);
+                } else if (review.getStatus() != PullRequestReview.Status.PENDING) {
+                    review.setStatus(PullRequestReview.Status.PENDING);
+                    pullRequestReviewManager.createOrUpdate(review);
+                }
+            }
+        }
+        var removeReviewerNames = (List<String>) data.remove("removeReviewers");
+        if (removeReviewerNames != null) {
+            if (!request.isOpen())
+                throw new NotAcceptableException("Pull request is closed");
+            var excludedReviews = new ArrayList<PullRequestReview>();
+            for (var reviewerName : removeReviewerNames) {
+                User reviewer = userManager.findByName(reviewerName);
+                if (reviewer == null)
+                    throw new NotFoundException("Reviewer not found: " + reviewerName);
+                var review = request.getReview(reviewer);
+                if (review != null && review.getStatus() != PullRequestReview.Status.EXCLUDED) {
+                    review.setStatus(PullRequestReview.Status.EXCLUDED);
+                    excludedReviews.add(review);
+                }
+            }
+            pullRequestManager.checkReviews(request, false);
+            var requiredReviewers = excludedReviews.stream()
+                    .filter(it -> it.getStatus() != PullRequestReview.Status.EXCLUDED)
+                    .map(it -> it.getUser().getName())
+                    .collect(Collectors.toList());
+            if (!requiredReviewers.isEmpty())
+                throw new NotAcceptableException("Unable to remove mandatory reviewers: " + String.join(", ", requiredReviewers));
+            for (var review : excludedReviews) 
+                pullRequestReviewManager.createOrUpdate(review);
+        }
+
+
+        var autoMergeEnabled = (Boolean) data.remove("autoMerge");
+        if (autoMergeEnabled != null) {
+            if (!SecurityUtils.canWriteCode(request.getProject()))
+                throw new UnauthorizedException("Code write permission is required to edit auto merge");
+            if (!request.isOpen())
+                throw new NotAcceptableException("Pull request is closed");
+
+            if (autoMergeEnabled && request.checkMerge() == null) 
+                throw new NotAcceptableException("This pull request is not eligible for auto-merge, as it can be merged directly now");
+
+            var autoMerge = new AutoMerge();
+            autoMerge.setEnabled(autoMergeEnabled);
+            autoMerge.setCommitMessage(StringUtils.trimToNull((String) data.remove("autoMergeCommitMessage")));
+            autoMerge.setUser(user);
+            var errorMessage = request.checkMergeCommitMessage(user, request, autoMerge.getCommitMessage());
+            if (errorMessage != null) 
+                throw new NotAcceptableException("Error validating param auto merge commit message: " + errorMessage);
+
+            pullRequestChangeManager.changeAutoMerge(request, autoMerge);
+        }
+                    
+        return "Edited pull request " + request.getReference().toString(currentProject) + ": " + urlManager.urlFor(request, true);
+    }    
+
+    @Path("/review-pull-request")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @POST
+    public String reviewPullRequest(@QueryParam("currentProject") String currentProjectPath, 
+            @QueryParam("reference") @NotNull String pullRequestReference, 
+            @QueryParam("approved") boolean approved, String comment) {
+        var user = SecurityUtils.getAuthUser();
+        if (user == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+        try {
+            pullRequestReviewManager.review(pullRequest, approved, comment);
+        } catch (ReviewRejectException e) {
+            throw new NotAcceptableException(e.getMessage());
+        }
+
+        if (approved) {
+            return "Approved pull request " + pullRequestReference + ": " + urlManager.urlFor(pullRequest, true);
+        } else {
+            return "Requested changes on pull request " + pullRequestReference + ": " + urlManager.urlFor(pullRequest, true);
+        }
+    }
+
+    @Path("/add-pull-request-comment")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @POST
+    public String addPullRequestComment(@QueryParam("currentProject") String currentProjectPath, 
+            @QueryParam("reference") @NotNull String pullRequestReference, @NotNull String commentContent) {
+        if (SecurityUtils.getAuthUser() == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+        var comment = new PullRequestComment();
+        comment.setRequest(pullRequest);
+        comment.setContent(commentContent);
+        comment.setUser(SecurityUtils.getAuthUser());
+        comment.setDate(new Date());
+        pullRequestCommentManager.create(comment);
+
+        return "Commented on pull request " + pullRequestReference + ": " + urlManager.urlFor(comment, true);
     }
     
     private void normalizePullRequestData(Map<String, Serializable> data) {

@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.ser.impl.PropertySerializerMap;
 /**
  * Serializer to use for values proxied using {@link HibernateProxy}.
  * <p>
- * TODO: should try to make this work more like Jackson
  * <code>BeanPropertyWriter</code>, possibly sub-classing it -- it handles much
  * of functionality we need, and has access to more information than value
  * serializers (like this one) have.
@@ -34,8 +33,6 @@ public class HibernateProxySerializer extends JsonSerializer<HibernateProxy> {
 			SerializerProvider provider) throws IOException,
 			JsonProcessingException {
 		Object proxiedValue = findProxied(value);
-		// TODO: figure out how to suppress nulls, if necessary? (too late for
-		// that here)
 		if (proxiedValue == null) {
 			provider.defaultSerializeNull(jgen);
 			return;
@@ -72,10 +69,6 @@ public class HibernateProxySerializer extends JsonSerializer<HibernateProxy> {
 	protected JsonSerializer<Object> findSerializer(
 			SerializerProvider provider, Object value) throws IOException,
 			JsonProcessingException {
-		/*
-		 * TODO: if Hibernate did use generics, or we wanted to allow use of
-		 * Jackson annotations to indicate type, should take that into user.
-		 */
 		Class<?> type = value.getClass();
 		/*
 		 * we will use a map to contain serializers found so far, keyed by type:

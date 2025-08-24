@@ -105,6 +105,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.model.PullRequestLabel;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
@@ -326,7 +327,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 
 	@Transactional
 	@Override
-	public void merge(User user, PullRequest request, String commitMessage) {
+	public void merge(User user, PullRequest request, @Nullable String commitMessage) {
 		MergePreview mergePreview = checkNotNull(request.checkMergePreview());
 		ObjectId mergeCommitId = ObjectId.fromString(checkNotNull(mergePreview.getMergeCommitHash()));
         PersonIdent person = user.asPerson();
@@ -410,6 +411,9 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 
 		for (PullRequestAssignment assignment: request.getAssignments())
 			dao.persist(assignment);
+
+		for (PullRequestLabel label: request.getLabels())
+			dao.persist(label);
 
 		MergePreview mergePreview = request.checkMergePreview();
 

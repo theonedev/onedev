@@ -1211,6 +1211,18 @@ public class PullRequest extends ProjectBelonging
 	}
 
 	@Nullable
+	public String checkMergeCommitMessage(User user, PullRequest request, @Nullable String commitMessage) {
+		if (request.isMergeCommitMessageRequired()) {
+			var branchProtection = request.getProject().getBranchProtection(request.getTargetBranch(), user);
+			if (commitMessage == null)
+				commitMessage = request.getDefaultMergeCommitMessage();
+			return branchProtection.checkCommitMessage(commitMessage,
+					request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
+		}
+		return null;
+	}
+
+	@Nullable
 	public String checkReopen() {
 		if (isOpen())
 			return _T("Pull request already opened");

@@ -1,47 +1,58 @@
 package io.onedev.server.rest.resource;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.NotAcceptableException;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.shiro.authz.UnauthorizedException;
+
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 @Path("/pull-request-reviews")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class PullRequestReviewResource {
-	
-	private final PullRequestReviewManager reviewManager;
+
+	private final PullRequestManager pullRequestManager;
+
+	private final PullRequestReviewManager pullRequestReviewManager;
 
 	@Inject
-	public PullRequestReviewResource(PullRequestReviewManager reviewManager) {
-		this.reviewManager = reviewManager;
+	public PullRequestReviewResource(PullRequestReviewManager pullRequestReviewManager, PullRequestManager pullRequestManager) {
+		this.pullRequestManager = pullRequestManager;
+		this.pullRequestReviewManager = pullRequestReviewManager;
 	}
 
 	@Api(order=100)
 	@Path("/{reviewId}")
 	@GET
 	public PullRequestReview get(@PathParam("reviewId") Long reviewId) {
-		PullRequestReview review = reviewManager.load(reviewId);
+		PullRequestReview review = pullRequestReviewManager.load(reviewId);
 		if (!SecurityUtils.canReadCode(review.getRequest().getProject()))
 			throw new UnauthorizedException();
 		return review;
 	}
 	
-	@Api(order=200, description="Creater new pull request review")
+	@Api(order=200, description="Create new pull request review")
 	@POST
 	public Long create(@NotNull PullRequestReview review) {
-		if (!SecurityUtils.canReadCode(review.getRequest().getProject()) 
-				|| !SecurityUtils.isAdministrator() && !review.getUser().equals(SecurityUtils.getAuthUser())) {
+		var request = review.getRequest();
+		if (!SecurityUtils.canModifyPullRequest(request)) {
 			throw new UnauthorizedException();
 		}
 
@@ -51,7 +62,7 @@ public class PullRequestReviewResource {
 		if (review.getRequest().isMerged())
 			throw new ExplicitException("Pull request is merged");
 		
-		reviewManager.createOrUpdate(review);
+		pullRequestReviewManager.createOrUpdate(review);
 		return review.getId();
 	}
 
@@ -62,14 +73,20 @@ public class PullRequestReviewResource {
 		if (!SecurityUtils.canModifyOrDelete(review)) 
 			throw new UnauthorizedException();
 
-		if (review.getUser().equals(review.getRequest().getSubmitter()))
-			throw new ExplicitException("Pull request submitter can not be reviewer");
+		var request = review.getRequest();
+		var reviewer = review.getUser();
 
-		if (review.getRequest().isMerged())
+		if (request.isMerged())
 			throw new ExplicitException("Pull request is merged");
-
-		reviewManager.createOrUpdate(review);
-		return Response.ok().build();
+		
+		pullRequestManager.checkReviews(request, false);
+		if (review.getStatus() == PullRequestReview.Status.EXCLUDED) {
+			pullRequestReviewManager.createOrUpdate(review);
+			return Response.ok().build();
+		} else {
+			throw new NotAcceptableException("Reviewer '" + reviewer.getDisplayName()
+					+ "' is required and can not be removed");
+		}
 	}
 	
 }

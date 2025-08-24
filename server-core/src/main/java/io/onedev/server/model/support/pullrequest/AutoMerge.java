@@ -52,7 +52,7 @@ public class AutoMerge implements Serializable {
 		return commitMessage;
 	}
 
-	public void setCommitMessage(String commitMessage) {
+	public void setCommitMessage(@Nullable String commitMessage) {
 		this.commitMessage = commitMessage;
 	}
 	

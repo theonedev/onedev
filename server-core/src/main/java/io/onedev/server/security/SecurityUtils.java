@@ -559,8 +559,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 
 	public static boolean canModifyOrDelete(PullRequestReview review) {
 		var subject = getSubject();
-		return canManagePullRequests(subject, review.getRequest().getProject())
-				|| review.getUser().equals(getAuthUser(subject));
+		return canModifyPullRequest(review.getRequest()) || review.getUser().equals(getAuthUser(subject));
 	}
 	
 	public static boolean canModifyPullRequest(PullRequest request) {

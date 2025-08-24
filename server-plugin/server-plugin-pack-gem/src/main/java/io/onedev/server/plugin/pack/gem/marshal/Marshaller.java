@@ -165,10 +165,6 @@ public class Marshaller {
 		stream.write(value);
 	}
 
-	/**
-	 * FIXME: this seems like its wrong and actually should support up to 8
-	 * bytes, not 4
-	 */
 	private void writeInt(int value) throws IOException {
 		if (value == 0) {
 			stream.write(0);

@@ -62,6 +62,7 @@ import io.onedev.server.codequality.LineCoverageContribution;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
+import io.onedev.server.entitymanager.LabelSpecManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
@@ -74,6 +75,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.model.PullRequestAssignment;
+import io.onedev.server.model.PullRequestLabel;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
@@ -104,6 +106,7 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
@@ -113,6 +116,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPa
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.util.TextUtils;
+import io.onedev.server.web.util.editbean.LabelsBean;
 
 public class NewPullRequestPage extends ProjectPage implements RevisionAnnotationSupport {
 
@@ -645,6 +649,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		Form<?> form = new Form<Void>("form");
 		fragment.add(form);
 		
+		var labelsBean = new LabelsBean();
 		form.add(new Button("send") {
 
 			@Override
@@ -661,6 +666,12 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				} else {
 					getPullRequest().setSource(source);
 					getPullRequest().setTarget(target);
+					for (var label: labelsBean.getLabels()) {
+						PullRequestLabel requestLabel = new PullRequestLabel();
+						requestLabel.setSpec(OneDev.getInstance(LabelSpecManager.class).find(label));
+						requestLabel.setRequest(getPullRequest());
+						getPullRequest().getLabels().add(requestLabel);
+					}
 					for (PullRequestReview review: getPullRequest().getReviews())
 						review.setUser(dao.load(User.class, review.getUser().getId()));
 					for (PullRequestAssignment assignment: getPullRequest().getAssignments())
@@ -811,6 +822,8 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			}
 			
 		}.setOutputMarkupPlaceholderTag(true));
+
+		form.add(BeanContext.edit("labels", labelsBean));
 		
 		return fragment;
 	}

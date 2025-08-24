@@ -395,7 +395,6 @@ public final class Strings
 					if (
 					// if this is non-printable and not whitespace (TAB, LF, CR)
 					((ci < 32) && (ci != 9) && (ci != 10) && (ci != 13)) ||
-					// or non-ASCII (XXX: why 160+ ?!) and need to UNICODE escape it
 						(convertToHtmlUnicodeEscapes && (ci > 159)))
 					{
 						buffer.append("&#");
@@ -654,9 +653,6 @@ public final class Strings
 	 * @param fragments
 	 * @return combined fragments
      */
-	// TODO Wicket 8: consider to deprecate methods {@code join} in Wicket 7 and replace it with standard
-	// Java 8 methods {@code String#join(CharSequence delimiter, CharSequence... elements)}
-	// and {@code String#join(CharSequence delimiter, Iterable<? extends CharSequence> elements)}
 	public static String join(final String separator, final List<String> fragments)
 	{
 		if (fragments == null)
@@ -673,9 +669,6 @@ public final class Strings
 	 * @param fragments
 	 * @return combined fragments
 	 */
-	// TODO Wicket 8: consider to deprecate methods {@code join} in Wicket 7 and replace it with standard
-	// Java 8 methods {@code String#join(CharSequence delimiter, CharSequence... elements)}
-	// and {@code String#join(CharSequence delimiter, Iterable<? extends CharSequence> elements)}
 	public static String join(final String separator, final String... fragments)
 	{
 		if ((fragments == null) || (fragments.length < 1))

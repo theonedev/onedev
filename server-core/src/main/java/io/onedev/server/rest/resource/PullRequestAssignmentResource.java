@@ -48,8 +48,7 @@ public class PullRequestAssignmentResource {
 	@POST
 	public Long create(PullRequestAssignment assignment) {
 		PullRequest pullRequest = assignment.getRequest();
-		if (!SecurityUtils.canReadCode(pullRequest.getProject()) 
-				|| !SecurityUtils.canModifyPullRequest(pullRequest)) {
+		if (!SecurityUtils.canModifyPullRequest(pullRequest)) {
 			throw new UnauthorizedException();
 		}
 		
@@ -63,10 +62,8 @@ public class PullRequestAssignmentResource {
 	@Path("/{assignmentId}")
 	@DELETE
 	public Response delete(@PathParam("assignmentId") Long assignmentId) {
-		PullRequestAssignment assignment = assignmentManager.load(assignmentId);
-		
-		if (!SecurityUtils.canReadCode(assignment.getRequest().getProject()) 
-				|| !SecurityUtils.canModifyPullRequest(assignment.getRequest())) {
+		PullRequestAssignment assignment = assignmentManager.load(assignmentId);		
+		if (!SecurityUtils.canModifyPullRequest(assignment.getRequest())) {
 			throw new UnauthorizedException();
 		}
 		if (assignment.getRequest().isMerged())

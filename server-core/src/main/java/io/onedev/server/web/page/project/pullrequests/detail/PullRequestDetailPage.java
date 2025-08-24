@@ -1468,10 +1468,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				if (getPullRequest().getAutoMerge().isEnabled())
-					setVisible(SecurityUtils.canModifyPullRequest(getPullRequest()));
-				else
-					setVisible(SecurityUtils.canWriteCode(getProject()));
+				setVisible(SecurityUtils.canModifyPullRequest(getPullRequest()) && SecurityUtils.canWriteCode(getProject()));
 			}
 
 		};
