@@ -1,10 +1,12 @@
 package io.onedev.server.model.support.issue;
 
-import io.onedev.server.annotation.Color;
-import io.onedev.server.annotation.Editable;
+import java.io.Serializable;
 
 import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
+
+import io.onedev.server.annotation.Color;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Multiline;
 
 @Editable
 public class StateSpec implements Serializable {
@@ -28,6 +30,7 @@ public class StateSpec implements Serializable {
 	}
 
 	@Editable(order=200, placeholder="No description")
+	@Multiline
 	public String getDescription() {
 		return description;
 	}

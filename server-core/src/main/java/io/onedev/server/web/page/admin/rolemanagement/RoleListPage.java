@@ -21,6 +21,7 @@ import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvid
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -167,13 +168,15 @@ public class RoleListPage extends AdministrationPage {
 				
 				cellItem.add(fragment);
 			}
+
+			
 		});
 
 		columns.add(new AbstractColumn<Role, Void>(Model.of(_T("Description"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Role>> cellItem, String componentId, IModel<Role> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getDescription()));
+				cellItem.add(new MultiLineLabel(componentId, rowModel.getObject().getDescription()));
 			}
 			
 		});
@@ -225,7 +228,7 @@ public class RoleListPage extends AdministrationPage {
 
 			@Override
 			public String getCssClass() {
-				return "actions";
+				return "text-nowrap";
 			}
 			
 		});

@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.RoleName;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.entitymanager.LinkSpecManager;
@@ -154,6 +155,7 @@ public class Role extends AbstractEntity implements BasePermission {
 	}
 	
 	@Editable(order=110)
+	@Multiline
 	public String getDescription() {
 		return description;
 	}

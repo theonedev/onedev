@@ -16,6 +16,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.jetbrains.annotations.Nullable;
 
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.security.permission.CreateRootProjects;
@@ -72,6 +73,7 @@ public class Group extends AbstractEntity implements BasePermission {
 	}
 
 	@Editable(order=200, description="Optionally describe the group")
+	@Multiline
 	public String getDescription() {
 		return description;
 	}
