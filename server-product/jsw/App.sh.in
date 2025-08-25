@@ -216,7 +216,7 @@ gettext() {
 }
 
 checkIsRoot() {
-    if [ `id | sed 's/^uid=//;s/(.*$//'` != "0" ] ; then
+    if [ `id -u` != "0" ] ; then
         IS_ROOT=false
     else
         IS_ROOT=true
