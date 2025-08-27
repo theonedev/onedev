@@ -123,6 +123,9 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	private static final String TABS_ID = "tabs";
 	
 	private static final String TAB_PANEL_ID = "tabPanel";
+
+	private static final List<String> CONVENTIONAL_COMMIT_TYPES = List.of(
+		"feat", "fix", "docs", "style", "refactor", "perf", "test", "build", "ci", "chore", "revert");
 	
 	private ProjectAndBranch target;
 	
@@ -247,7 +250,6 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			}
 			if (baseCommitId != null) {
 				PullRequest request = new PullRequest();
-				request.setTitle(StringUtils.capitalize(source.getBranch().replace('-', ' ').replace('_', ' ').toLowerCase()));
 				pullRequestRef.set(request);
 				request.setTarget(target);
 				request.setSource(source);
@@ -263,6 +265,39 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				update.setRequest(request);
 				update.setHeadCommitHash(source.getObjectName());
 				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
+
+				String title;
+				String description;
+				var commits = update.getCommits();
+				if (commits.size() == 1) {
+					title = commits.get(0).getShortMessage();
+					description = commits.get(0).getFullMessage().substring(title.length()).trim();
+					if (description.length() == 0)
+						description = null;
+				} else {
+					title = source.getBranch().toLowerCase();
+					boolean wip = false;
+					if (title.startsWith("wip-") || title.startsWith("wip_") || title.startsWith("wip/")) {
+						wip = true;
+						title = title.substring(4);
+					}
+					boolean found = false;
+					for (var commitType: CONVENTIONAL_COMMIT_TYPES) {
+						if (title.startsWith(commitType + "-") || title.startsWith(commitType + "_") || title.startsWith(commitType + "/")) {
+							title = commitType + ": " + StringUtils.capitalize(title.substring(commitType.length() + 1).replace('-', ' ').replace('_', ' ').replace('/', ' '));
+							found = true;
+							break;
+						}
+					}
+					if (!found) {
+						title = StringUtils.capitalize(title.replace('-', ' ').replace('_', ' ').replace('/', ' '));
+					}
+					if (wip)
+						title = "[WIP] " + title;
+					description = null;
+				}
+				request.setTitle(title);
+				request.setDescription(description);
 
 				getPullRequestManager().checkReviews(request, false);
 
