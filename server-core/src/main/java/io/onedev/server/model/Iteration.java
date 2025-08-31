@@ -54,7 +54,7 @@ public class Iteration extends AbstractEntity {
 	@Column(nullable=false)
 	private String name;
 	
-	@Api(description="Description of the iteration. May be null")
+	@Api(description="Description of the iteration. May be empty")
 	@Column(length=MAX_DESCRIPTION_LEN)
 	private String description;
 	

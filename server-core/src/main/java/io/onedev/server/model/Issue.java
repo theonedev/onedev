@@ -284,7 +284,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	private String title;
 	
 	@Column(length=MAX_DESCRIPTION_LEN)
-	@Api(description = "May be null")
+	@Api(description = "May be empty")
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)

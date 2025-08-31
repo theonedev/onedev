@@ -1,7 +1,12 @@
 package io.onedev.server.util.jackson;
 
+import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -11,8 +16,12 @@ import javax.inject.Singleton;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +33,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 
 import io.onedev.commons.loader.ImplementationRegistry;
@@ -117,6 +127,18 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);	
+		
+		SimpleModule emptyStringModule = new SimpleModule();
+		emptyStringModule.addDeserializer(String.class, new JsonDeserializer<String>() {
+
+			@Override
+			public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+				String value = p.getValueAsString();
+				return (value != null && value.trim().isEmpty()) ? null : value;
+			}
+		
+		});
+		mapper.registerModule(emptyStringModule);
 		
 		for (ObjectMapperConfigurator each: configurators)
 			each.configure(mapper);

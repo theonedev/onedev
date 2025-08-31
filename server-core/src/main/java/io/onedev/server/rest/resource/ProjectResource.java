@@ -290,7 +290,7 @@ public class ProjectResource {
 	@Path("/{projectId}")
 	@POST
 	public Response updateProject(@PathParam("projectId") Long projectId, @NotNull @Valid ProjectData data) {
-		Project project = projectManager.load(projectId);
+		Project project = projectManager.load(projectId);		
 		var oldAuditContent = VersionedXmlDoc.fromBean(ProjectData.from(project)).toXML();
 
 		data.populate(project, projectManager);
@@ -413,14 +413,14 @@ public class ProjectResource {
 		@Api(order = 300)
 		private String name;
 
-		@Api(order = 400, description="May be null")
+		@Api(order = 400, description="May be empty")
 		private String key;
 
 		@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 		@Api(order = 450)
 		private String path;
 
-		@Api(order = 500, description="May be null")
+		@Api(order = 500, description="May be empty")
 		private String description;
 
 		@JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -439,7 +439,7 @@ public class ProjectResource {
 		@Api(order = 750)
 		private boolean timeTracking = false;			
 		
-		@Api(order = 800, description = "May be null")
+		@Api(order = 800, description = "May be empty")
 		private String serviceDeskEmailAddress;
 
 		@Api(order = 850)

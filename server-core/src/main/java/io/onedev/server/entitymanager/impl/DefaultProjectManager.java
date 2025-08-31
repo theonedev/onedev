@@ -747,7 +747,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	private boolean updateStoredConfig(StoredConfig storedConfig, String section,
 									   String name, @Nullable String value) {
 		if (value != null) {
-			if (!value.equals(storedConfig.getString(section, "null", name))) {
+			if (!value.equals(storedConfig.getString(section, null, name))) {
 				storedConfig.setString(section, null, name, value);
 				return true;
 			}

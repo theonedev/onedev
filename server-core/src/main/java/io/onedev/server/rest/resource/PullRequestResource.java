@@ -30,7 +30,6 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.joda.time.DateTime;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entitymanager.AuditManager;
@@ -373,7 +372,7 @@ public class PullRequestResource {
 
 		var autoMerge = new AutoMerge();
 		autoMerge.setEnabled(data.isEnabled());
-		autoMerge.setCommitMessage(StringUtils.trimToNull(data.getCommitMessage()));
+		autoMerge.setCommitMessage(data.getCommitMessage());
 		autoMerge.setUser(user);
 		var errorMessage = request.checkMergeCommitMessage(user, autoMerge.getCommitMessage());
 		if (errorMessage != null)
