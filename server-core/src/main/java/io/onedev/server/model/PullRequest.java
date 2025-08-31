@@ -1406,8 +1406,13 @@ public class PullRequest extends ProjectBelonging
 					wip = true;
 					title = title.substring(4);
 				}
+				var commitTypes = CONVENTIONAL_COMMIT_TYPES;
+				var branchProtection = getProject().getBranchProtection(getTargetBranch(), getSubmitter());
+				if (branchProtection.isEnforceConventionalCommits() && !branchProtection.getCommitTypes().isEmpty()) {
+					commitTypes = branchProtection.getCommitTypes();
+				}
 				boolean found = false;
-				for (var commitType: CONVENTIONAL_COMMIT_TYPES) {
+				for (var commitType: commitTypes) {
 					if (title.startsWith(commitType + "-") || title.startsWith(commitType + "_") || title.startsWith(commitType + "/")) {
 						title = commitType + ": " + StringUtils.capitalize(title.substring(commitType.length() + 1).replace('-', ' ').replace('_', ' ').replace('/', ' '));
 						found = true;
