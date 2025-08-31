@@ -373,7 +373,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 				ObjectId.fromString(mergePreview.getTargetHeadCommitHash()));
 
 		if (project.findDeleteBranchAfterPullRequestMerge()
-				&& request.checkDeleteSourceBranch() == null
+				&& request.checkDeleteSourceBranchCondition() == null
 				&& SecurityUtils.canDeleteBranch(user.asSubject(), request.getSourceProject(), request.getSourceBranch())) {
 			gitService.deleteBranch(request.getSourceProject(), request.getSourceBranch());
 		}
@@ -501,7 +501,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	public void checkAutoMerge(PullRequest request) {
 		if (request.isOpen()) {
 			var autoMerge = request.getAutoMerge();
-			if (autoMerge.isEnabled() && request.checkMerge() == null) {
+			if (autoMerge.isEnabled() && request.checkMergeCondition() == null) {
 				if (autoMerge.getUser() != null)
 					merge(autoMerge.getUser(), request, autoMerge.getCommitMessage());
 				else

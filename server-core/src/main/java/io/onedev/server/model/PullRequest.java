@@ -246,6 +246,9 @@ public class PullRequest extends ProjectBelonging
 
 	private static final int MAX_CHECK_ERROR_LEN = 1024;
 
+	private static final List<String> CONVENTIONAL_COMMIT_TYPES = List.of(
+		"feat", "fix", "docs", "style", "refactor", "perf", "test", "build", "ci", "chore", "revert");
+
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_NUMBER, NAME_TITLE, NAME_TARGET_PROJECT, NAME_TARGET_BRANCH, 
 			NAME_SOURCE_PROJECT, NAME_SOURCE_BRANCH, NAME_LABEL, NAME_DESCRIPTION, 
@@ -1172,7 +1175,7 @@ public class PullRequest extends ProjectBelonging
 	}
 	
 	@Nullable
-	public String checkMerge() {
+	public String checkMergeCondition() {
     	if (!isOpen())
     		return _T("Pull request already closed");
     	String checkError = getCheckError();
@@ -1211,19 +1214,18 @@ public class PullRequest extends ProjectBelonging
 	}
 
 	@Nullable
-	public String checkMergeCommitMessage(User user, PullRequest request, @Nullable String commitMessage) {
-		if (request.isMergeCommitMessageRequired()) {
-			var branchProtection = request.getProject().getBranchProtection(request.getTargetBranch(), user);
+	public String checkMergeCommitMessage(User user, @Nullable String commitMessage) {
+		if (isMergeCommitMessageRequired()) {
+			var branchProtection = getProject().getBranchProtection(getTargetBranch(), user);
 			if (commitMessage == null)
-				commitMessage = request.getDefaultMergeCommitMessage();
-			return branchProtection.checkCommitMessage(commitMessage,
-					request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
+				commitMessage = getDefaultMergeCommitMessage();
+			return branchProtection.checkCommitMessage(commitMessage, getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
 		}
 		return null;
 	}
 
 	@Nullable
-	public String checkReopen() {
+	public String checkReopenCondition() {
 		if (isOpen())
 			return _T("Pull request already opened");
 		if (getTarget().getObjectName(false) == null)
@@ -1250,7 +1252,7 @@ public class PullRequest extends ProjectBelonging
 	}
 	
 	@Nullable
-	public String checkDeleteSourceBranch() {
+	public String checkDeleteSourceBranchCondition() {
 		if (!isMerged())
 			return _T("Pull request not merged");
 		if (getSourceProject() == null)
@@ -1273,7 +1275,7 @@ public class PullRequest extends ProjectBelonging
 	}
 	
 	@Nullable
-	public String checkRestoreSourceBranch() {
+	public String checkRestoreSourceBranchCondition() {
 		if (getSourceProject() == null)
 			return _T("Source project no longer exists");
 		if (getSource().getObjectName(false) != null)
@@ -1305,12 +1307,8 @@ public class PullRequest extends ProjectBelonging
 				error = getProject().checkCommitMessages(getTargetBranch(), getSubmitter(),
 						getBaseCommit().copy(), getLatestUpdate().getHeadCommit().copy(), new HashMap<>());
 			}
-			if (error == null && autoMerge.isEnabled() && isMergeCommitMessageRequired()) {
-				var branchProtection = getProject().getBranchProtection(getTargetBranch(), autoMerge.getUser());
-				var commitMessage = autoMerge.getCommitMessage();
-				if (commitMessage == null)
-					commitMessage = getDefaultMergeCommitMessage();
-				var errorMessage = branchProtection.checkCommitMessage(commitMessage, mergeStrategy != SQUASH_SOURCE_BRANCH_COMMITS);
+			if (error == null && autoMerge.isEnabled()) {
+				var errorMessage = checkMergeCommitMessage(autoMerge.getUser(), autoMerge.getCommitMessage());
 				if (errorMessage != null)
 					error = new CommitMessageError(null, errorMessage);
 			}
@@ -1394,6 +1392,45 @@ public class PullRequest extends ProjectBelonging
 	public boolean isWorkInProgress() {
 		var lowerTitle = title.toLowerCase();
 		return lowerTitle.startsWith("wip") || lowerTitle.startsWith("[wip]");
+	}
+
+	public void generateTitleAndDescriptionIfEmpty() {
+		if (title == null) {
+			var commits = getLatestUpdate().getCommits();
+			if (commits.size() == 1) {
+				title = commits.get(0).getShortMessage();
+			} else {
+				title = getSource().getBranch().toLowerCase();
+				boolean wip = false;
+				if (title.startsWith("wip-") || title.startsWith("wip_") || title.startsWith("wip/")) {
+					wip = true;
+					title = title.substring(4);
+				}
+				boolean found = false;
+				for (var commitType: CONVENTIONAL_COMMIT_TYPES) {
+					if (title.startsWith(commitType + "-") || title.startsWith(commitType + "_") || title.startsWith(commitType + "/")) {
+						title = commitType + ": " + StringUtils.capitalize(title.substring(commitType.length() + 1).replace('-', ' ').replace('_', ' ').replace('/', ' '));
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					title = StringUtils.capitalize(title.replace('-', ' ').replace('_', ' ').replace('/', ' '));
+				}
+				if (wip)
+					title = "[WIP] " + title;
+			}
+		}
+		if (description == null) {
+			var commits = getLatestUpdate().getCommits();
+			if (commits.size() == 1) {
+				var commit = commits.get(0);
+				var shortMessage = commits.get(0).getShortMessage();
+				description = commit.getFullMessage().substring(shortMessage.length()).trim();
+				if (description.length() == 0)
+					description = null;
+			}
+		}		
 	}
 
 }

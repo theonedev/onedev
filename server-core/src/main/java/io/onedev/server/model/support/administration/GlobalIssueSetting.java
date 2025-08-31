@@ -1,7 +1,6 @@
 package io.onedev.server.model.support.administration;
 
 import java.io.Serializable;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -40,7 +39,6 @@ import io.onedev.server.model.support.issue.transitionspec.BranchUpdatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.IssueStateTransitedSpec;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
 import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
-import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.util.usage.Usage;
@@ -754,6 +752,7 @@ public class GlobalIssueSetting implements Serializable {
 		return getStateSpecs().indexOf(getStateSpec(state));
 	}
 
+	@Nullable
 	public ManualSpec getManualSpec(Issue issue, String state) {
 		for (var transition: getTransitionSpecs()) {
 			if (transition instanceof ManualSpec) {
@@ -763,10 +762,7 @@ public class GlobalIssueSetting implements Serializable {
 				}
 			}
 		}
-		var message = MessageFormat.format(
-				"No applicable manual transition spec found for current user (issue: {0}, from state: {1}, to state: {2})",
-				issue.getReference().toString(), issue.getState(), state);
-		throw new InvalidParamsException(message);
+		return null;
 	}
 
 	public Collection<String> getPromptFieldsUponIssueOpen(Project project) {

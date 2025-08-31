@@ -11,6 +11,7 @@ import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -38,7 +39,6 @@ import io.onedev.server.model.support.administration.emailtemplates.EmailTemplat
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.mailservice.MailService;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
-import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
@@ -211,7 +211,7 @@ public class SettingResource {
 			throw new UnauthorizedException();
     	String ingressUrl = OneDev.getInstance().getIngressUrl();
     	if (ingressUrl != null && !ingressUrl.equals(systemSetting.getServerUrl()))
-    		throw new InvalidParamsException("Server URL can only be \"" + ingressUrl + "\"");
+    		throw new NotAcceptableException("Server URL can only be \"" + ingressUrl + "\"");
     	var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getSystemSetting()).toXML();
     	settingManager.saveSystemSetting(systemSetting);
 		auditManager.audit(null, "changed system setting via RESTful API", 

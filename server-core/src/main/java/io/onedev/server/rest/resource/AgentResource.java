@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -23,7 +24,6 @@ import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.model.Agent;
-import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -78,7 +78,7 @@ public class AgentResource {
 		try {
 			parsedQuery = AgentQuery.parse(query, false);
 		} catch (Exception e) {
-			throw new InvalidParamsException("Error parsing query", e);
+			throw new NotAcceptableException("Error parsing query", e);
 		}
     	
     	return agentManager.query(parsedQuery, offset, count);

@@ -24,6 +24,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -62,7 +63,6 @@ import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.pack.ProjectPackSetting;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.resource.support.RestConstants;
@@ -192,13 +192,13 @@ public class ProjectResource {
     		@QueryParam("count") @Api(example="100") int count) {
 
 		if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamsException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	ProjectQuery parsedQuery;
 		try {
 			parsedQuery = ProjectQuery.parse(query);
 		} catch (Exception e) {
-			throw new InvalidParamsException("Error parsing query", e);
+			throw new NotAcceptableException("Error parsing query", e);
 		}
     	
     	return projectManager.query(parsedQuery, false, offset, count).stream()
@@ -221,7 +221,7 @@ public class ProjectResource {
 			throw new UnauthorizedException();
 
     	if (count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamsException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
     	
     	EntityCriteria<Iteration> criteria = EntityCriteria.of(Iteration.class);
     	criteria.add(Restrictions.in(Iteration.PROP_PROJECT, project.getSelfAndAncestors()));
@@ -254,7 +254,7 @@ public class ProjectResource {
 			throw new UnauthorizedException();
     	
     	if (count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamsException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
     	
     	int sinceDay = (int) LocalDate.parse(since).toEpochDay();
     	int untilDay = (int) LocalDate.parse(until).toEpochDay();

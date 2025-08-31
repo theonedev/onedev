@@ -1,29 +1,37 @@
 package io.onedev.server.rest.resource;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotEmpty;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.NotAcceptableException;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
+
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.util.ThreadContext;
+import org.eclipse.jgit.revwalk.RevCommit;
+
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.shiro.util.ThreadContext;
-import org.eclipse.jgit.revwalk.RevCommit;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Api(description="This resource provides an alternative way to run job by passing all parameters via url")
 @Path("/trigger-job")
@@ -92,11 +100,11 @@ public class TriggerJobResource {
 							String accessTokenValue, UriInfo uriInfo) {
 		Project project = projectManager.findByPath(projectPath);
 		if (project == null)
-			throw new InvalidParamsException("Project not found: " + projectPath);
+			throw new NotAcceptableException("Project not found: " + projectPath);
 
 		var accessToken = accessTokenManager.findByValue(accessTokenValue);
 		if (accessToken == null)
-			throw new InvalidParamsException("Invalid access token");
+			throw new NotAcceptableException("Invalid access token");
 		
 		ThreadContext.bind(accessToken.asSubject());
 		try {
@@ -104,7 +112,7 @@ public class TriggerJobResource {
 				throw new UnauthorizedException();
 
 			if (StringUtils.isNotBlank(branch) && StringUtils.isNotBlank(tag)) 
-				throw new InvalidParamsException("Either branch or tag should be specified, but not both");
+				throw new NotAcceptableException("Either branch or tag should be specified, but not both");
 			
 			String refName;
 			if (branch != null)
@@ -116,7 +124,7 @@ public class TriggerJobResource {
 			
 			RevCommit commit = project.getRevCommit(refName, false);
 			if (commit == null)
-				throw new InvalidParamsException("Ref not found: " + refName);
+				throw new BadRequestException("Ref not found: " + refName);
 			
 			Map<String, List<String>> jobParams = new HashMap<>();
 			for (Map.Entry<String, List<String>> entry: uriInfo.getQueryParameters().entrySet()) {

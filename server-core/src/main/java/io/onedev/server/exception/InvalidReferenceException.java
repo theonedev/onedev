@@ -2,9 +2,9 @@ package io.onedev.server.exception;
 
 import io.onedev.commons.utils.ExplicitException;
 
-public class ReviewRejectException extends ExplicitException {
+public class InvalidReferenceException extends ExplicitException {
 
-    public ReviewRejectException(String message) {
+    public InvalidReferenceException(String message) {
         super(message);
     }
 

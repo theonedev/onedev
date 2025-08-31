@@ -1441,7 +1441,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onConfigure() {
 				super.onConfigure();
 				var request = getPullRequest();
-				setVisible(request.isOpen() && request.checkMerge() != null);
+				setVisible(request.isOpen() && request.checkMergeCondition() != null);
 			}
 
 		};
@@ -2040,7 +2040,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
-				return SecurityUtils.canWriteCode(request.getProject()) && request.checkMerge() == null;
+				return SecurityUtils.canWriteCode(request.getProject()) && request.checkMergeCondition() == null;
 			}
 
 			@Override
@@ -2118,7 +2118,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
-				return SecurityUtils.canModifyPullRequest(request) && request.checkReopen() == null;
+				return SecurityUtils.canModifyPullRequest(request) && request.checkReopenCondition() == null;
 			}
 
 			@Override
@@ -2155,7 +2155,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
-				return request.checkDeleteSourceBranch() == null
+				return request.checkDeleteSourceBranchCondition() == null
 						&& SecurityUtils.canModifyPullRequest(request)
 						&& SecurityUtils.canDeleteBranch(request.getSourceProject(), request.getSourceBranch());
 			}
@@ -2195,7 +2195,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
-				return request.checkRestoreSourceBranch() == null
+				return request.checkRestoreSourceBranchCondition() == null
 						&& SecurityUtils.canModifyPullRequest(request)
 						&& SecurityUtils.canWriteCode(request.getSourceProject());
 			}

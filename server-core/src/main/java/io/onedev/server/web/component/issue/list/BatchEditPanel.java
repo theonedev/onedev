@@ -46,11 +46,11 @@ import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.exception.InvalidIssueFieldsException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.field.EmptyFieldsException;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -315,7 +315,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						try {
 							OneDev.getInstance(IssueChangeManager.class).batchUpdate(
 									getIssueIterator(), state, confidential, iterations, fieldValues, comment, sendNotifications);
-						} catch (EmptyFieldsException e) {
+						} catch (InvalidIssueFieldsException e) {
 							form.error(e.getMessage());
 							target.add(form);
 							return;

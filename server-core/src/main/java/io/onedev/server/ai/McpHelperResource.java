@@ -1,6 +1,7 @@
 package io.onedev.server.ai;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -58,8 +59,10 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.entityreference.PullRequestReference;
-import io.onedev.server.exception.LinkValidationException;
-import io.onedev.server.exception.ReviewRejectException;
+import io.onedev.server.exception.InvalidIssueFieldsException;
+import io.onedev.server.exception.InvalidReferenceException;
+import io.onedev.server.exception.IssueLinkValidationException;
+import io.onedev.server.exception.PullRequestReviewRejectedException;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
@@ -75,7 +78,6 @@ import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.field.EmptyFieldsException;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.BooleanField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
@@ -91,7 +93,6 @@ import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
-import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.EntityQuery;
@@ -392,6 +393,18 @@ public class McpHelperResource {
         return project;
     }
 
+    private ProjectInfo getProjectInfo(String projectPath, String currentProjectPath) {
+        projectPath = StringUtils.trimToNull(projectPath);
+        if (projectPath == null) 
+            projectPath = currentProjectPath;
+
+        var projectInfo = new ProjectInfo();
+        projectInfo.project = getProject(projectPath);
+        projectInfo.currentProject = getProject(currentProjectPath);
+        
+        return projectInfo;
+    }
+
     private Map<String, Object> getFieldProperties(FieldSpec field) {
         String fieldDescription;
         if (field.getDescription() != null)
@@ -449,379 +462,298 @@ public class McpHelperResource {
 
     @Path("/get-tool-input-schemas")
     @GET
-    public Map<String, Object> getToolInputSchemas(@QueryParam("currentProject") @NotNull String currentProjectPath) {
+    public Map<String, Object> getToolInputSchemas() {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
-        var currentProject = getProject(currentProjectPath);
+        var inputSchemas = new HashMap<String, Object>();
 
-        Project.push(currentProject);
-        try {
-            var inputSchemas = new HashMap<String, Object>();
+        var queryIssuesInputSchema = new HashMap<String, Object>();
+        var queryIssuesProperties = new HashMap<String, Object>();
 
-            var queryIssuesInputSchema = new HashMap<String, Object>();
-            var queryIssuesProperties = new HashMap<String, Object>();
+        queryIssuesProperties.put("project", Map.of(
+            "type", "string",
+            "description", "Project to query issues in. Leave empty to query in current project"));
+        queryIssuesProperties.put("query", Map.of(
+            "type", "string",
+            "description", getIssueQueryStringDescription()));
+        queryIssuesProperties.put("offset", Map.of(
+            "type", "integer",
+            "description", "start position for the query (optional, defaults to 0)"));
+        queryIssuesProperties.put("count", Map.of(
+            "type", "integer",
+            "description", "number of issues to return (optional, defaults to 25, max 100)"));
 
-            queryIssuesProperties.put("query", Map.of(
+        queryIssuesInputSchema.put("Type", "object");
+        queryIssuesInputSchema.put("Properties", queryIssuesProperties);
+        queryIssuesInputSchema.put("Required", new ArrayList<>());
+
+        inputSchemas.put("queryIssues", queryIssuesInputSchema);
+
+        var createIssueInputSchema = new HashMap<String, Object>();
+        var createIssueProperties = new HashMap<String, Object>();
+        createIssueProperties.put("project", Map.of(
+            "type", "string",
+            "description", "Project to create issue in. Leave empty to create issue in current project"));
+        createIssueProperties.put("title", Map.of(
+            "type", "string", 
+            "description", "title of the issue"));
+        createIssueProperties.put("description", Map.of(
+            "type", "string", 
+            "description", "description of the issue"));
+        createIssueProperties.put("confidential", Map.of(
+            "type", "boolean", 
+            "description", "whether the issue is confidential"));
+
+        createIssueProperties.put("iterations", getArrayProperties("iteration names"));
+
+        if (subscriptionManager.isSubscriptionActive()) {
+            createIssueProperties.put("ownEstimatedTime", Map.of(
+                "type", "integer",
+                "description", "Estimated time in hours for this issue only (not including linked issues)"));
+        }
+
+        for (var field: settingManager.getIssueSetting().getFieldSpecs()) {
+            var paramName = getToolParamName(field.getName());
+            var fieldProperties = getFieldProperties(field);
+            createIssueProperties.put(paramName, fieldProperties);
+        }
+        
+        createIssueInputSchema.put("Type", "object");
+        createIssueInputSchema.put("Properties", createIssueProperties);
+        createIssueInputSchema.put("Required", List.of("title"));
+
+        inputSchemas.put("createIssue", createIssueInputSchema);
+
+        var editIssueInputSchema = new HashMap<String, Object>();
+        var editIssueProperties = new HashMap<String, Object>();
+        editIssueProperties.put("issueReference", Map.of(
+            "type", "string",
+            "description", "reference of the issue to update"));
+        editIssueProperties.put("title", Map.of(
                 "type", "string",
-                "description", getIssueQueryStringDescription()));
-            queryIssuesProperties.put("offset", Map.of(
-                "type", "integer",
-                "description", "start position for the query (optional, defaults to 0)"));
-            queryIssuesProperties.put("count", Map.of(
-                "type", "integer",
-                "description", "number of issues to return (optional, defaults to 25, max 100)"));
-
-            queryIssuesInputSchema.put("Type", "object");
-            queryIssuesInputSchema.put("Properties", queryIssuesProperties);
-            queryIssuesInputSchema.put("Required", new ArrayList<>());
-
-            inputSchemas.put("queryIssues", queryIssuesInputSchema);
-
-            var createIssueInputSchema = new HashMap<String, Object>();
-            var createIssueProperties = new HashMap<String, Object>();
-            createIssueProperties.put("title", Map.of(
-                "type", "string", 
                 "description", "title of the issue"));
-            createIssueProperties.put("description", Map.of(
-                "type", "string", 
+        editIssueProperties.put("description", Map.of(
+                "type", "string",
                 "description", "description of the issue"));
-            createIssueProperties.put("confidential", Map.of(
-                "type", "boolean", 
+        editIssueProperties.put("confidential", Map.of(
+                "type", "boolean",
                 "description", "whether the issue is confidential"));
 
-            if (SecurityUtils.canScheduleIssues(currentProject)) {                
-                createIssueProperties.put("iterations", getArrayProperties("iteration names"));
+        editIssueProperties.put("iterations", getArrayProperties("iterations to schedule the issue in"));
 
-                if (subscriptionManager.isSubscriptionActive() && currentProject.isTimeTracking()) {
-                    createIssueProperties.put("ownEstimatedTime", Map.of(
-                        "type", "integer",
-                        "description", "Estimated time in hours for this issue only (not including linked issues)"));
+        if (subscriptionManager.isSubscriptionActive()) {
+            editIssueProperties.put("ownEstimatedTime", Map.of(
+                    "type", "integer",
+                    "description", "Estimated time in hours for this issue only (not including linked issues)"));
+        }
+
+        for (var field : settingManager.getIssueSetting().getFieldSpecs()) {
+            var paramName = getToolParamName(field.getName());
+
+            var fieldProperties = getFieldProperties(field);
+            editIssueProperties.put(paramName, fieldProperties);
+        }
+
+        editIssueInputSchema.put("Type", "object");
+        editIssueInputSchema.put("Properties", editIssueProperties);
+        editIssueInputSchema.put("Required", List.of("issueReference"));
+
+        inputSchemas.put("editIssue", editIssueInputSchema);            
+
+        var toStates = new HashSet<String>();
+        for (var transition: settingManager.getIssueSetting().getTransitionSpecs()) {
+            if (transition instanceof ManualSpec) {
+                if (transition.getToStates().isEmpty()) {
+                    toStates.addAll(settingManager.getIssueSetting().getStateSpecMap().keySet());
+                    break;
+                } else {
+                    toStates.addAll(transition.getToStates());
                 }
             }
+        }
+        if (toStates.size() > 0) {
+            var transitionInputSchema = new HashMap<String, Object>();
+            transitionInputSchema.put("Type", "object");
 
-            var createIssueRequiredProperties = new ArrayList<String>();
-            createIssueRequiredProperties.add("title");
-
-            for (var field: settingManager.getIssueSetting().getFieldSpecs()) {
-                if (field.isApplicable(currentProject) 
-                        && field.isPromptUponIssueOpen() 
-                        && SecurityUtils.canEditIssueField(currentProject, field.getName())) {
-                    var paramName = getToolParamName(field.getName());
-                    var fieldProperties = getFieldProperties(field);
-                    createIssueProperties.put(paramName, fieldProperties);
-
-                    if (!field.isAllowEmpty() && field.getShowCondition() == null) {
-                        createIssueRequiredProperties.add(paramName);
-                    }
-                }
-            }
-            
-            createIssueInputSchema.put("Type", "object");
-            createIssueInputSchema.put("Properties", createIssueProperties);
-            createIssueInputSchema.put("Required", createIssueRequiredProperties);
-
-            inputSchemas.put("createIssue", createIssueInputSchema);
-
-            var editIssueInputSchema = new HashMap<String, Object>();
-            var editIssueProperties = new HashMap<String, Object>();
-            editIssueProperties.put("issueReference", Map.of(
+            var transitIssueProperties = new HashMap<String, Object>();
+            transitIssueProperties.put("issueReference", Map.of(
                 "type", "string",
-                "description", "reference of the issue to update"));
-            editIssueProperties.put("title", Map.of(
+                "description", "reference of the issue to transit state"));
+            transitIssueProperties.put("state", Map.of(
                     "type", "string",
-                    "description", "title of the issue"));
-            editIssueProperties.put("description", Map.of(
+                    "description", "new state of the issue after transition. Must be one of: " + String.join(", ", toStates)));
+            transitIssueProperties.put("comment", Map.of(
                     "type", "string",
-                    "description", "description of the issue"));
-            editIssueProperties.put("confidential", Map.of(
-                    "type", "boolean",
-                    "description", "whether the issue is confidential"));
-
-            if (SecurityUtils.canScheduleIssues(currentProject)) {
-                editIssueProperties.put("iterations", getArrayProperties("iterations to schedule the issue in"));
-
-                if (subscriptionManager.isSubscriptionActive() && currentProject.isTimeTracking()) {
-                    editIssueProperties.put("ownEstimatedTime", Map.of(
-                            "type", "integer",
-                            "description", "Estimated time in hours for this issue only (not including linked issues)"));
-                }
-            }
+                    "description", "comment of the transition"));
 
             for (var field : settingManager.getIssueSetting().getFieldSpecs()) {
-                if (SecurityUtils.canEditIssueField(currentProject, field.getName())) {
-                    var paramName = getToolParamName(field.getName());
+                var paramName = getToolParamName(field.getName());
 
-                    var fieldProperties = getFieldProperties(field);
-                    editIssueProperties.put(paramName, fieldProperties);
-               }
-            }
+                var fieldProperties = getFieldProperties(field);
+                transitIssueProperties.put(paramName, fieldProperties);
+            }                
 
-            editIssueInputSchema.put("Type", "object");
-            editIssueInputSchema.put("Properties", editIssueProperties);
-            editIssueInputSchema.put("Required", List.of("issueReference"));
+            transitionInputSchema.put("Properties", transitIssueProperties);
+            transitionInputSchema.put("Required", List.of("issueReference", "state"));
 
-            inputSchemas.put("editIssue", editIssueInputSchema);            
-
-            var toStates = new HashSet<String>();
-            for (var transition: settingManager.getIssueSetting().getTransitionSpecs()) {
-                if (transition instanceof ManualSpec) {
-                    if (transition.getToStates().isEmpty()) {
-                        toStates.addAll(settingManager.getIssueSetting().getStateSpecMap().keySet());
-                        break;
-                    } else {
-                        toStates.addAll(transition.getToStates());
-                    }
-                }
-            }
-            if (toStates.size() > 0) {
-                var transitionInputSchema = new HashMap<String, Object>();
-                transitionInputSchema.put("Type", "object");
-
-                var transitIssueProperties = new HashMap<String, Object>();
-                transitIssueProperties.put("issueReference", Map.of(
-                    "type", "string",
-                    "description", "reference of the issue to transit state"));
-                transitIssueProperties.put("state", Map.of(
-                        "type", "string",
-                        "description", "new state of the issue after transition. Must be one of: " + String.join(", ", toStates)));
-                transitIssueProperties.put("comment", Map.of(
-                        "type", "string",
-                        "description", "comment of the transition"));
-
-                for (var field : settingManager.getIssueSetting().getFieldSpecs()) {
-                    if (SecurityUtils.canEditIssueField(currentProject, field.getName())) {
-                        var paramName = getToolParamName(field.getName());
-
-                        var fieldProperties = getFieldProperties(field);
-                        transitIssueProperties.put(paramName, fieldProperties);
-                    }
-                }                
-
-                transitionInputSchema.put("Properties", transitIssueProperties);
-                transitionInputSchema.put("Required", List.of("issueReference", "state"));
-
-                inputSchemas.put("transitIssue", transitionInputSchema);
-            }
-
-            var linkSpecs = linkSpecManager.query();
-            if (!linkSpecs.isEmpty()) {
-                var linkInputSchema = new HashMap<String, Object>();
-                linkInputSchema.put("Type", "object");
-
-                var linkProperties = new HashMap<String, Object>();
-                linkProperties.put("sourceIssueReference", Map.of(
-                    "type", "string", 
-                    "description", "Issue reference as source of the link"));
-                linkProperties.put("targetIssueReference", Map.of(
-                    "type", "string", 
-                    "description", "Issue reference as target of the link"
-                ));
-                var linkNames = new ArrayList<String>();
-                for (var linkSpec: linkSpecs) {
-                    linkNames.add(linkSpec.getName());
-                    if (linkSpec.getOpposite() != null)
-                        linkNames.add(linkSpec.getOpposite().getName());
-                }
-                linkProperties.put("linkName", Map.of(
-                    "type", "string", 
-                    "description", "Name of the link. Must be one of: " + String.join(", ", linkNames)));
-                linkInputSchema.put("Properties", linkProperties);
-                linkInputSchema.put("Required", List.of("sourceIssueReference", "targetIssueReference", "linkName"));
-
-                inputSchemas.put("linkIssues", linkInputSchema);
-            }
-
-            var queryPullRequestsInputSchema = new HashMap<String, Object>();
-            var queryPullRequestsProperties = new HashMap<String, Object>();
-
-            queryPullRequestsProperties.put("query", Map.of(
-                    "type", "string",
-                    "description", getPullRequestQueryStringDescription()));
-            queryPullRequestsProperties.put("offset", Map.of(
-                    "type", "integer",
-                    "description", "start position for the query (optional, defaults to 0)"));
-            queryPullRequestsProperties.put("count", Map.of(
-                    "type", "integer",
-                    "description", "number of pull requests to return (optional, defaults to 25, max 100)"));
-
-            queryPullRequestsInputSchema.put("Type", "object");
-            queryPullRequestsInputSchema.put("Properties", queryPullRequestsProperties);
-            queryPullRequestsInputSchema.put("Required", new ArrayList<>());
-
-            inputSchemas.put("queryPullRequests", queryPullRequestsInputSchema);
-
-            var createPullRequestInputSchema = new HashMap<String, Object>();
-            var createPullRequestProperties = new HashMap<String, Object>();            
-            createPullRequestProperties.put("title", Map.of(
-                    "type", "string",
-                    "description", "Title of the pull request"));
-            createPullRequestProperties.put("description", Map.of(
-                    "type", "string",
-                    "description", "Description of the pull request"));
-            createPullRequestProperties.put("targetBranch", Map.of(
-                    "type", "string",
-                    "description", "A branch in current project to be used as target branch of the pull request"));
-            createPullRequestProperties.put("sourceBranch", Map.of(
-                    "type", "string",
-                    "description", "A branch in current project to be used as source branch of the pull request"));
-            createPullRequestProperties.put("mergeStrategy", Map.of(
-                    "type", "string",
-                    "description", "Merge strategy of the pull request. Must be one of: " + 
-                        Arrays.stream(MergeStrategy.values()).map(Enum::name).collect(Collectors.joining(", "))));
-            createPullRequestProperties.put("reviewers", Map.of(
-                    "type", "array",
-                    "items", Map.of("type", "string"),
-                    "uniqueItems", true,
-                    "description", "Reviewers of the pull request. Expects user login names"));
-            createPullRequestProperties.put("assignees", Map.of(
-                    "type", "array",
-                    "items", Map.of("type", "string"),
-                    "uniqueItems", true,
-                    "description", "Assignees of the pull request. Expects user login names"));
-
-            var labelSpecs = labelSpecManager.query();
-            if (!labelSpecs.isEmpty()) {
-                createPullRequestProperties.put("labels", Map.of(
-                        "type", "array",
-                        "items", Map.of("type", "string"),
-                        "uniqueItems", true,
-                        "description", "Labels of the pull request. Must be one or more of: " + String.join(", ",
-                                labelSpecs.stream().map(LabelSpec::getName).collect(Collectors.toList()))));
-            }
-
-            createPullRequestInputSchema.put("Type", "object");
-            createPullRequestInputSchema.put("Properties", createPullRequestProperties);
-            createPullRequestInputSchema.put("Required", List.of("title", "targetBranch", "sourceBranch"));
-
-            inputSchemas.put("createPullRequest", createPullRequestInputSchema);
-
-            var editPullRequestInputSchema = new HashMap<String, Object>();
-            var editPullRequestProperties = new HashMap<String, Object>();
-            editPullRequestProperties.put("pullRequestReference", Map.of(
-                    "type", "string",
-                    "description", "Reference of the pull request to edit"));
-            editPullRequestProperties.put("title", Map.of(
-                    "type", "string",
-                    "description", "Title of the pull request"));
-            editPullRequestProperties.put("description", Map.of(
-                    "type", "string",
-                    "description", "Description of the pull request"));
-            editPullRequestProperties.put("mergeStrategy", Map.of(
-                    "type", "string",
-                    "description", "Merge strategy of the pull request. Must be one of: " +
-                            Arrays.stream(MergeStrategy.values()).map(Enum::name).collect(Collectors.joining(", "))));
-            editPullRequestProperties.put("assignees", Map.of(
-                    "type", "array",
-                    "items", Map.of("type", "string"),
-                    "uniqueItems", true,
-                    "description", "Assignees of the pull request. Expects user login names"));
-
-            editPullRequestProperties.put("addReviewers", Map.of(
-                    "type", "array",
-                    "items", Map.of("type", "string"),
-                    "uniqueItems", true,
-                    "description", "Request review from specified users. Expects user login names"));
-            editPullRequestProperties.put("removeReviewers", Map.of(
-                    "type", "array",
-                    "items", Map.of("type", "string"),
-                    "uniqueItems", true,
-                    "description", "Remove specified reviewers. Expects user login names"));
-
-            if (!labelSpecs.isEmpty()) {
-                editPullRequestProperties.put("labels", Map.of(
-                    "type", "array",
-                    "items", Map.of("type", "string"),
-                    "uniqueItems", true,
-                    "description", "Labels of the pull request. Must be one or more of: " + String.join(", ", labelSpecs.stream().map(LabelSpec::getName).collect(Collectors.toList()))));
-            }
-
-            editPullRequestProperties.put("autoMerge", Map.of(
-                    "type", "boolean",
-                    "description", "Whether to enable auto merge"));
-            editPullRequestProperties.put("autoMergeCommitMessage", Map.of(
-                    "type", "string",
-                    "description", "Preset commit message for auto merge"));
-
-            editPullRequestInputSchema.put("Type", "object");
-            editPullRequestInputSchema.put("Properties", editPullRequestProperties);
-            editPullRequestInputSchema.put("Required", List.of("pullRequestReference"));
-
-            inputSchemas.put("editPullRequest", editPullRequestInputSchema);
-
-            return inputSchemas;
-        } finally {
-            Project.pop();
+            inputSchemas.put("transitIssue", transitionInputSchema);
         }
-    }
 
-    @Path("/get-prompt-arguments")
-    @GET
-    public Map<String, Object> getPromptArguments(@QueryParam("currentProject") @NotNull String currentProjectPath) {
-        if (SecurityUtils.getAuthUser() == null)
-            throw new UnauthenticatedException();
+        var linkSpecs = linkSpecManager.query();
+        if (!linkSpecs.isEmpty()) {
+            var linkInputSchema = new HashMap<String, Object>();
+            linkInputSchema.put("Type", "object");
 
-        var currentProject = getProject(currentProjectPath);
-
-        Project.push(currentProject);
-        try {
-            var arguments = new LinkedHashMap<String, Object>();
-            var createIssueArguments = new ArrayList<Map<String, Object>>();
-            createIssueArguments.add(Map.of(
-                    "name", "title",
-                    "description", "title of the issue",
-                    "required", true));
-            createIssueArguments.add(Map.of(
-                    "name", "description",
-                    "description", "description of the issue",
-                    "required", false));
-            createIssueArguments.add(Map.of(
-                    "name", "confidential",
-                    "description", "whether the issue is confidential",
-                    "required", false));
-            
-            if (SecurityUtils.canScheduleIssues(currentProject)) {
-                createIssueArguments.add(Map.of(
-                        "name", "iterations",
-                        "description", "iterations to schedule the issue in",
-                        "required", false));
-
-                if (subscriptionManager.isSubscriptionActive() && currentProject.isTimeTracking()) {
-                    createIssueArguments.add(Map.of(
-                        "name", "ownEstimatedTime",
-                        "description", "estimated time for this issue only in hours (excluding linked issues)", 
-                        "required", false));
-                }
+            var linkProperties = new HashMap<String, Object>();
+            linkProperties.put("sourceIssueReference", Map.of(
+                "type", "string", 
+                "description", "Issue reference as source of the link"));
+            linkProperties.put("targetIssueReference", Map.of(
+                "type", "string", 
+                "description", "Issue reference as target of the link"
+            ));
+            var linkNames = new ArrayList<String>();
+            for (var linkSpec: linkSpecs) {
+                linkNames.add(linkSpec.getName());
+                if (linkSpec.getOpposite() != null)
+                    linkNames.add(linkSpec.getOpposite().getName());
             }
+            linkProperties.put("linkName", Map.of(
+                "type", "string", 
+                "description", "Name of the link. Must be one of: " + String.join(", ", linkNames)));
+            linkInputSchema.put("Properties", linkProperties);
+            linkInputSchema.put("Required", List.of("sourceIssueReference", "targetIssueReference", "linkName"));
 
-            for (var field: settingManager.getIssueSetting().getFieldSpecs()) {
-                if (field.isApplicable(currentProject) 
-                        && field.isPromptUponIssueOpen()
-                        && field.getShowCondition() == null
-                        && SecurityUtils.canEditIssueField(currentProject, field.getName())) {
-                    var paramName = getToolParamName(field.getName());
-                    String description = "";
-                    if (field.getDescription() != null)
-                        description = field.getDescription().replace("\n", " ");
-                    if (field instanceof ChoiceField) {
-                        var choiceField = (ChoiceField) field;
-                        if (field.isAllowMultiple())
-                            description = appendDescription(description, "Expects one or more of: " + String.join(", ", choiceField.getPossibleValues()));
-                        else
-                            description = appendDescription(description, "Expects one of: " + String.join(", ", choiceField.getPossibleValues()));
-                    }
-                    var argumentMap = new HashMap<String, Object>();
-                    argumentMap.put("name", paramName);
-                    argumentMap.put("required", !field.isAllowEmpty());
-                    argumentMap.put("description", HtmlEscape.escapeHtml5(description));
-                    createIssueArguments.add(argumentMap);
-                }
-            }
+            inputSchemas.put("linkIssues", linkInputSchema);
+        }
 
-            arguments.put("createIssue", createIssueArguments);
-            return arguments;
-        } finally {
-            Project.pop();
-        } 
+        var queryPullRequestsInputSchema = new HashMap<String, Object>();
+        var queryPullRequestsProperties = new HashMap<String, Object>();
+
+        queryPullRequestsProperties.put("project", Map.of(
+            "type", "string",
+            "description", "Project to query pull requests in. Leave empty to query in current project"));
+        queryPullRequestsProperties.put("query", Map.of(
+                "type", "string",
+                "description", getPullRequestQueryStringDescription()));
+        queryPullRequestsProperties.put("offset", Map.of(
+                "type", "integer",
+                "description", "start position for the query (optional, defaults to 0)"));
+        queryPullRequestsProperties.put("count", Map.of(
+                "type", "integer",
+                "description", "number of pull requests to return (optional, defaults to 25, max 100)"));
+
+        queryPullRequestsInputSchema.put("Type", "object");
+        queryPullRequestsInputSchema.put("Properties", queryPullRequestsProperties);
+        queryPullRequestsInputSchema.put("Required", new ArrayList<>());
+
+        inputSchemas.put("queryPullRequests", queryPullRequestsInputSchema);
+
+        var createPullRequestInputSchema = new HashMap<String, Object>();
+        var createPullRequestProperties = new HashMap<String, Object>();            
+        createPullRequestProperties.put("targetProject", Map.of(
+            "type", "string",
+            "description", "Target project of the pull request. If left empty, it defaults to the original project when the source project is a fork, or to the source project itself otherwise"));
+        createPullRequestProperties.put("sourceProject", Map.of(
+            "type", "string",
+            "description", "Source project of the pull request. Leave empty to use current project"));
+        createPullRequestProperties.put("title", Map.of(
+            "type", "string",
+            "description", "Title of the pull request. Leave empty to use default title"));
+        createPullRequestProperties.put("description", Map.of(
+                "type", "string",
+                "description", "Description of the pull request"));
+        createPullRequestProperties.put("targetBranch", Map.of(
+                "type", "string",
+                "description", "A branch in target project to be used as target branch of the pull request. Leave empty to use default branch"));
+        createPullRequestProperties.put("sourceBranch", Map.of(
+                "type", "string",
+                "description", "A branch in source project to be used as source branch of the pull request"));
+        createPullRequestProperties.put("mergeStrategy", Map.of(
+                "type", "string",
+                "description", "Merge strategy of the pull request. Must be one of: " + 
+                    Arrays.stream(MergeStrategy.values()).map(Enum::name).collect(Collectors.joining(", "))));
+        createPullRequestProperties.put("reviewers", Map.of(
+                "type", "array",
+                "items", Map.of("type", "string"),
+                "uniqueItems", true,
+                "description", "Reviewers of the pull request. Expects user login names"));
+        createPullRequestProperties.put("assignees", Map.of(
+                "type", "array",
+                "items", Map.of("type", "string"),
+                "uniqueItems", true,
+                "description", "Assignees of the pull request. Expects user login names"));
+
+        var labelSpecs = labelSpecManager.query();
+        if (!labelSpecs.isEmpty()) {
+            createPullRequestProperties.put("labels", Map.of(
+                    "type", "array",
+                    "items", Map.of("type", "string"),
+                    "uniqueItems", true,
+                    "description", "Labels of the pull request. Must be one or more of: " + String.join(", ",
+                            labelSpecs.stream().map(LabelSpec::getName).collect(Collectors.toList()))));
+        }
+
+        createPullRequestInputSchema.put("Type", "object");
+        createPullRequestInputSchema.put("Properties", createPullRequestProperties);
+        createPullRequestInputSchema.put("Required", List.of("sourceBranch"));
+
+        inputSchemas.put("createPullRequest", createPullRequestInputSchema);
+
+        var editPullRequestInputSchema = new HashMap<String, Object>();
+        var editPullRequestProperties = new HashMap<String, Object>();
+        editPullRequestProperties.put("pullRequestReference", Map.of(
+                "type", "string",
+                "description", "Reference of the pull request to edit"));
+        editPullRequestProperties.put("title", Map.of(
+                "type", "string",
+                "description", "Title of the pull request"));
+        editPullRequestProperties.put("description", Map.of(
+                "type", "string",
+                "description", "Description of the pull request"));
+        editPullRequestProperties.put("mergeStrategy", Map.of(
+                "type", "string",
+                "description", "Merge strategy of the pull request. Must be one of: " +
+                        Arrays.stream(MergeStrategy.values()).map(Enum::name).collect(Collectors.joining(", "))));
+        editPullRequestProperties.put("assignees", Map.of(
+                "type", "array",
+                "items", Map.of("type", "string"),
+                "uniqueItems", true,
+                "description", "Assignees of the pull request. Expects user login names"));
+
+        editPullRequestProperties.put("addReviewers", Map.of(
+                "type", "array",
+                "items", Map.of("type", "string"),
+                "uniqueItems", true,
+                "description", "Request review from specified users. Expects user login names"));
+        editPullRequestProperties.put("removeReviewers", Map.of(
+                "type", "array",
+                "items", Map.of("type", "string"),
+                "uniqueItems", true,
+                "description", "Remove specified reviewers. Expects user login names"));
+
+        if (!labelSpecs.isEmpty()) {
+            editPullRequestProperties.put("labels", Map.of(
+                "type", "array",
+                "items", Map.of("type", "string"),
+                "uniqueItems", true,
+                "description", "Labels of the pull request. Must be one or more of: " + String.join(", ", labelSpecs.stream().map(LabelSpec::getName).collect(Collectors.toList()))));
+        }
+
+        editPullRequestProperties.put("autoMerge", Map.of(
+                "type", "boolean",
+                "description", "Whether to enable auto merge"));
+        editPullRequestProperties.put("autoMergeCommitMessage", Map.of(
+                "type", "string",
+                "description", "Preset commit message for auto merge"));
+
+        editPullRequestInputSchema.put("Type", "object");
+        editPullRequestInputSchema.put("Properties", editPullRequestProperties);
+        editPullRequestInputSchema.put("Required", List.of("pullRequestReference"));
+
+        inputSchemas.put("editPullRequest", editPullRequestInputSchema);
+
+        return inputSchemas;
     }
 
     @Path("/get-login-name")
@@ -849,7 +781,7 @@ public class McpHelperResource {
                 if (matchingUsers.size() == 1) {
                     user = matchingUsers.get(0);
                 } else if (matchingUsers.size() > 1) {
-                    throw new InvalidParamsException("Multiple users found: " + userName);
+                    throw new NotAcceptableException("Multiple users found: " + userName);
                 }
             }
             if (user == null) 
@@ -871,28 +803,33 @@ public class McpHelperResource {
 
     @Path("/query-issues")
     @GET
-    public List<Map<String, Object>> queryIssues(@QueryParam("currentProject") @NotNull String currentProjectPath, 
-            @QueryParam("query") String query, @QueryParam("offset") int offset, @QueryParam("count") int count) {
+    public List<Map<String, Object>> queryIssues(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("project") String projectPath, 
+                @QueryParam("query") String query, 
+                @QueryParam("offset") int offset, 
+                @QueryParam("count") int count) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
 
-        if (count > RestConstants.MAX_PAGE_SIZE)
-            throw new InvalidParamsException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+        var projectInfo = getProjectInfo(projectPath, currentProjectPath);
 
-        var currentProject = getProject(currentProjectPath);
+        if (count > RestConstants.MAX_PAGE_SIZE)
+            throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+
 
         EntityQuery<Issue> parsedQuery;
         if (query != null) {
             var option = new IssueQueryParseOption();
             option.withCurrentUserCriteria(true);
-            parsedQuery = IssueQuery.parse(currentProject, query, option, true);
+            parsedQuery = IssueQuery.parse(projectInfo.project, query, option, true);
         } else {
             parsedQuery = new IssueQuery();
         }
 
         var issues = new ArrayList<Map<String, Object>>();
-        for (var issue : issueManager.query(new ProjectScope(currentProject, true, false), parsedQuery, true, offset, count)) {
-            var issueMap = getIssueMap(currentProject, issue);
+        for (var issue : issueManager.query(new ProjectScope(projectInfo.project, true, false), parsedQuery, true, offset, count)) {
+            var issueMap = getIssueMap(projectInfo.currentProject, issue);
             for (var entry: issue.getFieldInputs().entrySet()) {
                 issueMap.put(entry.getKey(), entry.getValue().getValues());
             }
@@ -903,7 +840,12 @@ public class McpHelperResource {
     }
 
     private Issue getIssue(Project currentProject, String referenceString) {
-        var issueReference = IssueReference.of(referenceString, currentProject);
+        IssueReference issueReference;
+        try {
+            issueReference = IssueReference.of(referenceString, currentProject);
+        } catch (InvalidReferenceException e) {
+            throw new NotAcceptableException(e.getMessage());
+        }
         var issue = issueManager.find(issueReference.getProject(), issueReference.getNumber());
         if (issue != null) {
             if (!SecurityUtils.canAccessIssue(issue))
@@ -940,7 +882,8 @@ public class McpHelperResource {
     
     @Path("/get-issue")
     @GET
-    public Map<String, Object> getIssue(@QueryParam("currentProject") @NotNull String currentProjectPath, 
+    public Map<String, Object> getIssue(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
@@ -975,12 +918,14 @@ public class McpHelperResource {
 
     @Path("/get-issue-comments")
     @GET
-    public List<Map<String, Object>> getIssueComments(@QueryParam("currentProject") @NotNull String currentProjectPath, 
+    public List<Map<String, Object>> getIssueComments(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
+
         var issue = getIssue(currentProject, issueReference);
                 
         var comments = new ArrayList<Map<String, Object>>();
@@ -997,8 +942,10 @@ public class McpHelperResource {
     @Path("/add-issue-comment")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String addIssueComment(@QueryParam("currentProject") String currentProjectPath, 
-            @QueryParam("reference") @NotNull String issueReference, @NotNull String commentContent) {
+    public String addIssueComment(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String issueReference, 
+                @NotNull String commentContent) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
 
@@ -1011,17 +958,19 @@ public class McpHelperResource {
         comment.setDate(new Date());
         issueCommentManager.create(comment);
 
-        return "Commented on issue " + issueReference + ": " + urlManager.urlFor(comment, true);
+        return "Commented on issue " + issueReference;
     }
 
     @Path("/create-issue")
     @POST
-    public String createIssue(@QueryParam("currentProject") @NotNull String currentProjectPath, 
+    public String createIssue(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("project") String projectPath, 
                 @NotNull @Valid Map<String, Serializable> data) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
 
-        var currentProject = getProject(currentProjectPath);
+        var projectInfo = getProjectInfo(projectPath, currentProjectPath);
 
         normalizeIssueData(data);
 
@@ -1030,7 +979,7 @@ public class McpHelperResource {
         Issue issue = new Issue();
         var title = (String) data.remove("title");
         if (title == null)
-            throw new InvalidParamsException("title is required");
+            throw new NotAcceptableException("title is required");
         issue.setTitle(title);
         var description = (String) data.remove("description");
         issue.setDescription(description);
@@ -1042,9 +991,9 @@ public class McpHelperResource {
         if (ownEstimatedTime != null) {
             if (!subscriptionManager.isSubscriptionActive())
                 throw new NotAcceptableException("An active subscription is required for this feature");
-            if (!currentProject.isTimeTracking())
+            if (!projectInfo.project.isTimeTracking())
                 throw new NotAcceptableException("Time tracking needs to be enabled for the project");
-            if (!SecurityUtils.canScheduleIssues(currentProject))
+            if (!SecurityUtils.canScheduleIssues(projectInfo.project))
                 throw new UnauthorizedException("Issue schedule permission required to set own estimated time");
             issue.setOwnEstimatedTime(ownEstimatedTime*60);
         }
@@ -1052,10 +1001,10 @@ public class McpHelperResource {
         @SuppressWarnings("unchecked")
         List<String> iterationNames = (List<String>) data.remove("iterations");
         if (iterationNames != null) {
-            if (!SecurityUtils.canScheduleIssues(currentProject))
+            if (!SecurityUtils.canScheduleIssues(projectInfo.project))
                 throw new UnauthorizedException("Issue schedule permission required to set iterations");
             for (var iterationName : iterationNames) {
-                var iteration = iterationManager.findInHierarchy(currentProject, iterationName);
+                var iteration = iterationManager.findInHierarchy(projectInfo.project, iterationName);
                 if (iteration == null)
                     throw new NotFoundException("Iteration '" + iterationName + "' not found");
                 IssueSchedule schedule = new IssueSchedule();
@@ -1065,7 +1014,7 @@ public class McpHelperResource {
             }
         }
 
-        issue.setProject(currentProject);
+        issue.setProject(projectInfo.project);
         issue.setSubmitDate(new Date());
         issue.setSubmitter(SecurityUtils.getAuthUser());
         issue.setState(issueSetting.getInitialStateSpec().getName());
@@ -1074,17 +1023,19 @@ public class McpHelperResource {
 
         try {
             issueManager.open(issue);
-        } catch (EmptyFieldsException e) {
-            throw new InvalidParamsException("Missing parameters: " + String.join(", ", e.getEmptyFields()));
+        } catch (InvalidIssueFieldsException e) {
+            throw newNotAcceptableException(e);
         }
 
-        return "Created issue " + issue.getReference().toString(currentProject) + ": " + urlManager.urlFor(issue, true);
+        return "Created issue " + issue.getReference().toString(projectInfo.currentProject) + ": " + urlManager.urlFor(issue, true);
     }
 
     @Path("/edit-issue")
     @POST
-    public String editIssue(@QueryParam("currentProject") @NotNull String currentProjectPath, 
-                @QueryParam("reference") @NotNull String issueReference, @NotNull Map<String, Serializable> data) {
+    public String editIssue(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String issueReference, 
+                @NotNull Map<String, Serializable> data) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
 
@@ -1145,18 +1096,20 @@ public class McpHelperResource {
 
             try {
                 issueChangeManager.changeFields(issue, FieldUtils.getFieldValues(issue.getProject(), data));
-            } catch (EmptyFieldsException e) {
-                throw new InvalidParamsException("Missing parameters: " + String.join(", ", e.getEmptyFields()));
+            } catch (InvalidIssueFieldsException e) {
+                throw newNotAcceptableException(e);
             }
         }
 
-        return "Edited issue " + issueReference + ": " + urlManager.urlFor(issue, true);
+        return "Edited issue " + issueReference;
     }
 
     @Path("/transit-issue")
     @POST
-    public String transitIssue(@QueryParam("currentProject") @NotNull String currentProjectPath, 
-                @QueryParam("reference") @NotNull String issueReference, @NotNull Map<String, Serializable> data) {
+    public String transitIssue(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String issueReference, 
+                @NotNull Map<String, Serializable> data) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
 
@@ -1166,36 +1119,45 @@ public class McpHelperResource {
         normalizeIssueData(data);
         var state = (String) data.remove("state");
         if (state == null)
-            throw new InvalidParamsException("state is required");
+            throw new NotAcceptableException("state is required");
         var comment = (String) data.remove("comment");
         ManualSpec transition = settingManager.getIssueSetting().getManualSpec(issue, state);
+        if (transition == null) {
+            var message = MessageFormat.format(
+                "No applicable manual transition spec found for current user (issue: {0}, from state: {1}, to state: {2})",
+                issue.getReference().toString(), issue.getState(), state);
+            throw new NotAcceptableException(message);
+        }
 
         var fieldValues = FieldUtils.getFieldValues(issue.getProject(), data);
         try {
             issueChangeManager.changeState(issue, state, fieldValues, transition.getPromptFields(),
                     transition.getRemoveFields(), comment);
-        } catch (EmptyFieldsException e) {
-            throw new InvalidParamsException("Missing parameters: " + String.join(", ", e.getEmptyFields()));
+        } catch (InvalidIssueFieldsException e) {
+            throw newNotAcceptableException(e);
         }
-        var feedback = "Issue " + issueReference + " transited to state \"" + state + "\": " + urlManager.urlFor(issue, true);
+        var feedback = "Issue " + issueReference + " transited to state \"" + state + "\"";
         var stateDescription = settingManager.getIssueSetting().getStateSpec(state).getDescription();
         if (stateDescription != null)
-            feedback += "\n\n" + stateDescription;
+            feedback += ":\n\n" + stateDescription;
         return feedback;
     }
 
     @Path("/link-issues")
     @GET
-    public String linkIssues(@QueryParam("currentProject") @NotNull String currentProjectPath, 
-            @QueryParam("sourceReference") @NotNull String sourceReference, 
-            @QueryParam("linkName") @Nullable String linkName, 
-            @QueryParam("targetReference") @NotNull String targetReference) {
+    public String linkIssues(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("sourceReference") @NotNull String sourceReference, 
+                @QueryParam("linkName") @Nullable String linkName, 
+                @QueryParam("targetReference") @NotNull String targetReference) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
+
         var sourceIssue = getIssue(currentProject, sourceReference);
         var targetIssue = getIssue(currentProject, targetReference);
+
         var linkSpec = linkSpecManager.find(linkName);
         if (linkSpec == null)
             throw new NotFoundException("Link spec not found: " + linkName);
@@ -1215,23 +1177,26 @@ public class McpHelperResource {
         }
         try {
             link.validate();
-        } catch (LinkValidationException e) {
+        } catch (IssueLinkValidationException e) {
             throw new NotAcceptableException(e.getMessage());
         }
         issueLinkManager.create(link);
 
-        return "Issue " + targetReference + " added as \"" + linkName + "\" of " + sourceReference + ": " + urlManager.urlFor(sourceIssue, true);
+        return "Issue " + targetReference + " added as \"" + linkName + "\" of " + sourceReference;
     }
 
     @Path("/log-work")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String logWork(@QueryParam("currentProject") @NotNull String currentProjectPath, 
-            @QueryParam("reference") @NotNull String issueReference, 
-            @QueryParam("spentHours") int spentHours, String comment) {
+    public String logWork(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String issueReference, 
+                @QueryParam("spentHours") int spentHours, String comment) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
+
         var currentProject = getProject(currentProjectPath);
+
         var issue = getIssue(currentProject, issueReference);
 
         if (!subscriptionManager.isSubscriptionActive())
@@ -1247,7 +1212,7 @@ public class McpHelperResource {
         work.setMinutes(spentHours * 60);
         work.setNote(StringUtils.trimToNull(comment));
         issueWorkManager.createOrUpdate(work);
-        return "Work logged for issue " + issueReference + ": " + urlManager.urlFor(issue, true);
+        return "Work logged for issue " + issueReference;
     }
 
     private void normalizeIssueData(Map<String, Serializable> data) {
@@ -1264,10 +1229,18 @@ public class McpHelperResource {
         }        
     }    
 
-    private Map<String, Object> getPullRequestMap(Project currentProject, PullRequest pullRequest) {
+    private Map<String, Object> getPullRequestMap(Project currentProject, 
+            PullRequest pullRequest, boolean checkMergeConditionIfOpen) {
         var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
         var pullRequestMap = objectMapper.convertValue(pullRequest, typeReference);
         pullRequestMap.remove("id");
+        if (pullRequest.isOpen() && checkMergeConditionIfOpen) {
+            var errorMessage = pullRequest.checkMergeCondition();
+            if (errorMessage != null) 
+                pullRequestMap.put("status", PullRequest.Status.OPEN.name() + " (" + errorMessage + ")");
+            else
+                pullRequestMap.put("status", PullRequest.Status.OPEN.name() + " (ready to merge)");
+        } 
         pullRequestMap.remove("uuid");
         pullRequestMap.remove("baseCommitHash");
         pullRequestMap.remove("buildCommitHash");
@@ -1295,29 +1268,33 @@ public class McpHelperResource {
 
     @Path("/query-pull-requests")
     @GET
-    public List<Map<String, Object>> queryPullRequests(@QueryParam("currentProject") @NotNull String currentProjectPath, 
-            @QueryParam("query") String query, @QueryParam("offset") int offset, @QueryParam("count") int count) {
+    public List<Map<String, Object>> queryPullRequests(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("project") String projectPath, 
+                @QueryParam("query") String query, 
+                @QueryParam("offset") int offset, 
+                @QueryParam("count") int count) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
 
-        if (!SecurityUtils.canReadCode(getProject(currentProjectPath)))
+        var projectInfo = getProjectInfo(projectPath, currentProjectPath);
+
+        if (!SecurityUtils.canReadCode(projectInfo.project))
             throw new UnauthorizedException("Code read permission required to query pull requests");
 
         if (count > RestConstants.MAX_PAGE_SIZE)
-            throw new InvalidParamsException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
-
-        var currentProject = getProject(currentProjectPath);
+            throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
         EntityQuery<PullRequest> parsedQuery;
         if (query != null) {
-            parsedQuery = PullRequestQuery.parse(currentProject, query, true);
+            parsedQuery = PullRequestQuery.parse(projectInfo.project, query, true);
         } else {
             parsedQuery = new PullRequestQuery();
         }
 
         var pullRequests = new ArrayList<Map<String, Object>>();
-        for (var pullRequest : pullRequestManager.query(currentProject, parsedQuery, false, offset, count)) {
-            var pullRequestMap = getPullRequestMap(currentProject, pullRequest);
+        for (var pullRequest : pullRequestManager.query(projectInfo.project, parsedQuery, false, offset, count)) {
+            var pullRequestMap = getPullRequestMap(projectInfo.currentProject, pullRequest, false);
             pullRequestMap.put("link", urlManager.urlFor(pullRequest, true));
             pullRequests.add(pullRequestMap);
         }
@@ -1326,15 +1303,18 @@ public class McpHelperResource {
 
     @Path("/get-pull-request")
     @GET
-    public Map<String, Object> getPullRequest(@QueryParam("currentProject") @NotNull String currentProjectPath, 
+    public Map<String, Object> getPullRequest(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String pullRequestReference) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
+
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
                 
-        var pullRequestMap = getPullRequestMap(currentProject, pullRequest);        
+        var pullRequestMap = getPullRequestMap(currentProject, pullRequest, true);        
+        pullRequestMap.put("headCommitHash", pullRequest.getLatestUpdate().getHeadCommitHash());
         pullRequestMap.put("assignees", pullRequest.getAssignees().stream().map(it->it.getName()).collect(Collectors.toList()));
         var reviews = new ArrayList<Map<String, Object>>();
         for (var review : pullRequest.getReviews()) {
@@ -1344,7 +1324,7 @@ public class McpHelperResource {
             reviewMap.put("reviewer", review.getUser().getName());
             reviewMap.put("status", review.getStatus());
             reviews.add(reviewMap);
-        }
+        }        
         pullRequestMap.put("reviews", reviews);
         pullRequestMap.put("labels", pullRequest.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
         pullRequestMap.put("link", urlManager.urlFor(pullRequest, true));
@@ -1354,7 +1334,8 @@ public class McpHelperResource {
 
     @Path("/get-pull-request-comments")
     @GET
-    public List<Map<String, Object>> getPullRequestComments(@QueryParam("currentProject") @NotNull String currentProjectPath, 
+    public List<Map<String, Object>> getPullRequestComments(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String pullRequestReference) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
@@ -1375,12 +1356,14 @@ public class McpHelperResource {
 
     @Path("/get-pull-request-code-comments")
     @GET
-    public List<Map<String, Object>> getPullRequestCodeComments(@QueryParam("currentProject") @NotNull String currentProjectPath, 
+    public List<Map<String, Object>> getPullRequestCodeComments(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String pullRequestReference) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
+
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
                 
         var comments = new ArrayList<Map<String, Object>>();
@@ -1398,35 +1381,6 @@ public class McpHelperResource {
         return comments;
     }
 
-    @Path("/get-pull-request-checkout-instruction")
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String getPullRequestCheckoutInstruction(
-                @QueryParam("currentProject") @NotNull String currentProjectPath, 
-                @QueryParam("reference") @NotNull String pullRequestReference) {
-        var user = SecurityUtils.getAuthUser();
-        if (user == null)
-            throw new UnauthenticatedException();
-        var currentProject = getProject(currentProjectPath);
-        var pullRequest = getPullRequest(currentProject, pullRequestReference);
-        String localBranch;
-        String remoteBranch;
-        if (currentProject.equals(pullRequest.getSourceProject()) && pullRequest.isOpen()) {
-            localBranch = pullRequest.getSourceBranch();
-            remoteBranch = pullRequest.getSourceBranch();
-        } else {
-            localBranch = "pr-" + pullRequest.getNumber();
-            remoteBranch = null;
-        }
-
-        var checkoutInstruction = new StringBuilder();
-        checkoutInstruction.append("1. Fetch commit " + pullRequest.getLatestUpdate().getHeadCommitHash() + "\n");
-        checkoutInstruction.append("2. If local branch " + localBranch + " does not exist, create it off above commit; otherwise fastforward it to above commit\n");
-        if (remoteBranch != null) 
-            checkoutInstruction.append("3. Set up above local branch to track remote branch " + remoteBranch + ". Make sure the remote tracking branch is reset to above commit\n");
-        return checkoutInstruction.toString();
-    }
-
     @Path("/get-pull-request-patch-info")
     @GET
     public Map<String, String> getPullRequestPatchInfo(
@@ -1436,8 +1390,11 @@ public class McpHelperResource {
         var user = SecurityUtils.getAuthUser();
         if (user == null)
             throw new UnauthenticatedException();
+
         var currentProject = getProject(currentProjectPath);
+
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
+
         var oldCommitHash = pullRequest.getBaseCommitHash();
         if (sinceLastReview) {
             Date sinceDate = null;
@@ -1466,7 +1423,7 @@ public class McpHelperResource {
             pullRequest, ObjectId.fromString(oldCommitHash), ObjectId.fromString(newCommitHash));
 
         var patchInfo = new HashMap<String, String>();
-        patchInfo.put("projectId", currentProject.getId().toString());
+        patchInfo.put("projectId", pullRequest.getProject().getId().toString());
         patchInfo.put("oldCommitHash", comparisonBase.name());
         patchInfo.put("newCommitHash", newCommitHash);        
         return patchInfo;
@@ -1474,35 +1431,63 @@ public class McpHelperResource {
 
     @Path("/create-pull-request")
     @POST
-    public String createPullRequest(@QueryParam("currentProject") @NotNull String currentProjectPath,
+    public String createPullRequest(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("targetProject") String targetProjectPath,
+                @QueryParam("sourceProject") String sourceProjectPath,
                 @NotNull Map<String, Serializable> data) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
-        var currentProject = getProject(currentProjectPath);        
-        if (!SecurityUtils.canReadCode(currentProject))
-            throw new UnauthorizedException("No permission to read code of project: " + currentProjectPath);
+        
+        sourceProjectPath = StringUtils.trimToNull(sourceProjectPath);
+        targetProjectPath = StringUtils.trimToNull(targetProjectPath);
+
+        if (sourceProjectPath == null)
+            sourceProjectPath = currentProjectPath;
+
+        var sourceProject = getProject(sourceProjectPath);
+        if (!SecurityUtils.canReadCode(sourceProject))
+            throw new UnauthorizedException("No permission to read code of source project: " + sourceProjectPath);
+
+        Project targetProject;
+        if (targetProjectPath != null) {
+            targetProject = getProject(targetProjectPath);
+        } else {
+            targetProject = sourceProject.getForkedFrom();
+            if (targetProject == null)
+                targetProject = sourceProject;
+        }
+        if (!SecurityUtils.canReadCode(targetProject))
+            throw new UnauthorizedException("No permission to read code of target project: " + targetProjectPath);
+
+        var currentProject = getProject(currentProjectPath);
 
         normalizePullRequestData(data);
 
         var targetBranch = (String) data.remove("targetBranch");
+        if (targetBranch == null)
+            targetBranch = targetProject.getDefaultBranch();
+        if (targetBranch == null)
+            throw new NotAcceptableException("No code in target project: " + targetProject.getPath());
+
         var sourceBranch = (String) data.remove("sourceBranch");
 
-        var target = new ProjectAndBranch(currentProject, targetBranch);
-        var source = new ProjectAndBranch(currentProject, sourceBranch);
+        var target = new ProjectAndBranch(targetProject, targetBranch);
+        var source = new ProjectAndBranch(sourceProject, sourceBranch);
 
         if (target.equals(source))
-            throw new InvalidParamsException("Target and source branches are the same");
+            throw new NotAcceptableException("Target and source branches are the same");
 
         PullRequest request = pullRequestManager.findOpen(target, source);
         if (request != null)
-            throw new InvalidParamsException("Another pull request already opened for this change");
+            throw new NotAcceptableException("Another pull request already opened for this change");
 
         request = pullRequestManager.findEffective(target, source);
         if (request != null) {
             if (request.isOpen())
-                throw new InvalidParamsException("Another pull request already opened for this change");
+                throw new NotAcceptableException("Another pull request already opened for this change");
             else
-                throw new InvalidParamsException("Change already merged");
+                throw new NotAcceptableException("Change already merged");
         }
 
         request = new PullRequest();
@@ -1511,14 +1496,14 @@ public class McpHelperResource {
                 source.getProject(), source.getObjectId());
 
         if (baseCommitId == null)
-            throw new InvalidParamsException("No common base for source and target branches");
+            throw new NotAcceptableException("No common base for source and target branches");
 
         request.setTitle((String) data.remove("title"));
+        request.setDescription((String) data.remove("description"));
         request.setTarget(target);
         request.setSource(source);
         request.setSubmitter(SecurityUtils.getAuthUser());
         request.setBaseCommitHash(baseCommitId.name());
-        request.setDescription((String) data.remove("description"));
 
         var mergeStrategyName = (String) data.remove("mergeStrategy");
         if (mergeStrategyName != null) 
@@ -1527,7 +1512,7 @@ public class McpHelperResource {
             request.setMergeStrategy(request.getProject().findDefaultPullRequestMergeStrategy());
 
         if (request.getBaseCommitHash().equals(source.getObjectName()))
-            throw new InvalidParamsException("Change already merged");
+            throw new NotAcceptableException("Change already merged");
 
         PullRequestUpdate update = new PullRequestUpdate();
         
@@ -1536,6 +1521,8 @@ public class McpHelperResource {
         update.setHeadCommitHash(source.getObjectName());
         update.setTargetHeadCommitHash(request.getTarget().getObjectName());
         request.getUpdates().add(update);
+
+        request.generateTitleAndDescriptionIfEmpty();
 
         pullRequestManager.checkReviews(request, false);
 
@@ -1547,7 +1534,7 @@ public class McpHelperResource {
                 if (reviewer == null)
                     throw new NotFoundException("Reviewer not found: " + reviewerName);
                 if (reviewer.equals(request.getSubmitter()))
-                    throw new InvalidParamsException("Pull request submitter can not be reviewer");
+                    throw new NotAcceptableException("Pull request submitter can not be reviewer");
 
                 if (request.getReview(reviewer) == null) {
                     PullRequestReview review = new PullRequestReview();
@@ -1585,7 +1572,12 @@ public class McpHelperResource {
     }
 
     private PullRequest getPullRequest(Project currentProject, String referenceString) {
-        var requestReference = PullRequestReference.of(referenceString, currentProject);
+        PullRequestReference requestReference;        
+        try {
+            requestReference = PullRequestReference.of(referenceString, currentProject);
+        } catch (InvalidReferenceException e) {
+            throw new NotAcceptableException(e.getMessage());
+        }
         var request = pullRequestManager.find(requestReference.getProject(), requestReference.getNumber());
         if (request != null) {
             if (!SecurityUtils.canReadCode(request.getProject()))
@@ -1599,16 +1591,19 @@ public class McpHelperResource {
     @SuppressWarnings("unchecked")
     @Path("/edit-pull-request")
     @POST
-    public String editPullRequest(@QueryParam("currentProject") @NotNull String currentProjectPath,
-            @QueryParam("reference") @NotNull String requestReference, @NotNull Map<String, Serializable> data) {
+    public String editPullRequest(
+                @QueryParam("currentProject") @NotNull String currentProjectPath,
+                @QueryParam("reference") @NotNull String pullRequestReference, @NotNull Map<String, Serializable> data) {
         var user = SecurityUtils.getAuthUser();
         if (user == null)
             throw new UnauthenticatedException();
+
         var currentProject = getProject(currentProjectPath);
-        var request = getPullRequest(currentProject, requestReference);
+
+        var request = getPullRequest(currentProject, pullRequestReference);
 
         if (!SecurityUtils.canModifyPullRequest(request))
-            throw new UnauthorizedException("No permission to edit pull request: " + requestReference);
+            throw new UnauthorizedException("No permission to edit pull request: " + pullRequestReference);
 
         normalizePullRequestData(data);
 
@@ -1712,57 +1707,126 @@ public class McpHelperResource {
             if (!request.isOpen())
                 throw new NotAcceptableException("Pull request is closed");
 
-            if (autoMergeEnabled && request.checkMerge() == null) 
+            if (autoMergeEnabled && request.checkMergeCondition() == null) 
                 throw new NotAcceptableException("This pull request is not eligible for auto-merge, as it can be merged directly now");
 
             var autoMerge = new AutoMerge();
             autoMerge.setEnabled(autoMergeEnabled);
             autoMerge.setCommitMessage(StringUtils.trimToNull((String) data.remove("autoMergeCommitMessage")));
             autoMerge.setUser(user);
-            var errorMessage = request.checkMergeCommitMessage(user, request, autoMerge.getCommitMessage());
+            var errorMessage = request.checkMergeCommitMessage(user, autoMerge.getCommitMessage());
             if (errorMessage != null) 
                 throw new NotAcceptableException("Error validating param auto merge commit message: " + errorMessage);
 
             pullRequestChangeManager.changeAutoMerge(request, autoMerge);
         }
                     
-        return "Edited pull request " + request.getReference().toString(currentProject) + ": " + urlManager.urlFor(request, true);
+        return "Edited pull request " + pullRequestReference;
     }    
 
-    @Path("/review-pull-request")
+    @Path("/process-pull-request")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String reviewPullRequest(@QueryParam("currentProject") String currentProjectPath, 
-            @QueryParam("reference") @NotNull String pullRequestReference, 
-            @QueryParam("approved") boolean approved, String comment) {
+    public String processPullRequest(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String pullRequestReference, 
+                @QueryParam("operation") String operation, 
+                String comment) {
         var user = SecurityUtils.getAuthUser();
         if (user == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
-        var pullRequest = getPullRequest(currentProject, pullRequestReference);
-        try {
-            pullRequestReviewManager.review(pullRequest, approved, comment);
-        } catch (ReviewRejectException e) {
-            throw new NotAcceptableException(e.getMessage());
-        }
 
-        if (approved) {
-            return "Approved pull request " + pullRequestReference + ": " + urlManager.urlFor(pullRequest, true);
-        } else {
-            return "Requested changes on pull request " + pullRequestReference + ": " + urlManager.urlFor(pullRequest, true);
+        var pullRequest = getPullRequest(currentProject, pullRequestReference);
+        comment = StringUtils.trimToNull(comment);
+        
+        switch (operation) {
+        case "approve":
+            try {
+                pullRequestReviewManager.review(pullRequest, true, comment);
+            } catch (PullRequestReviewRejectedException e) {
+                throw new NotAcceptableException(e.getMessage());
+            }
+            return "Approved pull request " + pullRequestReference;
+        case "requestChanges":
+            try {
+                pullRequestReviewManager.review(pullRequest, false, comment);
+            } catch (PullRequestReviewRejectedException e) {
+                throw new NotAcceptableException(e.getMessage());
+            }
+            return "Requested changes on pull request " + pullRequestReference;
+        case "merge":
+            if (!SecurityUtils.canWriteCode(user.asSubject(), pullRequest.getProject()))
+                throw new UnauthorizedException();
+            String errorMessage = pullRequest.checkMergeCondition();
+            if (errorMessage != null)
+                throw new NotAcceptableException(errorMessage);
+            errorMessage = pullRequest.checkMergeCommitMessage(user, comment);
+            if (errorMessage != null)
+                throw new NotAcceptableException("Error validating merge commit message: " + errorMessage);
+
+            pullRequestManager.merge(user, pullRequest, comment);
+
+            return "Merged pull request " + pullRequestReference;
+        case "discard":
+            if (!SecurityUtils.canModifyPullRequest(pullRequest))
+                throw new UnauthorizedException();
+            if (!pullRequest.isOpen())
+                throw new NotAcceptableException("Pull request already closed");
+            pullRequestManager.discard(pullRequest, comment);
+            return "Discarded pull request " + pullRequestReference;
+        case "reopen":
+            if (!SecurityUtils.canModifyPullRequest(pullRequest))
+                throw new UnauthorizedException();
+            errorMessage = pullRequest.checkReopenCondition();
+            if (errorMessage != null)
+                throw new NotAcceptableException(errorMessage);
+            pullRequestManager.reopen(pullRequest, comment);
+            return "Reopened pull request " + pullRequestReference;
+        case "deleteSourceBranch":
+            if (!SecurityUtils.canModifyPullRequest(pullRequest) 
+                    || !SecurityUtils.canDeleteBranch(pullRequest.getSourceProject(), pullRequest.getSourceBranch())) {
+                throw new UnauthorizedException();
+            }
+            
+            errorMessage = pullRequest.checkDeleteSourceBranchCondition();
+            if (errorMessage != null)
+                throw new NotAcceptableException(errorMessage); 		
+            
+            pullRequestManager.deleteSourceBranch(pullRequest, comment);
+
+            return "Deleted source branch of pull request " + pullRequestReference;
+        case "restoreSourceBranch":
+            if (!SecurityUtils.canModifyPullRequest(pullRequest) || 
+                    !SecurityUtils.canWriteCode(pullRequest.getSourceProject())) {
+                throw new UnauthorizedException();
+            }
+            
+            errorMessage = pullRequest.checkRestoreSourceBranchCondition();
+            if (errorMessage != null)
+                throw new NotAcceptableException(errorMessage);
+            
+            pullRequestManager.restoreSourceBranch(pullRequest, comment);
+
+            return "Restored source branch of pull request " + pullRequestReference;
+        default:
+            throw new NotAcceptableException("Invalid operation: " + operation);
         }
     }
 
     @Path("/add-pull-request-comment")
     @Consumes(MediaType.TEXT_PLAIN)
     @POST
-    public String addPullRequestComment(@QueryParam("currentProject") String currentProjectPath, 
-            @QueryParam("reference") @NotNull String pullRequestReference, @NotNull String commentContent) {
+    public String addPullRequestComment(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String pullRequestReference, 
+                @NotNull String commentContent) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
+
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
         var comment = new PullRequestComment();
         comment.setRequest(pullRequest);
@@ -1771,7 +1835,7 @@ public class McpHelperResource {
         comment.setDate(new Date());
         pullRequestCommentManager.create(comment);
 
-        return "Commented on pull request " + pullRequestReference + ": " + urlManager.urlFor(comment, true);
+        return "Commented on pull request " + pullRequestReference;
     }
     
     private void normalizePullRequestData(Map<String, Serializable> data) {
@@ -1781,4 +1845,19 @@ public class McpHelperResource {
         }
     }
 
-}
+    private NotAcceptableException newNotAcceptableException(InvalidIssueFieldsException e) {
+        var invaliParams = new ArrayList<String>();
+        for (var entry: e.getInvalidFields().entrySet()) {
+            invaliParams.add(getToolParamName(entry.getKey()) + ": " + entry.getValue());
+        }
+        return new NotAcceptableException("Invalid tool parameters:\n\n" + String.join("\n", invaliParams));
+    }
+
+    private static class ProjectInfo {
+        
+        Project project;
+
+        Project currentProject;
+    }
+
+ }

@@ -5,8 +5,10 @@ import java.lang.reflect.Parameter;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -14,8 +16,6 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
-
-import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.rest.resource.TriggerJobResource;
 
@@ -45,12 +45,12 @@ public class ParamCheckFilter implements ContainerRequestFilter {
 			Set<String> suppliedQueryParams = new HashSet<>(uriInfo.getQueryParameters().keySet());
 			suppliedQueryParams.removeAll(definedQueryParams);
 			if (!suppliedQueryParams.isEmpty()) 
-				throw new InvalidParamsException("Unexpected query params: " + suppliedQueryParams);
+				throw new NotAcceptableException("Unexpected query params: " + suppliedQueryParams);
 		}
 
 		requiredQueryParams.removeAll(uriInfo.getQueryParameters().keySet());
 		if (!requiredQueryParams.isEmpty()) 
-			throw new InvalidParamsException("Missing query params: " + requiredQueryParams);
+			throw new NotAcceptableException("Missing query params: " + requiredQueryParams);
 	}
 
 	public static boolean isRequired(Parameter param) {

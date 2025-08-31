@@ -20,7 +20,7 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.IssueLinkManager;
-import io.onedev.server.exception.LinkValidationException;
+import io.onedev.server.exception.IssueLinkValidationException;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.rest.annotation.Api;
 
@@ -59,7 +59,7 @@ public class IssueLinkResource {
 		}
 		try {
 			link.validate();
-		} catch (LinkValidationException e) {
+		} catch (IssueLinkValidationException e) {
 			throw new NotAcceptableException(e.getMessage());
 		}
 				

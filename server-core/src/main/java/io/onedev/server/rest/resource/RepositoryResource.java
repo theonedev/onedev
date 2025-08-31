@@ -1,12 +1,52 @@
 package io.onedev.server.rest.resource;
 
+import static java.util.stream.Collectors.toList;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.NotAcceptableException;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.git.*;
+import io.onedev.server.git.Blob;
+import io.onedev.server.git.BlobContent;
+import io.onedev.server.git.BlobEdits;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.BlobIdentFilter;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.LogCommand;
 import io.onedev.server.git.command.LogCommit;
 import io.onedev.server.git.command.RevListOptions;
@@ -15,31 +55,12 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.FileCreateOrUpdateRequest;
 import io.onedev.server.rest.resource.support.FileEditRequest;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.RevisionAndPath;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.PersonIdent;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.Serializable;
-import java.util.*;
-
-import static java.util.stream.Collectors.toList;
 
 @Path("/repositories")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -138,7 +159,7 @@ public class RepositoryResource {
 		if (!SecurityUtils.canWriteCode(project)) 
 			throw new UnauthorizedException();
 		else if (project.getBranchRef(request.getBranchName()) != null) 
-			throw new InvalidParamsException("Branch '" + request.getBranchName() + "' already exists");
+			throw new NotAcceptableException("Branch '" + request.getBranchName() + "' already exists");
 		else if (project.getBranchProtection(request.getBranchName(), user).isPreventCreation()) 
 			throw new ExplicitException("Branch creation prohibited by branch protection rule");
 		
@@ -217,7 +238,7 @@ public class RepositoryResource {
 		}
 
 		if (project.getTagRef(request.getTagName()) != null) {
-			throw new InvalidParamsException("Tag '" + request.getTagName() + "' already exists");
+			throw new NotAcceptableException("Tag '" + request.getTagName() + "' already exists");
 		} else {
 			User user = SecurityUtils.getUser();
 			gitService.createTag(project, request.getTagName(), request.getRevision(), user.asPerson(), 
@@ -257,13 +278,13 @@ public class RepositoryResource {
 		}
 		
     	if (count > MAX_COMMITS)
-    		throw new InvalidParamsException("Count should not be greater than " + MAX_COMMITS);
+    		throw new NotAcceptableException("Count should not be greater than " + MAX_COMMITS);
 
     	CommitQuery parsedQuery;
 		try {
 			parsedQuery = CommitQuery.parse(project, query, true);
 		} catch (Exception e) {
-			throw new InvalidParamsException("Error parsing query", e);
+			throw new NotAcceptableException("Error parsing query", e);
 		}
     	
 		RevListOptions options = new RevListOptions();
@@ -311,7 +332,7 @@ public class RepositoryResource {
 		BlobIdent blobIdent = new BlobIdent(project, revisionAndPathSegments);
 
 		if (!blobIdent.isTree()) {
-			throw new InvalidParamsException("Specified path is not a directory: " + blobIdent.path);
+			throw new NotAcceptableException("Specified path is not a directory: " + blobIdent.path);
 		}
 
 		ObjectId revId = project.getObjectId(blobIdent.revision, true);
@@ -343,7 +364,7 @@ public class RepositoryResource {
 		BlobIdent blobIdent = new BlobIdent(project, revisionAndPathSegments);
 
 		if (!blobIdent.isFile()) {
-			throw new InvalidParamsException("Specified path is not a file: " + blobIdent.path);
+			throw new NotAcceptableException("Specified path is not a file: " + blobIdent.path);
 		}
 
 		Blob blob = project.getBlob(blobIdent, true);
@@ -375,14 +396,14 @@ public class RepositoryResource {
 			revisionAndPath = RevisionAndPath.parse(project, revisionAndPathSegments);
 			RefFacade ref = project.getBranchRef(revisionAndPath.getRevision());
 			if (ref == null) 
-				throw new InvalidParamsException("Not a branch: " + revisionAndPath.getRevision());
+				throw new NotAcceptableException("Not a branch: " + revisionAndPath.getRevision());
 			refName = ref.getName();
 			oldCommitId = ref.getObjectId();
 			if (revisionAndPath.getPath() == null)
-				throw new InvalidParamsException("Branch and file should be specified");
+				throw new NotAcceptableException("Branch and file should be specified");
 		} else {
 			if (revisionAndPathSegments.size() < 2)
-				throw new InvalidParamsException("Branch and file should be specified");
+				throw new NotAcceptableException("Branch and file should be specified");
 			revisionAndPath = new RevisionAndPath(
 					revisionAndPathSegments.get(0), 
 					StringUtils.join(revisionAndPathSegments.subList(1, revisionAndPathSegments.size())));

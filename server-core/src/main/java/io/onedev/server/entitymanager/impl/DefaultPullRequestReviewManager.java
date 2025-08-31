@@ -15,7 +15,7 @@ import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pullrequest.PullRequestReviewRequested;
 import io.onedev.server.event.project.pullrequest.PullRequestReviewerRemoved;
-import io.onedev.server.exception.ReviewRejectException;
+import io.onedev.server.exception.PullRequestReviewRejectedException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestReview;
@@ -86,7 +86,7 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 		User user = SecurityUtils.getAuthUser();
 		PullRequestReview review = request.getReview(user);
 		if (review == null || review.getStatus() == PullRequestReview.Status.EXCLUDED)
-			throw new ReviewRejectException("You are not reviewer of this pull request");
+			throw new PullRequestReviewRejectedException("You are not reviewer of this pull request");
 		if (approved)
 			review.setStatus(PullRequestReview.Status.APPROVED);
 		else

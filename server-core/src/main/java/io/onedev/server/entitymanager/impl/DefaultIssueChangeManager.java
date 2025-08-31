@@ -59,6 +59,7 @@ import io.onedev.server.event.project.issue.IssueChanged;
 import io.onedev.server.event.project.pullrequest.PullRequestChanged;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.exception.InvalidIssueFieldsException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
@@ -86,7 +87,6 @@ import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTotalEstimatedTimeChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTotalSpentTimeChangeData;
-import io.onedev.server.model.support.issue.field.EmptyFieldsException;
 import io.onedev.server.model.support.issue.transitionspec.BranchUpdatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.BuildSuccessfulSpec;
 import io.onedev.server.model.support.issue.transitionspec.IssueStateTransitedSpec;
@@ -384,7 +384,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	public void changeFields(Issue issue, Map<String, Object> fieldValues) {
 		Map<String, Input> prevFields = issue.getFieldInputs(); 
 		issue.setFieldValues(fieldValues);
-		issue.checkEmptyFields();
+		issue.validateFields();
 		if (!prevFields.equals(issue.getFieldInputs())) {			
 			issueFieldManager.saveFields(issue);
 			
@@ -407,7 +407,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		issue.removeFields(removeFields);
 		issue.setFieldValues(fieldValues);
 		issue.addMissingFields(promptFields);
-		issue.checkEmptyFields();
+		issue.validateFields();
 				
 		issueFieldManager.saveFields(issue);
 		
@@ -441,10 +441,9 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			
 			issue.setFieldValues(fieldValues);
 			try {
-				issue.checkEmptyFields();
-			} catch (EmptyFieldsException e) {
-				Collection<String> emptyFields = e.getEmptyFields();
-				throw new EmptyFieldsException("The following fields must be set for issue " + issue.getReference().toString(issue.getProject()) + ": " + String.join(", ", emptyFields), emptyFields);
+				issue.validateFields();
+			} catch (InvalidIssueFieldsException e) {
+				throw new InvalidIssueFieldsException("Error validating fields for issue " + issue.getReference().toString(issue.getProject()) + ": " + InvalidIssueFieldsException.buildMessage(e.getInvalidFields()), e.getInvalidFields());
 			}
 			issueFieldManager.saveFields(issue);
 

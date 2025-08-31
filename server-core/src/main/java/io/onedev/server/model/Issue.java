@@ -78,13 +78,14 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.IssueReference;
+import io.onedev.server.exception.InvalidIssueFieldsException;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.model.support.issue.field.EmptyFieldsException;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.IssueSortField;
@@ -1028,6 +1029,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	}
 
 	public void addMissingFields(Collection<String> fieldNames) {
+		Project.push(getProject());
 		try {
 			var fieldBean = FieldUtils.getFieldBeanClass().getConstructor().newInstance();
 			var existingFieldNames = getFieldNames();
@@ -1039,23 +1041,56 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
 				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException(e);
+		} finally {
+			Project.pop();
 		}
 	}
 
-	public void checkEmptyFields() {
-		var emptyFields = new ArrayList<String>();
-		for (var fieldName: getFieldNames()) {
-			var field = getIssueSetting().getFieldSpec(fieldName);
-			if (field != null 
-					&& !field.isAllowEmpty() 
-					&& isFieldVisible(fieldName) 
-					&& SecurityUtils.canEditIssueField(getProject(), fieldName)
-					&& getFieldValue(fieldName) == null) {
-				emptyFields.add(field.getName());
+	@SuppressWarnings("unchecked")
+	public void validateFields() {
+		Project.push(getProject());
+		try {
+			var invalidFields = new HashMap<String, String>();
+			for (var fieldName: getFieldNames()) {
+				var field = getIssueSetting().getFieldSpec(fieldName);
+				if (field != null) {
+					var value = getFieldValue(fieldName);
+					if (value != null) {
+						if (field instanceof ChoiceField) {
+							var values = new ArrayList<String>();
+							if (value instanceof Collection) 
+								values.addAll((Collection<String>) value);
+							else 
+								values.add((String) value);
+							var choiceField = (ChoiceField) field;
+							var possibleValues = choiceField.getPossibleValues();
+							if (!possibleValues.containsAll(values)) {
+								if (field.isAllowMultiple())
+									invalidFields.put(fieldName, "value should be one or more of: " + String.join(", ", possibleValues));
+								else
+									invalidFields.put(fieldName, "value should be one of: " + String.join(", ", possibleValues));
+							}
+						}	
+					} else if (!field.isAllowEmpty() && isFieldVisible(fieldName) 
+								&& SecurityUtils.canEditIssueField(getProject(), fieldName)) {
+						if (field instanceof ChoiceField) {
+							var choiceField = (ChoiceField) field;
+							var possibleValues = choiceField.getPossibleValues();
+							if (field.isAllowMultiple())
+								invalidFields.put(fieldName, "value must not be empty, and should take one or more of: " + String.join(", ", possibleValues));
+							else
+								invalidFields.put(fieldName, "value must not be empty, and should take one of: " + String.join(", ", possibleValues));
+						} else {
+							invalidFields.put(fieldName, "value must not be empty");
+						}
+					}
+				}
 			}
+			if (invalidFields.size() > 0) 
+				throw new InvalidIssueFieldsException(invalidFields);
+		} finally {
+			Project.pop();
 		}
-		if (emptyFields.size() > 0) 
-			throw new EmptyFieldsException(emptyFields);
 	}
 	
 	public List<User> getParticipants() {

@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -27,7 +28,6 @@ import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Role;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.security.SecurityUtils;
@@ -66,7 +66,7 @@ public class RoleResource {
 			throw new UnauthorizedException();
 		
     	if (count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamsException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
 		EntityCriteria<Role> criteria = EntityCriteria.of(Role.class);
 		if (name != null) 

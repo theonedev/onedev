@@ -1,6 +1,5 @@
 package io.onedev.server.rest.resource;
 
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
 import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 
 import java.io.InputStream;
@@ -53,7 +52,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.resource.support.RestConstants;
@@ -219,13 +217,13 @@ public class PullRequestResource {
     		@QueryParam("count") @Api(example="100") int count) {
 
 		if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamsException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	PullRequestQuery parsedQuery;
 		try {
 			parsedQuery = PullRequestQuery.parse(null, query, true);
 		} catch (Exception e) {
-			throw new InvalidParamsException("Error parsing query", e);
+			throw new NotAcceptableException("Error parsing query", e);
 		}
     	
     	return pullRequestManager.query(null, parsedQuery, false, offset, count);
@@ -243,18 +241,18 @@ public class PullRequestResource {
 			throw new UnauthorizedException();
 		
 		if (target.equals(source))
-			throw new InvalidParamsException("Source and target are the same");
+			throw new NotAcceptableException("Source and target are the same");
 		
 		PullRequest request = pullRequestManager.findOpen(target, source);
 		if (request != null)
-			throw new InvalidParamsException("Another pull request already opened for this change");
+			throw new NotAcceptableException("Another pull request already opened for this change");
 		
 		request = pullRequestManager.findEffective(target, source);
 		if (request != null) { 
 			if (request.isOpen())
-				throw new InvalidParamsException("Another pull request already opened for this change");
+				throw new NotAcceptableException("Another pull request already opened for this change");
 			else
-				throw new InvalidParamsException("Change already merged");
+				throw new NotAcceptableException("Change already merged");
 		}
 
 		request = new PullRequest();
@@ -263,7 +261,7 @@ public class PullRequestResource {
 				source.getProject(), source.getObjectId());
 		
 		if (baseCommitId == null)
-			throw new InvalidParamsException("No common base for target and source");
+			throw new NotAcceptableException("No common base for target and source");
 
 		request.setTitle(data.getTitle());
 		request.setTarget(target);
@@ -278,7 +276,7 @@ public class PullRequestResource {
 			request.setMergeStrategy(request.getProject().findDefaultPullRequestMergeStrategy());
 		
 		if (request.getBaseCommitHash().equals(source.getObjectName())) 
-			throw new InvalidParamsException("Change already merged");
+			throw new NotAcceptableException("Change already merged");
 
 		PullRequestUpdate update = new PullRequestUpdate();
 		update.setDate(new DateTime(request.getSubmitDate()).plusSeconds(1).toDate());
@@ -370,14 +368,14 @@ public class PullRequestResource {
 		if (!request.isOpen())
 			throw new NotAcceptableException("Pull request is closed");
 
-		if (data.isEnabled() && request.checkMerge() == null)
+		if (data.isEnabled() && request.checkMergeCondition() == null)
 			throw new NotAcceptableException("This pull request is not eligible for auto-merge, as it can be merged directly now");
 
 		var autoMerge = new AutoMerge();
 		autoMerge.setEnabled(data.isEnabled());
 		autoMerge.setCommitMessage(StringUtils.trimToNull(data.getCommitMessage()));
 		autoMerge.setUser(user);
-		var errorMessage = request.checkMergeCommitMessage(user, request, autoMerge.getCommitMessage());
+		var errorMessage = request.checkMergeCommitMessage(user, autoMerge.getCommitMessage());
 		if (errorMessage != null)
 			throw new NotAcceptableException("Error validating auto merge commit message: " + errorMessage);
 
@@ -393,9 +391,9 @@ public class PullRequestResource {
 		PullRequest request = pullRequestManager.load(requestId);
     	if (!SecurityUtils.canModifyPullRequest(request))
 			throw new UnauthorizedException();
-    	String errorMessage = request.checkReopen();
+    	String errorMessage = request.checkReopenCondition();
     	if (errorMessage != null)
-    		return Response.status(NOT_ACCEPTABLE).entity(errorMessage).build();
+    		throw new NotAcceptableException(errorMessage);
     	
 		pullRequestManager.reopen(request, note);
 		return Response.ok().build();
@@ -409,7 +407,7 @@ public class PullRequestResource {
     	if (!SecurityUtils.canModifyPullRequest(request))
 			throw new UnauthorizedException();
     	if (!request.isOpen())
-			return Response.status(NOT_ACCEPTABLE).entity("Pull request already closed").build();
+			throw new NotAcceptableException("Pull request already closed");
     	
 		pullRequestManager.discard(request, note);
 		return Response.ok().build();
@@ -423,16 +421,13 @@ public class PullRequestResource {
 		var user = SecurityUtils.getUser();
     	if (!SecurityUtils.canWriteCode(user.asSubject(), request.getProject()))
 			throw new UnauthorizedException();
-    	String errorMessage = request.checkMerge();
+    	String errorMessage = request.checkMergeCondition();
     	if (errorMessage != null)
-			return Response.status(NOT_ACCEPTABLE).entity(errorMessage).build();
+			throw new NotAcceptableException(errorMessage);
 
-		if (request.isMergeCommitMessageRequired()) {
-			var branchProtection = request.getProject().getBranchProtection(request.getTargetBranch(), user);
-			errorMessage = branchProtection.checkCommitMessage(note, request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
-			if (errorMessage != null)
-				return Response.status(NOT_ACCEPTABLE).entity("Error validating merge commit message: " + errorMessage).build();
-		}
+		errorMessage = request.checkMergeCommitMessage(user, note);
+		if (errorMessage != null)
+			throw new NotAcceptableException("Error validating merge commit message: " + errorMessage);
 		
 		pullRequestManager.merge(user, request, note);
 		return Response.ok().build();
@@ -449,9 +444,9 @@ public class PullRequestResource {
 			throw new UnauthorizedException();
 		}
 		
-    	String errorMessage = request.checkDeleteSourceBranch();
+    	String errorMessage = request.checkDeleteSourceBranchCondition();
     	if (errorMessage != null)
-			return Response.status(NOT_ACCEPTABLE).entity(errorMessage).build(); 		
+			throw new NotAcceptableException(errorMessage); 		
 		
 		pullRequestManager.deleteSourceBranch(request, note);
 		return Response.ok().build();
@@ -468,9 +463,9 @@ public class PullRequestResource {
 			throw new UnauthorizedException();
 		}
 		
-    	String errorMessage = request.checkRestoreSourceBranch();
+    	String errorMessage = request.checkRestoreSourceBranchCondition();
     	if (errorMessage != null)
-			return Response.status(NOT_ACCEPTABLE).entity(errorMessage).build();
+			throw new NotAcceptableException(errorMessage);
 		
 		pullRequestManager.restoreSourceBranch(request, note);
 		return Response.ok().build();

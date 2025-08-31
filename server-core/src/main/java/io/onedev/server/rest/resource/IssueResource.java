@@ -2,6 +2,7 @@ package io.onedev.server.rest.resource;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -44,6 +45,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.exception.InvalidIssueFieldsException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
@@ -56,10 +58,8 @@ import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.field.EmptyFieldsException;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
-import io.onedev.server.rest.InvalidParamsException;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.resource.support.RestConstants;
@@ -259,14 +259,14 @@ public class IssueResource {
     		@QueryParam("count") @Api(example="100") int count) {
 		
     	if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamsException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	IssueQuery parsedQuery;
 		try {
 			IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
 			parsedQuery = IssueQuery.parse(null, query, option, true);
 		} catch (Exception e) {
-			throw new InvalidParamsException("Error parsing query", e);
+			throw new NotAcceptableException("Error parsing query", e);
 		}
 
 		var typeReference = new TypeReference<Map<String, Object>>() {};		
@@ -339,8 +339,8 @@ public class IssueResource {
 
 		try {
 			issueManager.open(issue);
-		} catch (EmptyFieldsException e) {
-			throw new InvalidParamsException(e.getMessage());
+		} catch (InvalidIssueFieldsException e) {
+			throw new NotAcceptableException(e.getMessage());
 		}
 
 		return issue.getId();
@@ -406,7 +406,7 @@ public class IssueResource {
     	for (Long iterationId: iterationIds) {
     		Iteration iteration = iterationManager.load(iterationId);
 	    	if (!iteration.getProject().isSelfOrAncestorOf(issue.getProject()))
-	    		throw new InvalidParamsException("Iteration is not defined in project hierarchy of the issue");
+	    		throw new NotAcceptableException("Iteration is not defined in project hierarchy of the issue");
 	    	iterations.add(iteration);
     	}
     	
@@ -430,8 +430,8 @@ public class IssueResource {
 
 		try {
 			issueChangeManager.changeFields(issue, FieldUtils.getFieldValues(issue.getProject(), fields));
-		} catch (EmptyFieldsException e) {
-			throw new InvalidParamsException(e.getMessage());
+		} catch (InvalidIssueFieldsException e) {
+			throw new NotAcceptableException(e.getMessage());
 		}
 		return Response.ok().build();
     }
@@ -449,12 +449,18 @@ public class IssueResource {
     public Response transitState(@PathParam("issueId") Long issueId, @NotNull @Valid StateTransitionData data) {
 		Issue issue = issueManager.load(issueId);
 		ManualSpec transition = settingManager.getIssueSetting().getManualSpec(issue, data.getState());
+		if (transition == null) {
+			var message = MessageFormat.format(
+				"No applicable manual transition spec found for current user (issue: {0}, from state: {1}, to state: {2})",
+				issue.getReference().toString(), issue.getState(), data.getState());
+			throw new NotAcceptableException(message);
+		}
     	
 		var fieldValues = FieldUtils.getFieldValues(issue.getProject(), data.getFields());
 		try {
 			issueChangeManager.changeState(issue, data.getState(), fieldValues, transition.getPromptFields(), transition.getRemoveFields(), data.getComment());
-		} catch (EmptyFieldsException e) {
-			throw new InvalidParamsException(e.getMessage());
+		} catch (InvalidIssueFieldsException e) {
+			throw new NotAcceptableException(e.getMessage());
 		}
 		return Response.ok().build();
     }
