@@ -201,11 +201,11 @@ public class OpenIdConnector extends SsoConnector {
 	@Nullable
 	private String getStringValue(Object jsonValue) {
 		if (jsonValue instanceof String) {
-			return (String) jsonValue;
+			return StringUtils.trimToNull((String) jsonValue);
 		} else if (jsonValue instanceof JSONArray) {
 			JSONArray jsonArray = (JSONArray) jsonValue;
 			if (!jsonArray.isEmpty())
-				return (String) jsonArray.iterator().next();
+				return StringUtils.trimToNull((String) jsonArray.iterator().next());
 			else
 				return null;
 		} else {
@@ -229,10 +229,10 @@ public class OpenIdConnector extends SsoConnector {
 			if (claims.getExpirationTime() != null && now.toDate().after(claims.getExpirationTime()))
 				throw new AuthenticationException(_T("ID token was expired"));
 
-			String subject = claims.getSubject();
-			String email = claims.getStringClaim("email");
-			String userName = claims.getStringClaim("preferred_username");
-			String fullName = claims.getStringClaim("name");
+			String subject = StringUtils.trimToNull(claims.getSubject());
+			String email = StringUtils.trimToNull(claims.getStringClaim("email"));
+			String userName = StringUtils.trimToNull(claims.getStringClaim("preferred_username"));
+			String fullName = StringUtils.trimToNull(claims.getStringClaim("name"));
 			List<String> groups;
 			if (getGroupsClaim() != null) {
 				var groupsArray = claims.getStringArrayClaim(getGroupsClaim());
@@ -261,6 +261,7 @@ public class OpenIdConnector extends SsoConnector {
 
 					if (email == null) 
 						email = getStringValue(json.get("email"));
+						
 					if (email == null)
 						throw new AuthenticationException(_T("OIDC error: No email claim returned"));
 
