@@ -18,6 +18,8 @@ public abstract class CommentRevision extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+    public static final String PROP_USER = "user";
+
 	public static final int MAX_CONTENT_LEN = 100000;
 
 	@ManyToOne(fetch=FetchType.LAZY)

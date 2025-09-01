@@ -209,6 +209,18 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<PullRequestMention> pullRequestMentions = new ArrayList<>();
 	
+	@OneToMany(mappedBy=IssueDescriptionRevision.PROP_USER, cascade=CascadeType.REMOVE)
+	private Collection<IssueDescriptionRevision> issueDescriptionRevisions = new ArrayList<>();
+
+	@OneToMany(mappedBy=PullRequestDescriptionRevision.PROP_USER, cascade=CascadeType.REMOVE)
+	private Collection<PullRequestDescriptionRevision> pullRequestDescriptionRevisions = new ArrayList<>();
+
+	@OneToMany(mappedBy=IssueCommentRevision.PROP_USER, cascade=CascadeType.REMOVE)
+	private Collection<IssueCommentRevision> issueCommentRevisions = new ArrayList<>();
+
+	@OneToMany(mappedBy=PullRequestCommentRevision.PROP_USER, cascade=CascadeType.REMOVE)
+	private Collection<PullRequestCommentRevision> pullRequestCommentRevisions = new ArrayList<>();
+
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
