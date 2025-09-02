@@ -67,7 +67,7 @@ public class DefaultOAuthTokenManager implements OAuthTokenManager, SchedulableT
 
         TokenResponse response;
         try {
-            TokenRequest request = new TokenRequest(new URI(tokenEndpoint), clientAuth, refreshTokenGrant);
+            TokenRequest request = new TokenRequest(new URI(tokenEndpoint), clientAuth, refreshTokenGrant, null);
             response = TokenResponse.parse(request.toHTTPRequest().send());
         } catch (ParseException | URISyntaxException | IOException e) {
             throw new RuntimeException(e);

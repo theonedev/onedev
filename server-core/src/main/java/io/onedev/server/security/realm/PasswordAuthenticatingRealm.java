@@ -1,8 +1,9 @@
 package io.onedev.server.security.realm;
 
 import static io.onedev.server.validation.validator.UserNameValidator.normalizeUserName;
+import static io.onedev.server.web.translation.Translation._T;
 
-import java.util.Collection;
+import java.text.MessageFormat;
 import java.util.HashSet;
 
 import javax.annotation.Nullable;
@@ -20,8 +21,6 @@ import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.realm.AuthenticatingRealm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.entitymanager.EmailAddressManager;
@@ -77,11 +76,10 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 		return token instanceof UsernamePasswordToken;
 	}
 
-	private User newUser(String userName, Authenticated authenticated, @Nullable String defaultGroup) {
+	private User newUser(String userName, Authenticated authenticated, @Nullable String defaultGroupName) {
 		User user = new User();
 		user.setName(userName);
-		if (authenticated.getFullName() != null)
-			user.setFullName(authenticated.getFullName());
+		user.setFullName(authenticated.getFullName());
 		userManager.create(user);
 		
 		if (authenticated.getEmail() != null) {
@@ -96,54 +94,43 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 			user.getEmailAddresses().add(emailAddress);
 		}
 
-		Collection<String> groupNames = authenticated.getGroupNames();
-		if (groupNames == null && defaultGroup != null)
-			groupNames = Sets.newHashSet(defaultGroup);
-		var defaultLoginGroupName = settingManager.getSecuritySetting().getDefaultGroupName();
-		if (defaultLoginGroupName != null) {
-			if (groupNames == null)
-				groupNames = new HashSet<>();
-			groupNames.add(defaultLoginGroupName);
-		}
-		if (groupNames != null) 
-			membershipManager.syncMemberships(user, groupNames);
-		
-    	if (authenticated.getSshKeys() != null)
-    		sshKeyManager.syncSshKeys(user, authenticated.getSshKeys());
+		syncGroupsAndSshKeys(user, true, authenticated, defaultGroupName);
     	return user;
+	}
+
+	private void syncGroupsAndSshKeys(User user, boolean forNewUser, 
+			Authenticated authenticated, @Nullable String defaultGroupName) {
+		var groupNames = authenticated.getGroupNames();
+		if (forNewUser && groupNames == null) 
+			groupNames = new HashSet<String>();
+		if (groupNames != null) {
+			if (defaultGroupName != null)
+				groupNames.add(defaultGroupName);
+			if (settingManager.getSecuritySetting().getDefaultGroupName() != null)
+				groupNames.add(settingManager.getSecuritySetting().getDefaultGroupName());
+			membershipManager.syncMemberships(user, groupNames);
+		}
+		
+		if (authenticated.getSshKeys() != null)
+			sshKeyManager.syncSshKeys(user, authenticated.getSshKeys());									
 	}
 	
 	@Transactional
-	protected void updateUser(User user, Authenticated authenticated, @Nullable EmailAddress emailAddress) {
+	protected void updateUser(User user, Authenticated authenticated, 
+			@Nullable EmailAddress emailAddress, @Nullable String defaultGroupName) {
 		if (emailAddress != null) {
 			emailAddress.setVerificationCode(null);
-			emailAddressManager.setAsPrimary(emailAddress);
+			if (!user.equals(emailAddress.getOwner())) 
+				user.addEmailAddress(emailAddress);
+			emailAddressManager.update(emailAddress);
 		} else if (authenticated.getEmail() != null) {
-			for (var eachEmailAddress: user.getEmailAddresses()) {
-				eachEmailAddress.setPrimary(false);
-				emailAddressManager.update(eachEmailAddress);
-			}
 			emailAddress = new EmailAddress();
 			emailAddress.setValue(authenticated.getEmail());
 			emailAddress.setVerificationCode(null);
-			emailAddress.setOwner(user);
-			emailAddress.setPrimary(true);
-			emailAddress.setGit(true);
+			user.addEmailAddress(emailAddress);
 			emailAddressManager.create(emailAddress);
 		}
-		if (authenticated.getFullName() != null)
-			user.setFullName(authenticated.getFullName());
-		userManager.update(user, null);
-		
-		var groupNames = authenticated.getGroupNames();
-		if (groupNames != null) {
-			var defaultLoginGroupName = settingManager.getSecuritySetting().getDefaultGroupName();
-			if (defaultLoginGroupName != null)
-				groupNames.add(defaultLoginGroupName);
-			membershipManager.syncMemberships(user, groupNames);
-		}
-    	if (authenticated.getSshKeys() != null)
-    		sshKeyManager.syncSshKeys(user, authenticated.getSshKeys());
+		syncGroupsAndSshKeys(user, false, authenticated, defaultGroupName);
 	}
 	
 	@Override
@@ -157,9 +144,9 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 					user = userManager.findByName(userName);
 				if (user != null) {
 					if (user.isDisabled())
-						throw new DisabledAccountException("Account is disabled");
+						throw new DisabledAccountException(_T("Account is disabled"));
 					else if (user.isServiceAccount())
-						throw new DisabledAccountException("Service account not allowed to login");
+						throw new DisabledAccountException(_T("Service account not allowed to login"));
 					if (user.getPassword() == null) {
 						var authenticator = settingManager.getAuthenticator();
 						if (authenticator != null) {
@@ -168,27 +155,22 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 							if (emailAddressValue != null) {
 								var emailAddress = emailAddressManager.findByValue(emailAddressValue);
 								if (emailAddress != null) {
-									if (emailAddress.getOwner().equals(user)) {
-										updateUser(user, authenticated, emailAddress);
-										return user;
-									} else if (!emailAddress.isVerified()) {
-										emailAddress.setOwner(user);
-										updateUser(user, authenticated, emailAddress);
+									if (emailAddress.getOwner().equals(user) || !emailAddress.isVerified()) {
+										updateUser(user, authenticated, emailAddress, authenticator.getDefaultGroup());
 										return user;
 									} else {
-										throw new AuthenticationException("Email address '" + emailAddressValue
-												+ "' has already been used by another user");
+										throw new AuthenticationException(MessageFormat.format(_T("Email address \"{0}\" already used by another account"), emailAddressValue));
 									}
 								} else {
-									updateUser(user, authenticated, null);
+									updateUser(user, authenticated, null, authenticator.getDefaultGroup());
 									return user;
 								}
 							} else {
-								updateUser(user, authenticated, null);
+								updateUser(user, authenticated, null, authenticator.getDefaultGroup());
 								return user;																
 							}
 						} else {
-							throw new AuthenticationException("No external authenticator to authenticate user '" + userName + "'");
+							throw new AuthenticationException(MessageFormat.format(_T("No external password authenticator to authenticate user \"{0}\""), userName));
 						}
 					} else {
 						return user;
@@ -205,8 +187,7 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 									emailAddressManager.delete(emailAddress);
 									return newUser(userName, authenticated, authenticator.getDefaultGroup());
 								} else {
-									throw new AuthenticationException("Email address '" + emailAddressValue
-											+ "' has already been used by another user");
+									throw new AuthenticationException(MessageFormat.format(_T("Email address \"{0}\" already used by another account"), emailAddressValue));
 								}
 							} else {
 								return newUser(userName, authenticated, authenticator.getDefaultGroup());
@@ -215,7 +196,7 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 							return newUser(userName, authenticated, authenticator.getDefaultGroup());
 						}
 					} else {
-						throw new UnknownAccountException("Invalid credentials");
+						throw new UnknownAccountException(_T("Invalid credentials"));
 					}
 				}
 			} catch (Exception e) {
@@ -224,7 +205,7 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 					throw ExceptionUtils.unchecked(e);
 				} else {
 					logger.error("Error authenticating user", e);
-					throw new AuthenticationException("Error authenticating user", e);
+					throw new AuthenticationException(_T("Error authenticating user"), e);
 				}
 			}
 		});

@@ -8181,4 +8181,61 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate208(File dataDir, Stack<Integer> versions) {		
+		VersionedXmlDoc ssoProvidersDom = new VersionedXmlDoc();
+		Element ssoProvidersListElement = ssoProvidersDom.addElement("list");		
+		long ssoProviderId = 1L;
+
+		var groupIds = new HashMap<String, String>();
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Groups.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					groupIds.put(element.elementText("name").trim(), element.elementText("id").trim());
+				}
+			}
+		}
+
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("SSO_CONNECTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (var connectorElement : valueElement.elements()) {
+								var connectorClass = connectorElement.getName();
+								var nameElement = connectorElement.element("name");
+								var defaultGroupElement = connectorElement.element("defaultGroup");
+
+								var ssoProviderElement = ssoProvidersListElement.addElement("io.onedev.server.model.SsoProvider");
+								ssoProviderElement.addAttribute("revision", "0.0");
+								ssoProviderElement.addElement("id").setText(String.valueOf(ssoProviderId++));
+								nameElement.detach();
+								ssoProviderElement.add(nameElement);
+								if (defaultGroupElement != null) {
+									var groupId = groupIds.get(defaultGroupElement.getText().trim());
+									if (groupId != null)
+										ssoProviderElement.addElement("defaultGroup").setText(groupId);
+									defaultGroupElement.detach();
+								}
+								connectorElement.setName("connector");
+								connectorElement.addAttribute("class", connectorClass);
+								connectorElement.detach();
+								ssoProviderElement.add(connectorElement);
+							}
+						}
+						element.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+
+		if (ssoProviderId > 1) {
+			ssoProvidersDom.writeToFile(new File(dataDir, "SsoProviders.xml"), false);
+		}
+	}
+
 }

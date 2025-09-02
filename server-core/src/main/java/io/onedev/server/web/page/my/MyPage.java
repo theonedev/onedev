@@ -7,7 +7,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.web.page.layout.LayoutPage;
-import io.onedev.server.web.page.simple.security.LoginPage;
+import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.UserAware;
 
 public abstract class MyPage extends LayoutPage implements UserAware {

@@ -1,0 +1,16 @@
+<wicket:extend>
+	<div class="sso-provider-edit card">
+		<div class="card-body">
+			<form wicket:id="form" class="leave-confirm">
+				<div wicket:id="editor"></div>
+				<div class="actions clearfix">
+					<input class="btn btn-primary dirty-aware float-left" type="submit" t:value="Save">
+					<a wicket:id="delete" class="btn btn-light-danger float-right"><wicket:t>Delete</wicket:t></a>
+				</div>
+			</form>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="topbarTitleFrag">
+		<a wicket:id="ssoProviders"><wicket:t>SSO Providers</wicket:t></a> <span class="dot"></span> <span class="text-truncate"><span wicket:id="providerName"></span></span> 
+	</wicket:fragment>
+</wicket:extend>

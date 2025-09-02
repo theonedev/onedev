@@ -16,7 +16,6 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.util.collections.ConcurrentHashSet;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 import io.onedev.server.web.util.Cursor;
 
 public class WebSession extends org.apache.wicket.protocol.http.WebSession {
@@ -60,7 +59,6 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 	public void logout() {
 		SecurityUtils.getSubject().logout();
         replaceSession();
-		SsoProcessPage.clearConnectorCookie();
 	}
 	
 	@Nullable

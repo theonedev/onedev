@@ -125,6 +125,10 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 		usage.add(settingManager.onDeleteGroup(group.getName()));
 		usage.checkInUse("Group '" + group.getName() + "'");
 
+    	var query = getSession().createQuery("update SsoProvider set defaultGroup=null where defaultGroup=:group");
+    	query.setParameter("group", group);
+    	query.executeUpdate();
+
 		dao.remove(group);
 	}
 

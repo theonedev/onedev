@@ -68,7 +68,7 @@ public class AccessTokenAuthorizationResource {
 		accessTokenAuthorizationManager.createOrUpdate(authorization);
 		if (!getAuthUser().equals(owner)) {
 			var newAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
-			auditManager.audit(null, "created access token authorization for account \"" + owner.getName() + "\" via RESTful API", null, newAuditContent);
+			auditManager.audit(null, "created access token authorization in account \"" + owner.getName() + "\" via RESTful API", null, newAuditContent);
 		}
 		return authorization.getId();
 	}
@@ -87,7 +87,7 @@ public class AccessTokenAuthorizationResource {
 		if (!getAuthUser().equals(owner)) {
 			var oldAuditContent = authorization.getOldVersion().toXML();
 			var newAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
-			auditManager.audit(null, "changed access token authorization for account \"" + owner.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
+			auditManager.audit(null, "changed access token authorization in account \"" + owner.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
 		}
 		return Response.ok().build();
 	}
@@ -103,7 +103,7 @@ public class AccessTokenAuthorizationResource {
 		accessTokenAuthorizationManager.delete(authorization);
 		if (!getAuthUser().equals(owner)) {
 			var oldAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
-			auditManager.audit(null, "deleted access token authorization for account \"" + owner.getName() + "\" via RESTful API", oldAuditContent, null);
+			auditManager.audit(null, "deleted access token authorization from account \"" + owner.getName() + "\" via RESTful API", oldAuditContent, null);
 		}
 		return Response.ok().build();
 	}

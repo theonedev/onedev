@@ -92,7 +92,10 @@ public class GroupProfilePage extends GroupPage {
 
 			@Override
 			public void onClick() {
+				var oldAuditContent = VersionedXmlDoc.fromBean(getGroup()).toXML();
 				OneDev.getInstance(GroupManager.class).delete(getGroup());
+				OneDev.getInstance(AuditManager.class).audit(null, "deleted group \"" + getGroup().getName() + "\"", oldAuditContent, null);
+
 				Session.get().success(MessageFormat.format(_T("Group \"{0}\" deleted"), getGroup().getName()));
 				
 				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Group.class);

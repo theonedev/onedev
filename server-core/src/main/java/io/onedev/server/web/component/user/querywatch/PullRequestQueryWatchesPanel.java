@@ -100,14 +100,14 @@ class PullRequestQueryWatchesPanel extends GenericPanel<User> {
                         if (queryInfo.projectId == null) {
                              getUser().getPullRequestQueryWatches().remove(queryInfo.name);
                              if (getPage() instanceof UserPage)
-                                auditManager.audit(null, "unwatched pull request query \"" + queryInfo.name + "\" for account \"" + getUser().getName() + "\"", null, null);
+                                auditManager.audit(null, "unwatched pull request query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\"", null, null);
                         } else {
                              for (var personalization: getUser().getPullRequestQueryPersonalizations()) {
                                  if (personalization.getProject().getId().equals(queryInfo.projectId)) {
                                      personalization.getQueryWatches().remove(queryInfo.name);
                                      getPullRequestQueryPersonalizationManager().createOrUpdate(personalization);
                                      if (getPage() instanceof UserPage)
-                                        auditManager.audit(null, "unwatched pull request query \"" + queryInfo.name + "\" for account \"" + getUser().getName() + "\" in project \"" + personalization.getProject().getPath() + "\"", null, null);
+                                        auditManager.audit(null, "unwatched pull request query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\" in project \"" + personalization.getProject().getPath() + "\"", null, null);
                                  }
                              }
                         }

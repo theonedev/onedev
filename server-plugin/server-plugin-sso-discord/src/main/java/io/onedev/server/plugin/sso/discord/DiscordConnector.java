@@ -3,8 +3,6 @@ package io.onedev.server.plugin.sso.discord;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
@@ -13,21 +11,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.wicket.Session;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.plugin.sso.discord.oauth2.AccessTokenResponse;
 import io.onedev.server.plugin.sso.discord.oauth2.Request;
 import io.onedev.server.plugin.sso.discord.oauth2.UserGuildsResponse;
 import io.onedev.server.plugin.sso.discord.oauth2.UserInfoResponse;
-import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 
 @Editable(name="Discord", order=150, description="Single sign on via discord.com")
 public class DiscordConnector extends SsoConnector {
@@ -38,11 +32,7 @@ public class DiscordConnector extends SsoConnector {
 	private String clientId;
 	private String clientSecret;
 	private String serverId;
-	
-	public DiscordConnector() {
-		setName("Discord");
-	}
-	
+		
 	@Editable(order=1000, description="OAuth2 Client information | CLIENT ID")
 	@NotEmpty
 	public String getClientId() {
@@ -79,18 +69,7 @@ public class DiscordConnector extends SsoConnector {
 	}
 
 	@Override
-	public URI getCallbackUri() {
-		String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-		try {
-			return new URI(serverUrl + "/" + SsoProcessPage.MOUNT_PATH + "/" 
-					+ SsoProcessPage.STAGE_CALLBACK + "/" + getName());
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
-	public SsoAuthenticated processLoginResponse() {
+	public SsoAuthenticated handleAuthResponse(String providerName) {
 		HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
 		DiscordAuthorizationCodeResponse codeResponse = new DiscordAuthorizationCodeResponse(request.getQueryString());
 		
@@ -118,12 +97,12 @@ public class DiscordConnector extends SsoConnector {
 	}
 
 	@Override
-	public void initiateLogin() {
-		Request apiRequest = new Request(getClientId(), getScopes(), getCallbackUri().toString());
+	public String buildAuthUrl(String providerName) {
+		Request apiRequest = new Request(getClientId(), getScopes(), getCallbackUri(providerName).toString());
 		Session.get().setAttribute(SESSION_ATTR_API_REQUEST, apiRequest);
 		
 		String authURI = apiRequest.getAuthorizationURI();
-		throw new RedirectToUrlException(authURI);
+		return authURI;
 	}
 	
 	private SsoAuthenticated processTokenResponse(AccessTokenResponse accessTokenResponse) {
@@ -135,11 +114,12 @@ public class DiscordConnector extends SsoConnector {
 			if (userInfoResponse.isOK()) {
 				JSONObject userObject = userInfoResponse.getContentAsJSONObject();
 				
+				String subject = (String) userObject.get("id");
 				String userName = (String) userObject.get("username");
-				String email = (String) userObject.get("email");
-				
-				if (StringUtils.isBlank(email))
-					throw new AuthenticationException(_T("A public email is required"));
+				String email = StringUtils.trimToNull((String) userObject.get("email"));
+				Boolean verified = (Boolean) userObject.get("verified");
+				if (!Boolean.TRUE.equals(verified))
+					email = null;
 				
 				if (bCheckGuilds) {
 					UserGuildsResponse guildsResponse = apiRequest.getUserGuilds(accessTokenResponse);
@@ -154,8 +134,8 @@ public class DiscordConnector extends SsoConnector {
 						throw new AuthenticationException(_T("Unable to get guilds info"));
 					}
 				}
-				
-				return new SsoAuthenticated(userName, email, null, null, null, this);
+
+				return new SsoAuthenticated(subject, userName, email, null, null, null);
 			} else {
 				String errorMessage = userInfoResponse.getMessage();
 				if (errorMessage != null) {

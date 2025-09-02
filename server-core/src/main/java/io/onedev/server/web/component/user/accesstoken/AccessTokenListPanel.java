@@ -57,7 +57,7 @@ public abstract class AccessTokenListPanel extends Panel {
 						getTokenManager().delete(token);
 						if (getPage() instanceof UserPage) {
 							var oldAuditContent = VersionedXmlDoc.fromBean(token).toXML();
-							getAuditManager().audit(null, "deleted access token \"" + token.getName() + "\" for account \"" + token.getOwner().getName() + "\"", oldAuditContent, null);
+							getAuditManager().audit(null, "deleted access token \"" + token.getName() + "\" from account \"" + token.getOwner().getName() + "\"", oldAuditContent, null);
 						}
 						target.add(container);
 					}

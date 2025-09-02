@@ -114,7 +114,7 @@ public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
 						SshKey sshKey = rowModel.getObject();
 						getSshKeyManager().delete(sshKey);
                     	if (getPage() instanceof UserPage)
-							getAuditManager().audit(null, "deleted SSH key \"" + sshKey.getFingerprint() + "\" for account \"" + sshKey.getOwner().getName() + "\"", null, null);
+							getAuditManager().audit(null, "deleted SSH key \"" + sshKey.getFingerprint() + "\" in account \"" + sshKey.getOwner().getName() + "\"", null, null);
 						Session.get().success(_T("SSH key deleted"));
 						target.add(sshKeysTable);
 					}

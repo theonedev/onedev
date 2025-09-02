@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.simple.security;
+package io.onedev.server.web.page.security;
 
 import com.google.common.collect.Lists;
 import io.onedev.commons.utils.ExplicitException;

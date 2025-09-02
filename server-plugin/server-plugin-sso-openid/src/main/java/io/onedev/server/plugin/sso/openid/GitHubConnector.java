@@ -1,13 +1,10 @@
 package io.onedev.server.plugin.sso.openid;
 
-import static io.onedev.server.web.translation.Translation._T;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authc.AuthenticationException;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
@@ -25,10 +22,6 @@ import net.minidev.json.JSONObject;
 public class GitHubConnector extends OpenIdConnector {
 
 	private static final long serialVersionUID = 1L;
-
-	public GitHubConnector() {
-		setName("GitHub");
-	}
 
 	@Override
 	public String getConfigurationDiscoveryUrl() {
@@ -70,10 +63,11 @@ public class GitHubConnector extends OpenIdConnector {
 
 			if (httpResponse.getStatusCode() == HTTPResponse.SC_OK) {
 				var jsonObject = httpResponse.getBodyAsJSONObject();
+				var subject = jsonObject.getAsString("id");
 				var userName = jsonObject.getAsString("login");
 				var fullName = jsonObject.getAsString("name");
-				var email = jsonObject.getAsString("email");
-				if (StringUtils.isBlank(email)) {
+				var email = StringUtils.trimToNull(jsonObject.getAsString("email"));
+				if (email == null) {
 					userInfoRequest = new UserInfoRequest(
 							new URI("https://api.github.com/user/emails"), accessToken);
 					httpResponse = userInfoRequest.toHTTPRequest().send();
@@ -82,17 +76,15 @@ public class GitHubConnector extends OpenIdConnector {
 							JSONObject emailObject = (JSONObject) element;
 							if (emailObject.getAsString("verified").equals("true") 
 									&& emailObject.getAsString("primary").equals("true")) {
-								email = emailObject.getAsString("email");
+								email = StringUtils.trimToNull(emailObject.getAsString("email"));
 								break;
 							}
 						}
-						if (StringUtils.isBlank(email))
-							throw new AuthenticationException(_T("A verified primary email address is required"));
 					} else {
 						throw buildException(UserInfoErrorResponse.parse(httpResponse).getErrorObject());
 					}
 				}
-				return new SsoAuthenticated(userName, email, fullName, null, null, this);
+				return new SsoAuthenticated(subject, userName, email, fullName, null, null);
 			} else {
 				throw buildException(UserInfoErrorResponse.parse(httpResponse).getErrorObject());
 			}

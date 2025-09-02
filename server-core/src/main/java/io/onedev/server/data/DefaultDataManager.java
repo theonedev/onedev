@@ -803,10 +803,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 		setting = settingManager.findSetting(Key.JOB_EXECUTORS);
 		if (setting == null) 
 			settingManager.saveJobExecutors(new ArrayList<>());
-		setting = settingManager.findSetting(Key.SSO_CONNECTORS);
-		if (setting == null) {
-			settingManager.saveSsoConnectors(Lists.newArrayList());
-		}
 		setting = settingManager.findSetting(Key.GROOVY_SCRIPTS);
 		if (setting == null) {
 			settingManager.saveGroovyScripts(Lists.newArrayList());

@@ -100,14 +100,14 @@ class PackQueryWatchesPanel extends GenericPanel<User> {
                         if (queryInfo.projectId == null) {
                              getUser().getPackQuerySubscriptions().remove(queryInfo.name);
                              if (getPage() instanceof UserPage)
-                                auditManager.audit(null, "unwatched pack query \"" + queryInfo.name + "\" for account \"" + getUser().getName() + "\"", null, null);
+                                auditManager.audit(null, "unwatched pack query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\"", null, null);
                         } else {
                              for (var personalization: getUser().getPackQueryPersonalizations()) {
                                  if (personalization.getProject().getId().equals(queryInfo.projectId)) {
                                      personalization.getQuerySubscriptions().remove(queryInfo.name);
                                      getPackQueryPersonalizationManager().createOrUpdate(personalization);
                                      if (getPage() instanceof UserPage)
-                                        auditManager.audit(null, "unwatched pack query \"" + queryInfo.name + "\" for account \"" + getUser().getName() + "\" in project \"" + personalization.getProject().getPath() + "\"", null, null);
+                                        auditManager.audit(null, "unwatched pack query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\" in project \"" + personalization.getProject().getPath() + "\"", null, null);
                                 }
                              }
                         }

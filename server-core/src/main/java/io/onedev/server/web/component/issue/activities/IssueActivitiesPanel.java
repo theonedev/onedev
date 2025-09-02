@@ -61,7 +61,7 @@ import io.onedev.server.web.component.issue.activities.activity.IssueChangeActiv
 import io.onedev.server.web.component.issue.activities.activity.IssueCommentActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueWorkActivity;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.simple.security.LoginPage;
+import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.WicketUtils;
 
 public abstract class IssueActivitiesPanel extends Panel {

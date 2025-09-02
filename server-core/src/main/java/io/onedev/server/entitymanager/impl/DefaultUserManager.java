@@ -316,6 +316,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 			dao.remove(vote);
 		for (var stopwatch: user.getStopwatches())
 			dao.remove(stopwatch);
+		for (var ssoAccount: user.getSsoAccounts())
+			dao.remove(ssoAccount);
 
 		for (var personalization: user.getIssueQueryPersonalizations())
 			dao.remove(personalization);
@@ -371,6 +373,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 			dao.remove(vote);
 		for (var stopwatch: user.getStopwatches())
 			dao.remove(stopwatch);
+		for (var ssoAccount: user.getSsoAccounts())
+			dao.remove(ssoAccount);
 
 		for (var personalization: user.getIssueQueryPersonalizations())
 			dao.remove(personalization);

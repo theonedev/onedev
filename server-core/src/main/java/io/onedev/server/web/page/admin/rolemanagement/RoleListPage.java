@@ -82,6 +82,20 @@ public class RoleListPage extends AdministrationPage {
 		target.add(rolesTable);
 	}
 	
+	private WebMarkupContainer newDetailLink(String componentId, Role role) {
+		return new ActionablePageLink(componentId, 
+				RoleDetailPage.class, RoleDetailPage.paramsOf(role)) {
+
+			@Override
+			public void doBeforeNav(AjaxRequestTarget target) {
+				String redirectUrlAfterDelete = RequestCycle.get().urlFor(
+						RoleListPage.class, getPageParameters()).toString();
+				WebSession.get().setRedirectUrlAfterDelete(Role.class, redirectUrlAfterDelete);
+			}
+		
+		};
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -152,17 +166,7 @@ public class RoleListPage extends AdministrationPage {
 				
 				Role role = rowModel.getObject();
 				
-				WebMarkupContainer link = new ActionablePageLink("link", 
-						RoleDetailPage.class, RoleDetailPage.paramsOf(role)) {
-
-					@Override
-					public void doBeforeNav(AjaxRequestTarget target) {
-						String redirectUrlAfterDelete = RequestCycle.get().urlFor(
-								RoleListPage.class, getPageParameters()).toString();
-						WebSession.get().setRedirectUrlAfterDelete(Role.class, redirectUrlAfterDelete);
-					}
-					
-				};
+				WebMarkupContainer link = newDetailLink("link", role);
 				link.add(new Label("label", role.getName()));
 				fragment.add(link);
 				
@@ -186,7 +190,9 @@ public class RoleListPage extends AdministrationPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Role>> cellItem, String componentId, IModel<Role> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionFrag", RoleListPage.this);
-				
+
+				fragment.add(newDetailLink("edit", rowModel.getObject()));
+
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override

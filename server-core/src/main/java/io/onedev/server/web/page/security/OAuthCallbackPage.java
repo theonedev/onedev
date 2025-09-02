@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.simple.security;
+package io.onedev.server.web.page.security;
 
 import static io.onedev.server.web.translation.Translation._T;
 

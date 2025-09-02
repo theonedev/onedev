@@ -58,7 +58,7 @@ abstract class AccessTokenPanel extends Panel {
 				var newAuditContent = VersionedXmlDoc.fromBean(token).toXML();
 				OneDev.getInstance(AccessTokenManager.class).createOrUpdate(token);
 				if (getPage() instanceof UserPage) {
-					OneDev.getInstance(AuditManager.class).audit(null, "regenerated access token \"" + token.getName() + "\" for account \"" + token.getOwner().getName() + "\"", oldAuditContent, newAuditContent);
+					OneDev.getInstance(AuditManager.class).audit(null, "regenerated access token \"" + token.getName() + "\" in account \"" + token.getOwner().getName() + "\"", oldAuditContent, newAuditContent);
 				}
 				target.add(AccessTokenPanel.this);
 				Session.get().success(_T("Access token regenerated successfully"));

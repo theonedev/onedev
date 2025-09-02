@@ -89,7 +89,7 @@ class CommitQueryWatchesPanel extends GenericPanel<User> {
                                  personalization.getQuerySubscriptions().remove(queryInfo.name);
                                  getCommitQueryPersonalizationManager().createOrUpdate(personalization);
                                  if (getPage() instanceof UserPage)
-                                    auditManager.audit(null, "unsubscribed from commit query \"" + queryInfo.name + "\" for account \"" + getUser().getName() + "\" in project \"" + personalization.getProject().getPath() + "\"", null, null);
+                                    auditManager.audit(null, "unsubscribed from commit query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\" in project \"" + personalization.getProject().getPath() + "\"", null, null);
                              }
                          }
                      }

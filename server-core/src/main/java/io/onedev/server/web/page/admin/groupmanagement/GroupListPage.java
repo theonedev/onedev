@@ -85,6 +85,19 @@ public class GroupListPage extends AdministrationPage {
 		target.add(groupsTable);
 	}
 	
+	private WebMarkupContainer newProfileLink(String componentId, Group group) {
+		return new ActionablePageLink(componentId, GroupProfilePage.class, GroupProfilePage.paramsOf(group)) {
+
+			@Override
+			protected void doBeforeNav(AjaxRequestTarget target) {
+				String redirectUrlAfterDelete = RequestCycle.get().urlFor(
+						GroupListPage.class, getPageParameters()).toString();
+				WebSession.get().setRedirectUrlAfterDelete(Group.class, redirectUrlAfterDelete);
+			}
+
+		};
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -148,17 +161,7 @@ public class GroupListPage extends AdministrationPage {
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId, IModel<Group> rowModel) {
 				Fragment fragment = new Fragment(componentId, "nameFrag", GroupListPage.this);
 				Group group = rowModel.getObject();
-				WebMarkupContainer link = new ActionablePageLink("link",
-						GroupProfilePage.class, GroupProfilePage.paramsOf(group)) {
-
-					@Override
-					protected void doBeforeNav(AjaxRequestTarget target) {
-						String redirectUrlAfterDelete = RequestCycle.get().urlFor(
-								GroupListPage.class, getPageParameters()).toString();
-						WebSession.get().setRedirectUrlAfterDelete(Group.class, redirectUrlAfterDelete);
-					}
-
-				};
+				var link = newProfileLink("link", group);
 				link.add(new Label("label", group.getName()));
 				fragment.add(link);
 				cellItem.add(fragment);
@@ -192,6 +195,7 @@ public class GroupListPage extends AdministrationPage {
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId, IModel<Group> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionFrag", GroupListPage.this);
 
+				fragment.add(newProfileLink("edit", rowModel.getObject()));				
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override

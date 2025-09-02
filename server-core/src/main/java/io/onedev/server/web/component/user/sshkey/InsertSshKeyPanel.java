@@ -63,7 +63,7 @@ public abstract class InsertSshKeyPanel extends Panel {
                     sshKey.setCreatedAt(new Date());
                     sshKeyManager.create(sshKey);
                     if (getPage() instanceof UserPage)
-						OneDev.getInstance(AuditManager.class).audit(null, "added SSH key \"" + sshKey.getFingerprint() + "\" for account \"" + sshKey.getOwner().getName() + "\"", null, null);
+						OneDev.getInstance(AuditManager.class).audit(null, "added SSH key \"" + sshKey.getFingerprint() + "\" in account \"" + sshKey.getOwner().getName() + "\"", null, null);
                     onSave(target);
                 }
             }

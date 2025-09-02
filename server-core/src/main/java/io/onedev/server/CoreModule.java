@@ -170,6 +170,8 @@ import io.onedev.server.entitymanager.ReviewedDiffManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.entitymanager.SsoAccountManager;
+import io.onedev.server.entitymanager.SsoProviderManager;
 import io.onedev.server.entitymanager.StopwatchManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.entitymanager.UserInvitationManager;
@@ -256,6 +258,8 @@ import io.onedev.server.entitymanager.impl.DefaultReviewedDiffManager;
 import io.onedev.server.entitymanager.impl.DefaultRoleManager;
 import io.onedev.server.entitymanager.impl.DefaultSettingManager;
 import io.onedev.server.entitymanager.impl.DefaultSshKeyManager;
+import io.onedev.server.entitymanager.impl.DefaultSsoAccountManager;
+import io.onedev.server.entitymanager.impl.DefaultSsoProviderManager;
 import io.onedev.server.entitymanager.impl.DefaultStopwatchManager;
 import io.onedev.server.entitymanager.impl.DefaultUserAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultUserInvitationManager;
@@ -564,6 +568,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestCommentRevisionManager.class).to(DefaultPullRequestCommentRevisionManager.class);
 		bind(IssueDescriptionRevisionManager.class).to(DefaultIssueDescriptionRevisionManager.class);
 		bind(PullRequestDescriptionRevisionManager.class).to(DefaultPullRequestDescriptionRevisionManager.class);
+		bind(SsoProviderManager.class).to(DefaultSsoProviderManager.class);
+		bind(SsoAccountManager.class).to(DefaultSsoAccountManager.class);
 		bind(BaseAuthorizationManager.class).to(DefaultBaseAuthorizationManager.class);
 		
 		bind(WebHookManager.class);

@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.simple.serverinit;
+package io.onedev.server.web.page.serverinit;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;

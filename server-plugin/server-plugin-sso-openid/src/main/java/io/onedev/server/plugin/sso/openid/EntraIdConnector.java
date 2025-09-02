@@ -33,10 +33,6 @@ public class EntraIdConnector extends OpenIdConnector {
 	
 	private boolean retrieveGroups;
 	
-	public EntraIdConnector() {
-		setName("EntraID");
-	}
-
 	@Editable(order=1000, name="Application (client) ID", description="Specify application (client) ID of the app registered in Entra ID")
 	@NotEmpty
 	public String getClientId() {

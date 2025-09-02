@@ -31,7 +31,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.TwoFactorAuthentication;
 import io.onedev.server.util.CryptoUtils;
-import io.onedev.server.web.page.simple.security.LoginPage;
+import io.onedev.server.web.page.security.LoginPage;
 
 public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<User> {
 

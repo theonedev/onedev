@@ -113,7 +113,7 @@ import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
-import io.onedev.server.web.page.simple.security.LoginPage;
+import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.editbean.LabelsBean;
 

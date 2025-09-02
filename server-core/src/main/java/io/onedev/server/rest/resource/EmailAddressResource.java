@@ -84,7 +84,7 @@ public class EmailAddressResource {
 		emailAddressManager.create(emailAddress);
 
 		if (!getAuthUser().equals(owner)) 
-			auditManager.audit(null, "added email address \"" + emailAddress.getValue() + "\" for account \"" + owner.getName() + "\" via RESTful API", null, null);
+			auditManager.audit(null, "added email address \"" + emailAddress.getValue() + "\" in account \"" + owner.getName() + "\" via RESTful API", null, null);
 		return emailAddress.getId();
 	}
 	
@@ -100,7 +100,7 @@ public class EmailAddressResource {
 		emailAddressManager.setAsPublic(emailAddress);
 
 		if (!getAuthUser().equals(owner)) 
-			auditManager.audit(null, "set email address \"" + emailAddress.getValue() + "\" as public for account \"" + owner.getName() + "\" via RESTful API", null, null);
+			auditManager.audit(null, "set email address \"" + emailAddress.getValue() + "\" as public in account \"" + owner.getName() + "\" via RESTful API", null, null);
 		
 		return emailAddressId;
 	}
@@ -117,7 +117,7 @@ public class EmailAddressResource {
 		emailAddressManager.setAsPrivate(emailAddress);
 
 		if (!getAuthUser().equals(owner)) 
-			auditManager.audit(null, "set email address \"" + emailAddress.getValue() + "\" as private for account \"" + owner.getName() + "\" via RESTful API", null, null);
+			auditManager.audit(null, "set email address \"" + emailAddress.getValue() + "\" as private in account \"" + owner.getName() + "\" via RESTful API", null, null);
 		
 		return emailAddressId;
 	}
@@ -137,7 +137,7 @@ public class EmailAddressResource {
 		emailAddressManager.setAsPrimary(emailAddress);
 
 		if (!getAuthUser().equals(owner)) 
-			auditManager.audit(null, "set email address \"" + emailAddress.getValue() + "\" as primary for account \"" + owner.getName() + "\" via RESTful API", null, null);
+			auditManager.audit(null, "set email address \"" + emailAddress.getValue() + "\" as primary in account \"" + owner.getName() + "\" via RESTful API", null, null);
 		
 		return emailAddressId;
 	}
@@ -153,7 +153,7 @@ public class EmailAddressResource {
 		emailAddressManager.useForGitOperations(emailAddress);
 		
 		if (!getAuthUser().equals(emailAddress.getOwner())) 
-			auditManager.audit(null, "specified email address \"" + emailAddress.getValue() + "\" for git operations for account \"" + emailAddress.getOwner().getName() + "\" via RESTful API", null, null);
+			auditManager.audit(null, "specified email address \"" + emailAddress.getValue() + "\" for git operations in account \"" + emailAddress.getOwner().getName() + "\" via RESTful API", null, null);
 		
 		return emailAddressId;
 	}
@@ -193,7 +193,7 @@ public class EmailAddressResource {
 		emailAddressManager.delete(emailAddress);
 
 		if (!getAuthUser().equals(emailAddress.getOwner())) 
-			auditManager.audit(null, "deleted email address \"" + emailAddress.getValue() + "\" for account \"" + emailAddress.getOwner().getName() + "\" via RESTful API", null, null);
+			auditManager.audit(null, "deleted email address \"" + emailAddress.getValue() + "\" from account \"" + emailAddress.getOwner().getName() + "\" via RESTful API", null, null);
 
 		return Response.ok().build();
 	}

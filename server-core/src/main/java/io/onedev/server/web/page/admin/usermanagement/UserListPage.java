@@ -65,6 +65,7 @@ import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.user.UserCssResourceReference;
+import io.onedev.server.web.page.user.basicsetting.UserBasicSettingPage;
 import io.onedev.server.web.page.user.profile.UserProfilePage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.WicketUtils;
@@ -839,7 +840,7 @@ public class UserListPage extends AdministrationPage {
 									 IModel<User> rowModel) {
 				User user = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "nameFrag", UserListPage.this);
-				WebMarkupContainer link = new ActionablePageLink("link", UserProfilePage.class, UserProfilePage.paramsOf(user)) {
+				var link = new ActionablePageLink("link", UserProfilePage.class, UserProfilePage.paramsOf(user)) {
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {
@@ -847,7 +848,7 @@ public class UserListPage extends AdministrationPage {
 								UserListPage.class, getPageParameters()).toString();
 						WebSession.get().setRedirectUrlAfterDelete(User.class, redirectUrlAfterDelete);
 					}
-
+		
 				};
 				link.add(new UserAvatar("avatar", user));
 				link.add(new Label("name", user.getName()));
@@ -920,6 +921,17 @@ public class UserListPage extends AdministrationPage {
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId, IModel<User> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionsFrag", UserListPage.this);
 				
+				fragment.add(new ActionablePageLink("edit", UserBasicSettingPage.class, UserBasicSettingPage.paramsOf(rowModel.getObject())) {
+
+					@Override
+					protected void doBeforeNav(AjaxRequestTarget target) {
+						String redirectUrlAfterDelete = RequestCycle.get().urlFor(
+								UserListPage.class, getPageParameters()).toString();
+						WebSession.get().setRedirectUrlAfterDelete(User.class, redirectUrlAfterDelete);
+					}
+		
+				});
+
 				fragment.add(new Link<Void>("impersonate") {
 
 					@Override

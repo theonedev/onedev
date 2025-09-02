@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.simple.security;
+package io.onedev.server.web.page.security;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;

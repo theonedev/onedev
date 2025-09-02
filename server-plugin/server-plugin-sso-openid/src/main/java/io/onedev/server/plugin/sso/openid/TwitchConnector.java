@@ -24,10 +24,6 @@ public class TwitchConnector extends OpenIdConnector {
 
 	private static final long serialVersionUID = 1L;
 
-	public TwitchConnector() {
-		setName("Twitch");
-	}
-
 	@Override
 	public String getConfigurationDiscoveryUrl() {
 		return super.getConfigurationDiscoveryUrl();

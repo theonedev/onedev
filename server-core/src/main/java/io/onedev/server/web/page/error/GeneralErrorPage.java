@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.simple.error;
+package io.onedev.server.web.page.error;
 
 import static io.onedev.server.web.translation.Translation._T;
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;

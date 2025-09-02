@@ -109,7 +109,7 @@ import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.code.CodeContribsPage;
 import io.onedev.server.web.page.project.stats.code.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
-import io.onedev.server.web.page.simple.security.LoginPage;
+import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.ProjectAware;
 
 public abstract class ProjectPage extends LayoutPage implements ProjectAware {

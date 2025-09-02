@@ -138,7 +138,7 @@ public class GpgKeyListPanel extends GenericPanel<List<GpgKey>> {
 						GpgKey gpgKey = rowModel.getObject();
 						OneDev.getInstance(GpgKeyManager.class).delete(gpgKey);
 						if (getPage() instanceof UserPage)
-							OneDev.getInstance(AuditManager.class).audit(null, "deleted GPG key \"" + GpgUtils.getKeyIDString(gpgKey.getKeyId()) + "\" for account \"" + gpgKey.getOwner().getName() + "\"", null, null);
+							OneDev.getInstance(AuditManager.class).audit(null, "deleted GPG key \"" + GpgUtils.getKeyIDString(gpgKey.getKeyId()) + "\" from account \"" + gpgKey.getOwner().getName() + "\"", null, null);
 						Session.get().success(_T("GPG key deleted"));
 						target.add(gpgKeysTable);
 					}

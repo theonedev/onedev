@@ -89,6 +89,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public static final String PROP_DISABLED = "disabled";
 
 	public static final String PROP_NOTIFY_OWN_EVENTS = "notifyOwnEvents";
+
+	public static final String PROP_PASSWORD = "password";
 	
 	private static ThreadLocal<Stack<User>> stack = ThreadLocal.withInitial(() -> new Stack<>());
 	
@@ -141,6 +143,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Membership> memberships = new ArrayList<>();
+
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<SsoAccount> ssoAccounts = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReview> pullRequestReviews = new ArrayList<>();
@@ -646,6 +652,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public void setMemberships(Collection<Membership> memberships) {
 		this.memberships = memberships;
 	}
+
+	public Collection<SsoAccount> getSsoAccounts() {
+		return ssoAccounts;
+	}
+
+	public void setSsoAccounts(Collection<SsoAccount> ssoAccounts) {
+		this.ssoAccounts = ssoAccounts;
+	}
 	
 	@Override
 	public String toString() {
@@ -1086,6 +1100,13 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		if (publicEmailAddress == null)
 			publicEmailAddress = Optional.ofNullable(getEmailAddressManager().findPublic(this));
 		return publicEmailAddress.orElse(null);
+	}
+
+	public void addEmailAddress(EmailAddress emailAddress) {
+		emailAddress.setOwner(this);
+		emailAddress.setPrimary(getEmailAddresses().stream().noneMatch(it->it.isPrimary()));		
+		emailAddress.setGit(getEmailAddresses().stream().noneMatch(it->it.isGit()));
+		getEmailAddresses().add(emailAddress);
 	}
 	
 	public UserFacade getFacade() {

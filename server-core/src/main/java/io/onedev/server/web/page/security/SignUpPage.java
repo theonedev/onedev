@@ -1,8 +1,8 @@
-package io.onedev.server.web.page.simple.security;
+package io.onedev.server.web.page.security;
 
 import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
 import static io.onedev.server.model.User.PROP_SERVICE_ACCOUNT;
-import static io.onedev.server.web.page.simple.security.SignUpBean.PROP_EMAIL_ADDRESS;
+import static io.onedev.server.web.page.security.SignUpBean.PROP_EMAIL_ADDRESS;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.credential.PasswordService;

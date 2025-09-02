@@ -85,7 +85,7 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.list.SimpleUserListLink;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.iteration.IterationIssuesPage;
-import io.onedev.server.web.page.simple.security.LoginPage;
+import io.onedev.server.web.page.security.LoginPage;
 
 public abstract class IssueSidePanel extends Panel {
 

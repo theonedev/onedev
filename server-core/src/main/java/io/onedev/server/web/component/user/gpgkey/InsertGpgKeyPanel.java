@@ -80,7 +80,7 @@ public abstract class InsertGpgKeyPanel extends Panel {
                         gpgKey.setCreatedAt(new Date());
                         gpgKeyManager.create(gpgKey);
                         if (getPage() instanceof UserPage)
-							OneDev.getInstance(AuditManager.class).audit(null, "added GPG key \"" + GpgUtils.getKeyIDString(gpgKey.getKeyId()) + "\" for account \"" + gpgKey.getOwner().getName() + "\"", null, null);
+							OneDev.getInstance(AuditManager.class).audit(null, "added GPG key \"" + GpgUtils.getKeyIDString(gpgKey.getKeyId()) + "\" in account \"" + gpgKey.getOwner().getName() + "\"", null, null);
                         onSave(target);
                 	}
                 }

@@ -103,7 +103,7 @@ abstract class AccessTokenEditPanel extends Panel {
 						if (getPage() instanceof UserPage) {
 							var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 							var verb = oldAuditContent != null ? "changed" : "created";
-							getAuditManager().audit(null, verb + " access token \"" + token.getName() + "\" for account \"" + token.getOwner().getName() + "\"", oldAuditContent, newAuditContent);
+							getAuditManager().audit(null, verb + " access token \"" + token.getName() + "\" in account \"" + token.getOwner().getName() + "\"", oldAuditContent, newAuditContent);
 							oldAuditContent = newAuditContent;
 						}
 					});

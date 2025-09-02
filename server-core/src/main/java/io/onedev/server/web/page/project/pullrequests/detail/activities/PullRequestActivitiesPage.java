@@ -65,7 +65,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPa
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestChangeActivity;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestCommentActivity;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestUpdateActivity;
-import io.onedev.server.web.page.simple.security.LoginPage;
+import io.onedev.server.web.page.security.LoginPage;
 
 public class PullRequestActivitiesPage extends PullRequestDetailPage {
 	

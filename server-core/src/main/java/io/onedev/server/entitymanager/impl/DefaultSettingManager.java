@@ -53,7 +53,6 @@ import io.onedev.server.model.support.administration.authenticator.Authenticator
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.mailservice.MailService;
-import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
@@ -246,12 +245,6 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
     	return (PerformanceSetting) getSettingValue(Key.PERFORMANCE);
     }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<SsoConnector> getSsoConnectors() {
-		return (List<SsoConnector>) getSettingValue(Key.SSO_CONNECTORS);
-	}
-
 	@Override
 	public ServiceDeskSetting getServiceDeskSetting() {
 		return (ServiceDeskSetting) getSettingValue(Key.SERVICE_DESK_SETTING); 
@@ -406,12 +399,6 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		saveSetting(Key.GPG, gpgSetting);
 	}
 	
-	@Transactional
-	@Override
-	public void saveSsoConnectors(List<SsoConnector> ssoConnectors) {
-		saveSetting(Key.SSO_CONNECTORS, (Serializable) ssoConnectors);
-	}
-
 	@Transactional
 	@Override
 	public void saveContributedSettings(Map<String, ContributedAdministrationSetting> contributedSettings) {

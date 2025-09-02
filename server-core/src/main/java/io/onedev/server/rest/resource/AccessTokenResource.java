@@ -82,7 +82,7 @@ public class AccessTokenResource {
 
 		if (!getAuthUser().equals(owner)) {
 			var newAuditContent = VersionedXmlDoc.fromBean(accessToken.getFacade()).toXML();
-			auditManager.audit(null, "created access token \"" + accessToken.getName() + "\" for account \"" + owner.getName() + "\" via RESTful API", 
+			auditManager.audit(null, "created access token \"" + accessToken.getName() + "\" in account \"" + owner.getName() + "\" via RESTful API", 
 					null, newAuditContent);
 		}
 
@@ -106,7 +106,7 @@ public class AccessTokenResource {
 		if (!getAuthUser().equals(owner)) {
 			var oldAuditContent = accessToken.getOldVersion().toXML();
 			var newAuditContent = VersionedXmlDoc.fromBean(accessToken).toXML();
-			auditManager.audit(null, "changed access token \"" + accessToken.getName() + "\" for account \"" + owner.getName() + "\" via RESTful API", 
+			auditManager.audit(null, "changed access token \"" + accessToken.getName() + "\" in account \"" + owner.getName() + "\" via RESTful API", 
 					oldAuditContent, newAuditContent);
 		}
 		return Response.ok().build();
@@ -123,7 +123,7 @@ public class AccessTokenResource {
 
 		if (!getAuthUser().equals(accessToken.getOwner())) {
 			var oldAuditContent = VersionedXmlDoc.fromBean(accessToken.getFacade()).toXML();
-			auditManager.audit(null, "deleted access token \"" + accessToken.getName() + "\" for account \"" + accessToken.getOwner().getName() + "\" via RESTful API", 
+			auditManager.audit(null, "deleted access token \"" + accessToken.getName() + "\" from account \"" + accessToken.getOwner().getName() + "\" via RESTful API", 
 					oldAuditContent, null);
 		}
 		return Response.ok().build();

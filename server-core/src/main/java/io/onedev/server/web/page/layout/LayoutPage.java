@@ -141,7 +141,7 @@ import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
 import io.onedev.server.web.page.admin.servicedesk.ServiceDeskSettingPage;
 import io.onedev.server.web.page.admin.sshserverkey.SshServerKeyPage;
-import io.onedev.server.web.page.admin.ssosetting.SsoConnectorListPage;
+import io.onedev.server.web.page.admin.ssosetting.SsoProviderListPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
 import io.onedev.server.web.page.admin.usermanagement.InvitationListPage;
 import io.onedev.server.web.page.admin.usermanagement.NewInvitationPage;
@@ -159,9 +159,10 @@ import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.querywatch.MyQueryWatchesPage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
+import io.onedev.server.web.page.my.ssoaccounts.MySsoAccountsPage;
 import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthenticationPage;
-import io.onedev.server.web.page.simple.security.LoginPage;
-import io.onedev.server.web.page.simple.security.LogoutPage;
+import io.onedev.server.web.page.security.LoginPage;
+import io.onedev.server.web.page.security.LogoutPage;
 import io.onedev.server.web.page.user.UserPage;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -231,12 +232,12 @@ public abstract class LayoutPage extends BasePage {
 							new PageParameters(), Lists.newArrayList(NewGroupPage.class, GroupPage.class)));
 
 					List<SidebarMenuItem> authenticationMenuItems = new ArrayList<>();
-					authenticationMenuItems.add(new SidebarMenuItem.Page(null, _T("Authenticator"),
+					authenticationMenuItems.add(new SidebarMenuItem.Page(null, _T("Password Authenticator"),
 							AuthenticatorPage.class, new PageParameters()));
 					authenticationMenuItems.add(new SidebarMenuItem.Page(null, _T("Single Sign On"),
-							SsoConnectorListPage.class, new PageParameters()));
+							SsoProviderListPage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("External Auth Source"), authenticationMenuItems));
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("External Authentication"), authenticationMenuItems));
 
 					var sshPort = OneDev.getInstance(ServerConfig.class).getSshPort();
 					List<SidebarMenuItem> keyManagementMenuItems = new ArrayList<>();
@@ -1140,6 +1141,14 @@ public abstract class LayoutPage extends BasePage {
 				item.add(AttributeAppender.append("class", "active"));
 		} else {
 			userInfo.add(new WebMarkupContainer("myTwoFactorAuthentication").setVisible(false));
+		}
+
+		if (loginUser != null && !loginUser.isDisabled() && !loginUser.isServiceAccount()) {
+			userInfo.add(item = new ViewStateAwarePageLink<Void>("mySsoAccounts", MySsoAccountsPage.class));
+			if (getPage() instanceof MySsoAccountsPage)
+				item.add(AttributeAppender.append("class", "active"));
+		} else {
+			userInfo.add(new WebMarkupContainer("mySsoAccounts").setVisible(false));
 		}
 
 		if (getLoginUser() != null && !getLoginUser().isServiceAccount() && !getLoginUser().isDisabled()) {

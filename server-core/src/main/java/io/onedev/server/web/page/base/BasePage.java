@@ -1,8 +1,6 @@
 package io.onedev.server.web.page.base;
 
 import static io.onedev.server.web.behavior.ChangeObserver.filterObservables;
-import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
-import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
 import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
@@ -47,7 +45,6 @@ import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.protocol.ws.api.message.TextMessage;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -68,7 +65,6 @@ import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.commandhandler.Upgrade;
 import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CryptoUtils;
@@ -80,11 +76,10 @@ import io.onedev.server.web.behavior.ForceOrdinaryStyleBehavior;
 import io.onedev.server.web.behavior.ZoneIdBehavior;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
+import io.onedev.server.web.page.security.LoginPage;
+import io.onedev.server.web.page.serverinit.ServerInitPage;
 import io.onedev.server.web.page.simple.SimplePage;
-import io.onedev.server.web.page.simple.security.LoginPage;
-import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.websocket.WebSocketManager;
 import io.onedev.server.web.websocket.WebSocketMessages;
@@ -151,17 +146,6 @@ public abstract class BasePage extends WebPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (getLoginUser() == null) {
-			Cookie cookie = SsoProcessPage.getConnectorCookie();
-			if (cookie != null) {
-				SsoProcessPage.clearConnectorCookie();
-				new RestartResponseAtInterceptPageException(getPage().getClass());
-				String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-				String redirectUrl = serverUrl + "/" + MOUNT_PATH + "/" + STAGE_INITIATE + "/" + cookie.getValue();
-				throw new RedirectToUrlException(redirectUrl);
-			}
-		}
-		
 		if (!isPermitted())
 			unauthorized();
 
@@ -292,7 +276,7 @@ public abstract class BasePage extends WebPage {
 				};
 
 				if (getPage() instanceof SimplePage && getPage().visitChildren(BeanEditor.class, visitor) != null)
-					builder.append("force-ordinary-style ");
+					builder.append(" force-ordinary-style ");
 
 				return String.format("$('html').addClass('%s');", builder.toString());
 			}

@@ -68,6 +68,42 @@
     color: var(--gray-dark);
 	height: auto;
 }
+.SimplePage:not(.force-ordinary-style) .main .select2-choice {
+	padding: 0.4rem 1rem;
+	background-color: var(--light);
+    border-color: var(--light);
+    color: var(--gray-dark);
+	height: auto;
+}
+.SimplePage:not(.force-ordinary-style) .select2-drop {
+	background-color: var(--light);
+}
+.SimplePage:not(.force-ordinary-style) .select2-drop input {
+	border-color: var(--light-gray);
+	background-color: var(--light-gray);
+}
+.SimplePage.dark-mode:not(.force-ordinary-style) .main .select2-choice {
+    background-color: var(--dark-mode-dark);
+    border: 1px solid #323248;	
+	color: white;
+}
+.SimplePage.dark-mode:not(.force-ordinary-style) .select2-drop {
+	background-color: var(--dark-mode-dark);
+	border: 1px solid #323248;
+}
+.SimplePage.dark-mode:not(.force-ordinary-style) .select2-drop input {
+    background-color: var(--dark-mode-dark);
+    border-color: #474761;	
+}
+
+.SimplePage:not(.force-ordinary-style) .main .select2-container .select2-choice .select2-arrow b,
+.SimplePage:not(.force-ordinary-style) .main .select2-container .select2-choice div b {
+  background-position: 0px 13px;
+}
+.SimplePage:not(.force-ordinary-style) .main .select2-dropdown-open .select2-choice .select2-arrow b,
+.SimplePage:not(.force-ordinary-style) .main .select2-dropdown-open .select2-choice div b {
+  background-position: -18px 13px;
+}
 .SimplePage.dark-mode:not(.force-ordinary-style) .main .form-control {
     color: white;
 }

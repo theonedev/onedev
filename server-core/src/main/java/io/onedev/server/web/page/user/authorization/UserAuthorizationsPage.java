@@ -89,7 +89,7 @@ public class UserAuthorizationsPage extends UserPage {
 				var oldAuditContent = getAuditContent();
 				OneDev.getInstance(UserAuthorizationManager.class).syncAuthorizations(getUser(), authorizations);
 				var newAuditContent = getAuditContent();
-				getAuditManager().audit(null, "changed project authorizations for account \"" + getUser().getName() + "\"", oldAuditContent, newAuditContent);
+				getAuditManager().audit(null, "changed project authorizations in account \"" + getUser().getName() + "\"", oldAuditContent, newAuditContent);
 
 				Session.get().success(_T("Project authorizations updated"));
 			}

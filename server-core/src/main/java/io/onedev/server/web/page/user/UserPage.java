@@ -28,6 +28,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.admin.usermanagement.UserListPage;
+import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.user.accesstoken.UserAccessTokensPage;
 import io.onedev.server.web.page.user.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.user.avatar.UserAvatarPage;
@@ -39,8 +40,8 @@ import io.onedev.server.web.page.user.password.UserPasswordPage;
 import io.onedev.server.web.page.user.profile.UserProfilePage;
 import io.onedev.server.web.page.user.querywatch.UserQueryWatchesPage;
 import io.onedev.server.web.page.user.sshkeys.UserSshKeysPage;
+import io.onedev.server.web.page.user.ssoaccounts.UserSsoAccountsPage;
 import io.onedev.server.web.page.user.twofactorauthentication.UserTwoFactorAuthenticationPage;
-import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.util.UserAware;
 
 public abstract class UserPage extends LayoutPage implements UserAware {
@@ -97,8 +98,10 @@ public abstract class UserPage extends LayoutPage implements UserAware {
 			tabs.add(new PageTab(Model.of(_T("Access Tokens")), Model.of("token"), UserAccessTokensPage.class, params));
 			if (!getUser().isServiceAccount() && getUser().isEnforce2FA())
 				tabs.add(new PageTab(Model.of(_T("Two-factor Authentication")), Model.of("shield"), UserTwoFactorAuthenticationPage.class, params));
-			if (!getUser().isServiceAccount())
+			if (!getUser().isServiceAccount()) {
+				tabs.add(new PageTab(Model.of(_T("SSO Accounts")), Model.of("bell"), UserSsoAccountsPage.class, params));
 				tabs.add(new PageTab(Model.of(_T("Query Watches")), Model.of("bell"), UserQueryWatchesPage.class, params));
+			}
 		}
 		
 		add(new Tabbable("userTabs", tabs).setVisible(SecurityUtils.isAdministrator()));

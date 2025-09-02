@@ -16,7 +16,6 @@ import javax.validation.constraints.NotEmpty;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.wicket.Session;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,13 +58,10 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
-import io.onedev.server.annotation.UrlSegment;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.security.TrustCertsSSLSocketFactory;
 import io.onedev.server.util.oauth.OAuthUtils;
-import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
@@ -94,23 +90,6 @@ public class OpenIdConnector extends SsoConnector {
 	
 	public OpenIdConnector() {
 		buttonImageUrl = "/wicket/resource/" + OpenIdConnector.class.getName() + "/openid.png";
-	}
-
-	@Editable(order=100, description="Name of the provider will serve two purpose: "
-			+ "<ul>"
-			+ "<li>Display on login button"
-			+ "<li>Form the authorization callback url which will be <i>&lt;server url&gt;/" + SsoProcessPage.MOUNT_PATH + "/" + SsoProcessPage.STAGE_CALLBACK + "/&lt;name&gt;</i>"
-			+ "</ul>")
-	@UrlSegment // will be used as part of callback url
-	@NotEmpty
-	@Override
-	public String getName() {
-		return super.getName();
-	}
-
-	@Override
-	public void setName(String name) {
-		super.setName(name);
 	}
 	
 	@Editable(order=200, description="Specify configuration discovery url of your OpenID provider, " +
@@ -150,7 +129,7 @@ public class OpenIdConnector extends SsoConnector {
 	}
 	
 	@Override
-	public SsoAuthenticated processLoginResponse() {
+	public SsoAuthenticated handleAuthResponse(String providerName) {
 		HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
 		try {
 			AuthenticationResponse authenticationResponse = AuthenticationResponseParser.parse(
@@ -166,13 +145,13 @@ public class OpenIdConnector extends SsoConnector {
 					throw new AuthenticationException(_T("Unsolicited OIDC authentication response"));
 				
 				AuthorizationGrant codeGrant = new AuthorizationCodeGrant(
-						authenticationSuccessResponse.getAuthorizationCode(), getCallbackUri());
+						authenticationSuccessResponse.getAuthorizationCode(), getCallbackUri(providerName));
 
 				ClientID clientID = new ClientID(getClientId());
 				com.nimbusds.oauth2.sdk.auth.Secret clientSecret = new com.nimbusds.oauth2.sdk.auth.Secret(getClientSecret());
 				ClientAuthentication clientAuth = createTokenRequestAuthentication(clientID, clientSecret);
 				TokenRequest tokenRequest = new TokenRequest(
-						new URI(getCachedProviderMetadata().getTokenEndpoint()), clientAuth, codeGrant);
+						new URI(getCachedProviderMetadata().getTokenEndpoint()), clientAuth, codeGrant, null);
 				
 				HTTPRequest httpRequest = tokenRequest.toHTTPRequest();
 				httpRequest.setSSLSocketFactory(TrustCertsSSLSocketFactory.getDefault());
@@ -212,6 +191,21 @@ public class OpenIdConnector extends SsoConnector {
 			return null;
 		}
 	}
+
+	@Nullable
+	private Boolean getBooleanValue(Object jsonValue) {
+		if (jsonValue instanceof Boolean) {
+			return (Boolean)jsonValue;
+		} else if (jsonValue instanceof JSONArray) {
+			JSONArray jsonArray = (JSONArray) jsonValue;
+			if (!jsonArray.isEmpty())
+				return (Boolean) jsonArray.iterator().next();
+			else
+				return null;
+		} else {
+			return null;
+		}
+	}
 	
 	protected SsoAuthenticated processTokenResponse(OIDCTokenResponse tokenResponse) {
 		try {
@@ -229,8 +223,14 @@ public class OpenIdConnector extends SsoConnector {
 			if (claims.getExpirationTime() != null && now.toDate().after(claims.getExpirationTime()))
 				throw new AuthenticationException(_T("ID token was expired"));
 
-			String subject = StringUtils.trimToNull(claims.getSubject());
+			String subject = claims.getSubject();
 			String email = StringUtils.trimToNull(claims.getStringClaim("email"));
+			Boolean emailVerified = claims.getBooleanClaim("email_verified");
+			if (emailVerified == null)
+				emailVerified = claims.getBooleanClaim("emailVerified");
+			if (!Boolean.TRUE.equals(emailVerified))
+				email = null;
+
 			String userName = StringUtils.trimToNull(claims.getStringClaim("preferred_username"));
 			String fullName = StringUtils.trimToNull(claims.getStringClaim("name"));
 			List<String> groups;
@@ -259,16 +259,17 @@ public class OpenIdConnector extends SsoConnector {
 					if (!subject.equals(json.get("sub")))
 						throw new AuthenticationException(_T("OIDC error: Inconsistent sub in ID token and userinfo"));
 
-					if (email == null) 
+					if (email == null) {
 						email = getStringValue(json.get("email"));
+						emailVerified = getBooleanValue(json.get("email_verified"));
+						if (emailVerified == null)
+							emailVerified = getBooleanValue(json.get("emailVerified"));
+						if (!Boolean.TRUE.equals(emailVerified))
+							email = null;
+					}
 						
-					if (email == null)
-						throw new AuthenticationException(_T("OIDC error: No email claim returned"));
-
 					if (userName == null) 
 						userName = getStringValue(json.get("preferred_username"));
-					if (userName == null)
-						userName = email;
 
 					if (fullName == null)
 						fullName = getStringValue(json.get("name"));
@@ -290,7 +291,7 @@ public class OpenIdConnector extends SsoConnector {
 			userName = StringUtils.substringBefore(userName, "@");
 			if (groups != null)
 				groups = convertGroups(accessToken, groups);
-			return new SsoAuthenticated(userName, email, fullName, groups, null, this);
+			return new SsoAuthenticated(subject, userName, email, fullName, groups, null);
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
 		}
@@ -305,7 +306,7 @@ public class OpenIdConnector extends SsoConnector {
 	}
 
 	@Override
-	public void initiateLogin() {
+	public String buildAuthUrl(String providerName) {
 		try {
 			ClientID clientID = new ClientID(getClientId());
 			
@@ -317,9 +318,9 @@ public class OpenIdConnector extends SsoConnector {
 			
 			AuthenticationRequest request = new AuthenticationRequest(
 					new URI(getCachedProviderMetadata().getAuthorizationEndpoint()),
-				    new ResponseType("code"), Scope.parse(scopes), clientID, getCallbackUri(),
+				    new ResponseType("code"), Scope.parse(scopes), clientID, getCallbackUri(providerName),
 				    state, new Nonce());
-			throw new RedirectToUrlException(request.toURI().toString());
+			return request.toURI().toString();
 		} catch (URISyntaxException|SerializeException e) {
 			throw new RuntimeException(e);
 		}		
@@ -384,15 +385,4 @@ public class OpenIdConnector extends SsoConnector {
 		return metadata;
 	}
 	
-	@Override
-	public URI getCallbackUri() {
-		String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-		try {
-			return new URI(serverUrl + "/" + SsoProcessPage.MOUNT_PATH + "/" 
-					+ SsoProcessPage.STAGE_CALLBACK + "/" + getName());
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 }

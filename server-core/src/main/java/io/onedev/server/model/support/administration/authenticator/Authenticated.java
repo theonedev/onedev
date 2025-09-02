@@ -1,9 +1,13 @@
 package io.onedev.server.model.support.administration.authenticator;
 
-import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.util.Collection;
 
-public class Authenticated {
+import javax.annotation.Nullable;
+
+public class Authenticated implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private final String fullName;
 	

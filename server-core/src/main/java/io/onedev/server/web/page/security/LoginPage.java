@@ -1,7 +1,7 @@
-package io.onedev.server.web.page.simple.security;
+package io.onedev.server.web.page.security;
 
-import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
-import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
+import static io.onedev.server.web.page.security.SsoProcessPage.MOUNT_PATH;
+import static io.onedev.server.web.page.security.SsoProcessPage.STAGE_INITIATE;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.text.MessageFormat;
@@ -33,10 +33,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.SsoProviderManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.SsoProvider;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.BrandingSetting;
-import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.realm.PasswordAuthenticatingRealm;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -175,15 +176,17 @@ public class LoginPage extends SimplePage {
 
 		String serverUrl = settingManager.getSystemSetting().getServerUrl();
 		
+		var ssoProviderManager = OneDev.getInstance(SsoProviderManager.class);
 		RepeatingView ssoButtonsView = new RepeatingView("ssoButtons");
-		for (SsoConnector connector: settingManager.getSsoConnectors()) {
+		var ssoProviders = ssoProviderManager.query();
+		for (SsoProvider provider: ssoProviders) {
 			ExternalLink ssoButton = new ExternalLink(ssoButtonsView.newChildId(), 
-					Model.of(serverUrl + "/" + MOUNT_PATH + "/" + STAGE_INITIATE + "/" + connector.getName()));
-			ssoButton.add(new ExternalImage("image", connector.getButtonImageUrl()));
-			ssoButton.add(new Label("label", MessageFormat.format(_T("Login with {0}"), connector.getName())));
+					Model.of(serverUrl + "/" + MOUNT_PATH + "/" + STAGE_INITIATE + "/" + provider.getName()));
+			ssoButton.add(new ExternalImage("image", provider.getConnector().getButtonImageUrl()));
+			ssoButton.add(new Label("label", MessageFormat.format(_T("Login with {0}"), provider.getName())));
 			ssoButtonsView.add(ssoButton);
 		}
-		fragment.add(ssoButtonsView.setVisible(!settingManager.getSsoConnectors().isEmpty()));
+		fragment.add(ssoButtonsView.setVisible(!ssoProviders.isEmpty()));
 		
 		add(fragment);
 		

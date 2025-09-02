@@ -57,7 +57,7 @@ public class AvatarEditPanel extends GenericPanel<User> {
 			public void onClick() {
 				getAvatarManager().useUserAvatar(getUser().getId(), null);
 				if (getPage() instanceof UserPage)
-					getAuditManager().audit(null, "specified to use default avatar for account \"" + getUser().getName() + "\"", null, null);
+					getAuditManager().audit(null, "specified to use default avatar in account \"" + getUser().getName() + "\"", null, null);
 				setResponsePage(getPage().getClass(), getPage().getPageParameters());
 			}
 			
@@ -74,7 +74,7 @@ public class AvatarEditPanel extends GenericPanel<User> {
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
             	avatarManager.useUserAvatar(getUser().getId(), uploadedAvatarData);
 				if (getPage() instanceof UserPage)
-					getAuditManager().audit(null, "specified to use uploaded avatar for account \"" + getUser().getName() + "\"", null, null);
+					getAuditManager().audit(null, "specified to use uploaded avatar in account \"" + getUser().getName() + "\"", null, null);
 				setResponsePage(getPage().getClass(), getPage().getPageParameters());
 			}
 

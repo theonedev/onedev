@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.simple.security;
+package io.onedev.server.web.page.security;
 
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.page.base.BasePage;

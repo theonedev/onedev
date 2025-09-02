@@ -63,7 +63,7 @@ public class SshKeyResource {
     	sshKeyManager.create(sshKey);
 		if (!getAuthUser().equals(sshKey.getOwner())) {
 			var newAuditContent = VersionedXmlDoc.fromBean(sshKey).toXML();
-			auditManager.audit(null, "created ssh key for account \"" + sshKey.getOwner().getName() + "\" via RESTful API", null, newAuditContent);
+			auditManager.audit(null, "created ssh key in account \"" + sshKey.getOwner().getName() + "\" via RESTful API", null, newAuditContent);
 		}
     	return sshKey.getId();
 	}
@@ -78,7 +78,7 @@ public class SshKeyResource {
 		sshKeyManager.delete(sshKey);
 		if (!getAuthUser().equals(sshKey.getOwner())) {
 			var oldAuditContent = VersionedXmlDoc.fromBean(sshKey).toXML();
-			auditManager.audit(null, "deleted ssh key for account \"" + sshKey.getOwner().getName() + "\" via RESTful API", oldAuditContent, null);
+			auditManager.audit(null, "deleted ssh key from account \"" + sshKey.getOwner().getName() + "\" via RESTful API", oldAuditContent, null);
 		}
 		return Response.ok().build();
 	}

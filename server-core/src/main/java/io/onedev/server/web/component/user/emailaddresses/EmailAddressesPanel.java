@@ -102,7 +102,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 											var emailAddress = getEmailAddressManager().load(emailAddressId);
 											getEmailAddressManager().setAsPrimary(emailAddress);
 											if (getPage() instanceof UserPage)
-												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as primary for account \"" + getUser().getName() + "\"", null, null);
+												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as primary in account \"" + getUser().getName() + "\"", null, null);
 										}
 										
 									};
@@ -127,7 +127,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 											var emailAddress = getEmailAddressManager().load(emailAddressId);
 											getEmailAddressManager().useForGitOperations(emailAddress);
 											if (getPage() instanceof UserPage)
-												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" for git operations for account \"" + getUser().getName() + "\"", null, null);
+												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" for git operations in account \"" + getUser().getName() + "\"", null, null);
 										}
 										
 									};
@@ -152,7 +152,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 											var emailAddress = getEmailAddressManager().load(emailAddressId);
 											getEmailAddressManager().setAsPublic(emailAddress);
 											if (getPage() instanceof UserPage)
-												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as public for account \"" + getUser().getName() + "\"", null, null);
+												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as public in account \"" + getUser().getName() + "\"", null, null);
 										}
 										
 									};
@@ -176,7 +176,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 											var emailAddress = getEmailAddressManager().load(emailAddressId);
 											getEmailAddressManager().setAsPrivate(emailAddress);
 											if (getPage() instanceof UserPage)
-												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as private for account \"" + getUser().getName() + "\"", null, null);
+												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as private in account \"" + getUser().getName() + "\"", null, null);
 										}
 										
 									};
@@ -232,7 +232,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 											var emailAddress = getEmailAddressManager().load(emailAddressId);
 											getEmailAddressManager().delete(emailAddress);
 											if (getPage() instanceof UserPage)
-												getAuditManager().audit(null, "deleted email address \"" + emailAddress.getValue() + "\" for account \"" + getUser().getName() + "\"", null, null);
+												getAuditManager().audit(null, "deleted email address \"" + emailAddress.getValue() + "\" from account \"" + getUser().getName() + "\"", null, null);
 										} else {
 											Session.get().warn(_T("At least one email address should be configured, please add a new one first"));
 										}
@@ -275,7 +275,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 						address.setVerificationCode(null);
 					getEmailAddressManager().create(address);
 					if (getPage() instanceof UserPage)
-						getAuditManager().audit(null, "added email address \"" + address.getValue() + "\" for account \"" + getUser().getName() + "\"", null, null);
+						getAuditManager().audit(null, "added email address \"" + address.getValue() + "\" in account \"" + getUser().getName() + "\"", null, null);
 					emailAddressValue = null;
 				}
 			}

@@ -38,7 +38,6 @@ import io.onedev.server.model.support.administration.authenticator.Authenticator
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.mailservice.MailService;
-import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
@@ -184,16 +183,7 @@ public class SettingResource {
 			throw new UnauthorizedException();
     	return settingManager.getSshSetting();
     }
-	
-	@Api(order=1400)
-	@Path("/sso-connectors")
-    @GET
-    public List<SsoConnector> getSsoConnectors() {
-    	if (!SecurityUtils.isAdministrator()) 
-			throw new UnauthorizedException();
-    	return settingManager.getSsoConnectors();
-    }
-	
+		
 	@Api(order=1450)
 	@Path("/contributed-settings")
     @GET
@@ -388,20 +378,7 @@ public class SettingResource {
 				oldAuditContent, VersionedXmlDoc.fromBean(sshSetting).toXML());
     	return Response.ok().build();
     }
-	
-	@Api(order=2700)
-	@Path("/sso-connectors")
-	@POST
-    public Response setSsoConnectors(@NotNull List<SsoConnector> ssoConnectors) {
-    	if (!SecurityUtils.isAdministrator()) 
-			throw new UnauthorizedException();
-		var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getSsoConnectors()).toXML();
-    	settingManager.saveSsoConnectors(ssoConnectors);
-		auditManager.audit(null, "changed sso connectors via RESTful API", 
-				oldAuditContent, VersionedXmlDoc.fromBean(ssoConnectors).toXML());
-    	return Response.ok().build();
-    }
-	
+		
 	private String getAuditContent(Map<String, ContributedAdministrationSetting> contributedSettings) {
 		var list = new ArrayList<ContributedAdministrationSetting>();
 		for (var entry: contributedSettings.entrySet())

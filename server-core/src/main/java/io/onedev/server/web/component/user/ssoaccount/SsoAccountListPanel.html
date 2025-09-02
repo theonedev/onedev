@@ -1,0 +1,12 @@
+<wicket:panel>
+    <div class="alert alert-light alert-notice mb-5">
+        <wicket:svg href="bulb" class="icon mr-2"></wicket:svg>
+        <wicket:t>Delete SSO account here to unlink user and SSO subject. Note that SSO subject with verified email address 
+            will be linked with user with same verified email address automatically
+        </wicket:t>
+    </div>
+    <table wicket:id="ssoAccounts" class="sso-accounts table table-hover"></table>
+    <wicket:fragment wicket:id="actionFrag">
+        <a wicket:id="delete" title="Delete" class="btn btn-xs btn-icon btn-light btn-hover-danger"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+    </wicket:fragment>
+</wicket:panel>

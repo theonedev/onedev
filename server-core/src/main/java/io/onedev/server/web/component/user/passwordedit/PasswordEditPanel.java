@@ -54,11 +54,11 @@ public class PasswordEditPanel extends GenericPanel<User> {
 				var auditManager = OneDev.getInstance(AuditManager.class);
 				if (getUser().getPassword() != null) {
 					if (getPage() instanceof UserPage)
-						auditManager.audit(null, "changed password for account \"" + getUser().getName() + "\"", null, null);
+						auditManager.audit(null, "changed password in account \"" + getUser().getName() + "\"", null, null);
 					Session.get().success(_T("Password has been changed"));
 				} else {
 					if (getPage() instanceof UserPage)
-						auditManager.audit(null, "created password for account \"" + getUser().getName() + "\"", null, null);
+						auditManager.audit(null, "created password in account \"" + getUser().getName() + "\"", null, null);
 					Session.get().success(_T("Password has been set"));
 				}
 					

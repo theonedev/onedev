@@ -20,6 +20,10 @@ public abstract class ActionTab extends Tab {
 		this.titleModel = titleModel;
 		this.iconModel = iconModel;
 	}
+
+	public ActionTab(IModel<String> titleModel) {
+		this(titleModel, null);
+	}
 	
 	protected final IModel<String> getTitleModel() {
 		return titleModel;

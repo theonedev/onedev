@@ -201,7 +201,7 @@ public class AuthenticatorPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, _T("External Authenticator"));
+		return new Label(componentId, _T("External Password Authenticator"));
 	}
 
 }

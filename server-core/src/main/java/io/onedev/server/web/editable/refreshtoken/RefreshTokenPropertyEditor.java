@@ -44,8 +44,8 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.page.security.OAuthCallbackPage;
 import io.onedev.server.annotation.RefreshToken;
-import io.onedev.server.web.page.simple.security.OAuthCallbackPage;
 
 public class RefreshTokenPropertyEditor extends PropertyEditor<String> {
 
@@ -151,7 +151,7 @@ public class RefreshTokenPropertyEditor extends PropertyEditor<String> {
 
 					URI tokenEndpoint = new URI(callback.getTokenEndpoint());
 
-					TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, codeGrant);
+					TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, null);
 					TokenResponse response = TokenResponse.parse(request.toHTTPRequest().send());
 
 					if (response.indicatesSuccess()) {

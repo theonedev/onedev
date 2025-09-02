@@ -60,14 +60,16 @@ import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
 import io.onedev.server.web.page.admin.sshserverkey.SshServerKeyPage;
-import io.onedev.server.web.page.admin.ssosetting.SsoConnectorListPage;
-import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
+import io.onedev.server.web.page.admin.ssosetting.NewSsoProviderPage;
+import io.onedev.server.web.page.admin.ssosetting.SsoProviderDetailPage;
+import io.onedev.server.web.page.admin.ssosetting.SsoProviderListPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
 import io.onedev.server.web.page.admin.usermanagement.InvitationListPage;
 import io.onedev.server.web.page.admin.usermanagement.NewInvitationPage;
 import io.onedev.server.web.page.admin.usermanagement.NewUserPage;
 import io.onedev.server.web.page.admin.usermanagement.UserListPage;
 import io.onedev.server.web.page.builds.BuildListPage;
+import io.onedev.server.web.page.error.PageNotFoundErrorPage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.help.MethodDetailPage;
 import io.onedev.server.web.page.help.ResourceDetailPage;
@@ -82,6 +84,7 @@ import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.querywatch.MyQueryWatchesPage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
+import io.onedev.server.web.page.my.ssoaccounts.MySsoAccountsPage;
 import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthenticationPage;
 import io.onedev.server.web.page.packs.PackListPage;
 import io.onedev.server.web.page.project.NewProjectPage;
@@ -148,15 +151,15 @@ import io.onedev.server.web.page.project.stats.code.CodeContribsPage;
 import io.onedev.server.web.page.project.stats.code.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.page.pullrequests.PullRequestListPage;
-import io.onedev.server.web.page.simple.error.PageNotFoundErrorPage;
-import io.onedev.server.web.page.simple.security.CreateUserFromInvitationPage;
-import io.onedev.server.web.page.simple.security.EmailAddressVerificationPage;
-import io.onedev.server.web.page.simple.security.LoginPage;
-import io.onedev.server.web.page.simple.security.LogoutPage;
-import io.onedev.server.web.page.simple.security.OAuthCallbackPage;
-import io.onedev.server.web.page.simple.security.PasswordResetPage;
-import io.onedev.server.web.page.simple.security.SignUpPage;
-import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
+import io.onedev.server.web.page.security.CreateUserFromInvitationPage;
+import io.onedev.server.web.page.security.EmailAddressVerificationPage;
+import io.onedev.server.web.page.security.LoginPage;
+import io.onedev.server.web.page.security.LogoutPage;
+import io.onedev.server.web.page.security.OAuthCallbackPage;
+import io.onedev.server.web.page.security.PasswordResetPage;
+import io.onedev.server.web.page.security.SignUpPage;
+import io.onedev.server.web.page.security.SsoProcessPage;
+import io.onedev.server.web.page.serverinit.ServerInitPage;
 import io.onedev.server.web.page.test.TestPage;
 import io.onedev.server.web.page.user.accesstoken.UserAccessTokensPage;
 import io.onedev.server.web.page.user.avatar.UserAvatarPage;
@@ -168,6 +171,7 @@ import io.onedev.server.web.page.user.password.UserPasswordPage;
 import io.onedev.server.web.page.user.profile.UserProfilePage;
 import io.onedev.server.web.page.user.querywatch.UserQueryWatchesPage;
 import io.onedev.server.web.page.user.sshkeys.UserSshKeysPage;
+import io.onedev.server.web.page.user.ssoaccounts.UserSsoAccountsPage;
 import io.onedev.server.web.page.user.twofactorauthentication.UserTwoFactorAuthenticationPage;
 import io.onedev.server.web.resource.AgentLibResourceReference;
 import io.onedev.server.web.resource.AgentLogResourceReference;
@@ -226,6 +230,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~my/gpg-keys", MyGpgKeysPage.class));
 		add(new BasePageMapper("~my/access-tokens", MyAccessTokensPage.class));
 		add(new BasePageMapper("~my/two-factor-authentication", MyTwoFactorAuthenticationPage.class));
+		add(new BasePageMapper("~my/sso-accounts", MySsoAccountsPage.class));
 		add(new BasePageMapper("~my/query-watches/#{tab}", MyQueryWatchesPage.class));
 	}
 
@@ -267,7 +272,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 				EmailAddressVerificationPage.class));
 		add(new BasePageMapper("~create-user-from-invitation/${emailAddress}/${invitationCode}", 
 				CreateUserFromInvitationPage.class));
-		add(new BasePageMapper(SsoProcessPage.MOUNT_PATH + "/${stage}/${connector}", SsoProcessPage.class));
+		add(new BasePageMapper(SsoProcessPage.MOUNT_PATH + "/${stage}/${provider}", SsoProcessPage.class));
 		add(new BasePageMapper(OAuthCallbackPage.MOUNT_PATH, OAuthCallbackPage.class));
 	}
  	
@@ -284,6 +289,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~users/${user}/gpg-keys", UserGpgKeysPage.class));
 		add(new BasePageMapper("~users/${user}/access-tokens", UserAccessTokensPage.class));
 		add(new BasePageMapper("~users/${user}/two-factor-authentication", UserTwoFactorAuthenticationPage.class));
+		add(new BasePageMapper("~users/${user}/sso-accounts", UserSsoAccountsPage.class));
 		add(new BasePageMapper("~users/${user}/query-watches/#{tab}", UserQueryWatchesPage.class));		
 	}
 
@@ -342,7 +348,9 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/settings/performance", PerformanceSettingPage.class));
 		add(new BasePageMapper("~administration/settings/backup", DatabaseBackupPage.class));
 		add(new BasePageMapper("~administration/settings/authenticator", AuthenticatorPage.class));
-		add(new BasePageMapper("~administration/settings/sso-connectors", SsoConnectorListPage.class));
+		add(new BasePageMapper("~administration/settings/sso-providers", SsoProviderListPage.class));
+		add(new BasePageMapper("~administration/settings/sso-providers/new", NewSsoProviderPage.class));
+		add(new BasePageMapper("~administration/settings/sso-providers/${provider}", SsoProviderDetailPage.class));
 		add(new BasePageMapper("~administration/settings/ssh-server-key", SshServerKeyPage.class));
  		add(new BasePageMapper("~administration/settings/gpg-signing-key", GpgSigningKeyPage.class));
  		add(new BasePageMapper("~administration/settings/gpg-trusted-keys", GpgTrustedKeysPage.class));

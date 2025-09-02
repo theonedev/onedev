@@ -1,6 +1,12 @@
 <wicket:extend>
 	<div class="card">
 		<div class="card-body">
+			<div class="alert alert-light alert-notice mb-5">
+				<wicket:svg href="bulb" class="icon mr-2"></wicket:svg>
+				<wicket:t>When login via OneDev's built-in form, submitted user credentials can be checked against 
+					authenticator defined here, besides the internal database
+				</wicket:t>
+			</div>
 			<form wicket:id="authenticator" class="authenticator leave-confirm">
 				<div wicket:id="editor" class="mb-5"></div>
 				<button wicket:id="save" class="btn btn-primary dirty-aware mr-3"><wicket:t>Save Settings</wicket:t></button>
