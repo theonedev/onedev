@@ -373,7 +373,6 @@ public class PullRequestResource {
 		var autoMerge = new AutoMerge();
 		autoMerge.setEnabled(data.isEnabled());
 		autoMerge.setCommitMessage(data.getCommitMessage());
-		autoMerge.setUser(user);
 		var errorMessage = request.checkMergeCommitMessage(user, autoMerge.getCommitMessage());
 		if (errorMessage != null)
 			throw new NotAcceptableException("Error validating auto merge commit message: " + errorMessage);

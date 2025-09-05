@@ -502,10 +502,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		if (request.isOpen()) {
 			var autoMerge = request.getAutoMerge();
 			if (autoMerge.isEnabled() && request.checkMergeCondition() == null) {
-				if (autoMerge.getUser() != null)
-					merge(autoMerge.getUser(), request, autoMerge.getCommitMessage());
-				else
-					throw new ExplicitException("Auto merge user not specified");
+				merge(userManager.getSystem(), request, autoMerge.getCommitMessage());
 			}
 		}
 	}

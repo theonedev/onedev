@@ -1308,7 +1308,8 @@ public class PullRequest extends ProjectBelonging
 						getBaseCommit().copy(), getLatestUpdate().getHeadCommit().copy(), new HashMap<>());
 			}
 			if (error == null && autoMerge.isEnabled()) {
-				var errorMessage = checkMergeCommitMessage(autoMerge.getUser(), autoMerge.getCommitMessage());
+				var system = OneDev.getInstance(UserManager.class).getSystem();
+				var errorMessage = checkMergeCommitMessage(system, autoMerge.getCommitMessage());
 				if (errorMessage != null)
 					error = new CommitMessageError(null, errorMessage);
 			}

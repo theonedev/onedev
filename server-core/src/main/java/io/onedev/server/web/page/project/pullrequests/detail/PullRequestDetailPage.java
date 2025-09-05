@@ -78,6 +78,7 @@ import io.onedev.server.entitymanager.PullRequestReactionManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.git.GitUtils;
@@ -1379,8 +1380,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					if (request.isMergeCommitMessageRequired()) {
 						tipsContainer = new Fragment("tips", "autoMergeEnabledWithPresetCommitMessageFrag", PullRequestDetailPage.this);					
 						WebMarkupContainer link;
-						if (SecurityUtils.canManagePullRequests(getProject())
-								|| autoMerge.getUser() != null && autoMerge.getUser().equals(SecurityUtils.getUser())) {
+						if (SecurityUtils.canModifyPullRequest(getPullRequest()) && SecurityUtils.canWriteCode(getProject())) {
 							link = new AjaxLink<Void>("commitMessage") {
 
 								@Override
@@ -1396,7 +1396,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 										@Override
 										protected String onSave(AjaxRequestTarget target, CommitMessageBean bean) {
 											var request = getPullRequest();
-											var branchProtection = getProject().getBranchProtection(request.getTargetBranch(), autoMerge.getUser());
+											var system = OneDev.getInstance(UserManager.class).getSystem();
+											var branchProtection = getProject().getBranchProtection(request.getTargetBranch(), system);
 											var errorMessage = branchProtection.checkCommitMessage(bean.getCommitMessage(),
 													request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
 											if (errorMessage != null) {
@@ -1502,7 +1503,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 								} else {
 									var autoMerge = new AutoMerge();
 									autoMerge.setEnabled(true);
-									autoMerge.setUser(user);
 									autoMerge.setCommitMessage(bean.getCommitMessage());
 									getPullRequestChangeManager().changeAutoMerge(getPullRequest(), autoMerge);
 									target.add(autoMergeContainer);
@@ -1523,12 +1523,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							}
 						};
 					} else {
-					 var autoMerge = new AutoMerge();
-					 autoMerge.setEnabled(true);
-					 autoMerge.setUser(SecurityUtils.getUser());
-					 autoMerge.setCommitMessage(request.getAutoMerge().getCommitMessage());
-					 getPullRequestChangeManager().changeAutoMerge(request, autoMerge);
-					 target.add(autoMergeContainer);
+						var autoMerge = new AutoMerge();
+						autoMerge.setEnabled(true);
+						autoMerge.setCommitMessage(request.getAutoMerge().getCommitMessage());
+						getPullRequestChangeManager().changeAutoMerge(request, autoMerge);
+						target.add(autoMergeContainer);
 					}
 				} else {
 					var autoMerge = new AutoMerge();

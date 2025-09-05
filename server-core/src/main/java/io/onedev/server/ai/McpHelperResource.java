@@ -1713,7 +1713,6 @@ public class McpHelperResource {
             var autoMerge = new AutoMerge();
             autoMerge.setEnabled(autoMergeEnabled);
             autoMerge.setCommitMessage(StringUtils.trimToNull((String) data.remove("autoMergeCommitMessage")));
-            autoMerge.setUser(user);
             var errorMessage = request.checkMergeCommitMessage(user, autoMerge.getCommitMessage());
             if (errorMessage != null) 
                 throw new NotAcceptableException("Error validating param auto merge commit message: " + errorMessage);

@@ -8193,6 +8193,14 @@ public class DataMigrator {
 				for (Element element : dom.getRootElement().elements()) {
 					groupIds.put(element.elementText("name").trim(), element.elementText("id").trim());
 				}
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var autoMergeUserElement = element.element("autoMerge").element("user");
+					if (autoMergeUserElement != null) 
+						autoMergeUserElement.detach();
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 
