@@ -18,6 +18,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToo
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -51,6 +52,35 @@ public class IssueTemplateListPage extends IssueSettingPage {
 	}
 
 	private DataTable<IssueTemplate, Void> templatesTable;
+	
+	private WebMarkupContainer newEditLink(String componentId, int templateIndex) {
+		return new ModalLink(componentId) {
+
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+				return new IssueTemplateEditPanel(id, templateIndex) {
+
+					@Override
+					protected void onSave(AjaxRequestTarget target) {
+						target.add(templatesTable);
+						modal.close();
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+					@Override
+					protected GlobalIssueSetting getSetting() {
+						return IssueTemplateListPage.this.getSetting();
+					}
+
+				};
+			}
+			
+		};		
+	}
 	
 	@Override
 	protected void onInitialize() {
@@ -112,13 +142,18 @@ public class IssueTemplateListPage extends IssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<IssueTemplate>> cellItem, String componentId, IModel<IssueTemplate> rowModel) {
+				int templateIndex = cellItem.findParent(LoopItem.class).getIndex();
+				var link = newEditLink("link", templateIndex);
 				String label;
 				IssueTemplate template = rowModel.getObject();
 				if (template.getIssueQuery() != null)
 					label = HtmlEscape.escapeHtml5(template.getIssueQuery());
 				else
 					label = "<i>All</i>";
-				cellItem.add(new Label(componentId, label).setEscapeModelStrings(false));
+				link.add(new Label("label", label).setEscapeModelStrings(false));
+				Fragment fragment = new Fragment(componentId, "nameColumnFrag", IssueTemplateListPage.this);
+				fragment.add(link);
+				cellItem.add(fragment);
 			}
 		});		
 		
@@ -128,32 +163,7 @@ public class IssueTemplateListPage extends IssueSettingPage {
 			public void populateItem(Item<ICellPopulator<IssueTemplate>> cellItem, String componentId, IModel<IssueTemplate> rowModel) {
 				int templateIndex = cellItem.findParent(LoopItem.class).getIndex();
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", IssueTemplateListPage.this);
-				fragment.add(new ModalLink("edit") {
-
-					@Override
-					protected Component newContent(String id, ModalPanel modal) {
-						return new IssueTemplateEditPanel(id, templateIndex) {
-
-							@Override
-							protected void onSave(AjaxRequestTarget target) {
-								target.add(templatesTable);
-								modal.close();
-							}
-
-							@Override
-							protected void onCancel(AjaxRequestTarget target) {
-								modal.close();
-							}
-
-							@Override
-							protected GlobalIssueSetting getSetting() {
-								return IssueTemplateListPage.this.getSetting();
-							}
-
-						};
-					}
-					
-				});
+				fragment.add(newEditLink("edit", templateIndex));
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override

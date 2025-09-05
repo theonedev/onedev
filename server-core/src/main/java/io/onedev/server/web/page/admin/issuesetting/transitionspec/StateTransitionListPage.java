@@ -17,6 +17,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolb
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -49,6 +50,35 @@ public class StateTransitionListPage extends IssueSettingPage {
 	
 	public StateTransitionListPage(PageParameters params) {
 		super(params);
+	}
+
+	private WebMarkupContainer newEditLink(String componentId, int transitionIndex) {
+		return new ModalLink(componentId) {
+
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+				return new TransitionEditPanel(id, transitionIndex) {
+
+					@Override
+					protected void onSave(AjaxRequestTarget target) {
+						target.add(transitionsTable);
+						modal.close();
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+					@Override
+					protected GlobalIssueSetting getSetting() {
+						return StateTransitionListPage.this.getSetting();
+					}
+
+				};
+			}
+
+		};
 	}
 
 	@Override
@@ -113,14 +143,18 @@ public class StateTransitionListPage extends IssueSettingPage {
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
 				TransitionSpec transition = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "descriptionFrag", StateTransitionListPage.this);
+				int transitionIndex = cellItem.findParent(LoopItem.class).getIndex();
+				var link = newEditLink("link", transitionIndex);
 				if (transition.getFromStates().isEmpty())
-					fragment.add(new Label("fromStates", _T("[Any state]")));
+					link.add(new Label("fromStates", _T("[Any state]")));
 				else					
-					fragment.add(new Label("fromStates", "[" + StringUtils.join(transition.getFromStates(), ",") + "]"));
+					link.add(new Label("fromStates", "[" + StringUtils.join(transition.getFromStates(), ",") + "]"));
 				if (transition.getToStates().isEmpty())
-					fragment.add(new Label("toStates", _T("[Any state]")));
+					link.add(new Label("toStates", _T("[Any state]")));
 				else
-					fragment.add(new Label("toStates", "[" + StringUtils.join(transition.getToStates(), ",") + "]"));
+					link.add(new Label("toStates", "[" + StringUtils.join(transition.getToStates(), ",") + "]"));
+
+				fragment.add(link);
 
 				fragment.add(new Label("when", MessageFormat.format(_T("When {0}"), transition.getTriggerDescription())));
 
@@ -140,32 +174,7 @@ public class StateTransitionListPage extends IssueSettingPage {
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
 				int transitionIndex = cellItem.findParent(LoopItem.class).getIndex();
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", StateTransitionListPage.this);
-				fragment.add(new ModalLink("edit") {
-
-					@Override
-					protected Component newContent(String id, ModalPanel modal) {
-						return new TransitionEditPanel(id, transitionIndex) {
-
-							@Override
-							protected void onSave(AjaxRequestTarget target) {
-								target.add(transitionsTable);
-								modal.close();
-							}
-
-							@Override
-							protected void onCancel(AjaxRequestTarget target) {
-								modal.close();
-							}
-
-							@Override
-							protected GlobalIssueSetting getSetting() {
-								return StateTransitionListPage.this.getSetting();
-							}
-
-						};
-					}
-
-				});
+				fragment.add(newEditLink("edit", transitionIndex));
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override

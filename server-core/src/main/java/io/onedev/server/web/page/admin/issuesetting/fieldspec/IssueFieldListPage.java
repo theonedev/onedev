@@ -19,6 +19,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToo
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -115,7 +116,12 @@ public class IssueFieldListPage extends IssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getName()));
+				Fragment fragment = new Fragment(componentId, "nameColumnFrag", IssueFieldListPage.this);
+				int fieldIndex = cellItem.findParent(LoopItem.class).getIndex();
+				var link = newEditLink("link", fieldIndex);
+				link.add(new Label("label", rowModel.getObject().getName()));
+				fragment.add(link);
+				cellItem.add(fragment);
 			}
 		});		
 		
@@ -134,32 +140,7 @@ public class IssueFieldListPage extends IssueSettingPage {
 			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
 				int fieldIndex = cellItem.findParent(LoopItem.class).getIndex();
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", IssueFieldListPage.this);
-				fragment.add(new ModalLink("edit") {
-	
-					@Override
-					protected Component newContent(String id, ModalPanel modal) {
-						return new FieldEditPanel(id, fieldIndex) {
-	
-							@Override
-							protected void onSave(AjaxRequestTarget target) {
-								target.add(fieldsTable);
-								modal.close();
-							}
-	
-							@Override
-							protected void onCancel(AjaxRequestTarget target) {
-								modal.close();
-							}
-	
-							@Override
-							protected GlobalIssueSetting getSetting() {
-								return IssueFieldListPage.this.getSetting();
-							}
-	
-						};
-					}
-					
-				});
+				fragment.add(newEditLink("edit", fieldIndex));
 				fragment.add(new AjaxLink<Void>("delete") {
 	
 					@Override
@@ -221,6 +202,35 @@ public class IssueFieldListPage extends IssueSettingPage {
 		}.sortable("tbody"));
 	}
 	
+	private WebMarkupContainer newEditLink(String componentId, int fieldIndex) {
+		return new ModalLink(componentId) {
+		
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+				return new FieldEditPanel(id, fieldIndex) {
+
+					@Override
+					protected void onSave(AjaxRequestTarget target) {
+						target.add(fieldsTable);
+						modal.close();
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+					@Override
+					protected GlobalIssueSetting getSetting() {
+						return IssueFieldListPage.this.getSetting();
+					}
+
+				};
+			}
+			
+		};
+	}
+
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

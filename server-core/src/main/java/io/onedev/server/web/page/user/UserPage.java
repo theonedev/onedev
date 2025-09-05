@@ -99,7 +99,7 @@ public abstract class UserPage extends LayoutPage implements UserAware {
 			if (!getUser().isServiceAccount() && getUser().isEnforce2FA())
 				tabs.add(new PageTab(Model.of(_T("Two-factor Authentication")), Model.of("shield"), UserTwoFactorAuthenticationPage.class, params));
 			if (!getUser().isServiceAccount()) {
-				tabs.add(new PageTab(Model.of(_T("SSO Accounts")), Model.of("bell"), UserSsoAccountsPage.class, params));
+				tabs.add(new PageTab(Model.of(_T("SSO Accounts")), Model.of("user"), UserSsoAccountsPage.class, params));
 				tabs.add(new PageTab(Model.of(_T("Query Watches")), Model.of("bell"), UserQueryWatchesPage.class, params));
 			}
 		}

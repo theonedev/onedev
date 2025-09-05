@@ -304,8 +304,6 @@ public abstract class FieldSpec extends InputSpec {
 			ComponentContext.push(new ComponentContext(new PropertyComponent()));
 			try {
 				runScripts();
-			} catch (Exception e) {
-				e.printStackTrace();
 			} finally {
 				ComponentContext.pop();
 			}

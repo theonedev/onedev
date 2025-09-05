@@ -16,6 +16,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolb
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -48,6 +49,34 @@ public class DefaultBoardListPage extends IssueSettingPage {
 	
 	public DefaultBoardListPage(PageParameters params) {
 		super(params);
+	}
+
+	private WebMarkupContainer newEditLink(String componentId, int boardIndex) {
+		return new ModalLink(componentId) {
+
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+				var oldAuditContent = VersionedXmlDoc.fromBean(getSetting().getBoardSpecs().get(boardIndex)).toXML();
+				return new BoardEditPanel(id, getSetting().getBoardSpecs(), boardIndex) {
+
+					@Override
+					protected void onSave(AjaxRequestTarget target, BoardSpec board) {
+						var newAuditContent = VersionedXmlDoc.fromBean(board).toXML();
+						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+						getAuditManager().audit(null, "changed default issue board \"" + board.getName() + "\"", oldAuditContent, newAuditContent);
+						target.add(boardsTable);
+						modal.close();
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+				};
+			}
+			
+		};		
 	}
 
 	@Override
@@ -108,7 +137,12 @@ public class DefaultBoardListPage extends IssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<BoardSpec>> cellItem, String componentId, IModel<BoardSpec> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getName()));
+				var fragment = new Fragment(componentId, "nameColumnFrag", DefaultBoardListPage.this);
+				int boardIndex = cellItem.findParent(LoopItem.class).getIndex();
+				var link = newEditLink("link", boardIndex);
+				link.add(new Label("label", rowModel.getObject().getName()));
+				fragment.add(link);
+				cellItem.add(fragment);
 			}
 		});		
 		
@@ -144,31 +178,8 @@ public class DefaultBoardListPage extends IssueSettingPage {
 				int boardIndex = cellItem.findParent(LoopItem.class).getIndex();
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", DefaultBoardListPage.this);
 
-				fragment.add(new ModalLink("edit") {
-
-					@Override
-					protected Component newContent(String id, ModalPanel modal) {
-						var oldAuditContent = VersionedXmlDoc.fromBean(getSetting().getBoardSpecs().get(boardIndex)).toXML();
-						return new BoardEditPanel(id, getSetting().getBoardSpecs(), boardIndex) {
-
-							@Override
-							protected void onSave(AjaxRequestTarget target, BoardSpec board) {
-								var newAuditContent = VersionedXmlDoc.fromBean(board).toXML();
-								OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-								getAuditManager().audit(null, "changed default issue board \"" + board.getName() + "\"", oldAuditContent, newAuditContent);
-								target.add(boardsTable);
-								modal.close();
-							}
-
-							@Override
-							protected void onCancel(AjaxRequestTarget target) {
-								modal.close();
-							}
-
-						};
-					}
-					
-				});
+				fragment.add(newEditLink("edit", boardIndex));
+				
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override

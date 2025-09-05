@@ -381,7 +381,7 @@ public class SsoProcessPage extends SimplePage {
 
 	@Override
 	protected String getSubTitle() {
-		return _T("Please tell how to set up your SSO account");
+		return _T("Connect with your SSO account");
 	}
 	
 	private TransactionManager getTransactionManager() {

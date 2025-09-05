@@ -16,6 +16,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolb
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -48,6 +49,30 @@ public class LinkSpecListPage extends IssueSettingPage {
 
 	private DataTable<LinkSpec, Void> linksTable;
 	
+	private WebMarkupContainer newEditLink(String componentId, IModel<LinkSpec> model) {
+		return new ModalLink(componentId) {
+
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+				return new LinkSpecEditPanel(id, model) {
+
+					@Override
+					protected void onSave(AjaxRequestTarget target) {
+						target.add(linksTable);
+						modal.close();
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+				};
+			}
+			
+		};
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -103,8 +128,11 @@ public class LinkSpecListPage extends IssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<LinkSpec>> cellItem, String componentId, IModel<LinkSpec> rowModel) {
-				LinkSpec link = rowModel.getObject();
-				cellItem.add(new Label(componentId, link.getName()));
+				var fragment = new Fragment(componentId, "nameColumnFrag", LinkSpecListPage.this);
+				var link = newEditLink("link", rowModel);
+				link.add(new Label("label", rowModel.getObject().getName()));
+				fragment.add(link);
+				cellItem.add(fragment);
 			}
 		});		
 		
@@ -125,28 +153,9 @@ public class LinkSpecListPage extends IssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<LinkSpec>> cellItem, String componentId, IModel<LinkSpec> rowModel) {
-				Fragment fragment = new Fragment(componentId, "linkActionsFrag", LinkSpecListPage.this);
-				fragment.add(new ModalLink("edit") {
-
-					@Override
-					protected Component newContent(String id, ModalPanel modal) {
-						return new LinkSpecEditPanel(id, rowModel) {
-
-							@Override
-							protected void onSave(AjaxRequestTarget target) {
-								target.add(linksTable);
-								modal.close();
-							}
-
-							@Override
-							protected void onCancel(AjaxRequestTarget target) {
-								modal.close();
-							}
-
-						};
-					}
-					
-				});
+				Fragment fragment = new Fragment(componentId, "actionColumnFrag", LinkSpecListPage.this);
+				fragment.add(newEditLink("edit", rowModel));
+				
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override

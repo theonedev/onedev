@@ -16,6 +16,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolb
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -52,6 +53,35 @@ public class GroovyScriptListPage extends AdministrationPage {
 
 	private DataTable<GroovyScript, Void> scriptsTable;
 	
+	private WebMarkupContainer newEditLink(String componentId, int scriptIndex) {
+		return new ModalLink(componentId) {
+
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+				return new GroovyScriptEditPanel(id, scriptIndex) {
+
+					@Override
+					protected void onSave(AjaxRequestTarget target) {
+						target.add(scriptsTable);
+						modal.close();
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+					@Override
+					protected List<GroovyScript> getScripts() {
+						return scripts;
+					}
+
+				};
+			}
+
+		};		
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -112,7 +142,12 @@ public class GroovyScriptListPage extends AdministrationPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getName()));
+				var fragment = new Fragment(componentId, "nameColumn", GroovyScriptListPage.this);
+				int scriptIndex = cellItem.findParent(LoopItem.class).getIndex();
+				var link = newEditLink("link", scriptIndex);
+				link.add(new Label("label", rowModel.getObject().getName()));
+				fragment.add(link);
+				cellItem.add(fragment);
 			}
 		});
 		columns.add(new AbstractColumn<>(Model.of(_T("Can Be Used By Jobs"))) {
@@ -145,32 +180,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 				int scriptIndex = cellItem.findParent(LoopItem.class).getIndex();
 
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", GroovyScriptListPage.this);
-				fragment.add(new ModalLink("edit") {
-
-					@Override
-					protected Component newContent(String id, ModalPanel modal) {
-						return new GroovyScriptEditPanel(id, scriptIndex) {
-
-							@Override
-							protected void onSave(AjaxRequestTarget target) {
-								target.add(scriptsTable);
-								modal.close();
-							}
-
-							@Override
-							protected void onCancel(AjaxRequestTarget target) {
-								modal.close();
-							}
-
-							@Override
-							protected List<GroovyScript> getScripts() {
-								return scripts;
-							}
-
-						};
-					}
-
-				});
+				fragment.add(newEditLink("edit", scriptIndex));
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
