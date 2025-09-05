@@ -72,16 +72,11 @@ public class SetupCacheStep extends Step {
 	public void setLoadKeys(List<String> loadKeys) {
 		this.loadKeys = loadKeys;
 	}
-	
-	@SuppressWarnings("unused")
-	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, true, true, false);
-	}
-	
+		
 	@Editable(order=300, name="Cache Paths", description = "For docker aware executors, this path is inside container, " +
 			"and accepts both absolute path and relative path (relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>). " +
 			"For shell related executors which runs on host machine directly, only relative path is accepted")
-	@Interpolative(variableSuggester="suggestStaticVariables")
+	@Interpolative(variableSuggester="suggestVariables")
 	@Size(min=1, max=100)
 	public List<String> getPaths() {
 		return paths;
@@ -107,7 +102,7 @@ public class SetupCacheStep extends Step {
 	@Editable(order=425, description = "Optionally specify files relative to cache path to ignore when " +
 			"detect cache changes. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. " +
 			"Multiple files should be separated by space, and single file containing space should be quoted")
-	@Interpolative(variableSuggester="suggestStaticVariables")
+	@Interpolative(variableSuggester="suggestVariables")
 	@ShowCondition("isUploadIfChanged")
 	public String getChangeDetectionExcludes() {
 		return changeDetectionExcludes;
@@ -134,7 +129,7 @@ public class SetupCacheStep extends Step {
 	}
 
 	@SuppressWarnings("unused")
-	private static List<InputSuggestion> suggestStaticVariables(String matchWith) {
+	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, true, false, false);
 	}
 	
