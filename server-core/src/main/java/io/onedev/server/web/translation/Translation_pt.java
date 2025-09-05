@@ -99,10 +99,8 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"Uma <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>expressão regular Java</a> para validar o rodapé da mensagem de commit");
 		m.put("A child project with name \"{0}\" already exists under \"{1}\"", "Um projeto filho com o nome \"{0}\" já existe sob \"{1}\"");
-		m.put("A public email is required", "Um e-mail público é necessário");
 		m.put("A pull request is open for this change", "Um pull request está aberto para esta alteração");
 		m.put("A root project with name \"{0}\" already exists", "Um projeto raiz com o nome \"{0}\" já existe");
-		m.put("A verified primary email address is required", "Um endereço de e-mail principal verificado é necessário");
 		m.put("A {0} used as body of address verification email", "Um {0} usado como corpo do e-mail de verificação de endereço");
 		m.put("A {0} used as body of build notification email", "Um {0} usado como corpo do e-mail de notificação de build");
 		m.put("A {0} used as body of commit notification email", "Um {0} usado como corpo do e-mail de notificação de commit");
@@ -767,7 +765,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Confirm password here", "Confirme a senha aqui");
 		m.put("Confirm your action", "Confirme sua ação");
 		m.put("Connect New Agent", "Conectar Novo Agente");
-		m.put("Connector", "Conector");
 		m.put("Contact Email", "Email de Contato");
 		m.put("Contact Name", "Nome de Contato");
 		m.put("Container Image", "Imagem do Container");
@@ -807,7 +804,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Create Branch Bean With Revision", "Bean de Criação de Branch com Revisão");
 		m.put("Create Child Project", "Criar Projeto Filho");
 		m.put("Create Child Projects", "Criar Projetos Filhos");
-		m.put("Create Group", "Criar Grupo");
 		m.put("Create Issue", "Criar Problema");
 		m.put("Create Iteration", "Criar Iteração");
 		m.put("Create Merge Commit", "Criar Commit de Mesclagem");
@@ -934,12 +930,10 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Delete this branch", "Excluir esta branch");
 		m.put("Delete this executor", "Excluir este executor");
 		m.put("Delete this field", "Excluir este campo");
-		m.put("Delete this group", "Excluir este grupo");
 		m.put("Delete this import", "Excluir esta importação");
 		m.put("Delete this iteration", "Excluir esta iteração");
 		m.put("Delete this key", "Excluir esta chave");
 		m.put("Delete this link", "Excluir este link");
-		m.put("Delete this role", "Excluir este papel");
 		m.put("Delete this rule", "Excluir esta regra");
 		m.put("Delete this secret", "Excluir este segredo");
 		m.put("Delete this state", "Excluir este estado");
@@ -1019,7 +1013,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Do you really want to delete this build?", "Você realmente deseja excluir esta build?");
 		m.put("Do you really want to delete this code comment and all its replies?", "Você realmente deseja excluir este comentário de código e todas as suas respostas?");
 		m.put("Do you really want to delete this code comment?", "Você realmente deseja excluir este comentário de código?");
-		m.put("Do you really want to delete this connector?", "Você realmente deseja excluir este conector?");
 		m.put("Do you really want to delete this directory?", "Você realmente deseja excluir este diretório?");
 		m.put("Do you really want to delete this email address?", "Você realmente deseja excluir este endereço de e-mail?");
 		m.put("Do you really want to delete this executor?", "Você realmente deseja excluir este executor?");
@@ -1236,8 +1229,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Export XLSX", "Exportar XLSX");
 		m.put("Export as OCI layout", "Exportar como layout OCI");
 		m.put("Extend Trial Subscription", "Estender Assinatura de Avaliação");
-		m.put("External Auth Source", "Fonte de Autenticação Externa");
-		m.put("External Authenticator", "Autenticador Externo");
 		m.put("External Issue Transformers", "Transformadores de Problemas Externos");
 		m.put("External Participants", "Participantes Externos");
 		m.put("External System", "Sistema Externo");
@@ -1540,7 +1531,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Image URL should be specified", "URL da Imagem deve ser especificado");
 		m.put("Imap Ssl Setting", "Configuração de SSL do IMAP");
 		m.put("Imap With Ssl", "IMAP com SSL");
-		m.put("Impersonate this user", "Personificar este usuário");
 		m.put("Implicit SSL", "SSL Implícito");
 		m.put("Import", "Importar");
 		m.put("Import All Projects", "Importar Todos os Projetos");
@@ -1971,7 +1961,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("More Settings", "Mais Configurações");
 		m.put("More commits", "Mais commits");
 		m.put("More info", "Mais informações");
-		m.put("More info about this property", "Mais informações sobre esta propriedade");
 		m.put("More operations", "Mais operações");
 		m.put("Most branch coverage", "Maior cobertura de branch");
 		m.put("Most line coverage", "Maior cobertura de linha");
@@ -2006,7 +1995,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Name of the link", "Nome do link");
 		m.put("Name of the link on the other side. For instance if name is <tt>sub issues</tt>, name on the other side can be <tt>parent issue</tt>", 
 			"Nome do link do outro lado. Por exemplo, se o nome for <tt>sub issues</tt>, o nome do outro lado pode ser <tt>parent issue</tt>");
-		m.put("Name of the provider will be displayed on login button", "O nome do provedor será exibido no botão de login");
 		m.put("Name of the provider will serve two purpose: <ul><li>Display on login button<li>Form the authorization callback url which will be <i>&lt;server url&gt;/~sso/callback/&lt;name&gt;</i></ul>", 
 			"O nome do provedor terá dois propósitos: <ul><li>Exibir no botão de login<li>Formar a URL de callback de autorização que será <i>&lt;server url&gt;/~sso/callback/&lt;name&gt;</i></ul>");
 		m.put("Name reversely", "Nome inversamente");
@@ -2096,7 +2084,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("No diffs to navigate", "Sem diferenças para navegar");
 		m.put("No directories to skip", "Sem diretórios para ignorar");
 		m.put("No executors defined. Jobs will use auto-discovered executors instead", "Nenhum executor definido. Os trabalhos usarão executores descobertos automaticamente");
-		m.put("No external authenticator", "Sem autenticador externo");
 		m.put("No fields to prompt", "Sem campos para solicitar");
 		m.put("No fields to remove", "Sem campos para remover");
 		m.put("No file attachments", "Sem anexos de arquivo");
@@ -2202,7 +2189,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("OAuth2 Client information | CLIENT SECRET", "Informações do Cliente OAuth2 | CLIENT SECRET");
 		m.put("OCI Layout Directory", "Diretório de Layout OCI");
 		m.put("OIDC error: Inconsistent sub in ID token and userinfo", "Erro OIDC: Sub inconsistente no token ID e userinfo");
-		m.put("OIDC error: No email claim returned", "Erro OIDC: Nenhuma reivindicação de email retornada");
 		m.put("OOPS! There Is An Error", "OOPS! Há Um Erro");
 		m.put("OPEN", "ABERTO");
 		m.put("OS", "Sistema Operacional");
@@ -3255,7 +3241,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Signing Key ID", "ID da Chave de Assinatura");
 		m.put("Similar Issues", "Questões Similares");
 		m.put("Single Sign On", "Login Único");
-		m.put("Single Sign On Provider", "Provedor de Login Único");
 		m.put("Single sign on via discord.com", "Login único via discord.com");
 		m.put("Single sign on via twitch.tv", "Login único via twitch.tv");
 		m.put("Site", "Site");
@@ -3645,8 +3630,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Ssh Setting", "Configuração Ssh");
 		m.put("Ssl Setting", "Configuração Ssl");
 		m.put("Sso Connector", "Conector Sso");
-		m.put("Sso Connector Bean", "Bean do Conector Sso");
-		m.put("Sso connectors", "Conectores Sso");
 		m.put("Start At", "Iniciar Em");
 		m.put("Start Date", "Data de Início");
 		m.put("Start Page", "Página Inicial");
@@ -4056,7 +4039,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Unable to create protected tag", "Não foi possível criar tag protegida");
 		m.put("Unable to diff as some line is too long.", "Não foi possível gerar diff, pois alguma linha é muito longa.");
 		m.put("Unable to diff as the file is too large.", "Não foi possível gerar diff, pois o arquivo é muito grande.");
-		m.put("Unable to find SSO connector: ", "Não foi possível encontrar o conector SSO:");
 		m.put("Unable to find agent {0}", "Não foi possível encontrar o agente {0}");
 		m.put("Unable to find build #{0} in project {1}", "Não foi possível encontrar a build #{0} no projeto {1}");
 		m.put("Unable to find commit to import build spec (import project: {0}, import revision: {1})", 
@@ -4590,6 +4572,40 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("Account is disabled", "Conta está desativada");
+		m.put("Connect with your SSO account", "Conecte-se com sua conta SSO");
+		m.put("Create New User", "Criar Novo Usuário");
+		m.put("Delete SSO account here to reconnect corresponding SSO subject upon next login. Note that SSO subject with verified email will be connected to user with same verified email automatically", 
+			"Exclua a conta SSO aqui para reconectar o sujeito SSO correspondente no próximo login. Note que o sujeito SSO com email verificado será conectado ao usuário com o mesmo email verificado automaticamente");
+		m.put("Do you really want to delete SSO provider \"{0}\"?", "Você realmente deseja excluir o provedor SSO \"{0}\"?");
+		m.put("Do you really want to delete this SSO account?", "Você realmente deseja excluir esta conta SSO?");
+		m.put("Email address \"{0}\" already used by another account", "Endereço de email \"{0}\" já utilizado por outra conta");
+		m.put("Email address \"{0}\" used by account \"{1}\"", "Endereço de email \"{0}\" utilizado pela conta \"{1}\"");
+		m.put("Email address \"{0}\" used by disabled account \"{1}\"", "Endereço de email \"{0}\" utilizado pela conta desativada \"{1}\"");
+		m.put("Error authenticating user", "Erro ao autenticar usuário");
+		m.put("External Authentication", "Autenticação Externa");
+		m.put("External Password Authenticator", "Autenticador de Senha Externa");
+		m.put("Impersonate", "Personificar");
+		m.put("Link Existing User", "Vincular Usuário Existente");
+		m.put("Link User Bean", "Vincular Usuário Bean");
+		m.put("My SSO Accounts", "Minhas Contas SSO");
+		m.put("No external password authenticator", "Nenhum autenticador de senha externa");
+		m.put("No external password authenticator to authenticate user \"{0}\"", "Nenhum autenticador de senha externa para autenticar o usuário \"{0}\"");
+		m.put("Only users able to authenticate via password can be linked", "Apenas usuários capazes de autenticar via senha podem ser vinculados");
+		m.put("Password Authenticator", "Autenticador de Senha");
+		m.put("Password of the user", "Senha do usuário");
+		m.put("SSO Accounts", "Contas SSO");
+		m.put("SSO Providers", "Provedores SSO");
+		m.put("SSO account deleted", "Conta SSO excluída");
+		m.put("SSO provider \"{0}\" deleted", "Provedor SSO \"{0}\" excluído");
+		m.put("SSO provider created", "Provedor SSO criado");
+		m.put("SSO provider updated", "Provedor SSO atualizado");
+		m.put("Service account not allowed to login", "Conta de serviço não permitida para login");
+		m.put("Single Sign-On", "Single Sign-On");
+		m.put("Sso Provider Bean", "Provedor Sso Bean");
+		m.put("Unable to find SSO provider: ", "Não foi possível encontrar o provedor SSO:");
+		m.put("When login via OneDev's built-in form, submitted user credentials can be checked against authenticator defined here, besides the internal database", 
+			"Ao fazer login via o formulário interno do OneDev, as credenciais do usuário enviadas podem ser verificadas contra o autenticador definido aqui, além do banco de dados interno");
 	}
 		
 	@Override

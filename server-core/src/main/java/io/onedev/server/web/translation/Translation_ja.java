@@ -99,10 +99,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"コミットメッセージのフッターを検証するための<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java正規表現</a>");
 		m.put("A child project with name \"{0}\" already exists under \"{1}\"", "\"{1}\" の下に \"{0}\" という名前の子プロジェクトがすでに存在します");
-		m.put("A public email is required", "公開メールが必要です");
 		m.put("A pull request is open for this change", "この変更に対するプルリクエストが開かれています");
 		m.put("A root project with name \"{0}\" already exists", "\"{0}\" という名前のルートプロジェクトがすでに存在します");
-		m.put("A verified primary email address is required", "確認済みの主要メールアドレスが必要です");
 		m.put("A {0} used as body of address verification email", "アドレス確認メールの本文として使用される {0}");
 		m.put("A {0} used as body of build notification email", "ビルド通知メールの本文として使用される {0}");
 		m.put("A {0} used as body of commit notification email", "コミット通知メールの本文として使用される {0}");
@@ -767,7 +765,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Confirm password here", "ここでパスワードを確認");
 		m.put("Confirm your action", "アクションを確認");
 		m.put("Connect New Agent", "新しいエージェントを接続");
-		m.put("Connector", "コネクタ");
 		m.put("Contact Email", "連絡先メール");
 		m.put("Contact Name", "連絡先名");
 		m.put("Container Image", "コンテナイメージ");
@@ -807,7 +804,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Create Branch Bean With Revision", "リビジョン付きブランチBeanを作成");
 		m.put("Create Child Project", "子プロジェクトを作成");
 		m.put("Create Child Projects", "子プロジェクトを作成");
-		m.put("Create Group", "グループを作成");
 		m.put("Create Issue", "課題を作成");
 		m.put("Create Iteration", "イテレーションを作成");
 		m.put("Create Merge Commit", "マージコミットを作成");
@@ -934,12 +930,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Delete this branch", "このブランチを削除");
 		m.put("Delete this executor", "このエグゼキューターを削除");
 		m.put("Delete this field", "このフィールドを削除");
-		m.put("Delete this group", "このグループを削除");
 		m.put("Delete this import", "このインポートを削除");
 		m.put("Delete this iteration", "このイテレーションを削除");
 		m.put("Delete this key", "このキーを削除");
 		m.put("Delete this link", "このリンクを削除");
-		m.put("Delete this role", "このロールを削除");
 		m.put("Delete this rule", "このルールを削除");
 		m.put("Delete this secret", "このシークレットを削除");
 		m.put("Delete this state", "この状態を削除");
@@ -1019,7 +1013,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Do you really want to delete this build?", "このビルドを本当に削除しますか？");
 		m.put("Do you really want to delete this code comment and all its replies?", "このコードコメントとそのすべての返信を本当に削除しますか？");
 		m.put("Do you really want to delete this code comment?", "このコードコメントを本当に削除しますか？");
-		m.put("Do you really want to delete this connector?", "このコネクタを本当に削除しますか？");
 		m.put("Do you really want to delete this directory?", "このディレクトリを本当に削除しますか？");
 		m.put("Do you really want to delete this email address?", "このメールアドレスを本当に削除しますか？");
 		m.put("Do you really want to delete this executor?", "本当にこのエグゼキュータを削除しますか？");
@@ -1236,8 +1229,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Export XLSX", "XLSXをエクスポート");
 		m.put("Export as OCI layout", "OCIレイアウトとしてエクスポート");
 		m.put("Extend Trial Subscription", "試用サブスクリプションを延長する");
-		m.put("External Auth Source", "外部認証ソース");
-		m.put("External Authenticator", "外部認証者");
 		m.put("External Issue Transformers", "外部問題トランスフォーマー");
 		m.put("External Participants", "外部参加者");
 		m.put("External System", "外部システム");
@@ -1540,7 +1531,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Image URL should be specified", "画像URLを指定する必要があります");
 		m.put("Imap Ssl Setting", "IMAP SSL設定");
 		m.put("Imap With Ssl", "IMAP SSL使用");
-		m.put("Impersonate this user", "このユーザーを偽装");
 		m.put("Implicit SSL", "暗黙的SSL");
 		m.put("Import", "インポート");
 		m.put("Import All Projects", "すべてのプロジェクトをインポート");
@@ -1971,7 +1961,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("More Settings", "その他の設定");
 		m.put("More commits", "さらにコミットを見る");
 		m.put("More info", "詳細情報");
-		m.put("More info about this property", "このプロパティに関する詳細情報");
 		m.put("More operations", "その他の操作");
 		m.put("Most branch coverage", "最もブランチカバレッジが高い");
 		m.put("Most line coverage", "最もラインカバレッジが高い");
@@ -2006,7 +1995,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Name of the link", "リンクの名前");
 		m.put("Name of the link on the other side. For instance if name is <tt>sub issues</tt>, name on the other side can be <tt>parent issue</tt>", 
 			"反対側のリンクの名前。例えば、名前が<tt>サブ課題</tt>の場合、反対側の名前は<tt>親課題</tt>になることがあります");
-		m.put("Name of the provider will be displayed on login button", "プロバイダーの名前はログインボタンに表示されます");
 		m.put("Name of the provider will serve two purpose: <ul><li>Display on login button<li>Form the authorization callback url which will be <i>&lt;server url&gt;/~sso/callback/&lt;name&gt;</i></ul>", 
 			"プロバイダーの名前は2つの目的を果たします: <ul><li>ログインボタンに表示<li>認証コールバックURLを形成します。これは<i>&lt;サーバーURL&gt;/~sso/callback/&lt;名前&gt;</i>になります</ul>");
 		m.put("Name reversely", "名前を逆に");
@@ -2096,7 +2084,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No diffs to navigate", "ナビゲートする差分なし");
 		m.put("No directories to skip", "スキップするディレクトリなし");
 		m.put("No executors defined. Jobs will use auto-discovered executors instead", "エグゼキュータが定義されていません。ジョブは自動検出されたエグゼキュータを使用します");
-		m.put("No external authenticator", "外部認証機関なし");
 		m.put("No fields to prompt", "プロンプトするフィールドなし");
 		m.put("No fields to remove", "削除するフィールドなし");
 		m.put("No file attachments", "ファイル添付なし");
@@ -2202,7 +2189,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("OAuth2 Client information | CLIENT SECRET", "OAuth2クライアント情報 | クライアントシークレット");
 		m.put("OCI Layout Directory", "OCIレイアウトディレクトリ");
 		m.put("OIDC error: Inconsistent sub in ID token and userinfo", "OIDCエラー: IDトークンとユーザー情報のサブが一致しません");
-		m.put("OIDC error: No email claim returned", "OIDCエラー: メールクレームが返されません");
 		m.put("OOPS! There Is An Error", "おっと！エラーがあります");
 		m.put("OPEN", "オープン");
 		m.put("OS", "OS");
@@ -3255,7 +3241,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Signing Key ID", "署名キーID");
 		m.put("Similar Issues", "類似の課題");
 		m.put("Single Sign On", "シングルサインオン");
-		m.put("Single Sign On Provider", "シングルサインオンプロバイダー");
 		m.put("Single sign on via discord.com", "discord.comを介したシングルサインオン");
 		m.put("Single sign on via twitch.tv", "twitch.tvを介したシングルサインオン");
 		m.put("Site", "サイト");
@@ -3645,8 +3630,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Ssh Setting", "Ssh設定");
 		m.put("Ssl Setting", "Ssl設定");
 		m.put("Sso Connector", "Ssoコネクタ");
-		m.put("Sso Connector Bean", "SsoコネクタBean");
-		m.put("Sso connectors", "Ssoコネクタ");
 		m.put("Start At", "開始時刻");
 		m.put("Start Date", "開始日");
 		m.put("Start Page", "開始ページ");
@@ -4056,7 +4039,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Unable to create protected tag", "保護されたタグを作成できません");
 		m.put("Unable to diff as some line is too long.", "一部の行が長すぎるため、差分を表示できません");
 		m.put("Unable to diff as the file is too large.", "ファイルが大きすぎるため、差分を表示できません");
-		m.put("Unable to find SSO connector: ", "SSOコネクタが見つかりません:");
 		m.put("Unable to find agent {0}", "エージェント{0}が見つかりません");
 		m.put("Unable to find build #{0} in project {1}", "プロジェクト{1}内でビルド#{0}が見つかりません");
 		m.put("Unable to find commit to import build spec (import project: {0}, import revision: {1})", 
@@ -4590,6 +4572,40 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("Account is disabled", "アカウントが無効になっています");
+		m.put("Connect with your SSO account", "SSOアカウントで接続");
+		m.put("Create New User", "新しいユーザーを作成");
+		m.put("Delete SSO account here to reconnect corresponding SSO subject upon next login. Note that SSO subject with verified email will be connected to user with same verified email automatically", 
+			"次回ログイン時に対応するSSOサブジェクトを再接続するためにここでSSOアカウントを削除します。確認済みのメールを持つSSOサブジェクトは、同じ確認済みメールを持つユーザーに自動的に接続されます");
+		m.put("Do you really want to delete SSO provider \"{0}\"?", "本当にSSOプロバイダー\"{0}\"を削除しますか？");
+		m.put("Do you really want to delete this SSO account?", "本当にこのSSOアカウントを削除しますか？");
+		m.put("Email address \"{0}\" already used by another account", "メールアドレス\"{0}\"は他のアカウントで既に使用されています");
+		m.put("Email address \"{0}\" used by account \"{1}\"", "メールアドレス\"{0}\"はアカウント\"{1}\"で使用されています");
+		m.put("Email address \"{0}\" used by disabled account \"{1}\"", "メールアドレス\"{0}\"は無効なアカウント\"{1}\"で使用されています");
+		m.put("Error authenticating user", "ユーザー認証エラー");
+		m.put("External Authentication", "外部認証");
+		m.put("External Password Authenticator", "外部パスワード認証");
+		m.put("Impersonate", "偽装");
+		m.put("Link Existing User", "既存ユーザーをリンク");
+		m.put("Link User Bean", "ユーザービーンをリンク");
+		m.put("My SSO Accounts", "私のSSOアカウント");
+		m.put("No external password authenticator", "外部パスワード認証がありません");
+		m.put("No external password authenticator to authenticate user \"{0}\"", "ユーザー\"{0}\"を認証する外部パスワード認証がありません");
+		m.put("Only users able to authenticate via password can be linked", "パスワードで認証できるユーザーのみリンク可能");
+		m.put("Password Authenticator", "パスワード認証");
+		m.put("Password of the user", "ユーザーのパスワード");
+		m.put("SSO Accounts", "SSOアカウント");
+		m.put("SSO Providers", "SSOプロバイダー");
+		m.put("SSO account deleted", "SSOアカウントが削除されました");
+		m.put("SSO provider \"{0}\" deleted", "SSOプロバイダー\"{0}\"が削除されました");
+		m.put("SSO provider created", "SSOプロバイダーが作成されました");
+		m.put("SSO provider updated", "SSOプロバイダーが更新されました");
+		m.put("Service account not allowed to login", "サービスアカウントはログインできません");
+		m.put("Single Sign-On", "シングルサインオン");
+		m.put("Sso Provider Bean", "Ssoプロバイダービーン");
+		m.put("Unable to find SSO provider: ", "SSOプロバイダーが見つかりません:");
+		m.put("When login via OneDev's built-in form, submitted user credentials can be checked against authenticator defined here, besides the internal database", 
+			"OneDevの組み込みフォームでログインする際、ここで定義された認証者に対して送信されたユーザー資格情報を内部データベースの他にチェックできます");
 	}
 		
 	@Override

@@ -99,10 +99,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"커밋 메시지 푸터를 검증하기 위한 <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java 정규 표현식</a>");
 		m.put("A child project with name \"{0}\" already exists under \"{1}\"", "\"{1}\" 아래에 이름이 \"{0}\"인 하위 프로젝트가 이미 존재합니다");
-		m.put("A public email is required", "공용 이메일이 필요합니다");
 		m.put("A pull request is open for this change", "이 변경에 대한 풀 리퀘스트가 열려 있습니다");
 		m.put("A root project with name \"{0}\" already exists", "이름이 \"{0}\"인 루트 프로젝트가 이미 존재합니다");
-		m.put("A verified primary email address is required", "확인된 기본 이메일 주소가 필요합니다");
 		m.put("A {0} used as body of address verification email", "주소 확인 이메일 본문으로 사용된 {0}");
 		m.put("A {0} used as body of build notification email", "빌드 알림 이메일 본문으로 사용된 {0}");
 		m.put("A {0} used as body of commit notification email", "커밋 알림 이메일 본문으로 사용된 {0}");
@@ -767,7 +765,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Confirm password here", "여기에서 비밀번호를 확인하세요");
 		m.put("Confirm your action", "작업을 확인하세요");
 		m.put("Connect New Agent", "새 에이전트 연결");
-		m.put("Connector", "커넥터");
 		m.put("Contact Email", "연락처 이메일");
 		m.put("Contact Name", "연락처 이름");
 		m.put("Container Image", "컨테이너 이미지");
@@ -807,7 +804,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Create Branch Bean With Revision", "수정본과 함께 브랜치 빈 생성");
 		m.put("Create Child Project", "하위 프로젝트 생성");
 		m.put("Create Child Projects", "하위 프로젝트들 생성");
-		m.put("Create Group", "그룹 생성");
 		m.put("Create Issue", "이슈 생성");
 		m.put("Create Iteration", "반복 생성");
 		m.put("Create Merge Commit", "병합 커밋 생성");
@@ -934,12 +930,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Delete this branch", "이 브랜치 삭제");
 		m.put("Delete this executor", "이 실행기 삭제");
 		m.put("Delete this field", "이 필드 삭제");
-		m.put("Delete this group", "이 그룹 삭제");
 		m.put("Delete this import", "이 가져오기 삭제");
 		m.put("Delete this iteration", "이 반복 삭제");
 		m.put("Delete this key", "이 키 삭제");
 		m.put("Delete this link", "이 링크 삭제");
-		m.put("Delete this role", "이 역할 삭제");
 		m.put("Delete this rule", "이 규칙 삭제");
 		m.put("Delete this secret", "이 비밀 삭제");
 		m.put("Delete this state", "이 상태 삭제");
@@ -1019,7 +1013,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Do you really want to delete this build?", "이 빌드를 정말 삭제하시겠습니까?");
 		m.put("Do you really want to delete this code comment and all its replies?", "이 코드 주석과 모든 답글을 정말 삭제하시겠습니까?");
 		m.put("Do you really want to delete this code comment?", "이 코드 주석을 정말 삭제하시겠습니까?");
-		m.put("Do you really want to delete this connector?", "이 커넥터를 정말 삭제하시겠습니까?");
 		m.put("Do you really want to delete this directory?", "이 디렉터리를 정말 삭제하시겠습니까?");
 		m.put("Do you really want to delete this email address?", "이 이메일 주소를 정말 삭제하시겠습니까?");
 		m.put("Do you really want to delete this executor?", "정말로 이 실행자를 삭제하시겠습니까?");
@@ -1236,8 +1229,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Export XLSX", "XLSX 내보내기");
 		m.put("Export as OCI layout", "OCI 레이아웃으로 내보내기");
 		m.put("Extend Trial Subscription", "체험 구독 연장");
-		m.put("External Auth Source", "외부 인증 소스");
-		m.put("External Authenticator", "외부 인증자");
 		m.put("External Issue Transformers", "외부 이슈 변환기들");
 		m.put("External Participants", "외부 참가자들");
 		m.put("External System", "외부 시스템");
@@ -1540,7 +1531,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Image URL should be specified", "이미지 URL을 지정해야 합니다");
 		m.put("Imap Ssl Setting", "IMAP SSL 설정");
 		m.put("Imap With Ssl", "IMAP SSL 사용");
-		m.put("Impersonate this user", "이 사용자로 가장하기");
 		m.put("Implicit SSL", "암시적 SSL");
 		m.put("Import", "가져오기");
 		m.put("Import All Projects", "모든 프로젝트 가져오기");
@@ -1971,7 +1961,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("More Settings", "더 많은 설정");
 		m.put("More commits", "더 많은 커밋");
 		m.put("More info", "더 많은 정보");
-		m.put("More info about this property", "이 속성에 대한 추가 정보");
 		m.put("More operations", "더 많은 작업");
 		m.put("Most branch coverage", "최대 브랜치 커버리지");
 		m.put("Most line coverage", "최대 라인 커버리지");
@@ -2006,7 +1995,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Name of the link", "링크의 이름");
 		m.put("Name of the link on the other side. For instance if name is <tt>sub issues</tt>, name on the other side can be <tt>parent issue</tt>", 
 			"다른 쪽의 링크 이름. 예를 들어 이름이 <tt>하위 이슈</tt>라면, 다른 쪽의 이름은 <tt>상위 이슈</tt>일 수 있습니다");
-		m.put("Name of the provider will be displayed on login button", "로그인 버튼에 표시될 제공자의 이름");
 		m.put("Name of the provider will serve two purpose: <ul><li>Display on login button<li>Form the authorization callback url which will be <i>&lt;server url&gt;/~sso/callback/&lt;name&gt;</i></ul>", 
 			"제공자의 이름은 두 가지 목적을 가집니다: <ul><li>로그인 버튼에 표시<li>인증 콜백 URL을 형성하며, 이는 <i>&lt;서버 URL&gt;/~sso/callback/&lt;name&gt;</i>입니다</ul>");
 		m.put("Name reversely", "이름 반대로");
@@ -2096,7 +2084,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No diffs to navigate", "탐색할 차이 없음");
 		m.put("No directories to skip", "건너뛸 디렉터리 없음");
 		m.put("No executors defined. Jobs will use auto-discovered executors instead", "정의된 실행자가 없습니다. 작업은 자동으로 검색된 실행자를 대신 사용합니다");
-		m.put("No external authenticator", "외부 인증자 없음");
 		m.put("No fields to prompt", "프롬프트할 필드 없음");
 		m.put("No fields to remove", "제거할 필드 없음");
 		m.put("No file attachments", "파일 첨부 없음");
@@ -2202,7 +2189,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("OAuth2 Client information | CLIENT SECRET", "OAuth2 클라이언트 정보 | CLIENT SECRET");
 		m.put("OCI Layout Directory", "OCI 레이아웃 디렉토리");
 		m.put("OIDC error: Inconsistent sub in ID token and userinfo", "OIDC 오류: ID 토큰과 사용자 정보의 하위가 일치하지 않음");
-		m.put("OIDC error: No email claim returned", "OIDC 오류: 이메일 클레임이 반환되지 않음");
 		m.put("OOPS! There Is An Error", "이런! 오류가 발생했습니다");
 		m.put("OPEN", "열림");
 		m.put("OS", "운영 체제");
@@ -3255,7 +3241,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Signing Key ID", "서명 키 ID");
 		m.put("Similar Issues", "유사한 이슈");
 		m.put("Single Sign On", "싱글 사인온");
-		m.put("Single Sign On Provider", "싱글 사인온 제공자");
 		m.put("Single sign on via discord.com", "discord.com을 통한 싱글 사인온");
 		m.put("Single sign on via twitch.tv", "twitch.tv를 통한 싱글 사인온");
 		m.put("Site", "사이트");
@@ -3645,8 +3630,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Ssh Setting", "Ssh 설정");
 		m.put("Ssl Setting", "Ssl 설정");
 		m.put("Sso Connector", "Sso 커넥터");
-		m.put("Sso Connector Bean", "Sso 커넥터 빈");
-		m.put("Sso connectors", "Sso 커넥터들");
 		m.put("Start At", "시작 시간");
 		m.put("Start Date", "시작 날짜");
 		m.put("Start Page", "시작 페이지");
@@ -4056,7 +4039,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Unable to create protected tag", "보호된 태그를 생성할 수 없습니다");
 		m.put("Unable to diff as some line is too long.", "일부 줄이 너무 길어 차이를 표시할 수 없습니다.");
 		m.put("Unable to diff as the file is too large.", "파일이 너무 커서 차이를 표시할 수 없습니다.");
-		m.put("Unable to find SSO connector: ", "SSO 커넥터를 찾을 수 없습니다:");
 		m.put("Unable to find agent {0}", "에이전트 {0}을(를) 찾을 수 없습니다");
 		m.put("Unable to find build #{0} in project {1}", "프로젝트 {1}에서 빌드 #{0}을(를) 찾을 수 없습니다");
 		m.put("Unable to find commit to import build spec (import project: {0}, import revision: {1})", 
@@ -4590,6 +4572,40 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("Account is disabled", "계정이 비활성화되었습니다");
+		m.put("Connect with your SSO account", "SSO 계정으로 연결");
+		m.put("Create New User", "새 사용자 생성");
+		m.put("Delete SSO account here to reconnect corresponding SSO subject upon next login. Note that SSO subject with verified email will be connected to user with same verified email automatically", 
+			"다음 로그인 시 해당 SSO 주제를 다시 연결하려면 여기서 SSO 계정을 삭제하세요. 인증된 이메일이 있는 SSO 주제는 동일한 인증된 이메일을 가진 사용자와 자동으로 연결됩니다");
+		m.put("Do you really want to delete SSO provider \"{0}\"?", "SSO 제공자 \"{0}\"를 정말로 삭제하시겠습니까?");
+		m.put("Do you really want to delete this SSO account?", "이 SSO 계정을 정말로 삭제하시겠습니까?");
+		m.put("Email address \"{0}\" already used by another account", "이메일 주소 \"{0}\"는 다른 계정에서 이미 사용 중입니다");
+		m.put("Email address \"{0}\" used by account \"{1}\"", "이메일 주소 \"{0}\"는 계정 \"{1}\"에서 사용 중입니다");
+		m.put("Email address \"{0}\" used by disabled account \"{1}\"", "이메일 주소 \"{0}\"는 비활성화된 계정 \"{1}\"에서 사용 중입니다");
+		m.put("Error authenticating user", "사용자 인증 오류");
+		m.put("External Authentication", "외부 인증");
+		m.put("External Password Authenticator", "외부 비밀번호 인증기");
+		m.put("Impersonate", "가장하다");
+		m.put("Link Existing User", "기존 사용자 연결");
+		m.put("Link User Bean", "사용자 빈 연결");
+		m.put("My SSO Accounts", "내 SSO 계정");
+		m.put("No external password authenticator", "외부 비밀번호 인증기 없음");
+		m.put("No external password authenticator to authenticate user \"{0}\"", "사용자 \"{0}\"를 인증할 외부 비밀번호 인증기가 없습니다");
+		m.put("Only users able to authenticate via password can be linked", "비밀번호로 인증할 수 있는 사용자만 연결할 수 있습니다");
+		m.put("Password Authenticator", "비밀번호 인증기");
+		m.put("Password of the user", "사용자의 비밀번호");
+		m.put("SSO Accounts", "SSO 계정");
+		m.put("SSO Providers", "SSO 제공자");
+		m.put("SSO account deleted", "SSO 계정이 삭제되었습니다");
+		m.put("SSO provider \"{0}\" deleted", "SSO 제공자 \"{0}\"가 삭제되었습니다");
+		m.put("SSO provider created", "SSO 제공자가 생성되었습니다");
+		m.put("SSO provider updated", "SSO 제공자가 업데이트되었습니다");
+		m.put("Service account not allowed to login", "서비스 계정은 로그인할 수 없습니다");
+		m.put("Single Sign-On", "싱글 사인온");
+		m.put("Sso Provider Bean", "Sso 제공자 빈");
+		m.put("Unable to find SSO provider: ", "SSO 제공자를 찾을 수 없습니다:");
+		m.put("When login via OneDev's built-in form, submitted user credentials can be checked against authenticator defined here, besides the internal database", 
+			"OneDev의 내장된 양식을 통해 로그인할 때, 제출된 사용자 자격 증명은 내부 데이터베이스 외에도 여기 정의된 인증기를 통해 확인할 수 있습니다");
 	}
 		
 	@Override

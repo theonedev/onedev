@@ -27,7 +27,9 @@ public class Translation_zh extends TranslationResourceBundle {
 			"'image' should be translated to '图片' or '镜像' depending on context\n" + 
 			"'docker aware executor' should be translated to 'docker 相关执行器'\n" + 
 			"When used together with 'subscription', word 'active' should be translated to '有效'\n" + 
-			"Two factor authentication should be translated to '两阶段验证'")
+			"Two factor authentication should be translated to '两阶段验证'\n" + 
+			"Space should be added between English words and Chinese words\n" + 
+			"SSO provider should be translated as SSO 提供方")
 	public static void init(Map<String, String> m) {
 		m.clear();
 		m.put(" Project path can be omitted if reference from current project", "如果从当前项目引用，则可以省略项目路径");
@@ -112,10 +114,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"用于验证提交信息页脚的<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java正则表达式</a>");
 		m.put("A child project with name \"{0}\" already exists under \"{1}\"", "在 \"{1}\" 下已存在名为 \"{0}\" 的子项目");
-		m.put("A public email is required", "需要一个公共邮箱");
 		m.put("A pull request is open for this change", "一个合并请求正在审查此更改");
 		m.put("A root project with name \"{0}\" already exists", "已存在名为 \"{0}\" 的根项目");
-		m.put("A verified primary email address is required", "需要一个已验证的主邮箱");
 		m.put("A {0} used as body of address verification email", "用作邮箱验证邮件正文的 {0}");
 		m.put("A {0} used as body of build notification email", "用作构建通知邮件正文的 {0}");
 		m.put("A {0} used as body of commit notification email", "用作提交通知邮件正文的 {0}");
@@ -156,6 +156,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Access token regenerated, make sure to update the token at agent side", "访问令牌已重新生成，请确保在代理端更新令牌");
 		m.put("Account Email", "账户邮箱");
 		m.put("Account Name", "账户名称");
+		m.put("Account is disabled", "账户已被禁用");
 		m.put("Account set up successfully", "账户设置成功");
 		m.put("Active Directory", "Active Directory");
 		m.put("Active Since", "活跃起");
@@ -780,7 +781,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Confirm password here", "在此确认密码");
 		m.put("Confirm your action", "确认你的操作");
 		m.put("Connect New Agent", "连接新代理");
-		m.put("Connector", "连接器");
 		m.put("Contact Email", "联系邮箱");
 		m.put("Contact Name", "联系人");
 		m.put("Container Image", "容器镜像");
@@ -820,7 +820,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Create Branch Bean With Revision", "带版本的创建分支 Bean");
 		m.put("Create Child Project", "创建子项目");
 		m.put("Create Child Projects", "创建子项目");
-		m.put("Create Group", "创建组");
 		m.put("Create Issue", "创建工单");
 		m.put("Create Iteration", "创建迭代");
 		m.put("Create Merge Commit", "创建合并提交");
@@ -947,12 +946,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Delete this branch", "删除此分支");
 		m.put("Delete this executor", "删除此执行器");
 		m.put("Delete this field", "删除该字段");
-		m.put("Delete this group", "删除此组");
 		m.put("Delete this import", "删除此导入");
 		m.put("Delete this iteration", "删除此迭代");
 		m.put("Delete this key", "删除此密钥");
 		m.put("Delete this link", "删除此链接");
-		m.put("Delete this role", "删除此角色");
 		m.put("Delete this rule", "删除此规则");
 		m.put("Delete this secret", "删除此密钥");
 		m.put("Delete this state", "删除该状态");
@@ -1032,7 +1029,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Do you really want to delete this build?", "您确定要删除此构建吗？");
 		m.put("Do you really want to delete this code comment and all its replies?", "您真的要删除此代码评论及其所有回复吗？");
 		m.put("Do you really want to delete this code comment?", "您真的要删除此代码评论吗？");
-		m.put("Do you really want to delete this connector?", "您确定要删除这个连接器吗？");
 		m.put("Do you really want to delete this directory?", "您确定要删除此目录吗？");
 		m.put("Do you really want to delete this email address?", "您真的要删除这个电子邮件地址吗？");
 		m.put("Do you really want to delete this executor?", "你确定要删除这个执行器吗？");
@@ -1249,8 +1245,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Export XLSX", "导出 XLSX");
 		m.put("Export as OCI layout", "导出为 OCI 布局");
 		m.put("Extend Trial Subscription", "延长试用订阅");
-		m.put("External Auth Source", "外部认证源");
-		m.put("External Authenticator", "外部认证器");
 		m.put("External Issue Transformers", "外部工单转换");
 		m.put("External Participants", "外部参与者");
 		m.put("External System", "外部系统");
@@ -1553,7 +1547,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Image URL should be specified", "图片 URL 应该指定");
 		m.put("Imap Ssl Setting", "IMAP SSL 设置");
 		m.put("Imap With Ssl", "IMAP 使用 SSL");
-		m.put("Impersonate this user", "假装成此用户");
 		m.put("Implicit SSL", "隐式 SSL");
 		m.put("Import", "导入");
 		m.put("Import All Projects", "导入所有项目");
@@ -1984,7 +1977,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("More Settings", "更多设置");
 		m.put("More commits", "更多提交");
 		m.put("More info", "更多信息");
-		m.put("More info about this property", "关于此属性的更多信息");
 		m.put("More operations", "更多操作");
 		m.put("Most branch coverage", "最小的分支覆盖率");
 		m.put("Most line coverage", "最小的行覆盖率");
@@ -2019,9 +2011,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Name of the link", "链接的名称");
 		m.put("Name of the link on the other side. For instance if name is <tt>sub issues</tt>, name on the other side can be <tt>parent issue</tt>", 
 			"另一侧的链接名称。例如，如果名称是 <tt>sub issues</tt>，另一侧的名称可以是 <tt>parent issue</tt>");
-		m.put("Name of the provider will be displayed on login button", "提供商的名称将显示在登录按钮上");
 		m.put("Name of the provider will serve two purpose: <ul><li>Display on login button<li>Form the authorization callback url which will be <i>&lt;server url&gt;/~sso/callback/&lt;name&gt;</i></ul>", 
-			"提供商的名称将服务于两个目的：<ul><li>显示在登录按钮上<li>形成授权回调 URL，格式为 <i>&lt;server url&gt;/~sso/callback/&lt;name&gt;</i></ul>");
+			"提供方的名称将服务于两个目的：<ul><li>显示在登录按钮上<li>形成授权回调 URL，格式为 <i>&lt;server url&gt;/~sso/callback/&lt;name&gt;</i></ul>");
 		m.put("Name reversely", "名称反向");
 		m.put("Name unknown", "名称未知");
 		m.put("Name your file", "命名您的文件");
@@ -2109,7 +2100,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No diffs to navigate", "没有差异可导航");
 		m.put("No directories to skip", "无要跳过的目录");
 		m.put("No executors defined. Jobs will use auto-discovered executors instead", "未定义执行器。作业将使用自动发现的执行器");
-		m.put("No external authenticator", "无外部认证器");
 		m.put("No fields to prompt", "无要提示的字段");
 		m.put("No fields to remove", "无要删除的字段");
 		m.put("No file attachments", "没有文件附件");
@@ -2215,7 +2205,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("OAuth2 Client information | CLIENT SECRET", "OAuth2 客户端信息 | CLIENT SECRET");
 		m.put("OCI Layout Directory", "OCI 布局目录");
 		m.put("OIDC error: Inconsistent sub in ID token and userinfo", "ID 令牌中的 sub 与用户信息中的 sub 不一致");
-		m.put("OIDC error: No email claim returned", "没有返回邮箱声明");
 		m.put("OOPS! There Is An Error", "哎呀！发生错误");
 		m.put("OPEN", "打开");
 		m.put("OS", "操作系统");
@@ -2250,9 +2239,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Open terminal of current running step", "打开当前运行步骤的终端");
 		m.put("OpenID", "OpenID");
 		m.put("OpenID client identification will be assigned by your OpenID provider when registering this OneDev instance as client application", 
-			"OpenID 客户端标识将在注册此 OneDev 实例作为客户端应用程序时由您的 OpenID 提供商分配");
+			"OpenID 客户端标识将在注册此 OneDev 实例作为客户端应用程序时由您的 OpenID 提供方分配");
 		m.put("OpenID client secret will be generated by your OpenID provider when registering this OneDev instance as client application", 
-			"OpenID 客户端密钥将在注册此 OneDev 实例作为客户端应用程序时由您的 OpenID 提供商生成");
+			"OpenID 客户端密钥将在注册此 OneDev 实例作为客户端应用程序时由您的 OpenID 提供方生成");
 		m.put("OpenSSH Public Key", "OpenSSH 公钥");
 		m.put("OpenSSH public key begins with 'ssh-rsa', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521', 'ssh-ed25519', 'sk-ecdsa-sha2-nistp256@openssh.com', or 'sk-ssh-ed25519@openssh.com'", 
 			"OpenSSH 公钥以 'ssh-rsa'、'ecdsa-sha2-nistp256'、'ecdsa-sha2-nistp384'、'ecdsa-sha2-nistp521'、'ssh-ed25519'、'sk-ecdsa-sha2-nistp256@openssh.com' 或 'sk-ssh-ed25519@openssh.com' 开头");
@@ -2482,7 +2471,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify space-separated target branches of the pull requests to check. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all branches", 
 			"可选择指定要检查的以空格分隔的合并请求的目标分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有分支");
 		m.put("Optionally specify the OpenID claim to retrieve groups of authenticated user. Depending on the provider, you may need to request additional scopes above to make this claim available", 
-			"可选择指定要获取已认证用户的组。根据提供商，您可能需要请求额外的范围以使此声明可用");
+			"可选择指定要获取已认证用户的组。根据提供方，您可能需要请求额外的范围以使此声明可用");
 		m.put("Optionally specify the maximum value allowed.", "可选择指定允许的最大值");
 		m.put("Optionally specify the minimum value allowed.", "可选择指定允许的最小值");
 		m.put("Optionally specify the project to publish site files to. Leave empty to publish to current project", 
@@ -3268,7 +3257,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Signing Key ID", "签署密钥 ID");
 		m.put("Similar Issues", "相似工单");
 		m.put("Single Sign On", "单点登录");
-		m.put("Single Sign On Provider", "单点登录提供者");
 		m.put("Single sign on via discord.com", "通过 discord.com 单点登录");
 		m.put("Single sign on via twitch.tv", "通过 twitch.tv 单点登录");
 		m.put("Site", "站点");
@@ -3658,8 +3646,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Ssh Setting", "SSH 设置");
 		m.put("Ssl Setting", "SSL 设置");
 		m.put("Sso Connector", "SSO 连接器");
-		m.put("Sso Connector Bean", "SSO 连接器 Bean");
-		m.put("Sso connectors", "SSO 连接器");
 		m.put("Start At", "开始于");
 		m.put("Start Date", "开始日期");
 		m.put("Start Page", "起始页面");
@@ -4069,7 +4055,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Unable to create protected tag", "无法创建受保护的标签");
 		m.put("Unable to diff as some line is too long.", "无法比较，因为某些行太长");
 		m.put("Unable to diff as the file is too large.", "无法比较，因为文件太大");
-		m.put("Unable to find SSO connector: ", "找不到 SSO 连接器: ");
 		m.put("Unable to find agent {0}", "无法找到代理 {0}");
 		m.put("Unable to find build #{0} in project {1}", "在项目 {1} 中找不到构建 #{0}");
 		m.put("Unable to find commit to import build spec (import project: {0}, import revision: {1})", 
@@ -4603,6 +4588,39 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
+		m.put("Connect with your SSO account", "使用您的 SSO 账户连接");
+		m.put("Create New User", "创建新用户");
+		m.put("Delete SSO account here to reconnect corresponding SSO subject upon next login. Note that SSO subject with verified email will be connected to user with same verified email automatically", 
+			"在此删除 SSO 账户以便在下次登录时重新连接相应的 SSO 主题。请注意，具有已验证电子邮件的 SSO 主题将自动连接到具有相同已验证电子邮件的用户");
+		m.put("Do you really want to delete SSO provider \"{0}\"?", "您真的想删除 SSO 提供方 \"{0}\" 吗？");
+		m.put("Do you really want to delete this SSO account?", "您真的想删除此 SSO 账户吗？");
+		m.put("Email address \"{0}\" already used by another account", "电子邮件地址 \"{0}\" 已被另一个账户使用");
+		m.put("Email address \"{0}\" used by account \"{1}\"", "电子邮件地址 \"{0}\" 被账户 \"{1}\" 使用");
+		m.put("Email address \"{0}\" used by disabled account \"{1}\"", "电子邮件地址 \"{0}\" 被已禁用的账户 \"{1}\" 使用");
+		m.put("Error authenticating user", "用户认证错误");
+		m.put("External Authentication", "外部认证");
+		m.put("External Password Authenticator", "外部密码认证器");
+		m.put("Impersonate", "模拟");
+		m.put("Link Existing User", "链接现有用户");
+		m.put("Link User Bean", "链接用户 Bean");
+		m.put("My SSO Accounts", "我的 SSO 账户");
+		m.put("No external password authenticator", "没有外部密码认证器");
+		m.put("No external password authenticator to authenticate user \"{0}\"", "没有外部密码认证器来认证用户 \"{0}\"");
+		m.put("Only users able to authenticate via password can be linked", "只有能够通过密码认证的用户才能被链接");
+		m.put("Password Authenticator", "密码认证器");
+		m.put("Password of the user", "用户的密码");
+		m.put("SSO Accounts", "SSO 账户");
+		m.put("SSO Providers", "SSO 提供方");
+		m.put("SSO account deleted", "SSO 账户已删除");
+		m.put("SSO provider \"{0}\" deleted", "SSO 提供方 \"{0}\" 已删除");
+		m.put("SSO provider created", "SSO 提供方已创建");
+		m.put("SSO provider updated", "SSO 提供方已更新");
+		m.put("Service account not allowed to login", "服务账户不允许登录");
+		m.put("Single Sign-On", "单点登录");
+		m.put("Sso Provider Bean", "Sso 提供方 Bean");
+		m.put("Unable to find SSO provider: ", "无法找到 SSO 提供方：");
+		m.put("When login via OneDev's built-in form, submitted user credentials can be checked against authenticator defined here, besides the internal database", 
+			"通过 OneDev 的内置表单登录时，提交的用户凭据可以在此处定义的认证器以及内部数据库中进行检查");
 	}
 		
 	@Override
