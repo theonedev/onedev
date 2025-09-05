@@ -1,6 +1,5 @@
 package io.onedev.server.model.support.issue.changedata;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -21,19 +20,15 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.Input;
+import io.onedev.server.buildspecmodel.inputspec.Input;
 
 public class IssueFieldChangeData extends IssueChangeData {
 
 	private static final long serialVersionUID = 1L;
 
-	protected final Map<String, Serializable> oldFields;
+	protected final Map<String, Input> oldFields;
 	
-	protected final Map<String, Serializable> newFields;
-
-	private transient Map<String, Input> convertedOldFields;
-
-	private transient Map<String, Input> convertedNewFields;
+	protected final Map<String, Input> newFields;
 	
 	public IssueFieldChangeData(Map<String, Input> oldFields, Map<String, Input> newFields) {
 		this.oldFields = copyNonEmptyFields(oldFields);
@@ -41,33 +36,11 @@ public class IssueFieldChangeData extends IssueChangeData {
 	}
 	
 	public Map<String, Input> getOldFields() {
-		if (convertedOldFields == null) {
-			convertedOldFields = new LinkedHashMap<>();
-			for (Map.Entry<String, Serializable> entry: oldFields.entrySet()) {
-				if (entry.getValue() instanceof Input) {
-					convertedOldFields.put(entry.getKey(), (Input) entry.getValue());
-				} else {
-					io.onedev.server.buildspecmodel.inputspec.Input input = (io.onedev.server.buildspecmodel.inputspec.Input) entry.getValue();
-					convertedOldFields.put(entry.getKey(), new Input(input.getName(), input.getType(), input.getValues()));
-				}
-			}
-		}
-		return convertedOldFields;
+		return oldFields;
 	}
 
 	public Map<String, Input> getNewFields() {
-		if (convertedNewFields == null) {
-			convertedNewFields = new LinkedHashMap<>();
-			for (Map.Entry<String, Serializable> entry: newFields.entrySet()) {
-				if (entry.getValue() instanceof Input) {
-					convertedNewFields.put(entry.getKey(), (Input) entry.getValue());
-				} else {
-					io.onedev.server.buildspecmodel.inputspec.Input input = (io.onedev.server.buildspecmodel.inputspec.Input) entry.getValue();
-					convertedNewFields.put(entry.getKey(), new Input(input.getName(), input.getType(), input.getValues()));
-				}
-			}
-		}
-		return convertedNewFields;
+		return newFields;
 	}
 
 	private List<String> getDisplayValues(Input input) {
@@ -94,20 +67,20 @@ public class IssueFieldChangeData extends IssueChangeData {
 
 	public Map<String, String> getOldFieldValues() {
 		Map<String, String> oldFieldValues = new LinkedHashMap<>();
-		for (Map.Entry<String, Input> entry: getOldFields().entrySet())
+		for (Map.Entry<String, Input> entry: oldFields.entrySet())
 			oldFieldValues.put(entry.getKey(), StringUtils.join(getDisplayValues(entry.getValue())));
 		return oldFieldValues;
 	}
 	
 	public Map<String, String> getNewFieldValues() {
 		Map<String, String> newFieldValues = new LinkedHashMap<>();
-		for (Map.Entry<String, Input> entry: getNewFields().entrySet())
+		for (Map.Entry<String, Input> entry: newFields.entrySet())
 			newFieldValues.put(entry.getKey(), StringUtils.join(getDisplayValues(entry.getValue())));
 		return newFieldValues;
 	}
 	
-	private Map<String, Serializable> copyNonEmptyFields(Map<String, Input> fields) {
-		Map<String, Serializable> copy = new LinkedHashMap<>();
+	private Map<String, Input> copyNonEmptyFields(Map<String, Input> fields) {
+		Map<String, Input> copy = new LinkedHashMap<>();
 		for (Map.Entry<String, Input> entry: fields.entrySet()) {
 			if (!entry.getValue().getValues().isEmpty())
 				copy.put(entry.getKey(), entry.getValue());
@@ -135,8 +108,8 @@ public class IssueFieldChangeData extends IssueChangeData {
 	public Map<String, Collection<User>> getNewUsers() {
 		UserManager userManager = OneDev.getInstance(UserManager.class);
 		Map<String, Collection<User>> newUsers = new HashMap<>();
-		for (Input oldField: getOldFields().values()) {
-			Input newField = getNewFields().get(oldField.getName());
+		for (Input oldField: oldFields.values()) {
+			Input newField = newFields.get(oldField.getName());
 			if (newField != null 
 					&& !describe(oldField).equals(describe(newField)) 
 					&& newField.getType().equals(FieldSpec.USER)) { 
@@ -150,8 +123,8 @@ public class IssueFieldChangeData extends IssueChangeData {
 					newUsers.put(newField.getName(), newUsersOfField);
 			}
 		}
-		for (Input newField: getNewFields().values()) {
-			if (!getOldFields().containsKey(newField.getName()) 
+		for (Input newField: newFields.values()) {
+			if (!oldFields.containsKey(newField.getName()) 
 					&& newField.getType().equals(FieldSpec.USER)) { 
 				Set<User> usersOfField = newField.getValues()
 						.stream()
@@ -169,8 +142,8 @@ public class IssueFieldChangeData extends IssueChangeData {
 	public Map<String, Group> getNewGroups() {
 		Map<String, Group> newGroups = new HashMap<>();
 		GroupManager groupManager = OneDev.getInstance(GroupManager.class);
-		for (Input oldField: getOldFields().values()) {
-			Input newField = getNewFields().get(oldField.getName());
+		for (Input oldField: oldFields.values()) {
+			Input newField = newFields.get(oldField.getName());
 			if (newField != null 
 					&& !describe(oldField).equals(describe(newField)) 
 					&& newField.getType().equals(FieldSpec.GROUP) 
@@ -180,8 +153,8 @@ public class IssueFieldChangeData extends IssueChangeData {
 					newGroups.put(newField.getName(), group);
 			}
 		}
-		for (Input newField: getNewFields().values()) {
-			if (!getOldFields().containsKey(newField.getName()) 
+		for (Input newField: newFields.values()) {
+			if (!oldFields.containsKey(newField.getName()) 
 					&& newField.getType().equals(FieldSpec.GROUP) 
 					&& !newField.getValues().isEmpty()) { 
 				Group group = groupManager.find(newField.getValues().iterator().next());

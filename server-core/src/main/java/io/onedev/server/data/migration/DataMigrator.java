@@ -8201,6 +8201,16 @@ public class DataMigrator {
 						autoMergeUserElement.detach();
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueChanges.xml")) {
+				try {
+					var content = FileUtils.readFileToString(file, UTF_8);
+					content = StringUtils.replace(content,
+							"io.onedev.server.util.Input",
+							"io.onedev.server.buildspecmodel.inputspec.Input");
+					FileUtils.writeStringToFile(file, content, UTF_8.name());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 

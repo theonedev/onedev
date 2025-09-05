@@ -4,17 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import javax.validation.constraints.NotEmpty;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.buildspec.param.ParamCombination;
-import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.model.Build;
-import io.onedev.server.util.Input;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.buildspec.param.ParamCombination;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspecmodel.inputspec.Input;
+import io.onedev.server.model.Build;
 
 @Editable(name="Use value of specified parameter/secret")
 public class PassthroughValues implements ValuesProvider {

@@ -113,7 +113,7 @@ import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
-import io.onedev.server.util.Input;
+import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.concurrent.BatchWorkManager;

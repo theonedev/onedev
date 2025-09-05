@@ -1,19 +1,12 @@
 package io.onedev.server.util.interpolative;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.buildspec.job.JobVariable;
-import io.onedev.server.buildspec.param.ParamCombination;
-import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.support.build.JobProperty;
-import io.onedev.server.util.GroovyUtils;
-import io.onedev.server.util.Input;
-import io.onedev.server.util.interpolative.Interpolative.Segment;
-import io.onedev.server.util.interpolative.Interpolative.Segment.Type;
-import io.onedev.server.web.editable.EditableStringTransformer;
+import static io.onedev.k8shelper.KubernetesHelper.ATTRIBUTES;
+import static io.onedev.k8shelper.KubernetesHelper.PAUSE;
+import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_PREFIX;
+import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_SUFFIX;
+import static io.onedev.k8shelper.KubernetesHelper.WORKSPACE;
+import static io.onedev.server.web.translation.Translation._T;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +14,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import static io.onedev.k8shelper.KubernetesHelper.*;
-import static io.onedev.server.web.translation.Translation._T;
+import javax.annotation.Nullable;
+
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.buildspec.job.JobVariable;
+import io.onedev.server.buildspec.param.ParamCombination;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspecmodel.inputspec.Input;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.support.build.JobProperty;
+import io.onedev.server.util.GroovyUtils;
+import io.onedev.server.util.interpolative.Interpolative.Segment;
+import io.onedev.server.util.interpolative.Interpolative.Segment.Type;
+import io.onedev.server.web.editable.EditableStringTransformer;
 
 public class VariableInterpolator {
 	

@@ -29,6 +29,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
@@ -57,7 +58,6 @@ import io.onedev.server.util.ColorUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.Input;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
 import io.onedev.server.web.component.MultilineLabel;

@@ -6,7 +6,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.model.Build;
-import io.onedev.server.util.Input;
+import io.onedev.server.buildspecmodel.inputspec.Input;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
