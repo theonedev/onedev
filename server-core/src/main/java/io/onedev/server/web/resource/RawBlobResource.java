@@ -58,7 +58,7 @@ public class RawBlobResource extends AbstractResource {
 		String projectPath = params.get(ProjectMapperUtils.PARAM_PROJECT).toString();
 		Project project = getProjectManager().findByPath(projectPath);
 		if (project == null)
-			throw new EntityNotFoundException();
+			throw new EntityNotFoundException("Project not found: " + projectPath);
 		
 		List<String> revisionAndPathSegments = new ArrayList<>();
 		for (int i = 0; i < params.getIndexedCount(); i++) {

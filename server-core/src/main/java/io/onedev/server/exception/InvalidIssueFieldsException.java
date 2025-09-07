@@ -13,17 +13,17 @@ public class InvalidIssueFieldsException extends ExplicitException {
         this(buildMessage(invalidFields), invalidFields);
     }
 
+    public InvalidIssueFieldsException(String message, Map<String, String> invalidFields) {
+        super(message);
+        this.invalidFields = invalidFields;
+    }
+
     public static String buildMessage(Map<String, String> invalidFields) {
         var fieldErrors = new ArrayList<String>();
         for (var entry: invalidFields.entrySet()) {
             fieldErrors.add(entry.getKey() + " (" + entry.getValue() + ")");
         }
         return "Invalid fields: " + String.join(", ", fieldErrors);
-    }
-
-    public InvalidIssueFieldsException(String message, Map<String, String> invalidFields) {
-        super(message);
-        this.invalidFields = invalidFields;
     }
 
     public Map<String, String> getInvalidFields() {

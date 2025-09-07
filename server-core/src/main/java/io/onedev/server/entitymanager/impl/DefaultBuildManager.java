@@ -45,8 +45,6 @@ import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
@@ -322,7 +320,9 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				predicates.add(builder.isNull(root.get(Build.PROP_ISSUE)));
 		}
 		
-		predicates.addAll(getPredicates(root, builder, params));
+		var paramPredicate = getPredicate(root, builder, params);
+		if (paramPredicate != null)
+			predicates.add(paramPredicate);
 		
 		query.where(predicates.toArray(new Predicate[0]));
 		return getSession().createQuery(query).list();
@@ -377,31 +377,53 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				predicates.add(builder.isNull(root.get(Build.PROP_ISSUE)));
 		}
 			
-		predicates.addAll(getPredicates(root, builder, params));
-		
+		var paramPredicate = getPredicate(root, builder, params);
+		if (paramPredicate != null)
+			predicates.add(paramPredicate);
+
 		query.where(predicates.toArray(new Predicate[0]));
 		return getSession().createQuery(query).list();
 	}
 	
-	private List<Predicate> getPredicates(From<Build, Build> root, CriteriaBuilder builder, 
-			Map<String, List<String>> params) {
-		List<Predicate> predicates = new ArrayList<>();
-		
-		for (Map.Entry<String, List<String>> entry: params.entrySet()) {
-			if (!entry.getValue().isEmpty()) {
-				for (String value: entry.getValue()) {
-					Join<?, ?> join = root.join(Build.PROP_PARAMS, JoinType.INNER);
-					predicates.add(builder.equal(join.get(BuildParam.PROP_NAME), entry.getKey()));
-					predicates.add(builder.equal(join.get(BuildParam.PROP_VALUE), value));
+	@Nullable
+	private Predicate getPredicate(From<Build, Build> root, CriteriaBuilder builder, Map<String, List<String>> params) {
+		if (!params.isEmpty()) {
+			// Create a single exists subquery to check if build has all required params with same name and values
+			var subquery = builder.createQuery().subquery(Long.class);
+			var paramRoot = subquery.from(BuildParam.class);
+			subquery.select(builder.count(paramRoot));
+			
+			List<Predicate> paramPredicates = new ArrayList<>();
+			int expectedParamCount = 0;
+			
+			for (Map.Entry<String, List<String>> entry: params.entrySet()) {
+				if (!entry.getValue().isEmpty()) {
+					for (String value: entry.getValue()) {
+						paramPredicates.add(builder.and(
+							builder.equal(paramRoot.get(BuildParam.PROP_NAME), entry.getKey()),
+							builder.equal(paramRoot.get(BuildParam.PROP_VALUE), value)
+						));
+						expectedParamCount++;
+					}
+				} else {
+					paramPredicates.add(builder.and(
+						builder.equal(paramRoot.get(BuildParam.PROP_NAME), entry.getKey()),
+						builder.isNull(paramRoot.get(BuildParam.PROP_VALUE))
+					));
+					expectedParamCount++;
 				}
-			} else {
-				Join<?, ?> join = root.join(Build.PROP_PARAMS, JoinType.INNER);
-				predicates.add(builder.equal(join.get(BuildParam.PROP_NAME), entry.getKey()));
-				predicates.add(builder.isNull(join.get(BuildParam.PROP_VALUE)));
 			}
+			
+			subquery.where(
+				builder.equal(paramRoot.get(BuildParam.PROP_BUILD), root),
+				builder.or(paramPredicates.toArray(new Predicate[0]))
+			);
+			
+			// Check that the count of matching params equals the expected count
+			return builder.equal(subquery, (long) expectedParamCount);
+		} else {
+			return null;
 		}
-		
-		return predicates;
 	}
 	
 	@Sessional

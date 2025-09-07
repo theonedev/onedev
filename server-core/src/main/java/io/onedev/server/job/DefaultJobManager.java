@@ -106,7 +106,6 @@ import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -219,8 +218,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	private final ExecutorService executorService;
 
-	private final BuildParamManager buildParamManager;
-
 	private final TaskScheduler taskScheduler;
 
 	private final Validator validator;
@@ -253,10 +250,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public DefaultJobManager(BuildManager buildManager, AccessTokenManager accessTokenManager, UserManager userManager, 
 							 ListenerRegistry listenerRegistry, SettingManager settingManager, TransactionManager transactionManager, 
 							 LogManager logManager, ExecutorService executorService, SessionManager sessionManager, 
-							 BuildParamManager buildParamManager, ProjectManager projectManager, Validator validator, 
-							 TaskScheduler taskScheduler, ClusterManager clusterManager, 
-							 PullRequestManager pullRequestManager, IssueManager issueManager, GitService gitService, 
-							 SSLFactory sslFactory, Dao dao, BatchWorkManager batchWorkManager, WorkExecutor workExecutor) {
+							 ProjectManager projectManager, Validator validator, TaskScheduler taskScheduler, 
+							 ClusterManager clusterManager, PullRequestManager pullRequestManager, IssueManager issueManager, 
+							 GitService gitService, SSLFactory sslFactory, Dao dao, BatchWorkManager batchWorkManager, 
+							 WorkExecutor workExecutor) {
 		this.dao = dao;
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
@@ -267,7 +264,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.logManager = logManager;
 		this.executorService = executorService;
 		this.sessionManager = sessionManager;
-		this.buildParamManager = buildParamManager;
 		this.projectManager = projectManager;
 		this.validator = validator;
 		this.taskScheduler = taskScheduler;
@@ -886,31 +882,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				build.setAgent(null);
 				build.getCheckoutPaths().clear();
 
-				buildParamManager.deleteParams(build);
-				for (Map.Entry<String, List<String>> entry : build.getParamMap().entrySet()) {
-					ParamSpec paramSpec = build.getJob().getParamSpecMap().get(entry.getKey());
-					checkNotNull(paramSpec);
-					String type = paramSpec.getType();
-					List<String> values = entry.getValue();
-					if (!values.isEmpty()) {
-						for (String value : values) {
-							BuildParam param = new BuildParam();
-							param.setBuild(build);
-							param.setName(entry.getKey());
-							param.setType(type);
-							param.setValue(value);
-							build.getParams().add(param);
-							buildParamManager.create(param);
-						}
-					} else {
-						BuildParam param = new BuildParam();
-						param.setBuild(build);
-						param.setName(paramSpec.getName());
-						param.setType(type);
-						build.getParams().add(param);
-						buildParamManager.create(param);
-					}
-				}
 				buildManager.update(build);
 				buildSubmitted(build);
 			} catch (ValidationException e) {

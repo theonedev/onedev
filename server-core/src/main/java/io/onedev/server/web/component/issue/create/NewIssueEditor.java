@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -109,8 +108,6 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
 		Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
 		
-		System.out.println(FieldUtils.getFieldValues(null, fieldBean, Set.of("Assignees")));
-
 		var fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(getProject());
 		issue.setFieldValues(FieldUtils.getFieldValues(new ComponentContext(this), fieldBean, 
 				FieldUtils.getEditableFields(getProject(), fieldNames)));

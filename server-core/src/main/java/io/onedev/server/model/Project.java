@@ -820,7 +820,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			objectIdCache.put(revision, optional);
 		}
 		if (mustExist && !optional.isPresent())
-			throw new ObjectNotFoundException("Unable to find object '" + revision + "'");
+			throw new ObjectNotFoundException("Unable to find revision '" + revision + "'");
 		return optional.orNull();
 	}
 	

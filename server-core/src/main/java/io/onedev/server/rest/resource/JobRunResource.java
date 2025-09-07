@@ -106,7 +106,7 @@ public class JobRunResource {
 				jobRun.getParams(), refName, SecurityUtils.getUser(), request, 
 				null, jobRun.getReason());
 		if (build.isFinished())
-			jobManager.resubmit(build, "Rebuild via restful api");
+			jobManager.resubmit(build, jobRun.getReason());
 		return build.getId();
     }
 

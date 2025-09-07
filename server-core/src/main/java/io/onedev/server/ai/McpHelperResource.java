@@ -40,6 +40,8 @@ import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.SubscriptionManager;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueLinkManager;
@@ -57,13 +59,17 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.entityreference.PullRequestReference;
 import io.onedev.server.exception.InvalidIssueFieldsException;
 import io.onedev.server.exception.InvalidReferenceException;
 import io.onedev.server.exception.IssueLinkValidationException;
 import io.onedev.server.exception.PullRequestReviewRejectedException;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
+import io.onedev.server.job.JobManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueLink;
@@ -96,6 +102,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequeste
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
@@ -148,6 +155,12 @@ public class McpHelperResource {
 
     private final PullRequestCommentManager pullRequestCommentManager;
 
+    private final BuildManager buildManager;
+
+    private final BuildParamManager buildParamManager;
+
+    private final JobManager jobManager;
+
     private final GitService gitService;
 
     private final LabelSpecManager labelSpecManager;
@@ -165,7 +178,8 @@ public class McpHelperResource {
             LabelSpecManager labelSpecManager, PullRequestReviewManager pullRequestReviewManager, 
             PullRequestAssignmentManager pullRequestAssignmentManager, 
             PullRequestLabelManager pullRequestLabelManager, UrlManager urlManager,
-            PullRequestCommentManager pullRequestCommentManager) {
+            PullRequestCommentManager pullRequestCommentManager, BuildManager buildManager,
+            BuildParamManager buildParamManager, JobManager jobManager) {
         this.objectMapper = objectMapper;
         this.settingManager = settingManager;
         this.issueManager = issueManager;
@@ -187,6 +201,9 @@ public class McpHelperResource {
         this.pullRequestLabelManager = pullRequestLabelManager;
         this.urlManager = urlManager;
         this.pullRequestCommentManager = pullRequestCommentManager;
+        this.buildManager = buildManager;
+        this.buildParamManager = buildParamManager;
+        this.jobManager = jobManager;
     }
 
     private String getIssueQueryStringDescription() {
@@ -357,6 +374,57 @@ public class McpHelperResource {
                 "- closed (merged or discarded) after certain date criteria in form of: \"Close Date\" is since \"<date>\" (quotes are required), where <date> is of format YYYY-MM-DD HH:mm\n" +
                 "- includes specified issue criteria in form of: includes issue \"<issue reference>\" (quotes are required)\n" +
                 "- includes specified commit criteria in form of: includes commit \"<commit hash>\" (quotes are required)\n" +                
+                "- and criteria in form of <criteria1> and <criteria2>\n" +
+                "- or criteria in form of <criteria1> or <criteria2>. Note that \"and criteria\" takes precedence over \"or criteria\", use braces to group \"or criteria\" like \"(criteria1 or criteria2) and criteria3\" if you want to override precedence\n" +
+                "- not criteria in form of not(<criteria>)\n" +
+                "\n" +
+                "And can optionally add order clause at end of query string in form of: order by \"<field1>\" <asc|desc>,\"<field2>\" <asc|desc>,... (quotes are required), where <field> is one of below:\n" +
+                orderFields +
+                "\n" +
+                "Leave empty to list all pull requests";
+
+        return HtmlEscape.escapeHtml5(description);
+    }
+
+    private String getBuildQueryStringDescription() {
+        var orderFields = new StringBuilder();
+        for (var field : Build.SORT_FIELDS.keySet()) {
+            orderFields.append("- ").append(field).append("\n");
+        }
+
+        var jobNames = buildManager.getJobNames(null).stream().collect(Collectors.joining(", "));
+        var paramNames = buildParamManager.getParamNames(null).stream().collect(Collectors.joining(", "));
+        var labelNames = labelSpecManager.query().stream().map(LabelSpec::getName).collect(Collectors.joining(", "));
+
+        var description = 
+                "A query string is one of below criteria:\n" +
+                "- build with specified number in form of: \"Number\" is \"#<build number>\", or in form of: \"Number\" is \"<project key>-<build number>\" (quotes are required)\n" +
+                "- criteria to check if version/job contains specified text in form of: ~<containing text>~\n" +
+                "- sucessful criteria in form of: sucessful\n" +
+                "- failed criteria in form of: failed\n" +
+                "- cancelled criteria in form of: cancelled\n" +
+                "- timed out criteria in form of: timed out\n" +
+                "- finished criteria in form of: finished\n" +
+                "- running criteria in form of: running\n" +
+                "- waiting criteria in form of: waiting\n" +
+                "- pending criteria in form of: pending\n" +
+                "- submitted by specified user criteria in form of: submitted by \"<login name of a user>\" (quotes are required)\n" +
+                "- submitted by current user criteria in form of: submitted by me (quotes are required)\n" +
+                "- cancelled by specified user criteria in form of: cancelled by \"<login name of a user>\" (quotes are required)\n" +
+                "- cancelled by current user criteria in form of: cancelled by me (quotes are required)\n" +
+                "- depends on specified build criteria in form of: depends on \"<build reference>\" (quotes are required)\n" +
+                "- dependencies of specified build criteria in form of: dependencies of \"<build reference>\" (quotes are required)\n" +
+                "- fixed specified issue criteria in form of: fixed issue \"<issue reference>\" (quotes are required)\n" +
+                "- job criteria in form of: \"Job\" is \"<job name>\" (quotes are required), where <job name> is one of: " + jobNames + "\n" +
+                "- version criteria in form of: \"Version\" is \"<version>\" (quotes are required)\n" +                
+                "- branch criteria in form of: \"Branch\" is \"<branch name>\" (quotes are required)\n" +
+                "- tag criteria in form of: \"Tag\" is \"<tag name>\" (quotes are required)\n" +
+                "- param criteria in form of: \"<param name>\" is \"<param value>\" (quotes are required), where <param name> is one of: " + paramNames + "\n" +
+                "- label criteria in form of: \"Label\" is \"<label name>\" (quotes are required), where <label name> is one of: " + labelNames + "\n" +
+                "- pull request criteria in form of: \"Pull Request\" is \"<pull request reference>\" (quotes are required)\n" +
+                "- commit criteria in form of: \"Commit\" is \"<commit hash>\" (quotes are required)\n" +
+                "- before certain date criteria in form of: \"Submit Date\" is until \"<date>\" (quotes are required), where <date> is of format YYYY-MM-DD HH:mm\n" +
+                "- after certain date criteria in form of: \"Submit Date\" is since \"<date>\" (quotes are required), where <date> is of format YYYY-MM-DD HH:mm\n" +
                 "- and criteria in form of <criteria1> and <criteria2>\n" +
                 "- or criteria in form of <criteria1> or <criteria2>. Note that \"and criteria\" takes precedence over \"or criteria\", use braces to group \"or criteria\" like \"(criteria1 or criteria2) and criteria3\" if you want to override precedence\n" +
                 "- not criteria in form of not(<criteria>)\n" +
@@ -649,6 +717,28 @@ public class McpHelperResource {
 
         inputSchemas.put("queryPullRequests", queryPullRequestsInputSchema);
 
+        var queryBuildsInputSchema = new HashMap<String, Object>();
+        var queryBuildsProperties = new HashMap<String, Object>();
+
+        queryBuildsProperties.put("project", Map.of(
+            "type", "string",
+            "description", "Project to query builds in. Leave empty to query in current project"));
+        queryBuildsProperties.put("query", Map.of(
+                "type", "string",
+                "description", getBuildQueryStringDescription()));
+        queryBuildsProperties.put("offset", Map.of(
+                "type", "integer",
+                "description", "start position for the query (optional, defaults to 0)"));
+        queryBuildsProperties.put("count", Map.of(
+                "type", "integer",
+                "description", "number of builds to return (optional, defaults to 25, max 100)"));
+
+        queryBuildsInputSchema.put("Type", "object");
+        queryBuildsInputSchema.put("Properties", queryBuildsProperties);
+        queryBuildsInputSchema.put("Required", new ArrayList<>());
+
+        inputSchemas.put("queryBuilds", queryBuildsInputSchema);
+
         var createPullRequestInputSchema = new HashMap<String, Object>();
         var createPullRequestProperties = new HashMap<String, Object>();            
         createPullRequestProperties.put("targetProject", Map.of(
@@ -869,7 +959,6 @@ public class McpHelperResource {
         issueMap.put("reference", issue.getReference().toString(currentProject));
         issueMap.remove("submitterId");
         issueMap.put("submitter", issue.getSubmitter().getName());
-        issueMap.remove("projectId");
         issueMap.put("Project", issue.getProject().getPath());
         issueMap.remove("lastActivity");
         for (var it = issueMap.entrySet().iterator(); it.hasNext();) {
@@ -1251,9 +1340,7 @@ public class McpHelperResource {
         pullRequestMap.put("reference", pullRequest.getReference().toString(currentProject));
         pullRequestMap.remove("submitterId");
         pullRequestMap.put("submitter", pullRequest.getSubmitter().getName());
-        pullRequestMap.remove("targetProjectId");        
         pullRequestMap.put("targetProject", pullRequest.getTarget().getProject().getPath());
-        pullRequestMap.remove("sourceProjectId");
         if (pullRequest.getSourceProject() != null)
             pullRequestMap.put("sourceProject", pullRequest.getSourceProject().getPath());
         pullRequestMap.remove("codeCommentsUpdateDate");
@@ -1299,6 +1386,82 @@ public class McpHelperResource {
             pullRequests.add(pullRequestMap);
         }
         return pullRequests;
+    }
+
+    @Path("/query-builds")
+    @GET
+    public List<Map<String, Object>> queryBuilds(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("project") String projectPath, 
+                @QueryParam("query") String query, 
+                @QueryParam("offset") int offset, 
+                @QueryParam("count") int count) {
+        if (SecurityUtils.getAuthUser() == null)
+            throw new UnauthenticatedException();
+
+        var projectInfo = getProjectInfo(projectPath, currentProjectPath);
+
+        if (count > RestConstants.MAX_PAGE_SIZE)
+            throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+
+        EntityQuery<Build> parsedQuery;
+        if (query != null) {
+            parsedQuery = BuildQuery.parse(projectInfo.project, query, true, true);
+        } else {
+            parsedQuery = new BuildQuery();
+        }
+
+        var builds = new ArrayList<Map<String, Object>>();
+        for (var build : buildManager.query(projectInfo.project, parsedQuery, false, offset, count)) {
+            var buildMap = getBuildMap(projectInfo.currentProject, build);
+            buildMap.put("link", urlManager.urlFor(build, true));
+            builds.add(buildMap);
+        }
+        return builds;
+    }
+
+    @Path("/get-build")
+    @GET
+    public Map<String, Object> getBuild(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String buildReference) {
+        if (SecurityUtils.getAuthUser() == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+
+        var build = getBuild(currentProject, buildReference);
+                
+        var buildMap = getBuildMap(currentProject, build);     
+        buildMap.put("params", build.getParamMap());
+        buildMap.put("labels", build.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
+        buildMap.put("link", urlManager.urlFor(build, true));
+
+        return buildMap;
+    }
+
+    @Path("/get-previous-successful-build")
+    @GET
+    public Map<String, Object> getPreviousSuccessfulBuild(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("reference") @NotNull String buildReference) {
+        if (SecurityUtils.getAuthUser() == null)
+            throw new UnauthenticatedException();
+
+        var currentProject = getProject(currentProjectPath);
+
+        var build = getBuild(currentProject, buildReference);
+                
+        var previousSuccessfulBuild = buildManager.findStreamPrevious(build, Build.Status.SUCCESSFUL);
+        if (previousSuccessfulBuild != null) {
+            var buildMap = getBuildMap(currentProject, previousSuccessfulBuild);     
+            buildMap.put("params", previousSuccessfulBuild.getParamMap());
+            buildMap.put("labels", previousSuccessfulBuild.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
+            buildMap.put("link", urlManager.urlFor(previousSuccessfulBuild, true));
+            return buildMap;    
+        } else {
+            throw new NotFoundException("Previous successful build not found");
+        }
     }
 
     @Path("/get-pull-request")
@@ -1836,13 +1999,133 @@ public class McpHelperResource {
 
         return "Commented on pull request " + pullRequestReference;
     }
+
+    private Map<String, Object> getBuildMap(Project currentProject, Build build) {
+        var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
+        var buildMap = objectMapper.convertValue(build, typeReference);
+        buildMap.remove("id");
+        buildMap.remove("uuid");
+        buildMap.remove("numberScopeId");
+        buildMap.remove("workspacePath");
+        buildMap.remove("checkoutPaths");
+        buildMap.remove("submitSequence");
+        buildMap.remove("finishTimeGroups");        
+        buildMap.put("reference", build.getReference().toString(currentProject));
+        buildMap.remove("submitterId");
+        buildMap.put("submitter", build.getSubmitter().getName());
+        buildMap.remove("cancellerId");
+        if (build.getCanceller() != null)
+            buildMap.put("canceller", build.getCanceller().getName());
+        buildMap.remove("requestId");
+        if (build.getRequest() != null)
+            buildMap.put("pullRequest", build.getRequest().getReference().toString(currentProject));
+        buildMap.remove("issueId");
+        if (build.getIssue() != null)
+            buildMap.put("issue", build.getIssue().getReference().toString(currentProject));
+        buildMap.remove("agentId");
+        if (build.getAgent() != null)
+            buildMap.put("agent", build.getAgent().getName());
+        
+        buildMap.put("project", build.getProject().getPath());
+        return buildMap;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Path("/run-job")
+    @POST
+    public Map<String, Object> runJob(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("project") String projectPath, 
+                @NotNull @Valid Map<String, Serializable> data) {
+        if (SecurityUtils.getAuthUser() == null)
+            throw new UnauthenticatedException();
+
+        var projectInfo = getProjectInfo(projectPath, currentProjectPath);
+
+        var jobName = StringUtils.trimToNull((String)data.get("jobName"));
+        if (jobName == null)
+            throw new NotAcceptableException("Job name is required");
+
+        var project = projectInfo.project;
+        if (!SecurityUtils.canRunJob(project, jobName))		
+            throw new UnauthorizedException();
+
+        String refName;
+        var branch = StringUtils.trimToNull((String)data.get("branch"));
+        var tag = StringUtils.trimToNull((String)data.get("tag"));
+        var commitHash = StringUtils.trimToNull((String)data.get("commitHash"));
+        if (commitHash != null) {
+            refName = StringUtils.trimToNull((String)data.get("refName"));
+            if (refName == null) {
+                throw new NotAcceptableException("Ref name is required when commit hash is specified");
+            }
+        } else if (branch != null) {            
+            refName = GitUtils.branch2ref(branch);
+        } else if (tag != null) {
+            refName = GitUtils.tag2ref(tag);
+        } else {
+            throw new NotAcceptableException("Either commit hash, branch or tag should be specified");
+        }
+        if (commitHash == null)
+            commitHash = project.getRevCommit(refName, true).name();
+            
+        Map<String, List<String>> params;
+        var paramData = data.get("params");
+        if (paramData instanceof List) {
+            params = new HashMap<String, List<String>>();
+            List<String> paramPairs = (List<String>) paramData;
+            if (paramPairs != null) {
+                for (var paramPair: paramPairs) {
+                    var paramName = StringUtils.trimToNull(StringUtils.substringBefore(paramPair, "="));
+                    var paramValue = StringUtils.trimToNull(StringUtils.substringAfter(paramPair, "="));
+                    if (paramName != null && paramValue != null)
+                        params.computeIfAbsent(paramName, k -> new ArrayList<>()).add(paramValue);
+                }
+            }
+        } else if (paramData instanceof Map) {
+            params = (Map<String, List<String>>) paramData;
+        } else {
+            params = new HashMap<String, List<String>>();
+        }
+
+        var reason = StringUtils.trimToNull((String)data.get("reason"));
+        if (reason == null)
+            throw new NotAcceptableException("Reason is required");
+            
+        Build build = jobManager.submit(project, ObjectId.fromString(commitHash), jobName, 
+            params, refName, SecurityUtils.getUser(), null, 
+            null, reason);
+        if (build.isFinished())
+            jobManager.resubmit(build, reason);
+
+        var buildMap = getBuildMap(projectInfo.currentProject, build);
+        buildMap.put("id", build.getId());
+        return buildMap;
+    }
+
+    private Build getBuild(Project currentProject, String referenceString) {
+        BuildReference buildReference;        
+        try {
+            buildReference = BuildReference.of(referenceString, currentProject);
+        } catch (InvalidReferenceException e) {
+            throw new NotAcceptableException(e.getMessage());
+        }
+        var build = buildManager.find(buildReference.getProject(), buildReference.getNumber());
+        if (build != null) {
+            if (!SecurityUtils.canAccessBuild(build))
+                throw new UnauthorizedException("No permission to access build: " + referenceString);
+            return build;
+        } else {
+            throw new NotFoundException("Build not found: " + referenceString);
+        }
+    }
     
     private void normalizePullRequestData(Map<String, Serializable> data) {
         for (var entry : data.entrySet()) {
             if (entry.getValue() instanceof String)
                 entry.setValue(StringUtils.trimToNull((String) entry.getValue()));
         }
-    }
+    }    
 
     private NotAcceptableException newNotAcceptableException(InvalidIssueFieldsException e) {
         var invaliParams = new ArrayList<String>();

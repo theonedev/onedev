@@ -25,6 +25,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotAcceptableException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -108,6 +109,20 @@ public class ProjectResource {
 			throw new UnauthorizedException();
      	return ProjectData.from(project);
     }
+
+	@Api(order=125)
+	@Path("/ids/{path:.*}")
+	@GET
+	public Long getProjectId(@PathParam("path") String path) {
+		var project = projectManager.findByPath(path);
+		if (project != null) {
+			if (!SecurityUtils.canAccessProject(project))
+				throw new NotFoundException("Project not found or inaccessible: " + path);
+			return project.getId();
+		} else {
+			throw new NotFoundException("Project not found or inaccessible: " + path);
+		}
+	}
 	
 	@Api(order=150)
 	@Path("/{projectId}/clone-url")
