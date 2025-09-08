@@ -227,6 +227,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@OneToMany(mappedBy=PullRequestCommentRevision.PROP_USER, cascade=CascadeType.REMOVE)
 	private Collection<PullRequestCommentRevision> pullRequestCommentRevisions = new ArrayList<>();
 
+	@OneToMany(mappedBy=ReviewedDiff.PROP_USER, cascade=CascadeType.REMOVE)
+	private Collection<ReviewedDiff> reviewedDiffs = new ArrayList<>();
+
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
