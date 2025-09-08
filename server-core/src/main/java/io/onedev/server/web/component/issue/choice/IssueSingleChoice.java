@@ -9,9 +9,9 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.model.Issue;
 import io.onedev.server.web.component.select2.Select2Choice;
 
-public class IssueChoice extends Select2Choice<Issue> {
+public class IssueSingleChoice extends Select2Choice<Issue> {
 
-	public IssueChoice(String id, IModel<Issue> model, IssueChoiceProvider choiceProvider) {
+	public IssueSingleChoice(String id, IModel<Issue> model, IssueChoiceProvider choiceProvider) {
 		super(id, model, choiceProvider);
 	}
 

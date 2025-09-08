@@ -416,32 +416,46 @@ public abstract class IssuePrimaryPanel extends Panel {
 					return editor;
 				}
 
-				private FormComponent<Issue> newLinkExistingPanel(String componentId) {
-					return new SelectIssuePanel(componentId) {
-
+				private IssueChoiceProvider getIssueChoiceProvider() {
+					return new IssueChoiceProvider() {
 						@Override
-						protected IssueChoiceProvider getChoiceProvider() {
-							return new IssueChoiceProvider() {
-								@Override
-								protected Project getProject() {
-									return getIssue().getProject();
-								}
-								
-								@Override
-								protected IssueQuery getBaseQuery() {
-									LinkSpec spec = getLinkSpecManager().load(specId);
-									if (opposite) 
-										return spec.getOpposite().getParsedIssueQuery(getProject());
-									else 
-										return spec.getParsedIssueQuery(getProject());
-								}
-								
-							};						
+						protected Project getProject() {
+							return getIssue().getProject();
 						}
-					};
+						
+						@Override
+						protected IssueQuery getBaseQuery() {
+							LinkSpec spec = getLinkSpecManager().load(specId);
+							if (opposite) 
+								return spec.getOpposite().getParsedIssueQuery(getProject());
+							else 
+								return spec.getParsedIssueQuery(getProject());
+						}
+						
+					};						
 				}
 
-				private FormComponent<Issue> issuePopulator;
+				private FormComponent<?> newLinkExistingPanel(String componentId) {
+					LinkSpec spec = getLinkSpecManager().load(specId);
+					if (!opposite && spec.isMultiple() || opposite && spec.getOpposite().isMultiple()) {
+						return new SelectIssuesPanel(componentId) {
+
+							@Override
+							protected IssueChoiceProvider getChoiceProvider() {
+								return getIssueChoiceProvider();						
+							}
+						};
+					} else {
+						return new SelectIssuePanel(componentId) {
+							@Override
+							protected IssueChoiceProvider getChoiceProvider() {
+								return getIssueChoiceProvider();
+							}
+						};
+					}
+				}
+
+				private FormComponent<?> issuePopulator;
 
 				@Override
 				protected Component newContent(String id) {
@@ -511,30 +525,50 @@ public abstract class IssuePrimaryPanel extends Panel {
 					form.add(new Label("title", MessageFormat.format(_T("Add {0}"), linkName)));
 
 					form.add(new AjaxButton("save") {
+						@SuppressWarnings("unchecked")
 						@Override
 						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-							var linkIssue = issuePopulator.getConvertedInput();
-							if (linkIssue.isNew()) {
-								getIssueManager().open(linkIssue);
-								notifyIssueChange(target, linkIssue);
-								var spec = getLinkSpecManager().load(specId);
-								getIssueChangeManager().addLink(spec, getIssue(), linkIssue, opposite);
-								notifyIssueChange(target, getIssue());
-								close();							
-							} else {
-								LinkSpec spec = getLinkSpecManager().load(specId);
-								if (getIssue().getId().equals(linkIssue.getId())) {
-									form.error(_T("Can not link to self"));
-									target.add(form);
-								} else if (getIssue().findLinkedIssues(spec, opposite).contains(linkIssue)) { 
-									form.error(_T("Issue already linked"));
-									target.add(form);
-								} else {
-									getIssueChangeManager().addLink(spec, getIssue(), linkIssue, opposite);
-									notifyIssueChange(target, getIssue());
+							var convertedInput = issuePopulator.getConvertedInput();
+							if (convertedInput instanceof Issue) {
+								var linkIssue = (Issue) convertedInput;
+								if (linkIssue.isNew()) {
+									getIssueManager().open(linkIssue);
+									notifyIssueChange(target, linkIssue);
+									addLink(target, linkIssue);
 									close();
-								}	
+								} else if (checkLink(target, linkIssue)) {
+									addLink(target, linkIssue);
+									close();
+								}
+							} else {
+								var linkIssues = (List<Issue>) convertedInput;
+								if (linkIssues.stream().noneMatch(it->!checkLink(target, it))) {
+									for (var linkIssue: linkIssues) 
+										addLink(target, linkIssue);
+									close();
+								}
 							}
+						}
+
+						private boolean checkLink(AjaxRequestTarget target, Issue linkIssue) {
+							LinkSpec spec = getLinkSpecManager().load(specId);
+							if (getIssue().getId().equals(linkIssue.getId())) {
+								form.error(_T("Can not link to self: " + linkIssue.getReference().toString(getProject())));
+								target.add(form);
+								return false;
+							} else if (getIssue().findLinkedIssues(spec, opposite).contains(linkIssue)) { 
+								form.error(_T("Issue already linked: " + linkIssue.getReference().toString(getProject())));
+								target.add(form);
+								return false;
+							} else {
+								return true;
+							}	
+						}
+
+						private void addLink(AjaxRequestTarget target, Issue linkIssue) {
+							LinkSpec spec = getLinkSpecManager().load(specId);
+							getIssueChangeManager().addLink(spec, getIssue(), linkIssue, opposite);
+							notifyIssueChange(target, getIssue());
 						}
 
 						@Override

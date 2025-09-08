@@ -13,7 +13,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.web.component.issue.choice.IssueChoice;
+import io.onedev.server.web.component.issue.choice.IssueSingleChoice;
 import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -22,7 +22,7 @@ import io.onedev.server.web.util.ProjectAware;
 
 public class IssueChoiceEditor extends PropertyEditor<Long> {
 
-	private IssueChoice input;
+	private IssueSingleChoice input;
 	
 	public IssueChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
 			IModel<Long> propertyModel) {
@@ -64,7 +64,7 @@ public class IssueChoiceEditor extends PropertyEditor<Long> {
 			}
 			
 		};
-    	input = new IssueChoice("input", Model.of(issue), choiceProvider) {
+    	input = new IssueSingleChoice("input", Model.of(issue), choiceProvider) {
 
     		@Override
 			protected void onInitialize() {

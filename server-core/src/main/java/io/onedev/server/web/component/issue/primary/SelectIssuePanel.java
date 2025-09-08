@@ -8,14 +8,14 @@ import org.apache.wicket.model.Model;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.web.component.issue.choice.IssueChoice;
 import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
+import io.onedev.server.web.component.issue.choice.IssueSingleChoice;
 
 abstract class SelectIssuePanel extends FormComponentPanel<Issue> {
 
     private Long issueId;
 
-    private IssueChoice choice;
+    private IssueSingleChoice choice;
 
     public SelectIssuePanel(String id) {
         super(id, Model.of((Issue)null));
@@ -26,7 +26,7 @@ abstract class SelectIssuePanel extends FormComponentPanel<Issue> {
         super.onInitialize();
 
         add(new FencedFeedbackPanel("feedback"));
-        choice = new IssueChoice("choice", new IModel<Issue>() {
+        choice = new IssueSingleChoice("choice", new IModel<Issue>() {
 
             @Override
             public void detach() {
