@@ -4,24 +4,22 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.EditContext;
-import io.onedev.server.web.component.issue.workflowreconcile.WorkflowReconcilePanel.UndefinedFieldValueContainer;
 import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
-import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.web.component.issue.workflowreconcile.WorkflowReconcilePanel.UndefinedFieldValueContainer;
 
 @Editable
 public class UndefinedFieldValueResolution implements Serializable {
@@ -47,7 +45,7 @@ public class UndefinedFieldValueResolution implements Serializable {
 
 	@Editable(order=100)
 	@ChoiceProvider("getValueChoices")
-	@ShowCondition("isNewValueVisible")
+	@DependsOn(property="fixType", value="CHANGE_TO_ANOTHER_VALUE")
 	@OmitName
 	@NotEmpty
 	public String getNewValue() {
@@ -58,11 +56,6 @@ public class UndefinedFieldValueResolution implements Serializable {
 		this.newValue = newValue;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isNewValueVisible() {
-		return EditContext.get().getInputValue("fixType") == FixType.CHANGE_TO_ANOTHER_VALUE;
-	}
-	
 	@SuppressWarnings("unused")
 	private static List<String> getValueChoices() {
 		UndefinedFieldValueContainer container = ComponentContext.get().getComponent()

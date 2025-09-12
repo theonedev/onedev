@@ -1,18 +1,18 @@
 package io.onedev.server.model.support.administration;
 
-import io.onedev.server.job.JobAuthorizationContext;
-import io.onedev.server.util.EditContext;
-import io.onedev.server.util.usage.Usage;
-import io.onedev.server.annotation.Code;
-import io.onedev.server.annotation.RegEx;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.JobMatch;
-import io.onedev.server.annotation.ShowCondition;
+import java.io.Serializable;
+import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.util.List;
+
+import io.onedev.server.annotation.Code;
+import io.onedev.server.annotation.DependsOn;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.JobMatch;
+import io.onedev.server.annotation.RegEx;
+import io.onedev.server.job.JobAuthorizationContext;
+import io.onedev.server.util.usage.Usage;
 
 @Editable
 public class GroovyScript implements Serializable {
@@ -60,13 +60,8 @@ public class GroovyScript implements Serializable {
 		this.canBeUsedByBuildJobs = canBeUsedByBuildJobs;
 	}
 	
-	@SuppressWarnings("unused")
-	private static boolean isCanBeUsedByBuildJobsEnabled() {
-		return (boolean) EditContext.get().getInputValue("canBeUsedByBuildJobs");
-	}
-	
 	@Editable(order=500, placeholder="Any job", description="Optionally specify jobs allowed to use this script")
-	@ShowCondition("isCanBeUsedByBuildJobsEnabled")
+	@DependsOn(property="canBeUsedByBuildJobs")
 	@JobMatch(withProjectCriteria = true)
 	public String getAuthorization() {
 		return authorization;

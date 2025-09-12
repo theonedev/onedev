@@ -4,18 +4,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
-import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 
 @Editable
 public class UndefinedStateResolution implements Serializable {
@@ -41,7 +39,7 @@ public class UndefinedStateResolution implements Serializable {
 
 	@Editable(order=100)
 	@ChoiceProvider("getStateChoices")
-	@ShowCondition("isNewStateVisible")
+	@DependsOn(property="fixType", value="CHANGE_TO_ANOTHER_STATE")
 	@OmitName
 	@NotEmpty
 	public String getNewState() {
@@ -51,12 +49,7 @@ public class UndefinedStateResolution implements Serializable {
 	public void setNewState(String newState) {
 		this.newState = newState;
 	}
-	
-	@SuppressWarnings("unused")
-	private static boolean isNewStateVisible() {
-		return EditContext.get().getInputValue("fixType") == FixType.CHANGE_TO_ANOTHER_STATE;
-	}
-	
+		
 	@SuppressWarnings("unused")
 	private static List<String> getStateChoices() {
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();

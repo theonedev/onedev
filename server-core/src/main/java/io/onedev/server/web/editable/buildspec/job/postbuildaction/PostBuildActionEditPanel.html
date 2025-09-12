@@ -1,7 +1,7 @@
 <wicket:panel>
 	<form wicket:id="form" class="post-build-action-edit leave-confirm">
 		<div class="modal-header">
-			<h5 id="modal-title" class="modal-title">Post Build Action</h5>
+			<h5 id="modal-title" class="modal-title"><wicket:t>Post Build Action</wicket:t></h5>
 			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 		</div>
 		<div class="modal-body">
@@ -9,7 +9,7 @@
 		</div>
 		<div class="modal-footer">
 			<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" t:value="Save">
-			<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+			<a wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></a>
 		</div>
 	</form>
 </wicket:panel>

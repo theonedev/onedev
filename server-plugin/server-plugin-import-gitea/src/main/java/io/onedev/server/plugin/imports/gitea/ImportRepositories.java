@@ -1,10 +1,17 @@
 package io.onedev.server.plugin.imports.gitea;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.Size;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
@@ -12,12 +19,6 @@ import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.editable.BeanEditor;
-
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.Size;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Editable
 @ClassValidating
@@ -59,18 +60,9 @@ public class ImportRepositories extends ImportOrganization implements Validatabl
 	public void setAll(boolean all) {
 		this.all = all;
 	}
-	
-	private static boolean isAllEnabled() {
-		return (Boolean)EditContext.get().getInputValue("all");
-	}
 
-	@SuppressWarnings("unused")
-	private static boolean isAllDisabled() {
-		return !isAllEnabled();
-	}
-	
 	@Editable(order=400, description="Whether or not to import forked Gitea repositories")
-	@ShowCondition("isAllEnabled")
+	@DependsOn(property="all")
 	public boolean isIncludeForks() {
 		return includeForks;
 	}
@@ -81,7 +73,7 @@ public class ImportRepositories extends ImportOrganization implements Validatabl
 
 	@Editable(order=500, name="Gitea Repositories to Import")
 	@ChoiceProvider("getGiteaRepositoryChoices")
-	@ShowCondition("isAllDisabled")
+	@DependsOn(property="all", value="false")
 	@Size(min=1, message="At least one repository should be selected")
 	public List<String> getGiteaRepositories() {
 		return giteaRepositories;

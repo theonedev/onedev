@@ -45,6 +45,9 @@ public interface BuildManager extends EntityManager<Build> {
 							@Nullable String refName, @Nullable Optional<PullRequest> request, 
 							@Nullable Optional<Issue> issue, Map<String, List<String>> params);
 
+	@Nullable
+	Build findPreviousSuccessfulSimilar(Build build);
+
 	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName);
 
 	Collection<Build> query(Project project, ObjectId commitId);

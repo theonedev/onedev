@@ -1,33 +1,49 @@
 package io.onedev.server.plugin.authenticator.ldap;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
-import io.onedev.server.annotation.ShowCondition;
-import io.onedev.server.model.support.administration.authenticator.Authenticated;
-import io.onedev.server.model.support.administration.authenticator.Authenticator;
-import io.onedev.server.security.TrustCertsSSLSocketFactory;
-import io.onedev.server.util.EditContext;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+
+import javax.annotation.Nullable;
+import javax.naming.AuthenticationException;
+import javax.naming.CompositeName;
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.PartialResultException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import javax.naming.*;
-import javax.naming.directory.*;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.*;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.annotation.DependsOn;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
+import io.onedev.server.model.support.administration.authenticator.Authenticated;
+import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.security.TrustCertsSSLSocketFactory;
 
 @Editable(name="Generic LDAP", order=200)
 public class LdapAuthenticator extends Authenticator {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final String PROP_AUTHENTICATION_REQUIRED = "authenticationRequired";
+	protected static final String PROP_AUTHENTICATION_REQUIRED = "authenticationRequired";
 	
 	private static final Logger logger  = LoggerFactory.getLogger(LdapAuthenticator.class);
 
@@ -74,14 +90,9 @@ public class LdapAuthenticator extends Authenticator {
 	public void setAuthenticationRequired(boolean authenticationRequired) {
 		this.authenticationRequired = authenticationRequired;
 	}
-
-	@SuppressWarnings("unused")
-	private static boolean isAuthenticationRequiredEnabled() {
-		return (boolean) EditContext.get().getInputValue(PROP_AUTHENTICATION_REQUIRED);
-	}
 	
 	@Editable(order=300, description="Specify manager DN to authenticate OneDev itself to LDAP server")
-	@ShowCondition("isAuthenticationRequiredEnabled")
+	@DependsOn(property=PROP_AUTHENTICATION_REQUIRED)
 	@NotEmpty
 	public String getManagerDN() {
 		return managerDN;
@@ -93,7 +104,7 @@ public class LdapAuthenticator extends Authenticator {
 
 	@Editable(order=400, description="Specifies password of above manager DN")
 	@Password
-	@ShowCondition("isAuthenticationRequiredEnabled")
+	@DependsOn(property=PROP_AUTHENTICATION_REQUIRED)
 	@NotEmpty
 	public String getManagerPassword() {
 		return managerPassword;

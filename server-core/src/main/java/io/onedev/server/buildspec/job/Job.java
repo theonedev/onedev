@@ -32,6 +32,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.RetryCondition;
@@ -105,7 +106,7 @@ public class Job implements NamedElement, Validatable {
 	
 	private String sequentialGroup;
 	
-	private String retryCondition = "never";
+	private String retryCondition;
 	
 	private int maxRetries = 3;
 	
@@ -279,8 +280,7 @@ public class Job implements NamedElement, Validatable {
 		this.sequentialGroup = sequentialGroup;
 	}
 	
-	@Editable(order=9400, group="More Settings", description="Specify condition to retry build upon failure")
-	@NotEmpty
+	@Editable(order=9400, placeholder="Never retry", group="More Settings", description="Specify condition to retry build upon failure")
 	@RetryCondition
 	public String getRetryCondition() {
 		return retryCondition;
@@ -292,6 +292,7 @@ public class Job implements NamedElement, Validatable {
 
 	@Editable(order=9410, group="More Settings", description="Maximum of retries before giving up")
 	@Min(value=1, message="This value should not be less than 1")
+	@DependsOn(property="retryCondition")
 	public int getMaxRetries() {
 		return maxRetries;
 	}
@@ -304,6 +305,7 @@ public class Job implements NamedElement, Validatable {
 			"Delay of subsequent retries will be calculated using an exponential back-off based on " +
 			"this value")
 	@Min(value=1, message="This value should not be less than 1")
+	@DependsOn(property="retryCondition")
 	public int getRetryDelay() {
 		return retryDelay;
 	}

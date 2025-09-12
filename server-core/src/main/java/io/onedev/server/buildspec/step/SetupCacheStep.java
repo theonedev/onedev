@@ -1,6 +1,5 @@
 package io.onedev.server.buildspec.step;
 
-import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.UPLOAD_IF_CHANGED;
 import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.UPLOAD_IF_NOT_HIT;
 import static java.util.stream.Collectors.toList;
 
@@ -15,16 +14,15 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.SetupCacheFacade;
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.ProjectChoice;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.util.EditContext;
 
 @Editable(order=55, name="Set Up Cache", description = "Set up job cache to speed up job execution. " +
 		"Check <a href='https://docs.onedev.io/tutorials/cicd/job-cache' target='_blank'>this tutorial</a> " +
@@ -103,18 +101,13 @@ public class SetupCacheStep extends Step {
 			"detect cache changes. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. " +
 			"Multiple files should be separated by space, and single file containing space should be quoted")
 	@Interpolative(variableSuggester="suggestVariables")
-	@ShowCondition("isUploadIfChanged")
+	@DependsOn(property="uploadStrategy", value="UPLOAD_IF_CHANGED")
 	public String getChangeDetectionExcludes() {
 		return changeDetectionExcludes;
 	}
 	
 	public void setChangeDetectionExcludes(String changeDetectionExcludes) {
 		this.changeDetectionExcludes = changeDetectionExcludes;
-	}
-
-	@SuppressWarnings("unused")
-	private static boolean isUploadIfChanged() {
-		return UPLOAD_IF_CHANGED == EditContext.get().getInputValue("uploadStrategy");	
 	}
 	
 	@Editable(order=450, name="Upload to Project", placeholder = "Current project", description = "In case cache needs to be uploaded, this property " +

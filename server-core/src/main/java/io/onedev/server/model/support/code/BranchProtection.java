@@ -1,14 +1,36 @@
 package io.onedev.server.model.support.code;
 
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+
+import org.eclipse.jgit.lib.ObjectId;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.JobChoice;
 import io.onedev.server.annotation.Patterns;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.service.GitService;
@@ -16,26 +38,12 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.usermatch.Anyone;
 import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.util.SuggestionUtils;
-import org.eclipse.jgit.lib.ObjectId;
-
-import javax.annotation.Nullable;
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
-import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
 
 @Editable
 public class BranchProtection implements Serializable {
@@ -166,14 +174,9 @@ public class BranchProtection implements Serializable {
 		this.enforceConventionalCommits = enforceConventionalCommits;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isEnforceConventionalCommitsEnabled() {
-		return (boolean) EditContext.get().getInputValue("enforceConventionalCommits");
-	}
-
 	@Editable(order=380, placeholder = "Arbitrary type", description = "Optionally specify valid " +
 			"types of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary type")
-	@ShowCondition("isEnforceConventionalCommitsEnabled")
+	@DependsOn(property="enforceConventionalCommits")
 	public List<String> getCommitTypes() {
 		return commitTypes;
 	}
@@ -184,7 +187,7 @@ public class BranchProtection implements Serializable {
 
 	@Editable(order=390, placeholder = "Arbitrary scope", description = "Optionally specify valid " +
 			"scopes of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary scope")
-	@ShowCondition("isEnforceConventionalCommitsEnabled")
+	@DependsOn(property="enforceConventionalCommits")
 	public List<String> getCommitScopes() {
 		return commitScopes;
 	}
@@ -194,7 +197,7 @@ public class BranchProtection implements Serializable {
 	}
 
 	@Editable(order=391)
-	@ShowCondition("isEnforceConventionalCommitsEnabled")
+	@DependsOn(property="enforceConventionalCommits")
 	public boolean isCheckCommitMessageFooter() {
 		return checkCommitMessageFooter;
 	}
@@ -203,15 +206,10 @@ public class BranchProtection implements Serializable {
 		this.checkCommitMessageFooter = checkCommitMessageFooter;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isCheckCommitMessageFooterEnabled() {
-		return (boolean) EditContext.get().getInputValue("checkCommitMessageFooter");
-	}
-	
 	@Editable(order=393, description = "A " +
 			"<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> " +
 			"to validate commit message footer")
-	@ShowCondition("isCheckCommitMessageFooterEnabled")
+	@DependsOn(property="checkCommitMessageFooter")
 	@NotEmpty
 	public String getCommitMessageFooterPattern() {
 		return commitMessageFooterPattern;
@@ -223,7 +221,7 @@ public class BranchProtection implements Serializable {
 
 	@Editable(order=394, description = "Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). " +
 			"Leave empty to all types")
-	@ShowCondition("isCheckCommitMessageFooterEnabled")
+	@DependsOn(property="checkCommitMessageFooter")
 	public List<String> getCommitTypesForFooterCheck() {
 		return commitTypesForFooterCheck;
 	}

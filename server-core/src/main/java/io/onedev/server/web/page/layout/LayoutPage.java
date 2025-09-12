@@ -69,7 +69,6 @@ import io.onedev.server.entitymanager.AlertManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Alert;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.updatecheck.UpdateCheckManager;
@@ -512,11 +511,7 @@ public abstract class LayoutPage extends BasePage {
 		});
 
 		var version = AppLoader.getProduct().getVersion();
-		var brandingSetting = getSettingManager().getBrandingSetting();
-		if (brandingSetting.isOEM())
-			sidebar.add(new ExternalLink("productVersion", brandingSetting.getUrl(), brandingSetting.getName() + " " + version));
-		else
-			sidebar.add(new ExternalLink("productVersion", BrandingSetting.DEFAULT_URL, BrandingSetting.DEFAULT_NAME + " " + version));
+		sidebar.add(new ExternalLink("productVersion", "https://onedev.io", "OneDev " + version));
 		
 		sidebar.add(new WebMarkupContainer("tryEE") {
 			@Override

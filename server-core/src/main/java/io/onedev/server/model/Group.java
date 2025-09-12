@@ -15,14 +15,13 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.jetbrains.annotations.Nullable;
 
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.security.permission.CreateRootProjects;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.SystemAdministration;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.facade.UserFacade;
 
@@ -91,13 +90,8 @@ public class Group extends AbstractEntity implements BasePermission {
 		this.administrator = administrator;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isAdministratorDisabled() {
-		return !(boolean) EditContext.get().getInputValue("administrator");
-	}
-
 	@Editable(order=350, name="Can Create Root Projects", description="Whether or not to allow creating root projects (project without parent)")
-	@ShowCondition("isAdministratorDisabled")
+	@DependsOn(property="administrator", value="false")
 	public boolean isCreateRootProjects() {
 		return createRootProjects;
 	}

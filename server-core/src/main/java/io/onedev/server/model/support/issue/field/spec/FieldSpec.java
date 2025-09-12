@@ -14,6 +14,7 @@ import org.apache.wicket.MarkupContainer;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.FieldName;
 import io.onedev.server.annotation.Multiline;
@@ -113,7 +114,7 @@ public abstract class FieldSpec extends InputSpec {
 	}
 	
 	@Editable(order=60)
-	@io.onedev.server.annotation.ShowCondition("isNameOfEmptyValueVisible")
+	@DependsOn(property="allowEmpty")
 	@NotEmpty
 	public String getNameOfEmptyValue() {
 		return nameOfEmptyValue;
@@ -123,11 +124,6 @@ public abstract class FieldSpec extends InputSpec {
 		this.nameOfEmptyValue = nameOfEmptyValue;
 	}
 	
-	@SuppressWarnings("unused")
-	private static boolean isNameOfEmptyValueVisible() {
-		return (boolean) EditContext.get().getInputValue("allowEmpty");
-	}
-
 	@Editable(order=10000, name="Include When Issue is Opened", description="Whether or not to include this field when issue is initially opened. " +
 			"If not, you may include this field later when issue is transited to other states via issue transition rule")
 	public boolean isPromptUponIssueOpen() {
@@ -138,16 +134,11 @@ public abstract class FieldSpec extends InputSpec {
 		this.promptUponIssueOpen = promptUponIssueOpen;
 	}
 	
-	@SuppressWarnings("unused")
-	private static boolean isPromptUponIssueOpenEnabled() {
-		return Boolean.TRUE.equals(EditContext.get().getInputValue("promptUponIssueOpen"));
-	}
-
 	@Editable(order=10100, placeholder="All projects", description="Specify applicable projects for above option. "
 			+ "Multiple projects should be separated by space. Use '**', '*' or '?' for "
 			+ "<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty for all projects")
-	@io.onedev.server.annotation.ShowCondition("isPromptUponIssueOpenEnabled")
+	@DependsOn(property="promptUponIssueOpen")
 	@Patterns(suggester="suggestProjects", path=true)
 	public String getApplicableProjects() {
 		return applicableProjects;

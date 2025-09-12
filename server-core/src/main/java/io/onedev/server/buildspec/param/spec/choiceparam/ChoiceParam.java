@@ -7,15 +7,14 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import io.onedev.server.annotation.DependsOn;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.param.spec.choiceparam.defaultmultivalueprovider.DefaultMultiValueProvider;
 import io.onedev.server.buildspec.param.spec.choiceparam.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.util.EditContext;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.ShowCondition;
 
 @Editable(order=145, name= ParamSpec.ENUMERATION)
 public class ChoiceParam extends ParamSpec {
@@ -39,8 +38,8 @@ public class ChoiceParam extends ParamSpec {
 		this.choiceProvider = choiceProvider;
 	}
 
-	@ShowCondition("isDefaultValueProviderVisible")
 	@Editable(order=1100, name="Default Value", placeholder="No default value")
+	@DependsOn(property="allowMultiple", value="false")
 	@Valid
 	public DefaultValueProvider getDefaultValueProvider() {
 		return defaultValueProvider;
@@ -50,13 +49,8 @@ public class ChoiceParam extends ParamSpec {
 		this.defaultValueProvider = defaultValueProvider;
 	}
 	
-	@SuppressWarnings("unused")
-	private static boolean isDefaultValueProviderVisible() {
-		return EditContext.get().getInputValue("allowMultiple").equals(false);
-	}
-
-	@ShowCondition("isDefaultMultiValueProviderVisible")
 	@Editable(order=1100, name="Default Value", placeholder="No default value")
+	@DependsOn(property="allowMultiple")
 	@Valid
 	public DefaultMultiValueProvider getDefaultMultiValueProvider() {
 		return defaultMultiValueProvider;
@@ -66,11 +60,6 @@ public class ChoiceParam extends ParamSpec {
 		this.defaultMultiValueProvider = defaultMultiValueProvider;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isDefaultMultiValueProviderVisible() {
-		return EditContext.get().getInputValue("allowMultiple").equals(true);
-	}
-	
 	@Override
 	public List<String> getPossibleValues() {
 		return ChoiceInput.getPossibleValues(choiceProvider);

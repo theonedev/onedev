@@ -23,7 +23,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.img.ImageScope;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -77,7 +76,6 @@ public class BrandingSettingPage extends AdministrationPage {
 		var setting = getSettingManager().getBrandingSetting();
 		var bean = new BrandSettingEditBean();
 		bean.setName(setting.getName());
-		bean.setUrl(setting.getUrl());
 		bean.setLogoData(getLogoData(false));
 		bean.setDarkLogoData(getLogoData(true));
 		
@@ -86,7 +84,6 @@ public class BrandingSettingPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				setting.setName(bean.getName());
-				setting.setUrl(bean.getUrl());
 				getSettingManager().saveBrandingSetting(setting);
 				getAuditManager().audit(null, "changed branding settings", null, null);
 				if (!bean.getLogoData().equals(getDefaultLogoData(false))) {
@@ -106,8 +103,7 @@ public class BrandingSettingPage extends AdministrationPage {
 
 			@Override
 			public void onClick() {
-				setting.setName(BrandingSetting.DEFAULT_NAME);
-				setting.setUrl(BrandingSetting.DEFAULT_URL);
+				setting.setName("OneDev");
 				getSettingManager().saveBrandingSetting(setting);
 				getAuditManager().audit(null, "changed branding settings", null, null);
 				getClusterManager().runOnAllServers(new UpdateLogoTask(null, false));
@@ -119,7 +115,7 @@ public class BrandingSettingPage extends AdministrationPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!setting.getName().equals(BrandingSetting.DEFAULT_NAME) 
+				setVisible(!setting.getName().equals("OneDev") 
 						|| getCustomLogoFile(false).exists() 
 						|| getCustomLogoFile(true).exists());
 			}

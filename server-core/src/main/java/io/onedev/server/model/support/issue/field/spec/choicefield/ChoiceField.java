@@ -7,16 +7,15 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import io.onedev.server.annotation.DependsOn;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultmultivalueprovider.DefaultMultiValueProvider;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.ShowCondition;
 
 @Editable(order=145, name= FieldSpec.ENUMERATION)
 public class ChoiceField extends FieldSpec {
@@ -40,7 +39,7 @@ public class ChoiceField extends FieldSpec {
 		this.choiceProvider = choiceProvider;
 	}
 
-	@ShowCondition("isDefaultValueProviderVisible")
+	@DependsOn(property="allowMultiple", value="false")
 	@Editable(order=1100, name="Default Value", placeholder="No default value")
 	@Valid
 	public DefaultValueProvider getDefaultValueProvider() {
@@ -51,12 +50,7 @@ public class ChoiceField extends FieldSpec {
 		this.defaultValueProvider = defaultValueProvider;
 	}
 	
-	@SuppressWarnings("unused")
-	private static boolean isDefaultValueProviderVisible() {
-		return EditContext.get().getInputValue("allowMultiple").equals(false);
-	}
-
-	@ShowCondition("isDefaultMultiValueProviderVisible")
+	@DependsOn(property="allowMultiple")
 	@Editable(order=1100, name="Default Value", placeholder="No default value")
 	@Valid
 	public DefaultMultiValueProvider getDefaultMultiValueProvider() {
@@ -67,11 +61,6 @@ public class ChoiceField extends FieldSpec {
 		this.defaultMultiValueProvider = defaultMultiValueProvider;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isDefaultMultiValueProviderVisible() {
-		return EditContext.get().getInputValue("allowMultiple").equals(true);
-	}
-	
 	@Override
 	public List<String> getPossibleValues() {
 		return ChoiceInput.getPossibleValues(choiceProvider);

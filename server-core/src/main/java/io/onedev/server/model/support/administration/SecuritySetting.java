@@ -4,10 +4,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.GroupChoice;
 import io.onedev.server.annotation.Patterns;
-import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.util.usage.Usage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +59,7 @@ public class SecuritySetting implements Serializable {
 
 	@Editable(order=225, name="Allowed Self Sign-Up Email Domain", placeholder = "Any domain", description = "Optionally specify allowed email domain for self sign-up users. Use '*' or '?' for pattern match")
 	@Patterns
-	@ShowCondition("isEnableSelfRegisterEnabled")
+	@DependsOn(property="enableSelfRegister")
 	public String getAllowedSelfRegisterEmailDomain() {
 		return allowedSelfRegisterEmailDomain;
 	}
@@ -69,11 +68,6 @@ public class SecuritySetting implements Serializable {
 		this.allowedSelfRegisterEmailDomain = allowedSelfRegisterEmailDomain;
 	}
 	
-	@SuppressWarnings("unused")
-	private static boolean isEnableSelfRegisterEnabled() {
-		return (boolean) EditContext.get().getInputValue("enableSelfRegister");
-	}
-
 	@Editable(order=250, name="Enforce Password Policy", description="Enforce password policy for new users")
 	public PasswordPolicy getPasswordPolicy() {
 		return passwordPolicy;

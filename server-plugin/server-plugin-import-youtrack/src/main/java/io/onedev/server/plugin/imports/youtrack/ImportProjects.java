@@ -10,12 +10,11 @@ import javax.validation.constraints.Size;
 
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.editable.BeanEditor;
 
@@ -61,14 +60,9 @@ public class ImportProjects implements Serializable, Validatable {
 		this.all = all;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isAllDisabled() {
-		return !(Boolean) EditContext.get().getInputValue("all");
-	}
-
 	@Editable(order=500, name="YouTrack Projects to Import")
 	@ChoiceProvider("getYouTrackProjectChoices")
-	@ShowCondition("isAllDisabled")
+	@DependsOn(property="all", value="false")
 	@Size(min=1, message="At least one project should be selected")
 	public List<String> getYouTrackProjects() {
 		return youTrackProjects;

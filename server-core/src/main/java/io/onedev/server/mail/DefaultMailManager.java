@@ -105,7 +105,6 @@ import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.IssueCreationSetting;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
@@ -330,7 +329,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 				}
 			}
 			
-			if (senderName == null || senderName.equalsIgnoreCase(BrandingSetting.DEFAULT_NAME)) 
+			if (senderName == null || senderName.equalsIgnoreCase("onedev")) 
 				senderName = getQuoteMark();
 			else 
 				senderName += " " + getQuoteMark();

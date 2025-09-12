@@ -15,10 +15,13 @@ import javax.validation.constraints.Size;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.util.ReflectionUtils;
 
 public class PropertyDescriptor implements Serializable {
@@ -166,6 +169,35 @@ public class PropertyDescriptor implements Serializable {
 			ShowCondition showCondition = getPropertyGetter().getAnnotation(ShowCondition.class);
 			if (showCondition != null && !(boolean)ReflectionUtils.invokeStaticMethod(getBeanClass(), showCondition.value()))
 				return false;
+			DependsOn dependsOn = getPropertyGetter().getAnnotation(DependsOn.class);
+			if (dependsOn != null) {
+				var dependencyProperty = beanDescriptor.getProperty(dependsOn.property());
+				if (dependencyProperty == null) {
+					throw new ExplicitException("Dependency property not found: " + dependsOn.property());
+				}
+				var dependencyPropertyValue = EditContext.get().getInputValue(dependsOn.property());				
+				if (dependsOn.value().length() != 0) {
+					if (dependencyPropertyValue != null && dependencyPropertyValue.toString().equals(dependsOn.value())) {
+						if (dependsOn.inverse())
+							return false;
+					} else if (!dependsOn.inverse()) {
+						return false;
+					}
+				} else {
+					if (dependencyProperty.getPropertyClass() == boolean.class) {
+						boolean requiredPropertyValue = !dependsOn.inverse();
+						if (requiredPropertyValue != (boolean)dependencyPropertyValue)
+							return false;
+					} else if (dependencyProperty.getPropertyClass() == int.class || dependencyProperty.getPropertyClass() == long.class || dependencyProperty.getPropertyClass() == double.class || dependencyProperty.getPropertyClass() == float.class) {
+						int dependencyPropertyIntValue = (int) dependencyPropertyValue;
+						if (dependsOn.inverse() && dependencyPropertyIntValue != 0 || !dependsOn.inverse() && dependencyPropertyIntValue == 0)
+							return false;
+					} else {
+						if (dependsOn.inverse() && dependencyPropertyValue != null || !dependsOn.inverse() && dependencyPropertyValue == null)
+							return false;
+					}
+				}
+			}
 			getDependencyPropertyNames().remove(getPropertyName());
 			for (String dependencyPropertyName: getDependencyPropertyNames()) {
 				Set<String> copyOfCheckedPropertyNames = new HashSet<>(checkedPropertyNames);

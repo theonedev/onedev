@@ -1,12 +1,12 @@
 package io.onedev.server.plugin.authenticator.ldap;
 
+import java.util.List;
+
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.ShowCondition;
-
-import java.util.List;
 
 @Editable(name="Active Directory", order=100)
 public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
@@ -34,7 +34,7 @@ public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
 			+ "Specify manager DN to authenticate OneDev itself to Active Directory. The manager DN should be specified "
 			+ "in form of <i>&lt;account name&gt;@&lt;domain&gt;</i>, for instance: <i>manager@example.com</i>")
 	@NotEmpty
-	@ShowCondition("isAuthenticationRequiredEnabled")
+	@DependsOn(property=PROP_AUTHENTICATION_REQUIRED)
 	@Override
 	public String getManagerDN() {
 		return super.getManagerDN();

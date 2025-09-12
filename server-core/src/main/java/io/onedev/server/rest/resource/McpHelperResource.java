@@ -1,6 +1,7 @@
-package io.onedev.server.ai;
+package io.onedev.server.rest.resource;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +19,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -40,6 +42,8 @@ import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.SubscriptionManager;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.data.migration.VersionedYamlDoc;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
@@ -454,10 +458,8 @@ public class McpHelperResource {
 
     private Project getProject(String projectPath) {
         var project = projectManager.findByPath(projectPath);
-        if (project == null)
-            throw new NotFoundException("Project not found: " + projectPath);
-        if (!SecurityUtils.canAccessProject(project))
-            throw new UnauthorizedException("Unable to access project: " + projectPath);
+        if (project == null || !SecurityUtils.canAccessProject(project))
+            throw new NotFoundException("Project not found or inaccessible: " + projectPath);
         return project;
     }
 
@@ -1331,7 +1333,6 @@ public class McpHelperResource {
                 pullRequestMap.put("status", PullRequest.Status.OPEN.name() + " (ready to merge)");
         } 
         pullRequestMap.remove("uuid");
-        pullRequestMap.remove("baseCommitHash");
         pullRequestMap.remove("buildCommitHash");
         pullRequestMap.remove("submitTimeGroups");
         pullRequestMap.remove("closeTimeGroups");
@@ -1439,10 +1440,10 @@ public class McpHelperResource {
 
         return buildMap;
     }
-
-    @Path("/get-previous-successful-build")
+    
+    @Path("/get-previous-successful-similar-build")
     @GET
-    public Map<String, Object> getPreviousSuccessfulBuild(
+    public Map<String, Object> getPreviousSuccessfulSimilarBuild(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String buildReference) {
         if (SecurityUtils.getAuthUser() == null)
@@ -1452,16 +1453,28 @@ public class McpHelperResource {
 
         var build = getBuild(currentProject, buildReference);
                 
-        var previousSuccessfulBuild = buildManager.findStreamPrevious(build, Build.Status.SUCCESSFUL);
-        if (previousSuccessfulBuild != null) {
-            var buildMap = getBuildMap(currentProject, previousSuccessfulBuild);     
-            buildMap.put("params", previousSuccessfulBuild.getParamMap());
-            buildMap.put("labels", previousSuccessfulBuild.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
-            buildMap.put("link", urlManager.urlFor(previousSuccessfulBuild, true));
+        var foundBuild = buildManager.findPreviousSuccessfulSimilar(build);
+        if (foundBuild != null) {
+            var buildMap = getBuildMap(currentProject, foundBuild);     
+            buildMap.put("params", foundBuild.getParamMap());
+            buildMap.put("labels", foundBuild.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
+            buildMap.put("link", urlManager.urlFor(foundBuild, true));
             return buildMap;    
         } else {
-            throw new NotFoundException("Previous successful build not found");
+            throw new NotFoundException("Previous successful similar build not found");
         }
+    }
+
+    @Path("/migrate-build-spec")
+    @POST
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String migrateBuildSpec(@NotNull String buildSpecString) {
+        if (SecurityUtils.getAuthUser() == null)
+            throw new UnauthenticatedException();
+
+        var buildSpec = BuildSpec.parse(buildSpecString.getBytes(StandardCharsets.UTF_8));
+        return VersionedYamlDoc.fromBean(buildSpec).toYaml(); 
     }
 
     @Path("/get-pull-request")
@@ -1489,6 +1502,11 @@ public class McpHelperResource {
             reviews.add(reviewMap);
         }        
         pullRequestMap.put("reviews", reviews);
+        var builds = new ArrayList<String>();
+        for (var build : pullRequest.getBuilds()) {
+            builds.add(build.getReference().toString(currentProject) + " (job: " + build.getJobName() + ", status: " + build.getStatus() + ")");
+        }
+        pullRequestMap.put("builds", builds);
         pullRequestMap.put("labels", pullRequest.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
         pullRequestMap.put("link", urlManager.urlFor(pullRequest, true));
 
@@ -2092,11 +2110,16 @@ public class McpHelperResource {
         if (reason == null)
             throw new NotAcceptableException("Reason is required");
             
-        Build build = jobManager.submit(project, ObjectId.fromString(commitHash), jobName, 
-            params, refName, SecurityUtils.getUser(), null, 
-            null, reason);
-        if (build.isFinished())
-            jobManager.resubmit(build, reason);
+        Build build;
+        try {
+            build = jobManager.submit(project, ObjectId.fromString(commitHash), jobName, 
+                params, refName, SecurityUtils.getUser(), null, 
+                null, reason);
+            if (build.isFinished())
+                jobManager.resubmit(build, reason);
+        } catch (ValidationException e) {
+            throw new NotAcceptableException(e.getMessage());
+        }
 
         var buildMap = getBuildMap(projectInfo.currentProject, build);
         buildMap.put("id", build.getId());

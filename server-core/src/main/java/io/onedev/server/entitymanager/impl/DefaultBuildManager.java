@@ -328,6 +328,32 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		return getSession().createQuery(query).list();
 	}
 
+	@Sessional
+	@Override
+	public Build findPreviousSuccessfulSimilar(Build build) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Build> query = builder.createQuery(Build.class);
+		Root<Build> root = query.from(Build.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(builder.equal(root.get(Build.PROP_PROJECT), build.getProject()));
+		predicates.add(builder.equal(root.get(Build.PROP_JOB_NAME), build.getJobName()));
+		predicates.add(builder.equal(root.get(Build.PROP_STATUS), Build.Status.SUCCESSFUL));
+		predicates.add(builder.lessThan(root.get(Build.PROP_NUMBER), build.getNumber()));
+		
+		var paramPredicate = getPredicate(root, builder, build.getParamMap());
+		if (paramPredicate != null)
+			predicates.add(paramPredicate);
+		
+		query.where(predicates.toArray(new Predicate[0]));
+		query.orderBy(builder.desc(root.get(Build.PROP_NUMBER)));
+
+		return getSession().createQuery(query)
+				.setFirstResult(0)
+				.setMaxResults(1)
+				.uniqueResult();
+	}
+
 	@SuppressWarnings("unchecked")
 	@Sessional
 	@Override

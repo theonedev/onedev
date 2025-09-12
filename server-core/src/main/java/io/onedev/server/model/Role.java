@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.RoleName;
@@ -178,7 +179,7 @@ public class Role extends AbstractEntity implements BasePermission {
 	}
 	
 	@Editable(order=210, name="Create Child Projects", description="Create child projects under a project")
-	@ShowCondition("isManageProjectDisabled")
+	@DependsOn(property="manageProject", value="false")
 	public boolean isCreateChildren() {
 		return createChildren;
 	}
@@ -187,14 +188,9 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.createChildren = createChildren;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isManageProjectDisabled() {
-		return !(boolean)EditContext.get().getInputValue("manageProject");
-	}
-
 	@Editable(order=250, name="Pull Request Management", description="Pull request administrative permission inside a project, "
 			+ "including batch operations over multiple pull requests")
-	@ShowCondition("isManageProjectDisabled")
+	@DependsOn(property="manageProject", value="false")
 	public boolean isManagePullRequests() {
 		return managePullRequests;
 	}
@@ -205,7 +201,7 @@ public class Role extends AbstractEntity implements BasePermission {
 	
 	@Editable(order=260, name="Code Comment Management", description="Code comment administrative permission inside a project, "
 			+ "including batch operations over multiple code comments")
-	@ShowCondition("isManageProjectDisabled")
+	@DependsOn(property="manageProject", value="false")
 	public boolean isManageCodeComments() {
 		return manageCodeComments;
 	}
@@ -243,7 +239,7 @@ public class Role extends AbstractEntity implements BasePermission {
 
 	@Editable(order=400, name="Issue Management", description="Issue administrative permission inside a project, including batch "
 			+ "operations over multiple issues")
-	@ShowCondition("isManageProjectDisabled")
+	@DependsOn(property="manageProject", value="false")
 	public boolean isManageIssues() {
 		return manageIssues;
 	}
@@ -251,14 +247,9 @@ public class Role extends AbstractEntity implements BasePermission {
 	public void setManageIssues(boolean manageIssues) {
 		this.manageIssues = manageIssues;
 	}
-	
-	@SuppressWarnings("unused")
-	private static boolean isManageIssuesDisabled() {
-		return !(boolean)EditContext.get().getInputValue("manageIssues");
-	}
-	
+		
 	@Editable(order=450, description="This permission enables one to access confidential issues")
-	@ShowCondition("isManageIssuesDisabled")
+	@DependsOn(property="manageIssues", value="false")
 	public boolean isAccessConfidentialIssues() {
 		return accessConfidentialIssues;
 	}
@@ -278,7 +269,7 @@ public class Role extends AbstractEntity implements BasePermission {
 	}
 
 	@Editable(order=500, description = "This permission enables one to schedule issues into iterations")
-	@ShowCondition("isManageIssuesDisabled")
+	@DependsOn(property="manageIssues", value="false")
 	public boolean isScheduleIssues() {
 		return scheduleIssues;
 	}
@@ -288,7 +279,7 @@ public class Role extends AbstractEntity implements BasePermission {
 	}
 
 	@Editable(order=600, description="Optionally specify custom fields allowed to edit when open new issues")
-	@ShowCondition("isManageIssuesDisabled")
+	@DependsOn(property="manageIssues", value="false")
 	@NotNull
 	public IssueFieldSet getEditableIssueFields() {
 		return editableIssueFields;
@@ -304,7 +295,7 @@ public class Role extends AbstractEntity implements BasePermission {
 	}
 	
 	@Editable(order=625, placeholder="None", description="Optionally specify issue links allowed to edit")
-	@ShowCondition("isManageIssuesDisabled")
+	@DependsOn(property="manageIssues", value="false")
 	@ChoiceProvider(value="getIssueLinkChoices", displayNames = "getIssueLinkDisplayNames")
 	public List<String> getEditableIssueLinks() {
 		return editableIssueLinks;
@@ -329,7 +320,7 @@ public class Role extends AbstractEntity implements BasePermission {
 
 	@Editable(order=650, name="Build Management", description="Build administrative permission for all jobs inside a project, "
 			+ "including batch operations over multiple builds")
-	@ShowCondition("isManageProjectDisabled")
+	@DependsOn(property="manageProject", value="false")
 	public boolean isManageBuilds() {
 		return manageBuilds;
 	}
@@ -338,14 +329,9 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.manageBuilds = manageBuilds;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isManageBuildsDisabled() {
-		return !(boolean)EditContext.get().getInputValue("manageBuilds");
-	}
-
 	@Editable(order=675, description = "Enable to allow to upload build cache generated during CI/CD job. " +
 			"Uploaded cache can be used by subsequent builds of the project as long as cache key matches")
-	@ShowCondition("isManageBuildsDisabled")
+	@DependsOn(property="manageBuilds", value="false")
 	public boolean isUploadCache() {
 		return uploadCache;
 	}
@@ -355,7 +341,7 @@ public class Role extends AbstractEntity implements BasePermission {
 	}
 
 	@Editable(order=700)
-	@ShowCondition("isManageBuildsDisabled")
+	@DependsOn(property="manageBuilds", value="false")
 	public List<JobPrivilege> getJobPrivileges() {
 		return jobPrivileges;
 	}

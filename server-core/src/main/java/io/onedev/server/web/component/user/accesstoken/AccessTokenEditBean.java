@@ -11,15 +11,14 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Secret;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.AccessTokenAuthorization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.EditContext;
 
 @Editable
 public class AccessTokenEditBean implements Serializable {
@@ -68,7 +67,7 @@ public class AccessTokenEditBean implements Serializable {
 	
 	@Editable(order=300, name="Authorized Projects", description = "Only projects manageable by access token owner can be authorized")
 	@Size(min=1, message = "At least one project should be authorized")
-	@ShowCondition("isHasOwnerPermissionsDisabled")
+	@DependsOn(property="hasOwnerPermissions", value="false")
 	public List<AccessTokenAuthorizationBean> getAuthorizations() {
 		return authorizations;
 	}
@@ -77,11 +76,6 @@ public class AccessTokenEditBean implements Serializable {
 		this.authorizations = authorizations;
 	}
 	
-	@SuppressWarnings("unused")
-	private static boolean isHasOwnerPermissionsDisabled() {
-		return !(boolean) EditContext.get().getInputValue("hasOwnerPermissions");
-	}
-
 	@Editable(order=400, placeholder = "Never expire")
 	public Date getExpireDate() {
 		return expireDate;

@@ -8,10 +8,10 @@ import javax.validation.constraints.Pattern;
 import io.onedev.server.annotation.BuildQuery;
 import io.onedev.server.annotation.CodeCommentQuery;
 import io.onedev.server.annotation.CommitQuery;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.IssueQuery;
 import io.onedev.server.annotation.PullRequestQuery;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.build.BuildEvent;
@@ -19,7 +19,6 @@ import io.onedev.server.event.project.codecomment.CodeCommentEvent;
 import io.onedev.server.event.project.issue.IssueEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
-import io.onedev.server.util.EditContext;
 
 @Editable
 public class ChannelNotification implements Serializable {
@@ -70,7 +69,7 @@ public class ChannelNotification implements Serializable {
 
 	@Editable(order=200, name="Applicable Issues", placeholder="All")
 	@IssueQuery(withOrder=false)
-	@ShowCondition("isIssuesEnabled")
+	@DependsOn(property="issues")
 	public String getIssueQuery() {
 		return issueQuery;
 	}
@@ -79,11 +78,6 @@ public class ChannelNotification implements Serializable {
 		this.issueQuery = issueQuery;
 	}
 	
-	@SuppressWarnings("unused")
-	private static boolean isIssuesEnabled() {
-		return (boolean) EditContext.get().getInputValue("issues");
-	}
-
 	@Editable(order=300, name="Notify Pull Request Events")
 	public boolean isPullRequests() {
 		return pullRequests;
@@ -95,7 +89,7 @@ public class ChannelNotification implements Serializable {
 
 	@Editable(order=400, name="Applicable Pull Requests", placeholder="All")
 	@PullRequestQuery(withOrder=false)
-	@ShowCondition("isPullRequestsEnabled")
+	@DependsOn(property="pullRequests")
 	public String getPullRequestQuery() {
 		return pullRequestQuery;
 	}
@@ -104,11 +98,6 @@ public class ChannelNotification implements Serializable {
 		this.pullRequestQuery = pullRequestQuery;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isPullRequestsEnabled() {
-		return (boolean) EditContext.get().getInputValue("pullRequests");
-	}
-	
 	@Editable(order=500, name="Notify Build Events")
 	public boolean isBuilds() {
 		return builds;
@@ -120,7 +109,7 @@ public class ChannelNotification implements Serializable {
 
 	@Editable(order=600, name="Applicable Builds", placeholder="All")
 	@BuildQuery(withOrder=false, withUnfinishedCriteria=true)
-	@ShowCondition("isBuildsEnabled")
+	@DependsOn(property="builds")
 	public String getBuildQuery() {
 		return buildQuery;
 	}
@@ -129,11 +118,6 @@ public class ChannelNotification implements Serializable {
 		this.buildQuery = buildQuery;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isBuildsEnabled() {
-		return (boolean) EditContext.get().getInputValue("builds");
-	}
-	
 	@Editable(order=700, name="Notify Code Push Events")
 	public boolean isCodePush() {
 		return codePush;
@@ -145,7 +129,7 @@ public class ChannelNotification implements Serializable {
 
 	@Editable(order=800, name="Applicable Commits", placeholder="All")
 	@CommitQuery
-	@ShowCondition("isCodePushEnabled")
+	@DependsOn(property="codePush")
 	public String getCommitQuery() {
 		return commitQuery;
 	}
@@ -154,11 +138,6 @@ public class ChannelNotification implements Serializable {
 		this.commitQuery = commitQuery;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isCodePushEnabled() {
-		return (boolean) EditContext.get().getInputValue("codePush");
-	}
-	
 	@Editable(order=900, name="Notify Code Comment Events")
 	public boolean isCodeComments() {
 		return codeComments;
@@ -170,7 +149,7 @@ public class ChannelNotification implements Serializable {
 
 	@Editable(order=1000, name="Applicable Code Comments", placeholder="All")
 	@CodeCommentQuery(withOrder=false)
-	@ShowCondition("isCodeCommentsEnabled")
+	@DependsOn(property="codeComments")
 	public String getCodeCommentQuery() {
 		return codeCommentQuery;
 	}
@@ -179,11 +158,6 @@ public class ChannelNotification implements Serializable {
 		this.codeCommentQuery = codeCommentQuery;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isCodeCommentsEnabled() {
-		return (boolean) EditContext.get().getInputValue("codeComments");
-	}
-	
 	public boolean matches(ProjectEvent event) {
 		if (event instanceof IssueEvent) {
 			if (isIssues()) {

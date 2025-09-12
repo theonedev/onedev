@@ -4,18 +4,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
-import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 
 @Editable
 public class UndefinedFieldResolution implements Serializable {
@@ -41,7 +39,7 @@ public class UndefinedFieldResolution implements Serializable {
 
 	@Editable(order=100, name="new field")
 	@ChoiceProvider("getFieldChoices")
-	@ShowCondition("isNewFieldVisible")
+	@DependsOn(property="fixType", value="CHANGE_TO_ANOTHER_FIELD")
 	@NotEmpty
 	@OmitName
 	public String getNewField() {
@@ -50,11 +48,6 @@ public class UndefinedFieldResolution implements Serializable {
 
 	public void setNewField(String newField) {
 		this.newField = newField;
-	}
-
-	@SuppressWarnings("unused")
-	private static boolean isNewFieldVisible() {
-		return EditContext.get().getInputValue("fixType") == FixType.CHANGE_TO_ANOTHER_FIELD;
 	}
 	
 	@SuppressWarnings("unused")

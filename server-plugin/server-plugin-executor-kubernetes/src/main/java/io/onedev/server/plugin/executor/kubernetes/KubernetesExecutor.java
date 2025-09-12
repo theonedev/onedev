@@ -1,59 +1,13 @@
 package io.onedev.server.plugin.executor.kubernetes;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.utils.*;
-import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.LineConsumer;
-import io.onedev.k8shelper.*;
-import io.onedev.server.OneDev;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.OmitName;
-import io.onedev.server.annotation.ShowCondition;
-import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.job.JobContext;
-import io.onedev.server.job.JobManager;
-import io.onedev.server.job.JobRunnable;
-import io.onedev.server.model.support.administration.jobexecutor.*;
-import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
-import io.onedev.server.terminal.CommandlineShell;
-import io.onedev.server.terminal.Shell;
-import io.onedev.server.terminal.Terminal;
-import io.onedev.server.util.EditContext;
-import io.onedev.server.util.FilenameUtils;
-import io.onedev.server.web.util.Testable;
-import org.apache.commons.lang.SerializationUtils;
-import org.apache.commons.lang3.RandomUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotEmpty;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.*;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
 import static com.google.common.collect.Lists.newArrayList;
 import static io.onedev.k8shelper.ExecuteCondition.ALWAYS;
-import static io.onedev.k8shelper.KubernetesHelper.*;
+import static io.onedev.k8shelper.KubernetesHelper.ENV_JOB_TOKEN;
+import static io.onedev.k8shelper.KubernetesHelper.ENV_SERVER_URL;
+import static io.onedev.k8shelper.KubernetesHelper.IMAGE_REPO;
+import static io.onedev.k8shelper.KubernetesHelper.LOG_END_MESSAGE;
+import static io.onedev.k8shelper.KubernetesHelper.parseStepPosition;
+import static io.onedev.k8shelper.KubernetesHelper.stringifyStepPosition;
 import static io.onedev.k8shelper.RegistryLoginFacade.merge;
 import static io.onedev.server.util.CollectionUtils.newHashMap;
 import static io.onedev.server.util.CollectionUtils.newLinkedHashMap;
@@ -61,6 +15,85 @@ import static java.lang.Integer.parseInt;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
+
+import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.commons.utils.command.Commandline;
+import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.k8shelper.Action;
+import io.onedev.k8shelper.BuildImageFacade;
+import io.onedev.k8shelper.CommandFacade;
+import io.onedev.k8shelper.CompositeFacade;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.k8shelper.LeafFacade;
+import io.onedev.k8shelper.PruneBuilderCacheFacade;
+import io.onedev.k8shelper.RegistryLoginFacade;
+import io.onedev.k8shelper.RunContainerFacade;
+import io.onedev.k8shelper.RunImagetoolsFacade;
+import io.onedev.k8shelper.ServiceFacade;
+import io.onedev.k8shelper.SetupCacheFacade;
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.DependsOn;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.job.JobContext;
+import io.onedev.server.job.JobManager;
+import io.onedev.server.job.JobRunnable;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.jobexecutor.KubernetesAware;
+import io.onedev.server.model.support.administration.jobexecutor.NodeSelectorEntry;
+import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
+import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
+import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
+import io.onedev.server.terminal.CommandlineShell;
+import io.onedev.server.terminal.Shell;
+import io.onedev.server.terminal.Terminal;
+import io.onedev.server.util.FilenameUtils;
+import io.onedev.server.web.util.Testable;
 
 @Editable(order=KubernetesExecutor.ORDER, description="This executor runs build jobs as pods in a kubernetes cluster. "
 		+ "No any agents are required."
@@ -130,17 +163,12 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 	public void setBuildWithPV(boolean buildWithPV) {
 		this.buildWithPV = buildWithPV;
 	}
-
-	@SuppressWarnings("unused")
-	private static boolean isBuildWithPVEnabled() {
-		return (boolean) EditContext.get().getInputValue("buildWithPV");
-	}
 	
 	@Editable(order=400, name="Build Volume Storage Class", placeholder = "Use default storage class", description = "" +
 			"Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. " +
 			"<b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, " +
 			"as the volume is only used to hold temporary build files")
-	@ShowCondition("isBuildWithPVEnabled")
+	@DependsOn(property="buildWithPV")
 	public String getStorageClass() {
 		return storageClass;
 	}
@@ -152,7 +180,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 	@Editable(order=500, name="Build Volume Storage Size", description = "Specify storage size to request " +
 			"for the build volume. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, " +
 			"for instance <i>10Gi</i>")
-	@ShowCondition("isBuildWithPVEnabled")
+	@DependsOn(property="buildWithPV")
 	@NotEmpty
 	public String getStorageSize() {
 		return storageSize;

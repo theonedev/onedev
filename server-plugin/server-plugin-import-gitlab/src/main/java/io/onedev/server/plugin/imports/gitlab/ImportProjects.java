@@ -1,16 +1,17 @@
 package io.onedev.server.plugin.imports.gitlab;
 
+import java.util.Collection;
+import java.util.List;
+
+import javax.validation.constraints.Size;
+
 import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ProjectChoice;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.BeanEditor;
-
-import javax.validation.constraints.Size;
-import java.util.Collection;
-import java.util.List;
 
 @Editable
 public class ImportProjects extends ImportGroup {
@@ -44,18 +45,9 @@ public class ImportProjects extends ImportGroup {
 	public void setAll(boolean all) {
 		this.all = all;
 	}
-	
-	private static boolean isAllEnabled() {
-		return (Boolean)EditContext.get().getInputValue("all");
-	}
 
-	@SuppressWarnings("unused")
-	private static boolean isAllDisabled() {
-		return !isAllEnabled();
-	}
-	
 	@Editable(order=400, description="Whether or not to import forked GitLab projects")
-	@ShowCondition("isAllEnabled")
+	@DependsOn(property="all")
 	public boolean isIncludeForks() {
 		return includeForks;
 	}
@@ -66,7 +58,7 @@ public class ImportProjects extends ImportGroup {
 
 	@Editable(order=500, name="GitLab Projects to Import")
 	@ChoiceProvider("getGitLabProjectChoices")
-	@ShowCondition("isAllDisabled")
+	@DependsOn(property="all", value="false")
 	@Size(min=1, message="At least one project should be selected")
 	public List<String> getGitLabProjects() {
 		return gitLabProjects;

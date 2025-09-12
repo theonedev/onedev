@@ -37,7 +37,6 @@ import io.onedev.server.entitymanager.SsoProviderManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.SsoProvider;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.realm.PasswordAuthenticatingRealm;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -189,20 +188,10 @@ public class LoginPage extends SimplePage {
 		fragment.add(ssoButtonsView.setVisible(!ssoProviders.isEmpty()));
 		
 		add(fragment);
-		
-		var brandingSetting = getSettingManager().getBrandingSetting();	
-		if (brandingSetting.isOEM()) 
-			add(new ExternalLink("vendor", brandingSetting.getUrl(), brandingSetting.getName()));
-		else 
-			add(new ExternalLink("vendor", BrandingSetting.DEFAULT_URL, BrandingSetting.DEFAULT_NAME));
 	}
 	
 	private UserManager getUserManager() {
 		return OneDev.getInstance(UserManager.class);
-	}
-
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
 	}
 	
 	private void afterLogin(User user) {

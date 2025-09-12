@@ -284,7 +284,7 @@ public class BuildSpec implements Serializable, Validatable {
 			for (ConstraintViolation<Job> violation: getValidator().validate(job)) {
 				context.buildConstraintViolationWithTemplate(violation.getMessage())
 						.addPropertyNode(PROP_JOBS)
-						.addBeanNode()
+						.addPropertyNode(violation.getPropertyPath().toString())
 						.inIterable().atIndex(index)
 						.addConstraintViolation();
 				isValid = false;
@@ -306,7 +306,7 @@ public class BuildSpec implements Serializable, Validatable {
 			for (ConstraintViolation<Service> violation: getValidator().validate(service)) {
 				context.buildConstraintViolationWithTemplate(violation.getMessage())
 						.addPropertyNode(PROP_SERVICES)
-						.addBeanNode()
+						.addPropertyNode(violation.getPropertyPath().toString())
 						.inIterable().atIndex(index)
 						.addConstraintViolation();
 				isValid = false;
@@ -328,7 +328,7 @@ public class BuildSpec implements Serializable, Validatable {
 			for (ConstraintViolation<StepTemplate> violation: getValidator().validate(stepTemplate)) {
 				context.buildConstraintViolationWithTemplate(violation.getMessage())
 						.addPropertyNode(PROP_STEP_TEMPLATES)
-						.addBeanNode()
+						.addPropertyNode(violation.getPropertyPath().toString())
 						.inIterable().atIndex(index)
 						.addConstraintViolation();
 				isValid = false;
@@ -350,7 +350,7 @@ public class BuildSpec implements Serializable, Validatable {
 			for (ConstraintViolation<JobProperty> violation: getValidator().validate(property)) {
 				context.buildConstraintViolationWithTemplate(violation.getMessage())
 						.addPropertyNode(PROP_PROPERTIES)
-						.addBeanNode()
+						.addPropertyNode(violation.getPropertyPath().toString())
 						.inIterable().atIndex(index)
 						.addConstraintViolation();
 				isValid = false;
@@ -373,7 +373,7 @@ public class BuildSpec implements Serializable, Validatable {
 			for (ConstraintViolation<Import> violation: validator.validate(aImport)) {
 				context.buildConstraintViolationWithTemplate(violation.getMessage())
 						.addPropertyNode(PROP_IMPORTS)
-						.addBeanNode()
+						.addPropertyNode(violation.getPropertyPath().toString())
 						.inIterable().atIndex(index)
 						.addConstraintViolation();
 				isValid = false;
@@ -2310,6 +2310,29 @@ public class BuildSpec implements Serializable, Validatable {
 				stepMappingNode.getValue().add(new NodeTuple(new ScalarNode(Tag.STR, "optional"), new ScalarNode(Tag.STR, "false")));
 			}
 		});
+	}
+
+	@SuppressWarnings("unused")
+	private void migrate41(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (var itJobTuple = jobNode.getValue().iterator(); itJobTuple.hasNext();) {
+						var jobTuple = itJobTuple.next();
+						var keyNode = (ScalarNode) jobTuple.getKeyNode();
+						if (keyNode.getValue().equals("retryCondition")) {
+							var valueNode = (ScalarNode) jobTuple.getValueNode();
+							if (valueNode.getValue().equals("never")) {
+								itJobTuple.remove();
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 }

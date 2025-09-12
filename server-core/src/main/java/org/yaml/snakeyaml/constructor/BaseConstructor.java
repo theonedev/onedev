@@ -242,6 +242,20 @@ public abstract class BaseConstructor {
    * @return Java instance
    */
   protected Object constructObject(Node node) {
+    if (node instanceof MappingNode) {
+      MappingNode mappingNode = (MappingNode) node;
+      for (var it = mappingNode.getValue().iterator(); it.hasNext();) {
+        var tuple = it.next();
+        if (tuple.getKeyNode() instanceof ScalarNode) {
+          ScalarNode keyNode = (ScalarNode) tuple.getKeyNode();
+          if ("type".equals(keyNode.getValue())) {
+            String implementationName = ((ScalarNode) tuple.getValueNode()).getValue();
+            mappingNode.setTag(new Tag("!" + implementationName));
+            it.remove();
+          }
+        }
+      }
+    }
     if (constructedObjects.containsKey(node)) {
       return constructedObjects.get(node);
     }

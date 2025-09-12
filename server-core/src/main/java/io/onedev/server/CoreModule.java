@@ -71,9 +71,9 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.OsInfo;
-import io.onedev.server.ai.McpHelperResource;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.attachment.DefaultAttachmentManager;
+import io.onedev.server.buildspec.BuildSpecSchemaResource;
 import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
 import io.onedev.server.cluster.ClusterResource;
 import io.onedev.server.codequality.CodeProblemContribution;
@@ -331,6 +331,7 @@ import io.onedev.server.rest.DefaultServletContainer;
 import io.onedev.server.rest.JerseyConfigurator;
 import io.onedev.server.rest.ResourceConfigProvider;
 import io.onedev.server.rest.WebApplicationExceptionHandler;
+import io.onedev.server.rest.resource.McpHelperResource;
 import io.onedev.server.rest.resource.ProjectResource;
 import io.onedev.server.search.code.CodeIndexManager;
 import io.onedev.server.search.code.CodeSearchManager;
@@ -655,6 +656,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(JerseyConfigurator.class, resourceConfig -> resourceConfig.packages(ProjectResource.class.getPackage().getName()));
 		contribute(JerseyConfigurator.class, resourceConfig -> resourceConfig.register(ClusterResource.class));
 		contribute(JerseyConfigurator.class, resourceConfig -> resourceConfig.register(McpHelperResource.class));
+		contribute(JerseyConfigurator.class, resourceConfig -> resourceConfig.register(BuildSpecSchemaResource.class));
 	}
 
 	private void configureWeb() {

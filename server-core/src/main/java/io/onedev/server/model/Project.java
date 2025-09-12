@@ -71,11 +71,11 @@ import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Markdown;
 import io.onedev.server.annotation.ProjectKey;
 import io.onedev.server.annotation.ProjectName;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.BuildManager;
@@ -129,7 +129,6 @@ import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.facade.ProjectFacade;
@@ -1022,7 +1021,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 
 	@Editable(order=350, descriptionProvider = "getTimeTrackingDescription")
-	@ShowCondition("isIssueManagementEnabled")
+	@DependsOn(property="issueManagement")
 	@SubscriptionRequired
 	public boolean isTimeTracking() {
 		return timeTracking;
@@ -1039,11 +1038,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		} else {
 			return _T("Enable <a href='https://docs.onedev.io/tutorials/issue/time-tracking' target='_blank'>time tracking</a> for this project to track progress and generate timesheets");
 		}
-	}
-
-	@SuppressWarnings("unused")
-	private static boolean isIssueManagementEnabled() {
-		return (boolean) EditContext.get().getInputValue(PROP_ISSUE_MANAGEMENT);	
 	}
 
 	@Editable(order=400, name="Package Management", descriptionProvider = "getPackManagementDescription")

@@ -8256,4 +8256,25 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate209(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("BRANDING")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							Element urlElement = valueElement.element("url");
+							if (urlElement != null) {
+								urlElement.detach();
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

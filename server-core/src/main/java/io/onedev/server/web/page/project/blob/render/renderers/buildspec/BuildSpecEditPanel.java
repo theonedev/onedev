@@ -1,36 +1,20 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
-import com.google.common.base.Throwables;
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.*;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.JobAware;
-import io.onedev.server.buildspec.job.JobSuggestion;
-import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.buildspec.step.StepTemplate;
-import io.onedev.server.data.migration.VersionedYamlDoc;
-import io.onedev.server.model.support.build.JobProperty;
-import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.util.PathNode.Indexed;
-import io.onedev.server.util.PathNode.Named;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.behavior.sortable.SortBehavior;
-import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.component.MultilineLabel;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.pipeline.JobSelectionChange;
-import io.onedev.server.web.component.pipeline.PipelinePanel;
-import io.onedev.server.web.component.pipeline.Sortable;
-import io.onedev.server.web.editable.*;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.edit.EditCompleteAware;
-import io.onedev.server.web.util.AjaxPayload;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getActiveElementIndex;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getUrlSegment;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -58,19 +42,48 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.unbescape.html.HtmlEscape;
 
-import javax.annotation.Nullable;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import com.google.common.base.Throwables;
 
-import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getActiveElementIndex;
-import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getUrlSegment;
-import static io.onedev.server.web.translation.Translation._T;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.BuildSpecAware;
+import io.onedev.server.buildspec.Import;
+import io.onedev.server.buildspec.NamedElement;
+import io.onedev.server.buildspec.ParamSpecAware;
+import io.onedev.server.buildspec.Service;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.JobAware;
+import io.onedev.server.buildspec.job.JobSuggestion;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspec.step.StepTemplate;
+import io.onedev.server.data.migration.VersionedYamlDoc;
+import io.onedev.server.model.support.build.JobProperty;
+import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.util.PathNode.Indexed;
+import io.onedev.server.util.PathNode.Named;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.component.MultilineLabel;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.pipeline.JobSelectionChange;
+import io.onedev.server.web.component.pipeline.PipelinePanel;
+import io.onedev.server.web.component.pipeline.Sortable;
+import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.BeanUpdating;
+import io.onedev.server.web.editable.PropertyContext;
+import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.PropertyUpdating;
+import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.web.page.project.blob.render.edit.EditCompleteAware;
+import io.onedev.server.web.util.AjaxPayload;
 
 public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements BuildSpecAware, EditCompleteAware {
 
@@ -836,7 +849,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 		} else { 
 			setConvertedInput(getModelObject());
 		}
-	}
+	} 
 	
 	private void pushState(AjaxRequestTarget target, String selection) {
 		String position = BuildSpecRenderer.getPosition(selection);

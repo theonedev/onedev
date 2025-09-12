@@ -11,10 +11,10 @@ import javax.validation.constraints.NotNull;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.RegEx;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
@@ -23,7 +23,6 @@ import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.util.EditContext;
 
 @Editable(order=100, name="Execute Commands")
 public class CommandStep extends Step {
@@ -57,14 +56,9 @@ public class CommandStep extends Step {
 	public void setRunInContainer(boolean runInContainer) {
 		this.runInContainer = runInContainer;
 	}
-
-	@SuppressWarnings("unused")
-	private static boolean isRunInContainerEnabled() {
-		return (boolean) EditContext.get().getInputValue("runInContainer");
-	}
 	
 	@Editable(order=100, name="container:image", description="Specify container image to execute commands inside")
-	@ShowCondition("isRunInContainerEnabled")
+	@DependsOn(property="runInContainer")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getImage() {
@@ -92,7 +86,7 @@ public class CommandStep extends Step {
 	@Editable(order=8000, name="Run As", group = "More Settings", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
 			"<b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or " +
 			"using user namespace remapping")
-	@ShowCondition("isRunInContainerEnabled")
+	@DependsOn(property="runInContainer")
 	@RegEx(pattern="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
 	public String getRunAs() {
 		return runAs;
@@ -105,7 +99,7 @@ public class CommandStep extends Step {
 	@Editable(order=8500, group="More Settings", description="Optionally specify registry logins to override " +
 			"those defined in job executor. For built-in registry, use <code>@server_url@</code> for registry url, " +
 			"<code>@job_token@</code> for user name, and access token secret for password secret")
-	@ShowCondition("isRunInContainerEnabled")
+	@DependsOn(property="runInContainer")
 	public List<RegistryLogin> getRegistryLogins() {
 		return registryLogins;
 	}
@@ -125,7 +119,7 @@ public class CommandStep extends Step {
 	}
 	
 	@Editable(order=10000, name="Enable TTY Mode", group = "More Settings", description=USE_TTY_HELP)
-	@ShowCondition("isRunInContainerEnabled")
+	@DependsOn(property="runInContainer")
 	public boolean isUseTTY() {
 		return useTTY;
 	}

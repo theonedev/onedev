@@ -1,24 +1,22 @@
 package io.onedev.server.model.support.issue.field.spec.userchoicefield;
 
-import io.onedev.server.OneDev;
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.AllUsers;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.SubscriptionManager;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultmultivalueprovider.DefaultMultiValueProvider;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultmultivalueprovider.SpecifiedDefaultMultiValue;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultvalueprovider.SpecifiedDefaultValue;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.util.usage.Usage;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.util.List;
-import java.util.Map;
 
 @Editable(order=150, name= FieldSpec.USER)
 public class UserChoiceField extends FieldSpec {
@@ -43,7 +41,7 @@ public class UserChoiceField extends FieldSpec {
 	}
 
 	@Editable(order=1100, name="Default Value", placeholder="No default value")
-	@ShowCondition("isDefaultValueProviderVisible")
+	@DependsOn(property="allowMultiple", value="false")
 	@Valid
 	public DefaultValueProvider getDefaultValueProvider() {
 		return defaultValueProvider;
@@ -53,13 +51,8 @@ public class UserChoiceField extends FieldSpec {
 		this.defaultValueProvider = defaultValueProvider;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isDefaultValueProviderVisible() {
-		return EditContext.get().getInputValue("allowMultiple").equals(false);
-	}
-	
-	@ShowCondition("isDefaultMultiValueProviderVisible")
 	@Editable(order=1100, name="Default Value", placeholder="No default value")
+	@DependsOn(property="allowMultiple")
 	@Valid
 	public DefaultMultiValueProvider getDefaultMultiValueProvider() {
 		return defaultMultiValueProvider;
@@ -67,16 +60,6 @@ public class UserChoiceField extends FieldSpec {
 
 	public void setDefaultMultiValueProvider(DefaultMultiValueProvider defaultMultiValueProvider) {
 		this.defaultMultiValueProvider = defaultMultiValueProvider;
-	}
-
-	@SuppressWarnings("unused")
-	private static boolean isDefaultMultiValueProviderVisible() {
-		return EditContext.get().getInputValue("allowMultiple").equals(true);
-	}
-	
-	@SuppressWarnings("unused")
-	private static boolean isSubscriptionActive() {
-		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
 	}
 
 	@Override

@@ -1,10 +1,29 @@
 package io.onedev.server.buildspec.job.action;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+import javax.validation.Valid;
+import javax.validation.ValidationException;
+import javax.validation.constraints.NotEmpty;
+
+import org.apache.shiro.subject.Subject;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.annotation.*;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.DependsOn;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.FieldNamesProvider;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Multiline;
+import io.onedev.server.annotation.OmitName;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.entitymanager.IssueManager;
@@ -20,18 +39,9 @@ import io.onedev.server.model.support.issue.field.instance.FieldInstance;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.WicketUtils;
-import org.apache.shiro.subject.Subject;
-
-import javax.annotation.Nullable;
-import javax.validation.Valid;
-import javax.validation.ValidationException;
-import javax.validation.constraints.NotEmpty;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Editable(name="Create issue", order=300)
 public class CreateIssueAction extends PostBuildAction {
@@ -80,7 +90,7 @@ public class CreateIssueAction extends PostBuildAction {
 	@Editable(order=910, description="Specify a secret to be used as access token to create issue in " +
 			"above project if it is not publicly accessible")
 	@ChoiceProvider("getAccessTokenSecretChoices")
-	@ShowCondition("isProjectSpecified")
+	@DependsOn(property="projectPath")
 	@Nullable
 	public String getAccessTokenSecret() {
 		return accessTokenSecret;
@@ -88,11 +98,6 @@ public class CreateIssueAction extends PostBuildAction {
 
 	public void setAccessTokenSecret(String accessTokenSecret) {
 		this.accessTokenSecret = accessTokenSecret;
-	}
-	
-	@SuppressWarnings("unused")
-	private static boolean isProjectSpecified() {
-		return EditContext.get().getInputValue("projectPath") != null;
 	}
 
 	@SuppressWarnings("unused")

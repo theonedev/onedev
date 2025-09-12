@@ -1,12 +1,22 @@
 package io.onedev.server.data.migration;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.loader.ImplementationRegistry;
-import io.onedev.commons.utils.ClassUtils;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.util.BeanUtils;
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.hibernate.proxy.HibernateProxyHelper;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
@@ -18,19 +28,22 @@ import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.introspector.MethodProperty;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.introspector.PropertyUtils;
-import org.yaml.snakeyaml.nodes.*;
+import org.yaml.snakeyaml.nodes.MappingNode;
+import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.NodeTuple;
+import org.yaml.snakeyaml.nodes.ScalarNode;
+import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 import org.yaml.snakeyaml.resolver.Resolver;
 import org.yaml.snakeyaml.serializer.Serializer;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
+import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.commons.loader.ImplementationRegistry;
+import io.onedev.commons.utils.ClassUtils;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.util.BeanUtils;
 
 public class VersionedYamlDoc extends MappingNode {
 
@@ -96,7 +109,7 @@ public class VersionedYamlDoc extends MappingNode {
 			getValue().add(0, new NodeTuple(keyNode, versionNode));
 		}
 	}
-	
+		
 	public String toYaml() {
 		StringWriter writer = new StringWriter();
 		DumperOptions dumperOptions = new DumperOptions();
@@ -121,6 +134,12 @@ public class VersionedYamlDoc extends MappingNode {
 		
 		public Object construct(Node node) {
 			return constructDocument(node);
+		}
+		
+		@Override
+		protected String constructScalar(ScalarNode node) {
+			String value = super.constructScalar(node);
+			return (value != null && value.isEmpty()) ? null : value;
 		}
 
 		@Override
@@ -191,6 +210,8 @@ public class VersionedYamlDoc extends MappingNode {
 							Method setter = BeanUtils.findSetter(getter);
 							if (editable != null && setter != null) {
 								String propertyName = BeanUtils.getPropertyName(getter);
+								if (propertyName.equals("type"))
+									throw new ExplicitException("Property 'type' is reserved (class: " + type.getName() + ")");
 								try {
 									properties.add(new MethodProperty(new PropertyDescriptor(propertyName, getter, setter)));
 								} catch (IntrospectionException e) {

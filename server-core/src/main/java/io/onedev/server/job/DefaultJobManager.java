@@ -286,7 +286,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			for (ConstraintViolation<?> violation : validator.validate(buildSpec)) {
 				String message = String.format("Error validating build spec (project: %s, commit: %s, location: %s, message: %s)",
 						project.getPath(), commitId.name(), violation.getPropertyPath(), violation.getMessage());
-				throw new ExplicitException(message);
+				throw new ValidationException(message);
 			}
 		} finally {
 			Project.pop();
@@ -703,19 +703,23 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private boolean checkRetry(Job job, JobContext jobContext, TaskLogger jobLogger,
 							   @Nullable Throwable throwable, int retried) {
 		if (retried < job.getMaxRetries() && sessionManager.call(() -> {
-			RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
-			AtomicReference<String> errorMessage = new AtomicReference<>(null);
-			if (throwable != null) {
-				log(throwable, new TaskLogger() {
+			if (job.getRetryCondition() != null) {
+				RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
+				AtomicReference<String> errorMessage = new AtomicReference<>(null);
+				if (throwable != null) {
+					log(throwable, new TaskLogger() {
 
-					@Override
-					public void log(String message, String sessionId) {
-						errorMessage.set(message);
-					}
+						@Override
+						public void log(String message, String sessionId) {
+							errorMessage.set(message);
+						}
 
-				});
+					});
+				}
+				return retryCondition.matches(new RetryContext(buildManager.load(jobContext.getBuildId()), errorMessage.get()));
+			} else {
+				return false;
 			}
-			return retryCondition.matches(new RetryContext(buildManager.load(jobContext.getBuildId()), errorMessage.get()));
 		})) {
 			if (throwable != null)
 				log(throwable, jobLogger);

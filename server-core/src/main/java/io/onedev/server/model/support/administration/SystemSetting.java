@@ -17,6 +17,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.git.location.CurlLocation;
@@ -167,7 +168,7 @@ public class SystemSetting implements Serializable, Validatable {
 	}
 
 	@Editable(order=600, description="User avatar will be requested by appending a hash to this url")
-	@ShowCondition("isUseAvatarServiceEnabled")
+	@DependsOn(property="useAvatarService")
 	@NotEmpty
 	public String getAvatarServiceUrl() {
 		return avatarServiceUrl;
@@ -177,11 +178,6 @@ public class SystemSetting implements Serializable, Validatable {
 		this.avatarServiceUrl = avatarServiceUrl;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isUseAvatarServiceEnabled() {
-		return (boolean) EditContext.get().getInputValue(PROP_USE_AVATAR_SERVICE); 
-	}	
-	
 	public String getEffectiveSshRootUrl() {
 		if (getSshRootUrl() != null)
 			return getSshRootUrl();

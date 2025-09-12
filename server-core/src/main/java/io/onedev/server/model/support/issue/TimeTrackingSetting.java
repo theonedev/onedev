@@ -18,10 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.util.usage.Usage;
 
 @Editable
@@ -51,15 +50,10 @@ public class TimeTrackingSetting implements Serializable {
 		this.useHoursAndMinutesOnly = useHoursAndMinutesOnly;
 	}
 
-	@SuppressWarnings("unused")
-	private static boolean isUseHoursAndMinutesOnlyDisabled() {
-		return !(Boolean)EditContext.get().getInputValue("useHoursAndMinutesOnly");
-	}
-
 	@Editable(order=100, description = "Specify working hours per day. This will affect " +
 			"parsing and displaying of working periods. For instance <tt>1d</tt> is the " +
 			"same as <tt>8h</tt> if this property is set to <tt>8</tt>")
-	@ShowCondition("isUseHoursAndMinutesOnlyDisabled")
+	@DependsOn(property="useHoursAndMinutesOnly", value="false")
 	@Max(24)
 	@Min(1)
 	public int getHoursPerDay() {
@@ -73,7 +67,7 @@ public class TimeTrackingSetting implements Serializable {
 	@Editable(order=200, description = "Specify working days per week. This will affect " +
 			"parsing and displaying of working periods. For instance <tt>1w</tt> is the " +
 			"same as <tt>5d</tt> if this property is set to <tt>5</tt>")
-	@ShowCondition("isUseHoursAndMinutesOnlyDisabled")
+	@DependsOn(property="useHoursAndMinutesOnly", value="false")
 	@Max(7)
 	@Min(1)
 	public int getDaysPerWeek() {

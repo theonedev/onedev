@@ -27,9 +27,10 @@ public class Translation_zh extends TranslationResourceBundle {
 			"'image' should be translated to '图片' or '镜像' depending on context\n" + 
 			"'docker aware executor' should be translated to 'docker 相关执行器'\n" + 
 			"When used together with 'subscription', word 'active' should be translated to '有效'\n" + 
-			"Two factor authentication should be translated to '两阶段验证'\n" + 
+			"'two factor authentication' should be translated to '两阶段验证'\n" + 
 			"Space should be added between English words and Chinese words\n" + 
-			"SSO provider should be translated as SSO 提供方")
+			"'SSO provider' should be translated as SSO 提供方\n" + 
+			"'post build' should be translated as 构建后")
 	public static void init(Map<String, String> m) {
 		m.clear();
 		m.put(" Project path can be omitted if reference from current project", "如果从当前项目引用，则可以省略项目路径");
@@ -555,7 +556,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Can not disable root account", "不能禁用根账户");
 		m.put("Can not disable yourself", "不能禁用自己");
 		m.put("Can not find issue board: ", "找不到工单看板：");
-		m.put("Can not link to self", "不能链接到自己");
 		m.put("Can not move project \"{0}\" to be under itself or its descendants", "不能将项目 \"{0}\" 移动到其自身或其子项目下");
 		m.put("Can not perform this operation now", "当前无法执行此操作");
 		m.put("Can not reset password for service account or disabled user", "无法重置服务账户或禁用用户的密码");
@@ -643,6 +643,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Choose group...", "选择组...");
 		m.put("Choose groups...", "选择组...");
 		m.put("Choose issue...", "选择工单...");
+		m.put("Choose issues...", "选择工单...");
 		m.put("Choose iteration...", "选择迭代...");
 		m.put("Choose iterations...", "选择迭代...");
 		m.put("Choose job...", "选择任务...");
@@ -781,6 +782,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Confirm password here", "在此确认密码");
 		m.put("Confirm your action", "确认你的操作");
 		m.put("Connect New Agent", "连接新代理");
+		m.put("Connect with your SSO account", "使用您的 SSO 账户连接");
 		m.put("Contact Email", "联系邮箱");
 		m.put("Contact Name", "联系人");
 		m.put("Container Image", "容器镜像");
@@ -826,6 +828,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Create Merge Commit If Necessary", "仅当必要时创建合并提交");
 		m.put("Create New", "新建");
 		m.put("Create New File", "创建新文件");
+		m.put("Create New User", "创建新用户");
 		m.put("Create Project", "创建项目");
 		m.put("Create Pull Request", "创建合并请求");
 		m.put("Create Pull Request for This Change", "为此变更创建合并请求");
@@ -928,6 +931,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Delete Build", "删除构建");
 		m.put("Delete Comment", "删除评论");
 		m.put("Delete Pull Request", "删除合并请求");
+		m.put("Delete SSO account here to reconnect corresponding SSO subject upon next login. Note that SSO subject with verified email will be connected to user with same verified email automatically", 
+			"在此删除 SSO 账户以便在下次登录时重新连接相应的 SSO 主题。请注意，具有已验证电子邮件的 SSO 主题将自动连接到具有相同已验证电子邮件的用户");
 		m.put("Delete Selected", "删除选中的");
 		m.put("Delete Selected Builds", "删除选定的构建");
 		m.put("Delete Selected Comments", "删除选中的评论");
@@ -1013,6 +1018,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Do you really want to cancel this build?", "您确定要取消此构建吗？");
 		m.put("Do you really want to change target branch to {0}?", "确定要将目标分支更改为 {0} 吗？");
 		m.put("Do you really want to delete \"{0}\"?", "您真的要删除 \"{0}\" 吗？");
+		m.put("Do you really want to delete SSO provider \"{0}\"?", "您真的想删除 SSO 提供方 \"{0}\" 吗？");
 		m.put("Do you really want to delete board \"{0}\"?", "您确定要删除看板 \"{0}\" 吗？");
 		m.put("Do you really want to delete build #{0}?", "您确定要删除构建 #{0} 吗？");
 		m.put("Do you really want to delete group \"{0}\"?", "您真的要删除组 \"{0}\" 吗？");
@@ -1024,6 +1030,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Do you really want to delete tag {0}?", "确定要删除标签 {0} 吗？");
 		m.put("Do you really want to delete this GPG key?", "您确定要删除此 GPG 密钥吗？");
 		m.put("Do you really want to delete this SSH key?", "您确定要删除此 SSH 密钥吗？");
+		m.put("Do you really want to delete this SSO account?", "您真的想删除此 SSO 账户吗？");
 		m.put("Do you really want to delete this access token?", "您确定要删除此访问令牌吗？");
 		m.put("Do you really want to delete this board?", "您确定要删除此看板吗？");
 		m.put("Do you really want to delete this build?", "您确定要删除此构建吗？");
@@ -1124,6 +1131,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Email Verification", "邮件验证");
 		m.put("Email Verification Template", "邮箱验证模板");
 		m.put("Email address", "电子邮件地址");
+		m.put("Email address \"{0}\" already used by another account", "电子邮件地址 \"{0}\" 已被另一个账户使用");
+		m.put("Email address \"{0}\" used by account \"{1}\"", "电子邮件地址 \"{0}\" 被账户 \"{1}\" 使用");
+		m.put("Email address \"{0}\" used by disabled account \"{1}\"", "电子邮件地址 \"{0}\" 被已禁用的账户 \"{1}\" 使用");
 		m.put("Email address already in use: {0}", "电子邮件地址已被使用: {0}");
 		m.put("Email address already invited: {0}", "电子邮件地址已被邀请: {0}");
 		m.put("Email address already used by another user", "电子邮件地址已被另一个用户使用");
@@ -1184,6 +1194,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Environment variable <code>serverUrl</code> in above command is taken from OneDev server url specified in <i>Administration / System Setting</i>. Change it if necessary", 
 			"上面的命令中的环境变量 <code>serverUrl</code> 取自 <i>管理 / 系统设置</i> 中指定的 OneDev 服务器 URL。如果需要，请更改它");
 		m.put("Equal", "等于");
+		m.put("Error authenticating user", "用户认证错误");
 		m.put("Error calculating commits: check log for details", "计算提交时出错：请检查日志");
 		m.put("Error cherry-picking to {0}: Merge conflicts detected", "cherry-pick 到 {0} 时出错：合并冲突检测到");
 		m.put("Error cherry-picking to {0}: {1}", "cherry-pick 到 {0} 时出错：{1}");
@@ -1245,8 +1256,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Export XLSX", "导出 XLSX");
 		m.put("Export as OCI layout", "导出为 OCI 布局");
 		m.put("Extend Trial Subscription", "延长试用订阅");
+		m.put("External Authentication", "外部认证");
 		m.put("External Issue Transformers", "外部工单转换");
 		m.put("External Participants", "外部参与者");
+		m.put("External Password Authenticator", "外部密码认证器");
 		m.put("External System", "外部系统");
 		m.put("External authenticator settings saved", "外部认证器设置已保存");
 		m.put("External participants do not have accounts and involve in the issue via email", "外部参与者没有账户，通过电子邮件参与工单");
@@ -1547,6 +1560,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Image URL should be specified", "图片 URL 应该指定");
 		m.put("Imap Ssl Setting", "IMAP SSL 设置");
 		m.put("Imap With Ssl", "IMAP 使用 SSL");
+		m.put("Impersonate", "模拟");
 		m.put("Implicit SSL", "隐式 SSL");
 		m.put("Import", "导入");
 		m.put("Import All Projects", "导入所有项目");
@@ -1699,7 +1713,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Issue Votes", "工单投票");
 		m.put("Issue administrative permission inside a project, including batch operations over multiple issues", 
 			"工单管理权限，包括对多个工单的批量操作");
-		m.put("Issue already linked", "工单已链接");
 		m.put("Issue count", "工单数量");
 		m.put("Issue in state", "工单状态");
 		m.put("Issue list", "工单列表");
@@ -1845,11 +1858,13 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Line: ", "行：");
 		m.put("Lines", "行");
 		m.put("Link", "链接");
+		m.put("Link Existing User", "链接现有用户");
 		m.put("Link Spec", "链接规范");
 		m.put("Link Spec Opposite", "链接规范相反");
 		m.put("Link Text", "链接文本");
 		m.put("Link URL", "链接 URL");
 		m.put("Link URL should be specified", "链接 URL 应该指定");
+		m.put("Link User Bean", "链接用户 Bean");
 		m.put("Linkable Issues", "可链接的工单");
 		m.put("Linkable Issues On the Other Side", "另一侧可链接的工单");
 		m.put("Links", "链接");
@@ -1996,6 +2011,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("My GPG Keys", "我的 GPG 密钥");
 		m.put("My Profile", "我的个人资料");
 		m.put("My SSH Keys", "我的 SSH 密钥");
+		m.put("My SSO Accounts", "我的 SSO 账户");
 		m.put("Mypy Report", "Mypy 报告");
 		m.put("N/A", "不适用");
 		m.put("NPM(s)", "NPM");
@@ -2037,6 +2053,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Network Options", "网络选项");
 		m.put("Never", "从不");
 		m.put("Never expire", "永不过期");
+		m.put("Never retry", "从不重试");
 		m.put("New Board", "新建看板");
 		m.put("New Invitation Bean", "新邀请Bean");
 		m.put("New Issue", "新工单");
@@ -2100,6 +2117,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No diffs to navigate", "没有差异可导航");
 		m.put("No directories to skip", "无要跳过的目录");
 		m.put("No executors defined. Jobs will use auto-discovered executors instead", "未定义执行器。作业将使用自动发现的执行器");
+		m.put("No external password authenticator", "没有外部密码认证器");
+		m.put("No external password authenticator to authenticate user \"{0}\"", "没有外部密码认证器来认证用户 \"{0}\"");
 		m.put("No fields to prompt", "无要提示的字段");
 		m.put("No fields to remove", "无要删除的字段");
 		m.put("No file attachments", "没有文件附件");
@@ -2234,6 +2253,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Only projects manageable by access token owner can be authorized", "只有受访问令牌所有者管理的项目才能被授权");
 		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
 			"这里只显示系统级别的审计事件。要查看特定项目的审计事件，请访问项目审计日志页面");
+		m.put("Only users able to authenticate via password can be linked", "只有能够通过密码认证的用户才能被链接");
 		m.put("Open", "打开");
 		m.put("Open new pull request", "创建新的合并请求");
 		m.put("Open terminal of current running step", "打开当前运行步骤的终端");
@@ -2554,6 +2574,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Passcode", "Passcode");
 		m.put("Passed", "通过");
 		m.put("Password", "密码");
+		m.put("Password Authenticator", "密码认证器");
 		m.put("Password Edit Bean", "密码编辑 Bean");
 		m.put("Password Must Contain Digit", "密码必须包含数字");
 		m.put("Password Must Contain Lowercase", "密码必须包含小写字母");
@@ -2569,6 +2590,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Password has been changed", "密码已更改");
 		m.put("Password has been removed", "密码已删除");
 		m.put("Password has been set", "密码已设置");
+		m.put("Password of the user", "用户的密码");
 		m.put("Password or Access Token for Remote Repository", "密码或远程仓库的访问令牌");
 		m.put("Password reset request has been sent", "密码重置请求已发送");
 		m.put("Password reset url is invalid or obsolete", "密码重置URL无效或已过期");
@@ -2678,9 +2700,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Populate Tag Mappings", "填充标签映射");
 		m.put("Port", "端口");
 		m.put("Post", "发布");
-		m.put("Post Build Action", "发布构建操作");
-		m.put("Post Build Action Bean", "发布构建操作 Bean");
-		m.put("Post Build Actions", "发布构建操作");
+		m.put("Post Build Action", "构建后操作");
+		m.put("Post Build Action Bean", "构建后操作 Bean");
+		m.put("Post Build Actions", "构建后操作");
 		m.put("Post Url", "发布 URL");
 		m.put("PowerShell", "PowerShell");
 		m.put("Prefix Pattern", "前缀模式");
@@ -3071,6 +3093,12 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("SSH key deleted", "SSH 密钥已删除");
 		m.put("SSH settings have been saved and SSH server restarted", "SSH 设置已保存并重启 SSH 服务器");
 		m.put("SSL Setting", "SSL 设置");
+		m.put("SSO Accounts", "SSO 账户");
+		m.put("SSO Providers", "SSO 提供方");
+		m.put("SSO account deleted", "SSO 账户已删除");
+		m.put("SSO provider \"{0}\" deleted", "SSO 提供方 \"{0}\" 已删除");
+		m.put("SSO provider created", "SSO 提供方已创建");
+		m.put("SSO provider updated", "SSO 提供方已更新");
 		m.put("SUCCESSFUL", "成功");
 		m.put("Save", "保存");
 		m.put("Save Query", "保存查询");
@@ -3156,6 +3184,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Service Desk Settings", "服务台设置");
 		m.put("Service Locator", "服务定位器");
 		m.put("Service Locators", "服务定位器");
+		m.put("Service account not allowed to login", "服务账户不允许登录");
 		m.put("Service desk setting", "服务台设置");
 		m.put("Service desk settings have been saved", "服务台设置已保存");
 		m.put("Services", "服务");
@@ -3257,6 +3286,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Signing Key ID", "签署密钥 ID");
 		m.put("Similar Issues", "相似工单");
 		m.put("Single Sign On", "单点登录");
+		m.put("Single Sign-On", "单点登录");
 		m.put("Single sign on via discord.com", "通过 discord.com 单点登录");
 		m.put("Single sign on via twitch.tv", "通过 twitch.tv 单点登录");
 		m.put("Site", "站点");
@@ -3646,6 +3676,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Ssh Setting", "SSH 设置");
 		m.put("Ssl Setting", "SSL 设置");
 		m.put("Sso Connector", "SSO 连接器");
+		m.put("Sso Provider Bean", "Sso 提供方 Bean");
 		m.put("Start At", "开始于");
 		m.put("Start Date", "开始日期");
 		m.put("Start Page", "起始页面");
@@ -4055,6 +4086,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Unable to create protected tag", "无法创建受保护的标签");
 		m.put("Unable to diff as some line is too long.", "无法比较，因为某些行太长");
 		m.put("Unable to diff as the file is too large.", "无法比较，因为文件太大");
+		m.put("Unable to find SSO provider: ", "无法找到 SSO 提供方：");
 		m.put("Unable to find agent {0}", "无法找到代理 {0}");
 		m.put("Unable to find build #{0} in project {1}", "在项目 {1} 中找不到构建 #{0}");
 		m.put("Unable to find commit to import build spec (import project: {0}, import revision: {1})", 
@@ -4242,6 +4274,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("When determine if the user is author/committer of a git commit, all emails listed here will be checked", 
 			"确定用户是否是 git 提交的作者/提交者时，将检查此处列出的所有电子邮件");
 		m.put("When evaluating this template, below variables will be available:", "使用此模板时，以下变量将可用：");
+		m.put("When login via OneDev's built-in form, submitted user credentials can be checked against authenticator defined here, besides the internal database", 
+			"通过 OneDev 的内置表单登录时，提交的用户凭据可以在此处定义的认证器以及内部数据库中进行检查");
 		m.put("When target branch of a pull request has new commits, merge commit of the pull request will be recalculated, and this option tells whether or not to accept pull request builds ran on previous merged commit. If enabled, you will need to re-run required builds on the new merge commit. This setting takes effect only when required builds are specified", 
 			"当合并请求的目标分支有新提交时，合并请求的合并提交将被重新计算，此选项决定是否接受在之前合并提交上运行的合并请求构建。如果启用，您需要在新的合并提交上重新运行所需的构建。此设置仅在指定了所需构建时生效");
 		m.put("When this work starts", "此工作开始时");
@@ -4588,39 +4622,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Connect with your SSO account", "使用您的 SSO 账户连接");
-		m.put("Create New User", "创建新用户");
-		m.put("Delete SSO account here to reconnect corresponding SSO subject upon next login. Note that SSO subject with verified email will be connected to user with same verified email automatically", 
-			"在此删除 SSO 账户以便在下次登录时重新连接相应的 SSO 主题。请注意，具有已验证电子邮件的 SSO 主题将自动连接到具有相同已验证电子邮件的用户");
-		m.put("Do you really want to delete SSO provider \"{0}\"?", "您真的想删除 SSO 提供方 \"{0}\" 吗？");
-		m.put("Do you really want to delete this SSO account?", "您真的想删除此 SSO 账户吗？");
-		m.put("Email address \"{0}\" already used by another account", "电子邮件地址 \"{0}\" 已被另一个账户使用");
-		m.put("Email address \"{0}\" used by account \"{1}\"", "电子邮件地址 \"{0}\" 被账户 \"{1}\" 使用");
-		m.put("Email address \"{0}\" used by disabled account \"{1}\"", "电子邮件地址 \"{0}\" 被已禁用的账户 \"{1}\" 使用");
-		m.put("Error authenticating user", "用户认证错误");
-		m.put("External Authentication", "外部认证");
-		m.put("External Password Authenticator", "外部密码认证器");
-		m.put("Impersonate", "模拟");
-		m.put("Link Existing User", "链接现有用户");
-		m.put("Link User Bean", "链接用户 Bean");
-		m.put("My SSO Accounts", "我的 SSO 账户");
-		m.put("No external password authenticator", "没有外部密码认证器");
-		m.put("No external password authenticator to authenticate user \"{0}\"", "没有外部密码认证器来认证用户 \"{0}\"");
-		m.put("Only users able to authenticate via password can be linked", "只有能够通过密码认证的用户才能被链接");
-		m.put("Password Authenticator", "密码认证器");
-		m.put("Password of the user", "用户的密码");
-		m.put("SSO Accounts", "SSO 账户");
-		m.put("SSO Providers", "SSO 提供方");
-		m.put("SSO account deleted", "SSO 账户已删除");
-		m.put("SSO provider \"{0}\" deleted", "SSO 提供方 \"{0}\" 已删除");
-		m.put("SSO provider created", "SSO 提供方已创建");
-		m.put("SSO provider updated", "SSO 提供方已更新");
-		m.put("Service account not allowed to login", "服务账户不允许登录");
-		m.put("Single Sign-On", "单点登录");
-		m.put("Sso Provider Bean", "Sso 提供方 Bean");
-		m.put("Unable to find SSO provider: ", "无法找到 SSO 提供方：");
-		m.put("When login via OneDev's built-in form, submitted user credentials can be checked against authenticator defined here, besides the internal database", 
-			"通过 OneDev 的内置表单登录时，提交的用户凭据可以在此处定义的认证器以及内部数据库中进行检查");
 	}
 		
 	@Override
