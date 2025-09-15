@@ -29,7 +29,7 @@ public class VersionResource {
 	@GET
 	public VersionRange getCompatibleTodVersions() {
 		var versionRange = new VersionRange();
-		versionRange.minVersion = "1.0.0";
+		versionRange.minVersion = "2.0.0";
 		return versionRange;
 	}
 	
