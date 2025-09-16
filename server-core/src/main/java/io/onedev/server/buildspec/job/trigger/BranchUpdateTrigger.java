@@ -1,9 +1,18 @@
 package io.onedev.server.buildspec.job.trigger;
 
+import java.util.Collection;
+import java.util.List;
+
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;
+import io.onedev.server.annotation.UserMatch;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.TriggerMatch;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -11,15 +20,8 @@ import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
-import io.onedev.commons.utils.match.Matcher;
-import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.util.SuggestionUtils;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-
-import java.util.Collection;
-import java.util.List;
 
 @Editable(order=100, name="Branch update", description=""
 		+ "Job will run when code is committed. <b class='text-info'>NOTE:</b> This trigger will ignore commits "
@@ -33,7 +35,9 @@ public class BranchUpdateTrigger extends JobTrigger {
 	private String branches;
 	
 	private String paths;
-	
+
+	private String userMatch;
+		
 	@Editable(name="Branches", order=100, placeholder="Any branch", description="Optionally specify space-separated branches "
 			+ "to check. Use '**' or '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all branches")
@@ -61,6 +65,16 @@ public class BranchUpdateTrigger extends JobTrigger {
 
 	public void setPaths(String paths) {
 		this.paths = paths;
+	}
+
+	@Editable(order=150, name="Applicable Users", placeholder = "Any user", description="Optionally specify applicable users who pushed the change")
+	@UserMatch
+	public String getUserMatch() {
+		return userMatch;
+	}
+
+	public void setUserMatch(String userMatch) {
+		this.userMatch = userMatch;
 	}
 
 	@SuppressWarnings("unused")
@@ -92,6 +106,14 @@ public class BranchUpdateTrigger extends JobTrigger {
 			return true;
 		}
 	}
+
+	private boolean pushedBy(RefUpdated refUpdated) {
+		if (getUserMatch() != null && refUpdated.getUser() != null) {
+			return io.onedev.server.util.usermatch.UserMatch.parse(getUserMatch()).matches(refUpdated.getUser());			
+		} else {
+			return true;
+		}
+	}
 	
 	@Override
 	protected TriggerMatch triggerMatches(ProjectEvent event, Job job) {
@@ -102,7 +124,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 			if (updatedBranch != null
 					&& !SKIP_COMMIT.apply(event.getProject().getRevCommit(refUpdated.getNewCommitId(), true))
 					&& (branches == null || PatternSet.parse(branches).matches(matcher, updatedBranch)) 
-					&& touchedFile(refUpdated)) {
+					&& touchedFile(refUpdated) && pushedBy(refUpdated)) {
 				return new TriggerMatch(refUpdated.getRefName(), null, null,
 						getParamMatrix(), getExcludeParamMaps(), "Branch '" + updatedBranch + "' is updated");
 			}
@@ -113,12 +135,20 @@ public class BranchUpdateTrigger extends JobTrigger {
 	@Override
 	public String getTriggerDescription() {
 		String description;
-		if (getBranches() != null && getPaths() != null)
+		if (getBranches() != null && getPaths() != null && getUserMatch() != null)
+			description = String.format("When update branches '%s' and touch files '%s' and pushed by '%s'", getBranches(), getPaths(), getUserMatch());
+		else if (getBranches() != null && getUserMatch() != null)
+			description = String.format("When update branches '%s' and pushed by '%s'", getBranches(), getUserMatch());
+		else if (getPaths() != null && getUserMatch() != null)
+			description = String.format("When touch files '%s' and pushed by '%s'", getPaths(), getUserMatch());
+		else if (getBranches() != null && getPaths() != null)
 			description = String.format("When update branches '%s' and touch files '%s'", getBranches(), getPaths());
 		else if (getBranches() != null)
 			description = String.format("When update branches '%s'", getBranches());
 		else if (getPaths() != null)
 			description = String.format("When touch files '%s'", getPaths());
+		else if (getUserMatch() != null)
+			description = String.format("When pushed by '%s'", getUserMatch());
 		else
 			description = "When update branches";
 		return description;

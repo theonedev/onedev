@@ -1,5 +1,21 @@
 package io.onedev.server.util.usermatch;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
@@ -7,19 +23,10 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.usermatch.UserMatchParser.CriteriaContext;
 import io.onedev.server.util.usermatch.UserMatchParser.ExceptCriteriaContext;
 import io.onedev.server.util.usermatch.UserMatchParser.UserMatchContext;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class UserMatch implements Serializable {
 
@@ -42,13 +49,13 @@ public class UserMatch implements Serializable {
 		return exceptCriterias;
 	}
 
-	public boolean matches(Project project, User user) {
+	public boolean matches(User user) {
 		for (UserMatchCriteria criteria: exceptCriterias) {
-			if (criteria.matches(project, user))
+			if (criteria.matches(user))
 				return false;
 		}
 		for (UserMatchCriteria criteria: criterias) {
-			if (criteria.matches(project, user))
+			if (criteria.matches(user))
 				return true;
 		}
 		return false;

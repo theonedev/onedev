@@ -1,19 +1,19 @@
 package io.onedev.server.model.support.code;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.constraints.NotEmpty;
+
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.util.usermatch.Anyone;
 import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.util.SuggestionUtils;
-
-import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 @Editable
 public class TagProtection implements Serializable {
@@ -24,7 +24,7 @@ public class TagProtection implements Serializable {
 	
 	private String tags;
 	
-	private String userMatch = new Anyone().toString();
+	private String userMatch;
 	
 	private boolean preventUpdate = true;
 	
@@ -59,9 +59,8 @@ public class TagProtection implements Serializable {
 		return SuggestionUtils.suggestTags(Project.get(), matchWith);
 	}
 	
-	@Editable(order=150, name="Applicable Users", description="Rule will apply if user operating the tag matches criteria specified here")
+	@Editable(order=150, name="Applicable Users", placeholder = "Any user", description="Rule will apply if user operating the tag matches criteria specified here")
 	@io.onedev.server.annotation.UserMatch
-	@NotEmpty(message="may not be empty")
 	public String getUserMatch() {
 		return userMatch;
 	}
@@ -116,23 +115,25 @@ public class TagProtection implements Serializable {
 	}
 
 	public void onRenameGroup(String oldName, String newName) {
-		userMatch = UserMatch.onRenameGroup(userMatch, oldName, newName);
+		if (userMatch != null) 
+			userMatch = UserMatch.onRenameGroup(userMatch, oldName, newName);
 	}
 	
 	public Usage onDeleteGroup(String groupName) {
 		Usage usage = new Usage();
-		if (UserMatch.isUsingGroup(userMatch, groupName))
+		if (userMatch != null && UserMatch.isUsingGroup(userMatch, groupName))
 			usage.add("applicable users");
 		return usage.prefix("tag protection '" + getTags() + "'").prefix("code");
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
-		userMatch = UserMatch.onRenameUser(userMatch, oldName, newName);
+		if (userMatch != null) 
+			userMatch = UserMatch.onRenameUser(userMatch, oldName, newName);
 	}
 	
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
-		if (UserMatch.isUsingUser(userMatch, userName))
+		if (userMatch != null && UserMatch.isUsingUser(userMatch, userName))
 			usage.add("applicable users");
 		return usage.prefix("tag protection '" + getTags() + "'").prefix("code");
 	}

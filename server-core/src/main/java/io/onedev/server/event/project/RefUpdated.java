@@ -1,18 +1,22 @@
 package io.onedev.server.event.project;
 
+import java.util.Date;
+
+import javax.annotation.Nullable;
+
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.PlainText;
 import io.onedev.server.web.UrlManager;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-
-import java.util.Date;
 
 public class RefUpdated extends ProjectEvent implements CommitAware {
 	
@@ -26,11 +30,16 @@ public class RefUpdated extends ProjectEvent implements CommitAware {
 	
 	private transient ProjectScopedCommit commit;
 	
-	public RefUpdated(Project project, String refName, ObjectId oldCommitId, ObjectId newCommitId) {
-		super(null, new Date(), project);
+	public RefUpdated(@Nullable User user, Project project, String refName, 
+			ObjectId oldCommitId, ObjectId newCommitId) {
+		super(user, new Date(), project);
 		this.refName = refName;
 		this.oldCommitId = oldCommitId;
 		this.newCommitId = newCommitId;
+	}
+
+	public RefUpdated(Project project, String refName, ObjectId oldCommitId, ObjectId newCommitId) {
+		this(null, project, refName, oldCommitId, newCommitId);
 	}
 	
 	public static boolean isValidRef(String refName) {

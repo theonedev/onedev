@@ -1024,7 +1024,10 @@ onedev.server.markdown = {
             onedev.server.markdown.syncPreviewScroll(containerId);
         });
 	},
-	initRendered: function(containerId) {
+	initRendered: function(containerId, translations) {
+		if (translations)
+			onedev.server.markdown.translations = translations;
+
 		var $container = $("#" + containerId);
 		var $rendered = $container.find(".markdown-rendered");
 		

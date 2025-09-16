@@ -1,7 +1,6 @@
 package io.onedev.server.util.usermatch;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 
 public class UserCriteria implements UserMatchCriteria {
@@ -19,7 +18,7 @@ public class UserCriteria implements UserMatchCriteria {
 	}
 
 	@Override
-	public boolean matches(Project project, User user) {
+	public boolean matches(User user) {
 		return this.user.equals(user);
 	}
 

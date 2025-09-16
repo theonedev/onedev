@@ -6,6 +6,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.jgit.lib.Constants.R_HEADS;
 import static org.eclipse.jgit.lib.Constants.R_TAGS;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.CommandUtils;
@@ -158,9 +160,16 @@ public class PullRepository extends SyncRepository {
 			if (!authorized) 
 				throw new ExplicitException("This build is not authorized to sync to project: " + targetProject.getPath());
 
+			Long userId;
+			if (getAccessTokenSecret() != null) {
+				userId = build.getAccessToken(getAccessTokenSecret()).getOwner().getId();
+			} else {
+				userId = SecurityUtils.getUser().getId();
+			}
+
 			String remoteUrl = getRemoteUrlWithCredential(build);
 			Long targetProjectId = targetProject.getId();
-			var task = new PullTask(targetProjectId, remoteUrl, getCertificate(), getRefs(), isForce(), isWithLfs(), getProxy(), build.getSecretMasker());
+			var task = new PullTask(targetProjectId, userId, remoteUrl, getCertificate(), getRefs(), isForce(), isWithLfs(), getProxy(), build.getSecretMasker());
 			getProjectManager().runOnActiveServer(targetProjectId, task);
 			return new ServerStepResult(true);
 		});
@@ -169,10 +178,16 @@ public class PullRepository extends SyncRepository {
 	private static ProjectManager getProjectManager() {
 		return OneDev.getInstance(ProjectManager.class);
 	}
+
+	private static UserManager getUserManager() {
+		return OneDev.getInstance(UserManager.class);
+	}
 	
 	private static class PullTask implements ClusterTask<Void> {
 
 		private final Long projectId;
+
+		private final Long userId;
 		
 		private final String remoteUrl;
 		
@@ -188,10 +203,11 @@ public class PullRepository extends SyncRepository {
 
 		private final SecretMasker secretMasker;
 		
-		PullTask(Long projectId, String remoteUrl, @Nullable String certificate, 
+		PullTask(Long projectId, Long userId, String remoteUrl, @Nullable String certificate, 
 				 String refs, boolean force, boolean withLfs, @Nullable String proxy, 
 				 SecretMasker secretMasker) {
 			this.projectId = projectId;
+			this.userId = userId;
 			this.remoteUrl = remoteUrl;
 			this.certificate = certificate;
 			this.refs = refs;
@@ -370,19 +386,20 @@ public class PullRepository extends SyncRepository {
 						// Access db connection in a separate thread to avoid possible deadlock, as
 						// the parent thread is blocking another thread holding database connections
 						var project = getProjectManager().load(projectId);
+						var user = getUserManager().load(userId);
 						MapDifference<String, ObjectId> difference = difference(oldCommitIds, newCommitIds);
 						ListenerRegistry registry = OneDev.getInstance(ListenerRegistry.class);
 						for (Map.Entry<String, ObjectId> entry : difference.entriesOnlyOnLeft().entrySet()) {
 							if (RefUpdated.isValidRef(entry.getKey()))
-								registry.post(new RefUpdated(project, entry.getKey(), entry.getValue(), ObjectId.zeroId()));
+								registry.post(new RefUpdated(user, project, entry.getKey(), entry.getValue(), ObjectId.zeroId()));
 						}
 						for (Map.Entry<String, ObjectId> entry : difference.entriesOnlyOnRight().entrySet()) {
 							if (RefUpdated.isValidRef(entry.getKey()))
-								registry.post(new RefUpdated(project, entry.getKey(), ObjectId.zeroId(), entry.getValue()));
+								registry.post(new RefUpdated(user, project, entry.getKey(), ObjectId.zeroId(), entry.getValue()));
 						}
 						for (Map.Entry<String, ValueDifference<ObjectId>> entry : difference.entriesDiffering().entrySet()) {
 							if (RefUpdated.isValidRef(entry.getKey())) {
-								registry.post(new RefUpdated(project, entry.getKey(),
+								registry.post(new RefUpdated(user, project, entry.getKey(),
 										entry.getValue().leftValue(), entry.getValue().rightValue()));
 							}
 						}

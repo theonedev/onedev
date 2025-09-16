@@ -3,6 +3,7 @@ package io.onedev.server.git.hook;
 import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.GitUtils;
@@ -43,6 +44,8 @@ public class GitPostReceiveCallback extends HttpServlet {
     public static final String PATH = "/git-postreceive-callback";
     
     private final ProjectManager projectManager;
+
+	private final UserManager userManager;
     
     private final UrlManager urlManager;
 
@@ -52,11 +55,12 @@ public class GitPostReceiveCallback extends HttpServlet {
     
     @Inject
     public GitPostReceiveCallback(ProjectManager projectManager, UrlManager urlManager, 
-    		SessionManager sessionManager, ListenerRegistry listenerRegistry) {
+    		SessionManager sessionManager, ListenerRegistry listenerRegistry, UserManager userManager) {
     	this.projectManager = projectManager;
     	this.urlManager = urlManager;
     	this.sessionManager = sessionManager;
         this.listenerRegistry = listenerRegistry;
+        this.userManager = userManager;
     }
 
     @Sessional
@@ -139,12 +143,14 @@ public class GitPostReceiveCallback extends HttpServlet {
         		fields.set(pos, field);
         }
         
+		var userId = SecurityUtils.getUser().getId();
+
         sessionManager.runAsyncAfterCommit(() -> {
 			Project project = projectManager.load(projectId);
 			try {
 				for (var updateInfo: updateInfos) {
-					RefUpdated event = new RefUpdated(project, updateInfo.getLeft(), 
-							updateInfo.getMiddle(), updateInfo.getRight());
+					RefUpdated event = new RefUpdated(userManager.load(userId), project, 
+							updateInfo.getLeft(), updateInfo.getMiddle(), updateInfo.getRight());
 					listenerRegistry.invokeListeners(event);
 				}
 			} catch (Exception e) {

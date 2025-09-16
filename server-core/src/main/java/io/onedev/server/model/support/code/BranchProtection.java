@@ -41,7 +41,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.util.usermatch.Anyone;
 import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -58,7 +57,7 @@ public class BranchProtection implements Serializable {
 	
 	private String branches;
 	
-	private String userMatch = new Anyone().toString();
+	private String userMatch;
 	
 	private boolean preventForcedPush = true;
 	
@@ -117,9 +116,8 @@ public class BranchProtection implements Serializable {
 		return SuggestionUtils.suggestBranches(Project.get(), matchWith);
 	}
 	
-	@Editable(order=150, name="Applicable Users", description="Rule will apply only if the user changing the branch matches criteria specified here")
+	@Editable(order=150, name="Applicable Users", placeholder = "Any user", description="Rule will apply only if the user changing the branch matches criteria specified here")
 	@io.onedev.server.annotation.UserMatch
-	@NotEmpty(message="may not be empty")
 	public String getUserMatch() {
 		return userMatch;
 	}
@@ -311,7 +309,8 @@ public class BranchProtection implements Serializable {
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {
-		userMatch = UserMatch.onRenameGroup(userMatch, oldName, newName);
+		if (userMatch != null) 
+			userMatch = UserMatch.onRenameGroup(userMatch, oldName, newName);
 		reviewRequirement = ReviewRequirement.onRenameGroup(reviewRequirement, oldName, newName);
 		
 		for (FileProtection fileProtection: getFileProtections()) {
@@ -322,7 +321,7 @@ public class BranchProtection implements Serializable {
 	
 	public Usage onDeleteGroup(String groupName) {
 		Usage usage = new Usage();
-		if (UserMatch.isUsingGroup(userMatch, groupName))
+		if (userMatch != null && UserMatch.isUsingGroup(userMatch, groupName))
 			usage.add("applicable users");
 		if (ReviewRequirement.isUsingGroup(reviewRequirement, groupName))
 			usage.add("required reviewers");
@@ -337,7 +336,8 @@ public class BranchProtection implements Serializable {
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
-		userMatch = UserMatch.onRenameUser(userMatch, oldName, newName);
+		if (userMatch != null) 
+			userMatch = UserMatch.onRenameUser(userMatch, oldName, newName);
 		reviewRequirement = ReviewRequirement.onRenameUser(reviewRequirement, oldName, newName);
 		
 		for (FileProtection fileProtection: getFileProtections()) {
@@ -348,7 +348,7 @@ public class BranchProtection implements Serializable {
 	
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
-		if (UserMatch.isUsingUser(userMatch, userName))
+		if (userMatch != null && UserMatch.isUsingUser(userMatch, userName))
 			usage.add("applicable users");
 		if (ReviewRequirement.isUsingUser(reviewRequirement, userName))
 			usage.add("required reviewers");

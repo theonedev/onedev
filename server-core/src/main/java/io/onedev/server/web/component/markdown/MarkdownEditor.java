@@ -311,7 +311,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				public void renderHead(IHeaderResponse response) {
 					super.renderHead(response);
 					String script = String.format(
-							"onedev.server.markdown.initRendered('%s');", container.getMarkupId());
+							"onedev.server.markdown.initRendered('%s', %s);", 
+							container.getMarkupId(), JavascriptTranslations.get());
 					response.render(OnDomReadyHeaderItem.forScript(script));
 				}
 				
