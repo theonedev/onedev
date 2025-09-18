@@ -401,22 +401,24 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	public void changeState(Issue issue, String state, Map<String, Object> fieldValues, 
 			Collection<String> promptFields, Collection<String> removeFields, @Nullable String comment) {
 		String prevState = issue.getState();
-		Map<String, Input> prevFields = issue.getFieldInputs();
-		
-		issue.setState(state);
-		issue.removeFields(removeFields);
-		issue.setFieldValues(fieldValues);
-		issue.addMissingFields(promptFields);
-		issue.validateFields();
-				
-		issueFieldManager.saveFields(issue);
-		
-		IssueChange change = new IssueChange();
-		change.setIssue(issue);
-		change.setUser(SecurityUtils.getUser());
-		change.setData(new IssueStateChangeData(prevState, issue.getState(), 
-				prevFields, issue.getFieldInputs()));
-		create(change, comment);
+		if (!prevState.equals(state)) {
+				Map<String, Input> prevFields = issue.getFieldInputs();
+			
+			issue.setState(state);
+			issue.removeFields(removeFields);
+			issue.setFieldValues(fieldValues);
+			issue.addMissingFields(promptFields);
+			issue.validateFields();
+					
+			issueFieldManager.saveFields(issue);
+			
+			IssueChange change = new IssueChange();
+			change.setIssue(issue);
+			change.setUser(SecurityUtils.getUser());
+			change.setData(new IssueStateChangeData(prevState, issue.getState(), 
+					prevFields, issue.getFieldInputs()));
+			create(change, comment);
+		}
 	}
 	
 	@Transactional
@@ -485,31 +487,29 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 						Project project = issue.getProject();
 						ProjectScope projectScope = new ProjectScope(project, true, true);
 						IssueStateTransitedSpec issueStateTransitedSpec = (IssueStateTransitedSpec) transition;
-						if (issueStateTransitedSpec.getStates().contains(issue.getState())) {
-							IssueQuery query = IssueQuery.parse(project, issueStateTransitedSpec.getIssueQuery(), option, true);
-							List<Criteria<Issue>> criterias = new ArrayList<>();
-							
-							List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
-							for (String fromState: transition.getFromStates()) 
-								fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
-							
-							if (!fromStateCriterias.isEmpty())
-								criterias.add(Criteria.orCriterias(fromStateCriterias));
-							if (query.getCriteria() != null)
-								criterias.add(query.getCriteria());
-							query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
-							Issue.push(issue);
-							try {
-								for (Issue each: issueManager.query(
-										projectScope, query, true, 0, MAX_VALUE)) {
-									String message = "State changed as issue " + issue.getReference().toString(each.getProject()) 
-											+ " transited to '" + issue.getState() + "'";
-									changeState(each, issueStateTransitedSpec.getToState(), new HashMap<>(), 
-											new ArrayList<>(), transition.getRemoveFields(), message);
-								}
-							} finally {
-								Issue.pop();
+						IssueQuery query = IssueQuery.parse(project, issueStateTransitedSpec.getIssueQuery(), option, true);
+						List<Criteria<Issue>> criterias = new ArrayList<>();
+						
+						List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
+						for (String fromState: transition.getFromStates()) 
+							fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
+						
+						if (!fromStateCriterias.isEmpty())
+							criterias.add(Criteria.orCriterias(fromStateCriterias));
+						if (query.getCriteria() != null)
+							criterias.add(query.getCriteria());
+						query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
+						Issue.push(issue);
+						try {
+							for (Issue each: issueManager.query(
+									projectScope, query, true, 0, MAX_VALUE)) {
+								String message = "State changed as issue " + issue.getReference().toString(each.getProject()) 
+										+ " transited to '" + issue.getState() + "'";
+								changeState(each, issueStateTransitedSpec.getToState(), new HashMap<>(), 
+										new ArrayList<>(), transition.getRemoveFields(), message);
 							}
+						} finally {
+							Issue.pop();
 						}
 					}      												
 				}

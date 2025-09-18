@@ -892,7 +892,7 @@ public class McpHelperResource {
 
         return DateUtils.parseRelaxed(dateTimeDescription).getTime();
     }
-
+ 
     @Path("/query-issues")
     @GET
     public List<Map<String, Object>> queryIssues(
@@ -908,7 +908,6 @@ public class McpHelperResource {
 
         if (count > RestConstants.MAX_PAGE_SIZE)
             throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
-
 
         EntityQuery<Issue> parsedQuery;
         if (query != null) {

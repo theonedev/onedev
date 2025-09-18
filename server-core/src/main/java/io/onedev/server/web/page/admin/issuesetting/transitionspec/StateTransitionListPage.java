@@ -6,6 +6,9 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -52,12 +55,13 @@ public class StateTransitionListPage extends IssueSettingPage {
 		super(params);
 	}
 
-	private WebMarkupContainer newEditLink(String componentId, int transitionIndex) {
+	private WebMarkupContainer newEditLink(String componentId, int transitionIndex, 
+			@Nullable TransitionSpec transition) {
 		return new ModalLink(componentId) {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new TransitionEditPanel(id, transitionIndex) {
+				return new TransitionEditPanel(id, transitionIndex, transition) {
 
 					@Override
 					protected void onSave(AjaxRequestTarget target) {
@@ -85,32 +89,7 @@ public class StateTransitionListPage extends IssueSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ModalLink("addNew") {
-
-			@Override
-			protected Component newContent(String id, ModalPanel modal) {
-				return new TransitionEditPanel(id, -1) {
-
-					@Override
-					protected void onSave(AjaxRequestTarget target) {
-						target.add(transitionsTable);
-						modal.close();
-					}
-
-					@Override
-					protected void onCancel(AjaxRequestTarget target) {
-						modal.close();
-					}
-
-					@Override
-					protected GlobalIssueSetting getSetting() {
-						return StateTransitionListPage.this.getSetting();
-					}
-
-				};
-			}
-			
-		});
+		add(newEditLink("addNew", -1, null));
 		
 		List<IColumn<TransitionSpec, Void>> columns = new ArrayList<>();
 		
@@ -144,7 +123,7 @@ public class StateTransitionListPage extends IssueSettingPage {
 				TransitionSpec transition = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "descriptionFrag", StateTransitionListPage.this);
 				int transitionIndex = cellItem.findParent(LoopItem.class).getIndex();
-				var link = newEditLink("link", transitionIndex);
+				var link = newEditLink("link", transitionIndex, SerializationUtils.clone(transition));
 				if (transition.getFromStates().isEmpty())
 					link.add(new Label("fromStates", _T("[Any state]")));
 				else					
@@ -173,8 +152,11 @@ public class StateTransitionListPage extends IssueSettingPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
 				int transitionIndex = cellItem.findParent(LoopItem.class).getIndex();
+				var transitionClone = SerializationUtils.clone(rowModel.getObject());
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", StateTransitionListPage.this);
-				fragment.add(newEditLink("edit", transitionIndex));
+				fragment.add(newEditLink("edit", transitionIndex, transitionClone));
+
+				fragment.add(newEditLink("copy", -1, transitionClone));
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override

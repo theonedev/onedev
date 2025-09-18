@@ -38,6 +38,7 @@ import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoic
 import io.onedev.server.model.support.issue.transitionspec.BranchUpdatedSpec;
 import io.onedev.server.model.support.issue.transitionspec.IssueStateTransitedSpec;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
+import io.onedev.server.model.support.issue.transitionspec.PullRequestOpenedSpec;
 import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
@@ -164,70 +165,78 @@ public class GlobalIssueSetting implements Serializable {
 		assignees.setAllowEmpty(true);
 		assignees.setNameOfEmptyValue("Not assigned");
 		assignees.setName("Assignees");
-		
 		fieldSpecs.add(assignees);
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
-		open.setColor("#FFA800");
-		
+		open.setColor("#2095F2");		
 		stateSpecs.add(open);
-		
+
+		StateSpec inProgress = new StateSpec();
+		inProgress.setName("In Progress");
+		inProgress.setColor("#FFA700");		
+		inProgress.setDescription(
+			"The AI assistant should switch the working directory to the branch corresponding to the issue by running below command:\n" + 
+			"git checkout -b <branch-name> origin/main && git push -u origin <branch-name>");		
+		stateSpecs.add(inProgress);
+
+		StateSpec inReview = new StateSpec();
+		inReview.setName("In Review");
+		inReview.setColor("#9C26B0");		
+		inReview.setDescription(
+			"AI assistant should do the following:\n" + 
+			"1. Create conventional commit for current work if there are uncommitted changes. Note that subject of the commit message should mention the issue number at the end in form of (#<issue number>)\n" + 
+			"2. Push the branch to remote by running \"git push\"\n" + 
+			"3. Create a pull request for current branch");		
+		stateSpecs.add(inReview);
+
 		StateSpec closed = new StateSpec();
 		closed.setColor("#1BC5BD");
-		closed.setName("Closed");
-		
+		closed.setName("Closed");		
 		stateSpecs.add(closed);
 		
-		var manualSpec = new ManualSpec();
-		manualSpec.setFromStates(Lists.newArrayList("Open"));
-		manualSpec.setToStates(Lists.newArrayList("Closed"));
-		manualSpec.setAuthorizedRoles(Lists.newArrayList("Code Writer", ManualSpec.ROLE_SUBMITTER, "{Assignees}"));
-		manualSpec.setIssueQuery("not(any \"Blocked By\" matching(\"State\" is \"Open\")) and not(any \"Sub Issues\" matching(\"State\" is \"Open\"))");
-		
-		transitionSpecs.add(manualSpec);
-		
 		var branchUpdatedSpec = new BranchUpdatedSpec();
-		branchUpdatedSpec.setFromStates(Lists.newArrayList("Open"));
 		branchUpdatedSpec.setToState("Closed");
 		branchUpdatedSpec.setBranches("main");
-		
+		branchUpdatedSpec.setIssueQuery("fixed in current commit");		
 		transitionSpecs.add(branchUpdatedSpec);
 		
-		var issueStateTransitedSpec = new IssueStateTransitedSpec();
-		issueStateTransitedSpec.setFromStates(Lists.newArrayList("Open"));
-		issueStateTransitedSpec.setToState("Closed");
-		issueStateTransitedSpec.setStates(Lists.newArrayList("Closed"));
-		issueStateTransitedSpec.setIssueQuery("any \"Sub Issues\" matching(current issue) and all \"Sub Issues\" matching(\"State\" is \"Closed\")");
+		var pullRequestOpenedSpec = new PullRequestOpenedSpec();
+		pullRequestOpenedSpec.setToState("In Review");
+		pullRequestOpenedSpec.setBranches("main");
+		pullRequestOpenedSpec.setIssueQuery("fixed in current pull request");		
+		transitionSpecs.add(pullRequestOpenedSpec);
 		
+		var issueStateTransitedSpec = new IssueStateTransitedSpec();
+		issueStateTransitedSpec.setToState("Open");
+		issueStateTransitedSpec.setIssueQuery("any \"Sub Issues\" matching(current issue) and any \"Sub Issues\" matching(\"State\" is \"Open\")");		
 		transitionSpecs.add(issueStateTransitedSpec);
 		
-		manualSpec = new ManualSpec();
-		manualSpec.setFromStates(Lists.newArrayList("Closed"));
-		manualSpec.setToStates(Lists.newArrayList("Open"));
-		manualSpec.setAuthorizedRoles(Lists.newArrayList("Code Writer", "Code Reader", "Issue Reporter"));
-		
-		transitionSpecs.add(manualSpec);
+		issueStateTransitedSpec = new IssueStateTransitedSpec();
+		issueStateTransitedSpec.setToState("In Progress");
+		issueStateTransitedSpec.setIssueQuery("any \"Sub Issues\" matching(current issue) and any \"Sub Issues\" matching(\"State\" is \"In Progress\") and all \"Sub Issues\" matching(\"State\" is after \"Open\")");		
+		transitionSpecs.add(issueStateTransitedSpec);
 
 		issueStateTransitedSpec = new IssueStateTransitedSpec();
-		issueStateTransitedSpec.setFromStates(Lists.newArrayList("Closed"));
-		issueStateTransitedSpec.setToState("Open");
-		issueStateTransitedSpec.setStates(Lists.newArrayList("Open"));
-		issueStateTransitedSpec.setIssueQuery("any \"Sub Issues\" matching(current issue) or any \"Blocked By\" matching(current issue)");
-		
+		issueStateTransitedSpec.setToState("In Review");
+		issueStateTransitedSpec.setIssueQuery("any \"Sub Issues\" matching(current issue) and any \"Sub Issues\" matching(\"State\" is \"In Review\") and all \"Sub Issues\" matching(\"State\" is after \"In Progress\")");		
 		transitionSpecs.add(issueStateTransitedSpec);
 
-		manualSpec = new ManualSpec();
-		manualSpec.setAuthorizedRoles(Lists.newArrayList("Issue Manager"));
+		issueStateTransitedSpec = new IssueStateTransitedSpec();
+		issueStateTransitedSpec.setToState("Closed");
+		issueStateTransitedSpec.setIssueQuery("any \"Sub Issues\" matching(current issue) and all \"Sub Issues\" matching(\"State\" is \"Closed\")");		
+		transitionSpecs.add(issueStateTransitedSpec);
 
+		var manualSpec = new ManualSpec();
+		manualSpec.setAuthorizedRoles(Lists.newArrayList("Code Writer", "<Issue Submitter>", "{Assignees}"));
 		transitionSpecs.add(manualSpec);
-		
+
 		BoardSpec board = new BoardSpec();
 		board.setName(Issue.NAME_STATE);
 		board.setIdentifyField(Issue.NAME_STATE);
-		board.setColumns(Lists.newArrayList("Open", "Closed"));
+		board.setColumns(Lists.newArrayList("Open", "In Progress", "In Review", "Closed"));
 		board.setDisplayFields(Lists.newArrayList(Issue.NAME_STATE, "Type", "Priority", "Assignees", IssueSchedule.NAME_ITERATION));
-		board.setDisplayLinks(Lists.newArrayList("Sub Issues", "Parent Issue", "Blocked By", "Blocks", "Related"));
+		board.setDisplayLinks(Lists.newArrayList("Sub Issues", "Parent Issue", "Related"));
 		boardSpecs.add(board);
 		
 		listFields.add(Issue.NAME_STATE);
@@ -238,23 +247,22 @@ public class GlobalIssueSetting implements Serializable {
 		
 		listLinks.add("Sub Issues");
 		listLinks.add("Parent Issue");
-		listLinks.add("Blocked By");
-		listLinks.add("Blocks");
 		listLinks.add("Related");
 		
 		namedQueries.add(new NamedIssueQuery("Open", "\"State\" is \"Open\""));
-		namedQueries.add(new NamedIssueQuery("Assigned to me & Open", "\"Assignees\" is me and \"State\" is \"Open\""));
-		namedQueries.add(new NamedIssueQuery("Submitted by me & Open", "submitted by me and \"State\" is \"Open\""));
+		namedQueries.add(new NamedIssueQuery("In Progress", "\"State\" is \"In Progress\""));
+		namedQueries.add(new NamedIssueQuery("In Review", "\"State\" is \"In Review\""));
+		namedQueries.add(new NamedIssueQuery("Closed", "\"State\" is \"Closed\""));
+		namedQueries.add(new NamedIssueQuery("Assigned to me & open", "\"Assignees\" is me and \"State\" is \"Open\""));
+		namedQueries.add(new NamedIssueQuery("Submitted by me & open", "submitted by me and \"State\" is \"Open\""));
 		namedQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignees\" is me"));
 		namedQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
 		namedQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is since \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Mentioned me", "mentioned me"));
-		namedQueries.add(new NamedIssueQuery("Blocked issues", "any \"Blocked By\" matching(\"State\" is \"Open\") or any \"Sub Issues\" matching(\"State\" is \"Open\")"));
 		namedQueries.add(new NamedIssueQuery("Has activity recently", "\"Last Activity Date\" is since \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Open & Critical", "\"State\" is \"Open\" and \"Priority\" is \"Critical\""));
 		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignees\" is empty"));
 		namedQueries.add(new NamedIssueQuery("Open & Unscheduled", "\"State\" is \"Open\" and \"Iteration\" is empty"));
-		namedQueries.add(new NamedIssueQuery("Closed", "\"State\" is \"Closed\""));
 		namedQueries.add(new NamedIssueQuery("All", null));
 		
 		commitMessageFixPatterns = new CommitMessageFixPatterns();
@@ -604,8 +612,7 @@ public class GlobalIssueSetting implements Serializable {
 		for (IssueTemplate template: getIssueTemplates()) 
 			usage.add(template.getQueryUpdater().onDeleteProject(projectPath).prefix("description template #" + index++));
 		
-		return usage.prefix("issue settings");
-		
+		return usage.prefix("issue settings");		
 	}
 	
 	public void onRenameRole(String oldName, String newName) {

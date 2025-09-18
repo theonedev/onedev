@@ -138,6 +138,11 @@ public class IssueStateListPage extends IssueSettingPage {
 				cellItem.add(AttributeAppender.append("class", "color"));
 			}
 
+			@Override
+			public String getCssClass() {
+				return "text-nowrap";
+			}
+			
 		});		
 		
 		columns.add(new AbstractColumn<>(Model.of(_T("Description"))) {

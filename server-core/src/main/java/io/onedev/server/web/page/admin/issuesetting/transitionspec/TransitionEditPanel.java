@@ -2,7 +2,8 @@ package io.onedev.server.web.page.admin.issuesetting.transitionspec;
 
 import java.util.List;
 
-import org.apache.commons.lang3.SerializationUtils;
+import javax.annotation.Nullable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -26,23 +27,20 @@ import io.onedev.server.web.editable.BeanEditor;
 abstract class TransitionEditPanel extends Panel implements InputContext {
 
 	private final int transitionIndex;
+
+	private TransitionSpec transition;
 	
-	public TransitionEditPanel(String id, int transitionIndex) {
+	public TransitionEditPanel(String id, int transitionIndex, @Nullable TransitionSpec transition) {
 		super(id);
 	
 		this.transitionIndex = transitionIndex;
+		this.transition = transition;
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		TransitionSpec transition;
-		if (transitionIndex != -1)
-			transition = SerializationUtils.clone(getSetting().getTransitionSpecs().get(transitionIndex));
-		else
-			transition = null;
-		
+				
 		var bean = new TransitionEditBean();
 		bean.setTransitionSpec(transition);
 		
