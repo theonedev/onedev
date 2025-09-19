@@ -8277,4 +8277,31 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate210(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							Element transitionSpecsElement = valueElement.element("transitionSpecs");
+							for (Element transitionSpecElement : transitionSpecsElement.elements()) {
+								String className = transitionSpecElement.getName();
+								if (className.contains("IssueStateTransitedSpec")) {
+									Element statesElement = transitionSpecElement.element("states");
+									if (statesElement != null) {
+										statesElement.detach();
+									}
+								}
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }
