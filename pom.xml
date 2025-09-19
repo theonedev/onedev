@@ -654,7 +654,7 @@
 		<shiro.version>1.13.0</shiro.version>
 		<jgit.version>5.13.3.202401111512-r</jgit.version>
 		<flexmark.version>0.64.8</flexmark.version>
-		<groovy.version>3.0.19</groovy.version>
+		<groovy.version>3.0.25</groovy.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jackson.version>2.15.0</jackson.version>
 		<tika.version>1.28.3</tika.version>
