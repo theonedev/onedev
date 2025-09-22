@@ -33,8 +33,7 @@ public class ServerShellModule extends AbstractPluginModule {
 					return Sets.newHashSet(ServerShellExecutor.class);
 				}
 				
-			});
-						
+			});						
 		}
 	}
 

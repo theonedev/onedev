@@ -36,7 +36,7 @@ public abstract class Step implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=10000, description="Under which condition this step should run. <b>Successful</b> means all " +
+	@Editable(order=10000, description="Under which condition this step should run. <b>SUCCESSFUL</b> means all " +
 			"non-optional steps running before this step are successful")
 	@NotNull
 	public ExecuteCondition getCondition() {

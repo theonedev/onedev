@@ -2,6 +2,7 @@ package io.onedev.server.buildspec.step;
 
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -35,6 +36,7 @@ public class CheckoutStep extends Step {
 	@Editable(order=100, description="By default code is cloned via an auto-generated credential, " +
 			"which only has read permission over current project. In case the job needs to <a href='https://docs.onedev.io/tutorials/cicd/commit-and-push' target='_blank'>push code to server</a>, " +
 			"you should supply custom credential with appropriate permissions here")
+	@Valid
 	@NotNull
 	public GitCredential getCloneCredential() {
 		return cloneCredential;

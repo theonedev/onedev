@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -97,6 +98,7 @@ public class RunContainerStep extends Step {
 
 	@Editable(order=400, name="Environment Variables", group="More Settings", description="Optionally specify environment "
 			+ "variables for the container")
+	@Valid
 	public List<EnvVar> getEnvVars() {
 		return envVars;
 	}
@@ -106,6 +108,7 @@ public class RunContainerStep extends Step {
 	}
 	
 	@Editable(order=500, group = "More Settings", description="Optionally mount directories or files under job workspace into container")
+	@Valid
 	public List<VolumeMount> getVolumeMounts() {
 		return volumeMounts;
 	}
@@ -117,6 +120,7 @@ public class RunContainerStep extends Step {
 	@Editable(order=600, group="More Settings", description="Optionally specify registry logins to override " +
 			"those defined in job executor. For built-in registry, use <code>@server_url@</code> for registry url, " +
 			"<code>@job_token@</code> for user name, and access token secret for password secret")
+	@Valid
 	public List<RegistryLogin> getRegistryLogins() {
 		return registryLogins;
 	}

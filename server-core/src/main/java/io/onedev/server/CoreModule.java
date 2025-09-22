@@ -3,6 +3,7 @@ package io.onedev.server;
 import static com.google.common.collect.Lists.newArrayList;
 
 import java.io.Serializable;
+import java.lang.annotation.ElementType;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -23,6 +24,9 @@ import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.Configuration;
+import javax.validation.Path;
+import javax.validation.Path.Node;
+import javax.validation.TraversableResolver;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
@@ -71,6 +75,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.OsInfo;
+import io.onedev.server.annotation.Shallow;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.attachment.DefaultAttachmentManager;
 import io.onedev.server.buildspec.BuildSpecSchemaResource;
@@ -382,6 +387,7 @@ import io.onedev.server.util.xstream.ReflectionConverter;
 import io.onedev.server.util.xstream.StringConverter;
 import io.onedev.server.util.xstream.VersionedDocumentConverter;
 import io.onedev.server.validation.MessageInterpolator;
+import io.onedev.server.validation.ShallowValidatorProvider;
 import io.onedev.server.validation.ValidatorProvider;
 import io.onedev.server.web.DefaultUrlManager;
 import io.onedev.server.web.DefaultWicketFilter;
@@ -446,8 +452,31 @@ public class CoreModule extends AbstractPluginModule {
 					.messageInterpolator(new MessageInterpolator());
 			return configuration.buildValidatorFactory();
 		}).in(Singleton.class);
+
+		bind(ValidatorFactory.class).annotatedWith(Shallow.class).toProvider(() -> {
+			Configuration<?> configuration = Validation
+					.byDefaultProvider()
+					.configure()
+					.traversableResolver(new TraversableResolver() {
+
+						@Override
+						public boolean isReachable(Object traversableObject, Node traversableProperty,
+								Class<?> rootBeanType, Path pathToTraversableObject, ElementType elementType) {
+							return true;
+						}
+	
+						@Override
+						public boolean isCascadable(Object traversableObject, Node traversableProperty,
+								Class<?> rootBeanType, Path pathToTraversableObject, ElementType elementType) {
+							return false;
+						}
+					})					
+					.messageInterpolator(new MessageInterpolator());
+			return configuration.buildValidatorFactory();
+		}).in(Singleton.class);
 		
 		bind(Validator.class).toProvider(ValidatorProvider.class).in(Singleton.class);
+		bind(Validator.class).annotatedWith(Shallow.class).toProvider(ShallowValidatorProvider.class).in(Singleton.class);
 
 		configurePersistence();
 		configureSecurity();

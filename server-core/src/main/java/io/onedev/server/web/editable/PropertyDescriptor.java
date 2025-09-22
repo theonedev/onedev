@@ -21,6 +21,7 @@ import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.DependsOnUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.ReflectionUtils;
 
@@ -175,28 +176,9 @@ public class PropertyDescriptor implements Serializable {
 				if (dependencyProperty == null) {
 					throw new ExplicitException("Dependency property not found: " + dependsOn.property());
 				}
-				var dependencyPropertyValue = EditContext.get().getInputValue(dependsOn.property());				
-				if (dependsOn.value().length() != 0) {
-					if (dependencyPropertyValue != null && dependencyPropertyValue.toString().equals(dependsOn.value())) {
-						if (dependsOn.inverse())
-							return false;
-					} else if (!dependsOn.inverse()) {
-						return false;
-					}
-				} else {
-					if (dependencyProperty.getPropertyClass() == boolean.class) {
-						boolean requiredPropertyValue = !dependsOn.inverse();
-						if (requiredPropertyValue != (boolean)dependencyPropertyValue)
-							return false;
-					} else if (dependencyProperty.getPropertyClass() == int.class || dependencyProperty.getPropertyClass() == long.class || dependencyProperty.getPropertyClass() == double.class || dependencyProperty.getPropertyClass() == float.class) {
-						int dependencyPropertyIntValue = (int) dependencyPropertyValue;
-						if (dependsOn.inverse() && dependencyPropertyIntValue != 0 || !dependsOn.inverse() && dependencyPropertyIntValue == 0)
-							return false;
-					} else {
-						if (dependsOn.inverse() && dependencyPropertyValue != null || !dependsOn.inverse() && dependencyPropertyValue == null)
-							return false;
-					}
-				}
+				var dependencyPropertyValue = EditContext.get().getInputValue(dependsOn.property());	
+				if (!DependsOnUtils.isPropertyVisible(dependsOn, dependencyProperty.getPropertyClass(), dependencyPropertyValue))			
+					return false;
 			}
 			getDependencyPropertyNames().remove(getPropertyName());
 			for (String dependencyPropertyName: getDependencyPropertyNames()) {

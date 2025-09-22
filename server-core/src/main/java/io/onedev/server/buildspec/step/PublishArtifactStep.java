@@ -23,7 +23,8 @@ import java.util.List;
 
 import static io.onedev.server.buildspec.step.StepGroup.PUBLISH;
 
-@Editable(order=1050, group= PUBLISH, name="Artifacts")
+@Editable(order=1050, group= PUBLISH, name="Artifacts", description="This step copies files from job workspace " + 
+		"to build artifacts directory, so that they can be accessed after job is completed")
 public class PublishArtifactStep extends ServerSideStep {
 
 	private static final long serialVersionUID = 1L;
@@ -46,8 +47,7 @@ public class PublishArtifactStep extends ServerSideStep {
 		this.sourcePath = sourcePath;
 	}
 	
-	@Editable(order=100, description="Specify files under above directory to be published. "
-			+ "Use * or ? for pattern match")
+	@Editable(order=100, description="Specify files under above directory to be published")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
 	@NotEmpty

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -74,6 +75,7 @@ public class CommandStep extends Step {
 	}
 	
 	@Editable(order=110)
+	@Valid
 	@NotNull
 	public Interpreter getInterpreter() {
 		return interpreter;
@@ -100,6 +102,7 @@ public class CommandStep extends Step {
 			"those defined in job executor. For built-in registry, use <code>@server_url@</code> for registry url, " +
 			"<code>@job_token@</code> for user name, and access token secret for password secret")
 	@DependsOn(property="runInContainer")
+	@Valid
 	public List<RegistryLogin> getRegistryLogins() {
 		return registryLogins;
 	}
@@ -110,6 +113,7 @@ public class CommandStep extends Step {
 	
 	@Editable(order=9900, name="Environment Variables", group="More Settings", description="Optionally specify environment "
 			+ "variables for this step")
+	@Valid
 	public List<EnvVar> getEnvVars() {
 		return envVars;
 	}

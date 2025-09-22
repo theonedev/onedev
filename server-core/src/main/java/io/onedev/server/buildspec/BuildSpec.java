@@ -1,10 +1,42 @@
 package io.onedev.server.buildspec;
 
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.ConstraintViolation;
+import javax.validation.Valid;
+import javax.validation.ValidationException;
+import javax.validation.Validator;
+
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.wicket.Component;
+import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+import org.yaml.snakeyaml.nodes.MappingNode;
+import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.NodeTuple;
+import org.yaml.snakeyaml.nodes.ScalarNode;
+import org.yaml.snakeyaml.nodes.SequenceNode;
+import org.yaml.snakeyaml.nodes.Tag;
+
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -33,21 +65,6 @@ import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.wicket.Component;
-import org.yaml.snakeyaml.DumperOptions.FlowStyle;
-import org.yaml.snakeyaml.nodes.*;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidationException;
-import javax.validation.Validator;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @Editable
 @ClassValidating
@@ -105,6 +122,7 @@ public class BuildSpec implements Serializable, Validatable {
 	private transient Map<String, JobProperty> propertyMap;
 	
 	@Editable
+	@Valid
 	public List<Job> getJobs() {
 		return jobs;
 	}
@@ -115,6 +133,7 @@ public class BuildSpec implements Serializable, Validatable {
 	}
 	
 	@Editable
+	@Valid
 	public List<StepTemplate> getStepTemplates() {
 		return stepTemplates;
 	}
@@ -125,6 +144,7 @@ public class BuildSpec implements Serializable, Validatable {
 	}
 
 	@Editable
+	@Valid
 	public List<Service> getServices() {
 		return services;
 	}
@@ -135,6 +155,7 @@ public class BuildSpec implements Serializable, Validatable {
 	}
 
 	@Editable
+	@Valid
 	public List<JobProperty> getProperties() {
 		return properties;
 	}
@@ -145,6 +166,7 @@ public class BuildSpec implements Serializable, Validatable {
 	}
 
 	@Editable
+	@Valid
 	public List<Import> getImports() {
 		return imports;
 	}
@@ -271,27 +293,10 @@ public class BuildSpec implements Serializable, Validatable {
 		return isValid;
 	}
 	
-	private Validator getValidator() {
-		return OneDev.getInstance(Validator.class);
-	}
-	
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
 		boolean isValid = true;
 
-		int index = 0;
-		for (Job job: jobs) {
-			for (ConstraintViolation<Job> violation: getValidator().validate(job)) {
-				context.buildConstraintViolationWithTemplate(violation.getMessage())
-						.addPropertyNode(PROP_JOBS)
-						.addPropertyNode(violation.getPropertyPath().toString())
-						.inIterable().atIndex(index)
-						.addConstraintViolation();
-				isValid = false;
-			}
-			index++;
-		}
-		
 		Set<String> jobNames = new HashSet<>();
 		for (Job job: jobs) {
 			if (!jobNames.add(job.getName())) {
@@ -299,19 +304,6 @@ public class BuildSpec implements Serializable, Validatable {
 						.addPropertyNode(PROP_JOBS).addConstraintViolation();
 				isValid = false;
 			}
-		}
-
-		index = 0;
-		for (Service service: services) {
-			for (ConstraintViolation<Service> violation: getValidator().validate(service)) {
-				context.buildConstraintViolationWithTemplate(violation.getMessage())
-						.addPropertyNode(PROP_SERVICES)
-						.addPropertyNode(violation.getPropertyPath().toString())
-						.inIterable().atIndex(index)
-						.addConstraintViolation();
-				isValid = false;
-			}
-			index++;
 		}
 		
 		Set<String> serviceNames = new HashSet<>();
@@ -322,19 +314,6 @@ public class BuildSpec implements Serializable, Validatable {
 				isValid = false;
 			}
 		}
-
-		index = 0;
-		for (StepTemplate stepTemplate: stepTemplates) {
-			for (ConstraintViolation<StepTemplate> violation: getValidator().validate(stepTemplate)) {
-				context.buildConstraintViolationWithTemplate(violation.getMessage())
-						.addPropertyNode(PROP_STEP_TEMPLATES)
-						.addPropertyNode(violation.getPropertyPath().toString())
-						.inIterable().atIndex(index)
-						.addConstraintViolation();
-				isValid = false;
-			}
-			index++;
-		}
 		
 		Set<String> stepTemplateNames = new HashSet<>();
 		for (StepTemplate template: stepTemplates) {
@@ -344,19 +323,6 @@ public class BuildSpec implements Serializable, Validatable {
 				isValid = false;
 			}
 		}
-
-		index = 0;
-		for (JobProperty property: properties) {
-			for (ConstraintViolation<JobProperty> violation: getValidator().validate(property)) {
-				context.buildConstraintViolationWithTemplate(violation.getMessage())
-						.addPropertyNode(PROP_PROPERTIES)
-						.addPropertyNode(violation.getPropertyPath().toString())
-						.inIterable().atIndex(index)
-						.addConstraintViolation();
-				isValid = false;
-			}
-			index++;
-		}
 		
 		Set<String> propertyNames = new HashSet<>();
 		for (JobProperty property : properties) {
@@ -365,20 +331,6 @@ public class BuildSpec implements Serializable, Validatable {
 						.addPropertyNode(PROP_PROPERTIES).addConstraintViolation();
 				isValid = false;
 			}
-		}
-
-		index = 0;
-		for (Import aImport: getImports()) {
-			Validator validator = OneDev.getInstance(Validator.class);
-			for (ConstraintViolation<Import> violation: validator.validate(aImport)) {
-				context.buildConstraintViolationWithTemplate(violation.getMessage())
-						.addPropertyNode(PROP_IMPORTS)
-						.addPropertyNode(violation.getPropertyPath().toString())
-						.inIterable().atIndex(index)
-						.addConstraintViolation();
-				isValid = false;
-			}
-			index++;
 		}
 		
 		Set<String> importProjectAndRevisions = new HashSet<>();
@@ -2329,6 +2281,115 @@ public class BuildSpec implements Serializable, Validatable {
 								itJobTuple.remove();
 							}
 						}
+					}
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private void migrate42(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrate42_processNode(doc);
+	}
+
+	private void migrate42_processNode(Node node) {
+		if (node instanceof MappingNode) {
+			MappingNode mappingNode = (MappingNode) node;
+			
+			if (mappingNode.getTag() != null && !mappingNode.getTag().equals(Tag.MAP) 
+					&& mappingNode.getTag().getValue().startsWith("!")) {
+				var tagValue = mappingNode.getTag().getValue().substring(1); 
+				boolean hasTypeTuple = false;
+				for (NodeTuple tuple : mappingNode.getValue()) {
+					if (tuple.getKeyNode() instanceof ScalarNode) {
+						ScalarNode keyNode = (ScalarNode) tuple.getKeyNode();
+						if ("type".equals(keyNode.getValue())) {
+							hasTypeTuple = true;
+							break;
+						}
+					}
+				}
+				
+				if (!hasTypeTuple) {
+					mappingNode.getValue().add(0, new NodeTuple(
+							new ScalarNode(Tag.STR, "type"),
+							new ScalarNode(Tag.STR, tagValue)));
+				}
+				mappingNode.setTag(Tag.MAP);	
+			}
+			
+			for (NodeTuple tuple : mappingNode.getValue()) {
+				migrate42_processNode(tuple.getKeyNode());
+				migrate42_processNode(tuple.getValueNode());
+			}
+		} else if (node instanceof SequenceNode) {
+			SequenceNode sequenceNode = (SequenceNode) node;
+			for (Node item : sequenceNode.getValue()) {
+				migrate42_processNode(item);
+			}
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private void migrate43(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					boolean hasRetryCondition = false;
+					for (var itJobTuple = jobNode.getValue().iterator(); itJobTuple.hasNext();) {
+						var jobTuple = itJobTuple.next();
+						var keyNode = (ScalarNode) jobTuple.getKeyNode();
+						if (keyNode.getValue().equals("retryCondition")) {
+							var valueNode = (ScalarNode) jobTuple.getValueNode();
+							if (StringUtils.isBlank(valueNode.getValue())) {
+								itJobTuple.remove();
+							} else {
+								hasRetryCondition = true;
+							}
+							break;
+						} else if (keyNode.getValue().equals("triggers")) {
+							SequenceNode triggersNode = (SequenceNode) jobTuple.getValueNode();
+							for (Node triggerNode: triggersNode.getValue()) {
+								MappingNode triggerMappingNode = (MappingNode) triggerNode;
+								boolean hasUserMatch = false;
+								String triggerType = null;
+								for (var triggerTuple: triggerMappingNode.getValue()) {
+									String triggerTupleKey = ((ScalarNode)triggerTuple.getKeyNode()).getValue();
+									if (triggerTupleKey.equals("type")) {
+										triggerType = ((ScalarNode)triggerTuple.getValueNode()).getValue();
+										break;
+									}
+								}
+								if ("BranchUpdateTrigger".equals(triggerType)) {
+									for (var itTriggerTuple = triggerMappingNode.getValue().iterator(); itTriggerTuple.hasNext();) {
+										var triggerTuple = itTriggerTuple.next();
+										String triggerTupleKey = ((ScalarNode)triggerTuple.getKeyNode()).getValue();
+										if (triggerTupleKey.equals("userMatch")) {
+											var valueNode = (ScalarNode) triggerTuple.getValueNode();
+											if (StringUtils.isBlank(valueNode.getValue())) {
+												itTriggerTuple.remove();
+											} else {
+												hasUserMatch = true;
+											}
+											break;
+										}
+									}
+									if (!hasUserMatch) {
+										triggerMappingNode.getValue().add(new NodeTuple(
+												new ScalarNode(Tag.STR, "userMatch"),
+												new ScalarNode(Tag.STR, "anyone")));
+									}
+								}
+							}
+						}
+					}					
+					if (!hasRetryCondition) {
+						jobNode.getValue().add(new NodeTuple(
+								new ScalarNode(Tag.STR, "retryCondition"),
+								new ScalarNode(Tag.STR, "never")));
 					}
 				}
 			}

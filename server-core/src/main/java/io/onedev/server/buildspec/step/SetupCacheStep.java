@@ -47,7 +47,10 @@ public class SetupCacheStep extends Step {
 
 	@Editable(order=100, name="Cache Key", description = "This key is used to determine if there is a cache hit in " +
 			"project hierarchy (search from current project to root project in order, same for load keys below). " +
-			"A cache is considered hit if its key is exactly the same as the key defined here")
+			"A cache is considered hit if its key is exactly the same as the key defined here.<br>" + 
+			"<b>NOTE:</b> In case your project has lock files(package.json, pom.xml, etc.) able to represent cache state, " + 
+			"this key should be defined as &lt;cache name&gt;-@file:checksum.txt@, where checksum.txt is generated " + 
+			"from these lock files with the <b>generate checksum step</b> defined before this step")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getKey() {
@@ -123,7 +126,7 @@ public class SetupCacheStep extends Step {
 
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, true, false, false);
+		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 	
 	@Editable(order=500, description = "Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is an access token with upload cache permission " +

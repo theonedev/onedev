@@ -21,6 +21,7 @@ public class RegExValidator implements ConstraintValidator<RegEx, String> {
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
+		System.out.println("Validating value: " + value);
 		if (value == null) 
 			return true;
 		if (pattern.matcher(value).matches()) {

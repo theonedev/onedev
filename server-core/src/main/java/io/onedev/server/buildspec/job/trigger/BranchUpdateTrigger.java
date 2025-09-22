@@ -3,6 +3,8 @@ package io.onedev.server.buildspec.job.trigger;
 import java.util.Collection;
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
+
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 
@@ -21,6 +23,7 @@ import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.util.usermatch.Anyone;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable(order=100, name="Branch update", description=""
@@ -36,7 +39,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 	
 	private String paths;
 
-	private String userMatch;
+	private String userMatch = new Anyone().toString();
 		
 	@Editable(name="Branches", order=100, placeholder="Any branch", description="Optionally specify space-separated branches "
 			+ "to check. Use '**' or '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
@@ -67,8 +70,9 @@ public class BranchUpdateTrigger extends JobTrigger {
 		this.paths = paths;
 	}
 
-	@Editable(order=150, name="Applicable Users", placeholder = "Any user", description="Optionally specify applicable users who pushed the change")
+	@Editable(order=300, name="Applicable Users", description="Optionally specify applicable users who pushed the change")
 	@UserMatch
+	@NotEmpty
 	public String getUserMatch() {
 		return userMatch;
 	}
@@ -108,7 +112,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 	}
 
 	private boolean pushedBy(RefUpdated refUpdated) {
-		if (getUserMatch() != null && refUpdated.getUser() != null) {
+		if (refUpdated.getUser() != null) {
 			return io.onedev.server.util.usermatch.UserMatch.parse(getUserMatch()).matches(refUpdated.getUser());			
 		} else {
 			return true;
@@ -135,22 +139,26 @@ public class BranchUpdateTrigger extends JobTrigger {
 	@Override
 	public String getTriggerDescription() {
 		String description;
-		if (getBranches() != null && getPaths() != null && getUserMatch() != null)
-			description = String.format("When update branches '%s' and touch files '%s' and pushed by '%s'", getBranches(), getPaths(), getUserMatch());
-		else if (getBranches() != null && getUserMatch() != null)
-			description = String.format("When update branches '%s' and pushed by '%s'", getBranches(), getUserMatch());
-		else if (getPaths() != null && getUserMatch() != null)
-			description = String.format("When touch files '%s' and pushed by '%s'", getPaths(), getUserMatch());
-		else if (getBranches() != null && getPaths() != null)
-			description = String.format("When update branches '%s' and touch files '%s'", getBranches(), getPaths());
-		else if (getBranches() != null)
-			description = String.format("When update branches '%s'", getBranches());
-		else if (getPaths() != null)
-			description = String.format("When touch files '%s'", getPaths());
-		else if (getUserMatch() != null)
-			description = String.format("When pushed by '%s'", getUserMatch());
-		else
-			description = "When update branches";
+		
+		if (getUserMatch() == null || getUserMatch().equals(new Anyone().toString())) {
+			if (getBranches() != null && getPaths() != null)
+				description = String.format("When update branches '%s' and touch files '%s'", getBranches(), getPaths());
+			else if (getBranches() != null)
+				description = String.format("When update branches '%s'", getBranches());
+			else if (getPaths() != null)
+				description = String.format("When touch files '%s'", getPaths());
+			else
+				description = "When update branches";
+		} else {
+			if (getBranches() != null && getPaths() != null)
+				description = String.format("When update branches '%s' and touch files '%s' and pushed by '%s'", getBranches(), getPaths(), getUserMatch());
+			else if (getBranches() != null)
+				description = String.format("When update branches '%s' and pushed by '%s'", getBranches(), getUserMatch());
+			else if (getPaths() != null)
+				description = String.format("When touch files '%s' and pushed by '%s'", getPaths(), getUserMatch());
+			else
+				description = "When pushed by '" + getUserMatch() + "'";
+		}
 		return description;
 	}
 

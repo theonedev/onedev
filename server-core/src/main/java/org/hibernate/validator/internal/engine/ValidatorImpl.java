@@ -11,6 +11,7 @@ import static org.hibernate.validator.internal.util.logging.Messages.MESSAGES;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.ConstraintValidatorFactory;
 import javax.validation.ConstraintViolation;
@@ -66,7 +68,9 @@ import org.hibernate.validator.internal.metadata.aggregated.ReturnValueMetaData;
 import org.hibernate.validator.internal.metadata.core.MetaConstraint;
 import org.hibernate.validator.internal.metadata.facets.Cascadable;
 import org.hibernate.validator.internal.metadata.facets.Validatable;
+import org.hibernate.validator.internal.metadata.location.AbstractPropertyConstraintLocation;
 import org.hibernate.validator.internal.metadata.location.ConstraintLocation.ConstraintLocationKind;
+import org.hibernate.validator.internal.metadata.location.TypeArgumentConstraintLocation;
 import org.hibernate.validator.internal.util.Contracts;
 import org.hibernate.validator.internal.util.ExecutableHelper;
 import org.hibernate.validator.internal.util.ReflectionHelper;
@@ -74,7 +78,14 @@ import org.hibernate.validator.internal.util.TypeHelper;
 import org.hibernate.validator.internal.util.logging.Log;
 import org.hibernate.validator.internal.util.logging.LoggerFactory;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.DependsOn;
+import io.onedev.server.annotation.ShowCondition;
+import io.onedev.server.util.BeanUtils;
+import io.onedev.server.util.DependsOnUtils;
+import io.onedev.server.util.EditContext;
+import io.onedev.server.util.ReflectionUtils;
 
 /**
  * The main Bean Validation class. This is the core processing class of Hibernate Validator.
@@ -401,7 +412,7 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 		while ( groupIterator.hasNext() ) {
 			Group group = groupIterator.next();
 			valueContext.setCurrentGroup( group.getDefiningClass() );
-			validateConstraintsForCurrentGroup( validationContext, valueContext );
+			validatePropertyConstraintsForCurrentGroup( validationContext, valueContext );
 			if ( shouldFailFast( validationContext ) ) {
 				return validationContext.getFailingConstraints();
 			}
@@ -411,6 +422,20 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 			Group group = groupIterator.next();
 			valueContext.setCurrentGroup( group.getDefiningClass() );
 			validateCascadedConstraints( validationContext, valueContext );
+			if ( shouldFailFast( validationContext ) ) {
+				return validationContext.getFailingConstraints();
+			}
+		}
+
+		/*
+		 * Validate class constraints after cascading constraints. This ensures that when class validator 
+		 * is called, all properties have been validated recursively
+		 */
+		groupIterator = validationOrder.getGroupIterator();
+		while ( groupIterator.hasNext() ) {
+			Group group = groupIterator.next();
+			valueContext.setCurrentGroup( group.getDefiningClass() );
+			validateClassConstraintsForCurrentGroup( validationContext, valueContext );
 			if ( shouldFailFast( validationContext ) ) {
 				return validationContext.getFailingConstraints();
 			}
@@ -426,12 +451,21 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 				for ( Group group : groupOfGroups ) {
 					valueContext.setCurrentGroup( group.getDefiningClass() );
 
-					validateConstraintsForCurrentGroup( validationContext, valueContext );
+					validatePropertyConstraintsForCurrentGroup( validationContext, valueContext );
 					if ( shouldFailFast( validationContext ) ) {
 						return validationContext.getFailingConstraints();
 					}
 
 					validateCascadedConstraints( validationContext, valueContext );
+					if ( shouldFailFast( validationContext ) ) {
+						return validationContext.getFailingConstraints();
+					}
+
+					/*
+					 * Validate class constraints after cascading constraints. This ensures that when class validator 
+					 * is called, all properties have been validated recursively
+					 */
+					validateClassConstraintsForCurrentGroup( validationContext, valueContext );
 					if ( shouldFailFast( validationContext ) ) {
 						return validationContext.getFailingConstraints();
 					}
@@ -607,14 +641,14 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 					CascadingMetaData effectiveCascadingMetaData = cascadingMetaData.addRuntimeContainerSupport( valueExtractorManager, value.getClass() );
 
 					// validate cascading on the annotated object
-					if ( effectiveCascadingMetaData.isCascading() ) {
+					if ( effectiveCascadingMetaData.isCascading() && isCascadeValidationRequired( validationContext, valueContext, cascadable ) ) {
 						validateCascadedAnnotatedObjectForCurrentGroup( value, validationContext, valueContext, effectiveCascadingMetaData );
 					}
 
 					if ( effectiveCascadingMetaData.isContainer() ) {
 						ContainerCascadingMetaData containerCascadingMetaData = effectiveCascadingMetaData.as( ContainerCascadingMetaData.class );
 
-						if ( containerCascadingMetaData.hasContainerElementsMarkedForCascading() ) {
+						if ( containerCascadingMetaData.hasContainerElementsMarkedForCascading() && isCascadeValidationRequired( validationContext, valueContext, cascadable ) ) {
 							// validate cascading on the container elements
 							validateCascadedContainerElementsForCurrentGroup( value, validationContext, valueContext,
 									containerCascadingMetaData.getContainerElementTypesCascadingMetaData() );
@@ -1279,6 +1313,56 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 	private boolean isValidationRequired(BaseBeanValidationContext<?> validationContext,
 			ValueContext<?, ?> valueContext,
 			MetaConstraint<?> metaConstraint) {
+		var location = metaConstraint.getLocation();
+		if (location instanceof TypeArgumentConstraintLocation) {
+			location = ((TypeArgumentConstraintLocation) location).getOuterDelegate();
+		}		
+		if (location instanceof AbstractPropertyConstraintLocation && valueContext.getCurrentBean() != null) {
+			var bean = valueContext.getCurrentBean();			
+			var propertyName = ((AbstractPropertyConstraintLocation<?>) location).getPropertyName();
+			var getter = BeanUtils.findGetter(bean.getClass(), propertyName);
+			if (getter == null) {
+				throw new ExplicitException("Getter not found for property: " + propertyName);
+			}
+			var dependsOn = getter.getAnnotation(DependsOn.class);
+			if (dependsOn != null) {
+				var dependencyGetter = BeanUtils.findGetter(bean.getClass(), dependsOn.property());
+				if (dependencyGetter == null) {
+					throw new ExplicitException("Getter not found for property: " + dependsOn.property());
+				}
+				try {
+					var dependencyPropertyValue = dependencyGetter.invoke(bean);
+					if (!DependsOnUtils.isPropertyVisible(dependsOn, dependencyGetter.getReturnType(), dependencyPropertyValue))
+						return false;
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					throw new ExplicitException("Error invoking getter for property: " + dependsOn.property(), e);
+				}
+			}
+			var showCondition = getter.getAnnotation(ShowCondition.class);
+			if (showCondition != null) {
+				EditContext.push(new EditContext() {
+					@Override
+					public Object getInputValue(String name) {
+						var getter =  BeanUtils.findGetter(bean.getClass(), name);
+						if (getter == null) {
+							throw new ExplicitException("Getter not found for property: " + name);
+						}
+						try {
+							return getter.invoke(bean);
+						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+							throw new ExplicitException("Error invoking getter for property: " + dependsOn.property(), e);
+						}
+					}
+				});
+				try {
+					if (!(boolean)ReflectionUtils.invokeStaticMethod(bean.getClass(), showCondition.value()))
+						return false;
+				} finally {
+					EditContext.pop();
+				}
+			}
+		}
+				
 		// check if this validation context is qualified to validate the current meta constraint.
 		// For instance, in the case of validateProperty()/validateValue(), the current meta constraint
 		// could be for another property and, in this case, we don't validate it.
@@ -1334,6 +1418,59 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 				|| isCrossParameterValidation( path )
 				|| isParameterValidation( path )
 				|| isReturnValueValidation( path );
+	}
+
+	private boolean isCascadeValidationRequired(BaseBeanValidationContext<?> validationContext, ValueContext<?, Object> valueContext, Cascadable cascadable) {
+		if (valueContext.getCurrentBean() != null && cascadable.getConstraintLocationKind() == ConstraintLocationKind.GETTER) {
+			var bean = valueContext.getCurrentBean();
+			var currentPath = valueContext.getPropertyPath();
+			var leafNode = currentPath.getLeafNode();
+			if (leafNode != null) {
+				var propertyName = leafNode.getName();
+				Method getter = BeanUtils.findGetter(bean.getClass(), propertyName);
+				if (getter == null) {
+					throw new ExplicitException("Getter not found for property: " + propertyName);
+				}
+				DependsOn dependsOn = getter.getAnnotation(DependsOn.class);
+				if (dependsOn != null) {
+					Method dependencyGetter = BeanUtils.findGetter(bean.getClass(), dependsOn.property());
+					if (dependencyGetter == null) {
+						throw new ExplicitException("Getter not found for property: " + dependsOn.property());
+					}
+					try {
+						var dependencyPropertyValue = dependencyGetter.invoke(bean);
+						if (!DependsOnUtils.isPropertyVisible(dependsOn, dependencyGetter.getReturnType(), dependencyPropertyValue))
+							return false;
+					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+						throw new ExplicitException("Error invoking getter for property: " + dependsOn.property(), e);
+					}
+				}
+				ShowCondition showCondition = getter.getAnnotation(ShowCondition.class);
+				if (showCondition != null) {
+					EditContext.push(new EditContext() {
+						@Override
+						public Object getInputValue(String name) {
+							Method getter =  BeanUtils.findGetter(bean.getClass(), name);
+							if (getter == null) {
+								throw new ExplicitException("Getter not found for property: " + name);
+							}
+							try {
+								return getter.invoke(bean);
+							} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+								throw new ExplicitException("Error invoking getter for property: " + dependsOn.property(), e);
+							}
+						}
+					});
+					try {
+						if (!(boolean)ReflectionUtils.invokeStaticMethod(bean.getClass(), showCondition.value()))
+							return false;
+					} finally {
+						EditContext.pop();
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	private boolean isCascadeRequired(BaseBeanValidationContext<?> validationContext, Object traversableObject, PathImpl path,
@@ -1393,4 +1530,146 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 	private Object getCascadableValue(BaseBeanValidationContext<?> validationContext, Object object, Cascadable cascadable) {
 		return cascadable.getValue( object );
 	}
+
+	private void validatePropertyConstraintsForCurrentGroup(BaseBeanValidationContext<?> validationContext, BeanValueContext<?, Object> valueContext) {
+		if ( !valueContext.validatingDefault() ) {
+			validatePropertyConstraintsForNonDefaultGroup( validationContext, valueContext );
+		}
+		else {
+			validatePropertyConstraintsForDefaultGroup( validationContext, valueContext );
+		}
+	}
+
+	private void validateClassConstraintsForCurrentGroup(BaseBeanValidationContext<?> validationContext, BeanValueContext<?, Object> valueContext) {
+		if ( !valueContext.validatingDefault() ) {
+			validateClassConstraintsForNonDefaultGroup( validationContext, valueContext );
+		}
+		else {
+			validateClassConstraintsForDefaultGroup( validationContext, valueContext );
+		}
+	}
+
+	private void validatePropertyConstraintsForNonDefaultGroup(BaseBeanValidationContext<?> validationContext, BeanValueContext<?, Object> valueContext) {
+		Set<MetaConstraint<?>> propertyConstraints = filterPropertyConstraints(valueContext.getCurrentBeanMetaData().getMetaConstraints());
+		validateMetaConstraints( validationContext, valueContext, valueContext.getCurrentBean(), propertyConstraints );
+		validationContext.markCurrentBeanAsProcessed( valueContext );
+	}
+
+	private void validateClassConstraintsForNonDefaultGroup(BaseBeanValidationContext<?> validationContext, BeanValueContext<?, Object> valueContext) {
+		Set<MetaConstraint<?>> classConstraints = filterClassConstraints(valueContext.getCurrentBeanMetaData().getMetaConstraints());
+		validateMetaConstraints( validationContext, valueContext, valueContext.getCurrentBean(), classConstraints );
+		validationContext.markCurrentBeanAsProcessed( valueContext );
+	}
+
+	private <U> void validatePropertyConstraintsForDefaultGroup(BaseBeanValidationContext<?> validationContext, BeanValueContext<U, Object> valueContext) {
+		final BeanMetaData<U> beanMetaData = valueContext.getCurrentBeanMetaData();
+		final Map<Class<?>, Class<?>> validatedInterfaces = new HashMap<>();
+
+		// evaluating the constraints of a bean per class in hierarchy, this is necessary to detect potential default group re-definitions
+		for ( Class<? super U> clazz : beanMetaData.getClassHierarchy() ) {
+			BeanMetaData<? super U> hostingBeanMetaData = beanMetaDataManager.getBeanMetaData( clazz );
+			boolean defaultGroupSequenceIsRedefined = hostingBeanMetaData.isDefaultGroupSequenceRedefined();
+
+			// if the current class redefined the default group sequence, this sequence has to be applied to all the class hierarchy.
+			if ( defaultGroupSequenceIsRedefined ) {
+				Iterator<Sequence> defaultGroupSequence = hostingBeanMetaData.getDefaultValidationSequence( valueContext.getCurrentBean() );
+				Set<MetaConstraint<?>> metaConstraints = filterPropertyConstraints(hostingBeanMetaData.getMetaConstraints());
+
+				while ( defaultGroupSequence.hasNext() ) {
+					for ( GroupWithInheritance groupOfGroups : defaultGroupSequence.next() ) {
+						boolean validationSuccessful = true;
+
+						for ( Group defaultSequenceMember : groupOfGroups ) {
+							validationSuccessful = validateConstraintsForSingleDefaultGroupElement( validationContext, valueContext, validatedInterfaces, clazz,
+									metaConstraints, defaultSequenceMember ) && validationSuccessful;
+						}
+
+						validationContext.markCurrentBeanAsProcessed( valueContext );
+
+						if ( !validationSuccessful ) {
+							break;
+						}
+					}
+				}
+			}
+			// fast path in case the default group sequence hasn't been redefined
+			else {
+				Set<MetaConstraint<?>> metaConstraints = filterPropertyConstraints(hostingBeanMetaData.getDirectMetaConstraints());
+				validateConstraintsForSingleDefaultGroupElement( validationContext, valueContext, validatedInterfaces, clazz, metaConstraints,
+						Group.DEFAULT_GROUP );
+				validationContext.markCurrentBeanAsProcessed( valueContext );
+			}
+
+			if ( defaultGroupSequenceIsRedefined ) {
+				break;
+			}
+		}
+	}
+
+	private <U> void validateClassConstraintsForDefaultGroup(BaseBeanValidationContext<?> validationContext, BeanValueContext<U, Object> valueContext) {
+		final BeanMetaData<U> beanMetaData = valueContext.getCurrentBeanMetaData();
+		final Map<Class<?>, Class<?>> validatedInterfaces = new HashMap<>();
+
+		// evaluating the constraints of a bean per class in hierarchy, this is necessary to detect potential default group re-definitions
+		for ( Class<? super U> clazz : beanMetaData.getClassHierarchy() ) {
+			BeanMetaData<? super U> hostingBeanMetaData = beanMetaDataManager.getBeanMetaData( clazz );
+			boolean defaultGroupSequenceIsRedefined = hostingBeanMetaData.isDefaultGroupSequenceRedefined();
+
+			// if the current class redefined the default group sequence, this sequence has to be applied to all the class hierarchy.
+			if ( defaultGroupSequenceIsRedefined ) {
+				Iterator<Sequence> defaultGroupSequence = hostingBeanMetaData.getDefaultValidationSequence( valueContext.getCurrentBean() );
+				Set<MetaConstraint<?>> metaConstraints = filterClassConstraints(hostingBeanMetaData.getMetaConstraints());
+
+				while ( defaultGroupSequence.hasNext() ) {
+					for ( GroupWithInheritance groupOfGroups : defaultGroupSequence.next() ) {
+						boolean validationSuccessful = true;
+
+						for ( Group defaultSequenceMember : groupOfGroups ) {
+							validationSuccessful = validateConstraintsForSingleDefaultGroupElement( validationContext, valueContext, validatedInterfaces, clazz,
+									metaConstraints, defaultSequenceMember ) && validationSuccessful;
+						}
+
+						validationContext.markCurrentBeanAsProcessed( valueContext );
+
+						if ( !validationSuccessful ) {
+							break;
+						}
+					}
+				}
+			}
+			// fast path in case the default group sequence hasn't been redefined
+			else {
+				Set<MetaConstraint<?>> metaConstraints = filterClassConstraints(hostingBeanMetaData.getDirectMetaConstraints());
+				validateConstraintsForSingleDefaultGroupElement( validationContext, valueContext, validatedInterfaces, clazz, metaConstraints,
+						Group.DEFAULT_GROUP );
+				validationContext.markCurrentBeanAsProcessed( valueContext );
+			}
+
+			if ( defaultGroupSequenceIsRedefined ) {
+				break;
+			}
+		}
+	}
+
+	private Set<MetaConstraint<?>> filterPropertyConstraints(Set<MetaConstraint<?>> allConstraints) {
+		return allConstraints.stream()
+			.filter(this::isPropertyConstraint)
+			.collect(Collectors.toSet());
+	}
+
+	private Set<MetaConstraint<?>> filterClassConstraints(Set<MetaConstraint<?>> allConstraints) {
+		return allConstraints.stream()
+			.filter(this::isClassConstraint)
+			.collect(Collectors.toSet());
+	}
+
+	private boolean isPropertyConstraint(MetaConstraint<?> metaConstraint) {
+		ConstraintLocationKind kind = metaConstraint.getLocation().getKind();
+		return kind == ConstraintLocationKind.FIELD || kind == ConstraintLocationKind.GETTER;
+	}
+
+	private boolean isClassConstraint(MetaConstraint<?> metaConstraint) {
+		return metaConstraint.getLocation().getKind() == ConstraintLocationKind.TYPE;
+	}
+
 }

@@ -68,6 +68,7 @@ public class UseTemplateStep extends CompositeStep {
 
 	@Editable(order=300, name="Exclude Param Combos")
 	@ShowCondition("isExcludeParamMapsVisible")
+	@Valid
 	public List<ParamMap> getExcludeParamMaps() {
 		return excludeParamMaps;
 	}

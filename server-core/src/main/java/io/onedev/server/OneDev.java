@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -363,6 +364,10 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	
 	public static <T> T getInstance(Class<T> type) {
 		return AppLoader.getInstance(type);
+	}
+
+	public static <T> T getInstance(Class<T> type, Class<? extends Annotation> annotationClass) {
+		return AppLoader.getInstance(type, annotationClass);
 	}
 
 	public static <T> Set<T> getExtensions(Class<T> extensionPoint) {

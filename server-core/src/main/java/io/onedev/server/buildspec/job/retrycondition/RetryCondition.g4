@@ -1,7 +1,7 @@
 grammar RetryCondition;
 
 condition
-    : WS* criteria WS* EOF
+    : WS* (criteria|Never) WS* EOF
     ;
 
 criteria
@@ -12,7 +12,11 @@ criteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria
     | LParens WS* criteria WS* RParens #ParensCriteria
     ;
-		
+	
+Never
+	: 'never'
+	;
+	
 Contains
 	: 'contains'
 	;

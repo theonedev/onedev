@@ -224,14 +224,14 @@ onedev.server = {
 			setTimeout(function() {
 				// do not use :visible selector directly for performance reason 
 				var focusibleSelector = "input[type=text], input[type=password], input:not([type]), textarea, .CodeMirror";
-				var attentionSelector = ".is-invalid";
+				var attentionSelector = ".feedbackPanelERROR";
                 var $attention = $containers.find(attentionSelector).addBack(attentionSelector).filter(":visible:first");
                 if ($attention.length == 0) {
-				    attentionSelector = ".feedbackPanelERROR";
+				    attentionSelector = ".feedbackPanelWARNING";
                     $attention = $containers.find(attentionSelector).addBack(attentionSelector).filter(":visible:first");
                 }
                 if ($attention.length == 0) {
-				    attentionSelector = ".feedbackPanelWARNING";
+				    attentionSelector = ".is-invalid";
                     $attention = $containers.find(attentionSelector).addBack(attentionSelector).filter(":visible:first");
                 }
 

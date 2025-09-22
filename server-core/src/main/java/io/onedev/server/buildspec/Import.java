@@ -64,7 +64,7 @@ public class Import implements Serializable, Validatable {
 	
 	private transient BuildSpec buildSpec;
 	
-	private static ThreadLocal<Stack<String>> importChain = ThreadLocal.withInitial(Stack::new);
+	private static ThreadLocal<Stack<String>> IMPORT_CHAIN = ThreadLocal.withInitial(Stack::new);
 	
 	// change Named("projectPath") also if change name of this property 
 	@Editable(order=100, name="Project", description="Specify project to import build spec from")
@@ -194,8 +194,8 @@ public class Import implements Serializable, Validatable {
 	public boolean isValid(ConstraintValidatorContext context) {
 		try {
 			var commit = getCommit();
-			if (importChain.get().contains(commit.name())) {
-				List<String> circular = new ArrayList<>(importChain.get());
+			if (IMPORT_CHAIN.get().contains(commit.name())) {
+				List<String> circular = new ArrayList<>(IMPORT_CHAIN.get());
 				circular.add(commit.name());
 				String errorMessage = MessageFormat.format(
 						_T("Circular build spec imports ({0})"), circular);
@@ -203,7 +203,7 @@ public class Import implements Serializable, Validatable {
 				context.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
 				return false;
 			} else {
-				importChain.get().push(commit.name());
+				IMPORT_CHAIN.get().push(commit.name());
 				try {
 					Validator validator = OneDev.getInstance(Validator.class);
 					BuildSpec buildSpec = getBuildSpec();
@@ -226,7 +226,7 @@ public class Import implements Serializable, Validatable {
 						JobAuthorizationContext.pop();
 					}
 				} finally {
-					importChain.get().pop();
+					IMPORT_CHAIN.get().pop();
 				}
 			}
 		} catch (Exception e) {

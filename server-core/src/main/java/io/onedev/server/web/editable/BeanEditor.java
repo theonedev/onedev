@@ -34,6 +34,7 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.Shallow;
 import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
@@ -294,7 +295,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		add(validatable -> {
 			ComponentContext.push(newComponentContext());
 			try {
-				Validator validator = AppLoader.getInstance(Validator.class);
+				Validator validator = AppLoader.getInstance(Validator.class, Shallow.class);
 				for (var violation : validator.validate(validatable.getValue()))
 					error(new Path(violation.getPropertyPath()), violation.getMessage());
 			} finally {

@@ -14,4 +14,5 @@ public @interface DependsOn {
 	String value() default "";
 
 	boolean inverse() default false;
+
 }

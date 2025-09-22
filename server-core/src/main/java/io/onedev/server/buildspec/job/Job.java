@@ -83,6 +83,8 @@ public class Job implements NamedElement, Validatable {
 	public static final String PROP_RETRY_CONDITION = "retryCondition";
 	
 	public static final String PROP_POST_BUILD_ACTIONS = "postBuildActions";
+
+	public static final String PROP_JOB_EXECUTOR = "jobExecutor";
 	
 	private String name;
 	
@@ -106,7 +108,7 @@ public class Job implements NamedElement, Validatable {
 	
 	private String sequentialGroup;
 	
-	private String retryCondition;
+	private String retryCondition = "never";
 	
 	private int maxRetries = 3;
 	
@@ -189,6 +191,7 @@ public class Job implements NamedElement, Validatable {
 	}
 	
 	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>")
+	@Valid
 	public List<Step> getSteps() {
 		return steps;
 	}
@@ -280,8 +283,9 @@ public class Job implements NamedElement, Validatable {
 		this.sequentialGroup = sequentialGroup;
 	}
 	
-	@Editable(order=9400, placeholder="Never retry", group="More Settings", description="Specify condition to retry build upon failure")
+	@Editable(order=9400, group="More Settings", description="Specify condition to retry build upon failure")
 	@RetryCondition
+	@NotEmpty
 	public String getRetryCondition() {
 		return retryCondition;
 	}
@@ -292,7 +296,7 @@ public class Job implements NamedElement, Validatable {
 
 	@Editable(order=9410, group="More Settings", description="Maximum of retries before giving up")
 	@Min(value=1, message="This value should not be less than 1")
-	@DependsOn(property="retryCondition")
+	@DependsOn(property="retryCondition", value = "never", inverse = true)
 	public int getMaxRetries() {
 		return maxRetries;
 	}
@@ -305,7 +309,7 @@ public class Job implements NamedElement, Validatable {
 			"Delay of subsequent retries will be calculated using an exponential back-off based on " +
 			"this value")
 	@Min(value=1, message="This value should not be less than 1")
-	@DependsOn(property="retryCondition")
+	@DependsOn(property="retryCondition", value = "never", inverse = true)
 	public int getRetryDelay() {
 		return retryDelay;
 	}
@@ -348,6 +352,14 @@ public class Job implements NamedElement, Validatable {
 	public boolean isValid(ConstraintValidatorContext context) {
 		boolean isValid = true;
 		
+		var jobExecutors = OneDev.getInstance(SettingManager.class).getJobExecutors();
+		if (jobExecutor != null && !jobExecutor.contains("@") 
+				&& jobExecutors.stream().noneMatch(it->it.getName().equals(jobExecutor))) {
+			isValid = false;
+			context.buildConstraintViolationWithTemplate("Job executor not found: " + jobExecutor)
+					.addPropertyNode(PROP_JOB_EXECUTOR).addConstraintViolation();
+		}
+		
 		Set<String> dependencyJobNames = new HashSet<>();
 		for (JobDependency dependency: jobDependencies) {
 			if (!dependencyJobNames.add(dependency.getJobName())) {
@@ -366,18 +378,16 @@ public class Job implements NamedElement, Validatable {
 			} 
 		}
 		
-		if (getRetryCondition() != null) { 
-			try {
-				io.onedev.server.buildspec.job.retrycondition.RetryCondition.parse(this, getRetryCondition());
-			} catch (Exception e) {
-				String message = e.getMessage();
-				if (message == null)
-					message = "Malformed retry condition";
-				context.buildConstraintViolationWithTemplate(message)
-						.addPropertyNode(PROP_RETRY_CONDITION)
-						.addConstraintViolation();
-				isValid = false;
-			}
+		try {
+			io.onedev.server.buildspec.job.retrycondition.RetryCondition.parse(this, getRetryCondition());
+		} catch (Exception e) {
+			String message = e.getMessage();
+			if (message == null)
+				message = "Malformed retry condition";
+			context.buildConstraintViolationWithTemplate(message)
+					.addPropertyNode(PROP_RETRY_CONDITION)
+					.addConstraintViolation();
+			isValid = false;
 		}
 		
 		if (isValid) {

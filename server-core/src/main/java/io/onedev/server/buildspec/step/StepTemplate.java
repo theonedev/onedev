@@ -51,6 +51,7 @@ public class StepTemplate implements NamedElement {
 	}
 	
 	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>")
+	@Valid
 	public List<Step> getSteps() {
 		return steps;
 	}

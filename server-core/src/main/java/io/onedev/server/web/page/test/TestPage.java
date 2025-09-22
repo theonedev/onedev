@@ -17,7 +17,6 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
 		add(new Link<Void>("test") {
 
 			@Override

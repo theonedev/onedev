@@ -1342,7 +1342,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public TagProtection getTagProtection(String tagName, User user) {
 		for (TagProtection protection: getHierarchyTagProtections()) {
 			if (protection.isEnabled() 
-					&& (protection.getUserMatch() == null || UserMatch.parse(protection.getUserMatch()).matches(user)) 
+					&& UserMatch.parse(protection.getUserMatch()).matches(user) 
 					&& PatternSet.parse(protection.getTags()).matches(new PathMatcher(), tagName)) {
 				return protection;
 			}
@@ -1361,7 +1361,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			branchName = "main";
 		for (BranchProtection protection: getHierarchyBranchProtections()) {
 			if (protection.isEnabled() 
-					&& (protection.getUserMatch() == null || UserMatch.parse(protection.getUserMatch()).matches(user)) 
+					&& UserMatch.parse(protection.getUserMatch()).matches(user)
 					&& PatternSet.parse(protection.getBranches()).matches(new PathMatcher(), branchName)) {
 				return protection;
 			}
