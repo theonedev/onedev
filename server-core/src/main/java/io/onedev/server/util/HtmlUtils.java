@@ -15,7 +15,7 @@ public class HtmlUtils {
 			"i", "strong", "em", "a", "pre", "code", "img", "tt", "div", "ins", "del", "sup", "sub", "p", "ol", "ul",
 			"li", "table", "thead", "tbody", "tfoot", "th", "tr", "td", "rt", "rp", "blockquote", "dl", "dt", "dd",
 			"kbd", "q", "hr", "strike", "caption", "cite", "col", "colgroup", "small", "span", "u", "input", "video", 
-			"source", "details", "summary"};
+			"source", "details", "summary", "svg", "use"};
 
 	private static final String[] SAFE_ATTRIBUTES = new String[] { "abbr", "accept", "accept-charset", "accesskey",
 			"action", "align", "alt", "axis", "border", "cellpadding", "cellspacing", "char", "charoff", "charset",
@@ -48,6 +48,7 @@ public class HtmlUtils {
 				.addAttributes("img", "align", "alt", "height", "src", "title", "width")
 				.addAttributes("div", "itemscope", "itemtype")
 				.addAttributes("source", "src")
+				.addAttributes("use", "xlink:href")
 				.addAttributes(":all", SAFE_ATTRIBUTES)
 				.addProtocols("a", "href", SAFE_ANCHOR_SCHEMES)
 				.addProtocols("blockquote", "cite", "http", "https")

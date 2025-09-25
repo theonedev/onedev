@@ -59,6 +59,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 		extensions.add(TocExtension.create());
 		extensions.add(AutolinkExtension.create());
 		extensions.add(GitLabExtension.create());
+		extensions.add(CalloutExtension.create());
 		extensions.addAll(contributedExtensions);
 
 		return new MutableDataSet()

@@ -472,3 +472,16 @@
 .markdown-action-menu {
 	min-width: 320px !important;
 }
+
+.markdown-rendered .callout {
+	background-color: transparent !important;
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+}
+
+.markdown-rendered .callout-content {
+	color: var(--gray-dark) !important;
+}
+.dark-mode .markdown-rendered .callout-content {
+	color: var(--dark-mode-gray) !important;
+}
