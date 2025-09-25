@@ -475,12 +475,12 @@ public class BuildSpecSchemaResource {
             requiredList.add("version");
             rootNode.put("required", requiredList);
             rootNode.put("additionalProperties", false);
-
+ 
             DumperOptions options = new DumperOptions();
             options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
             options.setPrettyFlow(true);
             schema = new Yaml(options).dump(rootNode);
-        }
+        } 
         return schema;
     }
 
