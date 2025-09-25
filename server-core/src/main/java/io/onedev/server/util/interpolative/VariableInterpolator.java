@@ -64,18 +64,14 @@ public class VariableInterpolator {
 
 				for (Entry<String, Input> entry : paramCombination.getParamInputs().entrySet()) {
 					if (paramName.equals(entry.getKey())) {
-						if (paramCombination.isParamVisible(paramName)) {
-							String paramType = entry.getValue().getType();
-							List<String> paramValues = new ArrayList<>();
-							for (String value : entry.getValue().getValues()) {
-								if (paramType.equals(ParamSpec.SECRET))
-									value = build.getJobAuthorizationContext().getSecretValue(value);
-								paramValues.add(value);
-							}
-							return StringUtils.join(paramValues, ",");
-						} else {
-							throw new ExplicitException("Invisible param: " + paramName);
+						String paramType = entry.getValue().getType();
+						List<String> paramValues = new ArrayList<>();
+						for (String value : entry.getValue().getValues()) {
+							if (paramType.equals(ParamSpec.SECRET))
+								value = build.getJobAuthorizationContext().getSecretValue(value);
+							paramValues.add(value);
 						}
+						return StringUtils.join(paramValues, ",");
 					}
 				}
 				throw new ExplicitException("Undefined param: " + paramName);

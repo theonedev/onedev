@@ -86,6 +86,7 @@ import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.DependsOnUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.editable.EditableUtils;
 
 /**
  * The main Bean Validation class. This is the core processing class of Hibernate Validator.
@@ -1345,12 +1346,19 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 					public Object getInputValue(String name) {
 						var getter =  BeanUtils.findGetter(bean.getClass(), name);
 						if (getter == null) {
-							throw new ExplicitException("Getter not found for property: " + name);
+							for (var eachGetter: BeanUtils.findGetters(bean.getClass())) {
+								if (EditableUtils.getDisplayName(eachGetter).equals(name)) {
+									getter = eachGetter;
+									break;
+								}
+							}
+							if (getter == null) 
+								throw new ExplicitException("Getter not found for property: " + name);
 						}
 						try {
 							return getter.invoke(bean);
 						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-							throw new ExplicitException("Error invoking getter for property: " + dependsOn.property(), e);
+							throw new ExplicitException("Error invoking getter for property: " + name, e);
 						}
 					}
 				});
