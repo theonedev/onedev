@@ -90,12 +90,12 @@ onedev.server.markdown = {
 		$head.find(".dropdown>a").dropdown();
 		
 		if ($suggestion.attr("disabled") == "disabled") {
-			$suggestion.attr("title", onedev.server.markdown.translations["commented-code-outdated"]);
+			$suggestion.attr("data-tippy-content", onedev.server.markdown.translations["commented-code-outdated"]);
 		} else {
 			if (onedev.server.util.isMac())		
-				$suggestion.attr("title", onedev.server.markdown.translations["suggest-changes"] + " (cmd-g)");
+				$suggestion.attr("data-tippy-content", onedev.server.markdown.translations["suggest-changes"] + " (cmd-g)");
 			else
-				$suggestion.attr("title", onedev.server.markdown.translations["suggest-changes"] + " (ctrl-g)");
+				$suggestion.attr("data-tippy-content", onedev.server.markdown.translations["suggest-changes"] + " (ctrl-g)");
 				
 			$suggestion.click(function() {
 				var content = $(this).data("content");
@@ -941,9 +941,10 @@ onedev.server.markdown = {
 			var $action = $actionMenu.find(selector);
 			if ($actionMenu.closest(".floating").length != 0) 
 				$action.append("<span class='float-right ml-4 text-monospace font-size-sm'>" + prefix + key + "</span>");
-			else
-				$action.attr("title", $action.attr("title") + " (" + prefix + key + ")");
+			else 
+				$action.attr("data-tippy-content", $action.data("tippy-content") + " (" + prefix + key + ")");
 		}
+
 	},
 	onLoad: function(containerId) {
 		var $container = $("#" + containerId);
@@ -1305,17 +1306,21 @@ onedev.server.markdown = {
 		var contentHtml = "";
 		for (var i in emojis) {
 			var emoji = emojis[i];
-			contentHtml += "<a class='emoji' title='" + emoji.name + "'>" + emoji.unicode + "</a> ";
+			contentHtml += "<a class='emoji' data-tippy-content='" + emoji.name + "'>" + emoji.unicode + "</a> ";
 		}
 		$emojis.html(contentHtml);
 		$emojis.removeClass("loading");
 		$emojis.addClass("loaded");
+		tippy($emojis[0].querySelectorAll('.emoji'), {
+			delay: [500, 0],
+			placement: 'auto'
+		});
 		$emojis.find(".emoji").click(function() {
 			if (!$edit.is(":visible")) 
 				return;
 			$input.focus();
 			var prefix = onedev.server.markdown.getAtWhoPrefix($input);
-			document.execCommand("insertText", false, prefix + ":" + $(this).attr("title") + ": ");
+			document.execCommand("insertText", false, prefix + ":" + $(this).data("tippy-content") + ": ");
 			onedev.server.markdown.fireInputEvent($input);
 		});
 	},
