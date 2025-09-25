@@ -1,5 +1,7 @@
 package io.onedev.server.rest.resource;
 
+import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
+
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
@@ -2143,6 +2145,7 @@ public class McpHelperResource {
 
         var project = getProject(projectPath);
 		Project.push(project);
+        String schemaNotice = "\n\n**NOTE**: AI assistant may call the getBuildSpecSchema tool to know exact syntax of build spec";
 		try {
             var buildSpec = BuildSpec.parse(buildSpecString.getBytes(StandardCharsets.UTF_8));
             List<String> validationErrors = new ArrayList<>();
@@ -2154,14 +2157,14 @@ public class McpHelperResource {
             if (validationErrors.isEmpty()) {
                 return Response.ok(VersionedYamlDoc.fromBean(buildSpec).toYaml()).build();
             } else {
-                return Response.ok(Joiner.on("\n").join(validationErrors)).build();
+                return Response.status(NOT_ACCEPTABLE).entity(Joiner.on("\n").join(validationErrors) + schemaNotice).build();
             }
         } catch (Exception e) {
             var explicitException = ExceptionUtils.find(e, ExplicitException.class);
             if (explicitException != null) {
-                return Response.ok(explicitException.getMessage()).build();
+                return Response.status(NOT_ACCEPTABLE).entity(explicitException.getMessage() + schemaNotice).build();
             } else {
-                return Response.ok(Throwables.getStackTraceAsString(e)).build();
+                return Response.status(NOT_ACCEPTABLE).entity(Throwables.getStackTraceAsString(e) + schemaNotice).build();
             }
 		} finally {
 			Project.pop();

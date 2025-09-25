@@ -62,19 +62,11 @@ public class BuildSpecSchemaResource {
 
     private final ImplementationRegistry implementationRegistry;
     
-    private final Yaml yaml;
-
-    private String schema;
+    private volatile String schema;
 
     @Inject
     public BuildSpecSchemaResource(ImplementationRegistry implementationRegistry) {
-        this.implementationRegistry = implementationRegistry;
-        
-        // Configure YAML output
-        DumperOptions options = new DumperOptions();
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        options.setPrettyFlow(true);
-        this.yaml = new Yaml(options);
+        this.implementationRegistry = implementationRegistry;        
     }
 
     private void processProperty(Map<String, Object> currentNode, Object bean, PropertyDescriptor property) {
@@ -91,24 +83,28 @@ public class BuildSpecSchemaResource {
                 descriptionSections.add("NOTE: If set, the value can only contain one line");
             }
             InputStream grammarStream = null;
-            if (getter.getAnnotation(Patterns.class) != null) {
-                if (getter.getAnnotation(Interpolative.class) != null) {
-                    grammarStream = PatternSet.class.getResourceAsStream("InterpolativePatternSet.g4");
-                } else {
-                    grammarStream = PatternSet.class.getResourceAsStream("PatternSet.g4");
+            try {
+                if (getter.getAnnotation(Patterns.class) != null) {
+                    if (getter.getAnnotation(Interpolative.class) != null) {
+                        grammarStream = PatternSet.class.getResourceAsStream("InterpolativePatternSet.g4");
+                    } else {
+                        grammarStream = PatternSet.class.getResourceAsStream("PatternSet.g4");
+                    }
+                } else if (getter.getAnnotation(RetryCondition.class) != null) {
+                    grammarStream = io.onedev.server.buildspec.job.retrycondition.RetryCondition.class.getResourceAsStream("RetryCondition.g4");
+                } else if (getter.getAnnotation(UserMatch.class) != null) {
+                    grammarStream = io.onedev.server.util.usermatch.UserMatch.class.getResourceAsStream("UserMatch.g4");
                 }
-            } else if (getter.getAnnotation(RetryCondition.class) != null) {
-                grammarStream = io.onedev.server.buildspec.job.retrycondition.RetryCondition.class.getResourceAsStream("RetryCondition.g4");
-            } else if (getter.getAnnotation(UserMatch.class) != null) {
-                grammarStream = io.onedev.server.util.usermatch.UserMatch.class.getResourceAsStream("UserMatch.g4");
-            }
-            if (grammarStream != null) {
-                try {
-                    var grammar = IOUtils.toString(grammarStream, StandardCharsets.UTF_8);
-                    descriptionSections.add("NOTE: If set, the value should conform with below ANTLR v4 grammar:\n\n" + grammar);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                if (grammarStream != null) {
+                    try {
+                        var grammar = IOUtils.toString(grammarStream, StandardCharsets.UTF_8);
+                        descriptionSections.add("NOTE: If set, the value should conform with below ANTLR v4 grammar:\n\n" + grammar);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
+            } finally {
+                IOUtils.closeQuietly(grammarStream);
             }
         }
 
@@ -480,7 +476,10 @@ public class BuildSpecSchemaResource {
             rootNode.put("required", requiredList);
             rootNode.put("additionalProperties", false);
 
-            schema = yaml.dump(rootNode);
+            DumperOptions options = new DumperOptions();
+            options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+            options.setPrettyFlow(true);
+            schema = new Yaml(options).dump(rootNode);
         }
         return schema;
     }
