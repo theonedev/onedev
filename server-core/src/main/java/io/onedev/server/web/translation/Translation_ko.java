@@ -141,6 +141,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Access token regenerated, make sure to update the token at agent side", "액세스 토큰이 재생성되었습니다. 에이전트 측에서 토큰을 업데이트해야 합니다");
 		m.put("Account Email", "계정 이메일");
 		m.put("Account Name", "계정 이름");
+		m.put("Account is disabled", "계정이 비활성화되었습니다");
 		m.put("Account set up successfully", "계정이 성공적으로 설정되었습니다");
 		m.put("Active Directory", "액티브 디렉토리");
 		m.put("Active Since", "활성화된 이후");
@@ -329,7 +330,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("At least one repository should be selected", "최소한 하나의 저장소를 선택해야 합니다");
 		m.put("At least one role is required", "최소한 하나의 역할이 필요합니다");
 		m.put("At least one role must be selected", "최소한 하나의 역할을 선택해야 합니다");
-		m.put("At least one state needs to be specified", "최소한 하나의 상태를 지정해야 합니다");
 		m.put("At least one state should be specified", "최소한 하나의 상태를 지정해야 합니다");
 		m.put("At least one tab should be added", "최소한 하나의 탭을 추가해야 합니다");
 		m.put("At least one user search base should be specified", "최소한 하나의 사용자 검색 기준을 지정해야 합니다");
@@ -539,7 +539,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Can not disable root account", "루트 계정을 비활성화할 수 없습니다");
 		m.put("Can not disable yourself", "자신을 비활성화할 수 없습니다");
 		m.put("Can not find issue board: ", "이슈 보드를 찾을 수 없습니다:");
-		m.put("Can not link to self", "자기 자신과 연결할 수 없습니다");
 		m.put("Can not move project \"{0}\" to be under itself or its descendants", "프로젝트 \"{0}\"를 자신 또는 하위 프로젝트 아래로 이동할 수 없습니다");
 		m.put("Can not perform this operation now", "지금 이 작업을 수행할 수 없습니다");
 		m.put("Can not reset password for service account or disabled user", "서비스 계정 또는 비활성화된 사용자의 비밀번호를 재설정할 수 없습니다");
@@ -627,6 +626,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Choose group...", "그룹을 선택하세요...");
 		m.put("Choose groups...", "그룹들을 선택하세요...");
 		m.put("Choose issue...", "이슈를 선택하세요...");
+		m.put("Choose issues...", "이슈 선택...");
 		m.put("Choose iteration...", "반복을 선택하세요...");
 		m.put("Choose iterations...", "반복들을 선택하세요...");
 		m.put("Choose job...", "작업을 선택하세요...");
@@ -765,6 +765,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Confirm password here", "여기에서 비밀번호를 확인하세요");
 		m.put("Confirm your action", "작업을 확인하세요");
 		m.put("Connect New Agent", "새 에이전트 연결");
+		m.put("Connect with your SSO account", "SSO 계정으로 연결");
 		m.put("Contact Email", "연락처 이메일");
 		m.put("Contact Name", "연락처 이름");
 		m.put("Container Image", "컨테이너 이미지");
@@ -810,6 +811,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Create Merge Commit If Necessary", "필요한 경우 병합 커밋 생성");
 		m.put("Create New", "새로 생성");
 		m.put("Create New File", "새 파일 생성");
+		m.put("Create New User", "새 사용자 생성");
 		m.put("Create Project", "프로젝트 생성");
 		m.put("Create Pull Request", "풀 리퀘스트 생성");
 		m.put("Create Pull Request for This Change", "이 변경 사항에 대한 풀 리퀘스트 생성");
@@ -912,6 +914,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Delete Build", "빌드 삭제");
 		m.put("Delete Comment", "댓글 삭제");
 		m.put("Delete Pull Request", "풀 리퀘스트 삭제");
+		m.put("Delete SSO account here to reconnect corresponding SSO subject upon next login. Note that SSO subject with verified email will be connected to user with same verified email automatically", 
+			"다음 로그인 시 해당 SSO 주제를 다시 연결하려면 여기서 SSO 계정을 삭제하세요. 인증된 이메일이 있는 SSO 주제는 동일한 인증된 이메일을 가진 사용자와 자동으로 연결됩니다");
 		m.put("Delete Selected", "선택된 항목 삭제");
 		m.put("Delete Selected Builds", "선택된 빌드 삭제");
 		m.put("Delete Selected Comments", "선택된 댓글 삭제");
@@ -997,6 +1001,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Do you really want to cancel this build?", "이 빌드를 정말 취소하시겠습니까?");
 		m.put("Do you really want to change target branch to {0}?", "대상 브랜치를 {0}(으)로 변경하시겠습니까?");
 		m.put("Do you really want to delete \"{0}\"?", "\"{0}\"을(를) 정말 삭제하시겠습니까?");
+		m.put("Do you really want to delete SSO provider \"{0}\"?", "SSO 제공자 \"{0}\"를 정말로 삭제하시겠습니까?");
 		m.put("Do you really want to delete board \"{0}\"?", "보드 \"{0}\"을(를) 정말 삭제하시겠습니까?");
 		m.put("Do you really want to delete build #{0}?", "빌드 #{0}을(를) 정말 삭제하시겠습니까?");
 		m.put("Do you really want to delete group \"{0}\"?", "그룹 \"{0}\"을(를) 정말 삭제하시겠습니까?");
@@ -1008,6 +1013,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Do you really want to delete tag {0}?", "태그 {0}을(를) 정말 삭제하시겠습니까?");
 		m.put("Do you really want to delete this GPG key?", "이 GPG 키를 정말 삭제하시겠습니까?");
 		m.put("Do you really want to delete this SSH key?", "이 SSH 키를 정말 삭제하시겠습니까?");
+		m.put("Do you really want to delete this SSO account?", "이 SSO 계정을 정말로 삭제하시겠습니까?");
 		m.put("Do you really want to delete this access token?", "이 액세스 토큰을 정말 삭제하시겠습니까?");
 		m.put("Do you really want to delete this board?", "이 보드를 정말 삭제하시겠습니까?");
 		m.put("Do you really want to delete this build?", "이 빌드를 정말 삭제하시겠습니까?");
@@ -1078,7 +1084,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Edit Job Secret", "작업 비밀 편집");
 		m.put("Edit My Avatar", "내 아바타 편집");
 		m.put("Edit Rule", "규칙 편집");
-		m.put("Edit Source", "소스 편집");
 		m.put("Edit Timesheet", "타임시트 편집");
 		m.put("Edit dashboard", "대시보드 편집");
 		m.put("Edit issue title", "이슈 제목 편집");
@@ -1108,6 +1113,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Email Verification", "이메일 인증");
 		m.put("Email Verification Template", "이메일 인증 템플릿");
 		m.put("Email address", "이메일 주소");
+		m.put("Email address \"{0}\" already used by another account", "이메일 주소 \"{0}\"는 다른 계정에서 이미 사용 중입니다");
+		m.put("Email address \"{0}\" used by account \"{1}\"", "이메일 주소 \"{0}\"는 계정 \"{1}\"에서 사용 중입니다");
+		m.put("Email address \"{0}\" used by disabled account \"{1}\"", "이메일 주소 \"{0}\"는 비활성화된 계정 \"{1}\"에서 사용 중입니다");
 		m.put("Email address already in use: {0}", "이미 사용 중인 이메일 주소: {0}");
 		m.put("Email address already invited: {0}", "이미 초대된 이메일 주소: {0}");
 		m.put("Email address already used by another user", "다른 사용자가 이미 사용 중인 이메일 주소");
@@ -1168,6 +1176,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Environment variable <code>serverUrl</code> in above command is taken from OneDev server url specified in <i>Administration / System Setting</i>. Change it if necessary", 
 			"위 명령에서 <code>serverUrl</code> 환경 변수는 <i>관리 / 시스템 설정</i>에 지정된 OneDev 서버 URL에서 가져옵니다. 필요하면 변경하세요");
 		m.put("Equal", "동일");
+		m.put("Error authenticating user", "사용자 인증 오류");
 		m.put("Error calculating commits: check log for details", "커밋 계산 오류: 세부 사항은 로그를 확인하세요");
 		m.put("Error cherry-picking to {0}: Merge conflicts detected", "{0}로 체리픽킹 오류: 병합 충돌이 감지되었습니다");
 		m.put("Error cherry-picking to {0}: {1}", "{0}로 체리픽킹 오류: {1}");
@@ -1229,8 +1238,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Export XLSX", "XLSX 내보내기");
 		m.put("Export as OCI layout", "OCI 레이아웃으로 내보내기");
 		m.put("Extend Trial Subscription", "체험 구독 연장");
+		m.put("External Authentication", "외부 인증");
 		m.put("External Issue Transformers", "외부 이슈 변환기들");
 		m.put("External Participants", "외부 참가자들");
+		m.put("External Password Authenticator", "외부 비밀번호 인증기");
 		m.put("External System", "외부 시스템");
 		m.put("External authenticator settings saved", "외부 인증자 설정이 저장되었습니다");
 		m.put("External participants do not have accounts and involve in the issue via email", "외부 참가자는 계정이 없으며 이메일을 통해 이슈에 참여합니다");
@@ -1531,6 +1542,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Image URL should be specified", "이미지 URL을 지정해야 합니다");
 		m.put("Imap Ssl Setting", "IMAP SSL 설정");
 		m.put("Imap With Ssl", "IMAP SSL 사용");
+		m.put("Impersonate", "가장하다");
 		m.put("Implicit SSL", "암시적 SSL");
 		m.put("Import", "가져오기");
 		m.put("Import All Projects", "모든 프로젝트 가져오기");
@@ -1683,7 +1695,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Issue Votes", "이슈 투표");
 		m.put("Issue administrative permission inside a project, including batch operations over multiple issues", 
 			"프로젝트 내에서 여러 이슈에 대한 배치 작업을 포함한 이슈 관리 권한");
-		m.put("Issue already linked", "이슈가 이미 연결되었습니다");
 		m.put("Issue count", "이슈 개수");
 		m.put("Issue in state", "상태에 있는 이슈");
 		m.put("Issue list", "이슈 목록");
@@ -1829,11 +1840,13 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Line: ", "라인:");
 		m.put("Lines", "라인들");
 		m.put("Link", "링크");
+		m.put("Link Existing User", "기존 사용자 연결");
 		m.put("Link Spec", "링크 사양");
 		m.put("Link Spec Opposite", "반대 링크 사양");
 		m.put("Link Text", "링크 텍스트");
 		m.put("Link URL", "링크 URL");
 		m.put("Link URL should be specified", "링크 URL을 지정해야 합니다");
+		m.put("Link User Bean", "사용자 빈 연결");
 		m.put("Linkable Issues", "링크 가능한 이슈");
 		m.put("Linkable Issues On the Other Side", "반대편의 링크 가능한 이슈");
 		m.put("Links", "링크들");
@@ -1980,6 +1993,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("My GPG Keys", "내 GPG 키");
 		m.put("My Profile", "내 프로필");
 		m.put("My SSH Keys", "내 SSH 키");
+		m.put("My SSO Accounts", "내 SSO 계정");
 		m.put("Mypy Report", "Mypy 보고서");
 		m.put("N/A", "N/A");
 		m.put("NPM(s)", "NPM(s)");
@@ -2084,6 +2098,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No diffs to navigate", "탐색할 차이 없음");
 		m.put("No directories to skip", "건너뛸 디렉터리 없음");
 		m.put("No executors defined. Jobs will use auto-discovered executors instead", "정의된 실행자가 없습니다. 작업은 자동으로 검색된 실행자를 대신 사용합니다");
+		m.put("No external password authenticator", "외부 비밀번호 인증기 없음");
+		m.put("No external password authenticator to authenticate user \"{0}\"", "사용자 \"{0}\"를 인증할 외부 비밀번호 인증기가 없습니다");
 		m.put("No fields to prompt", "프롬프트할 필드 없음");
 		m.put("No fields to remove", "제거할 필드 없음");
 		m.put("No file attachments", "파일 첨부 없음");
@@ -2218,6 +2234,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Only projects manageable by access token owner can be authorized", "액세스 토큰 소유자가 관리할 수 있는 프로젝트만 승인 가능");
 		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
 			"여기에는 시스템 수준 감사 이벤트만 표시됩니다. 특정 프로젝트의 감사 이벤트를 보려면 프로젝트 감사 로그 페이지를 방문하세요");
+		m.put("Only users able to authenticate via password can be linked", "비밀번호로 인증할 수 있는 사용자만 연결할 수 있습니다");
 		m.put("Open", "열기");
 		m.put("Open new pull request", "새 풀 리퀘스트 열기");
 		m.put("Open terminal of current running step", "현재 실행 중인 단계의 터미널 열기");
@@ -2316,6 +2333,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). Leave empty to all types", 
 			"선택적으로 커밋 메시지 풋터 확인을 위한 적용 가능한 커밋 유형을 지정하세요 (값을 추가하려면 ENTER를 누르세요). 모든 유형을 지정하려면 비워 두세요.");
 		m.put("Optionally specify applicable jobs of this executor", "선택적으로 이 실행자에 적용 가능한 작업을 지정합니다");
+		m.put("Optionally specify applicable users who pushed the change", "변경 사항을 푸시한 적용 가능한 사용자를 선택적으로 지정");
 		m.put("Optionally specify arguments to run above image", "선택적으로 위 이미지 실행을 위한 인수를 지정하세요.");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
 			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 워크스페이스</a>로 종속 항목에서 검색할 아티팩트를 지정하세요. 게시된 아티팩트(아티팩트 게시 단계에서 게시된 것)만 검색할 수 있습니다. 아티팩트를 검색하지 않으려면 비워 두세요.");
@@ -2538,6 +2556,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Passcode", "암호");
 		m.put("Passed", "통과됨");
 		m.put("Password", "비밀번호");
+		m.put("Password Authenticator", "비밀번호 인증기");
 		m.put("Password Edit Bean", "비밀번호 편집 빈");
 		m.put("Password Must Contain Digit", "비밀번호는 숫자를 포함해야 합니다");
 		m.put("Password Must Contain Lowercase", "비밀번호는 소문자를 포함해야 합니다");
@@ -2553,6 +2572,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Password has been changed", "비밀번호가 변경되었습니다.");
 		m.put("Password has been removed", "비밀번호가 제거되었습니다.");
 		m.put("Password has been set", "비밀번호가 설정되었습니다.");
+		m.put("Password of the user", "사용자의 비밀번호");
 		m.put("Password or Access Token for Remote Repository", "원격 저장소를 위한 비밀번호 또는 액세스 토큰");
 		m.put("Password reset request has been sent", "비밀번호 재설정 요청이 전송되었습니다.");
 		m.put("Password reset url is invalid or obsolete", "비밀번호 재설정 URL이 유효하지 않거나 오래되었습니다");
@@ -3055,6 +3075,12 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("SSH key deleted", "SSH 키가 삭제되었습니다");
 		m.put("SSH settings have been saved and SSH server restarted", "SSH 설정이 저장되었으며 SSH 서버가 재시작되었습니다");
 		m.put("SSL Setting", "SSL 설정");
+		m.put("SSO Accounts", "SSO 계정");
+		m.put("SSO Providers", "SSO 제공자");
+		m.put("SSO account deleted", "SSO 계정이 삭제되었습니다");
+		m.put("SSO provider \"{0}\" deleted", "SSO 제공자 \"{0}\"가 삭제되었습니다");
+		m.put("SSO provider created", "SSO 제공자가 생성되었습니다");
+		m.put("SSO provider updated", "SSO 제공자가 업데이트되었습니다");
 		m.put("SUCCESSFUL", "성공");
 		m.put("Save", "저장");
 		m.put("Save Query", "쿼리 저장");
@@ -3140,6 +3166,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Service Desk Settings", "서비스 데스크 설정들");
 		m.put("Service Locator", "서비스 로케이터");
 		m.put("Service Locators", "서비스 로케이터들");
+		m.put("Service account not allowed to login", "서비스 계정은 로그인할 수 없습니다");
 		m.put("Service desk setting", "서비스 데스크 설정");
 		m.put("Service desk settings have been saved", "서비스 데스크 설정이 저장되었습니다");
 		m.put("Services", "서비스");
@@ -3241,6 +3268,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Signing Key ID", "서명 키 ID");
 		m.put("Similar Issues", "유사한 이슈");
 		m.put("Single Sign On", "싱글 사인온");
+		m.put("Single Sign-On", "싱글 사인온");
 		m.put("Single sign on via discord.com", "discord.com을 통한 싱글 사인온");
 		m.put("Single sign on via twitch.tv", "twitch.tv를 통한 싱글 사인온");
 		m.put("Site", "사이트");
@@ -3454,8 +3482,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 기준으로 게시할 파일을 지정하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
 		m.put("Specify files to create md5 checksum from. Multiple files should be separated by space. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> patterns accepted. Non-absolute file is considered to be relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
 			"md5 체크섬을 생성할 파일을 지정하세요. 여러 파일은 공백으로 구분해야 합니다. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> 패턴이 허용됩니다. 절대 경로가 아닌 파일은 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 공간</a> 기준으로 간주됩니다.");
-		m.put("Specify files under above directory to be published. Use * or ? for pattern match", 
-			"위 디렉터리 아래에서 게시할 파일을 지정하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
+		m.put("Specify files under above directory to be published", "위 디렉토리 아래에 게시할 파일 지정");
 		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> <code>index.html</code> should be included in these files to be served as site start page", 
 			"위 디렉터리 아래에서 게시할 파일을 지정하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요. <b>참고:</b> <code>index.html</code>은 사이트 시작 페이지로 제공되기 위해 이러한 파일에 포함되어야 합니다.");
 		m.put("Specify group to import from. Leave empty to import from projects under current account", 
@@ -3594,7 +3621,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify timeout in seconds when communicating with mail server", "메일 서버와 통신할 때의 타임아웃(초)을 지정하십시오.");
 		m.put("Specify timeout in seconds. It counts from the time when job is submitted", "작업이 제출된 시점부터의 타임아웃(초)을 지정하십시오.");
 		m.put("Specify title of the issue", "이슈 제목을 지정하십시오.");
-		m.put("Specify url for your brand", "브랜드 URL을 지정하십시오.");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "YouTrack API의 URL을 지정하십시오. 예를 들어 <tt>http://localhost:8080/api</tt>.");
 		m.put("Specify user name of above machine for SSH authentication", "SSH 인증을 위한 위 머신의 사용자 이름을 지정하십시오.");
 		m.put("Specify user name of specified registry", "지정된 레지스트리의 사용자 이름을 지정하십시오.");
@@ -3630,6 +3656,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Ssh Setting", "Ssh 설정");
 		m.put("Ssl Setting", "Ssl 설정");
 		m.put("Sso Connector", "Sso 커넥터");
+		m.put("Sso Provider Bean", "Sso 제공자 빈");
 		m.put("Start At", "시작 시간");
 		m.put("Start Date", "시작 날짜");
 		m.put("Start Page", "시작 페이지");
@@ -3644,7 +3671,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("State Spec", "상태 사양");
 		m.put("State Transitions", "상태 전환");
 		m.put("State Trends", "상태 추세");
-		m.put("State of other issue is transited to", "다른 이슈의 상태가 전환됨");
+		m.put("State of an issue is transited", "이슈의 상태가 전환됨");
 		m.put("States", "상태들");
 		m.put("Statistics", "통계");
 		m.put("Stats", "통계");
@@ -3848,8 +3875,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("This key has already been used by another project", "이 키는 이미 다른 프로젝트에서 사용되었습니다");
 		m.put("This key is associated with {0}, however it is NOT a verified email address of this user", 
 			"이 키는 {0}와 연결되어 있지만 이 사용자의 확인된 이메일 주소가 아닙니다");
-		m.put("This key is used to determine if there is a cache hit in project hierarchy (search from current project to root project in order, same for load keys below). A cache is considered hit if its key is exactly the same as the key defined here", 
-			"이 키는 프로젝트 계층 구조에서 캐시 적중 여부를 결정하는 데 사용됩니다 (현재 프로젝트에서 루트 프로젝트까지 순서대로 검색하며, 아래 로드 키도 동일). 캐시는 여기 정의된 키와 정확히 동일한 경우 적중된 것으로 간주됩니다");
+		m.put("This key is used to determine if there is a cache hit in project hierarchy (search from current project to root project in order, same for load keys below). A cache is considered hit if its key is exactly the same as the key defined here.<br><b>NOTE:</b> In case your project has lock files(package.json, pom.xml, etc.) able to represent cache state, this key should be defined as &lt;cache name&gt;-@file:checksum.txt@, where checksum.txt is generated from these lock files with the <b>generate checksum step</b> defined before this step", 
+			"이 키는 프로젝트 계층 구조에서 캐시 적중 여부를 결정하는 데 사용됩니다 (현재 프로젝트에서 루트 프로젝트로 순서대로 검색, 아래 로드 키도 동일). 캐시는 여기에 정의된 키와 정확히 동일할 경우 적중된 것으로 간주됩니다.<br><b>참고:</b> 프로젝트에 캐시 상태를 나타낼 수 있는 잠금 파일(package.json, pom.xml 등)이 있는 경우, 이 키는 &lt;cache name&gt;-@file:checksum.txt@로 정의되어야 하며, checksum.txt는 이 단계 전에 정의된 <b>체크섬 생성 단계</b>를 통해 이러한 잠금 파일에서 생성됩니다.");
 		m.put("This key is used to download and upload cache in project hierarchy (search from current project to root project in order)", 
 			"이 키는 프로젝트 계층 구조에서 캐시를 다운로드하고 업로드하는 데 사용됩니다 (현재 프로젝트에서 루트 프로젝트까지 순서대로 검색)");
 		m.put("This key or one of its sub key is already added", "이 키 또는 하위 키 중 하나가 이미 추가되었습니다");
@@ -3889,6 +3916,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("This step can only be executed by a docker aware executor", "이 단계는 Docker를 인식하는 실행자만 실행할 수 있습니다");
 		m.put("This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
 			"이 단계는 Docker를 인식하는 실행자만 실행할 수 있습니다. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 워크스페이스</a>에서 실행됩니다");
+		m.put("This step copies files from job workspace to build artifacts directory, so that they can be accessed after job is completed", 
+			"이 단계는 작업 공간에서 빌드 아티팩트 디렉토리로 파일을 복사하여 작업이 완료된 후에도 액세스할 수 있도록 합니다");
 		m.put("This step publishes specified files to be served as project web site. Project web site can be accessed publicly via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>", 
 			"이 단계는 지정된 파일을 프로젝트 웹 사이트로 제공하도록 게시합니다. 프로젝트 웹 사이트는 <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>를 통해 공개적으로 액세스할 수 있습니다");
 		m.put("This step pulls specified refs from remote", "이 단계는 원격에서 지정된 참조를 가져옵니다");
@@ -4039,6 +4068,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Unable to create protected tag", "보호된 태그를 생성할 수 없습니다");
 		m.put("Unable to diff as some line is too long.", "일부 줄이 너무 길어 차이를 표시할 수 없습니다.");
 		m.put("Unable to diff as the file is too large.", "파일이 너무 커서 차이를 표시할 수 없습니다.");
+		m.put("Unable to find SSO provider: ", "SSO 제공자를 찾을 수 없습니다:");
 		m.put("Unable to find agent {0}", "에이전트 {0}을(를) 찾을 수 없습니다");
 		m.put("Unable to find build #{0} in project {1}", "프로젝트 {1}에서 빌드 #{0}을(를) 찾을 수 없습니다");
 		m.put("Unable to find commit to import build spec (import project: {0}, import revision: {1})", 
@@ -4059,8 +4089,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Undefined Field Value Resolution", "정의되지 않은 필드 값 해결");
 		m.put("Undefined State Resolution", "정의되지 않은 상태 해결");
 		m.put("Undefined custom field: ", "정의되지 않은 사용자 지정 필드:");
-		m.put("Under which condition this step should run. <b>Successful</b> means all non-optional steps running before this step are successful", 
-			"이 단계가 실행되어야 하는 조건. <b>성공</b>은 이 단계 이전에 실행된 모든 선택적이지 않은 단계가 성공했음을 의미합니다");
+		m.put("Under which condition this step should run. <b>SUCCESSFUL</b> means all non-optional steps running before this step are successful", 
+			"이 단계가 실행되어야 하는 조건. <b>성공</b>은 이 단계 이전에 실행된 모든 비선택적 단계가 성공적임을 의미합니다");
 		m.put("Unexpected setting: {0}", "예상치 못한 설정: {0}");
 		m.put("Unexpected ssh signature hash algorithm: ", "예상치 못한 ssh 서명 해시 알고리즘:");
 		m.put("Unexpected ssh signature namespace: ", "예상치 못한 ssh 서명 네임스페이스:");
@@ -4226,6 +4256,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("When determine if the user is author/committer of a git commit, all emails listed here will be checked", 
 			"사용자가 Git 커밋의 작성자/커미터인지 확인할 때 여기에 나열된 모든 이메일이 확인됩니다");
 		m.put("When evaluating this template, below variables will be available:", "이 템플릿을 평가할 때 아래 변수가 사용 가능합니다:");
+		m.put("When login via OneDev's built-in form, submitted user credentials can be checked against authenticator defined here, besides the internal database", 
+			"OneDev의 내장된 양식을 통해 로그인할 때, 제출된 사용자 자격 증명은 내부 데이터베이스 외에도 여기 정의된 인증기를 통해 확인할 수 있습니다");
 		m.put("When target branch of a pull request has new commits, merge commit of the pull request will be recalculated, and this option tells whether or not to accept pull request builds ran on previous merged commit. If enabled, you will need to re-run required builds on the new merge commit. This setting takes effect only when required builds are specified", 
 			"풀 리퀘스트의 대상 브랜치에 새 커밋이 있을 경우, 풀 리퀘스트의 병합 커밋이 재계산되며, 이전 병합 커밋에서 실행된 빌드를 수락할지 여부를 결정합니다. 활성화되면 새 병합 커밋에서 필요한 빌드를 다시 실행해야 합니다. 이 설정은 필요한 빌드가 지정된 경우에만 적용됩니다");
 		m.put("When this work starts", "이 작업이 시작될 때");
@@ -4306,6 +4338,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Workflow reconciliation completed", "워크플로우 조정 완료");
 		m.put("Working Directory", "작업 디렉토리");
 		m.put("Write", "쓰기");
+		m.put("YAML", "YAML");
 		m.put("Yes", "예");
 		m.put("You are not member of discord server", "디스코드 서버의 멤버가 아닙니다");
 		m.put("You are rebasing source branch on top of target branch", "소스 브랜치를 대상 브랜치 위로 리베이스 중입니다");
@@ -4510,7 +4543,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("severity:MEDIUM", "중간");
 		m.put("skipped {0} lines", "{0}개의 라인을 건너뜀");
 		m.put("space", "공간");
-		m.put("state of other issue is transited to \"{0}\"", "다른 이슈의 상태가 \"{0}\"로 전환됨");
+		m.put("state of an issue is transited", "이슈의 상태가 전환됨");
 		m.put("step template", "단계 템플릿");
 		m.put("submit", "제출");
 		m.put("tag the job is running against", "작업이 실행 중인 태그");
@@ -4572,40 +4605,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Account is disabled", "계정이 비활성화되었습니다");
-		m.put("Connect with your SSO account", "SSO 계정으로 연결");
-		m.put("Create New User", "새 사용자 생성");
-		m.put("Delete SSO account here to reconnect corresponding SSO subject upon next login. Note that SSO subject with verified email will be connected to user with same verified email automatically", 
-			"다음 로그인 시 해당 SSO 주제를 다시 연결하려면 여기서 SSO 계정을 삭제하세요. 인증된 이메일이 있는 SSO 주제는 동일한 인증된 이메일을 가진 사용자와 자동으로 연결됩니다");
-		m.put("Do you really want to delete SSO provider \"{0}\"?", "SSO 제공자 \"{0}\"를 정말로 삭제하시겠습니까?");
-		m.put("Do you really want to delete this SSO account?", "이 SSO 계정을 정말로 삭제하시겠습니까?");
-		m.put("Email address \"{0}\" already used by another account", "이메일 주소 \"{0}\"는 다른 계정에서 이미 사용 중입니다");
-		m.put("Email address \"{0}\" used by account \"{1}\"", "이메일 주소 \"{0}\"는 계정 \"{1}\"에서 사용 중입니다");
-		m.put("Email address \"{0}\" used by disabled account \"{1}\"", "이메일 주소 \"{0}\"는 비활성화된 계정 \"{1}\"에서 사용 중입니다");
-		m.put("Error authenticating user", "사용자 인증 오류");
-		m.put("External Authentication", "외부 인증");
-		m.put("External Password Authenticator", "외부 비밀번호 인증기");
-		m.put("Impersonate", "가장하다");
-		m.put("Link Existing User", "기존 사용자 연결");
-		m.put("Link User Bean", "사용자 빈 연결");
-		m.put("My SSO Accounts", "내 SSO 계정");
-		m.put("No external password authenticator", "외부 비밀번호 인증기 없음");
-		m.put("No external password authenticator to authenticate user \"{0}\"", "사용자 \"{0}\"를 인증할 외부 비밀번호 인증기가 없습니다");
-		m.put("Only users able to authenticate via password can be linked", "비밀번호로 인증할 수 있는 사용자만 연결할 수 있습니다");
-		m.put("Password Authenticator", "비밀번호 인증기");
-		m.put("Password of the user", "사용자의 비밀번호");
-		m.put("SSO Accounts", "SSO 계정");
-		m.put("SSO Providers", "SSO 제공자");
-		m.put("SSO account deleted", "SSO 계정이 삭제되었습니다");
-		m.put("SSO provider \"{0}\" deleted", "SSO 제공자 \"{0}\"가 삭제되었습니다");
-		m.put("SSO provider created", "SSO 제공자가 생성되었습니다");
-		m.put("SSO provider updated", "SSO 제공자가 업데이트되었습니다");
-		m.put("Service account not allowed to login", "서비스 계정은 로그인할 수 없습니다");
-		m.put("Single Sign-On", "싱글 사인온");
-		m.put("Sso Provider Bean", "Sso 제공자 빈");
-		m.put("Unable to find SSO provider: ", "SSO 제공자를 찾을 수 없습니다:");
-		m.put("When login via OneDev's built-in form, submitted user credentials can be checked against authenticator defined here, besides the internal database", 
-			"OneDev의 내장된 양식을 통해 로그인할 때, 제출된 사용자 자격 증명은 내부 데이터베이스 외에도 여기 정의된 인증기를 통해 확인할 수 있습니다");
 	}
 		
 	@Override

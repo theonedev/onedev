@@ -141,6 +141,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Access token regenerated, make sure to update the token at agent side", "Token di accesso rigenerato, assicurati di aggiornare il token sul lato agente");
 		m.put("Account Email", "Email dell'account");
 		m.put("Account Name", "Nome dell'account");
+		m.put("Account is disabled", "L'account è disabilitato");
 		m.put("Account set up successfully", "Account configurato con successo");
 		m.put("Active Directory", "Active Directory");
 		m.put("Active Since", "Attivo da");
@@ -329,7 +330,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("At least one repository should be selected", "Almeno un repository deve essere selezionato");
 		m.put("At least one role is required", "Almeno un ruolo è richiesto");
 		m.put("At least one role must be selected", "Almeno un ruolo deve essere selezionato");
-		m.put("At least one state needs to be specified", "Almeno uno stato deve essere specificato");
 		m.put("At least one state should be specified", "Almeno uno stato deve essere specificato");
 		m.put("At least one tab should be added", "Almeno una scheda deve essere aggiunta");
 		m.put("At least one user search base should be specified", "Almeno una base di ricerca utente deve essere specificata");
@@ -539,7 +539,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Can not disable root account", "Non è possibile disabilitare l'account root");
 		m.put("Can not disable yourself", "Non è possibile disabilitare te stesso");
 		m.put("Can not find issue board: ", "Impossibile trovare la bacheca dei problemi:");
-		m.put("Can not link to self", "Non è possibile collegarsi a se stessi");
 		m.put("Can not move project \"{0}\" to be under itself or its descendants", "Non è possibile spostare il progetto \"{0}\" sotto se stesso o i suoi discendenti");
 		m.put("Can not perform this operation now", "Non è possibile eseguire questa operazione ora");
 		m.put("Can not reset password for service account or disabled user", "Impossibile reimpostare la password per account di servizio o utente disabilitato");
@@ -627,6 +626,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Choose group...", "Scegli il gruppo...");
 		m.put("Choose groups...", "Scegli i gruppi...");
 		m.put("Choose issue...", "Scegli il problema...");
+		m.put("Choose issues...", "Scegli problemi...");
 		m.put("Choose iteration...", "Scegli l'iterazione...");
 		m.put("Choose iterations...", "Scegli le iterazioni...");
 		m.put("Choose job...", "Scegli il job...");
@@ -765,6 +765,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Confirm password here", "Conferma la password qui");
 		m.put("Confirm your action", "Conferma la tua azione");
 		m.put("Connect New Agent", "Connetti Nuovo Agente");
+		m.put("Connect with your SSO account", "Connettiti con il tuo account SSO");
 		m.put("Contact Email", "Email di Contatto");
 		m.put("Contact Name", "Nome di Contatto");
 		m.put("Container Image", "Immagine del Container");
@@ -810,6 +811,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Create Merge Commit If Necessary", "Crea Commit di Merge Se Necessario");
 		m.put("Create New", "Crea Nuovo");
 		m.put("Create New File", "Crea Nuovo File");
+		m.put("Create New User", "Crea Nuovo Utente");
 		m.put("Create Project", "Crea Progetto");
 		m.put("Create Pull Request", "Crea Pull Request");
 		m.put("Create Pull Request for This Change", "Crea Pull Request per Questa Modifica");
@@ -912,6 +914,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Delete Build", "Elimina Build");
 		m.put("Delete Comment", "Elimina Commento");
 		m.put("Delete Pull Request", "Elimina Pull Request");
+		m.put("Delete SSO account here to reconnect corresponding SSO subject upon next login. Note that SSO subject with verified email will be connected to user with same verified email automatically", 
+			"Elimina l'account SSO qui per ricollegare il soggetto SSO corrispondente al prossimo accesso. Nota che il soggetto SSO con email verificata sarà collegato automaticamente all'utente con la stessa email verificata");
 		m.put("Delete Selected", "Elimina Selezionati");
 		m.put("Delete Selected Builds", "Elimina Build Selezionate");
 		m.put("Delete Selected Comments", "Elimina Commenti Selezionati");
@@ -997,6 +1001,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Do you really want to cancel this build?", "Vuoi davvero annullare questa build?");
 		m.put("Do you really want to change target branch to {0}?", "Vuoi davvero cambiare il branch di destinazione in {0}?");
 		m.put("Do you really want to delete \"{0}\"?", "Vuoi davvero eliminare \"{0}\"?");
+		m.put("Do you really want to delete SSO provider \"{0}\"?", "Vuoi davvero eliminare il provider SSO \"{0}\"?");
 		m.put("Do you really want to delete board \"{0}\"?", "Vuoi davvero eliminare la board \"{0}\"?");
 		m.put("Do you really want to delete build #{0}?", "Vuoi davvero eliminare la build #{0}?");
 		m.put("Do you really want to delete group \"{0}\"?", "Vuoi davvero eliminare il gruppo \"{0}\"?");
@@ -1008,6 +1013,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Do you really want to delete tag {0}?", "Vuoi davvero eliminare il tag {0}?");
 		m.put("Do you really want to delete this GPG key?", "Vuoi davvero eliminare questa chiave GPG?");
 		m.put("Do you really want to delete this SSH key?", "Vuoi davvero eliminare questa chiave SSH?");
+		m.put("Do you really want to delete this SSO account?", "Vuoi davvero eliminare questo account SSO?");
 		m.put("Do you really want to delete this access token?", "Vuoi davvero eliminare questo token di accesso?");
 		m.put("Do you really want to delete this board?", "Vuoi davvero eliminare questa board?");
 		m.put("Do you really want to delete this build?", "Vuoi davvero eliminare questa build?");
@@ -1078,7 +1084,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Edit Job Secret", "Modifica Segreto del Lavoro");
 		m.put("Edit My Avatar", "Modifica il Mio Avatar");
 		m.put("Edit Rule", "Modifica Regola");
-		m.put("Edit Source", "Modifica Sorgente");
 		m.put("Edit Timesheet", "Modifica Timesheet");
 		m.put("Edit dashboard", "Modifica dashboard");
 		m.put("Edit issue title", "Modifica titolo del problema");
@@ -1108,6 +1113,9 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Email Verification", "Verifica Email");
 		m.put("Email Verification Template", "Modello di Verifica Email");
 		m.put("Email address", "Indirizzo email");
+		m.put("Email address \"{0}\" already used by another account", "L'indirizzo email \"{0}\" è già utilizzato da un altro account");
+		m.put("Email address \"{0}\" used by account \"{1}\"", "L'indirizzo email \"{0}\" è utilizzato dall'account \"{1}\"");
+		m.put("Email address \"{0}\" used by disabled account \"{1}\"", "L'indirizzo email \"{0}\" è utilizzato dall'account disabilitato \"{1}\"");
 		m.put("Email address already in use: {0}", "Indirizzo email già in uso: {0}");
 		m.put("Email address already invited: {0}", "Indirizzo email già invitato: {0}");
 		m.put("Email address already used by another user", "Indirizzo email già utilizzato da un altro utente");
@@ -1168,6 +1176,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Environment variable <code>serverUrl</code> in above command is taken from OneDev server url specified in <i>Administration / System Setting</i>. Change it if necessary", 
 			"La variabile d'ambiente <code>serverUrl</code> nel comando sopra è presa dall'URL del server OneDev specificato in <i>Amministrazione / Impostazioni di Sistema</i>. Modificala se necessario");
 		m.put("Equal", "Uguale");
+		m.put("Error authenticating user", "Errore nell'autenticazione dell'utente");
 		m.put("Error calculating commits: check log for details", "Errore nel calcolo dei commit: controlla il log per i dettagli");
 		m.put("Error cherry-picking to {0}: Merge conflicts detected", "Errore nel cherry-picking su {0}: Rilevati conflitti di merge");
 		m.put("Error cherry-picking to {0}: {1}", "Errore nel cherry-picking su {0}: {1}");
@@ -1229,8 +1238,10 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Export XLSX", "Esporta XLSX");
 		m.put("Export as OCI layout", "Esporta come layout OCI");
 		m.put("Extend Trial Subscription", "Estendi Abbonamento di Prova");
+		m.put("External Authentication", "Autenticazione Esterna");
 		m.put("External Issue Transformers", "Trasformatori di Problemi Esterni");
 		m.put("External Participants", "Partecipanti Esterni");
+		m.put("External Password Authenticator", "Autenticatore di Password Esterna");
 		m.put("External System", "Sistema Esterno");
 		m.put("External authenticator settings saved", "Impostazioni dell'autenticatore esterno salvate");
 		m.put("External participants do not have accounts and involve in the issue via email", "I partecipanti esterni non hanno account e partecipano al problema tramite email");
@@ -1531,6 +1542,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Image URL should be specified", "L'URL immagine deve essere specificato");
 		m.put("Imap Ssl Setting", "Impostazione SSL IMAP");
 		m.put("Imap With Ssl", "IMAP con SSL");
+		m.put("Impersonate", "Impersonare");
 		m.put("Implicit SSL", "SSL implicito");
 		m.put("Import", "Importa");
 		m.put("Import All Projects", "Importa tutti i progetti");
@@ -1683,7 +1695,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Issue Votes", "Voti Problemi");
 		m.put("Issue administrative permission inside a project, including batch operations over multiple issues", 
 			"Permesso amministrativo per problemi all'interno di un progetto, inclusa l'operazione batch su più problemi");
-		m.put("Issue already linked", "Problema già collegato");
 		m.put("Issue count", "Conteggio Problemi");
 		m.put("Issue in state", "Problema in stato");
 		m.put("Issue list", "Lista Problemi");
@@ -1829,11 +1840,13 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Line: ", "Linea:");
 		m.put("Lines", "Linee");
 		m.put("Link", "Collegamento");
+		m.put("Link Existing User", "Collega Utente Esistente");
 		m.put("Link Spec", "Specifica del Collegamento");
 		m.put("Link Spec Opposite", "Specifica del Collegamento Opposto");
 		m.put("Link Text", "Testo del Collegamento");
 		m.put("Link URL", "URL del Collegamento");
 		m.put("Link URL should be specified", "URL del Collegamento deve essere specificato");
+		m.put("Link User Bean", "Collega User Bean");
 		m.put("Linkable Issues", "Problemi Collegabili");
 		m.put("Linkable Issues On the Other Side", "Problemi Collegabili dall'Altra Parte");
 		m.put("Links", "Collegamenti");
@@ -1980,6 +1993,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("My GPG Keys", "Le mie chiavi GPG");
 		m.put("My Profile", "Il mio profilo");
 		m.put("My SSH Keys", "Le mie chiavi SSH");
+		m.put("My SSO Accounts", "I Miei Account SSO");
 		m.put("Mypy Report", "Rapporto Mypy");
 		m.put("N/A", "N/D");
 		m.put("NPM(s)", "NPM(s)");
@@ -2084,6 +2098,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("No diffs to navigate", "Nessuna differenza da navigare");
 		m.put("No directories to skip", "Nessuna directory da saltare");
 		m.put("No executors defined. Jobs will use auto-discovered executors instead", "Nessun executor definito. I lavori utilizzeranno executor rilevati automaticamente");
+		m.put("No external password authenticator", "Nessun autenticatore di password esterna");
+		m.put("No external password authenticator to authenticate user \"{0}\"", "Nessun autenticatore di password esterna per autenticare l'utente \"{0}\"");
 		m.put("No fields to prompt", "Nessun campo da richiedere");
 		m.put("No fields to remove", "Nessun campo da rimuovere");
 		m.put("No file attachments", "Nessun allegato di file");
@@ -2218,6 +2234,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Only projects manageable by access token owner can be authorized", "Solo i progetti gestibili dal proprietario del token di accesso possono essere autorizzati");
 		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
 			"Qui vengono visualizzati solo gli eventi di controllo a livello di sistema. Per visualizzare gli eventi di controllo di un progetto specifico, visita la pagina del registro di controllo del progetto");
+		m.put("Only users able to authenticate via password can be linked", "Solo gli utenti in grado di autenticarsi tramite password possono essere collegati");
 		m.put("Open", "Apri");
 		m.put("Open new pull request", "Apri nuova pull request");
 		m.put("Open terminal of current running step", "Apri terminale del passo corrente in esecuzione");
@@ -2316,6 +2333,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). Leave empty to all types", 
 			"Specifica facoltativamente i tipi di commit applicabili per il controllo del piè di pagina del messaggio di commit (premi INVIO per aggiungere un valore). Lascia vuoto per tutti i tipi");
 		m.put("Optionally specify applicable jobs of this executor", "Specifica facoltativamente i lavori applicabili di questo executor");
+		m.put("Optionally specify applicable users who pushed the change", "Specifica facoltativamente gli utenti applicabili che hanno effettuato il push della modifica");
 		m.put("Optionally specify arguments to run above image", "Specifica facoltativamente gli argomenti per eseguire l'immagine sopra");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
 			"Specifica facoltativamente gli artefatti da recuperare dalla dipendenza in <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Possono essere recuperati solo artefatti pubblicati (tramite il passaggio di pubblicazione degli artefatti). Lascia vuoto per non recuperare alcun artefatto");
@@ -2538,6 +2556,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Passcode", "Codice di Accesso");
 		m.put("Passed", "Superato");
 		m.put("Password", "Password");
+		m.put("Password Authenticator", "Autenticatore di Password");
 		m.put("Password Edit Bean", "Bean Modifica Password");
 		m.put("Password Must Contain Digit", "La password deve contenere una cifra");
 		m.put("Password Must Contain Lowercase", "La password deve contenere una lettera minuscola");
@@ -2553,6 +2572,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Password has been changed", "La password è stata cambiata");
 		m.put("Password has been removed", "La password è stata rimossa");
 		m.put("Password has been set", "La password è stata impostata");
+		m.put("Password of the user", "Password dell'utente");
 		m.put("Password or Access Token for Remote Repository", "Password o Token di Accesso per Repository Remoto");
 		m.put("Password reset request has been sent", "La richiesta di reset della password è stata inviata");
 		m.put("Password reset url is invalid or obsolete", "L'url per reimpostare la password non è valido o è obsoleto");
@@ -3055,6 +3075,12 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("SSH key deleted", "Chiave SSH eliminata.");
 		m.put("SSH settings have been saved and SSH server restarted", "Le impostazioni SSH sono state salvate e il server SSH è stato riavviato.");
 		m.put("SSL Setting", "Impostazione SSL.");
+		m.put("SSO Accounts", "Account SSO");
+		m.put("SSO Providers", "Provider SSO");
+		m.put("SSO account deleted", "Account SSO eliminato");
+		m.put("SSO provider \"{0}\" deleted", "Provider SSO \"{0}\" eliminato");
+		m.put("SSO provider created", "Provider SSO creato");
+		m.put("SSO provider updated", "Provider SSO aggiornato");
 		m.put("SUCCESSFUL", "RIUSCITO.");
 		m.put("Save", "Salva.");
 		m.put("Save Query", "Salva query.");
@@ -3140,6 +3166,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Service Desk Settings", "Impostazioni del Service Desk.");
 		m.put("Service Locator", "Service Locator.");
 		m.put("Service Locators", "Service Locators.");
+		m.put("Service account not allowed to login", "Account di servizio non autorizzato ad accedere");
 		m.put("Service desk setting", "Impostazione del service desk");
 		m.put("Service desk settings have been saved", "Le impostazioni del service desk sono state salvate");
 		m.put("Services", "Servizi");
@@ -3241,6 +3268,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Signing Key ID", "ID della chiave di firma");
 		m.put("Similar Issues", "Problematiche simili");
 		m.put("Single Sign On", "Single Sign-On");
+		m.put("Single Sign-On", "Single Sign-On");
 		m.put("Single sign on via discord.com", "Single Sign-On tramite discord.com");
 		m.put("Single sign on via twitch.tv", "Single Sign-On tramite twitch.tv");
 		m.put("Site", "Sito");
@@ -3454,8 +3482,7 @@ public class Translation_it extends TranslationResourceBundle {
 			"Specifica i file relativi a <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> da pubblicare. Usa * o ? per la corrispondenza dei pattern");
 		m.put("Specify files to create md5 checksum from. Multiple files should be separated by space. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> patterns accepted. Non-absolute file is considered to be relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
 			"Specifica i file da cui creare il checksum md5. I file multipli devono essere separati da uno spazio. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>I pattern Globstar</a> sono accettati. I file non assoluti sono considerati relativi a <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>");
-		m.put("Specify files under above directory to be published. Use * or ? for pattern match", 
-			"Specifica i file sotto la directory sopra da pubblicare. Usa * o ? per la corrispondenza dei pattern");
+		m.put("Specify files under above directory to be published", "Specifica i file sotto la directory sopra da pubblicare");
 		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> <code>index.html</code> should be included in these files to be served as site start page", 
 			"Specifica i file sotto la directory sopra da pubblicare. Usa * o ? per la corrispondenza dei pattern. <b>NOTA:</b> <code>index.html</code> deve essere incluso in questi file per essere servito come pagina iniziale del sito");
 		m.put("Specify group to import from. Leave empty to import from projects under current account", 
@@ -3594,7 +3621,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Specify timeout in seconds when communicating with mail server", "Specifica il timeout in secondi durante la comunicazione con il server di posta");
 		m.put("Specify timeout in seconds. It counts from the time when job is submitted", "Specifica il timeout in secondi. Si conta dal momento in cui il job viene inviato");
 		m.put("Specify title of the issue", "Specifica il titolo dell'issue");
-		m.put("Specify url for your brand", "Specifica l'URL per il tuo brand");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "Specifica l'URL dell'API di YouTrack. Ad esempio <tt>http://localhost:8080/api</tt>");
 		m.put("Specify user name of above machine for SSH authentication", "Specifica il nome utente della macchina sopra per l'autenticazione SSH");
 		m.put("Specify user name of specified registry", "Specifica il nome utente del registro specificato");
@@ -3630,6 +3656,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Ssh Setting", "Impostazione Ssh");
 		m.put("Ssl Setting", "Impostazione Ssl");
 		m.put("Sso Connector", "Connettore Sso");
+		m.put("Sso Provider Bean", "Sso Provider Bean");
 		m.put("Start At", "Inizia a");
 		m.put("Start Date", "Data di Inizio");
 		m.put("Start Page", "Pagina Iniziale");
@@ -3644,7 +3671,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("State Spec", "Specifica dello Stato");
 		m.put("State Transitions", "Transizioni dello Stato");
 		m.put("State Trends", "Tendenze dello Stato");
-		m.put("State of other issue is transited to", "Lo stato di un'altra issue è transitato a");
+		m.put("State of an issue is transited", "Lo stato di un problema è transitato");
 		m.put("States", "Stati");
 		m.put("Statistics", "Statistiche");
 		m.put("Stats", "Statistiche");
@@ -3848,8 +3875,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("This key has already been used by another project", "Questa chiave è già stata utilizzata da un altro progetto");
 		m.put("This key is associated with {0}, however it is NOT a verified email address of this user", 
 			"Questa chiave è associata a {0}, tuttavia NON è un indirizzo email verificato di questo utente");
-		m.put("This key is used to determine if there is a cache hit in project hierarchy (search from current project to root project in order, same for load keys below). A cache is considered hit if its key is exactly the same as the key defined here", 
-			"Questa chiave viene utilizzata per determinare se c'è un hit del cache nella gerarchia del progetto (ricerca dal progetto corrente al progetto radice in ordine, lo stesso vale per le chiavi di caricamento di seguito). Un cache è considerato un hit se la sua chiave è esattamente la stessa della chiave definita qui");
+		m.put("This key is used to determine if there is a cache hit in project hierarchy (search from current project to root project in order, same for load keys below). A cache is considered hit if its key is exactly the same as the key defined here.<br><b>NOTE:</b> In case your project has lock files(package.json, pom.xml, etc.) able to represent cache state, this key should be defined as &lt;cache name&gt;-@file:checksum.txt@, where checksum.txt is generated from these lock files with the <b>generate checksum step</b> defined before this step", 
+			"Questa chiave è utilizzata per determinare se c'è un colpo di cache nella gerarchia del progetto (ricerca dal progetto corrente al progetto radice in ordine, lo stesso per le chiavi di caricamento sotto). Una cache è considerata colpita se la sua chiave è esattamente la stessa della chiave definita qui.<br><b>NOTA:</b> Nel caso in cui il tuo progetto abbia file di blocco (package.json, pom.xml, ecc.) in grado di rappresentare lo stato della cache, questa chiave dovrebbe essere definita come &lt;nome cache&gt;-@file:checksum.txt@, dove checksum.txt è generato da questi file di blocco con il <b>passo di generazione checksum</b> definito prima di questo passo");
 		m.put("This key is used to download and upload cache in project hierarchy (search from current project to root project in order)", 
 			"Questa chiave viene utilizzata per scaricare e caricare il cache nella gerarchia del progetto (ricerca dal progetto corrente al progetto radice in ordine)");
 		m.put("This key or one of its sub key is already added", "Questa chiave o una delle sue sottochiavi è già stata aggiunta");
@@ -3889,6 +3916,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("This step can only be executed by a docker aware executor", "Questo step può essere eseguito solo da un executor compatibile con docker");
 		m.put("This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
 			"Questo step può essere eseguito solo da un executor compatibile con docker. Viene eseguito sotto <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>workspace del lavoro</a>");
+		m.put("This step copies files from job workspace to build artifacts directory, so that they can be accessed after job is completed", 
+			"Questo passo copia i file dalla workspace del job alla directory degli artefatti di build, in modo che possano essere accessibili dopo il completamento del job");
 		m.put("This step publishes specified files to be served as project web site. Project web site can be accessed publicly via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>", 
 			"Questo step pubblica i file specificati per essere serviti come sito web del progetto. Il sito web del progetto può essere accessibile pubblicamente tramite <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>");
 		m.put("This step pulls specified refs from remote", "Questo passaggio estrae i ref specificati dal remoto");
@@ -4039,6 +4068,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Unable to create protected tag", "Impossibile creare un tag protetto");
 		m.put("Unable to diff as some line is too long.", "Impossibile effettuare il diff poiché alcune righe sono troppo lunghe.");
 		m.put("Unable to diff as the file is too large.", "Impossibile effettuare il diff poiché il file è troppo grande.");
+		m.put("Unable to find SSO provider: ", "Impossibile trovare il provider SSO:");
 		m.put("Unable to find agent {0}", "Impossibile trovare l'agente {0}");
 		m.put("Unable to find build #{0} in project {1}", "Impossibile trovare la build #{0} nel progetto {1}");
 		m.put("Unable to find commit to import build spec (import project: {0}, import revision: {1})", 
@@ -4059,8 +4089,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Undefined Field Value Resolution", "Risoluzione Valore Campo Non Definito");
 		m.put("Undefined State Resolution", "Risoluzione dello stato indefinito");
 		m.put("Undefined custom field: ", "Campo personalizzato indefinito:");
-		m.put("Under which condition this step should run. <b>Successful</b> means all non-optional steps running before this step are successful", 
-			"In quale condizione questo passaggio dovrebbe essere eseguito. <b>Riuscito</b> significa che tutti i passaggi non opzionali eseguiti prima di questo sono riusciti");
+		m.put("Under which condition this step should run. <b>SUCCESSFUL</b> means all non-optional steps running before this step are successful", 
+			"Sotto quale condizione questo passo dovrebbe essere eseguito. <b>SUCCESSFUL</b> significa che tutti i passi non opzionali eseguiti prima di questo passo sono riusciti");
 		m.put("Unexpected setting: {0}", "Impostazione imprevista: {0}");
 		m.put("Unexpected ssh signature hash algorithm: ", "Algoritmo di hash della firma ssh inaspettato:");
 		m.put("Unexpected ssh signature namespace: ", "Namespace della firma ssh inaspettato:");
@@ -4226,6 +4256,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("When determine if the user is author/committer of a git commit, all emails listed here will be checked", 
 			"Quando si determina se l'utente è autore/committente di un commit git, tutte le email elencate qui saranno verificate");
 		m.put("When evaluating this template, below variables will be available:", "Quando si valuta questo template, le variabili sottostanti saranno disponibili:");
+		m.put("When login via OneDev's built-in form, submitted user credentials can be checked against authenticator defined here, besides the internal database", 
+			"Quando si accede tramite il modulo integrato di OneDev, le credenziali utente inviate possono essere verificate contro l'autenticatore definito qui, oltre al database interno");
 		m.put("When target branch of a pull request has new commits, merge commit of the pull request will be recalculated, and this option tells whether or not to accept pull request builds ran on previous merged commit. If enabled, you will need to re-run required builds on the new merge commit. This setting takes effect only when required builds are specified", 
 			"Quando il branch di destinazione di una richiesta di pull ha nuovi commit, il commit di merge della richiesta di pull sarà ricalcolato, e questa opzione indica se accettare o meno le build della richiesta di pull eseguite sul commit di merge precedente. Se abilitato, sarà necessario rieseguire le build richieste sul nuovo commit di merge. Questa impostazione ha effetto solo quando sono specificate build richieste");
 		m.put("When this work starts", "Quando inizia questo lavoro");
@@ -4306,6 +4338,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Workflow reconciliation completed", "Riconciliazione del flusso di lavoro completata");
 		m.put("Working Directory", "Directory di Lavoro");
 		m.put("Write", "Scrivi");
+		m.put("YAML", "YAML");
 		m.put("Yes", "Sì");
 		m.put("You are not member of discord server", "Non sei membro del server Discord");
 		m.put("You are rebasing source branch on top of target branch", "Stai effettuando il rebase del branch sorgente sopra il branch di destinazione");
@@ -4510,7 +4543,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("severity:MEDIUM", "Medio");
 		m.put("skipped {0} lines", "saltate {0} righe");
 		m.put("space", "spazio");
-		m.put("state of other issue is transited to \"{0}\"", "lo stato di un altro problema è transitato a \"{0}\"");
+		m.put("state of an issue is transited", "lo stato di un problema è transitato");
 		m.put("step template", "modello di step");
 		m.put("submit", "invia");
 		m.put("tag the job is running against", "tag contro cui il lavoro è in esecuzione");
@@ -4572,40 +4605,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Account is disabled", "L'account è disabilitato");
-		m.put("Connect with your SSO account", "Connettiti con il tuo account SSO");
-		m.put("Create New User", "Crea Nuovo Utente");
-		m.put("Delete SSO account here to reconnect corresponding SSO subject upon next login. Note that SSO subject with verified email will be connected to user with same verified email automatically", 
-			"Elimina l'account SSO qui per ricollegare il soggetto SSO corrispondente al prossimo accesso. Nota che il soggetto SSO con email verificata sarà collegato automaticamente all'utente con la stessa email verificata");
-		m.put("Do you really want to delete SSO provider \"{0}\"?", "Vuoi davvero eliminare il provider SSO \"{0}\"?");
-		m.put("Do you really want to delete this SSO account?", "Vuoi davvero eliminare questo account SSO?");
-		m.put("Email address \"{0}\" already used by another account", "L'indirizzo email \"{0}\" è già utilizzato da un altro account");
-		m.put("Email address \"{0}\" used by account \"{1}\"", "L'indirizzo email \"{0}\" è utilizzato dall'account \"{1}\"");
-		m.put("Email address \"{0}\" used by disabled account \"{1}\"", "L'indirizzo email \"{0}\" è utilizzato dall'account disabilitato \"{1}\"");
-		m.put("Error authenticating user", "Errore nell'autenticazione dell'utente");
-		m.put("External Authentication", "Autenticazione Esterna");
-		m.put("External Password Authenticator", "Autenticatore di Password Esterna");
-		m.put("Impersonate", "Impersonare");
-		m.put("Link Existing User", "Collega Utente Esistente");
-		m.put("Link User Bean", "Collega User Bean");
-		m.put("My SSO Accounts", "I Miei Account SSO");
-		m.put("No external password authenticator", "Nessun autenticatore di password esterna");
-		m.put("No external password authenticator to authenticate user \"{0}\"", "Nessun autenticatore di password esterna per autenticare l'utente \"{0}\"");
-		m.put("Only users able to authenticate via password can be linked", "Solo gli utenti in grado di autenticarsi tramite password possono essere collegati");
-		m.put("Password Authenticator", "Autenticatore di Password");
-		m.put("Password of the user", "Password dell'utente");
-		m.put("SSO Accounts", "Account SSO");
-		m.put("SSO Providers", "Provider SSO");
-		m.put("SSO account deleted", "Account SSO eliminato");
-		m.put("SSO provider \"{0}\" deleted", "Provider SSO \"{0}\" eliminato");
-		m.put("SSO provider created", "Provider SSO creato");
-		m.put("SSO provider updated", "Provider SSO aggiornato");
-		m.put("Service account not allowed to login", "Account di servizio non autorizzato ad accedere");
-		m.put("Single Sign-On", "Single Sign-On");
-		m.put("Sso Provider Bean", "Sso Provider Bean");
-		m.put("Unable to find SSO provider: ", "Impossibile trovare il provider SSO:");
-		m.put("When login via OneDev's built-in form, submitted user credentials can be checked against authenticator defined here, besides the internal database", 
-			"Quando si accede tramite il modulo integrato di OneDev, le credenziali utente inviate possono essere verificate contro l'autenticatore definito qui, oltre al database interno");
 	}
 		
 	@Override

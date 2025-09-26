@@ -346,7 +346,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("At least one repository should be selected", "至少需要选择一个仓库");
 		m.put("At least one role is required", "至少需要一个角色");
 		m.put("At least one role must be selected", "至少需要选择一个角色");
-		m.put("At least one state needs to be specified", "至少需要指定一个状态");
 		m.put("At least one state should be specified", "至少需要指定一个状态");
 		m.put("At least one tab should be added", "至少需要添加一个标签");
 		m.put("At least one user search base should be specified", "至少需要指定一个用户搜索根节点");
@@ -1101,7 +1100,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Edit Job Secret", "编辑任务密钥");
 		m.put("Edit My Avatar", "编辑我的头像");
 		m.put("Edit Rule", "编辑规则");
-		m.put("Edit Source", "编辑源码");
 		m.put("Edit Timesheet", "编辑工时表");
 		m.put("Edit dashboard", "编辑仪表板");
 		m.put("Edit issue title", "编辑工单标题");
@@ -2053,7 +2051,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Network Options", "网络选项");
 		m.put("Never", "从不");
 		m.put("Never expire", "永不过期");
-		m.put("Never retry", "从不重试");
 		m.put("New Board", "新建看板");
 		m.put("New Invitation Bean", "新邀请Bean");
 		m.put("New Issue", "新工单");
@@ -2352,6 +2349,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). Leave empty to all types", 
 			"可选择指定适用于提交消息页脚检查的提交类型（按 ENTER 添加值）。留空则适用于所有类型");
 		m.put("Optionally specify applicable jobs of this executor", "可选地指定此执行器适用的作业");
+		m.put("Optionally specify applicable users who pushed the change", "可选地指定推送更改的适用用户");
 		m.put("Optionally specify arguments to run above image", "可选择指定运行上述镜像的参数");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
 			"可选择指定从依赖项拷贝到 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的制品。只能拷贝已发布的制品（通过制品发布步骤）。留空则不拷贝任何制品");
@@ -3500,8 +3498,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 要发布的文件。使用 * 或 ? 进行模式匹配");
 		m.put("Specify files to create md5 checksum from. Multiple files should be separated by space. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> patterns accepted. Non-absolute file is considered to be relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
 			"指定要创建 md5 校验和的文件。多个文件应以空格分隔。接受 <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> 模式。非绝对路径文件被视为相对于 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a>");
-		m.put("Specify files under above directory to be published. Use * or ? for pattern match", 
-			"指定要发布的上述目录下的文件。使用 * 或 ? 进行模式匹配");
+		m.put("Specify files under above directory to be published", "指定要发布的目录下的文件");
 		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> <code>index.html</code> should be included in these files to be served as site start page", 
 			"指定要发布的上述目录下的文件。使用 * 或 ? 进行模式匹配。<b>注意：</b>这些文件中应包含 <code>index.html</code> 作为站点起始页");
 		m.put("Specify group to import from. Leave empty to import from projects under current account", 
@@ -3640,7 +3637,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify timeout in seconds when communicating with mail server", "指定与邮件服务器通信时的超时时间（秒）");
 		m.put("Specify timeout in seconds. It counts from the time when job is submitted", "指定超时时间（秒）。从任务提交时开始计算");
 		m.put("Specify title of the issue", "指定工单的标题");
-		m.put("Specify url for your brand", "指定您品牌的 URL");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "指定 YouTrack API 的 URL。例如 <tt>http://localhost:8080/api</tt>");
 		m.put("Specify user name of above machine for SSH authentication", "指定上述机器的用户名用于 SSH 身份验证");
 		m.put("Specify user name of specified registry", "指定指定注册表的用户名");
@@ -3691,7 +3687,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("State Spec", "状态规范");
 		m.put("State Transitions", "状态转换");
 		m.put("State Trends", "状态趋势");
-		m.put("State of other issue is transited to", "其他工单的状态转换为");
+		m.put("State of an issue is transited", "工单的状态已转换");
 		m.put("States", "状态");
 		m.put("Statistics", "统计");
 		m.put("Stats", "统计");
@@ -3895,8 +3891,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This key has already been used by another project", "此键已被其他项目使用");
 		m.put("This key is associated with {0}, however it is NOT a verified email address of this user", 
 			"此密钥与 {0} 相关联，然而它不是此用户的已验证电子邮件地址");
-		m.put("This key is used to determine if there is a cache hit in project hierarchy (search from current project to root project in order, same for load keys below). A cache is considered hit if its key is exactly the same as the key defined here", 
-			"此密钥用于确定项目层次结构中是否存在缓存命中（按顺序从当前项目搜索到根项目，以下加载密钥同理）。如果缓存的密钥与此处定义的密钥完全相同，则视为缓存命中");
+		m.put("This key is used to determine if there is a cache hit in project hierarchy (search from current project to root project in order, same for load keys below). A cache is considered hit if its key is exactly the same as the key defined here.<br><b>NOTE:</b> In case your project has lock files(package.json, pom.xml, etc.) able to represent cache state, this key should be defined as &lt;cache name&gt;-@file:checksum.txt@, where checksum.txt is generated from these lock files with the <b>generate checksum step</b> defined before this step", 
+			"此密钥用于确定项目层次结构中是否存在缓存命中（按顺序从当前项目搜索到根项目，下面的加载密钥也是如此）。如果其密钥与此处定义的密钥完全相同，则认为缓存命中。<br><b>注意：</b>如果您的项目有能够表示缓存状态的锁定文件（package.json、pom.xml 等），则此密钥应定义为 &lt;cache name&gt;-@file:checksum.txt@，其中 checksum.txt 是从这些锁定文件生成的，并在此步骤之前定义了<b>生成校验和步骤</b>");
 		m.put("This key is used to download and upload cache in project hierarchy (search from current project to root project in order)", 
 			"此密钥用于在项目层次结构中下载和上传缓存（按顺序从当前项目搜索到根项目）");
 		m.put("This key or one of its sub key is already added", "此密钥或其子密钥已添加");
@@ -3936,6 +3932,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This step can only be executed by a docker aware executor", "此步骤只能由支持 Docker 的执行器执行");
 		m.put("This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
 			"此步骤只能由支持 Docker 的执行器执行。它在 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a> 下运行");
+		m.put("This step copies files from job workspace to build artifacts directory, so that they can be accessed after job is completed", 
+			"此步骤将文件从作业工作区复制到构建工件目录，以便在作业完成后可以访问它们");
 		m.put("This step publishes specified files to be served as project web site. Project web site can be accessed publicly via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>", 
 			"此步骤发布指定文件作为项目网站。项目网站可以通过 <code>http://&lt;onedev 基础 url&gt;/path/to/project/~site</code> 公开访问");
 		m.put("This step pulls specified refs from remote", "此步骤从远程拉取指定的引用");
@@ -4107,8 +4105,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Undefined Field Value Resolution", "未定义字段值解析");
 		m.put("Undefined State Resolution", "未定义状态解析");
 		m.put("Undefined custom field: ", "未定义自定义字段：");
-		m.put("Under which condition this step should run. <b>Successful</b> means all non-optional steps running before this step are successful", 
-			"在什么条件下应运行此步骤。<b>成功</b>表示在此步骤之前运行的所有非可选步骤都已成功");
+		m.put("Under which condition this step should run. <b>SUCCESSFUL</b> means all non-optional steps running before this step are successful", 
+			"此步骤应在何种条件下运行。<b>SUCCESSFUL</b> 表示在此步骤之前运行的所有非可选步骤均已成功");
 		m.put("Unexpected setting: {0}", "未知设置：{0}");
 		m.put("Unexpected ssh signature hash algorithm: ", "意外的 ssh 签名哈希算法：");
 		m.put("Unexpected ssh signature namespace: ", "意外的 ssh 签名命名空间：");
@@ -4356,6 +4354,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Workflow reconciliation completed", "工单工作流一致性检查完成");
 		m.put("Working Directory", "工作目录");
 		m.put("Write", "写入");
+		m.put("YAML", "YAML");
 		m.put("Yes", "是");
 		m.put("You are not member of discord server", "您不是 discord 服务器的成员");
 		m.put("You are rebasing source branch on top of target branch", "您正在将源分支 rebase 到目标分支之上");
@@ -4560,7 +4559,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("severity:MEDIUM", "中度");
 		m.put("skipped {0} lines", "跳过 {0} 行");
 		m.put("space", "空格");
-		m.put("state of other issue is transited to \"{0}\"", "其他工单的状态转换到 \"{0}\"");
+		m.put("state of an issue is transited", "工单的状态已转换");
 		m.put("step template", "步骤模板");
 		m.put("submit", "提交");
 		m.put("tag the job is running against", "任务运行的标签");

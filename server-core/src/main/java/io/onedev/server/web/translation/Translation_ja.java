@@ -141,6 +141,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Access token regenerated, make sure to update the token at agent side", "アクセストークンが再生成されました。エージェント側でトークンを更新することを確認してください");
 		m.put("Account Email", "アカウントメール");
 		m.put("Account Name", "アカウント名");
+		m.put("Account is disabled", "アカウントが無効になっています");
 		m.put("Account set up successfully", "アカウントが正常に設定されました");
 		m.put("Active Directory", "Active Directory");
 		m.put("Active Since", "アクティブ開始日");
@@ -329,7 +330,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("At least one repository should be selected", "少なくとも1つのリポジトリを選択する必要があります");
 		m.put("At least one role is required", "少なくとも1つの役割が必要です");
 		m.put("At least one role must be selected", "少なくとも1つの役割を選択する必要があります");
-		m.put("At least one state needs to be specified", "少なくとも1つの状態を指定する必要があります");
 		m.put("At least one state should be specified", "少なくとも1つの状態を指定する必要があります");
 		m.put("At least one tab should be added", "少なくとも1つのタブを追加する必要があります");
 		m.put("At least one user search base should be specified", "少なくとも1つのユーザー検索ベースを指定する必要があります");
@@ -539,7 +539,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Can not disable root account", "ルートアカウントを無効化できません");
 		m.put("Can not disable yourself", "自分自身を無効化できません");
 		m.put("Can not find issue board: ", "課題ボードが見つかりません:");
-		m.put("Can not link to self", "自己リンクはできません");
 		m.put("Can not move project \"{0}\" to be under itself or its descendants", "プロジェクト\"{0}\"を自身またはその子孫の下に移動することはできません");
 		m.put("Can not perform this operation now", "現在この操作を実行することはできません");
 		m.put("Can not reset password for service account or disabled user", "サービスアカウントまたは無効なユーザーのパスワードをリセットできません");
@@ -627,6 +626,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Choose group...", "グループを選択...");
 		m.put("Choose groups...", "グループを選択...");
 		m.put("Choose issue...", "課題を選択...");
+		m.put("Choose issues...", "課題を選択...");
 		m.put("Choose iteration...", "イテレーションを選択...");
 		m.put("Choose iterations...", "イテレーションを選択...");
 		m.put("Choose job...", "ジョブを選択...");
@@ -765,6 +765,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Confirm password here", "ここでパスワードを確認");
 		m.put("Confirm your action", "アクションを確認");
 		m.put("Connect New Agent", "新しいエージェントを接続");
+		m.put("Connect with your SSO account", "SSOアカウントで接続");
 		m.put("Contact Email", "連絡先メール");
 		m.put("Contact Name", "連絡先名");
 		m.put("Container Image", "コンテナイメージ");
@@ -810,6 +811,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Create Merge Commit If Necessary", "必要に応じてマージコミットを作成");
 		m.put("Create New", "新規作成");
 		m.put("Create New File", "新しいファイルを作成");
+		m.put("Create New User", "新しいユーザーを作成");
 		m.put("Create Project", "プロジェクトを作成");
 		m.put("Create Pull Request", "プルリクエストを作成");
 		m.put("Create Pull Request for This Change", "この変更のプルリクエストを作成");
@@ -912,6 +914,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Delete Build", "ビルドを削除");
 		m.put("Delete Comment", "コメントを削除");
 		m.put("Delete Pull Request", "プルリクエストを削除");
+		m.put("Delete SSO account here to reconnect corresponding SSO subject upon next login. Note that SSO subject with verified email will be connected to user with same verified email automatically", 
+			"次回ログイン時に対応するSSOサブジェクトを再接続するためにここでSSOアカウントを削除します。確認済みのメールを持つSSOサブジェクトは、同じ確認済みメールを持つユーザーに自動的に接続されます");
 		m.put("Delete Selected", "選択したものを削除");
 		m.put("Delete Selected Builds", "選択したビルドを削除");
 		m.put("Delete Selected Comments", "選択したコメントを削除");
@@ -997,6 +1001,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Do you really want to cancel this build?", "このビルドを本当にキャンセルしますか？");
 		m.put("Do you really want to change target branch to {0}?", "ターゲットブランチを{0}に変更してもよろしいですか？");
 		m.put("Do you really want to delete \"{0}\"?", "\"{0}\"を本当に削除しますか？");
+		m.put("Do you really want to delete SSO provider \"{0}\"?", "本当にSSOプロバイダー\"{0}\"を削除しますか？");
 		m.put("Do you really want to delete board \"{0}\"?", "ボード\"{0}\"を本当に削除しますか？");
 		m.put("Do you really want to delete build #{0}?", "ビルド#{0}を本当に削除しますか？");
 		m.put("Do you really want to delete group \"{0}\"?", "グループ\"{0}\"を本当に削除しますか？");
@@ -1008,6 +1013,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Do you really want to delete tag {0}?", "タグ{0}を本当に削除しますか？");
 		m.put("Do you really want to delete this GPG key?", "このGPGキーを本当に削除しますか？");
 		m.put("Do you really want to delete this SSH key?", "このSSHキーを本当に削除しますか？");
+		m.put("Do you really want to delete this SSO account?", "本当にこのSSOアカウントを削除しますか？");
 		m.put("Do you really want to delete this access token?", "このアクセストークンを本当に削除しますか？");
 		m.put("Do you really want to delete this board?", "このボードを本当に削除しますか？");
 		m.put("Do you really want to delete this build?", "このビルドを本当に削除しますか？");
@@ -1078,7 +1084,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Edit Job Secret", "ジョブシークレットを編集");
 		m.put("Edit My Avatar", "自分のアバターを編集");
 		m.put("Edit Rule", "ルールを編集");
-		m.put("Edit Source", "ソースを編集");
 		m.put("Edit Timesheet", "タイムシートを編集");
 		m.put("Edit dashboard", "ダッシュボードを編集");
 		m.put("Edit issue title", "課題タイトルを編集");
@@ -1108,6 +1113,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Email Verification", "メール認証");
 		m.put("Email Verification Template", "メール認証テンプレート");
 		m.put("Email address", "メールアドレス");
+		m.put("Email address \"{0}\" already used by another account", "メールアドレス\"{0}\"は他のアカウントで既に使用されています");
+		m.put("Email address \"{0}\" used by account \"{1}\"", "メールアドレス\"{0}\"はアカウント\"{1}\"で使用されています");
+		m.put("Email address \"{0}\" used by disabled account \"{1}\"", "メールアドレス\"{0}\"は無効なアカウント\"{1}\"で使用されています");
 		m.put("Email address already in use: {0}", "既に使用されているメールアドレス：{0}");
 		m.put("Email address already invited: {0}", "既に招待されているメールアドレス：{0}");
 		m.put("Email address already used by another user", "別のユーザーによって既に使用されているメールアドレス");
@@ -1168,6 +1176,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Environment variable <code>serverUrl</code> in above command is taken from OneDev server url specified in <i>Administration / System Setting</i>. Change it if necessary", 
 			"上記のコマンド内の環境変数<code>serverUrl</code>は、<i>管理 / システム設定</i>で指定されたOneDevサーバーURLから取得されます。必要に応じて変更してください");
 		m.put("Equal", "等しい");
+		m.put("Error authenticating user", "ユーザー認証エラー");
 		m.put("Error calculating commits: check log for details", "コミットの計算中にエラーが発生しました: 詳細はログを確認してください");
 		m.put("Error cherry-picking to {0}: Merge conflicts detected", "{0}へのチェリーピック中にエラーが発生しました: マージコンフリクトが検出されました");
 		m.put("Error cherry-picking to {0}: {1}", "{0}へのチェリーピック中にエラーが発生しました: {1}");
@@ -1229,8 +1238,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Export XLSX", "XLSXをエクスポート");
 		m.put("Export as OCI layout", "OCIレイアウトとしてエクスポート");
 		m.put("Extend Trial Subscription", "試用サブスクリプションを延長する");
+		m.put("External Authentication", "外部認証");
 		m.put("External Issue Transformers", "外部問題トランスフォーマー");
 		m.put("External Participants", "外部参加者");
+		m.put("External Password Authenticator", "外部パスワード認証");
 		m.put("External System", "外部システム");
 		m.put("External authenticator settings saved", "外部認証者設定が保存されました");
 		m.put("External participants do not have accounts and involve in the issue via email", "外部参加者はアカウントを持たず、メールを介して問題に関与します");
@@ -1531,6 +1542,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Image URL should be specified", "画像URLを指定する必要があります");
 		m.put("Imap Ssl Setting", "IMAP SSL設定");
 		m.put("Imap With Ssl", "IMAP SSL使用");
+		m.put("Impersonate", "偽装");
 		m.put("Implicit SSL", "暗黙的SSL");
 		m.put("Import", "インポート");
 		m.put("Import All Projects", "すべてのプロジェクトをインポート");
@@ -1683,7 +1695,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Issue Votes", "課題投票");
 		m.put("Issue administrative permission inside a project, including batch operations over multiple issues", 
 			"プロジェクト内での課題管理権限、複数の課題に対する一括操作を含む");
-		m.put("Issue already linked", "課題はすでにリンクされています");
 		m.put("Issue count", "課題数");
 		m.put("Issue in state", "状態にある課題");
 		m.put("Issue list", "課題一覧");
@@ -1829,11 +1840,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Line: ", "行:");
 		m.put("Lines", "行数");
 		m.put("Link", "リンク");
+		m.put("Link Existing User", "既存ユーザーをリンク");
 		m.put("Link Spec", "リンク仕様");
 		m.put("Link Spec Opposite", "リンク仕様の反対");
 		m.put("Link Text", "リンクテキスト");
 		m.put("Link URL", "リンクURL");
 		m.put("Link URL should be specified", "リンクURLを指定する必要があります");
+		m.put("Link User Bean", "ユーザービーンをリンク");
 		m.put("Linkable Issues", "リンク可能な課題");
 		m.put("Linkable Issues On the Other Side", "反対側のリンク可能な課題");
 		m.put("Links", "リンク");
@@ -1980,6 +1993,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("My GPG Keys", "私のGPGキー");
 		m.put("My Profile", "私のプロフィール");
 		m.put("My SSH Keys", "私のSSHキー");
+		m.put("My SSO Accounts", "私のSSOアカウント");
 		m.put("Mypy Report", "Mypyレポート");
 		m.put("N/A", "N/A");
 		m.put("NPM(s)", "NPM(s)");
@@ -2084,6 +2098,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No diffs to navigate", "ナビゲートする差分なし");
 		m.put("No directories to skip", "スキップするディレクトリなし");
 		m.put("No executors defined. Jobs will use auto-discovered executors instead", "エグゼキュータが定義されていません。ジョブは自動検出されたエグゼキュータを使用します");
+		m.put("No external password authenticator", "外部パスワード認証がありません");
+		m.put("No external password authenticator to authenticate user \"{0}\"", "ユーザー\"{0}\"を認証する外部パスワード認証がありません");
 		m.put("No fields to prompt", "プロンプトするフィールドなし");
 		m.put("No fields to remove", "削除するフィールドなし");
 		m.put("No file attachments", "ファイル添付なし");
@@ -2218,6 +2234,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Only projects manageable by access token owner can be authorized", "アクセストークン所有者が管理可能なプロジェクトのみが認可されます");
 		m.put("Only system level audit events are displayed here. To view audit events for a specific project, please visit the project audit log page", 
 			"ここにはシステムレベルの監査イベントのみが表示されます。特定のプロジェクトの監査イベントを表示するには、プロジェクト監査ログページをご覧ください");
+		m.put("Only users able to authenticate via password can be linked", "パスワードで認証できるユーザーのみリンク可能");
 		m.put("Open", "オープン");
 		m.put("Open new pull request", "新しいプルリクエストを開く");
 		m.put("Open terminal of current running step", "現在実行中のステップのターミナルを開く");
@@ -2316,6 +2333,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). Leave empty to all types", 
 			"オプションで、コミットメッセージフッターのチェックに適用されるコミットタイプを指定してください（ENTERキーを押して値を追加）。すべてのタイプを適用する場合は空のままにしてください。");
 		m.put("Optionally specify applicable jobs of this executor", "このエグゼキュータに適用可能なジョブを任意で指定してください");
+		m.put("Optionally specify applicable users who pushed the change", "変更をプッシュした適用可能なユーザーを任意で指定");
 		m.put("Optionally specify arguments to run above image", "オプションで、上記のイメージを実行するための引数を指定してください。");
 		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
 			"オプションで、依存関係から<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に取得するアーティファクトを指定してください。公開されたアーティファクト（アーティファクト公開ステップを介して）だけが取得可能です。アーティファクトを取得しない場合は空のままにしてください。");
@@ -2538,6 +2556,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Passcode", "パスコード");
 		m.put("Passed", "合格");
 		m.put("Password", "パスワード");
+		m.put("Password Authenticator", "パスワード認証");
 		m.put("Password Edit Bean", "パスワード編集Bean");
 		m.put("Password Must Contain Digit", "パスワードには数字を含める必要があります");
 		m.put("Password Must Contain Lowercase", "パスワードには小文字を含める必要があります");
@@ -2553,6 +2572,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Password has been changed", "パスワードが変更されました");
 		m.put("Password has been removed", "パスワードが削除されました");
 		m.put("Password has been set", "パスワードが設定されました");
+		m.put("Password of the user", "ユーザーのパスワード");
 		m.put("Password or Access Token for Remote Repository", "リモートリポジトリのパスワードまたはアクセストークン");
 		m.put("Password reset request has been sent", "パスワードリセットリクエストが送信されました");
 		m.put("Password reset url is invalid or obsolete", "パスワードリセットURLが無効または古くなっています");
@@ -3055,6 +3075,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("SSH key deleted", "SSHキーが削除されました");
 		m.put("SSH settings have been saved and SSH server restarted", "SSH設定が保存され、SSHサーバーが再起動されました");
 		m.put("SSL Setting", "SSL設定");
+		m.put("SSO Accounts", "SSOアカウント");
+		m.put("SSO Providers", "SSOプロバイダー");
+		m.put("SSO account deleted", "SSOアカウントが削除されました");
+		m.put("SSO provider \"{0}\" deleted", "SSOプロバイダー\"{0}\"が削除されました");
+		m.put("SSO provider created", "SSOプロバイダーが作成されました");
+		m.put("SSO provider updated", "SSOプロバイダーが更新されました");
 		m.put("SUCCESSFUL", "成功");
 		m.put("Save", "保存");
 		m.put("Save Query", "クエリを保存");
@@ -3140,6 +3166,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Service Desk Settings", "サービスデスク設定");
 		m.put("Service Locator", "サービスロケーター");
 		m.put("Service Locators", "サービスロケーター");
+		m.put("Service account not allowed to login", "サービスアカウントはログインできません");
 		m.put("Service desk setting", "サービスデスク設定");
 		m.put("Service desk settings have been saved", "サービスデスク設定が保存されました");
 		m.put("Services", "サービス");
@@ -3241,6 +3268,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Signing Key ID", "署名キーID");
 		m.put("Similar Issues", "類似の課題");
 		m.put("Single Sign On", "シングルサインオン");
+		m.put("Single Sign-On", "シングルサインオン");
 		m.put("Single sign on via discord.com", "discord.comを介したシングルサインオン");
 		m.put("Single sign on via twitch.tv", "twitch.tvを介したシングルサインオン");
 		m.put("Site", "サイト");
@@ -3454,8 +3482,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する公開するファイルを指定してください。パターンマッチには*や?を使用してください。");
 		m.put("Specify files to create md5 checksum from. Multiple files should be separated by space. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> patterns accepted. Non-absolute file is considered to be relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
 			"md5チェックサムを作成するファイルを指定してください。複数のファイルはスペースで区切ってください。<a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a>パターンが使用可能です。絶対パスでないファイルは<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>に対する相対パスとみなされます。");
-		m.put("Specify files under above directory to be published. Use * or ? for pattern match", 
-			"上記のディレクトリ内で公開するファイルを指定してください。パターンマッチには*や?を使用してください。");
+		m.put("Specify files under above directory to be published", "上記のディレクトリ内で公開するファイルを指定");
 		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> <code>index.html</code> should be included in these files to be served as site start page", 
 			"上記のディレクトリ内で公開するファイルを指定してください。パターンマッチには*や?を使用してください。<b>注意:</b> サイトの開始ページとして提供される<code>index.html</code>をこれらのファイルに含める必要があります。");
 		m.put("Specify group to import from. Leave empty to import from projects under current account", 
@@ -3594,7 +3621,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify timeout in seconds when communicating with mail server", "メールサーバーと通信する際のタイムアウトを秒単位で指定してください。");
 		m.put("Specify timeout in seconds. It counts from the time when job is submitted", "ジョブが送信されてからのタイムアウトを秒単位で指定してください。");
 		m.put("Specify title of the issue", "問題のタイトルを指定してください。");
-		m.put("Specify url for your brand", "ブランドのURLを指定してください。");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "YouTrack APIのURLを指定してください。例: <tt>http://localhost:8080/api</tt>");
 		m.put("Specify user name of above machine for SSH authentication", "SSH認証のための上記マシンのユーザー名を指定してください。");
 		m.put("Specify user name of specified registry", "指定されたレジストリのユーザー名を指定してください。");
@@ -3630,6 +3656,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Ssh Setting", "Ssh設定");
 		m.put("Ssl Setting", "Ssl設定");
 		m.put("Sso Connector", "Ssoコネクタ");
+		m.put("Sso Provider Bean", "Ssoプロバイダービーン");
 		m.put("Start At", "開始時刻");
 		m.put("Start Date", "開始日");
 		m.put("Start Page", "開始ページ");
@@ -3644,7 +3671,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("State Spec", "状態仕様");
 		m.put("State Transitions", "状態の遷移");
 		m.put("State Trends", "状態の傾向");
-		m.put("State of other issue is transited to", "他の問題の状態が遷移する先");
+		m.put("State of an issue is transited", "課題の状態が遷移される");
 		m.put("States", "状態");
 		m.put("Statistics", "統計");
 		m.put("Stats", "統計情報");
@@ -3848,8 +3875,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("This key has already been used by another project", "このキーは別のプロジェクトで既に使用されています");
 		m.put("This key is associated with {0}, however it is NOT a verified email address of this user", 
 			"このキーは{0}に関連付けられていますが、このユーザーの確認済みメールアドレスではありません");
-		m.put("This key is used to determine if there is a cache hit in project hierarchy (search from current project to root project in order, same for load keys below). A cache is considered hit if its key is exactly the same as the key defined here", 
-			"このキーはプロジェクト階層内でキャッシュヒットがあるかどうかを判断するために使用されます（現在のプロジェクトからルートプロジェクトまで順に検索し、以下のロードキーも同様です）。キャッシュがヒットと見なされるのは、ここで定義されたキーと完全に一致する場合です");
+		m.put("This key is used to determine if there is a cache hit in project hierarchy (search from current project to root project in order, same for load keys below). A cache is considered hit if its key is exactly the same as the key defined here.<br><b>NOTE:</b> In case your project has lock files(package.json, pom.xml, etc.) able to represent cache state, this key should be defined as &lt;cache name&gt;-@file:checksum.txt@, where checksum.txt is generated from these lock files with the <b>generate checksum step</b> defined before this step", 
+			"このキーはプロジェクト階層内でキャッシュヒットがあるかどうかを判断するために使用されます（現在のプロジェクトからルートプロジェクトまで順に検索し、以下のロードキーも同様です）。キャッシュは、ここで定義されたキーと完全に一致する場合にヒットと見なされます。<br><b>注意:</b> プロジェクトにキャッシュ状態を表現できるロックファイル（package.json、pom.xmlなど）がある場合、このキーは&lt;cache name&gt;-@file:checksum.txt@として定義されるべきです。ここで、checksum.txtはこれらのロックファイルから<b>チェックサム生成ステップ</b>で生成され、このステップの前に定義されます");
 		m.put("This key is used to download and upload cache in project hierarchy (search from current project to root project in order)", 
 			"このキーはプロジェクト階層内でキャッシュをダウンロードおよびアップロードするために使用されます（現在のプロジェクトからルートプロジェクトまで順に検索）");
 		m.put("This key or one of its sub key is already added", "このキーまたはそのサブキーのいずれかが既に追加されています");
@@ -3889,6 +3916,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("This step can only be executed by a docker aware executor", "このステップはDocker対応エグゼキュータによってのみ実行可能です");
 		m.put("This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
 			"このステップはDocker対応エグゼキュータによってのみ実行可能です。<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>で実行されます");
+		m.put("This step copies files from job workspace to build artifacts directory, so that they can be accessed after job is completed", 
+			"このステップは、ジョブのワークスペースからビルド成果物ディレクトリにファイルをコピーし、ジョブが完了した後にアクセスできるようにします");
 		m.put("This step publishes specified files to be served as project web site. Project web site can be accessed publicly via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>", 
 			"このステップは指定されたファイルをプロジェクトウェブサイトとして公開します。プロジェクトウェブサイトは<code>http://&lt;onedev base url&gt;/path/to/project/~site</code>で公開アクセス可能です");
 		m.put("This step pulls specified refs from remote", "このステップでは、指定されたリファレンスをリモートからプルします");
@@ -4039,6 +4068,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Unable to create protected tag", "保護されたタグを作成できません");
 		m.put("Unable to diff as some line is too long.", "一部の行が長すぎるため、差分を表示できません");
 		m.put("Unable to diff as the file is too large.", "ファイルが大きすぎるため、差分を表示できません");
+		m.put("Unable to find SSO provider: ", "SSOプロバイダーが見つかりません:");
 		m.put("Unable to find agent {0}", "エージェント{0}が見つかりません");
 		m.put("Unable to find build #{0} in project {1}", "プロジェクト{1}内でビルド#{0}が見つかりません");
 		m.put("Unable to find commit to import build spec (import project: {0}, import revision: {1})", 
@@ -4059,8 +4089,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Undefined Field Value Resolution", "未定義フィールド値解決");
 		m.put("Undefined State Resolution", "未定義の状態解決");
 		m.put("Undefined custom field: ", "未定義のカスタムフィールド:");
-		m.put("Under which condition this step should run. <b>Successful</b> means all non-optional steps running before this step are successful", 
-			"このステップが実行される条件。<b>成功</b>は、このステップの前に実行されるすべての非オプションステップが成功していることを意味します");
+		m.put("Under which condition this step should run. <b>SUCCESSFUL</b> means all non-optional steps running before this step are successful", 
+			"このステップが実行される条件。<b>SUCCESSFUL</b>は、このステップの前に実行されたすべての非オプションステップが成功したことを意味します");
 		m.put("Unexpected setting: {0}", "予期しない設定: {0}");
 		m.put("Unexpected ssh signature hash algorithm: ", "予期しないssh署名ハッシュアルゴリズム:");
 		m.put("Unexpected ssh signature namespace: ", "予期しないssh署名ネームスペース:");
@@ -4226,6 +4256,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("When determine if the user is author/committer of a git commit, all emails listed here will be checked", 
 			"ユーザーがGitコミットの著者/コミッターであるかを判断する際、ここにリストされたすべてのメールが確認されます");
 		m.put("When evaluating this template, below variables will be available:", "このテンプレートを評価する際、以下の変数が利用可能です:");
+		m.put("When login via OneDev's built-in form, submitted user credentials can be checked against authenticator defined here, besides the internal database", 
+			"OneDevの組み込みフォームでログインする際、ここで定義された認証者に対して送信されたユーザー資格情報を内部データベースの他にチェックできます");
 		m.put("When target branch of a pull request has new commits, merge commit of the pull request will be recalculated, and this option tells whether or not to accept pull request builds ran on previous merged commit. If enabled, you will need to re-run required builds on the new merge commit. This setting takes effect only when required builds are specified", 
 			"プルリクエストのターゲットブランチに新しいコミットがある場合、プルリクエストのマージコミットが再計算されます。このオプションは、以前のマージコミットで実行されたプルリクエストビルドを受け入れるかどうかを指定します。有効にすると、新しいマージコミットで必要なビルドを再実行する必要があります。この設定は必要なビルドが指定されている場合にのみ有効です");
 		m.put("When this work starts", "この作業が開始されるとき");
@@ -4306,6 +4338,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Workflow reconciliation completed", "ワークフローの調整が完了しました");
 		m.put("Working Directory", "作業ディレクトリ");
 		m.put("Write", "書き込み");
+		m.put("YAML", "YAML");
 		m.put("Yes", "はい");
 		m.put("You are not member of discord server", "あなたはDiscordサーバーのメンバーではありません");
 		m.put("You are rebasing source branch on top of target branch", "ソースブランチをターゲットブランチの上にリベースしています");
@@ -4510,7 +4543,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("severity:MEDIUM", "中");
 		m.put("skipped {0} lines", "{0} 行をスキップしました");
 		m.put("space", "スペース");
-		m.put("state of other issue is transited to \"{0}\"", "他の課題の状態が \"{0}\" に移行されました");
+		m.put("state of an issue is transited", "課題の状態が遷移される");
 		m.put("step template", "ステップテンプレート");
 		m.put("submit", "送信");
 		m.put("tag the job is running against", "ジョブが実行されているタグ");
@@ -4572,40 +4605,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Account is disabled", "アカウントが無効になっています");
-		m.put("Connect with your SSO account", "SSOアカウントで接続");
-		m.put("Create New User", "新しいユーザーを作成");
-		m.put("Delete SSO account here to reconnect corresponding SSO subject upon next login. Note that SSO subject with verified email will be connected to user with same verified email automatically", 
-			"次回ログイン時に対応するSSOサブジェクトを再接続するためにここでSSOアカウントを削除します。確認済みのメールを持つSSOサブジェクトは、同じ確認済みメールを持つユーザーに自動的に接続されます");
-		m.put("Do you really want to delete SSO provider \"{0}\"?", "本当にSSOプロバイダー\"{0}\"を削除しますか？");
-		m.put("Do you really want to delete this SSO account?", "本当にこのSSOアカウントを削除しますか？");
-		m.put("Email address \"{0}\" already used by another account", "メールアドレス\"{0}\"は他のアカウントで既に使用されています");
-		m.put("Email address \"{0}\" used by account \"{1}\"", "メールアドレス\"{0}\"はアカウント\"{1}\"で使用されています");
-		m.put("Email address \"{0}\" used by disabled account \"{1}\"", "メールアドレス\"{0}\"は無効なアカウント\"{1}\"で使用されています");
-		m.put("Error authenticating user", "ユーザー認証エラー");
-		m.put("External Authentication", "外部認証");
-		m.put("External Password Authenticator", "外部パスワード認証");
-		m.put("Impersonate", "偽装");
-		m.put("Link Existing User", "既存ユーザーをリンク");
-		m.put("Link User Bean", "ユーザービーンをリンク");
-		m.put("My SSO Accounts", "私のSSOアカウント");
-		m.put("No external password authenticator", "外部パスワード認証がありません");
-		m.put("No external password authenticator to authenticate user \"{0}\"", "ユーザー\"{0}\"を認証する外部パスワード認証がありません");
-		m.put("Only users able to authenticate via password can be linked", "パスワードで認証できるユーザーのみリンク可能");
-		m.put("Password Authenticator", "パスワード認証");
-		m.put("Password of the user", "ユーザーのパスワード");
-		m.put("SSO Accounts", "SSOアカウント");
-		m.put("SSO Providers", "SSOプロバイダー");
-		m.put("SSO account deleted", "SSOアカウントが削除されました");
-		m.put("SSO provider \"{0}\" deleted", "SSOプロバイダー\"{0}\"が削除されました");
-		m.put("SSO provider created", "SSOプロバイダーが作成されました");
-		m.put("SSO provider updated", "SSOプロバイダーが更新されました");
-		m.put("Service account not allowed to login", "サービスアカウントはログインできません");
-		m.put("Single Sign-On", "シングルサインオン");
-		m.put("Sso Provider Bean", "Ssoプロバイダービーン");
-		m.put("Unable to find SSO provider: ", "SSOプロバイダーが見つかりません:");
-		m.put("When login via OneDev's built-in form, submitted user credentials can be checked against authenticator defined here, besides the internal database", 
-			"OneDevの組み込みフォームでログインする際、ここで定義された認証者に対して送信されたユーザー資格情報を内部データベースの他にチェックできます");
 	}
 		
 	@Override
