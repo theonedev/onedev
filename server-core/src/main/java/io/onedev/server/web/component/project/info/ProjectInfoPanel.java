@@ -43,8 +43,8 @@ import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ParsedEmailAddress;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.forkoption.ForkOptionPanel;
@@ -166,7 +166,7 @@ public abstract class ProjectInfoPanel extends Panel {
         }
 		
 		if (getProject().getDescription() != null)
-			add(new MarkdownViewer("description", Model.of(getProject().getDescription()), null));
+			add(new MultilineLabel("description", Model.of(getProject().getDescription())));
 		else 
 			add(new WebMarkupContainer("description").setVisible(false));
 				

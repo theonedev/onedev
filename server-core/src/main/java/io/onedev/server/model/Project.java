@@ -73,7 +73,7 @@ import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Markdown;
+import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.ProjectKey;
 import io.onedev.server.annotation.ProjectName;
 import io.onedev.server.annotation.SubscriptionRequired;
@@ -495,7 +495,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 
 	@Editable(order=200)
-	@Markdown
+	@Multiline
 	public String getDescription() {
 		return description;
 	}
