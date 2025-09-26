@@ -46,7 +46,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.buildspec.BuildSpec;
@@ -73,7 +72,6 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.entityreference.PullRequestReference;
-import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.exception.InvalidIssueFieldsException;
 import io.onedev.server.exception.InvalidReferenceException;
 import io.onedev.server.exception.IssueLinkValidationException;
@@ -2160,12 +2158,7 @@ public class McpHelperResource {
                 return Response.status(NOT_ACCEPTABLE).entity(Joiner.on("\n").join(validationErrors) + schemaNotice).build();
             }
         } catch (Exception e) {
-            var explicitException = ExceptionUtils.find(e, ExplicitException.class);
-            if (explicitException != null) {
-                return Response.status(NOT_ACCEPTABLE).entity(explicitException.getMessage() + schemaNotice).build();
-            } else {
-                return Response.status(NOT_ACCEPTABLE).entity(Throwables.getStackTraceAsString(e) + schemaNotice).build();
-            }
+            return Response.status(NOT_ACCEPTABLE).entity(Throwables.getStackTraceAsString(e) + schemaNotice).build();
 		} finally {
 			Project.pop();
 		}

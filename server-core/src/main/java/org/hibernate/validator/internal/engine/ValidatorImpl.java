@@ -8,6 +8,7 @@ package org.hibernate.validator.internal.engine;
 
 import static org.hibernate.validator.internal.util.logging.Messages.MESSAGES;
 
+import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -69,7 +70,9 @@ import org.hibernate.validator.internal.metadata.core.MetaConstraint;
 import org.hibernate.validator.internal.metadata.facets.Cascadable;
 import org.hibernate.validator.internal.metadata.facets.Validatable;
 import org.hibernate.validator.internal.metadata.location.AbstractPropertyConstraintLocation;
+import org.hibernate.validator.internal.metadata.location.ConstraintLocation;
 import org.hibernate.validator.internal.metadata.location.ConstraintLocation.ConstraintLocationKind;
+import org.hibernate.validator.internal.metadata.location.GetterConstraintLocation;
 import org.hibernate.validator.internal.metadata.location.TypeArgumentConstraintLocation;
 import org.hibernate.validator.internal.util.Contracts;
 import org.hibernate.validator.internal.util.ExecutableHelper;
@@ -1311,6 +1314,23 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 		return ValueContexts.getLocalExecutionContextForValueValidation( validatorScopedContext.getParameterNameProvider(), beanMetaData, propertyPath );
 	}
 
+	/**
+	 * Check if a constraint comes from a superclass method that has been overridden
+	 * in the current bean class. If so, the constraint should be ignored.
+	 */
+	private boolean isConstraintFromOverriddenMethod(ConstraintLocation location, Class<?> beanClass, Class<? extends Annotation> constraintAnnotationType) {
+		if (location instanceof GetterConstraintLocation) {
+			GetterConstraintLocation getterLocation = (GetterConstraintLocation) location;
+			String propertyName = getterLocation.getPropertyName();
+			Method getter = BeanUtils.findGetter(beanClass, propertyName);
+			if (getter != null) {
+				return getter.getAnnotation(constraintAnnotationType) == null;
+			}
+		}
+		
+		return false;
+	}
+
 	private boolean isValidationRequired(BaseBeanValidationContext<?> validationContext,
 			ValueContext<?, ?> valueContext,
 			MetaConstraint<?> metaConstraint) {
@@ -1319,6 +1339,10 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 			location = ((TypeArgumentConstraintLocation) location).getOuterDelegate();
 		}		
 		if (location instanceof AbstractPropertyConstraintLocation && valueContext.getCurrentBean() != null) {
+			// Check if this constraint comes from a superclass method that has been overridden
+			if (isConstraintFromOverriddenMethod(location, valueContext.getCurrentBean().getClass(), metaConstraint.getDescriptor().getAnnotationType())) {
+				return false; // Skip validation for constraints from overridden superclass methods
+			}
 			var bean = valueContext.getCurrentBean();			
 			var propertyName = ((AbstractPropertyConstraintLocation<?>) location).getPropertyName();
 			var getter = BeanUtils.findGetter(bean.getClass(), propertyName);
@@ -1428,6 +1452,16 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 				|| isReturnValueValidation( path );
 	}
 
+	private boolean isCascadeFromOverriddenMethod(Cascadable cascadable, Class<?> beanClass, String propertyName) {
+		if (cascadable.getConstraintLocationKind() == ConstraintLocationKind.GETTER && propertyName != null) {
+			Method getter = BeanUtils.findGetter(beanClass, propertyName);
+			if (getter != null) {
+				return getter.getAnnotation(javax.validation.Valid.class) == null;
+			}
+		}		
+		return false;
+	}
+
 	private boolean isCascadeValidationRequired(BaseBeanValidationContext<?> validationContext, ValueContext<?, Object> valueContext, Cascadable cascadable) {
 		if (valueContext.getCurrentBean() != null && cascadable.getConstraintLocationKind() == ConstraintLocationKind.GETTER) {
 			var bean = valueContext.getCurrentBean();
@@ -1435,6 +1469,11 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 			var leafNode = currentPath.getLeafNode();
 			if (leafNode != null) {
 				var propertyName = leafNode.getName();
+				
+				// Check if this cascade validation comes from a superclass method that has been overridden
+				if (isCascadeFromOverriddenMethod(cascadable, bean.getClass(), propertyName)) {
+					return false; // Skip cascade validation for @Valid annotations from overridden superclass methods
+				}
 				Method getter = BeanUtils.findGetter(bean.getClass(), propertyName);
 				if (getter == null) {
 					throw new ExplicitException("Getter not found for property: " + propertyName);
