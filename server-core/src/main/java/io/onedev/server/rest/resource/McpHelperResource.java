@@ -2062,18 +2062,16 @@ public class McpHelperResource {
     @POST
     public Map<String, Object> runJob(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
-                @QueryParam("project") String projectPath, 
                 @NotNull @Valid Map<String, Serializable> data) {
         if (SecurityUtils.getAuthUser() == null)
             throw new UnauthenticatedException();
 
-        var projectInfo = getProjectInfo(projectPath, currentProjectPath);
+        var project = getProject(currentProjectPath);
 
         var jobName = StringUtils.trimToNull((String)data.get("jobName"));
         if (jobName == null)
             throw new NotAcceptableException("Job name is required");
 
-        var project = projectInfo.project;
         if (!SecurityUtils.canRunJob(project, jobName))		
             throw new UnauthorizedException();
 
@@ -2130,7 +2128,7 @@ public class McpHelperResource {
             throw new NotAcceptableException(e.getMessage());
         }
 
-        var buildMap = getBuildMap(projectInfo.currentProject, build);
+        var buildMap = getBuildMap(project, build);
         buildMap.put("id", build.getId());
         return buildMap;
     }
