@@ -47,6 +47,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.ServerConfig;
 import io.onedev.server.SubscriptionManager;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.data.migration.VersionedYamlDoc;
@@ -94,6 +95,7 @@ import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.BooleanField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
@@ -179,6 +181,8 @@ public class McpHelperResource {
 
     private final Validator validator;
 
+    private final ServerConfig serverConfig;
+
     @Inject
     public McpHelperResource(ObjectMapper objectMapper, SettingManager settingManager, 
             UserManager userManager, IssueManager issueManager, ProjectManager projectManager, 
@@ -191,7 +195,8 @@ public class McpHelperResource {
             PullRequestAssignmentManager pullRequestAssignmentManager, 
             PullRequestLabelManager pullRequestLabelManager, UrlManager urlManager,
             PullRequestCommentManager pullRequestCommentManager, BuildManager buildManager,
-            BuildParamManager buildParamManager, JobManager jobManager, Validator validator) {
+            BuildParamManager buildParamManager, JobManager jobManager, Validator validator,
+            ServerConfig serverConfig) {
         this.objectMapper = objectMapper;
         this.settingManager = settingManager;
         this.issueManager = issueManager;
@@ -217,6 +222,7 @@ public class McpHelperResource {
         this.buildParamManager = buildParamManager;
         this.jobManager = jobManager;
         this.validator = validator;
+        this.serverConfig = serverConfig;
     }
 
     private String getIssueQueryStringDescription() {
@@ -2131,6 +2137,25 @@ public class McpHelperResource {
         var buildMap = getBuildMap(project, build);
         buildMap.put("id", build.getId());
         return buildMap;
+    }
+
+    @Path("/get-clone-roots")
+    @GET
+    public Map<String, String> getCloneUrl() {
+        if (SecurityUtils.getAuthUser() == null)
+            throw new UnauthenticatedException();
+
+        var cloneRoots = new HashMap<String, String>();
+        var systemSetting = settingManager.getSystemSetting();
+        var serverUrl = systemSetting.getServerUrl();        
+        cloneRoots.put("http", serverUrl);
+        if (serverConfig.getSshPort() != 0) {
+            var sshRootUrl = systemSetting.getSshRootUrl();
+            if (sshRootUrl == null)
+                sshRootUrl = SystemSetting.deriveSshRootUrl(serverUrl);
+            cloneRoots.put("ssh", sshRootUrl);    
+        }
+        return cloneRoots;
     }
 
     @Path("/check-build-spec")

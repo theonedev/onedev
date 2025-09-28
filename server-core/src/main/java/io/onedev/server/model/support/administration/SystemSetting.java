@@ -87,7 +87,7 @@ public class SystemSetting implements Serializable, Validatable {
 	}
 
 	@Nullable
-	private static String deriveSshRootUrl(@Nullable String serverUrl) {
+	public static String deriveSshRootUrl(@Nullable String serverUrl) {
 		if (serverUrl != null) {
 			try {
 				URL url = new URL(serverUrl);
