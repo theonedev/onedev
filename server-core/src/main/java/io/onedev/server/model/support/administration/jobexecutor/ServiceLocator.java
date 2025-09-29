@@ -4,14 +4,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
-import io.onedev.k8shelper.ServiceFacade;
 import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
-import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.k8shelper.ServiceFacade;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;
+import io.onedev.server.util.patternset.PatternSet;
 
 @Editable
 public class ServiceLocator implements Serializable {
@@ -52,6 +53,7 @@ public class ServiceLocator implements Serializable {
 
 	@Editable(order=300, description="Specify node selector of this locator")
 	@Size(min=1, message="At least one entry should be specified")
+	@Valid
 	public List<NodeSelectorEntry> getNodeSelector() {
 		return nodeSelector;
 	}

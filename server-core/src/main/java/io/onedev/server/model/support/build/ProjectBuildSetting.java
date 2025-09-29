@@ -1,6 +1,19 @@
 package io.onedev.server.model.support.build;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.validation.Valid;
+
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
@@ -10,11 +23,6 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldReso
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
-import io.onedev.server.annotation.Editable;
-
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.*;
 
 @Editable
 public class ProjectBuildSetting implements Serializable {
@@ -39,6 +47,7 @@ public class ProjectBuildSetting implements Serializable {
 	
 	private transient GlobalBuildSetting globalSetting;
 	
+	@Valid
 	public List<JobProperty> getJobProperties() {
 		return jobProperties;
 	}
@@ -47,6 +56,7 @@ public class ProjectBuildSetting implements Serializable {
 		this.jobProperties = jobProperties;
 	}
 
+	@Valid
 	public List<JobSecret> getJobSecrets() {
 		return jobSecrets;
 	}
@@ -55,6 +65,7 @@ public class ProjectBuildSetting implements Serializable {
 		this.jobSecrets = jobSecrets;
 	}
 	
+	@Valid
 	public List<BuildPreservation> getBuildPreservations() {
 		return buildPreservations;
 	}
@@ -63,6 +74,7 @@ public class ProjectBuildSetting implements Serializable {
 		this.buildPreservations = buildPreservations;
 	}
 
+	@Valid
 	public List<DefaultFixedIssueFilter> getDefaultFixedIssueFilters() {
 		return defaultFixedIssueFilters;
 	}
@@ -97,6 +109,7 @@ public class ProjectBuildSetting implements Serializable {
 		this.listParams = listParams;
 	}
 
+	@Valid
 	@Nullable
 	public List<NamedBuildQuery> getNamedQueries() {
 		return namedQueries;

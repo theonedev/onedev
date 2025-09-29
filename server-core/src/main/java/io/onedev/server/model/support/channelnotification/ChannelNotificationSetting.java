@@ -6,13 +6,14 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.annotation.Vertical;
-import io.onedev.server.validation.Validatable;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.Vertical;
+import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 
 @ClassValidating
@@ -26,6 +27,7 @@ public class ChannelNotificationSetting implements ContributedProjectSetting, Va
 	@Vertical
 	@OmitName
 	@NotNull
+	@Valid
 	public List<ChannelNotification> getNotifications() {
 		return notifications;
 	}

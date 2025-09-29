@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
-import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.model.support.build.NamedBuildQuery;
 
 @Editable
 public class GlobalBuildSetting implements Serializable {
@@ -30,6 +32,7 @@ public class GlobalBuildSetting implements Serializable {
 		namedQueries.add(new NamedBuildQuery("Build recently", "\"Submit Date\" is since \"last week\""));		
 	}
 	
+	@Valid
 	public List<NamedBuildQuery> getNamedQueries() {
 		return namedQueries;
 	}
@@ -38,6 +41,7 @@ public class GlobalBuildSetting implements Serializable {
 		this.namedQueries = namedQueries;
 	}
 	
+	@NotNull
 	public List<String> getListParams() {
 		return listParams;
 	}

@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
 import org.apache.commons.lang3.SystemUtils;
@@ -83,9 +84,9 @@ import io.onedev.server.job.JobManager;
 import io.onedev.server.job.JobRunnable;
 import io.onedev.server.job.ResourceAllocator;
 import io.onedev.server.job.ServerCacheHelper;
+import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
-import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor.TestData;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
@@ -135,6 +136,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	@Editable(order=400, description="Specify registry logins if necessary. For built-in registry, " +
 			"use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and " +
 			"access token for password")
+	@Valid
 	public List<RegistryLogin> getRegistryLogins() {
 		return registryLogins;
 	}

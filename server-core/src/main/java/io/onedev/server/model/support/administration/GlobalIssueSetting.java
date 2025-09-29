@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import com.google.common.collect.Lists;
 
@@ -298,6 +300,8 @@ public class GlobalIssueSetting implements Serializable {
 		return sorted;
 	}
 	
+	@NotNull
+	@Valid
 	public List<StateSpec> getStateSpecs() {
 		return stateSpecs;
 	}
@@ -306,6 +310,8 @@ public class GlobalIssueSetting implements Serializable {
 		this.stateSpecs = stateSpecs;
 	}
 
+	@NotNull
+	@Valid
 	public List<TransitionSpec> getTransitionSpecs() {
 		return transitionSpecs;
 	}
@@ -315,6 +321,8 @@ public class GlobalIssueSetting implements Serializable {
 	}
 
 	@Editable
+	@NotNull
+	@Valid
 	public List<FieldSpec> getFieldSpecs() {
 		return fieldSpecs;
 	}
@@ -686,6 +694,8 @@ public class GlobalIssueSetting implements Serializable {
 			throw new ExplicitException("No any issue state is defined");
 	}
 	
+	@NotNull
+	@Valid
 	public List<BoardSpec> getBoardSpecs() {
 		return boardSpecs;
 	}
@@ -694,6 +704,8 @@ public class GlobalIssueSetting implements Serializable {
 		this.boardSpecs = boardSpecs;
 	}
 
+	@NotNull
+	@Valid
 	public TimeTrackingSetting getTimeTrackingSetting() {
 		return timeTrackingSetting;
 	}
@@ -702,6 +714,7 @@ public class GlobalIssueSetting implements Serializable {
 		this.timeTrackingSetting = timeTrackingSetting;
 	}
 
+	@NotNull
 	public List<String> getListFields() {
 		return listFields;
 	}
@@ -709,7 +722,8 @@ public class GlobalIssueSetting implements Serializable {
 	public void setListFields(List<String> listFields) {
 		this.listFields = listFields;
 	}
-	
+
+	@NotNull
 	public List<String> getListLinks() {
 		return listLinks;
 	}
@@ -718,6 +732,8 @@ public class GlobalIssueSetting implements Serializable {
 		this.listLinks = listLinks;
 	}
 
+	@NotNull
+	@Valid
 	public List<NamedIssueQuery> getNamedQueries() {
 		return namedQueries;
 	}
@@ -726,6 +742,8 @@ public class GlobalIssueSetting implements Serializable {
 		this.namedQueries = namedQueries;
 	}
 	
+	@NotNull
+	@Valid
 	public List<IssueTemplate> getIssueTemplates() {
 		return issueTemplates;
 	}
@@ -734,6 +752,8 @@ public class GlobalIssueSetting implements Serializable {
 		this.issueTemplates = issueTemplates;
 	}
 
+	@NotNull
+	@Valid
 	public CommitMessageFixPatterns getCommitMessageFixPatterns() {
 		return commitMessageFixPatterns;
 	}
@@ -742,6 +762,8 @@ public class GlobalIssueSetting implements Serializable {
 		this.commitMessageFixPatterns = commitMessageFixPatterns;
 	}
 
+	@Valid
+	@NotNull
 	public ExternalIssueTransformers getExternalIssueTransformers() {
 		return externalIssueTransformers;
 	}

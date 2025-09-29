@@ -1,5 +1,16 @@
 package io.onedev.server.model.support.pullrequest;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import javax.annotation.Nullable;
+import javax.validation.Valid;
+
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.UserChoice;
@@ -8,16 +19,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.usage.Usage;
-
-import javax.annotation.Nullable;
-
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 @Editable
 public class ProjectPullRequestSetting implements Serializable {
@@ -33,6 +34,7 @@ public class ProjectPullRequestSetting implements Serializable {
 	private Boolean deleteSourceBranchAfterMerge;
 	
 	@Nullable
+	@Valid
 	public List<NamedPullRequestQuery> getNamedQueries() {
 		return namedQueries;
 	}

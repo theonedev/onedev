@@ -355,7 +355,7 @@ public class ProjectResource {
 	@Api(order=900, description="Update project settings")
 	@Path("/{projectId}/setting")
     @POST
-    public Response updateSetting(@PathParam("projectId") Long projectId, @NotNull ProjectSetting setting) {
+    public Response updateSetting(@PathParam("projectId") Long projectId, @NotNull @Valid ProjectSetting setting) {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canManageProject(project)) 
 			throw new UnauthorizedException();
@@ -654,6 +654,7 @@ public class ProjectResource {
 		
 		private ArrayList<ContributedProjectSetting> contributedSettings = new ArrayList<>();
 
+		@Valid
 		public ArrayList<BranchProtection> getBranchProtections() {
 			return branchProtections;
 		}
@@ -662,6 +663,7 @@ public class ProjectResource {
 			this.branchProtections = branchProtections;
 		}
 
+		@Valid
 		public ArrayList<TagProtection> getTagProtections() {
 			return tagProtections;
 		}
@@ -670,6 +672,7 @@ public class ProjectResource {
 			this.tagProtections = tagProtections;
 		}
 
+		@Valid
 		public ProjectIssueSetting getIssueSetting() {
 			return issueSetting;
 		}
@@ -678,6 +681,7 @@ public class ProjectResource {
 			this.issueSetting = issueSetting;
 		}
 
+		@Valid
 		public ProjectBuildSetting getBuildSetting() {
 			return buildSetting;
 		}
@@ -686,6 +690,7 @@ public class ProjectResource {
 			this.buildSetting = buildSetting;
 		}
 
+		@Valid
 		public ProjectPackSetting getPackSetting() {
 			return packSetting;
 		}
@@ -694,6 +699,7 @@ public class ProjectResource {
 			this.packSetting = packSetting;
 		}
 
+		@Valid
 		public ProjectPullRequestSetting getPullRequestSetting() {
 			return pullRequestSetting;
 		}
@@ -702,6 +708,7 @@ public class ProjectResource {
 			this.pullRequestSetting = pullRequestSetting;
 		}
 
+		@Valid
 		public ArrayList<NamedCommitQuery> getNamedCommitQueries() {
 			return namedCommitQueries;
 		}
@@ -710,6 +717,7 @@ public class ProjectResource {
 			this.namedCommitQueries = namedCommitQueries;
 		}
 
+		@Valid
 		public ArrayList<NamedCodeCommentQuery> getNamedCodeCommentQueries() {
 			return namedCodeCommentQueries;
 		}
@@ -718,6 +726,7 @@ public class ProjectResource {
 			this.namedCodeCommentQueries = namedCodeCommentQueries;
 		}
 
+		@Valid
 		public ArrayList<WebHook> getWebHooks() {
 			return webHooks;
 		}
@@ -726,6 +735,7 @@ public class ProjectResource {
 			this.webHooks = webHooks;
 		}
 
+		@Valid
 		public ArrayList<ContributedProjectSetting> getContributedSettings() {
 			return contributedSettings;
 		}

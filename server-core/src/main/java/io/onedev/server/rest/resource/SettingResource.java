@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -196,7 +197,7 @@ public class SettingResource {
 	@Api(order=1500)
 	@Path("/system")
     @POST
-    public Response setSystemSetting(@NotNull SystemSetting systemSetting) {
+    public Response setSystemSetting(@NotNull @Valid SystemSetting systemSetting) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
     	String ingressUrl = OneDev.getInstance().getIngressUrl();
@@ -212,7 +213,7 @@ public class SettingResource {
 	@Api(order=1600)
 	@Path("/authenticator")
     @POST
-    public Response setAuthenticator(Authenticator authenticator) {
+    public Response setAuthenticator(@Valid Authenticator authenticator) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getAuthenticator()).toXML();
@@ -225,7 +226,7 @@ public class SettingResource {
 	@Api(order=1700)
 	@Path("/backup")
     @POST
-    public Response setBackupSetting(BackupSetting backupSetting) {
+    public Response setBackupSetting(@Valid BackupSetting backupSetting) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getBackupSetting()).toXML();
@@ -238,7 +239,7 @@ public class SettingResource {
 	@Api(order=1800)
 	@Path("/build")
     @POST
-    public Response setBuildSetting(@NotNull GlobalBuildSetting buildSetting) {
+    public Response setBuildSetting(@NotNull @Valid GlobalBuildSetting buildSetting) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getBuildSetting()).toXML();
@@ -251,7 +252,7 @@ public class SettingResource {
 	@Api(order=1900)
 	@Path("/groovy-scripts")
 	@POST
-    public Response setGroovyScripts(@NotNull List<GroovyScript> groovyScripts) {
+    public Response setGroovyScripts(@NotNull @Valid List<GroovyScript> groovyScripts) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getGroovyScripts()).toXML();
@@ -264,7 +265,7 @@ public class SettingResource {
 	@Api(order=2000)
 	@Path("/issue")
 	@POST
-    public Response setIssueSetting(@NotNull GlobalIssueSetting issueSetting) {
+    public Response setIssueSetting(@NotNull @Valid GlobalIssueSetting issueSetting) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getIssueSetting()).toXML();
@@ -278,7 +279,7 @@ public class SettingResource {
 	@Api(order=2100)
 	@Path("/job-executors")
 	@POST
-    public Response setJobExecutors(@NotNull List<JobExecutor> jobExecutors) {
+    public Response setJobExecutors(@NotNull @Valid List<JobExecutor> jobExecutors) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getJobExecutors()).toXML();
@@ -291,7 +292,7 @@ public class SettingResource {
 	@Api(order=2200)
 	@Path("/mail-service")
 	@POST
-    public Response setMailService(MailService mailService) {
+    public Response setMailService(@Valid MailService mailService) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getMailService()).toXML();
@@ -304,7 +305,7 @@ public class SettingResource {
 	@Api(order=2210)
 	@Path("/service-desk")
 	@POST
-    public Response setServiceDeskSetting(ServiceDeskSetting serviceDeskSetting) {
+    public Response setServiceDeskSetting(@Valid ServiceDeskSetting serviceDeskSetting) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getServiceDeskSetting()).toXML();
@@ -317,7 +318,7 @@ public class SettingResource {
 	@Api(order=2220)
 	@Path("/notification-template")
 	@POST
-    public Response setNotificationTemplateSetting(EmailTemplates emailTemplates) {
+    public Response setNotificationTemplateSetting(@Valid EmailTemplates emailTemplates) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getEmailTemplates()).toXML();
@@ -330,7 +331,7 @@ public class SettingResource {
 	@Api(order=2300)
 	@Path("/project")
 	@POST
-    public Response setProjectSetting(@NotNull GlobalProjectSetting projectSetting) {
+    public Response setProjectSetting(@NotNull @Valid GlobalProjectSetting projectSetting) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getProjectSetting()).toXML();
@@ -343,7 +344,7 @@ public class SettingResource {
 	@Api(order=2400)
 	@Path("/pull-request")
 	@POST
-    public Response setPullRequestSetting(@NotNull GlobalPullRequestSetting pullRequestSetting) {
+    public Response setPullRequestSetting(@NotNull @Valid GlobalPullRequestSetting pullRequestSetting) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getPullRequestSetting()).toXML();
@@ -356,7 +357,7 @@ public class SettingResource {
 	@Api(order=2500)
 	@Path("/security")
 	@POST
-    public Response setSecuritySetting(@NotNull SecuritySetting securitySetting) {
+    public Response setSecuritySetting(@NotNull @Valid SecuritySetting securitySetting) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getSecuritySetting()).toXML();
@@ -369,7 +370,7 @@ public class SettingResource {
 	@Api(order=2600)
 	@Path("/ssh")
 	@POST
-    public Response setSshSetting(@NotNull SshSetting sshSetting) {
+    public Response setSshSetting(@NotNull @Valid SshSetting sshSetting) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(settingManager.getSshSetting()).toXML();
@@ -390,7 +391,7 @@ public class SettingResource {
 	@Api(order=2800)
 	@Path("/contributed-settings")
 	@POST
-    public Response setContributedSettings(@NotNull List<ContributedAdministrationSetting> contributedSettings) {
+    public Response setContributedSettings(@NotNull @Valid List<ContributedAdministrationSetting> contributedSettings) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		var oldAuditContent = getAuditContent(settingManager.getContributedSettings());

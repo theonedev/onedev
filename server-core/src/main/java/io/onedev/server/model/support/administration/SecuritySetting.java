@@ -1,20 +1,23 @@
 package io.onedev.server.model.support.administration;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.GroupChoice;
-import io.onedev.server.annotation.Patterns;
-import io.onedev.server.annotation.DependsOn;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.model.Group;
-import io.onedev.server.util.usage.Usage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.DependsOn;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.GroupChoice;
+import io.onedev.server.annotation.Patterns;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.model.Group;
+import io.onedev.server.util.usage.Usage;
 
 @Editable
 public class SecuritySetting implements Serializable {
@@ -110,6 +113,7 @@ public class SecuritySetting implements Serializable {
 			"Optionally specify allowed <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS' target='_blank'>CORS</a> origins. " +
 			"For a CORS simple or preflight request, if value of request header <code>Origin</code> is included here, " +
 			"the response header <code>Access-Control-Allow-Origin</code> will be set to the same value")
+	@NotNull
 	public List<String> getCorsAllowedOrigins() {
 		return corsAllowedOrigins;
 	}

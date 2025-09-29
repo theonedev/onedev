@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.validation.Valid;
 
 import io.onedev.server.model.support.NamedProjectQuery;
 
@@ -19,6 +20,7 @@ public class GlobalProjectSetting implements Serializable {
 		namedQueries.add(new NamedProjectQuery("My projects", "owned by me"));
 	}
 	
+	@Valid
 	public List<NamedProjectQuery> getNamedQueries() {
 		return namedQueries;
 	}

@@ -1,5 +1,16 @@
 package io.onedev.server.model.support.administration;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.match.PathMatcher;
@@ -12,10 +23,6 @@ import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
-
-import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Editable
 public class ServiceDeskSetting implements Serializable {
@@ -35,6 +42,7 @@ public class ServiceDeskSetting implements Serializable {
 	@Editable(order=300, description="Specify issue creation settings. For a particular sender and project, " +
 			"the first matching entry will take effect. Issue creation will be disallowed if no matching " +
 			"entry found")
+	@Valid
 	public List<IssueCreationSetting> getIssueCreationSettings() {
 		return issueCreationSettings;
 	}

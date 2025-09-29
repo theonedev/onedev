@@ -1,5 +1,18 @@
 package io.onedev.server.model.support.issue;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.validation.Valid;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.entitymanager.SettingManager;
@@ -8,11 +21,11 @@ import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.component.issue.workflowreconcile.*;
-
-import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.*;
+import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
 @Editable
 public class ProjectIssueSetting implements Serializable {
@@ -56,6 +69,7 @@ public class ProjectIssueSetting implements Serializable {
 	}
 
 	@Nullable
+	@Valid
 	public List<BoardSpec> getBoardSpecs() {
 		return boardSpecs;
 	}
@@ -65,6 +79,7 @@ public class ProjectIssueSetting implements Serializable {
 	}
 
 	@Nullable
+	@Valid
 	public List<NamedIssueQuery> getNamedQueries() {
 		return namedQueries;
 	}
@@ -73,6 +88,7 @@ public class ProjectIssueSetting implements Serializable {
 		this.namedQueries = namedQueries;
 	}
 
+	@Valid
 	public Map<String, TimesheetSetting> getTimesheetSettings() {
 		return timesheetSettings;
 	}
