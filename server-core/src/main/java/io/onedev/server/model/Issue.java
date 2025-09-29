@@ -1055,7 +1055,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 				var field = getIssueSetting().getFieldSpec(fieldName);
 				if (field != null) {
 					var value = getFieldValue(fieldName);
-					if (value != null) {
+					if (value != null && (!(value instanceof Collection) || !((Collection<?>) value).isEmpty())) {
 						if (field instanceof ChoiceField) {
 							var values = new ArrayList<String>();
 							if (value instanceof Collection) 

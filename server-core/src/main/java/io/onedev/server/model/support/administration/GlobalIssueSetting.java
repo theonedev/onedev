@@ -176,18 +176,22 @@ public class GlobalIssueSetting implements Serializable {
 		inProgress.setName("In Progress");
 		inProgress.setColor("#FFA700");		
 		inProgress.setDescription(
-			"The AI assistant should switch the working directory to the branch corresponding to the issue by running below command:\n" + 
-			"git checkout -b <branch-name> origin/main && git push -u origin <branch-name>");		
+			"The AI assistant should switch the working directory to the branch corresponding to the issue by running below command:\n\n" + 
+			"git fetch <onedev remote> main && git checkout -b <branch-name> <onedev remote>/main && git push -u <onedev remote> <branch-name>\n\n" +
+			"Here <branch name> should be derived from user instruction or issue title, and <onedev remote> should be retrieved by calling tool getCurrentRemote"
+		);
 		stateSpecs.add(inProgress);
 
 		StateSpec inReview = new StateSpec();
 		inReview.setName("In Review");
 		inReview.setColor("#9C26B0");		
 		inReview.setDescription(
-			"AI assistant should do the following:\n" + 
-			"1. Create conventional commit for current work if there are uncommitted changes. Note that subject of the commit message should mention the issue number at the end in form of (#<issue number>)\n" + 
-			"2. Push the branch to remote by running \"git push\"\n" + 
-			"3. Create a pull request for current branch");		
+			"AI assistant should do the following:\n\n" +
+			"1. Add files to git index, and create conventional commit for current work if there are uncommitted changes. Subject line of the commit message should include the issue number at the end in form of (<issue reference>)\n" +
+			"2. Push the branch to remote by running \"git push <onedev remote>\"\n" +
+			"3. Create a pull request for current branch, with other params derived from current issue, and user instruction\n\n" +
+			"Here <issue reference> should be replaced with reference of the issue whose state is being changed, and <onedev remote> should be retrieved via tool getCurrentRemote"
+		);
 		stateSpecs.add(inReview);
 
 		StateSpec closed = new StateSpec();

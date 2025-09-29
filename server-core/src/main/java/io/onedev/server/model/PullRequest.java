@@ -1395,11 +1395,20 @@ public class PullRequest extends ProjectBelonging
 		return lowerTitle.startsWith("wip") || lowerTitle.startsWith("[wip]");
 	}
 
+	// Remove issue number suffix if there is any
+	public void cleanTitle() {
+        var cleanedTitle = title.replaceFirst("\\s*\\([a-zA-Z]+-\\d+\\)$", "");
+        cleanedTitle = cleanedTitle.replaceFirst("\\s*\\(#\\d+\\)$", "").trim();
+        if (cleanedTitle.length() != 0)
+            title = cleanedTitle;
+	}
+
 	public void generateTitleAndDescriptionIfEmpty() {
 		if (title == null) {
 			var commits = getLatestUpdate().getCommits();
 			if (commits.size() == 1) {
 				title = commits.get(0).getShortMessage();
+				cleanTitle();
 			} else {
 				title = getSource().getBranch().toLowerCase();
 				boolean wip = false;
