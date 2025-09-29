@@ -113,7 +113,7 @@ public class GemPackService implements PackService {
 			sessionManager.run(() -> {
 				checkProject(projectId, true);
 			});
-			var tempFile = FileUtils.createTempFile("upload", "nuget");
+			var tempFile = FileUtils.createTempFile("upload", "gem");
 			try {
 				try (var os = new BufferedOutputStream(new FileOutputStream(tempFile), BUFFER_SIZE)) {
 					IOUtils.copy(request.getInputStream(), os);

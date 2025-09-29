@@ -136,6 +136,24 @@ public class VersionedYamlDoc extends MappingNode {
 			return constructDocument(node);
 		}
 		
+		protected Object constructObject(Node node) {
+			if (node instanceof MappingNode) {
+			  MappingNode mappingNode = (MappingNode) node;
+			  for (var it = mappingNode.getValue().iterator(); it.hasNext();) {
+				var tuple = it.next();
+				if (tuple.getKeyNode() instanceof ScalarNode) {
+				  ScalarNode keyNode = (ScalarNode) tuple.getKeyNode();
+				  if ("type".equals(keyNode.getValue())) {
+					String implementationName = ((ScalarNode) tuple.getValueNode()).getValue();
+					mappingNode.setTag(new Tag("!" + implementationName));
+					it.remove();
+				  }
+				}
+			  }
+			}
+			return super.constructObject(node);
+		}
+		
 		@Override
 		protected String constructScalar(ScalarNode node) {
 			String value = super.constructScalar(node);
