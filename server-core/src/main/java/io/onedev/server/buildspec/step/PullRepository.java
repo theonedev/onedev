@@ -56,6 +56,7 @@ import io.onedev.server.git.command.LfsFetchAllCommand;
 import io.onedev.server.git.command.LfsFetchCommand;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
 
@@ -164,7 +165,7 @@ public class PullRepository extends SyncRepository {
 			if (getAccessTokenSecret() != null) {
 				userId = build.getAccessToken(getAccessTokenSecret()).getOwner().getId();
 			} else {
-				userId = SecurityUtils.getUser().getId();
+				userId = User.SYSTEM_ID;
 			}
 
 			String remoteUrl = getRemoteUrlWithCredential(build);
