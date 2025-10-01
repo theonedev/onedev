@@ -45,7 +45,6 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IterationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.exception.InvalidIssueFieldsException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
@@ -336,12 +335,7 @@ public class IssueResource {
 		}
 
 		issue.setFieldValues(FieldUtils.getFieldValues(project, data.fields));
-
-		try {
-			issueManager.open(issue);
-		} catch (InvalidIssueFieldsException e) {
-			throw new NotAcceptableException(e.getMessage());
-		}
+		issueManager.open(issue);
 
 		return issue.getId();
     }
@@ -428,11 +422,7 @@ public class IssueResource {
 			throw new UnauthorizedException();
 		}
 
-		try {
-			issueChangeManager.changeFields(issue, FieldUtils.getFieldValues(issue.getProject(), fields));
-		} catch (InvalidIssueFieldsException e) {
-			throw new NotAcceptableException(e.getMessage());
-		}
+		issueChangeManager.changeFields(issue, FieldUtils.getFieldValues(issue.getProject(), fields));
 		return Response.ok().build();
     }
 
@@ -457,11 +447,7 @@ public class IssueResource {
 		}
     	
 		var fieldValues = FieldUtils.getFieldValues(issue.getProject(), data.getFields());
-		try {
-			issueChangeManager.changeState(issue, data.getState(), fieldValues, transition.getPromptFields(), transition.getRemoveFields(), data.getComment());
-		} catch (InvalidIssueFieldsException e) {
-			throw new NotAcceptableException(e.getMessage());
-		}
+		issueChangeManager.changeState(issue, data.getState(), fieldValues, transition.getPromptFields(), transition.getRemoveFields(), data.getComment());
 		return Response.ok().build();
     }
 

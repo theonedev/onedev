@@ -41,6 +41,7 @@ import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueDescriptionRevisionManager;
@@ -59,7 +60,6 @@ import io.onedev.server.event.project.issue.IssueChanged;
 import io.onedev.server.event.project.pullrequest.PullRequestChanged;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.exception.InvalidIssueFieldsException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
@@ -113,7 +113,6 @@ import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
-import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.concurrent.BatchWorkManager;
@@ -442,11 +441,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				issueScheduleManager.syncIterations(issue, iterations);
 			
 			issue.setFieldValues(fieldValues);
-			try {
-				issue.validateFields();
-			} catch (InvalidIssueFieldsException e) {
-				throw new InvalidIssueFieldsException("Error validating fields for issue " + issue.getReference().toString(issue.getProject()) + ": " + InvalidIssueFieldsException.buildMessage(e.getInvalidFields()), e.getInvalidFields());
-			}
+			issue.validateFields();
 			issueFieldManager.saveFields(issue);
 
 			if (!prevState.equals(issue.getState()) 

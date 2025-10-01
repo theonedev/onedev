@@ -7,8 +7,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import io.onedev.server.exception.IssueLinkValidationException;
+import javax.validation.ValidationException;
 
 @Entity
 @Table(
@@ -66,35 +65,35 @@ public class IssueLink extends AbstractEntity {
 
 	public void validate() {
 		if (getSource().equals(getTarget()))
-			throw new IssueLinkValidationException("Can not link to self");
+			throw new ValidationException("Can not link to self");
 		if (getSpec().getOpposite() != null) {
 			if (getSource().getTargetLinks().stream()
 					.anyMatch(it -> it.getSpec().equals(getSpec()) && it.getTarget().equals(getTarget())))
-				throw new IssueLinkValidationException("Source issue already linked to target issue via specified link spec");
+				throw new ValidationException("Source issue already linked to target issue via specified link spec");
 			if (!getSpec().isMultiple()
 					&& getSource().getTargetLinks().stream().anyMatch(it -> it.getSpec().equals(getSpec())))
-				throw new IssueLinkValidationException(
+				throw new ValidationException(
 						"Link spec is not multiple and the source issue is already linked to another issue via this link spec");
 			if (!getSpec().getParsedIssueQuery(getSource().getProject()).matches(getTarget()))
-				throw new IssueLinkValidationException("Link spec not allowed to link to the target issue");
+				throw new ValidationException("Link spec not allowed to link to the target issue");
 			if (!getSpec().getOpposite().isMultiple()
 					&& getTarget().getSourceLinks().stream().anyMatch(it -> it.getSpec().equals(getSpec())))
-				throw new IssueLinkValidationException(
+				throw new ValidationException(
 						"Opposite side of link spec is not multiple and the target issue is already linked to another issue via this link spec");
 			if (!getSpec().getOpposite().getParsedIssueQuery(getSource().getProject())
 					.matches(getSource()))
-				throw new IssueLinkValidationException("Opposite side of link spec not allowed to link to the source issue");
+				throw new ValidationException("Opposite side of link spec not allowed to link to the source issue");
 		} else {
 			if (getSource().getLinks().stream().anyMatch(it -> it.getSpec().equals(getSpec())
 					&& it.getLinked(getSource()).equals(getTarget())))
-				throw new IssueLinkValidationException("Specified issues already linked via specified link spec");
+				throw new ValidationException("Specified issues already linked via specified link spec");
 			if (!getSpec().isMultiple()
 					&& getSource().getLinks().stream().anyMatch(it -> it.getSpec().equals(getSpec())))
-				throw new IssueLinkValidationException(
+				throw new ValidationException(
 						"Link spec is not multiple and source issue is already linked to another issue via this link spec");
 			var parsedIssueQuery = getSpec().getParsedIssueQuery(getSource().getProject());
 			if (!parsedIssueQuery.matches(getSource()) || !parsedIssueQuery.matches(getTarget()))
-				throw new IssueLinkValidationException("Link spec not allowed to link specified issues");
+				throw new ValidationException("Link spec not allowed to link specified issues");
 		}
 	}
 }

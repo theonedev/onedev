@@ -14,7 +14,7 @@ public class ValidationExceptionHandler extends AbstractExceptionHandler<Validat
 		var errorMessage = exception.getMessage();
 		if (errorMessage == null)
 			errorMessage = "Validation error";
-		return new HttpResponse(HttpServletResponse.SC_BAD_REQUEST, errorMessage);
+		return new HttpResponse(HttpServletResponse.SC_NOT_ACCEPTABLE, errorMessage);
     }
     
 }

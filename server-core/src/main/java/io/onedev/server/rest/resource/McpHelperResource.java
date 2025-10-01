@@ -73,9 +73,6 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.entityreference.PullRequestReference;
-import io.onedev.server.exception.InvalidIssueFieldsException;
-import io.onedev.server.exception.InvalidReferenceException;
-import io.onedev.server.exception.IssueLinkValidationException;
 import io.onedev.server.exception.PullRequestReviewRejectedException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
@@ -946,12 +943,7 @@ public class McpHelperResource {
     }
 
     private Issue getIssue(Project currentProject, String referenceString) {
-        IssueReference issueReference;
-        try {
-            issueReference = IssueReference.of(referenceString, currentProject);
-        } catch (InvalidReferenceException e) {
-            throw new NotAcceptableException(e.getMessage());
-        }
+        var issueReference = IssueReference.of(referenceString, currentProject);
         var issue = issueManager.find(issueReference.getProject(), issueReference.getNumber());
         if (issue != null) {
             if (!SecurityUtils.canAccessIssue(issue))
@@ -1126,11 +1118,7 @@ public class McpHelperResource {
 
         issue.setFieldValues(FieldUtils.getFieldValues(issue.getProject(), data));
 
-        try {
-            issueManager.open(issue);
-        } catch (InvalidIssueFieldsException e) {
-            throw newNotAcceptableException(e);
-        }
+        issueManager.open(issue);
 
         return "Created issue " + issue.getReference().toString(projectInfo.currentProject) + ": " + urlManager.urlFor(issue, true);
     }
@@ -1201,8 +1189,8 @@ public class McpHelperResource {
 
             try {
                 issueChangeManager.changeFields(issue, FieldUtils.getFieldValues(issue.getProject(), data));
-            } catch (InvalidIssueFieldsException e) {
-                throw newNotAcceptableException(e);
+            } catch (ValidationException e) {
+                throw new NotAcceptableException(e.getMessage());
             }
         }
 
@@ -1238,8 +1226,8 @@ public class McpHelperResource {
         try {
             issueChangeManager.changeState(issue, state, fieldValues, transition.getPromptFields(),
                     transition.getRemoveFields(), comment);
-        } catch (InvalidIssueFieldsException e) {
-            throw newNotAcceptableException(e);
+        } catch (ValidationException e) {
+            throw new NotAcceptableException(e.getMessage());
         }
         var feedback = "Issue " + issueReference + " transited to state \"" + state + "\"";
         var stateDescription = settingManager.getIssueSetting().getStateSpec(state).getDescription();
@@ -1280,11 +1268,7 @@ public class McpHelperResource {
             link.setSource(targetIssue);
             link.setTarget(sourceIssue);
         }
-        try {
-            link.validate();
-        } catch (IssueLinkValidationException e) {
-            throw new NotAcceptableException(e.getMessage());
-        }
+        link.validate();
         issueLinkManager.create(link);
 
         return "Issue " + targetReference + " added as \"" + linkName + "\" of " + sourceReference;
@@ -1762,12 +1746,7 @@ public class McpHelperResource {
     }
 
     private PullRequest getPullRequest(Project currentProject, String referenceString) {
-        PullRequestReference requestReference;        
-        try {
-            requestReference = PullRequestReference.of(referenceString, currentProject);
-        } catch (InvalidReferenceException e) {
-            throw new NotAcceptableException(e.getMessage());
-        }
+        var requestReference = PullRequestReference.of(referenceString, currentProject);
         var request = pullRequestManager.find(requestReference.getProject(), requestReference.getNumber());
         if (request != null) {
             if (!SecurityUtils.canReadCode(request.getProject()))
@@ -2186,12 +2165,7 @@ public class McpHelperResource {
     }
 
     private Build getBuild(Project currentProject, String referenceString) {
-        BuildReference buildReference;        
-        try {
-            buildReference = BuildReference.of(referenceString, currentProject);
-        } catch (InvalidReferenceException e) {
-            throw new NotAcceptableException(e.getMessage());
-        }
+        var buildReference = BuildReference.of(referenceString, currentProject);
         var build = buildManager.find(buildReference.getProject(), buildReference.getNumber());
         if (build != null) {
             if (!SecurityUtils.canAccessBuild(build))
@@ -2208,14 +2182,6 @@ public class McpHelperResource {
                 entry.setValue(StringUtils.trimToNull((String) entry.getValue()));
         }
     }    
-
-    private NotAcceptableException newNotAcceptableException(InvalidIssueFieldsException e) {
-        var invaliParams = new ArrayList<String>();
-        for (var entry: e.getInvalidFields().entrySet()) {
-            invaliParams.add(getToolParamName(entry.getKey()) + ": " + entry.getValue());
-        }
-        return new NotAcceptableException("Invalid tool parameters:\n\n" + String.join("\n", invaliParams));
-    }
 
     private static class ProjectInfo {
         

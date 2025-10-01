@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+import javax.validation.ValidationException;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -46,7 +47,6 @@ import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.exception.InvalidIssueFieldsException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
@@ -315,7 +315,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						try {
 							OneDev.getInstance(IssueChangeManager.class).batchUpdate(
 									getIssueIterator(), state, confidential, iterations, fieldValues, comment, sendNotifications);
-						} catch (InvalidIssueFieldsException e) {
+						} catch (ValidationException e) {
 							form.error(e.getMessage());
 							target.add(form);
 							return;

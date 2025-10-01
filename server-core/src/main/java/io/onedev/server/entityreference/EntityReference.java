@@ -3,13 +3,13 @@ package io.onedev.server.entityreference;
 import java.io.Serializable;
 
 import javax.annotation.Nullable;
+import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.exception.InvalidReferenceException;
 import io.onedev.server.model.Project;
 
 public abstract class EntityReference implements Serializable {
@@ -54,7 +54,7 @@ public abstract class EntityReference implements Serializable {
 		try {
 			return Long.valueOf(numberString);
 		} catch (NumberFormatException e) {
-			throw new InvalidReferenceException("Invalid reference number: " + numberString);
+			throw new ValidationException("Invalid reference number: " + numberString);
 		}
 	}
 
@@ -68,13 +68,13 @@ public abstract class EntityReference implements Serializable {
 				if (currentProject != null)
 					return EntityReference.of(type, currentProject, number);
 				else
-					throw new InvalidReferenceException("Reference project not specified: " + referenceString);
+					throw new ValidationException("Reference project not specified: " + referenceString);
 			} else {
 				var project = projectManager.findByPath(projectPath);
 				if (project != null)
 					return EntityReference.of(type, project, number);
 				else
-					throw new InvalidReferenceException("Reference project not found: " + projectPath);
+					throw new ValidationException("Reference project not found: " + projectPath);
 			}
 		}
 		index = referenceString.indexOf('-');
@@ -85,9 +85,9 @@ public abstract class EntityReference implements Serializable {
 			if (project != null)
 				return EntityReference.of(type, project, number);
 			else
-				throw new InvalidReferenceException("Reference project not found with key: " + projectKey);
+				throw new ValidationException("Reference project not found with key: " + projectKey);
 		}
-		throw new InvalidReferenceException("Invalid entity reference: " + referenceString);
+		throw new ValidationException("Invalid entity reference: " + referenceString);
 	}
 	
 	@Override

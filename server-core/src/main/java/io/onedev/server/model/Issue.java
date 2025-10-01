@@ -54,6 +54,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
@@ -79,7 +80,6 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.IssueReference;
-import io.onedev.server.exception.InvalidIssueFieldsException;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.ProjectBelonging;
@@ -1086,8 +1086,13 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 					}
 				}
 			}
-			if (invalidFields.size() > 0) 
-				throw new InvalidIssueFieldsException(invalidFields);
+			if (invalidFields.size() > 0) {
+				var fieldErrors = new ArrayList<String>();
+				for (var entry: invalidFields.entrySet()) {
+					fieldErrors.add(entry.getKey() + " (" + entry.getValue() + ")");
+				}
+				throw new ValidationException("Invalid fields: " + String.join(", ", fieldErrors));
+			}
 		} finally {
 			Project.pop();
 		}

@@ -30,7 +30,7 @@ public class JerseyApplication extends ResourceConfig {
         // Add this in order to send build log entries as soon as possible in 
         // KubernetesResource.runServerStep
         property(ServerProperties.OUTBOUND_CONTENT_LENGTH_BUFFER, 0);
-        
+
         // add the default Jackson exception mappers
         register(JacksonFeature.class);
         

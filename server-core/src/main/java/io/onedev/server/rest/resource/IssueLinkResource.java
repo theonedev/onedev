@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -20,7 +19,6 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.IssueLinkManager;
-import io.onedev.server.exception.IssueLinkValidationException;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.rest.annotation.Api;
 
@@ -57,11 +55,7 @@ public class IssueLinkResource {
 			throw new UnauthorizedException("No permission to add specified link for specified issues");
 
 		}
-		try {
-			link.validate();
-		} catch (IssueLinkValidationException e) {
-			throw new NotAcceptableException(e.getMessage());
-		}
+		link.validate();
 				
 		linkManager.create(link);
 		return link.getId();
