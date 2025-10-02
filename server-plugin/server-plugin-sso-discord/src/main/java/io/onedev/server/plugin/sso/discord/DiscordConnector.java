@@ -118,7 +118,7 @@ public class DiscordConnector extends SsoConnector {
 				String userName = (String) userObject.get("username");
 				String email = StringUtils.trimToNull((String) userObject.get("email"));
 				Boolean verified = (Boolean) userObject.get("verified");
-				if (!Boolean.TRUE.equals(verified))
+				if (verified != null && !verified)
 					email = null;
 				
 				if (bCheckGuilds) {

@@ -225,10 +225,11 @@ public class OpenIdConnector extends SsoConnector {
 
 			String subject = claims.getSubject();
 			String email = StringUtils.trimToNull(claims.getStringClaim("email"));
+
 			Boolean emailVerified = claims.getBooleanClaim("email_verified");
 			if (emailVerified == null)
 				emailVerified = claims.getBooleanClaim("emailVerified");
-			if (!Boolean.TRUE.equals(emailVerified))
+			if (emailVerified != null && !emailVerified)
 				email = null;
 
 			String userName = StringUtils.trimToNull(claims.getStringClaim("preferred_username"));
@@ -264,7 +265,7 @@ public class OpenIdConnector extends SsoConnector {
 						emailVerified = getBooleanValue(json.get("email_verified"));
 						if (emailVerified == null)
 							emailVerified = getBooleanValue(json.get("emailVerified"));
-						if (!Boolean.TRUE.equals(emailVerified))
+						if (emailVerified != null && !emailVerified)
 							email = null;
 					}
 						
@@ -335,7 +336,7 @@ public class OpenIdConnector extends SsoConnector {
 	public void setRequestScopes(String requestScopes) {
 		this.requestScopes = requestScopes;
 	}
-
+		
 	@Editable(order=10100, group = "More Settings", description="Optionally specify the OpenID claim to retrieve " +
 			"groups of authenticated user. Depending on the provider, you may need to request additional scopes " +
 			"above to make this claim available")
