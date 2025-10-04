@@ -4,7 +4,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.rest.ParamCheckFilter;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.TriggerJobResource;
@@ -410,7 +410,7 @@ public class MethodDetailPage extends ApiHelpPage {
 			break;
 		}
 		
-		curlExample.append(OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl()).append(endPoint);
+		curlExample.append(OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl()).append(endPoint);
 		
 		for (Map.Entry<String, Serializable> entry: queryParams.entrySet()) {
 			if (entry.getValue() instanceof List) {

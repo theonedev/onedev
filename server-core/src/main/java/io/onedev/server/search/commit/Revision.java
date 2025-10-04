@@ -17,7 +17,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
@@ -56,8 +56,8 @@ public class Revision implements Serializable {
 	
 	public Build getValueAsBuild(Project project) {
 		var buildReference = BuildReference.of(value, project);
-		var buildManager = OneDev.getInstance(BuildManager.class);
-		var build = buildManager.find(buildReference.getProject(), buildReference.getNumber());
+		var buildService = OneDev.getInstance(BuildService.class);
+		var build = buildService.find(buildReference.getProject(), buildReference.getNumber());
 		if (build == null)
 			throw new ExplicitException("Unable to find build: " + value);
 		else

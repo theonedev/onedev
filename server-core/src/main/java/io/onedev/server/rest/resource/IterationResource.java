@@ -16,8 +16,8 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.IterationManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.IterationService;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -28,21 +28,21 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class IterationResource {
 
-	private final IterationManager iterationManager;
+	private final IterationService iterationService;
 
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 
 	@Inject
-	public IterationResource(IterationManager iterationManager, AuditManager auditManager) {
-		this.iterationManager = iterationManager;
-		this.auditManager = auditManager;
+	public IterationResource(IterationService iterationService, AuditService auditService) {
+		this.iterationService = iterationService;
+		this.auditService = auditService;
 	}
 
 	@Api(order=100)
 	@Path("/{iterationId}")
 	@GET
 	public Iteration getIteration(@PathParam("iterationId") Long iterationId) {
-		Iteration iteration = iterationManager.load(iterationId);
+		Iteration iteration = iterationService.load(iterationId);
 		if (!SecurityUtils.canAccessProject(iteration.getProject()))
 			throw new UnauthorizedException();
 		return iteration;
@@ -53,9 +53,9 @@ public class IterationResource {
 	public Long createIteration(@NotNull Iteration iteration) {
 		if (!SecurityUtils.canManageIssues(iteration.getProject()))
 			throw new UnauthorizedException();
-		iterationManager.createOrUpdate(iteration);
+		iterationService.createOrUpdate(iteration);
 		var newAuditContent = VersionedXmlDoc.fromBean(iteration).toXML();
-		auditManager.audit(iteration.getProject(), "created iteration \"" + iteration.getName() + "\" via RESTful API", null, newAuditContent);
+		auditService.audit(iteration.getProject(), "created iteration \"" + iteration.getName() + "\" via RESTful API", null, newAuditContent);
 		return iteration.getId();
 	}
 
@@ -65,10 +65,10 @@ public class IterationResource {
 	public Long updateIteration(@PathParam("iterationId") Long iterationId, @NotNull Iteration iteration) {
 		if (!SecurityUtils.canManageIssues(iteration.getProject()))
 			throw new UnauthorizedException();
-		iterationManager.createOrUpdate(iteration);
+		iterationService.createOrUpdate(iteration);
 		var oldAuditContent = iteration.getOldVersion().toXML();
 		var newAuditContent = VersionedXmlDoc.fromBean(iteration).toXML();
-		auditManager.audit(iteration.getProject(), "changed iteration \"" + iteration.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
+		auditService.audit(iteration.getProject(), "changed iteration \"" + iteration.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
 		return iteration.getId();
 	}
 	
@@ -76,12 +76,12 @@ public class IterationResource {
 	@Path("/{iterationId}")
 	@DELETE
 	public Response deleteIteration(@PathParam("iterationId") Long iterationId) {
-		Iteration iteration = iterationManager.load(iterationId);
+		Iteration iteration = iterationService.load(iterationId);
 		if (!SecurityUtils.canManageIssues(iteration.getProject()))
 			throw new UnauthorizedException();
-		iterationManager.delete(iteration);
+		iterationService.delete(iteration);
 		var oldAuditContent = VersionedXmlDoc.fromBean(iteration).toXML();
-		auditManager.audit(iteration.getProject(), "deleted iteration \"" + iteration.getName() + "\" via RESTful API", oldAuditContent, null);
+		auditService.audit(iteration.getProject(), "deleted iteration \"" + iteration.getName() + "\" via RESTful API", oldAuditContent, null);
 		return Response.ok().build();
 	}
 	

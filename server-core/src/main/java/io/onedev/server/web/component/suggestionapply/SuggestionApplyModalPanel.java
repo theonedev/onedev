@@ -11,7 +11,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
+import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.exception.ObsoleteCommitException;
@@ -76,7 +76,7 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<Sugge
 					compareContext.setOldCommitHash(mark.getCommitHash());
 					compareContext.setNewCommitHash(newCommitId.name());
 					change.setCompareContext(compareContext);
-					OneDev.getInstance(CodeCommentStatusChangeManager.class).create(change, "Suggestion applied");
+					OneDev.getInstance(CodeCommentStatusChangeService.class).create(change, "Suggestion applied");
 				}
 
 				if (request != null) {

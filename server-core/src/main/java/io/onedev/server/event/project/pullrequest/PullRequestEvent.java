@@ -5,8 +5,8 @@ import java.util.Date;
 import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -23,7 +23,7 @@ public abstract class PullRequestEvent extends ProjectEvent {
 	}
 
 	public PullRequest getRequest() {
-		return OneDev.getInstance(PullRequestManager.class).load(requestId);
+		return OneDev.getInstance(PullRequestService.class).load(requestId);
 	}
 
 	@Override
@@ -33,7 +33,7 @@ public abstract class PullRequestEvent extends ProjectEvent {
 	
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getRequest(), true);
+		return OneDev.getInstance(UrlService.class).urlFor(getRequest(), true);
 	}
 	
 }

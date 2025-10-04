@@ -26,9 +26,9 @@ import com.hazelcast.core.HazelcastInstance;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.service.AgentService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.agent.AgentConnected;
 import io.onedev.server.event.agent.AgentDisconnected;
@@ -38,7 +38,7 @@ import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.taskschedule.SchedulableTask;
@@ -50,13 +50,13 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultResourceAllocator.class);
 
-	private final AgentManager agentManager;
+	private final AgentService agentService;
 
-	private final ClusterManager clusterManager;
+	private final ClusterService clusterService;
 
-	private final TransactionManager transactionManager;
+	private final TransactionService transactionService;
 
-	private final JobManager jobManager;
+	private final JobService jobService;
 	
 	private final TaskScheduler taskScheduler;
 
@@ -71,13 +71,13 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 	private volatile String taskId;
 	
 	@Inject
-	public DefaultResourceAllocator(AgentManager agentManager, TransactionManager transactionManager,
-									ClusterManager clusterManager, JobManager jobManager,
-									TaskScheduler taskScheduler) {
-		this.agentManager = agentManager;
-		this.transactionManager = transactionManager;
-		this.clusterManager = clusterManager;
-		this.jobManager = jobManager;
+	public DefaultResourceAllocator(AgentService agentService, TransactionService transactionService,
+                                    ClusterService clusterService, JobService jobService,
+                                    TaskScheduler taskScheduler) {
+		this.agentService = agentService;
+		this.transactionService = transactionService;
+		this.clusterService = clusterService;
+		this.jobService = jobService;
 		this.taskScheduler = taskScheduler;
 	}
 
@@ -87,10 +87,10 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 
 	@Listen
 	public void on(SystemStarting event) {
-		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
+		HazelcastInstance hazelcastInstance = clusterService.getHazelcastInstance();
 
 		cpuCounts = hazelcastInstance.getReplicatedMap("cpuCounts");
-		var localServer = clusterManager.getLocalServerAddress();
+		var localServer = clusterService.getLocalServerAddress();
 		try {
 			cpuCounts.put(
 					localServer,
@@ -107,7 +107,7 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 	@Listen
 	public void on(SystemStopped event) {
 		if (cpuCounts != null)
-			cpuCounts.remove(clusterManager.getLocalServerAddress());
+			cpuCounts.remove(clusterService.getLocalServerAddress());
 	}
 
 	@Listen
@@ -123,8 +123,8 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 	
 	@Listen
 	public void on(ConnectionRestored event) {
-		if (clusterManager.isLeaderServer()) {
-			clusterManager.submitToServer(event.getServer(), () -> {
+		if (clusterService.isLeaderServer()) {
+			clusterService.submitToServer(event.getServer(), () -> {
 				try {
 					while (true) {
 						synchronized (concurrencyUsages) {
@@ -156,7 +156,7 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 	public void on(AgentConnected event) {
 		var agentId = event.getAgent().getId();
 		var agentCpuCount = event.getAgent().getCpuCount();
-		transactionManager.runAfterCommit(() -> {
+		transactionService.runAfterCommit(() -> {
 			cpuCounts.put(String.valueOf(agentId), agentCpuCount);
 			removeNodeFromConcurrencyUsagesCache(agentId.toString());
 			synchronized (concurrencyUsages) {
@@ -173,7 +173,7 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 	@Listen
 	public void on(AgentDisconnected event) {
 		var agentId = event.getAgent().getId();
-		transactionManager.runAfterCommit(() -> {
+		transactionService.runAfterCommit(() -> {
 			cpuCounts.remove(String.valueOf(agentId));
 		});
 	}
@@ -187,7 +187,7 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 
 	@Transactional
 	protected void updateLastUsedDate(Long agentId) {
-		agentManager.load(agentId).getLastUsedDate().setValue(new Date());
+		agentService.load(agentId).getLastUsedDate().setValue(new Date());
 	}
 
 	@Override
@@ -283,16 +283,16 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 	public boolean runServerJob(String executorName, int totalConcurrency, 
 								int requiredConcurrency, ClusterTask<Boolean> runnable) {
 		while (true) {
-			var servers = clusterManager.getServerAddresses();
-			servers.retainAll(clusterManager.getOnlineServers());
+			var servers = clusterService.getServerAddresses();
+			servers.retainAll(clusterService.getOnlineServers());
 			var server = allocateNode(servers, executorName, totalConcurrency, requiredConcurrency);
 			if (server != null) {
-				return jobManager.runJob(server, () -> {
+				return jobService.runJob(server, () -> {
 					int effectiveTotalConcurrency = getEffectiveTotalConcurrency(server, totalConcurrency);
 					var concurrencyKey = server + ":" + executorName;
 					acquireConcurrency(concurrencyKey, effectiveTotalConcurrency, requiredConcurrency);
 					try {
-						return jobManager.runJob(server, runnable);
+						return jobService.runJob(server, runnable);
 					} finally {
 						releaseConcurrency(concurrencyKey, requiredConcurrency);
 					}
@@ -311,7 +311,7 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 							int totalConcurrency, int requiredConcurrency, 
 							AgentRunnable runnable) {
 		while (true) {
-			var agentIds = agentManager.query(agentQuery, 0, MAX_VALUE)
+			var agentIds = agentService.query(agentQuery, 0, MAX_VALUE)
 					.stream().filter(it -> it.isOnline() && !it.isPaused())
 					.map(AbstractEntity::getId)
 					.collect(toSet());
@@ -321,11 +321,11 @@ public class DefaultResourceAllocator implements ResourceAllocator, Serializable
 					executorName, totalConcurrency, requiredConcurrency);
 			var agentId = agentIdString != null? Long.valueOf(agentIdString): null;
 			if (agentId != null) {
-				var server = agentManager.getAgentServer(agentId);
+				var server = agentService.getAgentServer(agentId);
 				if (server == null)
 					throw new ExplicitException("Can not find server managing allocated agent, please retry later");
 
-				return jobManager.runJob(server, () -> {
+				return jobService.runJob(server, () -> {
 					var effectiveTotalConcurrency = getEffectiveTotalConcurrency(agentIdString, totalConcurrency);
 					var concurrencyKey = agentId + ":" + executorName;
 					acquireConcurrency(concurrencyKey, effectiveTotalConcurrency, requiredConcurrency);

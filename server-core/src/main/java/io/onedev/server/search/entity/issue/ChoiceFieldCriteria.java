@@ -12,7 +12,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -96,7 +96,7 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	@Override
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
 		SpecifiedChoices specifiedChoices = SpecifiedChoices.of(issueSetting.getFieldSpec(getFieldName()));
 		if (specifiedChoices != null && !specifiedChoices.getChoiceValues().contains(value)) 
 			undefinedFieldValues.add(new UndefinedFieldValue(getFieldName(), value));

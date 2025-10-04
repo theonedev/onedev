@@ -26,7 +26,7 @@ import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.coverage.Coverage;
@@ -73,8 +73,8 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 		
 		Map<String, Map<Integer, CoverageStatus>> coverageStatuses = new HashMap<>();
 		
-		var projectManager = OneDev.getInstance(ProjectManager.class);
-		var repository = projectManager.getRepository(build.getProject().getId());
+		var projectService = OneDev.getInstance(ProjectService.class);
+		var repository = projectService.getRepository(build.getProject().getId());
 		var blobPaths = GitUtils.getBlobPaths(repository, build.getCommitId());
 		for (File file: getPatternSet().listFiles(inputDir)) {
 			String relativePath = file.getAbsolutePath().substring(baseLen);

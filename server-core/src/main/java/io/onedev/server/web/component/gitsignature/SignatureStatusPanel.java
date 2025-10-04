@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.gitsignature;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.git.signatureverification.SignatureVerificationManager;
+import io.onedev.server.git.signatureverification.SignatureVerificationService;
 import io.onedev.server.git.signatureverification.VerificationResult;
 import io.onedev.server.git.signatureverification.VerificationSuccessful;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -20,7 +20,7 @@ public abstract class SignatureStatusPanel extends DropdownLink {
 
 		@Override
 		protected VerificationResult load() {
-			return OneDev.getInstance(SignatureVerificationManager.class).verifySignature(getRevObject());
+			return OneDev.getInstance(SignatureVerificationService.class).verifySignature(getRevObject());
 		}
 
 	};

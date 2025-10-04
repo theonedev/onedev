@@ -2,9 +2,9 @@ package io.onedev.server.mail;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AlertManager;
+import io.onedev.server.service.AlertService;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.oauth.OAuthTokenManager;
+import io.onedev.server.util.oauth.OAuthTokenService;
 import io.onedev.server.util.oauth.RefreshTokenAccessor;
 import org.unbescape.html.HtmlEscape;
 
@@ -31,10 +31,10 @@ public class OAuthAccessToken implements MailCredential {
 	@Override
 	public String getValue() {
 		try {
-			return OneDev.getInstance(OAuthTokenManager.class).getAccessToken(tokenEndpoint, clientId, clientSecret, refreshTokenAccessor);
+			return OneDev.getInstance(OAuthTokenService.class).getAccessToken(tokenEndpoint, clientId, clientSecret, refreshTokenAccessor);
 		} catch (ExplicitException e) {
 			if (SecurityUtils.isAnonymous() || SecurityUtils.isSystem())
-				OneDev.getInstance(AlertManager.class).alert("Failed to get access token of mail server",
+				OneDev.getInstance(AlertService.class).alert("Failed to get access token of mail server",
 						HtmlEscape.escapeHtml5(e.getMessage()), true);
 			throw e;
 		}

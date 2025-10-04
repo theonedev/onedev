@@ -32,8 +32,8 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.util.CollectionUtils;
@@ -209,8 +209,8 @@ public class IssueStateListPage extends IssueSettingPage {
 						var state = getSetting().getStateSpecs().remove(stateIndex);
 						var oldAuditContent = VersionedXmlDoc.fromBean(state).toXML();
 						getSetting().setReconciled(false);
-						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-						OneDev.getInstance(AuditManager.class).audit(null, "deleted issue state \"" + state.getName() + "\"", oldAuditContent, null);
+						OneDev.getInstance(SettingService.class).saveIssueSetting(getSetting());
+						OneDev.getInstance(AuditService.class).audit(null, "deleted issue state \"" + state.getName() + "\"", oldAuditContent, null);
 						target.add(statesTable);
 						send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
 					}
@@ -249,8 +249,8 @@ public class IssueStateListPage extends IssueSettingPage {
 				CollectionUtils.move(getSetting().getStateSpecs(), from.getItemIndex(), to.getItemIndex());
 				var newAuditContent = VersionedXmlDoc.fromBean(getSetting().getStateSpecs()).toXML();
 				getSetting().setReconciled(false);
-				OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-				getAuditManager().audit(null, "changed order of issue states", oldAuditContent, newAuditContent);
+				OneDev.getInstance(SettingService.class).saveIssueSetting(getSetting());
+				auditService.audit(null, "changed order of issue states", oldAuditContent, newAuditContent);
 				target.add(statesTable);
 				send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
 			}

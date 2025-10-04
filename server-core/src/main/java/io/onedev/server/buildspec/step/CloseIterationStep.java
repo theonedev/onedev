@@ -8,11 +8,11 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.IterationManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.IterationService;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.File;
@@ -63,16 +63,16 @@ public class CloseIterationStep extends ServerSideStep {
 	
 	@Override
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
-		return OneDev.getInstance(TransactionManager.class).call(() -> {
-			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+		return OneDev.getInstance(TransactionService.class).call(() -> {
+			var build = OneDev.getInstance(BuildService.class).load(buildId);
 			Project project = build.getProject();
 			String iterationName = getIterationName();
-			IterationManager iterationManager = OneDev.getInstance(IterationManager.class);
-			Iteration iteration = iterationManager.findInHierarchy(project, iterationName);
+			IterationService iterationService = OneDev.getInstance(IterationService.class);
+			Iteration iteration = iterationService.findInHierarchy(project, iterationName);
 			if (iteration != null) {
 				if (build.canCloseIteration(getAccessTokenSecret())) {
 					iteration.setClosed(true);
-					iterationManager.createOrUpdate(iteration);
+					iterationService.createOrUpdate(iteration);
 				} else {
 					logger.error("This build is not authorized to close iteration '" + iterationName + "'");
 					return new ServerStepResult(false);

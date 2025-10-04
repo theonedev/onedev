@@ -32,7 +32,7 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.IssueTemplate;
 import io.onedev.server.util.CollectionUtils;
@@ -176,8 +176,8 @@ public class IssueTemplateListPage extends IssueSettingPage {
 					public void onClick(AjaxRequestTarget target) {
 						var template = getSetting().getIssueTemplates().remove(templateIndex);
 						var oldAuditContent = VersionedXmlDoc.fromBean(template).toXML();
-						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-						getAuditManager().audit(null, "deleted issue description template", oldAuditContent, null);
+						OneDev.getInstance(SettingService.class).saveIssueSetting(getSetting());
+						auditService.audit(null, "deleted issue description template", oldAuditContent, null);
 						target.add(templatesTable);
 					}
 					
@@ -215,8 +215,8 @@ public class IssueTemplateListPage extends IssueSettingPage {
 				var oldAuditContent = VersionedXmlDoc.fromBean(getSetting().getIssueTemplates()).toXML();
 				CollectionUtils.move(getSetting().getIssueTemplates(), from.getItemIndex(), to.getItemIndex());
 				var newAuditContent = VersionedXmlDoc.fromBean(getSetting().getIssueTemplates()).toXML();
-				OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-				getAuditManager().audit(null, "changed order of issue description templates", oldAuditContent, newAuditContent);
+				OneDev.getInstance(SettingService.class).saveIssueSetting(getSetting());
+				auditService.audit(null, "changed order of issue description templates", oldAuditContent, newAuditContent);
 				target.add(templatesTable);
 			}
 			

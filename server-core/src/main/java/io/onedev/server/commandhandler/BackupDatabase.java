@@ -6,8 +6,8 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.data.DataManager;
-import io.onedev.server.persistence.SessionFactoryManager;
+import io.onedev.server.data.DataService;
+import io.onedev.server.persistence.SessionFactoryService;
 import io.onedev.server.security.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,18 +26,18 @@ public class BackupDatabase extends CommandHandler {
 	
 	private static final Logger logger = LoggerFactory.getLogger(BackupDatabase.class);
 	
-	private final DataManager dataManager;
+	private final DataService dataService;
 	
-	private final SessionFactoryManager sessionFactoryManager;
+	private final SessionFactoryService sessionFactoryService;
 		
 	private File backupFile;
 	
 	@Inject
-	public BackupDatabase(DataManager dataManager, SessionFactoryManager sessionFactoryManager,
+	public BackupDatabase(DataService dataService, SessionFactoryService sessionFactoryService,
                           HibernateConfig hibernateConfig) {
 		super(hibernateConfig);
-		this.dataManager = dataManager;
-		this.sessionFactoryManager = sessionFactoryManager;
+		this.dataService = dataService;
+		this.sessionFactoryService = sessionFactoryService;
 	}
 	
 	@Override
@@ -60,11 +60,11 @@ public class BackupDatabase extends CommandHandler {
 
 		try {
 			doMaintenance(() -> {
-				sessionFactoryManager.start();
+				sessionFactoryService.start();
 
-				try (var conn = dataManager.openConnection()) {
+				try (var conn = dataService.openConnection()) {
 					callWithTransaction(conn, () -> {
-						dataManager.checkDataVersion(conn, false);
+						dataService.checkDataVersion(conn, false);
 						return null;
 					});
 				} catch (SQLException e) {
@@ -75,7 +75,7 @@ public class BackupDatabase extends CommandHandler {
 
 				File tempDir = FileUtils.createTempDir("backup");
 				try {
-					dataManager.exportData(tempDir);
+					dataService.exportData(tempDir);
 					ZipUtils.zip(tempDir, backupFile, null);
 				} catch (Exception e) {
 					throw ExceptionUtils.unchecked(e);
@@ -95,7 +95,7 @@ public class BackupDatabase extends CommandHandler {
 
 	@Override
 	public void stop() {
-		sessionFactoryManager.stop();
+		sessionFactoryService.stop();
 	}
 
 }

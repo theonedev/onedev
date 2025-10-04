@@ -35,15 +35,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.subject.Subject;
 import org.hibernate.criterion.Restrictions;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.IterationManager;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
 import io.onedev.server.model.BaseAuthorization;
@@ -69,10 +67,13 @@ import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.IterationService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
-import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoService;
 
 @Path("/projects")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -80,31 +81,31 @@ import io.onedev.server.xodus.CommitInfoManager;
 @Singleton
 public class ProjectResource {
 
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
-	private final IterationManager iterationManager;
+	private final IterationService iterationService;
 	
-	private final CommitInfoManager commitInfoManager;
+	private final CommitInfoService commitInfoService;
 	
-	private final UrlManager urlManager;
+	private final UrlService urlService;
 
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 	
 	@Inject
-	public ProjectResource(ProjectManager projectManager, IterationManager iterationManager, 
-			CommitInfoManager commitInfoManager, UrlManager urlManager, AuditManager auditManager) {
-		this.projectManager = projectManager;
-		this.iterationManager = iterationManager;
-		this.commitInfoManager = commitInfoManager;
-		this.urlManager = urlManager;
-		this.auditManager = auditManager;
+	public ProjectResource(ProjectService projectService, IterationService iterationService,
+                           CommitInfoService commitInfoService, UrlService urlService, AuditService auditService) {
+		this.projectService = projectService;
+		this.iterationService = iterationService;
+		this.commitInfoService = commitInfoService;
+		this.urlService = urlService;
+		this.auditService = auditService;
 	}
 	
 	@Api(order=100)
 	@Path("/{projectId}")
     @GET
     public ProjectData getProject(@PathParam("projectId") Long projectId) {
-    	Project project = projectManager.load(projectId);
+    	Project project = projectService.load(projectId);
     	if (!SecurityUtils.canAccessProject(project))
 			throw new UnauthorizedException();
      	return ProjectData.from(project);
@@ -114,7 +115,7 @@ public class ProjectResource {
 	@Path("/ids/{path:.*}")
 	@GET
 	public Long getProjectId(@PathParam("path") String path) {
-		var project = projectManager.findByPath(path);
+		var project = projectService.findByPath(path);
 		if (project != null) {
 			if (!SecurityUtils.canAccessProject(project))
 				throw new NotFoundException("Project not found or inaccessible: " + path);
@@ -128,13 +129,13 @@ public class ProjectResource {
 	@Path("/{projectId}/clone-url")
     @GET
     public CloneUrl getCloneURL(@PathParam("projectId") Long projectId) {
-    	Project project = projectManager.load(projectId);
+    	Project project = projectService.load(projectId);
     	if (!SecurityUtils.canAccessProject(project))
 			throw new UnauthorizedException();
 
     	CloneUrl cloneUrl = new CloneUrl();
-    	cloneUrl.setHttp(urlManager.cloneUrlFor(project, false));
-    	cloneUrl.setSsh(urlManager.cloneUrlFor(project, true));
+    	cloneUrl.setHttp(urlService.cloneUrlFor(project, false));
+    	cloneUrl.setSsh(urlService.cloneUrlFor(project, true));
     	
     	return cloneUrl;
     }
@@ -143,7 +144,7 @@ public class ProjectResource {
 	@Path("/{projectId}/setting")
     @GET
     public ProjectSetting getSetting(@PathParam("projectId") Long projectId) {
-    	Project project = projectManager.load(projectId);
+    	Project project = projectService.load(projectId);
     	if (!SecurityUtils.canManageProject(project)) 
 			throw new UnauthorizedException();
 		return ProjectSetting.from(project);
@@ -153,7 +154,7 @@ public class ProjectResource {
 	@Path("/{projectId}/forks")
     @GET
     public Collection<Project> getForks(@PathParam("projectId") Long projectId) {
-    	Project project = projectManager.load(projectId);
+    	Project project = projectService.load(projectId);
     	if (!SecurityUtils.canAccessProject(project)) 
 			throw new UnauthorizedException();
     	return project.getForks();
@@ -163,7 +164,7 @@ public class ProjectResource {
 	@Path("/{projectId}/base-authorizations")
     @GET
     public Collection<BaseAuthorization> getBaseAuthorizations(@PathParam("projectId") Long projectId) {
-    	Project project = projectManager.load(projectId);
+    	Project project = projectService.load(projectId);
     	if (!SecurityUtils.canManageProject(project)) 
 			throw new UnauthorizedException();
     	return project.getBaseAuthorizations();
@@ -173,7 +174,7 @@ public class ProjectResource {
 	@Path("/{projectId}/group-authorizations")
     @GET
     public Collection<GroupAuthorization> getGroupAuthorizations(@PathParam("projectId") Long projectId) {
-		var project = projectManager.load(projectId);
+		var project = projectService.load(projectId);
 		if (!SecurityUtils.canManageProject(project))
 			throw new UnauthorizedException();
     	return project.getGroupAuthorizations();
@@ -183,7 +184,7 @@ public class ProjectResource {
 	@Path("/{projectId}/user-authorizations")
     @GET
     public Collection<UserAuthorization> getUserAuthorizations(@PathParam("projectId") Long projectId) {
-    	Project project = projectManager.load(projectId);
+    	Project project = projectService.load(projectId);
     	if (!SecurityUtils.canManageProject(project)) 
 			throw new UnauthorizedException();
     	return project.getUserAuthorizations();
@@ -193,7 +194,7 @@ public class ProjectResource {
 	@Path("/{projectId}/labels")
 	@GET
 	public Collection<ProjectLabel> getLabels(@PathParam("projectId") Long projectId) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		if (!SecurityUtils.canAccessProject(project))
 			throw new UnauthorizedException();
 		return project.getLabels();
@@ -206,7 +207,8 @@ public class ProjectResource {
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 
-		if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)
+		var subject = SecurityUtils.getSubject();
+		if (!SecurityUtils.isAdministrator(subject) && count > RestConstants.MAX_PAGE_SIZE)
     		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	ProjectQuery parsedQuery;
@@ -216,7 +218,7 @@ public class ProjectResource {
 			throw new NotAcceptableException("Error parsing query", e);
 		}
     	
-    	return projectManager.query(parsedQuery, false, offset, count).stream()
+    	return projectService.query(subject, parsedQuery, false, offset, count).stream()
     			.map(ProjectData::from)
     			.collect(Collectors.toList());
     }
@@ -231,7 +233,7 @@ public class ProjectResource {
 										   @QueryParam("dueAfter") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String dueAfter,
 										   @QueryParam("closed") Boolean closed, @QueryParam("offset") @Api(example="0") int offset,
 										   @QueryParam("count") @Api(example="100") int count) {
-    	Project project = projectManager.load(projectId);
+    	Project project = projectService.load(projectId);
     	if (!SecurityUtils.canAccessProject(project)) 
 			throw new UnauthorizedException();
 
@@ -253,7 +255,7 @@ public class ProjectResource {
     	if (closed != null)
     		criteria.add(Restrictions.eq(Iteration.PROP_CLOSED, closed));
     	
-    	return iterationManager.query(criteria, offset, count);
+    	return iterationService.query(criteria, offset, count);
     }
 	
 	@Api(order=760, description="Get top contributors on default branch")
@@ -264,7 +266,7 @@ public class ProjectResource {
     		@QueryParam("sinceDate") @NotEmpty @Api(description="Since date of format <i>yyyy-MM-dd</i>") String since, 
     		@QueryParam("untilDate") @NotEmpty @Api(description="Until date of format <i>yyyy-MM-dd</i>") String until, 
     		@QueryParam("count") int count) {
-    	Project project = projectManager.load(projectId);
+    	Project project = projectService.load(projectId);
     	if (!SecurityUtils.canAccessProject(project)) 
 			throw new UnauthorizedException();
     	
@@ -274,7 +276,7 @@ public class ProjectResource {
     	int sinceDay = (int) LocalDate.parse(since).toEpochDay();
     	int untilDay = (int) LocalDate.parse(until).toEpochDay();
     	
-    	return commitInfoManager.getTopContributors(project.getId(), count, type, sinceDay, untilDay);
+    	return commitInfoService.getTopContributors(project.getId(), count, type, sinceDay, untilDay);
     }
 	
 	@SuppressWarnings("unused")
@@ -286,17 +288,20 @@ public class ProjectResource {
     @POST
     public Long createProject(@NotNull @Valid ProjectData data) {
 		var project = new Project();
-		data.populate(project, projectManager);
+		data.populate(project, projectService);
 		
-		checkProjectCreationPermission(project.getParent());
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+
+		checkProjectCreationPermission(subject, project.getParent());
 	
 		if (project.getParent() != null && project.isSelfOrAncestorOf(project.getParent())) 
 			throw new ExplicitException("Can not use current or descendant project as parent");
 		
 		checkProjectNameDuplication(project);		
-		projectManager.create(project);
+		projectService.create(user, project);
 
-		auditManager.audit(project, "created project via RESTful API", null, VersionedXmlDoc.fromBean(data).toXML());
+		auditService.audit(project, "created project via RESTful API", null, VersionedXmlDoc.fromBean(data).toXML());
 
     	return project.getId();
     }
@@ -305,43 +310,43 @@ public class ProjectResource {
 	@Path("/{projectId}")
 	@POST
 	public Response updateProject(@PathParam("projectId") Long projectId, @NotNull @Valid ProjectData data) {
-		Project project = projectManager.load(projectId);		
+		Project project = projectService.load(projectId);		
 		var oldAuditContent = VersionedXmlDoc.fromBean(ProjectData.from(project)).toXML();
-
-		data.populate(project, projectManager);
+		data.populate(project, projectService);
 		
-		Project parent = data.getParentId() != null? projectManager.load(data.getParentId()) : null;
+		Project parent = data.getParentId() != null? projectService.load(data.getParentId()) : null;
 		Long oldParentId = Project.idOf(project.getParent());
 
+		var subject = SecurityUtils.getSubject();
 		if (!Objects.equals(oldParentId, Project.idOf(parent))) 
-			checkProjectCreationPermission(parent);
+			checkProjectCreationPermission(subject, parent);
 
 		if (parent != null && project.isSelfOrAncestorOf(parent))
 			throw new ExplicitException("Can not use current or descendant project as parent");
 
 		checkProjectNameDuplication(project);
 
-		if (!SecurityUtils.canManageProject(project)) {
+		if (!SecurityUtils.canManageProject(subject, project)) {
 			throw new UnauthorizedException();
 		} else {
-			projectManager.update(project);
-			auditManager.audit(project, "changed project via RESTful API", oldAuditContent, 
+			projectService.update(project);
+			auditService.audit(project, "changed project via RESTful API", oldAuditContent, 
 					VersionedXmlDoc.fromBean(ProjectData.from(project)).toXML());
 		}
 
 		return Response.ok().build();
 	}
 	
-	private void checkProjectCreationPermission(@Nullable Project parent) {
-		if (parent != null && !SecurityUtils.canCreateChildren(parent))
+	private void checkProjectCreationPermission(Subject subject, @Nullable Project parent) {
+		if (parent != null && !SecurityUtils.canCreateChildren(subject, parent))
 			throw new UnauthorizedException("Not authorized to create project under '" + parent.getPath() + "'");
-		if (parent == null && !SecurityUtils.canCreateRootProjects())
+		if (parent == null && !SecurityUtils.canCreateRootProjects(subject))
 			throw new UnauthorizedException("Not authorized to create root project");
 	}
 	
 	private void checkProjectNameDuplication(Project project) {
 		Project parent = project.getParent();
-		Project projectWithSameName = projectManager.find(parent, project.getName());
+		Project projectWithSameName = projectService.find(parent, project.getName());
 		if (projectWithSameName != null && !projectWithSameName.equals(project)) {
 			if (parent != null) {
 				throw new ExplicitException("Name '" + project.getName() + "' is already used by another project under '"
@@ -356,13 +361,13 @@ public class ProjectResource {
 	@Path("/{projectId}/setting")
     @POST
     public Response updateSetting(@PathParam("projectId") Long projectId, @NotNull @Valid ProjectSetting setting) {
-    	Project project = projectManager.load(projectId);
+    	Project project = projectService.load(projectId);
     	if (!SecurityUtils.canManageProject(project)) 
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(ProjectSetting.from(project)).toXML();
 		setting.populate(project);
-		projectManager.update(project);
-		auditManager.audit(project, "changed project settings via RESTful API", oldAuditContent, VersionedXmlDoc.fromBean(setting).toXML());
+		projectService.update(project);
+		auditService.audit(project, "changed project settings via RESTful API", oldAuditContent, VersionedXmlDoc.fromBean(setting).toXML());
 		
 		return Response.ok().build();
     }
@@ -371,14 +376,14 @@ public class ProjectResource {
 	@Path("/{projectId}")
     @DELETE
     public Response deleteProject(@PathParam("projectId") Long projectId) {
-    	Project project = projectManager.load(projectId);
+    	Project project = projectService.load(projectId);
     	if (!SecurityUtils.canManageProject(project))
 			throw new UnauthorizedException();
-    	projectManager.delete(project);
+    	projectService.delete(project);
 		if (project.getParent() != null)
-			auditManager.audit(project.getParent(), "deleted child project \"" + project.getName() + "\" via RESTful API", VersionedXmlDoc.fromBean(ProjectData.from(project)).toXML(), null);
+			auditService.audit(project.getParent(), "deleted child project \"" + project.getName() + "\" via RESTful API", VersionedXmlDoc.fromBean(ProjectData.from(project)).toXML(), null);
 		else
-			auditManager.audit(null, "deleted root project \"" + project.getName() + "\" via RESTful API", VersionedXmlDoc.fromBean(ProjectData.from(project)).toXML(), null);
+			auditService.audit(null, "deleted root project \"" + project.getName() + "\" via RESTful API", VersionedXmlDoc.fromBean(ProjectData.from(project)).toXML(), null);
     	return Response.ok().build();
     }
 	
@@ -586,13 +591,13 @@ public class ProjectResource {
 			this.codeAnalysisSetting = codeAnalysisSetting;
 		}
 
-		public void populate(Project project, ProjectManager projectManager) {
+		public void populate(Project project, ProjectService projectService) {
 			if (parentId != null)
-				project.setParent(projectManager.load(getParentId()));
+				project.setParent(projectService.load(getParentId()));
 			else
 				project.setParent(null);
 			if (forkedFromId != null)
-				project.setForkedFrom(projectManager.load(getForkedFromId()));
+				project.setForkedFrom(projectService.load(getForkedFromId()));
 			else
 				project.setForkedFrom(null);
 			project.setName(getName());

@@ -1,7 +1,7 @@
 package io.onedev.server.event.project.codecomment;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.service.CodeCommentReplyService;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.security.SecurityUtils;
 
@@ -19,7 +19,7 @@ public class CodeCommentReplyEdited extends CodeCommentEvent {
 	}
 	
 	public CodeCommentReply getReply() {
-		return OneDev.getInstance(CodeCommentReplyManager.class).load(replyId);
+		return OneDev.getInstance(CodeCommentReplyService.class).load(replyId);
 	}
 
 	@Override

@@ -23,7 +23,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
@@ -50,7 +50,7 @@ public class IssueStatsPanel extends Panel {
 	}
 	
 	private GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
 	@Override

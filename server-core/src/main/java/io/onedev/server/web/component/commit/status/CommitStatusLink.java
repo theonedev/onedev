@@ -1,18 +1,12 @@
 package io.onedev.server.web.component.commit.status;
 
-import com.google.common.collect.Sets;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.job.JobAuthorizationContext;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Build.Status;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.job.joblist.JobListPanel;
-import io.onedev.server.web.component.link.DropdownLink;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -27,11 +21,19 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import com.google.common.collect.Sets;
+
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.job.JobAuthorizationContext;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.job.joblist.JobListPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 
 public abstract class CommitStatusLink extends DropdownLink {
 
@@ -46,7 +48,7 @@ public abstract class CommitStatusLink extends DropdownLink {
 		@Override
 		protected List<Job> load() {
 			List<Job> jobs = new ArrayList<>();
-			JobAuthorizationContext.push(new JobAuthorizationContext(getProject(), commitId, SecurityUtils.getAuthUser(), getPullRequest()));
+			JobAuthorizationContext.push(new JobAuthorizationContext(getProject(), commitId, getPullRequest()));
 			try {
 				BuildSpec buildSpec = getProject().getBuildSpec(commitId);
 				if (buildSpec != null)

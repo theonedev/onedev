@@ -29,7 +29,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -48,7 +48,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 	
 	public GroovyScriptListPage(PageParameters params) {
 		super(params);
-		scripts = OneDev.getInstance(SettingManager.class).getGroovyScripts();
+		scripts = OneDev.getInstance(SettingService.class).getGroovyScripts();
 	}
 
 	private DataTable<GroovyScript, Void> scriptsTable;
@@ -193,8 +193,8 @@ public class GroovyScriptListPage extends AdministrationPage {
 					public void onClick(AjaxRequestTarget target) {
 						var script = scripts.remove(scriptIndex);
 						var oldAuditContent = VersionedXmlDoc.fromBean(script).toXML();
-						OneDev.getInstance(SettingManager.class).saveGroovyScripts(scripts);
-						getAuditManager().audit(null, "deleted groovy script \"" + script.getName() + "\"", oldAuditContent, null);
+						OneDev.getInstance(SettingService.class).saveGroovyScripts(scripts);
+						auditService.audit(null, "deleted groovy script \"" + script.getName() + "\"", oldAuditContent, null);
 						target.add(scriptsTable);
 					}
 
@@ -230,7 +230,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 				CollectionUtils.move(scripts, from.getItemIndex(), to.getItemIndex());
-				OneDev.getInstance(SettingManager.class).saveGroovyScripts(scripts);
+				OneDev.getInstance(SettingService.class).saveGroovyScripts(scripts);
 				target.add(scriptsTable);
 			}
 			

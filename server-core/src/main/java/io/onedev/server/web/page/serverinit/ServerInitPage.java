@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.serverinit;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ManualConfigStep;
@@ -67,7 +67,7 @@ public class ServerInitPage extends SimplePage {
 								}
 							}
 							WebSession.get().logout();
-							User root = OneDev.getInstance(UserManager.class).getRoot();
+							User root = OneDev.getInstance(UserService.class).getRoot();
 							SecurityUtils.getSubject().runAs(root.getPrincipals());
 							throw new RestartResponseException(HomePage.class);
 						}

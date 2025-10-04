@@ -38,8 +38,8 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueAuthorizationManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.IssueAuthorizationService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.User;
@@ -108,7 +108,7 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 
 			@Override
 			public void query(String term, int page, Response<User> response) {
-				UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();
+				UserCache cache = OneDev.getInstance(UserService.class).cloneCache();
 				
 				List<User> users = new ArrayList<>(cache.getUsers());
 				users.removeAll(getIssue().getAuthorizedUsers());
@@ -142,8 +142,8 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 			protected void onSelect(AjaxRequestTarget target, User selection) {
 				IssueAuthorization authorization = new IssueAuthorization();
 				authorization.setIssue(getIssue());
-				authorization.setUser(OneDev.getInstance(UserManager.class).load(selection.getId()));
-				OneDev.getInstance(IssueAuthorizationManager.class).createOrUpdate(authorization);
+				authorization.setUser(OneDev.getInstance(UserService.class).load(selection.getId()));
+				OneDev.getInstance(IssueAuthorizationService.class).createOrUpdate(authorization);
 				target.add(authorizationsTable);
 				Session.get().success(_T("User authorized"));
 			}
@@ -192,7 +192,7 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						IssueAuthorization authorization = rowModel.getObject();
-						OneDev.getInstance(IssueAuthorizationManager.class).delete(authorization);
+						OneDev.getInstance(IssueAuthorizationService.class).delete(authorization);
 						Session.get().success(MessageFormat.format(_T("User \"{0}\" unauthorized"), authorization.getUser().getDisplayName()));
 						
 						target.add(authorizationsTable);
@@ -220,13 +220,13 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 			public Iterator<? extends IssueAuthorization> iterator(long first, long count) {
 				EntityCriteria<IssueAuthorization> criteria = getCriteria();
 				criteria.addOrder(Order.desc(IssueAuthorization.PROP_ID));
-				return OneDev.getInstance(IssueAuthorizationManager.class).query(criteria, (int)first, 
+				return OneDev.getInstance(IssueAuthorizationService.class).query(criteria, (int)first,
 						(int)count).iterator();
 			}
 
 			@Override
 			public long size() {
-				return OneDev.getInstance(IssueAuthorizationManager.class).count(getCriteria());
+				return OneDev.getInstance(IssueAuthorizationService.class).count(getCriteria());
 			}
 
 			@Override
@@ -236,7 +236,7 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 
 					@Override
 					protected IssueAuthorization load() {
-						return OneDev.getInstance(IssueAuthorizationManager.class).load(id);
+						return OneDev.getInstance(IssueAuthorizationService.class).load(id);
 					}
 					
 				};

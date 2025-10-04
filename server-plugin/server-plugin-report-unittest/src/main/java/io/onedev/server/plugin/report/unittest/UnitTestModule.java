@@ -20,9 +20,9 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildMetricManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.BuildMetricService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.UnitTestMetric;
@@ -53,7 +53,7 @@ public class UnitTestModule extends AbstractPluginModule {
 				Long projectId = build.getProject().getId();
 				Long buildNumber = build.getNumber();
 				
-				return getProjectManager().runOnActiveServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
+				return getProjectService().runOnActiveServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
 						.filter(it->SecurityUtils.canAccessReport(build, it.getTitle()))
 						.collect(Collectors.toList());
 			}
@@ -70,7 +70,7 @@ public class UnitTestModule extends AbstractPluginModule {
 			@Override
 			public List<SidebarMenuItem> getMenuItems(Project project) {
 				List<SidebarMenuItem> menuItems = new ArrayList<>();
-				if (!OneDev.getInstance(BuildMetricManager.class).getAccessibleReportNames(project, UnitTestMetric.class).isEmpty()) {
+				if (!OneDev.getInstance(BuildMetricService.class).getAccessibleReportNames(project, UnitTestMetric.class).isEmpty()) {
 					PageParameters params = UnitTestStatsPage.paramsOf(project);
 					menuItems.add(new SidebarMenuItem.Page(null, "Unit Test", UnitTestStatsPage.class, params));
 				}
@@ -91,14 +91,14 @@ public class UnitTestModule extends AbstractPluginModule {
 		});		
 		
 		contribute(BuildStorageSyncer.class, ((projectId, buildNumber, activeServer) -> {
-			getProjectManager().syncDirectory(projectId, 
+			getProjectService().syncDirectory(projectId, 
 					getProjectRelativeDirPath(buildNumber) + "/" + CATEGORY,
 					getReportLockName(projectId, buildNumber), activeServer);
 		}));
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
 	private static class GetBuildTabs implements ClusterTask<List<BuildTab>> {
@@ -118,7 +118,7 @@ public class UnitTestModule extends AbstractPluginModule {
 		public List<BuildTab> call() {
 			return read(getReportLockName(projectId, buildNumber), () -> {
 				List<BuildTab> tabs = new ArrayList<>();
-				File categoryDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), CATEGORY);
+				File categoryDir = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (!reportDir.isHidden() && !isVersionFile(reportDir)) {

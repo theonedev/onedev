@@ -15,11 +15,12 @@ import org.apache.wicket.markup.html.panel.Panel;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
@@ -60,7 +61,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 						getIssue().getProject(), transition.getPromptFields());
 				Map<String, Object> fieldValues = FieldUtils.getFieldValues(
 						editor.newComponentContext(), fieldBean, editableFields);
-				OneDev.getInstance(IssueChangeManager.class).changeState(getIssue(), 
+				OneDev.getInstance(IssueChangeService.class).changeState(SecurityUtils.getUser(), getIssue(),
 						getToState(), fieldValues, transition.getPromptFields(), transition.getRemoveFields(), null);
 				onSaved(target);
 			}
@@ -100,7 +101,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 
 	@Override
 	public InputSpec getInputSpec(String inputName) {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(inputName);
+		return OneDev.getInstance(SettingService.class).getIssueSetting().getFieldSpec(inputName);
 	}
 	
 	protected abstract Issue getIssue();

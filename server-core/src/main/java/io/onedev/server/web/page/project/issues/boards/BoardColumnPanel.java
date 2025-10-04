@@ -5,7 +5,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
@@ -146,8 +146,9 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 								// move issue between board columns
 								String identifyField = getBoard().getIdentifyField();
 								if (identifyField.equals(Issue.NAME_STATE)) {
+									var subject = SecurityUtils.getSubject();
 									for (TransitionSpec transition: getIssueSetting().getTransitionSpecs()) {
-										if (transition instanceof ManualSpec && ((ManualSpec)transition).canTransit(issue, getColumn())) {
+										if (transition instanceof ManualSpec && ((ManualSpec)transition).canTransit(subject, issue, getColumn())) {
 											issue = SerializationUtils.clone(issue);
 											issue.setState(getColumn());
 											issue.getLastActivity().setDate(new Date());
@@ -242,7 +243,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 						ComponentContext.pop();
 					}
 				} else if (fieldSpec instanceof UserChoiceField) {
-					user = OneDev.getInstance(UserManager.class).findByName(getColumn());
+					user = OneDev.getInstance(UserService.class).findByName(getColumn());
 				}
 			}
 		} else {
@@ -357,16 +358,18 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 				if (card != null) { // Move in same column
 					cardListPanel.onCardDropped(target, issueId, cardIndex, true);
 				} else {
-					Issue issue = getIssueManager().load(issueId);
+					var subject = SecurityUtils.getSubject();
+					var user = SecurityUtils.getUser(subject);
+					Issue issue = getIssueService().load(issueId);
 					String fieldName = getBoard().getIdentifyField();
 					var iteration = getIterationSelection().getIteration();
 					if (iteration != null && !issue.getIterations().contains(iteration)) {
-						getIssueChangeManager().addSchedule(issue, iteration);
+						getIssueChangeService().addSchedule(user, issue, iteration);
 						cardListPanel.onCardDropped(target, issueId, cardIndex, true);
 					} else if (fieldName.equals(Issue.NAME_STATE)) {
 						AtomicReference<ManualSpec> transitionRef = new AtomicReference<>(null);
 						for (TransitionSpec transition : getIssueSetting().getTransitionSpecs()) {
-							if (transition instanceof ManualSpec && ((ManualSpec)transition).canTransit(issue, getColumn())) {
+							if (transition instanceof ManualSpec && ((ManualSpec)transition).canTransit(subject, issue, getColumn())) {
 								transitionRef.set((ManualSpec) transition);
 								break;
 							}
@@ -408,7 +411,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 
 										@Override
 										protected Issue getIssue() {
-											return getIssueManager().load(issueId);
+											return getIssueService().load(issueId);
 										}
 
 										@Override
@@ -426,8 +429,9 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 
 							};
 						} else {
-							getIssueChangeManager().changeState(issue, getColumn(),
-									new HashMap<>(), transitionRef.get().getPromptFields(), transitionRef.get().getRemoveFields(), null);
+							getIssueChangeService().changeState(user, issue, getColumn(),
+									new HashMap<>(), transitionRef.get().getPromptFields(), 
+									transitionRef.get().getRemoveFields(), null);
 							cardListPanel.onCardDropped(target, issueId, cardIndex, true);
 						}
 					} else {
@@ -484,8 +488,8 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 											FieldUtils.newBeanComponentContext(beanDescriptor, bean),
 											bean, FieldUtils.getEditableFields(getProject(), dependentFields)));
 									close();
-									Issue issue = getIssueManager().load(issueId);
-									getIssueChangeManager().changeFields(issue, fieldValues);
+									Issue issue = getIssueService().load(issueId);
+									getIssueChangeService().changeFields(SecurityUtils.getUser(), issue, fieldValues);
 									cardListPanel.onCardDropped(target, issueId, cardIndex, true);
 									return null;
 								}
@@ -498,7 +502,7 @@ abstract class BoardColumnPanel extends AbstractColumnPanel {
 							}
 							new DependentFieldsEditor(target, fieldBean, propertyNames, false, _T("Dependent Fields"));
 						} else {
-							getIssueChangeManager().changeFields(issue, fieldValues);
+							getIssueChangeService().changeFields(user, issue, fieldValues);
 							cardListPanel.onCardDropped(target, issueId, cardIndex, true);
 						}
 					}

@@ -9,7 +9,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 
 public abstract class EntityReference implements Serializable {
@@ -30,7 +30,7 @@ public abstract class EntityReference implements Serializable {
 	}
 	
 	public Project getProject() {
-		return OneDev.getInstance(ProjectManager.class).load(projectId);
+		return OneDev.getInstance(ProjectService.class).load(projectId);
 	}
 
 	public Long getProjectId() {
@@ -59,7 +59,7 @@ public abstract class EntityReference implements Serializable {
 	}
 
 	public static EntityReference of(String type, String referenceString, @Nullable Project currentProject) {
-		var projectManager = OneDev.getInstance(ProjectManager.class);
+		var projectService = OneDev.getInstance(ProjectService.class);
 		var index = referenceString.indexOf('#');
 		if (index != -1) {
 			var projectPath = referenceString.substring(0, index);
@@ -70,7 +70,7 @@ public abstract class EntityReference implements Serializable {
 				else
 					throw new ValidationException("Reference project not specified: " + referenceString);
 			} else {
-				var project = projectManager.findByPath(projectPath);
+				var project = projectService.findByPath(projectPath);
 				if (project != null)
 					return EntityReference.of(type, project, number);
 				else
@@ -81,7 +81,7 @@ public abstract class EntityReference implements Serializable {
 		if (index != -1) {
 			var projectKey = referenceString.substring(0, index);
 			var number = parseReferenceNumber(referenceString.substring(index + 1));
-			var project = projectManager.findByKey(projectKey);
+			var project = projectService.findByKey(projectKey);
 			if (project != null)
 				return EntityReference.of(type, project, number);
 			else

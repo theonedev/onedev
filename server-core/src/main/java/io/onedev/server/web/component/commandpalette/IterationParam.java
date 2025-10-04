@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IterationManager;
+import io.onedev.server.service.IterationService;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.web.page.project.issues.iteration.IterationDetailPage;
 
@@ -33,7 +33,7 @@ public class IterationParam extends ParamSegment {
 	public boolean isExactMatch(String matchWith, Map<String, String> paramValues) {
 		try {
 			Long iterationId = Long.valueOf(matchWith);
-			if (OneDev.getInstance(IterationManager.class).get(iterationId) != null) 
+			if (OneDev.getInstance(IterationService.class).get(iterationId) != null)
 				return true;
 		} catch (NumberFormatException e) {
 		}

@@ -12,10 +12,10 @@ import io.onedev.commons.utils.ExceptionUtils;
 public class SessionInterceptor implements MethodInterceptor {
 
 	@Inject
-	private SessionManager sessionManager;
+	private SessionService sessionService;
 
 	public Object invoke(MethodInvocation mi) throws Throwable {
-		return sessionManager.call(new Callable<Object>() {
+		return sessionService.call(new Callable<Object>() {
 
 			@Override
 			public Object call() throws Exception {

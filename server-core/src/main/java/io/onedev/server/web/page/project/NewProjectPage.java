@@ -22,12 +22,12 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.BaseAuthorizationManager;
-import io.onedev.server.entitymanager.ProjectLabelManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.BaseAuthorizationService;
+import io.onedev.server.service.ProjectLabelService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -67,7 +67,7 @@ public class NewProjectPage extends LayoutPage {
 		LabelsBean labelsBean = new LabelsBean();
 		ParentBean parentBean = new ParentBean();
 		if (parentId != null)
-			parentBean.setParentPath(getProjectManager().load(parentId).getPath());
+			parentBean.setParentPath(getProjectService().load(parentId).getPath());
 		
 		BeanEditor editor = BeanContext.edit("editor", editProject, properties, false);
 		BeanEditor labelsEditor = BeanContext.edit("labelsEditor", labelsBean);
@@ -85,8 +85,8 @@ public class NewProjectPage extends LayoutPage {
 					String projectPath = editProject.getName();
 					if (parentBean.getParentPath() != null)
 						projectPath = parentBean.getParentPath() + "/" + projectPath;
-					Project newProject = getProjectManager().setup(projectPath);
-					if (editProject.getKey() != null && getProjectManager().findByKey(editProject.getKey()) != null) {
+					Project newProject = getProjectService().setup(SecurityUtils.getSubject(), projectPath);
+					if (editProject.getKey() != null && getProjectService().findByKey(editProject.getKey()) != null) {
 						editor.error(new Path(new PathNode.Named(PROP_KEY)),
 								_T("This key has already been used by another project"));
 					}
@@ -102,16 +102,16 @@ public class NewProjectPage extends LayoutPage {
 						newProject.setPackManagement(editProject.isPackManagement());
 						newProject.setTimeTracking(editProject.isTimeTracking());
 						
-						OneDev.getInstance(TransactionManager.class).run(() -> {
-							getProjectManager().create(newProject);
-							OneDev.getInstance(BaseAuthorizationManager.class).syncRoles(newProject, defaultRolesBean.getRoles());
-							OneDev.getInstance(ProjectLabelManager.class).sync(newProject, labelsBean.getLabels());
+						OneDev.getInstance(TransactionService.class).run(() -> {
+							getProjectService().create(SecurityUtils.getUser(), newProject);
+							OneDev.getInstance(BaseAuthorizationService.class).syncRoles(newProject, defaultRolesBean.getRoles());
+							OneDev.getInstance(ProjectLabelService.class).sync(newProject, labelsBean.getLabels());
 
 							var auditData = editor.getPropertyValues();
 							auditData.put("parent", parentBean.getParentPath());
 							auditData.put("labels", labelsBean.getLabels());
 							auditData.put("defaultRoles", defaultRolesBean.getRoleNames());
-							OneDev.getInstance(AuditManager.class).audit(newProject, "created project", null, VersionedXmlDoc.fromBean(newProject).toXML());
+							OneDev.getInstance(AuditService.class).audit(newProject, "created project", null, VersionedXmlDoc.fromBean(newProject).toXML());
 						});
 						
 						Session.get().success(_T("New project created"));
@@ -140,8 +140,8 @@ public class NewProjectPage extends LayoutPage {
 		add(form);
 	}
 
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
 	@Override

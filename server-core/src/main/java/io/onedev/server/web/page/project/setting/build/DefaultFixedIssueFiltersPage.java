@@ -12,7 +12,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 
@@ -39,8 +39,8 @@ public class DefaultFixedIssueFiltersPage extends ProjectBuildSettingPage {
 				super.onSubmit();
 				var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 				getProject().getBuildSetting().setDefaultFixedIssueFilters(bean.getDefaultFixedIssueFilters());
-				OneDev.getInstance(ProjectManager.class).update(getProject());
-				getAuditManager().audit(getProject(), "changed default fixed issue filters", oldAuditContent, newAuditContent);
+				OneDev.getInstance(ProjectService.class).update(getProject());
+				auditService.audit(getProject(), "changed default fixed issue filters", oldAuditContent, newAuditContent);
 				setResponsePage(DefaultFixedIssueFiltersPage.class, 
 						DefaultFixedIssueFiltersPage.paramsOf(getProject()));
 				getSession().success(_T("Default fixed issue filters saved"));

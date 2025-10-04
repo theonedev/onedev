@@ -2,8 +2,8 @@ package io.onedev.server.git.signatureverification.ssh;
 
 import com.trilead.ssh2.packets.TypesReader;
 import com.trilead.ssh2.packets.TypesWriter;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.SshKeyService;
 import io.onedev.server.git.signatureverification.SignatureVerifier;
 import io.onedev.server.git.signatureverification.VerificationResult;
 import io.onedev.server.exception.ExceptionUtils;
@@ -26,14 +26,14 @@ import static org.bouncycastle.crypto.util.OpenSSHPublicKeyUtil.parsePublicKey;
 @Singleton
 public class SshSignatureVerifier implements SignatureVerifier {
 	
-	private final SshKeyManager sshKeyManager;
+	private final SshKeyService sshKeyService;
 	
-	private final EmailAddressManager emailAddressManager;
+	private final EmailAddressService emailAddressService;
 	
 	@Inject
-	public SshSignatureVerifier(SshKeyManager sshKeyManager, EmailAddressManager emailAddressManager) {
-		this.sshKeyManager = sshKeyManager;
-		this.emailAddressManager = emailAddressManager;
+	public SshSignatureVerifier(SshKeyService sshKeyService, EmailAddressService emailAddressService) {
+		this.sshKeyService = sshKeyService;
+		this.emailAddressService = emailAddressService;
 	}
 
 	@Override
@@ -52,11 +52,11 @@ public class SshSignatureVerifier implements SignatureVerifier {
 			var fingerprint = getFingerPrint(BuiltinDigests.sha256, publicKeyBytes);
 			var keyInfo = new SshKeyInfo(keyType, fingerprint);
 			
-			var sshKey = sshKeyManager.findByFingerprint(fingerprint);
+			var sshKey = sshKeyService.findByFingerprint(fingerprint);
 			if (sshKey == null)
 				return new SshVerificationFailed(keyInfo, _T("Signed with an unknown ssh key"));
 			
-			var emailAddress = emailAddressManager.findByValue(emailAddressValue);
+			var emailAddress = emailAddressService.findByValue(emailAddressValue);
 			if (emailAddress == null 
 					|| !emailAddress.isVerified() 
 					|| !emailAddress.getOwner().equals(sshKey.getOwner())) {

@@ -65,9 +65,9 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.event.project.CommitIndexed;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobContent;
@@ -87,8 +87,8 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.search.code.CodeIndexManager;
-import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.CodeIndexService;
+import io.onedev.server.search.code.CodeSearchService;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TextQuery;
@@ -250,9 +250,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 				if (resolvedRevision != null) {
 					RevCommit commit = getProject().getRevCommit(resolvedRevision, true);
-					CodeIndexManager indexManager = OneDev.getInstance(CodeIndexManager.class);
-					if (!indexManager.isIndexed(getProject().getId(), commit)) {
-						OneDev.getInstance(CodeIndexManager.class).indexAsync(getProject().getId(), commit);
+					CodeIndexService indexService = OneDev.getInstance(CodeIndexService.class);
+					if (!indexService.isIndexed(getProject().getId(), commit)) {
+						OneDev.getInstance(CodeIndexService.class).indexAsync(getProject().getId(), commit);
 						setVisible(true);
 					} else {
 						setVisible(false);
@@ -289,14 +289,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 		List<QueryHit> queryHits;
 		if (state.query != null) {
-			int maxQueryEntries = getSettingManager().getPerformanceSetting().getMaxCodeSearchEntries();
+			int maxQueryEntries = getSettingService().getPerformanceSetting().getMaxCodeSearchEntries();
 			BlobQuery query = new TextQuery.Builder(state.query)
 					.wholeWord(true)
 					.caseSensitive(true)
 					.count(maxQueryEntries)
 					.build();
-			CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
-			queryHits = searchManager.search(projectModel.getObject(), 
+			CodeSearchService searchService = OneDev.getInstance(CodeSearchService.class);
+			queryHits = searchService.search(projectModel.getObject(), 
 					getProject().getRevCommit(resolvedRevision, true), query);
 		} else {
 			queryHits = null;
@@ -364,7 +364,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	@Override
 	public CodeComment getOpenComment() {
 		if (state.commentId != null)
-			return OneDev.getInstance(CodeCommentManager.class).load(state.commentId);
+			return OneDev.getInstance(CodeCommentService.class).load(state.commentId);
 		else
 			return null;
 	}
@@ -1583,8 +1583,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		}
 	}
 	
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 
 	@Override
@@ -1631,14 +1631,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	@Override
 	public PullRequest getPullRequest() {
 		if (state.requestId != null)
-			return OneDev.getInstance(PullRequestManager.class).load(state.requestId);
+			return OneDev.getInstance(PullRequestService.class).load(state.requestId);
 		else
 			return null;
 	}
 
 	@Override
 	public JobAuthorizationContext getJobAuthorizationContext() {
-		return new JobAuthorizationContext(getProject(), getCommit(), SecurityUtils.getAuthUser(), null);
+		return new JobAuthorizationContext(getProject(), getCommit(), null);
 	}
 
 	@Override

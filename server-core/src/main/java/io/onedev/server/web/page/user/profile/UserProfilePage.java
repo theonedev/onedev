@@ -12,7 +12,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateRange;
@@ -36,7 +36,7 @@ public class UserProfilePage extends UserPage {
     @Override
     protected boolean isPermitted() {
         return SecurityUtils.getAuthUser() != null 
-                || OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableAnonymousAccess();
+                || OneDev.getInstance(SettingService.class).getSecuritySetting().isEnableAnonymousAccess();
     }
 
     @Override

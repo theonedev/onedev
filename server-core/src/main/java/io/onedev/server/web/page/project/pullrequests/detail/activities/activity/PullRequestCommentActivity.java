@@ -5,7 +5,7 @@ import java.util.Date;
 import org.apache.wicket.Component;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestCommentManager;
+import io.onedev.server.service.PullRequestCommentService;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivity;
 
@@ -24,7 +24,7 @@ public class PullRequestCommentActivity implements PullRequestActivity {
 
 	
 	public PullRequestComment getComment() {
-		return OneDev.getInstance(PullRequestCommentManager.class).load(commentId);
+		return OneDev.getInstance(PullRequestCommentService.class).load(commentId);
 	}
 
 	@Override

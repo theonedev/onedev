@@ -13,11 +13,12 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.pullrequest.FuzzyCriteria;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedQuery;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.emoji.Emojis;
@@ -40,9 +41,9 @@ public abstract class PullRequestChoiceProvider extends ChoiceProvider<PullReque
 	@Override
 	public Collection<PullRequest> toChoices(Collection<String> ids) {
 		List<PullRequest> requests = Lists.newArrayList();
-		PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
+		PullRequestService pullRequestService = OneDev.getInstance(PullRequestService.class);
 		for (String id: ids) {
-			PullRequest request = pullRequestManager.load(Long.valueOf(id)); 
+			PullRequest request = pullRequestService.load(Long.valueOf(id)); 
 			Hibernate.initialize(request);
 			requests.add(request);
 		}
@@ -54,8 +55,9 @@ public abstract class PullRequestChoiceProvider extends ChoiceProvider<PullReque
 		int count = (page+1) * WebConstants.PAGE_SIZE + 1;
 		var scopedQuery = ProjectScopedQuery.of(getProject(), term, '#', '-');
 		if (scopedQuery != null) {
-			List<PullRequest> requests = OneDev.getInstance(PullRequestManager.class)
-					.query(scopedQuery.getProject(), new PullRequestQuery(new FuzzyCriteria(scopedQuery.getQuery())), false, 0, count);
+			var subject = SecurityUtils.getSubject();
+			List<PullRequest> requests = OneDev.getInstance(PullRequestService.class)
+					.query(subject, scopedQuery.getProject(), new PullRequestQuery(new FuzzyCriteria(scopedQuery.getQuery())), false, 0, count);
 			new ResponseFiller<>(response).fill(requests, page, WebConstants.PAGE_SIZE);
 		} else {
 			response.setHasMore(false);

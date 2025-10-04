@@ -18,8 +18,8 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import io.onedev.server.SubscriptionManager;
-import io.onedev.server.entitymanager.IssueWorkManager;
+import io.onedev.server.SubscriptionService;
+import io.onedev.server.service.IssueWorkService;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -30,23 +30,23 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class IssueWorkResource {
 
-	private final IssueWorkManager workManager;
+	private final IssueWorkService workService;
 	
-	private final SubscriptionManager subscriptionManager;
+	private final SubscriptionService subscriptionService;
 	
 	@Inject
-	public IssueWorkResource(IssueWorkManager workManager, SubscriptionManager subscriptionManager) {
-		this.workManager = workManager;
-		this.subscriptionManager = subscriptionManager;
+	public IssueWorkResource(IssueWorkService workService, SubscriptionService subscriptionService) {
+		this.workService = workService;
+		this.subscriptionService = subscriptionService;
 	}
 
 	@Api(order=100)
 	@Path("/{workId}")
 	@GET
 	public IssueWork getWork(@PathParam("workId") Long workId) {
-		if (!subscriptionManager.isSubscriptionActive())
+		if (!subscriptionService.isSubscriptionActive())
 			throw new UnsupportedOperationException("This feature requires an active subscription");
-		IssueWork work = workManager.load(workId);
+		IssueWork work = workService.load(workId);
     	if (!SecurityUtils.canAccessIssue(work.getIssue()))  
 			throw new UnauthorizedException();
     	return work;
@@ -55,7 +55,7 @@ public class IssueWorkResource {
 	@Api(order=200, description="Log new issue work")
 	@POST
 	public Long createWork(@NotNull IssueWork work) {
-		if (!subscriptionManager.isSubscriptionActive()) 
+		if (!subscriptionService.isSubscriptionActive()) 
 			throw new NotAcceptableException("This feature requires an active subscription");
 		if (!work.getIssue().getProject().isTimeTracking())
 			throw new NotAcceptableException("Time tracking not enabled for project");
@@ -64,7 +64,7 @@ public class IssueWorkResource {
 				|| !SecurityUtils.isAdministrator() && !work.getUser().equals(SecurityUtils.getAuthUser())) {
 			throw new UnauthorizedException();
 		}
-		workManager.createOrUpdate(work);
+		workService.createOrUpdate(work);
 		
 		return work.getId();
 	}
@@ -76,7 +76,7 @@ public class IssueWorkResource {
 		if (!canModifyOrDelete(work)) 
 			throw new UnauthorizedException();
 		
-		workManager.createOrUpdate(work);
+		workService.createOrUpdate(work);
 
 		return Response.ok().build();
 	}
@@ -85,10 +85,10 @@ public class IssueWorkResource {
 	@Path("/{workId}")
 	@DELETE
 	public Response deleteWork(@PathParam("workId") Long workId) {
-		var work = workManager.load(workId);
+		var work = workService.load(workId);
 		if (!canModifyOrDelete(work)) 
 			throw new UnauthorizedException();
-		workManager.delete(work);
+		workService.delete(work);
 		return Response.ok().build();
 	}
 	

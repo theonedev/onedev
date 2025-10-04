@@ -4,13 +4,13 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.mail.MailManager;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
+import io.onedev.server.mail.MailService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.component.taskbutton.TaskResult;
@@ -89,10 +89,10 @@ public class PasswordResetPage extends SimplePage {
 
 				@Override
 				protected TaskResult runTask(TaskLogger logger) {
-					return OneDev.getInstance(SessionManager.class).call(() -> {
-						User user = getUserManager().findByName(loginNameOrEmail);
+					return OneDev.getInstance(SessionService.class).call(() -> {
+						User user = getUserService().findByName(loginNameOrEmail);
 						if (user == null) 
-							user = getUserManager().findByVerifiedEmailAddress(loginNameOrEmail);
+							user = getUserService().findByVerifiedEmailAddress(loginNameOrEmail);
 						if (user == null) {
 							throw new ExplicitException(_T("No user found with login name or email: ") + loginNameOrEmail);
 						} else if (user.isServiceAccount() || user.isDisabled()) {
@@ -100,19 +100,19 @@ public class PasswordResetPage extends SimplePage {
 						} else if (user.getPassword() == null) {
 							throw new ExplicitException(_T("Can not reset password for user authenticating via external system"));
 						} else {
-							SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-							if (settingManager.getMailService() != null) {
+							SettingService settingService = OneDev.getInstance(SettingService.class);
+							if (settingService.getMailConnector() != null) {
 								String passwordResetCode = CryptoUtils.generateSecret();
 								user.setPasswordResetCode(passwordResetCode);
-								getUserManager().update(user, null);
+								getUserService().update(user, null);
 
-								MailManager mailManager = OneDev.getInstance(MailManager.class);
+								MailService mailService = OneDev.getInstance(MailService.class);
 
 								Map<String, Object> bindings = new HashMap<>();
-								bindings.put("passwordResetUrl", settingManager.getSystemSetting().getServerUrl() + "/~reset-password/" + passwordResetCode);
+								bindings.put("passwordResetUrl", settingService.getSystemSetting().getServerUrl() + "/~reset-password/" + passwordResetCode);
 								bindings.put("user", user);
 
-								var template = settingManager.getEmailTemplates().getPasswordReset();
+								var template = settingService.getEmailTemplates().getPasswordReset();
 								var htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
 								var textBody = EmailTemplates.evalTemplate(false, template, bindings);
 
@@ -129,7 +129,7 @@ public class PasswordResetPage extends SimplePage {
 										emailAddressValue = emailAddress.getValue();
 								}
 
-								mailManager.sendMail(Arrays.asList(emailAddressValue),
+								mailService.sendMail(Arrays.asList(emailAddressValue),
 										Lists.newArrayList(), Lists.newArrayList(),
 										"[Password Reset] You are Requesting to Reset Your OneDev Password",
 										htmlBody, textBody, null, null, null);
@@ -155,7 +155,7 @@ public class PasswordResetPage extends SimplePage {
 
 			fragment.add(form);
 		} else {
-			var userId = User.idOf(getUserManager().findByPasswordResetCode(passwordResetCode));
+			var userId = User.idOf(getUserService().findByPasswordResetCode(passwordResetCode));
 			if (userId != null) {
 				var fragment = new Fragment("content", "resetFrag", this);
 				add(fragment);
@@ -164,10 +164,10 @@ public class PasswordResetPage extends SimplePage {
 					@Override
 					protected void onSubmit() {
 						super.onSubmit();
-						var user = getUserManager().load(userId);
+						var user = getUserService().load(userId);
 						user.setPasswordResetCode(null);
 						user.setPassword(OneDev.getInstance(PasswordService.class).encryptPassword(bean.getNewPassword()));
-						getUserManager().update(user, null);
+						getUserService().update(user, null);
 						Session.get().success(_T("Password changed. Please login with your new password"));
 						setResponsePage(LoginPage.class);
 					}
@@ -188,8 +188,8 @@ public class PasswordResetPage extends SimplePage {
 		}  
 	}
 	
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 	
 	@Override

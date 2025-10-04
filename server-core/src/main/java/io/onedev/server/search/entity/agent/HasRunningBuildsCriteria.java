@@ -9,7 +9,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.ProjectScope;
@@ -28,7 +28,7 @@ public class HasRunningBuildsCriteria extends Criteria<Agent> {
 
 	@Override
 	public boolean matches(Agent agent) {
-		return !OneDev.getInstance(BuildManager.class).query(agent, Build.Status.RUNNING).isEmpty();
+		return !OneDev.getInstance(BuildService.class).query(agent, Build.Status.RUNNING).isEmpty();
 	}
 
 	@Override

@@ -29,8 +29,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.SsoProviderManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.SsoProviderService;
 import io.onedev.server.model.SsoProvider;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
@@ -99,8 +99,8 @@ public class SsoProviderListPage extends AdministrationPage {
 					public void onClick(AjaxRequestTarget target) {
 						SsoProvider provider = rowModel.getObject();
 						var oldAuditContent = VersionedXmlDoc.fromBean(provider).toXML();
-						getSsoProviderManager().delete(provider);
-						OneDev.getInstance(AuditManager.class).audit(null, "deleted SSO provider \"" + provider.getName() + "\"", oldAuditContent, null);
+						getSsoProviderService().delete(provider);
+						OneDev.getInstance(AuditService.class).audit(null, "deleted SSO provider \"" + provider.getName() + "\"", oldAuditContent, null);
 						Session.get().success(MessageFormat.format(_T("SSO provider \"{0}\" deleted"), provider.getName()));
 						target.add(providersTable);
 					}
@@ -120,12 +120,12 @@ public class SsoProviderListPage extends AdministrationPage {
 
 			@Override
 			public Iterator<? extends SsoProvider> iterator(long first, long count) {
-				return getSsoProviderManager().query().iterator();
+				return getSsoProviderService().query().iterator();
 			}
 
 			@Override
 			public long size() {
-				return getSsoProviderManager().count();
+				return getSsoProviderService().count();
 			}
 
 			@Override
@@ -135,7 +135,7 @@ public class SsoProviderListPage extends AdministrationPage {
 
 					@Override
 					protected SsoProvider load() {
-						return getSsoProviderManager().load(id);
+						return getSsoProviderService().load(id);
 					}
 
 				};
@@ -146,8 +146,8 @@ public class SsoProviderListPage extends AdministrationPage {
 		providersTable.setOutputMarkupId(true);
 	}
 
-	private SsoProviderManager getSsoProviderManager() {
-		return OneDev.getInstance(SsoProviderManager.class);
+	private SsoProviderService getSsoProviderService() {
+		return OneDev.getInstance(SsoProviderService.class);
 	}
 
 	@Override

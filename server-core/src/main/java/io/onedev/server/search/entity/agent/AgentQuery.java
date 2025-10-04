@@ -32,7 +32,7 @@ import org.antlr.v4.runtime.Recognizer;
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentAttributeManager;
+import io.onedev.server.service.AgentAttributeService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
@@ -232,7 +232,7 @@ public class AgentQuery extends EntityQuery<Agent> {
 	}
 
 	public static void checkField(String fieldName, int operator) {
-		var attributeNames = OneDev.getInstance(AgentAttributeManager.class).getAttributeNames();
+		var attributeNames = OneDev.getInstance(AgentAttributeService.class).getAttributeNames();
 		if (!QUERY_FIELDS.contains(fieldName) && !attributeNames.contains(fieldName))
 			throw new ExplicitException("Attribute not found: " + fieldName);
 	}

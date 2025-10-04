@@ -5,9 +5,9 @@ import io.onedev.commons.bootstrap.Command;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.ZipUtils;
-import io.onedev.server.data.DataManager;
+import io.onedev.server.data.DataService;
 import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.persistence.SessionFactoryManager;
+import io.onedev.server.persistence.SessionFactoryService;
 import io.onedev.server.security.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,20 +26,20 @@ public class RestoreDatabase extends CommandHandler {
 	
 	public static final String COMMAND = "restore-db";
 	
-	private final DataManager dataManager;
+	private final DataService dataService;
 	
-	private final SessionFactoryManager sessionFactoryManager;
+	private final SessionFactoryService sessionFactoryService;
 	
 	private final HibernateConfig hibernateConfig;
 	
 	private File backupFile;
 	
 	@Inject
-	public RestoreDatabase(DataManager dataManager, SessionFactoryManager sessionFactoryManager,
+	public RestoreDatabase(DataService dataService, SessionFactoryService sessionFactoryService,
                            HibernateConfig hibernateConfig) {
 		super(hibernateConfig);
-		this.dataManager = dataManager;
-		this.sessionFactoryManager = sessionFactoryManager;
+		this.dataService = dataService;
+		this.sessionFactoryService = sessionFactoryService;
 		this.hibernateConfig = hibernateConfig;
 	}
 
@@ -65,7 +65,7 @@ public class RestoreDatabase extends CommandHandler {
 
 		try {
 			doMaintenance(() -> {
-				sessionFactoryManager.start();
+				sessionFactoryService.start();
 
 				if (backupFile.isFile()) {
 					File dataDir = FileUtils.createTempDir("restore");
@@ -97,19 +97,19 @@ public class RestoreDatabase extends CommandHandler {
 	}
 
 	private void doRestore(File dataDir) {
-		dataManager.migrateData(dataDir);
+		dataService.migrateData(dataDir);
 		
-		try (var conn = dataManager.openConnection()) {
+		try (var conn = dataService.openConnection()) {
 			callWithTransaction(conn, () -> {
-				String dbDataVersion = dataManager.checkDataVersion(conn, true);
+				String dbDataVersion = dataService.checkDataVersion(conn, true);
 
 				if (dbDataVersion != null) {
 					logger.info("Cleaning database...");
-					dataManager.cleanDatabase(conn);
+					dataService.cleanDatabase(conn);
 				}
 
 				logger.info("Creating tables...");
-				dataManager.createTables(conn);
+				dataService.createTables(conn);
 
 				return null;
 			});
@@ -118,13 +118,13 @@ public class RestoreDatabase extends CommandHandler {
 		}
 				
 		logger.info("Importing data into database...");
-		dataManager.importData(dataDir);
+		dataService.importData(dataDir);
 
-		try (var conn = dataManager.openConnection()) {
+		try (var conn = dataService.openConnection()) {
 			callWithTransaction(conn, () -> {
 				logger.info("Applying foreign key constraints...");
 				try {
-					dataManager.applyConstraints(conn);
+					dataService.applyConstraints(conn);
 				} catch (Exception e) {
 					var message = String.format("Failed to apply database constraints. If this error is caused by " +
 							"foreign key constraint violations, you may fix it via your database sql tool, and " +
@@ -141,7 +141,7 @@ public class RestoreDatabase extends CommandHandler {
 
 	@Override
 	public void stop() {
-		sessionFactoryManager.stop();
+		sessionFactoryService.stop();
 	}
 	
 }

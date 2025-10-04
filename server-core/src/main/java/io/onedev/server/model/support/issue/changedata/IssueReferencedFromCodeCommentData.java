@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Group;
@@ -58,7 +58,7 @@ public class IssueReferencedFromCodeCommentData extends IssueChangeData implemen
 
 	@Override
 	public CodeComment getReferencedFrom() {
-		return OneDev.getInstance(CodeCommentManager.class).get(commentId);
+		return OneDev.getInstance(CodeCommentService.class).get(commentId);
 	}
 
 }

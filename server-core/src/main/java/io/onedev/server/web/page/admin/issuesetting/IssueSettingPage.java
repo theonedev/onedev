@@ -6,7 +6,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -17,7 +17,7 @@ public abstract class IssueSettingPage extends AdministrationPage {
 	
 	public IssueSettingPage(PageParameters params) {
 		super(params);
-		setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		setting = OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 
 	@Override

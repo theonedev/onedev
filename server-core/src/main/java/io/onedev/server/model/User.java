@@ -43,9 +43,9 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.annotation.UserName;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.TwoFactorAuthentication;
@@ -319,7 +319,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 			
 			@Override
 			public void onUpdated() {
-				OneDev.getInstance(UserManager.class).update(User.this, null);
+				OneDev.getInstance(UserService.class).update(User.this, null);
 			}
 			
 		};
@@ -367,7 +367,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 			@Override
 			public void onUpdated() {
-				OneDev.getInstance(UserManager.class).update(User.this, null);
+				OneDev.getInstance(UserService.class).update(User.this, null);
 			}
 			
 		};
@@ -415,7 +415,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 			@Override
 			public void onUpdated() {
-				OneDev.getInstance(UserManager.class).update(User.this, null);
+				OneDev.getInstance(UserService.class).update(User.this, null);
 			}
 			
 		};
@@ -463,7 +463,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 			@Override
 			public void onUpdated() {
-				OneDev.getInstance(UserManager.class).update(User.this, null);
+				OneDev.getInstance(UserService.class).update(User.this, null);
 			}
 			
 		};
@@ -511,7 +511,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 			@Override
 			public void onUpdated() {
-				OneDev.getInstance(UserManager.class).update(User.this, null);
+				OneDev.getInstance(UserService.class).update(User.this, null);
 			}
 
 		};
@@ -1062,7 +1062,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	}
 
 	public boolean isEnforce2FA() {
-		return OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnforce2FA() 
+		return OneDev.getInstance(SettingService.class).getSecuritySetting().isEnforce2FA()
 				|| getGroups().stream().anyMatch(it->it.isEnforce2FA());
 	}
 
@@ -1074,28 +1074,28 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		return sortedEmailAddresses;
 	}
 	
-	private EmailAddressManager getEmailAddressManager() {
-		return OneDev.getInstance(EmailAddressManager.class);
+	private EmailAddressService getEmailAddressService() {
+		return OneDev.getInstance(EmailAddressService.class);
 	}
 	
 	@Nullable
 	public EmailAddress getPrimaryEmailAddress() {
 		if (primaryEmailAddress == null)
-			primaryEmailAddress = Optional.ofNullable(getEmailAddressManager().findPrimary(this));
+			primaryEmailAddress = Optional.ofNullable(getEmailAddressService().findPrimary(this));
 		return primaryEmailAddress.orElse(null);
 	}
 
 	@Nullable
 	public EmailAddress getGitEmailAddress() {
 		if (gitEmailAddress == null)
-			gitEmailAddress = Optional.ofNullable(getEmailAddressManager().findGit(this));
+			gitEmailAddress = Optional.ofNullable(getEmailAddressService().findGit(this));
 		return gitEmailAddress.orElse(null);
 	}
 
 	@Nullable
 	public EmailAddress getPublicEmailAddress() {
 		if (publicEmailAddress == null)
-			publicEmailAddress = Optional.ofNullable(getEmailAddressManager().findPublic(this));
+			publicEmailAddress = Optional.ofNullable(getEmailAddressService().findPublic(this));
 		return publicEmailAddress.orElse(null);
 	}
 

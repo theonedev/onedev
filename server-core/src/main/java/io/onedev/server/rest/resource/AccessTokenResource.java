@@ -24,8 +24,8 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AccessTokenManager;
-import io.onedev.server.entitymanager.AuditManager;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.AuditService;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.AccessTokenAuthorization;
 import io.onedev.server.rest.annotation.Api;
@@ -36,21 +36,21 @@ import io.onedev.server.rest.annotation.Api;
 @Singleton
 public class AccessTokenResource {
 	
-	private final AccessTokenManager accessTokenManager;
+	private final AccessTokenService accessTokenService;
 
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 	
 	@Inject
-	public AccessTokenResource(AccessTokenManager accessTokenManager, AuditManager auditManager) {
-		this.accessTokenManager = accessTokenManager;
-		this.auditManager = auditManager;
+	public AccessTokenResource(AccessTokenService accessTokenService, AuditService auditService) {
+		this.accessTokenService = accessTokenService;
+		this.auditService = auditService;
 	}
 
 	@Api(order=100)
 	@Path("/{accessTokenId}")
 	@GET
 	public AccessToken getToken(@PathParam("accessTokenId") Long accessTokenId) {
-		var accessToken = accessTokenManager.load(accessTokenId);
+		var accessToken = accessTokenService.load(accessTokenId);
     	if (!isAdministrator() && !accessToken.getOwner().equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return accessToken;
@@ -60,7 +60,7 @@ public class AccessTokenResource {
 	@Path("/{accessTokenId}/authorizations")
 	@GET
 	public Collection<AccessTokenAuthorization> getAuthorizations(@PathParam("accessTokenId") Long accessTokenId) {
-		var accessToken = accessTokenManager.load(accessTokenId);
+		var accessToken = accessTokenService.load(accessTokenId);
 		if (!isAdministrator() && !accessToken.getOwner().equals(getAuthUser()))
 			throw new UnauthorizedException();
 		return accessToken.getAuthorizations();
@@ -75,14 +75,14 @@ public class AccessTokenResource {
 		else if (owner.isDisabled())
 			throw new ExplicitException("Can not create access token for disabled user");
 		
-		if (accessTokenManager.findByOwnerAndName(owner, accessToken.getName()) != null)
+		if (accessTokenService.findByOwnerAndName(owner, accessToken.getName()) != null)
 			throw new ExplicitException("Name already used by another access token of the owner");
 			
-		accessTokenManager.createOrUpdate(accessToken);
+		accessTokenService.createOrUpdate(accessToken);
 
 		if (!getAuthUser().equals(owner)) {
 			var newAuditContent = VersionedXmlDoc.fromBean(accessToken.getFacade()).toXML();
-			auditManager.audit(null, "created access token \"" + accessToken.getName() + "\" in account \"" + owner.getName() + "\" via RESTful API", 
+			auditService.audit(null, "created access token \"" + accessToken.getName() + "\" in account \"" + owner.getName() + "\" via RESTful API", 
 					null, newAuditContent);
 		}
 
@@ -97,16 +97,16 @@ public class AccessTokenResource {
 		if (!isAdministrator() && !owner.equals(getAuthUser()))
 			throw new UnauthorizedException();
 
-		var accessTokenWithSameName = accessTokenManager.findByOwnerAndName(owner, accessToken.getName());
+		var accessTokenWithSameName = accessTokenService.findByOwnerAndName(owner, accessToken.getName());
 		if (accessTokenWithSameName != null && !accessTokenWithSameName.equals(accessToken))
 			throw new BadRequestException("Name already used by another access token of the owner");
 		
-		accessTokenManager.createOrUpdate(accessToken);
+		accessTokenService.createOrUpdate(accessToken);
 
 		if (!getAuthUser().equals(owner)) {
 			var oldAuditContent = accessToken.getOldVersion().toXML();
 			var newAuditContent = VersionedXmlDoc.fromBean(accessToken).toXML();
-			auditManager.audit(null, "changed access token \"" + accessToken.getName() + "\" in account \"" + owner.getName() + "\" via RESTful API", 
+			auditService.audit(null, "changed access token \"" + accessToken.getName() + "\" in account \"" + owner.getName() + "\" via RESTful API", 
 					oldAuditContent, newAuditContent);
 		}
 		return Response.ok().build();
@@ -116,14 +116,14 @@ public class AccessTokenResource {
 	@Path("/{accessTokenId}")
 	@DELETE
 	public Response deleteToken(@PathParam("accessTokenId") Long accessTokenId) {
-		var accessToken = accessTokenManager.load(accessTokenId);
+		var accessToken = accessTokenService.load(accessTokenId);
 		if (!isAdministrator() && !accessToken.getOwner().equals(getAuthUser())) 
 			throw new UnauthorizedException();
-		accessTokenManager.delete(accessToken);
+		accessTokenService.delete(accessToken);
 
 		if (!getAuthUser().equals(accessToken.getOwner())) {
 			var oldAuditContent = VersionedXmlDoc.fromBean(accessToken.getFacade()).toXML();
-			auditManager.audit(null, "deleted access token \"" + accessToken.getName() + "\" from account \"" + accessToken.getOwner().getName() + "\" via RESTful API", 
+			auditService.audit(null, "deleted access token \"" + accessToken.getName() + "\" from account \"" + accessToken.getOwner().getName() + "\" via RESTful API", 
 					oldAuditContent, null);
 		}
 		return Response.ok().build();

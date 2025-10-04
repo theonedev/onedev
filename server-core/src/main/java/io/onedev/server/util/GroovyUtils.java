@@ -8,7 +8,7 @@ import groovy.text.SimpleTemplateEngine;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GroovyScript;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.slf4j.Logger;
@@ -76,7 +76,7 @@ public class GroovyUtils {
         		}
         	}
     	} else {
-        	for (GroovyScript each: OneDev.getInstance(SettingManager.class).getGroovyScripts()) {
+        	for (GroovyScript each: OneDev.getInstance(SettingService.class).getGroovyScripts()) {
         		if (each.getName().equals(scriptName)) {
         			script = each;
         			break;

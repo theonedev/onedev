@@ -26,8 +26,8 @@ import org.apache.shiro.authz.UnauthorizedException;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildLabel;
@@ -46,21 +46,21 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class BuildResource {
 
-	private final BuildManager buildManager;
+	private final BuildService buildService;
 	
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 	
 	@Inject
-	public BuildResource(BuildManager buildManager, AuditManager auditManager) {
-		this.buildManager = buildManager;
-		this.auditManager = auditManager;
+	public BuildResource(BuildService buildService, AuditService auditService) {
+		this.buildService = buildService;
+		this.auditService = auditService;
 	}
 
 	@Api(order=100)
 	@Path("/{buildId}")
     @GET
     public Build getBuild(@PathParam("buildId") Long buildId) {
-		Build build = buildManager.load(buildId);
+		Build build = buildService.load(buildId);
     	if (!SecurityUtils.canAccessBuild(build)) 
 			throw new UnauthorizedException();
     	return build;
@@ -70,7 +70,7 @@ public class BuildResource {
 	@Path("/{buildId}/labels")
 	@GET
 	public Collection<BuildLabel> getLabels(@PathParam("buildId") Long buildId) {
-		Build build = buildManager.load(buildId);
+		Build build = buildService.load(buildId);
 		if (!SecurityUtils.canAccessBuild(build))
 			throw new UnauthorizedException();
 		return build.getLabels();
@@ -80,7 +80,7 @@ public class BuildResource {
 	@Path("/{buildId}/params")
     @GET
     public Collection<BuildParam> getParams(@PathParam("buildId") Long buildId) {
-		Build build = buildManager.load(buildId);
+		Build build = buildService.load(buildId);
     	if (!SecurityUtils.canAccessBuild(build)) 
 			throw new UnauthorizedException();
     	
@@ -97,7 +97,7 @@ public class BuildResource {
 	@Path("/{buildId}/dependencies")
     @GET
     public Collection<BuildDependence> getDependencies(@PathParam("buildId") Long buildId) {
-		Build build = buildManager.load(buildId);
+		Build build = buildService.load(buildId);
     	if (!SecurityUtils.canAccessBuild(build)) 
 			throw new UnauthorizedException();
     	return build.getDependencies();
@@ -107,7 +107,7 @@ public class BuildResource {
 	@Path("/{buildId}/dependents")
     @GET
     public Collection<BuildDependence> getDependents(@PathParam("buildId") Long buildId) {
-		Build build = buildManager.load(buildId);
+		Build build = buildService.load(buildId);
     	if (!SecurityUtils.canAccessBuild(build)) 
 			throw new UnauthorizedException();
     	return build.getDependents();
@@ -117,7 +117,7 @@ public class BuildResource {
 	@Path("/{buildId}/fixed-issue-ids")
     @GET
     public Collection<Long> getFixedIssueIds(@PathParam("buildId") Long buildId) {
-		Build build = buildManager.load(buildId);
+		Build build = buildService.load(buildId);
     	if (!SecurityUtils.canAccessBuild(build)) 
 			throw new UnauthorizedException();
     	return build.getFixedIssueIds();
@@ -130,7 +130,8 @@ public class BuildResource {
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 
-		if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)
+		var subject = SecurityUtils.getSubject();
+		if (!SecurityUtils.isAdministrator(subject) && count > RestConstants.MAX_PAGE_SIZE)
     		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	BuildQuery parsedQuery;
@@ -140,21 +141,21 @@ public class BuildResource {
 			throw new NotAcceptableException("Error parsing query", e);
 		}
     	
-    	return buildManager.query(null, parsedQuery, false, offset, count);
+    	return buildService.query(subject, null, parsedQuery, false, offset, count);
     }
 
 	@Api(order = 650)
 	@Path("/{buildId}/description")
 	@POST
 	public Response setDescription(@PathParam("buildId") Long buildId, String description) {
-		Build build = buildManager.load(buildId);
+		Build build = buildService.load(buildId);
 		if (!SecurityUtils.canManageBuild(build))
 			throw new UnauthorizedException();
 		var oldDescription = build.getDescription();
 		if (!Objects.equals(oldDescription, description)) {
 			build.setDescription(description);
-			buildManager.update(build);
-			auditManager.audit(build.getProject(), "updated description of build \"" + build.getReference().toString(build.getProject()) + "\" via RESTful API", oldDescription, description);
+			buildService.update(build);
+			auditService.audit(build.getProject(), "updated description of build \"" + build.getReference().toString(build.getProject()) + "\" via RESTful API", oldDescription, description);
 		}
 		return Response.ok().build();
 	}
@@ -163,12 +164,12 @@ public class BuildResource {
 	@Path("/{buildId}")
     @DELETE
     public Response deleteBuild(@PathParam("buildId") Long buildId) {
-    	Build build = buildManager.load(buildId);
+    	Build build = buildService.load(buildId);
     	if (!SecurityUtils.canManageBuild(build))
 			throw new UnauthorizedException();
-    	buildManager.delete(build);
+    	buildService.delete(build);
 		var oldAuditContent = VersionedXmlDoc.fromBean(build).toXML();
-		auditManager.audit(build.getProject(), "deleted build \"" + build.getReference().toString(build.getProject()) + "\" via RESTful API", oldAuditContent, null);
+		auditService.audit(build.getProject(), "deleted build \"" + build.getReference().toString(build.getProject()) + "\" via RESTful API", oldAuditContent, null);
     	return Response.ok().build();
     }
 	

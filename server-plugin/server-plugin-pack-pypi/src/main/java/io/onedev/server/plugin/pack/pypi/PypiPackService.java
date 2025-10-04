@@ -5,17 +5,16 @@ import com.google.common.io.Resources;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.PackBlobManager;
-import io.onedev.server.entitymanager.PackManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.PackBlobService;
+import io.onedev.server.service.PackService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
-import io.onedev.server.pack.PackService;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.UrlUtils;
 import org.apache.commons.fileupload.FileUploadException;
@@ -41,7 +40,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.servlet.http.HttpServletResponse.*;
 
 @Singleton
-public class PypiPackService implements PackService {
+public class PypiPackService implements io.onedev.server.pack.PackService {
 	
 	public static final String SERVICE_ID = "pypi";
 	
@@ -49,28 +48,28 @@ public class PypiPackService implements PackService {
 
 	private static final Comparator<Pack> VERSION_COMPARATOR = comparing(Pack::getVersion);
 	
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
-	private final TransactionManager transactionManager;
+	private final TransactionService transactionService;
 	
-	private final PackBlobManager packBlobManager;
+	private final PackBlobService packBlobService;
 	
-	private final PackManager packManager;
+	private final PackService packService;
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
-	private final BuildManager buildManager;
+	private final BuildService buildService;
 	
 	@Inject
-	public PypiPackService(SessionManager sessionManager, TransactionManager transactionManager,
-						   PackBlobManager packBlobManager, PackManager packManager,
-						   ProjectManager projectManager, BuildManager buildManager) {
-		this.sessionManager = sessionManager;
-		this.transactionManager = transactionManager;
-		this.packBlobManager = packBlobManager;
-		this.packManager = packManager;
-		this.projectManager = projectManager;
-		this.buildManager = buildManager;
+	public PypiPackService(SessionService sessionService, TransactionService transactionService,
+                           PackBlobService packBlobService, PackService packService,
+                           ProjectService projectService, BuildService buildService) {
+		this.sessionService = sessionService;
+		this.transactionService = transactionService;
+		this.packBlobService = packBlobService;
+		this.packService = packService;
+		this.projectService = projectService;
+		this.buildService = buildService;
 	}
 	
 	@Override
@@ -126,7 +125,7 @@ public class PypiPackService implements PackService {
 								attributes.remove(":action");
 								attributes.remove("protocol_version");
 								
-								LockUtils.run(getLockName(projectId, name), () -> transactionManager.run(() -> {
+								LockUtils.run(getLockName(projectId, name), () -> transactionService.run(() -> {
 									var project = checkProject(projectId, true);
 									var contentDisposition = item.getHeaders().getHeader("content-disposition"); 
 									if (contentDisposition == null)
@@ -142,12 +141,12 @@ public class PypiPackService implements PackService {
 									if (fileName == null) 
 										throw new ClientException(SC_BAD_REQUEST, "File name not found in content disposition header of uploaded file");
 
-									var packBlobId = packBlobManager.uploadBlob(projectId, is, sha256Hash);																																								
+									var packBlobId = packBlobService.uploadBlob(projectId, is, sha256Hash);																																								
 									if (packBlobId == null)
 										throw new ClientException(SC_BAD_REQUEST, "Digest mismatch");
 									
 									PypiData data;
-									var pack = packManager.findByNameAndVersion(project, TYPE, name, version);
+									var pack = packService.findByNameAndVersion(project, TYPE, name, version);
 									if (pack == null) {
 										pack = new Pack();
 										pack.setType(TYPE);
@@ -162,7 +161,7 @@ public class PypiPackService implements PackService {
 
 									Build build = null;
 									if (buildId != null)
-										build = buildManager.load(buildId);
+										build = buildService.load(buildId);
 									pack.setBuild(build);
 									pack.setUser(SecurityUtils.getUser());
 									pack.setPublishDate(new Date());
@@ -174,10 +173,10 @@ public class PypiPackService implements PackService {
 									data.getSha256BlobHashes().put(fileName, sha256Hash);
 									
 									var packBlobs = data.getSha256BlobHashes().values().stream()
-											.map(hash -> packBlobManager.findBySha256Hash(projectId, hash))
+											.map(hash -> packBlobService.findBySha256Hash(projectId, hash))
 											.filter(Objects::nonNull)
 											.collect(toList());
-									packManager.createOrUpdate(pack, packBlobs, data.getSha256BlobHashes().size() == 1);									
+									packService.createOrUpdate(pack, packBlobs, data.getSha256BlobHashes().size() == 1);									
 								}));
 								response.setStatus(SC_OK);
 								break;
@@ -199,9 +198,9 @@ public class PypiPackService implements PackService {
 			// https://peps.python.org/pep-0503/
 			if (currentSegment.equals("simple")) { 
 				if (pathSegments.isEmpty()) {
-					sessionManager.run(() -> {
+					sessionService.run(() -> {
 						var project = checkProject(projectId, false);
-						var names = packManager.queryNames(project, TYPE, null, true, 0, MAX_VALUE);
+						var names = packService.queryNames(project, TYPE, null, true, 0, MAX_VALUE);
 						var bindings = new HashMap<String, Object>();
 						bindings.put("names", names);
 						try {
@@ -216,9 +215,9 @@ public class PypiPackService implements PackService {
 					});
 				} else {
 					var name = UrlUtils.decodePath(pathSegments.get(0));
-					sessionManager.run(() -> {
+					sessionService.run(() -> {
 						var project = checkProject(projectId, false);
-						var packs = packManager.queryByName(project, TYPE, name, VERSION_COMPARATOR);
+						var packs = packService.queryByName(project, TYPE, name, VERSION_COMPARATOR);
 						if (!packs.isEmpty()) {
 							var bindings = new HashMap<String, Object>();
 							bindings.put("baseUrl", "/" + project.getPath() + "/~" + SERVICE_ID + "/files/" + UrlUtils.encodePath(name));
@@ -249,18 +248,18 @@ public class PypiPackService implements PackService {
 				var version = UrlUtils.decodePath(pathSegments.get(1));
 				var fileName = UrlUtils.decodePath(pathSegments.get(2));
 				
-				sessionManager.run(() -> {
+				sessionService.run(() -> {
 					var project = checkProject(projectId, false);
-					var pack = packManager.findByNameAndVersion(project, TYPE, name, version);
+					var pack = packService.findByNameAndVersion(project, TYPE, name, version);
 					if (pack != null) {
 						var data = (PypiData) pack.getData();
 						var sha256BlobHash = data.getSha256BlobHashes().get(fileName);
 						if (sha256BlobHash != null) {
 							PackBlob packBlob;
-							if ((packBlob = packBlobManager.checkPackBlob(projectId, sha256BlobHash)) != null) {
+							if ((packBlob = packBlobService.checkPackBlob(projectId, sha256BlobHash)) != null) {
 								response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 								try {
-									packBlobManager.downloadBlob(packBlob.getProject().getId(),
+									packBlobService.downloadBlob(packBlob.getProject().getId(),
 											packBlob.getSha256Hash(), response.getOutputStream());
 								} catch (IOException e) {
 									throw new RuntimeException(e);
@@ -296,7 +295,7 @@ public class PypiPackService implements PackService {
 	}
 
 	private Project checkProject(Long projectId, boolean needsToWrite) {
-		var project = projectManager.load(projectId);
+		var project = projectService.load(projectId);
 		if (!project.isPackManagement()) {
 			throw new ClientException(SC_NOT_ACCEPTABLE, "Package management not enabled for project '" + project.getPath() + "'");
 		} else if (needsToWrite && !SecurityUtils.canWritePack(project)) {

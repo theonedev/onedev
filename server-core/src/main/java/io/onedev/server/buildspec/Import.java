@@ -30,7 +30,7 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -80,13 +80,13 @@ public class Import implements Serializable, Validatable {
 
 	@SuppressWarnings("unused")
 	private static List<String> getProjectChoices() {
-		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+		ProjectService projectService = OneDev.getInstance(ProjectService.class);
 		Project project = ((ProjectPage)WicketUtils.getPage()).getProject();
 		
 		Collection<Project> projects = SecurityUtils.getAuthorizedProjects(new AccessProject());
 		projects.remove(project);
 		
-		ProjectCache cache = projectManager.cloneCache();
+		ProjectCache cache = projectService.cloneCache();
 
 		List<String> choices = projects.stream().map(it->cache.get(it.getId()).getPath()).collect(Collectors.toList());
 		Collections.sort(choices);
@@ -98,7 +98,7 @@ public class Import implements Serializable, Validatable {
 	private static Project getInputProject() {
 		String projectPath = (String) EditContext.get().getInputValue("projectPath");
 		if (projectPath != null) {
-			Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+			Project project = OneDev.getInstance(ProjectService.class).findByPath(projectPath);
 			if (project != null && SecurityUtils.canReadCode(project))
 				return project;
 		}
@@ -207,8 +207,7 @@ public class Import implements Serializable, Validatable {
 				try {
 					Validator validator = OneDev.getInstance(Validator.class);
 					BuildSpec buildSpec = getBuildSpec();
-					JobAuthorizationContext.push(new JobAuthorizationContext(
-							getProject(), getCommit(), SecurityUtils.getUser(), null));
+					JobAuthorizationContext.push(new JobAuthorizationContext(getProject(), getCommit(), null));
 					try {
 						for (int i = 0; i < buildSpec.getImports().size(); i++) {
 							Import aImport = buildSpec.getImports().get(i);
@@ -243,7 +242,7 @@ public class Import implements Serializable, Validatable {
 	
 	public Project getProject() {
 		if (project == null) {
-			project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+			project = OneDev.getInstance(ProjectService.class).findByPath(projectPath);
 			if (project == null)
 				throw new ExplicitException(MessageFormat.format( _T("Unable to find project to import build spec: {0}"), projectPath));
 		}

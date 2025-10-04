@@ -19,9 +19,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.RoleManager;
-import io.onedev.server.entitymanager.UserAuthorizationManager;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.RoleService;
+import io.onedev.server.service.UserAuthorizationService;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.page.user.UserPage;
@@ -75,21 +75,21 @@ public class UserAuthorizationsPage extends UserPage {
 						error(MessageFormat.format(_T("Duplicate authorizations found: {0}"), authorizationBean.getProjectPath()));
 						return;
 					} else {
-						var project = getProjectManager().findByPath(authorizationBean.getProjectPath());
+						var project = getProjectService().findByPath(authorizationBean.getProjectPath());
 						authorizationBean.getRoleNames().stream().forEach(it -> {
 							UserAuthorization authorization = new UserAuthorization();
 							authorization.setUser(getUser());
 							authorization.setProject(project);
-							authorization.setRole(getRoleManager().find(it));
+							authorization.setRole(getRoleService().find(it));
 							authorizations.add(authorization);
 						});
 					}
 				}
 				
 				var oldAuditContent = getAuditContent();
-				OneDev.getInstance(UserAuthorizationManager.class).syncAuthorizations(getUser(), authorizations);
+				OneDev.getInstance(UserAuthorizationService.class).syncAuthorizations(getUser(), authorizations);
 				var newAuditContent = getAuditContent();
-				getAuditManager().audit(null, "changed project authorizations in account \"" + getUser().getName() + "\"", oldAuditContent, newAuditContent);
+				auditService.audit(null, "changed project authorizations in account \"" + getUser().getName() + "\"", oldAuditContent, newAuditContent);
 
 				Session.get().success(_T("Project authorizations updated"));
 			}
@@ -100,11 +100,11 @@ public class UserAuthorizationsPage extends UserPage {
 		add(form);	
 	}
 
-	private RoleManager getRoleManager() {
-		return OneDev.getInstance(RoleManager.class);
+	private RoleService getRoleService() {
+		return OneDev.getInstance(RoleService.class);
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 }

@@ -32,9 +32,9 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.SsoProviderManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.SsoProviderService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.SsoProvider;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -168,16 +168,16 @@ public class LoginPage extends SimplePage {
 		form.add(new ViewStateAwarePageLink<Void>("forgetPassword", PasswordResetPage.class));
 		fragment.add(form);
 		
-		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
+		SettingService settingService = OneDev.getInstance(SettingService.class);
 		
-		boolean enableSelfRegister = settingManager.getSecuritySetting().isEnableSelfRegister();
+		boolean enableSelfRegister = settingService.getSecuritySetting().isEnableSelfRegister();
 		fragment.add(new ViewStateAwarePageLink<Void>("registerUser", SignUpPage.class).setVisible(enableSelfRegister));
 
-		String serverUrl = settingManager.getSystemSetting().getServerUrl();
+		String serverUrl = settingService.getSystemSetting().getServerUrl();
 		
-		var ssoProviderManager = OneDev.getInstance(SsoProviderManager.class);
+		var ssoProviderService = OneDev.getInstance(SsoProviderService.class);
 		RepeatingView ssoButtonsView = new RepeatingView("ssoButtons");
-		var ssoProviders = ssoProviderManager.query();
+		var ssoProviders = ssoProviderService.query();
 		for (SsoProvider provider: ssoProviders) {
 			ExternalLink ssoButton = new ExternalLink(ssoButtonsView.newChildId(), 
 					Model.of(serverUrl + "/" + MOUNT_PATH + "/" + STAGE_INITIATE + "/" + provider.getName()));
@@ -190,8 +190,8 @@ public class LoginPage extends SimplePage {
 		add(fragment);
 	}
 	
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 	
 	private void afterLogin(User user) {
@@ -217,7 +217,7 @@ public class LoginPage extends SimplePage {
 			
 			@Override
 			protected User getUser() {
-				return getUserManager().load(userId);
+				return getUserService().load(userId);
 			}
 			
 		});
@@ -230,7 +230,7 @@ public class LoginPage extends SimplePage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				User user = getUserManager().load(userId);
+				User user = getUserService().load(userId);
 				if (user.getTwoFactorAuthentication().getTOTPCode().equals(passcode)) 
 					afterLogin(user);
 				else 
@@ -278,9 +278,9 @@ public class LoginPage extends SimplePage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				User user = getUserManager().load(userId);
+				User user = getUserService().load(userId);
 				if (user.getTwoFactorAuthentication().getScratchCodes().remove(recoveryCode)) {
-					getUserManager().update(user, null);
+					getUserService().update(user, null);
 					afterLogin(user);
 				} else {
 					error("Recovery code verification failed");
@@ -319,7 +319,7 @@ public class LoginPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return _T("Sign In To") + " " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return _T("Sign In To") + " " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
 	}
 
 	@Override

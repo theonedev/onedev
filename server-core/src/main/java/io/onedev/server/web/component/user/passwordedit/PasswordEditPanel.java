@@ -16,8 +16,8 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
@@ -51,19 +51,19 @@ public class PasswordEditPanel extends GenericPanel<User> {
 			protected void onSubmit() {
 				super.onSubmit();
 
-				var auditManager = OneDev.getInstance(AuditManager.class);
+				var auditService = OneDev.getInstance(AuditService.class);
 				if (getUser().getPassword() != null) {
 					if (getPage() instanceof UserPage)
-						auditManager.audit(null, "changed password in account \"" + getUser().getName() + "\"", null, null);
+						auditService.audit(null, "changed password in account \"" + getUser().getName() + "\"", null, null);
 					Session.get().success(_T("Password has been changed"));
 				} else {
 					if (getPage() instanceof UserPage)
-						auditManager.audit(null, "created password in account \"" + getUser().getName() + "\"", null, null);
+						auditService.audit(null, "created password in account \"" + getUser().getName() + "\"", null, null);
 					Session.get().success(_T("Password has been set"));
 				}
 					
 				getUser().setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(bean.getNewPassword()));
-				OneDev.getInstance(UserManager.class).update(getUser(), null);
+				OneDev.getInstance(UserService.class).update(getUser(), null);
 
 				bean.setOldPassword(null);
 				

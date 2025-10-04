@@ -19,9 +19,9 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -32,24 +32,24 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class EmailAddressResource {
 	
-	private final EmailAddressManager emailAddressManager;
+	private final EmailAddressService emailAddressService;
 	
-	private final SettingManager settingManager;
+	private final SettingService settingService;
 
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 
 	@Inject
-	public EmailAddressResource(EmailAddressManager emailAddressManager, SettingManager settingManager, AuditManager auditManager) {
-		this.emailAddressManager = emailAddressManager;
-		this.settingManager = settingManager;
-		this.auditManager = auditManager;
+	public EmailAddressResource(EmailAddressService emailAddressService, SettingService settingService, AuditService auditService) {
+		this.emailAddressService = emailAddressService;
+		this.settingService = settingService;
+		this.auditService = auditService;
 	}
 
 	@Api(order=100)
 	@Path("/{emailAddressId}")
 	@GET
 	public EmailAddress getEmailAddress(@PathParam("emailAddressId") Long emailAddressId) {
-		EmailAddress emailAddress = emailAddressManager.load(emailAddressId);
+		EmailAddress emailAddress = emailAddressService.load(emailAddressId);
     	if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return emailAddress;
@@ -59,7 +59,7 @@ public class EmailAddressResource {
 	@Path("/{emailAddressId}/verified")
 	@GET
 	public boolean isEmailAddressVerified(@PathParam("emailAddressId") Long emailAddressId) {
-		EmailAddress emailAddress = emailAddressManager.load(emailAddressId);
+		EmailAddress emailAddress = emailAddressService.load(emailAddressId);
     	if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return emailAddress.isVerified();
@@ -75,16 +75,16 @@ public class EmailAddressResource {
 			throw new ExplicitException("Can not set email address for disabled user");
 		else if (owner.isServiceAccount())
 			throw new ExplicitException("Can not set email address for service account");
-		else if (emailAddressManager.findByValue(emailAddress.getValue()) != null)
+		else if (emailAddressService.findByValue(emailAddress.getValue()) != null)
 			throw new ExplicitException("This email address is already used by another user");
 		
 		if (SecurityUtils.isAdministrator()) 
 			emailAddress.setVerificationCode(null);
 		
-		emailAddressManager.create(emailAddress);
+		emailAddressService.create(emailAddress);
 
 		if (!getAuthUser().equals(owner)) 
-			auditManager.audit(null, "added email address \"" + emailAddress.getValue() + "\" in account \"" + owner.getName() + "\" via RESTful API", null, null);
+			auditService.audit(null, "added email address \"" + emailAddress.getValue() + "\" in account \"" + owner.getName() + "\" via RESTful API", null, null);
 		return emailAddress.getId();
 	}
 	
@@ -92,15 +92,15 @@ public class EmailAddressResource {
 	@Path("/public")
 	@POST
 	public Long setAsPublic(@NotNull Long emailAddressId) {
-		var emailAddress = emailAddressManager.load(emailAddressId);
+		var emailAddress = emailAddressService.load(emailAddressId);
 		var owner = emailAddress.getOwner();
 		if (!SecurityUtils.isAdministrator() && !owner.equals(getAuthUser()))
 			throw new UnauthorizedException();
 				
-		emailAddressManager.setAsPublic(emailAddress);
+		emailAddressService.setAsPublic(emailAddress);
 
 		if (!getAuthUser().equals(owner)) 
-			auditManager.audit(null, "set email address \"" + emailAddress.getValue() + "\" as public in account \"" + owner.getName() + "\" via RESTful API", null, null);
+			auditService.audit(null, "set email address \"" + emailAddress.getValue() + "\" as public in account \"" + owner.getName() + "\" via RESTful API", null, null);
 		
 		return emailAddressId;
 	}
@@ -109,15 +109,15 @@ public class EmailAddressResource {
 	@Path("/private")
 	@POST
 	public Long setAsPrivate(@NotNull Long emailAddressId) {
-		var emailAddress = emailAddressManager.load(emailAddressId);
+		var emailAddress = emailAddressService.load(emailAddressId);
 		var owner = emailAddress.getOwner();
 		if (!SecurityUtils.isAdministrator() && !owner.equals(getAuthUser()))
 			throw new UnauthorizedException();
 		
-		emailAddressManager.setAsPrivate(emailAddress);
+		emailAddressService.setAsPrivate(emailAddress);
 
 		if (!getAuthUser().equals(owner)) 
-			auditManager.audit(null, "set email address \"" + emailAddress.getValue() + "\" as private in account \"" + owner.getName() + "\" via RESTful API", null, null);
+			auditService.audit(null, "set email address \"" + emailAddress.getValue() + "\" as private in account \"" + owner.getName() + "\" via RESTful API", null, null);
 		
 		return emailAddressId;
 	}
@@ -126,7 +126,7 @@ public class EmailAddressResource {
 	@Path("/primary")
 	@POST
 	public Long setAsPrimary(@NotNull Long emailAddressId) {
-		var emailAddress = emailAddressManager.load(emailAddressId);
+		var emailAddress = emailAddressService.load(emailAddressId);
 		var owner = emailAddress.getOwner();
 		if (!SecurityUtils.isAdministrator() && !owner.equals(getAuthUser()))
 			throw new UnauthorizedException();
@@ -134,10 +134,10 @@ public class EmailAddressResource {
 		if (owner.getPassword() == null)
 			throw new ExplicitException("Can not set primary email address for externally authenticated user");
 		
-		emailAddressManager.setAsPrimary(emailAddress);
+		emailAddressService.setAsPrimary(emailAddress);
 
 		if (!getAuthUser().equals(owner)) 
-			auditManager.audit(null, "set email address \"" + emailAddress.getValue() + "\" as primary in account \"" + owner.getName() + "\" via RESTful API", null, null);
+			auditService.audit(null, "set email address \"" + emailAddress.getValue() + "\" as primary in account \"" + owner.getName() + "\" via RESTful API", null, null);
 		
 		return emailAddressId;
 	}
@@ -146,14 +146,14 @@ public class EmailAddressResource {
 	@Path("/git")
 	@POST
 	public Long useForGitOperations(@NotNull Long emailAddressId) {
-		var emailAddress = emailAddressManager.load(emailAddressId);
+		var emailAddress = emailAddressService.load(emailAddressId);
 		if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(getAuthUser()))
 			throw new UnauthorizedException();
 		
-		emailAddressManager.useForGitOperations(emailAddress);
+		emailAddressService.useForGitOperations(emailAddress);
 		
 		if (!getAuthUser().equals(emailAddress.getOwner())) 
-			auditManager.audit(null, "specified email address \"" + emailAddress.getValue() + "\" for git operations in account \"" + emailAddress.getOwner().getName() + "\" via RESTful API", null, null);
+			auditService.audit(null, "specified email address \"" + emailAddress.getValue() + "\" for git operations in account \"" + emailAddress.getOwner().getName() + "\" via RESTful API", null, null);
 		
 		return emailAddressId;
 	}
@@ -162,16 +162,16 @@ public class EmailAddressResource {
 	@Path("/resend-verification-email")
 	@POST
 	public Long resendVerificationEmail(@NotNull Long emailAddressId) {
-		var emailAddress = emailAddressManager.load(emailAddressId);
+		var emailAddress = emailAddressService.load(emailAddressId);
 		if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(getAuthUser()))
 			throw new UnauthorizedException();
 
-		if (settingManager.getMailService() == null)
+		if (settingService.getMailConnector() == null)
 			throw new ExplicitException("Unable to send verification email as mail service is not configured");
 		if (emailAddress.isVerified())
 			throw new ExplicitException("Unable to send verification email as this email address is already verified");
 		
-		emailAddressManager.sendVerificationEmail(emailAddress);
+		emailAddressService.sendVerificationEmail(emailAddress);
 		
 		return emailAddressId;
 	}
@@ -180,7 +180,7 @@ public class EmailAddressResource {
 	@Path("/{emailAddressId}")
 	@DELETE
 	public Response deleteEmailAddress(@PathParam("emailAddressId") Long emailAddressId) {
-		var emailAddress = emailAddressManager.load(emailAddressId);
+		var emailAddress = emailAddressService.load(emailAddressId);
 		if (!SecurityUtils.isAdministrator() && !emailAddress.getOwner().equals(getAuthUser())) 
 			throw new UnauthorizedException();
 		
@@ -190,10 +190,10 @@ public class EmailAddressResource {
 		}
 		if (emailAddress.getOwner().getEmailAddresses().size() == 1)
 			throw new ExplicitException("At least one email address should be present for a user");
-		emailAddressManager.delete(emailAddress);
+		emailAddressService.delete(emailAddress);
 
 		if (!getAuthUser().equals(emailAddress.getOwner())) 
-			auditManager.audit(null, "deleted email address \"" + emailAddress.getValue() + "\" from account \"" + emailAddress.getOwner().getName() + "\" via RESTful API", null, null);
+			auditService.audit(null, "deleted email address \"" + emailAddress.getValue() + "\" from account \"" + emailAddress.getOwner().getName() + "\" via RESTful API", null, null);
 
 		return Response.ok().build();
 	}

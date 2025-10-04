@@ -10,10 +10,10 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.code.GitPackConfig;
 import io.onedev.server.security.SecurityUtils;
@@ -43,20 +43,20 @@ public class GitPackConfigPage extends ProjectSettingPage {
 				
 				var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 				getProject().setGitPackConfig(bean);
-				var projectManager = OneDev.getInstance(ProjectManager.class);
-				var clusterManager = OneDev.getInstance(ClusterManager.class);
-				projectManager.update(getProject());
-				getAuditManager().audit(getProject(), "changed git pack config", oldAuditContent, newAuditContent);
+				var projectService = OneDev.getInstance(ProjectService.class);
+				var clusterService = OneDev.getInstance(ClusterService.class);
+				projectService.update(getProject());
+				auditService.audit(getProject(), "changed git pack config", oldAuditContent, newAuditContent);
 
 				Long projectId = getProject().getId();
 				GitPackConfig gitPackConfig = getProject().getGitPackConfig();
-				String activeServer = projectManager.getActiveServer(projectId, false);
+				String activeServer = projectService.getActiveServer(projectId, false);
 				if (activeServer != null) {
-					clusterManager.runOnServer(activeServer, new ClusterTask<Void>() {
+					clusterService.runOnServer(activeServer, new ClusterTask<Void>() {
 
 						@Override
 						public Void call() throws Exception {
-							projectManager.checkGitConfig(projectId, gitPackConfig);
+							projectService.checkGitConfig(projectId, gitPackConfig);
 							return null;
 						}
 

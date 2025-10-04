@@ -17,7 +17,7 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -32,7 +32,7 @@ public class SystemSettingPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		SystemSetting systemSetting = OneDev.getInstance(SettingManager.class).getSystemSetting();
+		SystemSetting systemSetting = OneDev.getInstance(SettingService.class).getSystemSetting();
 		var oldAuditContent = VersionedXmlDoc.fromBean(systemSetting).toXML();
 
 		String ingressUrl = OneDev.getInstance().getIngressUrl();
@@ -43,9 +43,9 @@ public class SystemSettingPage extends AdministrationPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				OneDev.getInstance(SettingManager.class).saveSystemSetting(systemSetting);
+				OneDev.getInstance(SettingService.class).saveSystemSetting(systemSetting);
 				var newAuditContent = VersionedXmlDoc.fromBean(systemSetting).toXML();
-				getAuditManager().audit(null, "changed system settings", oldAuditContent, newAuditContent);
+				auditService.audit(null, "changed system settings", oldAuditContent, newAuditContent);
 				
 				getSession().success(_T("System settings have been saved"));
 				

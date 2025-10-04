@@ -4,8 +4,8 @@ import com.google.common.base.Splitter;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
@@ -56,7 +56,7 @@ public class RawBlobResource extends AbstractResource {
 		PageParameters params = attributes.getParameters();
 
 		String projectPath = params.get(ProjectMapperUtils.PARAM_PROJECT).toString();
-		Project project = getProjectManager().findByPath(projectPath);
+		Project project = getProjectService().findByPath(projectPath);
 		if (project == null)
 			throw new EntityNotFoundException("Project not found: " + projectPath);
 		
@@ -132,12 +132,12 @@ public class RawBlobResource extends AbstractResource {
 				if (blob.getLfsPointer() == null && !blob.isPartial()) {
 					return new ByteArrayInputStream(blob.getBytes());
 				} else {
-					String activeServer = getProjectManager().getActiveServer(project.getId(), true);
-					if (activeServer.equals(getClusterManager().getLocalServerAddress())) {
+					String activeServer = getProjectService().getActiveServer(project.getId(), true);
+					if (activeServer.equals(getClusterService().getLocalServerAddress())) {
 						if (blob.getLfsPointer() != null) {
 							return new LfsObject(project.getId(), blob.getLfsPointer().getObjectId()).getInputStream();
 						} else {
-							Repository repository = getProjectManager().getRepository(project.getId());
+							Repository repository = getProjectService().getRepository(project.getId());
 							ObjectId commitId = project.getObjectId(blob.getIdent().revision, true);
 							return GitUtils.getInputStream(repository, commitId, blob.getIdent().path);
 						}
@@ -145,7 +145,7 @@ public class RawBlobResource extends AbstractResource {
 						// Use JDK api instead of jersey client api to get input stream directly as otherwise
 						// jersey will throw exception when close the response
 						try {
-							var builder = new URIBuilder(getClusterManager().getServerUrl(activeServer));
+							var builder = new URIBuilder(getClusterService().getServerUrl(activeServer));
 							if (blob.getLfsPointer() != null) {
 								builder.setPath("~api/cluster/lfs")
 										.addParameter("projectId", String.valueOf(project.getId()))
@@ -159,7 +159,7 @@ public class RawBlobResource extends AbstractResource {
 							}
 							var conn = builder.build().toURL().openConnection();
 							conn.setRequestProperty(HttpHeaders.AUTHORIZATION,
-									KubernetesHelper.BEARER + " " + getClusterManager().getCredential());
+									KubernetesHelper.BEARER + " " + getClusterService().getCredential());
 							return conn.getInputStream();
 						} catch (URISyntaxException | IOException e) {
 							throw new RuntimeException(e);
@@ -173,12 +173,12 @@ public class RawBlobResource extends AbstractResource {
 		return response;
 	}
 
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
-	private ClusterManager getClusterManager() {
-		return OneDev.getInstance(ClusterManager.class);
+	private ClusterService getClusterService() {
+		return OneDev.getInstance(ClusterService.class);
 	}
 
 	public static PageParameters paramsOf(Project project, BlobIdent blobIdent) {

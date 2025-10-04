@@ -43,7 +43,7 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.BlameCommit;
 import io.onedev.server.git.BlobChange;
@@ -306,7 +306,7 @@ public class BlobTextDiffPanel extends Panel {
 					case "openComment": 
 						Long commentId = params.getParameterValue("param1").toLong();
 						commentRange = getRange(params, "param2", "param3", "param4", "param5", "param6");
-						CodeComment comment = OneDev.getInstance(CodeCommentManager.class).load(commentId);
+						CodeComment comment = OneDev.getInstance(CodeCommentService.class).load(commentId);
 						getAnnotationSupport().onOpenComment(target, comment, commentRange);
 						script = String.format("onedev.server.blobTextDiff.onCommentOpened($('#%s'), %s);", 
 								getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, commentRange)));

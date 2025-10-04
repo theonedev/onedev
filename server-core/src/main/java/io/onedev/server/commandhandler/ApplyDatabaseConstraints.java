@@ -2,8 +2,8 @@ package io.onedev.server.commandhandler;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.data.DataManager;
-import io.onedev.server.persistence.SessionFactoryManager;
+import io.onedev.server.data.DataService;
+import io.onedev.server.persistence.SessionFactoryService;
 import io.onedev.server.security.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,18 +23,18 @@ public class ApplyDatabaseConstraints extends CommandHandler {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ApplyDatabaseConstraints.class);
 	
-	private final SessionFactoryManager sessionFactoryManager;
+	private final SessionFactoryService sessionFactoryService;
 	
-	private final DataManager dataManager;
+	private final DataService dataService;
 	
 	private final HibernateConfig hibernateConfig;
 	
 	@Inject
-	public ApplyDatabaseConstraints(SessionFactoryManager sessionFactoryManager, DataManager dataManager, 
-									HibernateConfig hibernateConfig) {
+	public ApplyDatabaseConstraints(SessionFactoryService sessionFactoryService, DataService dataService,
+                                    HibernateConfig hibernateConfig) {
 		super(hibernateConfig);
-		this.sessionFactoryManager = sessionFactoryManager;
-		this.dataManager = dataManager;
+		this.sessionFactoryService = sessionFactoryService;
+		this.dataService = dataService;
 		this.hibernateConfig = hibernateConfig;
 	}
 
@@ -44,10 +44,10 @@ public class ApplyDatabaseConstraints extends CommandHandler {
 		
 		try {
 			if (doMaintenance(() -> {
-				sessionFactoryManager.start();
-				try (var conn = dataManager.openConnection()) {
+				sessionFactoryService.start();
+				try (var conn = dataService.openConnection()) {
 					return callWithTransaction(conn, () -> {
-						dataManager.checkDataVersion(conn, false);
+						dataService.checkDataVersion(conn, false);
 
 						logger.warn("This script is mainly used to apply database constraints after fixing database integrity issues (may happen during restore/upgrade)");
 
@@ -66,8 +66,8 @@ public class ApplyDatabaseConstraints extends CommandHandler {
 								return false;
 						}
 
-						dataManager.dropConstraints(conn);
-						dataManager.applyConstraints(conn);
+						dataService.dropConstraints(conn);
+						dataService.applyConstraints(conn);
 						return true;
 					});
 				}
@@ -90,7 +90,7 @@ public class ApplyDatabaseConstraints extends CommandHandler {
 
 	@Override
 	public void stop() {
-		sessionFactoryManager.stop();
+		sessionFactoryService.stop();
 	}
 
 }

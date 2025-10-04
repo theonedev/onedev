@@ -18,7 +18,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.UserChoice;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
@@ -37,8 +37,8 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -46,7 +46,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		UserCache cache = getUserManager().cloneCache();
+		UserCache cache = getUserService().cloneCache();
 		
 		List<Long> choiceIds;
 		
@@ -86,7 +86,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 
 			@Override
 			public User getObject() {
-				return selectionId.get()!=null? getUserManager().load(selectionId.get()): null;
+				return selectionId.get()!=null? getUserService().load(selectionId.get()): null;
 			}
 
 			@Override
@@ -98,7 +98,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 
 			@Override
 			protected List<User> load() {
-				return choiceIds.stream().map(it -> getUserManager().load(it)).collect(toList());
+				return choiceIds.stream().map(it -> getUserService().load(it)).collect(toList());
 			}
     		
     	}) {

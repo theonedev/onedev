@@ -19,9 +19,9 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.entitymanager.AgentTokenManager;
-import io.onedev.server.entitymanager.AuditManager;
+import io.onedev.server.service.AgentService;
+import io.onedev.server.service.AgentTokenService;
+import io.onedev.server.service.AuditService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentToken;
 import io.onedev.server.persistence.dao.EntityCriteria;
@@ -35,17 +35,17 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class AgentTokenResource {
 
-	private final AgentTokenManager tokenManager;
+	private final AgentTokenService tokenService;
 	
-	private final AgentManager agentManager;
+	private final AgentService agentService;
 	
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 	
 	@Inject
-	public AgentTokenResource(AgentTokenManager tokenManager, AgentManager agentManager, AuditManager auditManager) {
-		this.tokenManager = tokenManager;
-		this.agentManager = agentManager;
-		this.auditManager = auditManager;
+	public AgentTokenResource(AgentTokenService tokenService, AgentService agentService, AuditService auditService) {
+		this.tokenService = tokenService;
+		this.agentService = agentService;
+		this.auditService = auditService;
 	}
 
 	@Api(order=100)
@@ -54,7 +54,7 @@ public class AgentTokenResource {
     public AgentToken getToken(@PathParam("tokenId") Long tokenId) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-    	return tokenManager.load(tokenId);
+    	return tokenService.load(tokenId);
     }
 
 	@Api(order=100, description="Get agent using specified token")
@@ -63,8 +63,8 @@ public class AgentTokenResource {
     public Agent getAgent(@PathParam("tokenId") Long tokenId) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-		AgentToken token = tokenManager.load(tokenId);
-    	return agentManager.findByToken(token);
+		AgentToken token = tokenService.load(tokenId);
+    	return agentService.findByToken(token);
     }
 	
 	@Api(order=200)
@@ -83,7 +83,7 @@ public class AgentTokenResource {
 		if (value != null) 
 			criteria.add(Restrictions.eq(AgentToken.PROP_VALUE, value));
 		
-    	return tokenManager.query(criteria, offset, count);
+    	return tokenService.query(criteria, offset, count);
     }
 	
 	@Api(order=500, description="Create new token")
@@ -92,8 +92,8 @@ public class AgentTokenResource {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		AgentToken token = new AgentToken();
-	    tokenManager.createOrUpdate(token);
-		auditManager.audit(null, "created agent token via RESTful API", null, null);
+	    tokenService.createOrUpdate(token);
+		auditService.audit(null, "created agent token via RESTful API", null, null);
 	    return token.getId();
     }
 	
@@ -103,8 +103,8 @@ public class AgentTokenResource {
     public Response deleteToken(@PathParam("tokenId") Long tokenId) {
     	if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-    	tokenManager.delete(tokenManager.load(tokenId));
-		auditManager.audit(null, "deleted agent token via RESTful API", null, null);
+    	tokenService.delete(tokenService.load(tokenId));
+		auditService.audit(null, "deleted agent token via RESTful API", null, null);
     	return Response.ok().build();
     }
 	

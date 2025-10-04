@@ -2,7 +2,7 @@ package io.onedev.server.util;
 
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.service.EmailAddressService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
@@ -26,8 +26,8 @@ public abstract class ScriptContribution {
 		Build build = Build.get();
 		if (build != null) {
 			RevCommit commit = Build.get().getProject().getRevCommit(build.getCommitId(), true);
-			EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
-			EmailAddress emailAddress = emailAddressManager.findByPersonIdent(commit.getCommitterIdent());
+			EmailAddressService emailAddressService = OneDev.getInstance(EmailAddressService.class);
+			EmailAddress emailAddress = emailAddressService.findByPersonIdent(commit.getCommitterIdent());
 			if (emailAddress != null && emailAddress.isVerified())
 				return emailAddress.getOwner().getName();
 			else

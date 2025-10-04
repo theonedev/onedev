@@ -36,14 +36,14 @@ import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.SubscriptionManager;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.annotation.UserName;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.SshKeyManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.SshKeyService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.BuildQueryPersonalization;
 import io.onedev.server.model.CodeCommentQueryPersonalization;
@@ -74,28 +74,28 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class UserResource {
 
-	private final UserManager userManager;
+	private final UserService userService;
 	
-	private final SshKeyManager sshKeyManager;
+	private final SshKeyService sshKeyService;
 	
 	private final PasswordService passwordService;
 	
-	private final EmailAddressManager emailAddressManager;
+	private final EmailAddressService emailAddressService;
 
-	private final SubscriptionManager subscriptionManager;
+	private final SubscriptionService subscriptionService;
 
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 	
 	@Inject
-	public UserResource(UserManager userManager, SshKeyManager sshKeyManager, 
-			PasswordService passwordService, EmailAddressManager emailAddressManager, 
-			SubscriptionManager subscriptionManager, AuditManager auditManager) {
-		this.userManager = userManager;
-		this.sshKeyManager = sshKeyManager;
+	public UserResource(UserService userService, SshKeyService sshKeyService,
+                        PasswordService passwordService, EmailAddressService emailAddressService,
+                        SubscriptionService subscriptionService, AuditService auditService) {
+		this.userService = userService;
+		this.sshKeyService = sshKeyService;
 		this.passwordService = passwordService;
-		this.emailAddressManager = emailAddressManager;
-		this.subscriptionManager = subscriptionManager;
-		this.auditManager = auditManager;
+		this.emailAddressService = emailAddressService;
+		this.subscriptionService = subscriptionService;
+		this.auditService = auditService;
 	}
 
 	private UserData getData(User user) {
@@ -113,7 +113,7 @@ public class UserResource {
 	@Path("/{userId}")
     @GET
     public UserData getUser(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
 		return getData(user);
@@ -133,7 +133,7 @@ public class UserResource {
 	@Path("/{userId}/access-tokens")
     @GET
     public Collection<AccessToken> getAccessTokens(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
 		return user.getAccessTokens();
@@ -143,7 +143,7 @@ public class UserResource {
 	@Path("/{userId}/email-addresses")
     @GET
     public Collection<EmailAddress> getEmailAddresses(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
 		return user.getEmailAddresses();
@@ -155,7 +155,7 @@ public class UserResource {
     public Collection<UserAuthorization> getAuthorizations(@PathParam("userId") Long userId) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-    	return userManager.load(userId).getProjectAuthorizations();
+    	return userService.load(userId).getProjectAuthorizations();
     }
 	
 	@Api(order=400)
@@ -164,14 +164,14 @@ public class UserResource {
     public Collection<Membership> getMemberships(@PathParam("userId") Long userId) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-    	return userManager.load(userId).getMemberships();
+    	return userService.load(userId).getMemberships();
     }
 	
 	@Api(order=600)
 	@Path("/{userId}/pull-request-reviews")
     @GET
     public Collection<PullRequestReview> getPullRequestReviews(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getPullRequestReviews();
@@ -181,7 +181,7 @@ public class UserResource {
 	@Path("/{userId}/issue-votes")
     @GET
     public Collection<IssueVote> getIssueVotes(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getIssueVotes();
@@ -191,7 +191,7 @@ public class UserResource {
 	@Path("/{userId}/issue-watches")
     @GET
     public Collection<IssueWatch> getIssueWatches(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getIssueWatches();
@@ -201,7 +201,7 @@ public class UserResource {
 	@Path("/{userId}/project-build-query-personalizations")
     @GET
     public Collection<BuildQueryPersonalization> getProjectBuildQueryPersonalizations(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getBuildQueryPersonalizations();
@@ -211,7 +211,7 @@ public class UserResource {
 	@Path("/{userId}/project-code-comment-query-personalizations")
     @GET
     public Collection<CodeCommentQueryPersonalization> getProjectCodeCommentQueryPersonalizations(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getCodeCommentQueryPersonalizations();
@@ -221,7 +221,7 @@ public class UserResource {
 	@Path("/{userId}/project-commit-query-personalizations")
     @GET
     public Collection<CommitQueryPersonalization> getProjectCommitQueryPersonalizations(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getCommitQueryPersonalizations();
@@ -231,7 +231,7 @@ public class UserResource {
 	@Path("/{userId}/project-issue-query-personalizations")
     @GET
     public Collection<IssueQueryPersonalization> getProjecIssueQueryPersonalizations(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getIssueQueryPersonalizations();
@@ -241,7 +241,7 @@ public class UserResource {
 	@Path("/{userId}/project-pull-request-query-personalizations")
     @GET
     public Collection<PullRequestQueryPersonalization> getProjecPullRequestQueryPersonalizations(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getPullRequestQueryPersonalizations();
@@ -251,7 +251,7 @@ public class UserResource {
 	@Path("/{userId}/pull-request-assignments")
     @GET
     public Collection<PullRequestAssignment> getPullRequestAssignments(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getPullRequestAssignments();
@@ -261,7 +261,7 @@ public class UserResource {
 	@Path("/{userId}/pull-request-watches")
     @GET
     public Collection<PullRequestWatch> getPullRequestWatches(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getPullRequestWatches();
@@ -271,7 +271,7 @@ public class UserResource {
 	@Path("/{userId}/ssh-keys")
     @GET
     public Collection<SshKey> getSshKeys(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return user.getSshKeys();
@@ -293,7 +293,7 @@ public class UserResource {
 	@Path("/{userId}/queries-and-watches")
     @GET
     public QueriesAndWatches getQueriesAndWatches(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
 		return getQueriesAndWatches(user);
@@ -308,7 +308,7 @@ public class UserResource {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 
-    	return userManager.query(term, offset, count).stream().map(this::getData).collect(toList());
+    	return userService.query(term, offset, count).stream().map(this::getData).collect(toList());
     }
 	
 	@Api(order=1850)
@@ -318,7 +318,7 @@ public class UserResource {
 		if (SecurityUtils.getAuthUser() == null)
 			throw new UnauthenticatedException();
 
-		var user = userManager.findByName(name);
+		var user = userService.findByName(name);
 		if (user != null)
 			return user.getId();
 		else 
@@ -331,9 +331,9 @@ public class UserResource {
 		if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 
-		if (userManager.findByName(data.getName()) != null)
+		if (userService.findByName(data.getName()) != null)
 			throw new ExplicitException("Login name is already used by another user");
-		if (!data.isServiceAccount() && emailAddressManager.findByValue(data.getEmailAddress()) != null)
+		if (!data.isServiceAccount() && emailAddressService.findByValue(data.getEmailAddress()) != null)
 			throw new ExplicitException("Email address is already used by another user");
 		
 		User user = new User();
@@ -341,22 +341,22 @@ public class UserResource {
 		user.setName(data.getName());
 		user.setFullName(data.getFullName());
 		if (data.isServiceAccount()) {
-			userManager.create(user);
+			userService.create(user);
 		} else {
 			user.setNotifyOwnEvents(data.isNotifyOwnEvents());
 			user.setPassword(passwordService.encryptPassword(data.getPassword()));
-			userManager.create(user);
+			userService.create(user);
 			EmailAddress emailAddress = new EmailAddress();
 			emailAddress.setGit(true);
 			emailAddress.setPrimary(true);
 			emailAddress.setOwner(user);
 			emailAddress.setValue(data.getEmailAddress());
 			emailAddress.setVerificationCode(null);
-			emailAddressManager.create(emailAddress);
+			emailAddressService.create(emailAddress);
 		}
 		
 		var newAuditContent = VersionedXmlDoc.fromBean(user).toXML();
-		auditManager.audit(null, "created account \"" + user.getName() + "\" via RESTful API", null, newAuditContent);
+		auditService.audit(null, "created account \"" + user.getName() + "\" via RESTful API", null, newAuditContent);
 
 		return user.getId();
     }
@@ -365,11 +365,11 @@ public class UserResource {
 	@Path("/{userId}")
     @POST
     public Response updateUser(@PathParam("userId") Long userId, @NotNull @Valid UserUpdateData data) {
-		User user = userManager.load(userId);
+		User user = userService.load(userId);
 		if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
 			
-		User existingUser = userManager.findByName(data.getName());
+		User existingUser = userService.findByName(data.getName());
 		if (existingUser != null && !existingUser.equals(user))
 			throw new ExplicitException("Login name is already used by another user");
 
@@ -385,11 +385,11 @@ public class UserResource {
 		user.setFullName(data.getFullName());
 		if (!user.isServiceAccount())
 			user.setNotifyOwnEvents(data.isNotifyOwnEvents());
-		userManager.update(user, oldName);
+		userService.update(user, oldName);
 
 		if (!getAuthUser().equals(user)) {
 			var newAuditContent = VersionedXmlDoc.fromBean(data).toXML();
-			auditManager.audit(null, "changed account \"" + user.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
+			auditService.audit(null, "changed account \"" + user.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
 		}
 		
 		return Response.ok().build();
@@ -399,17 +399,17 @@ public class UserResource {
 	@Path("/{userId}/disable")
     @POST
     public Response disableUser(@PathParam("userId") Long userId) {
-		if (!subscriptionManager.isSubscriptionActive())
+		if (!subscriptionService.isSubscriptionActive())
 			throw new NotAcceptableException("This operation requires active subscription");
 		if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		
 		if (userId <= User.ROOT_ID)		
 			throw new BadRequestException("Should only disable normal users");
-		var user = userManager.load(userId);
-		userManager.disable(user);
+		var user = userService.load(userId);
+		userService.disable(user);
 
-		auditManager.audit(null, "disabled account \"" + user.getName() + "\" via RESTful API", null, null);
+		auditService.audit(null, "disabled account \"" + user.getName() + "\" via RESTful API", null, null);
 
 		return Response.ok().build();
     }
@@ -418,16 +418,16 @@ public class UserResource {
 	@Path("/{userId}/enable")
     @POST
     public Response enableUser(@PathParam("userId") Long userId) {
-		if (!subscriptionManager.isSubscriptionActive())
+		if (!subscriptionService.isSubscriptionActive())
 			throw new NotAcceptableException("This operation requires active subscription");
 		if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		if (userId <= User.ROOT_ID)		
 			throw new BadRequestException("Should only enable normal users");
-		var user = userManager.load(userId);
-		userManager.enable(user);
+		var user = userService.load(userId);
+		userService.enable(user);
 
-		auditManager.audit(null, "enabled account \"" + user.getName() + "\" via RESTful API", null, null);
+		auditService.audit(null, "enabled account \"" + user.getName() + "\" via RESTful API", null, null);
 
 		return Response.ok().build();
     }
@@ -436,16 +436,16 @@ public class UserResource {
 	@Path("/{userId}/convert-to-service-account")
     @POST
     public Response convertToServiceAccount(@PathParam("userId") Long userId) {
-		if (!subscriptionManager.isSubscriptionActive())
+		if (!subscriptionService.isSubscriptionActive())
 			throw new NotAcceptableException("This operation requires active subscription");
 		if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		if (userId <= User.ROOT_ID)		
 			throw new BadRequestException("Should only convert normal users to service accounts");
-		var user = userManager.load(userId);
-		userManager.convertToServiceAccount(user);
+		var user = userService.load(userId);
+		userService.convertToServiceAccount(user);
 
-		auditManager.audit(null, "converted user \"" + user.getName() + "\" to service account via RESTful API", null, null);
+		auditService.audit(null, "converted user \"" + user.getName() + "\" to service account via RESTful API", null, null);
 
 		return Response.ok().build();
     }
@@ -454,12 +454,12 @@ public class UserResource {
 	@Path("/{userId}/password")
     @POST
     public Response setPassword(@PathParam("userId") Long userId, @Password(checkPolicy=true) @NotEmpty String password) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
 		if (SecurityUtils.isAdministrator()) {
 			user.setPassword(passwordService.encryptPassword(password));
-			userManager.update(user, null);
+			userService.update(user, null);
 			if (!getAuthUser().equals(user)) 
-				auditManager.audit(null, "changed password of account \"" + user.getName() + "\" via RESTful API", null, null);
+				auditService.audit(null, "changed password of account \"" + user.getName() + "\" via RESTful API", null, null);
 			return Response.ok().build();
 		} else if (user.isDisabled()) {
 			throw new ExplicitException("Can not set password for disabled user");
@@ -471,7 +471,7 @@ public class UserResource {
 						+ "please change password there instead");
 			} else {
 				user.setPassword(passwordService.encryptPassword(password));
-				userManager.update(user, null);
+				userService.update(user, null);
 				return Response.ok().build();
 			}			
     	} else {
@@ -486,15 +486,15 @@ public class UserResource {
 		if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 
-		User user = userManager.load(userId);		
+		User user = userService.load(userId);		
 		if (user.isDisabled()) {
 			throw new ExplicitException("Can not reset two factor authentication for disabled user");
 		} else if (user.isServiceAccount()) {
 			throw new ExplicitException("Can not reset two factor authentication for service account");
 		} else {
 			user.setTwoFactorAuthentication(null);
-			userManager.update(user, null);
-			auditManager.audit(null, "reset two factor authentication of account \"" + user.getName() + "\" via RESTful API", null, null);
+			userService.update(user, null);
+			auditService.audit(null, "reset two factor authentication of account \"" + user.getName() + "\" via RESTful API", null, null);
 			return Response.ok().build();
 		}
 	}
@@ -503,7 +503,7 @@ public class UserResource {
 	@Path("/{userId}/queries-and-watches")
     @POST
     public Response setQueriesAndWatches(@PathParam("userId") Long userId, @NotNull QueriesAndWatches queriesAndWatches) {
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
 			throw new UnauthorizedException();
 
@@ -522,11 +522,11 @@ public class UserResource {
 		user.setIssueQueryWatches(queriesAndWatches.issueQueryWatches);
 		user.setProjectQueries(queriesAndWatches.projectQueries);
 		user.setPullRequestQueries(queriesAndWatches.pullRequestQueries);
-		userManager.update(user, null);
+		userService.update(user, null);
 
 		if (!getAuthUser().equals(user)) {
 			var newAuditContent = VersionedXmlDoc.fromBean(queriesAndWatches).toXML();
-			auditManager.audit(null, "changed queries and watches of account \"" + user.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
+			auditService.audit(null, "changed queries and watches of account \"" + user.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
 		}
 
 		return Response.ok().build();
@@ -536,7 +536,7 @@ public class UserResource {
 	@Path("/{userId}/ssh-keys")
 	@POST
 	public Long addSshKey(@PathParam("userId") Long userId, @NotNull String content) {
-		User user = userManager.load(userId);
+		User user = userService.load(userId);
 		if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser()))
 			throw new UnauthorizedException();
 		
@@ -549,11 +549,11 @@ public class UserResource {
 		sshKey.setOwner(user);
 		sshKey.generateFingerprint();
         
-		sshKeyManager.create(sshKey);
+		sshKeyService.create(sshKey);
 
 		if (!getAuthUser().equals(user)) {
 			var newAuditContent = VersionedXmlDoc.fromBean(sshKey).toXML();
-			auditManager.audit(null, "added ssh key to account \"" + user.getName() + "\" via RESTful API", null, newAuditContent);
+			auditService.audit(null, "added ssh key to account \"" + user.getName() + "\" via RESTful API", null, newAuditContent);
 		}
 
 		return sshKey.getId();
@@ -566,16 +566,16 @@ public class UserResource {
     	if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 
-    	User user = userManager.load(userId);
+    	User user = userService.load(userId);
     	if (user.isRoot())
 			throw new ExplicitException("Root user can not be deleted");
     	else if (user.equals(getAuthUser()))
     		throw new ExplicitException("Can not delete yourself");
     	else
-    		userManager.delete(user);
+    		userService.delete(user);
 
 		var oldAuditContent = VersionedXmlDoc.fromBean(getData(user)).toXML();
-		auditManager.audit(null, "deleted account \"" + user.getName() + "\" via RESTful API", oldAuditContent, null);
+		auditService.audit(null, "deleted account \"" + user.getName() + "\" via RESTful API", oldAuditContent, null);
 
     	return Response.ok().build();
     }

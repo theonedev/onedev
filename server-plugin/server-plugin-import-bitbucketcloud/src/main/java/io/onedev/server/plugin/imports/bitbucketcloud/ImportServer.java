@@ -34,12 +34,12 @@ import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.BaseAuthorizationManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.BaseAuthorizationService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.JerseyUtils;
@@ -185,7 +185,7 @@ public class ImportServer implements Serializable, Validatable {
 		Client client = newClient();
 		try {
 			for (var bitbucketRepository : repositories.getImportRepositories()) {
-				OneDev.getInstance(TransactionManager.class).run(() -> {
+				OneDev.getInstance(TransactionService.class).run(() -> {
 					try {
 						String oneDevProjectPath;
 						if (repositories.getParentOneDevProject() != null)
@@ -195,8 +195,8 @@ public class ImportServer implements Serializable, Validatable {
 
 						logger.log("Importing from '" + bitbucketRepository + "' to '" + oneDevProjectPath + "'...");
 
-						ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-						Project project = projectManager.setup(oneDevProjectPath);
+						ProjectService projectService = OneDev.getInstance(ProjectService.class);
+						Project project = projectService.setup(SecurityUtils.getSubject(), oneDevProjectPath);
 
 						if (!project.isNew() && !SecurityUtils.canManageProject(project)) {
 							throw new UnauthorizedException("Import target already exists. " +
@@ -230,10 +230,10 @@ public class ImportServer implements Serializable, Validatable {
 									new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
 								} else {
 									if (project.isNew()) {
-										projectManager.create(project);
-										OneDev.getInstance(AuditManager.class).audit(project, "created project", null, VersionedXmlDoc.fromBean(project).toXML());
+										projectService.create(SecurityUtils.getUser(), project);
+										OneDev.getInstance(AuditService.class).audit(project, "created project", null, VersionedXmlDoc.fromBean(project).toXML());
 									}
-									projectManager.clone(project, builder.build().toString());
+									projectService.clone(project, builder.build().toString());
 								}
 							} finally {
 								SecretMasker.pop();
@@ -244,7 +244,7 @@ public class ImportServer implements Serializable, Validatable {
 
 						boolean isPrivate = repoNode.get("is_private").asBoolean();
 						if (!isPrivate && !option.getPublicRoles().isEmpty())
-							OneDev.getInstance(BaseAuthorizationManager.class).syncRoles(project, option.getPublicRoles());
+							OneDev.getInstance(BaseAuthorizationService.class).syncRoles(project, option.getPublicRoles());
 					} catch (URISyntaxException e) {
 						throw new RuntimeException(e);
 					}

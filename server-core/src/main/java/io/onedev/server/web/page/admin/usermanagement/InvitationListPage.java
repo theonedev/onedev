@@ -30,8 +30,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserInvitationManager;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserInvitationService;
 import io.onedev.server.model.UserInvitation;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
@@ -167,9 +167,9 @@ public class InvitationListPage extends AdministrationPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						if (OneDev.getInstance(SettingManager.class).getMailService() != null) {
+						if (OneDev.getInstance(SettingService.class).getMailConnector() != null) {
 							UserInvitation invitation = rowModel.getObject();
-							getInvitationManager().sendInvitationEmail(invitation);
+							getInvitationService().sendInvitationEmail(invitation);
 							Session.get().success(MessageFormat.format(_T("Invitation sent to \"{0}\""), invitation.getEmailAddress()));
 						} else {
 							Session.get().error(_T("Mail service not configured"));
@@ -190,7 +190,7 @@ public class InvitationListPage extends AdministrationPage {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						UserInvitation invitation = rowModel.getObject();
-						getInvitationManager().delete(invitation);
+						getInvitationService().delete(invitation);
 						Session.get().success(MessageFormat.format(_T("Invitation to \"{0}\" deleted"), invitation.getEmailAddress()));
 						target.add(invitationsTable);
 					}
@@ -212,12 +212,12 @@ public class InvitationListPage extends AdministrationPage {
 
 			@Override
 			public Iterator<? extends UserInvitation> iterator(long first, long count) {
-				return getInvitationManager().query(query, (int)first, (int)count).iterator();
+				return getInvitationService().query(query, (int)first, (int)count).iterator();
 			}
 
 			@Override
 			public long size() {
-				return getInvitationManager().count(query);
+				return getInvitationService().count(query);
 			}
 
 			@Override
@@ -227,7 +227,7 @@ public class InvitationListPage extends AdministrationPage {
 
 					@Override
 					protected UserInvitation load() {
-						return getInvitationManager().load(id);
+						return getInvitationService().load(id);
 					}
 					
 				};
@@ -256,8 +256,8 @@ public class InvitationListPage extends AdministrationPage {
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
 	}
 	
-	private UserInvitationManager getInvitationManager() {
-		return OneDev.getInstance(UserInvitationManager.class);
+	private UserInvitationService getInvitationService() {
+		return OneDev.getInstance(UserInvitationService.class);
 	}
 
 	@Override

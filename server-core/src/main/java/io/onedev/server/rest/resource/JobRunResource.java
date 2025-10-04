@@ -1,10 +1,10 @@
 package io.onedev.server.rest.resource;
 
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.job.JobManager;
+import io.onedev.server.job.JobService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -36,24 +36,24 @@ import java.io.Serializable;
 @Singleton
 public class JobRunResource {
 
-	private final JobManager jobManager;
+	private final JobService jobService;
 	
-	private final BuildManager buildManager;
+	private final BuildService buildService;
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
-	private final PullRequestManager pullRequestManager;
+	private final PullRequestService pullRequestService;
 	
 	private final GitService gitService;
 	
 	@Inject
-	public JobRunResource(JobManager jobManager, BuildManager buildManager, 
-			ProjectManager projectManager, PullRequestManager pullRequestManager, 
-			GitService gitService) {
-		this.jobManager = jobManager;
-		this.buildManager = buildManager;
-		this.projectManager = projectManager;
-		this.pullRequestManager = pullRequestManager;
+	public JobRunResource(JobService jobService, BuildService buildService,
+                          ProjectService projectService, PullRequestService pullRequestService,
+                          GitService gitService) {
+		this.jobService = jobService;
+		this.buildService = buildService;
+		this.projectService = projectService;
+		this.pullRequestService = pullRequestService;
 		this.gitService = gitService;
 	}
 
@@ -65,11 +65,13 @@ public class JobRunResource {
 		PullRequest request;
 		ObjectId commitId;
 		
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
 		if (jobRun instanceof JobRunOnCommit) {
 			JobRunOnCommit jobRunOnCommit = (JobRunOnCommit) jobRun;
 			
-	    	project = projectManager.load(jobRunOnCommit.getProjectId());
-			if (!SecurityUtils.canRunJob(project, jobRun.getJobName()))		
+	    	project = projectService.load(jobRunOnCommit.getProjectId());
+			if (!SecurityUtils.canRunJob(subject, project, jobRun.getJobName()))		
 				throw new UnauthorizedException();
 
 			if (!jobRunOnCommit.getRefName().startsWith(Constants.R_REFS)) 
@@ -86,11 +88,11 @@ public class JobRunResource {
 			request = null;
 		} else {
 			JobRunOnPullRequest jobRunOnPullRequest = (JobRunOnPullRequest) jobRun;
-			request = pullRequestManager.load(jobRunOnPullRequest.getPullRequestId());
+			request = pullRequestService.load(jobRunOnPullRequest.getPullRequestId());
 			refName = request.getMergeRef();
 			project = request.getProject();
 			
-			if (!SecurityUtils.canRunJob(request.getProject(), jobRun.getJobName()))		
+			if (!SecurityUtils.canRunJob(subject, request.getProject(), jobRun.getJobName()))		
 				throw new UnauthorizedException();
 
 			MergePreview preview = request.checkMergePreview();
@@ -102,11 +104,10 @@ public class JobRunResource {
 			commitId = ObjectId.fromString(preview.getMergeCommitHash());
 		}
 		
-		Build build = jobManager.submit(project, commitId, jobRun.getJobName(), 
-				jobRun.getParams(), refName, SecurityUtils.getUser(), request, 
-				null, jobRun.getReason());
+		Build build = jobService.submit(user, project, commitId, jobRun.getJobName(), 
+				jobRun.getParams(), refName, request, null, jobRun.getReason());
 		if (build.isFinished())
-			jobManager.resubmit(build, jobRun.getReason());
+			jobService.resubmit(user, build, jobRun.getReason());
 		return build.getId();
     }
 
@@ -114,10 +115,12 @@ public class JobRunResource {
     @Path("/rebuild")
     @POST
     public Response rebuild(@NotNull @Valid JobRerun jobRerun) {
-    	Build  build = buildManager.load(jobRerun.buildId);
-		if (!SecurityUtils.canRunJob(build.getProject(), build.getJobName()))		
+    	Build  build = buildService.load(jobRerun.buildId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+		if (!SecurityUtils.canRunJob(subject, build.getProject(), build.getJobName()))		
 			throw new UnauthorizedException();
-		jobManager.resubmit(build, jobRerun.reason);
+		jobService.resubmit(user, build, jobRerun.reason);
 		return Response.ok().build();
     }
     
@@ -125,11 +128,11 @@ public class JobRunResource {
 	@Path("/{buildId}")
     @DELETE
     public Response cancelBuild(@PathParam("buildId") Long buildId) {
-		Build build = buildManager.load(buildId);
+		Build build = buildService.load(buildId);
 		if (!SecurityUtils.canRunJob(build.getProject(), build.getJobName()))		
 			throw new UnauthorizedException();
 		if (!build.isFinished())
-			jobManager.cancel(build);
+			jobService.cancel(build);
     	return Response.ok().build();
     }
 	

@@ -25,7 +25,7 @@ import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Spec
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ShowCondition;
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ValueIsNotAnyOf;
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ValueIsOneOf;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.ComponentContext;
@@ -154,7 +154,7 @@ public abstract class FieldSpec extends InputSpec {
 	}
 	
 	private GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
 	public Collection<String> getUndefinedFields() {

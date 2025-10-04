@@ -18,8 +18,8 @@ import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
@@ -119,9 +119,9 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 						getSetting().getFieldSpecs().add(field);
 					}
 					var newAuditContent = VersionedXmlDoc.fromBean(field).toXML();
-					OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+					OneDev.getInstance(SettingService.class).saveIssueSetting(getSetting());
 					var verb = fieldIndex != -1 ? "changed" : "added";
-					OneDev.getInstance(AuditManager.class).audit(null, verb + " issue field \"" + field.getName() + "\"", oldAuditContent, newAuditContent);
+					OneDev.getInstance(AuditService.class).audit(null, verb + " issue field \"" + field.getName() + "\"", oldAuditContent, newAuditContent);
 					onSave(target);
 				} else {
 					target.add(form);

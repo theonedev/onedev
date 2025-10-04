@@ -16,14 +16,14 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AccessTokenAuthorizationManager;
-import io.onedev.server.entitymanager.AccessTokenManager;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.service.AccessTokenAuthorizationService;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.RoleService;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.AccessTokenAuthorization;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
@@ -60,7 +60,7 @@ abstract class AccessTokenEditPanel extends Panel {
 				var token = getToken();
 				
 				var nameConflict = false;
-				var tokenWithSameName = getTokenManager().findByOwnerAndName(token.getOwner(), bean.getName());
+				var tokenWithSameName = getAccessTokenService().findByOwnerAndName(token.getOwner(), bean.getName());
 				if (token.isNew()) {
 					if (tokenWithSameName != null)
 						nameConflict = true;
@@ -84,11 +84,11 @@ abstract class AccessTokenEditPanel extends Panel {
 							target.add(AccessTokenEditPanel.this);
 							return;
 						} else {
-							var project = getProjectManager().findByPath(authorizationBean.getProjectPath());
+							var project = getProjectService().findByPath(authorizationBean.getProjectPath());
 							authorizationBean.getRoleNames().forEach(it -> {
 								var authorization = new AccessTokenAuthorization();
 								authorization.setProject(project);
-								authorization.setRole(getRoleManager().find(it));
+								authorization.setRole(getRoleService().find(it));
 								authorization.setToken(token);
 								authorizations.add(authorization);
 							});
@@ -96,14 +96,14 @@ abstract class AccessTokenEditPanel extends Panel {
 					}
 					token.setExpireDate(bean.getExpireDate());
 
-					getTransactionManager().run(() -> {
+					getTransactionService().run(() -> {
 						if (token.isNew())						
-						getTokenManager().createOrUpdate(token);
-						getAuthorizationManager().syncAuthorizations(token, authorizations);
+						getAccessTokenService().createOrUpdate(token);
+						getAccessTokenAuthorizationService().syncAuthorizations(token, authorizations);
 						if (getPage() instanceof UserPage) {
 							var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 							var verb = oldAuditContent != null ? "changed" : "created";
-							getAuditManager().audit(null, verb + " access token \"" + token.getName() + "\" in account \"" + token.getOwner().getName() + "\"", oldAuditContent, newAuditContent);
+							getAuditService().audit(null, verb + " access token \"" + token.getName() + "\" in account \"" + token.getOwner().getName() + "\"", oldAuditContent, newAuditContent);
 							oldAuditContent = newAuditContent;
 						}
 					});
@@ -131,28 +131,28 @@ abstract class AccessTokenEditPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 
-	private AuditManager getAuditManager() {
-		return OneDev.getInstance(AuditManager.class);
+	private AuditService getAuditService() {
+		return OneDev.getInstance(AuditService.class);
 	}
 	
-	private TransactionManager getTransactionManager() {
-		return OneDev.getInstance(TransactionManager.class);
+	private TransactionService getTransactionService() {
+		return OneDev.getInstance(TransactionService.class);
 	}
 	
-	private AccessTokenManager getTokenManager() {
-		return OneDev.getInstance(AccessTokenManager.class);
+	private AccessTokenService getAccessTokenService() {
+		return OneDev.getInstance(AccessTokenService.class);
 	}
 	
-	private AccessTokenAuthorizationManager getAuthorizationManager() {
-		return OneDev.getInstance(AccessTokenAuthorizationManager.class);
+	private AccessTokenAuthorizationService getAccessTokenAuthorizationService() {
+		return OneDev.getInstance(AccessTokenAuthorizationService.class);
 	}
 	
-	private RoleManager getRoleManager() {
-		return OneDev.getInstance(RoleManager.class);
+	private RoleService getRoleService() {
+		return OneDev.getInstance(RoleService.class);
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
 	protected abstract AccessToken getToken();

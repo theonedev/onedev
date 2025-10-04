@@ -6,7 +6,7 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.IssueQuery;
 import io.onedev.server.annotation.RadioChoice;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 
 import javax.annotation.Nullable;
@@ -78,7 +78,7 @@ public class TimesheetSetting implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getGroupByChoices() {
 		var choices = Lists.newArrayList(NAME_PROJECT);
-		for (var fieldSpec: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpecs()) {
+		for (var fieldSpec: OneDev.getInstance(SettingService.class).getIssueSetting().getFieldSpecs()) {
 			if (!fieldSpec.isAllowMultiple() && fieldSpec instanceof ChoiceField)
 				choices.add(fieldSpec.getName());
 		}

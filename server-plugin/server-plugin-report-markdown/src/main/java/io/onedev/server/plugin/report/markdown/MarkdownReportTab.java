@@ -4,8 +4,8 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTabHead;
@@ -37,8 +37,8 @@ public class MarkdownReportTab extends BuildTab {
 				Build build = page.getBuild();
 				Long projectId = build.getProject().getId();
 				Long buildNumber = build.getNumber();
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				String startPage = projectManager.runOnActiveServer(projectId, new GetStartPage(projectId, buildNumber, getTitle()));
+				ProjectService projectService = OneDev.getInstance(ProjectService.class);
+				String startPage = projectService.runOnActiveServer(projectId, new GetStartPage(projectId, buildNumber, getTitle()));
 				
 				PageParameters params = MarkdownReportPage.paramsOf(page.getBuild(), getTitle(), startPage);
 				return new ViewStateAwarePageLink<Void>(linkId, pageClass, params);
@@ -77,7 +77,7 @@ public class MarkdownReportTab extends BuildTab {
 
 				@Override
 				public String call() throws Exception {
-					File startPageFile = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), 
+					File startPageFile = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber),
 							PublishMarkdownReportStep.CATEGORY + "/" + reportName + "/" + PublishMarkdownReportStep.START_PAGE);
 					return FileUtils.readFileToString(startPageFile, StandardCharsets.UTF_8);
 				}

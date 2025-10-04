@@ -15,8 +15,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.LinkSpecService;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -103,15 +103,15 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 					editor.error(new Path(new PathNode.Named("opposite"), new PathNode.Named("name")), errorMessage);
 					target.add(form);
 				} else {
-					var linkSpecManager = OneDev.getInstance(LinkSpecManager.class);
-					var auditManager = OneDev.getInstance(AuditManager.class);
-					LinkSpec specWithSameName = linkSpecManager.find(getSpec().getName());
+					var linkSpecService = OneDev.getInstance(LinkSpecService.class);
+					var auditService = OneDev.getInstance(AuditService.class);
+					LinkSpec specWithSameName = linkSpecService.find(getSpec().getName());
 					if (getSpec().isNew() && specWithSameName != null 
 							|| !getSpec().isNew() && specWithSameName != null && !specWithSameName.equals(getSpec())) {
 						editor.error(new Path(new PathNode.Named("name")), _T("Name already used by another link"));
 						target.add(form);
 					} else if (getSpec().getOpposite() != null) {
-						specWithSameName = linkSpecManager.find(getSpec().getOpposite().getName());
+						specWithSameName = linkSpecService.find(getSpec().getOpposite().getName());
 						if (getSpec().isNew() && specWithSameName != null 
 								|| !getSpec().isNew() && specWithSameName != null && !specWithSameName.equals(getSpec())) {
 							String errorMessage = _T("Name already used by another link");
@@ -120,12 +120,12 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 						} else {
 							var newAuditContent = VersionedXmlDoc.fromBean(getSpec()).toXML();
 							if (getSpec().isNew()) {
-								getSpec().setOrder(linkSpecManager.query().stream().mapToInt(it -> it.getOrder()).max().orElse(0) + 1);
-								linkSpecManager.create(getSpec());
-								auditManager.audit(null, "added issue link spec \"" + getSpec().getDisplayName() + "\"", null, newAuditContent);
+								getSpec().setOrder(linkSpecService.query().stream().mapToInt(it -> it.getOrder()).max().orElse(0) + 1);
+								linkSpecService.create(getSpec());
+								auditService.audit(null, "added issue link spec \"" + getSpec().getDisplayName() + "\"", null, newAuditContent);
 							} else {
-								linkSpecManager.update(getSpec(), oldName, oldOppositeName);
-								auditManager.audit(null, "changed issue link spec \"" + getSpec().getDisplayName() + "\"", oldAuditContent, newAuditContent);
+								linkSpecService.update(getSpec(), oldName, oldOppositeName);
+								auditService.audit(null, "changed issue link spec \"" + getSpec().getDisplayName() + "\"", oldAuditContent, newAuditContent);
 							}
 							oldAuditContent = newAuditContent;
 							onSave(target);
@@ -133,12 +133,12 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 					} else {
 						var newAuditContent = VersionedXmlDoc.fromBean(getSpec()).toXML();
 						if (getSpec().isNew()) {
-							getSpec().setOrder(linkSpecManager.query().stream().mapToInt(it -> it.getOrder()).max().orElse(0) + 1);
-							linkSpecManager.create(getSpec());
-							auditManager.audit(null, "added issue link spec \"" + getSpec().getDisplayName() + "\"", null, newAuditContent);
+							getSpec().setOrder(linkSpecService.query().stream().mapToInt(it -> it.getOrder()).max().orElse(0) + 1);
+							linkSpecService.create(getSpec());
+							auditService.audit(null, "added issue link spec \"" + getSpec().getDisplayName() + "\"", null, newAuditContent);
 						} else {
-							linkSpecManager.update(getSpec(), oldName, oldOppositeName);
-							auditManager.audit(null, "changed issue link spec \"" + getSpec().getDisplayName() + "\"", oldAuditContent, newAuditContent);
+							linkSpecService.update(getSpec(), oldName, oldOppositeName);
+							auditService.audit(null, "changed issue link spec \"" + getSpec().getDisplayName() + "\"", oldAuditContent, newAuditContent);
 						}
 						oldAuditContent = newAuditContent;
 						onSave(target);

@@ -4,7 +4,7 @@ import java.text.MessageFormat;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 
@@ -25,7 +25,7 @@ public class PullRequestReviewRequested extends PullRequestEvent {
 	}
 
 	public User getReviewer() {
-		return OneDev.getInstance(UserManager.class).load(reviewerId);
+		return OneDev.getInstance(UserService.class).load(reviewerId);
 	}
 
 	@Override

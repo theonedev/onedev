@@ -11,7 +11,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.annotation.UserChoice;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 
 @Editable
@@ -45,7 +45,7 @@ public class LinkUserBean implements Serializable {
 
 	@SuppressWarnings("unused")
 	private static List<User> getLinkableUsers() {
-		return OneDev.getInstance(UserManager.class).query().stream()
+		return OneDev.getInstance(UserService.class).query().stream()
                 .filter(it -> !it.isServiceAccount() && !it.isDisabled())
                 .sorted(Comparator.comparing(User::getDisplayName))
                 .collect(Collectors.toList());

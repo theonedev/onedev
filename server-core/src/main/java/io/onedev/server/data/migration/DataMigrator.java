@@ -38,10 +38,8 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Triple;
-import org.apache.shiro.crypto.AesCipherService;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.digest.BuiltinDigests;
 import org.dom4j.Element;
@@ -58,8 +56,8 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.markdown.MarkdownManager;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
@@ -4610,8 +4608,8 @@ public class DataMigrator {
 
 	private Set<String> getMentioned108(Map<String, String> userIds, String content) {
 		Set<String> mentioned = new HashSet<>();
-		MarkdownManager markdownManager = OneDev.getInstance(MarkdownManager.class);
-		for (String userName : new MentionParser().parseMentions(markdownManager.render(content))) {
+		MarkdownService markdownService = OneDev.getInstance(MarkdownService.class);
+		for (String userName : new MentionParser().parseMentions(markdownService.render(content))) {
 			String userId = userIds.get(userName);
 			if (userId != null)
 				mentioned.add(userId);
@@ -8144,7 +8142,7 @@ public class DataMigrator {
 					if (key.equals("SYSTEM_UUID")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							valueElement.setText(OneDev.getInstance(SettingManager.class).encryptUUID(valueElement.getText().trim()));
+							valueElement.setText(OneDev.getInstance(SettingService.class).encryptUUID(valueElement.getText().trim()));
 						}
 					} else if (key.equals("ALERT")) {
 						Element valueElement = element.element("value");
@@ -8327,4 +8325,28 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate212(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var keyElement = element.element("key");
+					if (keyElement.getTextTrim().equals("MAIL_SERVICE")) {
+						keyElement.setText("MAIL");
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var className = valueElement.attributeValue("class");
+							className = className.replace(".mailservice.", ".mail.");
+							className = className.replace("Office365MailService", "Office365Connector");
+							className = className.replace("GmailMailService", "GmailConnector");
+							className = className.replace("SmtpImapMailService", "SmtpImapConnector");
+							className = className.replace("SendgridMailService", "SendgridConnector");
+							valueElement.addAttribute("class", className);
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 }

@@ -39,16 +39,16 @@ import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.timetracking.TimeTrackingManager;
+import io.onedev.server.timetracking.TimeTrackingService;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.dropdowntriangleindicator.DropdownTriangleIndicatorCssResourceReference;
-import io.onedev.server.web.avatar.AvatarManager;
+import io.onedev.server.web.avatar.AvatarService;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -125,7 +125,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		if (requestUrl.startsWith("projects/")) {
 			requestUrl = StringUtils.stripStart(requestUrl.substring("projects/".length()), "/");
 			Long projectId = Long.valueOf(StringUtils.substringBefore(requestUrl, "/"));
-			Project project = getProjectManager().load(projectId);
+			Project project = getProjectService().load(projectId);
 			String suffix = StringUtils.substringAfter(requestUrl, "/");
 			
 			String redirectUrl = "/" + project.getPath();
@@ -141,7 +141,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		
 		projectPath = StringUtils.strip(projectPath, "/");
 		
-		Project project = getProjectManager().findByPath(projectPath);
+		Project project = getProjectService().findByPath(projectPath);
 		if (project == null || !SecurityUtils.canAccessProject(project)) {
 			if (getLoginUser() != null)
 				throw new EntityNotFoundException("Project not found or inaccessible");
@@ -154,7 +154,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 			@Override
 			protected Project load() {
-				Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+				Project project = OneDev.getInstance(ProjectService.class).load(projectId);
 				
 				/*
 				 * Give child page a chance to cache object id of known revisions upon
@@ -232,7 +232,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					IterationListPage.class, IterationListPage.paramsOf(getProject(), false, null), 
 					Lists.newArrayList(NewIterationPage.class, IterationDetailPage.class, IterationEditPage.class)));
 			if (getProject().isTimeTracking() && isSubscriptionActive() && SecurityUtils.canAccessTimeTracking(getProject())) 
-				issueMenuItems.add(OneDev.getInstance(TimeTrackingManager.class).newTimesheetsMenuItem(getProject()));
+				issueMenuItems.add(OneDev.getInstance(TimeTrackingService.class).newTimesheetsMenuItem(getProject()));
 			menuItems.add(new SidebarMenuItem.SubMenu("bug", _T("Issues"), issueMenuItems));
 		}
 
@@ -308,7 +308,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			
 			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("Build"), buildSettingMenuItems));
 			
-			if (getSettingManager().getServiceDeskSetting() != null && getProject().isIssueManagement()) {
+			if (getSettingService().getServiceDeskSetting() != null && getProject().isIssueManagement()) {
 				settingMenuItems.add(new SidebarMenuItem.Page(null, _T("Service Desk"), 
 						ServiceDeskSettingPage.class, ServiceDeskSettingPage.paramsOf(getProject())));
 			}
@@ -320,7 +320,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			menuItems.add(new SidebarMenuItem.SubMenu("sliders", _T("Settings"), settingMenuItems));
 		}
 		
-		String avatarUrl = OneDev.getInstance(AvatarManager.class).getProjectAvatarUrl(getProject().getId());
+		String avatarUrl = OneDev.getInstance(AvatarService.class).getProjectAvatarUrl(getProject().getId());
 		SidebarMenu.Header menuHeader = new SidebarMenu.Header(avatarUrl, getProject().getName()) {
 			
 			@Override
@@ -373,8 +373,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		return menus;
 	}
 
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 	
 	@Override
@@ -403,9 +403,9 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 				Fragment fragment = new Fragment(id, "favoritesFrag", ProjectPage.this);
 				RepeatingView projectsView = new RepeatingView("projects");
 				
-				String queryString = getProjectManager().getFavoriteQuery();
+				String queryString = getProjectService().getFavoriteQuery(getLoginUser());
 				ProjectQuery query = ProjectQuery.parse(queryString);
-				for (Project project: getProjectManager().query(query, false, 0, WebConstants.PAGE_SIZE)) 
+				for (Project project: getProjectService().query(SecurityUtils.getSubject(), query, false, 0, WebConstants.PAGE_SIZE)) 
 					projectsView.add(newItem(projectsView.newChildId(), project));
 				
 				fragment.add(projectsView);
@@ -414,7 +414,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					
 					@Override
 					protected void appendMore(AjaxRequestTarget target, int offset, int count) {
-						for (Project project: getProjectManager().query(query, false, offset, count)) {
+						for (Project project: getProjectService().query(SecurityUtils.getSubject(), query, false, offset, count)) {
 							Component item = newItem(projectsView.newChildId(), project);
 							projectsView.add(item);
 							String script = String.format("$('#%s ul').append('<li id=\"%s\"></li>');", 
@@ -463,7 +463,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					link.add(new Label("label", project.getName()));
 					item.add(link);
 					
-					if (item.getIndex() < getModelObject().size() - 1 || getProjectManager().hasChildren(project.getId())) {
+					if (item.getIndex() < getModelObject().size() - 1 || getProjectService().hasChildren(project.getId())) {
 						Long projectId = project.getId();
 						item.add(new DropdownLink("children") {
 	
@@ -473,7 +473,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 									@Override
 									protected WebMarkupContainer newChildLink(String componentId, Long childId) {
-										return navToProject(componentId, ProjectPage.getProjectManager().load(childId));
+										return navToProject(componentId, ProjectPage.getProjectService().load(childId));
 									}
 									
 								};
@@ -517,8 +517,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			description = getProject().getName();
 		}
 		
-		String urlOfProjectImage = getSettingManager().getSystemSetting().getServerUrl() +
-				OneDev.getInstance(AvatarManager.class).getProjectAvatarUrl(getProject().getId());
+		String urlOfProjectImage = getSettingService().getSystemSetting().getServerUrl() +
+				OneDev.getInstance(AvatarService.class).getProjectAvatarUrl(getProject().getId());
 		
 		new OpenGraphHeaderMeta(OpenGraphHeaderMetaType.Title, getProject().getPath()).render(response);
 		new OpenGraphHeaderMeta(OpenGraphHeaderMetaType.Description, description).render(response);
@@ -537,14 +537,14 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 	protected abstract BookmarkablePageLink<Void> navToProject(String componentId, Project project);
 	
-	protected static ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	protected static ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
 	protected abstract Component newProjectTitle(String componentId);
 	
 	public static PageParameters paramsOf(Long projectId) {
-		ProjectFacade project = getProjectManager().findFacadeById(projectId);
+		ProjectFacade project = getProjectService().findFacadeById(projectId);
 		return paramsOf(project.getPath());
 	}
 	

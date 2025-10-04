@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
@@ -53,7 +53,7 @@ public class IssueReferencedFromIssueData extends IssueChangeData implements Ref
 
 	@Override
 	public Issue getReferencedFrom() {
-		return OneDev.getInstance(IssueManager.class).get(issueId);
+		return OneDev.getInstance(IssueService.class).get(issueId);
 	}
 
 	@Override

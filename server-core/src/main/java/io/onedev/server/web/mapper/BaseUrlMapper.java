@@ -50,7 +50,7 @@ import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage
 import io.onedev.server.web.page.admin.issuesetting.timetracking.TimeTrackingSettingPage;
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
 import io.onedev.server.web.page.admin.labelmanagement.LabelManagementPage;
-import io.onedev.server.web.page.admin.mailservice.MailServicePage;
+import io.onedev.server.web.page.admin.mailservice.MailConnectorPage;
 import io.onedev.server.web.page.admin.performancesetting.PerformanceSettingPage;
 import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
 import io.onedev.server.web.page.admin.rolemanagement.NewRolePage;
@@ -311,7 +311,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/groups/${group}/members", GroupMembershipsPage.class));
 		add(new BasePageMapper("~administration/groups/${group}/authorizations", GroupAuthorizationsPage.class));
 		
-		add(new BasePageMapper("~administration/settings/mail-service", MailServicePage.class));
+		add(new BasePageMapper("~administration/settings/mail-service", MailConnectorPage.class));
 		add(new BasePageMapper("~administration/settings/service-desk-setting", 
 				io.onedev.server.web.page.admin.servicedesk.ServiceDeskSettingPage.class));
 		add(new BasePageMapper("~administration/settings/email-templates/issue-notification", 

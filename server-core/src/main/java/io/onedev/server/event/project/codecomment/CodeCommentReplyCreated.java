@@ -1,8 +1,8 @@
 package io.onedev.server.event.project.codecomment;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.service.CodeCommentReplyService;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
@@ -19,7 +19,7 @@ public class CodeCommentReplyCreated extends CodeCommentEvent {
 	}
 
 	public CodeCommentReply getReply() {
-		return OneDev.getInstance(CodeCommentReplyManager.class).load(replyId);
+		return OneDev.getInstance(CodeCommentReplyService.class).load(replyId);
 	}
 
 	@Override
@@ -34,7 +34,7 @@ public class CodeCommentReplyCreated extends CodeCommentEvent {
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getReply(), true);
+		return OneDev.getInstance(UrlService.class).urlFor(getReply(), true);
 	}
 
 }

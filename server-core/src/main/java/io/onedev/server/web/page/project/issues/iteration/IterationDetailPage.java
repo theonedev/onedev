@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.project.issues.iteration;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IterationManager;
+import io.onedev.server.service.IterationService;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -55,7 +55,7 @@ public abstract class IterationDetailPage extends ProjectPage {
 
 			@Override
 			protected Iteration load() {
-				return OneDev.getInstance(IterationManager.class).load(iterationId);
+				return OneDev.getInstance(IterationService.class).load(iterationId);
 			}
 			
 		};

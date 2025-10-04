@@ -11,7 +11,7 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.service.GroupService;
 import io.onedev.server.model.Group;
 import io.onedev.server.web.component.select2.ChoiceProvider;
 
@@ -27,9 +27,9 @@ public abstract class AbstractGroupChoiceProvider extends ChoiceProvider<Group> 
 	@Override
 	public Collection<Group> toChoices(Collection<String> ids) {
 		List<Group> groups = Lists.newArrayList();
-		GroupManager groupManager = OneDev.getInstance(GroupManager.class);
+		GroupService groupService = OneDev.getInstance(GroupService.class);
 		for (String each : ids) {
-			Group group = groupManager.load(Long.valueOf(each));
+			Group group = groupService.load(Long.valueOf(each));
 			Hibernate.initialize(group);
 			groups.add(group);
 		}

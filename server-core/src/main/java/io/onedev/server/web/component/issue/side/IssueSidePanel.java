@@ -47,9 +47,9 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.Input;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueVoteManager;
-import io.onedev.server.entitymanager.IssueWatchManager;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.IssueVoteService;
+import io.onedev.server.service.IssueWatchService;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
@@ -59,7 +59,7 @@ import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.StateCriteria;
@@ -111,12 +111,12 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			protected void onSaveWatch(EntityWatch watch) {
-				OneDev.getInstance(IssueWatchManager.class).createOrUpdate((IssueWatch) watch);
+				OneDev.getInstance(IssueWatchService.class).createOrUpdate((IssueWatch) watch);
 			}
 
 			@Override
 			protected void onDeleteWatch(EntityWatch watch) {
-				OneDev.getInstance(IssueWatchManager.class).delete((IssueWatch) watch);
+				OneDev.getInstance(IssueWatchService.class).delete((IssueWatch) watch);
 			}
 
 			@Override
@@ -232,7 +232,8 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				OneDev.getInstance(IssueChangeManager.class).changeConfidential(getIssue(), confidential);
+				var user = SecurityUtils.getUser();
+				OneDev.getInstance(IssueChangeService.class).changeConfidential(user, getIssue(), confidential);
 				setResponsePage(getPage());
 			}
 			
@@ -312,7 +313,8 @@ public abstract class IssueSidePanel extends Panel {
 					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getIssueChangeManager().removeSchedule(getIssue(), item.getModelObject());
+						var user = SecurityUtils.getUser();
+						getIssueChangeService().removeSchedule(user, getIssue(), item.getModelObject());
 						notifyIssueChange(target, getIssue());
 					}
 					
@@ -371,7 +373,7 @@ public abstract class IssueSidePanel extends Panel {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Iteration iteration) {
-				getIssueChangeManager().addSchedule(getIssue(), iteration);
+				getIssueChangeService().addSchedule(SecurityUtils.getUser(), getIssue(), iteration);
 				notifyIssueChange(target, getIssue());
 			}
 
@@ -471,12 +473,12 @@ public abstract class IssueSidePanel extends Panel {
 						vote.setIssue(getIssue());
 						vote.setUser(SecurityUtils.getAuthUser());
 						vote.setDate(new Date());
-						OneDev.getInstance(IssueVoteManager.class).create(vote);
+						OneDev.getInstance(IssueVoteService.class).create(vote);
 						getIssue().getVotes().add(vote);
 						target.add(watchesContainer);
 					} else {
 						getIssue().getVotes().remove(vote);
-						OneDev.getInstance(IssueVoteManager.class).delete(vote);
+						OneDev.getInstance(IssueVoteService.class).delete(vote);
 					}
 					target.add(container);
 				} else {
@@ -551,7 +553,7 @@ public abstract class IssueSidePanel extends Panel {
 					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						OneDev.getInstance(TransactionManager.class).run(() -> {
+						OneDev.getInstance(TransactionService.class).run(() -> {
 							getIssue().getExternalParticipants().remove(item.getModelObject());
 						});		
 						target.add(container);
@@ -568,8 +570,8 @@ public abstract class IssueSidePanel extends Panel {
 		return getIssue().getProject();
 	}
 	
-	private IssueChangeManager getIssueChangeManager() {
-		return OneDev.getInstance(IssueChangeManager.class);
+	private IssueChangeService getIssueChangeService() {
+		return OneDev.getInstance(IssueChangeService.class);
 	}
 	
 	@Override

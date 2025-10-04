@@ -27,10 +27,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.git.AbstractGitTest;
 import io.onedev.server.git.BlobContent;
@@ -41,7 +41,7 @@ import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GpgSetting;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 
 public class DefaultGitServiceCommitTest extends AbstractGitTest {
 
@@ -50,12 +50,12 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 	@Override
 	protected void setup() {
 		super.setup();
-		var projectManager = mock(ProjectManager.class);
-		when(projectManager.runOnActiveServer(any(), any())).thenAnswer(invocation -> invocation.getArgument(1, ClusterTask.class).call());
-		when(projectManager.getRepository(any())).thenReturn(git.getRepository());
+		var projectService = mock(ProjectService.class);
+		when(projectService.runOnActiveServer(any(), any())).thenAnswer(invocation -> invocation.getArgument(1, ClusterTask.class).call());
+		when(projectService.getRepository(any())).thenReturn(git.getRepository());
 		
-		var settingManager = mock(SettingManager.class);
-		when(settingManager.getGpgSetting()).thenReturn(new GpgSetting() {
+		var settingService = mock(SettingService.class);
+		when(settingService.getGpgSetting()).thenReturn(new GpgSetting() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -66,12 +66,12 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 			
 		});
 		
-		var sessionManager = mock(SessionManager.class);
-		var clusterManager = mock(ClusterManager.class);
+		var sessionService = mock(SessionService.class);
+		var clusterService = mock(ClusterService.class);
 		var listenerRegistry = mock(ListenerRegistry.class);
 		
-		gitService = new DefaultGitService(projectManager, settingManager, sessionManager, 
-				clusterManager, listenerRegistry);
+		gitService = new DefaultGitService(projectService, settingService, sessionService, 
+				clusterService, listenerRegistry);
 	}
 	
 	@Test

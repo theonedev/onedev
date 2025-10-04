@@ -11,8 +11,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.SshKeyService;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Path;
@@ -51,19 +51,19 @@ public abstract class InsertSshKeyPanel extends Panel {
             protected void onSubmit(AjaxRequestTarget target, Form<?> myform) {
                 super.onSubmit(target, myform);
                 
-                SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
+                SshKeyService sshKeyService = OneDev.getInstance(SshKeyService.class);
                 SshKey sshKey = (SshKey) editor.getModelObject();
                 sshKey.generateFingerprint();
                 
-                if (sshKeyManager.findByFingerprint(sshKey.getFingerprint()) != null) {
+                if (sshKeyService.findByFingerprint(sshKey.getFingerprint()) != null) {
 					editor.error(new Path(new PathNode.Named("content")), "This key is already in use");
 					target.add(form);
                 } else {
                     sshKey.setOwner(getUser());
                     sshKey.setCreatedAt(new Date());
-                    sshKeyManager.create(sshKey);
+                    sshKeyService.create(sshKey);
                     if (getPage() instanceof UserPage)
-						OneDev.getInstance(AuditManager.class).audit(null, "added SSH key \"" + sshKey.getFingerprint() + "\" in account \"" + sshKey.getOwner().getName() + "\"", null, null);
+						OneDev.getInstance(AuditService.class).audit(null, "added SSH key \"" + sshKey.getFingerprint() + "\" in account \"" + sshKey.getOwner().getName() + "\"", null, null);
                     onSave(target);
                 }
             }

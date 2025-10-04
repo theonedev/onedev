@@ -1,6 +1,6 @@
 package io.onedev.server.web;
 
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.protocol.http.WicketServlet;
 
@@ -17,7 +17,7 @@ public class DefaultWicketServlet extends WicketServlet {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
 	private final WicketFilter wicketFilter;
 	
@@ -27,8 +27,8 @@ public class DefaultWicketServlet extends WicketServlet {
 	}
 
 	@Inject
-	public DefaultWicketServlet(SessionManager sessionManager, WicketFilter wicketFilter) {
-		this.sessionManager = sessionManager;
+	public DefaultWicketServlet(SessionService sessionService, WicketFilter wicketFilter) {
+		this.sessionService = sessionService;
 		this.wicketFilter = wicketFilter;
 	}
 	
@@ -39,7 +39,7 @@ public class DefaultWicketServlet extends WicketServlet {
 
 	@Override
 	public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-		sessionManager.run(() -> {
+		sessionService.run(() -> {
 			var httpRes = (HttpServletResponse) res;
 			httpRes.setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
 			// Disable cloudflare suggested prefetch to fix OD-2120

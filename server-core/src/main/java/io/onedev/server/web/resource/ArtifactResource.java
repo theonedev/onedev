@@ -6,9 +6,9 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -70,9 +70,9 @@ public class ArtifactResource extends AbstractResource {
 		
 		FileInfo fileInfo = null;
 		if (!SecurityUtils.isSystem()) {
-			Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+			Project project = OneDev.getInstance(ProjectService.class).load(projectId);
 			
-			Build build = OneDev.getInstance(BuildManager.class).find(project, buildNumber);
+			Build build = OneDev.getInstance(BuildService.class).find(project, buildNumber);
 
 			if (build == null) {
 				String message = String.format("Unable to find build (project: %s, build number: %d)", 
@@ -83,7 +83,7 @@ public class ArtifactResource extends AbstractResource {
 			if (!SecurityUtils.canAccessBuild(build))
 				throw new UnauthorizedException();
 			
-			fileInfo = (FileInfo) getBuildManager().getArtifactInfo(build, artifactPath);
+			fileInfo = (FileInfo) getBuildService().getArtifactInfo(build, artifactPath);
 		}
 		
 		ResourceResponse response = new ResourceResponse();
@@ -110,12 +110,12 @@ public class ArtifactResource extends AbstractResource {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				String activeServer = projectManager.getActiveServer(projectId, true);
-				ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
-				if (activeServer.equals(clusterManager.getLocalServerAddress())) {
+				ProjectService projectService = OneDev.getInstance(ProjectService.class);
+				String activeServer = projectService.getActiveServer(projectId, true);
+				ClusterService clusterService = OneDev.getInstance(ClusterService.class);
+				if (activeServer.equals(clusterService.getLocalServerAddress())) {
 					read(getArtifactsLockName(projectId, buildNumber), () -> {
-						File artifactFile = new File(getBuildManager().getArtifactsDir(projectId, buildNumber), artifactPath);
+						File artifactFile = new File(getBuildService().getArtifactsDir(projectId, buildNumber), artifactPath);
 						try (
 								InputStream is = new FileInputStream(artifactFile);
 								OutputStream os = attributes.getResponse().getOutputStream()) {
@@ -129,12 +129,12 @@ public class ArtifactResource extends AbstractResource {
 	    				CharSequence path = RequestCycle.get().urlFor(
 	    						new ArtifactResourceReference(), 
 	    						ArtifactResource.paramsOf(projectId, buildNumber, artifactPath));
-	    				String activeServerUrl = clusterManager.getServerUrl(activeServer);
+	    				String activeServerUrl = clusterService.getServerUrl(activeServer);
 	    				
 	    				WebTarget target = client.target(activeServerUrl).path(path.toString());
 	    				Invocation.Builder builder =  target.request();
 	    				builder.header(HttpHeaders.AUTHORIZATION, 
-	    						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
+	    						KubernetesHelper.BEARER + " " + clusterService.getCredential());
 	    				
 	    				try (Response response = builder.get()) {
 	    					KubernetesHelper.checkStatus(response);
@@ -155,8 +155,8 @@ public class ArtifactResource extends AbstractResource {
 		return response;
 	}
 	
-	private BuildManager getBuildManager() {
-		return OneDev.getInstance(BuildManager.class);
+	private BuildService getBuildService() {
+		return OneDev.getInstance(BuildService.class);
 	}
 	
 	public static PageParameters paramsOf(Long projectId, Long buildNumber, String path) {

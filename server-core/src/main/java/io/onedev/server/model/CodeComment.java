@@ -33,7 +33,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentStorageSupport;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastActivity;
@@ -41,7 +41,7 @@ import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.xodus.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoService;
 
 @Entity
 @Table(indexes={
@@ -260,7 +260,7 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getAuthUser();
 		if (user != null) {
-			Date visitDate = OneDev.getInstance(VisitInfoManager.class).getCodeCommentVisitDate(user, this);
+			Date visitDate = OneDev.getInstance(VisitInfoService.class).getCodeCommentVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;
@@ -306,9 +306,9 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 			participants.add(getUser());
 			for (CodeCommentReply reply: getReplies()) 
 				participants.add(reply.getUser());
-			var userManager = OneDev.getInstance(UserManager.class);
-			participants.remove(userManager.getSystem());
-			participants.remove(userManager.getUnknown());
+			var userService = OneDev.getInstance(UserService.class);
+			participants.remove(userService.getSystem());
+			participants.remove(userService.getUnknown());
 		}
 		return new ArrayList<>(participants);
 	}

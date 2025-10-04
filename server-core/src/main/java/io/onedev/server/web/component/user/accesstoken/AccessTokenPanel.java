@@ -14,8 +14,8 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AccessTokenManager;
-import io.onedev.server.entitymanager.AuditManager;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.AuditService;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -56,9 +56,9 @@ abstract class AccessTokenPanel extends Panel {
 				var token = getToken();
 				token.setValue(CryptoUtils.generateSecret());
 				var newAuditContent = VersionedXmlDoc.fromBean(token).toXML();
-				OneDev.getInstance(AccessTokenManager.class).createOrUpdate(token);
+				OneDev.getInstance(AccessTokenService.class).createOrUpdate(token);
 				if (getPage() instanceof UserPage) {
-					OneDev.getInstance(AuditManager.class).audit(null, "regenerated access token \"" + token.getName() + "\" in account \"" + token.getOwner().getName() + "\"", oldAuditContent, newAuditContent);
+					OneDev.getInstance(AuditService.class).audit(null, "regenerated access token \"" + token.getName() + "\" in account \"" + token.getOwner().getName() + "\"", oldAuditContent, newAuditContent);
 				}
 				target.add(AccessTokenPanel.this);
 				Session.get().success(_T("Access token regenerated successfully"));

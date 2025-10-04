@@ -5,7 +5,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.job.TriggerMatch;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -65,7 +65,7 @@ public abstract class PullRequestTrigger extends JobTrigger {
 
 	private boolean touchedFile(PullRequest request) {
 		if (getPaths() != null) {
-			Repository repository = OneDev.getInstance(ProjectManager.class)
+			Repository repository = OneDev.getInstance(ProjectService.class)
 					.getRepository(request.getTargetProject().getId());
 			Collection<String> changedFiles = GitUtils.getChangedFiles(repository, 
 					request.getBaseCommit(), request.getLatestUpdate().getHeadCommit());

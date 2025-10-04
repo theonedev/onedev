@@ -17,7 +17,7 @@ import org.apache.wicket.util.convert.ConversionException;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.service.GroupService;
 import io.onedev.server.model.Group;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.groupchoice.GroupMultiChoice;
@@ -49,7 +49,7 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 				choices.addAll((List<Group>) ReflectionUtils
 						.invokeStaticMethod(descriptor.getBeanClass(), groupChoice.value()));
 			} else {
-				choices.addAll(OneDev.getInstance(GroupManager.class).query());
+				choices.addAll(OneDev.getInstance(GroupService.class).query());
 				choices.sort(Comparator.comparing(Group::getName));
 			}
 		} finally {
@@ -58,9 +58,9 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 	
     	List<Group> selections = new ArrayList<>();
 		if (getModelObject() != null) {
-			GroupManager groupManager = OneDev.getInstance(GroupManager.class);
+			GroupService groupService = OneDev.getInstance(GroupService.class);
 			for (String groupName: getModelObject()) {
-				Group group = groupManager.find(groupName);
+				Group group = groupService.find(groupName);
 				if (group != null && choices.contains(group))
 					selections.add(group);
 			}

@@ -13,8 +13,8 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.AppLoaderMocker;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 
@@ -22,25 +22,25 @@ public class ReferenceUtilsTest extends AppLoaderMocker {
 
     @Test
     public void test() {
-		var projectManager = mock(ProjectManager.class);
-		var settingManager = mock(SettingManager.class);
-		Mockito.when(AppLoader.getInstance(ProjectManager.class)).thenReturn(projectManager);	
-		Mockito.when(AppLoader.getInstance(SettingManager.class)).thenReturn(settingManager);	
+		var projectService = mock(ProjectService.class);
+		var settingService = mock(SettingService.class);
+		Mockito.when(AppLoader.getInstance(ProjectService.class)).thenReturn(projectService);
+		Mockito.when(AppLoader.getInstance(SettingService.class)).thenReturn(settingService);
 		var project1 = new Project();
 		project1.setId(1L);
 		project1.setKey("ONE");
 		project1.setPath("test/project1");
-		when(projectManager.load(1L)).thenReturn(project1);
-		when(projectManager.findByKey("ONE")).thenReturn(project1);
-		when(projectManager.findByPath("test/project1")).thenReturn(project1);
+		when(projectService.load(1L)).thenReturn(project1);
+		when(projectService.findByKey("ONE")).thenReturn(project1);
+		when(projectService.findByPath("test/project1")).thenReturn(project1);
 		var project2 = new Project();
 		project2.setId(2L);
 		project2.setKey("TWO");
 		project2.setPath("test/project2");
-		when(projectManager.load(2L)).thenReturn(project2);
-		when(projectManager.findByKey("TWO")).thenReturn(project2);
-		when(projectManager.findByPath("test/project2")).thenReturn(project2);
-		when(settingManager.getIssueSetting()).thenReturn(new GlobalIssueSetting());
+		when(projectService.load(2L)).thenReturn(project2);
+		when(projectService.findByKey("TWO")).thenReturn(project2);
+		when(projectService.findByPath("test/project2")).thenReturn(project2);
+		when(settingService.getIssueSetting()).thenReturn(new GlobalIssueSetting());
 
 		assertEquals("<a href='https://example.com'>A test issue</a>", transformReferences("A test issue", project1, ((reference, text) -> {
 			if (reference != null)

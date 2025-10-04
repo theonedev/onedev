@@ -13,7 +13,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.search.entitytext.PullRequestTextManager;
+import io.onedev.server.search.entitytext.PullRequestTextService;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -37,7 +37,7 @@ public class FuzzyCriteria extends Criteria<PullRequest> {
 			if (value.length() == 0)
 				return builder.conjunction();
 			var project = projectScope!=null? projectScope.getProject(): null;
-			requestIds = OneDev.getInstance(PullRequestTextManager.class).query(project, value, MAX_TEXT_QUERY_COUNT);
+			requestIds = OneDev.getInstance(PullRequestTextService.class).query(project, value, MAX_TEXT_QUERY_COUNT);
 		}
 		if (requestIds.isEmpty())
 			return builder.disjunction();
@@ -50,7 +50,7 @@ public class FuzzyCriteria extends Criteria<PullRequest> {
 		if (value.length() == 0)
 			return true;
 		else
-			return OneDev.getInstance(PullRequestTextManager.class).matches(request, value);
+			return OneDev.getInstance(PullRequestTextService.class).matches(request, value);
 	}
 
 	@Override

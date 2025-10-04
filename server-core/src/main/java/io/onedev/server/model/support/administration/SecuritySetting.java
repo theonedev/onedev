@@ -15,7 +15,7 @@ import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.GroupChoice;
 import io.onedev.server.annotation.Patterns;
-import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.service.GroupService;
 import io.onedev.server.model.Group;
 import io.onedev.server.util.usage.Usage;
 
@@ -125,7 +125,7 @@ public class SecuritySetting implements Serializable {
 	@Nullable
 	public Group getDefaultGroup() {
 		if (defaultGroupName != null) {
-       		Group group = OneDev.getInstance(GroupManager.class).find(defaultGroupName);
+       		Group group = OneDev.getInstance(GroupService.class).find(defaultGroupName);
        		if (group == null) 
        			logger.error("Unable to find default group: " + defaultGroupName);
        		else

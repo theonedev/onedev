@@ -15,7 +15,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import io.onedev.server.entitymanager.PackBlobManager;
+import io.onedev.server.service.PackBlobService;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -27,17 +27,17 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class PackBlobResource {
 	
-	private final PackBlobManager packBlobManager;
+	private final PackBlobService packBlobService;
 	
 	@Inject
-	public PackBlobResource(PackBlobManager packBlobManager) {
-		this.packBlobManager = packBlobManager;
+	public PackBlobResource(PackBlobService packBlobService) {
+		this.packBlobService = packBlobService;
 	}
 
 	@Api(order=100, description = "Find package blob by project id and hash")
 	@GET
 	public PackBlob findByHash(@QueryParam("projectId") Long projectId, @QueryParam("hash") String hash) {
-		var packBlob = packBlobManager.findBySha256Hash(projectId, hash);
+		var packBlob = packBlobService.findBySha256Hash(projectId, hash);
 		if (packBlob != null) 
 			return packBlob;			
 		else 
@@ -49,14 +49,14 @@ public class PackBlobResource {
 	@GET
 	@Produces(APPLICATION_OCTET_STREAM)
 	public StreamingOutput downloadBlob(@PathParam("packBlobId") Long packBlobId) {
-		var packBlob = packBlobManager.load(packBlobId);
+		var packBlob = packBlobService.load(packBlobId);
 		if (!SecurityUtils.canReadPack(packBlob.getProject()))
 			throw new UnauthorizedException();
 		
 		var projectId = packBlob.getProject().getId();
 		var hash = packBlob.getSha256Hash();
 		return os -> {
-			packBlobManager.downloadBlob(projectId, hash, os);
+			packBlobService.downloadBlob(projectId, hash, os);
 		};
 	}
 

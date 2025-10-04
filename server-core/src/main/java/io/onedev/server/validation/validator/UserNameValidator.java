@@ -9,9 +9,9 @@ import javax.validation.ConstraintValidatorContext;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.UserName;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 
 public class UserNameValidator implements ConstraintValidator<UserName, String> {
 	
@@ -52,18 +52,18 @@ public class UserNameValidator implements ConstraintValidator<UserName, String> 
 	}
 	
 	public static String suggestUserName(String preferredUserName) {
-		return OneDev.getInstance(SessionManager.class).call(new Callable<String>() {
+		return OneDev.getInstance(SessionService.class).call(new Callable<String>() {
 
 			@Override
 			public String call() throws Exception {
 				String normalizedUserName = normalizeUserName(preferredUserName);
 				int suffix = 1;
-				UserManager userManager = OneDev.getInstance(UserManager.class);
+				UserService userService = OneDev.getInstance(UserService.class);
 				while (true) {
 					String suggestedUserName = normalizedUserName;
 					if (suffix > 1)
 						suggestedUserName += suffix;
-					if (userManager.findByName(suggestedUserName) == null) 
+					if (userService.findByName(suggestedUserName) == null) 
 						return suggestedUserName;
 					suffix++;
 				}

@@ -160,7 +160,8 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
-				if (!canManageIssues(getProject()))
+				var subject = SecurityUtils.getSubject();
+				if (!canManageIssues(subject, getProject()))
 					throw new UnauthorizedException(_T("Permission denied"));
 				
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
@@ -169,10 +170,11 @@ abstract class BacklogColumnPanel extends AbstractColumnPanel {
 				
 				var card = cardListPanel.findCard(issueId);
 				if (card == null) { // moved from other columns
-					var issue = getIssueManager().load(issueId);
+					var issue = getIssueService().load(issueId);
+					var user = SecurityUtils.getUser(subject);
 					for (var iteration: getProject().getHierarchyIterations()) {
 						if (getIterationPrefix() == null || iteration.getName().startsWith(getIterationPrefix()))
-							getIssueChangeManager().removeSchedule(issue, iteration);
+							getIssueChangeService().removeSchedule(user, issue, iteration);
 					}
 				}
 				cardListPanel.onCardDropped(target, issueId, cardIndex, true);

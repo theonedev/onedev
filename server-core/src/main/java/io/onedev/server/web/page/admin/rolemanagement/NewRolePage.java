@@ -14,9 +14,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.LinkSpecService;
+import io.onedev.server.service.RoleService;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Role;
 import io.onedev.server.security.SecurityUtils;
@@ -46,8 +46,8 @@ public class NewRolePage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 
-				RoleManager roleManager = OneDev.getInstance(RoleManager.class);
-				Role roleWithSameName = roleManager.find(role.getName());
+				RoleService roleService = OneDev.getInstance(RoleService.class);
+				Role roleWithSameName = roleService.find(role.getName());
 				if (roleWithSameName != null) {
 					editor.error(new Path(new PathNode.Named("name")),
 							_T("This name has already been used by another role"));
@@ -55,10 +55,10 @@ public class NewRolePage extends AdministrationPage {
 				if (editor.isValid()) {
 					Collection<LinkSpec> authorizedLinks = new ArrayList<>();
 					for (String linkName : role.getEditableIssueLinks())
-						authorizedLinks.add(OneDev.getInstance(LinkSpecManager.class).find(linkName));
-					roleManager.create(role, authorizedLinks);
+						authorizedLinks.add(OneDev.getInstance(LinkSpecService.class).find(linkName));
+					roleService.create(role, authorizedLinks);
 					var newAuditContent = VersionedXmlDoc.fromBean(editor.getPropertyValues()).toXML();
-					OneDev.getInstance(AuditManager.class).audit(null, "created role \"" + role.getName() + "\"", null, newAuditContent);
+					OneDev.getInstance(AuditService.class).audit(null, "created role \"" + role.getName() + "\"", null, newAuditContent);
 					Session.get().success(_T("Role created"));
 					setResponsePage(RoleListPage.class);
 				}

@@ -5,7 +5,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -35,13 +35,13 @@ public class GitPreReceiveCallback extends HttpServlet {
 
 	public static final String PATH = "/git-prereceive-callback";
 
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
 	private final Set<GitPreReceiveChecker> preReceiveCheckers;
 	
 	@Inject
-	public GitPreReceiveCallback(ProjectManager projectManager, Set<GitPreReceiveChecker> preReceiveCheckers) {
-		this.projectManager = projectManager;
+	public GitPreReceiveCallback(ProjectService projectService, Set<GitPreReceiveChecker> preReceiveCheckers) {
+		this.projectService = projectService;
 		this.preReceiveCheckers = preReceiveCheckers;
 	}
 	
@@ -77,7 +77,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 		var principal = fields.get(1);
         if (!isSystem(principal)) { // not access with cluster credential
 			ThreadContext.bind(asSubject(asPrincipals(principal)));
-			Project project = projectManager.load(Long.valueOf(fields.get(0)));
+			Project project = projectService.load(Long.valueOf(fields.get(0)));
 			
 			String refUpdateInfo = null;
 			
@@ -144,7 +144,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 						if (protection.isPreventDeletion()) 
 							errorMessages.add("Can not delete this branch according to branch protection setting");
 					} else if (protection.isPreventForcedPush() 
-							&& !GitUtils.isMergedInto(projectManager.getRepository(project.getId()), gitEnvs, oldObjectId, newObjectId)) {
+							&& !GitUtils.isMergedInto(projectService.getRepository(project.getId()), gitEnvs, oldObjectId, newObjectId)) {
 						errorMessages.add("Can not force-push to this branch according to branch protection setting");
 					} else if (protection.isCommitSignatureRequired() 
 							&& !project.hasValidCommitSignature(newObjectId, gitEnvs)) {
@@ -173,7 +173,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 					}
 					if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
 						try {
-							projectManager.onDeleteBranch(project, branchName);
+							projectService.onDeleteBranch(project, branchName);
 						} catch (ExplicitException e) {
 							errorMessages.addAll(Splitter.on("\n").splitToList(e.getMessage()));
 						}
@@ -211,7 +211,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 					}
 					if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
 						try {
-							projectManager.onDeleteTag(project, tagName);
+							projectService.onDeleteTag(project, tagName);
 						} catch (ExplicitException e) {
 							errorMessages.addAll(Splitter.on("\n").splitToList(e.getMessage()));
 						}

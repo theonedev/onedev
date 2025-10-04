@@ -1,0 +1,12 @@
+<wicket:panel>
+	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>Edit <code>$HOME/.gem/credentials</code> to add a source</wicket:t></div>
+	<div wicket:id="addSource"></div>
+	<div class="text-muted font-size-sm mt-2 mb-5"><wicket:t>Make sure the access token has package write permission over the project. 
+		Also make sure to run command <code>chmod 0600 $HOME/.gem/credentials</code> after creating the file</wicket:t></div>
+
+	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>Then push gem to the source</wicket:t></div>
+	<div wicket:id="pushCommand" class="mb-5"></div>
+
+	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>For CI/CD job, run below to add source via command step</wicket:t></div>
+	<div wicket:id="jobCommands"></div>
+</wicket:panel>

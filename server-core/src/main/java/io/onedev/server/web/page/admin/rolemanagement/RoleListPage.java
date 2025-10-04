@@ -34,8 +34,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.RoleService;
 import io.onedev.server.model.Role;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
@@ -205,9 +205,9 @@ public class RoleListPage extends AdministrationPage {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Role role = rowModel.getObject();
-						OneDev.getInstance(RoleManager.class).delete(role);
+						OneDev.getInstance(RoleService.class).delete(role);
 						var oldAuditContent = VersionedXmlDoc.fromBean(role).toXML();
-						OneDev.getInstance(AuditManager.class).audit(null, "deleted role \"" + role.getName() + "\"", oldAuditContent, null);
+						OneDev.getInstance(AuditService.class).audit(null, "deleted role \"" + role.getName() + "\"", oldAuditContent, null);
 						Session.get().success(MessageFormat.format(_T("Role \"{0}\" deleted"), role.getName()));
 						target.add(rolesTable);
 					}
@@ -243,12 +243,12 @@ public class RoleListPage extends AdministrationPage {
 
 			@Override
 			public Iterator<? extends Role> iterator(long first, long count) {
-				return OneDev.getInstance(RoleManager.class).query(query, (int)first, (int)count).iterator();
+				return OneDev.getInstance(RoleService.class).query(query, (int)first, (int)count).iterator();
 			}
 
 			@Override
 			public long size() {
-				return OneDev.getInstance(RoleManager.class).count(query);
+				return OneDev.getInstance(RoleService.class).count(query);
 			}
 
 			@Override
@@ -258,7 +258,7 @@ public class RoleListPage extends AdministrationPage {
 
 					@Override
 					protected Role load() {
-						return OneDev.getInstance(RoleManager.class).load(id);
+						return OneDev.getInstance(RoleService.class).load(id);
 					}
 					
 				};

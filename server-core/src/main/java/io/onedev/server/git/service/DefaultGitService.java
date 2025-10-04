@@ -75,10 +75,10 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
-import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.DefaultBranchChanged;
 import io.onedev.server.event.project.RefUpdated;
@@ -106,7 +106,7 @@ import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.code.BranchProtection;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.annotation.Sessional;
 
 @Singleton
@@ -116,24 +116,24 @@ public class DefaultGitService implements GitService, Serializable {
 	
 	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
-	private final SettingManager settingManager;
+	private final SettingService settingService;
 	
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
-	private final ClusterManager clusterManager;
+	private final ClusterService clusterService;
 	
 	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
-	public DefaultGitService(ProjectManager projectManager, SettingManager settingManager, 
-							 SessionManager sessionManager, ClusterManager clusterManager, 
-							 ListenerRegistry listenerRegistry) {
-		this.projectManager = projectManager;
-		this.sessionManager = sessionManager;
-		this.settingManager = settingManager;
-		this.clusterManager = clusterManager;
+	public DefaultGitService(ProjectService projectService, SettingService settingService,
+                             SessionService sessionService, ClusterService clusterService,
+                             ListenerRegistry listenerRegistry) {
+		this.projectService = projectService;
+		this.sessionService = sessionService;
+		this.settingService = settingService;
+		this.clusterService = clusterService;
 		this.listenerRegistry = listenerRegistry;
 	}
 
@@ -142,15 +142,15 @@ public class DefaultGitService implements GitService, Serializable {
 	}
 
 	private Repository getRepository(Long projectId) {
-		return projectManager.getRepository(projectId);
+		return projectService.getRepository(projectId);
 	}
 	
 	private File getGitDir(Long projectId) {
-		return projectManager.getGitDir(projectId);
+		return projectService.getGitDir(projectId);
 	}
 
 	private <T> T runOnProjectServer(Long projectId, ClusterTask<T> task) {
-		return projectManager.runOnActiveServer(projectId, task);
+		return projectService.runOnActiveServer(projectId, task);
 	}
 	
 	private LineConsumer newInfoLogger() {
@@ -284,7 +284,7 @@ public class DefaultGitService implements GitService, Serializable {
 				RevCommit commit = revWalk.parseCommit(revId);
 				tagBuilder.setObjectId(commit);
 
-				PGPSecretKeyRing signingKey = settingManager.getGpgSetting().getSigningKey();
+				PGPSecretKeyRing signingKey = settingService.getGpgSetting().getSigningKey();
 				if (signingKey != null) { 
 					GitUtils.sign(tagBuilder, signingKey);
 				} else if (signRequired) {
@@ -392,11 +392,11 @@ public class DefaultGitService implements GitService, Serializable {
 				Git.wrap(repository).branchDelete().setForce(true).setBranchNames(branchName).call();
 				
 				String refName = GitUtils.branch2ref(branchName);
-				sessionManager.runAsync(new Runnable() {
+				sessionService.runAsync(new Runnable() {
 
 					@Override
 					public void run() {
-						Project innerProject = projectManager.load(projectId);
+						Project innerProject = projectService.load(projectId);
 						listenerRegistry.post(new RefUpdated(innerProject, refName, commitId, ObjectId.zeroId()));
 					}
 					
@@ -422,8 +422,8 @@ public class DefaultGitService implements GitService, Serializable {
 				Git.wrap(repository).tagDelete().setTags(tagName).call();
 				
 				String refName = GitUtils.tag2ref(tagName);
-				sessionManager.runAsync(() -> {
-					Project innerProject = projectManager.load(projectId);
+				sessionService.runAsync(() -> {
+					Project innerProject = projectService.load(projectId);
 					listenerRegistry.post(new RefUpdated(innerProject, refName, commitId, ObjectId.zeroId()));
 				});
 				
@@ -451,13 +451,13 @@ public class DefaultGitService implements GitService, Serializable {
 	
 	private void fetch(Long targetProjectId, Long sourceProjectId, 
 			String sourceProjectPath, String... refSpecs) {
-		String sourceActiveServer = projectManager.getActiveServer(sourceProjectId, true);
-		if (sourceActiveServer.equals(clusterManager.getLocalServerAddress())) {
+		String sourceActiveServer = projectService.getActiveServer(sourceProjectId, true);
+		if (sourceActiveServer.equals(clusterService.getLocalServerAddress())) {
 			Commandline git = CommandUtils.newGit();
 			fetch(git, targetProjectId, getGitDir(sourceProjectId).getAbsolutePath(), refSpecs);
 		} else {
 			CommandUtils.callWithClusterCredential(git -> {
-				String remoteUrl = clusterManager.getServerUrl(sourceActiveServer) 
+				String remoteUrl = clusterService.getServerUrl(sourceActiveServer) 
 						+ "/" + sourceProjectPath;
 				fetch(git, targetProjectId, remoteUrl, refSpecs);
 				return null;
@@ -481,13 +481,13 @@ public class DefaultGitService implements GitService, Serializable {
 		String targetProjectPath = targetProject.getPath();
 		
 		runOnProjectServer(sourceProjectId, () -> {
-			String targetActiveServer = projectManager.getActiveServer(targetProjectId, true);
+			String targetActiveServer = projectService.getActiveServer(targetProjectId, true);
 			
 			// Do not optimize to push to local directory when source and target are on same host, as otherwise
 			// environments in git pre/post receive hooks will not be set
 			CommandUtils.callWithClusterCredential(git -> {
 				git.workingDir(getGitDir(sourceProjectId));
-				git.addArgs("push", "--quiet", clusterManager.getServerUrl(targetActiveServer) + "/" + targetProjectPath);
+				git.addArgs("push", "--quiet", clusterService.getServerUrl(targetActiveServer) + "/" + targetProjectPath);
 				git.addArgs(sourceRev + ":" + targetRev);
 				git.execute(newInfoLogger(), newErrorLogger()).checkReturnCode();
 				return null;
@@ -506,12 +506,12 @@ public class DefaultGitService implements GitService, Serializable {
 		String targetProjectPath = targetProject.getPath();
 
 		runOnProjectServer(sourceProjectId, () -> {
-			String targetActiveServer = projectManager.getActiveServer(targetProjectId, true);
+			String targetActiveServer = projectService.getActiveServer(targetProjectId, true);
 
 			CommandUtils.callWithClusterCredential((GitTask<Void>) git -> {
 				git.workingDir(getGitDir(sourceProjectId));
 				
-				String remoteUrl = clusterManager.getServerUrl(targetActiveServer) + "/" + targetProjectPath;						
+				String remoteUrl = clusterService.getServerUrl(targetActiveServer) + "/" + targetProjectPath;						
 				AtomicReference<String> remoteCommitId = new AtomicReference<>(null);
 				git.addArgs("ls-remote", remoteUrl, "HEAD", targetRef);
 				git.execute(new LineConsumer() {
@@ -555,7 +555,7 @@ public class DefaultGitService implements GitService, Serializable {
 
 					}).checkReturnCode();
 
-					Repository repository = projectManager.getRepository(sourceProjectId);
+					Repository repository = projectService.getRepository(sourceProjectId);
 					String mergeBaseId = GitUtils.getMergeBase(repository,
 							ObjectId.fromString(remoteCommitId.get()), commitId).name();
 
@@ -838,7 +838,7 @@ public class DefaultGitService implements GitService, Serializable {
 					else
 						commit.setTreeId(inserter.insert(new TreeFormatter()));
 
-					PGPSecretKeyRing signingKey = settingManager.getGpgSetting().getSigningKey();
+					PGPSecretKeyRing signingKey = settingService.getGpgSetting().getSigningKey();
 					if (signingKey != null) {
 						GitUtils.sign(commit, signingKey);
 					} else if (signRequired) {
@@ -1030,7 +1030,7 @@ public class DefaultGitService implements GitService, Serializable {
 			String oldCommitterName, PersonIdent newCommitter) {
 		Long projectId = project.getId();
 		return runOnProjectServer(projectId, () -> {
-			PGPSecretKeyRing signingKey = settingManager.getGpgSetting().getSigningKey();
+			PGPSecretKeyRing signingKey = settingService.getGpgSetting().getSigningKey();
 			Repository repository = getRepository(projectId);
 			try (	RevWalk revWalk = new RevWalk(repository);
 					ObjectInserter inserter = repository.newObjectInserter()) {
@@ -1069,7 +1069,7 @@ public class DefaultGitService implements GitService, Serializable {
 			String commitMessage) {
 		Long projectId = project.getId();
 		return runOnProjectServer(projectId, () -> {
-			PGPSecretKeyRing signingKey = settingManager.getGpgSetting().getSigningKey();
+			PGPSecretKeyRing signingKey = settingService.getGpgSetting().getSigningKey();
 			Repository repository = getRepository(projectId);
 			try (	RevWalk revWalk = new RevWalk(repository);
 					ObjectInserter inserter = repository.newObjectInserter()) {
@@ -1234,7 +1234,7 @@ public class DefaultGitService implements GitService, Serializable {
 				normalizedPath = "";
 			
 			final File cacheDir = new File(
-					projectManager.getInfoDir(projectId), 
+					projectService.getInfoDir(projectId), 
 					"last_commits/" + normalizedPath + "/onedev_last_commits");
 			
 			final ReadWriteLock lock;
@@ -1394,7 +1394,7 @@ public class DefaultGitService implements GitService, Serializable {
 	@Override
 	public Collection<BlameBlock> blame(Project project, ObjectId revId, String file, LinearRange range) {
 		Long projectId = project.getId();
-		return runOnProjectServer(projectId, () -> new BlameCommand(projectManager.getGitDir(projectId), revId, file)
+		return runOnProjectServer(projectId, () -> new BlameCommand(projectService.getGitDir(projectId), revId, file)
 				.range(range).run());
 	}
 
@@ -1402,7 +1402,7 @@ public class DefaultGitService implements GitService, Serializable {
 	public byte[] getRawCommit(Project project, ObjectId revId, Map<String, String> envs) {
 		Long projectId = project.getId();
 		return runOnProjectServer(projectId, () -> {
-			File gitDir = projectManager.getGitDir(projectId);
+			File gitDir = projectService.getGitDir(projectId);
 			return new GetRawCommitCommand(gitDir, revId.name(), envs).run();
 		});
 	}
@@ -1411,7 +1411,7 @@ public class DefaultGitService implements GitService, Serializable {
 	public byte[] getRawTag(Project project, ObjectId tagId, Map<String, String> envs) {
 		Long projectId = project.getId();
 		return runOnProjectServer(projectId, () -> {
-			File gitDir = projectManager.getGitDir(projectId);
+			File gitDir = projectService.getGitDir(projectId);
 			return new GetRawTagCommand(gitDir, tagId.name(), envs).run();
 		});
 	}
@@ -1427,7 +1427,7 @@ public class DefaultGitService implements GitService, Serializable {
 				Map<ObjectId, String> commitMessages = new LinkedHashMap<>();
 				Set<ObjectId> mergeCommits = new HashSet<>();
 				if (envs != null) {
-					File gitDir = projectManager.getGitDir(projectId);
+					File gitDir = projectService.getGitDir(projectId);
 
 					List<String> revisions;
 					if (oldId.equals(ObjectId.zeroId()))
@@ -1454,7 +1454,7 @@ public class DefaultGitService implements GitService, Serializable {
 					}.options(options).envs(envs).fields(EnumSet.of(SUBJECT, BODY, PARENTS));
 					logCommand.run();
 				} else {
-					var repository = projectManager.getRepository(projectId);
+					var repository = projectService.getRepository(projectId);
 					if (!oldId.equals(ObjectId.zeroId())) {
 						for (var commit: GitUtils.getReachableCommits(repository, 
 								Sets.newHashSet(oldId), Sets.newHashSet(newId))) {

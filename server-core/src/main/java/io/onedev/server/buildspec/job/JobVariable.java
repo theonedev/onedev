@@ -2,7 +2,7 @@ package io.onedev.server.buildspec.job;
 
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.UrlUtils;
 
@@ -118,14 +118,14 @@ public enum JobVariable {
 	SERVER {
 		@Override
 		public String getValue(Build build) {
-			var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+			var serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 			return UrlUtils.getServer(serverUrl);
 		}
 	},
 	SERVER_HOST {
 		@Override
 		public String getValue(Build build) {
-			var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+			var serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 			try {
 				return new URL(serverUrl).getHost();
 			} catch (MalformedURLException e) {
@@ -136,7 +136,7 @@ public enum JobVariable {
 	SERVER_URL {
 		@Override
 		public String getValue(Build build) {
-			return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+			return OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 		}
 	};
 

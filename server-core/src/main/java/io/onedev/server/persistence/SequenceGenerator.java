@@ -1,7 +1,7 @@
 package io.onedev.server.persistence;
 
 import com.hazelcast.map.IMap;
-import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
@@ -13,21 +13,21 @@ public class SequenceGenerator {
 
 	private final Class<? extends AbstractEntity> sequenceClass;
 	
-	private final ClusterManager clusterManager;
+	private final ClusterService clusterService;
 	
 	private final Dao dao;
 	
 	private IMap<Long, Long> nextSequences;
 	
-	public SequenceGenerator(Class<? extends AbstractEntity> sequenceClass, ClusterManager clusterManager, Dao dao) {
+	public SequenceGenerator(Class<? extends AbstractEntity> sequenceClass, ClusterService clusterService, Dao dao) {
 		this.sequenceClass = sequenceClass;
 		this.dao = dao;
-		this.clusterManager = clusterManager;
+		this.clusterService = clusterService;
 	}
 
 	private synchronized Map<Long, Long> getNextSequences() {
 		if (nextSequences == null) 
-			nextSequences = clusterManager.getHazelcastInstance().getMap("nextSequences:" + sequenceClass.getName());
+			nextSequences = clusterService.getHazelcastInstance().getMap("nextSequences:" + sequenceClass.getName());
 		return nextSequences;
 	}
 	

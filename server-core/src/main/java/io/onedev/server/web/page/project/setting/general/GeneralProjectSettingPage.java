@@ -30,11 +30,11 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.BaseAuthorizationManager;
-import io.onedev.server.entitymanager.ProjectLabelManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BaseAuthorizationService;
+import io.onedev.server.service.ProjectLabelService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -121,7 +121,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 				String parentError = null;
 				if (!Objects.equal(prevParentPath, parentBean.getParentPath())) {
 					if (parentBean.getParentPath() != null) {
-						Project parent = getProjectManager().findByPath(parentBean.getParentPath());
+						Project parent = getProjectService().findByPath(parentBean.getParentPath());
 						if (parent == null) 
 							parentError = _T("Parent project not found");
 						else if (project.isSelfOrAncestorOf(parent)) 
@@ -140,33 +140,33 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 				if (parentError != null) {
 					parentEditor.error(new Path(new PathNode.Named("parentPath")), parentError);
 				} else {
-					var projectWithSameName = getProjectManager().find(project.getParent(), project.getName());
+					var projectWithSameName = getProjectService().find(project.getParent(), project.getName());
 					if (projectWithSameName != null && !projectWithSameName.equals(project)) {
 						editor.error(new Path(new PathNode.Named(PROP_NAME)),
 								_T("This name has already been used by another project"));
 					} 
 					if (project.getKey() != null) {
-						var projectWithSameKey = getProjectManager().findByKey(project.getKey());
+						var projectWithSameKey = getProjectService().findByKey(project.getKey());
 						if (projectWithSameKey != null && !projectWithSameKey.equals(project)) {
 							editor.error(new Path(new PathNode.Named(PROP_KEY)),
 									_T("This key has already been used by another project"));
 						}
 					}
 					if (editor.isValid()) {
-						OneDev.getInstance(TransactionManager.class).run(new Runnable() {
+						OneDev.getInstance(TransactionService.class).run(new Runnable() {
 
 							@Override
 							public void run() {
 								var project = getProject();
-								getProjectManager().update(project);
-								OneDev.getInstance(BaseAuthorizationManager.class).syncRoles(project, defaultRolesBean.getRoles());
-								OneDev.getInstance(ProjectLabelManager.class).sync(project, labelsBean.getLabels());								
+								getProjectService().update(project);
+								OneDev.getInstance(BaseAuthorizationService.class).syncRoles(project, defaultRolesBean.getRoles());
+								OneDev.getInstance(ProjectLabelService.class).sync(project, labelsBean.getLabels());
 								var auditData = editor.getPropertyValues();
 								auditData.put("defaultRoles", defaultRolesBean.getRoleNames());
 								auditData.put("labels", labelsBean.getLabels());
 								auditData.put("parent", parentBean.getParentPath());
 								var newAuditContent = VersionedXmlDoc.fromBean(auditData).toXML();
-								getAuditManager().audit(project, "changed general settings", oldAuditContent, newAuditContent);
+								auditService.audit(project, "changed general settings", oldAuditContent, newAuditContent);
 							}
 							
 						});
@@ -192,12 +192,12 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 					@Override
 					protected void onConfirm(AjaxRequestTarget target) {
 						Project project = getProject();
-						OneDev.getInstance(ProjectManager.class).delete(project);
+						OneDev.getInstance(ProjectService.class).delete(project);
 						var oldAuditContent = VersionedXmlDoc.fromBean(project).toXML();
 						if (project.getParent() != null)
-							getAuditManager().audit(project.getParent(), "deleted child project \"" + project.getName() + "\" via RESTful API", oldAuditContent, null);
+							auditService.audit(project.getParent(), "deleted child project \"" + project.getName() + "\" via RESTful API", oldAuditContent, null);
 						else
-							getAuditManager().audit(null, "deleted root project \"" + project.getName() + "\" via RESTful API", oldAuditContent, null);
+							auditService.audit(null, "deleted root project \"" + project.getName() + "\" via RESTful API", oldAuditContent, null);
 						
 						getSession().success(MessageFormat.format(_T("Project \"{0}\" deleted"), project.getPath()));
 

@@ -12,7 +12,7 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.util.ComponentContext;
@@ -47,7 +47,7 @@ public class ImportRepositories extends ImportOrganization implements Validatabl
 
 	@SuppressWarnings("unused")
 	private static List<String> getParentOneDevProjectChoices() {
-		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+		ProjectService projectService = OneDev.getInstance(ProjectService.class);
 		return SecurityUtils.getAuthorizedProjects(new CreateChildren()).stream()
 				.map(it->it.getPath()).sorted().collect(Collectors.toList());
 	}

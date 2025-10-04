@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.pack.npm;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -47,7 +47,7 @@ public class NpmHelpPanel extends Panel {
 	}
 	
 	private String getServerUrl() {
-		return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+		return OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 	}
 	
 }

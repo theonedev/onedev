@@ -10,7 +10,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 
@@ -24,17 +24,17 @@ public class TimeTrackingSettingPage extends IssueSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var timeTrackingSetting = getSettingManager().getIssueSetting().getTimeTrackingSetting();
+		var timeTrackingSetting = getSettingService().getIssueSetting().getTimeTrackingSetting();
 		Form<?> form = new Form<Void>("form") {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				var issueSetting = getSettingManager().getIssueSetting();
+				var issueSetting = getSettingService().getIssueSetting();
 				var oldAuditContent = VersionedXmlDoc.fromBean(issueSetting.getTimeTrackingSetting()).toXML();
 				issueSetting.setTimeTrackingSetting(timeTrackingSetting);
 				var newAuditContent = VersionedXmlDoc.fromBean(issueSetting.getTimeTrackingSetting()).toXML();
-				getSettingManager().saveIssueSetting(issueSetting);
-				getAuditManager().audit(null, "changed time tracking settings", oldAuditContent, newAuditContent);
+				getSettingService().saveIssueSetting(issueSetting);
+				auditService.audit(null, "changed time tracking settings", oldAuditContent, newAuditContent);
 				Session.get().success(_T("Time tracking settings have been saved"));
 			}
 		};
@@ -42,8 +42,8 @@ public class TimeTrackingSettingPage extends IssueSettingPage {
 		add(form);
 	}
 	
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 
 	@Override

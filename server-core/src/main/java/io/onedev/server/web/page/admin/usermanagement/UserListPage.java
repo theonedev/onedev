@@ -42,11 +42,11 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.web.WebConstants;
@@ -84,8 +84,8 @@ public class UserListPage extends AdministrationPage {
 
 		@Override
 		protected List<User> load() {
-			var userCache = getUserManager().cloneCache();
-			var emailAddressCache = getEmailAddressManager().cloneCache();
+			var userCache = getUserService().cloneCache();
+			var emailAddressCache = getEmailAddressService().cloneCache();
 			var emailAddresses = new HashMap<Long, Collection<String>>();
 			for (var emailAddress: emailAddressCache.values()) 
 				emailAddresses.computeIfAbsent(emailAddress.getOwnerId(), key -> new HashSet<>()).add(emailAddress.getValue());
@@ -226,12 +226,12 @@ public class UserListPage extends AdministrationPage {
 
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									getTransactionManager().run(() -> {
+									getTransactionService().run(() -> {
 										dropdown.close();
 										var users = selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet());
-										getUserManager().enable(users);
+										getUserService().enable(users);
 										for (var user: users) {
-											getAuditManager().audit(null, "enabled account \"" + user.getName() + "\"", null, null);
+											auditService.audit(null, "enabled account \"" + user.getName() + "\"", null, null);
 										}
 										target.add(countLabel);
 										target.add(usersTable);
@@ -290,11 +290,11 @@ public class UserListPage extends AdministrationPage {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											getTransactionManager().run(() -> {
+											getTransactionService().run(() -> {
 												var users = selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet());
-												getUserManager().disable(users);
+												getUserService().disable(users);
 												for (var user: users) {
-													getAuditManager().audit(null, "disabled account \"" + user.getName() + "\"", null, null);
+													auditService.audit(null, "disabled account \"" + user.getName() + "\"", null, null);
 												}
 												target.add(countLabel);
 												target.add(usersTable);
@@ -368,11 +368,11 @@ public class UserListPage extends AdministrationPage {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											getTransactionManager().run(() -> {
+											getTransactionService().run(() -> {
 												var users = selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet());
-												getUserManager().convertToServiceAccounts(users);
+												getUserService().convertToServiceAccounts(users);
 												for (var user: users) {
-													getAuditManager().audit(null, "converted \"" + user.getName() + "\" to service account", null, null);
+													auditService.audit(null, "converted \"" + user.getName() + "\" to service account", null, null);
 												}
 												target.add(countLabel);
 												target.add(usersTable);
@@ -446,12 +446,12 @@ public class UserListPage extends AdministrationPage {
 
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										getTransactionManager().run(() -> {
+										getTransactionService().run(() -> {
 											var users = selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet());
-											getUserManager().delete(users);
+											getUserService().delete(users);
 											for (var user: users) {
 												var oldAuditContent = VersionedXmlDoc.fromBean(user).toXML();
-												getAuditManager().audit(null, "deleted account \"" + user.getName() + "\"", oldAuditContent, null);
+												auditService.audit(null, "deleted account \"" + user.getName() + "\"", oldAuditContent, null);
 											}
 											target.add(countLabel);
 											target.add(usersTable);
@@ -508,14 +508,14 @@ public class UserListPage extends AdministrationPage {
 	
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									getTransactionManager().run(() -> {
+									getTransactionService().run(() -> {
 										dropdown.close();
 										Collection<User> users = new ArrayList<>();
 										for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
 											users.add(it.next());
-										getUserManager().enable(users);
+										getUserService().enable(users);
 										for (var user: users) {
-											getAuditManager().audit(null, "enabled account \"" + user.getName() + "\"", null, null);
+											auditService.audit(null, "enabled account \"" + user.getName() + "\"", null, null);
 										}
 										target.add(usersTable);
 										dataProvider.detach();
@@ -576,13 +576,13 @@ public class UserListPage extends AdministrationPage {
 	
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											getTransactionManager().run(() -> {
+											getTransactionService().run(() -> {
 												Collection<User> users = new ArrayList<>();
 												for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
 													users.add(it.next());
-												getUserManager().disable(users);
+												getUserService().disable(users);
 												for (var user: users) {
-													getAuditManager().audit(null, "disabled account \"" + user.getName() + "\"", null, null);
+													auditService.audit(null, "disabled account \"" + user.getName() + "\"", null, null);
 												}
 												target.add(usersTable);
 												dataProvider.detach();
@@ -657,13 +657,13 @@ public class UserListPage extends AdministrationPage {
 	
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											getTransactionManager().run(() -> {
+											getTransactionService().run(() -> {
 												Collection<User> users = new ArrayList<>();
 												for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
 													users.add(it.next());
-												getUserManager().convertToServiceAccounts(users);
+												getUserService().convertToServiceAccounts(users);
 												for (var user: users) {
-													getAuditManager().audit(null, "converted user \"" + user.getName() + "\" to service account", null, null);
+													auditService.audit(null, "converted user \"" + user.getName() + "\" to service account", null, null);
 												}
 												target.add(usersTable);
 												dataProvider.detach();
@@ -739,14 +739,14 @@ public class UserListPage extends AdministrationPage {
 
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										getTransactionManager().run(() -> {
+										getTransactionService().run(() -> {
 											Collection<User> users = new ArrayList<>();
 											for (@SuppressWarnings("unchecked") var it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
 												users.add(it.next());
-											getUserManager().delete(users);
+											getUserService().delete(users);
 											for (var user: users) {
 												var oldAuditContent = VersionedXmlDoc.fromBean(user).toXML();
-												getAuditManager().audit(null, "deleted account \"" + user.getName() + "\"", oldAuditContent, null);
+												auditService.audit(null, "deleted account \"" + user.getName() + "\"", oldAuditContent, null);
 											}											
 											target.add(usersTable);
 											dataProvider.detach();
@@ -991,7 +991,7 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					protected User load() {
-						return getUserManager().load(id);
+						return getUserService().load(id);
 					}
 
 				};
@@ -1016,16 +1016,16 @@ public class UserListPage extends AdministrationPage {
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
 	}
 	
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 	
-	private EmailAddressManager getEmailAddressManager() {
-		return OneDev.getInstance(EmailAddressManager.class);
+	private EmailAddressService getEmailAddressService() {
+		return OneDev.getInstance(EmailAddressService.class);
 	}
 
-	private TransactionManager getTransactionManager() {
-		return OneDev.getInstance(TransactionManager.class);
+	private TransactionService getTransactionService() {
+		return OneDev.getInstance(TransactionService.class);
 	}
 
 	@Override

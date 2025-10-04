@@ -8,7 +8,7 @@ import javax.validation.constraints.NotEmpty;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;
@@ -48,7 +48,7 @@ public class DefaultProjectSetting implements Serializable {
 
 	@SuppressWarnings("unused")
 	private static List<String> getProjectChoices() {
-		List<String> projectPaths = OneDev.getInstance(ProjectManager.class)
+		List<String> projectPaths = OneDev.getInstance(ProjectService.class)
 				.query().stream().map(it->it.getPath()).collect(Collectors.toList());
 		Collections.sort(projectPaths);
 		return projectPaths;

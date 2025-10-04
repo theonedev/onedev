@@ -21,6 +21,7 @@ import javax.annotation.Nullable;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
 
 public class ReflectionUtils {
 	
@@ -145,6 +146,19 @@ public class ReflectionUtils {
 		}
 		
 		return null;
+	}
+
+	public static void setFieldValue(Object object, String fieldName, Object value) {
+		Field field = findField(object.getClass(), fieldName);
+		if (field == null) {
+			throw new ExplicitException("Field not found (class: " + object.getClass().getName() + ", field: " + fieldName + ")");
+		}
+		field.setAccessible(true);
+		try {
+			field.set(object, value);
+		} catch (IllegalAccessException e) {
+			throw ExceptionUtils.unchecked(e);
+		}
 	}
 	
 	/**
@@ -301,7 +315,7 @@ public class ReflectionUtils {
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
 		}
-	}
+	}	
 
 	/**
 	 * Instantiate specified class with specified parameters. The constructor 

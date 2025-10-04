@@ -10,16 +10,16 @@ import io.onedev.server.model.CodeComment;
 @Singleton
 public class CodeCommentEventBroadcaster {
 	
-	private final WebSocketManager webSocketManager;
+	private final WebSocketService webSocketService;
 	
 	@Inject
-	public CodeCommentEventBroadcaster(WebSocketManager webSocketManager) {
-		this.webSocketManager = webSocketManager;
+	public CodeCommentEventBroadcaster(WebSocketService webSocketService) {
+		this.webSocketService = webSocketService;
 	}
 	
 	@Listen
 	public void on(CodeCommentEvent event) {
-		webSocketManager.notifyObservableChange(CodeComment.getChangeObservable(event.getComment().getId()), event.getSourcePage());
+		webSocketService.notifyObservableChange(CodeComment.getChangeObservable(event.getComment().getId()), event.getSourcePage());
 	}
 		
 }

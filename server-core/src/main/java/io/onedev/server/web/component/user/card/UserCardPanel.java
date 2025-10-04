@@ -12,7 +12,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.UserAvatar;
 
@@ -26,7 +26,7 @@ public class UserCardPanel extends GenericPanel<User> {
 
 			@Override
 			protected User load() {
-				return OneDev.getInstance(UserManager.class).load(userId);
+				return OneDev.getInstance(UserService.class).load(userId);
 			}
 			
 		});

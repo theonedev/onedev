@@ -10,7 +10,7 @@ import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.LeafFacade;
 import io.onedev.k8shelper.ServiceFacade;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
@@ -123,7 +123,7 @@ public class JobContext implements Serializable {
 	}
 	
 	public boolean canManageProject(Project targetProject) {
-		var project = OneDev.getInstance(ProjectManager.class).load(projectId);
+		var project = OneDev.getInstance(ProjectService.class).load(projectId);
 		return project.isCommitOnBranch(commitId, project.getDefaultBranch())
 				&& project.isSelfOrAncestorOf(targetProject);
 	}

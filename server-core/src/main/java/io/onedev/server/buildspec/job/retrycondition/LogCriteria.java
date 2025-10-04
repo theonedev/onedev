@@ -9,7 +9,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.job.log.LogManager;
+import io.onedev.server.job.log.LogService;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
@@ -33,7 +33,7 @@ public class LogCriteria extends Criteria<RetryContext> {
 	public boolean matches(RetryContext context) {
 		Pattern pattern = Pattern.compile(value);
 		return context.getErrorMessage() != null && pattern.matcher(context.getErrorMessage()).find() 
-				|| OneDev.getInstance(LogManager.class).matches(context.getBuild(), pattern);
+				|| OneDev.getInstance(LogService.class).matches(context.getBuild(), pattern);
 	}
 
 	@Override

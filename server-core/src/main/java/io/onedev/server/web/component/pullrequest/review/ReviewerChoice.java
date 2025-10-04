@@ -1,20 +1,21 @@
 package io.onedev.server.web.component.pullrequest.review;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestReviewManager;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.model.PullRequestReview.Status;
-import io.onedev.server.model.User;
-import io.onedev.server.web.component.select2.SelectToActChoice;
-import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
-import io.onedev.server.web.page.base.BasePage;
-
 import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestReview.Status;
+import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.PullRequestReviewService;
+import io.onedev.server.web.component.select2.SelectToActChoice;
+import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
+import io.onedev.server.web.page.base.BasePage;
 
 public abstract class ReviewerChoice extends SelectToActChoice<User> {
 
@@ -61,9 +62,9 @@ public abstract class ReviewerChoice extends SelectToActChoice<User> {
 		} else {
 			review.setStatus(Status.PENDING);
 		}
-		
+
 		if (!getPullRequest().isNew()) {
-			OneDev.getInstance(PullRequestReviewManager.class).createOrUpdate(review);
+			OneDev.getInstance(PullRequestReviewService.class).createOrUpdate(SecurityUtils.getUser(), review);
 			((BasePage)getPage()).notifyObservableChange(target,
 					PullRequest.getChangeObservable(getPullRequest().getId()));
 		}

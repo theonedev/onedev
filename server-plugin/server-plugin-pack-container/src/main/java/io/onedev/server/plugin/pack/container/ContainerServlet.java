@@ -4,14 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.service.*;
 import io.onedev.server.exception.DataTooLargeException;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.Digest;
@@ -50,32 +50,32 @@ public class ContainerServlet extends HttpServlet {
 	
 	private static final int MAX_MANIFEST_SIZE = 10000000;
 
-	private final SettingManager settingManager;
+	private final SettingService settingService;
 	
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
-	private final PackBlobManager packBlobManager;
+	private final PackBlobService packBlobService;
 	
-	private final PackManager packManager;
+	private final PackService packService;
 	
-	private final BuildManager buildManager;
+	private final BuildService buildService;
 	
 	private final ObjectMapper objectMapper;
 	
 	@Inject
-	public ContainerServlet(SettingManager settingManager, BuildManager buildManager, 
-							ObjectMapper objectMapper, SessionManager sessionManager, 
-							ProjectManager projectManager, PackBlobManager packBlobManager, 
-							PackManager packManager) {
-		this.settingManager = settingManager;
-		this.sessionManager = sessionManager;
-		this.projectManager = projectManager;
-		this.packBlobManager = packBlobManager;
-		this.packManager = packManager;
+	public ContainerServlet(SettingService settingService, BuildService buildService,
+                            ObjectMapper objectMapper, SessionService sessionService,
+                            ProjectService projectService, PackBlobService packBlobService,
+                            PackService packService) {
+		this.settingService = settingService;
+		this.sessionService = sessionService;
+		this.projectService = projectService;
+		this.packBlobService = packBlobService;
+		this.packService = packService;
 		this.objectMapper = objectMapper;
-		this.buildManager = buildManager;
+		this.buildService = buildService;
 	}
 	
 	@Override
@@ -123,11 +123,11 @@ public class ContainerServlet extends HttpServlet {
 				var projectPath = matcher.group(1);
 				var repository = matcher.group(2);
 				var digestString = request.getParameter("mount");
-				sessionManager.run(() -> {
+				sessionService.run(() -> {
 					var project = checkProject(projectPath, true);
 					if (digestString != null) {
 						var hash = parseDigest(digestString).getHash();
-						if (packBlobManager.checkPackBlob(project.getId(), hash) != null) {
+						if (packBlobService.checkPackBlob(project.getId(), hash) != null) {
 							response.setStatus(SC_CREATED);
 							response.setHeader("Location", getBlobUrl(projectPath, repository, digestString));
 						}
@@ -135,7 +135,7 @@ public class ContainerServlet extends HttpServlet {
 					if (response.getStatus() != SC_CREATED) {
 						response.setStatus(SC_ACCEPTED);
 						var uuid = UUID.randomUUID().toString();
-						packBlobManager.initUpload(project.getId(), uuid);
+						packBlobService.initUpload(project.getId(), uuid);
 						response.setHeader("Location", getUploadUrl(projectPath, repository, uuid));
 						response.setHeader("Content-Length", "0");
 						response.setHeader("Range", "0-0");
@@ -148,10 +148,10 @@ public class ContainerServlet extends HttpServlet {
 				var uuid = matcher.group(3);
 				response.setHeader("Location", getUploadUrl(projectPath, repository, uuid));
 				response.setHeader("Docker-Upload-UUID", uuid);
-				var projectId = sessionManager.call(() -> checkProject(projectPath, true).getId());
+				var projectId = sessionService.call(() -> checkProject(projectPath, true).getId());
 				switch (method) {
 					case "PATCH": {
-						var uploadedSize = packBlobManager.getUploadFileSize(projectId, uuid);
+						var uploadedSize = packBlobService.getUploadFileSize(projectId, uuid);
 						if (uploadedSize == -1)
 							throw new NotFoundException(ErrorCode.BLOB_UPLOAD_UNKNOWN);
 						var contentRange = request.getHeader("Content-Range");
@@ -167,7 +167,7 @@ public class ContainerServlet extends HttpServlet {
 									"Content range header expected after first upload");
 						}
 						try (var is = request.getInputStream()) {
-							uploadedSize += packBlobManager.uploadBlob(projectId, uuid, is);
+							uploadedSize += packBlobService.uploadBlob(projectId, uuid, is);
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
@@ -176,14 +176,14 @@ public class ContainerServlet extends HttpServlet {
 						break;
 					}
 					case "PUT": {
-						if (packBlobManager.getUploadFileSize(projectId, uuid) == -1)
+						if (packBlobService.getUploadFileSize(projectId, uuid) == -1)
 							throw new NotFoundException(ErrorCode.BLOB_UPLOAD_UNKNOWN);
 						var contentLength = request.getHeader("Content-Length");
 						if (contentLength != null) {
 							var parsedContentLength = parseLong(contentLength);
 							if (parsedContentLength != 0) {
 								try (var is = request.getInputStream()) {
-									packBlobManager.uploadBlob(projectId, uuid, is);
+									packBlobService.uploadBlob(projectId, uuid, is);
 								} catch (IOException e) {
 									throw new RuntimeException(e);
 								}
@@ -196,7 +196,7 @@ public class ContainerServlet extends HttpServlet {
 						}
 
 						var digest = parseDigest(digestString);
-						if (packBlobManager.finishUpload(projectId, uuid, digest.getHash()) != null) {
+						if (packBlobService.finishUpload(projectId, uuid, digest.getHash()) != null) {
 							response.setStatus(SC_CREATED);
 							response.setHeader("Location", getBlobUrl(projectPath, repository, digestString));
 							response.setHeader("Docker-Content-Digest", digestString);
@@ -207,7 +207,7 @@ public class ContainerServlet extends HttpServlet {
 						break;
 					}
 					case "GET": {
-						var uploadedSize = packBlobManager.getUploadFileSize(projectId, uuid);
+						var uploadedSize = packBlobService.getUploadFileSize(projectId, uuid);
 						if (uploadedSize == -1)
 							throw new NotFoundException(ErrorCode.BLOB_UPLOAD_UNKNOWN);
 						response.setStatus(SC_NO_CONTENT);
@@ -216,7 +216,7 @@ public class ContainerServlet extends HttpServlet {
 						break;
 					}
 					case "DELETE": {
-						packBlobManager.cancelUpload(projectId, uuid);
+						packBlobService.cancelUpload(projectId, uuid);
 						response.setStatus(SC_NO_CONTENT);
 						break;
 					}
@@ -228,12 +228,12 @@ public class ContainerServlet extends HttpServlet {
 				var projectPath = matcher.group(1);
 				var digestString = matcher.group(3);
 				if (method.equals("GET") || method.equals("HEAD")) {
-					var packBlobInfo = sessionManager.call(() -> {
+					var packBlobInfo = sessionService.call(() -> {
 						var project = checkProject(projectPath, false);
 						var digest = parseDigest(digestString);
 						var hash = digest.getHash();
 						PackBlob packBlob;
-						if ((packBlob = packBlobManager.checkPackBlob(project.getId(), hash)) != null) {
+						if ((packBlob = packBlobService.checkPackBlob(project.getId(), hash)) != null) {
 							response.setStatus(SC_OK);	
 							response.setHeader("Content-Length", String.valueOf(packBlob.getSize()));
 							response.setHeader("Docker-Content-Digest", digestString);
@@ -243,7 +243,7 @@ public class ContainerServlet extends HttpServlet {
 						}
 					});
 					if (method.equals("GET")) {
-						packBlobManager.downloadBlob(packBlobInfo.getLeft(), packBlobInfo.getRight(),
+						packBlobService.downloadBlob(packBlobInfo.getLeft(), packBlobInfo.getRight(),
 								response.getOutputStream());
 					}
 				} else if (method.equals("DELETE")) {
@@ -257,7 +257,7 @@ public class ContainerServlet extends HttpServlet {
 				var reference = matcher.group(3);
 				switch (method) {
 					case "PUT":
-						var projectId = sessionManager.call(() -> checkProject(projectPath, true).getId());
+						var projectId = sessionService.call(() -> checkProject(projectPath, true).getId());
 						var baos = new ByteArrayOutputStream();
 						try (var is = request.getInputStream()) {
 							copyWithMaxSize(is, baos, MAX_MANIFEST_SIZE);
@@ -268,17 +268,17 @@ public class ContainerServlet extends HttpServlet {
 						var bytes = baos.toByteArray();
 						String hash;
 						if (isTag(reference)) {
-							var packBlobId = packBlobManager.uploadBlob(projectId, bytes, null);
+							var packBlobId = packBlobService.uploadBlob(projectId, bytes, null);
 							// Do not use lamda here as it may cause compilation error on terminal
 							hash = LockUtils.call(getLockName(projectId, repository), new Callable<String>() {
 								@Override
 								public String call() {
-									return sessionManager.call(new Callable<>() {
+									return sessionService.call(new Callable<>() {
 
 										private PackBlob loadPackBlob(Map<String, PackBlob> packBlobs, String hash, long size) {
 											var packBlob = packBlobs.get(hash);
 											if (packBlob == null) {
-												packBlob = packBlobManager.findBySha256Hash(projectId, hash);
+												packBlob = packBlobService.findBySha256Hash(projectId, hash);
 												if (packBlob != null) {
 													if (packBlob.getSize() == size)
 														packBlobs.put(hash, packBlob);
@@ -301,7 +301,7 @@ public class ContainerServlet extends HttpServlet {
 													var mediaType = manifestNode.get("mediaType").asText();
 													if (isImageIndex(mediaType) || isImageManifest(mediaType)) {
 														var baos = new ByteArrayOutputStream();
-														packBlobManager.downloadBlob(packBlob.getProject().getId(), hash, baos);
+														packBlobService.downloadBlob(packBlob.getProject().getId(), hash, baos);
 														loadReferencedPackBlobs(packBlobs, baos.toByteArray());
 													}
 												}
@@ -322,11 +322,11 @@ public class ContainerServlet extends HttpServlet {
 										public String call() {
 											var packBlobs = new HashMap<String, PackBlob>();
 											loadReferencedPackBlobs(packBlobs, bytes);
-											var packBlob = packBlobManager.load(packBlobId);
+											var packBlob = packBlobService.load(packBlobId);
 											packBlobs.put(packBlob.getSha256Hash(), packBlob);
 
-											var project = projectManager.load(projectId);
-											var pack = packManager.findByNameAndVersion(project, TYPE, repository, reference);
+											var project = projectService.load(projectId);
+											var pack = packService.findByNameAndVersion(project, TYPE, repository, reference);
 											if (pack == null) {
 												pack = new Pack();
 												pack.setProject(project);
@@ -338,13 +338,13 @@ public class ContainerServlet extends HttpServlet {
 											Build build = null;
 											Long buildId = (Long) request.getAttribute(ATTR_BUILD_ID);
 											if (buildId != null)
-												build = buildManager.load(buildId);
+												build = buildService.load(buildId);
 											pack.setBuild(build);
 											pack.setUser(SecurityUtils.getUser());
 											pack.setData(packBlob.getSha256Hash());
 											pack.setPublishDate(new Date());
 
-											packManager.createOrUpdate(pack, packBlobs.values(), true);
+											packService.createOrUpdate(pack, packBlobs.values(), true);
 
 											return packBlob.getSha256Hash();
 										}
@@ -353,7 +353,7 @@ public class ContainerServlet extends HttpServlet {
 							});
 						} else {
 							hash = parseDigest(reference).getHash();
-							if (packBlobManager.uploadBlob(projectId, bytes, hash) == null) {
+							if (packBlobService.uploadBlob(projectId, bytes, hash) == null) {
 								throw new ClientException(SC_BAD_REQUEST, ErrorCode.DIGEST_INVALID,
 										"Invalid manifest digest");
 							}
@@ -366,20 +366,20 @@ public class ContainerServlet extends HttpServlet {
 						break;
 					case "GET":
 					case "HEAD":
-						var manifestInfo = sessionManager.call(() -> {
+						var manifestInfo = sessionService.call(() -> {
 							PackBlob packBlob;
 							var project = checkProject(projectPath, false);
 							if (isTag(reference)) {
-								var pack = packManager.findByNameAndVersion(project, TYPE, repository, reference);
+								var pack = packService.findByNameAndVersion(project, TYPE, repository, reference);
 								if (pack != null)
-									packBlob = packBlobManager.findBySha256Hash(project.getId(), (String)pack.getData());
+									packBlob = packBlobService.findBySha256Hash(project.getId(), (String)pack.getData());
 								else
 									packBlob = null;
 							} else {
-								packBlob = packBlobManager.findBySha256Hash(project.getId(), parseDigest(reference).getHash());
+								packBlob = packBlobService.findBySha256Hash(project.getId(), parseDigest(reference).getHash());
 							}
 							if (packBlob != null && packBlob.getSize() < MAX_MANIFEST_SIZE 
-									&& packBlobManager.checkPackBlobFile(packBlob.getProject().getId(), packBlob.getSha256Hash(), packBlob.getSize())) {
+									&& packBlobService.checkPackBlobFile(packBlob.getProject().getId(), packBlob.getSha256Hash(), packBlob.getSize())) {
 								response.setHeader("Docker-Content-Digest", "sha256:" + packBlob.getSha256Hash());
 								response.setContentLengthLong(packBlob.getSize());
 								return new Pair<>(packBlob.getProject().getId(), packBlob.getSha256Hash());
@@ -390,7 +390,7 @@ public class ContainerServlet extends HttpServlet {
 						if (manifestInfo != null) {
 							response.setStatus(SC_OK);
 							baos = new ByteArrayOutputStream();
-							packBlobManager.downloadBlob(manifestInfo.getLeft(), manifestInfo.getRight(), baos);
+							packBlobService.downloadBlob(manifestInfo.getLeft(), manifestInfo.getRight(), baos);
 							bytes = baos.toByteArray();
 							response.setContentType(new ContainerManifest(bytes).getMediaType());
 							if (method.equals("GET")) 
@@ -400,10 +400,10 @@ public class ContainerServlet extends HttpServlet {
 						}
 						break;
 					case "DELETE":
-						sessionManager.run(() -> {
+						sessionService.run(() -> {
 							var project = checkProject(projectPath, true);
 							if (isTag(reference))
-								packManager.deleteByNameAndVersion(project, TYPE, repository, reference);
+								packService.deleteByNameAndVersion(project, TYPE, repository, reference);
 							response.setStatus(SC_ACCEPTED);
 						});
 						break;
@@ -413,7 +413,7 @@ public class ContainerServlet extends HttpServlet {
 			} else if ((matcher = compile("(.+)/([^/]+)/tags/list").matcher(pathInfo)).matches()) {
 				var projectPath = matcher.group(1);
 				var repository = matcher.group(2);
-				sessionManager.run(() -> {
+				sessionService.run(() -> {
 					var project = checkProject(projectPath, false);
 
 					var result = new HashMap<String, Object>();
@@ -427,7 +427,7 @@ public class ContainerServlet extends HttpServlet {
 						count = Integer.parseInt(countParam);
 					if (count != 0) {
 						var lastTag = request.getParameter("last");
-						tags.addAll(packManager.queryVersions(project, TYPE, repository, lastTag, count));
+						tags.addAll(packService.queryVersions(project, TYPE, repository, lastTag, count));
 					}
 
 					response.setStatus(SC_OK);
@@ -492,7 +492,7 @@ public class ContainerServlet extends HttpServlet {
 	}
 	
 	private Project checkProject(String projectPath, boolean needsToPush) {
-		var project = projectManager.findByPath(projectPath);
+		var project = projectService.findByPath(projectPath);
 		if (project == null) 
 			throw new NotFoundException(ErrorCode.NAME_UNKNOWN, "Unknown project: " + projectPath);
 		else if (!project.isPackManagement())
@@ -506,7 +506,7 @@ public class ContainerServlet extends HttpServlet {
 	}
 
 	private String getChallenge() {
-		var serverUrl = settingManager.getSystemSetting().getServerUrl();
+		var serverUrl = settingService.getSystemSetting().getServerUrl();
 		return "Bearer realm=\"" + serverUrl + "/v2/token\",service=\"onedev\",scope=\"*\"";
 	}
 	

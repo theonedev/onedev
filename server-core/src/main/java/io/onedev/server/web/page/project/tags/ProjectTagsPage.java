@@ -5,8 +5,8 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
@@ -410,7 +410,7 @@ public class ProjectTagsPage extends ProjectPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						OneDev.getInstance(ProjectManager.class).deleteTag(getProject(), tagName);
+						OneDev.getInstance(ProjectService.class).deleteTag(getProject(), tagName);
 						WebSession.get().success(MessageFormat.format(_T("Tag \"{0}\" deleted"), tagName));
 						target.add(tagsTable);
 					}
@@ -478,8 +478,8 @@ public class ProjectTagsPage extends ProjectPage {
 					commitIdsToDisplay.add(ref.getObjectId());
 				}
 				
-				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-				getProject().cacheCommitStatuses(buildManager.queryStatus(getProject(), commitIdsToDisplay));
+				BuildService buildService = OneDev.getInstance(BuildService.class);
+				getProject().cacheCommitStatuses(buildService.queryStatus(getProject(), commitIdsToDisplay));
 				super.onBeforeRender();
 			}
 			

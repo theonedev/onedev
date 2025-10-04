@@ -30,7 +30,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 
 public abstract class WizardPanel extends Panel {
 
@@ -106,7 +106,7 @@ public abstract class WizardPanel extends Panel {
 			@Override
 			public void onSubmit() {
 				super.onSubmit();
-				OneDev.getInstance(TransactionManager.class).run(new Runnable() {
+				OneDev.getInstance(TransactionService.class).run(new Runnable() {
 
 					@Override
 					public void run() {

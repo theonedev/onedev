@@ -3,9 +3,9 @@ package io.onedev.server.web.page.admin.databasebackup;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.data.DataManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.data.DataService;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import org.apache.tika.mime.MimeTypes;
@@ -28,8 +28,8 @@ public class DatabaseBackupPage extends AdministrationPage {
 		super(params);
 	}
 
-	private ClusterManager getClusterManager() {
-		return OneDev.getInstance(ClusterManager.class);
+	private ClusterService getClusterService() {
+		return OneDev.getInstance(ClusterService.class);
 	}
 	
 	@Override
@@ -39,23 +39,23 @@ public class DatabaseBackupPage extends AdministrationPage {
 		add(new Label("leadServer", new LoadableDetachableModel<String>() {
 			@Override
 			protected String load() {
-				return getClusterManager().getLeaderServerAddress();
+				return getClusterService().getLeaderServerAddress();
 			}
 		}) {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getClusterManager().getServerAddresses().size() > 1);
+				setVisible(getClusterService().getServerAddresses().size() > 1);
 			}
 		});
 		BackupSettingHolder backupSettingHolder = new BackupSettingHolder();
-		backupSettingHolder.setBackupSetting(OneDev.getInstance(SettingManager.class).getBackupSetting());
+		backupSettingHolder.setBackupSetting(OneDev.getInstance(SettingService.class).getBackupSetting());
 		Form<?> form = new Form<Void>("backupSetting") {
 
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				OneDev.getInstance(SettingManager.class).saveBackupSetting(backupSettingHolder.getBackupSetting());
+				OneDev.getInstance(SettingService.class).saveBackupSetting(backupSettingHolder.getBackupSetting());
 				getSession().success(_T("Backup settings updated"));
 				
 				setResponsePage(DatabaseBackupPage.class);
@@ -77,7 +77,7 @@ public class DatabaseBackupPage extends AdministrationPage {
 					public void writeData(Attributes attributes) throws IOException {
 						File tempDir = FileUtils.createTempDir("backup");
 						try {
-							DataManager databaseManager = OneDev.getInstance(DataManager.class);
+							DataService databaseManager = OneDev.getInstance(DataService.class);
 							databaseManager.exportData(tempDir);
 							ZipUtils.zip(tempDir, attributes.getResponse().getOutputStream());
 						} finally {

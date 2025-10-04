@@ -26,7 +26,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
@@ -140,8 +140,8 @@ public abstract class JobListPanel extends Panel {
 
 				@Override
 				protected List<Build> load() {
-					BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-					List<Build> builds = new ArrayList<>(buildManager.query(getProject(), 
+					BuildService buildService = OneDev.getInstance(BuildService.class);
+					List<Build> builds = new ArrayList<>(buildService.query(getProject(), 
 							commitId, job.getName(), refName, Optional.ofNullable(getPullRequest()), 
 							null, new HashMap<>()));
 					builds.sort(Comparator.comparing(Build::getNumber));

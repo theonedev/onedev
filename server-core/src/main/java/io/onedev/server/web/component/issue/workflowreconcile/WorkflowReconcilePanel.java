@@ -28,8 +28,8 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.web.ajaxlistener.ChangeTextListener;
 import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
@@ -65,8 +65,8 @@ public abstract class WorkflowReconcilePanel extends Panel {
 		}.add(AttributeAppender.append("class", "p-4 m-0"));
 	}
 	
-	private IssueManager getIssueManager() {
-		return OneDev.getInstance(IssueManager.class);
+	private IssueService getIssueService() {
+		return OneDev.getInstance(IssueService.class);
 	}
 	
 	private Component checkStates(String markupId) {
@@ -80,7 +80,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				Collection<String> undefinedStates = getIssueManager().getUndefinedStates();
+				Collection<String> undefinedStates = getIssueService().getUndefinedStates();
 				if (!undefinedStates.isEmpty()) {
 					Fragment fragment = new Fragment(markupId, "fixStatesFrag", WorkflowReconcilePanel.this);
 					Form<?> form = new Form<Void>("form") {
@@ -136,7 +136,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 						@Override
 						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 							super.onSubmit(target, form);
-							getIssueManager().fixUndefinedStates(resolutions);
+							getIssueService().fixUndefinedStates(resolutions);
 							Component content = checkFields(CONTENT_ID);
 							WorkflowReconcilePanel.this.replace(content);
 							target.add(content);
@@ -171,7 +171,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				Collection<String> undefinedFields = getIssueManager().getUndefinedFields();
+				Collection<String> undefinedFields = getIssueService().getUndefinedFields();
 				if (!undefinedFields.isEmpty()) {
 					Fragment fragment = new Fragment(markupId, "fixFieldsFrag", WorkflowReconcilePanel.this);
 					Form<?> form = new Form<Void>("form") {
@@ -225,7 +225,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 						@Override
 						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 							super.onSubmit(target, form);
-							getIssueManager().fixUndefinedFields(resolutions);
+							getIssueService().fixUndefinedFields(resolutions);
 							
 							Component content = checkFieldValues(CONTENT_ID);
 							WorkflowReconcilePanel.this.replace(content);
@@ -260,7 +260,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				Collection<UndefinedFieldValue> undefinedFieldValues = getIssueManager().getUndefinedFieldValues();
+				Collection<UndefinedFieldValue> undefinedFieldValues = getIssueService().getUndefinedFieldValues();
 				if (!undefinedFieldValues.isEmpty()) {
 					Fragment fragment = new Fragment(markupId, "fixFieldValuesFrag", WorkflowReconcilePanel.this);
 					Form<?> form = new Form<Void>("form") {
@@ -333,7 +333,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 								edits.put(fieldName, new UndefinedFieldValuesResolution(renames, deletions));
 							}
 							
-							getIssueManager().fixUndefinedFieldValues(edits);
+							getIssueService().fixUndefinedFieldValues(edits);
 							
 							Component content = checkStateAndFieldOrdinals(CONTENT_ID);
 							WorkflowReconcilePanel.this.replace(content);
@@ -370,12 +370,12 @@ public abstract class WorkflowReconcilePanel extends Panel {
 					
 					@Override
 					protected void respond(AjaxRequestTarget target) {
-						getIssueManager().fixStateAndFieldOrdinals();
+						getIssueService().fixStateAndFieldOrdinals();
 						
-						SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-						GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
+						SettingService settingService = OneDev.getInstance(SettingService.class);
+						GlobalIssueSetting issueSetting = settingService.getIssueSetting();
 						issueSetting.setReconciled(true);
-						settingManager.saveIssueSetting(issueSetting);
+						settingService.saveIssueSetting(issueSetting);
 						Session.get().success(_T("Workflow reconciliation completed"));
 						onCompleted(target);
 					}

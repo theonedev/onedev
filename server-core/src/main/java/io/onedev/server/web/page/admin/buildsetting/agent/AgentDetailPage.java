@@ -17,7 +17,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.service.AgentService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -35,7 +35,7 @@ public abstract class AgentDetailPage extends AdministrationPage {
 
 		String agentName = params.get(PARAM_AGENT).toString();
 		
-		Agent agent = OneDev.getInstance(AgentManager.class).findByName(agentName);
+		Agent agent = OneDev.getInstance(AgentService.class).findByName(agentName);
 		
 		if (agent == null) 
 			throw new ExplicitException(MessageFormat.format(_T("Unable to find agent {0}"), agentName));
@@ -46,7 +46,7 @@ public abstract class AgentDetailPage extends AdministrationPage {
 
 			@Override
 			protected Agent load() {
-				return OneDev.getInstance(AgentManager.class).load(agentId);
+				return OneDev.getInstance(AgentService.class).load(agentId);
 			}
 			
 		};

@@ -14,8 +14,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.util.Path;
@@ -59,8 +59,8 @@ abstract class NewBoardPanel extends Panel {
 					boards.add(newBoard);
 					getProject().getIssueSetting().setBoardSpecs(boards);
 					var newAuditContent = VersionedXmlDoc.fromBean(newBoard).toXML();
-					OneDev.getInstance(ProjectManager.class).update(getProject());
-					OneDev.getInstance(AuditManager.class).audit(getProject(), "created issue board \"" + newBoard.getName() + "\"", null, newAuditContent);
+					OneDev.getInstance(ProjectService.class).update(getProject());
+					OneDev.getInstance(AuditService.class).audit(getProject(), "created issue board \"" + newBoard.getName() + "\"", null, newAuditContent);
 					Session.get().success(_T("New issue board created"));
 					onBoardCreated(target, newBoard);
 				} else {

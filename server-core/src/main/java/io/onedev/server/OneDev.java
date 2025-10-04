@@ -44,20 +44,20 @@ import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TarUtils;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.data.DataManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.data.DataService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.ServerNotReadyException;
-import io.onedev.server.jetty.JettyManager;
+import io.onedev.server.jetty.JettyService;
 import io.onedev.server.model.support.administration.SystemSetting;
-import io.onedev.server.persistence.IdManager;
-import io.onedev.server.persistence.SessionFactoryManager;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.IdService;
+import io.onedev.server.persistence.SessionFactoryService;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.taskschedule.TaskScheduler;
@@ -69,11 +69,11 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	
 	private static final Logger logger = LoggerFactory.getLogger(OneDev.class);
 	
-	private final Provider<JettyManager> jettyLauncherProvider;
+	private final Provider<JettyService> jettyLauncherProvider;
 		
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
-	private final DataManager dataManager;
+	private final DataService dataService;
 	
 	private final Provider<ServerConfig> serverConfigProvider;
 	
@@ -83,13 +83,13 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	
 	private final ExecutorService executorService;
 	
-	private final ClusterManager clusterManager;
+	private final ClusterService clusterService;
 	
-	private final SettingManager settingManager;
+	private final SettingService settingService;
 	
-	private final IdManager idManager;
+	private final IdService idService;
 	
-	private final SessionFactoryManager sessionFactoryManager;
+	private final SessionFactoryService sessionFactoryService;
 	
 	private final Date bootDate = new Date();
 	
@@ -101,23 +101,23 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	
 	// Some are injected via provider as instantiation might encounter problem during upgrade 
 	@Inject
-	public OneDev(Provider<JettyManager> jettyLauncherProvider, TaskScheduler taskScheduler,
-                  SessionManager sessionManager, Provider<ServerConfig> serverConfigProvider,
-                  DataManager dataManager, ExecutorService executorService,
-                  ListenerRegistry listenerRegistry, ClusterManager clusterManager,
-                  IdManager idManager, SessionFactoryManager sessionFactoryManager, 
-				  SettingManager settingManager) {
+	public OneDev(Provider<JettyService> jettyLauncherProvider, TaskScheduler taskScheduler,
+                  SessionService sessionService, Provider<ServerConfig> serverConfigProvider,
+                  DataService dataService, ExecutorService executorService,
+                  ListenerRegistry listenerRegistry, ClusterService clusterService,
+                  IdService idService, SessionFactoryService sessionFactoryService,
+                  SettingService settingService) {
 		this.jettyLauncherProvider = jettyLauncherProvider;
 		this.taskScheduler = taskScheduler;
-		this.sessionManager = sessionManager;
-		this.dataManager = dataManager;
+		this.sessionService = sessionService;
+		this.dataService = dataService;
 		this.serverConfigProvider = serverConfigProvider;
 		this.executorService = executorService;
 		this.listenerRegistry = listenerRegistry;
-		this.clusterManager = clusterManager;
-		this.idManager = idManager;
-		this.sessionFactoryManager = sessionFactoryManager;
-		this.settingManager = settingManager;
+		this.clusterService = clusterService;
+		this.idService = idService;
+		this.sessionFactoryService = sessionFactoryService;
+		this.settingService = settingService;
 		
 		try {
 			wrapperManagerClass = Class.forName("org.tanukisoftware.wrapper.WrapperManager");
@@ -145,16 +145,16 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		System.setProperty("hsqldb.reconfig_logging", "false");
 		System.setProperty("hsqldb.method_class_names", "java.lang.Math");
 
-		clusterManager.start();
-		sessionFactoryManager.start();
+		clusterService.start();
+		sessionFactoryService.start();
 		
-		var databasePopulated = clusterManager.getHazelcastInstance().getCPSubsystem().getAtomicLong("databasePopulated");
+		var databasePopulated = clusterService.getHazelcastInstance().getCPSubsystem().getAtomicLong("databasePopulated");
 		// Do not use database lock as schema update will commit transaction immediately 
 		// in MySQL 
-		clusterManager.initWithLead(databasePopulated, () -> {
-			try (var conn = dataManager.openConnection()) {
+		clusterService.initWithLead(databasePopulated, () -> {
+			try (var conn = dataService.openConnection()) {
 				callWithTransaction(conn, () -> {
-					dataManager.populateDatabase(conn);
+					dataService.populateDatabase(conn);
 					return null;
 				});
 			} catch (SQLException e) {
@@ -163,9 +163,9 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 			return 1L;
 		});
 		
-		idManager.init();
+		idService.init();
 
-		sessionManager.run(() -> listenerRegistry.post(new SystemStarting()));
+		sessionService.run(() -> listenerRegistry.post(new SystemStarting()));
 		jettyLauncherProvider.get().start();
 
 		var manualConfigs = checkData();
@@ -175,16 +175,16 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 			else
 				logger.warn("Please set up the server at " + guessServerUrl());
 			initStage = new InitStage("Server Setup", manualConfigs);
-			var localServer = clusterManager.getLocalServerAddress();
+			var localServer = clusterService.getLocalServerAddress();
 			while (true) {
 				if (maintenanceFile.exists()) {
 					logger.info("Maintenance requested, trying to stop all servers...");
-					clusterManager.submitToAllServers(() -> {
-						if (!localServer.equals(clusterManager.getLocalServerAddress()))
+					clusterService.submitToAllServers(() -> {
+						if (!localServer.equals(clusterService.getLocalServerAddress()))
 							restart();
 						return null;
 					});
-					while (thread != null && clusterManager.getServerAddresses().size() != 1) {
+					while (thread != null && clusterService.getServerAddresses().size() != 1) {
 						try {
 							Thread.sleep(1000);
 						} catch (InterruptedException ignored) {
@@ -211,16 +211,16 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 			}
 		}
 		
-		var leadServer = clusterManager.getLeaderServerAddress();
-		if (!leadServer.equals(clusterManager.getLocalServerAddress())) {
+		var leadServer = clusterService.getLeaderServerAddress();
+		if (!leadServer.equals(clusterService.getLocalServerAddress())) {
 			logger.info("Syncing assets...");
 			Client client = ClientBuilder.newClient();
 			try {
-				String fromServerUrl = clusterManager.getServerUrl(leadServer);
+				String fromServerUrl = clusterService.getServerUrl(leadServer);
 				WebTarget target = client.target(fromServerUrl).path("/~api/cluster/assets");
 				Invocation.Builder builder = target.request();
 				builder.header(AUTHORIZATION,
-						BEARER + " " + clusterManager.getCredential());
+						BEARER + " " + clusterService.getCredential());
 
 				try (Response response = builder.get()) {
 					checkStatus(response);
@@ -248,30 +248,30 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		SecurityUtils.bindAsSystem();
 		initStage = null;
 		listenerRegistry.post(new SystemStarted());
-		clusterManager.postStart();
+		clusterService.postStart();
 		thread.start();
 
-		SystemSetting systemSetting = settingManager.getSystemSetting();
+		SystemSetting systemSetting = settingService.getSystemSetting();
 		logger.info("Server is ready at " + systemSetting.getServerUrl() + ".");
 	}
 
 	@Override
 	public void preStop() {
 		thread = null;
-		clusterManager.preStop();
+		clusterService.preStop();
 		SecurityUtils.bindAsSystem();
 		try {
-			sessionManager.run(() -> listenerRegistry.post(new SystemStopping()));
+			sessionService.run(() -> listenerRegistry.post(new SystemStopping()));
 		} catch (ServerNotReadyException ignore) {
 		}
 	}
 	
 	private List<ManualConfig> checkData() {
-		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
+		HazelcastInstance hazelcastInstance = clusterService.getHazelcastInstance();
 		var lock = hazelcastInstance.getCPSubsystem().getLock("checkData");
 		lock.lock();
 		try {
-			return dataManager.checkData();
+			return dataService.checkData();
 		} finally {
 			lock.unlock();
 		}
@@ -285,10 +285,10 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 			taskScheduler.stop();
 
 			jettyLauncherProvider.get().stop();
-			sessionManager.run(() -> listenerRegistry.post(new SystemStopped()));
+			sessionService.run(() -> listenerRegistry.post(new SystemStopped()));
 
-			sessionFactoryManager.stop();
-			clusterManager.stop();
+			sessionFactoryService.stop();
+			clusterService.stop();
 			executorService.shutdown();
 		} catch (ServerNotReadyException ignore) {
 		}
@@ -423,17 +423,17 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 
 	@Override
 	public void run() {
-		var localServer = clusterManager.getLocalServerAddress();
+		var localServer = clusterService.getLocalServerAddress();
 		var maintenanceFile = getMaintenanceFile(Bootstrap.installDir);
 		while (thread != null) {
 			if (maintenanceFile.exists()) {
 				logger.info("Maintenance requested, trying to stop all servers...");
-				clusterManager.submitToAllServers(() -> {
-					if (!localServer.equals(clusterManager.getLocalServerAddress())) 
+				clusterService.submitToAllServers(() -> {
+					if (!localServer.equals(clusterService.getLocalServerAddress())) 
 						restart();
 					return null;
 				});
-				while (thread != null && clusterManager.getServerAddresses().size() != 1) {
+				while (thread != null && clusterService.getServerAddresses().size() != 1) {
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException ignored) {

@@ -6,8 +6,8 @@ import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
 import io.onedev.server.replica.BuildStorageSyncer;
 import io.onedev.server.security.SecurityUtils;
@@ -62,7 +62,7 @@ public class HtmlModule extends AbstractPluginModule {
 				Long projectId = build.getProject().getId();
 				Long buildNumber = build.getNumber();
 				
-				return getProjectManager().runOnActiveServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
+				return getProjectService().runOnActiveServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
 						.filter(it->SecurityUtils.canAccessReport(build, it.getTitle()))
 						.collect(Collectors.toList());
 			}
@@ -81,14 +81,14 @@ public class HtmlModule extends AbstractPluginModule {
 		});		
 		
 		contribute(BuildStorageSyncer.class, ((projectId, buildNumber, activeServer) -> {
-			getProjectManager().syncDirectory(projectId, 
+			getProjectService().syncDirectory(projectId, 
 					getProjectRelativeDirPath(buildNumber) + "/" + CATEGORY,
 					getReportLockName(projectId, buildNumber), activeServer);
 		}));
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
 	private static class GetBuildTabs implements ClusterTask<List<BuildTab>> {
@@ -108,7 +108,7 @@ public class HtmlModule extends AbstractPluginModule {
 		public List<BuildTab> call() {
 			return read(getReportLockName(projectId, buildNumber), () -> {
 				List<BuildTab> tabs = new ArrayList<>();
-				File categoryDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), CATEGORY);
+				File categoryDir = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (!reportDir.isHidden() && !isVersionFile(reportDir)) {

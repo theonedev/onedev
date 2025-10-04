@@ -15,7 +15,7 @@ import javax.persistence.criteria.Predicate;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
@@ -23,7 +23,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoService;
 
 public class FixedIssueCriteria extends Criteria<Build> {
 
@@ -43,13 +43,13 @@ public class FixedIssueCriteria extends Criteria<Build> {
 		value = String.valueOf(issue.getNumber());
 	}
 
-	private CommitInfoManager getCommitInfoManager() {
-		return OneDev.getInstance(CommitInfoManager.class);
+	private CommitInfoService getCommitInfoManager() {
+		return OneDev.getInstance(CommitInfoService.class);
 	}
 	
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
-		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+		BuildService buildService = OneDev.getInstance(BuildService.class);
 		Path<Long> attribute = from.get(Build.PROP_NUMBER);
 		List<Predicate> predicates = new ArrayList<>();
 		issue.getProject().getTree().stream().filter(it->it.isCodeManagement()).forEach(it-> {
@@ -57,10 +57,10 @@ public class FixedIssueCriteria extends Criteria<Build> {
 			Collection<String> descendants = new HashSet<>();
 			for (ObjectId each: getCommitInfoManager().getDescendants(it.getId(), fixCommits))
 				descendants.add(each.name());
-			Collection<Long> inBuildNumbers = buildManager.filterNumbers(it.getId(), descendants);
+			Collection<Long> inBuildNumbers = buildService.filterNumbers(it.getId(), descendants);
 			predicates.add(builder.and(
 					builder.equal(from.get(Build.PROP_PROJECT), it),
-					forManyValues(builder, attribute, inBuildNumbers, buildManager.getNumbers(it.getId()))));
+					forManyValues(builder, attribute, inBuildNumbers, buildService.getNumbers(it.getId()))));
 		});
 		if (!predicates.isEmpty())
 			return builder.or(predicates.toArray(new Predicate[0]));

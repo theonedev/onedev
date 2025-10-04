@@ -4,7 +4,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
-import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.validation.Validatable;
 
 import javax.validation.ConstraintValidatorContext;
@@ -35,7 +35,7 @@ public class ClusterSetting implements Serializable, Validatable {
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
 		boolean isValid = true;
-		int memberCount = OneDev.getInstance(ClusterManager.class)
+		int memberCount = OneDev.getInstance(ClusterService.class)
 				.getHazelcastInstance()
 				.getCluster().getMembers().size();
 		if (replicaCount > memberCount) {

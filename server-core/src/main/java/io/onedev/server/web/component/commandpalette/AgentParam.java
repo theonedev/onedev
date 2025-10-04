@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.service.AgentService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.agent.*;
 import io.onedev.server.util.criteria.Criteria;
@@ -24,7 +24,7 @@ public class AgentParam extends ParamSegment {
 	@Override
 	public Map<String, String> suggest(String matchWith, Map<String, String> paramValues, int count) {
 		Map<String, String> suggestions = new LinkedHashMap<>();
-		AgentManager agentManager = OneDev.getInstance(AgentManager.class);
+		AgentService agentService = OneDev.getInstance(AgentService.class);
 		AgentQuery query;
 		if (matchWith.length() == 0) {
 			query = new AgentQuery();
@@ -37,7 +37,7 @@ public class AgentParam extends ParamSegment {
 			query = new AgentQuery(new OrCriteria<Agent>(criterias));
 		}
 		
-		for (Agent agent: agentManager.query(query, 0, count))
+		for (Agent agent: agentService.query(query, 0, count))
 			suggestions.put(agent.getName(), agent.getName());
 		
 		return suggestions;
@@ -45,8 +45,8 @@ public class AgentParam extends ParamSegment {
 
 	@Override
 	public boolean isExactMatch(String matchWith, Map<String, String> paramValues) {
-		AgentManager agentManager = OneDev.getInstance(AgentManager.class);
-		return agentManager.findByName(matchWith) != null; 
+		AgentService agentService = OneDev.getInstance(AgentService.class);
+		return agentService.findByName(matchWith) != null; 
 	}
 		
 }

@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.admin;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.layout.LayoutPage;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -32,7 +32,7 @@ public abstract class AdministrationPage extends LayoutPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Administration - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return "Administration - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
 	}
 	
 }

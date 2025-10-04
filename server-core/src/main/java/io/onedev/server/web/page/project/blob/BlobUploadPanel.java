@@ -1,12 +1,12 @@
 package io.onedev.server.web.page.project.blob;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.upload.UploadManager;
+import io.onedev.server.web.upload.UploadService;
 
 import static io.onedev.server.web.translation.Translation._T;
 
@@ -43,7 +43,7 @@ public abstract class BlobUploadPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		int maxUploadFileSize = OneDev.getInstance(SettingManager.class)
+		int maxUploadFileSize = OneDev.getInstance(SettingService.class)
 				.getPerformanceSetting().getMaxUploadFileSize();
 		
 		Form<?> form = new Form<Void>("form");
@@ -81,7 +81,7 @@ public abstract class BlobUploadPanel extends Panel {
 				if (StringUtils.isBlank(commitMessage))
 					commitMessage = _T("Add files via upload");
 				
-				var upload = getUploadManager().getUpload(uploadId);
+				var upload = getUploadService().getUpload(uploadId);
 				try {
 					onCommitted(target, context.uploadFiles(upload, directory, commitMessage));
 				} finally {
@@ -120,8 +120,8 @@ public abstract class BlobUploadPanel extends Panel {
 		});
 	}
 	
-	private UploadManager getUploadManager() {
-		return OneDev.getInstance(UploadManager.class);
+	private UploadService getUploadService() {
+		return OneDev.getInstance(UploadService.class);
 	}
 
 	public abstract void onCommitted(AjaxRequestTarget target, ObjectId commitId);

@@ -8,13 +8,13 @@ import io.onedev.commons.utils.TarUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.K8sJobData;
 import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.JobCacheManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.JobCacheService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.job.JobContext;
-import io.onedev.server.job.JobManager;
+import io.onedev.server.job.JobService;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IOUtils;
@@ -52,28 +52,28 @@ import static org.apache.commons.io.IOUtils.copy;
 @Singleton
 public class KubernetesResource {
 
-	private final JobManager jobManager;
+	private final JobService jobService;
 	
-	private final JobCacheManager jobCacheManager;
+	private final JobCacheService jobCacheService;
 	
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
-	private final ClusterManager clusterManager;
+	private final ClusterService clusterService;
 	
     @Context
     private HttpServletRequest request;
     
     @Inject
-    public KubernetesResource(JobManager jobManager, JobCacheManager jobCacheManager, 
-							  SessionManager sessionManager, ProjectManager projectManager, 
-							  ClusterManager clusterManager) {
-    	this.jobManager = jobManager;
-		this.jobCacheManager = jobCacheManager;
-    	this.sessionManager = sessionManager;
-		this.projectManager = projectManager;
-		this.clusterManager = clusterManager;
+    public KubernetesResource(JobService jobService, JobCacheService jobCacheService,
+                              SessionService sessionService, ProjectService projectService,
+                              ClusterService clusterService) {
+    	this.jobService = jobService;
+		this.jobCacheService = jobCacheService;
+    	this.sessionService = sessionService;
+		this.projectService = projectService;
+		this.clusterService = clusterService;
 	}
     
 	@Path("/job-data")
@@ -81,9 +81,9 @@ public class KubernetesResource {
     @GET
     public byte[] getJobData(@QueryParam("jobToken") String jobToken, 
 							 @QueryParam("jobWorkspace") @Nullable String jobWorkspace) {
-		JobContext jobContext = jobManager.getJobContext(jobToken, true);
+		JobContext jobContext = jobService.getJobContext(jobToken, true);
 		if (StringUtils.isNotBlank(jobWorkspace))
-			jobManager.reportJobWorkspace(jobContext, jobWorkspace);	
+			jobService.reportJobWorkspace(jobContext, jobWorkspace);	
 		K8sJobData k8sJobData = new K8sJobData(
 				jobContext.getJobExecutor().getName(), 
 				jobContext.getRefName(),
@@ -96,12 +96,12 @@ public class KubernetesResource {
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@POST
 	public StreamingOutput runServerStep(@QueryParam("jobToken") String jobToken, InputStream is) {
-		JobContext jobContext = jobManager.getJobContext(jobToken, true);
+		JobContext jobContext = jobService.getJobContext(jobToken, true);
 		return os -> {
 			File filesDir = FileUtils.createTempDir();
 			// Make sure we are not occupying a database connection here as we will occupy 
 			// database connection when running step at project server side
-			sessionManager.closeSession();
+			sessionService.closeSession();
 			try {
 				int length = readInt(is);
 				List<Integer> stepPosition = new ArrayList<>();
@@ -115,7 +115,7 @@ public class KubernetesResource {
 				
 				TarUtils.untar(is, filesDir, false);
 				
-				var result = jobManager.runServerStep(jobContext, 
+				var result = jobService.runServerStep(jobContext, 
 						stepPosition, filesDir, placeholderValues, true, new TaskLogger() {
 
 					@Override
@@ -137,7 +137,7 @@ public class KubernetesResource {
 				KubernetesHelper.writeInt(os, bytes.length);
 				os.write(bytes);
 			} finally {
-				sessionManager.openSession();
+				sessionService.openSession();
 				FileUtils.deleteDir(filesDir);
 			}						
 	   };
@@ -148,14 +148,14 @@ public class KubernetesResource {
 	@GET
 	public StreamingOutput downloadDependencies(@QueryParam("jobToken") String jobToken) {
 		return os -> {
-			JobContext jobContext = jobManager.getJobContext(jobToken, true);
+			JobContext jobContext = jobService.getJobContext(jobToken, true);
 			File tempDir = FileUtils.createTempDir();
-			sessionManager.closeSession();
+			sessionService.closeSession();
 			try {
-				jobManager.copyDependencies(jobContext, tempDir);
+				jobService.copyDependencies(jobContext, tempDir);
 				TarUtils.tar(tempDir, os, false);
 			} finally {
-				sessionManager.openSession();
+				sessionService.openSession();
 				FileUtils.deleteDir(tempDir);
 			}
 		};
@@ -170,26 +170,26 @@ public class KubernetesResource {
 			@QueryParam("loadKeys") @Nullable String joinedLoadKeys, 
 			@QueryParam("cachePaths") String joinedCachePaths) {
 		return os -> {
-			sessionManager.closeSession();
+			sessionService.closeSession();
 			try {
-				var jobContext = jobManager.getJobContext(jobToken, true);
+				var jobContext = jobService.getJobContext(jobToken, true);
 				Pair<Long, Long> cacheInfo;
 				if (cacheKey != null) {
-					cacheInfo = jobCacheManager.getCacheInfoForDownload(jobContext.getProjectId(), cacheKey);
+					cacheInfo = jobCacheService.getCacheInfoForDownload(jobContext.getProjectId(), cacheKey);
 				} else {
 					var loadKeys = Splitter.on('\n').splitToList(joinedLoadKeys);
-					cacheInfo = jobCacheManager.getCacheInfoForDownload(jobContext.getProjectId(), loadKeys);
+					cacheInfo = jobCacheService.getCacheInfoForDownload(jobContext.getProjectId(), loadKeys);
 				}
 				if (cacheInfo != null) {
 					var cachePaths = Splitter.on('\n').splitToList(joinedCachePaths); 					
-					var activeServer = projectManager.getActiveServer(cacheInfo.getLeft(), true);
-					if (activeServer.equals(clusterManager.getLocalServerAddress())) {
-						jobCacheManager.downloadCache(cacheInfo.getLeft(), cacheInfo.getRight(), cachePaths, os);
+					var activeServer = projectService.getActiveServer(cacheInfo.getLeft(), true);
+					if (activeServer.equals(clusterService.getLocalServerAddress())) {
+						jobCacheService.downloadCache(cacheInfo.getLeft(), cacheInfo.getRight(), cachePaths, os);
 					} else {
 						Client client = ClientBuilder.newClient();
 						client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
 						try {
-							String serverUrl = clusterManager.getServerUrl(activeServer);
+							String serverUrl = clusterService.getServerUrl(activeServer);
 							var target = client.target(serverUrl)
 									.path("~api/cluster/cache")
 									.queryParam("projectId", cacheInfo.getLeft())
@@ -197,7 +197,7 @@ public class KubernetesResource {
 									.queryParam("cachePaths", Joiner.on('\n').join(cachePaths));
 							Invocation.Builder builder = target.request();
 							builder.header(HttpHeaders.AUTHORIZATION,
-									KubernetesHelper.BEARER + " " + clusterManager.getCredential());
+									KubernetesHelper.BEARER + " " + clusterService.getCredential());
 							try (Response response = builder.get()) {
 								KubernetesHelper.checkStatus(response);
 								try (var is = response.readEntity(InputStream.class)) {
@@ -214,7 +214,7 @@ public class KubernetesResource {
 					os.write(0);					
 				}
 			} finally {
-				sessionManager.openSession();
+				sessionService.openSession();
 			}
 		};
 	}
@@ -224,12 +224,12 @@ public class KubernetesResource {
 	public Long checkUploadCache(
 			@QueryParam("jobToken") String jobToken,
 			@QueryParam("projectPath") @Nullable String projectPath) {
-		var jobContext = jobManager.getJobContext(jobToken, true);
+		var jobContext = jobService.getJobContext(jobToken, true);
 		Project uploadProject;
 		if (projectPath == null) {
-			uploadProject = projectManager.load(jobContext.getProjectId());
+			uploadProject = projectService.load(jobContext.getProjectId());
 		} else {
-			uploadProject = projectManager.findByPath(projectPath);
+			uploadProject = projectService.findByPath(projectPath);
 			if (uploadProject == null)
 				throw new NotFoundException("Project not found: " + projectPath);
 		}
@@ -251,18 +251,18 @@ public class KubernetesResource {
 			@QueryParam("cachePaths") String joinedCachePaths, 
 			InputStream is) {
 		var projectId = checkUploadCache(jobToken, projectPath);
-		sessionManager.closeSession();
+		sessionService.closeSession();
 		try {
-			Long cacheId = jobCacheManager.getCacheIdForUpload(projectId, cacheKey);
+			Long cacheId = jobCacheService.getCacheIdForUpload(projectId, cacheKey);
 			var cachePaths = Splitter.on('\n').splitToList(joinedCachePaths);
-			var activeServer = projectManager.getActiveServer(projectId, true);
-			if (activeServer.equals(clusterManager.getLocalServerAddress())) {
-				jobCacheManager.uploadCache(projectId, cacheId, cachePaths, is);
+			var activeServer = projectService.getActiveServer(projectId, true);
+			if (activeServer.equals(clusterService.getLocalServerAddress())) {
+				jobCacheService.uploadCache(projectId, cacheId, cachePaths, is);
 			} else {
 				Client client = ClientBuilder.newClient();
 				client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
 				try {
-					String serverUrl = clusterManager.getServerUrl(activeServer);
+					String serverUrl = clusterService.getServerUrl(activeServer);
 					var target = client.target(serverUrl)
 							.path("~api/cluster/cache")
 							.queryParam("projectId", projectId)
@@ -270,7 +270,7 @@ public class KubernetesResource {
 							.queryParam("cachePaths", joinedCachePaths);
 					Invocation.Builder builder = target.request();
 					builder.header(HttpHeaders.AUTHORIZATION,
-							KubernetesHelper.BEARER + " " + clusterManager.getCredential());
+							KubernetesHelper.BEARER + " " + clusterService.getCredential());
 					StreamingOutput output = os -> copy(is, os, BUFFER_SIZE);
 					try (Response response = builder.post(Entity.entity(output, MediaType.APPLICATION_OCTET_STREAM))) {
 						KubernetesHelper.checkStatus(response);
@@ -281,7 +281,7 @@ public class KubernetesResource {
 			}
 			return Response.ok().build();
 		} finally {
-			sessionManager.openSession();
+			sessionService.openSession();
 		}
 	}	
 	

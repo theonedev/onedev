@@ -9,7 +9,7 @@ import java.util.List;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.RoleChoice;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.service.RoleService;
 import io.onedev.server.model.Role;
 
 @Editable
@@ -36,7 +36,7 @@ public class DefaultRolesBean implements Serializable {
 	}
 	
 	public List<Role> getRoles() {
-		return roleNames.stream().map(OneDev.getInstance(RoleManager.class)::find).collect(toList());
+		return roleNames.stream().map(OneDev.getInstance(RoleService.class)::find).collect(toList());
 	}
 	
 }

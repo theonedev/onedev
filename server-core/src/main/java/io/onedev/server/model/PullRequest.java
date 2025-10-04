@@ -76,8 +76,8 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentStorageSupport;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.PullRequestReference;
 import io.onedev.server.git.GitUtils;
@@ -102,7 +102,7 @@ import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.xodus.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoService;
 
 @Entity
 @Table(
@@ -912,7 +912,7 @@ public class PullRequest extends ProjectBelonging
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getAuthUser();
 		if (user != null) {
-			Date visitDate = OneDev.getInstance(VisitInfoManager.class).getPullRequestVisitDate(user, this);
+			Date visitDate = OneDev.getInstance(VisitInfoService.class).getPullRequestVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;
@@ -922,7 +922,7 @@ public class PullRequest extends ProjectBelonging
 	public boolean isCodeCommentsVisitedAfter(Date date) {
 		User user = SecurityUtils.getAuthUser();
 		if (user != null) {
-			Date visitDate = OneDev.getInstance(VisitInfoManager.class).getPullRequestCodeCommentsVisitDate(user, this);
+			Date visitDate = OneDev.getInstance(VisitInfoService.class).getPullRequestCodeCommentsVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;
@@ -1006,9 +1006,9 @@ public class PullRequest extends ProjectBelonging
 				if (change.getUser() != null)
 					participants.add(change.getUser());
 			}
-			var userManager = OneDev.getInstance(UserManager.class);
-			participants.remove(userManager.getSystem());
-			participants.remove(userManager.getUnknown());
+			var userService = OneDev.getInstance(UserService.class);
+			participants.remove(userService.getSystem());
+			participants.remove(userService.getUnknown());
 		}
 		return new ArrayList<>(participants);
 	}
@@ -1234,7 +1234,7 @@ public class PullRequest extends ProjectBelonging
 			return _T("Source project no longer exists");
 		if (getSource().getObjectName(false) == null)
 			return _T("Source branch no longer exists");
-		PullRequestManager manager = OneDev.getInstance(PullRequestManager.class);
+		PullRequestService manager = OneDev.getInstance(PullRequestService.class);
 		PullRequest request = manager.findEffective(getTarget(), getSource());
 		if (request != null) {
 			if (request.isOpen())
@@ -1268,7 +1268,7 @@ public class PullRequest extends ProjectBelonging
 				&& !getSource().getObjectName().equals(preview.getMergeCommitHash())) {
 			return _T("Change not updated yet");
 		}
-		PullRequestManager manager = OneDev.getInstance(PullRequestManager.class);
+		PullRequestService manager = OneDev.getInstance(PullRequestService.class);
 		if (!manager.queryOpenTo(getSource()).isEmpty())
 			return _T("Some other pull requests are opening to this branch");
 		return null;
@@ -1308,7 +1308,7 @@ public class PullRequest extends ProjectBelonging
 						getBaseCommit().copy(), getLatestUpdate().getHeadCommit().copy(), new HashMap<>());
 			}
 			if (error == null && autoMerge.isEnabled()) {
-				var system = OneDev.getInstance(UserManager.class).getSystem();
+				var system = OneDev.getInstance(UserService.class).getSystem();
 				var errorMessage = checkMergeCommitMessage(system, autoMerge.getCommitMessage());
 				if (errorMessage != null)
 					error = new CommitMessageError(null, errorMessage);

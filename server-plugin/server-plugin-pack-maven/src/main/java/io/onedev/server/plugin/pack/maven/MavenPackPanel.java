@@ -46,8 +46,8 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.io.Resources;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PackBlobManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.PackBlobService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.PackBlobReference;
@@ -66,7 +66,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 
 	private byte[] readBlob(PackBlob packBlob) {
 		var baos = new ByteArrayOutputStream();
-		getPackBlobManager().downloadBlob(packBlob.getProject().getId(), packBlob.getSha256Hash(), baos);
+		getPackBlobService().downloadBlob(packBlob.getProject().getId(), packBlob.getSha256Hash(), baos);
 		return baos.toByteArray();
 	}
 	
@@ -94,7 +94,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 				if (fileName.endsWith(".pom")) {
 					var packBlob = getPackBlobs().get(fileName);
 					var baos = new ByteArrayOutputStream();
-					getPackBlobManager().downloadBlob(packBlob.getProject().getId(),
+					getPackBlobService().downloadBlob(packBlob.getProject().getId(),
 							packBlob.getSha256Hash(), baos);
 					try {
 						pomElement = new SAXReader().read(new ByteArrayInputStream(baos.toByteArray())).getRootElement();
@@ -119,7 +119,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 				bindings.put("groupId", substringBefore(getPack().getName(), ":"));
 				bindings.put("artifactId", substringAfter(getPack().getName(), ":"));
 				bindings.put("version", getPack().getVersion());
-				var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+				var serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 				bindings.put("url", serverUrl + "/" + getPack().getProject().getPath() + "/~" + MavenPackService.SERVICE_ID);
 				bindings.put("permission", "read");
 
@@ -180,7 +180,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 								@Override
 								public void write(OutputStream os) {
 									var packBlob = getPackBlobs().get(fileName);
-									getPackBlobManager().downloadBlob(packBlob.getProject().getId(),
+									getPackBlobService().downloadBlob(packBlob.getProject().getId(),
 											packBlob.getSha256Hash(), os);
 								}
 
@@ -255,8 +255,8 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 		return packBlobs;
 	}
 
-	private PackBlobManager getPackBlobManager() {
-		return OneDev.getInstance(PackBlobManager.class);
+	private PackBlobService getPackBlobService() {
+		return OneDev.getInstance(PackBlobService.class);
 	}
 	
 }

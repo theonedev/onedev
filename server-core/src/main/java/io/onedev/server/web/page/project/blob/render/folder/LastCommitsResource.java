@@ -3,7 +3,7 @@ package io.onedev.server.web.page.project.blob.render.folder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.service.EmailAddressService;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
@@ -12,7 +12,7 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.avatar.AvatarManager;
+import io.onedev.server.web.avatar.AvatarService;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -65,8 +65,8 @@ class LastCommitsResource extends AbstractResource {
 				
 				LastCommitsOfChildren lastCommits = project.getLastCommitsOfChildren(revision, path);
 				
-				var avatarManager = OneDev.getInstance(AvatarManager.class);
-				var emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
+				var avatarService = OneDev.getInstance(AvatarService.class);
+				var emailAddressService = OneDev.getInstance(EmailAddressService.class);
 				Map<String, LastCommitInfo> map = new HashMap<>();
 				for (var entry: lastCommits.entrySet()) {
 					var info = new LastCommitInfo();
@@ -80,7 +80,7 @@ class LastCommitsResource extends AbstractResource {
 					info.when = DateUtils.formatAge(value.getCommitDate());
 					
 					PersonIdent author = value.getAuthor();
-					EmailAddress emailAddress = emailAddressManager.findByValue(author.getEmailAddress());
+					EmailAddress emailAddress = emailAddressService.findByValue(author.getEmailAddress());
 					if (emailAddress != null && emailAddress.isVerified()) {
 						User owner = emailAddress.getOwner();
 						info.authorName = owner.getDisplayName();
@@ -93,7 +93,7 @@ class LastCommitsResource extends AbstractResource {
 						info.authorName = author.getName();
 						info.authorEmailAddress = author.getEmailAddress();
 					}
-					info.authorAvatarUrl = avatarManager.getPersonAvatarUrl(author);
+					info.authorAvatarUrl = avatarService.getPersonAvatarUrl(author);
 					map.put(entry.getKey(), info);
 				}
 				String json;

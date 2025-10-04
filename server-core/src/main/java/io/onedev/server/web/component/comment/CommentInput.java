@@ -6,10 +6,10 @@ import java.util.List;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -33,7 +33,7 @@ public abstract class CommentInput extends MarkdownEditor {
 	@Override
 	protected final UserMentionSupport getUserMentionSupport() {
 		return (query, count) -> {
-			var cache = getUserManager().cloneCache();
+			var cache = getUserService().cloneCache();
 			var participants = getParticipants();
 			var otherUsers = new ArrayList<>(cache.getUsers());
 			otherUsers.removeAll(participants);
@@ -64,8 +64,8 @@ public abstract class CommentInput extends MarkdownEditor {
 		};
 	}
 	
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 	
 	protected List<User> getParticipants() {
@@ -83,9 +83,10 @@ public abstract class CommentInput extends MarkdownEditor {
 
 			@Override
 			public List<PullRequest> queryPullRequests(Project project, String query, int count) {
-				if (SecurityUtils.canReadCode(project)) {
+				var subject = SecurityUtils.getSubject();
+				if (SecurityUtils.canReadCode(subject, project)) {
 					var requestQuery = new PullRequestQuery(new io.onedev.server.search.entity.pullrequest.FuzzyCriteria(query));
-					return OneDev.getInstance(PullRequestManager.class).query(project, requestQuery, false, 0, count);
+					return OneDev.getInstance(PullRequestService.class).query(subject, project, requestQuery, false, 0, count);
 				} else {
 					return new ArrayList<>();
 				}
@@ -93,10 +94,11 @@ public abstract class CommentInput extends MarkdownEditor {
 
 			@Override
 			public List<Issue> queryIssues(Project project, String query, int count) {
-				if (SecurityUtils.canAccessProject(project)) {
+				var subject = SecurityUtils.getSubject();
+				if (SecurityUtils.canAccessProject(subject, project)) {
 					var projectScope = new ProjectScope(project, false, false);
 					var issueQuery = new IssueQuery(new io.onedev.server.search.entity.issue.FuzzyCriteria(query));
-					return OneDev.getInstance(IssueManager.class).query(projectScope, issueQuery, false, 0, count);
+					return OneDev.getInstance(IssueService.class).query(subject, projectScope, issueQuery, false, 0, count);
 				} else {
 					return new ArrayList<>();
 				}
@@ -104,7 +106,7 @@ public abstract class CommentInput extends MarkdownEditor {
 
 			@Override
 			public List<Build> queryBuilds(Project project, String query, int count) {
-				return OneDev.getInstance(BuildManager.class).query(project, query, count);
+				return OneDev.getInstance(BuildService.class).query(SecurityUtils.getSubject(), project, query, count);
 			}
 			
 		};

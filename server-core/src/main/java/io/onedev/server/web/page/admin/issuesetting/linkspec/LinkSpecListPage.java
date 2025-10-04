@@ -29,7 +29,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.service.LinkSpecService;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -167,9 +167,9 @@ public class LinkSpecListPage extends IssueSettingPage {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						var link = rowModel.getObject();
-						getLinkSpecManager().delete(link);
+						getLinkSpecService().delete(link);
 						var oldAuditContent = VersionedXmlDoc.fromBean(link).toXML();
-						getAuditManager().audit(null, "deleted issue link spec \"" + link.getDisplayName() + "\"", oldAuditContent, null);
+						auditService.audit(null, "deleted issue link spec \"" + link.getDisplayName() + "\"", oldAuditContent, null);
 						target.add(linksTable);
 					}
 					
@@ -188,7 +188,7 @@ public class LinkSpecListPage extends IssueSettingPage {
 
 			@Override
 			protected List<LinkSpec> getData() {
-				return getLinkSpecManager().queryAndSort();
+				return getLinkSpecService().queryAndSort();
 			}
 
 			@Override
@@ -198,7 +198,7 @@ public class LinkSpecListPage extends IssueSettingPage {
 
 					@Override
 					protected LinkSpec load() {
-						return getLinkSpecManager().load(id);
+						return getLinkSpecService().load(id);
 					}
 					
 				};
@@ -216,20 +216,20 @@ public class LinkSpecListPage extends IssueSettingPage {
 
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
-				List<LinkSpec> links = getLinkSpecManager().queryAndSort();
+				List<LinkSpec> links = getLinkSpecService().queryAndSort();
 				var oldAuditContent = VersionedXmlDoc.fromBean(links).toXML();
 				CollectionUtils.move(links, from.getItemIndex(), to.getItemIndex());
 				var newAuditContent = VersionedXmlDoc.fromBean(links).toXML();
-				getLinkSpecManager().updateOrders(links);
-				getAuditManager().audit(null, "changed order of issue link specs", oldAuditContent, newAuditContent);
+				getLinkSpecService().updateOrders(links);
+				auditService.audit(null, "changed order of issue link specs", oldAuditContent, newAuditContent);
 				target.add(linksTable);
 			}
 			
 		}.sortable("tbody"));
 	}
 
-	private LinkSpecManager getLinkSpecManager() {
-		return OneDev.getInstance(LinkSpecManager.class);
+	private LinkSpecService getLinkSpecService() {
+		return OneDev.getInstance(LinkSpecService.class);
 	}
 	
 	@Override

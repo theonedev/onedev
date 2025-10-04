@@ -10,7 +10,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.ContentDetector;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,16 +37,16 @@ public class LfsObject implements Serializable {
 		return objectId;
 	}
 
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
 	private File getFile() {
 		File objectDir = new File(
-				getProjectManager().getLfsObjectsDir(projectId), 
+				getProjectService().getLfsObjectsDir(projectId), 
 				objectId.substring(0, 2) + "/" + objectId.substring(2, 4));
 		String lockName = "lfs-storage:" 
-				+ getProjectManager().getGitDir(projectId).getAbsolutePath();
+				+ getProjectService().getGitDir(projectId).getAbsolutePath();
 		Lock lock = LockUtils.getLock(lockName);
 		lock.lock();
 		try {
@@ -62,7 +62,7 @@ public class LfsObject implements Serializable {
 	}
 
 	public boolean exists() {
-		return getProjectManager().runOnActiveServer(projectId, new ClusterTask<Boolean>() {
+		return getProjectService().runOnActiveServer(projectId, new ClusterTask<Boolean>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -123,7 +123,7 @@ public class LfsObject implements Serializable {
 	}
 	
 	public void delete() {
-		getProjectManager().runOnActiveServer(projectId, new ClusterTask<Void>() {
+		getProjectService().runOnActiveServer(projectId, new ClusterTask<Void>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -143,7 +143,7 @@ public class LfsObject implements Serializable {
 	}
 	
 	public MediaType detectMediaType(String fileName) {
-		return getProjectManager().runOnActiveServer(projectId, new ClusterTask<MediaType> () {
+		return getProjectService().runOnActiveServer(projectId, new ClusterTask<MediaType> () {
 
 			private static final long serialVersionUID = 1L;
 

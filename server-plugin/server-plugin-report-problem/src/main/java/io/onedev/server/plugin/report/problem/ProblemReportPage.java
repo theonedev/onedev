@@ -56,8 +56,8 @@ import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
 import io.onedev.server.codequality.ProblemTarget;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
@@ -100,7 +100,7 @@ public class ProblemReportPage extends BuildReportPage {
 				Long projectId = getProject().getId();
 				Long buildNumber = getBuild().getNumber();
 
-				var report = OneDev.getInstance(ProjectManager.class).runOnActiveServer(projectId, new GetProblemReport(projectId, buildNumber, getReportName()));
+				var report = OneDev.getInstance(ProjectService.class).runOnActiveServer(projectId, new GetProblemReport(projectId, buildNumber, getReportName()));
 				for (var problem: report.getProblems()) {
 					if (problem.getTarget() == null)
 						return null;
@@ -449,7 +449,7 @@ public class ProblemReportPage extends BuildReportPage {
 
 				@Override
 				public ProblemReport call() throws Exception {
-					File reportDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), ProblemReport.CATEGORY + "/" + reportName);				
+					File reportDir = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), ProblemReport.CATEGORY + "/" + reportName);
 					return ProblemReport.readFrom(reportDir);
 				}
 				

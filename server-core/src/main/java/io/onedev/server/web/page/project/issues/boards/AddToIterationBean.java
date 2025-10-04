@@ -4,7 +4,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ShowCondition;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.EditContext;
 
 import javax.validation.constraints.NotEmpty;
@@ -100,7 +100,7 @@ public class AddToIterationBean implements Serializable {
 		var iterationPrefix = (String) EditContext.get().getInputValue("iterationPrefix");
 		var currentIteration = (String) EditContext.get().getInputValue("currentIteration");
 		var backlog = (boolean) EditContext.get().getInputValue("backlog");
-		var project = OneDev.getInstance(ProjectManager.class).load(projectId);
+		var project = OneDev.getInstance(ProjectService.class).load(projectId);
 		
 		var iterations = new ArrayList<String>();
 		for (var iteration: project.getSortedHierarchyIterations()) {

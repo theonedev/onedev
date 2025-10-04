@@ -1,0 +1,13 @@
+<wicket:panel>
+	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>Run below commands to use this package</wicket:t></div>
+	<div class="code mb-5">
+		<div wicket:id="addSource" class="text-break font-size-sm mt-2"></div>
+		<span class="text-muted font-size-sm"><wicket:t>Make sure the account has package read permission over the project</wicket:t></span>
+		<div wicket:id="addPack" class="text-break font-size-sm mt-2"></div>
+	</div>
+	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>For CI/CD job, run below to add package source via command step</wicket:t></div>
+	<div wicket:id="jobCommands" class="mb-5"></div>
+	
+	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>NuSpec</wicket:t></div>
+	<div wicket:id="nuspec"></div>
+</wicket:panel>

@@ -3,7 +3,7 @@ package io.onedev.server.web.editable.build.choice;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.BuildChoice;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.ReflectionUtils;
@@ -39,7 +39,7 @@ public class BuildChoiceEditSupport implements EditSupport {
 						        if (buildIds != null && !buildIds.isEmpty()) {
 						        	List<String> buildNumbers = new ArrayList<>();
 						        	for (Long buildId: buildIds) {
-						        		Build build = getBuildManager().get(buildId);
+						        		Build build = getBuildService().get(buildId);
 						        		if (build != null) 
 						        			buildNumbers.add(HtmlEscape.escapeHtml5(getBuildNumber(build)));
 						        		else
@@ -78,7 +78,7 @@ public class BuildChoiceEditSupport implements EditSupport {
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								Long buildId = model.getObject();
 								if (buildId != null) {
-									Build build = getBuildManager().get(buildId);
+									Build build = getBuildService().get(buildId);
 									if (build != null) 
 										return new Label(id, getBuildNumber(build));
 									else 
@@ -119,8 +119,8 @@ public class BuildChoiceEditSupport implements EditSupport {
 			return build.getReference().toString(null);
 	}
 	
-	private BuildManager getBuildManager() {
-		return OneDev.getInstance(BuildManager.class);
+	private BuildService getBuildService() {
+		return OneDev.getInstance(BuildService.class);
 	}
 
 	@Override

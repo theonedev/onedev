@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.websocket.WebSocketManager;
+import io.onedev.server.web.websocket.WebSocketService;
 
 /**
  * A handler of WebSocket requests.
@@ -131,7 +131,7 @@ public class WebSocketRequestHandler implements IWebSocketRequestHandler
 				@Override
 				protected void onAfterRespond(Response response) {
 					if (!markupIdToComponent.isEmpty())
-						OneDev.getInstance(WebSocketManager.class).observe((BasePage) getPage());
+						OneDev.getInstance(WebSocketService.class).observe((BasePage) getPage());
 					super.onAfterRespond(response);
 				}
 				

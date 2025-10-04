@@ -19,8 +19,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.PullRequestReviewManager;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.PullRequestReviewService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
@@ -113,7 +113,7 @@ public abstract class ReviewListPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						PullRequestReview review = item.getModelObject();
 						review.setStatus(Status.PENDING);
-						OneDev.getInstance(PullRequestReviewManager.class).createOrUpdate(review);
+						OneDev.getInstance(PullRequestReviewService.class).createOrUpdate(SecurityUtils.getUser(), review);
 						notifyPullRequestChange(target);
 					}
 
@@ -148,17 +148,17 @@ public abstract class ReviewListPanel extends Panel {
 						PullRequest request = getPullRequest();
 						PullRequestReview review = item.getModelObject();
 						review.setStatus(Status.EXCLUDED);
-						OneDev.getInstance(PullRequestManager.class).checkReviews(request, false);
+						OneDev.getInstance(PullRequestService.class).checkReviews(request, false);
 						User reviewer = review.getUser();
 						boolean reviewerRequired = false;
 						if (request.isNew()) {
 							if (request.getReview(reviewer).getStatus() != Status.EXCLUDED)
 								reviewerRequired = true;
 						} else if (request.getReview(reviewer).getStatus() == Status.EXCLUDED) {
-							getReviewManager().createOrUpdate(review);
+							getReviewService().createOrUpdate(SecurityUtils.getUser(), review);
 							for (PullRequestReview eachReview : request.getReviews()) {
 								if (eachReview.isNew())
-									getReviewManager().createOrUpdate(eachReview);
+									getReviewService().createOrUpdate(SecurityUtils.getUser(), eachReview);
 							}
 							notifyPullRequestChange(target);
 						} else {
@@ -218,8 +218,8 @@ public abstract class ReviewListPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 
-	private PullRequestReviewManager getReviewManager() {
-		return OneDev.getInstance(PullRequestReviewManager.class);
+	private PullRequestReviewService getReviewService() {
+		return OneDev.getInstance(PullRequestReviewService.class);
 	}
 
 	@Override

@@ -2,8 +2,8 @@ package io.onedev.server.web.page.project.builds.detail.dashboard;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
@@ -31,11 +31,11 @@ public class BuildDashboardPage extends BuildDetailPage {
 			Long projectId = getBuild().getProject().getId();
 			Long buildNumber = getBuild().getNumber();
 			
-			boolean hasArtifacts = OneDev.getInstance(ProjectManager.class).runOnActiveServer(projectId, new ClusterTask<Boolean>() {
+			boolean hasArtifacts = OneDev.getInstance(ProjectService.class).runOnActiveServer(projectId, new ClusterTask<Boolean>() {
 
 				@Override
 				public Boolean call() throws Exception {
-					File artifactsDir = OneDev.getInstance(BuildManager.class).getArtifactsDir(projectId, buildNumber);
+					File artifactsDir = OneDev.getInstance(BuildService.class).getArtifactsDir(projectId, buildNumber);
 					return artifactsDir.exists() && artifactsDir.listFiles().length != 0;
 				}
 				

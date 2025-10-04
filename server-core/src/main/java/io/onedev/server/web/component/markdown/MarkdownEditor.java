@@ -56,8 +56,8 @@ import com.google.common.base.Preconditions;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.markdown.MarkdownManager;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -67,7 +67,7 @@ import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.validation.validator.ProjectPathValidator;
 import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.avatar.AvatarManager;
+import io.onedev.server.web.avatar.AvatarService;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -178,7 +178,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			}
 			
 		};
-		MarkdownManager manager = OneDev.getInstance(MarkdownManager.class);
+		MarkdownService manager = OneDev.getInstance(MarkdownService.class);
 		return manager.process(manager.render(markdown), project, blobRenderContext, 
 				suggestionSupport, false);
 	}
@@ -403,7 +403,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				case "userQuery":
 					String userQuery = params.getParameterValue("param1").toOptionalString();
 
-					AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
+					AvatarService avatarService = OneDev.getInstance(AvatarService.class);
 					List<Map<String, String>> userList = new ArrayList<>();
 					for (User user: getUserMentionSupport().findUsers(userQuery, ATWHO_LIMIT)) {
 						Map<String, String> userMap = new HashMap<>();
@@ -417,7 +417,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 						} else {
 							userMap.put("searchKey", noSpaceName);
 						}
-						String avatarUrl = avatarManager.getUserAvatarUrl(user.getId());
+						String avatarUrl = avatarService.getUserAvatarUrl(user.getId());
 						userMap.put("avatarUrl", avatarUrl);
 						userList.add(userMap);
 					}
@@ -439,14 +439,14 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 					String projectKeyOrPath = params.getParameterValue("param4").toOptionalString();
 					List<Map<String, String>> referenceList = new ArrayList<>();
 					Project project;
-					var projectManager = OneDev.getInstance(ProjectManager.class);
+					var projectService = OneDev.getInstance(ProjectService.class);
 					if (atChar.equals("#")) {
 						if (StringUtils.isNotBlank(projectKeyOrPath))
-							project = projectManager.findByPath(projectKeyOrPath);
+							project = projectService.findByPath(projectKeyOrPath);
 						else
 							project = currentProject;
 					} else {
-						project = projectManager.findByKey(projectKeyOrPath);
+						project = projectService.findByKey(projectKeyOrPath);
 					}
 					if (project != null) {
 						if (type.length() == 0 || "issue".equals(type)) {

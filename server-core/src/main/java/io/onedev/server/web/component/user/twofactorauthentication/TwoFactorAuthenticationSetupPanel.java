@@ -27,7 +27,7 @@ import org.apache.wicket.request.resource.ContentDisposition;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.TwoFactorAuthentication;
 import io.onedev.server.util.CryptoUtils;
@@ -116,7 +116,7 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 					target.add(form);
 				} else {
 					getUser().setTwoFactorAuthentication(authentication);
-					OneDev.getInstance(UserManager.class).update(getUser(), null);
+					OneDev.getInstance(UserService.class).update(getUser(), null);
 					
 					Fragment fragment = new Fragment("content", "verifiedFrag", TwoFactorAuthenticationSetupPanel.this);
 					RepeatingView recoveryCodesView = new RepeatingView("recoveryCodes");

@@ -9,7 +9,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.service.EmailAddressService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.web.page.simple.SimplePage;
 
@@ -29,7 +29,7 @@ public class EmailAddressVerificationPage extends SimplePage {
 
 			@Override
 			protected EmailAddress load() {
-				return getEmailAddressManager().load(emailAddressId);
+				return getEmailAddressService().load(emailAddressId);
 			}
 			
 		};
@@ -39,12 +39,12 @@ public class EmailAddressVerificationPage extends SimplePage {
 
 		if (verificationCode.equals(emailAddress.getVerificationCode())) {
 			emailAddress.setVerificationCode(null);
-			getEmailAddressManager().update(emailAddress);
+			getEmailAddressService().update(emailAddress);
 		} 
 	}
 	
-	private EmailAddressManager getEmailAddressManager() {
-		return OneDev.getInstance(EmailAddressManager.class);
+	private EmailAddressService getEmailAddressService() {
+		return OneDev.getInstance(EmailAddressService.class);
 	}
 
 	@Override

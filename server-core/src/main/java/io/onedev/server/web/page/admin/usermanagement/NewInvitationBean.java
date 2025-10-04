@@ -17,8 +17,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.UserInvitationManager;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.UserInvitationService;
 import io.onedev.server.validation.Validatable;
 
 @Editable
@@ -53,12 +53,12 @@ public class NewInvitationBean implements Serializable, Validatable {
 				context.buildConstraintViolationWithTemplate(MessageFormat.format(_T("Invalid email address: {0}"), emailAddress))
 						.addPropertyNode("emailAddresses").addConstraintViolation();
 				return false;
-			} else if (OneDev.getInstance(EmailAddressManager.class).findByValue(emailAddress) != null) {
+			} else if (OneDev.getInstance(EmailAddressService.class).findByValue(emailAddress) != null) {
 				context.disableDefaultConstraintViolation();
 				context.buildConstraintViolationWithTemplate(MessageFormat.format(_T("Email address already in use: {0}"), emailAddress))
 						.addPropertyNode("emailAddresses").addConstraintViolation();
 				return false;
-			} else if (OneDev.getInstance(UserInvitationManager.class).findByEmailAddress(emailAddress) != null) {
+			} else if (OneDev.getInstance(UserInvitationService.class).findByEmailAddress(emailAddress) != null) {
 				context.disableDefaultConstraintViolation();
 				context.buildConstraintViolationWithTemplate(MessageFormat.format(_T("Email address already invited: {0}"), emailAddress))
 						.addPropertyNode("emailAddresses").addConstraintViolation();

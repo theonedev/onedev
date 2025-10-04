@@ -5,7 +5,7 @@ import java.io.Serializable;
 import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebConstants;
@@ -54,7 +54,7 @@ public class Cursor implements Serializable {
 	@Nullable
 	public ProjectScope getProjectScope() {
 		if (projectId != null) 
-			return new ProjectScope(OneDev.getInstance(ProjectManager.class).load(projectId), true, true);
+			return new ProjectScope(OneDev.getInstance(ProjectService.class).load(projectId), true, true);
 		else 
 			return null;
 	}

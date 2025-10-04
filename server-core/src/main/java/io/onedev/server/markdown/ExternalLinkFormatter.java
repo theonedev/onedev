@@ -14,7 +14,7 @@ public class ExternalLinkFormatter<N extends InlineLinkNode> implements NodeForm
 		markdown.append("[");
 		context.renderChildren(node);
 		markdown.append("](");
-		markdown.append(OneDev.getInstance(MarkdownManager.class).toExternal(node.getUrl().toString()));
+		markdown.append(OneDev.getInstance(MarkdownService.class).toExternal(node.getUrl().toString()));
 		markdown.append(")");
 	}
 

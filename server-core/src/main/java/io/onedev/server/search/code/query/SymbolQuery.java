@@ -3,7 +3,7 @@ package io.onedev.server.search.code.query;
 import com.google.common.base.Preconditions;
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.server.OneDev;
-import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.CodeSearchService;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.hit.SymbolHit;
 import org.apache.lucene.search.BooleanQuery;
@@ -56,7 +56,7 @@ public class SymbolQuery extends BlobQuery {
 		String blobPath = treeWalk.getPathString();
 		ObjectId blobId = treeWalk.getObjectId(0);
 		
-		List<Symbol> symbols = OneDev.getInstance(CodeSearchManager.class).getSymbols(searcher, blobId, blobPath);
+		List<Symbol> symbols = OneDev.getInstance(CodeSearchService.class).getSymbols(searcher, blobId, blobPath);
 		if (symbols != null) {
 			var matches = getOption().matches(blobPath, symbols, excludeTerm, excludeBlobPath, 
 					primary, local, getCount() - hits.size());

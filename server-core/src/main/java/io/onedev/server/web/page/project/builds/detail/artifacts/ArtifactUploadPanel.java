@@ -35,16 +35,16 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.StorageManager;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.StorageService;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
 import io.onedev.server.web.upload.FileUpload;
-import io.onedev.server.web.upload.UploadManager;
+import io.onedev.server.web.upload.UploadService;
 
 public abstract class ArtifactUploadPanel extends Panel {
 
@@ -60,8 +60,8 @@ public abstract class ArtifactUploadPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-		int maxUploadFileSize = settingManager.getPerformanceSetting().getMaxUploadFileSize();
+		SettingService settingService = OneDev.getInstance(SettingService.class);
+		int maxUploadFileSize = settingService.getPerformanceSetting().getMaxUploadFileSize();
 		
 		Form<?> form = new Form<Void>("form");
 		form.setMultiPart(true);
@@ -105,17 +105,17 @@ public abstract class ArtifactUploadPanel extends Panel {
 					error(_T("'..' is not allowed in the directory"));
 					target.add(feedback);
 				} else {
-					ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-					ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
+					ProjectService projectService = OneDev.getInstance(ProjectService.class);
+					ClusterService clusterService = OneDev.getInstance(ClusterService.class);
 					
 					Long projectId = getBuild().getProject().getId();
-					String activeServer = projectManager.getActiveServer(projectId, true);
-					var upload = getUploadManager().getUpload(uploadId);
+					String activeServer = projectService.getActiveServer(projectId, true);
+					var upload = getUploadService().getUpload(uploadId);
 					try {
-						if (activeServer.equals(clusterManager.getLocalServerAddress())) {
+						if (activeServer.equals(clusterService.getLocalServerAddress())) {
 							LockUtils.write(getBuild().getArtifactsLockName(), () -> {
-								StorageManager storageManager = OneDev.getInstance(StorageManager.class);
-								var artifactsDir = storageManager.initArtifactsDir(getBuild().getProject().getId(), getBuild().getNumber());
+								StorageService storageService = OneDev.getInstance(StorageService.class);
+								var artifactsDir = storageService.initArtifactsDir(getBuild().getProject().getId(), getBuild().getNumber());
 								for (var item : upload.getItems()) {
 									String filePath = getArtifactPath(item);
 									File file = new File(artifactsDir, filePath);
@@ -125,14 +125,14 @@ public abstract class ArtifactUploadPanel extends Panel {
 										IOUtils.copy(is, os, BUFFER_SIZE);
 									}
 								}
-								projectManager.directoryModified(projectId, artifactsDir);
+								projectService.directoryModified(projectId, artifactsDir);
 								return null;
 							});
 						} else {
 							Client client = ClientBuilder.newClient();
 							client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
 							try {
-								String serverUrl = clusterManager.getServerUrl(activeServer);
+								String serverUrl = clusterService.getServerUrl(activeServer);
 								for (var item : upload.getItems()) {
 									String filePath = getArtifactPath(item);
 									WebTarget jerseyTarget = client.target(serverUrl)
@@ -142,7 +142,7 @@ public abstract class ArtifactUploadPanel extends Panel {
 											.queryParam("artifactPath", filePath);
 									Invocation.Builder builder = jerseyTarget.request();
 									builder.header(HttpHeaders.AUTHORIZATION,
-											KubernetesHelper.BEARER + " " + clusterManager.getCredential());
+											KubernetesHelper.BEARER + " " + clusterService.getCredential());
 
 									StreamingOutput os = output -> {
 										try (InputStream is = item.getInputStream()) {
@@ -188,8 +188,8 @@ public abstract class ArtifactUploadPanel extends Panel {
 		});
 	}
 	
-	private UploadManager getUploadManager() {
-		return OneDev.getInstance(UploadManager.class);
+	private UploadService getUploadService() {
+		return OneDev.getInstance(UploadService.class);
 	}
 
 	public abstract void onUploaded(AjaxRequestTarget target);

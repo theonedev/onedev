@@ -62,13 +62,13 @@ import com.google.common.hash.HashingInputStream;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.GitLfsLockManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.GitLfsLockService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.GitLfsLock;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
@@ -86,30 +86,30 @@ public class GitLfsFilter implements Filter {
 	
 	private static final Logger logger = LoggerFactory.getLogger(GitLfsFilter.class);
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
 	private final ObjectMapper objectMapper;
 	
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
-	private final SettingManager settingManager;
+	private final SettingService settingService;
 	
-	private final GitLfsLockManager lockManager;
+	private final GitLfsLockService lockService;
 	
-	private final ClusterManager clusterManager;
+	private final ClusterService clusterService;
 	
 	private final Set<CodePullAuthorizationSource> codePullAuthorizationSources;
 	
 	@Inject
-	public GitLfsFilter(ProjectManager projectManager, ObjectMapper objectMapper, SessionManager sessionManager, 
-			SettingManager settingManager, GitLfsLockManager lockManager, ClusterManager clusterManager,
-			Set<CodePullAuthorizationSource> codePullAuthorizationSources) {
-		this.projectManager = projectManager;
+	public GitLfsFilter(ProjectService projectService, ObjectMapper objectMapper, SessionService sessionService,
+                        SettingService settingService, GitLfsLockService lockService, ClusterService clusterService,
+                        Set<CodePullAuthorizationSource> codePullAuthorizationSources) {
+		this.projectService = projectService;
 		this.objectMapper = objectMapper;
-		this.sessionManager = sessionManager;
-		this.settingManager = settingManager;
-		this.lockManager = lockManager;
-		this.clusterManager = clusterManager;
+		this.sessionService = sessionService;
+		this.settingService = settingService;
+		this.lockService = lockService;
+		this.clusterService = clusterService;
 		this.codePullAuthorizationSources = codePullAuthorizationSources;
 	}
 	
@@ -118,7 +118,7 @@ public class GitLfsFilter implements Filter {
 	}
 	
 	private long getMaxLFSFileSize() {
-		return (long) settingManager.getPerformanceSetting().getMaxGitLFSFileSize() * 1024 * 1024;
+		return (long) settingService.getPerformanceSetting().getMaxGitLFSFileSize() * 1024 * 1024;
 	}
 	
 	private boolean canReadCode(HttpServletRequest request, Project project) {
@@ -146,7 +146,7 @@ public class GitLfsFilter implements Filter {
 	}
 
 	private String getObjectUrl(HttpServletRequest request, String projectPath, String objectId) {
-		var serverUrl = settingManager.getSystemSetting().getServerUrl();
+		var serverUrl = settingService.getSystemSetting().getServerUrl();
 		return String.format("%s/%s.git/lfs/objects/%s?lfs-objects=true", 
 				StringUtils.stripEnd(serverUrl, "/\\"), projectPath, objectId);
 	}
@@ -184,11 +184,11 @@ public class GitLfsFilter implements Filter {
 			if (httpRequest.getMethod().equals("GET")) {
 				LfsObject lfsObject = null;
 				if (clusterAccess) {
-					lfsObject = new LfsObject(projectManager.findFacadeByPath(projectPath).getId(), objectId);
+					lfsObject = new LfsObject(projectService.findFacadeByPath(projectPath).getId(), objectId);
 				} else {
-					sessionManager.openSession();
+					sessionService.openSession();
 					try {
-						Project project = projectManager.findByPath(projectPath);
+						Project project = projectService.findByPath(projectPath);
 						if (project == null || !canAccessProject(httpRequest, project))
 							reportProjectNotFoundOrInaccessible(httpResponse, projectPath);
 						else if (canReadCode(httpRequest, project))  
@@ -196,14 +196,14 @@ public class GitLfsFilter implements Filter {
 						else 
 							sendAuthorizationError(httpResponse);
 					} finally {
-						sessionManager.closeSession();
+						sessionService.closeSession();
 					}
 				}
 
 				if (lfsObject != null) {
 					httpResponse.setContentType(OCTET_STREAM);
-					String activeServer = projectManager.getActiveServer(lfsObject.getProjectId(), true);
-					if (activeServer.equals(clusterManager.getLocalServerAddress())) {
+					String activeServer = projectService.getActiveServer(lfsObject.getProjectId(), true);
+					if (activeServer.equals(clusterService.getLocalServerAddress())) {
 						try (
 								InputStream is = lfsObject.getInputStream();
 								OutputStream os = httpResponse.getOutputStream()) {
@@ -212,13 +212,13 @@ public class GitLfsFilter implements Filter {
 					} else {
 						Client client = ClientBuilder.newClient();
 						try {
-							String serverUrl = clusterManager.getServerUrl(activeServer);
+							String serverUrl = clusterService.getServerUrl(activeServer);
 							WebTarget target = client.target(serverUrl)
 									.path("~api/cluster/lfs")
 									.queryParam("projectId", lfsObject.getProjectId())
 									.queryParam("objectId", lfsObject.getObjectId());
 							Invocation.Builder builder =  target.request();
-							builder.header(AUTHORIZATION, BEARER + " " + clusterManager.getCredential());
+							builder.header(AUTHORIZATION, BEARER + " " + clusterService.getCredential());
 							try (Response lfsResponse = builder.get()){
 								KubernetesHelper.checkStatus(lfsResponse);
 								try (
@@ -235,11 +235,11 @@ public class GitLfsFilter implements Filter {
 			} else {
 				LfsObject lfsObject = null;
 				if (clusterAccess) {
-					lfsObject = new LfsObject(projectManager.findFacadeByPath(projectPath).getId(), objectId);
+					lfsObject = new LfsObject(projectService.findFacadeByPath(projectPath).getId(), objectId);
 				} else {
-					sessionManager.openSession();
+					sessionService.openSession();
 					try {
-						Project project = projectManager.findByPath(getProjectPath(pathInfo));
+						Project project = projectService.findByPath(getProjectPath(pathInfo));
 						if (project == null || !canAccessProject(httpRequest, project))
 							reportProjectNotFoundOrInaccessible(httpResponse, projectPath);
 						else if (SecurityUtils.canWriteCode(project))  
@@ -247,15 +247,15 @@ public class GitLfsFilter implements Filter {
 						else 
 							sendAuthorizationError(httpResponse);
 					} finally {
-						sessionManager.closeSession();
+						sessionService.closeSession();
 					}
 				}
 
 				if (lfsObject != null) {
-					String activeServer = projectManager.getActiveServer(lfsObject.getProjectId(), true);
+					String activeServer = projectService.getActiveServer(lfsObject.getProjectId(), true);
 					var hash = new AtomicReference<String>(null);
 					try {
-						if (activeServer.equals(clusterManager.getLocalServerAddress())) {
+						if (activeServer.equals(clusterService.getLocalServerAddress())) {
 							try (
 									HashingInputStream is = new HashingInputStream(
 											sha256(), httpRequest.getInputStream());
@@ -267,14 +267,14 @@ public class GitLfsFilter implements Filter {
 							Client client = ClientBuilder.newClient();
 							client.property(REQUEST_ENTITY_PROCESSING, "CHUNKED");
 							try {
-								String serverUrl = clusterManager.getServerUrl(activeServer);
+								String serverUrl = clusterService.getServerUrl(activeServer);
 								WebTarget target = client.target(serverUrl)
 										.path("~api/cluster/lfs")
 										.queryParam("projectId", lfsObject.getProjectId())
 										.queryParam("objectId", lfsObject.getObjectId());
 								Invocation.Builder builder = target.request();
 								builder.header(AUTHORIZATION,
-										BEARER + " " + clusterManager.getCredential());
+										BEARER + " " + clusterService.getCredential());
 
 								StreamingOutput os = output -> {
 									try (HashingInputStream is = new HashingInputStream(
@@ -308,7 +308,7 @@ public class GitLfsFilter implements Filter {
 			String projectPath = getProjectPath(pathInfo);
 			
 			if (clusterAccess) {
-				ProjectFacade project = projectManager.findFacadeByPath(projectPath);
+				ProjectFacade project = projectService.findFacadeByPath(projectPath);
 				if (project == null) {
 					sendBatchError(httpResponse, SC_NOT_FOUND, "Project not found: " + projectPath);
 				} else {
@@ -321,15 +321,15 @@ public class GitLfsFilter implements Filter {
 								return true;
 							}
 							
-						}, () -> true, clusterManager.getCredential());
+						}, () -> true, clusterService.getCredential());
 					} else {
 						httpResponse.setStatus(SC_NOT_IMPLEMENTED);
 					}
 				}
 			} else {
-				sessionManager.openSession();
+				sessionService.openSession();
 				try {
-					Project project = projectManager.findByPath(projectPath);
+					Project project = projectService.findByPath(projectPath);
 					if (project == null || !canAccessProject(httpRequest, project)) {
 						reportProjectNotFoundOrInaccessible(httpResponse, projectPath);
 					} else {
@@ -348,12 +348,12 @@ public class GitLfsFilter implements Filter {
 										lockRequestNode = objectMapper.readTree(is);
 									}
 									String path = lockRequestNode.get("path").asText();
-									GitLfsLock lock = lockManager.find(path);
+									GitLfsLock lock = lockService.find(path);
 									if (lock == null) {
 										lock = new GitLfsLock();
 										lock.setPath(path);
 										lock.setOwner(SecurityUtils.getUser());
-										lockManager.create(lock);
+										lockService.create(lock);
 										httpResponse.setStatus(SC_CREATED);
 									} else {
 										httpResponse.setStatus(SC_CONFLICT);
@@ -393,7 +393,7 @@ public class GitLfsFilter implements Filter {
 										criteria.add(Restrictions.eq(GitLfsLock.PROP_ID, id));
 									
 									List<Map<Object, Object>> locks = new ArrayList<>();
-									for (GitLfsLock lock: lockManager.query(criteria, cursor, limit))
+									for (GitLfsLock lock: lockService.query(criteria, cursor, limit))
 										locks.add(toMap(lock));
 									Map<Object, Object> locksResponse = newHashMap("locks", locks);
 									if (locks.size() == limit)
@@ -441,7 +441,7 @@ public class GitLfsFilter implements Filter {
 								List<Map<Object, Object>> ourLocks =  new ArrayList<>();
 								List<Map<Object, Object>> theirLocks = new ArrayList<>();
 								
-								for (GitLfsLock lock: lockManager.query(criteria, cursor, limit)) {
+								for (GitLfsLock lock: lockService.query(criteria, cursor, limit)) {
 									if (lock.getOwner().equals(SecurityUtils.getUser()))
 										ourLocks.add(toMap(lock));
 									else
@@ -471,13 +471,13 @@ public class GitLfsFilter implements Filter {
 								if (forceNode != null)
 									force = forceNode.asBoolean();
 
-								GitLfsLock lock = lockManager.load(id);
+								GitLfsLock lock = lockService.load(id);
 								if (lock.getOwner().equals(SecurityUtils.getUser())) {
-									lockManager.delete(lock);
+									lockService.delete(lock);
 									writeTo(httpResponse, newHashMap("lock", toMap(lock)));
 								} else if (force) {
 									if (SecurityUtils.canManageProject(project)) {
-										lockManager.delete(lock);
+										lockService.delete(lock);
 										writeTo(httpResponse, newHashMap("lock", toMap(lock)));
 									} else {
 										sendBatchError(httpResponse, SC_FORBIDDEN, "Only project managers can unlock forcibly");
@@ -495,7 +495,7 @@ public class GitLfsFilter implements Filter {
 					sendBatchError(httpResponse, SC_INTERNAL_SERVER_ERROR, 
 							"Internal server error, please check server log");
 				} finally {
-					sessionManager.closeSession();
+					sessionService.closeSession();
 				}				
 			}
 		} else {

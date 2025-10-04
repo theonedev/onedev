@@ -17,16 +17,16 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.IssueCommentManager;
-import io.onedev.server.entitymanager.IssueCommentReactionManager;
-import io.onedev.server.entitymanager.IssueCommentRevisionManager;
+import io.onedev.server.service.IssueCommentService;
+import io.onedev.server.service.IssueCommentReactionService;
+import io.onedev.server.service.IssueCommentRevisionService;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueCommentRevision;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CommentRevision;
 import io.onedev.server.model.support.EntityReaction;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.comment.CommentHistoryLink;
@@ -82,10 +82,10 @@ class IssueCommentPanel extends Panel {
 				var entity = IssueCommentPanel.this.getComment();
 				var oldComment = entity.getContent();
 				if (!oldComment.equals(comment)) {
-					getTransactionManager().run(() -> {
+					getTransactionService().run(() -> {
 						entity.setContent(comment);
 						entity.setRevisionCount(entity.getRevisionCount() + 1);
-						getIssueCommentManager().update(entity);
+						getIssueCommentService().update(entity);
 
 						var revision = new IssueCommentRevision();
 						revision.setComment(entity);
@@ -144,7 +144,7 @@ class IssueCommentPanel extends Panel {
 					var issue = IssueCommentPanel.this.getComment().getIssue();
 					target.appendJavaScript(String.format("$('#%s').remove();", IssueCommentPanel.this.getMarkupId()));	
 					IssueCommentPanel.this.remove();
-					getIssueCommentManager().delete(IssueCommentPanel.this.getComment());
+					getIssueCommentService().delete(IssueCommentPanel.this.getComment());
 					page.notifyObservablesChange(target, issue.getChangeObservables(false));					
 				};
 			}
@@ -198,19 +198,19 @@ class IssueCommentPanel extends Panel {
 		return ((IssueCommentActivity) getDefaultModelObject()).getComment();
 	}
 	
-	private TransactionManager getTransactionManager() {
-		return OneDev.getInstance(TransactionManager.class);
+	private TransactionService getTransactionService() {
+		return OneDev.getInstance(TransactionService.class);
 	}
 
-	private IssueCommentRevisionManager getIssueCommentRevisionManager() {
-		return OneDev.getInstance(IssueCommentRevisionManager.class);
+	private IssueCommentRevisionService getIssueCommentRevisionManager() {
+		return OneDev.getInstance(IssueCommentRevisionService.class);
 	}
 
-	private IssueCommentManager getIssueCommentManager() {
-		return OneDev.getInstance(IssueCommentManager.class);
+	private IssueCommentService getIssueCommentService() {
+		return OneDev.getInstance(IssueCommentService.class);
 	}
 
-	private IssueCommentReactionManager getIssueCommentReactionManager() {
-		return OneDev.getInstance(IssueCommentReactionManager.class);
+	private IssueCommentReactionService getIssueCommentReactionManager() {
+		return OneDev.getInstance(IssueCommentReactionService.class);
 	}
 }

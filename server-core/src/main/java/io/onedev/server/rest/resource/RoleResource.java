@@ -24,8 +24,8 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.RoleService;
 import io.onedev.server.model.Role;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.annotation.Api;
@@ -38,14 +38,14 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class RoleResource {
 
-	private final RoleManager roleManager;
+	private final RoleService roleService;
 	
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 	
 	@Inject
-	public RoleResource(RoleManager roleManager, AuditManager auditManager) {
-		this.roleManager = roleManager;
-		this.auditManager = auditManager;
+	public RoleResource(RoleService roleService, AuditService auditService) {
+		this.roleService = roleService;
+		this.auditService = auditService;
 	}
 
 	@Api(order=100)
@@ -54,7 +54,7 @@ public class RoleResource {
     public Role getRole(@PathParam("roleId") Long roleId) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-    	return roleManager.load(roleId);
+    	return roleService.load(roleId);
     }	
 
 	@Api(order=200)
@@ -72,7 +72,7 @@ public class RoleResource {
 		if (name != null) 
 			criteria.add(Restrictions.ilike("name", name.replace('*', '%'), MatchMode.EXACT));
 		
-    	return roleManager.query(name, offset, count);
+    	return roleService.query(name, offset, count);
     }
 
 	@Api(order=250)
@@ -82,7 +82,7 @@ public class RoleResource {
 		if (SecurityUtils.getAuthUser() == null)
 			throw new UnauthenticatedException();
 
-		var role = roleManager.find(name);
+		var role = roleService.find(name);
 		if (role != null)
 			return role.getId();
 		else
@@ -95,9 +95,9 @@ public class RoleResource {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 
-		roleManager.create(role, null);
+		roleService.create(role, null);
 		var auditContent = VersionedXmlDoc.fromBean(role).toXML();
-		auditManager.audit(null, "created role \"" + role.getName() + "\" via RESTful API", null, auditContent);
+		auditService.audit(null, "created role \"" + role.getName() + "\" via RESTful API", null, auditContent);
 
     	return role.getId();
     }
@@ -113,9 +113,9 @@ public class RoleResource {
 		var newAuditContent = VersionedXmlDoc.fromBean(role).toXML();
 
 		var oldName = role.getOldVersion().getRootElement().elementText(Role.PROP_NAME);
-		roleManager.update(role, null, oldName);
+		roleService.update(role, null, oldName);
 
-		auditManager.audit(null, "changed role \"" + role.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
+		auditService.audit(null, "changed role \"" + role.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
 
 		return Response.ok().build();
 	}
@@ -126,10 +126,10 @@ public class RoleResource {
     public Response deleteRole(@PathParam("roleId") Long roleId) {
     	if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-		var role = roleManager.load(roleId);
+		var role = roleService.load(roleId);
 		var oldAuditContent = VersionedXmlDoc.fromBean(role).toXML();
-    	roleManager.delete(role);
-		auditManager.audit(null, "deleted role \"" + role.getName() + "\" via RESTful API", oldAuditContent, null);
+    	roleService.delete(role);
+		auditService.audit(null, "deleted role \"" + role.getName() + "\" via RESTful API", oldAuditContent, null);
     	return Response.ok().build();
     }	
 

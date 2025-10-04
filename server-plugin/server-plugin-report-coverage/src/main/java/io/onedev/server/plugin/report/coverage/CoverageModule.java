@@ -32,9 +32,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildMetricManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.BuildMetricService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CoverageMetric;
 import io.onedev.server.model.Project;
@@ -65,7 +65,7 @@ public class CoverageModule extends AbstractPluginModule {
 			@Override
 			public List<SidebarMenuItem> getMenuItems(Project project) {
 				List<SidebarMenuItem> menuItems = new ArrayList<>();
-				if (!OneDev.getInstance(BuildMetricManager.class).getAccessibleReportNames(project, CoverageMetric.class).isEmpty()) {
+				if (!OneDev.getInstance(BuildMetricService.class).getAccessibleReportNames(project, CoverageMetric.class).isEmpty()) {
 					PageParameters params = CoverageStatsPage.paramsOf(project);
 					menuItems.add(new SidebarMenuItem.Page(null, "Coverage", CoverageStatsPage.class, params));
 				}
@@ -84,7 +84,7 @@ public class CoverageModule extends AbstractPluginModule {
 			Long buildNumber = build.getNumber();
 			
 			Map<Integer, CoverageStatus> coverages = new HashMap<>();
-			for (var entry: getProjectManager().runOnActiveServer(projectId, new GetLineCoverages(projectId, buildNumber, blobPath, reportName)).entrySet()) {
+			for (var entry: getProjectService().runOnActiveServer(projectId, new GetLineCoverages(projectId, buildNumber, blobPath, reportName)).entrySet()) {
 				if (SecurityUtils.canAccessReport(build, entry.getKey())) {
 					entry.getValue().forEach((key, value) -> {
 						coverages.merge(key, value, CoverageStatus::mergeWith);
@@ -102,7 +102,7 @@ public class CoverageModule extends AbstractPluginModule {
 				Long projectId = build.getProject().getId();
 				Long buildNumber = build.getNumber();
 				
-				return getProjectManager().runOnActiveServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
+				return getProjectService().runOnActiveServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
 						.filter(it->SecurityUtils.canAccessReport(build, it.getTitle()))
 						.collect(Collectors.toList());
 			}
@@ -120,15 +120,15 @@ public class CoverageModule extends AbstractPluginModule {
 		});
 
 		contribute(BuildStorageSyncer.class, ((projectId, buildNumber, activeServer) -> {
-			getProjectManager().syncDirectory(projectId, 
+			getProjectService().syncDirectory(projectId, 
 					getProjectRelativeDirPath(buildNumber) + "/" + CATEGORY, 
 					getReportLockName(projectId, buildNumber), activeServer);
 		}));
 		
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
 	private static class GetBuildTabs implements ClusterTask<List<BuildTab>> {
@@ -148,7 +148,7 @@ public class CoverageModule extends AbstractPluginModule {
 		public List<BuildTab> call() {
 			return read(getReportLockName(projectId, buildNumber), () -> {
 				List<BuildTab> tabs = new ArrayList<>();
-				File categoryDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), CATEGORY);
+				File categoryDir = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (!reportDir.isHidden() && !isVersionFile(reportDir)) {
@@ -188,7 +188,7 @@ public class CoverageModule extends AbstractPluginModule {
 		public Map<String, Map<Integer, CoverageStatus>> call() {
 			return read(getReportLockName(projectId, buildNumber), () -> {
 				Map<String, Map<Integer, CoverageStatus>> coverages = new HashMap<>();
-				File categoryDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), CATEGORY);
+				File categoryDir = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (reportName == null || reportName.equals(reportDir.getName())) { 

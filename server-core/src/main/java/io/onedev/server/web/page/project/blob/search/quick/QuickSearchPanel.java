@@ -3,10 +3,10 @@ package io.onedev.server.web.page.project.blob.search.quick;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.CodeSearchService;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.FileQuery;
@@ -71,7 +71,7 @@ public abstract class QuickSearchPanel extends Panel {
 	}
 
 	private List<QueryHit> querySymbols(String searchInput, int count) {
-		CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
+		CodeSearchService searchService = OneDev.getInstance(CodeSearchService.class);
 		ObjectId commit = projectModel.getObject().getRevCommit(revisionModel.getObject(), true);		
 		List<QueryHit> symbolHits = new ArrayList<>();
 		try {
@@ -81,7 +81,7 @@ public abstract class QuickSearchPanel extends Panel {
 					.primary(true)
 					.count(count)
 					.build();
-			symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
+			symbolHits.addAll(searchService.search(projectModel.getObject(), commit, query));
 			
 			// now do wildcard search but exclude the exact match returned above 
 			if (symbolHits.size() < count) {
@@ -90,13 +90,13 @@ public abstract class QuickSearchPanel extends Panel {
 						.primary(true)
 						.count(count-symbolHits.size())
 						.build();
-				symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
+				symbolHits.addAll(searchService.search(projectModel.getObject(), commit, query));
 			}
 
 			// do the same for file names
 			if (symbolHits.size() < count) {
 				query = new FileQuery.Builder(searchInput).count(count-symbolHits.size()).build();
-				symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
+				symbolHits.addAll(searchService.search(projectModel.getObject(), commit, query));
 			}
 			
 			if (symbolHits.size() < count) {
@@ -104,7 +104,7 @@ public abstract class QuickSearchPanel extends Panel {
 						.excludeFileName(searchInput)
 						.count(count-symbolHits.size())
 						.build();
-				symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
+				symbolHits.addAll(searchService.search(projectModel.getObject(), commit, query));
 			}
 			
 			// do the same for secondary symbols
@@ -113,7 +113,7 @@ public abstract class QuickSearchPanel extends Panel {
 						.primary(false)
 						.count(count-symbolHits.size())
 						.build(); 
-				symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
+				symbolHits.addAll(searchService.search(projectModel.getObject(), commit, query));
 			}
 			
 			if (symbolHits.size() < count) {
@@ -122,7 +122,7 @@ public abstract class QuickSearchPanel extends Panel {
 						.primary(false)
 						.count(count-symbolHits.size())
 						.build();
-				symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
+				symbolHits.addAll(searchService.search(projectModel.getObject(), commit, query));
 			}
 		} catch (Exception e) {
 			if (ExceptionUtils.find(e, TooGeneralQueryException.class) != null)
@@ -271,7 +271,7 @@ public abstract class QuickSearchPanel extends Panel {
 					
 					@Override
 					protected void runTask(AjaxRequestTarget target) {
-						int maxQueryEntries = OneDev.getInstance(SettingManager.class)
+						int maxQueryEntries = OneDev.getInstance(SettingService.class)
 								.getPerformanceSetting().getMaxCodeSearchEntries();
 						List<QueryHit> hits = querySymbols(searchInput, maxQueryEntries);
 						onMoreQueried(target, hits);

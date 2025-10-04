@@ -11,9 +11,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AuditManager;
+import io.onedev.server.service.AuditService;
 import io.onedev.server.model.User;
-import io.onedev.server.web.avatar.AvatarManager;
+import io.onedev.server.web.avatar.AvatarService;
 import io.onedev.server.web.component.avatarupload.AvatarFileSelected;
 import io.onedev.server.web.component.avatarupload.AvatarUploadField;
 import io.onedev.server.web.component.user.UserAvatar;
@@ -27,16 +27,16 @@ public class AvatarEditPanel extends GenericPanel<User> {
 		super(id, model);
 	}
 	
-	private AvatarManager getAvatarManager() {
-		return OneDev.getInstance(AvatarManager.class);
+	private AvatarService getAvatarService() {
+		return OneDev.getInstance(AvatarService.class);
 	}
 
 	private User getUser() {
 		return getModelObject();
 	}
 	
-	private AuditManager getAuditManager() {
-		return OneDev.getInstance(AuditManager.class);
+	private AuditService getAuditService() {
+		return OneDev.getInstance(AuditService.class);
 	}
 
 	@Override
@@ -50,14 +50,14 @@ public class AvatarEditPanel extends GenericPanel<User> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getAvatarManager().getUserUploadedFile(getUser().getId()).exists());
+				setVisible(getAvatarService().getUserUploadedFile(getUser().getId()).exists());
 			}
 
 			@Override
 			public void onClick() {
-				getAvatarManager().useUserAvatar(getUser().getId(), null);
+				getAvatarService().useUserAvatar(getUser().getId(), null);
 				if (getPage() instanceof UserPage)
-					getAuditManager().audit(null, "specified to use default avatar in account \"" + getUser().getName() + "\"", null, null);
+					getAuditService().audit(null, "specified to use default avatar in account \"" + getUser().getName() + "\"", null, null);
 				setResponsePage(getPage().getClass(), getPage().getPageParameters());
 			}
 			
@@ -71,10 +71,10 @@ public class AvatarEditPanel extends GenericPanel<User> {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-            	avatarManager.useUserAvatar(getUser().getId(), uploadedAvatarData);
+				AvatarService avatarService = OneDev.getInstance(AvatarService.class);
+            	avatarService.useUserAvatar(getUser().getId(), uploadedAvatarData);
 				if (getPage() instanceof UserPage)
-					getAuditManager().audit(null, "specified to use uploaded avatar in account \"" + getUser().getName() + "\"", null, null);
+					getAuditService().audit(null, "specified to use uploaded avatar in account \"" + getUser().getName() + "\"", null, null);
 				setResponsePage(getPage().getClass(), getPage().getPageParameters());
 			}
 

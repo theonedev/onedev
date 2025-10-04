@@ -34,7 +34,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspecmodel.inputspec.Input;
-import io.onedev.server.entitymanager.BuildLabelManager;
+import io.onedev.server.service.BuildLabelService;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
@@ -351,7 +351,7 @@ public abstract class BuildSidePanel extends Panel {
 				@Override
 				protected void onUpdated(IPartialPageRequestHandler handler, Serializable bean, String propertyName) {
 					LabelsBean labelsBean = (LabelsBean) bean;
-					OneDev.getInstance(BuildLabelManager.class).sync(getBuild(), labelsBean.getLabels());
+					OneDev.getInstance(BuildLabelService.class).sync(getBuild(), labelsBean.getLabels());
 					handler.add(labelsContainer);
 				}
 				

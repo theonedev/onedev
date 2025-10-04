@@ -13,8 +13,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.SsoProviderManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.SsoProviderService;
 import io.onedev.server.model.SsoProvider;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
@@ -43,7 +43,7 @@ public class NewSsoProviderPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				SsoProvider providerWithSameName = getSsoProviderManager().find(bean.getName());
+				SsoProvider providerWithSameName = getSsoProviderService().find(bean.getName());
 				if (providerWithSameName != null) {
 					editor.error(new Path(new PathNode.Named("name")),
 							_T("This name has already been used by another provider"));
@@ -51,9 +51,9 @@ public class NewSsoProviderPage extends AdministrationPage {
 				if (editor.isValid()) {			
 					var provider = new SsoProvider();
 					bean.populate(provider);
-					getSsoProviderManager().createOrUpdate(provider);
+					getSsoProviderService().createOrUpdate(provider);
 					var newAuditContent = VersionedXmlDoc.fromBean(provider).toXML();
-					OneDev.getInstance(AuditManager.class).audit(null, "created SSO provider \"" + provider.getName() + "\"", null, newAuditContent);
+					OneDev.getInstance(AuditService.class).audit(null, "created SSO provider \"" + provider.getName() + "\"", null, newAuditContent);
 					Session.get().success(_T("SSO provider created"));
 					setResponsePage(SsoProviderListPage.class);
 				}
@@ -64,8 +64,8 @@ public class NewSsoProviderPage extends AdministrationPage {
 		add(form);
 	}
 
-	private SsoProviderManager getSsoProviderManager() {
-		return OneDev.getInstance(SsoProviderManager.class);
+	private SsoProviderService getSsoProviderService() {
+		return OneDev.getInstance(SsoProviderService.class);
 	}
 
 	@Override

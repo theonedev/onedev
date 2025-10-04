@@ -18,8 +18,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
@@ -58,7 +58,7 @@ public class IssueListPage extends LayoutPage {
 	}
 	
 	private static GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();		
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
 	@Override
@@ -97,8 +97,8 @@ public class IssueListPage extends LayoutPage {
 				var oldAuditContent = VersionedXmlDoc.fromBean(getIssueSetting().getNamedQueries()).toXML();
 				getIssueSetting().setNamedQueries(queries);
 				var newAuditContent = VersionedXmlDoc.fromBean(getIssueSetting().getNamedQueries()).toXML();
-				OneDev.getInstance(SettingManager.class).saveIssueSetting(getIssueSetting());
-				getAuditManager().audit(null, "changed issue queries", oldAuditContent, newAuditContent);
+				OneDev.getInstance(SettingService.class).saveIssueSetting(getIssueSetting());
+				auditService.audit(null, "changed issue queries", oldAuditContent, newAuditContent);
 			}
 
 			@Override
@@ -172,7 +172,7 @@ public class IssueListPage extends LayoutPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										OneDev.getInstance(UserManager.class).update(getLoginUser(), null);
+										OneDev.getInstance(UserService.class).update(getLoginUser(), null);
 										target.add(savedQueries);
 										close();
 									}
@@ -195,8 +195,8 @@ public class IssueListPage extends LayoutPage {
 											verb = "changed";
 										}
 										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
-										OneDev.getInstance(SettingManager.class).saveIssueSetting(issueSetting);
-										getAuditManager().audit(null, verb + " issue query \"" + name + "\"", oldAuditContent, newAuditContent);
+										OneDev.getInstance(SettingService.class).saveIssueSetting(issueSetting);
+										auditService.audit(null, verb + " issue query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}
@@ -263,7 +263,7 @@ public class IssueListPage extends LayoutPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return _T("Issues") + " - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return _T("Issues") + " - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
 	}
 	
 }

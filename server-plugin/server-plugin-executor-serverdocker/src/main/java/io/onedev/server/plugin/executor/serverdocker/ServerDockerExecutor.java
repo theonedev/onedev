@@ -76,11 +76,11 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Numeric;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.ReservedOptions;
-import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.git.location.GitLocation;
 import io.onedev.server.job.JobContext;
-import io.onedev.server.job.JobManager;
+import io.onedev.server.job.JobService;
 import io.onedev.server.job.JobRunnable;
 import io.onedev.server.job.ResourceAllocator;
 import io.onedev.server.job.ServerCacheHelper;
@@ -274,12 +274,12 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 		return docker;
 	}
 
-	private ClusterManager getClusterManager() {
-		return OneDev.getInstance(ClusterManager.class);
+	private ClusterService getClusterService() {
+		return OneDev.getInstance(ClusterService.class);
 	}
 		
-	private JobManager getJobManager() {
-		return OneDev.getInstance(JobManager.class);
+	private JobService getJobService() {
+		return OneDev.getInstance(JobService.class);
 	}
 	
 	private ResourceAllocator getResourceAllocator() {
@@ -303,7 +303,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 	
 	@Override
 	public boolean execute(JobContext jobContext, TaskLogger jobLogger) {
-		ClusterTask<Boolean> runnable = () -> getJobManager().runJob(jobContext, new JobRunnable() {
+		ClusterTask<Boolean> runnable = () -> getJobService().runJob(jobContext, new JobRunnable() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -320,7 +320,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 					String network = getName() + "-" + jobContext.getProjectId() + "-"
 							+ jobContext.getBuildNumber() + "-" + jobContext.getSubmitSequence();
 
-					String localServer = getClusterManager().getLocalServerAddress();
+					String localServer = getClusterService().getLocalServerAddress();
 					jobLogger.log(String.format("Executing job (executor: %s, server: %s, network: %s)...", 
 							getName(), localServer, network));
 
@@ -348,7 +348,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 						
 						try {
 							jobLogger.log("Copying job dependencies...");
-							getJobManager().copyDependencies(jobContext, hostWorkspace);
+							getJobService().copyDependencies(jobContext, hostWorkspace);
 
 							String containerBuildHome;
 							String containerWorkspace;
@@ -364,7 +364,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 							}
 
 							var ownerChanged = new AtomicBoolean(false);
-							getJobManager().reportJobWorkspace(jobContext, containerWorkspace);
+							getJobService().reportJobWorkspace(jobContext, containerWorkspace);
 							CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
 							var successful = entryFacade.execute(new LeafHandler() {
 
@@ -581,7 +581,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 
 											@Override
 											public ServerStepResult run(File inputDir, Map<String, String> placeholderValues) {
-												return getJobManager().runServerStep(jobContext, position, inputDir,
+												return getJobService().runServerStep(jobContext, position, inputDir,
 														placeholderValues, false, jobLogger);
 											}
 

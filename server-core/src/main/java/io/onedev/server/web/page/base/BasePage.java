@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.codec.binary.Base64;
@@ -64,9 +65,9 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.commandhandler.Upgrade;
-import io.onedev.server.entitymanager.AuditManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AuditService;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.asset.icon.IconScope;
@@ -81,7 +82,7 @@ import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.serverinit.ServerInitPage;
 import io.onedev.server.web.page.simple.SimplePage;
 import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.web.websocket.WebSocketManager;
+import io.onedev.server.web.websocket.WebSocketService;
 import io.onedev.server.web.websocket.WebSocketMessages;
 
 public abstract class BasePage extends WebPage {
@@ -100,6 +101,9 @@ public abstract class BasePage extends WebPage {
 	private RepeatingView rootComponents;
 
 	private AbstractDefaultAjaxBehavior zoneIdDetectBehavior;
+
+	@Inject
+	protected AuditService auditService;
 	
 	public BasePage(PageParameters params) {
 		super(params);
@@ -388,7 +392,7 @@ public abstract class BasePage extends WebPage {
 
 	@Override
 	protected void onAfterRender() {
-		AppLoader.getInstance(WebSocketManager.class).observe(this);
+		AppLoader.getInstance(WebSocketService.class).observe(this);
 		super.onAfterRender();
 	}
 
@@ -472,10 +476,6 @@ public abstract class BasePage extends WebPage {
 		if (removeAutosaveKeys == null)
 			removeAutosaveKeys = new HashSet<>();
 		return removeAutosaveKeys;
-	}
-
-	protected AuditManager getAuditManager() {
-		return OneDev.getInstance(AuditManager.class);
 	}
 	
 }

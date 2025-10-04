@@ -20,7 +20,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.service.LinkSpecService;
 import io.onedev.server.util.usage.Usage;
 
 @Editable
@@ -92,7 +92,7 @@ public class TimeTrackingSetting implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getLinkChoices() {
 		var choices = new LinkedHashSet<String>();
-		for (var linkSpec: OneDev.getInstance(LinkSpecManager.class).query()) {
+		for (var linkSpec: OneDev.getInstance(LinkSpecService.class).query()) {
 			if (linkSpec.getOpposite() != null) {
 				choices.add(linkSpec.getName());
 				choices.add(linkSpec.getOpposite().getName());

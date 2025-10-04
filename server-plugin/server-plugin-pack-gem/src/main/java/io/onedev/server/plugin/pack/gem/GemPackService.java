@@ -4,17 +4,16 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.PackBlobManager;
-import io.onedev.server.entitymanager.PackManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.PackBlobService;
+import io.onedev.server.service.PackService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
-import io.onedev.server.pack.PackService;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.plugin.pack.gem.marshal.Marshaller;
 import io.onedev.server.plugin.pack.gem.marshal.RubyObject;
 import io.onedev.server.plugin.pack.gem.marshal.UserDefined;
@@ -57,34 +56,34 @@ import static java.util.stream.Collectors.toList;
 import static javax.servlet.http.HttpServletResponse.*;
 
 @Singleton
-public class GemPackService implements PackService {
+public class GemPackService implements io.onedev.server.pack.PackService {
 	
 	public static final String SERVICE_ID = "rubygems";
 	
 	private static final int MAX_METADATA_SIZE = 10000000;
 	
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
-	private final TransactionManager transactionManager;
+	private final TransactionService transactionService;
 	
-	private final PackBlobManager packBlobManager;
+	private final PackBlobService packBlobService;
 	
-	private final PackManager packManager;
+	private final PackService packService;
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
-	private final BuildManager buildManager;
+	private final BuildService buildService;
 	
 	@Inject
-	public GemPackService(SessionManager sessionManager, TransactionManager transactionManager,
-						  PackBlobManager packBlobManager, PackManager packManager,
-						  ProjectManager projectManager, BuildManager buildManager) {
-		this.sessionManager = sessionManager;
-		this.transactionManager = transactionManager;
-		this.packBlobManager = packBlobManager;
-		this.packManager = packManager;
-		this.projectManager = projectManager;
-		this.buildManager = buildManager;
+	public GemPackService(SessionService sessionService, TransactionService transactionService,
+                          PackBlobService packBlobService, PackService packService,
+                          ProjectService projectService, BuildService buildService) {
+		this.sessionService = sessionService;
+		this.transactionService = transactionService;
+		this.packBlobService = packBlobService;
+		this.packService = packService;
+		this.projectService = projectService;
+		this.buildService = buildService;
 	}
 	
 	@Override
@@ -110,7 +109,7 @@ public class GemPackService implements PackService {
 			if (!isPost)
 				throw new ClientException(SC_METHOD_NOT_ALLOWED);
 			
-			sessionManager.run(() -> {
+			sessionService.run(() -> {
 				checkProject(projectId, true);
 			});
 			var tempFile = FileUtils.createTempFile("upload", "gem");
@@ -168,17 +167,17 @@ public class GemPackService implements PackService {
 				String finalVersion = version;
 				String finalPlatform = platform;
 				byte[] finalMetadataBytes = metadataBytes;
-				LockUtils.run(getLockName(projectId, name), () -> transactionManager.run(() -> {
-					var project = projectManager.load(projectId);
+				LockUtils.run(getLockName(projectId, name), () -> transactionService.run(() -> {
+					var project = projectService.load(projectId);
 
 					PackBlob packBlob;
 					try (var is = new FileInputStream(tempFile)) {
-						packBlob = packBlobManager.load(packBlobManager.uploadBlob(projectId, is, null));
+						packBlob = packBlobService.load(packBlobService.uploadBlob(projectId, is, null));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
 					GemData data;
-					var pack = packManager.findByNameAndVersion(project, TYPE, finalName, finalVersion);
+					var pack = packService.findByNameAndVersion(project, TYPE, finalName, finalVersion);
 					if (pack == null) {
 						pack = new Pack();
 						pack.setType(TYPE);
@@ -194,7 +193,7 @@ public class GemPackService implements PackService {
 
 					Build build = null;
 					if (buildId != null)
-						build = buildManager.load(buildId);
+						build = buildService.load(buildId);
 					pack.setBuild(build);
 					pack.setUser(SecurityUtils.getUser());
 					pack.setPublishDate(new Date());
@@ -212,10 +211,10 @@ public class GemPackService implements PackService {
 					data.getSha256BlobHashes().put(fileName, packBlob.getSha256Hash());
 
 					var packBlobs = data.getSha256BlobHashes().values().stream()
-							.map(hash -> packBlobManager.findBySha256Hash(projectId, hash))
+							.map(hash -> packBlobService.findBySha256Hash(projectId, hash))
 							.filter(Objects::nonNull)
 							.collect(toList());
-					packManager.createOrUpdate(pack, packBlobs, data.getSha256BlobHashes().size() == 1);
+					packService.createOrUpdate(pack, packBlobs, data.getSha256BlobHashes().size() == 1);
 					response.setStatus(SC_OK);
 				}));
 			} finally {
@@ -233,11 +232,11 @@ public class GemPackService implements PackService {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-			LockUtils.run(getLockName(projectId, name), () -> transactionManager.run(() -> {
+			LockUtils.run(getLockName(projectId, name), () -> transactionService.run(() -> {
 				var project = checkProject(projectId, true);
-				var pack = packManager.findByNameAndVersion(project, TYPE, name, version);
+				var pack = packService.findByNameAndVersion(project, TYPE, name, version);
 				if (pack != null) {
-					packManager.delete(pack);
+					packService.delete(pack);
 					response.setStatus(SC_OK);
 				} else {
 					response.setStatus(SC_NOT_FOUND);
@@ -246,24 +245,24 @@ public class GemPackService implements PackService {
 		} else if (pathSegments.equals(newArrayList("latest_specs.4.8.gz"))) {
 			if (!isGet)
 				throw new ClientException(SC_METHOD_NOT_ALLOWED);
-			sessionManager.run(() -> {
+			sessionService.run(() -> {
 				var project = checkProject(projectId, false);
-				var latestPacks = packManager.queryLatests(project, TYPE, null, false, 0, MAX_VALUE);
+				var latestPacks = packService.queryLatests(project, TYPE, null, false, 0, MAX_VALUE);
 				sendPacks(response, latestPacks);
 			});
 		} else if (pathSegments.equals(newArrayList("specs.4.8.gz"))) {
 			if (!isGet)
 				throw new ClientException(SC_METHOD_NOT_ALLOWED);
-			sessionManager.run(() -> {
+			sessionService.run(() -> {
 				var project = checkProject(projectId, false);
-				sendPacks(response, packManager.query(project, TYPE, false));
+				sendPacks(response, packService.query(project, TYPE, false));
 			});
 		} else if (pathSegments.equals(newArrayList("prerelease_specs.4.8.gz"))) {
 			if (!isGet)
 				throw new ClientException(SC_METHOD_NOT_ALLOWED);
-			sessionManager.run(() -> {
+			sessionService.run(() -> {
 				var project = checkProject(projectId, false);
-				sendPacks(response, packManager.query(project, TYPE, true));
+				sendPacks(response, packService.query(project, TYPE, true));
 			});
 		} else if (pathSegments.size() == 3 && pathSegments.subList(0, 2).equals(newArrayList("quick", "Marshal.4.8"))) {
 			if (!isGet)
@@ -273,7 +272,7 @@ public class GemPackService implements PackService {
 				throw new ClientException(SC_NOT_IMPLEMENTED);
 			var nameAndVersion = fileName.substring(0, fileName.length() - ".gemspec.rz".length());
 			
-			sessionManager.run(() -> {
+			sessionService.run(() -> {
 				var project = checkProject(projectId, false);
 				var pack = findPack(project, nameAndVersion);
 				if (pack != null) {
@@ -380,7 +379,7 @@ public class GemPackService implements PackService {
 				throw new ClientException(SC_NOT_IMPLEMENTED);
 			
 			var nameAndVersion = fileName.substring(0, fileName.length() - ".gem".length());
-			sessionManager.run(() -> {
+			sessionService.run(() -> {
 				var project = checkProject(projectId, false);
 				var pack = findPack(project, nameAndVersion);
 				if (pack != null) {
@@ -388,10 +387,10 @@ public class GemPackService implements PackService {
 					var sha256BlobHash = data.getSha256BlobHashes().get(fileName);
 					if (sha256BlobHash != null) {
 						PackBlob packBlob;
-						if ((packBlob = packBlobManager.findBySha256Hash(projectId, sha256BlobHash)) != null) {
+						if ((packBlob = packBlobService.findBySha256Hash(projectId, sha256BlobHash)) != null) {
 							response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 							try {
-								packBlobManager.downloadBlob(packBlob.getProject().getId(),
+								packBlobService.downloadBlob(packBlob.getProject().getId(),
 										packBlob.getSha256Hash(), response.getOutputStream());
 							} catch (IOException e) {
 								throw new RuntimeException(e);
@@ -448,7 +447,7 @@ public class GemPackService implements PackService {
 		while (dashIndex != -1) {
 			var name = nameAndVersion.substring(0, dashIndex);
 			var version = nameAndVersion.substring(dashIndex + 1, nameAndVersion.length());
-			var pack = packManager.findByNameAndVersion(project, TYPE, name, version);
+			var pack = packService.findByNameAndVersion(project, TYPE, name, version);
 			if (pack != null) 
 				return pack;
 			dashIndex = nameAndVersion.indexOf('-', dashIndex + 1);
@@ -466,7 +465,7 @@ public class GemPackService implements PackService {
 	}
 	
 	private Project checkProject(Long projectId, boolean needsToWrite) {
-		var project = projectManager.load(projectId);
+		var project = projectService.load(projectId);
 		if (!project.isPackManagement()) {
 			throw new ClientException(SC_NOT_ACCEPTABLE, "Package management not enabled for project '" + project.getPath() + "'");
 		} else if (needsToWrite && !SecurityUtils.canWritePack(project)) {

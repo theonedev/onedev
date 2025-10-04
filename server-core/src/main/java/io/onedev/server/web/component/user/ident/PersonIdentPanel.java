@@ -13,7 +13,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.service.EmailAddressService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
@@ -40,8 +40,8 @@ public class PersonIdentPanel extends Panel {
 		userModel = new LoadableDetachableModel<User>() {
 			@Override
 			protected User load() {
-				EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
-				EmailAddress emailAddress = emailAddressManager.findByValue(personIdent.getEmailAddress());
+				EmailAddressService emailAddressService = OneDev.getInstance(EmailAddressService.class);
+				EmailAddress emailAddress = emailAddressService.findByValue(personIdent.getEmailAddress());
 				if (emailAddress != null && emailAddress.isVerified())
 					return emailAddress.getOwner();
 				else

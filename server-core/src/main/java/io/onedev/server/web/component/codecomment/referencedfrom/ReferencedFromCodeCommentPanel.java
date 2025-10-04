@@ -6,10 +6,10 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 
 public class ReferencedFromCodeCommentPanel extends GenericPanel<CodeComment> {
 
@@ -18,7 +18,7 @@ public class ReferencedFromCodeCommentPanel extends GenericPanel<CodeComment> {
 
 			@Override
 			protected CodeComment load() {
-				return OneDev.getInstance(CodeCommentManager.class).load(commentId);
+				return OneDev.getInstance(CodeCommentService.class).load(commentId);
 			}
 			
 		});
@@ -32,7 +32,7 @@ public class ReferencedFromCodeCommentPanel extends GenericPanel<CodeComment> {
 		
 		if (SecurityUtils.canReadCode(comment.getProject())) {
 			String title = String.format("<a href='%s'>%s</a>",
-					OneDev.getInstance(UrlManager.class).urlFor(comment, false),
+					OneDev.getInstance(UrlService.class).urlFor(comment, false),
 					HtmlEscape.escapeHtml5(comment.getMark().getPath()));
 			add(new Label("title", title).setEscapeModelStrings(false));
 		} else {

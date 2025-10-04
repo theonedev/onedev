@@ -15,7 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
+import io.onedev.server.service.CommitQueryPersonalizationService;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
@@ -110,7 +110,7 @@ public class CommitQueryPersonalization extends AbstractEntity implements QueryP
 
 	@Override
 	public void onUpdated() {
-		OneDev.getInstance(CommitQueryPersonalizationManager.class).createOrUpdate(this);
+		OneDev.getInstance(CommitQueryPersonalizationService.class).createOrUpdate(this);
 	}
 	
 }

@@ -2,7 +2,7 @@ package io.onedev.server.web.editable.workingperiod;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.WorkingPeriod;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.editable.*;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
@@ -28,7 +28,7 @@ public class WorkingPeriodEditSupport implements EditSupport {
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null) {
-									var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+									var timeTrackingSetting = OneDev.getInstance(SettingService.class).getIssueSetting().getTimeTrackingSetting();
 									return new Label(id, timeTrackingSetting.formatWorkingPeriod(model.getObject(), true));
 								} else { 
 									return new EmptyValueLabel(id) {

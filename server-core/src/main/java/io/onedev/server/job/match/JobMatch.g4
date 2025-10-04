@@ -5,7 +5,7 @@ jobMatch
     ;
 
 criteria
-    : operator=(OnBranch|SubmittedByUser|SubmittedByGroup) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
+    : operator=OnBranch WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsNot) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
@@ -20,14 +20,6 @@ multipleQuoted
 OnBranch
 	: 'on' WS+ 'branch'
 	;
-
-SubmittedByUser
-    : 'submitted' WS+ 'by' WS+ 'user'
-    ;
-
-SubmittedByGroup
-    : 'submitted' WS+ 'by' WS+ 'group'
-    ;
 
 Is
 	: 'is'

@@ -1,6 +1,6 @@
 package io.onedev.server.rest.resource;
 
-import io.onedev.server.entitymanager.IssueVoteManager;
+import io.onedev.server.service.IssueVoteService;
 import io.onedev.server.model.IssueVote;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -21,18 +21,18 @@ import static io.onedev.server.security.SecurityUtils.canModifyOrDelete;
 @Singleton
 public class IssueVoteResource {
 
-	private final IssueVoteManager voteManager;
+	private final IssueVoteService voteService;
 
 	@Inject
-	public IssueVoteResource(IssueVoteManager voteManager) {
-		this.voteManager = voteManager;
+	public IssueVoteResource(IssueVoteService voteService) {
+		this.voteService = voteService;
 	}
 
 	@Api(order=100)
 	@Path("/{voteId}")
 	@GET
 	public IssueVote getVote(@PathParam("voteId") Long voteId) {
-		IssueVote vote = voteManager.load(voteId);
+		IssueVote vote = voteService.load(voteId);
 		if (!SecurityUtils.canAccessIssue(vote.getIssue()))
 			throw new UnauthorizedException();
 		return vote;
@@ -45,7 +45,7 @@ public class IssueVoteResource {
 				|| !SecurityUtils.isAdministrator() && !vote.getUser().equals(SecurityUtils.getAuthUser())) {
 			throw new UnauthorizedException();
 		}
-		voteManager.create(vote);
+		voteService.create(vote);
 		return vote.getId();
 	}
 	
@@ -53,11 +53,11 @@ public class IssueVoteResource {
 	@Path("/{voteId}")
 	@DELETE
 	public Response deleteVote(@PathParam("voteId") Long voteId) {
-		IssueVote vote = voteManager.load(voteId);
+		IssueVote vote = voteService.load(voteId);
 		if (!canModifyOrDelete(vote)) 
 			throw new UnauthorizedException();
 		
-		voteManager.delete(vote);
+		voteService.delete(vote);
 		return Response.ok().build();
 	}
 	

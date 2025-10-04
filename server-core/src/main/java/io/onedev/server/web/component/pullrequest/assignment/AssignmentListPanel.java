@@ -22,7 +22,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestAssignmentManager;
+import io.onedev.server.service.PullRequestAssignmentService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.User;
@@ -109,7 +109,7 @@ public abstract class AssignmentListPanel extends Panel {
 						if (request.isNew()) {
 							target.add(AssignmentListPanel.this);
 						} else {
-							OneDev.getInstance(PullRequestAssignmentManager.class).delete(assignment);
+							OneDev.getInstance(PullRequestAssignmentService.class).delete(assignment);
 							((BasePage) getPage()).notifyObservableChange(target,
 									PullRequest.getChangeObservable(getPullRequest().getId()));
 						}

@@ -1,7 +1,7 @@
 package io.onedev.server.util;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -50,11 +50,11 @@ public class ProjectScopedCommit implements Serializable {
 
 	@Nullable
 	public Project getProject(boolean mustExist) {
-		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+		ProjectService projectService = OneDev.getInstance(ProjectService.class);
 		if (mustExist)
-			return projectManager.load(projectId);
+			return projectService.load(projectId);
 		else 
-			return projectManager.get(projectId);
+			return projectService.get(projectId);
 	}
 	
 	public RevCommit getRevCommit() {

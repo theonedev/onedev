@@ -8,12 +8,12 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildMetricManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.BuildMetricService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CoverageMetric;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.dao.Dao;
 import org.apache.commons.lang.SerializationUtils;
 
@@ -31,8 +31,8 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	
 	@Override
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
-		return OneDev.getInstance(SessionManager.class).call(() -> {
-			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+		return OneDev.getInstance(SessionService.class).call(() -> {
+			var build = OneDev.getInstance(BuildService.class).load(buildId);
 			CoverageReport result = write(getReportLockName(build), () -> {
 				File reportDir = new File(build.getDir(), CoverageStats.CATEGORY + "/" + getReportName());
 
@@ -44,7 +44,7 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 						for (var entry: aResult.getStatuses().entrySet())
 							writeLineStatuses(build, entry.getKey(), entry.getValue());
 
-						OneDev.getInstance(ProjectManager.class).directoryModified(
+						OneDev.getInstance(ProjectService.class).directoryModified(
 								build.getProject().getId(), reportDir.getParentFile());
 						return aResult;
 					} else {
@@ -58,7 +58,7 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 			});
 
 			if (result != null) {
-				var metric = OneDev.getInstance(BuildMetricManager.class).find(CoverageMetric.class, build, getReportName());
+				var metric = OneDev.getInstance(BuildMetricService.class).find(CoverageMetric.class, build, getReportName());
 				if (metric == null) {
 					metric = new CoverageMetric();
 					metric.setBuild(build);

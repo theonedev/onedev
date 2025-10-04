@@ -36,15 +36,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.SubscriptionManager;
-import io.onedev.server.attachment.AttachmentManager;
+import io.onedev.server.SubscriptionService;
+import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IterationManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IterationService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
@@ -66,7 +66,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.web.page.help.ApiHelpUtils;
 import io.onedev.server.web.page.help.ValueInfo;
 
@@ -79,49 +79,49 @@ import io.onedev.server.web.page.help.ValueInfo;
 @Singleton
 public class IssueResource {
 
-	private final SettingManager settingManager;
+	private final SettingService settingService;
 	
-	private final IssueManager issueManager;
+	private final IssueService issueService;
 	
-	private final IssueChangeManager issueChangeManager;
+	private final IssueChangeService issueChangeService;
 	
-	private final IterationManager iterationManager;
+	private final IterationService iterationService;
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
 	private final ObjectMapper objectMapper;
 
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 
-	private final AttachmentManager attachmentManager;
+	private final AttachmentService attachmentService;
 
-	private final UrlManager urlManager;
+	private final UrlService urlService;
 
-	private final SubscriptionManager subscriptionManager;
+	private final SubscriptionService subscriptionService;
 
 	@Inject
-	public IssueResource(SettingManager settingManager, IssueManager issueManager, 
-						 IssueChangeManager issueChangeManager, IterationManager iterationManager, 
-						 ProjectManager projectManager, ObjectMapper objectMapper, 
-						 AuditManager auditManager, AttachmentManager attachmentManager, 
-						 UrlManager urlManager, SubscriptionManager subscriptionManager) {
-		this.settingManager = settingManager;
-		this.issueManager = issueManager;
-		this.issueChangeManager = issueChangeManager;
-		this.iterationManager = iterationManager;
-		this.projectManager = projectManager;
+	public IssueResource(SettingService settingService, IssueService issueService,
+                         IssueChangeService issueChangeService, IterationService iterationService,
+                         ProjectService projectService, ObjectMapper objectMapper,
+                         AuditService auditService, AttachmentService attachmentService,
+                         UrlService urlService, SubscriptionService subscriptionService) {
+		this.settingService = settingService;
+		this.issueService = issueService;
+		this.issueChangeService = issueChangeService;
+		this.iterationService = iterationService;
+		this.projectService = projectService;
 		this.objectMapper = objectMapper;
-		this.auditManager = auditManager;
-		this.attachmentManager = attachmentManager;
-		this.urlManager = urlManager;
-		this.subscriptionManager = subscriptionManager;
+		this.auditService = auditService;
+		this.attachmentService = attachmentService;
+		this.urlService = urlService;
+		this.subscriptionService = subscriptionService;
 	}
 
 	@Api(order=100)
 	@Path("/{issueId}")
     @GET
     public Issue getIssue(@PathParam("issueId") Long issueId) {
-		Issue issue = issueManager.load(issueId);
+		Issue issue = issueService.load(issueId);
     	if (!SecurityUtils.canAccessIssue(issue)) 
 			throw new UnauthorizedException();
     	return issue;
@@ -131,11 +131,11 @@ public class IssueResource {
 	@Path("/{issueId}/fields")
     @GET
     public Map<String, Serializable> getFields(@PathParam("issueId") Long issueId) {
-		Issue issue = issueManager.load(issueId);
+		Issue issue = issueService.load(issueId);
     	if (!SecurityUtils.canAccessIssue(issue)) 
 			throw new UnauthorizedException();
 
-		var issueSetting = settingManager.getIssueSetting();
+		var issueSetting = settingService.getIssueSetting();
 		Map<String, Serializable> fields = new HashMap<>();
 		for (var field: issue.getFieldInputs().values()) {
 			var fieldSpec = issueSetting.getFieldSpec(field.getName());
@@ -155,7 +155,7 @@ public class IssueResource {
 	@Path("/{issueId}/changes")
     @GET
     public Collection<IssueChange> getChanges(@PathParam("issueId") Long issueId) {
-		Issue issue = issueManager.load(issueId);
+		Issue issue = issueService.load(issueId);
     	if (!SecurityUtils.canAccessIssue(issue)) 
 			throw new UnauthorizedException();
     	return issue.getChanges();
@@ -165,7 +165,7 @@ public class IssueResource {
 	@Path("/{issueId}/comments")
     @GET
     public Collection<IssueComment> getComments(@PathParam("issueId") Long issueId) {
-		Issue issue = issueManager.load(issueId);
+		Issue issue = issueService.load(issueId);
     	if (!SecurityUtils.canAccessIssue(issue)) 
 			throw new UnauthorizedException();
     	return issue.getComments();
@@ -175,7 +175,7 @@ public class IssueResource {
 	@Path("/{issueId}/works")
 	@GET
 	public Collection<IssueWork> getWorks(@PathParam("issueId") Long issueId) {
-		Issue issue = issueManager.load(issueId);
+		Issue issue = issueService.load(issueId);
 		if (!SecurityUtils.canAccessIssue(issue))
 			throw new UnauthorizedException();
 		return issue.getWorks();
@@ -185,7 +185,7 @@ public class IssueResource {
 	@Path("/{issueId}/iterations")
     @GET
     public Collection<Iteration> getIterations(@PathParam("issueId") Long issueId) {
-		Issue issue = issueManager.load(issueId);
+		Issue issue = issueService.load(issueId);
     	if (!SecurityUtils.canAccessIssue(issue)) 
 			throw new UnauthorizedException();
     	return issue.getIterations();
@@ -195,7 +195,7 @@ public class IssueResource {
 	@Path("/{issueId}/votes")
     @GET
     public Collection<IssueVote> getVotes(@PathParam("issueId") Long issueId) {
-		Issue issue = issueManager.load(issueId);
+		Issue issue = issueService.load(issueId);
     	if (!SecurityUtils.canAccessIssue(issue)) 
 			throw new UnauthorizedException();
     	return issue.getVotes();
@@ -205,7 +205,7 @@ public class IssueResource {
 	@Path("/{issueId}/watches")
     @GET
     public Collection<IssueWatch> getWatches(@PathParam("issueId") Long issueId) {
-		Issue issue = issueManager.load(issueId);
+		Issue issue = issueService.load(issueId);
     	if (!SecurityUtils.canAccessIssue(issue)) 
 			throw new UnauthorizedException();
     	return issue.getWatches();
@@ -215,7 +215,7 @@ public class IssueResource {
 	@Path("/{issueId}/links")
 	@GET
 	public Collection<IssueLink> getLinks(@PathParam("issueId") Long issueId) {
-		Issue issue = issueManager.load(issueId);
+		Issue issue = issueService.load(issueId);
 		if (!SecurityUtils.canAccessIssue(issue))
 			throw new UnauthorizedException();
 		return issue.getLinks();
@@ -225,7 +225,7 @@ public class IssueResource {
 	@Path("/{issueId}/pulls")
     @GET
     public Collection<PullRequest> getPullRequests(@PathParam("issueId") Long issueId) {
-		Issue issue = issueManager.load(issueId);
+		Issue issue = issueService.load(issueId);
     	if (!SecurityUtils.canReadCode(issue.getProject())) 
 			throw new UnauthorizedException();
     	return issue.getPullRequests();
@@ -235,7 +235,7 @@ public class IssueResource {
 	@Path("/{issueId}/commits")
     @GET
     public List<FixCommit> getCommits(@PathParam("issueId") Long issueId) {
-		Issue issue = issueManager.load(issueId);
+		Issue issue = issueService.load(issueId);
     	if (!SecurityUtils.canReadCode(issue.getProject())) 
 			throw new UnauthorizedException();
     	
@@ -257,7 +257,8 @@ public class IssueResource {
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 		
-    	if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)
+		var subject = SecurityUtils.getSubject();
+    	if (!SecurityUtils.isAdministrator(subject) && count > RestConstants.MAX_PAGE_SIZE)
     		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	IssueQuery parsedQuery;
@@ -270,7 +271,7 @@ public class IssueResource {
 
 		var typeReference = new TypeReference<Map<String, Object>>() {};		
 		var issues = new ArrayList<Map<String, Object>>();
-		for (var issue: issueManager.query(null, parsedQuery, false, offset, count)) {
+		for (var issue: issueService.query(subject, null, parsedQuery, false, offset, count)) {
 			var issueMap = objectMapper.convertValue(issue, typeReference);
 			if (withFields != null && withFields)
 				issueMap.put("fields", issue.getFields());
@@ -293,7 +294,7 @@ public class IssueResource {
     public Long createIssue(@NotNull @Valid IssueOpenData data) {
     	User user = SecurityUtils.getUser();
     	
-    	Project project = projectManager.load(data.getProjectId());
+    	Project project = projectService.load(data.getProjectId());
     	if (!SecurityUtils.canAccessProject(project))
 			throw new UnauthorizedException();
 
@@ -301,7 +302,7 @@ public class IssueResource {
 			throw new UnauthorizedException("No permission to schedule issue. Remove iterationIds if you want to create issue without scheduling it.");
 
 		if (data.getOwnEstimatedTime() != null) {
- 			if (!subscriptionManager.isSubscriptionActive())			
+ 			if (!subscriptionService.isSubscriptionActive())			
 				throw new NotAcceptableException("An active subscription is required for this feature");
 			if (!project.isTimeTracking())
 				throw new NotAcceptableException("Time tracking needs to be enabled for the project");
@@ -309,7 +310,7 @@ public class IssueResource {
 				throw new UnauthorizedException("Issue schedule permission required to set own estimated time. Remove ownEstimatedTime if you want to create issue without setting own estimated time.");
 		}
 
-		var issueSetting = settingManager.getIssueSetting();
+		var issueSetting = settingService.getIssueSetting();
 		
 		Issue issue = new Issue();
 		issue.setTitle(data.getTitle());
@@ -324,7 +325,7 @@ public class IssueResource {
 
 		if (data.getIterationIds() != null) {
 			for (Long iterationId : data.getIterationIds()) {
-				Iteration iteration = iterationManager.load(iterationId);
+				Iteration iteration = iterationService.load(iterationId);
 				if (!iteration.getProject().isSelfOrAncestorOf(project))
 					throw new BadRequestException("Iteration is not defined in project hierarchy of the issue");
 				IssueSchedule schedule = new IssueSchedule();
@@ -335,7 +336,7 @@ public class IssueResource {
 		}
 
 		issue.setFieldValues(FieldUtils.getFieldValues(project, data.fields));
-		issueManager.open(issue);
+		issueService.open(issue);
 
 		return issue.getId();
     }
@@ -344,10 +345,12 @@ public class IssueResource {
 	@Path("/{issueId}/title")
     @POST
     public Response setTitle(@PathParam("issueId") Long issueId, @NotEmpty String title) {
-		Issue issue = issueManager.load(issueId);
-    	if (!SecurityUtils.canModifyIssue(issue))
+		Issue issue = issueService.load(issueId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+    	if (!SecurityUtils.canModifyIssue(subject, issue))
 			throw new UnauthorizedException();
-		issueChangeManager.changeTitle(issue, title);
+		issueChangeService.changeTitle(user, issue, title);
 		return Response.ok().build();
     }
 	
@@ -355,10 +358,12 @@ public class IssueResource {
 	@Path("/{issueId}/description")
     @POST
     public Response setDescription(@PathParam("issueId") Long issueId, String description) {
-		Issue issue = issueManager.load(issueId);
-    	if (!SecurityUtils.canModifyIssue(issue))
+		Issue issue = issueService.load(issueId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+    	if (!SecurityUtils.canModifyIssue(subject, issue))
 			throw new UnauthorizedException();
-		issueChangeManager.changeDescription(issue, description);
+		issueChangeService.changeDescription(user, issue, description);
 		return Response.ok().build();
     }
 	
@@ -366,10 +371,12 @@ public class IssueResource {
 	@Path("/{issueId}/confidential")
     @POST
     public Response setConfidential(@PathParam("issueId") Long issueId, boolean confidential) {
-		Issue issue = issueManager.load(issueId);
-    	if (!SecurityUtils.canModifyIssue(issue))
+		Issue issue = issueService.load(issueId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+    	if (!SecurityUtils.canModifyIssue(subject, issue))
 			throw new UnauthorizedException();
-		issueChangeManager.changeConfidential(issue, confidential);
+		issueChangeService.changeConfidential(user, issue, confidential);
 		return Response.ok().build();
     }
 
@@ -377,14 +384,16 @@ public class IssueResource {
 	@Path("/{issueId}/own-estimated-time")
 	@POST
 	public Response setOwnEstimatedTime(@PathParam("issueId") Long issueId, int minutes) {
-		Issue issue = issueManager.load(issueId);
-		if (!subscriptionManager.isSubscriptionActive())
+		Issue issue = issueService.load(issueId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+		if (!subscriptionService.isSubscriptionActive())
 			throw new NotAcceptableException("An active subscription is required for this feature");
 		if (!issue.getProject().isTimeTracking())
 			throw new NotAcceptableException("Time tracking needs to be enabled for the project");
 		if (!SecurityUtils.canScheduleIssues(issue.getProject()))
 			throw new UnauthorizedException("Issue schedule permission required to set own estimated time");
-		issueChangeManager.changeOwnEstimatedTime(issue, minutes);
+		issueChangeService.changeOwnEstimatedTime(user, issue, minutes);
 		return Response.ok().build();
 	}
 	
@@ -392,19 +401,21 @@ public class IssueResource {
 	@Path("/{issueId}/iterations")
     @POST
     public Response setIterations(@PathParam("issueId") Long issueId, List<Long> iterationIds) {
-		Issue issue = issueManager.load(issueId);
-    	if (!SecurityUtils.canScheduleIssues(issue.getProject()))
+		Issue issue = issueService.load(issueId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+    	if (!SecurityUtils.canScheduleIssues(subject, issue.getProject()))
 			throw new UnauthorizedException("Issue schedule permission required to set iterations");
 		
     	Collection<Iteration> iterations = new HashSet<>();
     	for (Long iterationId: iterationIds) {
-    		Iteration iteration = iterationManager.load(iterationId);
+    		Iteration iteration = iterationService.load(iterationId);
 	    	if (!iteration.getProject().isSelfOrAncestorOf(issue.getProject()))
 	    		throw new NotAcceptableException("Iteration is not defined in project hierarchy of the issue");
 	    	iterations.add(iteration);
     	}
     	
-    	issueChangeManager.changeIterations(issue, iterations);
+    	issueChangeService.changeIterations(user, issue, iterations);
     	
 		return Response.ok().build();
     }
@@ -413,16 +424,18 @@ public class IssueResource {
 	@Path("/{issueId}/fields")
     @POST
     public Response setFields(@PathParam("issueId") Long issueId, @NotNull @Api(exampleProvider = "getFieldsExample") Map<String, Serializable> fields) {
-		Issue issue = issueManager.load(issueId);
-		var issueSetting = settingManager.getIssueSetting();
+		Issue issue = issueService.load(issueId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+		var issueSetting = settingService.getIssueSetting();
 		String initialState = issueSetting.getInitialStateSpec().getName();
 		
-    	if (!SecurityUtils.canManageIssues(issue.getProject()) 
-				&& !(issue.getSubmitter().equals(SecurityUtils.getAuthUser()) && issue.getState().equals(initialState))) {
+    	if (!SecurityUtils.canManageIssues(subject, issue.getProject()) 
+				&& !(issue.getSubmitter().equals(user) && issue.getState().equals(initialState))) {
 			throw new UnauthorizedException();
 		}
 
-		issueChangeManager.changeFields(issue, FieldUtils.getFieldValues(issue.getProject(), fields));
+		issueChangeService.changeFields(user, issue, FieldUtils.getFieldValues(issue.getProject(), fields));
 		return Response.ok().build();
     }
 
@@ -437,8 +450,10 @@ public class IssueResource {
 	@Path("/{issueId}/state-transitions")
     @POST
     public Response transitState(@PathParam("issueId") Long issueId, @NotNull @Valid StateTransitionData data) {
-		Issue issue = issueManager.load(issueId);
-		ManualSpec transition = settingManager.getIssueSetting().getManualSpec(issue, data.getState());
+		Issue issue = issueService.load(issueId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+		ManualSpec transition = settingService.getIssueSetting().getManualSpec(subject, issue, data.getState());
 		if (transition == null) {
 			var message = MessageFormat.format(
 				"No applicable manual transition spec found for current user (issue: {0}, from state: {1}, to state: {2})",
@@ -447,7 +462,8 @@ public class IssueResource {
 		}
     	
 		var fieldValues = FieldUtils.getFieldValues(issue.getProject(), data.getFields());
-		issueChangeManager.changeState(issue, data.getState(), fieldValues, transition.getPromptFields(), transition.getRemoveFields(), data.getComment());
+		issueChangeService.changeState(user, issue, data.getState(), fieldValues, 
+				transition.getPromptFields(), transition.getRemoveFields(), data.getComment());
 		return Response.ok().build();
     }
 
@@ -457,12 +473,12 @@ public class IssueResource {
     @POST
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
     public String uploadAttachment(@PathParam("issueId") Long issueId, @PathParam("preferredAttachmentName") String preferredAttachmentName, InputStream input) {
-		Issue issue = issueManager.load(issueId);
+		Issue issue = issueService.load(issueId);
     	if (!SecurityUtils.canModifyIssue(issue))
 			throw new UnauthorizedException();
 			
-		var attachmentName = attachmentManager.saveAttachment(issue.getProject().getId(), issue.getUUID(), preferredAttachmentName, input);
-		var url = urlManager.urlForAttachment(issue.getProject(), issue.getUUID(), attachmentName, false);
+		var attachmentName = attachmentService.saveAttachment(issue.getProject().getId(), issue.getUUID(), preferredAttachmentName, input);
+		var url = urlService.urlForAttachment(issue.getProject(), issue.getUUID(), attachmentName, false);
 		return url;
     }
 	
@@ -470,12 +486,12 @@ public class IssueResource {
 	@Path("/{issueId}")
     @DELETE
     public Response deleteIssue(@PathParam("issueId") Long issueId) {
-    	Issue issue = issueManager.load(issueId);
+    	Issue issue = issueService.load(issueId);
     	if (!SecurityUtils.canManageIssues(issue.getProject()))
 			throw new UnauthorizedException();
-		issueManager.delete(issue);
+		issueService.delete(issue);
 		var oldAuditContent = VersionedXmlDoc.fromBean(issue).toXML();
-		auditManager.audit(issue.getProject(), "deleted issue \"" + issue.getReference().toString(issue.getProject()) + "\" via RESTful API", oldAuditContent, null);
+		auditService.audit(issue.getProject(), "deleted issue \"" + issue.getReference().toString(issue.getProject()) + "\" via RESTful API", oldAuditContent, null);
     	return Response.ok().build();
     }
 	

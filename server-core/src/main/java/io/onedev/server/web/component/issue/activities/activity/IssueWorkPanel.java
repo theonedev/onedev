@@ -16,8 +16,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueWorkManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.IssueWorkService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
@@ -40,7 +40,7 @@ class IssueWorkPanel extends Panel {
 		super.onInitialize();
 		
 		add(new UserIdentPanel("user", getWork().getUser(), Mode.AVATAR_AND_NAME));
-		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+		var timeTrackingSetting = OneDev.getInstance(SettingService.class).getIssueSetting().getTimeTrackingSetting();
 		add(new Label("workingPeriod", timeTrackingSetting.formatWorkingPeriod(getWork().getMinutes(), true)));	
 		add(new Label("age", DateUtils.formatAge(getWork().getDate()))
 			.add(new AttributeAppender("title", formatDateTime(getWork().getDate()))));
@@ -84,7 +84,7 @@ class IssueWorkPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				notifyIssueChange(target);
-				getWorkManager().delete(getWork());
+				getWorkService().delete(getWork());
 				IssueWorkPanel.this.remove();
 				target.appendJavaScript(String.format("$('#%s').remove();", IssueWorkPanel.this.getMarkupId()));
 			}
@@ -116,7 +116,7 @@ class IssueWorkPanel extends Panel {
 				work.setNote(bean.getNote());
 				work.setDate(bean.getStartAt());
 				work.setMinutes(bean.getSpentTime());
-				getWorkManager().createOrUpdate(work);
+				getWorkService().createOrUpdate(work);
 				var detailViewer = newDetailViewer("body");
 				fragment.replaceWith(detailViewer);
 				target.add(detailViewer);
@@ -142,8 +142,8 @@ class IssueWorkPanel extends Panel {
 		return fragment;
 	}
 	
-	private IssueWorkManager getWorkManager() {
-		return OneDev.getInstance(IssueWorkManager.class);
+	private IssueWorkService getWorkService() {
+		return OneDev.getInstance(IssueWorkService.class);
 	}
 
 	private IssueWork getWork() {

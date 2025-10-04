@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.facade.UserCache;
@@ -32,9 +32,9 @@ public class UserChoiceProvider extends AbstractUserChoiceProvider {
 	@Override
 	public void query(String term, int page, Response<User> response) {
 		List<User> users = choicesModel.getObject();
-		UserManager userManager = OneDev.getInstance(UserManager.class);
+		UserService userService = OneDev.getInstance(UserService.class);
 		
-		UserCache cache = userManager.cloneCache();
+		UserCache cache = userService.cloneCache();
 		
 		List<User> similarities = new Similarities<User>(users) {
 

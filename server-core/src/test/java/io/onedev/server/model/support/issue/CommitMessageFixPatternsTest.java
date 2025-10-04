@@ -1,29 +1,30 @@
 package io.onedev.server.model.support.issue;
 
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.commons.loader.AppLoaderMocker;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Project;
-import org.junit.Test;
-import org.mockito.Mockito;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.loader.AppLoaderMocker;
+import io.onedev.server.model.Project;
+import io.onedev.server.service.ProjectService;
 
 public class CommitMessageFixPatternsTest extends AppLoaderMocker {
 
     @Test
     public void parseFixedIssues() {
-		var projectManager = mock(ProjectManager.class);
-		Mockito.when(AppLoader.getInstance(ProjectManager.class)).thenReturn(projectManager);
+		var projectService = mock(ProjectService.class);
+		Mockito.when(AppLoader.getInstance(ProjectService.class)).thenReturn(projectService);
 		var project = new Project();
 		project.setId(1L);
 		project.setKey("TESTPROJ");
 		project.setPath("test/project");
-		when(projectManager.load(1L)).thenReturn(project);
-		when(projectManager.findByKey("TESTPROJ")).thenReturn(project);
-		when(projectManager.findByPath("test/project")).thenReturn(project);
+		when(projectService.load(1L)).thenReturn(project);
+		when(projectService.findByKey("TESTPROJ")).thenReturn(project);
+		when(projectService.findByPath("test/project")).thenReturn(project);
 		
 		var commitMessageFixPatterns = new CommitMessageFixPatterns();
 		var entry = new CommitMessageFixPatterns.Entry();

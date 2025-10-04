@@ -11,7 +11,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
@@ -26,7 +26,7 @@ public class ApprovePullRequest extends PullRequestActivity {
 
     @Override
     public PullRequest getPullRequest() {
-        return OneDev.getInstance(PullRequestManager.class).load(requestId);
+        return OneDev.getInstance(PullRequestService.class).load(requestId);
     }
 
     @Override

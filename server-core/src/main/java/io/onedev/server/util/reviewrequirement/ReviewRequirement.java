@@ -4,8 +4,8 @@ import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.GroupService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.util.reviewrequirement.ReviewRequirementParser.CriteriaContext;
@@ -54,7 +54,7 @@ public class ReviewRequirement {
 			for (CriteriaContext criteria: requirementContext.criteria()) {
 				if (criteria.userCriteria() != null) {
 					String userName = getValue(criteria.userCriteria().Value());
-					User user = OneDev.getInstance(UserManager.class).findByName(userName);
+					User user = OneDev.getInstance(UserService.class).findByName(userName);
 					if (user != null) {
 						if (!users.contains(user)) 
 							users.add(user);
@@ -65,7 +65,7 @@ public class ReviewRequirement {
 					}
 				} else if (criteria.groupCriteria() != null) {
 					String groupName = getValue(criteria.groupCriteria().Value());
-					Group group = OneDev.getInstance(GroupManager.class).find(groupName);
+					Group group = OneDev.getInstance(GroupService.class).find(groupName);
 					if (group != null) {
 						if (!groups.containsKey(group)) {
 							TerminalNode digit = criteria.groupCriteria().DIGIT();

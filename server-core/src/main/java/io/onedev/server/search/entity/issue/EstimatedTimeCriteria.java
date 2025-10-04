@@ -11,7 +11,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
@@ -57,7 +57,7 @@ public class EstimatedTimeCriteria extends Criteria<Issue> {
 
 	@Override
 	public String toStringWithoutParens() {
-		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+		var timeTrackingSetting = OneDev.getInstance(SettingService.class).getIssueSetting().getTimeTrackingSetting();
 		return quote(NAME_ESTIMATED_TIME) + " "
 				+ IssueQuery.getRuleName(operator) + " "
 				+ quote(timeTrackingSetting.formatWorkingPeriod(value, false));

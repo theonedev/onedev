@@ -17,7 +17,7 @@ import io.onedev.server.annotation.Patterns;
 import io.onedev.server.annotation.UserMatch;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.TriggerMatch;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.GitUtils;
@@ -93,7 +93,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 			} else if (refUpdated.getNewCommitId().equals(ObjectId.zeroId())) {
 				return false;
 			} else {
-				Repository repository = OneDev.getInstance(ProjectManager.class)
+				Repository repository = OneDev.getInstance(ProjectService.class)
 						.getRepository(refUpdated.getProject().getId());
 				Collection<String> changedFiles = GitUtils.getChangedFiles(
 						repository, 

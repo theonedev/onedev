@@ -20,9 +20,9 @@ import com.google.common.io.Resources;
 
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.img.ImageScope;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -73,7 +73,7 @@ public class BrandingSettingPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		var setting = getSettingManager().getBrandingSetting();
+		var setting = getSettingService().getBrandingSetting();
 		var bean = new BrandSettingEditBean();
 		bean.setName(setting.getName());
 		bean.setLogoData(getLogoData(false));
@@ -84,15 +84,15 @@ public class BrandingSettingPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				setting.setName(bean.getName());
-				getSettingManager().saveBrandingSetting(setting);
-				getAuditManager().audit(null, "changed branding settings", null, null);
+				getSettingService().saveBrandingSetting(setting);
+				auditService.audit(null, "changed branding settings", null, null);
 				if (!bean.getLogoData().equals(getDefaultLogoData(false))) {
 					var bytes = getLogoBytes(bean.getLogoData());
-					getClusterManager().runOnAllServers(new UpdateLogoTask(bytes, false));
+					getClusterService().runOnAllServers(new UpdateLogoTask(bytes, false));
 				}
 				if (!bean.getDarkLogoData().equals(getDefaultLogoData(true))) {
 					var bytes = getLogoBytes(bean.getDarkLogoData());
-					getClusterManager().runOnAllServers(new UpdateLogoTask(bytes, true));
+					getClusterService().runOnAllServers(new UpdateLogoTask(bytes, true));
 				}
 				Session.get().success(_T("Branding settings updated"));
 			}
@@ -104,10 +104,10 @@ public class BrandingSettingPage extends AdministrationPage {
 			@Override
 			public void onClick() {
 				setting.setName("OneDev");
-				getSettingManager().saveBrandingSetting(setting);
-				getAuditManager().audit(null, "changed branding settings", null, null);
-				getClusterManager().runOnAllServers(new UpdateLogoTask(null, false));
-				getClusterManager().runOnAllServers(new UpdateLogoTask(null, true));
+				getSettingService().saveBrandingSetting(setting);
+				auditService.audit(null, "changed branding settings", null, null);
+				getClusterService().runOnAllServers(new UpdateLogoTask(null, false));
+				getClusterService().runOnAllServers(new UpdateLogoTask(null, true));
 				setResponsePage(BrandingSettingPage.class);
 				Session.get().success(_T("Default branding settings restored"));
 			}
@@ -127,12 +127,12 @@ public class BrandingSettingPage extends AdministrationPage {
 		return new Label(componentId, _T("Branding"));
 	}
 	
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 
-	private ClusterManager getClusterManager() {
-		return OneDev.getInstance(ClusterManager.class);
+	private ClusterService getClusterService() {
+		return OneDev.getInstance(ClusterService.class);
 	}
 	
 	private static class UpdateLogoTask implements ClusterTask<Void> {

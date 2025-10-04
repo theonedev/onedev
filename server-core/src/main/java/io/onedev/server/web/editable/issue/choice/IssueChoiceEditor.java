@@ -9,7 +9,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -43,7 +43,7 @@ public class IssueChoiceEditor extends PropertyEditor<Long> {
 
 		Issue issue;
 		if (getModelObject() != null)
-			issue = OneDev.getInstance(IssueManager.class).get(getModelObject());
+			issue = OneDev.getInstance(IssueService.class).get(getModelObject());
 		else
 			issue = null;
 		

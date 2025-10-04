@@ -2,11 +2,11 @@ package io.onedev.server.commandhandler;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.data.DataManager;
-import io.onedev.server.persistence.SessionFactoryManager;
+import io.onedev.server.data.DataService;
+import io.onedev.server.persistence.SessionFactoryService;
 import io.onedev.server.security.SecurityUtils;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.slf4j.Logger;
@@ -25,22 +25,22 @@ public class ResetAdminPassword extends CommandHandler {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ResetAdminPassword.class);
 	
-	private final DataManager dataManager;
+	private final DataService dataService;
 	
-	private final SessionFactoryManager sessionFactoryManager;
+	private final SessionFactoryService sessionFactoryService;
 	
-	private final UserManager userManager;
+	private final UserService userService;
 	
 	private final PasswordService passwordService;
 	
 	@Inject
-	public ResetAdminPassword(HibernateConfig hibernateConfig, DataManager dataManager, 
-							  SessionFactoryManager sessionFactoryManager, UserManager userManager, 
-							  PasswordService passwordService) {
+	public ResetAdminPassword(HibernateConfig hibernateConfig, DataService dataService,
+                              SessionFactoryService sessionFactoryService, UserService userService,
+                              PasswordService passwordService) {
 		super(hibernateConfig);
-		this.dataManager = dataManager;
-		this.sessionFactoryManager = sessionFactoryManager;
-		this.userManager = userManager;
+		this.dataService = dataService;
+		this.sessionFactoryService = sessionFactoryService;
+		this.userService = userService;
 		this.passwordService = passwordService;
 	}
 
@@ -55,24 +55,24 @@ public class ResetAdminPassword extends CommandHandler {
 
 		try {
 			doMaintenance(() -> {
-				sessionFactoryManager.start();
+				sessionFactoryService.start();
 
-				try (var conn = dataManager.openConnection()) {
+				try (var conn = dataService.openConnection()) {
 					callWithTransaction(conn, () -> {
-						dataManager.checkDataVersion(conn, false);
+						dataService.checkDataVersion(conn, false);
 						return null;
 					});
 				} catch (SQLException e) {
 					throw new RuntimeException(e);
 				}
 
-				User root = userManager.get(User.ROOT_ID);
+				User root = userService.get(User.ROOT_ID);
 				if (root == null)
 					throw new ExplicitException("Server not set up yet");
 				String password = Bootstrap.command.getArgs()[0];
 				root.setTwoFactorAuthentication(null);
 				root.setPassword(passwordService.encryptPassword(password));
-				userManager.update(root, null);
+				userService.update(root, null);
 
 				// wait for a short period to have embedded db flushing data
 				try {
@@ -93,7 +93,7 @@ public class ResetAdminPassword extends CommandHandler {
 
 	@Override
 	public void stop() {
-		sessionFactoryManager.stop();
+		sessionFactoryService.stop();
 	}
 
 }

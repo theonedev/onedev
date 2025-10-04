@@ -46,14 +46,13 @@ import io.onedev.server.buildspec.job.trigger.JobTrigger;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.step.Step;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.criteria.Criteria;
@@ -151,7 +150,7 @@ public class Job implements NamedElement, Validatable {
 
 	@SuppressWarnings("unused")
 	private static String getJobExecutorPlaceholder() {
-		if (OneDev.getInstance(SettingManager.class).getJobExecutors().isEmpty())
+		if (OneDev.getInstance(SettingService.class).getJobExecutors().isEmpty())
 			return _T("Auto-discovered executor");
 		else 
 			return _T("First applicable executor");
@@ -159,7 +158,7 @@ public class Job implements NamedElement, Validatable {
 
 	@SuppressWarnings("unused")
 	private static String getJobExecutorDescription() {
-		if (OneDev.getInstance(SettingManager.class).getJobExecutors().isEmpty())
+		if (OneDev.getInstance(SettingService.class).getJobExecutors().isEmpty())
 			return _T("Optionally specify executor for this job. Leave empty to use auto-discover executor");
 		else 
 			return _T("Optionally specify executor for this job. Leave empty to use first applicable executor");
@@ -174,8 +173,8 @@ public class Job implements NamedElement, Validatable {
 			String branch = page.getBlobIdent().revision;
 			if (branch == null)
 				branch = "main";
-			JobMatchContext context = new JobMatchContext(page.getProject(), branch, null, SecurityUtils.getAuthUser(), jobName);
-			for (JobExecutor executor: OneDev.getInstance(SettingManager.class).getJobExecutors()) {
+			JobMatchContext context = new JobMatchContext(page.getProject(), branch, null, jobName);
+			for (JobExecutor executor: OneDev.getInstance(SettingService.class).getJobExecutors()) {
 				if (executor.isEnabled()) {
 					if (executor.getJobMatch() == null) {
 						applicableJobExecutors.add(executor.getName());
@@ -352,7 +351,7 @@ public class Job implements NamedElement, Validatable {
 	public boolean isValid(ConstraintValidatorContext context) {
 		boolean isValid = true;
 		
-		var jobExecutors = OneDev.getInstance(SettingManager.class).getJobExecutors();
+		var jobExecutors = OneDev.getInstance(SettingService.class).getJobExecutors();
 		if (jobExecutor != null && !jobExecutor.contains("@") 
 				&& jobExecutors.stream().noneMatch(it->it.getName().equals(jobExecutor))) {
 			isValid = false;

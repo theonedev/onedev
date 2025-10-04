@@ -23,34 +23,34 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.AccessTokenManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.job.JobManager;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.job.JobService;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.ExceptionHandleFilter;
 
 @Singleton
 public class PackFilter extends ExceptionHandleFilter {
 	
-	private final AccessTokenManager accessTokenManager;
+	private final AccessTokenService accessTokenService;
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
-	private final JobManager jobManager;
+	private final JobService jobService;
 	
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 
 	private final Set<PackService> packServices;
 	
 	@Inject
-	public PackFilter(AccessTokenManager accessTokenManager, ProjectManager projectManager, 
-					  JobManager jobManager, SessionManager sessionManager, 
-					  Set<PackService> packServices) {
-		this.accessTokenManager = accessTokenManager;
-		this.projectManager = projectManager;
-		this.jobManager = jobManager;
-		this.sessionManager = sessionManager;
+	public PackFilter(AccessTokenService accessTokenService, ProjectService projectService,
+                      JobService jobService, SessionService sessionService,
+                      Set<PackService> packServices) {
+		this.accessTokenService = accessTokenService;
+		this.projectService = projectService;
+		this.jobService = jobService;
+		this.sessionService = sessionService;
 		this.packServices = packServices;
 	}
 	
@@ -68,8 +68,8 @@ public class PackFilter extends ExceptionHandleFilter {
 				var serviceMarkIndex = pathSegments.indexOf(serviceMark);
 				request.setAttribute(DefaultSubjectContext.SESSION_CREATION_ENABLED, Boolean.FALSE);
 				var projectPath = Joiner.on('/').join(pathSegments.subList(0, serviceMarkIndex));
-				var projectId = sessionManager.call(() -> {
-					var project = projectManager.findByPath(projectPath);
+				var projectId = sessionService.call(() -> {
+					var project = projectService.findByPath(projectPath);
 					if (project != null)
 						return project.getId();
 					else
@@ -90,11 +90,11 @@ public class PackFilter extends ExceptionHandleFilter {
 						accessTokenValue = apiKey;
 					}
 					if (jobToken != null) {
-						var jobContext = jobManager.getJobContext(jobToken, false);
+						var jobContext = jobService.getJobContext(jobToken, false);
 						if (jobContext != null)
 							buildId = jobContext.getBuildId();
 					}
-					var accessToken = accessTokenManager.findByValue(accessTokenValue);
+					var accessToken = accessTokenService.findByValue(accessTokenValue);
 					if (accessToken != null)
 						ThreadContext.bind(accessToken.asSubject());
 					else
@@ -107,11 +107,11 @@ public class PackFilter extends ExceptionHandleFilter {
 						String userName = StringUtils.substringBefore(decoded, ":").trim();
 						String password = StringUtils.substringAfter(decoded, ":").trim();
 						if (userName.length() != 0) {
-							var jobContext = jobManager.getJobContext(userName, false);
+							var jobContext = jobService.getJobContext(userName, false);
 							if (jobContext != null)
 								buildId = jobContext.getBuildId();
 							if (password.length() != 0) {
-								var accessToken = accessTokenManager.findByValue(password);
+								var accessToken = accessTokenService.findByValue(password);
 								if (accessToken != null)
 									ThreadContext.bind(accessToken.asSubject());
 								else

@@ -16,7 +16,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQuery;
@@ -40,8 +40,8 @@ public class BuildChangesPage extends BuildDetailPage {
 		super(params);
 		query = params.get(PARAM_QUERY).toString();
 
-		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-		Build baseBuild = buildManager.findStreamPrevious(getBuild(), null);
+		BuildService buildService = OneDev.getInstance(BuildService.class);
+		Build baseBuild = buildService.findStreamPrevious(getBuild(), null);
 		if (baseBuild != null)
 			baseCommitHash = baseBuild.getCommitHash();
 		else

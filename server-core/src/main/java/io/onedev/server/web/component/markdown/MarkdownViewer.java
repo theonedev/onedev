@@ -3,12 +3,12 @@ package io.onedev.server.web.component.markdown;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.service.*;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.entityreference.PullRequestReference;
-import io.onedev.server.markdown.MarkdownManager;
+import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -16,7 +16,7 @@ import io.onedev.server.util.ColorUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.asset.lozad.LozadResourceReference;
-import io.onedev.server.web.avatar.AvatarManager;
+import io.onedev.server.web.avatar.AvatarService;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.svg.SpriteImage;
@@ -74,7 +74,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 		protected String load() {
 			String markdown = getModelObject();
 			if (markdown != null) {
-				MarkdownManager manager = AppLoader.getInstance(MarkdownManager.class);
+				MarkdownService manager = AppLoader.getInstance(MarkdownService.class);
 				return manager.process(manager.render(markdown), getProject(), 
 						getRenderContext(), getSuggestionSupport(), false);
 			} else {
@@ -183,10 +183,10 @@ public class MarkdownViewer extends GenericPanel<String> {
 				switch (referenceType) {
 				case "issue":
 					EntityReference reference = IssueReference.of(referenceId, null);
-					var issue = OneDev.getInstance(IssueManager.class).find(reference.getProject(), reference.getNumber());
+					var issue = OneDev.getInstance(IssueService.class).find(reference.getProject(), reference.getNumber());
 					// check permission here as issue project may not be the same as current project
 					if (issue != null && SecurityUtils.canAccessIssue(issue)) {
-						String color = OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpec(issue.getState()).getColor();
+						String color = OneDev.getInstance(SettingService.class).getIssueSetting().getStateSpec(issue.getState()).getColor();
 						String script = String.format("onedev.server.markdown.renderIssueTooltip('%s', '%s', '%s', '%s');", 
 								Emojis.getInstance().apply(JavaScriptEscape.escapeJavaScript(issue.getTitle())), 
 								JavaScriptEscape.escapeJavaScript(issue.getState()), 
@@ -198,7 +198,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 					break;
 				case "pull request":
 					reference = PullRequestReference.of(referenceId, null);
-					var request = OneDev.getInstance(PullRequestManager.class).find(reference.getProject(), reference.getNumber());
+					var request = OneDev.getInstance(PullRequestService.class).find(reference.getProject(), reference.getNumber());
 					// check permission here as target project may not be the same as current project
 					if (request != null && SecurityUtils.canReadCode(request.getTargetProject())) {
  	 					String status = request.getStatus().toString();
@@ -224,7 +224,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 					break;
 				case "build":
 					reference = BuildReference.of(referenceId, null);
-					var build = OneDev.getInstance(BuildManager.class).find(reference.getProject(), reference.getNumber());
+					var build = OneDev.getInstance(BuildService.class).find(reference.getProject(), reference.getNumber());
 					// check permission here as build project may not be the same as current project
 					if (build != null && SecurityUtils.canAccessBuild(build)) {
 						String iconHref = SpriteImage.getVersionedHref(BuildStatusIcon.getIconHref(build.getStatus()));
@@ -241,9 +241,9 @@ public class MarkdownViewer extends GenericPanel<String> {
 					}
 					break;
 				case "user":
-					User user = OneDev.getInstance(UserManager.class).findByName(referenceId);
+					User user = OneDev.getInstance(UserService.class).findByName(referenceId);
 					if (user != null) {
-						String avatarUrl = OneDev.getInstance(AvatarManager.class).getUserAvatarUrl(user.getId());
+						String avatarUrl = OneDev.getInstance(AvatarService.class).getUserAvatarUrl(user.getId());
 						String script = String.format("onedev.server.markdown.renderUserTooltip('%s', '%s')", 
 								JavaScriptEscape.escapeJavaScript(avatarUrl), 
 								JavaScriptEscape.escapeJavaScript(user.getDisplayName()));
@@ -254,7 +254,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 					Project commitProject = getProject();
 					String commitHash;
 					if (referenceId.contains(":")) {
-						commitProject = OneDev.getInstance(ProjectManager.class)
+						commitProject = OneDev.getInstance(ProjectService.class)
 								.findByPath(StringUtils.substringBefore(referenceId, ":"));
 						commitHash = StringUtils.substringAfter(referenceId, ":");
 					} else {

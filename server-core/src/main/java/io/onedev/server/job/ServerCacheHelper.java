@@ -7,12 +7,12 @@ import io.onedev.k8shelper.CacheHelper;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.SetupCacheFacade;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.AccessTokenManager;
-import io.onedev.server.entitymanager.JobCacheManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.JobCacheService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.SecurityUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.glassfish.jersey.client.ClientProperties;
@@ -41,13 +41,13 @@ public class ServerCacheHelper extends CacheHelper {
 
 	@Override
 	protected boolean downloadCache(String cacheKey, List<String> cachePaths, List<File> cacheDirs) {
-		var cacheInfo = getCacheManager().getCacheInfoForDownload(jobContext.getProjectId(), cacheKey);
+		var cacheInfo = getCacheService().getCacheInfoForDownload(jobContext.getProjectId(), cacheKey);
 		return downloadCache(cacheInfo, cachePaths, cacheDirs);
 	}
 
 	@Override
 	protected boolean downloadCache(List<String> loadKeys, List<String> cachePaths, List<File> cacheDirs) {
-		var cacheInfo = getCacheManager().getCacheInfoForDownload(jobContext.getProjectId(), loadKeys);
+		var cacheInfo = getCacheService().getCacheInfoForDownload(jobContext.getProjectId(), loadKeys);
 		return downloadCache(cacheInfo, cachePaths, cacheDirs);		
 	}
 
@@ -55,14 +55,14 @@ public class ServerCacheHelper extends CacheHelper {
 		if (cacheInfo != null) {
 			var projectId = cacheInfo.getLeft();
 			var cacheId = cacheInfo.getRight();
-			var activeServer = getProjectManager().getActiveServer(projectId, true);
-			if (activeServer.equals(getClusterManager().getLocalServerAddress())) {
-				return getCacheManager().downloadCache(projectId, cacheId, cachePaths, is -> untar(cacheDirs, is));
+			var activeServer = getProjectService().getActiveServer(projectId, true);
+			if (activeServer.equals(getClusterService().getLocalServerAddress())) {
+				return getCacheService().downloadCache(projectId, cacheId, cachePaths, is -> untar(cacheDirs, is));
 			} else {
 				Client client = ClientBuilder.newClient();
 				client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
 				try {
-					String serverUrl = getClusterManager().getServerUrl(activeServer);
+					String serverUrl = getClusterService().getServerUrl(activeServer);
 					var target = client.target(serverUrl)
 							.path("~api/cluster/cache")
 							.queryParam("projectId", projectId)
@@ -70,7 +70,7 @@ public class ServerCacheHelper extends CacheHelper {
 							.queryParam("cachePaths", Joiner.on('\n').join(cachePaths));
 					Invocation.Builder builder = target.request();
 					builder.header(HttpHeaders.AUTHORIZATION,
-							KubernetesHelper.BEARER + " " + getClusterManager().getCredential());
+							KubernetesHelper.BEARER + " " + getClusterService().getCredential());
 					try (Response response = builder.get()) {
 						KubernetesHelper.checkStatus(response);
 						try (var is = response.readEntity(InputStream.class)) {
@@ -99,19 +99,19 @@ public class ServerCacheHelper extends CacheHelper {
 		var projectPath = cacheConfig.getUploadProjectPath();
 		var accessTokenValue = cacheConfig.getUploadAccessToken();
 		var cachePaths = cacheConfig.getPaths();
-		var projectId = getSessionManager().call(() -> {
+		var projectId = getSessionService().call(() -> {
 			Project project;
 			if (projectPath != null) {
-				project = getProjectManager().findByPath(projectPath);
+				project = getProjectService().findByPath(projectPath);
 				if (project == null)
 					throw new ExplicitException("Upload project not found: " + projectPath);
 			} else {
-				project = getProjectManager().load(jobContext.getProjectId());
+				project = getProjectService().load(jobContext.getProjectId());
 			}
 			if (jobContext.canManageProject(project)) {
 				return project.getId();
 			} else if (accessTokenValue != null) {
-				var accessToken = getAccessTokenManager().findByValue(accessTokenValue);
+				var accessToken = getAccessTokenService().findByValue(accessTokenValue);
 				if (accessToken != null && SecurityUtils.canUploadCache(accessToken.asSubject(), project))
 					return project.getId();
 			} 
@@ -119,15 +119,15 @@ public class ServerCacheHelper extends CacheHelper {
 		});
 		
 		if (projectId != null) {
-			Long cacheId = getCacheManager().getCacheIdForUpload(projectId, cacheKey);
-			var activeServer = getProjectManager().getActiveServer(projectId, true);
-			if (activeServer.equals(getClusterManager().getLocalServerAddress())) {
-				getCacheManager().uploadCache(projectId, cacheId, cachePaths, os -> tar(cacheDirs, os));
+			Long cacheId = getCacheService().getCacheIdForUpload(projectId, cacheKey);
+			var activeServer = getProjectService().getActiveServer(projectId, true);
+			if (activeServer.equals(getClusterService().getLocalServerAddress())) {
+				getCacheService().uploadCache(projectId, cacheId, cachePaths, os -> tar(cacheDirs, os));
 			} else {
 				Client client = ClientBuilder.newClient();
 				client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
 				try {
-					String serverUrl = getClusterManager().getServerUrl(activeServer);
+					String serverUrl = getClusterService().getServerUrl(activeServer);
 					var target = client.target(serverUrl)
 							.path("~api/cluster/cache")
 							.queryParam("projectId", projectId)
@@ -135,7 +135,7 @@ public class ServerCacheHelper extends CacheHelper {
 							.queryParam("cachePaths", Joiner.on('\n').join(cachePaths));
 					Invocation.Builder builder = target.request();
 					builder.header(HttpHeaders.AUTHORIZATION,
-							KubernetesHelper.BEARER + " " + getClusterManager().getCredential());
+							KubernetesHelper.BEARER + " " + getClusterService().getCredential());
 					StreamingOutput output = os -> tar(cacheDirs, os);
 					try (Response response = builder.post(Entity.entity(output, MediaType.APPLICATION_OCTET_STREAM))) {
 						KubernetesHelper.checkStatus(response);
@@ -150,24 +150,24 @@ public class ServerCacheHelper extends CacheHelper {
 		}
 	}
 	
-	private ClusterManager getClusterManager() {
-		return OneDev.getInstance(ClusterManager.class);
+	private ClusterService getClusterService() {
+		return OneDev.getInstance(ClusterService.class);
 	}
 	
-	private SessionManager getSessionManager() {
-		return OneDev.getInstance(SessionManager.class);
+	private SessionService getSessionService() {
+		return OneDev.getInstance(SessionService.class);
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
-	private AccessTokenManager getAccessTokenManager() {
-		return OneDev.getInstance(AccessTokenManager.class);
+	private AccessTokenService getAccessTokenService() {
+		return OneDev.getInstance(AccessTokenService.class);
 	}
 	
-	private JobCacheManager getCacheManager() {
-		return OneDev.getInstance(JobCacheManager.class);
+	private JobCacheService getCacheService() {
+		return OneDev.getInstance(JobCacheService.class);
 	}
 	
 }

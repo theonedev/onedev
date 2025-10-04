@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.git.service.GitService;
 
 @Entity
@@ -88,7 +88,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	public Collection<String> getChangedFiles() {
 		if (changedFiles == null) {
 			ObjectId headCommitId = ObjectId.fromString(getHeadCommitHash());
-			ObjectId comparisonBaseCommitId = getPullRequestManager().getComparisonBase(
+			ObjectId comparisonBaseCommitId = getPullRequestService().getComparisonBase(
 					getRequest(), ObjectId.fromString(getBaseCommitHash()), headCommitId);
 			changedFiles = getGitService().getChangedFiles(
 					getRequest().getWorkProject(), headCommitId, comparisonBaseCommitId, null);
@@ -130,8 +130,8 @@ public class PullRequestUpdate extends AbstractEntity {
 		return OneDev.getInstance(GitService.class);
 	}
 	
-	private PullRequestManager getPullRequestManager() {
-		return OneDev.getInstance(PullRequestManager.class);
+	private PullRequestService getPullRequestService() {
+		return OneDev.getInstance(PullRequestService.class);
 	}
 	
 }

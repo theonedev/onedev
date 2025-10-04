@@ -59,7 +59,6 @@ import io.onedev.server.data.migration.XmlBuildSpecMigrator;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.build.JobProperty;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -186,8 +185,7 @@ public class BuildSpec implements Serializable, Validatable {
 						Collection<String> newCommitChain = new HashSet<>(commitChain);
 						newCommitChain.add(importCommit.name());
 						BuildSpec importedBuildSpec = aImport.getBuildSpec();
-						JobAuthorizationContext.push(new JobAuthorizationContext(
-								aImport.getProject(), importCommit, SecurityUtils.getUser(), null));
+						JobAuthorizationContext.push(new JobAuthorizationContext(aImport.getProject(), importCommit, null));
 						try {
 							importedBuildSpecs.addAll(importedBuildSpec.getImportedBuildSpecs(newCommitChain));
 						} finally {

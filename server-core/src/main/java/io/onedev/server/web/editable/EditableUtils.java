@@ -12,7 +12,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.WorkingPeriod;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ReflectionUtils;
@@ -105,7 +105,7 @@ public class EditableUtils {
 			}
 			return description;
 		} else if (element.getAnnotation(WorkingPeriod.class) != null) {
-			var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+			var timeTrackingSetting = OneDev.getInstance(SettingService.class).getIssueSetting().getTimeTrackingSetting();
 			String description = getDescription(element, editable);
 			if (description.length() != 0) {
 				if (!description.endsWith("."))

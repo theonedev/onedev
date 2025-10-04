@@ -2,13 +2,13 @@ package io.onedev.server.notification;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import io.onedev.server.entitymanager.PullRequestMentionManager;
-import io.onedev.server.entitymanager.PullRequestWatchManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.PullRequestMentionService;
+import io.onedev.server.service.PullRequestWatchService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.pullrequest.*;
-import io.onedev.server.mail.MailManager;
+import io.onedev.server.mail.MailService;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;
@@ -26,7 +26,7 @@ import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.commenttext.MarkdownText;
 import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.xodus.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.shiro.authz.Permission;
@@ -42,29 +42,23 @@ import static io.onedev.server.notification.NotificationUtils.isNotified;
 @Singleton
 public class PullRequestNotificationManager {
 
-	private final MailManager mailManager;
-
-	private final PullRequestWatchManager watchManager;
-
-	private final VisitInfoManager userInfoManager;
-
-	private final UserManager userManager;
-
-	private final PullRequestMentionManager mentionManager;
-	
-	private final SettingManager settingManager;
+	@Inject
+	private MailService mailService;
 
 	@Inject
-	public PullRequestNotificationManager(MailManager mailManager, PullRequestWatchManager watchManager,
-										  VisitInfoManager userInfoManager, UserManager userManager, 
-										  PullRequestMentionManager mentionManager, SettingManager settingManager) {
-		this.mailManager = mailManager;
-		this.watchManager = watchManager;
-		this.userInfoManager = userInfoManager;
-		this.userManager = userManager;
-		this.mentionManager = mentionManager;
-		this.settingManager = settingManager;
-	}
+	private PullRequestWatchService watchService;
+
+	@Inject
+	private VisitInfoService userInfoManager;
+
+	@Inject
+	private UserService userService;
+
+	@Inject
+	private PullRequestMentionService mentionService;
+
+	@Inject
+	private SettingService settingService;
 
 	@Transactional
 	@Listen
@@ -98,7 +92,7 @@ public class PullRequestNotificationManager {
 				}
 	
 			}.getWatches().entrySet()) {
-				watchManager.watch(request, entry.getKey(), entry.getValue());
+				watchService.watch(request, entry.getKey(), entry.getValue());
 			}
 	
 			for (Map.Entry<User, Boolean> entry : new QueryWatchBuilder<PullRequest>() {
@@ -110,7 +104,7 @@ public class PullRequestNotificationManager {
 	
 				@Override
 				protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
-					return userManager.query().stream().map(it -> it.getPullRequestQueryPersonalization()).collect(Collectors.toList());
+					return userService.query().stream().map(it -> it.getPullRequestQueryPersonalization()).collect(Collectors.toList());
 				}
 	
 				@Override
@@ -120,11 +114,11 @@ public class PullRequestNotificationManager {
 	
 				@Override
 				protected Collection<? extends NamedQuery> getNamedQueries() {
-					return settingManager.getPullRequestSetting().getNamedQueries();
+					return settingService.getPullRequestSetting().getNamedQueries();
 				}
 	
 			}.getWatches().entrySet()) {
-				watchManager.watch(request, entry.getKey(), entry.getValue());
+				watchService.watch(request, entry.getKey(), entry.getValue());
 			}
 	
 			Collection<String> notifiedEmailAddresses;
@@ -138,7 +132,7 @@ public class PullRequestNotificationManager {
 				if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
 					notifiedUsers.add(user); 
 				if (!user.isSystem() && !user.isServiceAccount())
-					watchManager.watch(request, user, true);
+					watchService.watch(request, user, true);
 			}
 	
 			User committer = null;
@@ -151,7 +145,7 @@ public class PullRequestNotificationManager {
 				}
 				for (User each : committers) {
 					if (!each.isSystem() && !each.isServiceAccount())
-						watchManager.watch(request, each, true);
+						watchService.watch(request, each, true);
 				}
 			}
 	
@@ -169,7 +163,7 @@ public class PullRequestNotificationManager {
 			}
 			
 			var emojis = Emojis.getInstance();
-			String replyAddress = mailManager.getReplyAddress(request);
+			String replyAddress = mailService.getReplyAddress(request);
 			boolean replyable = replyAddress != null;
 	
 			Set<User> reviewers = new HashSet<>();
@@ -197,7 +191,7 @@ public class PullRequestNotificationManager {
 							changeData.getActivity().replace(' ', '-'), request.getUUID());
 					EmailAddress emailAddress = request.getSubmitter().getPrimaryEmailAddress();
 					if (emailAddress != null && emailAddress.isVerified()) {
-						mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
+						mailService.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
 								Lists.newArrayList(), Lists.newArrayList(), subject,
 								getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null),
 								getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
@@ -213,7 +207,7 @@ public class PullRequestNotificationManager {
 	
 			for (User assignee : assignees) {
 				if (!assignee.isServiceAccount())
-					watchManager.watch(request, assignee, true);
+					watchService.watch(request, assignee, true);
 				if (!notifiedUsers.contains(assignee)) {
 					String subject = String.format(
 							"[Pull Request %s] (Assigned) %s",
@@ -227,7 +221,7 @@ public class PullRequestNotificationManager {
 						assignmentSummary = "Assigned to you";
 					EmailAddress emailAddress = assignee.getPrimaryEmailAddress();
 					if (emailAddress != null && emailAddress.isVerified()) {
-						mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
+						mailService.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
 								Lists.newArrayList(), Lists.newArrayList(), subject,
 								getEmailBody(true, event, assignmentSummary, event.getHtmlBody(), url, replyable, null),
 								getEmailBody(false, event, assignmentSummary, event.getTextBody(), url, replyable, null),
@@ -239,7 +233,7 @@ public class PullRequestNotificationManager {
 	
 			for (User reviewer : reviewers) {
 				if (!reviewer.isServiceAccount())
-					watchManager.watch(request, reviewer, true);
+					watchService.watch(request, reviewer, true);
 				if (!notifiedUsers.contains(reviewer)) {
 					String subject = String.format(
 							"[Pull Request %s] (Review Request) %s",
@@ -254,7 +248,7 @@ public class PullRequestNotificationManager {
 	
 					EmailAddress emailAddress = reviewer.getPrimaryEmailAddress();
 					if (emailAddress != null && emailAddress.isVerified()) {
-						mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
+						mailService.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
 								Lists.newArrayList(), Lists.newArrayList(), subject,
 								getEmailBody(true, event, reviewInvitationSummary, event.getHtmlBody(), url, replyable, null),
 								getEmailBody(false, event, reviewInvitationSummary, event.getTextBody(), url, replyable, null),
@@ -267,11 +261,11 @@ public class PullRequestNotificationManager {
 			if (event.getCommentText() instanceof MarkdownText) {
 				MarkdownText markdown = (MarkdownText) event.getCommentText();
 				for (String userName : new MentionParser().parseMentions(markdown.getRendered())) {
-					User mentionedUser = userManager.findByName(userName);
+					User mentionedUser = userService.findByName(userName);
 					if (mentionedUser != null) {
-						mentionManager.mention(request, mentionedUser);
+						mentionService.mention(request, mentionedUser);
 						if (!mentionedUser.isServiceAccount())
-							watchManager.watch(request, mentionedUser, true);
+							watchService.watch(request, mentionedUser, true);
 						if (!isNotified(notifiedEmailAddresses, mentionedUser)) {
 							String subject = String.format(
 									"[Pull Request %s] (Mentioned You) %s", 
@@ -281,7 +275,7 @@ public class PullRequestNotificationManager {
 	
 							EmailAddress emailAddress = mentionedUser.getPrimaryEmailAddress();
 							if (emailAddress != null && emailAddress.isVerified()) {
-								mailManager.sendMailAsync(Sets.newHashSet(emailAddress.getValue()),
+								mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()),
 										Sets.newHashSet(), Sets.newHashSet(), subject,
 										getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null),
 										getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
@@ -323,10 +317,10 @@ public class PullRequestNotificationManager {
 							(event instanceof PullRequestOpened) ? "Opened" : "Updated", 
 							emojis.apply(request.getTitle()));
 					String threadingReferences = "<" + request.getUUID() + "@onedev>";
-					Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(request));
+					Unsubscribable unsubscribable = new Unsubscribable(mailService.getUnsubscribeAddress(request));
 					String htmlBody = getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
 					String textBody = getEmailBody(false, event, summary, event.getTextBody(), url, replyable, unsubscribable);
-					mailManager.sendMailAsync(
+					mailService.sendMailAsync(
 							Lists.newArrayList(), Lists.newArrayList(),
 							bccEmailAddresses, subject, htmlBody, textBody,
 							replyAddress, senderName, threadingReferences);

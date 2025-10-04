@@ -46,8 +46,8 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.PullRequestCommentManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.PullRequestCommentService;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -162,8 +162,8 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		return row;
 	}
 
-	private BuildManager getBuildManager() {
-		return 	OneDev.getInstance(BuildManager.class);
+	private BuildService getBuildService() {
+		return 	OneDev.getInstance(BuildService.class);
 	}
 	
 	@Override
@@ -189,7 +189,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				
 				PullRequest request = getPullRequest();
 				Project project = request.getTargetProject();
-				project.cacheCommitStatuses(getBuildManager().queryStatus(project, commitIds));
+				project.cacheCommitStatuses(getBuildService().queryStatus(project, commitIds));
 					
 				List<PullRequestActivity> oldActivities = new ArrayList<>();
 				List<PullRequestActivity> newActivities = new ArrayList<>();
@@ -280,7 +280,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 						comment.setRequest(getPullRequest());
 						comment.setUser(getLoginUser());
 						comment.setContent(input.getModelObject());
-						OneDev.getInstance(PullRequestCommentManager.class).create(comment, new ArrayList<>());
+						OneDev.getInstance(PullRequestCommentService.class).create(comment, new ArrayList<>());
 						
 						if (showComments) {
 							((BasePage) getPage()).notifyObservableChange(target,
@@ -395,7 +395,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				
 				PullRequest request = getPullRequest();
 				Project project = request.getTargetProject();
-				project.cacheCommitStatuses(getBuildManager().queryStatus(project, commitIds));
+				project.cacheCommitStatuses(getBuildService().queryStatus(project, commitIds));
 			}
 			
 		});

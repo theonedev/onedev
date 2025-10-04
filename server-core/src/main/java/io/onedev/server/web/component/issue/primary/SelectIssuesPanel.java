@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
 import io.onedev.server.web.component.issue.choice.IssueMultiChoice;
@@ -52,7 +52,7 @@ abstract class SelectIssuesPanel extends FormComponentPanel<Collection<Issue>> {
 
             @Override
             public Collection<Issue> getObject() {
-                return issueIds.stream().map(it->getIssueManager().load(it)).collect(Collectors.toList());
+                return issueIds.stream().map(it->getIssueService().load(it)).collect(Collectors.toList());
             }
 
             @Override
@@ -76,8 +76,8 @@ abstract class SelectIssuesPanel extends FormComponentPanel<Collection<Issue>> {
     
     protected abstract IssueChoiceProvider getChoiceProvider();
 
-    private IssueManager getIssueManager() {
-        return OneDev.getInstance(IssueManager.class);
+    private IssueService getIssueService() {
+        return OneDev.getInstance(IssueService.class);
     }
 
 }

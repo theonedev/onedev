@@ -11,7 +11,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
@@ -32,7 +32,7 @@ public class UserIdentPanel extends GenericPanel<User> {
 
 			@Override
 			protected User load() {
-				return OneDev.getInstance(UserManager.class).load(userId);
+				return OneDev.getInstance(UserService.class).load(userId);
 			}
 			
 		});

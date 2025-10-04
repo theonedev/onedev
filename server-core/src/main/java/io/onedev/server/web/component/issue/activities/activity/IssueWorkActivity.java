@@ -5,7 +5,7 @@ import java.util.Date;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueWorkManager;
+import io.onedev.server.service.IssueWorkService;
 import io.onedev.server.model.IssueWork;
 
 public class IssueWorkActivity implements IssueActivity {
@@ -26,7 +26,7 @@ public class IssueWorkActivity implements IssueActivity {
 	}
 	
 	public IssueWork getWork() {
-		return OneDev.getInstance(IssueWorkManager.class).load(workId);
+		return OneDev.getInstance(IssueWorkService.class).load(workId);
 	}
 	
 	@Override

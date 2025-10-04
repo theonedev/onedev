@@ -31,7 +31,7 @@ import org.bouncycastle.openpgp.PGPPublicKey;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.BaseGpgKey;
 import io.onedev.server.model.support.administration.GpgSetting;
 import io.onedev.server.util.GpgUtils;
@@ -87,7 +87,7 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 		                
 		                BaseGpgKey bean = (BaseGpgKey) editor.getModelObject();
 		                
-		                GpgSetting setting = getSettingManager().getGpgSetting();
+		                GpgSetting setting = getSettingService().getGpgSetting();
 		                if (bean.getKeyIds().stream().anyMatch(it-> setting.getTrustedSignatureVerificationKey(it) != null)) {
 							editor.error(
 									new Path(new PathNode.Named(BaseGpgKey.PROP_CONTENT)), 
@@ -96,8 +96,8 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 		                } else {
 			                setting.getEncodedTrustedKeys().put(bean.getKeyIds().get(0), bean.getContent());
 							setting.encodedTrustedKeysUpdated();
-		                	getSettingManager().saveGpgSetting(setting);
-							getAuditManager().audit(null, "added trust GPG key \"" + GpgUtils.getKeyIDString(bean.getKeyIds().get(0)), null, null);
+		                	getSettingService().saveGpgSetting(setting);
+							auditService.audit(null, "added trust GPG key \"" + GpgUtils.getKeyIDString(bean.getKeyIds().get(0)), null, null);
 		                	target.add(trustedKeysTable);
 		                	modal.close();
 		                }
@@ -188,12 +188,12 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						GpgSetting setting = getSettingManager().getGpgSetting();
+						GpgSetting setting = getSettingService().getGpgSetting();
 						var keyId = rowModel.getObject();
 						setting.getEncodedTrustedKeys().remove(keyId);
 						setting.encodedTrustedKeysUpdated();
-						getSettingManager().saveGpgSetting(setting);
-						getAuditManager().audit(null, "deleted trust GPG key \"" + GpgUtils.getKeyIDString(keyId), null, null);
+						getSettingService().saveGpgSetting(setting);
+						auditService.audit(null, "deleted trust GPG key \"" + GpgUtils.getKeyIDString(keyId), null, null);
 						Session.get().success(_T("GPG key deleted"));
 						target.add(trustedKeysTable);
 					}
@@ -221,12 +221,12 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 
 			@Override
 			public Iterator<? extends Long> iterator(long first, long count) {
-				return getSettingManager().getGpgSetting().getEncodedTrustedKeys().keySet().iterator();
+				return getSettingService().getGpgSetting().getEncodedTrustedKeys().keySet().iterator();
 			}
 
 			@Override
 			public long calcSize() {
-				return getSettingManager().getGpgSetting().getEncodedTrustedKeys().size();
+				return getSettingService().getGpgSetting().getEncodedTrustedKeys().size();
 			}
 
 			@Override
@@ -240,11 +240,11 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 	}
     
     private List<PGPPublicKey> getTrustedKey(long keyId) {
-    	return getSettingManager().getGpgSetting().getTrustedKeys().get(keyId);
+    	return getSettingService().getGpgSetting().getTrustedKeys().get(keyId);
     }
     
-    private SettingManager getSettingManager() {
-    	return OneDev.getInstance(SettingManager.class);
+    private SettingService getSettingService() {
+    	return OneDev.getInstance(SettingService.class);
     }
 
 	@Override

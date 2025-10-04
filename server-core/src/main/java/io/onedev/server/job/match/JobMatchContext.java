@@ -1,10 +1,10 @@
 package io.onedev.server.job.match;
 
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+import javax.annotation.Nullable;
+
 import org.eclipse.jgit.lib.ObjectId;
 
-import javax.annotation.Nullable;
+import io.onedev.server.model.Project;
 
 public class JobMatchContext {
 
@@ -15,19 +15,14 @@ public class JobMatchContext {
 	
 	@Nullable
 	private final ObjectId commitId;
-	
-	@Nullable
-	private final User user;
-	
+		
 	@Nullable
 	private final String jobName;
 
-	public JobMatchContext(Project project, @Nullable String branch, @Nullable ObjectId commitId,
-						   @Nullable User user, @Nullable String jobName) {
+	public JobMatchContext(Project project, @Nullable String branch, @Nullable ObjectId commitId, @Nullable String jobName) {
 		this.project = project;
 		this.branch = branch;
 		this.commitId = commitId;
-		this.user = user;
 		this.jobName = jobName;
 	}
 
@@ -43,11 +38,6 @@ public class JobMatchContext {
 	@Nullable
 	public ObjectId getCommitId() {
 		return commitId;
-	}
-
-	@Nullable
-	public User getUser() {
-		return user;
 	}
 	
 	@Nullable

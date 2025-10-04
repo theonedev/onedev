@@ -21,11 +21,12 @@ import org.apache.wicket.util.visit.IVisitor;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.ChangeObserver;
@@ -90,7 +91,7 @@ abstract class CardListPanel extends Panel {
 						for (var observable : changedObservables) {
 							var issueId = parseLong(substringAfterLast(observable, ":"));
 							Component card = findCard(issueId);
-							if (getQuery().matches(getIssueManager().load(issueId))) {
+							if (getQuery().matches(getIssueService().load(issueId))) {
 								if (card != null) 
 									handler.add(card);
 								else 
@@ -157,13 +158,13 @@ abstract class CardListPanel extends Panel {
 		};
 	}
 		
-	private IssueManager getIssueManager() {
-		return OneDev.getInstance(IssueManager.class);
+	private IssueService getIssueService() {
+		return OneDev.getInstance(IssueService.class);
 	}
 
 	private List<Issue> queryIssues(int offset, int count) {
 		if (getQuery() != null) {
-			return getIssueManager().query(getProjectScope(), getQuery(), true, offset, count);
+			return getIssueService().query(SecurityUtils.getSubject(), getProjectScope(), getQuery(), true, offset, count);
 		} else { 
 			return new ArrayList<>();
 		}
@@ -258,7 +259,7 @@ abstract class CardListPanel extends Panel {
 	
 	@SuppressWarnings("deprecation")
 	private Issue getIssue(int cardIndex) {
-		return getIssueManager().load(((BoardCardPanel) cardsView.get(cardIndex)).getIssueId());
+		return getIssueService().load(((BoardCardPanel) cardsView.get(cardIndex)).getIssueId());
 	}
 	
 	private void updateCardPositions(int index) {
@@ -269,7 +270,7 @@ abstract class CardListPanel extends Panel {
 		else 
 			baseIndex = index;
 		basePosition = getIssue(baseIndex).getBoardPosition();
-		OneDev.getInstance(TransactionManager.class).run(() -> {
+		OneDev.getInstance(TransactionService.class).run(() -> {
 			for (var i=0; i<baseIndex; i++)
 				getIssue(i).setBoardPosition(basePosition-baseIndex+i);
 		});

@@ -1,8 +1,8 @@
 package io.onedev.server.event.project.issue;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueCommentManager;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.service.IssueCommentService;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
@@ -24,7 +24,7 @@ public class IssueCommentCreated extends IssueEvent {
 	}
 
 	public IssueComment getComment() {
-		return OneDev.getInstance(IssueCommentManager.class).load(commentId);
+		return OneDev.getInstance(IssueCommentService.class).load(commentId);
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class IssueCommentCreated extends IssueEvent {
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getComment(), true);
+		return OneDev.getInstance(UrlService.class).urlFor(getComment(), true);
 	}
 
 }

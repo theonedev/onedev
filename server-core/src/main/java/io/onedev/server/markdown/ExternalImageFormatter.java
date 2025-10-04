@@ -14,7 +14,7 @@ public class ExternalImageFormatter<N extends InlineLinkNode> implements NodeFor
 		markdown.append("![");
 		context.renderChildren(node);
 		markdown.append("](");
-		markdown.append(OneDev.getInstance(MarkdownManager.class).toExternal(node.getUrl().toString()));
+		markdown.append(OneDev.getInstance(MarkdownService.class).toExternal(node.getUrl().toString()));
 		markdown.append(")");
 	}
 

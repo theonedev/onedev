@@ -3,7 +3,7 @@ package io.onedev.server.web.page.project.stats.buildmetric;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildMetricManager;
+import io.onedev.server.service.BuildMetricService;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.buildmetric.BuildMetricQuery;
@@ -183,7 +183,7 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 						}
 					});
 
-					Map<Integer, T> stats = OneDev.getInstance(BuildMetricManager.class)
+					Map<Integer, T> stats = OneDev.getInstance(BuildMetricService.class)
 							.queryStats(getProject(), metricClass, parsedQuery);
 
 					for (List<Method> group : groupedMetricGetters) {
@@ -269,7 +269,7 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 	
 	@Override
 	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
-		if (!OneDev.getInstance(BuildMetricManager.class).getAccessibleReportNames(project, metricClass).isEmpty()) 
+		if (!OneDev.getInstance(BuildMetricService.class).getAccessibleReportNames(project, metricClass).isEmpty())
 			return new ViewStateAwarePageLink<>(componentId, getPageClass(), paramsOf(project));
 		else 
 			return new ViewStateAwarePageLink<>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));

@@ -2,7 +2,7 @@ package io.onedev.server.util;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.service.LinkSpecService;
 import io.onedev.server.model.LinkSpec;
 
 public class LinkDescriptor {
@@ -17,7 +17,7 @@ public class LinkDescriptor {
 	}
 	
 	public LinkDescriptor(String linkName) {
-		spec = OneDev.getInstance(LinkSpecManager.class).find(linkName);
+		spec = OneDev.getInstance(LinkSpecService.class).find(linkName);
 		if (spec == null)
 			throw new ExplicitException("Link spec not found: " + linkName);
 		opposite = !linkName.equals(spec.getName());

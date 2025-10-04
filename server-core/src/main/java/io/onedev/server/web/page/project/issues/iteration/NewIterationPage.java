@@ -9,7 +9,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.IterationManager;
+import io.onedev.server.service.IterationService;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -41,9 +41,9 @@ public class NewIterationPage extends ProjectPage {
 				var iteration = new Iteration();
 				iteration.setProject(getProject());
 				bean.update(iteration);
-				OneDev.getInstance(IterationManager.class).createOrUpdate(iteration);
+				OneDev.getInstance(IterationService.class).createOrUpdate(iteration);
 				var newAuditContent = VersionedXmlDoc.fromBean(iteration).toXML();
-				getAuditManager().audit(getProject(), "created iteration \"" + iteration.getName() + "\"", null, newAuditContent);
+				auditService.audit(getProject(), "created iteration \"" + iteration.getName() + "\"", null, newAuditContent);
 				Session.get().success("New iteration created");
 				setResponsePage(IterationIssuesPage.class, IterationIssuesPage.paramsOf(getProject(), iteration, null));
 			}

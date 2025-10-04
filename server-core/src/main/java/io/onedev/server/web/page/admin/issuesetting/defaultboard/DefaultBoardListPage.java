@@ -30,7 +30,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -62,8 +62,8 @@ public class DefaultBoardListPage extends IssueSettingPage {
 					@Override
 					protected void onSave(AjaxRequestTarget target, BoardSpec board) {
 						var newAuditContent = VersionedXmlDoc.fromBean(board).toXML();
-						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-						getAuditManager().audit(null, "changed default issue board \"" + board.getName() + "\"", oldAuditContent, newAuditContent);
+						OneDev.getInstance(SettingService.class).saveIssueSetting(getSetting());
+						auditService.audit(null, "changed default issue board \"" + board.getName() + "\"", oldAuditContent, newAuditContent);
 						target.add(boardsTable);
 						modal.close();
 					}
@@ -94,8 +94,8 @@ public class DefaultBoardListPage extends IssueSettingPage {
 						target.add(boardsTable);
 						modal.close();
 						var newAuditContent = VersionedXmlDoc.fromBean(board).toXML();
-						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-						getAuditManager().audit(null, "added default issue board \"" + board.getName() + "\"", null, newAuditContent);
+						OneDev.getInstance(SettingService.class).saveIssueSetting(getSetting());
+						auditService.audit(null, "added default issue board \"" + board.getName() + "\"", null, newAuditContent);
 					}
 
 					@Override
@@ -192,8 +192,8 @@ public class DefaultBoardListPage extends IssueSettingPage {
 					public void onClick(AjaxRequestTarget target) {
 						var board = getSetting().getBoardSpecs().remove(boardIndex);
 						var oldAuditContent = VersionedXmlDoc.fromBean(board).toXML();
-						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-						getAuditManager().audit(null, "deleted default issue board \"" + board.getName() + "\"", oldAuditContent, null);
+						OneDev.getInstance(SettingService.class).saveIssueSetting(getSetting());
+						auditService.audit(null, "deleted default issue board \"" + board.getName() + "\"", oldAuditContent, null);
 						target.add(boardsTable);
 					}
 					
@@ -230,8 +230,8 @@ public class DefaultBoardListPage extends IssueSettingPage {
 				var oldAuditContent = VersionedXmlDoc.fromBean(getSetting().getBoardSpecs()).toXML();
 				CollectionUtils.move(getSetting().getBoardSpecs(), from.getItemIndex(), to.getItemIndex());
 				var newAuditContent = VersionedXmlDoc.fromBean(getSetting().getBoardSpecs()).toXML();
-				OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-				getAuditManager().audit(null, "changed order of default issue boards", oldAuditContent, newAuditContent);
+				OneDev.getInstance(SettingService.class).saveIssueSetting(getSetting());
+				auditService.audit(null, "changed order of default issue boards", oldAuditContent, newAuditContent);
 				target.add(boardsTable);
 			}
 			

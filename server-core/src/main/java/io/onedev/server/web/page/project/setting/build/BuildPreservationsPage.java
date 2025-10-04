@@ -12,7 +12,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 
@@ -39,8 +39,8 @@ public class BuildPreservationsPage extends ProjectBuildSettingPage {
 				super.onSubmit();
 				var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 				getProject().getBuildSetting().setBuildPreservations(bean.getBuildPreservations());
-				OneDev.getInstance(ProjectManager.class).update(getProject());
-				getAuditManager().audit(getProject(), "changed build preserve rules", oldAuditContent, newAuditContent);
+				OneDev.getInstance(ProjectService.class).update(getProject());
+				auditService.audit(getProject(), "changed build preserve rules", oldAuditContent, newAuditContent);
 				setResponsePage(BuildPreservationsPage.class, 
 						BuildPreservationsPage.paramsOf(getProject()));
 					getSession().success(_T("Build preserve rules saved"));

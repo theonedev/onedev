@@ -58,11 +58,11 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.PullRequestReviewManager;
-import io.onedev.server.entitymanager.PullRequestWatchManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.PullRequestReviewService;
+import io.onedev.server.service.PullRequestWatchService;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -70,7 +70,7 @@ import io.onedev.server.model.PullRequestLabel;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.LastActivity;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -112,7 +112,7 @@ import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
-import io.onedev.server.xodus.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoService;
 
 public abstract class PullRequestListPanel extends Panel {
 
@@ -148,12 +148,12 @@ public abstract class PullRequestListPanel extends Panel {
 		this.queryStringModel = queryModel;
 	}
 
-	private PullRequestManager getPullRequestManager() {
-		return OneDev.getInstance(PullRequestManager.class);		
+	private PullRequestService getPullRequestService() {
+		return OneDev.getInstance(PullRequestService.class);		
 	}
 
-	private TransactionManager getTransactionManager() {
-		return OneDev.getInstance(TransactionManager.class);
+	private TransactionService getTransactionService() {
+		return OneDev.getInstance(TransactionService.class);
 	}
 	
 	@Nullable
@@ -299,7 +299,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 											var requests = selectionColumn.getSelections().stream()
 													.map(it->it.getObject()).collect(toList());
-											getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
+											getWatchService().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
 											selectionColumn.getSelections().clear();
 											Session.get().success(_T("Watch status changed"));
 										}
@@ -360,8 +360,9 @@ public abstract class PullRequestListPanel extends Panel {
 
 											@Override
 											protected void onConfirm(AjaxRequestTarget target) {
+												var user = SecurityUtils.getUser();
 												for (IModel<PullRequest> each : selectionColumn.getSelections())
-													OneDev.getInstance(PullRequestManager.class).discard(each.getObject(), null);
+													OneDev.getInstance(PullRequestService.class).discard(user, each.getObject(), null);
 												target.add(countLabel);
 												target.add(body);
 												selectionColumn.getSelections().clear();
@@ -422,14 +423,14 @@ public abstract class PullRequestListPanel extends Panel {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											getTransactionManager().run(()-> {
+											getTransactionService().run(()-> {
 												Collection<PullRequest> requests = new ArrayList<>();
 												for (IModel<PullRequest> each : selectionColumn.getSelections())
 													requests.add(each.getObject());
-												getPullRequestManager().delete(requests, getProject());
+												getPullRequestService().delete(requests, getProject());
 												for (var request: requests) {
 													var oldAuditContent = VersionedXmlDoc.fromBean(request).toXML();
-													getAuditManager().audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
+													getAuditService().audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
 												}													
 											});
 											target.add(countLabel);
@@ -502,7 +503,7 @@ public abstract class PullRequestListPanel extends Panel {
 											Collection<PullRequest> requests = new ArrayList<>();
 											for (@SuppressWarnings("unchecked") var it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
 												requests.add(it.next());
-											getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
+											getWatchService().setWatchStatus(SecurityUtils.getAuthUser(), requests, watchStatus);
 											Session.get().success(_T("Watch status changed"));
 										}
 
@@ -563,8 +564,9 @@ public abstract class PullRequestListPanel extends Panel {
 
 											@Override
 											protected void onConfirm(AjaxRequestTarget target) {
+												var user = SecurityUtils.getUser();
 												for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
-													OneDev.getInstance(PullRequestManager.class).discard(it.next(), null);
+													OneDev.getInstance(PullRequestService.class).discard(user, it.next(), null);
 												dataProvider.detach();
 												target.add(countLabel);
 												target.add(body);
@@ -627,14 +629,14 @@ public abstract class PullRequestListPanel extends Panel {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											getTransactionManager().run(()-> {
+											getTransactionService().run(()-> {
 												Collection<PullRequest> requests = new ArrayList<>();
 												for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
 													requests.add(it.next());
-												getPullRequestManager().delete(requests, getProject());
+												getPullRequestService().delete(requests, getProject());
 												for (var request: requests) {
 													var oldAuditContent = VersionedXmlDoc.fromBean(request).toXML();
-													getAuditManager().audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
+													getAuditService().audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
 												}													
 											});
 											dataProvider.detach();
@@ -709,9 +711,9 @@ public abstract class PullRequestListPanel extends Panel {
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
-								var visitInfoManager = OneDev.getInstance(VisitInfoManager.class);
+								var visitInfoService = OneDev.getInstance(VisitInfoService.class);
 								for (@SuppressWarnings("unchecked") var it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext(); )
-									visitInfoManager.visitPullRequest(SecurityUtils.getAuthUser(), it.next());
+									visitInfoService.visitPullRequest(SecurityUtils.getAuthUser(), it.next());
 								target.add(body);
 							}
 
@@ -851,9 +853,9 @@ public abstract class PullRequestListPanel extends Panel {
 	
 						@Override
 						protected List<Project> load() {
-							ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+							ProjectService projectService = OneDev.getInstance(ProjectService.class);
 							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new ReadCode()));
-							projects.sort(projectManager.cloneCache().comparingPath());
+							projects.sort(projectService.cloneCache().comparingPath());
 							return projects;
 						}
 						
@@ -967,7 +969,7 @@ public abstract class PullRequestListPanel extends Panel {
 	
 							@Override
 							protected PullRequestReview getReview() {
-								return OneDev.getInstance(PullRequestReviewManager.class).load(reviewId);
+								return OneDev.getInstance(PullRequestReviewService.class).load(reviewId);
 							}
 							
 						});
@@ -1044,7 +1046,7 @@ public abstract class PullRequestListPanel extends Panel {
 				try {
 					var query = queryModel.getObject();
 					if (query != null) 
-						return getPullRequestManager().query(getProject(), query, true, (int) first, (int) count).iterator();
+						return getPullRequestService().query(SecurityUtils.getSubject(), getProject(), query, true, (int) first, (int) count).iterator();
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				}
@@ -1056,7 +1058,7 @@ public abstract class PullRequestListPanel extends Panel {
 				try {
 					var query = queryModel.getObject();
 					if (query != null)
-						return getPullRequestManager().count(getProject(), query.getCriteria());
+						return getPullRequestService().count(SecurityUtils.getSubject(), getProject(), query.getCriteria());
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				}
@@ -1070,7 +1072,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 					@Override
 					protected PullRequest load() {
-						return getPullRequestManager().load(requestId);
+						return getPullRequestService().load(requestId);
 					}
 
 				};
@@ -1121,12 +1123,12 @@ public abstract class PullRequestListPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	private PullRequestWatchManager getWatchManager() {
-		return OneDev.getInstance(PullRequestWatchManager.class);
+	private PullRequestWatchService getWatchService() {
+		return OneDev.getInstance(PullRequestWatchService.class);
 	}
 
-	private AuditManager getAuditManager() {
-		return OneDev.getInstance(AuditManager.class);
+	private AuditService getAuditService() {
+		return OneDev.getInstance(AuditService.class);
 	}
 
 	@Override

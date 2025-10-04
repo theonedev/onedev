@@ -9,7 +9,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.buildspec.job.JobVariable;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -73,7 +73,7 @@ public class RegistryLogin implements Serializable {
 	public RegistryLoginFacade getFacade(String jobToken) {
 		var interpolator = new VariableInterpolator(t -> {
 			if (t.equalsIgnoreCase(JobVariable.SERVER_URL.name()))
-				return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+				return OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 			else if (t.equalsIgnoreCase(JobVariable.JOB_TOKEN.name()))
 				return jobToken;
 			else

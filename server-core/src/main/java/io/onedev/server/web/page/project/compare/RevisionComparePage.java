@@ -41,10 +41,10 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.CodeCommentReplyService;
+import io.onedev.server.service.CodeCommentStatusChangeService;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
@@ -124,7 +124,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 
 				@Override
 				protected Collection<CodeComment> load() {
-					CodeCommentManager manager = OneDev.getInstance(CodeCommentManager.class);
+					CodeCommentService manager = OneDev.getInstance(CodeCommentService.class);
 					return manager.query(projectModel.getObject(),
 							state.compareWithMergeBase ? mergeBase : leftCommitId, rightCommitId);
 				}
@@ -247,7 +247,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 				if (state.leftSide.getBranch() != null && state.rightSide.getBranch() != null) {
 					ProjectAndBranch left = new ProjectAndBranch(state.leftSide.toString());
 					ProjectAndBranch right = new ProjectAndBranch(state.rightSide.toString());
-					return OneDev.getInstance(PullRequestManager.class).findEffective(left, right);
+					return OneDev.getInstance(PullRequestService.class).findEffective(left, right);
 				} else {
 					return null;
 				}
@@ -767,7 +767,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	@Override
 	public CodeComment getOpenComment() {
 		if (state.commentId != null)
-			return OneDev.getInstance(CodeCommentManager.class).load(state.commentId);
+			return OneDev.getInstance(CodeCommentService.class).load(state.commentId);
 		else
 			return null;
 	}
@@ -813,22 +813,22 @@ public class RevisionComparePage extends ProjectPage implements RevisionAnnotati
 	@Override
 	public void onSaveComment(CodeComment comment) {
 		if (comment.isNew())
-			OneDev.getInstance(CodeCommentManager.class).create(comment);
+			OneDev.getInstance(CodeCommentService.class).create(comment);
 		else
-			OneDev.getInstance(CodeCommentManager.class).update(comment);			
+			OneDev.getInstance(CodeCommentService.class).update(comment);
 	}
 	
 	@Override
 	public void onSaveCommentReply(CodeCommentReply reply) {
 		if (reply.isNew())
-			OneDev.getInstance(CodeCommentReplyManager.class).create(reply);
+			OneDev.getInstance(CodeCommentReplyService.class).create(reply);
 		else
-			OneDev.getInstance(CodeCommentReplyManager.class).update(reply);			
+			OneDev.getInstance(CodeCommentReplyService.class).update(reply);
 	}
 
 	@Override
 	public void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
-		OneDev.getInstance(CodeCommentStatusChangeManager.class).create(change, note);
+		OneDev.getInstance(CodeCommentStatusChangeService.class).create(change, note);
 	}
 	
 	@Override

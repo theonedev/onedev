@@ -1,18 +1,19 @@
 package io.onedev.server.web.component.commandpalette;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.BuildQueryParser;
 import io.onedev.server.search.entity.build.FuzzyCriteria;
 import io.onedev.server.search.entity.build.ReferenceCriteria;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 public class BuildParam extends ParamSegment {
 
@@ -27,7 +28,7 @@ public class BuildParam extends ParamSegment {
 			Map<String, String> paramValues, int count) {
 		var project = ParsedUrl.getProject(paramValues);
 		Map<String, String> suggestions = new LinkedHashMap<>();
-		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+		BuildService buildService = OneDev.getInstance(BuildService.class);
 		BuildQuery query;
 		if (matchWith.length() == 0) {
 			query = new BuildQuery();
@@ -40,7 +41,7 @@ public class BuildParam extends ParamSegment {
 			}
 			query = new BuildQuery(criteria);
 		}
-		List<Build> builds = buildManager.query(project, query, false, 0, count);
+		List<Build> builds = buildService.query(SecurityUtils.getSubject(), project, query, false, 0, count);
 		
 		for (Build build: builds) 
 			suggestions.put(build.getSummary(project), String.valueOf(build.getNumber()));
@@ -49,10 +50,10 @@ public class BuildParam extends ParamSegment {
 
 	@Override
 	public boolean isExactMatch(String matchWith, Map<String, String> paramValues) {
-		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+		BuildService buildService = OneDev.getInstance(BuildService.class);
 		try {
 			Long buildNumber = Long.valueOf(matchWith);
-			if (buildManager.find(ParsedUrl.getProject(paramValues), buildNumber) != null) 
+			if (buildService.find(ParsedUrl.getProject(paramValues), buildNumber) != null) 
 				return true;
 		} catch (NumberFormatException e) {
 		}

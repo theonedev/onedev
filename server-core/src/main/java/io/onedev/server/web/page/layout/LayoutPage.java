@@ -63,15 +63,15 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
-import io.onedev.server.SubscriptionManager;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.AlertManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.SubscriptionService;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.AlertService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Alert;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.updatecheck.UpdateCheckManager;
+import io.onedev.server.updatecheck.UpdateCheckService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -129,7 +129,7 @@ import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage
 import io.onedev.server.web.page.admin.issuesetting.timetracking.TimeTrackingSettingPage;
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
 import io.onedev.server.web.page.admin.labelmanagement.LabelManagementPage;
-import io.onedev.server.web.page.admin.mailservice.MailServicePage;
+import io.onedev.server.web.page.admin.mailservice.MailConnectorPage;
 import io.onedev.server.web.page.admin.performancesetting.PerformanceSettingPage;
 import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
 import io.onedev.server.web.page.admin.rolemanagement.NewRolePage;
@@ -199,7 +199,7 @@ public abstract class LayoutPage extends BasePage {
 
 					@Override
 					protected String load() {
-						return getSettingManager().getBrandingSetting().getName();
+						return getSettingService().getBrandingSetting().getName();
 					}
 
 				}));
@@ -282,7 +282,7 @@ public abstract class LayoutPage extends BasePage {
 							AgentListPage.class, AgentListPage.paramsOf(0), Lists.newArrayList(AgentDetailPage.class)));
 
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, _T("Mail Service"),
-							MailServicePage.class, new PageParameters()));
+							MailConnectorPage.class, new PageParameters()));
 
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, _T("Service Desk Settings"),
 							ServiceDeskSettingPage.class, new PageParameters()));
@@ -344,7 +344,7 @@ public abstract class LayoutPage extends BasePage {
 					List<SidebarMenuItem> maintenanceMenuItems = new ArrayList<>();
 					maintenanceMenuItems.add(new SidebarMenuItem.Page(null, _T("Database Backup"),
 							DatabaseBackupPage.class, new PageParameters()));
-					var servers = getClusterManager().getServerAddresses();
+					var servers = getClusterService().getServerAddresses();
 					if (servers.size() > 1) {
 						List<SidebarMenuItem> serverLogMenuItems = new ArrayList<>();
 						List<SidebarMenuItem> serverInformationMenuItems = new ArrayList<>();
@@ -536,7 +536,7 @@ public abstract class LayoutPage extends BasePage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getUpdateCheckManager().clearCache();
+				getUpdateCheckService().clearCache();
 				throw new RedirectToUrlException(checkUpdateUrl);
 			}
 
@@ -561,7 +561,7 @@ public abstract class LayoutPage extends BasePage {
 
 		}));
 		if (SecurityUtils.isAdministrator())
-			sidebar.add(getSubscriptionManager().renderSupportRequestLink("supportRequest"));
+			sidebar.add(getSubscriptionService().renderSupportRequestLink("supportRequest"));
 		else
 			sidebar.add(new WebMarkupContainer("supportRequest").setVisible(false));
 
@@ -580,7 +580,7 @@ public abstract class LayoutPage extends BasePage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getAlertManager().clear();
+						getAlertService().clear();
 						notifyObservableChange(target, Alert.getChangeObservable());
 					}
 
@@ -648,7 +648,7 @@ public abstract class LayoutPage extends BasePage {
 							actionFrag.add(new AjaxLink<Void>("delete") {
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									getAlertManager().delete(rowModel.getObject());
+									getAlertService().delete(rowModel.getObject());
 									notifyObservableChange(target, Alert.getChangeObservable());
 								}
 							});
@@ -663,12 +663,12 @@ public abstract class LayoutPage extends BasePage {
 					public Iterator<? extends Alert> iterator(long first, long count) {
 						var criteria = EntityCriteria.of(Alert.class);
 						criteria.addOrder(Order.desc(PROP_DATE));
-						return getAlertManager().query(criteria, (int)first, (int)count).iterator();
+						return getAlertService().query(criteria, (int)first, (int)count).iterator();
 					}
 
 					@Override
 					public long size() {
-						return getAlertManager().count();
+						return getAlertService().count();
 					}
 
 					@Override
@@ -678,7 +678,7 @@ public abstract class LayoutPage extends BasePage {
 
 							@Override
 							protected Alert load() {
-								return getAlertManager().load(id);
+								return getAlertService().load(id);
 							}
 
 						};
@@ -700,7 +700,7 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getAlertManager().count() != 0);
+				setVisible(getAlertService().count() != 0);
 			}
 
 		});
@@ -709,7 +709,7 @@ public abstract class LayoutPage extends BasePage {
 		topbar.add(new ChangeObserver() {
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
-				var count = getAlertManager().count();
+				var count = getAlertService().count();
 				if (count != 0 && !alertsLink.isVisible() || count == 0 && alertsLink.isVisible())
 					handler.add(alertsLink);
 			}
@@ -770,7 +770,7 @@ public abstract class LayoutPage extends BasePage {
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
-						var newVersionStatus = getUpdateCheckManager().getNewVersionStatus();
+						var newVersionStatus = getUpdateCheckService().getNewVersionStatus();
 						if (newVersionStatus != null) {
 							tag.put("src", "/~img/new-" + newVersionStatus + ".svg");
 							tag.put("onload", "onedev.server.layout.onNewVersionStatusIconLoaded();");
@@ -787,14 +787,14 @@ public abstract class LayoutPage extends BasePage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getUpdateCheckManager().clearCache();
+				getUpdateCheckService().clearCache();
 				throw new RedirectToUrlException(checkUpdateUrl);
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getSettingManager().getSystemSetting().isDisableAutoUpdateCheck());
+				setVisible(!getSettingService().getSystemSetting().isDisableAutoUpdateCheck());
 			}
 
 		});
@@ -1207,34 +1207,34 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				String newVersionStatus = RequestCycle.get().getRequest().getPostParameters().getParameterValue("newVersionStatus").toString();
-				getUpdateCheckManager().cacheNewVersionStatus(newVersionStatus);
+				getUpdateCheckService().cacheNewVersionStatus(newVersionStatus);
 			}
 		});
 	}
 
-	private SubscriptionManager getSubscriptionManager() {
-		return OneDev.getInstance(SubscriptionManager.class);
+	private SubscriptionService getSubscriptionService() {
+		return OneDev.getInstance(SubscriptionService.class);
 	}
 
-	private AlertManager getAlertManager() {
-		return OneDev.getInstance(AlertManager.class);
+	private AlertService getAlertService() {
+		return OneDev.getInstance(AlertService.class);
 	}
 
-	private ClusterManager getClusterManager() {
-		return OneDev.getInstance(ClusterManager.class);
+	private ClusterService getClusterService() {
+		return OneDev.getInstance(ClusterService.class);
 	}
 
 	@Override
 	protected boolean isPermitted() {
-		return getLoginUser() != null || getSettingManager().getSecuritySetting().isEnableAnonymousAccess();
+		return getLoginUser() != null || getSettingService().getSecuritySetting().isEnableAnonymousAccess();
 	}
 
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 
-	private UpdateCheckManager getUpdateCheckManager() {
-		return OneDev.getInstance(UpdateCheckManager.class);
+	private UpdateCheckService getUpdateCheckService() {
+		return OneDev.getInstance(UpdateCheckService.class);
 	}
 
 	@Override

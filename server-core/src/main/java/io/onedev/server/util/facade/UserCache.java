@@ -10,7 +10,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.util.MapProxy;
 import io.onedev.server.util.Similarities;
@@ -55,10 +55,10 @@ public class UserCache extends MapProxy<Long, UserFacade> {
 	}
 		
 	public Collection<User> getUsers(boolean includeDisabled) {
-		UserManager userManager = OneDev.getInstance(UserManager.class);
+		UserService userService = OneDev.getInstance(UserService.class);
 		return entrySet().stream()
 				.filter(it -> includeDisabled || !it.getValue().isDisabled())
-				.map(it -> userManager.load(it.getKey()))
+				.map(it -> userService.load(it.getKey()))
 				.collect(toSet());
 	}
 

@@ -9,13 +9,13 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Numeric;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.AgentService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.job.*;
-import io.onedev.server.job.log.LogManager;
+import io.onedev.server.job.log.LogService;
 import io.onedev.server.job.log.ServerJobLogger;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.terminal.AgentShell;
@@ -63,16 +63,16 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 		super.setConcurrency(concurrency);
 	}
 	
-	private AgentManager getAgentManager() {
-		return OneDev.getInstance(AgentManager.class);
+	private AgentService getAgentService() {
+		return OneDev.getInstance(AgentService.class);
 	}
 	
-	private JobManager getJobManager() {
-		return OneDev.getInstance(JobManager.class);
+	private JobService getJobService() {
+		return OneDev.getInstance(JobService.class);
 	}
 
-	private SessionManager getSessionManager() {
-		return OneDev.getInstance(SessionManager.class);
+	private SessionService getSessionService() {
+		return OneDev.getInstance(SessionService.class);
 	}
 	
 	private int getConcurrencyNumber() {
@@ -85,15 +85,15 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 	@Override
 	public boolean execute(JobContext jobContext, TaskLogger logger) {
 		AgentRunnable runnable = (agentId) -> {
-			return getJobManager().runJob(jobContext, new JobRunnable() {
+			return getJobService().runJob(jobContext, new JobRunnable() {
 				
 				@Override
 				public boolean run(TaskLogger jobLogger) {
 					notifyJobRunning(jobContext.getBuildId(), agentId);
 					
-					var agentData = getSessionManager().call(() -> getAgentManager().load(agentId).getAgentData());
+					var agentData = getSessionService().call(() -> getAgentService().load(agentId).getAgentData());
 
-					agentSession = getAgentManager().getAgentSession(agentId);
+					agentSession = getAgentService().getAgentSession(agentId);
 					if (agentSession == null)
 						throw new ExplicitException("Allocated agent not connected to current server, please retry later");
 
@@ -141,12 +141,12 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 				jobContext.getServices().size()+1, runnable);
 	}
 	
-	private LogManager getLogManager() {
-		return OneDev.getInstance(LogManager.class);
+	private LogService getLogService() {
+		return OneDev.getInstance(LogService.class);
 	}
 	
-	private ClusterManager getClusterManager() {
-		return OneDev.getInstance(ClusterManager.class);
+	private ClusterService getClusterService() {
+		return OneDev.getInstance(ClusterService.class);
 	}
 	
 	private ResourceAllocator getResourceAllocator() {
@@ -156,16 +156,16 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
 		String jobToken = UUID.randomUUID().toString();
-		getLogManager().addJobLogger(jobToken, jobLogger);
+		getLogService().addJobLogger(jobToken, jobLogger);
 		try {
-			String testServer = getClusterManager().getLocalServerAddress();
+			String testServer = getClusterService().getLocalServerAddress();
 			jobLogger.log("Pending resource allocation...");
 			AgentRunnable runnable = agentId -> {
 				TaskLogger currentJobLogger = new ServerJobLogger(testServer, jobToken);
-				var agentData = getSessionManager().call(
-						() -> getAgentManager().load(agentId).getAgentData());
+				var agentData = getSessionService().call(
+						() -> getAgentService().load(agentId).getAgentData());
 
-				Session agentSession = getAgentManager().getAgentSession(agentId);
+				Session agentSession = getAgentService().getAgentSession(agentId);
 				if (agentSession == null)
 					throw new ExplicitException("Allocated agent not connected to current server, please retry later");
 
@@ -173,19 +173,19 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 
 				TestDockerJobData jobData = new TestDockerJobData(getName(), jobToken,
 						testData.getDockerImage(), getDockerSockPath(), getRegistryLogins(jobToken), 
-						OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl(),
+						OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl(),
 						getRunOptions());
 
 				long timeout = 300*1000L;
-				if (getLogManager().getJobLogger(jobToken) == null) {
-					getLogManager().addJobLogger(jobToken, currentJobLogger);
+				if (getLogService().getJobLogger(jobToken) == null) {
+					getLogService().addJobLogger(jobToken, currentJobLogger);
 					try {
 						return call(agentSession, jobData, timeout);
 					} catch (InterruptedException | TimeoutException e) {
 						new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
 						throw new RuntimeException(e);
 					} finally {
-						getLogManager().removeJobLogger(jobToken);
+						getLogService().removeJobLogger(jobToken);
 					}
 				} else {
 					try {
@@ -201,7 +201,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 					AgentQuery.parse(agentQuery, true), getName(), 
 					getConcurrencyNumber(), 1, runnable);
 		} finally {
-			getLogManager().removeJobLogger(jobToken);
+			getLogService().removeJobLogger(jobToken);
 		}
 	}
 

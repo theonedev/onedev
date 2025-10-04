@@ -22,15 +22,15 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.GroupService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.UserAuthorization;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.security.permission.ConfidentialIssuePermission;
@@ -42,30 +42,30 @@ import io.onedev.server.util.facade.UserFacade;
 
 public class GeneralAuthorizingRealm extends AuthorizingRealm {
 
-    protected final UserManager userManager;
+    protected final UserService userService;
     
-    protected final GroupManager groupManager;
+    protected final GroupService groupService;
     
-    protected final ProjectManager projectManager;
+    protected final ProjectService projectService;
     
-    protected final SessionManager sessionManager;
+    protected final SessionService sessionService;
     
-    protected final SettingManager settingManager;
+    protected final SettingService settingService;
     
 	private static final MetaDataKey<Map<String, AuthorizationInfo>> AUTHORIZATION_INFOS = new MetaDataKey<>() {};    
     
 	@Inject
-    public GeneralAuthorizingRealm(UserManager userManager, GroupManager groupManager,
-								   ProjectManager projectManager, SessionManager sessionManager, SettingManager settingManager) {
-    	this.userManager = userManager;
-    	this.groupManager = groupManager;
-    	this.projectManager = projectManager;
-    	this.sessionManager = sessionManager;
-    	this.settingManager = settingManager;
+    public GeneralAuthorizingRealm(UserService userService, GroupService groupService,
+                                   ProjectService projectService, SessionService sessionService, SettingService settingService) {
+    	this.userService = userService;
+    	this.groupService = groupService;
+    	this.projectService = projectService;
+    	this.sessionService = sessionService;
+    	this.settingService = settingService;
     }
 	
 	private AuthorizationInfo newAuthorizationInfo(String principal) {
-		var result = sessionManager.call(() -> {
+		var result = sessionService.call(() -> {
 			Collection<Permission> permissions = new ArrayList<>();
 			var user = SecurityUtils.getAuthUser(principal);
 			if (user != null) {
@@ -110,7 +110,7 @@ public class GeneralAuthorizingRealm extends AuthorizingRealm {
 				}
 			}
 			
-			if (!SecurityUtils.isAnonymous(principal) || settingManager.getSecuritySetting().isEnableAnonymousAccess()) {
+			if (!SecurityUtils.isAnonymous(principal) || settingService.getSecuritySetting().isEnableAnonymousAccess()) {
 				permissions.add(p -> {
 					if (p instanceof ProjectPermission) {
 						ProjectPermission projectPermission = (ProjectPermission) p;

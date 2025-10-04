@@ -10,7 +10,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.service.AgentService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.util.ProjectScope;
 
@@ -21,8 +21,8 @@ public class OnlineCriteria extends StatusCriteria {
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Agent, Agent> from, CriteriaBuilder builder) {
 		Path<?> attribute = from.get(Agent.PROP_ID);
-		var agentManager = OneDev.getInstance(AgentManager.class);
-		Collection<Long> agentIds = agentManager.getOnlineAgents();
+		var agentService = OneDev.getInstance(AgentService.class);
+		Collection<Long> agentIds = agentService.getOnlineAgents();
 		if (!agentIds.isEmpty())
 			return attribute.in(agentIds);
 		else

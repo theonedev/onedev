@@ -16,7 +16,7 @@ import org.apache.wicket.util.convert.ConversionException;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.service.GroupService;
 import io.onedev.server.model.Group;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.groupchoice.GroupSingleChoice;
@@ -48,7 +48,7 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 				choices.addAll((List<Group>) ReflectionUtils
 						.invokeStaticMethod(descriptor.getBeanClass(), groupChoice.value()));
 			} else {
-				choices.addAll(OneDev.getInstance(GroupManager.class).query());
+				choices.addAll(OneDev.getInstance(GroupService.class).query());
 				choices.sort(Comparator.comparing(Group::getName));
 			}
 		} finally {
@@ -56,7 +56,7 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 		}
 		Group group;
 		if (getModelObject() != null)
-			group = OneDev.getInstance(GroupManager.class).find(getModelObject());
+			group = OneDev.getInstance(GroupService.class).find(getModelObject());
 		else
 			group = null;
 		

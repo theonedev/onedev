@@ -16,7 +16,7 @@ import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.PlainText;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 
 public class RefUpdated extends ProjectEvent implements CommitAware {
 	
@@ -105,7 +105,7 @@ public class RefUpdated extends ProjectEvent implements CommitAware {
 	@Override
 	public String getUrl() {
 		if (newCommitId != null)
-			return OneDev.getInstance(UrlManager.class).urlFor(getProject(), newCommitId, true);
+			return OneDev.getInstance(UrlService.class).urlFor(getProject(), newCommitId, true);
 		else
 			throw new UnsupportedOperationException();
 	}

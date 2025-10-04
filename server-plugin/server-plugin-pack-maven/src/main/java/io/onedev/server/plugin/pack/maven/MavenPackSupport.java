@@ -13,7 +13,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.google.common.io.Resources;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PackManager;
+import io.onedev.server.service.PackService;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.pack.PackSupport;
@@ -56,7 +56,7 @@ public class MavenPackSupport implements PackSupport {
 		return new MavenPackPanel(componentId, new LoadableDetachableModel<>() {
 			@Override
 			protected Pack load() {
-				return OneDev.getInstance(PackManager.class).load(packId);
+				return OneDev.getInstance(PackService.class).load(packId);
 			}
 			
 		});

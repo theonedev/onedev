@@ -1,6 +1,6 @@
 package io.onedev.server.rest.resource;
 
-import io.onedev.server.entitymanager.PullRequestWatchManager;
+import io.onedev.server.service.PullRequestWatchService;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -19,18 +19,18 @@ import javax.ws.rs.core.Response;
 @Singleton
 public class PullRequestWatchResource {
 
-	private final PullRequestWatchManager watchManager;
+	private final PullRequestWatchService watchService;
 
 	@Inject
-	public PullRequestWatchResource(PullRequestWatchManager watchManager) {
-		this.watchManager = watchManager;
+	public PullRequestWatchResource(PullRequestWatchService watchService) {
+		this.watchService = watchService;
 	}
 
 	@Api(order=100)
 	@Path("/{watchId}")
 	@GET
 	public PullRequestWatch get(@PathParam("watchId") Long watchId) {
-		PullRequestWatch watch = watchManager.load(watchId);
+		PullRequestWatch watch = watchService.load(watchId);
 		if (!SecurityUtils.canReadCode(watch.getRequest().getProject()))
 			throw new UnauthorizedException();
 		return watch;
@@ -43,7 +43,7 @@ public class PullRequestWatchResource {
 				|| !SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getAuthUser())) {
 			throw new UnauthorizedException();
 		}
-		watchManager.createOrUpdate(watch);
+		watchService.createOrUpdate(watch);
 		return watch.getId();
 	}
 
@@ -53,7 +53,7 @@ public class PullRequestWatchResource {
 	public Response update(@PathParam("watchId") Long watchId, @NotNull PullRequestWatch watch) {
 		if (!SecurityUtils.canModifyOrDelete(watch)) 
 			throw new UnauthorizedException();
-		watchManager.createOrUpdate(watch);
+		watchService.createOrUpdate(watch);
 		return Response.ok().build();
 	}
 	
@@ -61,11 +61,11 @@ public class PullRequestWatchResource {
 	@Path("/{watchId}")
 	@DELETE
 	public Response delete(@PathParam("watchId") Long watchId) {
-		PullRequestWatch watch = watchManager.load(watchId);
+		PullRequestWatch watch = watchService.load(watchId);
 		if (!SecurityUtils.canModifyOrDelete(watch))
 			throw new UnauthorizedException();
 		
-		watchManager.delete(watch);
+		watchService.delete(watch);
 		return Response.ok().build();
 	}
 	

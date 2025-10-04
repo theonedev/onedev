@@ -17,14 +17,14 @@ import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IterationManager;
-import io.onedev.server.entitymanager.LabelSpecManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IterationService;
+import io.onedev.server.service.LabelSpecService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.entityreference.PullRequestReference;
@@ -109,7 +109,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	}
 	
 	public static LabelSpec getLabelSpec(String labelName) {
-		var labelSpec = OneDev.getInstance(LabelSpecManager.class).find(labelName);
+		var labelSpec = OneDev.getInstance(LabelSpecService.class).find(labelName);
 		if (labelSpec != null) 
 			return labelSpec;
 		else
@@ -118,7 +118,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	
 	public static int getWorkingPeriodValue(String value) {
 		try {
-			var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+			var timeTrackingSetting = OneDev.getInstance(SettingService.class).getIssueSetting().getTimeTrackingSetting();
 			return timeTrackingSetting.parseWorkingPeriod(value);
 		} catch (ValidationException e) {
 			throw new ExplicitException("Invalid working period: " + value);
@@ -134,14 +134,14 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	}
 	
 	public static User getUser(String loginName) {
-		User user = OneDev.getInstance(UserManager.class).findByName(loginName);
+		User user = OneDev.getInstance(UserService.class).findByName(loginName);
 		if (user == null)
 			throw new ExplicitException("Unable to find user with login: " + loginName);
 		return user;
 	}
 	
 	public static Project getProject(String projectPath) {
-		Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+		Project project = OneDev.getInstance(ProjectService.class).findByPath(projectPath);
 		if (project == null)
 			throw new ExplicitException("Unable to find project '" + projectPath + "'");
 		return project;
@@ -185,7 +185,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	
 	public static Issue getIssue(@Nullable Project project, String value) {
 		var reference = IssueReference.of(value, project);
-		var issue = OneDev.getInstance(IssueManager.class).find(reference.getProject(), reference.getNumber());
+		var issue = OneDev.getInstance(IssueService.class).find(reference.getProject(), reference.getNumber());
 		if (issue != null)
 			return issue;
 		else
@@ -194,7 +194,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	
 	public static PullRequest getPullRequest(@Nullable Project project, String value) {
 		var reference = PullRequestReference.of(value, project);
-		var pullRequest = OneDev.getInstance(PullRequestManager.class).find(reference.getProject(), reference.getNumber());
+		var pullRequest = OneDev.getInstance(PullRequestService.class).find(reference.getProject(), reference.getNumber());
 		if (pullRequest != null)
 			return pullRequest;
 		else
@@ -203,7 +203,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	
 	public static Build getBuild(@Nullable Project project, String value) {
 		var reference = BuildReference.of(value, project);
-		var build = OneDev.getInstance(BuildManager.class).find(reference.getProject(), reference.getNumber());
+		var build = OneDev.getInstance(BuildService.class).find(reference.getProject(), reference.getNumber());
 		if (build != null)
 			return build;
 		else
@@ -213,7 +213,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	public static Iteration getIteration(@Nullable Project project, String value) {
 		if (project != null && !value.contains(":")) 
 			value = project.getPath() + ":" + value;
-		Iteration iteration = OneDev.getInstance(IterationManager.class).findInHierarchy(value);
+		Iteration iteration = OneDev.getInstance(IterationService.class).findInHierarchy(value);
 		if (iteration != null)
 			return iteration;
 		else

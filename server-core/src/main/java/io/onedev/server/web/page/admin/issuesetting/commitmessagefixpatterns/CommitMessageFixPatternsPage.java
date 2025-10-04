@@ -11,7 +11,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.issue.CommitMessageFixPatterns;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
@@ -36,8 +36,8 @@ public class CommitMessageFixPatternsPage extends IssueSettingPage {
 				super.onSubmit();
 				getSetting().setCommitMessageFixPatterns(patterns);
 				var newAuditContent = VersionedXmlDoc.fromBean(patterns).toXML();
-				getSettingManager().saveIssueSetting(getSetting());
-				getAuditManager().audit(null, "changed commit message fix patterns", oldAuditContent, newAuditContent);
+				getSettingService().saveIssueSetting(getSetting());
+				auditService.audit(null, "changed commit message fix patterns", oldAuditContent, newAuditContent);
 				oldAuditContent = newAuditContent;
 				Session.get().success(_T("Settings updated"));
 			}
@@ -47,8 +47,8 @@ public class CommitMessageFixPatternsPage extends IssueSettingPage {
 		add(form);
 	}
 	
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 
 	@Override

@@ -16,8 +16,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.transitionspec.TransitionSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -86,9 +86,9 @@ abstract class TransitionEditPanel extends Panel implements InputContext {
 					getSetting().getTransitionSpecs().add(transition);
 				}
 				var newAuditContent = VersionedXmlDoc.fromBean(transition).toXML();
-				OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+				OneDev.getInstance(SettingService.class).saveIssueSetting(getSetting());
 				var verb = transitionIndex != -1 ? "changed" : "added";
-				OneDev.getInstance(AuditManager.class).audit(null, verb + " issue transition", oldAuditContent, newAuditContent);
+				OneDev.getInstance(AuditService.class).audit(null, verb + " issue transition", oldAuditContent, newAuditContent);
 				onSave(target);
 			}
 			
@@ -114,7 +114,7 @@ abstract class TransitionEditPanel extends Panel implements InputContext {
 	}
 
 	private GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
 	@Override

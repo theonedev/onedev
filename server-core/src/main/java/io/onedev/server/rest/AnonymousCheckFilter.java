@@ -12,7 +12,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.rest.resource.TriggerJobResource;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -20,7 +20,7 @@ import io.onedev.server.security.SecurityUtils;
 @Provider
 public class AnonymousCheckFilter implements ContainerRequestFilter {
 
-	private final SettingManager settingManager;
+	private final SettingService settingService;
 	
 	@Context
 	private ResourceInfo resourceInfo;
@@ -29,8 +29,8 @@ public class AnonymousCheckFilter implements ContainerRequestFilter {
 	private HttpServletRequest request;
 	
 	@Inject
-	public AnonymousCheckFilter(SettingManager settingManager) {
-		this.settingManager = settingManager;
+	public AnonymousCheckFilter(SettingService settingService) {
+		this.settingService = settingService;
 	}
 	
 	@Override
@@ -40,7 +40,7 @@ public class AnonymousCheckFilter implements ContainerRequestFilter {
 				&& resourceInfo.getResourceClass() != TriggerJobResource.class) { 
 			String method = request.getMethod();
 			if (method.equals("POST") || method.equals("DELETE") || method.equals("PUT") 
-					|| !settingManager.getSecuritySetting().isEnableAnonymousAccess()) {
+					|| !settingService.getSecuritySetting().isEnableAnonymousAccess()) {
 				throw new UnauthenticatedException();
 			}
 		}

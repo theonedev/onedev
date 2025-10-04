@@ -11,9 +11,9 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.project.ProjectQueryLexer;
@@ -60,12 +60,12 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 							List<String> candidates = new ArrayList<>(Project.QUERY_FIELDS);
 							if (childQuery)
 								candidates.remove(Project.NAME_PATH);
-							if (OneDev.getInstance(SettingManager.class).getServiceDeskSetting() == null) 
+							if (OneDev.getInstance(SettingService.class).getServiceDeskSetting() == null)
 								candidates.remove(Project.NAME_SERVICE_DESK_EMAIL_ADDRESS);
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(Project.SORT_FIELDS.keySet());
-							if (OneDev.getInstance(SettingManager.class).getServiceDeskSetting() == null) 
+							if (OneDev.getInstance(SettingService.class).getServiceDeskSetting() == null)
 								candidates.remove(Project.NAME_SERVICE_DESK_EMAIL_ADDRESS);
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ((criteriaValueExpect = terminalExpect.findExpectByLabel("criteriaValue")) != null) {
@@ -109,8 +109,8 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 										return SuggestionUtils.suggestLabels(matchWith);
 									} else if (fieldName.equals(Project.NAME_SERVICE_DESK_EMAIL_ADDRESS)) {
 										if (!matchWith.contains("*")) {
-											ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-											ProjectCache cache = projectManager.cloneCache();
+											ProjectService projectService = OneDev.getInstance(ProjectService.class);
+											ProjectCache cache = projectService.cloneCache();
 											Collection<Project> projects = SecurityUtils.getAuthorizedProjects(new AccessProject());
 											List<String> serviceDeskNames = projects.stream()
 													.map(it->cache.get(it.getId()).getServiceDeskEmailAddress())
@@ -158,7 +158,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
-		if (!OneDev.getInstance(ClusterManager.class).isClusteringSupported() 
+		if (!OneDev.getInstance(ClusterService.class).isClusteringSupported()
 				&& (suggestedLiteral.equals(getRuleName(WithoutEnoughReplicas)) || suggestedLiteral.equals(getRuleName(HasOutdatedReplicas)))) {
 			return null;
 		} else if (suggestedLiteral.equals(",")) {

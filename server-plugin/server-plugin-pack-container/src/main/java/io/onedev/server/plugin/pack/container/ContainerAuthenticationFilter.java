@@ -1,8 +1,8 @@
 package io.onedev.server.plugin.pack.container;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.AccessTokenManager;
-import io.onedev.server.job.JobManager;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.job.JobService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.ExceptionHandleFilter;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -28,14 +28,14 @@ public class ContainerAuthenticationFilter extends ExceptionHandleFilter {
 	
 	static final String ATTR_BUILD_ID = "buildId";
 	
-	private final AccessTokenManager accessTokenManager;
+	private final AccessTokenService accessTokenService;
 	
-	private final JobManager jobManager;
+	private final JobService jobService;
 	
 	@Inject
-	public ContainerAuthenticationFilter(AccessTokenManager accessTokenManager, JobManager jobManager) {
-		this.accessTokenManager = accessTokenManager;
-		this.jobManager = jobManager;
+	public ContainerAuthenticationFilter(AccessTokenService accessTokenService, JobService jobService) {
+		this.accessTokenService = accessTokenService;
+		this.jobService = jobService;
 	}
 	
 	@Sessional
@@ -50,7 +50,7 @@ public class ContainerAuthenticationFilter extends ExceptionHandleFilter {
 				String userName = StringUtils.substringBefore(decodedAuthValue, ":").trim();
 				String password = StringUtils.substringAfter(decodedAuthValue, ":").trim();
 				if (userName.length() != 0 && password.length() != 0) {
-					var accessToken = accessTokenManager.findByValue(password);
+					var accessToken = accessTokenService.findByValue(password);
 					if (accessToken != null) {
 						ThreadContext.bind(accessToken.asSubject());
 					} else {
@@ -64,11 +64,11 @@ public class ContainerAuthenticationFilter extends ExceptionHandleFilter {
 				}
 			} else if (authHeader.toLowerCase().startsWith("bearer ")) {
 				var authValue = substringAfter(authHeader, " ");
-				var jobContext = jobManager.getJobContext(substringBefore(authValue, ":"), false);
+				var jobContext = jobService.getJobContext(substringBefore(authValue, ":"), false);
 				if (jobContext != null)
 					request.setAttribute(ATTR_BUILD_ID, jobContext.getBuildId());
 				var bearerToken = substringAfter(authValue, ":");
-				var accessToken = accessTokenManager.findByValue(bearerToken);
+				var accessToken = accessTokenService.findByValue(bearerToken);
 				// Do not throw IncorrectCredentialException if no access token found 
 				// as the bearer token can be a faked token for anonymous access
 				if (accessToken != null) 

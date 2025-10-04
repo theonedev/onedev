@@ -56,13 +56,13 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.PackManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.PackService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.imports.ProjectImporterContribution;
 import io.onedev.server.model.Build;
@@ -142,7 +142,7 @@ public class ProjectListPanel extends Panel {
 					List<Project> projects = new ArrayList<>();
 					for (Component row : (WebMarkupContainer) projectsTable.get("body").get("rows"))
 						projects.add((Project) row.getDefaultModelObject());
-					return OneDev.getInstance(IssueManager.class).queryStateStats(projects);
+					return OneDev.getInstance(IssueService.class).queryStateStats(SecurityUtils.getSubject(), projects);
 				}
 
 			}; 
@@ -155,7 +155,7 @@ public class ProjectListPanel extends Panel {
 					List<Project> projects = new ArrayList<>();
 					for (Component row : (WebMarkupContainer) projectsTable.get("body").get("rows"))
 						projects.add((Project) row.getDefaultModelObject());
-					return OneDev.getInstance(BuildManager.class).queryStatusStats(projects);
+					return OneDev.getInstance(BuildService.class).queryStatusStats(projects);
 				}
 
 			};
@@ -168,7 +168,7 @@ public class ProjectListPanel extends Panel {
 					List<Project> projects = new ArrayList<>();
 					for (Component row : (WebMarkupContainer) projectsTable.get("body").get("rows"))
 						projects.add((Project) row.getDefaultModelObject());
-					return OneDev.getInstance(PackManager.class).queryTypeStats(projects);
+					return OneDev.getInstance(PackService.class).queryTypeStats(projects);
 				}
 
 			};
@@ -181,7 +181,7 @@ public class ProjectListPanel extends Panel {
 					List<Project> projects = new ArrayList<>();
 					for (Component row : (WebMarkupContainer) projectsTable.get("body").get("rows"))
 						projects.add((Project) row.getDefaultModelObject());
-					return OneDev.getInstance(PullRequestManager.class).queryStatusStats(projects);
+					return OneDev.getInstance(PullRequestService.class).queryStatusStats(projects);
 				}
 
 			}; 
@@ -208,12 +208,12 @@ public class ProjectListPanel extends Panel {
 		this.expectedCount = expectedCount;
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 
-	private AuditManager getAuditManager() {
-		return OneDev.getInstance(AuditManager.class);
+	private AuditService getAuditService() {
+		return OneDev.getInstance(AuditService.class);
 	}
 	
 	@Override
@@ -251,11 +251,11 @@ public class ProjectListPanel extends Panel {
 		for (var project: Project.getIndependents(projects)) {
 			var oldAuditContent = VersionedXmlDoc.fromBean(project).toXML();
 			if (project.getParent() != null)
-				getAuditManager().audit(project.getParent(), "deleted child project \"" + project.getName() + "\"", oldAuditContent, null);
+				getAuditService().audit(project.getParent(), "deleted child project \"" + project.getName() + "\"", oldAuditContent, null);
 			else
-				getAuditManager().audit(null, "deleted root project \"" + project.getName() + "\"", oldAuditContent, null);
+				getAuditService().audit(null, "deleted root project \"" + project.getName() + "\"", oldAuditContent, null);
 		}
-}
+	}
 
 	@Override
 	protected void onInitialize() {
@@ -422,7 +422,7 @@ public class ProjectListPanel extends Panel {
 												errorMessage = MessageFormat.format(_T("Can not move project \"{0}\" to be under itself or its descendants"), eachProject);
 												break;	
 											} else {
-												Project projectWithSameName = getProjectManager().find(project, eachProject.getName());
+												Project projectWithSameName = getProjectService().find(project, eachProject.getName());
 												if (projectWithSameName != null && !projectWithSameName.equals(eachProject)) {
 													errorMessage = MessageFormat.format(_T("A child project with name \"{0}\" already exists under \"{1}\""), eachProject.getName(), project.getPath());
 													break;
@@ -436,7 +436,7 @@ public class ProjectListPanel extends Panel {
 											new ConfirmModalPanel(target) {
 												
 												private Project getTargetProject() {
-													return getProjectManager().load(projectId);
+													return getProjectService().load(projectId);
 												}
 												
 												@Override
@@ -448,12 +448,12 @@ public class ProjectListPanel extends Panel {
 													for (var project: projects) {
 														oldAuditContents.put(project.getId(), project.getParent()!=null? project.getParent().getPath() : null);
 													}
-													getProjectManager().move(projects, getTargetProject());
+													getProjectService().move(projects, getTargetProject());
 													for (var project: projects) {
 														var oldAuditContent = oldAuditContents.get(project.getId());
 														var newAuditContent = project.getParent()!=null? project.getParent().getPath() : null;
 														if (!Objects.equals(oldAuditContent, newAuditContent))
-															getAuditManager().audit(project, "changed parent", oldAuditContent, newAuditContent);
+															getAuditService().audit(project, "changed parent", oldAuditContent, newAuditContent);
 													}
 													target.add(countLabel);
 													target.add(body);
@@ -522,7 +522,7 @@ public class ProjectListPanel extends Panel {
 											errorMessage = MessageFormat.format(_T("Project manage privilege required to modify \"{0}\""), eachProject);
 											break;
 										} else {
-											Project projectWithSameName = getProjectManager().findByPath(eachProject.getName());
+											Project projectWithSameName = getProjectService().findByPath(eachProject.getName());
 											if (projectWithSameName != null && !projectWithSameName.equals(eachProject)) {
 												errorMessage = MessageFormat.format(_T("A root project with name \"{0}\" already exists"), eachProject.getName());
 												break;
@@ -544,11 +544,11 @@ public class ProjectListPanel extends Panel {
 												for (var project: projects) {
 													oldAuditContents.put(project.getId(), project.getParent()!=null? project.getParent().getPath() : null);
 												}
-												getProjectManager().move(projects, null);
+												getProjectService().move(projects, null);
 												for (var project: projects) {
 													var oldAuditContent = oldAuditContents.get(project.getId());
 													if (oldAuditContent != null)
-														getAuditManager().audit(project, "changed parent", oldAuditContent, null);
+														getAuditService().audit(project, "changed parent", oldAuditContent, null);
 												}
 												target.add(countLabel);
 												target.add(body);
@@ -628,7 +628,7 @@ public class ProjectListPanel extends Panel {
 												projects.add(project);
 												observables.add(project.getDeleteChangeObservable());
 											}
-											getProjectManager().delete(projects);
+											getProjectService().delete(projects);
 											auditDeletions(projects);
 											selectionColumn.getSelections().clear();
 											target.add(countLabel);
@@ -712,7 +712,7 @@ public class ProjectListPanel extends Panel {
 												errorMessage = MessageFormat.format(_T("Can not move project \"{0}\" to be under itself or its descendants"), eachProject);
 												break;
 											} else {
-												Project projectWithSameName = getProjectManager().find(project, eachProject.getName());
+												Project projectWithSameName = getProjectService().find(project, eachProject.getName());
 												if (projectWithSameName != null && !projectWithSameName.equals(eachProject)) {
 													errorMessage = MessageFormat.format(_T("A child project with name \"{0}\" already exists under \"{1}\""), eachProject.getName(), project.getPath());
 													break;
@@ -726,7 +726,7 @@ public class ProjectListPanel extends Panel {
 											new ConfirmModalPanel(target) {
 												
 												private Project getTargetProject() {
-													return getProjectManager().load(projectId);
+													return getProjectService().load(projectId);
 												}
 												
 												@Override
@@ -738,12 +738,12 @@ public class ProjectListPanel extends Panel {
 													for (var project: projects) {
 														oldAuditContents.put(project.getId(), project.getParent()!=null? project.getParent().getPath() : null);
 													}	
-													getProjectManager().move(projects, getTargetProject());
+													getProjectService().move(projects, getTargetProject());
 													for (var project: projects) {
 														var oldAuditContent = oldAuditContents.get(project.getId());
 														var newAuditContent = project.getParent()!=null? project.getParent().getPath() : null;
 														if (!Objects.equals(oldAuditContent, newAuditContent))
-															getAuditManager().audit(project, "changed parent", oldAuditContent, newAuditContent);
+															getAuditService().audit(project, "changed parent", oldAuditContent, newAuditContent);
 													}
 													dataProvider.detach();
 													target.add(countLabel);
@@ -813,7 +813,7 @@ public class ProjectListPanel extends Panel {
 											errorMessage = MessageFormat.format(_T("Project manage privilege required to modify \"{0}\""), eachProject);
 											break;
 										} else {
-											Project projectWithSameName = getProjectManager().findByPath(eachProject.getName());
+											Project projectWithSameName = getProjectService().findByPath(eachProject.getName());
 											if (projectWithSameName != null && !projectWithSameName.equals(eachProject)) {
 												errorMessage = MessageFormat.format(_T("A root project with name \"{0}\" already exists"), eachProject.getName());
 												break;
@@ -836,11 +836,11 @@ public class ProjectListPanel extends Panel {
 												for (var project: projects) {
 													oldAuditContents.put(project.getId(), project.getParent()!=null? project.getParent().getPath() : null);
 												}
-												getProjectManager().move(projects, null);
+												getProjectService().move(projects, null);
 												for (var project: projects) {
 													var oldAuditContent = oldAuditContents.get(project.getId());
 													if (oldAuditContent != null)
-														getAuditManager().audit(project, "changed parent", oldAuditContent, null);
+														getAuditService().audit(project, "changed parent", oldAuditContent, null);
 												}
 
 												dataProvider.detach();
@@ -925,7 +925,7 @@ public class ProjectListPanel extends Panel {
 												projects.add(project);
 												observables.add(project.getDeleteChangeObservable());
 											}
-											getProjectManager().delete(projects);
+											getProjectService().delete(projects);
 											auditDeletions(projects);
 											dataProvider.detach();
 											selectionColumn.getSelections().clear();
@@ -1112,7 +1112,7 @@ public class ProjectListPanel extends Panel {
 				try {
 					ProjectQuery query = queryModel.getObject();
 					if (query != null)
-						return getProjectManager().query(query, true, (int) first, (int) count).iterator();
+						return getProjectService().query(SecurityUtils.getSubject(), query, true, (int) first, (int) count).iterator();
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				}
@@ -1124,7 +1124,7 @@ public class ProjectListPanel extends Panel {
 				try {
 					ProjectQuery query = queryModel.getObject();
 					if (query != null)
-						return getProjectManager().count(query.getCriteria());
+						return getProjectService().count(SecurityUtils.getSubject(), query.getCriteria());
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				}
@@ -1138,7 +1138,7 @@ public class ProjectListPanel extends Panel {
 
 					@Override
 					protected Project load() {
-						return getProjectManager().load(projectId);
+						return getProjectService().load(projectId);
 					}
 
 				};
@@ -1222,7 +1222,7 @@ public class ProjectListPanel extends Panel {
 							@Override
 							protected Map<Integer, Long> load() {
 								Map<Integer, Long> stateCounts = new LinkedHashMap<>();
-								GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+								GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
 								for (ProjectIssueStateStat stats : issueStatsModel.getObject()) {
 									if (stats.getProjectId().equals(projectId)
 											&& stats.getStateOrdinal() >= 0

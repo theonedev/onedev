@@ -22,9 +22,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
@@ -52,7 +52,7 @@ import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.util.CursorSupport;
-import io.onedev.server.xodus.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoService;
 
 abstract class CardDetailPanel extends GenericPanel<Issue> implements InputContext {
 
@@ -241,9 +241,9 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								OneDev.getInstance(IssueManager.class).delete(getIssue());
+								OneDev.getInstance(IssueService.class).delete(getIssue());
 								var oldAuditContent = VersionedXmlDoc.fromBean(getIssue()).toXML();
-								OneDev.getInstance(AuditManager.class).audit(getIssue().getProject(), "deleted issue \"" + getIssue().getReference().toString(getIssue().getProject()) + "\"", oldAuditContent, null);
+								OneDev.getInstance(AuditService.class).audit(getIssue().getProject(), "deleted issue \"" + getIssue().getReference().toString(getIssue().getProject()) + "\"", oldAuditContent, null);
 								onDeletedIssue(target);
 							}
 							
@@ -270,8 +270,8 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 					@Override
 					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, ProjectScope projectScope) {
-						IssueManager issueManager = OneDev.getInstance(IssueManager.class);
-						return issueManager.query(projectScope, query, false, offset, count);
+						IssueService issueService = OneDev.getInstance(IssueService.class);
+						return issueService.query(SecurityUtils.getSubject(), projectScope, query, false, offset, count);
 					}
 
 					@Override
@@ -307,7 +307,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				if (SecurityUtils.getAuthUser() != null) 
-					OneDev.getInstance(VisitInfoManager.class).visitIssue(SecurityUtils.getAuthUser(), getIssue());
+					OneDev.getInstance(VisitInfoService.class).visitIssue(SecurityUtils.getAuthUser(), getIssue());
 			}
 						
 		});	
@@ -322,7 +322,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 	@Override
 	public InputSpec getInputSpec(String inputName) {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(inputName);
+		return OneDev.getInstance(SettingService.class).getIssueSetting().getFieldSpec(inputName);
 	}
 
 	protected abstract Project getProject();

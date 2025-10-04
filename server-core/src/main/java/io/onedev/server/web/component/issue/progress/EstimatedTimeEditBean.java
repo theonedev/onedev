@@ -4,7 +4,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.WorkingPeriod;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -34,7 +34,7 @@ public class EstimatedTimeEditBean implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static String getEstimatedTimeDescription() {
-		var aggregationLink = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting().getAggregationLink();
+		var aggregationLink = OneDev.getInstance(SettingService.class).getIssueSetting().getTimeTrackingSetting().getAggregationLink();
 		if (aggregationLink != null)
 			return MessageFormat.format(_T("Specify estimated time <b class='text-warning'>only for this issue</b>, not counting \"{0}\""), aggregationLink);
 		else 

@@ -2,7 +2,7 @@ package io.onedev.server.util;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -28,22 +28,22 @@ public class ProjectScopedRevision implements Serializable {
 	}
 	
 	public Project getProject() {
-		return getProjectManager().load(projectId);
+		return getProjectService().load(projectId);
 	}
 
 	public String getRevision() {
 		return revision;
 	}
 
-	private static ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private static ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
 	@Nullable
 	public static ProjectScopedRevision from(String revisionFQN) {
 		String projectPath = StringUtils.substringBefore(revisionFQN, ":");
 		String revision = StringUtils.substringAfter(revisionFQN, ":");
-		Project project = getProjectManager().findByPath(projectPath);
+		Project project = getProjectService().findByPath(projectPath);
 		if (project != null)
 			return new ProjectScopedRevision(project, revision);
 		else

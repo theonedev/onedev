@@ -32,7 +32,7 @@ import io.onedev.server.util.NameAndEmail;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
-import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoService;
 
 public class CommitQueryBehavior extends ANTLRAssistBehavior {
 
@@ -138,8 +138,8 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 		return null;
 	}
 
-	private CommitInfoManager getCommitInfoManager() {
-		return OneDev.getInstance(CommitInfoManager.class);
+	private CommitInfoService getCommitInfoManager() {
+		return OneDev.getInstance(CommitInfoService.class);
 	}
 	
 	@Override

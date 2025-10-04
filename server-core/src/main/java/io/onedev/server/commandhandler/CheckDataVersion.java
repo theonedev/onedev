@@ -11,9 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.data.DataManager;
+import io.onedev.server.data.DataService;
 import io.onedev.server.persistence.HibernateConfig;
-import io.onedev.server.persistence.SessionFactoryManager;
+import io.onedev.server.persistence.SessionFactoryService;
 import io.onedev.server.security.SecurityUtils;
 
 @Singleton
@@ -23,16 +23,16 @@ public class CheckDataVersion extends CommandHandler {
 	
 	private static final Logger logger = LoggerFactory.getLogger(CheckDataVersion.class);
 
-	private final SessionFactoryManager sessionFactoryManager;
+	private final SessionFactoryService sessionFactoryService;
 	
-	private final DataManager dataManager;
+	private final DataService dataService;
 		
 	@Inject
-	public CheckDataVersion(SessionFactoryManager sessionFactoryManager, DataManager dataManager, 
-							HibernateConfig hibernateConfig) {
+	public CheckDataVersion(SessionFactoryService sessionFactoryService, DataService dataService,
+                            HibernateConfig hibernateConfig) {
 		super(hibernateConfig);
-		this.sessionFactoryManager = sessionFactoryManager;
-		this.dataManager = dataManager;
+		this.sessionFactoryService = sessionFactoryService;
+		this.dataService = dataService;
 	}
 
 	@Override
@@ -41,13 +41,13 @@ public class CheckDataVersion extends CommandHandler {
 
 		try {
 			doMaintenance(() -> {
-				sessionFactoryManager.start();
+				sessionFactoryService.start();
 
 				// Use system.out in case logger is suppressed by user as this output is important to 
 				// upgrade procedure
 				String dataVersion;
-				try (var conn = dataManager.openConnection()) {
-					dataVersion = callWithTransaction(conn, () -> dataManager.checkDataVersion(conn, false));
+				try (var conn = dataService.openConnection()) {
+					dataVersion = callWithTransaction(conn, () -> dataService.checkDataVersion(conn, false));
 				} catch (SQLException e) {
 					throw new RuntimeException(e);
 				}
@@ -63,7 +63,7 @@ public class CheckDataVersion extends CommandHandler {
 
 	@Override
 	public void stop() {
-		sessionFactoryManager.stop();
+		sessionFactoryService.stop();
 	}
 
 }

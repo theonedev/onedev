@@ -7,14 +7,14 @@ import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 
@@ -81,9 +81,9 @@ public class CreateTagStep extends ServerSideStep {
 
 	@Override
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
-		return OneDev.getInstance(SessionManager.class).call(() -> {
-			var build = OneDev.getInstance(BuildManager.class).load(buildId);
-			PersonIdent taggerIdent = OneDev.getInstance(UserManager.class).getSystem().asPerson();
+		return OneDev.getInstance(SessionService.class).call(() -> {
+			var build = OneDev.getInstance(BuildService.class).load(buildId);
+			PersonIdent taggerIdent = OneDev.getInstance(UserService.class).getSystem().asPerson();
 			Project project = build.getProject();
 			String tagName = getTagName();
 
@@ -95,7 +95,7 @@ public class CreateTagStep extends ServerSideStep {
 			if (build.canCreateTag(getAccessTokenSecret(), tagName)) {
 				RefFacade tagRef = project.getTagRef(tagName);
 				if (tagRef != null)
-					OneDev.getInstance(ProjectManager.class).deleteTag(project, tagName);
+					OneDev.getInstance(ProjectService.class).deleteTag(project, tagName);
 				OneDev.getInstance(GitService.class).createTag(project, tagName, build.getCommitHash(),
 						taggerIdent, getTagMessage(), false);
 			} else {

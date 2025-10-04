@@ -25,10 +25,10 @@ import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.AccessTokenManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.job.JobManager;
+import io.onedev.server.job.JobService;
 import io.onedev.server.model.Project;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -59,17 +59,17 @@ public class TriggerJobResource {
 	
 	private static final String ACCESS_TOKEN_DESCRIPTION = "OneDev access token with permission to trigger the job";
 	
-	private final JobManager jobManager;
+	private final JobService jobService;
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
-	private final AccessTokenManager accessTokenManager;
+	private final AccessTokenService accessTokenService;
 	
 	@Inject
-	public TriggerJobResource(JobManager jobManager, ProjectManager projectManager, AccessTokenManager accessTokenManager) {
-		this.jobManager = jobManager;
-		this.projectManager = projectManager;
-		this.accessTokenManager = accessTokenManager;
+	public TriggerJobResource(JobService jobService, ProjectService projectService, AccessTokenService accessTokenService) {
+		this.jobService = jobService;
+		this.projectService = projectService;
+		this.accessTokenService = accessTokenService;
 	}
 
 	@Api(order=100, description=DESCRIPTION)
@@ -98,17 +98,19 @@ public class TriggerJobResource {
 
     private Long triggerJob(String projectPath, @Nullable String branch, @Nullable String tag, String job,
 							String accessTokenValue, UriInfo uriInfo) {
-		Project project = projectManager.findByPath(projectPath);
+		Project project = projectService.findByPath(projectPath);
 		if (project == null)
 			throw new NotAcceptableException("Project not found: " + projectPath);
 
-		var accessToken = accessTokenManager.findByValue(accessTokenValue);
+		var accessToken = accessTokenService.findByValue(accessTokenValue);
 		if (accessToken == null)
 			throw new NotAcceptableException("Invalid access token");
 		
-		ThreadContext.bind(accessToken.asSubject());
+		var subject = accessToken.asSubject();
+		var user = SecurityUtils.getUser(subject);
+		ThreadContext.bind(subject);
 		try {
-			if (!SecurityUtils.canRunJob(project, job))		
+			if (!SecurityUtils.canRunJob(subject, project, job))		
 				throw new UnauthorizedException();
 
 			if (StringUtils.isNotBlank(branch) && StringUtils.isNotBlank(tag)) 
@@ -136,11 +138,10 @@ public class TriggerJobResource {
 				}
 			}
 			
-			var build = jobManager.submit(project, commit.copy(), job, 
-					jobParams, refName, SecurityUtils.getUser(), null, 
-					null, "Triggered via restful api");
+			var build = jobService.submit(user, project, commit.copy(), job, jobParams, refName, 
+			null, null, "Triggered via restful api");
 			if (build.isFinished())
-				jobManager.resubmit(build, "Rebuild via restful api");
+				jobService.resubmit(user, build, "Rebuild via restful api");
 			return build.getId();
 		} finally {
 			ThreadContext.unbindSubject();

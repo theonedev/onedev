@@ -18,15 +18,15 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.MembershipManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.MembershipService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
@@ -57,13 +57,13 @@ public class NewUserPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				User userWithSameName = getUserManager().findByName(bean.getName());
+				User userWithSameName = getUserService().findByName(bean.getName());
 				if (userWithSameName != null) {
 					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
 							_T("User name already used by another account"));
 				} 
 				
-				if (!bean.isServiceAccount() && getEmailAddressManager().findByValue(bean.getEmailAddress()) != null) {
+				if (!bean.isServiceAccount() && getEmailAddressService().findByValue(bean.getEmailAddress()) != null) {
 					editor.error(new Path(new PathNode.Named(NewUserBean.PROP_EMAIL_ADDRESS)),
 							_T("Email address already used by another user"));
 				} 
@@ -72,12 +72,12 @@ public class NewUserPage extends AdministrationPage {
 					user.setName(bean.getName());
 					user.setFullName(bean.getFullName());
 					user.setServiceAccount(bean.isServiceAccount());
-					var defaultLoginGroup = getSettingManager().getSecuritySetting().getDefaultGroup();
+					var defaultLoginGroup = getSettingService().getSecuritySetting().getDefaultGroup();
 					if (user.isServiceAccount()) {
-						getTransactionManager().run(new Runnable() {
+						getTransactionService().run(new Runnable() {
 							@Override
 							public void run() {
-								getUserManager().create(user);
+								getUserService().create(user);
 								if (defaultLoginGroup != null) 
 									createMembership(user, defaultLoginGroup);
 							}
@@ -89,16 +89,16 @@ public class NewUserPage extends AdministrationPage {
 						emailAddress.setOwner(user);
 						emailAddress.setVerificationCode(null);
 						
-						getTransactionManager().run(new Runnable() {
+						getTransactionService().run(new Runnable() {
 	
 							@Override
 							public void run() {
-								getUserManager().create(user);
-								getEmailAddressManager().create(emailAddress);
+								getUserService().create(user);
+								getEmailAddressService().create(emailAddress);
 								if (defaultLoginGroup != null) 
 									createMembership(user, defaultLoginGroup);
 								var newAuditContent = VersionedXmlDoc.fromBean(user).toXML();
-								getAuditManager().audit(null, "created account \"" + user.getName() + "\"", null, newAuditContent);
+								auditService.audit(null, "created account \"" + user.getName() + "\"", null, newAuditContent);
 							}
 							
 						});
@@ -141,27 +141,27 @@ public class NewUserPage extends AdministrationPage {
 		membership.setUser(user);
 		membership.setGroup(group);
 		user.getMemberships().add(membership);
-		getMembershipManager().create(membership);
+		getMembershipService().create(membership);
 	}
 
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 
-	private TransactionManager getTransactionManager() {
-		return OneDev.getInstance(TransactionManager.class);
+	private TransactionService getTransactionService() {
+		return OneDev.getInstance(TransactionService.class);
 	}
 
-	private MembershipManager getMembershipManager() {
-		return OneDev.getInstance(MembershipManager.class);
+	private MembershipService getMembershipService() {
+		return OneDev.getInstance(MembershipService.class);
 	}
 
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 	
-	private EmailAddressManager getEmailAddressManager() {
-		return OneDev.getInstance(EmailAddressManager.class);
+	private EmailAddressService getEmailAddressService() {
+		return OneDev.getInstance(EmailAddressService.class);
 	}
 	
 	@Override

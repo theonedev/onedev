@@ -15,16 +15,16 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserInvitationManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserInvitationService;
 import io.onedev.server.model.UserInvitation;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.admin.mailservice.MailServicePage;
+import io.onedev.server.web.page.admin.mailservice.MailConnectorPage;
 
 public class NewInvitationPage extends AdministrationPage {
 
@@ -36,8 +36,8 @@ public class NewInvitationPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		var mailService = OneDev.getInstance(SettingManager.class).getMailService();
-		if (mailService != null) {
+		var mailConnector = OneDev.getInstance(SettingService.class).getMailConnector();
+		if (mailConnector != null) {
 			Fragment fragment = new Fragment("content", "inviteFrag", this);
 			NewInvitationBean bean = new NewInvitationBean();
 			Form<?> form = new Form<Void>("form");
@@ -51,10 +51,10 @@ public class NewInvitationPage extends AdministrationPage {
 						logger.log(MessageFormat.format(_T("Sending invitation to \"{0}\"..."), emailAddress));
 						UserInvitation invitation = new UserInvitation();
 						invitation.setEmailAddress(emailAddress);
-						UserInvitationManager userInvitationManager = OneDev.getInstance(UserInvitationManager.class);
-						userInvitationManager.create(invitation);
-						OneDev.getInstance(AuditManager.class).audit(null, "created invitation for \"" + emailAddress + "\"", null, null);
-						userInvitationManager.sendInvitationEmail(invitation);
+						UserInvitationService userInvitationService = OneDev.getInstance(UserInvitationService.class);
+						userInvitationService.create(invitation);
+						OneDev.getInstance(AuditService.class).audit(null, "created invitation for \"" + emailAddress + "\"", null, null);
+						userInvitationService.sendInvitationEmail(invitation);
 						if (Thread.interrupted())
 							throw new InterruptedException();
 					}
@@ -72,7 +72,7 @@ public class NewInvitationPage extends AdministrationPage {
 			add(fragment);
 		} else {
 			Fragment fragment = new Fragment("content", "noMailServiceFrag", this);
-			fragment.add(new BookmarkablePageLink<Void>("mailSetting", MailServicePage.class));
+			fragment.add(new BookmarkablePageLink<Void>("mailSetting", MailConnectorPage.class));
 			add(fragment);
 		}
 	}

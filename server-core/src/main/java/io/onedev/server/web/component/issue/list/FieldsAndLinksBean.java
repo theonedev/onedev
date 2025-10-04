@@ -11,8 +11,8 @@ import java.util.Map;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.LinkSpecService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.LinkSpec;
@@ -41,7 +41,7 @@ public class FieldsAndLinksBean implements Serializable {
 	private static List<String> getFieldChoices() {
 		List<String> choices = new ArrayList<>();
 		choices.add(Issue.NAME_STATE);
-		for (String fieldName: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldNames())
+		for (String fieldName: OneDev.getInstance(SettingService.class).getIssueSetting().getFieldNames())
 			choices.add(fieldName);
 		choices.add(IssueSchedule.NAME_ITERATION);
 		return choices;
@@ -51,7 +51,7 @@ public class FieldsAndLinksBean implements Serializable {
 	private static Map<String, String> getFieldDisplayNames() {
 		Map<String, String> displayNames = new HashMap<>();
 		displayNames.put(Issue.NAME_STATE, _T("State"));
-		for (String fieldName: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldNames())
+		for (String fieldName: OneDev.getInstance(SettingService.class).getIssueSetting().getFieldNames())
 			displayNames.put(fieldName, fieldName);
 		displayNames.put(IssueSchedule.NAME_ITERATION, _T("Iteration"));
 		return displayNames;
@@ -71,7 +71,7 @@ public class FieldsAndLinksBean implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getLinkChoices() {
 		List<String> choices = new ArrayList<>();
-		for (LinkSpec linkSpec: OneDev.getInstance(LinkSpecManager.class).queryAndSort()) {
+		for (LinkSpec linkSpec: OneDev.getInstance(LinkSpecService.class).queryAndSort()) {
 			choices.add(linkSpec.getName());
 			if (linkSpec.getOpposite() != null)
 				choices.add(linkSpec.getOpposite().getName());

@@ -2,7 +2,7 @@ package io.onedev.server.plugin.pack.npm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Pack;
 import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
@@ -85,7 +85,7 @@ public class NpmPackPanel extends GenericPanel<Pack> {
 	}
 
 	private String getServerUrl() {
-		return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+		return OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 	}
 	
 }

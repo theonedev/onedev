@@ -9,7 +9,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.ProjectScope;
@@ -30,7 +30,7 @@ public class ProjectCriteria extends Criteria<Issue> {
 
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
-		var predicate =  OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(
+		var predicate =  OneDev.getInstance(ProjectService.class).getPathMatchPredicate(
 				builder, from.join(Issue.PROP_PROJECT, JoinType.INNER), projectPath);
 		if (operator == IssueQueryLexer.IsNot)
 			predicate = builder.not(predicate);

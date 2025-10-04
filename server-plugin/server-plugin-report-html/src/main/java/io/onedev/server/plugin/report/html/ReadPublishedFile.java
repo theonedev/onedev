@@ -2,7 +2,7 @@ package io.onedev.server.plugin.report.html;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 
 import java.io.File;
 
@@ -31,7 +31,7 @@ class ReadPublishedFile implements ClusterTask<byte[]> {
 	@Override
 	public byte[] call() {
 		return read(getReportLockName(projectId, buildNumber), () -> {
-			File reportDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), CATEGORY + "/" + reportName);
+			File reportDir = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), CATEGORY + "/" + reportName);
 			return readFileToByteArray(new File(reportDir, filePath));
 		});
 	}

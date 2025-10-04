@@ -18,8 +18,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
@@ -57,7 +57,7 @@ public class PackListPage extends LayoutPage {
 	}
 
 	private static GlobalPackSetting getPackSetting() {
-		return OneDev.getInstance(SettingManager.class).getPackSetting();		
+		return OneDev.getInstance(SettingService.class).getPackSetting();
 	}
 	
 	@Override
@@ -92,8 +92,8 @@ public class PackListPage extends LayoutPage {
 				var oldAuditContent = VersionedXmlDoc.fromBean(getPackSetting().getNamedQueries()).toXML();
 				getPackSetting().setNamedQueries(namedQueries);
 				var newAuditContent = VersionedXmlDoc.fromBean(getPackSetting().getNamedQueries()).toXML();
-				OneDev.getInstance(SettingManager.class).savePackSetting(getPackSetting());
-				getAuditManager().audit(null, "changed package queries", oldAuditContent, newAuditContent);
+				OneDev.getInstance(SettingService.class).savePackSetting(getPackSetting());
+				auditService.audit(null, "changed package queries", oldAuditContent, newAuditContent);
 			}
 
 		});
@@ -160,7 +160,7 @@ public class PackListPage extends LayoutPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										OneDev.getInstance(UserManager.class).update(getLoginUser(), null);
+										OneDev.getInstance(UserService.class).update(getLoginUser(), null);
 										target.add(savedQueries);
 										close();
 									}
@@ -183,8 +183,8 @@ public class PackListPage extends LayoutPage {
 											verb = "changed";
 										}
 										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
-										OneDev.getInstance(SettingManager.class).savePackSetting(packSetting);
-										getAuditManager().audit(null, verb + " package query \"" + name + "\"", oldAuditContent, newAuditContent);
+										OneDev.getInstance(SettingService.class).savePackSetting(packSetting);
+										auditService.audit(null, verb + " package query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}
@@ -250,7 +250,7 @@ public class PackListPage extends LayoutPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return _T("Packages") + " - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return _T("Packages") + " - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
 	}
 	
 }

@@ -78,9 +78,9 @@ import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.AccessTokenManager;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.git.GitUtils;
@@ -241,7 +241,7 @@ public class Build extends ProjectBelonging
 	private static ThreadLocal<Stack<Build>> stack = ThreadLocal.withInitial(Stack::new);
 
 	public static File getLogFile(Long projectId, Long buildNumber) {
-		File buildDir = OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber);
+		File buildDir = OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber);
 		return new File(buildDir, LOG_FILE);
 	}
 	
@@ -902,7 +902,7 @@ public class Build extends ProjectBelonging
 	
 	public JobAuthorizationContext getJobAuthorizationContext() {
 		if (jobAuthorizationContext == null) 
-			jobAuthorizationContext = new JobAuthorizationContext(project, getCommitId(), getSubmitter(), request);
+			jobAuthorizationContext = new JobAuthorizationContext(project, getCommitId(), request);
 		return jobAuthorizationContext;
 	}
 	
@@ -918,7 +918,7 @@ public class Build extends ProjectBelonging
 	public Collection<String> getMaskSecrets() {
 		Collection<String> maskSecrets = new HashSet<>();
 		maskSecrets.add(getJobToken());
-		maskSecrets.add(OneDev.getInstance(ClusterManager.class).getCredential());
+		maskSecrets.add(OneDev.getInstance(ClusterService.class).getCredential());
 
 		for (JobSecret secret: getProject().getHierarchyJobSecrets()) 
 			maskSecrets.add(secret.getValue());
@@ -973,11 +973,11 @@ public class Build extends ProjectBelonging
 	}
 	
 	public File getDir() {
-		return getBuildManager().getBuildDir(getProject().getId(), getNumber());
+		return getBuildService().getBuildDir(getProject().getId(), getNumber());
 	}
 	
 	public File getArtifactsDir() {
-		return getBuildManager().getArtifactsDir(getProject().getId(), getNumber());
+		return getBuildService().getArtifactsDir(getProject().getId(), getNumber());
 	}
 	
 	@Nullable
@@ -985,7 +985,7 @@ public class Build extends ProjectBelonging
 		if (streamPreviousCache == null) 
 			streamPreviousCache = new HashMap<>();
 		if (!streamPreviousCache.containsKey(status)) 
-			streamPreviousCache.put(status, getBuildManager().findStreamPrevious(this, status));
+			streamPreviousCache.put(status, getBuildService().findStreamPrevious(this, status));
 		return streamPreviousCache.get(status);
 	}
 	
@@ -993,15 +993,15 @@ public class Build extends ProjectBelonging
 		return OneDev.getInstance(GitService.class);
 	}
 	
-	private BuildManager getBuildManager() {
-		return OneDev.getInstance(BuildManager.class);
+	private BuildService getBuildService() {
+		return OneDev.getInstance(BuildService.class);
 	}
 	
 	public Collection<Long> getStreamPreviousNumbers(int limit) {
 		if (streamPreviousNumbersCache == null) 
 			streamPreviousNumbersCache = new HashMap<>();
 		if (!streamPreviousNumbersCache.containsKey(limit)) {
-			streamPreviousNumbersCache.put(limit, getBuildManager().queryStreamPreviousNumbers(
+			streamPreviousNumbersCache.put(limit, getBuildService().queryStreamPreviousNumbers(
 					this, null, Criteria.IN_CLAUSE_LIMIT));
 		}
 		return streamPreviousNumbersCache.get(limit);
@@ -1060,7 +1060,7 @@ public class Build extends ProjectBelonging
 	
 	public AccessToken getAccessToken(String accessTokenSecret) {
 		String secretValue = getJobAuthorizationContext().getSecretValue(accessTokenSecret);
-		var accessToken = OneDev.getInstance(AccessTokenManager.class).findByValue(secretValue);
+		var accessToken = OneDev.getInstance(AccessTokenService.class).findByValue(secretValue);
 		if (accessToken == null)
 			throw new ExplicitException("Invalid access token");
 		return accessToken;
@@ -1107,7 +1107,7 @@ public class Build extends ProjectBelonging
 	
 	public List<ArtifactInfo> getRootArtifacts() {
 		if (rootArtifacts == null) {
-			DirectoryInfo directory = (DirectoryInfo) getBuildManager()
+			DirectoryInfo directory = (DirectoryInfo) getBuildService()
 					.getArtifactInfo(this, null);
 			if (directory != null)
 				rootArtifacts = directory.getChildren();

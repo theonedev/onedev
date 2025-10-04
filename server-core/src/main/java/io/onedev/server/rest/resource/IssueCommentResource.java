@@ -20,8 +20,8 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import io.onedev.server.entitymanager.IssueCommentManager;
-import io.onedev.server.entitymanager.IssueCommentRevisionManager;
+import io.onedev.server.service.IssueCommentService;
+import io.onedev.server.service.IssueCommentRevisionService;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueCommentRevision;
 import io.onedev.server.rest.annotation.Api;
@@ -33,21 +33,21 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class IssueCommentResource {
 
-	private final IssueCommentManager commentManager;
+	private final IssueCommentService commentService;
 	
-	private final IssueCommentRevisionManager commentRevisionManager;
+	private final IssueCommentRevisionService commentRevisionService;
 
 	@Inject
-	public IssueCommentResource(IssueCommentManager commentManager, IssueCommentRevisionManager commentRevisionManager) {
-		this.commentManager = commentManager;
-		this.commentRevisionManager = commentRevisionManager;
+	public IssueCommentResource(IssueCommentService commentService, IssueCommentRevisionService commentRevisionService) {
+		this.commentService = commentService;
+		this.commentRevisionService = commentRevisionService;
 	}
 
 	@Api(order=100)
 	@Path("/{commentId}")
 	@GET
 	public IssueComment getComment(@PathParam("commentId") Long commentId) {
-		IssueComment comment = commentManager.load(commentId);
+		IssueComment comment = commentService.load(commentId);
     	if (!SecurityUtils.canAccessProject(comment.getIssue().getProject()))  
 			throw new UnauthorizedException();
     	return comment;
@@ -60,7 +60,7 @@ public class IssueCommentResource {
 				|| !isAdministrator() && !comment.getUser().equals(getUser())) {
 			throw new UnauthorizedException();
 		}
-		commentManager.create(comment);
+		commentService.create(comment);
 		return comment.getId();
 	}
 
@@ -68,21 +68,21 @@ public class IssueCommentResource {
 	@Path("/{commentId}")
 	@POST
 	public Response updateComment(@PathParam("commentId") Long commentId, @NotNull String content) {
-		var comment = commentManager.load(commentId);
+		var comment = commentService.load(commentId);
 		if (!canModifyOrDelete(comment)) 
 			throw new UnauthorizedException();
 		var oldContent = comment.getContent();
 		if (!oldContent.equals(content)) {
 			comment.setContent(content);
 			comment.setRevisionCount(comment.getRevisionCount() + 1);
-			commentManager.update(comment);
+			commentService.update(comment);
 
 			var revision = new IssueCommentRevision();
 			revision.setComment(comment);
 			revision.setUser(SecurityUtils.getUser());
 			revision.setOldContent(oldContent);
 			revision.setNewContent(content);
-			commentRevisionManager.create(revision);
+			commentRevisionService.create(revision);
 		}
 		return Response.ok().build();
 	}
@@ -91,10 +91,10 @@ public class IssueCommentResource {
 	@Path("/{commentId}")
 	@DELETE
 	public Response deleteComment(@PathParam("commentId") Long commentId) {
-		IssueComment comment = commentManager.load(commentId);
+		IssueComment comment = commentService.load(commentId);
     	if (!canModifyOrDelete(comment)) 
 			throw new UnauthorizedException();
-		commentManager.delete(comment);
+		commentService.delete(SecurityUtils.getUser(), comment);
 		return Response.ok().build();
 	}
 	

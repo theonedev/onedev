@@ -24,7 +24,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -49,7 +49,7 @@ public class InvalidCodeCommentPage extends ProjectPage {
 			@Override
 			protected CodeComment load() {
 				Long codeCommentId = params.get(PARAM_COEDE_COMMENT).toLong();
-				CodeComment codeComment = OneDev.getInstance(CodeCommentManager.class).load(codeCommentId);
+				CodeComment codeComment = OneDev.getInstance(CodeCommentService.class).load(codeCommentId);
 				Preconditions.checkState(!codeComment.isValid());
 				return codeComment;
 			}
@@ -74,7 +74,7 @@ public class InvalidCodeCommentPage extends ProjectPage {
 
 			@Override
 			public void onClick() {
-				OneDev.getInstance(CodeCommentManager.class).delete(getCodeComment());
+				OneDev.getInstance(CodeCommentService.class).delete(getCodeComment());
 				
 				Session.get().success(MessageFormat.format(_T("Code comment #{0} deleted"), getCodeComment().getId()));
 				

@@ -7,7 +7,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.FieldNamesProvider;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.Patterns;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.field.instance.FieldInstance;
 import io.onedev.server.util.patternset.PatternSet;
@@ -71,7 +71,7 @@ public class IssueCreationSetting implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static Collection<String> getFieldNames() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldNames();
+		return OneDev.getInstance(SettingService.class).getIssueSetting().getFieldNames();
 	}
 	
 	public boolean isProjectAuthorized(Project project) {

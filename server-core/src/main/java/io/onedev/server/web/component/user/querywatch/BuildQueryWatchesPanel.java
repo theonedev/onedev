@@ -28,14 +28,14 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.BuildQueryPersonalizationManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.BuildQueryPersonalizationService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.page.builds.BuildListPage;
@@ -55,7 +55,7 @@ class BuildQueryWatchesPanel extends GenericPanel<User> {
         @Override
         protected List<QueryInfo> load() {
             List<QueryInfo> queryInfos = new ArrayList<>();
-            var buildSetting = getSettingManager().getBuildSetting();
+            var buildSetting = getSettingService().getBuildSetting();
             for (var name: getUser().getBuildQuerySubscriptions()) {
                 NamedQuery query;
                 if (name.startsWith(COMMON_NAME_PREFIX))
@@ -93,26 +93,26 @@ class BuildQueryWatchesPanel extends GenericPanel<User> {
 
             @Override
             public void onClick() {
-                OneDev.getInstance(TransactionManager.class).run(() -> {
-                    var auditManager = OneDev.getInstance(AuditManager.class);
+                OneDev.getInstance(TransactionService.class).run(() -> {
+                    var auditService = OneDev.getInstance(AuditService.class);
                     for (IModel<QueryInfo> each: selectionColumn.getSelections()) {
                         var queryInfo = each.getObject();
                         if (queryInfo.projectId == null) {
                              getUser().getBuildQuerySubscriptions().remove(queryInfo.name);
                              if (getPage() instanceof UserPage)
-                                auditManager.audit(null, "unsubscribed from build query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\"", null, null);
+                                auditService.audit(null, "unsubscribed from build query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\"", null, null);
                         } else {
                              for (var personalization: getUser().getBuildQueryPersonalizations()) {
                                  if (personalization.getProject().getId().equals(queryInfo.projectId)) {
                                      personalization.getQuerySubscriptions().remove(queryInfo.name);
-                                     getBuildQueryPersonalizationManager().createOrUpdate(personalization);
+                                     getBuildQueryPersonalizationService().createOrUpdate(personalization);
                                      if (getPage() instanceof UserPage)
-                                        auditManager.audit(null, "unsubscribed from build query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\" in project \"" + personalization.getProject().getPath() + "\"", null, null);
+                                        auditService.audit(null, "unsubscribed from build query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\" in project \"" + personalization.getProject().getPath() + "\"", null, null);
                                  }
                              }
                         }
                      }
-                     getUserManager().update(getUser(), null);     
+                     getUserService().update(getUser(), null);     
                 });
             }
             
@@ -162,7 +162,7 @@ class BuildQueryWatchesPanel extends GenericPanel<User> {
                 var fragment = new Fragment(componentId, "linkFrag", BuildQueryWatchesPanel.this);
                 var projectId = rowModel.getObject().projectId;
                 if (projectId != null) {
-                    var project = getProjectManager().load(projectId);
+                    var project = getProjectService().load(projectId);
                     var link = new BookmarkablePageLink<Void>("link", ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(project, rowModel.getObject().query, 1));
                     link.add(new Label("label", name));
                     fragment.add(link);
@@ -182,7 +182,7 @@ class BuildQueryWatchesPanel extends GenericPanel<User> {
                                      IModel<QueryInfo> rowModel) {
                 var projectId = rowModel.getObject().projectId;
                 if (projectId != null) {
-                    var project = getProjectManager().load(projectId);
+                    var project = getProjectService().load(projectId);
                     var fragment = new Fragment(componentId, "linkFrag", BuildQueryWatchesPanel.this);
                     var link = new BookmarkablePageLink<Void>("link", ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project));
                     link.add(new Label("label", project.getPath()));
@@ -226,20 +226,20 @@ class BuildQueryWatchesPanel extends GenericPanel<User> {
         super.onDetach();
     }
 
-    private ProjectManager getProjectManager() {
-        return OneDev.getInstance(ProjectManager.class);
+    private ProjectService getProjectService() {
+        return OneDev.getInstance(ProjectService.class);
     }
 
-    private SettingManager getSettingManager() {
-        return OneDev.getInstance(SettingManager.class);
+    private SettingService getSettingService() {
+        return OneDev.getInstance(SettingService.class);
     }
 
-    private BuildQueryPersonalizationManager getBuildQueryPersonalizationManager() {
-        return OneDev.getInstance(BuildQueryPersonalizationManager.class);
+    private BuildQueryPersonalizationService getBuildQueryPersonalizationService() {
+        return OneDev.getInstance(BuildQueryPersonalizationService.class);
     }
     
-    private UserManager getUserManager() {
-        return OneDev.getInstance(UserManager.class);
+    private UserService getUserService() {
+        return OneDev.getInstance(UserService.class);
     }
 
     private User getUser() {

@@ -5,7 +5,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.mail.MailManager;
+import io.onedev.server.mail.MailService;
 import io.onedev.server.model.CommitQueryPersonalization;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
@@ -15,7 +15,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
@@ -35,16 +35,12 @@ import static io.onedev.server.notification.NotificationUtils.getEmailBody;
 public class CommitNotificationManager {
 	
 	private static final Logger logger = LoggerFactory.getLogger(CommitNotificationManager.class);
-	
-	private final MailManager mailManager;
-	
-	private final UrlManager urlManager;
-	
+
 	@Inject
-	public CommitNotificationManager(MailManager mailManager, UrlManager urlManager) {
-		this.mailManager = mailManager;
-		this.urlManager = urlManager;
-	}
+	private MailService mailService;
+
+	@Inject
+	private UrlService urlService;
 
 	private void fillSubscribedQueryStrings(Map<User, Collection<String>> subscribedQueryStrings, 
 			User user, @Nullable NamedQuery query) {
@@ -114,13 +110,13 @@ public class CommitNotificationManager {
 						commit.getShortMessage(),
 						StringUtils.capitalize(event.getActivity()));
 
-				String url = urlManager.urlFor(project, commit, true);
+				String url = urlService.urlFor(project, commit, true);
 				String summary = String.format("Commit authored by %s", commit.getAuthorIdent().getName());
 
 				String threadingReferences = "<commit-" + commit.name() + "@onedev>";
 				
 				if (!notifyEmails.isEmpty()) {
-					mailManager.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), notifyEmails, subject,
+					mailService.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), notifyEmails, subject,
 							getEmailBody(true, event, summary, event.getHtmlBody(), url, false, null),
 							getEmailBody(false, event, summary, event.getTextBody(), url, false, null),
 							null, commit.getAuthorIdent().getName(), threadingReferences);

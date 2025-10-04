@@ -9,10 +9,10 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.service.CodeCommentReplyService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 
 public class ReplyCodeComment extends CodeCommentActivity {
 
@@ -25,13 +25,13 @@ public class ReplyCodeComment extends CodeCommentActivity {
 
     @Override
     public CodeComment getComment() {
-        return OneDev.getInstance(CodeCommentReplyManager.class).load(replyId).getComment();
+        return OneDev.getInstance(CodeCommentReplyService.class).load(replyId).getComment();
     }
     
     @Override
     public Component render(String id) {
         var comment = getComment();
-        var url = OneDev.getInstance(UrlManager.class).urlFor(comment, false);
+        var url = OneDev.getInstance(UrlService.class).urlFor(comment, false);
         var label = MessageFormat.format(_T("Replied to comment on file \"{0}\" in project \"{1}\""), "<a href=\"" + url + "\">" + HtmlEscape.escapeHtml5(comment.getMark().getPath()) + "</a>", comment.getProject().getPath());
         return new Label(id, label).setEscapeModelStrings(false);
     }

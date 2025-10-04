@@ -22,7 +22,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.tabbable.PageTab;
@@ -64,7 +64,7 @@ public abstract class UserPage extends LayoutPage implements UserAware {
 
 			@Override
 			protected User load() {
-				return getUserManager().load(userId);
+				return getUserService().load(userId);
 			}
 
 		};
@@ -125,8 +125,8 @@ public abstract class UserPage extends LayoutPage implements UserAware {
 		return userModel.getObject();
 	}
 	
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 	
 	public static PageParameters paramsOf(User user) {

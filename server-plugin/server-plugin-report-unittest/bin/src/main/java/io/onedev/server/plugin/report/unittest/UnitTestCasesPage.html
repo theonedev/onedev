@@ -1,0 +1,73 @@
+<wicket:extend>
+	<div wicket:id="report" class="test-cases"></div>
+	<wicket:fragment wicket:id="validFrag">
+		<div class="d-flex flex-wrap flex-md-nowrap no-autofocus">
+			<form wicket:id="nameForm" class="w-100 pr-md-2">
+				<div class="clearable-wrapper">
+					<div class="input-group">
+                        <input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off" t:placeholder="Filter by name">
+						<span class="input-group-append">
+							<button wicket:id="submit" t:data-tippy-content="Filter" class="btn btn-icon btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+						</span>
+					</div>
+				</div>
+				<div wicket:id="feedback" class="mt-3"></div>
+			</form>
+			<form wicket:id="testSuiteForm" class="w-100 pl-md-2">
+				<div class="clearable-wrapper">
+					<div class="input-group">
+                        <input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off" t:placeholder="Filter by test suite">
+						<span class="input-group-append">
+							<button wicket:id="submit" t:data-tippy-content="Filter" class="btn btn-icon btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+						</span>
+					</div>
+				</div>
+				<div wicket:id="feedback" class="mt-3"></div>
+			</form>
+		</div>
+		<div wicket:id="summary" class="summary"></div>
+		<wicket:enclosure child="longestDurationFirst">
+		<div class="d-flex align-items-center mb-2">
+			<span class="ml-auto mr-3 font-weight-bold"><wicket:t>Longest Duration First</wicket:t></span>
+			<span class="switch switch-sm switch-primary">
+				<label>
+					<input wicket:id="longestDurationFirst" type="checkbox"> 
+				</label>
+			</span>
+		</div>
+		</wicket:enclosure>
+		<table wicket:id="detail" class="detail table">
+			<tbody>
+				<tr wicket:id="testCases">
+					<td>
+						<div class="d-flex align-items-start">
+							<span wicket:id="status" class="mr-3"></span> 
+							<span wicket:id="name" class="mr-4 text-break"></span>
+							<span wicket:id="duration" class="ml-auto"></span>
+						</div>
+						<pre wicket:id="detail" class="text-gray font-size-sm text-break mt-3"></pre>
+					</td>
+				</tr>
+			</tbody>
+			<wicket:enclosure>
+			<tfoot>
+				<tr>
+					<td wicket:id="pagingNavigator" class="pt-5"></td>						
+				</tr>
+			</tfoot>
+			</wicket:enclosure>
+			<wicket:enclosure>
+			<tfoot>
+				<tr>
+					<td wicket:id="noRecords"></td>						
+				</tr>
+			</tfoot>
+			</wicket:enclosure>
+		</table>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="invalidFrag">
+		<div class="alert alert-notice alert-light-warning">
+			<wicket:t>Report format changed. You may re-run this build to generate the report in new format</wicket:t>
+		</div>
+	</wicket:fragment>
+</wicket:extend>

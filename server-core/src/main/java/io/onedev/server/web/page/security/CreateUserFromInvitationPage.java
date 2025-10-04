@@ -13,17 +13,17 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.MembershipManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserInvitationManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.MembershipService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserInvitationService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserInvitation;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -46,10 +46,10 @@ public class CreateUserFromInvitationPage extends SimplePage {
 
 			@Override
 			protected UserInvitation load() {
-				UserInvitation invitation = getInvitationManager().findByInvitationCode(invitationCode);
+				UserInvitation invitation = getInvitationService().findByInvitationCode(invitationCode);
 				if (invitation == null)
 					throw new ExplicitException(_T("Invalid invitation code"));
-				else if (getEmailAddressManager().findByValue(invitation.getEmailAddress()) != null)
+				else if (getEmailAddressService().findByValue(invitation.getEmailAddress()) != null)
 					throw new ExplicitException(_T("Email address already used: ") + invitation.getEmailAddress());
 				else
 					return invitation;
@@ -71,7 +71,7 @@ public class CreateUserFromInvitationPage extends SimplePage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				User userWithSameName = getUserManager().findByName(newUser.getName());
+				User userWithSameName = getUserService().findByName(newUser.getName());
 				if (userWithSameName != null) {
 					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
 							_T("Login name already used by another account"));
@@ -88,11 +88,11 @@ public class CreateUserFromInvitationPage extends SimplePage {
 					emailAddress.setOwner(user);
 					emailAddress.setVerificationCode(null);
 					
-					var defaultLoginGroup = getSettingManager().getSecuritySetting().getDefaultGroup();
-					getTransactionManager().run(() -> {
-						getUserManager().create(user);
-						getEmailAddressManager().create(emailAddress);
-						getInvitationManager().delete(invitationModel.getObject());
+					var defaultLoginGroup = getSettingService().getSecuritySetting().getDefaultGroup();
+					getTransactionService().run(() -> {
+						getUserService().create(user);
+						getEmailAddressService().create(emailAddress);
+						getInvitationService().delete(invitationModel.getObject());
 						if (defaultLoginGroup != null)
 							createMembership(user, defaultLoginGroup);
 					});
@@ -112,16 +112,16 @@ public class CreateUserFromInvitationPage extends SimplePage {
 		return OneDev.getInstance(PasswordService.class);
 	}
 
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 
-	private MembershipManager getMembershipManager() {
-		return OneDev.getInstance(MembershipManager.class);
+	private MembershipService getMembershipService() {
+		return OneDev.getInstance(MembershipService.class);
 	}
 
-	private TransactionManager getTransactionManager() {
-		return OneDev.getInstance(TransactionManager.class);
+	private TransactionService getTransactionService() {
+		return OneDev.getInstance(TransactionService.class);
 	}
 
 	private void createMembership(User user, Group group) {
@@ -129,19 +129,19 @@ public class CreateUserFromInvitationPage extends SimplePage {
 		membership.setUser(user);
 		membership.setGroup(group);
 		user.getMemberships().add(membership);
-		getMembershipManager().create(membership);
+		getMembershipService().create(membership);
 	}
 
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 	
-	private EmailAddressManager getEmailAddressManager() {
-		return OneDev.getInstance(EmailAddressManager.class);
+	private EmailAddressService getEmailAddressService() {
+		return OneDev.getInstance(EmailAddressService.class);
 	}
 	
-	private UserInvitationManager getInvitationManager() {
-		return OneDev.getInstance(UserInvitationManager.class);
+	private UserInvitationService getInvitationService() {
+		return OneDev.getInstance(UserInvitationService.class);
 	}
 
 	@Override

@@ -12,10 +12,10 @@ import io.onedev.commons.utils.ExceptionUtils;
 public class TransactionInterceptor implements MethodInterceptor {
 
 	@Inject
-	private TransactionManager transactionManager;
+	private TransactionService transactionService;
 	
 	public Object invoke(MethodInvocation mi) throws Throwable {
-		return transactionManager.call(new Callable<Object>() {
+		return transactionService.call(new Callable<Object>() {
 
 			@Override
 			public Object call() throws Exception {

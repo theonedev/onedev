@@ -15,7 +15,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.IterationManager;
+import io.onedev.server.service.IterationService;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -40,7 +40,7 @@ public class IterationEditPage extends ProjectPage {
 
 			@Override
 			protected Iteration load() {
-				return getIterationManager().load(iterationId);
+				return getIterationService().load(iterationId);
 			}
 			
 		};
@@ -65,8 +65,8 @@ public class IterationEditPage extends ProjectPage {
 				var oldAuditContent = VersionedXmlDoc.fromBean(getIteration()).toXML();
 				bean.update(getIteration());
 				var newAuditContent = VersionedXmlDoc.fromBean(getIteration()).toXML();
-				getIterationManager().createOrUpdate(getIteration());
-				getAuditManager().audit(getIteration().getProject(), "changed iteration \"" + getIteration().getName() + "\"", oldAuditContent, newAuditContent);
+				getIterationService().createOrUpdate(getIteration());
+				auditService.audit(getIteration().getProject(), "changed iteration \"" + getIteration().getName() + "\"", oldAuditContent, newAuditContent);
 				Session.get().success(_T("Iteration saved"));
 				setResponsePage(IterationIssuesPage.class, 
 						IterationIssuesPage.paramsOf(getIteration().getProject(), getIteration(), null));
@@ -95,8 +95,8 @@ public class IterationEditPage extends ProjectPage {
 		return SecurityUtils.canManageIssues(getProject());
 	}
 
-	private IterationManager getIterationManager() {
-		return OneDev.getInstance(IterationManager.class);
+	private IterationService getIterationService() {
+		return OneDev.getInstance(IterationService.class);
 	}
 
 	@Override

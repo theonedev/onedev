@@ -1,23 +1,27 @@
 package io.onedev.server.web.component.build.choice;
 
-import com.google.common.collect.Lists;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
-import io.onedev.server.util.ProjectScopedQuery;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.component.select2.ChoiceProvider;
-import io.onedev.server.web.component.select2.Response;
-import io.onedev.server.web.component.select2.ResponseFiller;
+import java.util.Collection;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import org.hibernate.Hibernate;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.unbescape.html.HtmlEscape;
 
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.List;
+import com.google.common.collect.Lists;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScopedQuery;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.component.select2.ChoiceProvider;
+import io.onedev.server.web.component.select2.Response;
+import io.onedev.server.web.component.select2.ResponseFiller;
 
 public abstract class BuildChoiceProvider extends ChoiceProvider<Build> {
 
@@ -36,9 +40,9 @@ public abstract class BuildChoiceProvider extends ChoiceProvider<Build> {
 	@Override
 	public Collection<Build> toChoices(Collection<String> ids) {
 		List<Build> builds = Lists.newArrayList();
-		BuildManager buildManager = OneDev.getInstance(BuildManager.class); 
+		BuildService buildService = OneDev.getInstance(BuildService.class); 
 		for (String id: ids) {
-			Build build = buildManager.load(Long.valueOf(id));
+			Build build = buildService.load(Long.valueOf(id));
 			Hibernate.initialize(build);
 			builds.add(build);
 		}
@@ -50,7 +54,7 @@ public abstract class BuildChoiceProvider extends ChoiceProvider<Build> {
 		int count = (page+1) * WebConstants.PAGE_SIZE + 1;
 		var scopedQuery = ProjectScopedQuery.of(getProject(), term, '#', '-');
 		if (scopedQuery != null) {
-			List<Build> builds = OneDev.getInstance(BuildManager.class).query(scopedQuery.getProject(), scopedQuery.getQuery(), count);
+			List<Build> builds = OneDev.getInstance(BuildService.class).query(SecurityUtils.getSubject(), scopedQuery.getProject(), scopedQuery.getQuery(), count);
 			new ResponseFiller<>(response).fill(builds, page, WebConstants.PAGE_SIZE);
 		} else {
 			response.setHasMore(false);

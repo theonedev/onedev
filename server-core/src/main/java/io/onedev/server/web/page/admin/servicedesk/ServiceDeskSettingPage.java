@@ -11,11 +11,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.admin.mailservice.MailServicePage;
+import io.onedev.server.web.page.admin.mailservice.MailConnectorPage;
 
 public class ServiceDeskSettingPage extends AdministrationPage {
 
@@ -29,10 +29,10 @@ public class ServiceDeskSettingPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new BookmarkablePageLink<Void>("mailService", MailServicePage.class));
+		add(new BookmarkablePageLink<Void>("mailConnector", MailConnectorPage.class));
 		
 		ServiceDeskSettingHolder serviceDeskSettingHolder = new ServiceDeskSettingHolder();
-		serviceDeskSettingHolder.setServiceDeskSetting(OneDev.getInstance(SettingManager.class).getServiceDeskSetting());
+		serviceDeskSettingHolder.setServiceDeskSetting(OneDev.getInstance(SettingService.class).getServiceDeskSetting());
 		oldAuditContent = VersionedXmlDoc.fromBean(serviceDeskSettingHolder.getServiceDeskSetting()).toXML();
 		
 		BeanEditor editor = BeanContext.edit("editor", serviceDeskSettingHolder);
@@ -44,8 +44,8 @@ public class ServiceDeskSettingPage extends AdministrationPage {
 				super.onSubmit();
 
 				var newAuditContent = VersionedXmlDoc.fromBean(serviceDeskSettingHolder.getServiceDeskSetting()).toXML();
-				OneDev.getInstance(SettingManager.class).saveServiceDeskSetting(serviceDeskSettingHolder.getServiceDeskSetting());
-				getAuditManager().audit(null, "changed service desk settings", oldAuditContent, newAuditContent);
+				OneDev.getInstance(SettingService.class).saveServiceDeskSetting(serviceDeskSettingHolder.getServiceDeskSetting());
+				auditService.audit(null, "changed service desk settings", oldAuditContent, newAuditContent);
 				oldAuditContent = newAuditContent;
 				getSession().success(_T("Service desk settings have been saved"));
 			}

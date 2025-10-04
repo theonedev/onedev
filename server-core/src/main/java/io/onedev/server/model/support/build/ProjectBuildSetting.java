@@ -14,10 +14,9 @@ import javax.validation.Valid;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -93,7 +92,7 @@ public class ProjectBuildSetting implements Serializable {
 
 	private GlobalBuildSetting getGlobalSetting() {
 		if (globalSetting == null)
-			globalSetting = OneDev.getInstance(SettingManager.class).getBuildSetting();
+			globalSetting = OneDev.getInstance(SettingService.class).getBuildSetting();
 		return globalSetting;
 	}
 
@@ -194,49 +193,5 @@ public class ProjectBuildSetting implements Serializable {
 				it.remove();
 		}
 	}	
-	
-	public void onRenameGroup(String oldName, String newName) {
-		for (var jobSecret: getJobSecrets()) {
-			if (jobSecret.getAuthorization() != null) {
-				JobMatch jobMatch = JobMatch.parse(jobSecret.getAuthorization(), false, false);
-				jobMatch.onRenameGroup(oldName, newName);
-				jobSecret.setAuthorization(jobMatch.toString());
-			}
-		}
-	}
-
-	public Usage onDeleteGroup(String name) {
-		Usage usage = new Usage();
-		for (var jobSecret: getJobSecrets()) {
-			if (jobSecret.getAuthorization() != null) {
-				JobMatch jobMatch = JobMatch.parse(jobSecret.getAuthorization(), false, false);
-				if (jobMatch.isUsingGroup(name))
-					usage.add("job secret '" + jobSecret.getName() + "': authorization");
-			}
-		}
-		return usage.prefix("build");
-	}
-
-	public void onRenameUser(String oldName, String newName) {
-		for (var jobSecret: getJobSecrets()) {
-			if (jobSecret.getAuthorization() != null) {
-				JobMatch jobMatch = JobMatch.parse(jobSecret.getAuthorization(), false, false);
-				jobMatch.onRenameUser(oldName, newName);
-				jobSecret.setAuthorization(jobMatch.toString());
-			}
-		}
-	}
-
-	public Usage onDeleteUser(String name) {
-		Usage usage = new Usage();
-		for (var jobSecret: getJobSecrets()) {
-			if (jobSecret.getAuthorization() != null) {
-				JobMatch jobMatch = JobMatch.parse(jobSecret.getAuthorization(), false, false);
-				if (jobMatch.isUsingUser(name))
-					usage.add("job secret '" + jobSecret.getName() + "': authorization");
-			}
-		}
-		return usage.prefix("build");
-	}
-	
+		
 }

@@ -11,7 +11,7 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.service.RoleService;
 import io.onedev.server.model.Role;
 import io.onedev.server.web.component.select2.ChoiceProvider;
 
@@ -29,9 +29,9 @@ public abstract class AbstractRoleChoiceProvider extends ChoiceProvider<Role> {
 	@Override
 	public Collection<Role> toChoices(Collection<String> ids) {
 		List<Role> roles = Lists.newArrayList();
-		RoleManager roleManager = OneDev.getInstance(RoleManager.class);
+		RoleService roleService = OneDev.getInstance(RoleService.class);
 		for (String each : ids) {
-			Role role = roleManager.load(Long.valueOf(each));
+			Role role = roleService.load(Long.valueOf(each));
 			Hibernate.initialize(role);
 			roles.add(role);
 		}

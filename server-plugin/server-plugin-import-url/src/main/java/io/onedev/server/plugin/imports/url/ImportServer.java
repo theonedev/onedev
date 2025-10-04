@@ -19,11 +19,11 @@ import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.validation.Validatable;
@@ -93,7 +93,7 @@ public class ImportServer implements Serializable, Validatable {
 	}
 	
 	TaskResult importProject(boolean dryRun, TaskLogger logger) {
-		return OneDev.getInstance(TransactionManager.class).call(() -> {
+		return OneDev.getInstance(TransactionService.class).call(() -> {
 			try {
 				String projectPath = getProject();
 				if (projectPath == null)
@@ -103,7 +103,7 @@ public class ImportServer implements Serializable, Validatable {
 
 				logger.log("Importing from '" + getUrl() + "' to '" + projectPath + "'...");
 
-				Project project = getProjectManager().setup(projectPath);
+				Project project = getProjectService().setup(SecurityUtils.getSubject(), projectPath);
 
 				if (!project.isNew() && !SecurityUtils.canManageProject(project)) {
 					throw new UnauthorizedException("Import target already exists. " +
@@ -128,10 +128,10 @@ public class ImportServer implements Serializable, Validatable {
 							new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
 						} else {
 							if (project.isNew()) {
-								getProjectManager().create(project);
-								OneDev.getInstance(AuditManager.class).audit(project, "created project", null, VersionedXmlDoc.fromBean(project).toXML());
+								getProjectService().create(SecurityUtils.getUser(), project);
+								OneDev.getInstance(AuditService.class).audit(project, "created project", null, VersionedXmlDoc.fromBean(project).toXML());
 							}
-							getProjectManager().clone(project, builder.build().toString());
+							getProjectService().clone(project, builder.build().toString());
 						}
 					} finally {
 						SecretMasker.pop();
@@ -146,8 +146,8 @@ public class ImportServer implements Serializable, Validatable {
 		});
 	}	
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 
 	@Override

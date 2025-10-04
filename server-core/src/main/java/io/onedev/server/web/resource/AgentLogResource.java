@@ -20,7 +20,7 @@ import com.google.common.base.Joiner;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.service.AgentService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.security.SecurityUtils;
 
@@ -36,7 +36,7 @@ public class AgentLogResource extends AbstractResource {
 			throw new UnauthorizedException();
 
 		String agentName = attributes.getParameters().get(PARAM_AGENT).toString();
-		Agent agent = OneDev.getInstance(AgentManager.class).findByName(agentName);
+		Agent agent = OneDev.getInstance(AgentService.class).findByName(agentName);
 		if (agent == null)
 			throw new EntityNotFoundException("Unable to find agent: " + agentName);
 		
@@ -58,8 +58,8 @@ public class AgentLogResource extends AbstractResource {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				Agent agent = OneDev.getInstance(AgentManager.class).load(agentId);
-				List<String> agentLog = OneDev.getInstance(AgentManager.class).getAgentLog(agent);
+				Agent agent = OneDev.getInstance(AgentService.class).load(agentId);
+				List<String> agentLog = OneDev.getInstance(AgentService.class).getAgentLog(agent);
 				String content = Joiner.on("\n").join(toZoneId(agentLog, getZoneId()));
 				attributes.getResponse().getOutputStream().write(content.getBytes(StandardCharsets.UTF_8));
 			}				

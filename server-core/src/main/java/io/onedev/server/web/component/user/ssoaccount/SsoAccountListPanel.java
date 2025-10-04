@@ -26,8 +26,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.SsoAccountManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.SsoAccountService;
 import io.onedev.server.model.SsoAccount;
 import io.onedev.server.model.User;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -84,9 +84,9 @@ public class SsoAccountListPanel extends GenericPanel<User> {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						var ssoAccount = rowModel.getObject();
-						OneDev.getInstance(SsoAccountManager.class).delete(ssoAccount);
+						OneDev.getInstance(SsoAccountService.class).delete(ssoAccount);
 						if (getPage() instanceof UserPage)
-							OneDev.getInstance(AuditManager.class).audit(null, "deleted SSO account \"" + ssoAccount.getProvider() + "/" + ssoAccount.getSubject() + "\" from account \"" + ssoAccount.getUser().getName() + "\"", null, null);
+							OneDev.getInstance(AuditService.class).audit(null, "deleted SSO account \"" + ssoAccount.getProvider() + "/" + ssoAccount.getSubject() + "\" from account \"" + ssoAccount.getUser().getName() + "\"", null, null);
 						Session.get().success(_T("SSO account deleted"));
 						target.add(ssoAccountsTable);
 					}
@@ -136,7 +136,7 @@ public class SsoAccountListPanel extends GenericPanel<User> {
 
 					@Override
 					protected SsoAccount load() {
-						return OneDev.getInstance(SsoAccountManager.class).load(id);
+						return OneDev.getInstance(SsoAccountService.class).load(id);
 					}
 					
 				};

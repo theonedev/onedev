@@ -23,18 +23,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.MembershipManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.SshKeyManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.GroupService;
+import io.onedev.server.service.MembershipService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.SshKeyService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Transactional;
 
 @Singleton
@@ -42,33 +42,33 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 
 	private static final Logger logger = LoggerFactory.getLogger(PasswordAuthenticatingRealm.class);
 	
-	private final UserManager userManager;
+	private final UserService userService;
 	
-    private final TransactionManager transactionManager;
+    private final TransactionService transactionService;
     
-    private final MembershipManager membershipManager;
+    private final MembershipService membershipService;
     
-    private final SshKeyManager sshKeyManager;
+    private final SshKeyService sshKeyService;
     
-    private final EmailAddressManager emailAddressManager;
+    private final EmailAddressService emailAddressService;
 	
-	private final SettingManager settingManager;
+	private final SettingService settingService;
     
 	@Inject
-    public PasswordAuthenticatingRealm(UserManager userManager, SettingManager settingManager,
-									   MembershipManager membershipManager, GroupManager groupManager,
-									   ProjectManager projectManager, SessionManager sessionManager,
-									   TransactionManager transactionManager, SshKeyManager sshKeyManager,
-									   PasswordService passwordService, EmailAddressManager emailAddressManager) {
+    public PasswordAuthenticatingRealm(UserService userService, SettingService settingService,
+									   MembershipService membershipService, GroupService groupService,
+									   ProjectService projectService, SessionService sessionService,
+									   TransactionService transactionService, SshKeyService sshKeyService,
+									   PasswordService passwordService, EmailAddressService emailAddressService) {
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(passwordService);
 		setCredentialsMatcher(passwordMatcher);
-		this.userManager = userManager;
-    	this.transactionManager = transactionManager;
-    	this.membershipManager = membershipManager;
-    	this.sshKeyManager = sshKeyManager;
-    	this.emailAddressManager = emailAddressManager;
-		this.settingManager = settingManager;
+		this.userService = userService;
+    	this.transactionService = transactionService;
+    	this.membershipService = membershipService;
+    	this.sshKeyService = sshKeyService;
+    	this.emailAddressService = emailAddressService;
+		this.settingService = settingService;
     }
 
 	@Override
@@ -80,7 +80,7 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 		User user = new User();
 		user.setName(userName);
 		user.setFullName(authenticated.getFullName());
-		userManager.create(user);
+		userService.create(user);
 		
 		if (authenticated.getEmail() != null) {
 			EmailAddress emailAddress = new EmailAddress();
@@ -89,7 +89,7 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 			emailAddress.setOwner(user);
 			emailAddress.setPrimary(true);
 			emailAddress.setGit(true);
-			emailAddressManager.create(emailAddress);
+			emailAddressService.create(emailAddress);
 
 			user.getEmailAddresses().add(emailAddress);
 		}
@@ -106,13 +106,13 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 		if (groupNames != null) {
 			if (defaultGroupName != null)
 				groupNames.add(defaultGroupName);
-			if (settingManager.getSecuritySetting().getDefaultGroupName() != null)
-				groupNames.add(settingManager.getSecuritySetting().getDefaultGroupName());
-			membershipManager.syncMemberships(user, groupNames);
+			if (settingService.getSecuritySetting().getDefaultGroupName() != null)
+				groupNames.add(settingService.getSecuritySetting().getDefaultGroupName());
+			membershipService.syncMemberships(user, groupNames);
 		}
 		
 		if (authenticated.getSshKeys() != null)
-			sshKeyManager.syncSshKeys(user, authenticated.getSshKeys());									
+			sshKeyService.syncSshKeys(user, authenticated.getSshKeys());									
 	}
 	
 	@Transactional
@@ -122,13 +122,13 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 			emailAddress.setVerificationCode(null);
 			if (!user.equals(emailAddress.getOwner())) 
 				user.addEmailAddress(emailAddress);
-			emailAddressManager.update(emailAddress);
+			emailAddressService.update(emailAddress);
 		} else if (authenticated.getEmail() != null) {
 			emailAddress = new EmailAddress();
 			emailAddress.setValue(authenticated.getEmail());
 			emailAddress.setVerificationCode(null);
 			user.addEmailAddress(emailAddress);
-			emailAddressManager.create(emailAddress);
+			emailAddressService.create(emailAddress);
 		}
 		syncGroupsAndSshKeys(user, false, authenticated, defaultGroupName);
 	}
@@ -136,24 +136,24 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 	@Override
 	protected final AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) 
 			throws AuthenticationException {
-		return transactionManager.call(() -> {
+		return transactionService.call(() -> {
 			try {
 				var userName = normalizeUserName((String) token.getPrincipal());
-				var user = userManager.findByVerifiedEmailAddress((String) token.getPrincipal());
+				var user = userService.findByVerifiedEmailAddress((String) token.getPrincipal());
 				if (user == null) 
-					user = userManager.findByName(userName);
+					user = userService.findByName(userName);
 				if (user != null) {
 					if (user.isDisabled())
 						throw new DisabledAccountException(_T("Account is disabled"));
 					else if (user.isServiceAccount())
 						throw new DisabledAccountException(_T("Service account not allowed to login"));
 					if (user.getPassword() == null) {
-						var authenticator = settingManager.getAuthenticator();
+						var authenticator = settingService.getAuthenticator();
 						if (authenticator != null) {
 							var authenticated = authenticator.authenticate((UsernamePasswordToken) token);
 							var emailAddressValue = authenticated.getEmail();
 							if (emailAddressValue != null) {
-								var emailAddress = emailAddressManager.findByValue(emailAddressValue);
+								var emailAddress = emailAddressService.findByValue(emailAddressValue);
 								if (emailAddress != null) {
 									if (emailAddress.getOwner().equals(user) || !emailAddress.isVerified()) {
 										updateUser(user, authenticated, emailAddress, authenticator.getDefaultGroup());
@@ -176,15 +176,15 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 						return user;
 					}
 				} else {
-					var authenticator = settingManager.getAuthenticator();
+					var authenticator = settingService.getAuthenticator();
 					if (authenticator != null) {
 						var authenticated = authenticator.authenticate((UsernamePasswordToken) token);
 						var emailAddressValue = authenticated.getEmail();
 						if (emailAddressValue != null) {
-							var emailAddress = emailAddressManager.findByValue(emailAddressValue);
+							var emailAddress = emailAddressService.findByValue(emailAddressValue);
 							if (emailAddress != null) {								
 								if (!emailAddress.isVerified()) {
-									emailAddressManager.delete(emailAddress);
+									emailAddressService.delete(emailAddress);
 									return newUser(userName, authenticated, authenticator.getDefaultGroup());
 								} else {
 									throw new AuthenticationException(MessageFormat.format(_T("Email address \"{0}\" already used by another account"), emailAddressValue));

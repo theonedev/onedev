@@ -24,8 +24,8 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -50,7 +50,7 @@ public class PatchResource extends AbstractResource {
 		var newCommitId = ObjectId.fromString(params.get(PARAM_NEW_COMMIT).toString());
 		
 		if (!SecurityUtils.isSystem()) {
-			Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+			Project project = OneDev.getInstance(ProjectService.class).load(projectId);
 			if (!SecurityUtils.canReadCode(project))
 				throw new UnauthorizedException();
 		}
@@ -66,17 +66,17 @@ public class PatchResource extends AbstractResource {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				String activeServer = getProjectManager().getActiveServer(projectId, true);
-				ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
-				if (activeServer.equals(clusterManager.getLocalServerAddress())) {
+				String activeServer = getProjectService().getActiveServer(projectId, true);
+				ClusterService clusterService = OneDev.getInstance(ClusterService.class);
+				if (activeServer.equals(clusterService.getLocalServerAddress())) {
 					try (var os = attributes.getResponse().getOutputStream()) {
-						var repository = getProjectManager().getRepository(projectId);
+						var repository = getProjectService().getRepository(projectId);
 						GitUtils.diff(repository, oldCommitId, newCommitId, os);
 					}
 				} else {
 	    			Client client = ClientBuilder.newClient();
 	    			try {
-	    				String activeServerUrl = clusterManager.getServerUrl(activeServer);
+	    				String activeServerUrl = clusterService.getServerUrl(activeServer);
 	    				var pathAndQuery = Url.parse(RequestCycle.get().urlFor(
 	    						new PatchResourceReference(), 
 	    						PatchResource.paramsOf(projectId, oldCommitId, newCommitId)));
@@ -86,7 +86,7 @@ public class PatchResource extends AbstractResource {
 							target = target.queryParam(entry.getName(), entry.getValue());
 	    				Invocation.Builder builder =  target.request();
 	    				builder.header(HttpHeaders.AUTHORIZATION, 
-	    						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
+	    						KubernetesHelper.BEARER + " " + clusterService.getCredential());
 	    				
 	    				try (Response response = builder.get()) {
 	    					KubernetesHelper.checkStatus(response);
@@ -107,8 +107,8 @@ public class PatchResource extends AbstractResource {
 		return response;
 	}
 		
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
 	public static PageParameters paramsOf(Long projectId, ObjectId oldCommitId, ObjectId newCommitId) {

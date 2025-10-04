@@ -47,8 +47,8 @@ import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
@@ -92,7 +92,7 @@ public class CoverageReportPage extends BuildReportPage {
 		protected CoverageStats load() {
 			try {
 				Long projectId = getProject().getId();
-				return OneDev.getInstance(ProjectManager.class).runOnActiveServer(projectId, new GetCoverageReport(projectId, getBuild().getNumber(), getReportName()));
+				return OneDev.getInstance(ProjectService.class).runOnActiveServer(projectId, new GetCoverageReport(projectId, getBuild().getNumber(), getReportName()));
 			} catch (Exception e) {
 				if (ExceptionUtils.find(e, SerializationException.class) != null)
 					return null;
@@ -452,7 +452,7 @@ public class CoverageReportPage extends BuildReportPage {
 
 				@Override
 				public CoverageStats call() throws Exception {
-					return CoverageStats.readFrom(new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), CoverageStats.CATEGORY + "/" + reportName));
+					return CoverageStats.readFrom(new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), CoverageStats.CATEGORY + "/" + reportName));
 				}
 				
 			});

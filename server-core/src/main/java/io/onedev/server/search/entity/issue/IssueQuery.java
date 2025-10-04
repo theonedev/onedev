@@ -69,7 +69,7 @@ import org.antlr.v4.runtime.Recognizer;
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
@@ -308,7 +308,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 						List<Criteria<Issue>> criterias = new ArrayList<>();
 						for (var quoted: ctx.criteriaValue.Quoted()) {
 							String value = getValue(quoted.getText());
-							var timeTrackingSetting = OneDev.getInstance(SettingManager.class)
+							var timeTrackingSetting = OneDev.getInstance(SettingService.class)
 									.getIssueSetting().getTimeTrackingSetting();
 							switch (operator) {
 								case IsUntil:
@@ -532,7 +532,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 		if (WicketUtils.getPage() instanceof IssueSettingPage)
 			return ((IssueSettingPage) WicketUtils.getPage()).getSetting();
 		else
-			return OneDev.getInstance(SettingManager.class).getIssueSetting();
+			return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 
 	private static ExplicitException newOperatorException(String fieldName, int operator) {

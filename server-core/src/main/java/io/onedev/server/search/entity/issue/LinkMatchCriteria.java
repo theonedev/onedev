@@ -22,7 +22,7 @@ import javax.persistence.criteria.Subquery;
 import org.hibernate.Hibernate;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueLinkManager;
+import io.onedev.server.service.IssueLinkService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.LinkSpec;
@@ -124,7 +124,7 @@ public class LinkMatchCriteria extends Criteria<Issue> {
 	@Override
 	public boolean matches(Issue issue) {
 		if (!Hibernate.isInitialized(issue.getSourceLinks()) || !Hibernate.isInitialized(issue.getTargetLinks()))
-			OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
+			OneDev.getInstance(IssueLinkService.class).loadDeepLinks(issue);
 		LinkSpec spec = getLinkDescriptor().getSpec();
 		boolean opposite = getLinkDescriptor().isOpposite();
 		if (allMatch) {

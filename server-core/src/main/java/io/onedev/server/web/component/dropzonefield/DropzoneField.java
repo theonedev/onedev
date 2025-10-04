@@ -3,7 +3,7 @@ package io.onedev.server.web.component.dropzonefield;
 import io.onedev.server.OneDev;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.upload.FileUpload;
-import io.onedev.server.web.upload.UploadManager;
+import io.onedev.server.web.upload.UploadService;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -57,14 +57,14 @@ public class DropzoneField extends FormComponentPanel<String> {
 		this.maxFilesize = maxFilesize;
 	}
 
-	private UploadManager getUploadManager() {
-		return OneDev.getInstance(UploadManager.class);
+	private UploadService getUploadService() {
+		return OneDev.getInstance(UploadService.class);
 	}
 	
 	@Override
 	protected void onBeforeRender() {
 		// In order to be consistent with browser side
-		getUploadManager().clearUpload(uploadId);
+		getUploadService().clearUpload(uploadId);
 		super.onBeforeRender();
 	}
 
@@ -81,10 +81,10 @@ public class DropzoneField extends FormComponentPanel<String> {
 	                MultipartServletWebRequest multiPartRequest = webRequest.newMultipartWebRequest(
 	                    Bytes.megabytes(maxFilesize), "ignored");
 	                multiPartRequest.parseFileParts();
-					var upload = getUploadManager().getUpload(uploadId);
+					var upload = getUploadService().getUpload(uploadId);
 					if (upload == null) {
 						upload = new FileUpload(uploadId, new ArrayList<>());
-						getUploadManager().cacheUpload(upload);
+						getUploadService().cacheUpload(upload);
 					}
 					upload.getItems().addAll(multiPartRequest.getFiles().get("file"));
 	            } catch (FileUploadException e) {
@@ -106,7 +106,7 @@ public class DropzoneField extends FormComponentPanel<String> {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				String fileName = params.getParameterValue("name").toString();
-				var upload = getUploadManager().getUpload(uploadId);
+				var upload = getUploadService().getUpload(uploadId);
 				if (upload != null) {
 					for (var it = upload.getItems().iterator(); it.hasNext();) {
 						var item = it.next();
@@ -124,7 +124,7 @@ public class DropzoneField extends FormComponentPanel<String> {
 
 	@Override
 	public void convertInput() {
-		var upload = getUploadManager().getUpload(uploadId);
+		var upload = getUploadService().getUpload(uploadId);
 		if (upload != null && !upload.getItems().isEmpty())
 			setConvertedInput(uploadId);
 		else

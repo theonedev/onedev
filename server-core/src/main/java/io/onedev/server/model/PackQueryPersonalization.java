@@ -15,7 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PackQueryPersonalizationManager;
+import io.onedev.server.service.PackQueryPersonalizationService;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
@@ -110,7 +110,7 @@ public class PackQueryPersonalization extends AbstractEntity implements QueryPer
 
 	@Override
 	public void onUpdated() {
-		OneDev.getInstance(PackQueryPersonalizationManager.class).createOrUpdate(this);
+		OneDev.getInstance(PackQueryPersonalizationService.class).createOrUpdate(this);
 	}
 
 }

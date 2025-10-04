@@ -18,8 +18,8 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.xodus.CommitInfoManager;
-import io.onedev.server.xodus.PullRequestInfoManager;
+import io.onedev.server.xodus.CommitInfoService;
+import io.onedev.server.xodus.PullRequestInfoService;
 
 public class IncludesIssueCriteria extends Criteria<PullRequest> {
 
@@ -54,8 +54,8 @@ public class IncludesIssueCriteria extends Criteria<PullRequest> {
 	
 	private Collection<Long> getPullRequestIds(Project project) {
 		Collection<Long> pullRequestIds = new HashSet<>();
-		for (ObjectId commit: OneDev.getInstance(CommitInfoManager.class).getFixCommits(project.getId(), issue.getId(), false))
-			pullRequestIds.addAll(OneDev.getInstance(PullRequestInfoManager.class).getPullRequestIds(project, commit));
+		for (ObjectId commit: OneDev.getInstance(CommitInfoService.class).getFixCommits(project.getId(), issue.getId(), false))
+			pullRequestIds.addAll(OneDev.getInstance(PullRequestInfoService.class).getPullRequestIds(project, commit));
 		return pullRequestIds;
 	}
 	

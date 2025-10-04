@@ -1,7 +1,7 @@
 package io.onedev.server.persistence.dao;
 
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
@@ -98,7 +98,7 @@ public interface Dao {
 	 */
 	<T extends AbstractEntity> int count(EntityCriteria<T> entityCriteria);
 	
-	SessionManager getSessionManager();
+	SessionService getSessionService();
 
 	Session getSession();
 

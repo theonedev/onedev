@@ -33,7 +33,7 @@ public class FileUpload {
 	}
 	
 	public void clear() {
-		OneDev.getInstance(UploadManager.class).clearUpload(id);
+		OneDev.getInstance(UploadService.class).clearUpload(id);
 	}
 
 	public static String getFileName(FileItem file) {

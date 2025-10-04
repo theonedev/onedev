@@ -21,8 +21,8 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.PackManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.PackService;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.PackBlobReference;
@@ -39,21 +39,21 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class PackResource {
 
-	private final PackManager packManager;
+	private final PackService packService;
 	
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 	
 	@Inject
-	public PackResource(PackManager packManager, AuditManager auditManager) {
-		this.packManager = packManager;
-		this.auditManager = auditManager;
+	public PackResource(PackService packService, AuditService auditService) {
+		this.packService = packService;
+		this.auditService = auditService;
 	}
 
 	@Api(order=100)
 	@Path("/{packId}")
     @GET
     public Pack getPack(@PathParam("packId") Long packId) {
-		Pack pack = packManager.load(packId);
+		Pack pack = packService.load(packId);
     	if (!SecurityUtils.canReadPack(pack.getProject())) 
 			throw new UnauthorizedException();
     	return pack;
@@ -63,7 +63,7 @@ public class PackResource {
 	@Path("/{packId}/labels")
 	@GET
 	public Collection<PackLabel> getLabels(@PathParam("packId") Long packId) {
-		Pack pack = packManager.load(packId);
+		Pack pack = packService.load(packId);
 		if (!SecurityUtils.canReadPack(pack.getProject()))
 			throw new UnauthorizedException();
 		return pack.getLabels();
@@ -73,7 +73,7 @@ public class PackResource {
 	@Path("/{packId}/blobs")
     @GET
     public Collection<PackBlob> getBlobs(@PathParam("packId") Long packId) {
-		Pack pack = packManager.load(packId);
+		Pack pack = packService.load(packId);
     	if (!SecurityUtils.canReadPack(pack.getProject())) 
 			throw new UnauthorizedException();
     	return pack.getBlobReferences().stream().map(PackBlobReference::getPackBlob).collect(toList());
@@ -85,8 +85,8 @@ public class PackResource {
     		@QueryParam("query") @Api(description="Syntax of this query is the same as in <a href='/~packages'>packages page</a>", example="\"Type\" is \"Container Image\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
-
-		if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)
+		var subject = SecurityUtils.getSubject();
+		if (!SecurityUtils.isAdministrator(subject) && count > RestConstants.MAX_PAGE_SIZE)
     		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	PackQuery parsedQuery;
@@ -96,19 +96,19 @@ public class PackResource {
 			throw new NotAcceptableException("Error parsing query", e);
 		}
     	
-    	return packManager.query(null, parsedQuery, false, offset, count);
+    	return packService.query(subject, null, parsedQuery, false, offset, count);
     }
 	
 	@Api(order=700)
 	@Path("/{packId}")
     @DELETE
     public Response deletePack(@PathParam("packId") Long packId) {
-    	Pack pack = packManager.load(packId);
+    	Pack pack = packService.load(packId);
     	if (!SecurityUtils.canWritePack(pack.getProject()))
 			throw new UnauthorizedException();
-    	packManager.delete(pack);
+    	packService.delete(pack);
 		var oldAuditContent = VersionedXmlDoc.fromBean(pack).toXML();
-		auditManager.audit(pack.getProject(), "deleted package \"" + pack.getReference(false) + "\" via RESTful API", oldAuditContent, null);
+		auditService.audit(pack.getProject(), "deleted package \"" + pack.getReference(false) + "\" via RESTful API", oldAuditContent, null);
     	return Response.ok().build();
     }
 	

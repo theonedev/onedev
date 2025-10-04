@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.pack.container;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import org.apache.wicket.markup.html.panel.Panel;
 
 public class InsecureRegistryNotePanel extends Panel {
@@ -11,7 +11,7 @@ public class InsecureRegistryNotePanel extends Panel {
 	}
 
 	private String getServerUrl() {
-		return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+		return OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 	}
 	
 	@Override

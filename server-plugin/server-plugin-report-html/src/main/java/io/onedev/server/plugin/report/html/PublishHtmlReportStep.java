@@ -18,12 +18,12 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.buildspec.step.StepGroup;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.job.JobContext;
-import io.onedev.server.job.JobManager;
+import io.onedev.server.job.JobService;
 import io.onedev.server.model.Build;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 
 @Editable(order=1070, group= StepGroup.PUBLISH, name="Html Report")
 public class PublishHtmlReportStep extends PublishReportStep {
@@ -54,9 +54,9 @@ public class PublishHtmlReportStep extends PublishReportStep {
 
 	@Override
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
-		return OneDev.getInstance(SessionManager.class).call(() -> {
-			var build = OneDev.getInstance(BuildManager.class).load(buildId);
-			JobContext jobContext = OneDev.getInstance(JobManager.class).getJobContext(build.getId());
+		return OneDev.getInstance(SessionService.class).call(() -> {
+			var build = OneDev.getInstance(BuildService.class).load(buildId);
+			JobContext jobContext = OneDev.getInstance(JobService.class).getJobContext(build.getId());
 			if (jobContext.getJobExecutor().isHtmlReportPublishEnabled()) {
 				write(getReportLockName(build), () -> {
 					File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
@@ -74,7 +74,7 @@ public class PublishHtmlReportStep extends PublishReportStep {
 								throw new RuntimeException(e);
 							}
 						}
-						OneDev.getInstance(ProjectManager.class).directoryModified(
+						OneDev.getInstance(ProjectService.class).directoryModified(
 								build.getProject().getId(), reportDir.getParentFile());
 					} else {
 						logger.warning("Html report start page not found: " + startPage.getAbsolutePath());

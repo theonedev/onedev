@@ -14,7 +14,7 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
@@ -43,8 +43,8 @@ public class ParentChoiceEditor extends PropertyEditor<String> {
 				List<String> projectPaths = new ArrayList<>();
 				Project currentProject = Project.get();
 				
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				ProjectCache cache = projectManager.cloneCache();
+				ProjectService projectService = OneDev.getInstance(ProjectService.class);
+				ProjectCache cache = projectService.cloneCache();
 				for (Project project: SecurityUtils.getAuthorizedProjects(new CreateChildren())) {
 					if (currentProject == null || !cache.isSelfOrAncestorOf(currentProject.getId(), project.getId())) {
 						String projectPath = cache.get(project.getId()).getPath();

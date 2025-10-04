@@ -9,16 +9,16 @@ import io.onedev.server.event.project.CommitIndexed;
 @Singleton
 public class CommitIndexedBroadcaster {
 
-	private final WebSocketManager webSocketManager;
+	private final WebSocketService webSocketService;
 	
 	@Inject
-	public CommitIndexedBroadcaster(WebSocketManager webSocketManager) {
-		this.webSocketManager = webSocketManager;
+	public CommitIndexedBroadcaster(WebSocketService webSocketService) {
+		this.webSocketService = webSocketService;
 	}
 	
 	@Listen
 	public void on(CommitIndexed event) {
-		webSocketManager.notifyObservableChange(CommitIndexed.getChangeObservable(event.getCommitId().name()), event.getSourcePage());
+		webSocketService.notifyObservableChange(CommitIndexed.getChangeObservable(event.getCommitId().name()), event.getSourcePage());
 	}
 
 }

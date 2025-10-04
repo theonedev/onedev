@@ -7,7 +7,7 @@ import java.util.List;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -47,7 +47,7 @@ public class IssueTypeMapping implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getOneDevIssueFieldChoices() {
 		List<String> choices = new ArrayList<>();
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
 		for (FieldSpec field: issueSetting.getFieldSpecs()) {
 			if (field.getType().equals(InputSpec.ENUMERATION)) {
 				for (String value: field.getPossibleValues()) 

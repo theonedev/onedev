@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.project.selector;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.facade.ProjectCache;
@@ -43,7 +43,7 @@ public abstract class ProjectSelector extends Panel {
 
 		@Override
 		protected List<Project> load() {
-			ProjectCache cache = getProjectManager().cloneCache();
+			ProjectCache cache = getProjectService().cloneCache();
 			
 			return new Similarities<>(projectsModel.getObject()) {
 
@@ -172,14 +172,14 @@ public abstract class ProjectSelector extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onSelect(target, getProjectManager().load(projectId));
+				onSelect(target, getProjectService().load(projectId));
 			}
 			
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				PageParameters params = ProjectBlobPage.paramsOf(getProjectManager().load(projectId));
+				PageParameters params = ProjectBlobPage.paramsOf(getProjectService().load(projectId));
 				tag.put("href", urlFor(ProjectBlobPage.class, params).toString());
 			}
 			
@@ -193,8 +193,8 @@ public abstract class ProjectSelector extends Panel {
 		return item;
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 
 	@Override

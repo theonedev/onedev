@@ -5,7 +5,7 @@ import java.util.Date;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.service.IssueChangeService;
 import io.onedev.server.model.IssueChange;
 
 public class IssueChangeActivity implements IssueActivity {
@@ -22,7 +22,7 @@ public class IssueChangeActivity implements IssueActivity {
 	}
 
 	public IssueChange getChange() {
-		return OneDev.getInstance(IssueChangeManager.class).load(changeId);
+		return OneDev.getInstance(IssueChangeService.class).load(changeId);
 	}
 	
 	@Override

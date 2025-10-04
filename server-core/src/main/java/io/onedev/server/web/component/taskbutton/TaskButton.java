@@ -275,16 +275,12 @@ public abstract class TaskButton extends AjaxButton {
 	public static class TaskFutureManager implements SchedulableTask {
 
 		private static final Map<String, TaskFuture> taskFutures = new ConcurrentHashMap<>();
-		
-		private final TaskScheduler taskScheduler;
+
+		@Inject
+		private TaskScheduler taskScheduler;
 		
 		private String taskId;
-		
-		@Inject
-		public TaskFutureManager(TaskScheduler taskScheduler) {
-			this.taskScheduler = taskScheduler;
-		}
-		
+
 		@Listen
 		public void on(SystemStarted event) {
 			taskId = taskScheduler.schedule(this);

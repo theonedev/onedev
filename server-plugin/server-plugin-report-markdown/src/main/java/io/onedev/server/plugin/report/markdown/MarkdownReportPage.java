@@ -6,8 +6,8 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
@@ -62,8 +62,8 @@ public class MarkdownReportPage extends BuildDetailPage {
 		super.onInitialize();
 
 		Long projectId = getBuild().getProject().getId();
-		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-		String markdown = projectManager.runOnActiveServer(projectId, new GetMarkdownContent(projectId, getBuild().getNumber(), reportName, filePath));
+		ProjectService projectService = OneDev.getInstance(ProjectService.class);
+		String markdown = projectService.runOnActiveServer(projectId, new GetMarkdownContent(projectId, getBuild().getNumber(), reportName, filePath));
 		add(new MarkdownViewer("markdownReport", Model.of(markdown), null));
 	}
 
@@ -114,7 +114,7 @@ public class MarkdownReportPage extends BuildDetailPage {
 		
 		@Override
 		public String call() throws Exception {
-			File file = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), 
+			File file = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber),
 					PublishMarkdownReportStep.CATEGORY + "/" + reportName + "/" + filePath);
 			return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 		}

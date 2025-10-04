@@ -10,12 +10,12 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.eclipse.jgit.lib.Repository;
 
@@ -93,8 +93,8 @@ public class CreateBranchStep extends ServerSideStep {
 
 	@Override
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
-		return OneDev.getInstance(SessionManager.class).call(() -> {
-			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+		return OneDev.getInstance(SessionService.class).call(() -> {
+			var build = OneDev.getInstance(BuildService.class).load(buildId);
 			Project project = build.getProject();
 			String branchName = getBranchName();
 

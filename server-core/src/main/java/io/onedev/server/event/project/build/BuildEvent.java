@@ -5,8 +5,8 @@ import java.util.Date;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
@@ -27,7 +27,7 @@ public abstract class BuildEvent extends ProjectEvent implements CommitAware {
 	}
 
 	public Build getBuild() {
-		return OneDev.getInstance(BuildManager.class).load(buildId);
+		return OneDev.getInstance(BuildService.class).load(buildId);
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public abstract class BuildEvent extends ProjectEvent implements CommitAware {
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getBuild(), true);
+		return OneDev.getInstance(UrlService.class).urlFor(getBuild(), true);
 	}
 	
 }

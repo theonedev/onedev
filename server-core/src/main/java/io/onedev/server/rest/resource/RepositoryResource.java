@@ -40,7 +40,7 @@ import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
@@ -70,15 +70,15 @@ public class RepositoryResource {
 
 	private static final int MAX_COMMITS = 10000;
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 
 	private final GitService gitService;
 	
 	private final ObjectMapper mapper;
 	
 	@Inject
-	public RepositoryResource(ProjectManager projectManager, GitService gitService, ObjectMapper mapper) {
-		this.projectManager = projectManager;
+	public RepositoryResource(ProjectService projectService, GitService gitService, ObjectMapper mapper) {
+		this.projectService = projectService;
 		this.gitService = gitService;
 		this.mapper = mapper;
 	}
@@ -87,7 +87,7 @@ public class RepositoryResource {
 	@Path("/{projectId}/branches")
 	@GET
 	public List<String> getBranches(@PathParam("projectId") Long projectId) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		if (!SecurityUtils.canReadCode(project)) 
 			throw new UnauthorizedException();
 
@@ -102,7 +102,7 @@ public class RepositoryResource {
 	@GET
 	@Nullable
 	public String getDefaultBranch(@PathParam("projectId") Long projectId) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		if (!SecurityUtils.canReadCode(project)) {
 			throw new UnauthorizedException();
 		}
@@ -114,7 +114,7 @@ public class RepositoryResource {
 	@Path("/{projectId}/default-branch")
 	@POST
 	public Response setDefaultBranch(@PathParam("projectId") Long projectId, @NotNull String defaultBranch) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		if (!SecurityUtils.canWriteCode(project))
 			throw new UnauthorizedException();
 
@@ -133,7 +133,7 @@ public class RepositoryResource {
 	public RefResponse getBranch(
 			@PathParam("projectId") Long projectId, 
 			@PathParam("branch") @Api(example="test-branch") String branchName) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		if (!SecurityUtils.canReadCode(project)) {
 			throw new UnauthorizedException();
 		}
@@ -154,7 +154,7 @@ public class RepositoryResource {
 	@Path("/{projectId}/branches")
 	@POST
 	public Response createBranch(@PathParam("projectId") Long projectId, @NotNull CreateBranchRequest request) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		User user = SecurityUtils.getUser();
 		if (!SecurityUtils.canWriteCode(project)) 
 			throw new UnauthorizedException();
@@ -180,12 +180,12 @@ public class RepositoryResource {
 	@DELETE
 	public Response deleteBranch(@PathParam("projectId") Long projectId, 
 			@PathParam("branch") @Api(example="test-branch") String branchName) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		if (!SecurityUtils.canDeleteBranch(project, branchName)) {
 			throw new UnauthorizedException();
 		}
 
-		projectManager.deleteBranch(project, branchName);
+		projectService.deleteBranch(project, branchName);
 
 		return Response.ok().build();
 	}
@@ -194,7 +194,7 @@ public class RepositoryResource {
 	@Path("/{projectId}/tags")
 	@GET
 	public List<String> getTags(@PathParam("projectId") Long projectId) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		if (!SecurityUtils.canReadCode(project)) {
 			throw new UnauthorizedException();
 		}
@@ -210,7 +210,7 @@ public class RepositoryResource {
 	public RefResponse getTag(
 			@PathParam("projectId") Long projectId, 
 			@PathParam("tag") @Api(example="test-tag") String tagName) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		
 		if (!SecurityUtils.canReadCode(project)) {
 			throw new UnauthorizedException();
@@ -232,7 +232,7 @@ public class RepositoryResource {
 	@Path("/{projectId}/tags")
 	@POST
 	public Response createTag(@PathParam("projectId") Long projectId, @NotNull CreateTagRequest request) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		if (!SecurityUtils.canCreateTag(project, request.getTagName())) {
 			throw new UnauthorizedException();
 		}
@@ -254,12 +254,12 @@ public class RepositoryResource {
 	public Response deleteTag(
 			@PathParam("projectId") Long projectId, 
 			@PathParam("tag") @Api(example="test-tag") String tagName) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		if (!SecurityUtils.canDeleteTag(project, tagName)) {
 			throw new UnauthorizedException();
 		}
 
-		projectManager.deleteTag(project, tagName);
+		projectService.deleteTag(project, tagName);
 
 		return Response.ok().build();
 	}
@@ -272,7 +272,7 @@ public class RepositoryResource {
     		@QueryParam("query") @Api(description="Syntax of this query is the same as in commits page", example="since tag(v4.0.0) until tag(v4.7.0)") String query, 
     		@QueryParam("count") @Api(example="100", description="Number of commits to return") int count, 
 			@QueryParam("field") @Api(exampleProvider = "getFieldsExample", description = "Fields to return. Unspecified fields will return as null in returned commit object") List<String> fields) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		if (!SecurityUtils.canReadCode(project)) {
 			throw new UnauthorizedException();
 		}
@@ -323,7 +323,7 @@ public class RepositoryResource {
 	public List<DirectoryChild> getDirectory(
 			@PathParam("projectId") Long projectId, 
 			@PathParam("revisionAndDirectory") @NotEmpty @Api(example="some-branch-or-tag/path/to/directory") String revisionAndDirectory) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		if (!SecurityUtils.canReadCode(project)) {
 			throw new UnauthorizedException();
 		}
@@ -355,7 +355,7 @@ public class RepositoryResource {
 	public FileResponse getFile(
 			@PathParam("projectId") Long projectId, 
 			@PathParam("revisionAndFile") @NotEmpty @Api(example="some-branch-or-tag/path/to/file") String revisionAndFile) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		if (!SecurityUtils.canReadCode(project)) {
 			throw new UnauthorizedException();
 		}
@@ -386,7 +386,7 @@ public class RepositoryResource {
 			@PathParam("projectId") Long projectId, 
 			@PathParam("branchAndFile") @NotEmpty @Api(example="test-branch/path/to/file") String branchAndFile, 
 			@NotNull FileEditRequest request) {
-		Project project = projectManager.load(projectId);
+		Project project = projectService.load(projectId);
 		
 		List<String> revisionAndPathSegments = Splitter.on('/').splitToList(branchAndFile);
 		RevisionAndPath revisionAndPath;

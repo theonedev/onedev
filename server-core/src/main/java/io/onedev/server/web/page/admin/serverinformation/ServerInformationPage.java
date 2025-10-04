@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.admin.serverinformation;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.page.admin.ServerDetailPage;
 import org.apache.wicket.markup.ComponentTag;
@@ -74,7 +74,7 @@ public class ServerInformationPage extends ServerDetailPage {
 			@Override
 			public void onClick() {
 				if (server != null) {
-					getClusterManager().runOnServer(server, () -> {
+					getClusterService().runOnServer(server, () -> {
 						System.gc();
 						return null;
 					});
@@ -92,8 +92,8 @@ public class ServerInformationPage extends ServerDetailPage {
 		super.onDetach();
 	}
 
-	private static ClusterManager getClusterManager() {
-		return OneDev.getInstance(ClusterManager.class);
+	private static ClusterService getClusterService() {
+		return OneDev.getInstance(ClusterService.class);
 	}
 
 	private static ServerInformation getServerInformation() {
@@ -112,7 +112,7 @@ public class ServerInformationPage extends ServerDetailPage {
 	private static ServerInformation getServerInformation(@Nullable String server) {
 		ServerInformation serverInformation;
 		if (server != null)
-			serverInformation = getClusterManager().runOnServer(server, () -> getServerInformation());
+			serverInformation = getClusterService().runOnServer(server, () -> getServerInformation());
 		else
 			serverInformation = getServerInformation();
 		return serverInformation;

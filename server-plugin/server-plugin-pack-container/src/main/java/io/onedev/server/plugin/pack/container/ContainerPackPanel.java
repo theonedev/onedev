@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PackBlobManager;
+import io.onedev.server.service.PackBlobService;
 import io.onedev.server.util.Pair;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
@@ -43,7 +43,7 @@ public class ContainerPackPanel extends Panel {
 	private final IModel<ContainerManifest> manifestIModel = new LoadableDetachableModel<>() {
 		@Override
 		protected ContainerManifest load() {
-			return new ContainerManifest(getPackBlobManager().readBlob(projectId, manifestSha256Hash));
+			return new ContainerManifest(getPackBlobService().readBlob(projectId, manifestSha256Hash));
 		}
 
 	};
@@ -56,8 +56,8 @@ public class ContainerPackPanel extends Panel {
 		this.manifestSha256Hash = manifestSha256Hash;
 	}
 	
-	private PackBlobManager getPackBlobManager() {
-		return OneDev.getInstance(PackBlobManager.class);
+	private PackBlobService getPackBlobService() {
+		return OneDev.getInstance(PackBlobService.class);
 	}
 
 	private String formatJson(JsonNode jsonNode) {
@@ -120,7 +120,7 @@ public class ContainerPackPanel extends Panel {
 				add(fragment);
 			} else if (archDigests.size() == 1) {
 				var archHash = substringAfter(archDigests.values().iterator().next(), ":");
-				var archManifestBytes = getPackBlobManager().readBlob(projectId, archHash);
+				var archManifestBytes = getPackBlobService().readBlob(projectId, archHash);
 				add(newImagePanel("content", readJson(archManifestBytes), null));
 			} else {
 				boolean cache = false;
@@ -155,7 +155,7 @@ public class ContainerPackPanel extends Panel {
 	
 	private Component newArchImagePanel(String componentId, String archDigest) {
 		var archHash = substringAfter(archDigest, ":");
-		var archManifestBytes = getPackBlobManager().readBlob(projectId, archHash);
+		var archManifestBytes = getPackBlobService().readBlob(projectId, archHash);
 		return newImagePanel(componentId, readJson(archManifestBytes), archDigest);
 	}
 	
@@ -166,7 +166,7 @@ public class ContainerPackPanel extends Panel {
 		fragment.add(new CopyToClipboardLink("copyPullCommand", Model.of(pullCommand)));
 		
 		var configHash = substringAfter(manifest.get("config").get("digest").asText(), ":");
-		var config = readJson(getPackBlobManager().readBlob(projectId, configHash));
+		var config = readJson(getPackBlobService().readBlob(projectId, configHash));
 		if (archDigest != null) {
 			fragment.add(new WebMarkupContainer("osArch").setVisible(false));
 			var pullArchCommand = "docker pull " + namespace + "@" + archDigest;

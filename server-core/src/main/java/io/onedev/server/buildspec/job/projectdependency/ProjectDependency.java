@@ -8,7 +8,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
@@ -57,8 +57,8 @@ public class ProjectDependency implements Serializable {
 		List<String> choices = new ArrayList<>();
 		Project currentProject = ((ProjectPage)WicketUtils.getPage()).getProject();
 		
-		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-		ProjectCache cache = projectManager.cloneCache();
+		ProjectService projectService = OneDev.getInstance(ProjectService.class);
+		ProjectCache cache = projectService.cloneCache();
 		for (Project project: SecurityUtils.getAuthorizedProjects(new AccessProject())) {
 			if (!project.equals(currentProject))
 				choices.add(cache.get(project.getId()).getPath());
@@ -83,7 +83,7 @@ public class ProjectDependency implements Serializable {
 	static Project getInputProject(EditContext editContext) {
 		String projectPath = (String) editContext.getInputValue("projectPath");
 		if (projectPath != null) {
-			Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+			Project project = OneDev.getInstance(ProjectService.class).findByPath(projectPath);
 			if (project != null && SecurityUtils.canReadCode(project))
 				return project;
 		}

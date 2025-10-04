@@ -24,9 +24,9 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TarUtils;
 import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.entitymanager.AgentTokenManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.AgentService;
+import io.onedev.server.service.AgentTokenService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.AgentToken;
 import io.onedev.server.security.SecurityUtils;
 
@@ -56,7 +56,7 @@ public class AgentResource extends AbstractResource {
 			public void writeData(Attributes attributes) throws IOException {
 				File tempDir = FileUtils.createTempDir("agent");
 				try {
-					String agentVersion = OneDev.getInstance(AgentManager.class).getAgentVersion();
+					String agentVersion = OneDev.getInstance(AgentService.class).getAgentVersion();
 					
 					File agentDir = new File(tempDir, "agent");
 					FileUtils.copyDirectoryToDirectory(new File(Bootstrap.installDir, "agent"), agentDir);
@@ -68,10 +68,10 @@ public class AgentResource extends AbstractResource {
 							wrapperConfContent, StandardCharsets.UTF_8);
 					
 					Properties props = new Properties();
-					props.setProperty("serverUrl", OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl());
+					props.setProperty("serverUrl", OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl());
 					
 					AgentToken token = new AgentToken();
-					OneDev.getInstance(AgentTokenManager.class).createOrUpdate(token);
+					OneDev.getInstance(AgentTokenService.class).createOrUpdate(token);
 					props.setProperty("agentToken", token.getValue());
 					
 					try (var os = new BufferedOutputStream(new FileOutputStream(new File(agentDir, "agent/conf/agent.properties")))) {
@@ -88,7 +88,7 @@ public class AgentResource extends AbstractResource {
 					FileUtils.touchFile(new File(agentDir, "agent/conf/attributes.properties"));
 					FileUtils.touchFile(new File(agentDir, "agent/logs/console.log"));
 					
-					Collection<String> agentLibs = OneDev.getInstance(AgentManager.class).getAgentLibs();
+					Collection<String> agentLibs = OneDev.getInstance(AgentService.class).getAgentLibs();
 					
 					for (File file: Bootstrap.getBootDir().listFiles()) {
 						if (file.getName().startsWith("libwrapper-") 

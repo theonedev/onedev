@@ -26,8 +26,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.SshKeyService;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -47,12 +47,12 @@ public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
     	return getModelObject();
     }
     
-	private SshKeyManager getSshKeyManager() {
-		return OneDev.getInstance(SshKeyManager.class);
+	private SshKeyService getSshKeyService() {
+		return OneDev.getInstance(SshKeyService.class);
 	}
 
-	private AuditManager getAuditManager() {
-		return OneDev.getInstance(AuditManager.class);
+	private AuditService getAuditService() {
+		return OneDev.getInstance(AuditService.class);
 	}
 
     @Override
@@ -112,9 +112,9 @@ public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						SshKey sshKey = rowModel.getObject();
-						getSshKeyManager().delete(sshKey);
+						getSshKeyService().delete(sshKey);
                     	if (getPage() instanceof UserPage)
-							getAuditManager().audit(null, "deleted SSH key \"" + sshKey.getFingerprint() + "\" in account \"" + sshKey.getOwner().getName() + "\"", null, null);
+							getAuditService().audit(null, "deleted SSH key \"" + sshKey.getFingerprint() + "\" in account \"" + sshKey.getOwner().getName() + "\"", null, null);
 						Session.get().success(_T("SSH key deleted"));
 						target.add(sshKeysTable);
 					}
@@ -157,7 +157,7 @@ public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
 
 					@Override
 					protected SshKey load() {
-						return getSshKeyManager().load(id);
+						return getSshKeyService().load(id);
 					}
 					
 				};

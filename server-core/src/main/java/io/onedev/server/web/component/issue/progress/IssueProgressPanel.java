@@ -2,7 +2,7 @@ package io.onedev.server.web.component.issue.progress;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.StopwatchManager;
+import io.onedev.server.service.StopwatchService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Stopwatch;
 import io.onedev.server.security.SecurityUtils;
@@ -129,8 +129,8 @@ public abstract class IssueProgressPanel extends Panel {
 		super.onDetach();
 	}
 
-	private StopwatchManager getStopWatchManager() {
-		return OneDev.getInstance(StopwatchManager.class);
+	private StopwatchService getStopWatchManager() {
+		return OneDev.getInstance(StopwatchService.class);
 	}
 
 	@Override

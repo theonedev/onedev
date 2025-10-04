@@ -81,7 +81,7 @@ import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.entitymanager.PendingSuggestionApplyManager;
+import io.onedev.server.service.PendingSuggestionApplyService;
 import io.onedev.server.event.project.CommitIndexed;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobEdits;
@@ -99,7 +99,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
-import io.onedev.server.search.code.CodeIndexManager;
+import io.onedev.server.search.code.CodeIndexService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.PathComparator;
@@ -300,7 +300,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 				@Override
 				protected List<PendingSuggestionApply> load() {
-					return OneDev.getInstance(PendingSuggestionApplyManager.class)
+					return OneDev.getInstance(PendingSuggestionApplyService.class)
 							.query(SecurityUtils.getAuthUser(), getPullRequest());
 				}
 
@@ -402,20 +402,20 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 
-				CodeIndexManager indexManager = OneDev.getInstance(CodeIndexManager.class);
+				CodeIndexService indexService = OneDev.getInstance(CodeIndexService.class);
 				ObjectId oldCommit = getOldCommitId();
 				ObjectId newCommit = getNewCommitId();
 				boolean oldCommitIndexed = oldCommit.equals(ObjectId.zeroId()) 
-						|| indexManager.isIndexed(getProject().getId(), oldCommit);
+						|| indexService.isIndexed(getProject().getId(), oldCommit);
 				boolean newCommitIndexed = newCommit.equals(ObjectId.zeroId()) 
-						|| indexManager.isIndexed(getProject().getId(), newCommit);
+						|| indexService.isIndexed(getProject().getId(), newCommit);
 				if (oldCommitIndexed && newCommitIndexed) {
 					setVisible(false);
 				} else {
 					if (!oldCommitIndexed)
-						indexManager.indexAsync(getProject().getId(), oldCommit);
+						indexService.indexAsync(getProject().getId(), oldCommit);
 					if (!newCommitIndexed)
-						indexManager.indexAsync(getProject().getId(), newCommit);
+						indexService.indexAsync(getProject().getId(), newCommit);
 					setVisible(true);
 				}
 			}
@@ -479,7 +479,7 @@ public abstract class RevisionDiffPanel extends Panel {
 												PullRequest request = getPullRequest();
 												ObjectId commitId = request.getLatestUpdate().getHeadCommit().copy();
 												try {
-													ObjectId newCommitId = OneDev.getInstance(PendingSuggestionApplyManager.class)
+													ObjectId newCommitId = OneDev.getInstance(PendingSuggestionApplyService.class)
 															.apply(SecurityUtils.getAuthUser(), request, commitMessage);
 													
 													PullRequestChangesPage.State state = new PullRequestChangesPage.State();
@@ -532,7 +532,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										OneDev.getInstance(PendingSuggestionApplyManager.class)
+										OneDev.getInstance(PendingSuggestionApplyService.class)
 												.discard(SecurityUtils.getAuthUser(), getPullRequest());
 										target.add(commentContainer);
 										target.add(RevisionDiffPanel.this.get("operations"));
@@ -1892,7 +1892,7 @@ public abstract class RevisionDiffPanel extends Panel {
 											pendingApply.setRequest(getPullRequest());
 											pendingApply.setUser(SecurityUtils.getAuthUser());
 											pendingApply.setSuggestion(new ArrayList<String>(suggestion));
-											OneDev.getInstance(PendingSuggestionApplyManager.class).create(pendingApply);
+											OneDev.getInstance(PendingSuggestionApplyService.class).create(pendingApply);
 											onBatchChange(target);
 										}
 
@@ -1905,7 +1905,7 @@ public abstract class RevisionDiffPanel extends Panel {
 														&& pendingApply.getUser().equals(SecurityUtils.getAuthUser())
 														&& pendingApply.getComment().equals(annotationSupport.getOpenComment())) {
 													it.remove();
-													OneDev.getInstance(PendingSuggestionApplyManager.class).delete(pendingApply);
+													OneDev.getInstance(PendingSuggestionApplyService.class).delete(pendingApply);
 													break;
 												}
 											}

@@ -9,17 +9,17 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.web.page.admin.ServerDetailPage;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Splitter;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -109,7 +109,7 @@ public abstract class ParsedUrl implements Serializable {
 	}
 	
 	private List<String> getServers() {
-		return OneDev.getInstance(ClusterManager.class).getServerAddresses();
+		return OneDev.getInstance(ClusterService.class).getServerAddresses();
 	}
 	
 	private boolean isApplicable(Project project, String path) {
@@ -120,7 +120,7 @@ public abstract class ParsedUrl implements Serializable {
 		case "~settings":
 			if (SecurityUtils.canManageProject(project)) {
 				if (segment2.equals("service-desk")) {
-					return OneDev.getInstance(SettingManager.class).getServiceDeskSetting() != null 
+					return OneDev.getInstance(SettingService.class).getServiceDeskSetting() != null
 							&& project.isIssueManagement();
 				} else {
 					return true;
@@ -308,17 +308,17 @@ public abstract class ParsedUrl implements Serializable {
 	
 	static Project getProject(Map<String, String> paramValues) {
 		String projectPath = paramValues.get(ProjectMapperUtils.PARAM_PROJECT);
-		return OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+		return OneDev.getInstance(ProjectService.class).findByPath(projectPath);
 	}
 	
 	static Build getBuild(Map<String, String> paramValues) {
 		Long buildNumber = Long.valueOf(paramValues.get(BuildDetailPage.PARAM_BUILD));
-		return OneDev.getInstance(BuildManager.class).find(getProject(paramValues), buildNumber);
+		return OneDev.getInstance(BuildService.class).find(getProject(paramValues), buildNumber);
 	}
 	
 	static Issue getIssue(Map<String, String> paramValues) {
 		Long issueNumber = Long.valueOf(paramValues.get(IssueDetailPage.PARAM_ISSUE));
-		return OneDev.getInstance(IssueManager.class).find(getProject(paramValues), issueNumber);
+		return OneDev.getInstance(IssueService.class).find(getProject(paramValues), issueNumber);
 	}
 	
 }

@@ -32,7 +32,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.util.CollectionUtils;
@@ -155,8 +155,8 @@ public class IssueFieldListPage extends IssueSettingPage {
 						var oldAuditContent = VersionedXmlDoc.fromBean(field).toXML();
 						getSetting().setReconciled(false);
 						send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
-						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-						getAuditManager().audit(null, "deleted issue field \"" + field.getName() + "\"", oldAuditContent, null);
+						OneDev.getInstance(SettingService.class).saveIssueSetting(getSetting());
+						auditService.audit(null, "deleted issue field \"" + field.getName() + "\"", oldAuditContent, null);
 						target.add(fieldsTable);
 					}
 					
@@ -194,8 +194,8 @@ public class IssueFieldListPage extends IssueSettingPage {
 				var oldAuditContent = VersionedXmlDoc.fromBean(getSetting().getFieldSpecs()).toXML();
 				CollectionUtils.move(getSetting().getFieldSpecs(), from.getItemIndex(), to.getItemIndex());
 				var newAuditContent = VersionedXmlDoc.fromBean(getSetting().getFieldSpecs()).toXML();
-				OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-				getAuditManager().audit(null, "changed order of issue fields", oldAuditContent, newAuditContent);
+				OneDev.getInstance(SettingService.class).saveIssueSetting(getSetting());
+				auditService.audit(null, "changed order of issue fields", oldAuditContent, newAuditContent);
 				target.add(fieldsTable);
 			}
 			

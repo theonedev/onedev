@@ -10,7 +10,7 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.HttpCloneInfo;
 import io.onedev.server.OneDev;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.validation.Validatable;
@@ -45,7 +45,7 @@ public class HttpCredential implements GitCredential, Validatable {
 
 	@Override
 	public CloneInfo newCloneInfo(Build build, String jobToken) {
-		return new HttpCloneInfo(OneDev.getInstance(UrlManager.class).cloneUrlFor(build.getProject(), false), 
+		return new HttpCloneInfo(OneDev.getInstance(UrlService.class).cloneUrlFor(build.getProject(), false),
 				build.getJobAuthorizationContext().getSecretValue(accessTokenSecret));
 	}
 

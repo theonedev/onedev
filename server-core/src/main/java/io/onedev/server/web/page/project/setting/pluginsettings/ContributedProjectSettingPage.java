@@ -20,7 +20,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -89,8 +89,8 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 
 				var newAuditContent = VersionedXmlDoc.fromBean(setting).toXML();
 
-				OneDev.getInstance(ProjectManager.class).update(getProject());
-				getAuditManager().audit(getProject(), "changed contributed settings of \"" + settingClass.getName() + "\"", oldAuditContent, newAuditContent);
+				OneDev.getInstance(ProjectService.class).update(getProject());
+				auditService.audit(getProject(), "changed contributed settings of \"" + settingClass.getName() + "\"", oldAuditContent, newAuditContent);
 
 				getSession().success("Settings have been saved");
 				

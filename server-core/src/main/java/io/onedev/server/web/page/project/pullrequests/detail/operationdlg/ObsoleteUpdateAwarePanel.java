@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.project.pullrequests.detail.operationdlg;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestUpdateManager;
+import io.onedev.server.service.PullRequestUpdateService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -140,7 +140,7 @@ public abstract class ObsoleteUpdateAwarePanel extends Panel {
 	}
 	
 	protected final PullRequestUpdate getLatestUpdate() {
-		return OneDev.getInstance(PullRequestUpdateManager.class).load(latestUpdateId);
+		return OneDev.getInstance(PullRequestUpdateService.class).load(latestUpdateId);
 	}
 	
 	protected abstract String getTitle();

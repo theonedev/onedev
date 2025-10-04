@@ -5,7 +5,7 @@ import java.util.List;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.service.GroupService;
 import io.onedev.server.model.Group;
 import io.onedev.server.annotation.Editable;
 
@@ -16,7 +16,7 @@ public class AllGroups implements ChoiceProvider {
 
 	@Override
 	public List<Group> getChoices(boolean allPossible) {
-		List<Group> groups = OneDev.getInstance(GroupManager.class).query();
+		List<Group> groups = OneDev.getInstance(GroupService.class).query();
 		Collections.sort(groups, new Comparator<Group>() {
 
 			@Override

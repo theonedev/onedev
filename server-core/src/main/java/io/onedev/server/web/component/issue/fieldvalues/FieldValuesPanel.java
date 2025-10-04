@@ -34,13 +34,13 @@ import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IterationManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IterationService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
@@ -91,7 +91,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 	}
 
 	private GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
 	private InplacePropertyEditLink newInplaceEditLink(String componentId) {
@@ -165,7 +165,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 							fieldValues.putAll(FieldUtils.getFieldValues(
 									FieldUtils.newBeanComponentContext(beanDescriptor, bean), 
 									bean, FieldUtils.getEditableFields(getProject(), dependentFields)));
-							OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues);
+							var user = SecurityUtils.getUser();
+							OneDev.getInstance(IssueChangeService.class).changeFields(user, getIssue(), fieldValues);
 							notifyObservablesChange(target);
 							close();
 							return null;
@@ -175,7 +176,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 					
 					new DependentFieldsEditor(handler, bean, propertyNames, false, "Dependent Fields");
 				} else {
-					OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues);
+					var user = SecurityUtils.getUser();
+					OneDev.getInstance(IssueChangeService.class).changeFields(user, getIssue(), fieldValues);
 					notifyObservablesChange(handler);					
 				}
 			}
@@ -205,7 +207,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 		if (getIssueSetting().isReconciled()) { 
 			if (getField() != null && getIssueSetting().getFieldSpec(getField().getName()) != null) {
 				User user = SecurityUtils.getUser();
-				String initialState = OneDev.getInstance(SettingManager.class).getIssueSetting().getInitialStateSpec().getName();
+				String initialState = OneDev.getInstance(SettingService.class).getIssueSetting().getInitialStateSpec().getName();
 				if (SecurityUtils.canManageIssues(getIssue().getProject())) {
 					return null;
 				} else {
@@ -258,13 +260,13 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 				} else if (getField().getType().equals(FieldSpec.DATE_TIME)) {
 					valueContainer.add(new Label("value", DateUtils.formatDateTime(new Date(Long.parseLong(value)))));
 				} else if (getField().getType().equals(FieldSpec.USER)) {
-					User user = OneDev.getInstance(UserManager.class).findByName(value);
+					User user = OneDev.getInstance(UserService.class).findByName(value);
 					if (user != null)
 						valueContainer.add(new UserIdentPanel("value", user, userFieldDisplayMode));
 					else 
 						valueContainer.add(new Label("value", value));
 				} else if (getField().getType().equals(FieldSpec.ISSUE)) {
-					Issue issue = OneDev.getInstance(IssueManager.class).get(Long.valueOf(value));
+					Issue issue = OneDev.getInstance(IssueService.class).get(Long.valueOf(value));
 					if (issue != null) {
 						Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 						Link<Void> issueLink = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
@@ -276,7 +278,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 						valueContainer.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
 					}
 				} else if (getField().getType().equals(FieldSpec.BUILD)) {
-					Build build = OneDev.getInstance(BuildManager.class).get(Long.valueOf(value));
+					Build build = OneDev.getInstance(BuildService.class).get(Long.valueOf(value));
 					if (build != null) {
 						Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 						Link<Void> buildLink = new BookmarkablePageLink<Void>("link", 
@@ -288,7 +290,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 						valueContainer.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
 					}
 				} else if (getField().getType().equals(FieldSpec.PULL_REQUEST)) {
-					PullRequest request = OneDev.getInstance(PullRequestManager.class).get(Long.valueOf(value));
+					PullRequest request = OneDev.getInstance(PullRequestService.class).get(Long.valueOf(value));
 					if (request != null) {
 						Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 						Link<Void> requestLink = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, 
@@ -300,7 +302,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 						valueContainer.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
 					}
 				} else if (getField().getType().equals(FieldSpec.ITERATION)) {
-					Iteration iteration = OneDev.getInstance(IterationManager.class).findInHierarchy(getIssue().getProject(), value);
+					Iteration iteration = OneDev.getInstance(IterationService.class).findInHierarchy(getIssue().getProject(), value);
 					if (iteration != null) {
 						Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 						Link<Void> iterationLink = new BookmarkablePageLink<Void>("link", IterationIssuesPage.class, 

@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.entitymanager.PullRequestAssignmentManager;
+import io.onedev.server.service.PullRequestAssignmentService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.rest.annotation.Api;
@@ -27,18 +27,18 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class PullRequestAssignmentResource {
 
-	private final PullRequestAssignmentManager assignmentManager;
+	private final PullRequestAssignmentService assignmentService;
 
 	@Inject
-	public PullRequestAssignmentResource(PullRequestAssignmentManager assignmentManager) {
-		this.assignmentManager = assignmentManager;
+	public PullRequestAssignmentResource(PullRequestAssignmentService assignmentService) {
+		this.assignmentService = assignmentService;
 	}
 
 	@Api(order=100)
 	@Path("/{assignmentId}")
 	@GET
 	public PullRequestAssignment get(@PathParam("assignmentId") Long assignmentId) {
-		PullRequestAssignment assignment = assignmentManager.load(assignmentId);
+		PullRequestAssignment assignment = assignmentService.load(assignmentId);
 		if (!SecurityUtils.canReadCode(assignment.getRequest().getProject()))
 			throw new UnauthorizedException();
 		return assignment;
@@ -54,7 +54,7 @@ public class PullRequestAssignmentResource {
 		
 		if (pullRequest.isMerged())
 			throw new ExplicitException("Pull request is merged");
-		assignmentManager.create(assignment);
+		assignmentService.create(assignment);
 		return assignment.getId();
 	}
 	
@@ -62,14 +62,14 @@ public class PullRequestAssignmentResource {
 	@Path("/{assignmentId}")
 	@DELETE
 	public Response delete(@PathParam("assignmentId") Long assignmentId) {
-		PullRequestAssignment assignment = assignmentManager.load(assignmentId);		
+		PullRequestAssignment assignment = assignmentService.load(assignmentId);		
 		if (!SecurityUtils.canModifyPullRequest(assignment.getRequest())) {
 			throw new UnauthorizedException();
 		}
 		if (assignment.getRequest().isMerged())
 			throw new ExplicitException("Pull request is merged");
 		
-		assignmentManager.delete(assignment);
+		assignmentService.delete(assignment);
 		
 		return Response.ok().build();
 	}

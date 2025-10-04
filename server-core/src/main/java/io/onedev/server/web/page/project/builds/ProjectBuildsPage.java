@@ -18,8 +18,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.BuildQueryPersonalizationManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.BuildQueryPersonalizationService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.BuildQueryPersonalization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedQuery;
@@ -58,12 +58,12 @@ public class ProjectBuildsPage extends ProjectPage {
 		query = getPageParameters().get(PARAM_QUERY).toOptionalString();
 	}
 
-	private BuildQueryPersonalizationManager getBuildQueryPersonalizationManager() {
-		return OneDev.getInstance(BuildQueryPersonalizationManager.class);		
+	private BuildQueryPersonalizationService getBuildQueryPersonalizationService() {
+		return OneDev.getInstance(BuildQueryPersonalizationService.class);
 	}
 	
 	protected GlobalBuildSetting getBuildSetting() {
-		return OneDev.getInstance(SettingManager.class).getBuildSetting();		
+		return OneDev.getInstance(SettingService.class).getBuildSetting();
 	}
 	
 	@Override
@@ -105,8 +105,8 @@ public class ProjectBuildsPage extends ProjectPage {
 				var oldAuditContent = getAuditContent();
 				getProject().getBuildSetting().setNamedQueries(namedQueries);
 				var newAuditContent = getAuditContent();
-				getProjectManager().update(getProject());
-				getAuditManager().audit(getProject(), "changed build queries", oldAuditContent, newAuditContent);
+				getProjectService().update(getProject());
+				auditService.audit(getProject(), "changed build queries", oldAuditContent, newAuditContent);
 			}
 
 			@Override
@@ -181,7 +181,7 @@ public class ProjectBuildsPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getBuildQueryPersonalizationManager().createOrUpdate(setting);
+										getBuildQueryPersonalizationService().createOrUpdate(setting);
 											
 										target.add(savedQueries);
 										close();
@@ -207,8 +207,8 @@ public class ProjectBuildsPage extends ProjectPage {
 											verb = "changed";
 										}
 										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
-										getProjectManager().update(getProject());
-										getAuditManager().audit(getProject(), verb + " build query \"" + name + "\"", oldAuditContent, newAuditContent);
+										getProjectService().update(getProject());
+										auditService.audit(getProject(), verb + " build query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}

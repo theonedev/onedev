@@ -3,11 +3,11 @@ package io.onedev.server.event.project.pack;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PackManager;
+import io.onedev.server.service.PackService;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.User;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 
 public abstract class PackEvent extends ProjectEvent {
 
@@ -21,12 +21,12 @@ public abstract class PackEvent extends ProjectEvent {
 	}
 
 	public Pack getPack() {
-		return OneDev.getInstance(PackManager.class).load(packId);
+		return OneDev.getInstance(PackService.class).load(packId);
 	}
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getPack(), true);
+		return OneDev.getInstance(UrlService.class).urlFor(getPack(), true);
 	}
 	
 }

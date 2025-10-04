@@ -10,9 +10,9 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.buildspec.step.StepGroup;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.persistence.SessionService;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.File;
@@ -56,8 +56,8 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 
 	@Override
 	public ServerStepResult run(Long buildId, File workspace, TaskLogger logger) {
-		OneDev.getInstance(SessionManager.class).run(() -> {
-			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+		OneDev.getInstance(SessionService.class).run(() -> {
+			var build = OneDev.getInstance(BuildService.class).load(buildId);
 			if (build.getRequest() != null) {
 				write(getReportLockName(build.getProject().getId(), build.getNumber()), () -> {
 					File file = new File(workspace, getFile());
@@ -66,7 +66,7 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 						String markdown = FileUtils.readFileToString(file, UTF_8);
 						FileUtils.createDir(reportDir);
 						FileUtils.writeFile(new File(reportDir, CONTENT), markdown, UTF_8);
-						OneDev.getInstance(ProjectManager.class).directoryModified(
+						OneDev.getInstance(ProjectService.class).directoryModified(
 								build.getProject().getId(), reportDir.getParentFile());
 					} else {
 						logger.warning("WARNING: Markdown report file not found: " + file.getAbsolutePath());

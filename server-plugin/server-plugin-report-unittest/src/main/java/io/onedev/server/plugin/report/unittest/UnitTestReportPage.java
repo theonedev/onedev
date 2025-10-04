@@ -3,8 +3,8 @@ package io.onedev.server.plugin.report.unittest;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTabHead;
@@ -41,7 +41,7 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 			try {
 				Long projectId = getProject().getId();
 				Long buildNumber = getBuild().getNumber();
-				return OneDev.getInstance(ProjectManager.class).runOnActiveServer(projectId, new GetUnitTestReport(projectId, buildNumber, getReportName()));
+				return OneDev.getInstance(ProjectService.class).runOnActiveServer(projectId, new GetUnitTestReport(projectId, buildNumber, getReportName()));
 			} catch (Exception e) {
 				if (ExceptionUtils.find(e, SerializationException.class) != null)
 					return null;
@@ -133,7 +133,7 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 		@Override
 		public UnitTestReport call() throws Exception {
 			return LockUtils.read(UnitTestReport.getReportLockName(projectId, buildNumber), () -> {
-				File reportDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), UnitTestReport.CATEGORY + "/" + reportName);				
+				File reportDir = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), UnitTestReport.CATEGORY + "/" + reportName);
 				return UnitTestReport.readFrom(reportDir);
 			});
 		}

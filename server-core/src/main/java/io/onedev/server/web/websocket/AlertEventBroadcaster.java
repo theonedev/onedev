@@ -12,23 +12,23 @@ import javax.inject.Singleton;
 @Singleton
 public class AlertEventBroadcaster {
 	
-	private final WebSocketManager webSocketManager;
+	private final WebSocketService webSocketService;
 	
 	@Inject
-	public AlertEventBroadcaster(WebSocketManager webSocketManager) {
-		this.webSocketManager = webSocketManager;
+	public AlertEventBroadcaster(WebSocketService webSocketService) {
+		this.webSocketService = webSocketService;
 	}
 
 	@Listen
 	public void on(EntityPersisted event) {
 		if (event.getEntity() instanceof Alert) 
-			webSocketManager.notifyObservablesChange(Sets.newHashSet(Alert.getChangeObservable()), event.getSourcePage());
+			webSocketService.notifyObservablesChange(Sets.newHashSet(Alert.getChangeObservable()), event.getSourcePage());
 	}
 
 	@Listen
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Alert)
-			webSocketManager.notifyObservablesChange(Sets.newHashSet(Alert.getChangeObservable()), event.getSourcePage());
+			webSocketService.notifyObservablesChange(Sets.newHashSet(Alert.getChangeObservable()), event.getSourcePage());
 	}
 	
 }

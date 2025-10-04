@@ -8,7 +8,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.editable.EditSupport;
@@ -37,7 +37,7 @@ public class IssueChoiceEditSupport implements EditSupport {
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								Long issueId = model.getObject();
 								if (issueId != null) {
-									Issue issue = OneDev.getInstance(IssueManager.class).get(issueId);
+									Issue issue = OneDev.getInstance(IssueService.class).get(issueId);
 									if (issue != null) {
 										if (Project.get() != null && Project.get().getForkRoot().equals(issue.getNumberScope()))
 											return new Label(id, "#" + issue.getNumber());

@@ -38,8 +38,8 @@ import com.google.common.collect.Sets;
 import io.onedev.agent.AgentData;
 import io.onedev.k8shelper.OsInfo;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.AgentService;
 import io.onedev.server.search.entity.SortField;
 
 @Entity
@@ -225,11 +225,11 @@ public class Agent extends AbstractEntity {
 	@JsonProperty
 	public boolean isOnline() {
 		if (online == null) {
-			var agentManager = OneDev.getInstance(AgentManager.class);
-			var clusterManager = OneDev.getInstance(ClusterManager.class);
-			var server = agentManager.getAgentServer(getId());
-			online = server != null && clusterManager.getServer(server, false) != null
-					&& clusterManager.getOnlineServers().contains(server);
+			var agentService = OneDev.getInstance(AgentService.class);
+			var clusterService = OneDev.getInstance(ClusterService.class);
+			var server = agentService.getAgentServer(getId());
+			online = server != null && clusterService.getServer(server, false) != null
+					&& clusterService.getOnlineServers().contains(server);
 		}
 		return online;
 	}

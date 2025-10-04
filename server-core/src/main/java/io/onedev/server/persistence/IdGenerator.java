@@ -21,7 +21,7 @@ public class IdGenerator implements IdentifierGenerator, Configurable {
 
 	@Override
 	public Serializable generate(SharedSessionContractImplementor session, Object object) throws HibernateException {
-		return AppLoader.getInstance(IdManager.class).nextId(object.getClass());
+		return AppLoader.getInstance(IdService.class).nextId(object.getClass());
 	}
 
 }

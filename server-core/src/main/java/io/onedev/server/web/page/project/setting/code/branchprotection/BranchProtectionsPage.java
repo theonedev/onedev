@@ -53,8 +53,8 @@ public class BranchProtectionsPage extends ProjectSettingPage {
 					protected void onDelete(AjaxRequestTarget target) {
 						var protection = getProject().getBranchProtections().remove(item.getIndex());
 						var oldAuditContent = VersionedXmlDoc.fromBean(protection).toXML();
-						getProjectManager().update(getProject());
-						getAuditManager().audit(getProject(), "deleted branch protection rule", oldAuditContent, null);
+						getProjectService().update(getProject());
+						auditService.audit(getProject(), "deleted branch protection rule", oldAuditContent, null);
 						target.add(container);
 					}
 
@@ -63,8 +63,8 @@ public class BranchProtectionsPage extends ProjectSettingPage {
 						var oldProtection = getProject().getBranchProtections().set(item.getIndex(), protection);
 						var oldAuditContent = VersionedXmlDoc.fromBean(oldProtection).toXML();
 						var newAuditContent = VersionedXmlDoc.fromBean(protection).toXML();
-						getProjectManager().update(getProject());
-						getAuditManager().audit(getProject(), "changed branch protection rule", oldAuditContent, newAuditContent);
+						getProjectService().update(getProject());
+						auditService.audit(getProject(), "changed branch protection rule", oldAuditContent, newAuditContent);
 						target.add(container);
 					}
 
@@ -86,8 +86,8 @@ public class BranchProtectionsPage extends ProjectSettingPage {
 				var oldAuditContent = VersionedXmlDoc.fromBean(protections).toXML();
 				CollectionUtils.move(protections, from.getItemIndex(), to.getItemIndex());
 				var newAuditContent = VersionedXmlDoc.fromBean(protections).toXML();
-				getProjectManager().update(getProject());
-				getAuditManager().audit(getProject(), "reordered branch protection rules", oldAuditContent, newAuditContent);
+				getProjectService().update(getProject());
+				auditService.audit(getProject(), "reordered branch protection rules", oldAuditContent, newAuditContent);
 				
 				target.add(container);
 			}
@@ -111,8 +111,8 @@ public class BranchProtectionsPage extends ProjectSettingPage {
 					protected void onSave(AjaxRequestTarget target, BranchProtection protection) {
 						getProject().getBranchProtections().add(protection);
 						var newAuditContent = VersionedXmlDoc.fromBean(protection).toXML();
-						getProjectManager().update(getProject());
-						getAuditManager().audit(getProject(), "created branch protection rule", null, newAuditContent);
+						getProjectService().update(getProject());
+						auditService.audit(getProject(), "created branch protection rule", null, newAuditContent);
 						container.replace(newAddNewFrag());
 						target.add(container);
 					}

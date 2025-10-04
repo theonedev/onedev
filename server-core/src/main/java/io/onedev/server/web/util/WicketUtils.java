@@ -1,8 +1,8 @@
 package io.onedev.server.web.util;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.SubscriptionManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.SubscriptionService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.LongRange;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.WebSession;
@@ -43,32 +43,32 @@ public class WicketUtils {
 	}
 
 	public static ProjectCache getProjectCache() {
-		var projectManager = OneDev.getInstance(ProjectManager.class);
+		var projectService = OneDev.getInstance(ProjectService.class);
 		var requestCycle = RequestCycle.get();
 		if (requestCycle != null) {
 			var cache = requestCycle.getMetaData(ProjectCacheKey.INSTANCE);
 			if (cache == null) {
-				cache = projectManager.cloneCache();
+				cache = projectService.cloneCache();
 				requestCycle.setMetaData(ProjectCacheKey.INSTANCE, cache);
 			}
 			return cache;
 		} else {
-			return projectManager.cloneCache();
+			return projectService.cloneCache();
 		}
 	}
 	
 	public static boolean isSubscriptionActive() {
-		var subscriptionManager = OneDev.getInstance(SubscriptionManager.class);
+		var subscriptionService = OneDev.getInstance(SubscriptionService.class);
 		var requestCycle = RequestCycle.get();
 		if (requestCycle != null) {
 			var subscriptionActive = requestCycle.getMetaData(SubscriptionActiveKey.INSTANCE);
 			if (subscriptionActive == null) {
-				subscriptionActive = subscriptionManager.isSubscriptionActive();
+				subscriptionActive = subscriptionService.isSubscriptionActive();
 				requestCycle.setMetaData(SubscriptionActiveKey.INSTANCE, subscriptionActive);
 			}
 			return subscriptionActive;
 		} else {
-			return subscriptionManager.isSubscriptionActive();
+			return subscriptionService.isSubscriptionActive();
 		}
 	}
 

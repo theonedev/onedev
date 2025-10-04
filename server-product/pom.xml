@@ -252,17 +252,17 @@
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-mailservice-smtpimap</artifactId>
+			<artifactId>server-plugin-mail-smtpimap</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-mailservice-office365</artifactId>
+			<artifactId>server-plugin-mail-office365</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-mailservice-gmail</artifactId>
+			<artifactId>server-plugin-mail-gmail</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

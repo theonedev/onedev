@@ -15,7 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
+import io.onedev.server.service.IssueQueryPersonalizationService;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
@@ -112,7 +112,7 @@ public class IssueQueryPersonalization extends AbstractEntity implements QueryPe
 
 	@Override
 	public void onUpdated() {
-		OneDev.getInstance(IssueQueryPersonalizationManager.class).createOrUpdate(this);
+		OneDev.getInstance(IssueQueryPersonalizationService.class).createOrUpdate(this);
 	}
 	
 }

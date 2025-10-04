@@ -16,8 +16,8 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.BaseAuthorizationManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.BaseAuthorizationService;
 import io.onedev.server.model.BaseAuthorization;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -29,21 +29,21 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class BaseAuthorizationResource {
 
-	private final BaseAuthorizationManager authorizationManager;
+	private final BaseAuthorizationService authorizationService;
 
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 
 	@Inject
-	public BaseAuthorizationResource(BaseAuthorizationManager authorizationManager, AuditManager auditManager) {
-		this.authorizationManager = authorizationManager;
-		this.auditManager = auditManager;
+	public BaseAuthorizationResource(BaseAuthorizationService authorizationService, AuditService auditService) {
+		this.authorizationService = authorizationService;
+		this.auditService = auditService;
 	}
 
 	@Api(order=100, description = "Get base authorization of specified id")
 	@Path("/{authorizationId}")
 	@GET
 	public BaseAuthorization getAuthorization(@PathParam("authorizationId") Long authorizationId) {
-		var authorization = authorizationManager.load(authorizationId);
+		var authorization = authorizationService.load(authorizationId);
 		if (!SecurityUtils.canManageProject(authorization.getProject()))
 			throw new UnauthorizedException();
 		return authorization;
@@ -54,9 +54,9 @@ public class BaseAuthorizationResource {
 	public Long createAuthorization(@NotNull BaseAuthorization authorization) {
 		if (!SecurityUtils.canManageProject(authorization.getProject()))
 			throw new UnauthorizedException();
-		authorizationManager.create(authorization);
+		authorizationService.create(authorization);
 		var newAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
-		auditManager.audit(authorization.getProject(), "created base authorization via RESTful API", null, newAuditContent);
+		auditService.audit(authorization.getProject(), "created base authorization via RESTful API", null, newAuditContent);
 		return authorization.getId();
 	}
 
@@ -64,12 +64,12 @@ public class BaseAuthorizationResource {
 	@Path("/{authorizationId}")
 	@DELETE
 	public Response deleteAuthorization(@PathParam("authorizationId") Long authorizationId) {
-		var authorization = authorizationManager.load(authorizationId);
+		var authorization = authorizationService.load(authorizationId);
 		if (!SecurityUtils.canManageProject(authorization.getProject()))
 			throw new UnauthorizedException();
-		authorizationManager.delete(authorization);
+		authorizationService.delete(authorization);
 		var oldAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
-		auditManager.audit(authorization.getProject(), "deleted base authorization via RESTful API", oldAuditContent, null);
+		auditService.audit(authorization.getProject(), "deleted base authorization via RESTful API", oldAuditContent, null);
 		return Response.ok().build();
 	}
 	

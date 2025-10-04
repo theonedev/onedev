@@ -7,7 +7,7 @@ import java.util.List;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.annotation.ChoiceProvider;
@@ -46,7 +46,7 @@ public class IssueStateMapping implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getOneDevIssueStateChoices() {
 		List<String> choices = new ArrayList<>();
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
 		for (StateSpec state: issueSetting.getStateSpecs()) 
 			choices.add(state.getName());
 		return choices;

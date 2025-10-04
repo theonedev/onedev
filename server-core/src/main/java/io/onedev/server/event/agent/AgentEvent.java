@@ -1,7 +1,7 @@
 package io.onedev.server.event.agent;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.service.AgentService;
 import io.onedev.server.event.Event;
 import io.onedev.server.model.Agent;
 
@@ -14,7 +14,7 @@ public abstract class AgentEvent extends Event {
 	}
 
 	public Agent getAgent() {
-		return OneDev.getInstance(AgentManager.class).load(agentId);
+		return OneDev.getInstance(AgentService.class).load(agentId);
 	}
 	
 }

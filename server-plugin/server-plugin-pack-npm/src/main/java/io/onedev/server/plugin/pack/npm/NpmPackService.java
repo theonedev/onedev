@@ -5,21 +5,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.PackBlobManager;
-import io.onedev.server.entitymanager.PackManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.PackBlobService;
+import io.onedev.server.service.PackService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.exception.DataTooLargeException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
-import io.onedev.server.pack.PackService;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Digest;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -48,7 +47,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.apache.commons.lang3.StringUtils.*;
 
 @Singleton
-public class NpmPackService implements PackService {
+public class NpmPackService implements io.onedev.server.pack.PackService {
 	
 	public static final String SERVICE_ID = "npm";
 	
@@ -58,35 +57,35 @@ public class NpmPackService implements PackService {
 	
 	private static final int MAX_QUERY_COUNT = 1000;
 
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
-	private final TransactionManager transactionManager;
+	private final TransactionService transactionService;
 	
-	private final PackBlobManager packBlobManager;
+	private final PackBlobService packBlobService;
 	
-	private final PackManager packManager;
+	private final PackService packService;
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
-	private final BuildManager buildManager;
+	private final BuildService buildService;
 	
 	private final ObjectMapper objectMapper;
 	
-	private final UrlManager urlManager;
+	private final UrlService urlService;
 
 	@Inject
-	public NpmPackService(SessionManager sessionManager, TransactionManager transactionManager,
-						  PackBlobManager packBlobManager, PackManager packManager,
-						  ProjectManager projectManager, BuildManager buildManager,
-						  ObjectMapper objectMapper, UrlManager urlManager) {
-		this.sessionManager = sessionManager;
-		this.transactionManager = transactionManager;
-		this.packBlobManager = packBlobManager;
-		this.packManager = packManager;
-		this.projectManager = projectManager;
-		this.buildManager = buildManager;
+	public NpmPackService(SessionService sessionService, TransactionService transactionService,
+                          PackBlobService packBlobService, PackService packService,
+                          ProjectService projectService, BuildService buildService,
+                          ObjectMapper objectMapper, UrlService urlService) {
+		this.sessionService = sessionService;
+		this.transactionService = transactionService;
+		this.packBlobService = packBlobService;
+		this.packService = packService;
+		this.projectService = projectService;
+		this.buildService = buildService;
 		this.objectMapper = objectMapper;
-		this.urlManager = urlManager;
+		this.urlService = urlService;
 	}
 	
 	@Override
@@ -147,9 +146,9 @@ public class NpmPackService implements PackService {
 					if (pathSegments.get(1).equals("dist-tags")) {
 						if (pathSegments.size() == 2) {
 							if (isGet) {
-								sessionManager.run(() -> {
+								sessionService.run(() -> {
 									var project = checkProject(projectId, false);
-									var packs = packManager.queryByName(project, TYPE, packageName, null);
+									var packs = packService.queryByName(project, TYPE, packageName, null);
 									var distTags = new HashMap<String, String>();
 									for (var pack : packs) {
 										var packData = (NpmData) pack.getData();
@@ -168,7 +167,7 @@ public class NpmPackService implements PackService {
 								throw new ClientException(SC_METHOD_NOT_ALLOWED);
 							}
 						} else {
-							sessionManager.run(() -> {
+							sessionService.run(() -> {
 								checkProject(projectId, true);
 							});
 							var tag = decodePath(pathSegments.get(2));
@@ -183,9 +182,9 @@ public class NpmPackService implements PackService {
 										throw new RuntimeException(e);
 									}
 									var version = StringUtils.strip(baos.toString(UTF_8), "\"");
-									transactionManager.run(() -> {
-										var project = projectManager.load(projectId);
-										var pack = packManager.findByNameAndVersion(project, TYPE, packageName, version);
+									transactionService.run(() -> {
+										var project = projectService.load(projectId);
+										var pack = packService.findByNameAndVersion(project, TYPE, packageName, version);
 										if (pack != null) {
 											var packData = (NpmData) pack.getData();
 											packData.getDistTags().add(tag);
@@ -195,9 +194,9 @@ public class NpmPackService implements PackService {
 									});
 									response.setStatus(SC_OK);
 								} else if (isDelete) {
-									transactionManager.run(() -> {
-										var project = projectManager.load(projectId);
-										for (var pack: packManager.queryByName(project, TYPE, packageName, null)) {
+									transactionService.run(() -> {
+										var project = projectService.load(projectId);
+										for (var pack: packService.queryByName(project, TYPE, packageName, null)) {
 											var packData = (NpmData) pack.getData();
 											packData.getDistTags().remove(tag);
 										}
@@ -219,10 +218,10 @@ public class NpmPackService implements PackService {
 					var query = request.getParameter("text");
 					var offset = Integer.parseInt(request.getParameter("from"));
 					var count = Math.min(Integer.parseInt(request.getParameter("size")), MAX_QUERY_COUNT);
-					sessionManager.run(() -> {
+					sessionService.run(() -> {
 						var project = checkProject(projectId, false);
 						var objectsNode = objectMapper.createArrayNode();
-						for (var pack: packManager.queryLatests(project, TYPE, query, true, offset, count)) {
+						for (var pack: packService.queryLatests(project, TYPE, query, true, offset, count)) {
 							var packNode = objectMapper.createObjectNode();
 							var packData = (NpmData) pack.getData();								
 							var metadata = readJson(packData.getMetadata());
@@ -289,9 +288,9 @@ public class NpmPackService implements PackService {
 			if (pathSegments.isEmpty()) {
 				if (isGet) {
 					var project = checkProject(projectId, false);
-					sessionManager.run(() -> {
-						var packs = packManager.queryByName(project, TYPE, packageName, null);
-						var npmUrl = urlManager.urlFor(project, true) + "/~" + getServiceId() + "/" + encodePath(packageName);
+					sessionService.run(() -> {
+						var packs = packService.queryByName(project, TYPE, packageName, null);
+						var npmUrl = urlService.urlFor(project, true) + "/~" + getServiceId() + "/" + encodePath(packageName);
 						var distTagsNode = objectMapper.createObjectNode();
 						var versionsNode = objectMapper.createObjectNode();
 						NpmData latestPackData = null;
@@ -301,11 +300,11 @@ public class NpmPackService implements PackService {
 								distTagsNode.put(distTag, pack.getVersion());
 							ObjectNode versionMetadata = readJson(packData.getMetadata());
 							PackBlob packBlob;
-							if ((packBlob = packBlobManager.checkPackBlob(projectId, packData.getFileSha256BlobHash())) != null) {
+							if ((packBlob = packBlobService.checkPackBlob(projectId, packData.getFileSha256BlobHash())) != null) {
 								latestPackData = packData;
 								var distNode = versionMetadata.putObject("dist");
-								distNode.put("shasum", packBlobManager.getSha1Hash(packBlob));
-								distNode.put("integrity", "sha512-" + encodeBase64String(decodeHex(packBlobManager.getSha512Hash(packBlob))));
+								distNode.put("shasum", packBlobService.getSha1Hash(packBlob));
+								distNode.put("integrity", "sha512-" + encodeBase64String(decodeHex(packBlobService.getSha512Hash(packBlob))));
 								distNode.put("tarball", npmUrl + "/-/" + encodePath(pack.getVersion()) + "/" + encodePath(packData.getFileName()));
 								versionsNode.set(pack.getVersion(), versionMetadata);
 							}
@@ -326,7 +325,7 @@ public class NpmPackService implements PackService {
 						}	
 					});
 				} else if (isPut) {
-					sessionManager.run(() -> {
+					sessionService.run(() -> {
 						checkProject(projectId, true);
 					});
 					try (var is = request.getInputStream()) {
@@ -375,12 +374,12 @@ public class NpmPackService implements PackService {
 								var name = versionMetadata.get("name").asText();
 
 								LockUtils.run(getLockName(projectId, name), () -> {
-									transactionManager.run(() -> {
-										var project = projectManager.load(projectId);
-										var pack = packManager.findByNameAndVersion(project, TYPE, name, version);
+									transactionService.run(() -> {
+										var project = projectService.load(projectId);
+										var pack = packService.findByNameAndVersion(project, TYPE, name, version);
 										if (pack != null) {
 											var packData = (NpmData) pack.getData();
-											if (packBlobManager.checkPackBlob(projectId, packData.getFileSha256BlobHash()) != null) {
+											if (packBlobService.checkPackBlob(projectId, packData.getFileSha256BlobHash()) != null) {
 												var errorMessage = String.format("Package already exists (name: %s, version: %s)",
 														name, version);
 												throw new ClientException(SC_CONFLICT, errorMessage);
@@ -394,7 +393,7 @@ public class NpmPackService implements PackService {
 										}
 										Build build = null;
 										if (buildId != null)
-											build = buildManager.load(buildId);
+											build = buildService.load(buildId);
 										pack.setBuild(build);
 										pack.setUser(SecurityUtils.getUser());
 										pack.setPublishDate(new Date());
@@ -430,10 +429,10 @@ public class NpmPackService implements PackService {
 															fileName, algorithm);
 													throw new ClientException(SC_BAD_REQUEST, errorMessage);
 												}
-												var packBlobId = packBlobManager.uploadBlob(projectId, fileContent, null);
-												var sha256Hash = packBlobManager.load(packBlobId).getSha256Hash();
+												var packBlobId = packBlobService.uploadBlob(projectId, fileContent, null);
+												var sha256Hash = packBlobService.load(packBlobId).getSha256Hash();
 												pack.setData(new NpmData(packageMetadataBytes, versionMetadataBytes, distTagsOfVersion, fileName, sha256Hash));
-												packManager.createOrUpdate(pack, newArrayList(packBlobManager.load(packBlobId)), true);
+												packService.createOrUpdate(pack, newArrayList(packBlobService.load(packBlobId)), true);
 												response.setStatus(SC_CREATED);
 											}
 										}
@@ -454,12 +453,12 @@ public class NpmPackService implements PackService {
 				if (currentSegment.equals("-rev")) {
 					if (isDelete) {
 						LockUtils.run(getLockName(projectId, packageName), () -> {
-							transactionManager.run(() -> {
+							transactionService.run(() -> {
 								var project = checkProject(projectId, true);
-								var packs = packManager.queryByName(project, TYPE, packageName, null);
+								var packs = packService.queryByName(project, TYPE, packageName, null);
 								if (!packs.isEmpty()) {
 									for (var pack: packs)
-										packManager.delete(pack);
+										packService.delete(pack);
 									response.setStatus(SC_OK);									
 								} else {
 									response.setStatus(SC_NOT_FOUND);
@@ -479,16 +478,16 @@ public class NpmPackService implements PackService {
 						var fileName = decodePath(pathSegments.get(0));
 						if (fileName.startsWith(packageName + "-")) {
 							var version = substringBefore(fileName.substring(packageName.length() + 1), ".");
-							sessionManager.run(() -> {
+							sessionService.run(() -> {
 								var project = checkProject(projectId, false);
-								var pack = packManager.findByNameAndVersion(project, TYPE, packageName, version);
+								var pack = packService.findByNameAndVersion(project, TYPE, packageName, version);
 								if (pack != null) {
 									var packData = (NpmData) pack.getData();
 									PackBlob packBlob;
-									if ((packBlob = packBlobManager.checkPackBlob(projectId, packData.getFileSha256BlobHash())) != null) {
+									if ((packBlob = packBlobService.checkPackBlob(projectId, packData.getFileSha256BlobHash())) != null) {
 										try {
 											response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-											packBlobManager.downloadBlob(packBlob.getProject().getId(), packBlob.getSha256Hash(), response.getOutputStream());
+											packBlobService.downloadBlob(packBlob.getProject().getId(), packBlob.getSha256Hash(), response.getOutputStream());
 											response.setStatus(SC_OK);
 										} catch (IOException e) {
 											throw new RuntimeException(e);
@@ -505,18 +504,18 @@ public class NpmPackService implements PackService {
 						var version = decodePath(pathSegments.get(0));
 						var fileName = decodePath(pathSegments.get(1));
 						if (isGet) {
-							sessionManager.run(() -> {
+							sessionService.run(() -> {
 								var project = checkProject(projectId, false);
-								var pack = packManager.findByNameAndVersion(project, TYPE, packageName, version);
+								var pack = packService.findByNameAndVersion(project, TYPE, packageName, version);
 								if (pack != null) {
 									var packData = (NpmData) pack.getData();
 									if (!packData.getFileName().equals(fileName)) 
 										throw new ClientException(SC_BAD_REQUEST, "Incorrect file name requested");
 									PackBlob packBlob;
-									if ((packBlob = packBlobManager.checkPackBlob(projectId, packData.getFileSha256BlobHash())) != null) {
+									if ((packBlob = packBlobService.checkPackBlob(projectId, packData.getFileSha256BlobHash())) != null) {
 										try {
 											response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-											packBlobManager.downloadBlob(packBlob.getProject().getId(), packData.getFileSha256BlobHash(), response.getOutputStream());
+											packBlobService.downloadBlob(packBlob.getProject().getId(), packData.getFileSha256BlobHash(), response.getOutputStream());
 											response.setStatus(SC_OK);
 										} catch (IOException e) {
 											throw new RuntimeException(e);
@@ -530,11 +529,11 @@ public class NpmPackService implements PackService {
 							});
 						} else if (isDelete) {
 							LockUtils.run(getLockName(projectId, packageName), () -> {
-								transactionManager.run(() -> {
+								transactionService.run(() -> {
 									var project = checkProject(projectId, true);
-									var pack = packManager.findByNameAndVersion(project, TYPE, packageName, version);
+									var pack = packService.findByNameAndVersion(project, TYPE, packageName, version);
 									if (pack != null) {
-										packManager.delete(pack);
+										packService.delete(pack);
 										response.setStatus(SC_OK);
 									} else {
 										response.setStatus(SC_NOT_FOUND);
@@ -562,7 +561,7 @@ public class NpmPackService implements PackService {
 	}
 
 	private Project checkProject(Long projectId, boolean needsToWrite) {
-		var project = projectManager.load(projectId);
+		var project = projectService.load(projectId);
 		if (!project.isPackManagement())
 			throw new ClientException(SC_NOT_ACCEPTABLE, "Package management not enabled for project '" + project.getPath() + "'");
 		else if (needsToWrite && !SecurityUtils.canWritePack(project))

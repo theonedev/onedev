@@ -34,18 +34,18 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.command.ReceivePackCommand;
 import io.onedev.server.git.command.UploadPackCommand;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.ssh.SshAuthenticator;
-import io.onedev.server.ssh.SshManager;
+import io.onedev.server.ssh.SshService;
 import io.onedev.server.util.OutputStreamWrapper;
-import io.onedev.server.util.concurrent.WorkExecutor;
+import io.onedev.server.util.concurrent.WorkExecutionService;
 
 class SshCommand implements Command, ServerSessionAware {
 	
@@ -90,14 +90,14 @@ class SshCommand implements Command, ServerSessionAware {
 		
 		boolean clusterAccess = SecurityUtils.isSystem();		
 		
-		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+		ProjectService projectService = OneDev.getInstance(ProjectService.class);
 
 		var tempStr = StringUtils.substringAfter(commandString, "'/");   
 		var projectPath = decodeFullRepoNameAsPath(substringBefore(tempStr, "'"));
-		var projectFacade = projectManager.findFacadeByPath(projectPath);
+		var projectFacade = projectService.findFacadeByPath(projectPath);
 		if (projectFacade == null && projectPath.endsWith(".git")) {
 			projectPath = StringUtils.substringBeforeLast(projectPath, ".");
-			projectFacade = projectManager.findFacadeByPath(projectPath);				
+			projectFacade = projectService.findFacadeByPath(projectPath);				
 		}
 		if (StringUtils.isBlank(projectPath))
 			throw new ExplicitException("Project not specified");
@@ -106,19 +106,19 @@ class SshCommand implements Command, ServerSessionAware {
 			return;
         } 
 		
-		ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
+		ClusterService clusterService = OneDev.getInstance(ClusterService.class);
 		
-		String activeServerAddress = projectManager.getActiveServer(projectFacade.getId(), true);
-		if (clusterAccess || activeServerAddress.equals(clusterManager.getLocalServerAddress())) {
-	        File gitDir = OneDev.getInstance(ProjectManager.class).getGitDir(projectFacade.getId());
+		String activeServerAddress = projectService.getActiveServer(projectFacade.getId(), true);
+		if (clusterAccess || activeServerAddress.equals(clusterService.getLocalServerAddress())) {
+	        File gitDir = OneDev.getInstance(ProjectService.class).getGitDir(projectFacade.getId());
 			String principal = (String) SecurityUtils.getSubject().getPrincipal();
 	        Map<String, String> hookEnvs = HookUtils.getHookEnvs(projectFacade.getId(), principal);
 
 	        if (!clusterAccess) {
-		        SessionManager sessionManager = OneDev.getInstance(SessionManager.class);
-		        sessionManager.openSession(); 
+		        SessionService sessionService = OneDev.getInstance(SessionService.class);
+		        sessionService.openSession(); 
 		        try {
-		        	Project project = projectManager.load(projectFacade.getId());
+		        	Project project = projectService.load(projectFacade.getId());
 					if (!SecurityUtils.canAccessProject(project)) {
 						reportProjectNotFoundOrInaccessible(projectPath);
 						return;
@@ -135,14 +135,14 @@ class SshCommand implements Command, ServerSessionAware {
 		    			}
 		        	}
 		        } finally {                
-		            sessionManager.closeSession();
+		            sessionService.closeSession();
 		        }
 	        }
 
 	        String groupId = "git-over-ssh-" + projectFacade.getId() + "-" + principal;
 	        
-	        WorkExecutor workExecutor = OneDev.getInstance(WorkExecutor.class);
-			future = workExecutor.submit(PACK_PRIORITY, groupId, new Runnable() {
+	        WorkExecutionService workExecutionService = OneDev.getInstance(WorkExecutionService.class);
+			future = workExecutionService.submit(PACK_PRIORITY, groupId, new Runnable() {
 				
 				@Override
 				public void run() {
@@ -168,8 +168,8 @@ class SshCommand implements Command, ServerSessionAware {
 		} else {
 			ExecutorService executorService = OneDev.getInstance(ExecutorService.class);
 			future = executorService.submit(() -> {
-				SshManager sshManager = OneDev.getInstance(SshManager.class);
-				try (	var clientSession = sshManager.ssh(activeServerAddress); 
+				SshService sshService = OneDev.getInstance(SshService.class);
+				try (	var clientSession = sshService.ssh(activeServerAddress); 
 						var clientChannel = clientSession.createExecChannel(commandString)) {
 					clientChannel.setIn(in);
 					clientChannel.setOut(out);

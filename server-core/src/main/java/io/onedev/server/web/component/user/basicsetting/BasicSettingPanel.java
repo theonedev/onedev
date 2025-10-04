@@ -15,8 +15,8 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -75,7 +75,7 @@ public class BasicSettingPanel extends GenericPanel<User> {
 				
 				User user = getUser();
 				
-				User userWithSameName = getUserManager().findByName(user.getName());
+				User userWithSameName = getUserService().findByName(user.getName());
 				if (userWithSameName != null && !userWithSameName.equals(user)) {
 					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
 							_T("Login name already used by another account"));
@@ -83,9 +83,9 @@ public class BasicSettingPanel extends GenericPanel<User> {
 				
 				if (editor.isValid()) {
 					var newAuditContent = VersionedXmlDoc.fromBean(editor.getPropertyValues()).toXML();					
-					getUserManager().update(user, oldName);
+					getUserService().update(user, oldName);
 					if (getPage() instanceof UserPage)
-						getAuditManager().audit(null, "changed basic settings of account \"" + user.getName() + "\"", oldAuditContent, newAuditContent);
+						getAuditService().audit(null, "changed basic settings of account \"" + user.getName() + "\"", oldAuditContent, newAuditContent);
 					Session.get().success(_T("Basic settings updated"));
 					setResponsePage(getPage().getClass(), getPage().getPageParameters());
 				}
@@ -99,12 +99,12 @@ public class BasicSettingPanel extends GenericPanel<User> {
 		add(form);
 	}
 
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 
-	private AuditManager getAuditManager() {
-		return OneDev.getInstance(AuditManager.class);
+	private AuditService getAuditService() {
+		return OneDev.getInstance(AuditService.class);
 	}
 	
 }

@@ -12,7 +12,7 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 
 @Editable
@@ -53,7 +53,7 @@ public class UndefinedFieldResolution implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getFieldChoices() {
 		List<String> fields = new ArrayList<>();
-		for (FieldSpec field: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpecs()) 
+		for (FieldSpec field: OneDev.getInstance(SettingService.class).getIssueSetting().getFieldSpecs())
 			fields.add(field.getName());
 		return fields;
 	}

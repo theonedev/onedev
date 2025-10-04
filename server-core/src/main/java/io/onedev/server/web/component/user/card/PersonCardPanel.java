@@ -12,7 +12,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.service.EmailAddressService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.UserAvatar;
@@ -40,9 +40,9 @@ public class PersonCardPanel extends Panel {
 		
 		StringBuilder builder = new StringBuilder();
 		
-		EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
+		EmailAddressService emailAddressService = OneDev.getInstance(EmailAddressService.class);
 		String displayName;
-		EmailAddress emailAddress = emailAddressManager.findByValue(personIdent.getEmailAddress());
+		EmailAddress emailAddress = emailAddressService.findByValue(personIdent.getEmailAddress());
 		if (emailAddress != null && emailAddress.isVerified())
 			displayName = emailAddress.getOwner().getDisplayName();
 		else

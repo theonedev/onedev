@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.project.builds.detail.artifacts;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ChildrenAggregator;
@@ -142,7 +142,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							getBuildManager().deleteArtifact(getBuild(), rowModel.getObject().getRight().getPath());
+							getBuildService().deleteArtifact(getBuild(), rowModel.getObject().getRight().getPath());
 							updateArtifacts(target);
 						}
 
@@ -164,7 +164,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 						if (directoryNode.getChildren() != null) {
 							return directoryNode.getChildren();
 						} else {
-							directoryNode = ((DirectoryInfo) getBuildManager()
+							directoryNode = ((DirectoryInfo) getBuildService()
 									.getArtifactInfo(getBuild(), directoryNode.getPath()));
 							return directoryNode.getChildren();
 						}
@@ -276,8 +276,8 @@ public class BuildArtifactsPage extends BuildDetailPage {
 		}.setOutputMarkupPlaceholderTag(true));
 	}
 	
-	private BuildManager getBuildManager() {
-		return OneDev.getInstance(BuildManager.class);
+	private BuildService getBuildService() {
+		return OneDev.getInstance(BuildService.class);
 	}
 
 	private void updateArtifacts(AjaxRequestTarget target) {

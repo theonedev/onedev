@@ -48,17 +48,17 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
-import io.onedev.server.attachment.AttachmentManager;
+import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.attachment.AttachmentTooLargeException;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.BaseAuthorizationManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IterationManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.BaseAuthorizationService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IterationService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.issue.IssuesImported;
@@ -73,7 +73,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
@@ -244,7 +244,7 @@ public class ImportServer implements Serializable, Validatable {
 			if (email == null && userNode.hasNonNull("public_email"))
 				email = userNode.get("public_email").asText(null);
 			if (email != null)
-				userIdOpt = Optional.ofNullable(User.idOf(OneDev.getInstance(UserManager.class).findByVerifiedEmailAddress(email)));
+				userIdOpt = Optional.ofNullable(User.idOf(OneDev.getInstance(UserService.class).findByVerifiedEmailAddress(email)));
 			else
 				userIdOpt = Optional.empty();
 			userIds.put(gitlabUserId, userIdOpt);
@@ -288,7 +288,7 @@ public class ImportServer implements Serializable, Validatable {
 			Map<String, Optional<Long>> userIds = new HashMap<>();
 			ImportResult result = new ImportResult();
 			for (var gitLabProject: projects.getImportProjects()) {
-				OneDev.getInstance(TransactionManager.class).run(() -> {
+				OneDev.getInstance(TransactionService.class).run(() -> {
 					try {
 						String oneDevProjectPath;
 						if (projects.getParentOneDevProject() != null)
@@ -298,8 +298,8 @@ public class ImportServer implements Serializable, Validatable {
 
 						logger.log("Importing from '" + gitLabProject + "' to '" + oneDevProjectPath + "'...");
 
-						ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-						Project project = projectManager.setup(oneDevProjectPath);
+						ProjectService projectService = OneDev.getInstance(ProjectService.class);
+						Project project = projectService.setup(SecurityUtils.getSubject(), oneDevProjectPath);
 
 						if (!project.isNew() && !SecurityUtils.canManageProject(project)) {
 							throw new UnauthorizedException("Import target already exists. " +
@@ -330,10 +330,10 @@ public class ImportServer implements Serializable, Validatable {
 									new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
 								} else {
 									if (project.isNew()) {
-										projectManager.create(project);
-										OneDev.getInstance(AuditManager.class).audit(project, "created project", null, VersionedXmlDoc.fromBean(project).toXML());
+										projectService.create(SecurityUtils.getUser(), project);
+										OneDev.getInstance(AuditService.class).audit(project, "created project", null, VersionedXmlDoc.fromBean(project).toXML());
 									}
-									projectManager.clone(project, builder.build().toString());
+									projectService.clone(project, builder.build().toString());
 								}
 							} finally {
 								SecretMasker.pop();
@@ -344,7 +344,7 @@ public class ImportServer implements Serializable, Validatable {
 
 						String visibility = projectNode.get("visibility").asText();
 						if (!visibility.equals("private") && !option.getPublicRoles().isEmpty())
-							OneDev.getInstance(BaseAuthorizationManager.class).syncRoles(project, option.getPublicRoles());
+							OneDev.getInstance(BaseAuthorizationService.class).syncRoles(project, option.getPublicRoles());
 
 						if (option.getIssueImportOption() != null) {
 							List<Iteration> iterations = new ArrayList<>();
@@ -364,7 +364,7 @@ public class ImportServer implements Serializable, Validatable {
 									iteration.setProject(project);
 									project.getIterations().add(iteration);
 									if (!dryRun)
-										OneDev.getInstance(IterationManager.class).createOrUpdate(iteration);
+										OneDev.getInstance(IterationService.class).createOrUpdate(iteration);
 								}
 							}
 
@@ -390,7 +390,7 @@ public class ImportServer implements Serializable, Validatable {
 	
 	ImportResult importIssues(String gitLabProject, Project oneDevProject, IssueImportOption option, 
 			Map<String, Optional<Long>> userIds, boolean dryRun, TaskLogger logger) {
-		IssueManager issueManager = OneDev.getInstance(IssueManager.class);
+		IssueService issueService = OneDev.getInstance(IssueService.class);
 		Client client = newClient();
 		try {
 			Set<String> nonExistentIterations = new HashSet<>();
@@ -439,8 +439,8 @@ public class ImportServer implements Serializable, Validatable {
 								errorAttachments.add(attachmentUrl);
 							} else {
 								try (InputStream is = response.readEntity(InputStream.class)) {
-									AttachmentManager attachmentManager = OneDev.getInstance(AttachmentManager.class);
-									String oneDevAttachmentName = attachmentManager.saveAttachment(
+									AttachmentService attachmentService = OneDev.getInstance(AttachmentService.class);
+									String oneDevAttachmentName = attachmentService.saveAttachment(
 											oneDevProject.getId(), issueUUID, attachmentName, is);
 									String oneDevAttachmentUrl = oneDevProject.getAttachmentUrlPath(issueUUID, oneDevAttachmentName);
 							    	matcher.appendReplacement(buffer, 
@@ -484,10 +484,10 @@ public class ImportServer implements Serializable, Validatable {
 
 						Long newNumber;
 						Long oldNumber = issueNode.get("iid").asLong();
-						if (dryRun || (issueManager.find(oneDevProject, oldNumber) == null && !issueNumberMappings.containsValue(oldNumber))) 
+						if (dryRun || (issueService.find(oneDevProject, oldNumber) == null && !issueNumberMappings.containsValue(oldNumber))) 
 							newNumber = oldNumber;
 						else
-							newNumber = issueManager.getNextNumber(oneDevProject);
+							newNumber = issueService.getNextNumber(oneDevProject);
 						
 						issue.setNumber(newNumber);
 						issueNumberMappings.put(oldNumber, newNumber);
@@ -513,13 +513,13 @@ public class ImportServer implements Serializable, Validatable {
 							}
 						}
 						
-						var userManager = OneDev.getInstance(UserManager.class);
+						var userService = OneDev.getInstance(UserService.class);
 						JsonNode authorNode = issueNode.get("author");
 						Long userId = getUserId(client, userIds, authorNode.get("id").asText(), logger);
 						if (userId != null) {
-							issue.setSubmitter(userManager.load(userId));
+							issue.setSubmitter(userService.load(userId));
 						} else {
-							issue.setSubmitter(OneDev.getInstance(UserManager.class).getUnknown());
+							issue.setSubmitter(OneDev.getInstance(UserService.class).getUnknown());
 							nonExistentLogins.add(authorNode.get("username").asText());
 						}
 						
@@ -549,7 +549,7 @@ public class ImportServer implements Serializable, Validatable {
 							
 							userId = getUserId(client, userIds, assigneeNode.get("id").asText(), logger);
 							if (userId != null) { 
-								assigneeField.setValue(userManager.load(userId).getName());
+								assigneeField.setValue(userService.load(userId).getName());
 								issue.getFields().add(assigneeField);
 							} else {
 								nonExistentLogins.add(assigneeNode.get("username").asText());
@@ -661,9 +661,9 @@ public class ImportServer implements Serializable, Validatable {
 									authorNode = noteNode.get("author");
 									userId = getUserId(client, userIds, authorNode.get("id").asText(), logger);
 									if (userId != null) {
-										comment.setUser(userManager.load(userId));
+										comment.setUser(userService.load(userId));
 									} else {
-										comment.setUser(OneDev.getInstance(UserManager.class).getUnknown());
+										comment.setUser(OneDev.getInstance(UserService.class).getUnknown());
 										nonExistentLogins.add(authorNode.get("username").asText());
 									}
 									issue.getComments().add(comment);
@@ -741,13 +741,13 @@ public class ImportServer implements Serializable, Validatable {
 			return result;
 		} finally {
 			if (!dryRun)
-				issueManager.resetNextNumber(oneDevProject);
+				issueService.resetNextNumber(oneDevProject);
 			client.close();
 		}
 	}
 	
 	private GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
 	List<JsonNode> list(Client client, String apiEndpoint, TaskLogger logger) {

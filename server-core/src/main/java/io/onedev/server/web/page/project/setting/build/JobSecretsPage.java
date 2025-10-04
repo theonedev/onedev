@@ -237,8 +237,8 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 						var jobSecrets = getProject().getBuildSetting().getJobSecrets();
 						var jobSecret = jobSecrets.remove(index);
 						var oldAuditContent = VersionedXmlDoc.fromBean(jobSecret).toXML();
-						getProjectManager().update(getProject());
-						getAuditManager().audit(getProject(), "deleted job secret \"" + jobSecret.getName() + "\"", oldAuditContent, null);
+						getProjectService().update(getProject());
+						auditService.audit(getProject(), "deleted job secret \"" + jobSecret.getName() + "\"", oldAuditContent, null);
 						Session.get().success(MessageFormat.format(_T("Job secret \"{0}\" deleted"), rowModel.getObject().getName()));
 						target.add(toggleArchiveButton);
 						target.add(secretsTable);
@@ -290,8 +290,8 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 				var oldAuditContent = VersionedXmlDoc.fromBean(secrets).toXML();
 				CollectionUtils.move(secrets, from.getItemIndex(), to.getItemIndex());
 				var newAuditContent = VersionedXmlDoc.fromBean(secrets).toXML();
-				getProjectManager().update(getProject());
-				getAuditManager().audit(getProject(), "reordered job secrets", oldAuditContent, newAuditContent);
+				getProjectService().update(getProject());
+				auditService.audit(getProject(), "reordered job secrets", oldAuditContent, newAuditContent);
 				target.add(secretsTable);
 			}
 

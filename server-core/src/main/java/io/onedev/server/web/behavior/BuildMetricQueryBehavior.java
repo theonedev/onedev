@@ -21,7 +21,7 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.service.BuildParamService;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -67,8 +67,8 @@ public class BuildMetricQueryBehavior extends ANTLRAssistBehavior {
 						Project project = getProject();
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = new ArrayList<>(Build.METRIC_QUERY_FIELDS);
-							BuildParamManager buildParamManager = OneDev.getInstance(BuildParamManager.class);
-							List<String> paramNames = new ArrayList<>(buildParamManager.getParamNames(project));
+							BuildParamService buildParamService = OneDev.getInstance(BuildParamService.class);
+							List<String> paramNames = new ArrayList<>(buildParamService.getParamNames(project));
 							Collections.sort(paramNames);
 							fields.addAll(paramNames);
 							return SuggestionUtils.suggest(fields, matchWith);

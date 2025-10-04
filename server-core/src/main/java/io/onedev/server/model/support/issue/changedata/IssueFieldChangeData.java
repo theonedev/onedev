@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.GroupService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -106,7 +106,7 @@ public class IssueFieldChangeData extends IssueChangeData {
 	
 	@Override
 	public Map<String, Collection<User>> getNewUsers() {
-		UserManager userManager = OneDev.getInstance(UserManager.class);
+		UserService userService = OneDev.getInstance(UserService.class);
 		Map<String, Collection<User>> newUsers = new HashMap<>();
 		for (Input oldField: oldFields.values()) {
 			Input newField = newFields.get(oldField.getName());
@@ -116,7 +116,7 @@ public class IssueFieldChangeData extends IssueChangeData {
 				Set<User> newUsersOfField = newField.getValues()
 						.stream()
 						.filter(it->!oldField.getValues().contains(it))
-						.map(it->userManager.findByName(it))
+						.map(it->userService.findByName(it))
 						.filter(it->it!=null)
 						.collect(Collectors.toSet());
 				if (!newUsersOfField.isEmpty())
@@ -128,7 +128,7 @@ public class IssueFieldChangeData extends IssueChangeData {
 					&& newField.getType().equals(FieldSpec.USER)) { 
 				Set<User> usersOfField = newField.getValues()
 						.stream()
-						.map(it->userManager.findByName(it))
+						.map(it->userService.findByName(it))
 						.filter(it->it!=null)
 						.collect(Collectors.toSet());
 				if (!usersOfField.isEmpty())
@@ -141,14 +141,14 @@ public class IssueFieldChangeData extends IssueChangeData {
 	@Override
 	public Map<String, Group> getNewGroups() {
 		Map<String, Group> newGroups = new HashMap<>();
-		GroupManager groupManager = OneDev.getInstance(GroupManager.class);
+		GroupService groupService = OneDev.getInstance(GroupService.class);
 		for (Input oldField: oldFields.values()) {
 			Input newField = newFields.get(oldField.getName());
 			if (newField != null 
 					&& !describe(oldField).equals(describe(newField)) 
 					&& newField.getType().equals(FieldSpec.GROUP) 
 					&& !newField.getValues().isEmpty()) { 
-				Group group = groupManager.find(newField.getValues().iterator().next());
+				Group group = groupService.find(newField.getValues().iterator().next());
 				if (group != null)
 					newGroups.put(newField.getName(), group);
 			}
@@ -157,7 +157,7 @@ public class IssueFieldChangeData extends IssueChangeData {
 			if (!oldFields.containsKey(newField.getName()) 
 					&& newField.getType().equals(FieldSpec.GROUP) 
 					&& !newField.getValues().isEmpty()) { 
-				Group group = groupManager.find(newField.getValues().iterator().next());
+				Group group = groupService.find(newField.getValues().iterator().next());
 				if (group != null)
 					newGroups.put(newField.getName(), group);
 			}

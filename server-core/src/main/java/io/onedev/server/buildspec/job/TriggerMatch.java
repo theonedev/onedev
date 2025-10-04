@@ -3,8 +3,8 @@ package io.onedev.server.buildspec.job;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.param.instance.ParamInstances;
 import io.onedev.server.buildspec.param.instance.ParamMap;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -48,7 +48,7 @@ public class TriggerMatch implements Serializable {
 	@Nullable
 	public PullRequest getRequest() {
 		if (requestId != null)
-			return OneDev.getInstance(PullRequestManager.class).load(requestId);
+			return OneDev.getInstance(PullRequestService.class).load(requestId);
 		else 
 			return null;
 	}
@@ -56,7 +56,7 @@ public class TriggerMatch implements Serializable {
 	@Nullable
 	public Issue getIssue() {
 		if (issueId != null)
-			return OneDev.getInstance(IssueManager.class).load(issueId);
+			return OneDev.getInstance(IssueService.class).load(issueId);
 		else
 			return null;
 	}

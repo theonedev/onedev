@@ -12,15 +12,14 @@ import org.jetbrains.annotations.Nullable;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.entitymanager.AccessTokenManager;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -30,20 +29,15 @@ public class JobAuthorizationContext {
 	
 	@Nullable
 	private final ObjectId commitId;
-	
-	@Nullable
-	private final User user;
-	
+		
 	@Nullable
 	private final PullRequest request;
 	
 	private static final ThreadLocal<Stack<JobAuthorizationContext>> stack = ThreadLocal.withInitial(Stack::new);
 	
-	public JobAuthorizationContext(Project project, @Nullable ObjectId commitId, 
-								   @Nullable User user, @Nullable PullRequest request) {
+	public JobAuthorizationContext(Project project, @Nullable ObjectId commitId, @Nullable PullRequest request) {
 		this.project = project;
 		this.commitId = commitId;
-		this.user = user;
 		this.request = request;
 	}
 	
@@ -52,14 +46,14 @@ public class JobAuthorizationContext {
 			JobMatch jobMatch = JobMatch.parse(script.getAuthorization(), true, false);
 			if (request != null) {	
 				if (request.getSource() != null) {
-					JobMatchContext sourceContext = new JobMatchContext(request.getSourceProject(), request.getSourceBranch(), null, request.getSubmitter(), null);
-					JobMatchContext targetContext = new JobMatchContext(request.getTargetProject(), request.getTargetBranch(), null, request.getSubmitter(), null);
+					JobMatchContext sourceContext = new JobMatchContext(request.getSourceProject(), request.getSourceBranch(), null, null);
+					JobMatchContext targetContext = new JobMatchContext(request.getTargetProject(), request.getTargetBranch(), null, null);
 					return jobMatch.matches(sourceContext) && jobMatch.matches(targetContext);
 				} else {
 					return false;					
 				}
 			} else {
-				return jobMatch.matches(new JobMatchContext(project, null, commitId, user, null));
+				return jobMatch.matches(new JobMatchContext(project, null, commitId, null));
 			}
 		} else {
 			return true;
@@ -69,7 +63,7 @@ public class JobAuthorizationContext {
 	public Subject getSubject(@Nullable String accessTokenSecret) {
 		if (accessTokenSecret != null) {
 			String secretValue = getSecretValue(accessTokenSecret);
-			var accessToken = OneDev.getInstance(AccessTokenManager.class).findByValue(secretValue);
+			var accessToken = OneDev.getInstance(AccessTokenService.class).findByValue(secretValue);
 			if (accessToken == null)
 				throw new ExplicitException(MessageFormat.format(_T("Invalid access token: {0}"), secretValue));
 			return accessToken.asSubject();
@@ -91,17 +85,17 @@ public class JobAuthorizationContext {
 						JobMatch jobMatch = JobMatch.parse(authorization, false, false);
 						if (request != null) {
 							if (project.equals(request.getSourceProject())) {
-								JobMatchContext sourceMatchContext = new JobMatchContext(project, request.getSourceBranch(), null, request.getSubmitter(), null);
-								JobMatchContext targetMatchContext = new JobMatchContext(project, request.getTargetBranch(), null, request.getSubmitter(), null);
+								JobMatchContext sourceMatchContext = new JobMatchContext(project, request.getSourceBranch(), null, null);
+								JobMatchContext targetMatchContext = new JobMatchContext(project, request.getTargetBranch(), null, null);
 								if (jobMatch.matches(sourceMatchContext) && jobMatch.matches(targetMatchContext))
 									return normalizeSecretValue(secret.getValue());
 							} else {
-								JobMatchContext matchContext = new JobMatchContext(project, null, commitId, request.getSubmitter(), null);
+								JobMatchContext matchContext = new JobMatchContext(project, null, commitId, null);
 								if (jobMatch.matches(matchContext))
 									return normalizeSecretValue(secret.getValue());
 							}
 						} else {
-							JobMatchContext matchContext = new JobMatchContext(project, null, commitId, user, null);
+							JobMatchContext matchContext = new JobMatchContext(project, null, commitId, null);
 							if (jobMatch.matches(matchContext))
 								return normalizeSecretValue(secret.getValue());
 						}

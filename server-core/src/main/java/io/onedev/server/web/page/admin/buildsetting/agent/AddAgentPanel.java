@@ -16,8 +16,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentTokenManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.AgentTokenService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.AgentToken;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
@@ -69,9 +69,9 @@ class AddAgentPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				AgentToken token = new AgentToken();
-				OneDev.getInstance(AgentTokenManager.class).createOrUpdate(token);
+				OneDev.getInstance(AgentTokenService.class).createOrUpdate(token);
 				StringBuilder builder = new StringBuilder("docker run -t -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/agent/work:/agent/work -e serverUrl=");
-				builder.append(OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl());
+				builder.append(OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl());
 				builder.append(" -e agentToken=").append(token.getValue()).append(" -h myagent").append(" 1dev/agent");
 				Fragment commandFragment = new Fragment("command", "dockerCommandFrag", AddAgentPanel.this);
 				commandFragment.add(new Label("command", builder.toString()));

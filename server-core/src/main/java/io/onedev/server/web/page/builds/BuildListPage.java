@@ -18,8 +18,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
@@ -57,7 +57,7 @@ public class BuildListPage extends LayoutPage {
 	}
 
 	private static GlobalBuildSetting getBuildSetting() {
-		return OneDev.getInstance(SettingManager.class).getBuildSetting();		
+		return OneDev.getInstance(SettingService.class).getBuildSetting();
 	}
 	
 	@Override
@@ -92,8 +92,8 @@ public class BuildListPage extends LayoutPage {
 				var oldAuditContent = VersionedXmlDoc.fromBean(getBuildSetting().getNamedQueries()).toXML();
 				getBuildSetting().setNamedQueries(namedQueries);
 				var newAuditContent = VersionedXmlDoc.fromBean(getBuildSetting().getNamedQueries()).toXML();
-				OneDev.getInstance(SettingManager.class).saveBuildSetting(getBuildSetting());
-				getAuditManager().audit(null, "changed build queries", oldAuditContent, newAuditContent);
+				OneDev.getInstance(SettingService.class).saveBuildSetting(getBuildSetting());
+				auditService.audit(null, "changed build queries", oldAuditContent, newAuditContent);
 			}
 
 		});
@@ -160,7 +160,7 @@ public class BuildListPage extends LayoutPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										OneDev.getInstance(UserManager.class).update(getLoginUser(), null);
+										OneDev.getInstance(UserService.class).update(getLoginUser(), null);
 										target.add(savedQueries);
 										close();
 									}
@@ -183,8 +183,8 @@ public class BuildListPage extends LayoutPage {
 											verb = "changed";
 										}
 										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
-										OneDev.getInstance(SettingManager.class).saveBuildSetting(buildSetting);
-										getAuditManager().audit(null, verb + " build query \"" + name + "\"", oldAuditContent, newAuditContent);
+										OneDev.getInstance(SettingService.class).saveBuildSetting(buildSetting);
+										auditService.audit(null, verb + " build query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}
@@ -251,7 +251,7 @@ public class BuildListPage extends LayoutPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return _T("Builds") + " - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return _T("Builds") + " - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
 	}
 	
 }

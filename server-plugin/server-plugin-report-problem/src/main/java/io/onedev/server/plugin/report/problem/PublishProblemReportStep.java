@@ -11,12 +11,12 @@ import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
 import io.onedev.server.codequality.BlobTarget;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildMetricManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.BuildMetricService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.ProblemMetric;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.dao.Dao;
 import org.apache.commons.lang3.SerializationUtils;
 
@@ -48,8 +48,8 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 	
 	@Override
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
-		return OneDev.getInstance(SessionManager.class).call(() -> {
-			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+		return OneDev.getInstance(SessionService.class).call(() -> {
+			var build = OneDev.getInstance(BuildService.class).load(buildId);
 			File reportDir = new File(build.getDir(), ProblemReport.CATEGORY + "/" + getReportName());
 
 			ProblemReport report = LockUtils.write(ProblemReport.getReportLockName(build), () -> {
@@ -63,7 +63,7 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 							if (group.getKey() instanceof BlobTarget.GroupKey)
 								writeFileProblems(build, group.getKey().getName(), group.getProblems());
 						}
-						OneDev.getInstance(ProjectManager.class).directoryModified(
+						OneDev.getInstance(ProjectService.class).directoryModified(
 								build.getProject().getId(), reportDir.getParentFile());
 						return aReport;
 					} else {
@@ -80,7 +80,7 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 				FileUtils.createDir(reportDir);
 				report.writeTo(reportDir);
 
-				var metric = OneDev.getInstance(BuildMetricManager.class).find(ProblemMetric.class, build, getReportName());
+				var metric = OneDev.getInstance(BuildMetricService.class).find(ProblemMetric.class, build, getReportName());
 				if (metric == null) {
 					metric = new ProblemMetric();
 					metric.setBuild(build);

@@ -21,7 +21,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.EditableUtils;
@@ -58,8 +58,8 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 			throw new RuntimeException(MessageFormat.format(_T("Unexpected setting: {0}"), settingName));
 	}
 
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);		
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 	
 	@Override
@@ -83,12 +83,12 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 				String newAuditContent = null;
 				if (editor instanceof BeanEditor && editor.isVisible()) {
 					var setting = (ContributedAdministrationSetting) ((BeanEditor)editor).getModelObject();
-					getSettingManager().saveContributedSetting(setting);
+					getSettingService().saveContributedSetting(setting);
 					newAuditContent = VersionedXmlDoc.fromBean(setting).toXML();
 				} else {
-					getSettingManager().removeContributedSetting(settingClass);
+					getSettingService().removeContributedSetting(settingClass);
 				}
-				getAuditManager().audit(null, "changed " + EditableUtils.getDisplayName(settingClass).toLowerCase(), 
+				auditService.audit(null, "changed " + EditableUtils.getDisplayName(settingClass).toLowerCase(), 
 						oldAuditContent, newAuditContent);
 
 				getSession().success(_T("Setting has been saved"));
@@ -149,7 +149,7 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 			
 		}));
 		
-		Serializable setting = getSettingManager().getContributedSetting(settingClass);
+		Serializable setting = getSettingService().getContributedSetting(settingClass);
 		oldAuditContent = VersionedXmlDoc.fromBean(setting).toXML();
 		form.add(newBeanEditor(setting));
 		

@@ -12,7 +12,7 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.service.BuildParamService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.build.BuildQuery;
@@ -84,8 +84,8 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 							List<String> fields = new ArrayList<>(Build.QUERY_FIELDS);
 							if (getProject() != null)
 								fields.remove(Build.NAME_PROJECT);
-							BuildParamManager buildParamManager = OneDev.getInstance(BuildParamManager.class);
-							List<String> paramNames = new ArrayList<>(buildParamManager.getParamNames(project));
+							BuildParamService buildParamService = OneDev.getInstance(BuildParamService.class);
+							List<String> paramNames = new ArrayList<>(buildParamService.getParamNames(project));
 							Collections.sort(paramNames);
 							fields.addAll(paramNames);
 							return SuggestionUtils.suggest(fields, matchWith);

@@ -36,9 +36,9 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.IssueLinkManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.IssueLinkService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -68,7 +68,7 @@ import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
-import io.onedev.server.xodus.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoService;
 
 public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext {
 
@@ -98,11 +98,11 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 					throw new ValidationException(MessageFormat.format(_T("Invalid issue number: {0}"), issueNumberString));
 				}
 				
-				Issue issue = getIssueManager().find(getProject(), issueNumber);
+				Issue issue = getIssueService().find(getProject(), issueNumber);
 				if (issue == null) { 
 					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find issue #{0} in project {1}"), issueNumber, getProject()));
 				} else {
-					OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
+					OneDev.getInstance(IssueLinkService.class).loadDeepLinks(issue);
 					if (!issue.getProject().equals(getProject())) 
 						throw new RestartResponseException(getPageClass(), paramsOf(issue));
 					return issue;
@@ -293,9 +293,9 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 							@Override
 							public void onClick() {
-								getIssueManager().delete(getIssue());
+								getIssueService().delete(getIssue());
 								var oldAuditContent = VersionedXmlDoc.fromBean(getIssue()).toXML();
-								getAuditManager().audit(getIssue().getProject(), "deleted issue \"" + getIssue().getReference().toString(getIssue().getProject()) + "\"", oldAuditContent, null);
+								auditService.audit(getIssue().getProject(), "deleted issue \"" + getIssue().getReference().toString(getIssue().getProject()) + "\"", oldAuditContent, null);
 								
 								Session.get().success(MessageFormat.format(_T("Issue #{0} deleted"), getIssue().getNumber()));
 								
@@ -331,7 +331,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 					@Override
 					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, ProjectScope projectScope) {
-						return getIssueManager().query(projectScope, query, false, offset, count);
+						return getIssueService().query(SecurityUtils.getSubject(), projectScope, query, false, offset, count);
 					}
 
 					@Override
@@ -362,7 +362,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				if (SecurityUtils.getAuthUser() != null) 
-					OneDev.getInstance(VisitInfoManager.class).visitIssue(SecurityUtils.getAuthUser(), getIssue());
+					OneDev.getInstance(VisitInfoService.class).visitIssue(SecurityUtils.getAuthUser(), getIssue());
 			}
 						
 		});	
@@ -392,11 +392,11 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 	@Override
 	public FieldSpec getInputSpec(String inputName) {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(inputName);
+		return OneDev.getInstance(SettingService.class).getIssueSetting().getFieldSpec(inputName);
 	}
 	
-	private IssueManager getIssueManager() {
-		return OneDev.getInstance(IssueManager.class);
+	private IssueService getIssueService() {
+		return OneDev.getInstance(IssueService.class);
 	}
 	
 	@Override

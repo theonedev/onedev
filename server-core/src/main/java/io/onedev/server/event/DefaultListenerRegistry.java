@@ -3,13 +3,13 @@ package io.onedev.server.event;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.event.project.ProjectDeleted;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.ActiveServerChanged;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.security.SecurityUtils;
 import org.slf4j.Logger;
@@ -28,25 +28,25 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultListenerRegistry.class);
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
-	private final TransactionManager transactionManager;
+	private final TransactionService transactionService;
 	
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
-	private final ClusterManager clusterManager;
+	private final ClusterService clusterService;
 	
 	private volatile Map<Object, Collection<Method>> listenerMethods;
 	
 	private final Map<Class<?>, Collection<Listener>> listeners = new ConcurrentHashMap<>();
 	
 	@Inject
-	public DefaultListenerRegistry(ProjectManager projectManager, ClusterManager clusterManager,
-								   TransactionManager transactionManager, SessionManager sessionManager) {
-		this.projectManager = projectManager;
-		this.transactionManager = transactionManager;
-		this.clusterManager = clusterManager;
-		this.sessionManager = sessionManager;
+	public DefaultListenerRegistry(ProjectService projectService, ClusterService clusterService,
+								   TransactionService transactionService, SessionService sessionService) {
+		this.projectService = projectService;
+		this.transactionService = transactionService;
+		this.clusterService = clusterService;
+		this.sessionService = sessionService;
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -110,17 +110,17 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 		if (event instanceof ProjectEvent) {
 			ProjectEvent projectEvent = (ProjectEvent) event;
 			Long projectId = projectEvent.getProject().getId();
-			transactionManager.runAfterCommit(() -> projectManager.submitToActiveServer(projectId, () -> {
+			transactionService.runAfterCommit(() -> projectService.submitToActiveServer(projectId, () -> {
 				SecurityUtils.bindAsSystem();
 				try {
 					String lockName = projectEvent.getLockName();
 					if (lockName != null) {
 						LockUtils.call(lockName, true, () -> {
-							sessionManager.run(() -> invokeListeners(event));
+							sessionService.run(() -> invokeListeners(event));
 							return null;
 						});
 					} else {
-						sessionManager.run(() -> invokeListeners(event));
+						sessionService.run(() -> invokeListeners(event));
 					}
 				} catch (Exception e) {
 					logger.error("Error invoking listeners", e);
@@ -130,11 +130,11 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 		} else if (event instanceof ProjectDeleted) {
 			ProjectDeleted projectDeleted = (ProjectDeleted) event;
 			Long projectId = projectDeleted.getProjectId();
-			String activeServer = projectManager.getActiveServer(projectId, false);
+			String activeServer = projectService.getActiveServer(projectId, false);
 			if (activeServer != null) {
-				transactionManager.runAfterCommit(() -> clusterManager.submitToServer(activeServer, () -> {
+				transactionService.runAfterCommit(() -> clusterService.submitToServer(activeServer, () -> {
 					try {
-						sessionManager.run(() -> invokeListeners(event));
+						sessionService.run(() -> invokeListeners(event));
 					} catch (Exception e) {
 						logger.error("Error invoking listeners", e);
 					}
@@ -143,9 +143,9 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 			}
 		} else if (event instanceof ActiveServerChanged) {
 			ActiveServerChanged activeServerChanged = (ActiveServerChanged) event;
-			transactionManager.runAfterCommit(() -> clusterManager.submitToServer(activeServerChanged.getActiveServer(), () -> {
+			transactionService.runAfterCommit(() -> clusterService.submitToServer(activeServerChanged.getActiveServer(), () -> {
 				try {
-					sessionManager.run(() -> invokeListeners(event));
+					sessionService.run(() -> invokeListeners(event));
 				} catch (Exception e) {
 					logger.error("Error invoking listeners", e);
 				}

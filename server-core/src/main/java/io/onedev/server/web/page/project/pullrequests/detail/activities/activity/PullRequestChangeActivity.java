@@ -5,7 +5,7 @@ import java.util.Date;
 import org.apache.wicket.Component;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.service.PullRequestChangeService;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivity;
 
@@ -23,7 +23,7 @@ public class PullRequestChangeActivity implements PullRequestActivity {
 	}
 
 	public PullRequestChange getChange() {
-		return OneDev.getInstance(PullRequestChangeManager.class).load(changeId);
+		return OneDev.getInstance(PullRequestChangeService.class).load(changeId);
 	}
 
 	@Override

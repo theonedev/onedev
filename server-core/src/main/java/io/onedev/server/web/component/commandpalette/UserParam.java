@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.web.page.user.UserPage;
 
@@ -22,18 +22,18 @@ public class UserParam extends ParamSegment {
 		Map<String, String> suggestions = new LinkedHashMap<>();
 		if (matchWith.length() == 0) 
 			matchWith = null;
-		UserManager userManager = OneDev.getInstance(UserManager.class);
-		for (User user: userManager.query(matchWith, 0, count))
+		UserService userService = OneDev.getInstance(UserService.class);
+		for (User user: userService.query(matchWith, 0, count))
 			suggestions.put(user.getDisplayName(), String.valueOf(user.getId()));
 		return suggestions;
 	}
 
 	@Override
 	public boolean isExactMatch(String matchWith, Map<String, String> paramValues) {
-		UserManager userManager = OneDev.getInstance(UserManager.class);
+		UserService userService = OneDev.getInstance(UserService.class);
 		try {
 			Long userId = Long.valueOf(matchWith);
-			if (userManager.get(userId) != null) 
+			if (userService.get(userId) != null) 
 				return true;
 		} catch (NumberFormatException e) {
 		}

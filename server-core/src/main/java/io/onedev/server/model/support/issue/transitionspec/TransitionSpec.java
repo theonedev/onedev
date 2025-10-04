@@ -11,7 +11,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -109,7 +109,7 @@ public abstract class TransitionSpec implements Serializable {
 	}
 	
 	protected static GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 
 	public Collection<String> getUndefinedStates() {
@@ -125,7 +125,7 @@ public abstract class TransitionSpec implements Serializable {
 	public Collection<String> getUndefinedFields() {
 		Collection<String> undefinedFields = new HashSet<>();
 		undefinedFields.addAll(getQueryUpdater().getUndefinedFields());
-		GlobalIssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting setting = OneDev.getInstance(SettingService.class).getIssueSetting();
 		for (String field: getRemoveFields()) {
 			if (setting.getFieldSpec(field) == null)
 				undefinedFields.add(field);

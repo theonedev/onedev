@@ -9,16 +9,16 @@ import javax.inject.Singleton;
 @Singleton
 public class BuildEventBroadcaster {
 	
-	private final WebSocketManager webSocketManager;
+	private final WebSocketService webSocketService;
 	
 	@Inject
-	public BuildEventBroadcaster(WebSocketManager webSocketManager) {
-		this.webSocketManager = webSocketManager;
+	public BuildEventBroadcaster(WebSocketService webSocketService) {
+		this.webSocketService = webSocketService;
 	}
 
 	@Listen
 	public void on(BuildEvent event) {
-		webSocketManager.notifyObservablesChange(event.getBuild().getChangeObservables(), event.getSourcePage());
+		webSocketService.notifyObservablesChange(event.getBuild().getChangeObservables(), event.getSourcePage());
 	}
 
 }

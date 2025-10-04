@@ -2,9 +2,9 @@ package io.onedev.server.web.resource;
 
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentManager;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.attachment.AttachmentService;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.*;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -58,21 +58,21 @@ public class AttachmentResource extends AbstractResource {
 			throw new IllegalArgumentException("Invalid parameter 'attachment-group'");
 
 		if (!SecurityUtils.isSystem()) {
-			Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+			Project project = OneDev.getInstance(ProjectService.class).load(projectId);
 			
 			String authorization = params.get(PARAM_AUTHORIZATION).toOptionalString();
 			if (authorization == null 
 					|| !new String(CryptoUtils.decrypt(Base64.decodeBase64(authorization)), UTF_8).equals(attachmentGroup)) {
 				Issue issue;
 				Build build;
-				if (OneDev.getInstance(PullRequestManager.class).find(attachmentGroup) != null 
-						|| OneDev.getInstance(CodeCommentManager.class).findByUUID(attachmentGroup) != null) {
+				if (OneDev.getInstance(PullRequestService.class).find(attachmentGroup) != null
+						|| OneDev.getInstance(CodeCommentService.class).findByUUID(attachmentGroup) != null) {
 					if (!SecurityUtils.canReadCode(project))
 						throw new UnauthorizedException();
-				} else if ((issue = OneDev.getInstance(IssueManager.class).find(attachmentGroup)) != null) {
+				} else if ((issue = OneDev.getInstance(IssueService.class).find(attachmentGroup)) != null) {
 					if (!SecurityUtils.canAccessIssue(issue))
 						throw new UnauthorizedException();
-				} else if ((build = OneDev.getInstance(BuildManager.class).find(attachmentGroup)) != null) {
+				} else if ((build = OneDev.getInstance(BuildService.class).find(attachmentGroup)) != null) {
 					if (!SecurityUtils.canAccessBuild(build))
 						throw new UnauthorizedException();
 				} else if (!SecurityUtils.canAccessProject(project)) {
@@ -88,7 +88,7 @@ public class AttachmentResource extends AbstractResource {
 			throw new IllegalArgumentException("Invalid attachment parameter");
 
 		ResourceResponse response = new ResourceResponse();
-		response.setContentLength(getAttachmentManager().getAttachmentInfo(projectId, attachmentGroup, attachment).getLength());
+		response.setContentLength(getAttachmentService().getAttachmentInfo(projectId, attachmentGroup, attachment).getLength());
 		
 		response.getHeaders().addHeader("X-Content-Type-Options", "nosniff");
 		response.setContentType(MimeTypes.OCTET_STREAM);
@@ -99,11 +99,11 @@ public class AttachmentResource extends AbstractResource {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				String activeServer = getProjectManager().getActiveServer(projectId, true);
-				ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
-				if (activeServer.equals(clusterManager.getLocalServerAddress())) {
-					read(getAttachmentManager().getAttachmentLockName(projectId, attachmentGroup), () -> {
-						File attachmentFile = new File(getAttachmentManager().getAttachmentGroupDir(projectId, attachmentGroup), attachment);
+				String activeServer = getProjectService().getActiveServer(projectId, true);
+				ClusterService clusterService = OneDev.getInstance(ClusterService.class);
+				if (activeServer.equals(clusterService.getLocalServerAddress())) {
+					read(getAttachmentService().getAttachmentLockName(projectId, attachmentGroup), () -> {
+						File attachmentFile = new File(getAttachmentService().getAttachmentGroupDir(projectId, attachmentGroup), attachment);
 						try (
 								InputStream is = new FileInputStream(attachmentFile);
 								OutputStream os = attributes.getResponse().getOutputStream()) {
@@ -117,12 +117,12 @@ public class AttachmentResource extends AbstractResource {
 	    				CharSequence path = RequestCycle.get().urlFor(
 	    						new AttachmentResourceReference(), 
 	    						AttachmentResource.paramsOf(projectId, attachmentGroup, attachment));
-	    				String activeServerUrl = clusterManager.getServerUrl(activeServer) + path;
+	    				String activeServerUrl = clusterService.getServerUrl(activeServer) + path;
 	    				
 	    				WebTarget target = client.target(activeServerUrl).path(path.toString());
 	    				Invocation.Builder builder =  target.request();
 	    				builder.header(HttpHeaders.AUTHORIZATION, 
-	    						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
+	    						KubernetesHelper.BEARER + " " + clusterService.getCredential());
 	    				
 	    				try (Response response = builder.get()) {
 	    					KubernetesHelper.checkStatus(response);
@@ -143,12 +143,12 @@ public class AttachmentResource extends AbstractResource {
 		return response;
 	}
 		
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
-	private static AttachmentManager getAttachmentManager() {
-		return OneDev.getInstance(AttachmentManager.class);
+	private static AttachmentService getAttachmentService() {
+		return OneDev.getInstance(AttachmentService.class);
 	}
 
 	public static PageParameters paramsOf(Long projectId, String attachmentGroup, String attachment) {
@@ -157,7 +157,7 @@ public class AttachmentResource extends AbstractResource {
 		params.set(PARAM_ATTACHMENT_GROUP, attachmentGroup);
 		params.set(PARAM_ATTACHMENT, attachment);
 		
-		params.set("v", getAttachmentManager().getAttachmentInfo(projectId, attachmentGroup, attachment).getLastModified());
+		params.set("v", getAttachmentService().getAttachmentInfo(projectId, attachmentGroup, attachment).getLastModified());
 		
 		return params;
 	}

@@ -1,17 +1,13 @@
 package io.onedev.server.web.component.issue.operation;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.issue.transitionoption.TransitionOptionPanel;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.page.base.BasePage;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -19,9 +15,19 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.*;
+import io.onedev.server.OneDev;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.issue.transitionoption.TransitionOptionPanel;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.page.base.BasePage;
 
 public abstract class TransitionMenuLink extends MenuLink {
 
@@ -30,11 +36,12 @@ public abstract class TransitionMenuLink extends MenuLink {
 
 				@Override
 				protected List<ManualSpec> load() {
+					var subject = SecurityUtils.getSubject();
 					var manualSpecs = new ArrayList<ManualSpec>();
-					for (var transitionSpec: OneDev.getInstance(SettingManager.class).getIssueSetting().getTransitionSpecs()) {
+					for (var transitionSpec: OneDev.getInstance(SettingService.class).getIssueSetting().getTransitionSpecs()) {
 						if (transitionSpec instanceof ManualSpec) {
 							ManualSpec manualSpec = (ManualSpec) transitionSpec;
-							if (manualSpec.canTransit(getIssue(), null)) 
+							if (manualSpec.canTransit(subject, getIssue(), null)) 
 								manualSpecs.add(manualSpec);								
 						}
 					}
@@ -71,7 +78,7 @@ public abstract class TransitionMenuLink extends MenuLink {
 		for (ManualSpec transition: manualTransitionsModel.getObject()) {
 			var toStates = transition.getToStates();
 			if (toStates.isEmpty())
-				toStates = new ArrayList<>(OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpecMap().keySet());
+				toStates = new ArrayList<>(OneDev.getInstance(SettingService.class).getIssueSetting().getStateSpecMap().keySet());
 			for (var toState: toStates) {
 				if (!toState.equals(getIssue().getState()) && encounteredStates.add(toState)) {
 					menuItems.add(new MenuItem() {
@@ -112,8 +119,9 @@ public abstract class TransitionMenuLink extends MenuLink {
 
 										@Override
 										protected void onTransit(AjaxRequestTarget target, Map<String, Object> fieldValues, String comment) {
-											IssueChangeManager manager = OneDev.getInstance(IssueChangeManager.class);
-											manager.changeState(getIssue(), toState, fieldValues, transition.getPromptFields(), transition.getRemoveFields(), comment);
+											IssueChangeService service = OneDev.getInstance(IssueChangeService.class);
+											var user = SecurityUtils.getUser();
+											service.changeState(user, getIssue(), toState, fieldValues, transition.getPromptFields(), transition.getRemoveFields(), comment);
 											((BasePage)getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(true));
 											modal.close();
 										}

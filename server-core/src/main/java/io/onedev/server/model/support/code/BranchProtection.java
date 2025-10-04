@@ -32,7 +32,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.JobChoice;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
@@ -438,7 +438,7 @@ public class BranchProtection implements Serializable {
 			Map<String, String> gitEnvs) {
 		Collection<String> requiredJobs = getBuildRequirement(project, oldObjectId, newObjectId, gitEnvs).getRequiredJobs();
 
-		Collection<Build> builds = OneDev.getInstance(BuildManager.class).query(project, newObjectId, null);
+		Collection<Build> builds = OneDev.getInstance(BuildService.class).query(project, newObjectId, null);
 		for (Build build: builds) {
 			if (requiredJobs.contains(build.getJobName()) && build.getStatus() != Status.SUCCESSFUL)
 				return true;

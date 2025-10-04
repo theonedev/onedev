@@ -2,16 +2,16 @@ package io.onedev.server.git.hook;
 
 import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.shiro.util.ThreadContext;
@@ -43,24 +43,24 @@ public class GitPostReceiveCallback extends HttpServlet {
 	
     public static final String PATH = "/git-postreceive-callback";
     
-    private final ProjectManager projectManager;
+    private final ProjectService projectService;
 
-	private final UserManager userManager;
+	private final UserService userService;
     
-    private final UrlManager urlManager;
+    private final UrlService urlService;
 
-    private final SessionManager sessionManager;
+    private final SessionService sessionService;
     
     private final ListenerRegistry listenerRegistry;
     
     @Inject
-    public GitPostReceiveCallback(ProjectManager projectManager, UrlManager urlManager, 
-    		SessionManager sessionManager, ListenerRegistry listenerRegistry, UserManager userManager) {
-    	this.projectManager = projectManager;
-    	this.urlManager = urlManager;
-    	this.sessionManager = sessionManager;
+    public GitPostReceiveCallback(ProjectService projectService, UrlService urlService,
+                                  SessionService sessionService, ListenerRegistry listenerRegistry, UserService userService) {
+    	this.projectService = projectService;
+    	this.urlService = urlService;
+    	this.sessionService = sessionService;
         this.listenerRegistry = listenerRegistry;
-        this.userManager = userManager;
+        this.userService = userService;
     }
 
     @Sessional
@@ -114,7 +114,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         	String field = fields.get(pos);
         	ObjectId oldObjectId = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
         	
-        	Repository repository = projectManager.getRepository(projectId);
+        	Repository repository = projectService.getRepository(projectId);
         	String branch = GitUtils.ref2branch(refName);
         	String defaultBranch = GitUtils.getDefaultBranch(repository);
         	if (branch != null && defaultBranch == null) {
@@ -145,11 +145,11 @@ public class GitPostReceiveCallback extends HttpServlet {
         
 		var userId = SecurityUtils.getUser().getId();
 
-        sessionManager.runAsyncAfterCommit(() -> {
-			Project project = projectManager.load(projectId);
+        sessionService.runAsyncAfterCommit(() -> {
+			Project project = projectService.load(projectId);
 			try {
 				for (var updateInfo: updateInfos) {
-					RefUpdated event = new RefUpdated(userManager.load(userId), project, 
+					RefUpdated event = new RefUpdated(userService.load(userId), project, 
 							updateInfo.getLeft(), updateInfo.getMiddle(), updateInfo.getRight());
 					listenerRegistry.invokeListeners(event);
 				}
@@ -162,7 +162,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 	private void showPullRequestLink(Output output, Long projectId, String branch, String defaultBranch) {
     	output.writeLine();
     	output.writeLine("Create a pull request for '"+ branch +"' by visiting:");
-		output.writeLine("    " + urlManager.urlForProject(projectId, true) 
+		output.writeLine("    " + urlService.urlForProject(projectId, true) 
 				+"/~pulls/new?target=" 
 				+ projectId 
 				+ ":" 

@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.revision;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
@@ -83,7 +83,7 @@ public abstract class AffinalRevisionPicker extends Panel {
 
 			@Override
 			protected Project getCurrent() {
-				return OneDev.getInstance(ProjectManager.class).load(projectId);
+				return OneDev.getInstance(ProjectService.class).load(projectId);
 			}
 			
 		});

@@ -39,9 +39,9 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.IssueLinkManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
+import io.onedev.server.service.IssueLinkService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IssueQueryPersonalizationService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueQueryPersonalization;
 import io.onedev.server.model.IssueSchedule;
@@ -90,7 +90,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 	private final IModel<List<Issue>> pinnedIssuesModel = new LoadableDetachableModel<>() {
 		@Override
 		protected List<Issue> load() {
-			return getIssueManager().queryPinned(getProject());
+			return getIssueService().queryPinned(SecurityUtils.getSubject(), getProject());
 		}
 
 	};
@@ -106,12 +106,12 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 		query = params.get(PARAM_QUERY).toOptionalString();
 	}
 
-	private IssueQueryPersonalizationManager getIssueQueryPersonalizationManager() {
-		return OneDev.getInstance(IssueQueryPersonalizationManager.class);		
+	private IssueQueryPersonalizationService getIssueQueryPersonalizationService() {
+		return OneDev.getInstance(IssueQueryPersonalizationService.class);		
 	}
 	
-	private IssueManager getIssueManager() {
-		return OneDev.getInstance(IssueManager.class);
+	private IssueService getIssueService() {
+		return OneDev.getInstance(IssueService.class);
 	}
 	
 	@Override
@@ -131,7 +131,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 					}
 					
 					private Component newContent(String componentId, Long issueId, Set<Long> displayedIssueIds) {
-						Issue issue = getIssueManager().load(issueId);
+						Issue issue = getIssueService().load(issueId);
 
 						Fragment fragment = new Fragment(componentId, "pinnedIssueFrag", ProjectIssueListPage.this);
 
@@ -146,7 +146,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 									@Override
 									protected Issue getIssue() {
-										return getIssueManager().load(issueId);
+										return getIssueService().load(issueId);
 									}
 
 								};
@@ -154,7 +154,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 								transitLink.add(new IssueStateBadge("state", new LoadableDetachableModel<Issue>() {
 									@Override
 									protected Issue load() {
-										return getIssueManager().load(issueId);
+										return getIssueService().load(issueId);
 									}
 								}, true));
 								stateFragment.add(transitLink);
@@ -164,7 +164,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 								fieldsView.add(new IterationCrumbPanel(fieldsView.newChildId()) {
 									@Override
 									protected Issue getIssue() {
-										return getIssueManager().load(issueId);
+										return getIssueService().load(issueId);
 									}
 								});
 							} else {
@@ -174,12 +174,12 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 										@Override
 										protected Issue getIssue() {
-											return getIssueManager().load(issueId);
+											return getIssueService().load(issueId);
 										}
 
 										@Override
 										protected Input getField() {
-											var issue = getIssueManager().load(issueId);
+											var issue = getIssueService().load(issueId);
 											if (issue.isFieldVisible(fieldName))
 												return field;
 											else
@@ -203,7 +203,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 							@Override
 							protected Issue getIssue() {
-								return getIssueManager().load(issueId);
+								return getIssueService().load(issueId);
 							}
 
 							@Override
@@ -222,7 +222,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 							@Override
 							protected Issue getIssue() {
-								return getIssueManager().load(issueId);
+								return getIssueService().load(issueId);
 							}
 
 						});
@@ -234,7 +234,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 							@Override
 							protected Issue getIssue() {
-								return getIssueManager().load(issueId);
+								return getIssueService().load(issueId);
 							}
 
 							@Override
@@ -256,14 +256,14 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								getIssueManager().togglePin(getIssueManager().load(issueId));
+								getIssueService().togglePin(getIssueService().load(issueId));
 								send(getPage(), Broadcast.BREADTH, new IssuePinStatusChanged(target, issueId));
 							}
 
 							@Override
 							protected void onConfigure() {
 								super.onConfigure();
-								setVisible(SecurityUtils.canManageIssues(getIssueManager().load(issueId).getProject()));
+								setVisible(SecurityUtils.canManageIssues(getIssueService().load(issueId).getProject()));
 							}
 							
 						});
@@ -272,8 +272,8 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 							@Override
 							protected List<Issue> load() {
-								Issue issue = getIssueManager().load(issueId);
-								OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
+								Issue issue = getIssueService().load(issueId);
+								OneDev.getInstance(IssueLinkService.class).loadDeepLinks(issue);
 								LinkDescriptor descriptor = new LinkDescriptor(linksPanel.getExpandedLink());
 								return issue.findLinkedIssues(descriptor.getSpec(), descriptor.isOpposite());
 							}
@@ -373,8 +373,8 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 				var oldAuditContent = getAuditContent();
 				getProject().getIssueSetting().setNamedQueries(namedQueries);
 				var newAuditContent = getAuditContent();
-				getProjectManager().update(getProject());
-				getAuditManager().audit(getProject(), "changed issue queries", oldAuditContent, newAuditContent);
+				getProjectService().update(getProject());
+				auditService.audit(getProject(), "changed issue queries", oldAuditContent, newAuditContent);
 			}
 
 			@Override
@@ -464,7 +464,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getIssueQueryPersonalizationManager().createOrUpdate(setting);
+										getIssueQueryPersonalizationService().createOrUpdate(setting);
 										target.add(savedQueries);
 										close();
 									}
@@ -489,8 +489,8 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 											verb = "changed";
 										}
 										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
-										getProjectManager().update(getProject());
-										getAuditManager().audit(getProject(), verb + " issue query \"" + name + "\"", oldAuditContent, newAuditContent);
+										getProjectService().update(getProject());
+										auditService.audit(getProject(), verb + " issue query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}

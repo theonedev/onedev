@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 
 public abstract class IssueEvent extends ProjectEvent {
 
@@ -32,7 +32,7 @@ public abstract class IssueEvent extends ProjectEvent {
 	}
 	
 	public Issue getIssue() {
-		return OneDev.getInstance(IssueManager.class).load(issueId);
+		return OneDev.getInstance(IssueService.class).load(issueId);
 	}
 	
 	public abstract boolean affectsListing();
@@ -52,7 +52,7 @@ public abstract class IssueEvent extends ProjectEvent {
 	
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getIssue(), true);
+		return OneDev.getInstance(UrlService.class).urlFor(getIssue(), true);
 	}
 
 	public boolean isSendNotifications() {

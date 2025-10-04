@@ -326,14 +326,14 @@ public class Response implements HttpServletResponse
 			return null;
 
 		final Request request = _channel.getRequest();
-		SessionHandler sessionManager = request.getSessionHandler();
+		SessionHandler sessionService = request.getSessionHandler();
 
-		if (sessionManager == null)
+		if (sessionService == null)
 			return url;
 
 		HttpURI uri = null;
 		boolean hasScheme = URIUtil.hasScheme(url);
-		if (sessionManager.isCheckingRemoteSessionIdEncoding() && hasScheme)
+		if (sessionService.isCheckingRemoteSessionIdEncoding() && hasScheme)
 		{
 			uri = new HttpURI(url);
 			String path = uri.getPath();
@@ -351,12 +351,12 @@ public class Response implements HttpServletResponse
 				return url;
 		}
 
-		String sessionURLPrefix = sessionManager.getSessionIdPathParameterNamePrefix();
+		String sessionURLPrefix = sessionService.getSessionIdPathParameterNamePrefix();
 		if (sessionURLPrefix == null)
 			return url;
 
 		// should not encode if cookies in evidence
-		if ((sessionManager.isUsingCookies() && request.isRequestedSessionIdFromCookie()) || !sessionManager.isUsingURLs())
+		if ((sessionService.isUsingCookies() && request.isRequestedSessionIdFromCookie()) || !sessionService.isUsingURLs())
 		{
 			int prefix = url.indexOf(sessionURLPrefix);
 			if (prefix != -1)
@@ -380,10 +380,10 @@ public class Response implements HttpServletResponse
 			return url;
 
 		// invalid session
-		if (!sessionManager.isValid(session))
+		if (!sessionService.isValid(session))
 			return url;
 
-		String id = sessionManager.getExtendedId(session);
+		String id = sessionService.getExtendedId(session);
 
 		// Already encoded
 		int prefix = url.indexOf(sessionURLPrefix);

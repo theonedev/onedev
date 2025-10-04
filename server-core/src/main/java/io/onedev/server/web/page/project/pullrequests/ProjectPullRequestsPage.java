@@ -18,8 +18,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.PullRequestQueryPersonalizationService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequestQueryPersonalization;
 import io.onedev.server.model.support.NamedQuery;
@@ -59,12 +59,12 @@ public class ProjectPullRequestsPage extends ProjectPage {
 		query = getPageParameters().get(PARAM_QUERY).toOptionalString();
 	}
 
-	private PullRequestQueryPersonalizationManager getPullRequestQueryPersonalizationManager() {
-		return OneDev.getInstance(PullRequestQueryPersonalizationManager.class);		
+	private PullRequestQueryPersonalizationService getPullRequestQueryPersonalizationService() {
+		return OneDev.getInstance(PullRequestQueryPersonalizationService.class);		
 	}
 	
 	protected GlobalPullRequestSetting getPullRequestSetting() {
-		return OneDev.getInstance(SettingManager.class).getPullRequestSetting();		
+		return OneDev.getInstance(SettingService.class).getPullRequestSetting();
 	}
 	
 	@Override
@@ -114,8 +114,8 @@ public class ProjectPullRequestsPage extends ProjectPage {
 				var oldAuditContent = getAuditContent();
 				getProject().getPullRequestSetting().setNamedQueries(namedQueries);
 				var newAuditContent = getAuditContent();
-				getProjectManager().update(getProject());
-				getAuditManager().audit(getProject(), "changed pull request queries", oldAuditContent, newAuditContent);
+				getProjectService().update(getProject());
+				auditService.audit(getProject(), "changed pull request queries", oldAuditContent, newAuditContent);
 			}
 
 		});
@@ -184,7 +184,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getPullRequestQueryPersonalizationManager().createOrUpdate(setting);
+										getPullRequestQueryPersonalizationService().createOrUpdate(setting);
 											
 										target.add(savedQueries);
 										close();
@@ -210,8 +210,8 @@ public class ProjectPullRequestsPage extends ProjectPage {
 											verb = "changed";
 										}
 										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
-										getProjectManager().update(getProject());
-										getAuditManager().audit(getProject(), verb + " pull request query \"" + name + "\"", oldAuditContent, newAuditContent);
+										getProjectService().update(getProject());
+										auditService.audit(getProject(), verb + " pull request query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}

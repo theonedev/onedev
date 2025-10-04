@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
@@ -48,7 +48,7 @@ public class ScriptingChoices implements ChoiceProvider {
 		try {
 			return ((List<String>) GroovyUtils.evalScriptByName(scriptName, variables))
 					.stream()
-					.map(it->OneDev.getInstance(UserManager.class).findByName(it))
+					.map(it->OneDev.getInstance(UserService.class).findByName(it))
 					.filter(it->it!=null)
 					.collect(Collectors.toList());
 		} catch (RuntimeException e) {

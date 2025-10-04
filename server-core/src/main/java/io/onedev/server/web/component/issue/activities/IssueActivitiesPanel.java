@@ -39,7 +39,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.IssueCommentManager;
+import io.onedev.server.service.IssueCommentService;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
@@ -276,7 +276,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 						comment.setUser(SecurityUtils.getAuthUser());
 						comment.setDate(new Date());
 						comment.setIssue(getIssue());
-						OneDev.getInstance(IssueCommentManager.class).create(comment);
+						OneDev.getInstance(IssueCommentService.class).create(comment);
 						
 						if (showComments) {
 							((BasePage) getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(false));

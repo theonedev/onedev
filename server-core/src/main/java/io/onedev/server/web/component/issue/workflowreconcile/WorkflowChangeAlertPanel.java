@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -71,7 +71,7 @@ public abstract class WorkflowChangeAlertPanel extends Panel {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(!OneDev.getInstance(SettingManager.class).getIssueSetting().isReconciled());
+		setVisible(!OneDev.getInstance(SettingService.class).getIssueSetting().isReconciled());
 	}
 
 	protected abstract void onCompleted(AjaxRequestTarget target);

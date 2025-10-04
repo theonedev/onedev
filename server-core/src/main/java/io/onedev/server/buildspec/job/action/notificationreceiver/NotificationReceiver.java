@@ -22,8 +22,8 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiverParser.CriteriaContext;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.GroupService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Group;
@@ -60,14 +60,14 @@ public class NotificationReceiver {
 		for (CriteriaContext criteria: parser.receiver().criteria()) {
 			if (criteria.userCriteria() != null) {
 				String userName = getValue(criteria.userCriteria().Value());
-				User user = OneDev.getInstance(UserManager.class).findByName(userName);
+				User user = OneDev.getInstance(UserService.class).findByName(userName);
 				if (user != null) 
 					addEmailAddress(emailAddresses, user);
 				else 
 					throw new ExplicitException("Unable to find user '" + userName + "'");
 			} else if (criteria.groupCriteria() != null) {
 				String groupName = getValue(criteria.groupCriteria().Value());
-				Group group = OneDev.getInstance(GroupManager.class).find(groupName);
+				Group group = OneDev.getInstance(GroupService.class).find(groupName);
 				if (group != null) {
 					emailAddresses.addAll(group.getMembers().stream()
 							.map(it->it.getPrimaryEmailAddress())

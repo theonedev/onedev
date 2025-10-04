@@ -26,8 +26,8 @@ import org.apache.wicket.model.Model;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PackLabelManager;
-import io.onedev.server.entitymanager.PackManager;
+import io.onedev.server.service.PackLabelService;
+import io.onedev.server.service.PackService;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
@@ -114,10 +114,10 @@ public abstract class PackSidePanel extends Panel {
 				@Override
 				public void query(String term, int page, Response<Pack> response) {
 					int count = (page+1) * WebConstants.PAGE_SIZE + 1;
-					var packManager = OneDev.getInstance(PackManager.class);
+					var packService = OneDev.getInstance(PackService.class);
 					if (term.length() == 0)
 						term = null;
-					List<Pack> packs = packManager.queryPrevComparables(getPack(), term, count);
+					List<Pack> packs = packService.queryPrevComparables(getPack(), term, count);
 					new ResponseFiller<>(response).fill(packs, page, WebConstants.PAGE_SIZE);
 				}
 			};
@@ -191,7 +191,7 @@ public abstract class PackSidePanel extends Panel {
 				@Override
 				protected void onUpdated(IPartialPageRequestHandler handler, Serializable bean, String propertyName) {
 					LabelsBean labelsBean = (LabelsBean) bean;
-					OneDev.getInstance(PackLabelManager.class).sync(getPack(), labelsBean.getLabels());
+					OneDev.getInstance(PackLabelService.class).sync(getPack(), labelsBean.getLabels());
 					handler.add(labelsContainer);
 				}
 

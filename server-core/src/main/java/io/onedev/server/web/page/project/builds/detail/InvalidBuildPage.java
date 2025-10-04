@@ -20,7 +20,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -45,7 +45,7 @@ public class InvalidBuildPage extends ProjectPage {
 			@Override
 			protected Build load() {
 				Long buildNumber = params.get(PARAM_BUILD).toLong();
-				Build build = OneDev.getInstance(BuildManager.class).find(getProject(), buildNumber);
+				Build build = OneDev.getInstance(BuildService.class).find(getProject(), buildNumber);
 				if (build == null)
 					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find build #{0} in project {1}"), buildNumber, getProject()));
 				Preconditions.checkState(!build.isValid());
@@ -67,7 +67,7 @@ public class InvalidBuildPage extends ProjectPage {
 
 			@Override
 			public void onClick() {
-				OneDev.getInstance(BuildManager.class).delete(getBuild());
+				OneDev.getInstance(BuildService.class).delete(getBuild());
 				
 				Session.get().success(MessageFormat.format(_T("Build #{0} deleted"), getBuild().getNumber()));
 				

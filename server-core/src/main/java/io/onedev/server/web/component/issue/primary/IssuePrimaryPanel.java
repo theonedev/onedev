@@ -46,10 +46,10 @@ import org.unbescape.html.HtmlEscape;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IssueReactionManager;
-import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IssueReactionService;
+import io.onedev.server.service.LinkSpecService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
@@ -95,7 +95,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 	private final IModel<List<LinkSpec>> linkSpecsModel = new LoadableDetachableModel<>() {
 		@Override
 		protected List<LinkSpec> load() {
-			return getLinkSpecManager().queryAndSort();
+			return getLinkSpecService().queryAndSort();
 		}
 
 	};
@@ -173,7 +173,8 @@ public abstract class IssuePrimaryPanel extends Panel {
 
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
-				OneDev.getInstance(IssueChangeManager.class).changeDescription(getIssue(), comment);
+				var user = SecurityUtils.getUser();
+				OneDev.getInstance(IssueChangeService.class).changeDescription(user, getIssue(), comment);
 				((BasePage)getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(false));
 			}
 
@@ -234,7 +235,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 					
 					@Override
 					public void onToggleEmoji(AjaxRequestTarget target, String emoji) {
-						OneDev.getInstance(IssueReactionManager.class).toggleEmoji(
+						OneDev.getInstance(IssueReactionService.class).toggleEmoji(
 							SecurityUtils.getUser(), 
 							getIssue(), 
 							emoji);
@@ -351,7 +352,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 	
 							@Override
 							void onDelete(AjaxRequestTarget target, Issue linkedIssue) {
-								getIssueChangeManager().removeLink(getLinkSpecManager().load(specId), getIssue(), 
+								getIssueChangeService().removeLink(SecurityUtils.getUser(), getLinkSpecService().load(specId), getIssue(), 
 										linkedIssue, opposite);
 								notifyIssueChange(target, getIssue());
 							}
@@ -387,7 +388,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 	}
 
 	private void onLinkIssue(AjaxRequestTarget target, Long specId, boolean opposite, String linkName) {
-		var spec = getLinkSpecManager().load(specId);
+		var spec = getLinkSpecService().load(specId);
 		if (!opposite && !spec.isMultiple() && getIssue().findLinkedIssue(spec, false) != null 
 				|| opposite && !spec.getOpposite().isMultiple() && getIssue().findLinkedIssue(spec, true) != null) {
 			Session.get().error(MessageFormat.format(_T("An issue already linked for {0}. Unlink it first"), spec.getName(opposite)));							
@@ -399,7 +400,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 						@Override
 						protected Criteria<Issue> getTemplate() {
 							String query;
-							var spec = getLinkSpecManager().load(specId);
+							var spec = getLinkSpecService().load(specId);
 							if (opposite)
 								query = spec.getOpposite().getIssueQuery();
 							else
@@ -425,7 +426,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 						
 						@Override
 						protected IssueQuery getBaseQuery() {
-							LinkSpec spec = getLinkSpecManager().load(specId);
+							LinkSpec spec = getLinkSpecService().load(specId);
 							if (opposite) 
 								return spec.getOpposite().getParsedIssueQuery(getProject());
 							else 
@@ -436,7 +437,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 				}
 
 				private FormComponent<?> newLinkExistingPanel(String componentId) {
-					LinkSpec spec = getLinkSpecManager().load(specId);
+					LinkSpec spec = getLinkSpecService().load(specId);
 					if (!opposite && spec.isMultiple() || opposite && spec.getOpposite().isMultiple()) {
 						return new SelectIssuesPanel(componentId) {
 
@@ -532,7 +533,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 							if (convertedInput instanceof Issue) {
 								var linkIssue = (Issue) convertedInput;
 								if (linkIssue.isNew()) {
-									getIssueManager().open(linkIssue);
+									getIssueService().open(linkIssue);
 									notifyIssueChange(target, linkIssue);
 									addLink(target, linkIssue);
 									close();
@@ -551,7 +552,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 						}
 
 						private boolean checkLink(AjaxRequestTarget target, Issue linkIssue) {
-							LinkSpec spec = getLinkSpecManager().load(specId);
+							LinkSpec spec = getLinkSpecService().load(specId);
 							if (getIssue().getId().equals(linkIssue.getId())) {
 								form.error(_T("Can not link to self: " + linkIssue.getReference().toString(getProject())));
 								target.add(form);
@@ -566,8 +567,8 @@ public abstract class IssuePrimaryPanel extends Panel {
 						}
 
 						private void addLink(AjaxRequestTarget target, Issue linkIssue) {
-							LinkSpec spec = getLinkSpecManager().load(specId);
-							getIssueChangeManager().addLink(spec, getIssue(), linkIssue, opposite);
+							LinkSpec spec = getLinkSpecService().load(specId);
+							getIssueChangeService().addLink(SecurityUtils.getUser(), spec, getIssue(), linkIssue, opposite);
 							notifyIssueChange(target, getIssue());
 						}
 
@@ -632,7 +633,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					Issue linkedIssue = getIssueManager().load(linkedIssueId);
+					Issue linkedIssue = getIssueService().load(linkedIssueId);
 					deleteListener.onDelete(target, linkedIssue);
 					notifyIssueChange(target, getIssue());
 				}
@@ -643,7 +644,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 
 				@Override
 				protected Issue getIssue() {
-					return getIssueManager().load(linkedIssueId);
+					return getIssueService().load(linkedIssueId);
 				}
 
 			};
@@ -651,7 +652,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 			stateLink.add(new IssueStateBadge("badge", new LoadableDetachableModel<>() {
 				@Override
 				protected Issue load() {
-					return getIssueManager().load(linkedIssueId);
+					return getIssueService().load(linkedIssueId);
 				}
 			}, true).add(AttributeAppender.append("class", "badge-sm")));
 			
@@ -681,16 +682,16 @@ public abstract class IssuePrimaryPanel extends Panel {
 		super.onDetach();
 	}
 
-	private LinkSpecManager getLinkSpecManager() {
-		return OneDev.getInstance(LinkSpecManager.class);
+	private LinkSpecService getLinkSpecService() {
+		return OneDev.getInstance(LinkSpecService.class);
 	}
 
-	private IssueManager getIssueManager() {
-		return OneDev.getInstance(IssueManager.class);
+	private IssueService getIssueService() {
+		return OneDev.getInstance(IssueService.class);
 	}
 	
-	private IssueChangeManager getIssueChangeManager() {
-		return OneDev.getInstance(IssueChangeManager.class);
+	private IssueChangeService getIssueChangeService() {
+		return OneDev.getInstance(IssueChangeService.class);
 	}
 	
 	private void notifyIssueChange(IPartialPageRequestHandler handler, Issue issue) {

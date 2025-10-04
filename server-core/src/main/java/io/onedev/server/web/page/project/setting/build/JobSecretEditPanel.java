@@ -11,8 +11,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -77,8 +77,8 @@ public abstract class JobSecretEditPanel extends Panel {
 					oldAuditContent = VersionedXmlDoc.fromBean(oldSecret).toXML();
 				}
 				var newAuditContent = VersionedXmlDoc.fromBean(editingSecret).toXML();
-				OneDev.getInstance(ProjectManager.class).update(getProject());
-				OneDev.getInstance(AuditManager.class).audit(getProject(), action, oldAuditContent, newAuditContent);
+				OneDev.getInstance(ProjectService.class).update(getProject());
+				OneDev.getInstance(AuditService.class).audit(getProject(), action, oldAuditContent, newAuditContent);
 				onSaved(target);
 			}
 

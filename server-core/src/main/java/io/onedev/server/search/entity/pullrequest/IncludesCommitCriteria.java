@@ -17,7 +17,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.xodus.PullRequestInfoManager;
+import io.onedev.server.xodus.PullRequestInfoService;
 
 public class IncludesCommitCriteria extends Criteria<PullRequest> {
 
@@ -46,7 +46,7 @@ public class IncludesCommitCriteria extends Criteria<PullRequest> {
 	}
 	
 	private Collection<Long> getPullRequestIds() {
-		return OneDev.getInstance(PullRequestInfoManager.class).getPullRequestIds(project, commitId);		
+		return OneDev.getInstance(PullRequestInfoService.class).getPullRequestIds(project, commitId);
 	}
 	
 	@Override

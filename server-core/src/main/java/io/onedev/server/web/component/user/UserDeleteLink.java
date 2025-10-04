@@ -8,8 +8,8 @@ import org.apache.wicket.request.flow.RedirectToUrlException;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebSession;
@@ -31,18 +31,18 @@ public abstract class UserDeleteLink extends Link<Void> {
 
 	@Override
 	public void onClick() {
-		var userManager = OneDev.getInstance(UserManager.class);
-		var auditManager = OneDev.getInstance(AuditManager.class);
+		var userService = OneDev.getInstance(UserService.class);
+		var auditService = OneDev.getInstance(AuditService.class);
 		var oldAuditContent = VersionedXmlDoc.fromBean(getUser()).toXML();
 		if (getUser().equals(SecurityUtils.getAuthUser())) {
-			userManager.delete(getUser());
-			auditManager.audit(null, "deleted account \"" + getUser().getName() + "\"", oldAuditContent, null);
+			userService.delete(getUser());
+			auditService.audit(null, "deleted account \"" + getUser().getName() + "\"", oldAuditContent, null);
 			WebSession.get().success("Account removed");
 			WebSession.get().logout();
 			throw new RestartResponseException(getApplication().getHomePage());
 		} else {
-			userManager.delete(getUser());
-			auditManager.audit(null, "deleted account \"" + getUser().getName() + "\"", oldAuditContent, null);
+			userService.delete(getUser());
+			auditService.audit(null, "deleted account \"" + getUser().getName() + "\"", oldAuditContent, null);
 			WebSession.get().success("Account removed");
 				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(User.class);
 			if (redirectUrlAfterDelete != null)

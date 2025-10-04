@@ -39,8 +39,8 @@ import org.hibernate.criterion.Restrictions;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IterationManager;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IterationService;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
@@ -87,7 +87,7 @@ public class IterationListPanel extends GenericPanel<Project> {
 						Iteration iteration = (Iteration) row.getDefaultModelObject();
 						iterations.add(iteration);
 					}
-					return OneDev.getInstance(IssueManager.class).queryIterationAndIssueStates(getProject(), iterations);
+					return OneDev.getInstance(IssueService.class).queryIterationAndIssueStates(getProject(), iterations);
 				}
 
 			}; 
@@ -397,7 +397,7 @@ public class IterationListPanel extends GenericPanel<Project> {
 
 					@Override
 					protected Iteration load() {
-						return OneDev.getInstance(IterationManager.class).load(id);
+						return OneDev.getInstance(IterationService.class).load(id);
 					}
 
 				};

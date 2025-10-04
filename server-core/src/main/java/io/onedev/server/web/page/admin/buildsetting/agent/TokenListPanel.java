@@ -25,8 +25,8 @@ import org.apache.wicket.model.Model;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentTokenManager;
-import io.onedev.server.entitymanager.AuditManager;
+import io.onedev.server.service.AgentTokenService;
+import io.onedev.server.service.AuditService;
 import io.onedev.server.model.AgentToken;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
@@ -41,7 +41,7 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 
 			@Override
 			protected List<AgentToken> load() {
-				List<AgentToken> tokens = getTokenManager().queryUnused();
+				List<AgentToken> tokens = getTokenService().queryUnused();
 				Collections.sort(tokens);
 				return tokens;
 			}
@@ -49,8 +49,8 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 		});
 	}
 
-	private AgentTokenManager getTokenManager() {
-		return OneDev.getInstance(AgentTokenManager.class);
+	private AgentTokenService getTokenService() {
+		return OneDev.getInstance(AgentTokenService.class);
 	}
 	
 	@Override
@@ -62,8 +62,8 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				AgentToken token = new AgentToken();
-				getTokenManager().createOrUpdate(token);
-				getAuditManager().audit(null, "created agent token", null, null);
+				getTokenService().createOrUpdate(token);
+				getAuditService().audit(null, "created agent token", null, null);
 				target.add(TokenListPanel.this);
 			}
 			
@@ -79,8 +79,8 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getTokenManager().deleteUnused();
-				getAuditManager().audit(null, "deleted unused agent tokens", null, null);
+				getTokenService().deleteUnused();
+				getAuditService().audit(null, "deleted unused agent tokens", null, null);
 				target.add(TokenListPanel.this);
 				target.add(this);
 			}
@@ -148,7 +148,7 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 
 					@Override
 					protected AgentToken load() {
-						return getTokenManager().load(tokenId);
+						return getTokenService().load(tokenId);
 					}
 					
 				};
@@ -173,8 +173,8 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 		return getModelObject();
 	}
 	
-	private AuditManager getAuditManager() {
-		return OneDev.getInstance(AuditManager.class);
+	private AuditService getAuditService() {
+		return OneDev.getInstance(AuditService.class);
 	}
 	
 }

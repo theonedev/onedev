@@ -5,7 +5,7 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.TriggerMatch;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.issue.IssueChanged;
 import io.onedev.server.event.project.issue.IssueOpened;
@@ -42,7 +42,7 @@ public class IssueInStateTrigger extends JobTrigger {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getStateChoices() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting()
+		return OneDev.getInstance(SettingService.class).getIssueSetting()
 				.getStateSpecs().stream().map(StateSpec::getName).collect(toList());		
 	}
 

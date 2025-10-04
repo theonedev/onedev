@@ -22,10 +22,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.LabelSpecManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.AgentService;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.LabelSpecService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -46,6 +46,7 @@ import io.onedev.server.search.entity.build.SubmittedByUserCriteria;
 import io.onedev.server.search.entity.build.SuccessfulCriteria;
 import io.onedev.server.search.entity.build.TimedOutCriteria;
 import io.onedev.server.search.entity.build.WaitingCriteria;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.datepicker.DatePicker;
@@ -142,7 +143,8 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 
 			@Override
 			protected List<String> load() {
-				var jobNames = new ArrayList<>(getBuildManager().getAccessibleJobNames(getProject()));
+				var subject = SecurityUtils.getSubject();
+				var jobNames = new ArrayList<>(getBuildService().getAccessibleJobNames(subject, getProject()));
 				Collections.sort(jobNames);
 				return jobNames;
 			}
@@ -188,8 +190,8 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 
 			@Override
 			protected List<User> load() {
-				var users = getUserManager().query().stream().filter(it -> !it.isDisabled()).collect(toList());
-				var cache = getUserManager().cloneCache();
+				var users = getUserService().query().stream().filter(it -> !it.isDisabled()).collect(toList());
+				var cache = getUserService().cloneCache();
 				users.sort(cache.comparingDisplayName(new ArrayList<>()));
 				return users;
 			}
@@ -227,7 +229,7 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 
 			@Override
 			public void setObject(Collection<String> object) {	
-				var criterias = Criteria.orCriterias(object.stream().map(it->new LabelCriteria(getLabelSpecManager().find(it), BuildQueryLexer.Is)).collect(toList()));
+				var criterias = Criteria.orCriterias(object.stream().map(it->new LabelCriteria(getLabelSpecService().find(it), BuildQueryLexer.Is)).collect(toList()));
 				var query = getModelObject();
 				query.setCriteria(setMatchingCriteria(query.getCriteria(), LabelCriteria.class, criterias, null));
 				getModel().setObject(query);
@@ -237,7 +239,7 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 
 			@Override
 			protected List<String> load() {
-				var names = getLabelSpecManager().query().stream().map(it->it.getName()).collect(toList());
+				var names = getLabelSpecService().query().stream().map(it->it.getName()).collect(toList());
 				Collections.sort(names);
 				return names;
 			}
@@ -276,7 +278,7 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 
 			@Override
 			protected List<String> load() {
-				var agents = new ArrayList<>(getAgentManager().query());
+				var agents = new ArrayList<>(getAgentService().query());
 				agents.sort(Comparator.comparing(Agent::getName));
 				return agents.stream().map(it->it.getName()).collect(toList());
 			}
@@ -369,20 +371,20 @@ abstract class BuildFilterPanel extends FilterEditPanel<Build> {
 	@Nullable
 	protected abstract Project getProject();
 
-	private BuildManager getBuildManager() {
-		return OneDev.getInstance(BuildManager.class);
+	private BuildService getBuildService() {
+		return OneDev.getInstance(BuildService.class);
 	}
 
-	private LabelSpecManager getLabelSpecManager() {
-		return OneDev.getInstance(LabelSpecManager.class);
+	private LabelSpecService getLabelSpecService() {
+		return OneDev.getInstance(LabelSpecService.class);
 	}	
 
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 
-	private AgentManager getAgentManager() {
-		return OneDev.getInstance(AgentManager.class);
+	private AgentService getAgentService() {
+		return OneDev.getInstance(AgentService.class);
 	}
 
 }

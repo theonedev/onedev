@@ -1,7 +1,7 @@
 package io.onedev.server.model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
+import io.onedev.server.service.CodeCommentQueryPersonalizationService;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
@@ -71,7 +71,7 @@ public class CodeCommentQueryPersonalization extends AbstractEntity implements Q
 
 	@Override
 	public void onUpdated() {
-		OneDev.getInstance(CodeCommentQueryPersonalizationManager.class).createOrUpdate(this);
+		OneDev.getInstance(CodeCommentQueryPersonalizationService.class).createOrUpdate(this);
 	}
 	
 }

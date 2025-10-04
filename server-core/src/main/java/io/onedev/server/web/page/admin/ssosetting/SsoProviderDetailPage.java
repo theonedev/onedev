@@ -20,8 +20,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.SsoProviderManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.SsoProviderService;
 import io.onedev.server.model.SsoProvider;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
@@ -49,7 +49,7 @@ public class SsoProviderDetailPage extends AdministrationPage {
 		providerModel = new LoadableDetachableModel<SsoProvider>() {
 			@Override
 			protected SsoProvider load() {
-				return OneDev.getInstance(SsoProviderManager.class).load(providerId);
+				return OneDev.getInstance(SsoProviderService.class).load(providerId);
 			}
 		};
 	}
@@ -67,7 +67,7 @@ public class SsoProviderDetailPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				SsoProvider providerWithSameName = getSsoProviderManager().find(bean.getName());
+				SsoProvider providerWithSameName = getSsoProviderService().find(bean.getName());
 				if (providerWithSameName != null && !providerWithSameName.equals(providerModel.getObject())) {
 					editor.error(new Path(new PathNode.Named("name")),
 							_T("This name has already been used by another provider"));
@@ -76,9 +76,9 @@ public class SsoProviderDetailPage extends AdministrationPage {
 					var provider = providerModel.getObject();
 					var oldAuditContent = VersionedXmlDoc.fromBean(provider).toXML();
 					bean.populate(provider);
-					getSsoProviderManager().createOrUpdate(provider);
+					getSsoProviderService().createOrUpdate(provider);
 					var newAuditContent = VersionedXmlDoc.fromBean(provider).toXML();
-					OneDev.getInstance(AuditManager.class).audit(null, "changed sso provider \"" + provider.getName() + "\"", oldAuditContent, newAuditContent);
+					OneDev.getInstance(AuditService.class).audit(null, "changed sso provider \"" + provider.getName() + "\"", oldAuditContent, newAuditContent);
 					Session.get().success(_T("SSO provider updated"));
 					setResponsePage(SsoProviderListPage.class);
 				}
@@ -92,8 +92,8 @@ public class SsoProviderDetailPage extends AdministrationPage {
 			@Override
 			public void onClick() {
 				var oldAuditContent = VersionedXmlDoc.fromBean(providerModel.getObject()).toXML();
-				getSsoProviderManager().delete(providerModel.getObject());
-				OneDev.getInstance(AuditManager.class).audit(null, "deleted SSO provider \"" + providerModel.getObject().getName() + "\"", oldAuditContent, null);
+				getSsoProviderService().delete(providerModel.getObject());
+				OneDev.getInstance(AuditService.class).audit(null, "deleted SSO provider \"" + providerModel.getObject().getName() + "\"", oldAuditContent, null);
 				Session.get().success(MessageFormat.format(_T("SSO provider \"{0}\" deleted"), providerModel.getObject().getName()));
 				setResponsePage(SsoProviderListPage.class);
 			}
@@ -114,8 +114,8 @@ public class SsoProviderDetailPage extends AdministrationPage {
 		response.render(CssHeaderItem.forReference(new GroupCssResourceReference()));
 	}
 
-	private SsoProviderManager getSsoProviderManager() {
-		return OneDev.getInstance(SsoProviderManager.class);
+	private SsoProviderService getSsoProviderService() {
+		return OneDev.getInstance(SsoProviderService.class);
 	}
 
 	@Override

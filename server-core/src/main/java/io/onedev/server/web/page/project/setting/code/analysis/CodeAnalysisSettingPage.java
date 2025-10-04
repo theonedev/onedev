@@ -11,7 +11,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.CodeAnalysisSetting;
 import io.onedev.server.security.SecurityUtils;
@@ -41,8 +41,8 @@ public class CodeAnalysisSettingPage extends ProjectSettingPage {
 				
 				var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 				getProject().setCodeAnalysisSetting(bean);
-				OneDev.getInstance(ProjectManager.class).update(getProject());
-				getAuditManager().audit(getProject(), "changed code analysis settings", oldAuditContent, newAuditContent);
+				OneDev.getInstance(ProjectService.class).update(getProject());
+				auditService.audit(getProject(), "changed code analysis settings", oldAuditContent, newAuditContent);
 				setResponsePage(CodeAnalysisSettingPage.class, CodeAnalysisSettingPage.paramsOf(getProject()));
 				Session.get().success(_T("Code analysis settings updated"));
 			}

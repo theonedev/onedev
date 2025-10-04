@@ -1,6 +1,6 @@
 package io.onedev.server.rest.resource;
 
-import io.onedev.server.entitymanager.BuildLabelManager;
+import io.onedev.server.service.BuildLabelService;
 import io.onedev.server.model.BuildLabel;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -19,11 +19,11 @@ import javax.ws.rs.core.Response;
 @Singleton
 public class BuildLabelResource {
 
-	private final BuildLabelManager buildLabelManager;
+	private final BuildLabelService buildLabelService;
 
 	@Inject
-	public BuildLabelResource(BuildLabelManager buildLabelManager) {
-		this.buildLabelManager = buildLabelManager;
+	public BuildLabelResource(BuildLabelService buildLabelService) {
+		this.buildLabelService = buildLabelService;
 	}
 	
 	@Api(order=200, description="Create build label")
@@ -31,7 +31,7 @@ public class BuildLabelResource {
 	public Long createLabel(@NotNull BuildLabel buildLabel) {
 		if (!SecurityUtils.canManageBuild(buildLabel.getBuild()))
 			throw new UnauthorizedException();
-		buildLabelManager.create(buildLabel);
+		buildLabelService.create(buildLabel);
 		return buildLabel.getId();
 	}
 	
@@ -39,10 +39,10 @@ public class BuildLabelResource {
 	@Path("/{buildLabelId}")
 	@DELETE
 	public Response deleteLabel(@PathParam("buildLabelId") Long buildLabelId) {
-		BuildLabel buildLabel = buildLabelManager.load(buildLabelId);
+		BuildLabel buildLabel = buildLabelService.load(buildLabelId);
 		if (!SecurityUtils.canManageBuild(buildLabel.getBuild()))
 			throw new UnauthorizedException();
-		buildLabelManager.delete(buildLabel);
+		buildLabelService.delete(buildLabel);
 		return Response.ok().build();
 	}
 	

@@ -17,7 +17,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
@@ -32,11 +32,11 @@ public class JobExecutorsPage extends AdministrationPage {
 	
 	public JobExecutorsPage(PageParameters params) {
 		super(params);
-		executors = getSettingManager().getJobExecutors();
+		executors = getSettingService().getJobExecutors();
 	}
 
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 	
 	@Override
@@ -50,7 +50,7 @@ public class JobExecutorsPage extends AdministrationPage {
 
 			@Override
 			public List<JobExecutor> getObject() {
-				return getSettingManager().getJobExecutors();
+				return getSettingService().getJobExecutors();
 			}
 
 		}) {
@@ -64,8 +64,8 @@ public class JobExecutorsPage extends AdministrationPage {
 					protected void onDelete(AjaxRequestTarget target) {
 						var executor = executors.remove(item.getIndex());
 						var oldAuditContent = VersionedXmlDoc.fromBean(executor).toXML();
-						getSettingManager().saveJobExecutors(executors);
-						getAuditManager().audit(null, "deleted job executor \"" + executor.getName() + "\"", oldAuditContent, null);
+						getSettingService().saveJobExecutors(executors);
+						auditService.audit(null, "deleted job executor \"" + executor.getName() + "\"", oldAuditContent, null);
 						target.add(container);
 					}
 
@@ -73,8 +73,8 @@ public class JobExecutorsPage extends AdministrationPage {
 					protected void onSave(AjaxRequestTarget target) {
 						var executor = executors.get(item.getIndex());
 						var newAuditContent = VersionedXmlDoc.fromBean(executor).toXML();
-						getAuditManager().audit(null, "changed job executor \"" + executor.getName() + "\"", oldAuditContent, newAuditContent);
-						getSettingManager().saveJobExecutors(executors);
+						auditService.audit(null, "changed job executor \"" + executor.getName() + "\"", oldAuditContent, newAuditContent);
+						getSettingService().saveJobExecutors(executors);
 						target.add(container);
 					}
 
@@ -95,8 +95,8 @@ public class JobExecutorsPage extends AdministrationPage {
 				var oldAuditContent = VersionedXmlDoc.fromBean(executors).toXML();
 				CollectionUtils.move(executors, from.getItemIndex(), to.getItemIndex());
 				var newAuditContent = VersionedXmlDoc.fromBean(executors).toXML();
-				getSettingManager().saveJobExecutors(executors);
-				getAuditManager().audit(null, "changed order of job executors", oldAuditContent, newAuditContent);			
+				getSettingService().saveJobExecutors(executors);
+				auditService.audit(null, "changed order of job executors", oldAuditContent, newAuditContent);			
 				target.add(container);
 			}
 			
@@ -107,7 +107,7 @@ public class JobExecutorsPage extends AdministrationPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getSettingManager().getJobExecutors().isEmpty());
+				setVisible(getSettingService().getJobExecutors().isEmpty());
 			}
 		});
 	}
@@ -124,11 +124,11 @@ public class JobExecutorsPage extends AdministrationPage {
 
 					@Override
 					protected void onSave(AjaxRequestTarget target) {
-						getSettingManager().saveJobExecutors(executors);
+						getSettingService().saveJobExecutors(executors);
 						container.replace(newAddNewFrag());
 						var executor = executors.get(executors.size() - 1);
 						var newAuditContent = VersionedXmlDoc.fromBean(executor).toXML();
-						getAuditManager().audit(null, "added job executor \"" + executor.getName() + "\"", null, newAuditContent);
+						auditService.audit(null, "added job executor \"" + executor.getName() + "\"", null, newAuditContent);
 						target.add(container);
 					}
 

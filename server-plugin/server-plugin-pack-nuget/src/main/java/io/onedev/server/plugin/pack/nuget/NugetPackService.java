@@ -61,24 +61,23 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.PackBlobManager;
-import io.onedev.server.entitymanager.PackManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.PackBlobService;
+import io.onedev.server.service.PackService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.exception.DataTooLargeException;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
-import io.onedev.server.pack.PackService;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.SemanticVersion;
 import io.onedev.server.util.XmlUtils;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 
 @Singleton
-public class NugetPackService implements PackService {
+public class NugetPackService implements io.onedev.server.pack.PackService {
 	
 	public static final String SERVICE_ID = "nuget";
 	
@@ -98,35 +97,35 @@ public class NugetPackService implements PackService {
 		}
 	};
 	
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
-	private final TransactionManager transactionManager;
+	private final TransactionService transactionService;
 	
-	private final PackBlobManager packBlobManager;
+	private final PackBlobService packBlobService;
 	
-	private final PackManager packManager;
+	private final PackService packService;
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
-	private final BuildManager buildManager;
+	private final BuildService buildService;
 	
 	private final ObjectMapper objectMapper;
 	
-	private final UrlManager urlManager;
+	private final UrlService urlService;
 
 	@Inject
-	public NugetPackService(SessionManager sessionManager, TransactionManager transactionManager,
-							PackBlobManager packBlobManager, PackManager packManager,
-							ProjectManager projectManager, BuildManager buildManager,
-							ObjectMapper objectMapper, UrlManager urlManager) {
-		this.sessionManager = sessionManager;
-		this.transactionManager = transactionManager;
-		this.packBlobManager = packBlobManager;
-		this.packManager = packManager;
-		this.projectManager = projectManager;
-		this.buildManager = buildManager;
+	public NugetPackService(SessionService sessionService, TransactionService transactionService,
+                            PackBlobService packBlobService, PackService packService,
+                            ProjectService projectService, BuildService buildService,
+                            ObjectMapper objectMapper, UrlService urlService) {
+		this.sessionService = sessionService;
+		this.transactionService = transactionService;
+		this.packBlobService = packBlobService;
+		this.packService = packService;
+		this.projectService = projectService;
+		this.buildService = buildService;
 		this.objectMapper = objectMapper;
-		this.urlManager = urlManager;
+		this.urlService = urlService;
 	}
 	
 	@Override
@@ -164,7 +163,7 @@ public class NugetPackService implements PackService {
 		pathSegments = pathSegments.subList(1, pathSegments.size());
 		if (currentSegment.equals("index.json")) {
 			if (isGet) {
-				var baseUrl = sessionManager.call(() -> getBaseUrl(checkProject(projectId, false)));
+				var baseUrl = sessionService.call(() -> getBaseUrl(checkProject(projectId, false)));
 				
 				var resources = newArrayList(
 						Map.of(
@@ -205,7 +204,7 @@ public class NugetPackService implements PackService {
 			}
 		} else if (currentSegment.equals("publish")) {
 			if (isPut) {
-				sessionManager.run(() -> {
+				sessionService.run(() -> {
 					checkProject(projectId, true);
 				});
 				var upload = new ServletFileUpload();
@@ -258,9 +257,9 @@ public class NugetPackService implements PackService {
 							}
 							
 							var metadataBytesCopy = metadataBytes;
-							LockUtils.run(getLockName(projectId, name), () -> transactionManager.run(() -> {
-								var project = projectManager.load(projectId);
-								var pack = packManager.findByNameAndVersion(project, TYPE, name, version);
+							LockUtils.run(getLockName(projectId, name), () -> transactionService.run(() -> {
+								var project = projectService.load(projectId);
+								var pack = packService.findByNameAndVersion(project, TYPE, name, version);
 
 								if (!symbolsPackage) {
 									if (pack != null) {
@@ -277,19 +276,19 @@ public class NugetPackService implements PackService {
 									pack.setPrerelease(version.contains("-"));
 
 									if (buildId != null)
-										pack.setBuild(buildManager.load(buildId));
+										pack.setBuild(buildService.load(buildId));
 									pack.setUser(SecurityUtils.getUser());
 									pack.setPublishDate(new Date());
 
 									PackBlob packBlob;
 									try (var is = new FileInputStream(tempFile)) {
-										packBlob = packBlobManager.load(packBlobManager.uploadBlob(projectId, is, null));
+										packBlob = packBlobService.load(packBlobService.uploadBlob(projectId, is, null));
 									} catch (IOException e) {
 										throw new RuntimeException(e);
 									}
 									pack.setData(new NugetData(packBlob.getSha256Hash(), null, 
 											metadataBytesCopy));
-									packManager.createOrUpdate(pack, newArrayList(packBlob), true);
+									packService.createOrUpdate(pack, newArrayList(packBlob), true);
 									response.setStatus(SC_CREATED);
 								} else {
 									if (pack == null) {
@@ -301,20 +300,20 @@ public class NugetPackService implements PackService {
 
 									PackBlob snupkgBlob;
 									try (var is = new FileInputStream(tempFile)) {
-										snupkgBlob = packBlobManager.load(packBlobManager.uploadBlob(projectId, is, null));
+										snupkgBlob = packBlobService.load(packBlobService.uploadBlob(projectId, is, null));
 									} catch (IOException e) {
 										throw new RuntimeException(e);
 									}
 
 									List<PackBlob> packBlobs = Lists.newArrayList(snupkgBlob);
 									var data = (NugetData) pack.getData();
-									var nupkgBlob = packBlobManager.findBySha256Hash(projectId, data.getNupkgBlobSha256Hash());
+									var nupkgBlob = packBlobService.findBySha256Hash(projectId, data.getNupkgBlobSha256Hash());
 									if (nupkgBlob != null)
 										packBlobs.add(nupkgBlob);
 
 									pack.setData(new NugetData(data.getNupkgBlobSha256Hash(), snupkgBlob.getSha256Hash(), 
 											data.getMetadata()));
-									packManager.createOrUpdate(pack, packBlobs, false);
+									packService.createOrUpdate(pack, packBlobs, false);
 									response.setStatus(SC_CREATED);
 								}
 							}));
@@ -343,11 +342,11 @@ public class NugetPackService implements PackService {
 				}
 				var version = pathSegments.get(0);
 
-				LockUtils.run(getLockName(projectId, name), () -> transactionManager.run(() -> {
+				LockUtils.run(getLockName(projectId, name), () -> transactionService.run(() -> {
 					var project = checkProject(projectId, true);
-					var pack = packManager.findByNameAndVersion(project, TYPE, name, version);
+					var pack = packService.findByNameAndVersion(project, TYPE, name, version);
 					if (pack != null) {
-						packManager.delete(pack);
+						packService.delete(pack);
 						response.setStatus(SC_NO_CONTENT);
 					} else {
 						response.setStatus(SC_NOT_FOUND);
@@ -357,7 +356,7 @@ public class NugetPackService implements PackService {
 				throw new ClientException(SC_METHOD_NOT_ALLOWED);
 			}
 		} else if (currentSegment.equals("query")) {
-			sessionManager.run(() -> {
+			sessionService.run(() -> {
 				var nameQuery = request.getParameter("q");
 				if (StringUtils.isBlank(nameQuery))
 					nameQuery = null;
@@ -375,11 +374,11 @@ public class NugetPackService implements PackService {
 				boolean includePrerelease = "true".equals(request.getParameter("prerelease"));
 				
 				var project = checkProject(projectId, false);
-				var totalHits = packManager.countNames(project, TYPE, nameQuery, includePrerelease);
-				var names = packManager.queryNames(project, TYPE, nameQuery, includePrerelease, offset, count);
+				var totalHits = packService.countNames(project, TYPE, nameQuery, includePrerelease);
+				var names = packService.queryNames(project, TYPE, nameQuery, includePrerelease, offset, count);
 				Map<String, List<Pack>> packs;
 				if (!names.isEmpty()) 
-					packs = packManager.loadPacks(names, includePrerelease, VERSION_COMPARATOR);
+					packs = packService.loadPacks(names, includePrerelease, VERSION_COMPARATOR);
 				else 
 					packs = new LinkedHashMap<>();
 
@@ -420,10 +419,10 @@ public class NugetPackService implements PackService {
 				throw new ClientException(SC_METHOD_NOT_ALLOWED);
 			var name = decodePath(pathSegments.get(0));
 			if (pathSegments.size() == 2) {
-				sessionManager.run(() -> {
+				sessionService.run(() -> {
 					var project = checkProject(projectId, false);
 					var baseUrl = getBaseUrl(project);
-					var packs = packManager.queryByName(project, TYPE, name, VERSION_COMPARATOR);
+					var packs = packService.queryByName(project, TYPE, name, VERSION_COMPARATOR);
 					if (packs.isEmpty()) {
 						response.setStatus(SC_NOT_FOUND);
 					} else {
@@ -447,11 +446,11 @@ public class NugetPackService implements PackService {
 				});
 			} else {
 				var version = decodePath(pathSegments.get(1));
-				sessionManager.run(() -> {
+				sessionService.run(() -> {
 					var project = checkProject(projectId, false);
 					var saxReader = newSAXReader();
 					var baseUrl = getBaseUrl(project);
-					var pack = packManager.findByNameAndVersion(project, TYPE, name, version);
+					var pack = packService.findByNameAndVersion(project, TYPE, name, version);
 					if (pack != null) {
 						var leafValue = getLeafValue(pack, saxReader, baseUrl);
 						leafValue.put("listed", true);
@@ -473,9 +472,9 @@ public class NugetPackService implements PackService {
 				throw new ClientException(SC_METHOD_NOT_ALLOWED);
 			var name = decodePath(pathSegments.get(0));
 			if (pathSegments.size() == 2) {
-				sessionManager.run(() -> {
+				sessionService.run(() -> {
 					var project = checkProject(projectId, false);
-					var packs = packManager.queryByName(project, TYPE, name, VERSION_COMPARATOR);
+					var packs = packService.queryByName(project, TYPE, name, VERSION_COMPARATOR);
 					if (!packs.isEmpty()) {
 						var versionsValue = packs.stream().map(it->it.getVersion().toLowerCase()).collect(toList());
 						sendResponse(response, Map.of("versions", versionsValue));
@@ -487,9 +486,9 @@ public class NugetPackService implements PackService {
 			} else {
 				var version = decodePath(pathSegments.get(1));
 				var fileName = decodePath(pathSegments.get(2));
-				sessionManager.run(() -> {
+				sessionService.run(() -> {
 					var project = checkProject(projectId, false);
-					var pack = packManager.findByNameAndVersion(project, TYPE, name, version);
+					var pack = packService.findByNameAndVersion(project, TYPE, name, version);
 					if (pack != null) {
 						var data = (NugetData) pack.getData();
 						if (fileName.endsWith(".nuspec")) {
@@ -500,9 +499,9 @@ public class NugetPackService implements PackService {
 							}
 						} else {
 							PackBlob packBlob;
-							if ((packBlob = packBlobManager.checkPackBlob(projectId, data.getNupkgBlobSha256Hash())) != null) {
+							if ((packBlob = packBlobService.checkPackBlob(projectId, data.getNupkgBlobSha256Hash())) != null) {
 								try {
-									packBlobManager.downloadBlob(packBlob.getProject().getId(), 
+									packBlobService.downloadBlob(packBlob.getProject().getId(), 
 											packBlob.getSha256Hash(), response.getOutputStream());
 								} catch (IOException e) {
 									throw new RuntimeException(e);
@@ -586,7 +585,7 @@ public class NugetPackService implements PackService {
 	}
 	
 	private String getBaseUrl(Project project) {
-		return urlManager.urlFor(project, true) + "/~" + SERVICE_ID;
+		return urlService.urlFor(project, true) + "/~" + SERVICE_ID;
 	}
 
 	private String getRegistrationIndexUrl(String baseUrl, String name) {
@@ -614,7 +613,7 @@ public class NugetPackService implements PackService {
 	}
 
 	private Project checkProject(Long projectId, boolean needsToWrite) {
-		var project = projectManager.load(projectId);
+		var project = projectService.load(projectId);
 		if (!project.isPackManagement()) {
 			logger.warn("Package management not enabled for project '" + project.getPath() + "'");
 			throw new ClientException(SC_NOT_ACCEPTABLE);

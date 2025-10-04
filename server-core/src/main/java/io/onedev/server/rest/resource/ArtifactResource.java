@@ -2,9 +2,9 @@ package io.onedev.server.rest.resource;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -43,18 +43,18 @@ import static io.onedev.server.util.IOUtils.copy;
 @Singleton
 public class ArtifactResource {
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
-	private final BuildManager buildManager;
+	private final BuildService buildService;
 	
-	private final ClusterManager clusterManager;	
+	private final ClusterService clusterService;	
 	
 	@Inject
-	public ArtifactResource(ProjectManager projectManager, BuildManager buildManager, 
-							ClusterManager clusterManager) {
-		this.projectManager = projectManager;
-		this.buildManager = buildManager;
-		this.clusterManager = clusterManager;
+	public ArtifactResource(ProjectService projectService, BuildService buildService,
+							ClusterService clusterService) {
+		this.projectService = projectService;
+		this.buildService = buildService;
+		this.clusterService = clusterService;
 	}
 	
 	@Nullable
@@ -75,10 +75,10 @@ public class ArtifactResource {
     @GET
     public ArtifactInfo getArtifactInfo(@PathParam("buildId") Long buildId, 
 										@PathParam("artifactPath") @Api(example = "/path/to/directoryOrFile") String artifactPath) {
-		Build build = buildManager.load(buildId);
+		Build build = buildService.load(buildId);
 		if (!SecurityUtils.canAccessBuild(build))
 			throw new UnauthorizedException();
-		return buildManager.getArtifactInfo(build, normalizeArtifactPath(artifactPath));
+		return buildService.getArtifactInfo(build, normalizeArtifactPath(artifactPath));
     }
 
 	@Api(order=200, description = "Download artifact of specified path")
@@ -87,15 +87,15 @@ public class ArtifactResource {
 	@Produces(APPLICATION_OCTET_STREAM)
 	public StreamingOutput downloadArtifact(@PathParam("buildId") Long buildId,
 									 @PathParam("artifactPath") @Api(example = "path/to/file") String artifactPath) {
-		Build build = buildManager.load(buildId);
+		Build build = buildService.load(buildId);
 		if (!SecurityUtils.canAccessBuild(build))
 			throw new UnauthorizedException();
 
 		var projectId = build.getProject().getId();
 		var buildNumber = build.getNumber();
 		return os -> {
-			String activeServer = projectManager.getActiveServer(projectId, true);
-			String serverUrl = clusterManager.getServerUrl(activeServer);
+			String activeServer = projectService.getActiveServer(projectId, true);
+			String serverUrl = clusterService.getServerUrl(activeServer);
 			Client client = ClientBuilder.newClient();
 			try {
 				WebTarget target = client.target(serverUrl).path("~api/cluster/artifact")
@@ -104,7 +104,7 @@ public class ArtifactResource {
 						.queryParam("artifactPath", normalizeArtifactPath(artifactPath));
 				Invocation.Builder builder = target.request();
 				builder.header(AUTHORIZATION, BEARER + " "
-						+ clusterManager.getCredential());
+						+ clusterService.getCredential());
 
 				try (Response response = builder.get()) {
 					checkStatus(response);
@@ -128,14 +128,14 @@ public class ArtifactResource {
 			@PathParam("buildId") Long buildId, 
 			@PathParam("artifactPath") @Api(example = "path/to/file") String artifactPath, 
 			InputStream input) {
-		Build build = buildManager.load(buildId);
+		Build build = buildService.load(buildId);
 		if (!SecurityUtils.canManageBuild(build))
 			throw new UnauthorizedException();
 
 		var projectId = build.getProject().getId();
 		var buildNumber = build.getNumber();
-		String activeServer = projectManager.getActiveServer(projectId, true);
-		String serverUrl = clusterManager.getServerUrl(activeServer);
+		String activeServer = projectService.getActiveServer(projectId, true);
+		String serverUrl = clusterService.getServerUrl(activeServer);
 
 		Client client = ClientBuilder.newClient();
 		client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
@@ -146,7 +146,7 @@ public class ArtifactResource {
 					.queryParam("buildNumber", buildNumber)
 					.queryParam("artifactPath", normalizeArtifactPath(artifactPath));
 			Invocation.Builder builder = target.request();
-			builder.header(AUTHORIZATION, BEARER + " " + clusterManager.getCredential());
+			builder.header(AUTHORIZATION, BEARER + " " + clusterService.getCredential());
 
 			StreamingOutput os = output -> {
 				try {
@@ -173,11 +173,11 @@ public class ArtifactResource {
 	public Response deleteArtifact(
 			@PathParam("buildId") Long buildId, 
 			@PathParam("artifactPath") @Api(example = "/path/to/directoryOrFile") String artifactPath) {
-		Build build = buildManager.load(buildId);
+		Build build = buildService.load(buildId);
 		if (!SecurityUtils.canManageBuild(build))
 			throw new UnauthorizedException();
 		
-		buildManager.deleteArtifact(build, normalizeArtifactPath(artifactPath));
+		buildService.deleteArtifact(build, normalizeArtifactPath(artifactPath));
 		return ok().build();
 	}
 	

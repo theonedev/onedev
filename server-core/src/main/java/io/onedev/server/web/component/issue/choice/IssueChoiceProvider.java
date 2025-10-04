@@ -14,12 +14,13 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.FuzzyCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedQuery;
 import io.onedev.server.util.criteria.AndCriteria;
@@ -48,9 +49,9 @@ public abstract class IssueChoiceProvider extends ChoiceProvider<Issue> {
 	@Override
 	public Collection<Issue> toChoices(Collection<String> ids) {
 		List<Issue> issues = Lists.newArrayList();
-		IssueManager issueManager = OneDev.getInstance(IssueManager.class);
+		IssueService issueService = OneDev.getInstance(IssueService.class);
 		for (String id: ids) {
-			Issue issue = issueManager.load(Long.valueOf(id)); 
+			Issue issue = issueService.load(Long.valueOf(id)); 
 			Hibernate.initialize(issue);
 			issues.add(issue);
 		}
@@ -76,8 +77,9 @@ public abstract class IssueChoiceProvider extends ChoiceProvider<Issue> {
 				sorts.addAll(getBaseQuery().getSorts());
 			}
 			var issueQuery = new IssueQuery(new AndCriteria<>(criterias), sorts);
-			var issues = OneDev.getInstance(IssueManager.class)
-					.query(projectScope, issueQuery, false, 0, count);
+			var subject = SecurityUtils.getSubject();
+			var issues = OneDev.getInstance(IssueService.class)
+					.query(subject, projectScope, issueQuery, false, 0, count);
 			new ResponseFiller<>(response).fill(issues, page, WebConstants.PAGE_SIZE);
 		} else {
 			response.setHasMore(false);

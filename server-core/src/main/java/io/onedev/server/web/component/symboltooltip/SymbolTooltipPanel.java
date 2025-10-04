@@ -2,11 +2,11 @@ package io.onedev.server.web.component.symboltooltip;
 
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.CodeSearchService;
 import io.onedev.server.search.code.IndexConstants;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.hit.SymbolHit;
@@ -144,16 +144,16 @@ public abstract class SymbolTooltipPanel extends Panel {
 						List<QueryHit> hits;						
 						// do this check to avoid TooGeneralQueryException
 						if (symbolName.length() >= IndexConstants.NGRAM_SIZE) {
-							int maxQueryEntries = OneDev.getInstance(SettingManager.class)
+							int maxQueryEntries = OneDev.getInstance(SettingService.class)
 									.getPerformanceSetting().getMaxCodeSearchEntries();
 							var query = new TextQuery.Builder(symbolName)
 									.wholeWord(true)
 									.caseSensitive(true)
 									.count(maxQueryEntries)
 									.build();
-							CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
+							CodeSearchService searchService = OneDev.getInstance(CodeSearchService.class);
 							ObjectId commit = getProject().getRevCommit(revision, true);
-							hits = searchManager.search(getProject(), commit, query);
+							hits = searchService.search(getProject(), commit, query);
 						} else {
 							hits = new ArrayList<>();
 						}
@@ -203,7 +203,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 					
 					if (symbolHits.size() < QUERY_ENTRIES) {
 						// first find in current file for matched symbols
-						List<Symbol> symbols = OneDev.getInstance(CodeSearchManager.class).getSymbols(getProject(), 
+						List<Symbol> symbols = OneDev.getInstance(CodeSearchService.class).getSymbols(getProject(),
 								blob.getBlobId(), getBlobPath());
 						if (symbols != null) {
 							for (Symbol symbol: symbols) {
@@ -227,7 +227,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 					
 					if (symbolHits.size() < QUERY_ENTRIES) {
 						// then find in other files for public symbols
-						CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
+						CodeSearchService searchService = OneDev.getInstance(CodeSearchService.class);
 						ObjectId commit = getProject().getRevCommit(revision, true);
 						BlobQuery query;
 						if (symbolHits.size() < QUERY_ENTRIES) {
@@ -238,7 +238,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 									.local(false)
 									.count(QUERY_ENTRIES)
 									.build();
-							symbolHits.addAll(searchManager.search(getProject(), commit, query));
+							symbolHits.addAll(searchService.search(getProject(), commit, query));
 						}							
 						if (symbolHits.size() < QUERY_ENTRIES) {
 							query = new SymbolQuery.Builder(symbolName)
@@ -248,7 +248,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 									.local(false)
 									.count(QUERY_ENTRIES - symbolHits.size())
 									.build();
-							symbolHits.addAll(searchManager.search(getProject(), commit, query));
+							symbolHits.addAll(searchService.search(getProject(), commit, query));
 						}
 					}					
 				}

@@ -51,8 +51,8 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
@@ -69,7 +69,7 @@ import io.onedev.server.search.entity.codecomment.FuzzyCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Provider;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
@@ -90,7 +90,7 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
-import io.onedev.server.xodus.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoService;
 
 public abstract class CodeCommentListPanel extends Panel {
 
@@ -140,8 +140,8 @@ public abstract class CodeCommentListPanel extends Panel {
 		this.queryStringModel = queryModel;
 	}
 
-	private CodeCommentManager getCodeCommentManager() {
-		return OneDev.getInstance(CodeCommentManager.class);
+	private CodeCommentService getCodeCommentService() {
+		return OneDev.getInstance(CodeCommentService.class);
 	}
 	
 	private void doQuery(AjaxRequestTarget target) {
@@ -238,7 +238,7 @@ public abstract class CodeCommentListPanel extends Panel {
 						
 						String note = bean.getNote();
 						
-						OneDev.getInstance(CodeCommentStatusChangeManager.class).create(changes, note);
+						OneDev.getInstance(CodeCommentStatusChangeService.class).create(changes, note);
 						selectionColumn.getSelections().clear();
 						dataProvider.detach();
 						target.add(countLabel);
@@ -374,7 +374,7 @@ public abstract class CodeCommentListPanel extends Panel {
 											Collection<CodeComment> comments = new ArrayList<>();
 											for (IModel<CodeComment> each: selectionColumn.getSelections())
 												comments.add(each.getObject());
-											OneDev.getInstance(CodeCommentManager.class).delete(comments, getProject());
+											OneDev.getInstance(CodeCommentService.class).delete(comments, getProject());
 											selectionColumn.getSelections().clear();
 											target.add(countLabel);
 											target.add(body);
@@ -530,7 +530,7 @@ public abstract class CodeCommentListPanel extends Panel {
 											Collection<CodeComment> comments = new ArrayList<>();
 											for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
 												comments.add(it.next());
-											OneDev.getInstance(CodeCommentManager.class).delete(comments, getProject());
+											OneDev.getInstance(CodeCommentService.class).delete(comments, getProject());
 											dataProvider.detach();
 											selectionColumn.getSelections().clear();
 											target.add(countLabel);
@@ -602,10 +602,10 @@ public abstract class CodeCommentListPanel extends Panel {
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
-								var visitInfoManager = OneDev.getInstance(VisitInfoManager.class);
+								var visitInfoService = OneDev.getInstance(VisitInfoService.class);
 								for (@SuppressWarnings("unchecked")
 								Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext(); )
-									visitInfoManager.visitCodeComment(SecurityUtils.getAuthUser(), it.next());
+									visitInfoService.visitCodeComment(SecurityUtils.getAuthUser(), it.next());
 								target.add(body);
 							}
 
@@ -757,7 +757,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			public Iterator<? extends CodeComment> iterator(long first, long count) {
 				var query = queryModel.getObject();
 				if (query != null) {
-					return getCodeCommentManager().query(getProject(), getPullRequest(),
+					return getCodeCommentService().query(getProject(), getPullRequest(),
 							query, (int) first, (int) count).iterator();
 				} else {
 					return new ArrayList<CodeComment>().iterator();
@@ -769,7 +769,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				try {
 					var query = queryModel.getObject();
 					if (query != null)
-						return getCodeCommentManager().count(getProject(), getPullRequest(), query.getCriteria());
+						return getCodeCommentService().count(getProject(), getPullRequest(), query.getCriteria());
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				}
@@ -783,7 +783,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 					@Override
 					protected CodeComment load() {
-						return OneDev.getInstance(CodeCommentManager.class).load(commentId);
+						return OneDev.getInstance(CodeCommentService.class).load(commentId);
 					}
 
 				};
@@ -855,7 +855,7 @@ public abstract class CodeCommentListPanel extends Panel {
 					}
 				});
 
-				String url = OneDev.getInstance(UrlManager.class).urlFor(comment, false);
+				String url = OneDev.getInstance(UrlService.class).urlFor(comment, false);
 				var link = new ExternalLink("description", url);
 				link.add(new Label("label", StringUtils.abbreviate(comment.getContent(), MAX_DESCRIPTION_LEN)));
 				fragment.add(link);

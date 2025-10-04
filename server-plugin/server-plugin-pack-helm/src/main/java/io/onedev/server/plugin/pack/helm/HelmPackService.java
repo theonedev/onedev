@@ -30,51 +30,50 @@ import org.yaml.snakeyaml.Yaml;
 
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.PackBlobManager;
-import io.onedev.server.entitymanager.PackManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.PackBlobService;
+import io.onedev.server.service.PackService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.exception.DataTooLargeException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
-import io.onedev.server.pack.PackService;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.Pair;
 
 @Singleton
-public class HelmPackService implements PackService {
+public class HelmPackService implements io.onedev.server.pack.PackService {
 
     public static final String SERVICE_ID = "helm";
 
     private static final int MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-    private final ProjectManager projectManager;
+    private final ProjectService projectService;
 
-    private final PackManager packManager;
+    private final PackService packService;
 
-    private final PackBlobManager packBlobManager;
+    private final PackBlobService packBlobService;
 
-    private final SessionManager sessionManager;
+    private final SessionService sessionService;
 
-    private final TransactionManager transactionManager;
+    private final TransactionService transactionService;
 
-    private final BuildManager buildManager;
+    private final BuildService buildService;
 
     @Inject
-    public HelmPackService(ProjectManager projectManager, PackManager packManager, 
-            PackBlobManager packBlobManager, SessionManager sessionManager, 
-            TransactionManager transactionManager, BuildManager buildManager) {
-        this.projectManager = projectManager;
-        this.packManager = packManager;
-        this.packBlobManager = packBlobManager;
-        this.sessionManager = sessionManager;
-        this.transactionManager = transactionManager;
-        this.buildManager = buildManager;
+    public HelmPackService(ProjectService projectService, PackService packService,
+                           PackBlobService packBlobService, SessionService sessionService,
+                           TransactionService transactionService, BuildService buildService) {
+        this.projectService = projectService;
+        this.packService = packService;
+        this.packBlobService = packBlobService;
+        this.sessionService = sessionService;
+        this.transactionService = transactionService;
+        this.buildService = buildService;
     }
 
     @Override
@@ -94,9 +93,9 @@ public class HelmPackService implements PackService {
                     index.put("generated", new Date());
 
                     var entries = new HashMap<String, List<Map<String, Object>>>();
-                    sessionManager.run(() -> {
+                    sessionService.run(() -> {
                         var project = checkProject(projectId, false);
-                        var packs = packManager.query(project, HelmPackSupport.TYPE, null);
+                        var packs = packService.query(project, HelmPackSupport.TYPE, null);
                         
                         for (var pack : packs) {
                             var data = (HelmData) pack.getData();
@@ -118,13 +117,13 @@ public class HelmPackService implements PackService {
                         throw new RuntimeException(e);
                     }
                 } else {
-                    var packBlobInfo = sessionManager.call(() -> {
+                    var packBlobInfo = sessionService.call(() -> {
                         var project = checkProject(projectId, false);
                         var fileNameWithoutSuffix = StringUtils.substringBeforeLast(fileName, ".");
                         var chartName = StringUtils.substringBeforeLast(fileNameWithoutSuffix, "-");
                         var chartVersion = StringUtils.substringAfterLast(fileNameWithoutSuffix, "-");
                         
-                        var pack = packManager.findByNameAndVersion(project, HelmPackSupport.TYPE, chartName, chartVersion);
+                        var pack = packService.findByNameAndVersion(project, HelmPackSupport.TYPE, chartName, chartVersion);
                         if (pack != null && !pack.getBlobReferences().isEmpty()) {
                             var packBlob = pack.getBlobReferences().iterator().next().getPackBlob();
                             return new Pair<>(packBlob.getSha256Hash(), packBlob.getSize());
@@ -137,7 +136,7 @@ public class HelmPackService implements PackService {
                             response.setContentType("application/gzip");
                             response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
                             response.setContentLengthLong(packBlobInfo.getRight());
-                            packBlobManager.downloadBlob(projectId, packBlobInfo.getLeft(), os);
+                            packBlobService.downloadBlob(projectId, packBlobInfo.getLeft(), os);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -149,7 +148,7 @@ public class HelmPackService implements PackService {
                 response.setStatus(SC_NOT_FOUND);
             }
         } else if (request.getMethod().equals("POST")) {            
-            sessionManager.run(() -> {
+            sessionService.run(() -> {
                 checkProject(projectId, true);
             });
             var baos = new ByteArrayOutputStream();
@@ -213,12 +212,12 @@ public class HelmPackService implements PackService {
 
             var finalMetadata = metadata;
 			var lockName = "update-pack:" + projectId + ":" + HelmPackSupport.TYPE + ":" + chartName + ":" + chartVersion;
-            LockUtils.run(lockName, () -> transactionManager.run(() -> {
-                var project = projectManager.load(projectId);
+            LockUtils.run(lockName, () -> transactionService.run(() -> {
+                var project = projectService.load(projectId);
 
-                PackBlob packBlob = packBlobManager.load(packBlobManager.uploadBlob(projectId, bytes, null));
+                PackBlob packBlob = packBlobService.load(packBlobService.uploadBlob(projectId, bytes, null));
                 var data = new HelmData(finalMetadata, packBlob.getSha256Hash());
-                Pack pack = packManager.findByNameAndVersion(project, HelmPackSupport.TYPE, chartName, chartVersion);
+                Pack pack = packService.findByNameAndVersion(project, HelmPackSupport.TYPE, chartName, chartVersion);
                 if (pack == null) {
                     pack = new Pack();
                     pack.setProject(project);
@@ -229,12 +228,12 @@ public class HelmPackService implements PackService {
                 pack.setData(data);
                 Build build = null;
                 if (buildId != null)
-                    build = buildManager.load(buildId);
+                    build = buildService.load(buildId);
                 pack.setBuild(build);
                 pack.setUser(SecurityUtils.getUser());
                 pack.setPublishDate(new Date());
 
-                packManager.createOrUpdate(pack, List.of(packBlob), true);
+                packService.createOrUpdate(pack, List.of(packBlob), true);
                 response.setStatus(SC_CREATED);
             }));
         } else {
@@ -248,7 +247,7 @@ public class HelmPackService implements PackService {
     }
 
 	private Project checkProject(Long projectId, boolean needsToWrite) {
-		var project = projectManager.load(projectId);
+		var project = projectService.load(projectId);
 		if (!project.isPackManagement()) {
 			throw new ClientException(SC_NOT_ACCEPTABLE, "Package management not enabled for project '" + project.getPath() + "'");
 		} else if (needsToWrite && !SecurityUtils.canWritePack(project)) {

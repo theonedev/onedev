@@ -2,7 +2,7 @@ package io.onedev.server.web.editable.workingperiod;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.issue.TimeTrackingSetting;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -63,7 +63,7 @@ public class WorkingPeriodPropertyEditor extends PropertyEditor<Integer> {
 	}
 	
 	private TimeTrackingSetting getTimeTrackingSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting().getTimeTrackingSetting();
 	}
 
 	@Override

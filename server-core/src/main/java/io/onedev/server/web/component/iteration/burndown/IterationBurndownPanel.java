@@ -26,7 +26,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Iteration;
@@ -35,7 +35,7 @@ import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.web.component.chart.line.Line;
 import io.onedev.server.web.component.chart.line.LineChartPanel;
 import io.onedev.server.web.component.chart.line.LineSeries;
-import io.onedev.server.xodus.IssueInfoManager;
+import io.onedev.server.xodus.IssueInfoService;
 
 public class IterationBurndownPanel extends GenericPanel<Iteration> {
 
@@ -49,7 +49,7 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 	}
 
 	private static GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
 	@Override
@@ -83,12 +83,12 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 						long scheduleDay = toLocalDate(schedule.getDate(), ZoneId.systemDefault()).toEpochDay();
 
 						Map<Long, Integer> dailyMetrics = new HashMap<>();
-						var issueInfoManager = OneDev.getInstance(IssueInfoManager.class);
+						var issueInfoService = OneDev.getInstance(IssueInfoService.class);
 						var fromDay = Math.max(getIteration().getStartDay(), scheduleDay);
-						var dailyStates = issueInfoManager.getDailyStates(issue, fromDay, getIteration().getDueDay());
+						var dailyStates = issueInfoService.getDailyStates(issue, fromDay, getIteration().getDueDay());
 						if (getIndicator().equals(REMAINING_TIME)) {
 							var estimatedTime = issue.getOwnEstimatedTime();
-							for (var entry: issueInfoManager.getDailySpentTimes(issue, fromDay, getIteration().getDueDay()).entrySet()) 
+							for (var entry: issueInfoService.getDailySpentTimes(issue, fromDay, getIteration().getDueDay()).entrySet()) 
 								dailyMetrics.put(entry.getKey(), estimatedTime - entry.getValue());
 						} else {
 							int metric = getIndicatorValue(issue);
@@ -117,7 +117,7 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 
 					int initialIssueMetric = 0;
 					var today = LocalDate.now().toEpochDay();
-					for (StateSpec spec : OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpecs()) {
+					for (StateSpec spec : OneDev.getInstance(SettingService.class).getIssueSetting().getStateSpecs()) {
 						List<Integer> yAxisValues = new ArrayList<>();
 						for (Map.Entry<Long, Map<String, Integer>> entry : dailyStateMetrics.entrySet()) {
 							if (entry.getKey() <= today) {
@@ -165,7 +165,7 @@ public class IterationBurndownPanel extends GenericPanel<Iteration> {
 
 			}));
 
-			var aggregationLink = OneDev.getInstance(SettingManager.class).getIssueSetting()
+			var aggregationLink = OneDev.getInstance(SettingService.class).getIssueSetting()
 					.getTimeTrackingSetting().getAggregationLink();
 			fragment.add(new Label("message", new AbstractReadOnlyModel<String>() {
 				@Override

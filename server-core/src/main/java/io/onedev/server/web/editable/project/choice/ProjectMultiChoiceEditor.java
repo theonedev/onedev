@@ -14,7 +14,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.util.facade.ProjectCache;
@@ -35,7 +35,7 @@ public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {
 				return (List<Project>) ReflectionUtils.invokeStaticMethod(
 						descriptor.getPropertyGetter().getDeclaringClass(), projectChoice.value());
 			} else {
-				ProjectCache cache = getProjectManager().cloneCache();
+				ProjectCache cache = getProjectService().cloneCache();
 				List<Project> projects = new ArrayList<>(cache.getProjects());
 				projects.sort(cache.comparingPath());
 				return projects;
@@ -57,8 +57,8 @@ public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {
 		super.onDetach();
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {
 		List<Project> selections = new ArrayList<>();
 		if (getModelObject() != null) {
 			for (String projectPath: getModelObject()) {
-				Project selection = getProjectManager().findByPath(projectPath);
+				Project selection = getProjectService().findByPath(projectPath);
 				if (selection != null) 
 					selections.add(selection);
 			}

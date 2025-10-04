@@ -1,15 +1,15 @@
 package io.onedev.server.event.project;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.event.Event;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.commenttext.CommentText;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -35,12 +35,12 @@ public abstract class ProjectEvent extends Event implements Serializable {
 	}
 	
 	public Project getProject() {
-		return OneDev.getInstance(ProjectManager.class).load(projectId);
+		return OneDev.getInstance(ProjectService.class).load(projectId);
 	}
 	
 	@Nullable
 	public User getUser() {
-		return userId != null? OneDev.getInstance(UserManager.class).load(userId): null;
+		return userId != null? OneDev.getInstance(UserService.class).load(userId): null;
 	}
 
 	public Date getDate() {
@@ -105,7 +105,7 @@ public abstract class ProjectEvent extends Event implements Serializable {
 	}
 	
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getProject(), true);
+		return OneDev.getInstance(UrlService.class).urlFor(getProject(), true);
 	}
 	
 	@Nullable

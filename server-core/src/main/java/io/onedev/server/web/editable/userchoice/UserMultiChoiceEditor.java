@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.UserChoice;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
@@ -44,7 +44,7 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		UserCache cache = getUserManager().cloneCache();
+		UserCache cache = getUserService().cloneCache();
 		
 		List<Long> choiceIds;
 		
@@ -85,7 +85,7 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 
 			@Override
 			public Collection<User> getObject() {
-				return selectionIds.stream().map(it-> getUserManager().load(it)).collect(Collectors.toList());
+				return selectionIds.stream().map(it-> getUserService().load(it)).collect(Collectors.toList());
 			}
 
 			@Override
@@ -99,7 +99,7 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 
 			@Override
 			protected List<User> load() {
-				return choiceIds.stream().map(it->getUserManager().load(it)).collect(Collectors.toList());
+				return choiceIds.stream().map(it->getUserService().load(it)).collect(Collectors.toList());
 			}
     		
     	}) {
@@ -126,8 +126,8 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
         add(input);
 	}
 	
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 
 	@Override

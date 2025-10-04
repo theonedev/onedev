@@ -1,0 +1,19 @@
+torchtune/utils/_version.py:6:1:6:1: error: Cannot find implementation or library stub for module named "torch"  [import-not-found]
+torchtune/utils:/_device.py:10:1:10:1: error: Cannot find implementation or library stub for module named "torch"  [import-not-found]
+torchtune/modules/rlhf/rewards.py:16:32:16:35: note: PEP 484 prohibits implicit Optional. Accordingly, mypy has changed its default to no_implicit_optional=True
+torchtune/modules/low_precision/nf4_linear.py:9:1:9:1: error: Cannot find implementation or library stub for module named "torch"  [import-not-found]
+torchtune/modules/tokenizers/_tiktoken.py:88:5:135:21: error: Signature of "encode" incompatible with supertype "BaseTokenizer"  [override]
+torchtune/modules/tokenizers/_tiktoken.py:88:5:135:21: note:      Superclass:
+torchtune/modules/tokenizers/_tiktoken.py:88:5:135:21: note:          def encode(self, text: str, **kwargs: dict[str, Any]) -> list[int]
+torchtune/modules/tokenizers/_tiktoken.py:88:5:135:21: note:      Subclass:
+torchtune/modules/tokenizers/_tiktoken.py:88:5:135:21: note:          def encode(self, text: str, add_bos: bool = ..., add_eos: bool = ...) -> list[int]
+torchtune/modules/tokenizers/_tiktoken.py:137:5:170:46: error: Signature of "decode" incompatible with supertype "BaseTokenizer"  [override]
+torchtune/modules/tokenizers/_tiktoken.py:137:5:170:46: note:      Superclass:
+torchtune/modules/tokenizers/_tiktoken.py:137:5:170:46: note:          def decode(self, token_ids: list[int], **kwargs: dict[str, Any]) -> str
+torchtune/modules/tokenizers/_tiktoken.py:137:5:170:46: note:      Subclass:
+torchtune/modules/tokenizers/_tiktoken.py:137:5:170:46: note:          def decode(self, token_ids: list[int], truncate_at_eos: bool = ..., skip_special_tokens: bool = ...) -> str
+torchtune/modules/tokenizers/_sentencepiece.py:9:1:9:1: note: Cannot find implementation or library stub for module named "sentencepiece"  [import-not-found]
+torchtune/modules/tokenizers/_sentencepiece.py:49:5:100:13: error: Signature of "encode" incompatible with supertype "BaseTokenizer"  [override]
+torchtune/_cli/run.py:174:21: error: Item "None" of "Recipe | None" has no attribute "name"  [union-attr]
+torchtune/_cli/cp.py:109: error: Argument 1 to "copy" has incompatible type "Any | None"; expected "str | PathLike[str]"  [arg-type]
+Found 418 errors in 113 files (checked 159 source files)

@@ -10,8 +10,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.Submodule;
@@ -33,20 +33,20 @@ public class GitLinkPanel extends BlobViewPanel {
 		Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
 		Submodule submodule = Submodule.fromString(blob.getText().getContent()); 
 		WebMarkupContainer link = null;
-		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-		String rootUrl = settingManager.getSystemSetting().getServerUrl() + "/";
+		SettingService settingService = OneDev.getInstance(SettingService.class);
+		ProjectService projectService = OneDev.getInstance(ProjectService.class);
+		String rootUrl = settingService.getSystemSetting().getServerUrl() + "/";
 		Project project = null;
 		if (submodule.getUrl().startsWith(rootUrl)) {
 			link = new WebMarkupContainer("link");
 			String projectPath = submodule.getUrl().substring(rootUrl.length());
-			project = projectManager.findByPath(projectPath);
+			project = projectService.findByPath(projectPath);
 		} else if (!submodule.getUrl().startsWith("http:") 
 				&& !submodule.getUrl().startsWith("https:") 
 				&& !submodule.getUrl().startsWith("ssh:")) { // relative url
 			String projectPath = Paths.get(context.getProject().getPath())
 					.resolve(submodule.getUrl()).normalize().toString();
-			project = projectManager.findByPath(projectPath);
+			project = projectService.findByPath(projectPath);
 		}
 		if (project != null) {
 			BlobIdent blobIdent = new BlobIdent();

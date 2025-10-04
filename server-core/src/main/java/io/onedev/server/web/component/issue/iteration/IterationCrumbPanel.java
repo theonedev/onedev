@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.issue.iteration;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.service.IssueChangeService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -63,7 +63,8 @@ public abstract class IterationCrumbPanel extends Panel {
 				var iterations = iterationsBean.getIterationNames().stream()
 						.map(it -> issue.getProject().getHierarchyIteration(it))
 						.collect(toList());
-				OneDev.getInstance(IssueChangeManager.class).changeIterations(issue, iterations);
+				var user = SecurityUtils.getUser();
+				OneDev.getInstance(IssueChangeService.class).changeIterations(user, issue, iterations);
 				((BasePage) getPage()).notifyObservablesChange(handler, issue.getChangeObservables(true));
 			}
 

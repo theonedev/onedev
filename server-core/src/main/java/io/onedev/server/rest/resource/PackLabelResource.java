@@ -1,6 +1,6 @@
 package io.onedev.server.rest.resource;
 
-import io.onedev.server.entitymanager.PackLabelManager;
+import io.onedev.server.service.PackLabelService;
 import io.onedev.server.model.PackLabel;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -20,11 +20,11 @@ import javax.ws.rs.core.Response;
 @Singleton
 public class PackLabelResource {
 
-	private final PackLabelManager packLabelManager;
+	private final PackLabelService packLabelService;
 
 	@Inject
-	public PackLabelResource(PackLabelManager packLabelManager) {
-		this.packLabelManager = packLabelManager;
+	public PackLabelResource(PackLabelService packLabelService) {
+		this.packLabelService = packLabelService;
 	}
 	
 	@Api(order=200, description="Create package label")
@@ -32,7 +32,7 @@ public class PackLabelResource {
 	public Long createLabel(@NotNull PackLabel packLabel) {
 		if (!SecurityUtils.canWritePack(packLabel.getPack().getProject()))
 			throw new UnauthorizedException();
-		packLabelManager.create(packLabel);
+		packLabelService.create(packLabel);
 		return packLabel.getId();
 	}
 	
@@ -40,10 +40,10 @@ public class PackLabelResource {
 	@Path("/{packLabelId}")
 	@DELETE
 	public Response deleteLabel(@PathParam("packLabelId") Long packLabelId) {
-		PackLabel buildLabel = packLabelManager.load(packLabelId);
+		PackLabel buildLabel = packLabelService.load(packLabelId);
 		if (!SecurityUtils.canWritePack(buildLabel.getPack().getProject()))
 			throw new UnauthorizedException();
-		packLabelManager.delete(buildLabel);
+		packLabelService.delete(buildLabel);
 		return Response.ok().build();
 	}
 	

@@ -11,9 +11,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.web.resource.AttachmentResource;
 import io.onedev.server.web.resource.AttachmentResourceReference;
 
@@ -44,21 +44,21 @@ public class ProjectAttachmentSupport implements AttachmentSupport {
 
 	@Override
 	public List<String> getAttachments() {
-		return getAttachmentManager().listAttachments(projectId, attachmentGroup).stream()
+		return getAttachmentService().listAttachments(projectId, attachmentGroup).stream()
 				.map(it->it.getPath()).collect(Collectors.toList());
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 
-	private AttachmentManager getAttachmentManager() {
-		return OneDev.getInstance(AttachmentManager.class);
+	private AttachmentService getAttachmentService() {
+		return OneDev.getInstance(AttachmentService.class);
 	}
 	
 	@Override
 	public void deleteAttachemnt(String attachment) {
-		getAttachmentManager().deleteAttachment(projectId, attachmentGroup, attachment);
+		getAttachmentService().deleteAttachment(projectId, attachmentGroup, attachment);
 	}
 
 	@Override
@@ -67,18 +67,18 @@ public class ProjectAttachmentSupport implements AttachmentSupport {
 	}
 
 	protected Project getProject() {
-		SessionManager sessionManager = OneDev.getInstance(SessionManager.class);
-		sessionManager.openSession();
+		SessionService sessionService = OneDev.getInstance(SessionService.class);
+		sessionService.openSession();
 		try {
-			return getProjectManager().load(projectId);
+			return getProjectService().load(projectId);
 		} finally {
-			sessionManager.closeSession();
+			sessionService.closeSession();
 		}
 	}
 
 	@Override
 	public String saveAttachment(String suggestedAttachmentName, InputStream attachmentStream) {
-		return getAttachmentManager().saveAttachment(
+		return getAttachmentService().saveAttachment(
 				projectId, attachmentGroup, suggestedAttachmentName, attachmentStream);
 	}
 

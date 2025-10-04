@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.service.LinkSpecService;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
@@ -47,7 +47,7 @@ public class IssueLinkMapping implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getOneDevIssueLinkChoices() {
 		List<String> choices = new ArrayList<>();
-		List<LinkSpec> linkSpecs = OneDev.getInstance(LinkSpecManager.class).query();
+		List<LinkSpec> linkSpecs = OneDev.getInstance(LinkSpecService.class).query();
 		Collections.sort(linkSpecs, new Comparator<LinkSpec>() {
 
 			@Override

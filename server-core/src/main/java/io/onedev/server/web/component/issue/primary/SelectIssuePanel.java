@@ -6,7 +6,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
 import io.onedev.server.web.component.issue.choice.IssueSingleChoice;
@@ -35,7 +35,7 @@ abstract class SelectIssuePanel extends FormComponentPanel<Issue> {
             @Override
             public Issue getObject() {
                 if (issueId != null)
-                    return getIssueManager().load(issueId);
+                    return getIssueService().load(issueId);
                 else
                     return null;
             }
@@ -60,8 +60,8 @@ abstract class SelectIssuePanel extends FormComponentPanel<Issue> {
     
     protected abstract IssueChoiceProvider getChoiceProvider();
 
-    private IssueManager getIssueManager() {
-        return OneDev.getInstance(IssueManager.class);
+    private IssueService getIssueService() {
+        return OneDev.getInstance(IssueService.class);
     }
 
 }

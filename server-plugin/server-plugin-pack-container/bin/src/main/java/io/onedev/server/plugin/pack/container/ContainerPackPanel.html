@@ -1,0 +1,81 @@
+<wicket:panel>
+	<div>
+		<b><wicket:t>Digest</wicket:t></b>
+		<div wicket:id="digest" class="text-monospace text-break font-size-sm mt-2"></div>
+	</div>
+	<div wicket:id="content"></div>
+	<div wicket:id="insecureRegistryNote" class="mt-4"></div>
+	<wicket:fragment wicket:id="multiArchFrag">
+		<div class="mt-4">
+			<b><wicket:t>Pull Command</wicket:t></b>
+			<div class="mt-2">
+				<span wicket:id="pullCommand" class="text-monospace text-break font-size-sm"></span>
+				<a wicket:id="copyPullCommand"><wicket:svg href="copy" class="icon"/></a>
+			</div>
+		</div>
+		<ul wicket:id="tabs" class="tabs nav nav-tabs nav-tabs-line nav-bold mb-4 mt-4"></ul>
+		<div wicket:id="content"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="imageFrag">
+		<wicket:enclosure child="osArch">
+			<div class="mt-4">
+				<b><wicket:t>OS/ARCH</wicket:t></b>
+				<div wicket:id="osArch" class="mt-2"></div>
+			</div>
+			<div class="mt-4">
+				<b><wicket:t>Pull Command</wicket:t></b>
+				<div class="mt-2">
+					<span wicket:id="pullCommand" class="text-monospace text-break font-size-sm"></span>
+					<a wicket:id="copyPullCommand"><wicket:svg href="copy" class="icon"/></a>
+				</div>
+			</div>
+		</wicket:enclosure>
+		<wicket:enclosure child="pullArchCommand">
+			<div class="mt-4">
+				<b><wicket:t>Arch Pull Command</wicket:t></b>
+				<div class="mt-2">
+					<span wicket:id="pullArchCommand" class="text-monospace text-break font-size-sm"></span>
+					<a wicket:id="copyPullArchCommand"><wicket:svg href="copy" class="icon"/></a>
+				</div>
+			</div>
+		</wicket:enclosure>
+		<div class="mt-4">
+			<b><wicket:t>Image Size</wicket:t></b>
+			<div wicket:id="imageSize" class="mt-2"></div>
+		</div>
+		<div class="mt-4">
+			<b><wicket:t>Image Manifest</wicket:t></b>
+			<pre wicket:id="manifest" class="code text-break mt-2 mb-0"></pre>
+		</div>
+		<div wicket:id="labels" class="mt-4">
+			<b><wicket:t>Image Labels</wicket:t></b>
+			<table class="table table-bordered mt-2 mb-0">
+				<tbody>
+					<tr wicket:id="labels">
+						<td wicket:id="name"></td>
+						<td wicket:id="value"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="cacheFrag">
+		<div class="alert alert-light-info alert-notice mt-4 mb-0">
+			<b><wicket:t>This is a layer cache. To use the cache, add below option to your docker buildx command</wicket:t></b>
+			<div class="mt-2">
+				<span wicket:id="cacheFromOption" class="text-monospace text-break font-size-sm"></span>
+				<a wicket:id="copyCacheFromOption"><wicket:svg href="copy" class="icon"/></a>
+			</div>
+		</div>
+		<div class="mt-4">
+			<b>Manifest</b>
+			<pre wicket:id="manifest" class="code text-break mt-2 mb-0"></pre>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="manifestFrag">
+		<div class="mt-4">
+			<b>Manifest</b>
+			<pre wicket:id="manifest" class="code text-break mt-2 mb-0"></pre>
+		</div>
+	</wicket:fragment>
+</wicket:panel>

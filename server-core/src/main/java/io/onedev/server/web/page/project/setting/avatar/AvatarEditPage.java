@@ -13,7 +13,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.web.avatar.AvatarManager;
+import io.onedev.server.web.avatar.AvatarService;
 import io.onedev.server.web.component.avatarupload.AvatarFileSelected;
 import io.onedev.server.web.component.avatarupload.AvatarUploadField;
 import io.onedev.server.web.component.project.ProjectAvatar;
@@ -27,8 +27,8 @@ public class AvatarEditPage extends ProjectSettingPage {
 		super(params);
 	}
 	
-	private AvatarManager getAvatarManager() {
-		return OneDev.getInstance(AvatarManager.class);
+	private AvatarService getAvatarService() {
+		return OneDev.getInstance(AvatarService.class);
 	}
 
 	@Override
@@ -42,12 +42,12 @@ public class AvatarEditPage extends ProjectSettingPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getAvatarManager().getProjectUploadedFile(getProject().getId()).exists());
+				setVisible(getAvatarService().getProjectUploadedFile(getProject().getId()).exists());
 			}
 
 			@Override
 			public void onClick() {
-				getAvatarManager().useProjectAvatar(getProject().getId(), null);
+				getAvatarService().useProjectAvatar(getProject().getId(), null);
 				setResponsePage(AvatarEditPage.class, AvatarEditPage.paramsOf(getProject()));
 			}
 			
@@ -61,8 +61,8 @@ public class AvatarEditPage extends ProjectSettingPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-            	avatarManager.useProjectAvatar(getProject().getId(), uploadedAvatarData);
+				AvatarService avatarService = OneDev.getInstance(AvatarService.class);
+            	avatarService.useProjectAvatar(getProject().getId(), uploadedAvatarData);
 				setResponsePage(AvatarEditPage.class, AvatarEditPage.paramsOf(getProject()));
 			}
 

@@ -5,7 +5,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Password;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 
 public class PasswordValidator implements ConstraintValidator<Password, String> {
 	
@@ -24,7 +24,7 @@ public class PasswordValidator implements ConstraintValidator<Password, String> 
 		if (value == null || !checkPolicy)
 			return true;
 		
-		var passwordPolicy = OneDev.getInstance(SettingManager.class).getSecuritySetting().getPasswordPolicy();
+		var passwordPolicy = OneDev.getInstance(SettingService.class).getSecuritySetting().getPasswordPolicy();
 		if (passwordPolicy != null) {
 			var error = passwordPolicy.checkPassword(value);
 			if (error != null) {

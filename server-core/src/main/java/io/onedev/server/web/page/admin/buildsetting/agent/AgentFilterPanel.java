@@ -18,7 +18,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.service.AgentService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.agent.AgentQueryLexer;
@@ -116,7 +116,7 @@ class AgentFilterPanel extends FilterEditPanel<Agent> {
 
 			@Override
 			protected List<String> load() {
-				var osNames = new ArrayList<>(getAgentManager().getOsNames());
+				var osNames = new ArrayList<>(getAgentService().getOsNames());
 				Collections.sort(osNames);
 				return osNames;
 			}
@@ -155,7 +155,7 @@ class AgentFilterPanel extends FilterEditPanel<Agent> {
 
 			@Override
 			protected List<String> load() {
-				var osArchs = new ArrayList<>(getAgentManager().getOsArchs());
+				var osArchs = new ArrayList<>(getAgentService().getOsArchs());
 				Collections.sort(osArchs);
 				return osArchs;
 			}
@@ -296,8 +296,8 @@ class AgentFilterPanel extends FilterEditPanel<Agent> {
 		add(notUsedSincePicker);			
 	}
 	
-	private static AgentManager getAgentManager() {
-		return OneDev.getInstance(AgentManager.class);
+	private static AgentService getAgentService() {
+		return OneDev.getInstance(AgentService.class);
 	}
 
 }

@@ -1,0 +1,37 @@
+<wicket:extend>
+	<div wicket:id="report" class="coverage-report"></div>
+	<wicket:fragment wicket:id="validFrag">
+		<div wicket:id="coverageTitle" class="title h4 mb-3 text-break"></div>
+		<div wicket:id="coverages" class="coverages mb-5"></div>
+		<div class="items">
+			<div wicket:id="itemsTitle" class="title h4 mb-3 font-weight-bold"></div>
+			<form wicket:id="form">
+				<div class="operations d-flex flex-nowrap">
+					<div class="clearable-wrapper flex-grow-1 mr-3">
+						<div class="input-group">
+							<input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off">
+							<span class="input-group-append">
+								<button wicket:id="submit" t:data-tippy-content="Filter" class="btn btn-icon btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+							</span>
+						</div>
+					</div>
+					<a wicket:id="orderBy" class="order-by btn btn-primary flex-shrink-0"><wicket:t>Order By</wicket:t> <wicket:svg href="arrow" class="dropdown-caret icon rotate-90"/></a>
+				</div>
+				<div wicket:id="feedback" class="mt-3"></div>
+			</form>
+			<div wicket:id="itemsContainer">
+				<div wicket:id="items" class="item mt-4">
+					<a wicket:id="name" class="name font-weight-bold text-break"><span wicket:id="label"></span></a>
+					<div wicket:id="coverages" class="coverages mt-3"></div>
+				</div>
+				<div wicket:id="pagingNavigator" class="mt-4"></div>
+				<div wicket:id="noRecords"></div>
+			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="invalidFrag">
+		<div class="alert alert-notice alert-light-warning">
+			<wicket:t>Report format changed. You may re-run this build to generate the report in new format</wicket:t>
+		</div>
+	</wicket:fragment>
+</wicket:extend>

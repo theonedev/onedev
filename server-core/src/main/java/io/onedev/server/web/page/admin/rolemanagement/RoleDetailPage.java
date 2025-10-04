@@ -24,8 +24,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.service.LinkSpecService;
+import io.onedev.server.service.RoleService;
 import io.onedev.server.model.LinkAuthorization;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Role;
@@ -68,8 +68,8 @@ public class RoleDetailPage extends AdministrationPage {
 		};
 	}
 	
-	private RoleManager getManager() {
-		return OneDev.getInstance(RoleManager.class);
+	private RoleService getManager() {
+		return OneDev.getInstance(RoleService.class);
 	}
 
 	@Override
@@ -107,8 +107,8 @@ public class RoleDetailPage extends AdministrationPage {
 					super.onSubmit();
 					
 					Role role = getRole();
-					RoleManager roleManager = OneDev.getInstance(RoleManager.class);
-					Role roleWithSameName = roleManager.find(role.getName());
+					RoleService roleService = OneDev.getInstance(RoleService.class);
+					Role roleWithSameName = roleService.find(role.getName());
 					if (roleWithSameName != null && !roleWithSameName.equals(role)) {
 						editor.error(new Path(new PathNode.Named("name")),
 								_T("This name has already been used by another role."));
@@ -116,10 +116,10 @@ public class RoleDetailPage extends AdministrationPage {
 					if (editor.isValid()) {
 						Collection<LinkSpec> authorizedLinks = new ArrayList<>();
 						for (String linkName: role.getEditableIssueLinks()) 
-							authorizedLinks.add(OneDev.getInstance(LinkSpecManager.class).find(linkName));
-						roleManager.update(role, authorizedLinks, oldName);
+							authorizedLinks.add(OneDev.getInstance(LinkSpecService.class).find(linkName));
+						roleService.update(role, authorizedLinks, oldName);
 						var newAuditContent = VersionedXmlDoc.fromBean(editor.getPropertyValues()).toXML();
-						getAuditManager().audit(null, "changed role \"" + role.getName() + "\"", oldAuditContent, newAuditContent);
+						auditService.audit(null, "changed role \"" + role.getName() + "\"", oldAuditContent, newAuditContent);
 						setResponsePage(RoleDetailPage.class, RoleDetailPage.paramsOf(role));
 						Session.get().success(MessageFormat.format(_T("Role \"{0}\" updated"), role.getName()));
 					}
@@ -133,7 +133,7 @@ public class RoleDetailPage extends AdministrationPage {
 
 				@Override
 				public void onClick() {
-					OneDev.getInstance(RoleManager.class).delete(getRole());
+					OneDev.getInstance(RoleService.class).delete(getRole());
 					Session.get().success(MessageFormat.format(_T("Role \"{0}\" deleted"), getRole().getName()));
 					
 					String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Role.class);

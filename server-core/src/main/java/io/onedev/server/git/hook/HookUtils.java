@@ -5,7 +5,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.CryptoUtils;
 import org.apache.commons.io.IOUtils;
 
@@ -33,9 +33,9 @@ public class HookUtils {
 	
 	public static Map<String, String> getHookEnvs(Long projectId, String principal) {
 		ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class);
-		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
+		SettingService settingService = OneDev.getInstance(SettingService.class);
 		String hookUrl = "http://localhost:" + serverConfig.getHttpPort();
-		String curl = settingManager.getSystemSetting().getCurlLocation().getExecutable();
+		String curl = settingService.getSystemSetting().getCurlLocation().getExecutable();
 		
 		Map<String, String> envs = new HashMap<>();
 		

@@ -6,7 +6,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Patterns;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.web.util.SuggestionUtils;
 
 import javax.annotation.Nullable;
@@ -47,7 +47,7 @@ public class JobPrivilege implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestJobNames(String matchWith) {
-		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildManager.class).getJobNames(null));
+		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildService.class).getJobNames(null));
 		Collections.sort(jobNames);
 		return SuggestionUtils.suggest(jobNames, matchWith);
 	}

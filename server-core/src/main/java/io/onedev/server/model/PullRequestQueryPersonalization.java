@@ -15,7 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
+import io.onedev.server.service.PullRequestQueryPersonalizationService;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
@@ -110,7 +110,7 @@ public class PullRequestQueryPersonalization extends AbstractEntity implements Q
 
 	@Override
 	public void onUpdated() {
-		OneDev.getInstance(PullRequestQueryPersonalizationManager.class).createOrUpdate(this);
+		OneDev.getInstance(PullRequestQueryPersonalizationService.class).createOrUpdate(this);
 	}
 	
 }

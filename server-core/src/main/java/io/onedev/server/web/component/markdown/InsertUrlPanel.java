@@ -56,7 +56,7 @@ import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
@@ -77,7 +77,7 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.upload.FileUpload;
-import io.onedev.server.web.upload.UploadManager;
+import io.onedev.server.web.upload.UploadService;
 
 abstract class InsertUrlPanel extends Panel {
 
@@ -404,7 +404,7 @@ abstract class InsertUrlPanel extends Panel {
 					
 					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 					String attachmentName;
-					var upload = getUploadManager().getUpload(uploadId);
+					var upload = getUploadService().getUpload(uploadId);
 					try {
 						for (var item : upload.getItems()) {
 							try (InputStream is = item.getInputStream()) {
@@ -448,7 +448,7 @@ abstract class InsertUrlPanel extends Panel {
 			});
 			fragment.add(form);
 		} else {
-			int maxUploadFileSize = OneDev.getInstance(SettingManager.class).getPerformanceSetting().getMaxUploadFileSize();
+			int maxUploadFileSize = OneDev.getInstance(SettingService.class).getPerformanceSetting().getMaxUploadFileSize();
 			fragment = new Fragment(CONTENT_ID, "uploadBlobFrag", this);
 			Form<?> form = new Form<Void>("form");
 			form.setMultiPart(true);
@@ -552,7 +552,7 @@ abstract class InsertUrlPanel extends Panel {
 					if (StringUtils.isBlank(commitMessage))
 						commitMessage = _T("Add files via upload");
 
-					var upload = getUploadManager().getUpload(uploadId);
+					var upload = getUploadService().getUpload(uploadId);
 					try {
 						String directory = WebSession.get().getMetaData(UPLOAD_DIRECTORY);
 						context.onCommitted(null, context.uploadFiles(upload, directory, commitMessage));
@@ -671,8 +671,8 @@ abstract class InsertUrlPanel extends Panel {
 		
 	}
 	
-	private UploadManager getUploadManager() {
-		return OneDev.getInstance(UploadManager.class);
+	private UploadService getUploadService() {
+		return OneDev.getInstance(UploadService.class);
 	}
 	
 	protected abstract void onClose(AjaxRequestTarget target);

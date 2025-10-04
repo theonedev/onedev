@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,6 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.IssueQuery;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Membership;
@@ -32,6 +32,7 @@ import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
 import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.RoleService;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
@@ -76,7 +77,7 @@ public class ManualSpec extends TransitionSpec {
 	
 	private static Map<String, String> getRoleDescriptions() {
 		Map<String, String> descriptions = new HashMap<>();
-		for (Role role: OneDev.getInstance(RoleManager.class).query()) 
+		for (Role role: OneDev.getInstance(RoleService.class).query())
 			descriptions.put(role.getName(), role.getDescription());
 		descriptions = CollectionUtils.sortByKey(descriptions);
 		descriptions.put(ROLE_SUBMITTER, "user opening the issue");
@@ -115,10 +116,10 @@ public class ManualSpec extends TransitionSpec {
 		}
 	}
 
-	public boolean canTransit(Issue issue, @Nullable String state) {
+	public boolean canTransit(Subject subject, Issue issue, @Nullable String state) {
 		if ((state == null || getToStates().isEmpty() || getToStates().contains(state)) 
 				&& (getFromStates().isEmpty() || getFromStates().contains(issue.getState())) 
-				&& isAuthorized(issue)) {
+				&& isAuthorized(subject, issue)) {
 			io.onedev.server.search.entity.issue.IssueQuery parsedQuery = io.onedev.server.search.entity.issue.IssueQuery.parse(issue.getProject(),
 					getIssueQuery(), new IssueQueryParseOption().enableAll(true), true);
 			return parsedQuery.matches(issue);
@@ -201,12 +202,12 @@ public class ManualSpec extends TransitionSpec {
 		return usage;
 	}
 	
-	public boolean isAuthorized(Issue issue) {
-		User user = SecurityUtils.getUser();
+	public boolean isAuthorized(Subject subject, Issue issue) {
+		User user = SecurityUtils.getUser(subject);
 		Project project = issue.getProject();
 		if (user != null) {
 			if (!getAuthorizedRoles().isEmpty()) {
-				if (SecurityUtils.canManageIssues(project)) {
+				if (SecurityUtils.canManageIssues(subject, project)) {
 					return true;
 				} else {
 					for (String roleName: getAuthorizedRoles()) {
@@ -229,9 +230,9 @@ public class ManualSpec extends TransitionSpec {
 							if (user.equals(issue.getSubmitter()))
 								return true;
 						} else {
-							Role role = OneDev.getInstance(RoleManager.class).find(roleName);
+							Role role = OneDev.getInstance(RoleService.class).find(roleName);
 							if (role != null) {
-								if (SecurityUtils.isAssignedRole(project, role)) 
+								if (SecurityUtils.isAssignedRole(subject, project, role)) 
 									return true;
 							} else {
 								logger.error("Undefined role: " + roleName);

@@ -1,0 +1,11 @@
+<wicket:panel>
+	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>Add a package source like below</wicket:t></div>
+	<div wicket:id="addSource"></div>
+	<div class="text-muted font-size-sm mt-2 mb-5"><wicket:t>Make sure the user has package write permission over the project</wicket:t></div>
+	
+	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>Then push package to the source</wicket:t></div>
+	<div wicket:id="pushCommand" class="mb-5"></div>
+
+	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>For CI/CD job, run below to add package source via command step</wicket:t></div>
+	<div wicket:id="jobCommands"></div>
+</wicket:panel>

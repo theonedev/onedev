@@ -21,8 +21,8 @@ import com.google.common.collect.ImmutableSet;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.TextNodeVisitor;
@@ -48,7 +48,7 @@ public class ReferenceUtils {
 	public static String transformReferences(String text, @Nullable Project currentProject,
 									  BiFunction<EntityReference, String, String> transformer) {
 		if (mayContainReferences(text)) {
-			var projectManager = OneDev.getInstance(ProjectManager.class);
+			var projectService = OneDev.getInstance(ProjectService.class);
 			var builder = new StringBuilder();
 			var index = 0;
 			var matcher = PATTERN.matcher(text);
@@ -56,11 +56,11 @@ public class ReferenceUtils {
 				Project project;
 				var projectKey = matcher.group("projectKey");
 				if (projectKey != null) {
-					project = projectManager.findByKey(projectKey);
+					project = projectService.findByKey(projectKey);
 				} else {
 					var projectPath = matcher.group("projectPath");
 					if (projectPath != null)
-						project = projectManager.findByPath(projectPath);
+						project = projectService.findByPath(projectPath);
 					else
 						project = currentProject;
 				}
@@ -78,7 +78,7 @@ public class ReferenceUtils {
 		} else {
 			text = transformer.apply(null, text);
 		}
-		var issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		var issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
 		for (var entry: issueSetting.getExternalIssueTransformers().getEntries()) {
 			text = text.replaceAll(entry.getPattern(), entry.getReplaceWith());
 		}

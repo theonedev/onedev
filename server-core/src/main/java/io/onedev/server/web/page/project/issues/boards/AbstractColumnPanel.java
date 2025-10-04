@@ -17,10 +17,10 @@ import org.apache.wicket.util.visit.IVisitor;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IterationManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IterationService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
@@ -40,7 +40,7 @@ abstract class AbstractColumnPanel extends Panel implements EditContext {
 		protected Integer load() {
 			if (getQuery() != null) {
 				try {
-					return getIssueManager().count(getProjectScope(), getQuery().getCriteria());
+					return getIssueService().count(SecurityUtils.getSubject(), getProjectScope(), getQuery().getCriteria());
 				} catch (ExplicitException ignored) {
 				}
 			}
@@ -65,8 +65,8 @@ abstract class AbstractColumnPanel extends Panel implements EditContext {
 				var cardListPanel = columnPanel.getCardListPanel();
 				var firstCard = cardListPanel.findCard(null);
 				if (firstCard != null)
-					issue.setBoardPosition(getIssueManager().load(firstCard.getIssueId()).getBoardPosition() - 1);
-				getIssueManager().open(issue);
+					issue.setBoardPosition(getIssueService().load(firstCard.getIssueId()).getBoardPosition() - 1);
+				getIssueService().open(issue);
 				cardListPanel.onCardAdded(target, issue.getId());
 				visit.stop();
 			}
@@ -78,19 +78,19 @@ abstract class AbstractColumnPanel extends Panel implements EditContext {
 	protected abstract CardListPanel getCardListPanel();
 
 	protected GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
-	protected IssueChangeManager getIssueChangeManager() {
-		return OneDev.getInstance(IssueChangeManager.class);
+	protected IssueChangeService getIssueChangeService() {
+		return OneDev.getInstance(IssueChangeService.class);
 	}
 	
-	protected IssueManager getIssueManager() {
-		return OneDev.getInstance(IssueManager.class);
+	protected IssueService getIssueService() {
+		return OneDev.getInstance(IssueService.class);
 	}
 
-	protected IterationManager getIterationManager() {
-		return OneDev.getInstance(IterationManager.class);
+	protected IterationService getIterationService() {
+		return OneDev.getInstance(IterationService.class);
 	}
 	
 	@Override
@@ -131,15 +131,15 @@ abstract class AbstractColumnPanel extends Panel implements EditContext {
 						protected String onSave(AjaxRequestTarget target, AddToIterationBean bean) {
 							BasePage page = (BasePage) getPage();
 							close();
-							var issues = getIssueManager().query(getProjectScope(), getQuery(),
+							var issues = getIssueService().query(SecurityUtils.getSubject(), getProjectScope(), getQuery(),
 									false, 0, Integer.MAX_VALUE);
-							var addIteration = getIterationManager().findInHierarchy(getProject(), bean.getIteration());
+							var addIteration = getIterationService().findInHierarchy(getProject(), bean.getIteration());
 							Iteration removeIteration;
 							if (!isBacklog() && bean.isRemoveFromCurrentIteration())
 								removeIteration = getIterationSelection().getIteration();
 							else 
 								removeIteration = null;
-							getIssueChangeManager().changeSchedule(issues, addIteration, removeIteration, bean.isSendNotifications());
+							getIssueChangeService().changeSchedule(SecurityUtils.getUser(), issues, addIteration, removeIteration, bean.isSendNotifications());
 							for (var issue : issues)
 								page.notifyObservablesChange(target, issue.getChangeObservables(true));
 							return null;

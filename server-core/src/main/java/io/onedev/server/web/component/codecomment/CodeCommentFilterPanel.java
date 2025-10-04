@@ -19,7 +19,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityQuery;
@@ -115,8 +115,8 @@ class CodeCommentFilterPanel extends FilterEditPanel<CodeComment> {
 
 			@Override
 			protected List<User> load() {
-				var users = getUserManager().query().stream().filter(it -> !it.isDisabled()).collect(toList());
-				var cache = getUserManager().cloneCache();
+				var users = getUserService().query().stream().filter(it -> !it.isDisabled()).collect(toList());
+				var cache = getUserService().cloneCache();
 				users.sort(cache.comparingDisplayName(new ArrayList<>()));
 				return users;
 			}
@@ -213,8 +213,8 @@ class CodeCommentFilterPanel extends FilterEditPanel<CodeComment> {
 		add(notActiveSincePicker);				
 	}
 	
-	private static UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private static UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 
 }

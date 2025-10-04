@@ -9,7 +9,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.util.ProjectScope;
@@ -31,7 +31,7 @@ public class PublishedViaProjectCriteria extends Criteria<Pack> {
 
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Pack, Pack> from, CriteriaBuilder builder) {
-		return OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(
+		return OneDev.getInstance(ProjectService.class).getPathMatchPredicate(
 				builder, from.join(Pack.PROP_BUILD, JoinType.INNER).join(Build.PROP_PROJECT, JoinType.INNER), projectPath);
 	}
 

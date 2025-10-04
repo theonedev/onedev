@@ -5,7 +5,7 @@ import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import org.hibernate.Criteria;
@@ -22,13 +22,13 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public class DefaultDao implements Dao, Serializable {
 
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
 	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
-	public DefaultDao(SessionManager sessionManager, ListenerRegistry listenerRegistry) {
-		this.sessionManager = sessionManager;
+	public DefaultDao(SessionService sessionService, ListenerRegistry listenerRegistry) {
+		this.sessionService = sessionService;
 		this.listenerRegistry = listenerRegistry;
 	}
 	
@@ -124,13 +124,13 @@ public class DefaultDao implements Dao, Serializable {
 	}
 	
 	@Override
-	public SessionManager getSessionManager() {
-		return sessionManager;
+	public SessionService getSessionService() {
+		return sessionService;
 	}
 
 	@Override
 	public Session getSession() {
-		return sessionManager.getSession();
+		return sessionService.getSession();
 	}
 	
 }

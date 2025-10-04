@@ -36,8 +36,8 @@ import com.google.common.base.Splitter;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
@@ -59,7 +59,7 @@ public class SiteFileResource extends AbstractResource {
 		PageParameters params = attributes.getParameters();
 
 		String projectPath = params.get(ProjectMapperUtils.PARAM_PROJECT).toString();
-		Project project = getProjectManager().findByPath(projectPath);
+		Project project = getProjectService().findByPath(projectPath);
 		if (project == null)
 			throw new EntityNotFoundException();
 		
@@ -77,11 +77,11 @@ public class SiteFileResource extends AbstractResource {
 		FileInfo fileInfo;
 		String filePath = Joiner.on("/").join(filePathSegments);
 		if (filePath.length() != 0) {
-			ArtifactInfo artifactInfo = getProjectManager().getSiteArtifactInfo(projectId, filePath);
+			ArtifactInfo artifactInfo = getProjectService().getSiteArtifactInfo(projectId, filePath);
 			if (artifactInfo instanceof DirectoryInfo) {
 				if (attributes.getRequest().getUrl().getPath().endsWith("/")) {
 					filePath += "/index.html";
-					artifactInfo = getProjectManager().getSiteArtifactInfo(projectId, filePath);
+					artifactInfo = getProjectService().getSiteArtifactInfo(projectId, filePath);
 					if (artifactInfo instanceof FileInfo)
 						fileInfo = (FileInfo) artifactInfo;
 					else						
@@ -96,7 +96,7 @@ public class SiteFileResource extends AbstractResource {
 			}
 		} else if (attributes.getRequest().getUrl().getPath().endsWith("/")) {
 			filePath = "index.html";
-			ArtifactInfo artifactInfo = getProjectManager().getSiteArtifactInfo(projectId, filePath);
+			ArtifactInfo artifactInfo = getProjectService().getSiteArtifactInfo(projectId, filePath);
 			if (artifactInfo instanceof FileInfo)
 				fileInfo = (FileInfo) artifactInfo;
 			else
@@ -131,10 +131,10 @@ public class SiteFileResource extends AbstractResource {
 			public void writeData(Attributes attributes) throws IOException {
 				LongRange range = WicketUtils.getRequestContentRange(fileInfo.getLength());
 				
-				String activeServer = getProjectManager().getActiveServer(projectId, true);
-				if (activeServer.equals(getClusterManager().getLocalServerAddress())) {
+				String activeServer = getProjectService().getActiveServer(projectId, true);
+				if (activeServer.equals(getClusterService().getLocalServerAddress())) {
 					read(Project.getSiteLockName(projectId), () -> {
-						File file = new File(getProjectManager().getSiteDir(projectId), finalFilePath);
+						File file = new File(getProjectService().getSiteDir(projectId), finalFilePath);
 						try (InputStream is = new FileInputStream(file)) {
 							copyRange(is, attributes.getResponse().getOutputStream(), range);
 						} catch (IOException e) {
@@ -145,14 +145,14 @@ public class SiteFileResource extends AbstractResource {
 				} else {
 					Client client = ClientBuilder.newClient();
 					try {
-						String serverUrl = getClusterManager().getServerUrl(activeServer);
+						String serverUrl = getClusterService().getServerUrl(activeServer);
 						WebTarget target = client.target(serverUrl);
 						target = target.path("~api/cluster/site")
 								.queryParam("projectId", project.getId())
 								.queryParam("filePath", finalFilePath);
 						Invocation.Builder builder =  target.request();
 						builder.header(HttpHeaders.AUTHORIZATION, 
-								KubernetesHelper.BEARER + " " + getClusterManager().getCredential());
+								KubernetesHelper.BEARER + " " + getClusterService().getCredential());
 						try (Response response = builder.get()){
 							KubernetesHelper.checkStatus(response);
 							try (InputStream is = response.readEntity(InputStream.class)) {
@@ -185,12 +185,12 @@ public class SiteFileResource extends AbstractResource {
 		});			
 	}
 
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
-	private ClusterManager getClusterManager() {
-		return OneDev.getInstance(ClusterManager.class);
+	private ClusterService getClusterService() {
+		return OneDev.getInstance(ClusterService.class);
 	}
 	
 	public static PageParameters paramsOf(Project project, BlobIdent blobIdent) {

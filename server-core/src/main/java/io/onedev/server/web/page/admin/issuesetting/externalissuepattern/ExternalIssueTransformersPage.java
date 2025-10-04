@@ -11,7 +11,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.issue.ExternalIssueTransformers;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
@@ -38,8 +38,8 @@ public class ExternalIssueTransformersPage extends IssueSettingPage {
 				super.onSubmit();
 				getSetting().setExternalIssueTransformers(transformers);
 				var newAuditContent = VersionedXmlDoc.fromBean(transformers).toXML();
-				getSettingManager().saveIssueSetting(getSetting());
-				getAuditManager().audit(null, "changed external issue transformers", oldAuditContent, newAuditContent);
+				getSettingService().saveIssueSetting(getSetting());
+				auditService.audit(null, "changed external issue transformers", oldAuditContent, newAuditContent);
 				oldAuditContent = newAuditContent;
 				Session.get().success(_T("Settings updated"));
 			}
@@ -49,8 +49,8 @@ public class ExternalIssueTransformersPage extends IssueSettingPage {
 		add(form);
     }
 
-    private SettingManager getSettingManager() {
-        return OneDev.getInstance(SettingManager.class);
+    private SettingService getSettingService() {
+        return OneDev.getInstance(SettingService.class);
     }
 
     @Override

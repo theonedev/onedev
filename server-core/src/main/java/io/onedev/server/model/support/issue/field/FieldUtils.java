@@ -26,7 +26,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.instance.FieldInstance;
@@ -75,7 +75,7 @@ public class FieldUtils {
 	
 	@SuppressWarnings("unchecked")
 	private static Class<? extends Serializable> defineFieldBeanClass() {
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
 		return (Class<? extends Serializable>) FieldSpec.defineClass(FIELD_BEAN_CLASS_NAME, 
 				"Issue Fields", issueSetting.getFieldSpecs());
 	}
@@ -179,8 +179,8 @@ public class FieldUtils {
 
 	@SuppressWarnings("unchecked")
 	public static Map<String, Object> getFieldValues(Project project, Map<String, Serializable> fieldEdits) {
-		var settingManager = OneDev.getInstance(SettingManager.class);
-		var issueSetting = settingManager.getIssueSetting();
+		var settingService = OneDev.getInstance(SettingService.class);
+		var issueSetting = settingService.getIssueSetting();
 		Map<String, Object> fieldValues = new HashMap<>();
 		for (Map.Entry<String, Serializable> entry : fieldEdits.entrySet()) {
 			var fieldName = entry.getKey();
@@ -239,7 +239,7 @@ public class FieldUtils {
 			}
 
 			private GlobalIssueSetting getIssueSetting() {
-				return OneDev.getInstance(SettingManager.class).getIssueSetting();
+				return OneDev.getInstance(SettingService.class).getIssueSetting();
 			}
 			
 			@Override

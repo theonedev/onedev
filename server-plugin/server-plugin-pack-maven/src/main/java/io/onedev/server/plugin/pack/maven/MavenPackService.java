@@ -2,7 +2,7 @@ package io.onedev.server.plugin.pack.maven;
 
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.service.*;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pack.PackPublished;
 import io.onedev.server.exception.DataTooLargeException;
@@ -11,9 +11,8 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
-import io.onedev.server.pack.PackService;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Digest;
@@ -46,7 +45,7 @@ import static javax.servlet.http.HttpServletResponse.*;
 import static javax.ws.rs.core.HttpHeaders.LAST_MODIFIED;
 
 @Singleton
-public class MavenPackService implements PackService {
+public class MavenPackService implements io.onedev.server.pack.PackService {
 
 	public static final String SERVICE_ID = "maven";
 	
@@ -75,36 +74,36 @@ public class MavenPackService implements PackService {
 	
 	private static final String CONTENT_TYPE_JAR = "application/java-archive";
 
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
-	private final TransactionManager transactionManager;
+	private final TransactionService transactionService;
 	
-	private final PackBlobManager packBlobManager;
+	private final PackBlobService packBlobService;
 	
-	private final PackManager packManager;
+	private final PackService packService;
 	
-	private final PackBlobReferenceManager packBlobReferenceManager;
+	private final PackBlobReferenceService packBlobReferenceService;
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
 	private final ListenerRegistry listenerRegistry;
 	
-	private final BuildManager buildManager;
+	private final BuildService buildService;
 	
 	@Inject
-	public MavenPackService(SessionManager sessionManager, TransactionManager transactionManager,
-							PackBlobManager packBlobManager, PackManager packManager,
-							PackBlobReferenceManager packBlobReferenceManager,
-							ProjectManager projectManager, ListenerRegistry listenerRegistry,
-							BuildManager buildManager) {
-		this.sessionManager = sessionManager;
-		this.transactionManager = transactionManager;
-		this.packBlobManager = packBlobManager;
-		this.packManager = packManager;
-		this.packBlobReferenceManager = packBlobReferenceManager;
-		this.projectManager = projectManager;
+	public MavenPackService(SessionService sessionService, TransactionService transactionService,
+                            PackBlobService packBlobService, PackService packService,
+                            PackBlobReferenceService packBlobReferenceService,
+                            ProjectService projectService, ListenerRegistry listenerRegistry,
+                            BuildService buildService) {
+		this.sessionService = sessionService;
+		this.transactionService = transactionService;
+		this.packBlobService = packBlobService;
+		this.packService = packService;
+		this.packBlobReferenceService = packBlobReferenceService;
+		this.projectService = projectService;
 		this.listenerRegistry = listenerRegistry;
-		this.buildManager = buildManager;
+		this.buildService = buildService;
 	}
 	
 	@Override
@@ -142,7 +141,7 @@ public class MavenPackService implements PackService {
 					uploadBlob(request, response, projectId, buildId, prevSegment, null, null, fileName);					
 			} else {
 				var groupId = getGroupId(pathSegments);
-				var versionInfos = sessionManager.call(() -> {
+				var versionInfos = sessionService.call(() -> {
 					var project = checkProject(projectId, false);
 					var packs = queryByGAWithV(project, groupId, prevSegment);
 					if (!packs.isEmpty() && fileName.equals(FILE_METADATA) && !isHead && !isGet) {
@@ -244,17 +243,17 @@ public class MavenPackService implements PackService {
 	
 	private String getNonSha256Hash(PackBlob packBlob, String fileName) {
 		if (fileName.endsWith(EXT_SHA512))
-			return packBlobManager.getSha512Hash(packBlob);
+			return packBlobService.getSha512Hash(packBlob);
 		else if (fileName.endsWith(EXT_MD5))
-			return packBlobManager.getMd5Hash(packBlob);
+			return packBlobService.getMd5Hash(packBlob);
 		else 
-			return packBlobManager.getSha1Hash(packBlob);
+			return packBlobService.getSha1Hash(packBlob);
 	}
 
 	private void serveBlob(HttpServletResponse response, boolean isGet, Long projectId,
 						   String groupId, @Nullable String artifactId,
 						   @Nullable String version, String fileName) {
-		var packInfo = sessionManager.call(() -> {
+		var packInfo = sessionService.call(() -> {
 			var project = checkProject(projectId, false);
 			var pack = findPack(project, groupId, artifactId, version);
 			if (pack != null)
@@ -274,9 +273,9 @@ public class MavenPackService implements PackService {
 							if (fileName.endsWith(EXT_SHA256)) {
 								blobHash = sha256BlobHash;
 							} else {
-								blobHash = sessionManager.call(() -> {
+								blobHash = sessionService.call(() -> {
 									PackBlob packBlob;
-									if ((packBlob = packBlobManager.checkPackBlob(projectId, sha256BlobHash)) != null) 
+									if ((packBlob = packBlobService.checkPackBlob(projectId, sha256BlobHash)) != null) 
 										return getNonSha256Hash(packBlob, fileName);
 									else 
 										throw new HttpResponseAwareException(SC_NOT_FOUND);
@@ -286,9 +285,9 @@ public class MavenPackService implements PackService {
 							response.setContentType(MediaType.TEXT_PLAIN);
 							response.getOutputStream().write(blobHash.getBytes(UTF_8));
 						} else {
-							var packBlobInfo = sessionManager.call(() -> {
+							var packBlobInfo = sessionService.call(() -> {
 								PackBlob packBlob;
-								if ((packBlob = packBlobManager.checkPackBlob(projectId, sha256BlobHash)) != null) 
+								if ((packBlob = packBlobService.checkPackBlob(projectId, sha256BlobHash)) != null) 
 									return new Pair<>(packBlob.getProject().getId(), packBlob.getSize());
 								else
 									throw new HttpResponseAwareException(SC_NOT_FOUND);
@@ -298,7 +297,7 @@ public class MavenPackService implements PackService {
 								response.setContentType(MediaType.APPLICATION_XML);
 							else if (fileName.endsWith(EXT_JAR))
 								response.setContentType(CONTENT_TYPE_JAR);
-							packBlobManager.downloadBlob(packBlobInfo.getLeft(), sha256BlobHash, 
+							packBlobService.downloadBlob(packBlobInfo.getLeft(), sha256BlobHash, 
 									response.getOutputStream());
 							response.setStatus(SC_OK);
 						}
@@ -320,7 +319,7 @@ public class MavenPackService implements PackService {
 	private void uploadBlob(HttpServletRequest request, HttpServletResponse response,
 							Long projectId, Long buildId, String groupId, @Nullable String artifactId, 
 							@Nullable String version, String fileName) {
-		sessionManager.run(() -> {
+		sessionService.run(() -> {
 			checkProject(projectId, true);
 		});
 		try (var is = request.getInputStream()) {
@@ -336,22 +335,22 @@ public class MavenPackService implements PackService {
 					throw new HttpResponseAwareException(SC_REQUEST_ENTITY_TOO_LARGE, "Checksum is too large");
 				}
 				var checksum = new String(baos.toByteArray(), UTF_8);
-				LockUtils.run(lockName, () -> transactionManager.run(() -> {
-					var project = projectManager.load(projectId);
+				LockUtils.run(lockName, () -> transactionService.run(() -> {
+					var project = projectService.load(projectId);
 					Pack pack = findPack(project, groupId, artifactId, version);
 					if (pack != null) {
 						MavenData data = (MavenData) pack.getData();
 						var sha256BlobHash = data.getSha256BlobHashes().get(blobName);
 						if (sha256BlobHash != null) {
 							PackBlob packBlob;
-							if ((packBlob = packBlobManager.checkPackBlob(projectId, sha256BlobHash)) != null) {
+							if ((packBlob = packBlobService.checkPackBlob(projectId, sha256BlobHash)) != null) {
 								String blobHash;
 								if (fileName.endsWith(EXT_SHA256))
 									blobHash = sha256BlobHash;
 								else
 									blobHash = getNonSha256Hash(packBlob, fileName);
 								if (blobHash.equals(checksum)) {
-									packBlobReferenceManager.createIfNotExist(pack, packBlob);
+									packBlobReferenceService.createIfNotExist(pack, packBlob);
 									response.setStatus(SC_OK);
 								} else {
 									throw new HttpResponseAwareException(SC_BAD_REQUEST, "Checksum verification failed");
@@ -367,10 +366,10 @@ public class MavenPackService implements PackService {
 					}
 				}));			
 			} else {
-				var packBlobId = packBlobManager.uploadBlob(projectId, is, null);
-				var sha256BlobHash = sessionManager.call(() -> packBlobManager.load(packBlobId).getSha256Hash());
-				LockUtils.run(lockName, () -> transactionManager.run(() -> {
-					var project = projectManager.load(projectId);
+				var packBlobId = packBlobService.uploadBlob(projectId, is, null);
+				var sha256BlobHash = sessionService.call(() -> packBlobService.load(packBlobId).getSha256Hash());
+				LockUtils.run(lockName, () -> transactionService.run(() -> {
+					var project = projectService.load(projectId);
 					Pack pack = findPack(project, groupId, artifactId, version);
 					if (pack == null) {
 						pack = new Pack();
@@ -383,17 +382,17 @@ public class MavenPackService implements PackService {
 					
 					Build build = null;
 					if (buildId != null)
-						build = buildManager.load(buildId);
+						build = buildService.load(buildId);
 					pack.setBuild(build);
 					pack.setUser(SecurityUtils.getUser());
 					pack.setPublishDate(new Date());
 					MavenData data = (MavenData) pack.getData();
 					var prevSha256BlobHash = data.getSha256BlobHashes().put(blobName, sha256BlobHash);
-					packManager.createOrUpdate(pack, null, false);
+					packService.createOrUpdate(pack, null, false);
 					if (prevSha256BlobHash != null) {
 						for (var blobReference: pack.getBlobReferences()) {
 							if (blobReference.getPackBlob().getSha256Hash().equals(prevSha256BlobHash)) {
-								packBlobReferenceManager.delete(blobReference);
+								packBlobReferenceService.delete(blobReference);
 								break;
 							}
 						}
@@ -407,7 +406,7 @@ public class MavenPackService implements PackService {
 	}
 	
 	private Project checkProject(Long projectId, boolean needsToWrite) {
-		var project = projectManager.load(projectId);
+		var project = projectService.load(projectId);
 		if (!project.isPackManagement())
 			throw new HttpResponseAwareException(SC_NOT_ACCEPTABLE, "Package management not enabled for project '" + project.getPath() + "'");
 		else if (needsToWrite && !SecurityUtils.canWritePack(project))
@@ -429,7 +428,7 @@ public class MavenPackService implements PackService {
 		criteria.add(Restrictions.eq(PROP_TYPE, TYPE));
 		criteria.add(Restrictions.eq(PROP_NAME, getName(groupId, artifactId)));
 		criteria.add(Restrictions.not(Restrictions.eq(PROP_VERSION, NONE)));
-		return packManager.query(criteria);
+		return packService.query(criteria);
 	}
 	
 	private Pack findPack(Project project, String groupId, @Nullable String artifactId,
@@ -438,7 +437,7 @@ public class MavenPackService implements PackService {
 			artifactId = NONE;
 		if (version == null)
 			version = NONE;
-		return packManager.findByNameAndVersion(project, TYPE, getName(groupId, artifactId), version);
+		return packService.findByNameAndVersion(project, TYPE, getName(groupId, artifactId), version);
 	}
 
 	private Pair<String, String> getGroupIdAndArtifactId(List<String> pathSegments) {

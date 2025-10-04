@@ -2,12 +2,12 @@ package io.onedev.server.notification;
 
 import com.google.common.collect.Lists;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.project.build.BuildUpdated;
-import io.onedev.server.mail.MailManager;
+import io.onedev.server.mail.MailService;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -15,7 +15,7 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import org.apache.shiro.authz.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,23 +36,18 @@ import static java.util.stream.Collectors.toList;
 public class BuildNotificationManager {
 	
 	private static final Logger logger = LoggerFactory.getLogger(BuildNotificationManager.class);
-	
-	private final MailManager mailManager;
-	
-	private final UrlManager urlManager;
-	
-	private final UserManager userManager;
-	
-	private final SettingManager settingManager;
-	
+
 	@Inject
-	public BuildNotificationManager(MailManager mailManager, UrlManager urlManager, 
-									UserManager userManager, SettingManager settingManager) {
-		this.mailManager = mailManager;
-		this.urlManager = urlManager;
-		this.userManager = userManager;
-		this.settingManager = settingManager;
-	}
+	private MailService mailService;
+
+	@Inject
+	private UrlService urlService;
+
+	@Inject
+	private UserService userService;
+
+	@Inject
+	private SettingService settingService;
 
 	private void fillSubscribedQueryStrings(Map<User, Collection<String>> subscribedQueryStrings, 
 			User user, @Nullable NamedQuery query) {
@@ -100,11 +95,11 @@ public class BuildNotificationManager {
 			else
 				summary = status + " on ref " + build.getRefName();
 			
-			String url = urlManager.urlFor(build, true);
+			String url = urlService.urlFor(build, true);
 			String threadingReferences = "<" + build.getProject().getPath() + "-build-" + build.getNumber() + "@onedev>";
 			String htmlBody = getEmailBody(true, event, summary, null, url, false, null);
 			String textBody = getEmailBody(false, event, summary, null, url, false, null);
-			mailManager.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), emails, subject, htmlBody,
+			mailService.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), emails, subject, htmlBody,
 					textBody, null, null, threadingReferences);
 		}
 	}
@@ -164,12 +159,12 @@ public class BuildNotificationManager {
 			}
 			
 			subscribedQueryStrings.clear();
-			for (User user: userManager.query()) {
+			for (User user: userService.query()) {
 				for (String name: user.getBuildQueryPersonalization().getQuerySubscriptionSupport().getQuerySubscriptions()) {
 					String globalName = NamedQuery.getCommonName(name);
 					if (globalName != null) {
 						fillSubscribedQueryStrings(subscribedQueryStrings, user, 
-								NamedQuery.find(settingManager.getBuildSetting().getNamedQueries(), globalName));
+								NamedQuery.find(settingService.getBuildSetting().getNamedQueries(), globalName));
 					}
 					String personalName = NamedQuery.getPersonalName(name);
 					if (personalName != null) {

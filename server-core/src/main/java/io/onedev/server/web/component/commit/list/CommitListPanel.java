@@ -56,7 +56,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.RevListOptions;
@@ -503,7 +503,7 @@ public abstract class CommitListPanel extends Panel {
 						target.focusComponent(null);
 						target.appendJavaScript(renderCommitGraph());
 						
-						getProject().cacheCommitStatuses(getBuildManager().queryStatus(getProject(), getCommitIdsToQueryStatus()));						
+						getProject().cacheCommitStatuses(getBuildService().queryStatus(getProject(), getCommitIdsToQueryStatus()));						
 					}
 					
 				});
@@ -535,8 +535,8 @@ public abstract class CommitListPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	private BuildManager getBuildManager() {
-		return OneDev.getInstance(BuildManager.class);
+	private BuildService getBuildService() {
+		return OneDev.getInstance(BuildService.class);
 	}
 	
 	private Collection<ObjectId> getCommitIdsToQueryStatus() {
@@ -557,7 +557,7 @@ public abstract class CommitListPanel extends Panel {
 				addCommitClass(item, commitIndex++);
 			commitsView.add(item);
 		}
-		getProject().cacheCommitStatuses(getBuildManager().queryStatus(getProject(), getCommitIdsToQueryStatus()));
+		getProject().cacheCommitStatuses(getBuildService().queryStatus(getProject(), getCommitIdsToQueryStatus()));
 		return commitsView;
 	}
 

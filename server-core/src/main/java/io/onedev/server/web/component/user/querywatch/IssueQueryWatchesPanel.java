@@ -28,14 +28,14 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.IssueQueryPersonalizationService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.page.issues.IssueListPage;
@@ -55,7 +55,7 @@ class IssueQueryWatchesPanel extends GenericPanel<User> {
         @Override
         protected List<QueryInfo> load() {
             List<QueryInfo> queryInfos = new ArrayList<>();
-            var issueSetting = getSettingManager().getIssueSetting();
+            var issueSetting = getSettingService().getIssueSetting();
             for (var entry: getUser().getIssueQueryWatches().entrySet()) {
                 NamedQuery query;
                 if (entry.getKey().startsWith(COMMON_NAME_PREFIX))
@@ -93,26 +93,26 @@ class IssueQueryWatchesPanel extends GenericPanel<User> {
 
             @Override
             public void onClick() {
-                OneDev.getInstance(TransactionManager.class).run(() -> {
-                    var auditManager = OneDev.getInstance(AuditManager.class);
+                OneDev.getInstance(TransactionService.class).run(() -> {
+                    var auditService = OneDev.getInstance(AuditService.class);
                     for (IModel<QueryInfo> each: selectionColumn.getSelections()) {
                         var queryInfo = each.getObject();
                         if (queryInfo.projectId == null) {
                              getUser().getIssueQueryWatches().remove(queryInfo.name);
                              if (getPage() instanceof UserPage)
-                                auditManager.audit(null, "unwatched issue query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\"", null, null);
+                                auditService.audit(null, "unwatched issue query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\"", null, null);
                         } else {
                              for (var personalization: getUser().getIssueQueryPersonalizations()) {
                                  if (personalization.getProject().getId().equals(queryInfo.projectId)) {
                                      personalization.getQueryWatches().remove(queryInfo.name);
-                                     getIssueQueryPersonalizationManager().createOrUpdate(personalization);
+                                     getIssueQueryPersonalizationService().createOrUpdate(personalization);
                                      if (getPage() instanceof UserPage)
-                                        auditManager.audit(null, "unwatched issue query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\" in project \"" + personalization.getProject().getPath() + "\"", null, null);
+                                        auditService.audit(null, "unwatched issue query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\" in project \"" + personalization.getProject().getPath() + "\"", null, null);
                                  }
                              }
                         }
                      }
-                     getUserManager().update(getUser(), null);
+                     getUserService().update(getUser(), null);
                 });
             }
             
@@ -162,7 +162,7 @@ class IssueQueryWatchesPanel extends GenericPanel<User> {
                 var fragment = new Fragment(componentId, "linkFrag", IssueQueryWatchesPanel.this);
                 var projectId = rowModel.getObject().projectId;
                 if (projectId != null) {
-                    var project = getProjectManager().load(projectId);
+                    var project = getProjectService().load(projectId);
                     var link = new BookmarkablePageLink<Void>("link", ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, rowModel.getObject().query, 1));
                     link.add(new Label("label", name));
                     fragment.add(link);
@@ -182,7 +182,7 @@ class IssueQueryWatchesPanel extends GenericPanel<User> {
                                      IModel<QueryInfo> rowModel) {
                 var projectId = rowModel.getObject().projectId;
                 if (projectId != null) {
-                    var project = getProjectManager().load(projectId);
+                    var project = getProjectService().load(projectId);
                     var fragment = new Fragment(componentId, "linkFrag", IssueQueryWatchesPanel.this);
                     var link = new BookmarkablePageLink<Void>("link", ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project));
                     link.add(new Label("label", project.getPath()));
@@ -239,20 +239,20 @@ class IssueQueryWatchesPanel extends GenericPanel<User> {
         super.onDetach();
     }
 
-    private ProjectManager getProjectManager() {
-        return OneDev.getInstance(ProjectManager.class);
+    private ProjectService getProjectService() {
+        return OneDev.getInstance(ProjectService.class);
     }
 
-    private SettingManager getSettingManager() {
-        return OneDev.getInstance(SettingManager.class);
+    private SettingService getSettingService() {
+        return OneDev.getInstance(SettingService.class);
     }
 
-    private IssueQueryPersonalizationManager getIssueQueryPersonalizationManager() {
-        return OneDev.getInstance(IssueQueryPersonalizationManager.class);
+    private IssueQueryPersonalizationService getIssueQueryPersonalizationService() {
+        return OneDev.getInstance(IssueQueryPersonalizationService.class);
     }
     
-    private UserManager getUserManager() {
-        return OneDev.getInstance(UserManager.class);
+    private UserService getUserService() {
+        return OneDev.getInstance(UserService.class);
     }
 
     private User getUser() {

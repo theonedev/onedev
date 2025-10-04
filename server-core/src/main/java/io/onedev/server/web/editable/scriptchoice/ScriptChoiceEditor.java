@@ -14,7 +14,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
@@ -39,7 +39,7 @@ public class ScriptChoiceEditor extends PropertyEditor<String> {
 			protected List<String> load() {
 				List<String> choices = new ArrayList<>();
 				
-				for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts())
+				for (GroovyScript script: OneDev.getInstance(SettingService.class).getGroovyScripts())
 					choices.add(script.getName());
 				
 				for (ScriptContribution contribution: OneDev.getExtensions(ScriptContribution.class)) {

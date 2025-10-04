@@ -17,7 +17,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.editable.BeanContext;
@@ -35,15 +35,15 @@ public abstract class AbstractTemplatePage extends AdministrationPage {
 		super(params);
 	}
 
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		EmailTemplates templates = getSettingManager().getEmailTemplates();
+		EmailTemplates templates = getSettingService().getEmailTemplates();
 		add(new Label("templateHelp", getTemplateHelp(getHelpText(), getVariableHelp()))
 				.setEscapeModelStrings(false));
 		
@@ -57,8 +57,8 @@ public abstract class AbstractTemplatePage extends AdministrationPage {
 				super.onSubmit();
 				
 				var newAuditContent = getTemplate(templates);
-				getSettingManager().saveEmailTemplates(templates);
-				getAuditManager().audit(null, "changed email template \"" + getPropertyName() + "\"", oldAuditContent, newAuditContent);
+				getSettingService().saveEmailTemplates(templates);
+				auditService.audit(null, "changed email template \"" + getPropertyName() + "\"", oldAuditContent, newAuditContent);
 				oldAuditContent = newAuditContent;
 				getSession().success(_T("Template saved"));
 			}
@@ -78,8 +78,8 @@ public abstract class AbstractTemplatePage extends AdministrationPage {
 			public void onClick(AjaxRequestTarget target) {
 				setTemplate(templates, getDefaultTemplate());
 				var newAuditContent = getTemplate(templates);
-				getSettingManager().saveEmailTemplates(templates);
-				getAuditManager().audit(null, "changed email template \"" + getPropertyName() + "\"", oldAuditContent, newAuditContent);
+				getSettingService().saveEmailTemplates(templates);
+				auditService.audit(null, "changed email template \"" + getPropertyName() + "\"", oldAuditContent, newAuditContent);
 				oldAuditContent = newAuditContent;
 				setResponsePage(getPageClass());
 			}

@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.pullrequest.referencedfrom;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
@@ -22,7 +22,7 @@ public class ReferencedFromPullRequestPanel extends GenericPanel<PullRequest> {
 
 			@Override
 			protected PullRequest load() {
-				return OneDev.getInstance(PullRequestManager.class).load(requestId);
+				return OneDev.getInstance(PullRequestService.class).load(requestId);
 			}
 			
 		});

@@ -10,7 +10,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestCommentManager;
+import io.onedev.server.service.PullRequestCommentService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
@@ -25,7 +25,7 @@ public class CommentPullRequest extends PullRequestActivity {
     }
 
     private PullRequestComment getComment() {
-        return OneDev.getInstance(PullRequestCommentManager.class).load(commentId);
+        return OneDev.getInstance(PullRequestCommentService.class).load(commentId);
     }
 
     @Override

@@ -78,18 +78,18 @@ import io.onedev.server.annotation.ProjectKey;
 import io.onedev.server.annotation.ProjectName;
 import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildQueryPersonalizationManager;
-import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
-import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
-import io.onedev.server.entitymanager.PackQueryPersonalizationManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.BuildQueryPersonalizationService;
+import io.onedev.server.service.CodeCommentQueryPersonalizationService;
+import io.onedev.server.service.CommitQueryPersonalizationService;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IssueQueryPersonalizationService;
+import io.onedev.server.service.PackQueryPersonalizationService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestQueryPersonalizationService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
@@ -100,7 +100,7 @@ import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.service.CommitMessageError;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.git.signatureverification.SignatureVerificationManager;
+import io.onedev.server.git.signatureverification.SignatureVerificationService;
 import io.onedev.server.git.signatureverification.VerificationSuccessful;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.CodeAnalysisSetting;
@@ -134,11 +134,11 @@ import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usermatch.UserMatch;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoService;
 
 @Entity
 @Table(
@@ -708,24 +708,24 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return forkAncestors;
 	}
 
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
 	private GitService getGitService() {
 		return OneDev.getInstance(GitService.class);
 	}
 	
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(this, true);
+		return OneDev.getInstance(UrlService.class).urlFor(this, true);
 	}
 	
 	@Nullable
@@ -834,8 +834,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 												 @Nullable String refName) {
 		Map<String, Collection<StatusInfo>> commitStatusInfos = getCommitStatusCache().get(commitId);
 		if (commitStatusInfos == null) {
-			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-			commitStatusInfos = buildManager.queryStatus(this, Sets.newHashSet(commitId)).get(commitId);
+			BuildService buildService = OneDev.getInstance(BuildService.class);
+			commitStatusInfos = buildService.queryStatus(this, Sets.newHashSet(commitId)).get(commitId);
 			getCommitStatusCache().put(commitId, Preconditions.checkNotNull(commitStatusInfos));
 		}
 		Map<String, Status> commitStatuses = new HashMap<>();
@@ -1382,9 +1382,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public List<User> getAuthors(String filePath, ObjectId commitId, @Nullable LinearRange range) {
 		List<User> authors = new ArrayList<>();
-		EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
+		EmailAddressService emailAddressService = OneDev.getInstance(EmailAddressService.class);
 		for (BlameBlock block: getGitService().blame(this, commitId, filePath, range)) {
-			EmailAddress emailAddress = emailAddressManager.findByPersonIdent(block.getCommit().getAuthor());
+			EmailAddress emailAddress = emailAddressService.findByPersonIdent(block.getCommit().getAuthor());
 			if (emailAddress != null && emailAddress.isVerified() && !authors.contains(emailAddress.getOwner()))
 				authors.add(emailAddress.getOwner());
 		}
@@ -1397,7 +1397,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			User user = SecurityUtils.getAuthUser();
 			if (user != null) {
 				IssueQueryPersonalization personalization = 
-						OneDev.getInstance(IssueQueryPersonalizationManager.class).find(this, user);
+						OneDev.getInstance(IssueQueryPersonalizationService.class).find(this, user);
 				if (personalization == null) {
 					personalization = new IssueQueryPersonalization();
 					personalization.setProject(this);
@@ -1416,7 +1416,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			User user = SecurityUtils.getAuthUser();
 			if (user != null) {
 				CommitQueryPersonalization personalization = 
-						OneDev.getInstance(CommitQueryPersonalizationManager.class).find(this, user);
+						OneDev.getInstance(CommitQueryPersonalizationService.class).find(this, user);
 				if (personalization == null) {
 					personalization = new CommitQueryPersonalization();
 					personalization.setProject(this);
@@ -1436,7 +1436,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			User user = SecurityUtils.getAuthUser();
 			if (user != null) {
 				PullRequestQueryPersonalization personalization = 
-						OneDev.getInstance(PullRequestQueryPersonalizationManager.class).find(this, user);
+						OneDev.getInstance(PullRequestQueryPersonalizationService.class).find(this, user);
 				if (personalization == null) {
 					personalization = new PullRequestQueryPersonalization();
 					personalization.setProject(this);
@@ -1456,7 +1456,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			User user = SecurityUtils.getAuthUser();
 			if (user != null) {
 				CodeCommentQueryPersonalization personalization = 
-						OneDev.getInstance(CodeCommentQueryPersonalizationManager.class).find(this, user);
+						OneDev.getInstance(CodeCommentQueryPersonalizationService.class).find(this, user);
 				if (personalization == null) {
 					personalization = new CodeCommentQueryPersonalization();
 					personalization.setProject(this);
@@ -1476,7 +1476,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			User user = SecurityUtils.getAuthUser();
 			if (user != null) {
 				BuildQueryPersonalization personalization = 
-						OneDev.getInstance(BuildQueryPersonalizationManager.class).find(this, user);
+						OneDev.getInstance(BuildQueryPersonalizationService.class).find(this, user);
 				if (personalization == null) {
 					personalization = new BuildQueryPersonalization();
 					personalization.setProject(this);
@@ -1496,7 +1496,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			User user = SecurityUtils.getAuthUser();
 			if (user != null) {
 				PackQueryPersonalization personalization =
-						OneDev.getInstance(PackQueryPersonalizationManager.class).find(this, user);
+						OneDev.getInstance(PackQueryPersonalizationService.class).find(this, user);
 				if (personalization == null) {
 					personalization = new PackQueryPersonalization();
 					personalization.setProject(this);
@@ -1535,8 +1535,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		if (reachableBranches == null) {
 			reachableBranches = new HashSet<>();
 			
-			CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-			Collection<ObjectId> descendants = commitInfoManager.getDescendants(
+			CommitInfoService commitInfoService = OneDev.getInstance(CommitInfoService.class);
+			Collection<ObjectId> descendants = commitInfoService.getDescendants(
 					getId(), Sets.newHashSet(commitId));
 			descendants.add(commitId);
 
@@ -1571,7 +1571,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public boolean isCommitSignatureRequiredButNoSigningKey(User user, String branch) {
 		return getBranchProtection(branch, user).isCommitSignatureRequired()
-				&& getSettingManager().getGpgSetting().getSigningKey() == null;
+				&& getSettingService().getGpgSetting().getSigningKey() == null;
 	}
 	
 	public boolean isCommitSignatureRequired(User user, String branch) {
@@ -1584,7 +1584,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	public boolean isTagSignatureRequiredButNoSigningKey(User user, String tag) {
 		return getTagProtection(tag, user).isCommitSignatureRequired()
-				&& getSettingManager().getGpgSetting().getSigningKey() == null;
+				&& getSettingService().getGpgSetting().getSigningKey() == null;
 	}
 	
 	public boolean isReviewRequiredForPush(User user, String branch, ObjectId oldObjectId, 
@@ -1725,26 +1725,26 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 	
 	public boolean hasValidCommitSignature(RevCommit commit) {
-		return getSignatureVerificationManager().verifySignature(commit) instanceof VerificationSuccessful;
+		return getSignatureVerificationService().verifySignature(commit) instanceof VerificationSuccessful;
 	}
 	
 	public boolean hasValidCommitSignature(ObjectId commitId, Map<String, String> gitEnvs) {
 		byte[] rawCommit = getGitService().getRawCommit(this, commitId, gitEnvs);
-		return getSignatureVerificationManager().verifyCommitSignature(rawCommit) 
+		return getSignatureVerificationService().verifyCommitSignature(rawCommit) 
 				instanceof VerificationSuccessful;
 	}
 	
 	public boolean hasValidTagSignature(ObjectId tagId, Map<String, String> gitEnvs) {
 		byte[] rawTag = getGitService().getRawTag(this, tagId, gitEnvs);
-		return rawTag != null && getSignatureVerificationManager().verifyTagSignature(rawTag) instanceof VerificationSuccessful;
+		return rawTag != null && getSignatureVerificationService().verifyTagSignature(rawTag) instanceof VerificationSuccessful;
 	}
 	
 	public boolean isCommitSignatureRequirementSatisfied(User user, String branch, RevCommit commit) {
 		return !isCommitSignatureRequired(user, branch) || hasValidCommitSignature(commit);
 	}
 	
-	private SignatureVerificationManager getSignatureVerificationManager() {
-		return OneDev.getInstance(SignatureVerificationManager.class);
+	private SignatureVerificationService getSignatureVerificationService() {
+		return OneDev.getInstance(SignatureVerificationService.class);
 	}
 	
 	public static boolean containsPath(@Nullable String patterns, String path) {
@@ -1807,7 +1807,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			current = current.getParent();
 		} while (current != null); 
 		
-		return getSettingManager().getIssueSetting().getNamedQueries();
+		return getSettingService().getIssueSetting().getNamedQueries();
 	}
 	
 	public List<NamedBuildQuery> getNamedBuildQueries() {
@@ -1819,7 +1819,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			current = current.getParent();
 		} while (current != null); 
 		
-		return getSettingManager().getBuildSetting().getNamedQueries();
+		return getSettingService().getBuildSetting().getNamedQueries();
 	}
 
 	public List<NamedPackQuery> getNamedPackQueries() {
@@ -1831,7 +1831,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			current = current.getParent();
 		} while (current != null);
 
-		return getSettingManager().getPackSetting().getNamedQueries();
+		return getSettingService().getPackSetting().getNamedQueries();
 	}
 	
 	public List<NamedPullRequestQuery> getNamedPullRequestQueries() {
@@ -1843,7 +1843,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			current = current.getParent();
 		} while (current != null); 
 		
-		return getSettingManager().getPullRequestSetting().getNamedQueries();
+		return getSettingService().getPullRequestSetting().getNamedQueries();
 	}
 	
 	public Map<String, TimesheetSetting> getHierarchyTimesheetSettings() {
@@ -1869,12 +1869,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		} while (current != null);
 		
 		if (boards == null)
-			boards = getSettingManager().getIssueSetting().getBoardSpecs();
+			boards = getSettingService().getIssueSetting().getBoardSpecs();
 		return boards;
 	}
 	
 	public Collection<Long> parseFixedIssueIds(String commitMessage) {
-		return OneDev.getInstance(IssueManager.class).parseFixedIssueIds(this, commitMessage);
+		return OneDev.getInstance(IssueService.class).parseFixedIssueIds(this, commitMessage);
 	}
 	
 	public Collection<Project> getTree() {
@@ -1898,7 +1898,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public String getActiveServer(boolean mustExist) {
 		if (activeServer == null) {
 			activeServer = Optional.fromNullable(
-					getProjectManager().getActiveServer(getId(), false));
+					getProjectService().getActiveServer(getId(), false));
 		}
 		if (activeServer.isPresent())
 			return activeServer.get();
@@ -1947,7 +1947,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			if (!current.getPullRequestSetting().getDefaultAssignees().isEmpty()) {
 				var users = new ArrayList<User>();
 				for (var userName: current.getPullRequestSetting().getDefaultAssignees()) {
-					var user = getUserManager().findByName(userName);
+					var user = getUserService().findByName(userName);
 					if (user == null)
 						throw new ExplicitException("Pull request default assignee not found: " + userName);
 					else if (!SecurityUtils.canWriteCode(user.asSubject(), this))
@@ -1975,8 +1975,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			buildsCache = new HashMap<>();
 		Collection<Build> builds = buildsCache.get(commitId);
 		if (builds == null) {
-			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-			builds = buildManager.query(this, commitId, null, null, null, null, new HashMap<>());
+			BuildService buildService = OneDev.getInstance(BuildService.class);
+			builds = buildService.query(this, commitId, null, null, null, null, new HashMap<>());
 			buildsCache.put(commitId, builds);
 		}
 		return builds;
@@ -1991,7 +1991,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 	
 	public File getDir() {
-		return OneDev.getInstance(ProjectManager.class).getProjectDir(getId());
+		return OneDev.getInstance(ProjectService.class).getProjectDir(getId());
 	}
 	
 	public static String encodePathAsRepoName(String projectPath) {

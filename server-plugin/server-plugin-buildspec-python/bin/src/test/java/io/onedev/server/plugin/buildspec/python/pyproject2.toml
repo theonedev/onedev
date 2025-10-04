@@ -1,0 +1,159 @@
+[tool.poetry]
+name = "copier"
+# This version is a placeholder autoupdated by poetry-dynamic-versioning
+version = "0.0.0"
+description = "A library for rendering project templates."
+license = "MIT"
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+authors = ["Ben Felder <ben@felder.io>"]
+homepage = "https://github.com/copier-org/copier"
+repository = "https://github.com/copier-org/copier"
+readme = "README.md"
+
+[tool.poetry.scripts]
+copier = "copier.__main__:copier_app_run"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/copier-org/copier/issues"
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+colorama = ">=0.4.6"
+dunamai = ">=1.7.0"
+funcy = ">=1.17"
+jinja2 = ">=3.1.4"
+jinja2-ansible-filters = ">=1.3.1"
+packaging = ">=23.0"
+pathspec = ">=0.9.0"
+plumbum = ">=1.6.9"
+pydantic = ">=2.4.2"
+pygments = ">=2.7.1"
+pyyaml = ">=5.3.1"
+questionary = ">=1.8.1"
+typing-extensions = { version = ">=3.7.4,<5.0.0", python = "<3.9" }
+eval-type-backport = { version = ">=0.1.3,<0.3.0", python = "<3.10" }
+
+[tool.poetry.group.dev]
+optional = false
+
+[tool.poetry.group.dev.dependencies]
+mypy = ">=0.931"
+pexpect = ">=4.8.0"
+poethepoet = ">=0.12.3"
+pre-commit = ">=2.17.0"
+types-backports = ">=0.1.3"
+types-colorama = ">=0.4"
+types-psutil = "*"
+types-pygments = ">=2.17"
+types-pyyaml = ">=6.0.4"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+markdown-exec = ">=1.3.0"
+mkdocs-material = ">=8.2,<10.0.0"
+mkdocstrings = { version = ">=0.19.0", extras = ["python"] }
+
+[tool.poetry.group.build]
+# Helper group just for helping nix to build properly
+optional = true
+
+[tool.poetry.group.build.dependencies]
+poetry-dynamic-versioning = { version = ">=1.1.0", markers = "python_version < '4'" }
+
+[tool.poe.tasks.dev-setup]
+script = "devtasks:dev_setup"
+help = "set up local development environment"
+
+[tool.poe.tasks.docs]
+cmd = "mkdocs serve"
+help = "start local docs server"
+
+[tool.poe.tasks.lint]
+script = "devtasks:lint"
+help = "check (and auto-fix) style with pre-commit"
+
+[tool.poe.tasks.types]
+cmd = "mypy ."
+help = "run the type (mypy) checker on the codebase"
+
+[tool.poetry-dynamic-versioning]
+enable = true
+style = "pep440"
+vcs = "git"
+
+[tool.ruff.lint]
+extend-select = [
+  "ARG",
+  "B",
+  "C90",
+  "D",
+  "E",
+  "F",
+  "FA",
+  "I",
+  "PERF",
+  "PGH",
+  "UP",
+]
+extend-ignore = ['B028', "B904", "D105", "D107", "E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = ["copier"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+strict = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = [
+  "coverage.tracer",
+  "funcy",
+  "pexpect.*",
+  "plumbum.*",
+  "poethepoet.app",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+  "copier.subproject",
+  "copier.template",
+  "copier.tools",
+  "copier.user_data",
+  "copier.vcs",
+]
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = ["tests.test_cli", "tests.test_prompt"]
+disable_error_code = ["no-untyped-def"]
+
+[tool.commitizen]
+annotated_tag = true
+changelog_incremental = true
+tag_format = "v$version"
+update_changelog_on_bump = true
+version = "9.3.1"
+
+[build-system]
+requires = ["poetry-core>=1.7.0", "poetry-dynamic-versioning>=1.1.0"]
+build-backend = "poetry_dynamic_versioning.backend"

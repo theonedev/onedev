@@ -1,7 +1,7 @@
 package io.onedev.server.ssh;
 
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.SshKeyService;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -22,14 +22,14 @@ public class DefaultSshAuthenticator implements SshAuthenticator {
 
     private static final AttributeKey<Long> ATTR_PUBLIC_KEY_OWNER_ID = new AttributeKey<>();
 
-	private final SshKeyManager sshKeyManager;
+	private final SshKeyService sshKeyService;
 	
-	private final SettingManager settingManager;
+	private final SettingService settingService;
 
 	@Inject
-	public DefaultSshAuthenticator(SshKeyManager sshKeyManager, SettingManager settingManager) {
-		this.sshKeyManager = sshKeyManager;
-		this.settingManager = settingManager;
+	public DefaultSshAuthenticator(SshKeyService sshKeyService, SettingService settingService) {
+		this.sshKeyService = sshKeyService;
+		this.settingService = settingService;
 	}
 	
 	@Sessional
@@ -37,7 +37,7 @@ public class DefaultSshAuthenticator implements SshAuthenticator {
 	public boolean authenticate(String username, PublicKey key, ServerSession session) 
 			throws AsyncAuthException {
 		try {
-			PrivateKey privateKey = settingManager.getSshSetting().getPrivateKey();
+			PrivateKey privateKey = settingService.getSshSetting().getPrivateKey();
 			if (key.equals(KeyUtils.recoverPublicKey(privateKey))) {
 				session.setAttribute(ATTR_PUBLIC_KEY_OWNER_ID, User.SYSTEM_ID);
 				return true;
@@ -47,7 +47,7 @@ public class DefaultSshAuthenticator implements SshAuthenticator {
 		}
 		
         String digest = KeyUtils.getFingerPrint(BuiltinDigests.sha256, key);  
-        SshKey sshKey = sshKeyManager.findByFingerprint(digest);
+        SshKey sshKey = sshKeyService.findByFingerprint(digest);
         if (sshKey != null) {
             session.setAttribute(ATTR_PUBLIC_KEY_OWNER_ID, sshKey.getOwner().getId());
             return true;

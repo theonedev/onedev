@@ -2,10 +2,10 @@ package io.onedev.server.web.resource;
 
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.job.log.LogManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.job.log.LogService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -50,9 +50,9 @@ public class BuildLogResource extends AbstractResource {
 			throw new IllegalArgumentException("build number has to be specified");
 
 		if (!SecurityUtils.isSystem()) {
-			Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+			Project project = OneDev.getInstance(ProjectService.class).load(projectId);
 			
-			Build build = OneDev.getInstance(BuildManager.class).find(project, buildNumber);
+			Build build = OneDev.getInstance(BuildService.class).find(project, buildNumber);
 
 			if (build == null) {
 				String message = String.format("Unable to find build (project: %s, build number: %d)", 
@@ -78,13 +78,13 @@ public class BuildLogResource extends AbstractResource {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				String activeServer = projectManager.getActiveServer(projectId, true);
-				ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
-				LogManager logManager = OneDev.getInstance(LogManager.class);
-				if (activeServer.equals(clusterManager.getLocalServerAddress())) {
+				ProjectService projectService = OneDev.getInstance(ProjectService.class);
+				String activeServer = projectService.getActiveServer(projectId, true);
+				ClusterService clusterService = OneDev.getInstance(ClusterService.class);
+				LogService logService = OneDev.getInstance(LogService.class);
+				if (activeServer.equals(clusterService.getLocalServerAddress())) {
 					try (
-							InputStream is = logManager.openLogStream(projectId, buildNumber);
+							InputStream is = logService.openLogStream(projectId, buildNumber);
 							OutputStream os = attributes.getResponse().getOutputStream()) {
 						IOUtils.copy(is, os, BUFFER_SIZE);
 					}
@@ -94,12 +94,12 @@ public class BuildLogResource extends AbstractResource {
 	    				CharSequence path = RequestCycle.get().urlFor(
 	    						new BuildLogResourceReference(), 
 	    						BuildLogResource.paramsOf(projectId, buildNumber));
-	    				String activeServerUrl = clusterManager.getServerUrl(activeServer) + path;
+	    				String activeServerUrl = clusterService.getServerUrl(activeServer) + path;
 	    				
 	    				WebTarget target = client.target(activeServerUrl).path(path.toString());
 	    				Invocation.Builder builder =  target.request();
 	    				builder.header(HttpHeaders.AUTHORIZATION, 
-	    						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
+	    						KubernetesHelper.BEARER + " " + clusterService.getCredential());
 	    				
 	    				try (Response response = builder.get()) {
 	    					KubernetesHelper.checkStatus(response);

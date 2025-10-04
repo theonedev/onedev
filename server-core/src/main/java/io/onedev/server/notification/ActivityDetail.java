@@ -21,7 +21,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.PropertyChange;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.asset.fieldcompare.FieldCompareCssResourceReference;
 import io.onedev.server.web.component.codecomment.referencedfrom.ReferencedFromCodeCommentPanel;
@@ -146,7 +146,7 @@ public class ActivityDetail implements Serializable {
 	}
 	
 	public static ActivityDetail referencedFrom(CodeComment comment) {
-		String url = OneDev.getInstance(UrlManager.class).urlFor(comment, true);
+		String url = OneDev.getInstance(UrlService.class).urlFor(comment, true);
 		String htmlVersion = String.format("<div><a href='%s'>%s</a></div>", 
 				url, HtmlEscape.escapeHtml5(comment.getMark().getPath()));
 		String textVersion = comment.getMark().getPath() + "\n";  
@@ -166,7 +166,7 @@ public class ActivityDetail implements Serializable {
 	}
 	
 	public static ActivityDetail referencedFrom(Issue issue) {
-		String url = OneDev.getInstance(UrlManager.class).urlFor(issue, true);
+		String url = OneDev.getInstance(UrlService.class).urlFor(issue, true);
 		String htmlVersion = String.format("<div><a href='%s'>[%s] %s</a></div>", 
 				url, issue.getReference(), HtmlEscape.escapeHtml5(issue.getTitle()));
 		String textVersion = String.format("[%s] %s\n", issue.getReference(), issue.getTitle());
@@ -185,7 +185,7 @@ public class ActivityDetail implements Serializable {
 	}
 	
 	public static ActivityDetail referencedFrom(PullRequest request) {
-		String url = OneDev.getInstance(UrlManager.class).urlFor(request, true);
+		String url = OneDev.getInstance(UrlService.class).urlFor(request, true);
 		String htmlVersion = String.format("<div><a href='%s'>[%s] %s</a></div>", 
 				url, request.getReference().toString(null), HtmlEscape.escapeHtml5(request.getTitle()));
 		String textVersion = String.format("[%s] %s\n", request.getReference().toString(null), request.getTitle());
@@ -205,7 +205,7 @@ public class ActivityDetail implements Serializable {
 
 	public static ActivityDetail referencedFrom(ProjectScopedCommit commit) {
 		RevCommit revCommit = commit.getProject().getRevCommit(commit.getCommitId(), true);
-		String url = OneDev.getInstance(UrlManager.class).urlFor(commit.getProject(), commit.getCommitId(), true);
+		String url = OneDev.getInstance(UrlService.class).urlFor(commit.getProject(), commit.getCommitId(), true);
 		String htmlVersion = String.format("<div><a href='%s'>[%s] %s</a></div>",
 				url, commit.getFQN(), HtmlEscape.escapeHtml5(revCommit.getShortMessage()));
 		String textVersion = String.format("[%s] %s\n", commit.getFQN(), revCommit.getShortMessage());

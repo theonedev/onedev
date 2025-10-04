@@ -22,8 +22,8 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.LabelSpecManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.LabelSpecService;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.annotation.Api;
@@ -35,14 +35,14 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class LabelSpecResource {
 
-	private final LabelSpecManager labelSpecManager;
+	private final LabelSpecService labelSpecService;
 	
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 	
 	@Inject
-	public LabelSpecResource(LabelSpecManager labelSpecManager, AuditManager auditManager) {
-		this.labelSpecManager = labelSpecManager;
-		this.auditManager = auditManager;
+	public LabelSpecResource(LabelSpecService labelSpecService, AuditService auditService) {
+		this.labelSpecService = labelSpecService;
+		this.auditService = auditService;
 	}
 
 	@Api(order=100)
@@ -52,7 +52,7 @@ public class LabelSpecResource {
 		if (SecurityUtils.getAuthUser() == null)
 			throw new UnauthenticatedException();
 		
-    	return labelSpecManager.load(labelSpecId);
+    	return labelSpecService.load(labelSpecId);
     }
 	
 	@Api(order=400)
@@ -67,7 +67,7 @@ public class LabelSpecResource {
 		if (name != null) 
 			criteria.add(Restrictions.ilike("name", name.replace('*', '%'), MatchMode.EXACT));
 		
-    	return labelSpecManager.query(criteria, offset, count);
+    	return labelSpecService.query(criteria, offset, count);
     }
 	
 	@Api(order=500, description="Create new label spec")
@@ -76,9 +76,9 @@ public class LabelSpecResource {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		
-		labelSpecManager.createOrUpdate(labelSpec);
+		labelSpecService.createOrUpdate(labelSpec);
 		var newAuditContent = VersionedXmlDoc.fromBean(labelSpec).toXML();
-		auditManager.audit(null, "created label spec \"" + labelSpec.getName() + "\" via RESTful API", null, newAuditContent);
+		auditService.audit(null, "created label spec \"" + labelSpec.getName() + "\" via RESTful API", null, newAuditContent);
     	return labelSpec.getId();
     }
 
@@ -88,10 +88,10 @@ public class LabelSpecResource {
 	public Response updateSpec(@PathParam("labelSpecId") Long labelSpecId, @NotNull LabelSpec labelSpec) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-		labelSpecManager.createOrUpdate(labelSpec);
+		labelSpecService.createOrUpdate(labelSpec);
 		var oldAuditContent = labelSpec.getOldVersion().toXML();
 		var newAuditContent = VersionedXmlDoc.fromBean(labelSpec).toXML();
-		auditManager.audit(null, "changed label spec \"" + labelSpec.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
+		auditService.audit(null, "changed label spec \"" + labelSpec.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
 		return Response.ok().build();
 	}
 	
@@ -101,10 +101,10 @@ public class LabelSpecResource {
     public Response deleteSpec(@PathParam("labelSpecId") Long labelSpecId) {
     	if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-		var labelSpec = labelSpecManager.load(labelSpecId);
-    	labelSpecManager.delete(labelSpec);
+		var labelSpec = labelSpecService.load(labelSpecId);
+    	labelSpecService.delete(labelSpec);
 		var oldAuditContent = VersionedXmlDoc.fromBean(labelSpec).toXML();
-		auditManager.audit(null, "deleted label spec \"" + labelSpec.getName() + "\" via RESTful API", oldAuditContent, null);
+		auditService.audit(null, "deleted label spec \"" + labelSpec.getName() + "\" via RESTful API", oldAuditContent, null);
     	return Response.ok().build();
     }
 	

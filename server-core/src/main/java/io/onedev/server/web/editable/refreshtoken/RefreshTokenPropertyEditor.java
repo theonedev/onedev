@@ -36,7 +36,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.oauth.OAuthUtils;
 import io.onedev.server.util.ReflectionUtils;
@@ -179,7 +179,7 @@ public class RefreshTokenPropertyEditor extends PropertyEditor<String> {
 	}
 
 	private String getRedirectUrl() {
-		String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+		String serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 		return serverUrl + "/" + OAuthCallbackPage.MOUNT_PATH;
 	}
 	

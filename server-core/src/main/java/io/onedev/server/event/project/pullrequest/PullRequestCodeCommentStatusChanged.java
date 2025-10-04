@@ -3,12 +3,12 @@ package io.onedev.server.event.project.pullrequest;
 import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
+import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 
 public class PullRequestCodeCommentStatusChanged extends PullRequestCodeCommentEvent {
 
@@ -26,7 +26,7 @@ public class PullRequestCodeCommentStatusChanged extends PullRequestCodeCommentE
 	}
 
 	public CodeCommentStatusChange getChange() {
-		return OneDev.getInstance(CodeCommentStatusChangeManager.class).load(changeId);
+		return OneDev.getInstance(CodeCommentStatusChangeService.class).load(changeId);
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class PullRequestCodeCommentStatusChanged extends PullRequestCodeCommentE
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getChange(), true);
+		return OneDev.getInstance(UrlService.class).urlFor(getChange(), true);
 	}
 
 }

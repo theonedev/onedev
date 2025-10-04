@@ -1,7 +1,7 @@
 package io.onedev.server.git.signatureverification.gpg;
 
-import io.onedev.server.entitymanager.GpgKeyManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.GpgKeyService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.git.signatureverification.SignatureVerifier;
 import io.onedev.server.git.signatureverification.VerificationResult;
 import io.onedev.server.model.support.administration.GpgSetting;
@@ -27,14 +27,14 @@ public class GpgSignatureVerifier implements SignatureVerifier {
 	
 	private static final Logger logger = LoggerFactory.getLogger(GpgSignatureVerifier.class);
 	
-	private final GpgKeyManager gpgKeyManager;
+	private final GpgKeyService gpgKeyService;
 
-	private final SettingManager settingManager;
+	private final SettingService settingService;
 	
 	@Inject
-	public GpgSignatureVerifier(GpgKeyManager gpgKeyManager, SettingManager settingManager) {
-		this.gpgKeyManager = gpgKeyManager;
-		this.settingManager = settingManager;
+	public GpgSignatureVerifier(GpgKeyService gpgKeyService, SettingService settingService) {
+		this.gpgKeyService = gpgKeyService;
+		this.settingService = settingService;
 	}
 
 	private PGPSignature parseSignature(InputStream in) throws IOException, PGPException {
@@ -52,10 +52,10 @@ public class GpgSignatureVerifier implements SignatureVerifier {
 	}
 	
 	private GpgSigningKey loadKey(long keyId) {
-		GpgSetting gpgSetting = settingManager.getGpgSetting();
+		GpgSetting gpgSetting = settingService.getGpgSetting();
 		GpgSigningKey verificationKey = gpgSetting.findSigningKey(keyId);
 		if (verificationKey == null)
-			verificationKey = gpgKeyManager.findSigningKey(keyId);
+			verificationKey = gpgKeyService.findSigningKey(keyId);
 		return verificationKey;
 	}	
 

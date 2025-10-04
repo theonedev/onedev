@@ -1,0 +1,28 @@
+<wicket:panel>
+	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>Run below commands to install this package</wicket:t></div>
+	<div wicket:id="install" class="code text-break font-size-sm mb-2"></div>
+	<div class="text-muted font-size-sm mb-5"><wicket:t>Make sure the account has package read permission over the project</wicket:t></div>
+	
+	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>For CI/CD job, add this package to requirements.txt and 
+		run below to install the package via command step</wicket:t></div>
+	<div wicket:id="jobCommands" class="text-break font-size-sm mb-5"></div>
+
+	<wicket:enclosure child="description">
+		<div class="bg-light rounded p-4 mb-5">
+			<h6 class="border-bottom pb-3"><wicket:t>Description</wicket:t></h6>
+			<div wicket:id="description"></div>
+		</div>
+	</wicket:enclosure>
+
+	<div class="bg-light rounded p-4">
+		<h6 class="border-bottom pb-3"><wicket:t>Meta Info</wicket:t></h6>
+		<table class="table table-borderless">
+			<tbody>
+			<tr wicket:id="attributes">
+				<td wicket:id="name" class="name font-weight-bold"></td>
+				<td wicket:id="value" class="value"></td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+</wicket:panel>

@@ -17,7 +17,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;
-import io.onedev.server.entitymanager.IterationManager;
+import io.onedev.server.service.IterationService;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.DateUtils;
@@ -162,8 +162,8 @@ public class IterationEditBean implements Validatable, Serializable {
 					.addPropertyNode("name").addConstraintViolation();
 			return false;
 		}
-		IterationManager iterationManager = OneDev.getInstance(IterationManager.class);
-		Iteration iterationWithSameName = iterationManager.findInHierarchy(Project.get(), name);
+		IterationService iterationService = OneDev.getInstance(IterationService.class);
+		Iteration iterationWithSameName = iterationService.findInHierarchy(Project.get(), name);
 		if (iterationWithSameName != null && (oldName == null || !oldName.equals(name))) {
 			context.disableDefaultConstraintViolation();
 			var message = "Name has already been used by another iteration in the project hierarchy";

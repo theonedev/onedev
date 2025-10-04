@@ -1,7 +1,7 @@
 package io.onedev.server.git.signatureverification.gpg;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.git.signatureverification.VerificationSuccessful;
 import io.onedev.server.model.support.administration.GpgSetting;
 import io.onedev.server.web.component.gitsignature.GpgVerificationDetailPanel;
@@ -40,7 +40,7 @@ public class GpgVerificationSuccessful implements VerificationSuccessful {
 	}
 	
 	private GpgSetting getGpgSetting() {
-		return OneDev.getInstance(SettingManager.class).getGpgSetting();
+		return OneDev.getInstance(SettingService.class).getGpgSetting();
 	}
 	
 }

@@ -1,0 +1,31 @@
+.coverages>.coverage {
+	margin-right: 1.2rem;
+	width: 10%;
+	flex-grow: 1;
+}
+.coverages>.coverage>.label {
+	font-size: 0.9rem;
+	color: gray;
+	margin-bottom: 0.3rem;
+}
+.coverage-report>.coverages>.coverages>.coverage>.label {
+	font-size: 1rem;
+	color: inherit;
+	margin-bottom: 0.5rem;
+}
+.coverages>.coverage:last-child {
+	margin-right: 0;
+}
+
+@media(max-width: 991px) {
+.coverages>.coverage {
+	width: 40%;
+}
+.coverages>.coverage.method {
+	margin-bottom: 0.5rem;
+}
+.coverages>.coverage.branch {
+	margin-right: 0;
+	margin-bottom: 0.5rem;
+}
+}

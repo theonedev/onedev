@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;
-import io.onedev.server.job.JobManager;
-import io.onedev.server.job.log.LogManager;
+import io.onedev.server.job.JobService;
+import io.onedev.server.job.log.LogService;
 import io.onedev.server.job.log.LogSnippet;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
@@ -47,7 +47,7 @@ public class BuildLogPanel extends GenericPanel<Build> {
 		add(new ChangeObserver() {
 			
 			private void appendRecentLogEntries(IPartialPageRequestHandler handler) {
-				List<JobLogEntryEx> logEntries = getLogManager().readLogEntries(
+				List<JobLogEntryEx> logEntries = getLogService().readLogEntries(
 						getBuild().getProject().getId(), getBuild().getNumber(), nextOffset, 0);
 
 				if (!logEntries.isEmpty()) {
@@ -92,7 +92,7 @@ public class BuildLogPanel extends GenericPanel<Build> {
 				
 				@Override
 				protected void respond(AjaxRequestTarget target) {
-					OneDev.getInstance(JobManager.class).resume(getBuild());
+					OneDev.getInstance(JobService.class).resume(getBuild());
 					BasePage page = (BasePage) getPage();
 					page.notifyObservableChange(target, getDetailChangeObservable(getBuild().getId()));
 				}
@@ -104,8 +104,8 @@ public class BuildLogPanel extends GenericPanel<Build> {
 		setOutputMarkupId(true);
 	}
 
-	private LogManager getLogManager() {
-		return OneDev.getInstance(LogManager.class);
+	private LogService getLogService() {
+		return OneDev.getInstance(LogService.class);
 	}
 	
 	private String asJSON(List<JobLogEntryEx> entries) {
@@ -123,7 +123,7 @@ public class BuildLogPanel extends GenericPanel<Build> {
 		
 		response.render(JavaScriptHeaderItem.forReference(new BuildLogResourceReference()));
 		
-		LogSnippet snippet = getLogManager().readLogSnippetReversely(
+		LogSnippet snippet = getLogService().readLogSnippetReversely(
 				getBuild().getProject().getId(), getBuild().getNumber(), MAX_LOG_ENTRIES+1);
 		
 		nextOffset = snippet.offset + snippet.entries.size();

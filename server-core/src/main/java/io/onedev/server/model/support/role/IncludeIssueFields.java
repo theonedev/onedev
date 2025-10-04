@@ -6,7 +6,7 @@ import java.util.List;
 import javax.validation.constraints.Size;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
@@ -32,7 +32,7 @@ public class IncludeIssueFields implements IssueFieldSet {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getFieldChoices() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldNames();
+		return OneDev.getInstance(SettingService.class).getIssueSetting().getFieldNames();
 	}
 
 }

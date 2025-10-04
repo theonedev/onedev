@@ -1,9 +1,10 @@
 package io.onedev.server.web.component.issue.progress;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueTimes;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.behavior.CompletionRateBehavior;
@@ -23,7 +24,8 @@ public abstract class QueriedIssuesProgressPanel extends Panel {
 	private final IModel<IssueTimes> timesModel = new LoadableDetachableModel<IssueTimes>() {
 		@Override
 		protected IssueTimes load() {
-			return OneDev.getInstance(IssueManager.class).queryTimes(getProjectScope(), getQuery().getCriteria());
+			var subject = SecurityUtils.getSubject();
+			return OneDev.getInstance(IssueService.class).queryTimes(subject, getProjectScope(), getQuery().getCriteria());
 		}
 	};
 	
@@ -49,7 +51,7 @@ public abstract class QueriedIssuesProgressPanel extends Panel {
 				}
 			}));
 
-			var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+			var timeTrackingSetting = OneDev.getInstance(SettingService.class).getIssueSetting().getTimeTrackingSetting();
 			fragment.add(new Label("estimatedTime", timeTrackingSetting.formatWorkingPeriod(timesModel.getObject().getEstimatedTime(), true)));
 			fragment.add(new Label("spentTime", timeTrackingSetting.formatWorkingPeriod(timesModel.getObject().getSpentTime(), true)));
 			add(fragment);

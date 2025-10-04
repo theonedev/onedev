@@ -3,7 +3,7 @@ package io.onedev.server.agent;
 import io.onedev.agent.Agent;
 import io.onedev.server.OneDev;
 import io.onedev.server.exception.ServerNotReadyException;
-import io.onedev.server.entitymanager.AgentTokenManager;
+import io.onedev.server.service.AgentTokenService;
 import io.onedev.server.security.SecurityUtils;
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
@@ -22,11 +22,11 @@ public class ServerSocketServlet extends WebSocketServlet {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final AgentTokenManager tokenManager;
+	private final AgentTokenService tokenService;
 
 	@Inject
-	public ServerSocketServlet(AgentTokenManager tokenManager) {
-		this.tokenManager = tokenManager;
+	public ServerSocketServlet(AgentTokenService tokenService) {
+		this.tokenService = tokenService;
 	}
 	
 	@Override
@@ -43,7 +43,7 @@ public class ServerSocketServlet extends WebSocketServlet {
 		if (!OneDev.getInstance().isReady())
 			throw new ServerNotReadyException();
 		String tokenValue = SecurityUtils.getBearerToken(request);
-		if (tokenValue != null && tokenManager.find(tokenValue) != null)
+		if (tokenValue != null && tokenService.find(tokenValue) != null)
 			super.service(request, response);
 		else
 			response.sendError(SC_FORBIDDEN, "A valid agent token is expected");

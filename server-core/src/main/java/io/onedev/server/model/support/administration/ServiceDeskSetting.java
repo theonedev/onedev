@@ -16,7 +16,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
@@ -33,7 +33,7 @@ public class ServiceDeskSetting implements Serializable {
 
 	@SuppressWarnings("unused")
 	private static List<String> getProjectChoices() {
-		List<String> projectPaths = OneDev.getInstance(ProjectManager.class)
+		List<String> projectPaths = OneDev.getInstance(ProjectService.class)
 				.query().stream().map(it->it.getPath()).collect(Collectors.toList());
 		Collections.sort(projectPaths);
 		return projectPaths;

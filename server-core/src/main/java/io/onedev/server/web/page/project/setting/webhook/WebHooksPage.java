@@ -12,7 +12,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
@@ -40,8 +40,8 @@ public class WebHooksPage extends ProjectSettingPage {
 				super.onSubmit();
 				var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 				getProject().setWebHooks(bean.getWebHooks());
-				OneDev.getInstance(ProjectManager.class).update(getProject());
-				getAuditManager().audit(getProject(), "changed web hooks", oldAuditContent, newAuditContent);
+				OneDev.getInstance(ProjectService.class).update(getProject());
+				auditService.audit(getProject(), "changed web hooks", oldAuditContent, newAuditContent);
 				setResponsePage(WebHooksPage.class, WebHooksPage.paramsOf(getProject()));
 				getSession().success(_T("Web hooks saved"));
 			}

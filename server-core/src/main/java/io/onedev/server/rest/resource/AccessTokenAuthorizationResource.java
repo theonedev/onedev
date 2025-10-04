@@ -21,8 +21,8 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AccessTokenAuthorizationManager;
-import io.onedev.server.entitymanager.AuditManager;
+import io.onedev.server.service.AccessTokenAuthorizationService;
+import io.onedev.server.service.AuditService;
 import io.onedev.server.model.AccessTokenAuthorization;
 import io.onedev.server.rest.annotation.Api;
 
@@ -35,21 +35,21 @@ import io.onedev.server.rest.annotation.Api;
 @Singleton
 public class AccessTokenAuthorizationResource {
 
-	private final AccessTokenAuthorizationManager accessTokenAuthorizationManager;
+	private final AccessTokenAuthorizationService accessTokenAuthorizationService;
 
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 
 	@Inject
-	public AccessTokenAuthorizationResource(AccessTokenAuthorizationManager accessTokenAuthorizationManager, AuditManager auditManager) {
-		this.accessTokenAuthorizationManager = accessTokenAuthorizationManager;
-		this.auditManager = auditManager;
+	public AccessTokenAuthorizationResource(AccessTokenAuthorizationService accessTokenAuthorizationService, AuditService auditService) {
+		this.accessTokenAuthorizationService = accessTokenAuthorizationService;
+		this.auditService = auditService;
 	}
 
 	@Api(order=100, description = "Get access token authorization of specified id")
 	@Path("/{authorizationId}")
 	@GET
 	public AccessTokenAuthorization getAuthorization(@PathParam("authorizationId") Long authorizationId) {
-		var authorization = accessTokenAuthorizationManager.load(authorizationId);
+		var authorization = accessTokenAuthorizationService.load(authorizationId);
 		var owner = authorization.getToken().getOwner();
 		if (!isAdministrator() && !owner.equals(getAuthUser())) 
 			throw new UnauthorizedException();
@@ -65,10 +65,10 @@ public class AccessTokenAuthorizationResource {
 		if (!canManageProject(owner.asSubject(), authorization.getProject()))
 			throw new BadRequestException("Access token owner should have permission to manage authorized project");
 
-		accessTokenAuthorizationManager.createOrUpdate(authorization);
+		accessTokenAuthorizationService.createOrUpdate(authorization);
 		if (!getAuthUser().equals(owner)) {
 			var newAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
-			auditManager.audit(null, "created access token authorization in account \"" + owner.getName() + "\" via RESTful API", null, newAuditContent);
+			auditService.audit(null, "created access token authorization in account \"" + owner.getName() + "\" via RESTful API", null, newAuditContent);
 		}
 		return authorization.getId();
 	}
@@ -83,11 +83,11 @@ public class AccessTokenAuthorizationResource {
 		if (!canManageProject(owner.asSubject(), authorization.getProject()))
 			throw new BadRequestException("Access token owner should have permission to manage authorized project");
 
-		accessTokenAuthorizationManager.createOrUpdate(authorization);
+		accessTokenAuthorizationService.createOrUpdate(authorization);
 		if (!getAuthUser().equals(owner)) {
 			var oldAuditContent = authorization.getOldVersion().toXML();
 			var newAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
-			auditManager.audit(null, "changed access token authorization in account \"" + owner.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
+			auditService.audit(null, "changed access token authorization in account \"" + owner.getName() + "\" via RESTful API", oldAuditContent, newAuditContent);
 		}
 		return Response.ok().build();
 	}
@@ -96,14 +96,14 @@ public class AccessTokenAuthorizationResource {
 	@Path("/{authorizationId}")
 	@DELETE
 	public Response deleteAuthorization(@PathParam("authorizationId") Long authorizationId) {
-		var authorization = accessTokenAuthorizationManager.load(authorizationId);
+		var authorization = accessTokenAuthorizationService.load(authorizationId);
 		var owner = authorization.getToken().getOwner();
 		if (!isAdministrator() && !owner.equals(getAuthUser()))
 			throw new UnauthorizedException();
-		accessTokenAuthorizationManager.delete(authorization);
+		accessTokenAuthorizationService.delete(authorization);
 		if (!getAuthUser().equals(owner)) {
 			var oldAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
-			auditManager.audit(null, "deleted access token authorization from account \"" + owner.getName() + "\" via RESTful API", oldAuditContent, null);
+			auditService.audit(null, "deleted access token authorization from account \"" + owner.getName() + "\" via RESTful API", oldAuditContent, null);
 		}
 		return Response.ok().build();
 	}

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.PullRequest;
@@ -48,7 +48,7 @@ public class IssueReferencedFromPullRequestData extends IssueChangeData implemen
 
 	@Override
 	public PullRequest getReferencedFrom() {
-		return OneDev.getInstance(PullRequestManager.class).get(requestId);
+		return OneDev.getInstance(PullRequestService.class).get(requestId);
 	}
 
 	@Override

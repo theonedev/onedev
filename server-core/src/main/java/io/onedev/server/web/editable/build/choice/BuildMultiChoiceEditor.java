@@ -14,7 +14,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.build.choice.BuildChoiceProvider;
@@ -46,9 +46,9 @@ public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 
 		List<Build> selections = new ArrayList<>();
 		if (getModelObject() != null) {
-			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+			BuildService buildService = OneDev.getInstance(BuildService.class);
 			for (Long buildId: getModelObject()) {
-				Build build = buildManager.get(buildId);
+				Build build = buildService.get(buildId);
 				if (build != null)
 					selections.add(build);
 			}

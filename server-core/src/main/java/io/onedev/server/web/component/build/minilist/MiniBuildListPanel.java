@@ -22,7 +22,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
@@ -60,7 +60,7 @@ public class MiniBuildListPanel extends GenericPanel<List<Build>> {
 
 						@Override
 						protected Status load() {
-							return OneDev.getInstance(BuildManager.class).load(buildId).getStatus();
+							return OneDev.getInstance(BuildService.class).load(buildId).getStatus();
 						}
 						
 					}));

@@ -11,7 +11,7 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.job.JobAuthorizationContextAware;
-import io.onedev.server.job.JobManager;
+import io.onedev.server.job.JobService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -19,7 +19,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.component.modal.message.MessageModal;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
-import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoService;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -62,7 +62,7 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 		try {
 			BuildSpec buildSpec = Preconditions.checkNotNull(getProject().getBuildSpec(commitId));
 
-			Collection<ObjectId> descendants = OneDev.getInstance(CommitInfoManager.class)
+			Collection<ObjectId> descendants = OneDev.getInstance(CommitInfoService.class)
 					.getDescendants(getProject().getId(), Sets.newHashSet(commitId));
 			descendants.add(commitId);
 
@@ -87,6 +87,7 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 
 			if (!refNames.isEmpty()) {
 				Job job = Preconditions.checkNotNull(buildSpec.getJobMap().get(jobName));
+				var user = SecurityUtils.getUser();
 				if (refNames.size() > 1 || !job.getParamSpecs().isEmpty()) {
 					Serializable paramBean;
 					try {
@@ -106,17 +107,18 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 									job, populatedParamBean, job.getParamSpecMap().keySet());
 							List<Build> builds = new ArrayList<>();
 							for (String refName : selectedRefNames) {
-								builds.add(getJobManager().submit(getProject(), commitId, job.getName(),
-										paramMap, refName, SecurityUtils.getAuthUser(),
-										getPullRequest(), null, _T("Submitted manually")));
+								builds.add(getJobService().submit(user, getProject(), commitId, job.getName(),
+										paramMap, refName, getPullRequest(), null, _T("Submitted manually")));
 							}
 							if (builds.size() == 1)
 								setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(builds.iterator().next()));
 							else
 								close();
+								
+							var user = SecurityUtils.getUser();
 							for (var build: builds) {
 								if (build.isFinished())
-									getJobManager().resubmit(build, _T("Rebuild manually"));
+									getJobService().resubmit(user, build, _T("Rebuild manually"));
 							}
 						}
 
@@ -137,12 +139,12 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 
 					};
 				} else {
-					Build build = getJobManager().submit(getProject(), commitId, job.getName(),
-							new HashMap<>(), refNames.iterator().next(),
-							SecurityUtils.getAuthUser(), getPullRequest(), null, _T("Submitted manually"));
+					Build build = getJobService().submit(user, getProject(), commitId, job.getName(),
+							new HashMap<>(), refNames.iterator().next(), getPullRequest(), null, 
+							_T("Submitted manually"));
 					setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
 					if (build.isFinished())
-						getJobManager().resubmit(build, _T("Rebuild manually"));
+						getJobService().resubmit(SecurityUtils.getUser(), build, _T("Rebuild manually"));
 				}
 			} else {
 				new MessageModal(target) {
@@ -159,8 +161,8 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 		}
 	}
 	
-	private JobManager getJobManager() {
-		return OneDev.getInstance(JobManager.class);
+	private JobService getJobService() {
+		return OneDev.getInstance(JobService.class);
 	}
 
 	@Override
@@ -171,7 +173,7 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 
 	@Override
 	public JobAuthorizationContext getJobAuthorizationContext() {
-		return new JobAuthorizationContext(getProject(), commitId, SecurityUtils.getAuthUser(), getPullRequest());
+		return new JobAuthorizationContext(getProject(), commitId, getPullRequest());
 	}
 	
 }

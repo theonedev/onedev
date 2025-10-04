@@ -1,7 +1,7 @@
 package io.onedev.server.util;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 
 import javax.annotation.Nullable;
@@ -35,7 +35,7 @@ public class ProjectScopedQuery {
 				var projectPath = query.substring(0, index);
 				var newQuery = query.substring(index + 1);
 				if (projectPath.length() != 0) {
-					currentProject = getProjectManager().findByPath(projectPath);
+					currentProject = getProjectService().findByPath(projectPath);
 					if (currentProject != null)
 						return new ProjectScopedQuery(currentProject, newQuery);
 					else
@@ -50,7 +50,7 @@ public class ProjectScopedQuery {
 		if (keyIndicator != null) {
 			var index = query.indexOf(keyIndicator);
 			if (index != -1) {
-				currentProject = getProjectManager().findByKey(query.substring(0, index));
+				currentProject = getProjectService().findByKey(query.substring(0, index));
 				if (currentProject != null)
 					return new ProjectScopedQuery(currentProject, query.substring(index+1));
 				else
@@ -63,8 +63,8 @@ public class ProjectScopedQuery {
 			return null;
 	}
 	
-	private static ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private static ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
 }

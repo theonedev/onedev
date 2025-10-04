@@ -5,7 +5,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.codequality.*;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.service.*;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.*;
@@ -98,7 +98,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		protected ObjectId load() {
 			ObjectId oldCommitId = ObjectId.fromString(state.oldCommitHash);
 			ObjectId newCommitId = ObjectId.fromString(state.newCommitHash);
-			return getPullRequestManager().getComparisonBase(getPullRequest(), oldCommitId, newCommitId);
+			return getPullRequestService().getComparisonBase(getPullRequest(), oldCommitId, newCommitId);
 		}
 		
 	};
@@ -261,12 +261,12 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		return true;
 	}
 
-	private PullRequestManager getPullRequestManager() {
-		return OneDev.getInstance(PullRequestManager.class);
+	private PullRequestService getPullRequestService() {
+		return OneDev.getInstance(PullRequestService.class);
 	}
 	
-	private ReviewedDiffManager getDiffReviewStatusManager() {
-		return OneDev.getInstance(ReviewedDiffManager.class);
+	private ReviewedDiffService getDiffReviewStatusManager() {
+		return OneDev.getInstance(ReviewedDiffService.class);
 	}
 	
 	private Component newChangesContainer() {
@@ -808,7 +808,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	@Override
 	public CodeComment getOpenComment() {
 		if (state.commentId != null) 
-			return OneDev.getInstance(CodeCommentManager.class).load(state.commentId);
+			return OneDev.getInstance(CodeCommentService.class).load(state.commentId);
 		else
 			return null;
 	}
@@ -862,9 +862,9 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			CompareContext compareContext = comment.getCompareContext();
 			compareContext.setOldCommitHash(state.oldCommitHash);
 			compareContext.setNewCommitHash(state.newCommitHash);
-			OneDev.getInstance(CodeCommentManager.class).create(comment);
+			OneDev.getInstance(CodeCommentService.class).create(comment);
 		} else {
-			OneDev.getInstance(CodeCommentManager.class).update(comment);
+			OneDev.getInstance(CodeCommentService.class).update(comment);
 		}
 	}
 	
@@ -874,9 +874,9 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			CompareContext compareContext = reply.getCompareContext();
 			compareContext.setOldCommitHash(state.oldCommitHash);
 			compareContext.setNewCommitHash(state.newCommitHash);
-			OneDev.getInstance(CodeCommentReplyManager.class).create(reply);
+			OneDev.getInstance(CodeCommentReplyService.class).create(reply);
 		} else {
-			OneDev.getInstance(CodeCommentReplyManager.class).update(reply);
+			OneDev.getInstance(CodeCommentReplyService.class).update(reply);
 		}
 	}
 	
@@ -887,7 +887,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			compareContext.setOldCommitHash(state.oldCommitHash);
 			compareContext.setNewCommitHash(state.newCommitHash);
 		} 
-		OneDev.getInstance(CodeCommentStatusChangeManager.class).create(change, note);
+		OneDev.getInstance(CodeCommentStatusChangeService.class).create(change, note);
 	}
 	
 	@Override

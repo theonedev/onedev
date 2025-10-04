@@ -2,13 +2,13 @@ package io.onedev.server.notification;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.service.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.issue.IssueCommentCreated;
 import io.onedev.server.event.project.issue.IssueEvent;
 import io.onedev.server.event.project.issue.IssueOpened;
 import io.onedev.server.event.project.issue.IssuesMoved;
-import io.onedev.server.mail.MailManager;
+import io.onedev.server.mail.MailService;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.NamedQuery;
@@ -21,9 +21,9 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.commenttext.MarkdownText;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.xodus.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoService;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
@@ -39,45 +39,37 @@ import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @Singleton
 public class IssueNotificationManager {
-	
-	private final MailManager mailManager;
-	
-	private final IssueAuthorizationManager authorizationManager;
-	
-	private final IssueWatchManager watchManager;
-	
-	private final UserManager userManager;
-	
-	private final VisitInfoManager userInfoManager;
-	
-	private final IssueMentionManager mentionManager;
-	
-	private final IssueQueryPersonalizationManager queryPersonalizationManager;
-	
-	private final IssueManager issueManager;
-	
-	private final UrlManager urlManager;
-	
-	private final SettingManager settingManager;
-	
+
 	@Inject
-	public IssueNotificationManager(MailManager mailManager, IssueWatchManager watchManager, 
-									VisitInfoManager userInfoManager, UserManager userManager, 
-									IssueAuthorizationManager authorizationManager, IssueMentionManager mentionManager, 
-									IssueQueryPersonalizationManager queryPersonalizationManager, 
-									IssueManager issueManager, UrlManager urlManager, SettingManager settingManager) {
-		this.mailManager = mailManager;
-		this.watchManager = watchManager;
-		this.userInfoManager = userInfoManager;
-		this.userManager = userManager;
-		this.authorizationManager = authorizationManager;
-		this.mentionManager = mentionManager;
-		this.queryPersonalizationManager = queryPersonalizationManager;
-		this.issueManager = issueManager;
-		this.urlManager = urlManager;
-		this.settingManager = settingManager;
-	}
-	
+	private MailService mailService;
+
+	@Inject
+	private IssueAuthorizationService authorizationService;
+
+	@Inject
+	private IssueWatchService watchService;
+
+	@Inject
+	private UserService userService;
+
+	@Inject
+	private VisitInfoService userInfoManager;
+
+	@Inject
+	private IssueMentionService mentionService;
+
+	@Inject
+	private IssueQueryPersonalizationService queryPersonalizationService;
+
+	@Inject
+	private IssueService issueService;
+
+	@Inject
+	private UrlService urlService;
+
+	@Inject
+	private SettingService settingService;
+
 	private void setupWatches(Issue issue) {
 		for (Map.Entry<User, Boolean> entry : new QueryWatchBuilder<Issue>() {
 
@@ -88,7 +80,7 @@ public class IssueNotificationManager {
 
 			@Override
 			protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
-				return queryPersonalizationManager.query(new ProjectScope(issue.getProject(), true, true));
+				return queryPersonalizationService.query(new ProjectScope(issue.getProject(), true, true));
 			}
 
 			@Override
@@ -104,7 +96,7 @@ public class IssueNotificationManager {
 
 		}.getWatches().entrySet()) {
 			if (SecurityUtils.canAccessIssue(entry.getKey().asSubject(), issue))
-				watchManager.watch(issue, entry.getKey(), entry.getValue());
+				watchService.watch(issue, entry.getKey(), entry.getValue());
 		}
 
 		for (Map.Entry<User, Boolean> entry : new QueryWatchBuilder<Issue>() {
@@ -116,7 +108,7 @@ public class IssueNotificationManager {
 
 			@Override
 			protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
-				return userManager.query().stream().map(it -> it.getIssueQueryPersonalization()).collect(Collectors.toList());
+				return userService.query().stream().map(it -> it.getIssueQueryPersonalization()).collect(Collectors.toList());
 			}
 
 			@Override
@@ -127,12 +119,12 @@ public class IssueNotificationManager {
 
 			@Override
 			protected Collection<? extends NamedQuery> getNamedQueries() {
-				return settingManager.getIssueSetting().getNamedQueries();
+				return settingService.getIssueSetting().getNamedQueries();
 			}
 
 		}.getWatches().entrySet()) {
 			if (SecurityUtils.canAccessIssue(entry.getKey().asSubject(), issue))
-				watchManager.watch(issue, entry.getKey(), entry.getValue());
+				watchService.watch(issue, entry.getKey(), entry.getValue());
 		}
 	}
 	
@@ -186,14 +178,14 @@ public class IssueNotificationManager {
 			if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
 				notifiedUsers.add(user); 
 			if (!user.isSystem() && !user.isServiceAccount())
-				watchManager.watch(issue, user, true);
+				watchService.watch(issue, user, true);
 		}
 
 		var emojis = Emojis.getInstance();
 		Map<String, Group> newGroups = event.getNewGroups();
 		Map<String, Collection<User>> newUsers = event.getNewUsers();
 		
-		String replyAddress = mailManager.getReplyAddress(issue);
+		String replyAddress = mailService.getReplyAddress(issue);
 		boolean replyable = replyAddress != null;
 		for (Map.Entry<String, Group> entry: newGroups.entrySet()) {
 			String subject = String.format(
@@ -206,7 +198,7 @@ public class IssueNotificationManager {
 				if (!member.equals(user)) {
 					EmailAddress emailAddress = member.getPrimaryEmailAddress();
 					if (emailAddress != null && emailAddress.isVerified()) {
-						mailManager.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
+						mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
 								Lists.newArrayList(), Lists.newArrayList(), subject, 
 								getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null), 
 								getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
@@ -217,8 +209,8 @@ public class IssueNotificationManager {
 			
 			for (User member: entry.getValue().getMembers()) {
 				if (!member.isServiceAccount()) 
-					watchManager.watch(issue, member, true);
-				authorizationManager.authorize(issue, member);
+					watchService.watch(issue, member, true);
+				authorizationService.authorize(issue, member);
 			}
 			
 			notifiedUsers.addAll(entry.getValue().getMembers());
@@ -235,7 +227,7 @@ public class IssueNotificationManager {
 				if (!member.equals(user)) {
 					EmailAddress emailAddress = member.getPrimaryEmailAddress();
 					if (emailAddress != null && emailAddress.isVerified()) {
-						mailManager.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
+						mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
 								Lists.newArrayList(), Lists.newArrayList(), subject, 
 								getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null), 
 								getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
@@ -246,8 +238,8 @@ public class IssueNotificationManager {
 			
 			for (User each: entry.getValue()) {
 				if (!each.isServiceAccount()) 
-					watchManager.watch(issue, each, true);
-				authorizationManager.authorize(issue, each);
+					watchService.watch(issue, each, true);
+				authorizationService.authorize(issue, each);
 			}
 			notifiedUsers.addAll(entry.getValue());
 		}
@@ -255,12 +247,12 @@ public class IssueNotificationManager {
 		if (event.getCommentText() instanceof MarkdownText) {
 			MarkdownText markdown = (MarkdownText) event.getCommentText();
 			for (String userName: new MentionParser().parseMentions(markdown.getRendered())) {
-				User mentionedUser = userManager.findByName(userName);
+				User mentionedUser = userService.findByName(userName);
 				if (mentionedUser != null) {
-					mentionManager.mention(issue, mentionedUser);
+					mentionService.mention(issue, mentionedUser);
 					if (!mentionedUser.isServiceAccount())
-						watchManager.watch(issue, mentionedUser, true);
-					authorizationManager.authorize(issue, mentionedUser);
+						watchService.watch(issue, mentionedUser, true);
+					authorizationService.authorize(issue, mentionedUser);
 					if (!isNotified(notifiedEmailAddresses, mentionedUser)) {
 						String subject = String.format(
 								"[Issue %s] (Mentioned You) %s", 
@@ -270,7 +262,7 @@ public class IssueNotificationManager {
 						
 						EmailAddress emailAddress = mentionedUser.getPrimaryEmailAddress();
 						if (emailAddress != null && emailAddress.isVerified()) {
-							mailManager.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
+							mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
 									Sets.newHashSet(), Sets.newHashSet(), subject, 
 									getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null), 
 									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
@@ -321,12 +313,12 @@ public class IssueNotificationManager {
 					(event instanceof IssueOpened)?"Opened":"Updated", 
 					emojis.apply(issue.getTitle())); 
 
-			Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(issue));
+			Unsubscribable unsubscribable = new Unsubscribable(mailService.getUnsubscribeAddress(issue));
 			String htmlBody = getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
 			String textBody = getEmailBody(false, event, summary, event.getTextBody(), url, replyable, unsubscribable);
 
 			String threadingReferences = issue.getThreadingReferences();
-			mailManager.sendMailAsync(Sets.newHashSet(), Sets.newHashSet(), 
+			mailService.sendMailAsync(Sets.newHashSet(), Sets.newHashSet(), 
 					bccEmailAddresses, subject, htmlBody, textBody, 
 					replyAddress, senderName, threadingReferences);
 		}
@@ -337,7 +329,7 @@ public class IssueNotificationManager {
 	public void on(IssuesMoved event) {
 		User user = event.getUser();
 		for (var issueId: event.getIssueIds()) {
-			var issue = issueManager.load(issueId);
+			var issue = issueService.load(issueId);
 
 			String senderName;
 			String summary;
@@ -352,7 +344,7 @@ public class IssueNotificationManager {
 			setupWatches(issue);
 			
 			var emojis = Emojis.getInstance();
-			String replyAddress = mailManager.getReplyAddress(issue);
+			String replyAddress = mailService.getReplyAddress(issue);
 			boolean replyable = replyAddress != null;
 
 			Collection<String> bccEmailAddresses = new HashSet<>();
@@ -375,7 +367,7 @@ public class IssueNotificationManager {
 						"Moved",
 						emojis.apply(issue.getTitle()));
 				
-				var url = urlManager.urlFor(issue, true);
+				var url = urlService.urlFor(issue, true);
 				String textDetail = "" +
 						"Previous project: " + event.getSourceProject().getPath() + 
 						"\n" +
@@ -386,12 +378,12 @@ public class IssueNotificationManager {
 						"<br>" +
 						"Current project: " + escapeHtml5(event.getTargetProject().getPath()) + 
 						"<br>";
-				Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(issue));
+				Unsubscribable unsubscribable = new Unsubscribable(mailService.getUnsubscribeAddress(issue));
 				String htmlBody = getEmailBody(true, event, summary, htmlDetail, url, replyable, unsubscribable);
 				String textBody = getEmailBody(false, event, summary, textDetail, url, replyable, unsubscribable);
 
 				String threadingReferences = issue.getThreadingReferences();
-				mailManager.sendMailAsync(Sets.newHashSet(), Sets.newHashSet(),
+				mailService.sendMailAsync(Sets.newHashSet(), Sets.newHashSet(),
 						bccEmailAddresses, subject, htmlBody, textBody,
 						replyAddress, senderName, threadingReferences);
 			}

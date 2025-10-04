@@ -58,11 +58,11 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.entitymanager.LabelSpecManager;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.CodeCommentReplyService;
+import io.onedev.server.service.CodeCommentStatusChangeService;
+import io.onedev.server.service.LabelSpecService;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
@@ -134,7 +134,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 
 		@Override
 		protected Collection<CodeComment> load() {
-			CodeCommentManager manager = OneDev.getInstance(CodeCommentManager.class);
+			CodeCommentService manager = OneDev.getInstance(CodeCommentService.class);
 			return manager.query(projectModel.getObject(), 
 					getPullRequest().getBaseCommit(), source.getObjectId());
 		}
@@ -188,8 +188,8 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			return getProject().getDefaultBranch();
 	}
 	
-	private PullRequestManager getPullRequestManager() {
-		return OneDev.getInstance(PullRequestManager.class);
+	private PullRequestService getPullRequestService() {
+		return OneDev.getInstance(PullRequestService.class);
 	}
 	
 	public NewPullRequestPage(PageParameters params) {
@@ -229,11 +229,11 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 		}
 
 		AtomicReference<PullRequest> pullRequestRef = new AtomicReference<>(null);
-		PullRequest prevRequest = getPullRequestManager().findOpen(target, source);
+		PullRequest prevRequest = getPullRequestService().findOpen(target, source);
 		if (prevRequest != null) 
 			pullRequestRef.set(prevRequest);
 		else if (target.getBranch() != null && source.getBranch() != null) 
-			pullRequestRef.set(getPullRequestManager().findEffective(target, source));
+			pullRequestRef.set(getPullRequestService().findEffective(target, source));
 		
 		if (pullRequestRef.get() == null) {
 			ObjectId baseCommitId;
@@ -264,7 +264,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 
 				request.generateTitleAndDescriptionIfEmpty();
 
-				getPullRequestManager().checkReviews(request, false);
+				getPullRequestService().checkReviews(request, false);
 
 				for (var assignee: target.getProject().findDefaultPullRequestAssignees()) {
 					PullRequestAssignment assignment = new PullRequestAssignment();
@@ -295,7 +295,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 
 				@Override
 				protected PullRequest load() {
-					return getPullRequestManager().load(requestId);
+					return getPullRequestService().load(requestId);
 				}
 
 			};
@@ -668,7 +668,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 					getPullRequest().setTarget(target);
 					for (var label: labelsBean.getLabels()) {
 						PullRequestLabel requestLabel = new PullRequestLabel();
-						requestLabel.setSpec(OneDev.getInstance(LabelSpecManager.class).find(label));
+						requestLabel.setSpec(OneDev.getInstance(LabelSpecService.class).find(label));
 						requestLabel.setRequest(getPullRequest());
 						getPullRequest().getLabels().add(requestLabel);
 					}
@@ -677,7 +677,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 					for (PullRequestAssignment assignment: getPullRequest().getAssignments())
 						assignment.setUser(dao.load(User.class, assignment.getUser().getId()));
 					
-					getPullRequestManager().open(getPullRequest());
+					getPullRequestService().open(getPullRequest());
 					
 					setResponsePage(PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(getPullRequest()));
 				}			
@@ -985,7 +985,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	@Override
 	public CodeComment getOpenComment() {
 		if (commentId != null)
-			return OneDev.getInstance(CodeCommentManager.class).load(commentId);
+			return OneDev.getInstance(CodeCommentService.class).load(commentId);
 		else
 			return null;
 	}
@@ -1083,22 +1083,22 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	@Override
 	public void onSaveComment(CodeComment comment) {
 		if (comment.isNew())
-			OneDev.getInstance(CodeCommentManager.class).create(comment);
+			OneDev.getInstance(CodeCommentService.class).create(comment);
 		else
-			OneDev.getInstance(CodeCommentManager.class).update(comment);			
+			OneDev.getInstance(CodeCommentService.class).update(comment);
 	}
 	
 	@Override
 	public void onSaveCommentReply(CodeCommentReply reply) {
 		if (reply.isNew())
-			OneDev.getInstance(CodeCommentReplyManager.class).create(reply);
+			OneDev.getInstance(CodeCommentReplyService.class).create(reply);
 		else
-			OneDev.getInstance(CodeCommentReplyManager.class).update(reply);
+			OneDev.getInstance(CodeCommentReplyService.class).update(reply);
 	}
 	
 	@Override
 	public void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
-		OneDev.getInstance(CodeCommentStatusChangeManager.class).create(change, note);
+		OneDev.getInstance(CodeCommentStatusChangeService.class).create(change, note);
 	}
 	
 	@Override

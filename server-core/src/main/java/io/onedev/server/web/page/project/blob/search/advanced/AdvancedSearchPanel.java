@@ -3,10 +3,10 @@ package io.onedev.server.web.page.project.blob.search.advanced;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.CodeSearchService;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.*;
 import io.onedev.server.web.WebSession;
@@ -192,21 +192,21 @@ public abstract class AdvancedSearchPanel extends Panel {
 						var count = getMaxQueryEntries();
 						if (revision != null) {
 							var directory = getDirectory(insideCurrentDir);
-							var searchManager = OneDev.getInstance(CodeSearchManager.class);
+							var searchService = OneDev.getInstance(CodeSearchService.class);
 							if (option instanceof TextQueryOption) {
 								var query = new TextQuery.Builder((TextQueryOption) option)
 										.directory(directory)
 										.count(count)
 										.build();
 								ObjectId commit = project.getRevCommit(revision, true);
-								hits = searchManager.search(project, commit, query);
+								hits = searchService.search(project, commit, query);
 							} else if (option instanceof FileQueryOption) {
 								var query = new FileQuery.Builder((FileQueryOption) option)
 										.directory(directory)
 										.count(count)
 										.build();
 								ObjectId commit = project.getRevCommit(revision, true);
-								hits = searchManager.search(project, commit, query);
+								hits = searchService.search(project, commit, query);
 							} else {
 								var query = new SymbolQuery.Builder((SymbolQueryOption) option)
 										.primary(true)
@@ -214,7 +214,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 										.count(count)
 										.build();
 								ObjectId commit = project.getRevCommit(revision, true);
-								hits = searchManager.search(project, commit, query);
+								hits = searchService.search(project, commit, query);
 
 								if (hits.size() < count) {
 									query = new SymbolQuery.Builder((SymbolQueryOption) option)
@@ -222,7 +222,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 											.directory(directory)
 											.count(count-hits.size())
 											.build();
-									hits.addAll(searchManager.search(project, commit, query));
+									hits.addAll(searchService.search(project, commit, query));
 								}
 							}
 						} else {
@@ -301,7 +301,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 	protected abstract BlobIdent getCurrentBlob();
 	
 	private static int getMaxQueryEntries() {
-		return OneDev.getInstance(SettingManager.class).getPerformanceSetting().getMaxCodeSearchEntries();
+		return OneDev.getInstance(SettingService.class).getPerformanceSetting().getMaxCodeSearchEntries();
 	}
 	
 	protected String getDirectory(boolean insideDir) {

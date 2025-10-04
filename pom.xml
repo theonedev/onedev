@@ -228,6 +228,11 @@
 				<version>${wicket.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.wicket</groupId>
+				<artifactId>wicket-guice</artifactId>
+				<version>${wicket.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.glassfish.jersey.containers</groupId>
 				<artifactId>jersey-container-servlet</artifactId>
 				<version>${jersey.version}</version>

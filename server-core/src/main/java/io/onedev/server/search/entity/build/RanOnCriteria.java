@@ -10,7 +10,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.service.AgentService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.ProjectScope;
@@ -23,7 +23,7 @@ public class RanOnCriteria extends Criteria<Build> {
 	private final String value;
 	
 	public RanOnCriteria(String value) {
-		if (OneDev.getInstance(AgentManager.class).findByName(value) == null)
+		if (OneDev.getInstance(AgentService.class).findByName(value) == null)
 			throw new ExplicitException("No agent with name '" + value + "'");
 		this.value = value;
 	}

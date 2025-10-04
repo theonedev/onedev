@@ -31,6 +31,7 @@ import org.apache.wicket.core.request.handler.PageProvider;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
 import org.apache.wicket.core.request.mapper.HomePageMapper;
 import org.apache.wicket.core.request.mapper.ResourceMapper;
+import org.apache.wicket.guice.GuiceComponentInjector;
 import org.apache.wicket.markup.MarkupFactory;
 import org.apache.wicket.markup.MarkupParser;
 import org.apache.wicket.markup.MarkupResourceStream;
@@ -81,7 +82,7 @@ import io.onedev.server.web.translation.TranslationResolver;
 import io.onedev.server.web.translation.TranslationStringResourceLoader;
 import io.onedev.server.web.translation.TranslationTagHandler;
 import io.onedev.server.web.util.AbsoluteUrlRenderer;
-import io.onedev.server.web.websocket.WebSocketManager;
+import io.onedev.server.web.websocket.WebSocketService;
 import io.onedev.server.web.websocket.WebSocketMessages;
 
 @Singleton
@@ -156,6 +157,7 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 		
 		getRequestCycleSettings().setTimeout(Duration.minutes(30));
 		
+		getComponentInstantiationListeners().add(new GuiceComponentInjector(this, AppLoader.injector));
 		getComponentInstantiationListeners().add(new IComponentInstantiationListener() {
 			
 			@Override
@@ -190,7 +192,7 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 				if (!map.isEmpty()) {
 					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 					if (target != null)
-						OneDev.getInstance(WebSocketManager.class).observe((BasePage) target.getPage());
+						OneDev.getInstance(WebSocketService.class).observe((BasePage) target.getPage());
 				}
 			}
 

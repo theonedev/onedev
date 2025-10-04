@@ -16,11 +16,11 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.markdown.MarkdownManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.UserService;
+import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -62,7 +62,7 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 
 			@Override
 			protected String renderMarkdown(String markdown) {
-				MarkdownManager manager = OneDev.getInstance(MarkdownManager.class);
+				MarkdownService manager = OneDev.getInstance(MarkdownService.class);
 				return manager.process(manager.render(markdown), context.getProject(), context, null, false);
 			}
 
@@ -83,7 +83,7 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 
 					@Override
 					public List<User> findUsers(String query, int count) {
-						UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();
+						UserCache cache = OneDev.getInstance(UserService.class).cloneCache();
 						List<User> users = new ArrayList<>(cache.getUsers());
 						users.sort(cache.comparingDisplayName(Sets.newHashSet()));
 						
@@ -116,9 +116,10 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 
 					@Override
 					public List<PullRequest> queryPullRequests(Project project, String query, int count) {
-						if (SecurityUtils.canReadCode(project)) {
+						var subject = SecurityUtils.getSubject();
+						if (SecurityUtils.canReadCode(subject, project)) {
 							var requestQuery = new PullRequestQuery(new io.onedev.server.search.entity.pullrequest.FuzzyCriteria(query));
-							return OneDev.getInstance(PullRequestManager.class).query(project, requestQuery, false, 0, count);
+							return OneDev.getInstance(PullRequestService.class).query(subject, project, requestQuery, false, 0, count);
 						} else {
 							return new ArrayList<>();
 						}
@@ -126,10 +127,11 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 					
 					@Override
 					public List<Issue> queryIssues(Project project, String query, int count) {
-						if (SecurityUtils.canAccessProject(project)) {
+						var subject = SecurityUtils.getSubject();
+						if (SecurityUtils.canAccessProject(subject, project)) {
 							var projectScope = new ProjectScope(project, false, false);
 							var issueQuery = new IssueQuery(new io.onedev.server.search.entity.issue.FuzzyCriteria(query));
-							return OneDev.getInstance(IssueManager.class).query(projectScope, issueQuery, false, 0, count);
+							return OneDev.getInstance(IssueService.class).query(subject, projectScope, issueQuery, false, 0, count);
 						} else {
 							return new ArrayList<>();
 						}
@@ -137,7 +139,8 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 
 					@Override
 					public List<Build> queryBuilds(Project project, String query, int count) {
-						return OneDev.getInstance(BuildManager.class).query(project, query, count);
+						var subject = SecurityUtils.getSubject();
+						return OneDev.getInstance(BuildService.class).query(subject, project, query, count);
 					}
 					
 				};

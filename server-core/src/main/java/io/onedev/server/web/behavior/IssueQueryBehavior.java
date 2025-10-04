@@ -75,9 +75,9 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.GroupService;
+import io.onedev.server.service.LinkSpecService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.LinkSpec;
@@ -132,13 +132,13 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		return projectModel.getObject();
 	}
 
-	private LinkSpecManager getLinkSpecManager() {
-		return OneDev.getInstance(LinkSpecManager.class);
+	private LinkSpecService getLinkSpecService() {
+		return OneDev.getInstance(LinkSpecService.class);
 	}
 	
 	@Override
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
 		
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
@@ -242,7 +242,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								
 								try {
 									checkField(fieldName, operator, option);
-									LinkSpec linkSpec = getLinkSpecManager().find(fieldName);
+									LinkSpec linkSpec = getLinkSpecService().find(fieldName);
 									if (linkSpec != null) {
 										return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else {
@@ -264,7 +264,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										} else if (fieldSpec instanceof BooleanField) {
 											return SuggestionUtils.suggest(newArrayList("true", "false"), matchWith);
 										} else if (fieldSpec instanceof GroupChoiceField) {
-											List<String> candidates = OneDev.getInstance(GroupManager.class).query().stream().map(it -> it.getName()).collect(Collectors.toList());
+											List<String> candidates = OneDev.getInstance(GroupService.class).query().stream().map(it -> it.getName()).collect(Collectors.toList());
 											return SuggestionUtils.suggest(candidates, matchWith);
 										} else if (fieldSpec instanceof IterationChoiceField) {
 											if (project != null && !matchWith.contains("*"))
@@ -397,7 +397,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected List<String> getHints(TerminalExpect terminalExpect) {
 		List<String> hints = new ArrayList<>();
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if ("criteriaValue".equals(spec.getLabel())) {

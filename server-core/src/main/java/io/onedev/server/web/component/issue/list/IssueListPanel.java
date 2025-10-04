@@ -78,12 +78,12 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.IssueLinkManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IssueWatchManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.IssueLinkService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IssueWatchService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.imports.IssueImporterContribution;
 import io.onedev.server.model.Issue;
@@ -96,7 +96,7 @@ import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -105,7 +105,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.timetracking.TimeTrackingManager;
+import io.onedev.server.timetracking.TimeTrackingService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.LinkDescriptor;
 import io.onedev.server.util.ProjectScope;
@@ -152,7 +152,7 @@ import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
-import io.onedev.server.xodus.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoService;
 
 public abstract class IssueListPanel extends Panel {
 
@@ -188,20 +188,20 @@ public abstract class IssueListPanel extends Panel {
 		this.queryStringModel = queryModel;
 	}
 	
-	private IssueManager getIssueManager() {
-		return OneDev.getInstance(IssueManager.class);
+	private IssueService getIssueService() {
+		return OneDev.getInstance(IssueService.class);
 	}
 	
-	private IssueLinkManager getIssueLinkManager() {
-		return OneDev.getInstance(IssueLinkManager.class);
+	private IssueLinkService getIssueLinkService() {
+		return OneDev.getInstance(IssueLinkService.class);
 	}
 
-	private TransactionManager getTransactionManager() {
-		return OneDev.getInstance(TransactionManager.class);
+	private TransactionService getTransactionService() {
+		return OneDev.getInstance(TransactionService.class);
 	}
 
-	private AuditManager getAuditManager() {
-		return OneDev.getInstance(AuditManager.class);
+	private AuditService getAuditService() {
+		return OneDev.getInstance(AuditService.class);
 	}
 	
 	@Override
@@ -250,7 +250,7 @@ public abstract class IssueListPanel extends Panel {
 	}
 	
 	private GlobalIssueSetting getGlobalIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
 	private void doQuery(AjaxRequestTarget target) {
@@ -503,7 +503,7 @@ public abstract class IssueListPanel extends Panel {
 						protected List<Project> load() {
 							List<Project> projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new AccessProject()));
 							
-							ProjectCache cache = getProjectManager().cloneCache();
+							ProjectCache cache = getProjectService().cloneCache();
 							CollectionUtils.filter(projects, new Predicate<Project>() {
 
 								@Override
@@ -592,15 +592,15 @@ public abstract class IssueListPanel extends Panel {
 							getProject().getIssueSetting().setListFields(bean.getFields());
 							getProject().getIssueSetting().setListLinks(bean.getLinks());
 							var newAuditContent = getAuditContent(getProject());
-							getProjectManager().update(getProject());
-							getAuditManager().audit(getProject(), "changed display fields/links of issue list", oldAuditContent, newAuditContent);
+							getProjectService().update(getProject());
+							getAuditService().audit(getProject(), "changed display fields/links of issue list", oldAuditContent, newAuditContent);
 						} else {		
 							var oldAuditContent = getAuditContent();					
 							getGlobalIssueSetting().setListFields(bean.getFields());
 							getGlobalIssueSetting().setListLinks(bean.getLinks());
 							var newAuditContent = getAuditContent();
-							OneDev.getInstance(SettingManager.class).saveIssueSetting(getGlobalIssueSetting());
-							getAuditManager().audit(null, "changed display fields/links of issue list", oldAuditContent, newAuditContent);
+							OneDev.getInstance(SettingService.class).saveIssueSetting(getGlobalIssueSetting());
+							getAuditService().audit(null, "changed display fields/links of issue list", oldAuditContent, newAuditContent);
 						}
 						target.add(body);
 						onDisplayFieldsAndLinksUpdated(target);
@@ -617,8 +617,8 @@ public abstract class IssueListPanel extends Panel {
 						getProject().getIssueSetting().setListFields(null);
 						getProject().getIssueSetting().setListLinks(null);
 						var newAuditContent = getAuditContent();
-						getProjectManager().update(getProject());
-						getAuditManager().audit(getProject(), "changed display fields/links of issue list", oldAuditContent, newAuditContent);
+						getProjectService().update(getProject());
+						getAuditService().audit(getProject(), "changed display fields/links of issue list", oldAuditContent, newAuditContent);
 						target.add(body);
 						onDisplayFieldsAndLinksUpdated(target);
 					}
@@ -880,7 +880,7 @@ public abstract class IssueListPanel extends Panel {
 									dropdown.close();
 									var issueIds = selectionColumn.getSelections().stream()
 											.map(it->it.getObject()).map(Issue::getId).collect(toList());
-									getTimeTrackingManager().requestToSyncTimes(issueIds);
+									getTimeTrackingService().requestToSyncTimes(issueIds);
 									selectionColumn.getSelections().clear();
 									Session.get().success(_T("Requested to sync estimated/spent time"));
 								}
@@ -1004,7 +1004,7 @@ public abstract class IssueListPanel extends Panel {
 											new ConfirmModalPanel(target) {
 
 												private Project getTargetProject() {
-													return OneDev.getInstance(ProjectManager.class).load(projectId);
+													return OneDev.getInstance(ProjectService.class).load(projectId);
 												}
 
 												@Override
@@ -1012,7 +1012,8 @@ public abstract class IssueListPanel extends Panel {
 													Collection<Issue> issues = new ArrayList<>();
 													for (IModel<Issue> each : selectionColumn.getSelections())
 														issues.add(each.getObject());
-													getIssueManager().move(issues, getProject(), getTargetProject());
+													var user = SecurityUtils.getUser();
+													getIssueService().move(user, issues, getProject(), getTargetProject());
 													setResponsePage(ProjectIssueListPage.class,
 															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
 													Session.get().success(_T("Issues moved"));
@@ -1086,7 +1087,7 @@ public abstract class IssueListPanel extends Panel {
 											new ConfirmModalPanel(target) {
 
 												private Project getTargetProject() {
-													return OneDev.getInstance(ProjectManager.class).load(projectId);
+													return OneDev.getInstance(ProjectService.class).load(projectId);
 												}
 
 												@Override
@@ -1094,7 +1095,7 @@ public abstract class IssueListPanel extends Panel {
 													Collection<Issue> issues = new ArrayList<>();
 													for (IModel<Issue> each : selectionColumn.getSelections())
 														issues.add(each.getObject());
-													getIssueManager().copy(issues, getProject(), getTargetProject());
+													getIssueService().copy(issues, getProject(), getTargetProject());
 													setResponsePage(ProjectIssueListPage.class,
 															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
 													Session.get().success(_T("Issues copied"));
@@ -1155,14 +1156,14 @@ public abstract class IssueListPanel extends Panel {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											getTransactionManager().run(()-> {
+											getTransactionService().run(()-> {
 												Collection<Issue> issues = new ArrayList<>();
 												for (IModel<Issue> each : selectionColumn.getSelections())
 													issues.add(each.getObject());
-												getIssueManager().delete(issues, getProject());
+												getIssueService().delete(issues, getProject());
 												for (var issue: issues) {
 													var oldAuditContent = VersionedXmlDoc.fromBean(issue).toXML();
-													getAuditManager().audit(issue.getProject(), "deleted issue \"" + issue.getReference().toString(issue.getProject()) + "\"", oldAuditContent, null);
+													getAuditService().audit(issue.getProject(), "deleted issue \"" + issue.getReference().toString(issue.getProject()) + "\"", oldAuditContent, null);
 												}													
 											});
 											selectionColumn.getSelections().clear();
@@ -1228,7 +1229,7 @@ public abstract class IssueListPanel extends Panel {
 									for (@SuppressWarnings("unchecked")
 									Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
 										issueIds.add(it.next().getId());
-									getTimeTrackingManager().requestToSyncTimes(issueIds);
+									getTimeTrackingService().requestToSyncTimes(issueIds);
 									Session.get().success(_T("Requested to sync estimated/spent time"));
 								}
 								
@@ -1365,7 +1366,7 @@ public abstract class IssueListPanel extends Panel {
 											new ConfirmModalPanel(target) {
 
 												private Project getTargetProject() {
-													return OneDev.getInstance(ProjectManager.class).load(projectId);
+													return OneDev.getInstance(ProjectService.class).load(projectId);
 												}
 
 												@Override
@@ -1374,7 +1375,8 @@ public abstract class IssueListPanel extends Panel {
 													for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); ) {
 														issues.add(it.next());
 													}
-													OneDev.getInstance(IssueManager.class).move(issues, getProject(), getTargetProject());
+													var user = SecurityUtils.getUser();
+													OneDev.getInstance(IssueService.class).move(user, issues, getProject(), getTargetProject());
 													setResponsePage(ProjectIssueListPage.class,
 															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
 													Session.get().success(_T("Issues moved"));
@@ -1449,7 +1451,7 @@ public abstract class IssueListPanel extends Panel {
 											new ConfirmModalPanel(target) {
 
 												private Project getTargetProject() {
-													return OneDev.getInstance(ProjectManager.class).load(projectId);
+													return OneDev.getInstance(ProjectService.class).load(projectId);
 												}
 
 												@Override
@@ -1458,7 +1460,7 @@ public abstract class IssueListPanel extends Panel {
 													for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); ) {
 														issues.add(it.next());
 													}
-													OneDev.getInstance(IssueManager.class).copy(issues, getProject(), getTargetProject());
+													OneDev.getInstance(IssueService.class).copy(issues, getProject(), getTargetProject());
 													setResponsePage(ProjectIssueListPage.class,
 															ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
 													Session.get().success(_T("Issues copied"));
@@ -1521,14 +1523,14 @@ public abstract class IssueListPanel extends Panel {
 
 										@Override
 										protected void onConfirm(AjaxRequestTarget target) {
-											getTransactionManager().run(()-> {
+											getTransactionService().run(()-> {
 												Collection<Issue> issues = new ArrayList<>();
 												for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
 													issues.add(it.next());
-												getIssueManager().delete(issues, getProject());
+												getIssueService().delete(issues, getProject());
 												for (var issue: issues) {
 													var oldAuditContent = VersionedXmlDoc.fromBean(issue).toXML();
-													getAuditManager().audit(issue.getProject(), "deleted issue \"" + issue.getReference().toString(issue.getProject()) + "\"", oldAuditContent, null);
+													getAuditService().audit(issue.getProject(), "deleted issue \"" + issue.getReference().toString(issue.getProject()) + "\"", oldAuditContent, null);
 												}													
 											});
 											dataProvider.detach();
@@ -1602,7 +1604,7 @@ public abstract class IssueListPanel extends Panel {
 											Collection<Issue> issues = new ArrayList<>();
 											for (@SuppressWarnings("unchecked") var it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
 												issues.add(it.next());
-											getWatchManager().setWatchStatus(SecurityUtils.getAuthUser(), issues, watchStatus);
+											getWatchService().setWatchStatus(SecurityUtils.getAuthUser(), issues, watchStatus);
 											Session.get().success(_T("Watch status changed"));
 										}
 
@@ -1660,9 +1662,9 @@ public abstract class IssueListPanel extends Panel {
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
-								var visitInfoManager = OneDev.getInstance(VisitInfoManager.class);
+								var visitInfoService = OneDev.getInstance(VisitInfoService.class);
 								for (@SuppressWarnings("unchecked") var it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext(); )
-									visitInfoManager.visitIssue(SecurityUtils.getAuthUser(), it.next());
+									visitInfoService.visitIssue(SecurityUtils.getAuthUser(), it.next());
 								target.add(body);
 							}
 
@@ -1757,7 +1759,7 @@ public abstract class IssueListPanel extends Panel {
 			
 			private List<Project> getTargetProjects(boolean excludeCurrent) {
 				Collection<Project> collection = SecurityUtils.getAuthorizedProjects(new AccessProject());
-				ProjectCache cache = getProjectManager().cloneCache();
+				ProjectCache cache = getProjectService().cloneCache();
 				
 				CollectionUtils.filter(collection, new Predicate<Project>() {
 
@@ -1831,7 +1833,7 @@ public abstract class IssueListPanel extends Panel {
 				try {
 					var query = queryModel.getObject();
 					if (query != null) {
-						return getIssueManager().query(getProjectScope(), query,
+						return getIssueService().query(SecurityUtils.getSubject(), getProjectScope(), query,
 								true, (int) first, (int) count).iterator();
 					}
 				} catch (ExplicitException e) {
@@ -1848,7 +1850,7 @@ public abstract class IssueListPanel extends Panel {
 				try {
 					var query = queryModel.getObject();
 					if (query != null)
-						return getIssueManager().count(getProjectScope(), query.getCriteria());
+						return getIssueService().count(SecurityUtils.getSubject(), getProjectScope(), query.getCriteria());
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				} finally {
@@ -1864,7 +1866,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					protected Issue load() {
-						return getIssueManager().load(issueId);
+						return getIssueService().load(issueId);
 					}
 
 				};
@@ -1914,7 +1916,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					protected Issue load() {
-						return getIssueManager().load(issueId);
+						return getIssueService().load(issueId);
 					}
 
 				});
@@ -1957,7 +1959,7 @@ public abstract class IssueListPanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						var issue = (Issue) fragment.getDefaultModelObject();
-						getIssueManager().togglePin(issue);
+						getIssueService().togglePin(issue);
 						send(getPage(), Broadcast.BREADTH, new IssuePinStatusChanged(target, issueId));
 					}
 
@@ -2076,7 +2078,7 @@ public abstract class IssueListPanel extends Panel {
 					@Override
 					protected List<Issue> load() {
 						Issue issue = (Issue) fragment.getDefaultModelObject();
-						getIssueLinkManager().loadDeepLinks(issue);
+						getIssueLinkService().loadDeepLinks(issue);
 						LinkDescriptor descriptor = new LinkDescriptor(linksPanel.getExpandedLink());
 						return issue.findLinkedIssues(descriptor.getSpec(), descriptor.isOpposite()).stream().filter(SecurityUtils::canAccessIssue).collect(toList());
 					}
@@ -2165,16 +2167,16 @@ public abstract class IssueListPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
-	private IssueWatchManager getWatchManager() {
-		return OneDev.getInstance(IssueWatchManager.class);
+	private IssueWatchService getWatchService() {
+		return OneDev.getInstance(IssueWatchService.class);
 	}
 	
-	private TimeTrackingManager getTimeTrackingManager() {
-		return OneDev.getInstance(TimeTrackingManager.class);
+	private TimeTrackingService getTimeTrackingService() {
+		return OneDev.getInstance(TimeTrackingService.class);
 	}
 	
 	@Nullable

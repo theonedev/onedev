@@ -15,7 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildQueryPersonalizationManager;
+import io.onedev.server.service.BuildQueryPersonalizationService;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
@@ -109,7 +109,7 @@ public class BuildQueryPersonalization extends AbstractEntity implements QueryPe
 
 	@Override
 	public void onUpdated() {
-		OneDev.getInstance(BuildQueryPersonalizationManager.class).createOrUpdate(this);
+		OneDev.getInstance(BuildQueryPersonalizationService.class).createOrUpdate(this);
 	}
 
 }

@@ -8,7 +8,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -23,7 +23,7 @@ public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
 
 			@Override
 			protected Issue load() {
-				return OneDev.getInstance(IssueManager.class).load(issueId);
+				return OneDev.getInstance(IssueService.class).load(issueId);
 			}
 			
 		});

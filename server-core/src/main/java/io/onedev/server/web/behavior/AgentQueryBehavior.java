@@ -11,8 +11,8 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentAttributeManager;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.service.AgentAttributeService;
+import io.onedev.server.service.AgentService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.search.entity.agent.AgentQueryLexer;
@@ -49,8 +49,8 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
-						AgentManager agentManager = OneDev.getInstance(AgentManager.class);
-						AgentAttributeManager attributeManager = OneDev.getInstance(AgentAttributeManager.class);
+						AgentService agentService = OneDev.getInstance(AgentService.class);
+						AgentAttributeService attributeManager = OneDev.getInstance(AgentAttributeService.class);
 						ParseExpect criteriaValueExpect;
 						if ("criteriaField".equals(spec.getLabel())) {
 							var fields = new ArrayList<>(Agent.QUERY_FIELDS);
@@ -83,13 +83,13 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 									AgentQuery.checkField(fieldName, operator);
 									switch (fieldName) {
 										case Agent.NAME_OS_NAME:
-											var osNames = new ArrayList<>(agentManager.getOsNames());
+											var osNames = new ArrayList<>(agentService.getOsNames());
 											sort(osNames);
 											return SuggestionUtils.suggest(osNames, matchWith);
 										case Agent.NAME_NAME:
 											return SuggestionUtils.suggestAgents(matchWith);
 										case Agent.NAME_OS_ARCH:
-											var osArchs = new ArrayList<>(agentManager.getOsArchs());
+											var osArchs = new ArrayList<>(agentService.getOsArchs());
 											sort(osArchs);
 											return SuggestionUtils.suggest(osArchs, matchWith);
 										default:

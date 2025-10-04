@@ -4,7 +4,7 @@ import java.text.MessageFormat;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 
@@ -30,7 +30,7 @@ public class PullRequestAssigned extends PullRequestEvent {
 	}
 
 	public User getAssignee() {
-		return OneDev.getInstance(UserManager.class).load(assigneeId);
+		return OneDev.getInstance(UserService.class).load(assigneeId);
 	}
 
 }

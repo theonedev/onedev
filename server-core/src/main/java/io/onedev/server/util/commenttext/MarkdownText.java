@@ -1,8 +1,8 @@
 package io.onedev.server.util.commenttext;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.mail.MailManager;
-import io.onedev.server.markdown.MarkdownManager;
+import io.onedev.server.mail.MailService;
+import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.model.Project;
 
 public class MarkdownText extends CommentText {
@@ -20,19 +20,19 @@ public class MarkdownText extends CommentText {
 		this.project = project;
 	}
 	
-	private MarkdownManager getMarkdownManager() {
-		return OneDev.getInstance(MarkdownManager.class);
+	private MarkdownService getMarkdownService() {
+		return OneDev.getInstance(MarkdownService.class);
 	}
 	
 	public String getRendered() {
 		if (rendered == null) 
-			rendered = getMarkdownManager().render(getContent());
+			rendered = getMarkdownService().render(getContent());
 		return rendered;
 	}
 	
 	public String getProcessed() {
 		if (processed == null)
-			processed = getMarkdownManager().process(getRendered(), project, null, null, true);
+			processed = getMarkdownService().process(getRendered(), project, null, null, true);
 		return processed;
 	}
 
@@ -44,9 +44,9 @@ public class MarkdownText extends CommentText {
 	@Override
 	public String getPlainContent() {
 		if (plainContent == null) {
-			MailManager mailManager = OneDev.getInstance(MailManager.class);
-			if (mailManager.isMailContent(getContent()))  
-				plainContent = mailManager.toPlainText(getContent());
+			MailService mailService = OneDev.getInstance(MailService.class);
+			if (mailService.isMailContent(getContent()))  
+				plainContent = mailService.toPlainText(getContent());
 			else
 				plainContent = getContent();
 		}

@@ -30,12 +30,12 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.joda.time.DateTime;
 
-import io.onedev.server.attachment.AttachmentManager;
+import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.PullRequestChangeManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.PullRequestChangeService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
@@ -57,7 +57,7 @@ import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectAndBranch;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 
 @Api(name="Pull Request", description="In most cases, pull request resource is operated with pull request id, which is different from pull request number. "
 		+ "To get pull request id of a particular pull request number, use the <a href='/~help/api/io.onedev.server.rest.PullRequestResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
@@ -68,39 +68,39 @@ import io.onedev.server.web.UrlManager;
 @Singleton
 public class PullRequestResource {
 
-	private final PullRequestManager pullRequestManager;
+	private final PullRequestService pullRequestService;
 	
-	private final PullRequestChangeManager pullRequestChangeManager;
+	private final PullRequestChangeService pullRequestChangeService;
 	
-	private final UserManager userManager;
+	private final UserService userService;
 	
 	private final GitService gitService;
 
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 
-	private final AttachmentManager attachmentManager;
+	private final AttachmentService attachmentService;
 
-	private final UrlManager urlManager;
+	private final UrlService urlService;
 	
 	@Inject
-	public PullRequestResource(PullRequestManager pullRequestManager, 
-			PullRequestChangeManager pullRequestChangeManager, 
-			UserManager userManager, GitService gitService, AuditManager auditManager, 
-			AttachmentManager attachmentManager, UrlManager urlManager) {
-		this.pullRequestManager = pullRequestManager;
-		this.pullRequestChangeManager = pullRequestChangeManager;
-		this.userManager = userManager;
+	public PullRequestResource(PullRequestService pullRequestService,
+                               PullRequestChangeService pullRequestChangeService,
+                               UserService userService, GitService gitService, AuditService auditService,
+                               AttachmentService attachmentService, UrlService urlService) {
+		this.pullRequestService = pullRequestService;
+		this.pullRequestChangeService = pullRequestChangeService;
+		this.userService = userService;
 		this.gitService = gitService;
-		this.auditManager = auditManager;
-		this.attachmentManager = attachmentManager;
-		this.urlManager = urlManager;
+		this.auditService = auditService;
+		this.attachmentService = attachmentService;
+		this.urlService = urlService;
 	}
 
 	@Api(order=100)
 	@Path("/{requestId}")
     @GET
     public PullRequest getPullRequest(@PathParam("requestId") Long requestId) {
-		PullRequest pullRequest = pullRequestManager.load(requestId);
+		PullRequest pullRequest = pullRequestService.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
     	return pullRequest;
@@ -110,7 +110,7 @@ public class PullRequestResource {
 	@Path("/{requestId}/labels")
 	@GET
 	public Collection<PullRequestLabel> getLabels(@PathParam("requestId") Long requestId) {
-		PullRequest pullRequest = pullRequestManager.load(requestId);
+		PullRequest pullRequest = pullRequestService.load(requestId);
 		if (!SecurityUtils.canReadCode(pullRequest.getProject()))
 			throw new UnauthorizedException();
 		return pullRequest.getLabels();
@@ -120,7 +120,7 @@ public class PullRequestResource {
 	@Path("/{requestId}/merge-preview")
     @GET
     public MergePreview getMergePreview(@PathParam("requestId") Long requestId) {
-		PullRequest pullRequest = pullRequestManager.load(requestId);
+		PullRequest pullRequest = pullRequestService.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
     	return pullRequest.checkMergePreview();
@@ -130,7 +130,7 @@ public class PullRequestResource {
 	@Path("/{requestId}/assignments")
     @GET
     public Collection<PullRequestAssignment> getAssignments(@PathParam("requestId") Long requestId) {
-		PullRequest pullRequest = pullRequestManager.load(requestId);
+		PullRequest pullRequest = pullRequestService.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
     	return pullRequest.getAssignments();
@@ -140,7 +140,7 @@ public class PullRequestResource {
 	@Path("/{requestId}/reviews")
     @GET
     public Collection<PullRequestReview> getReviews(@PathParam("requestId") Long requestId) {
-		PullRequest pullRequest = pullRequestManager.load(requestId);
+		PullRequest pullRequest = pullRequestService.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
     	return pullRequest.getReviews().stream()
@@ -152,7 +152,7 @@ public class PullRequestResource {
 	@Path("/{requestId}/comments")
     @GET
     public Collection<PullRequestComment> getComments(@PathParam("requestId") Long requestId) {
-		PullRequest pullRequest = pullRequestManager.load(requestId);
+		PullRequest pullRequest = pullRequestService.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
     	return pullRequest.getComments();
@@ -162,7 +162,7 @@ public class PullRequestResource {
 	@Path("/{requestId}/watches")
     @GET
     public Collection<PullRequestWatch> getWatches(@PathParam("requestId") Long requestId) {
-		PullRequest pullRequest = pullRequestManager.load(requestId);
+		PullRequest pullRequest = pullRequestService.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
     	return pullRequest.getWatches();
@@ -172,7 +172,7 @@ public class PullRequestResource {
 	@Path("/{requestId}/updates")
     @GET
     public Collection<PullRequestUpdate> getUpdates(@PathParam("requestId") Long requestId) {
-		PullRequest pullRequest = pullRequestManager.load(requestId);
+		PullRequest pullRequest = pullRequestService.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
     	return pullRequest.getSortedUpdates();
@@ -182,7 +182,7 @@ public class PullRequestResource {
 	@Path("/{requestId}/current-builds")
     @GET
     public Collection<Build> getCurrentBuilds(@PathParam("requestId") Long requestId) {
-		PullRequest pullRequest = pullRequestManager.load(requestId);
+		PullRequest pullRequest = pullRequestService.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
     	return pullRequest.getCurrentBuilds();
@@ -192,7 +192,7 @@ public class PullRequestResource {
 	@Path("/{requestId}/changes")
     @GET
     public Collection<PullRequestChange> getChanges(@PathParam("requestId") Long requestId) {
-		PullRequest pullRequest = pullRequestManager.load(requestId);
+		PullRequest pullRequest = pullRequestService.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
     	return pullRequest.getChanges();
@@ -202,7 +202,7 @@ public class PullRequestResource {
 	@Path("/{requestId}/fixed-issue-ids")
     @GET
     public Collection<Long> getFixedIssueIds(@PathParam("requestId") Long requestId) {
-		PullRequest pullRequest = pullRequestManager.load(requestId);
+		PullRequest pullRequest = pullRequestService.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
     	return pullRequest.getFixedIssueIds();
@@ -215,7 +215,8 @@ public class PullRequestResource {
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 
-		if (!SecurityUtils.isAdministrator() && count > RestConstants.MAX_PAGE_SIZE)
+		var subject = SecurityUtils.getSubject();
+		if (!SecurityUtils.isAdministrator(subject) && count > RestConstants.MAX_PAGE_SIZE)
     		throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	PullRequestQuery parsedQuery;
@@ -225,7 +226,7 @@ public class PullRequestResource {
 			throw new NotAcceptableException("Error parsing query", e);
 		}
     	
-    	return pullRequestManager.query(null, parsedQuery, false, offset, count);
+    	return pullRequestService.query(subject, null, parsedQuery, false, offset, count);
     }
 
 	@Api(order=1200)
@@ -242,11 +243,11 @@ public class PullRequestResource {
 		if (target.equals(source))
 			throw new NotAcceptableException("Source and target are the same");
 		
-		PullRequest request = pullRequestManager.findOpen(target, source);
+		PullRequest request = pullRequestService.findOpen(target, source);
 		if (request != null)
 			throw new NotAcceptableException("Another pull request already opened for this change");
 		
-		request = pullRequestManager.findEffective(target, source);
+		request = pullRequestService.findEffective(target, source);
 		if (request != null) { 
 			if (request.isOpen())
 				throw new NotAcceptableException("Another pull request already opened for this change");
@@ -284,11 +285,11 @@ public class PullRequestResource {
 		update.setTargetHeadCommitHash(request.getTarget().getObjectName());
 		request.getUpdates().add(update);
 
-		pullRequestManager.checkReviews(request, false);
+		pullRequestService.checkReviews(request, false);
 		
 		if (data.getReviewerIds() != null) {
 			for (Long reviewerId: data.getReviewerIds()) {
-				User reviewer = userManager.load(reviewerId);
+				User reviewer = userService.load(reviewerId);
 				if (reviewer.equals(request.getSubmitter())) 
 					return Response.status(NOT_ACCEPTABLE).entity("Pull request submitter can not be reviewer").build();
 				
@@ -305,7 +306,7 @@ public class PullRequestResource {
 			for (Long assigneeId : data.getAssigneeIds()) {
 				PullRequestAssignment assignment = new PullRequestAssignment();
 				assignment.setRequest(request);
-				assignment.setUser(userManager.load(assigneeId));
+				assignment.setUser(userService.load(assigneeId));
 				request.getAssignments().add(assignment);
 			}
 		} else {
@@ -317,7 +318,7 @@ public class PullRequestResource {
 			}
 		}
 				
-		pullRequestManager.open(request);
+		pullRequestService.open(request);
 		return Response.ok(request.getId()).build();
     }
 	
@@ -325,10 +326,12 @@ public class PullRequestResource {
 	@Path("/{requestId}/title")
     @POST
     public Response setTitle(@PathParam("requestId") Long requestId, @NotEmpty String title) {
-		PullRequest request = pullRequestManager.load(requestId);
-    	if (!SecurityUtils.canModifyPullRequest(request))
+		PullRequest request = pullRequestService.load(requestId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+    	if (!SecurityUtils.canModifyPullRequest(subject, request))
 			throw new UnauthorizedException();
-		pullRequestChangeManager.changeTitle(request, title);
+		pullRequestChangeService.changeTitle(user, request, title);
 		return Response.ok().build();
     }
 	
@@ -336,10 +339,12 @@ public class PullRequestResource {
 	@Path("/{requestId}/description")
     @POST
     public Response setDescription(@PathParam("requestId") Long requestId, String description) {
-		PullRequest request = pullRequestManager.load(requestId);
-    	if (!SecurityUtils.canModifyPullRequest(request))
+		PullRequest request = pullRequestService.load(requestId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+    	if (!SecurityUtils.canModifyPullRequest(subject, request))
 			throw new UnauthorizedException();
-		pullRequestChangeManager.changeDescription(request, description);
+		pullRequestChangeService.changeDescription(user, request, description);
 		return Response.ok().build();
     }
 	
@@ -347,12 +352,14 @@ public class PullRequestResource {
 	@Path("/{requestId}/merge-strategy")
     @POST
     public Response setMergeStrategy(@PathParam("requestId") Long requestId, @NotNull MergeStrategy mergeStrategy) {
-		PullRequest request = pullRequestManager.load(requestId);
-    	if (!SecurityUtils.canModifyPullRequest(request))
+		PullRequest request = pullRequestService.load(requestId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+    	if (!SecurityUtils.canModifyPullRequest(subject, request))
 			throw new UnauthorizedException();
 		if (!request.isOpen())
 			throw new NotAcceptableException("Pull request is closed");
-		pullRequestChangeManager.changeMergeStrategy(request, mergeStrategy);
+		pullRequestChangeService.changeMergeStrategy(user, request, mergeStrategy);
 		return Response.ok().build();
     }
 	
@@ -360,9 +367,10 @@ public class PullRequestResource {
 	@Path("/{requestId}/auto-merge")
 	@POST
 	public Response setAutoMerge(@PathParam("requestId") Long requestId, @NotNull AutoMergeData data) {
-		var user = SecurityUtils.getUser();
-		PullRequest request = pullRequestManager.load(requestId);
-		if (!SecurityUtils.canModifyPullRequest(request) || !SecurityUtils.canWriteCode(request.getProject()))
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+		PullRequest request = pullRequestService.load(requestId);
+		if (!SecurityUtils.canModifyPullRequest(subject, request) || !SecurityUtils.canWriteCode(subject, request.getProject()))
 			throw new UnauthorizedException();
 		if (!request.isOpen())
 			throw new NotAcceptableException("Pull request is closed");
@@ -377,7 +385,7 @@ public class PullRequestResource {
 		if (errorMessage != null)
 			throw new NotAcceptableException("Error validating auto merge commit message: " + errorMessage);
 
-		pullRequestChangeManager.changeAutoMerge(request, autoMerge);
+		pullRequestChangeService.changeAutoMerge(user, request, autoMerge);
 
 		return Response.ok().build();
 	}
@@ -386,14 +394,16 @@ public class PullRequestResource {
 	@Path("/{requestId}/reopen")
     @POST
     public Response reopenPullRequest(@PathParam("requestId") Long requestId, String note) {
-		PullRequest request = pullRequestManager.load(requestId);
-    	if (!SecurityUtils.canModifyPullRequest(request))
+		PullRequest request = pullRequestService.load(requestId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+    	if (!SecurityUtils.canModifyPullRequest(subject, request))
 			throw new UnauthorizedException();
     	String errorMessage = request.checkReopenCondition();
     	if (errorMessage != null)
     		throw new NotAcceptableException(errorMessage);
     	
-		pullRequestManager.reopen(request, note);
+		pullRequestService.reopen(user, request, note);
 		return Response.ok().build();
     }
 	
@@ -401,13 +411,15 @@ public class PullRequestResource {
 	@Path("/{requestId}/discard")
     @POST
     public Response discardPullRequest(@PathParam("requestId") Long requestId, String note) {
-		PullRequest request = pullRequestManager.load(requestId);
-    	if (!SecurityUtils.canModifyPullRequest(request))
+		PullRequest request = pullRequestService.load(requestId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+    	if (!SecurityUtils.canModifyPullRequest(subject, request))
 			throw new UnauthorizedException();
     	if (!request.isOpen())
 			throw new NotAcceptableException("Pull request already closed");
     	
-		pullRequestManager.discard(request, note);
+		pullRequestService.discard(user, request, note);
 		return Response.ok().build();
     }
 	
@@ -415,7 +427,7 @@ public class PullRequestResource {
 	@Path("/{requestId}/merge")
     @POST
     public Response mergePullRequest(@PathParam("requestId") Long requestId, String note) {
-		PullRequest request = pullRequestManager.load(requestId);
+		PullRequest request = pullRequestService.load(requestId);
 		var user = SecurityUtils.getUser();
     	if (!SecurityUtils.canWriteCode(user.asSubject(), request.getProject()))
 			throw new UnauthorizedException();
@@ -427,7 +439,7 @@ public class PullRequestResource {
 		if (errorMessage != null)
 			throw new NotAcceptableException("Error validating merge commit message: " + errorMessage);
 		
-		pullRequestManager.merge(user, request, note);
+		pullRequestService.merge(user, request, note);
 		return Response.ok().build();
     }
 	
@@ -435,10 +447,11 @@ public class PullRequestResource {
 	@Path("/{requestId}/delete-source-branch")
     @POST
     public Response deleteSourceBranch(@PathParam("requestId") Long requestId, String note) {
-		PullRequest request = pullRequestManager.load(requestId);
-		
-		if (!SecurityUtils.canModifyPullRequest(request) 
-				|| !SecurityUtils.canDeleteBranch(request.getSourceProject(), request.getSourceBranch())) {
+		PullRequest request = pullRequestService.load(requestId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+		if (!SecurityUtils.canModifyPullRequest(subject, request) 
+				|| !SecurityUtils.canDeleteBranch(subject, request.getSourceProject(), request.getSourceBranch())) {
 			throw new UnauthorizedException();
 		}
 		
@@ -446,7 +459,7 @@ public class PullRequestResource {
     	if (errorMessage != null)
 			throw new NotAcceptableException(errorMessage); 		
 		
-		pullRequestManager.deleteSourceBranch(request, note);
+		pullRequestService.deleteSourceBranch(user, request, note);
 		return Response.ok().build();
     }
 	
@@ -454,10 +467,11 @@ public class PullRequestResource {
 	@Path("/{requestId}/restore-source-branch")
     @POST
     public Response restoreSourceBranch(@PathParam("requestId") Long requestId, String note) {
-		PullRequest request = pullRequestManager.load(requestId);
-		
-		if (!SecurityUtils.canModifyPullRequest(request) || 
-				!SecurityUtils.canWriteCode(request.getSourceProject())) {
+		PullRequest request = pullRequestService.load(requestId);
+		var subject = SecurityUtils.getSubject();
+		var user = SecurityUtils.getUser(subject);
+		if (!SecurityUtils.canModifyPullRequest(subject, request) || 
+				!SecurityUtils.canWriteCode(subject, request.getSourceProject())) {
 			throw new UnauthorizedException();
 		}
 		
@@ -465,7 +479,7 @@ public class PullRequestResource {
     	if (errorMessage != null)
 			throw new NotAcceptableException(errorMessage);
 		
-		pullRequestManager.restoreSourceBranch(request, note);
+		pullRequestService.restoreSourceBranch(user, request, note);
 		return Response.ok().build();
     }
 
@@ -475,12 +489,12 @@ public class PullRequestResource {
     @POST
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
     public String uploadAttachment(@PathParam("requestId") Long requestId, @PathParam("preferredAttachmentName") String preferredAttachmentName, InputStream input) {
-		PullRequest request = pullRequestManager.load(requestId);
+		PullRequest request = pullRequestService.load(requestId);
     	if (!SecurityUtils.canModifyPullRequest(request))
 			throw new UnauthorizedException();
 			
-		var attachmentName = attachmentManager.saveAttachment(request.getProject().getId(), request.getUUID(), preferredAttachmentName, input);
-		var url = urlManager.urlForAttachment(request.getProject(), request.getUUID(), attachmentName, false);
+		var attachmentName = attachmentService.saveAttachment(request.getProject().getId(), request.getUUID(), preferredAttachmentName, input);
+		var url = urlService.urlForAttachment(request.getProject(), request.getUUID(), attachmentName, false);
 		return url;
     }
 	
@@ -488,12 +502,12 @@ public class PullRequestResource {
 	@Path("/{requestId}")
     @DELETE
     public Response deletePullRequest(@PathParam("requestId") Long requestId) {
-    	PullRequest pullRequest = pullRequestManager.load(requestId);
+    	PullRequest pullRequest = pullRequestService.load(requestId);
     	if (!SecurityUtils.canManagePullRequests(pullRequest.getProject()))
 			throw new UnauthorizedException();
 		var oldAuditContent = VersionedXmlDoc.fromBean(pullRequest).toXML();
-		pullRequestManager.delete(pullRequest);
-		auditManager.audit(pullRequest.getProject(), "deleted pull request via RESTful API", oldAuditContent, null);
+		pullRequestService.delete(pullRequest);
+		auditService.audit(pullRequest.getProject(), "deleted pull request via RESTful API", oldAuditContent, null);
     	return Response.ok().build();
     }
 	

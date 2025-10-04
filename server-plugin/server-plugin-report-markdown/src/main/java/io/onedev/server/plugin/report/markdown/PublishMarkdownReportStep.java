@@ -10,10 +10,10 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.buildspec.step.StepGroup;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.File;
@@ -59,8 +59,8 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 	
 	@Override
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
-		OneDev.getInstance(SessionManager.class).run(() -> {
-			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+		OneDev.getInstance(SessionService.class).run(() -> {
+			var build = OneDev.getInstance(BuildService.class).load(buildId);
 			write(getReportLockName(build), () -> {
 				File startPage = new File(inputDir, getStartPage());
 				if (startPage.exists()) {
@@ -78,7 +78,7 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 							throw new RuntimeException(e);
 						}
 					}
-					OneDev.getInstance(ProjectManager.class).directoryModified(
+					OneDev.getInstance(ProjectService.class).directoryModified(
 							build.getProject().getId(), reportDir.getParentFile());
 				} else {
 					logger.warning("Markdown report start page not found: " + startPage.getAbsolutePath());

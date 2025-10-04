@@ -20,7 +20,7 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
-import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoService;
 
 public class CodeStatsPanel extends GenericPanel<Project> {
 
@@ -37,8 +37,8 @@ public class CodeStatsPanel extends GenericPanel<Project> {
 		super(id, projectModel);
 	}
 
-	private CommitInfoManager getCommitInfoManager() {
-		return OneDev.getInstance(CommitInfoManager.class);
+	private CommitInfoService getCommitInfoManager() {
+		return OneDev.getInstance(CommitInfoService.class);
 	}
 	
 	private Project getProject() {

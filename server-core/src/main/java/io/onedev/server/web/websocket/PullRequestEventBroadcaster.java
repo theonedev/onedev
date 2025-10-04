@@ -10,16 +10,16 @@ import javax.inject.Singleton;
 @Singleton
 public class PullRequestEventBroadcaster {
 	
-	private final WebSocketManager webSocketManager;
+	private final WebSocketService webSocketService;
 	
 	@Inject
-	public PullRequestEventBroadcaster(WebSocketManager webSocketManager) {
-		this.webSocketManager = webSocketManager;
+	public PullRequestEventBroadcaster(WebSocketService webSocketService) {
+		this.webSocketService = webSocketService;
 	}
 
 	@Listen
 	public void on(PullRequestEvent event) {
-		webSocketManager.notifyObservableChange(PullRequest.getChangeObservable(event.getRequest().getId()), event.getSourcePage());
+		webSocketService.notifyObservableChange(PullRequest.getChangeObservable(event.getRequest().getId()), event.getSourcePage());
 	}
 
 }

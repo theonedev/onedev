@@ -33,17 +33,13 @@ public class WebHookManager {
 	private static final Logger logger = LoggerFactory.getLogger(WebHookManager.class);
 	
 	private static final String SIGNATURE_HEAD = "X-OneDev-Signature";
-	
-	private final ObjectMapper mapper;
-	
-	private final ExecutorService executor;
 
 	@Inject
-	public WebHookManager(ObjectMapper mapper, ExecutorService executor) {
-		this.mapper = mapper;
-		this.executor = executor;
-	}
-	
+	private ObjectMapper mapper;
+
+	@Inject
+	private ExecutorService executorService;
+
 	@Sessional
 	@Listen
 	public void on(ProjectEvent event) {
@@ -57,7 +53,7 @@ public class WebHookManager {
 		for (WebHook webHook: event.getProject().getHierarchyWebHooks()) {
 			for (WebHook.EventType eventType: webHook.getEventTypes()) {
 				if (eventType.includes(event)) {
-					executor.submit(() -> {
+					executorService.submit(() -> {
 						try (var client = HttpClients.createDefault()) {
 							HttpPost httpPost = new HttpPost(webHook.getPostUrl());
 

@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Throwables;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.exception.ServerNotFoundException;
 import io.onedev.server.security.SecurityUtils;
@@ -78,7 +78,7 @@ public class GeneralErrorPage extends SimplePage {
 
 				@Override
 				public void onClick() {
-					OneDev.getInstance(ProjectManager.class).updateActiveServers();
+					OneDev.getInstance(ProjectService.class).updateActiveServers();
 					setResponsePage(HomePage.class);
 				}
 				

@@ -3,7 +3,7 @@ package io.onedev.server.event.project.pullrequest;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -20,7 +20,7 @@ public abstract class PullRequestCodeCommentEvent extends PullRequestEvent {
 	}
 
 	public CodeComment getComment() {
-		return OneDev.getInstance(CodeCommentManager.class).load(commentId);
+		return OneDev.getInstance(CodeCommentService.class).load(commentId);
 	}
 
 }

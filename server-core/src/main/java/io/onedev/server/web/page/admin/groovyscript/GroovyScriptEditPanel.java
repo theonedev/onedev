@@ -17,8 +17,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -102,8 +102,8 @@ abstract class GroovyScriptEditPanel extends Panel {
 						getScripts().add(script);
 						verb = "added";
 					}
-					OneDev.getInstance(SettingManager.class).saveGroovyScripts(getScripts());
-					OneDev.getInstance(AuditManager.class).audit(null, verb + " groovy script \"" + script.getName() + "\"", oldAuditContent, newAuditContent);
+					OneDev.getInstance(SettingService.class).saveGroovyScripts(getScripts());
+					OneDev.getInstance(AuditService.class).audit(null, verb + " groovy script \"" + script.getName() + "\"", oldAuditContent, newAuditContent);
 					onSave(target);
 				} else {
 					target.add(form);

@@ -6,7 +6,7 @@ import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -153,7 +153,7 @@ public abstract class TransitionOptionPanel extends Panel implements InputContex
 
 	@Override
 	public InputSpec getInputSpec(String inputName) {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(inputName);
+		return OneDev.getInstance(SettingService.class).getIssueSetting().getFieldSpec(inputName);
 	}
 	
 	protected abstract Issue getIssue();

@@ -12,7 +12,7 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 
 @Editable
@@ -52,7 +52,7 @@ public class UndefinedStateResolution implements Serializable {
 		
 	@SuppressWarnings("unused")
 	private static List<String> getStateChoices() {
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
 		return new ArrayList<>(issueSetting.getStateSpecMap().keySet());
 	}
 	

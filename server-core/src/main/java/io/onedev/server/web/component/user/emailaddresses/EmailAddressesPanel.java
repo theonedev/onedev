@@ -26,9 +26,9 @@ import org.apache.wicket.validation.IValidationError;
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -47,8 +47,8 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 		super(id, model);
 	}
 
-	private AuditManager getAuditManager() {
-		return OneDev.getInstance(AuditManager.class);
+	private AuditService getAuditService() {
+		return OneDev.getInstance(AuditService.class);
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 					@Override
 					protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 						List<MenuItem> menuItems = new ArrayList<>();
-						var emailAddress = getEmailAddressManager().load(emailAddressId);
+						var emailAddress = getEmailAddressService().load(emailAddressId);
 						if (!emailAddress.equals(getUser().getPrimaryEmailAddress())) {
 							menuItems.add(new MenuItem() {
 
@@ -99,10 +99,10 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 										@Override
 										public void onClick() {
-											var emailAddress = getEmailAddressManager().load(emailAddressId);
-											getEmailAddressManager().setAsPrimary(emailAddress);
+											var emailAddress = getEmailAddressService().load(emailAddressId);
+											getEmailAddressService().setAsPrimary(emailAddress);
 											if (getPage() instanceof UserPage)
-												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as primary in account \"" + getUser().getName() + "\"", null, null);
+												getAuditService().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as primary in account \"" + getUser().getName() + "\"", null, null);
 										}
 										
 									};
@@ -124,10 +124,10 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 										@Override
 										public void onClick() {
-											var emailAddress = getEmailAddressManager().load(emailAddressId);
-											getEmailAddressManager().useForGitOperations(emailAddress);
+											var emailAddress = getEmailAddressService().load(emailAddressId);
+											getEmailAddressService().useForGitOperations(emailAddress);
 											if (getPage() instanceof UserPage)
-												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" for git operations in account \"" + getUser().getName() + "\"", null, null);
+												getAuditService().audit(null, "specified email address \"" + emailAddress.getValue() + "\" for git operations in account \"" + getUser().getName() + "\"", null, null);
 										}
 										
 									};
@@ -149,10 +149,10 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 										@Override
 										public void onClick() {
-											var emailAddress = getEmailAddressManager().load(emailAddressId);
-											getEmailAddressManager().setAsPublic(emailAddress);
+											var emailAddress = getEmailAddressService().load(emailAddressId);
+											getEmailAddressService().setAsPublic(emailAddress);
 											if (getPage() instanceof UserPage)
-												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as public in account \"" + getUser().getName() + "\"", null, null);
+												getAuditService().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as public in account \"" + getUser().getName() + "\"", null, null);
 										}
 										
 									};
@@ -173,10 +173,10 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 										@Override
 										public void onClick() {
-											var emailAddress = getEmailAddressManager().load(emailAddressId);
-											getEmailAddressManager().setAsPrivate(emailAddress);
+											var emailAddress = getEmailAddressService().load(emailAddressId);
+											getEmailAddressService().setAsPrivate(emailAddress);
 											if (getPage() instanceof UserPage)
-												getAuditManager().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as private in account \"" + getUser().getName() + "\"", null, null);
+												getAuditService().audit(null, "specified email address \"" + emailAddress.getValue() + "\" as private in account \"" + getUser().getName() + "\"", null, null);
 										}
 										
 									};
@@ -199,8 +199,8 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 
 										@Override
 										public void onClick(AjaxRequestTarget target) {
-											if (OneDev.getInstance(SettingManager.class).getMailService() != null) {
-												getEmailAddressManager().sendVerificationEmail(item.getModelObject());
+											if (OneDev.getInstance(SettingService.class).getMailConnector() != null) {
+												getEmailAddressService().sendVerificationEmail(item.getModelObject());
 												Session.get().success(_T("Verification email sent, please check it"));
 											} else {
 												target.appendJavaScript(String.format("alert('%s');", 
@@ -229,10 +229,10 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 									@Override
 									public void onClick() {
 										if (hasMultipleEmailAddresses) {
-											var emailAddress = getEmailAddressManager().load(emailAddressId);
-											getEmailAddressManager().delete(emailAddress);
+											var emailAddress = getEmailAddressService().load(emailAddressId);
+											getEmailAddressService().delete(emailAddress);
 											if (getPage() instanceof UserPage)
-												getAuditManager().audit(null, "deleted email address \"" + emailAddress.getValue() + "\" from account \"" + getUser().getName() + "\"", null, null);
+												getAuditService().audit(null, "deleted email address \"" + emailAddress.getValue() + "\" from account \"" + getUser().getName() + "\"", null, null);
 										} else {
 											Session.get().warn(_T("At least one email address should be configured, please add a new one first"));
 										}
@@ -265,7 +265,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				if (getEmailAddressManager().findByValue(emailAddressValue) != null) {
+				if (getEmailAddressService().findByValue(emailAddressValue) != null) {
 					error(_T("This email address is being used"));
 				} else {
 					EmailAddress address = new EmailAddress();
@@ -273,9 +273,9 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 					address.setOwner(getUser());
 					if (SecurityUtils.isAdministrator())
 						address.setVerificationCode(null);
-					getEmailAddressManager().create(address);
+					getEmailAddressService().create(address);
 					if (getPage() instanceof UserPage)
-						getAuditManager().audit(null, "added email address \"" + address.getValue() + "\" in account \"" + getUser().getName() + "\"", null, null);
+						getAuditService().audit(null, "added email address \"" + address.getValue() + "\" in account \"" + getUser().getName() + "\"", null, null);
 					emailAddressValue = null;
 				}
 			}
@@ -318,8 +318,8 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 		add(form);
 	}
 	
-	private EmailAddressManager getEmailAddressManager() {
-		return OneDev.getInstance(EmailAddressManager.class);
+	private EmailAddressService getEmailAddressService() {
+		return OneDev.getInstance(EmailAddressService.class);
 	}
 
 	private User getUser() {

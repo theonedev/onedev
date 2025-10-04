@@ -7,7 +7,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.SubscriptionManager;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.GroupChoiceInput;
 import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.choiceprovider.AllGroups;
@@ -67,7 +67,7 @@ public class GroupChoiceField extends FieldSpec {
 
 	@SuppressWarnings("unused")
 	private static boolean isSubscriptionActive() {
-		return OneDev.getInstance(SubscriptionManager.class).isSubscriptionActive();
+		return OneDev.getInstance(SubscriptionService.class).isSubscriptionActive();
 	}
 	
 	@Override

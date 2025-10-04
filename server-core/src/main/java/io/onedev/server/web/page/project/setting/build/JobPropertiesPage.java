@@ -15,7 +15,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.web.editable.PropertyContext;
 
@@ -46,8 +46,8 @@ public class JobPropertiesPage extends ProjectBuildSettingPage {
 				super.onSubmit();
 				getProject().getBuildSetting().setJobProperties(bean.getProperties());
 				var newAuditContent = VersionedXmlDoc.fromBean(getProject().getBuildSetting().getJobProperties()).toXML();
-				OneDev.getInstance(ProjectManager.class).update(getProject());
-				getAuditManager().audit(getProject(), "changed job properties", oldAuditContent, newAuditContent);
+				OneDev.getInstance(ProjectService.class).update(getProject());
+				auditService.audit(getProject(), "changed job properties", oldAuditContent, newAuditContent);
 				setResponsePage(JobPropertiesPage.class, JobPropertiesPage.paramsOf(getProject()));
 				getSession().success(_T("Job properties saved"));
 			}

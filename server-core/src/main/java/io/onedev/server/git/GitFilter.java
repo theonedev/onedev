@@ -43,19 +43,19 @@ import org.glassfish.jersey.client.ClientProperties;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.git.command.AdvertiseReceiveRefsCommand;
 import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.OutputStreamWrapper;
-import io.onedev.server.util.concurrent.WorkExecutor;
+import io.onedev.server.util.concurrent.WorkExecutionService;
 
 @Singleton
 public class GitFilter implements Filter {
@@ -66,25 +66,25 @@ public class GitFilter implements Filter {
 	
 	private final OneDev onedev;
 	
-	private final ProjectManager projectManager;
+	private final ProjectService projectService;
 	
-	private final WorkExecutor workExecutor;
+	private final WorkExecutionService workExecutionService;
 	
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
-	private final ClusterManager clusterManager;
+	private final ClusterService clusterService;
 	
 	private final Set<CodePullAuthorizationSource> codePullAuthorizationSources;
 	
 	@Inject
-	public GitFilter(OneDev oneDev, ProjectManager projectManager, WorkExecutor workExecutor, 
-					 SessionManager sessionManager, ClusterManager clusterManager, 
-					 Set<CodePullAuthorizationSource> codePullAuthorizationSources) {
+	public GitFilter(OneDev oneDev, ProjectService projectService, WorkExecutionService workExecutionService,
+                     SessionService sessionService, ClusterService clusterService,
+                     Set<CodePullAuthorizationSource> codePullAuthorizationSources) {
 		this.onedev = oneDev;
-		this.projectManager = projectManager;
-		this.workExecutor = workExecutor;
-		this.sessionManager = sessionManager;
-		this.clusterManager = clusterManager;
+		this.projectService = projectService;
+		this.workExecutionService = workExecutionService;
+		this.sessionService = sessionService;
+		this.clusterService = clusterService;
 		this.codePullAuthorizationSources = codePullAuthorizationSources;
 	}
 	
@@ -94,10 +94,10 @@ public class GitFilter implements Filter {
 	}
 	
 	private Long getProjectId(String projectPath, boolean clusterAccess, boolean upload) {
-		var facade = projectManager.findFacadeByPath(projectPath);
+		var facade = projectService.findFacadeByPath(projectPath);
 		if (facade == null && projectPath.endsWith(".git")) {
 			projectPath = StringUtils.substringBeforeLast(projectPath, ".");
-			facade = projectManager.findFacadeByPath(projectPath);
+			facade = projectService.findFacadeByPath(projectPath);
 		}
 		if (StringUtils.isBlank(projectPath))
 			throw new ExplicitException("Project not specified");
@@ -157,9 +157,9 @@ public class GitFilter implements Filter {
 		String protocol = request.getHeader("Git-Protocol");		
 		
 		if (!clusterAccess) {
-			sessionManager.openSession();
+			sessionService.openSession();
 			try {
-				Project project = projectManager.load(projectId);
+				Project project = projectService.load(projectId);
 				if (!canAccessProject(request, project))
 					reportProjectNotFoundOrInaccessible(projectPath);
 				if (upload) {
@@ -169,14 +169,14 @@ public class GitFilter implements Filter {
 						throw new UnauthorizedException("You do not have permission to push to this project.");
 				}			
 			} finally {
-				sessionManager.closeSession();
+				sessionService.closeSession();
 			}
 			
-			String activeServer = projectManager.getActiveServer(projectId, true);
-			if (activeServer.equals(clusterManager.getLocalServerAddress())) {
-				File gitDir = projectManager.getGitDir(projectId);
+			String activeServer = projectService.getActiveServer(projectId, true);
+			if (activeServer.equals(clusterService.getLocalServerAddress())) {
+				File gitDir = projectService.getGitDir(projectId);
 				if (upload) {
-					workExecutor.submit(PACK_PRIORITY, new Runnable() {
+					workExecutionService.submit(PACK_PRIORITY, new Runnable() {
 						
 						@Override
 						public void run() {
@@ -185,7 +185,7 @@ public class GitFilter implements Filter {
 						
 					}).get();
 				} else {
-					workExecutor.submit(PACK_PRIORITY, new Runnable() {
+					workExecutionService.submit(PACK_PRIORITY, new Runnable() {
 						
 						@Override
 						public void run() {
@@ -198,7 +198,7 @@ public class GitFilter implements Filter {
 				Client client = ClientBuilder.newClient();
 				client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
 				try {
-					String serverUrl = clusterManager.getServerUrl(activeServer);
+					String serverUrl = clusterService.getServerUrl(activeServer);
 					WebTarget target = client.target(serverUrl)
 							.path("~api/cluster/git-pack")
 							.queryParam("projectId", projectId)
@@ -207,7 +207,7 @@ public class GitFilter implements Filter {
 							.queryParam("upload", upload);
 					Invocation.Builder builder =  target.request();
 					builder.header(HttpHeaders.AUTHORIZATION, 
-							KubernetesHelper.BEARER + " " + clusterManager.getCredential());
+							KubernetesHelper.BEARER + " " + clusterService.getCredential());
 					
 					StreamingOutput os = output -> {
 						try {
@@ -240,7 +240,7 @@ public class GitFilter implements Filter {
 				}
 			}
 		} else {
-			File gitDir = projectManager.getGitDir(projectId);
+			File gitDir = projectService.getGitDir(projectId);
 			if (upload) { 
 				// Run immediately if accessed with cluster credential to avoid 
 				// possible deadlock as caller itself might also hold some 
@@ -303,9 +303,9 @@ public class GitFilter implements Filter {
 		Long projectId = getProjectId(projectPath, clusterAccess, upload);
 				
 		if (!clusterAccess) {
-			sessionManager.openSession();
+			sessionService.openSession();
 			try {
-				Project project = projectManager.load(projectId);
+				Project project = projectService.load(projectId);
 				if (!canAccessProject(request, project))
 					reportProjectNotFoundOrInaccessible(projectPath);
 				if (upload) {
@@ -317,7 +317,7 @@ public class GitFilter implements Filter {
 					writeInitial(response, service);
 				}
 			} finally {
-				sessionManager.closeSession();
+				sessionService.closeSession();
 			}
 		} else { // cluster access, avoid accessing database
 			writeInitial(response, service);
@@ -333,9 +333,9 @@ public class GitFilter implements Filter {
 		
 		String protocol = request.getHeader("Git-Protocol");		
 
-		String activeServer = projectManager.getActiveServer(projectId, true);
-		if (activeServer.equals(clusterManager.getLocalServerAddress())) {
-			File gitDir = projectManager.getGitDir(projectId);
+		String activeServer = projectService.getActiveServer(projectId, true);
+		if (activeServer.equals(clusterService.getLocalServerAddress())) {
+			File gitDir = projectService.getGitDir(projectId);
 			if (upload) 
 				new AdvertiseUploadRefsCommand(gitDir, output).protocol(protocol).run();
 			else 
@@ -343,7 +343,7 @@ public class GitFilter implements Filter {
 		} else {
 			Client client = ClientBuilder.newClient();
 			try {
-				String serverUrl = clusterManager.getServerUrl(activeServer);
+				String serverUrl = clusterService.getServerUrl(activeServer);
 				WebTarget target = client.target(serverUrl)
 						.path("~api/cluster/git-advertise-refs")
 						.queryParam("projectId", projectId)
@@ -351,7 +351,7 @@ public class GitFilter implements Filter {
 						.queryParam("upload", upload);
 				Invocation.Builder builder =  target.request();
 				builder.header(HttpHeaders.AUTHORIZATION, 
-						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
+						KubernetesHelper.BEARER + " " + clusterService.getCredential());
 				try (Response gitResponse = builder.get()) {
 					KubernetesHelper.checkStatus(gitResponse);
 					try (InputStream is = gitResponse.readEntity(InputStream.class)) {

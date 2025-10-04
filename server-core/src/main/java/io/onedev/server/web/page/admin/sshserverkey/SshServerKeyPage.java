@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.web.editable.BeanContext;
@@ -27,7 +27,7 @@ public class SshServerKeyPage extends AdministrationPage {
     protected void onInitialize() {
         super.onInitialize();
         
-        SshSetting sshSetting = OneDev.getInstance(SettingManager.class).getSshSetting();
+        SshSetting sshSetting = OneDev.getInstance(SettingService.class).getSshSetting();
 
         Form<?> form = new Form<Void>("form");
 		form.add(new Button("save") {
@@ -35,8 +35,8 @@ public class SshServerKeyPage extends AdministrationPage {
 			@Override
 			public void onSubmit() {
 				super.onSubmit();
-				getSettingManager().saveSshSetting(sshSetting);
-				getAuditManager().audit(null, "changed SSH server key", null, null);
+				getSettingService().saveSshSetting(sshSetting);
+				auditService.audit(null, "changed SSH server key", null, null);
 				getSession().success(_T("SSH settings have been saved and SSH server restarted"));
 				setResponsePage(SshServerKeyPage.class);
 			}
@@ -50,8 +50,8 @@ public class SshServerKeyPage extends AdministrationPage {
 			@Override
 			public void onClick() {
 				sshSetting.setPemPrivateKey(SshKeyUtils.generatePEMPrivateKey());
-				getSettingManager().saveSshSetting(sshSetting);
-				getAuditManager().audit(null, "regenerated SSH server key", null, null);
+				getSettingService().saveSshSetting(sshSetting);
+				auditService.audit(null, "regenerated SSH server key", null, null);
 				setResponsePage(SshServerKeyPage.class);
 	            getSession().success(_T("Private key regenerated and SSH server restarted"));
 			}
@@ -62,8 +62,8 @@ public class SshServerKeyPage extends AdministrationPage {
         add(form);
     }
 
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 
 	@Override

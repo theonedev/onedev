@@ -1,18 +1,18 @@
 package io.onedev.server.notification;
 
 import com.google.common.collect.Lists;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.pack.PackEvent;
-import io.onedev.server.mail.MailManager;
+import io.onedev.server.mail.MailService;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadPack;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import org.apache.shiro.authz.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,23 +32,18 @@ import static java.util.stream.Collectors.toList;
 public class PackNotificationManager {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PackNotificationManager.class);
-	
-	private final MailManager mailManager;
-	
-	private final UrlManager urlManager;
-	
-	private final UserManager userManager;
-	
-	private final SettingManager settingManager;
-	
+
 	@Inject
-	public PackNotificationManager(MailManager mailManager, UrlManager urlManager,
-                                   UserManager userManager, SettingManager settingManager) {
-		this.mailManager = mailManager;
-		this.urlManager = urlManager;
-		this.userManager = userManager;
-		this.settingManager = settingManager;
-	}
+	private MailService mailService;
+
+	@Inject
+	private UrlService urlService;
+
+	@Inject
+	private UserService userService;
+
+	@Inject
+	private SettingService settingService;
 
 	private void fillSubscribedQueryStrings(Map<User, Collection<String>> subscribedQueryStrings, 
 			User user, @Nullable NamedQuery query) {
@@ -76,11 +71,11 @@ public class PackNotificationManager {
 			else
 				summary = "Package published via build " + pack.getBuild().getReference();
 
-			String url = urlManager.urlFor(pack, true);
+			String url = urlService.urlFor(pack, true);
 			String threadingReferences = "<" + pack.getProject().getPath() + "-pack-" + pack.getId() + "@onedev>";
 			String htmlBody = getEmailBody(true, event, summary, null, url, false, null);
 			String textBody = getEmailBody(false, event, summary, null, url, false, null);
-			mailManager.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), emails, subject, htmlBody,
+			mailService.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), emails, subject, htmlBody,
 					textBody, null, null, threadingReferences);
 		}
 	}
@@ -133,12 +128,12 @@ public class PackNotificationManager {
 			}
 			
 			subscribedQueryStrings.clear();
-			for (User user: userManager.query()) {
+			for (User user: userService.query()) {
 				for (String name: user.getPackQueryPersonalization().getQuerySubscriptionSupport().getQuerySubscriptions()) {
 					String globalName = NamedQuery.getCommonName(name);
 					if (globalName != null) {
 						fillSubscribedQueryStrings(subscribedQueryStrings, user, 
-								NamedQuery.find(settingManager.getPackSetting().getNamedQueries(), globalName));
+								NamedQuery.find(settingService.getPackSetting().getNamedQueries(), globalName));
 					}
 					String personalName = NamedQuery.getPersonalName(name);
 					if (personalName != null) {

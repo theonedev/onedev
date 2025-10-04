@@ -3,7 +3,7 @@ package io.onedev.server.event.project.pullrequest;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 
 public class PullRequestBuildEvent extends PullRequestEvent {
@@ -23,7 +23,7 @@ public class PullRequestBuildEvent extends PullRequestEvent {
 	}
 	
 	public Build getBuild() {
-		return OneDev.getInstance(BuildManager.class).load(buildId);
+		return OneDev.getInstance(BuildService.class).load(buildId);
 	}
 
 	@Override

@@ -14,9 +14,9 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.GpgKeyManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.GpgKeyService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.GpgKey;
 import io.onedev.server.model.User;
@@ -57,18 +57,18 @@ public abstract class InsertGpgKeyPanel extends Panel {
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 super.onSubmit(target, form);
                 
-                GpgKeyManager gpgKeyManager = OneDev.getInstance(GpgKeyManager.class);
+                GpgKeyService gpgKeyService = OneDev.getInstance(GpgKeyService.class);
                 GpgKey gpgKey = (GpgKey) editor.getModelObject();
                 gpgKey.setOwner(getUser());
                 gpgKey.setKeyId(gpgKey.getKeyIds().get(0));
                 
-                if (gpgKey.getKeyIds().stream().anyMatch(it->gpgKeyManager.findSigningKey(it)!=null)) { 
+                if (gpgKey.getKeyIds().stream().anyMatch(it->gpgKeyService.findSigningKey(it)!=null)) { 
 					editor.error(new Path(new PathNode.Named("content")), _T("This key or one of its subkey is already in use"));
 					target.add(form);
                 } else {
                 	boolean hasErrors = false;
                 	for (String emailAddressValue: GpgUtils.getEmailAddresses(gpgKey.getPublicKeys().get(0))) {
-                    	EmailAddress emailAddress = OneDev.getInstance(EmailAddressManager.class).findByValue(emailAddressValue);
+                    	EmailAddress emailAddress = OneDev.getInstance(EmailAddressService.class).findByValue(emailAddressValue);
                     	if (emailAddress == null || !emailAddress.isVerified() || !emailAddress.getOwner().equals(getUser())) {
                     		editor.error(new Path(new PathNode.Named("content")), MessageFormat.format(_T("This key is associated with {0}, however it is NOT a verified email address of this user"), emailAddressValue));
                     		target.add(form);
@@ -78,9 +78,9 @@ public abstract class InsertGpgKeyPanel extends Panel {
                 	}
                 	if (!hasErrors) {
                         gpgKey.setCreatedAt(new Date());
-                        gpgKeyManager.create(gpgKey);
+                        gpgKeyService.create(gpgKey);
                         if (getPage() instanceof UserPage)
-							OneDev.getInstance(AuditManager.class).audit(null, "added GPG key \"" + GpgUtils.getKeyIDString(gpgKey.getKeyId()) + "\" in account \"" + gpgKey.getOwner().getName() + "\"", null, null);
+							OneDev.getInstance(AuditService.class).audit(null, "added GPG key \"" + GpgUtils.getKeyIDString(gpgKey.getKeyId()) + "\" in account \"" + gpgKey.getOwner().getName() + "\"", null, null);
                         onSave(target);
                 	}
                 }

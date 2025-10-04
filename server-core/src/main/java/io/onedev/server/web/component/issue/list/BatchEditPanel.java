@@ -45,8 +45,8 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
@@ -313,8 +313,10 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						Map<String, Object> fieldValues = FieldUtils.getFieldValues(customFieldsEditor.newComponentContext(), 
 								customFieldsBean, selectedFields);
 						try {
-							OneDev.getInstance(IssueChangeManager.class).batchUpdate(
-									getIssueIterator(), state, confidential, iterations, fieldValues, comment, sendNotifications);
+							var user = SecurityUtils.getUser();
+							OneDev.getInstance(IssueChangeService.class).batchUpdate(
+									user, getIssueIterator(), state, confidential, iterations, 
+									fieldValues, comment, sendNotifications);
 						} catch (ValidationException e) {
 							form.error(e.getMessage());
 							target.add(form);
@@ -367,7 +369,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 	}
 	
 	private GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();		
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 
 	@Override

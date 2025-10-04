@@ -25,8 +25,8 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.IssueQuery;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.LinkSpecService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.LinkSpec;
@@ -144,7 +144,7 @@ public class BoardSpec implements Serializable {
 		List<String> displayColumns = new ArrayList<>();
 		for (String column: getColumns()) {
 			if (column == null) {
-				GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+				GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
 				FieldSpec field = issueSetting.getFieldSpec(getIdentifyField());
 				if (field != null)
 					displayColumns.add("<" + HtmlEscape.escapeHtml5(field.getNameOfEmptyValue()) + ">");
@@ -221,7 +221,7 @@ public class BoardSpec implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getDisplayLinkChoices() {
 		List<String> choices = new ArrayList<>();
-		for (LinkSpec linkSpec: OneDev.getInstance(LinkSpecManager.class).queryAndSort()) {
+		for (LinkSpec linkSpec: OneDev.getInstance(LinkSpecService.class).queryAndSort()) {
 			choices.add(linkSpec.getName());
 			if (linkSpec.getOpposite() != null)
 				choices.add(linkSpec.getOpposite().getName());
@@ -253,7 +253,7 @@ public class BoardSpec implements Serializable {
 	}
 	
 	private static GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
 	public static int getBoardIndex(List<BoardSpec> boards, String name) {

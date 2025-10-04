@@ -115,7 +115,7 @@ public class AccessToken extends AbstractEntity implements AuthenticationInfo {
 	}
 
 	public Subject asSubject() {
-		// Temporal access token, check AccessTokenManager.createTemporal
+		// Temporal access token, check AccessTokenService.createTemporal
 		if (isNew() || isHasOwnerPermissions())
 			return getOwner().asSubject();
 		else

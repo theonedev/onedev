@@ -1,0 +1,18 @@
+<wicket:panel>
+	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>Run below commands to install this package</wicket:t></div>
+	<div class="code mb-5">
+		<div wicket:id="registryConfig" class="text-break font-size-sm mt-2"></div>
+		<div wicket:id="registryAuth" class="text-break font-size-sm mt-2"></div>
+		<span class="text-muted font-size-sm"><wicket:t>Make sure the access token has package read permission over the project</wicket:t></span>
+		<div wicket:id="installPack" class="text-break font-size-sm mt-2"></div>
+	</div>
+	<div class="font-size-lg font-weight-bolder mb-3"><wicket:t>For CI/CD job, run below via a command step</wicket:t></div>
+	<div wicket:id="jobCommands"></div>
+	
+	<wicket:enclosure child="readme">
+		<div class="bg-light rounded p-4 mt-5">
+			<h6 class="border-bottom pb-3">README</h6>
+			<div wicket:id="readme"></div>
+		</div>
+	</wicket:enclosure>
+</wicket:panel>

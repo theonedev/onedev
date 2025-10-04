@@ -1,8 +1,8 @@
 package io.onedev.server.web.page.project.codecomments;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.CodeCommentQueryPersonalizationService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.CodeCommentQueryPersonalization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
@@ -54,8 +54,8 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 		query = getPageParameters().get(PARAM_QUERY).toString();
 	}
 
-	private CodeCommentQueryPersonalizationManager getCodeCommentQueryPersonalizationManager() {
-		return OneDev.getInstance(CodeCommentQueryPersonalizationManager.class);		
+	private CodeCommentQueryPersonalizationService getCodeCommentQueryPersonalizationManager() {
+		return OneDev.getInstance(CodeCommentQueryPersonalizationService.class);
 	}
 	
 	@Override
@@ -95,7 +95,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 			@Override
 			protected void onSaveCommonQueries(ArrayList<NamedCodeCommentQuery> projectQueries) {
 				getProject().setNamedCodeCommentQueries(projectQueries);
-				OneDev.getInstance(ProjectManager.class).update(getProject());
+				OneDev.getInstance(ProjectService.class).update(getProject());
 			}
 
 		});
@@ -184,7 +184,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										OneDev.getInstance(ProjectManager.class).update(getProject());
+										OneDev.getInstance(ProjectService.class).update(getProject());
 										target.add(savedQueries);
 										close();
 									}

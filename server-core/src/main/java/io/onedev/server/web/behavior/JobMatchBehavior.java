@@ -73,10 +73,6 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 							} else if (operator == OnBranch) {
 								if (Project.get() != null && !matchWith.contains("*") && !matchWith.contains("?"))
 									return SuggestionUtils.suggestBranches(Project.get(), matchWith);
-							} else if (operator == SubmittedByUser) {
-								return SuggestionUtils.suggestUsers(matchWith);
-							} else if (operator == SubmittedByGroup) {
-								return SuggestionUtils.suggestGroups(matchWith);
 							} 
 						} 
 						return null;

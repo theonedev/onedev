@@ -20,8 +20,8 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -107,7 +107,7 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 			protected void onSubmit() {
 				super.onSubmit();
 				Issue issue = editor.getConvertedInput();
-				OneDev.getInstance(IssueManager.class).open(issue);
+				OneDev.getInstance(IssueService.class).open(issue);
 				setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue));
 			}
 			
@@ -119,7 +119,7 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 	}
 
 	private GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
 	@Override

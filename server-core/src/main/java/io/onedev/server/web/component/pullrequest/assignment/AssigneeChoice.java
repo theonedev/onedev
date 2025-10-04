@@ -9,7 +9,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestAssignmentManager;
+import io.onedev.server.service.PullRequestAssignmentService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.User;
@@ -55,7 +55,7 @@ public abstract class AssigneeChoice extends SelectToActChoice<User> {
 		assignment.setUser(user);
 
 		if (!getPullRequest().isNew()) {
-			OneDev.getInstance(PullRequestAssignmentManager.class).create(assignment);
+			OneDev.getInstance(PullRequestAssignmentService.class).create(assignment);
 			((BasePage)getPage()).notifyObservableChange(target,
 					PullRequest.getChangeObservable(getPullRequest().getId()));
 		} else {

@@ -8,10 +8,10 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Markdown;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.build.BuildUpdated;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.File;
@@ -43,8 +43,8 @@ public class SetBuildDescriptionStep extends ServerSideStep {
 	
 	@Override
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger jobLogger) {
-		return OneDev.getInstance(TransactionManager.class).call(() -> {
-			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+		return OneDev.getInstance(TransactionService.class).call(() -> {
+			var build = OneDev.getInstance(BuildService.class).load(buildId);
 			build.setDescription(buildDescription);
 			OneDev.getInstance(ListenerRegistry.class).post(new BuildUpdated(build));
 			return new ServerStepResult(true);

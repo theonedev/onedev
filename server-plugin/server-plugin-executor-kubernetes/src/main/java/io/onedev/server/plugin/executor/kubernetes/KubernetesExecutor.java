@@ -79,10 +79,10 @@ import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.job.JobContext;
-import io.onedev.server.job.JobManager;
+import io.onedev.server.job.JobService;
 import io.onedev.server.job.JobRunnable;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.KubernetesAware;
@@ -305,10 +305,10 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 
 	@Override
 	public boolean execute(JobContext jobContext, TaskLogger jobLogger) {
-		var clusterManager = OneDev.getInstance(ClusterManager.class);
-		var servers = clusterManager.getServerAddresses();
+		var clusterService = OneDev.getInstance(ClusterService.class);
+		var servers = clusterService.getServerAddresses();
 		var server = servers.get(RandomUtils.nextInt(0, servers.size()));
-		return getJobManager().runJob(server, ()-> getJobManager().runJob(jobContext, new JobRunnable() {
+		return getJobService().runJob(server, ()-> getJobService().runJob(jobContext, new JobRunnable() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -381,8 +381,8 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 		}));
 	}
 	
-	private JobManager getJobManager() {
-		return OneDev.getInstance(JobManager.class);
+	private JobService getJobService() {
+		return OneDev.getInstance(JobService.class);
 	}
 	
 	private String getNamespace(@Nullable JobContext jobContext) {
@@ -555,7 +555,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 	}
 	
 	private String getServerUrl() {
-		return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl().toString();
+		return OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl().toString();
 	}
 	
 	private void mergeAndEnsureUnique(Collection<RegistryLoginFacade> logins, Collection<RegistryLoginFacade> otherLogins) {

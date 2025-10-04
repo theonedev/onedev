@@ -18,9 +18,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.LabelSpecManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.LabelSpecService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -100,7 +100,7 @@ class PackFilterPanel extends FilterEditPanel<Pack> {
 			@Override
 			public Collection<Project> getObject() {
 				var criterias = getMatchingCriterias(getModelObject().getCriteria(), PublishedViaProjectCriteria.class, null);
-				return criterias.stream().map(it->getProjectManager().findByPath(it.getProjectPath())).filter(Objects::nonNull).collect(toList());
+				return criterias.stream().map(it->getProjectService().findByPath(it.getProjectPath())).filter(Objects::nonNull).collect(toList());
 			}
 
 			@Override
@@ -116,7 +116,7 @@ class PackFilterPanel extends FilterEditPanel<Pack> {
 			@Override
 			protected List<Project> load() {
 				var projects = new ArrayList<>(SecurityUtils.getAuthorizedProjects(new AccessProject()));
-				var cache = getProjectManager().cloneCache();
+				var cache = getProjectService().cloneCache();
 				projects.sort(cache.comparingPath());
 				return projects;
 			}
@@ -163,8 +163,8 @@ class PackFilterPanel extends FilterEditPanel<Pack> {
 
 			@Override
 			protected List<User> load() {
-				var users = getUserManager().query().stream().filter(it -> !it.isDisabled()).collect(toList());
-				var cache = getUserManager().cloneCache();
+				var users = getUserService().query().stream().filter(it -> !it.isDisabled()).collect(toList());
+				var cache = getUserService().cloneCache();
 				users.sort(cache.comparingDisplayName(new ArrayList<>()));
 				return users;
 			}
@@ -202,7 +202,7 @@ class PackFilterPanel extends FilterEditPanel<Pack> {
 
 			@Override
 			public void setObject(Collection<String> object) {	
-				var criterias = Criteria.orCriterias(object.stream().map(it->new LabelCriteria(getLabelSpecManager().find(it), Is)).collect(toList()));
+				var criterias = Criteria.orCriterias(object.stream().map(it->new LabelCriteria(getLabelSpecService().find(it), Is)).collect(toList()));
 				var query = getModelObject();
 				query.setCriteria(setMatchingCriteria(query.getCriteria(), LabelCriteria.class, criterias, null));
 				getModel().setObject(query);
@@ -212,7 +212,7 @@ class PackFilterPanel extends FilterEditPanel<Pack> {
 
 			@Override
 			protected List<String> load() {
-				var names = getLabelSpecManager().query().stream().map(it->it.getName()).collect(toList());
+				var names = getLabelSpecService().query().stream().map(it->it.getName()).collect(toList());
 				Collections.sort(names);
 				return names;
 			}
@@ -302,16 +302,16 @@ class PackFilterPanel extends FilterEditPanel<Pack> {
 		add(publishedBeforePicker);					
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 
-	private LabelSpecManager getLabelSpecManager() {
-		return OneDev.getInstance(LabelSpecManager.class);
+	private LabelSpecService getLabelSpecService() {
+		return OneDev.getInstance(LabelSpecService.class);
 	}	
 
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 
 }

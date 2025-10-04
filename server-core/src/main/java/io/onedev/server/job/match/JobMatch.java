@@ -3,8 +3,6 @@ package io.onedev.server.job.match;
 import static io.onedev.commons.codeassist.AntlrUtils.getLexerRuleName;
 import static io.onedev.server.job.match.JobMatchParser.IsNot;
 import static io.onedev.server.job.match.JobMatchParser.OnBranch;
-import static io.onedev.server.job.match.JobMatchParser.SubmittedByGroup;
-import static io.onedev.server.job.match.JobMatchParser.SubmittedByUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +24,6 @@ import org.antlr.v4.runtime.Recognizer;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.AndCriteria;
@@ -103,20 +98,6 @@ public class JobMatch extends Criteria<JobMatchContext> {
 						case OnBranch:
 							criterias.add(new OnBranchCriteria(fieldValue));
 							break;
-						case SubmittedByGroup:
-							var group = OneDev.getInstance(GroupManager.class).find(fieldValue);
-							if (group != null)
-								criterias.add(new GroupCriteria(group));
-							else
-								throw new ExplicitException("Unable to find group: " + fieldValue);
-							break;
-						case SubmittedByUser:
-							var user = OneDev.getInstance(UserManager.class).findByName(fieldValue);
-							if (user != null)
-								criterias.add(new UserCriteria(user));
-							else
-								throw new ExplicitException("Unable to find user with login: " + fieldValue);
-							break;
 						default:
 							throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
 					}
@@ -172,32 +153,12 @@ public class JobMatch extends Criteria<JobMatchContext> {
 			CriteriaBuilder builder) {
 		throw new UnsupportedOperationException();
 	}
-	
-	@Override
-	public void onRenameUser(String oldName, String newName) {
-		criteria.onRenameUser(oldName, newName);
-	}
-
-	@Override
-	public void onRenameGroup(String oldName, String newName) {
-		criteria.onRenameGroup(oldName, newName);
-	}
-	
+		
 	@Override
 	public void onMoveProject(String oldPath, String newPath) {
 		criteria.onMoveProject(oldPath, newPath);
 	}
-
-	@Override
-	public boolean isUsingUser(String userName) {
-		return criteria.isUsingUser(userName);
-	}
-
-	@Override
-	public boolean isUsingGroup(String groupName) {
-		return criteria.isUsingGroup(groupName);
-	}
-	
+		
 	@Override
 	public boolean isUsingProject(String projectPath) {
 		return criteria.isUsingProject(projectPath);

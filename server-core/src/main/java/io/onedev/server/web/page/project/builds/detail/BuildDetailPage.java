@@ -43,11 +43,11 @@ import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.job.JobAuthorizationContextAware;
 import io.onedev.server.job.JobContext;
-import io.onedev.server.job.JobManager;
+import io.onedev.server.job.JobService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
@@ -56,7 +56,7 @@ import io.onedev.server.pack.PackSupport;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.terminal.TerminalManager;
+import io.onedev.server.terminal.TerminalService;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -137,7 +137,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			@Override
 			protected Build load() {
 				Long buildNumber = params.get(PARAM_BUILD).toLong();
-				Build build = OneDev.getInstance(BuildManager.class).find(getProject(), buildNumber);
+				Build build = OneDev.getInstance(BuildService.class).find(getProject(), buildNumber);
 				if (build == null)
 					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find build #{0} in project {1}"), buildNumber, getProject()));
 				else if (!build.getProject().equals(getProject()))
@@ -250,7 +250,8 @@ public abstract class BuildDetailPage extends ProjectPage
 					}
 
 					private void resubmit(Serializable paramBean) {
-						OneDev.getInstance(JobManager.class).resubmit(getBuild(), _T("Resubmitted manually"));
+						var user = SecurityUtils.getUser();
+						OneDev.getInstance(JobService.class).resubmit(user, getBuild(), _T("Resubmitted manually"));
 						setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild()));
 					}
 
@@ -279,7 +280,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						OneDev.getInstance(JobManager.class).cancel(getBuild());
+						OneDev.getInstance(JobService.class).cancel(getBuild());
 						getSession().success(_T("Cancel request submitted"));
 					}
 
@@ -293,15 +294,15 @@ public abstract class BuildDetailPage extends ProjectPage
 
 				add(new AjaxLink<Void>("terminal") {
 
-					private TerminalManager getTerminalManager() {
-						return OneDev.getInstance(TerminalManager.class);
+					private TerminalService getTerminalService() {
+						return OneDev.getInstance(TerminalService.class);
 					}
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						if (isSubscriptionActive()) {
 							target.appendJavaScript(String.format("onedev.server.buildDetail.openTerminal('%s');",
-									getTerminalManager().getTerminalUrl(getBuild())));
+									getTerminalService().getTerminalUrl(getBuild())));
 						} else {
 							new MessageModal(target) {
 
@@ -317,8 +318,8 @@ public abstract class BuildDetailPage extends ProjectPage
 					protected void onConfigure() {
 						super.onConfigure();
 
-						JobManager jobManager = OneDev.getInstance(JobManager.class);
-						JobContext jobContext = jobManager.getJobContext(getBuild().getId());
+						JobService jobService = OneDev.getInstance(JobService.class);
+						JobContext jobContext = jobService.getJobContext(getBuild().getId());
 						setVisible(jobContext!= null && SecurityUtils.canOpenTerminal(getBuild()));
 					}
 
@@ -415,7 +416,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
 				getBuild().setDescription(comment);
-				OneDev.getInstance(BuildManager.class).update(getBuild());
+				OneDev.getInstance(BuildService.class).update(getBuild());
 			}
 			
 			@Override
@@ -566,9 +567,9 @@ public abstract class BuildDetailPage extends ProjectPage
 
 							@Override
 							public void onClick() {
-								OneDev.getInstance(BuildManager.class).delete(getBuild());
+								OneDev.getInstance(BuildService.class).delete(getBuild());
 								var oldAuditContent = VersionedXmlDoc.fromBean(getBuild()).toXML();
-								getAuditManager().audit(getBuild().getProject(), "deleted build \"" + getBuild().getReference().toString(getBuild().getProject()) + "\"", oldAuditContent, null);
+								auditService.audit(getBuild().getProject(), "deleted build \"" + getBuild().getReference().toString(getBuild().getProject()) + "\"", oldAuditContent, null);
 								
 								Session.get().success(MessageFormat.format(_T("Build #{0} deleted"), getBuild().getNumber()));
 								
@@ -601,8 +602,9 @@ public abstract class BuildDetailPage extends ProjectPage
 
 					@Override
 					protected List<Build> query(EntityQuery<Build> query, int offset, int count, ProjectScope projectScope) {
-						BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-						return buildManager.query(projectScope!=null?projectScope.getProject():null, query, false, offset, count);
+						BuildService buildService = OneDev.getInstance(BuildService.class);
+						var subject = SecurityUtils.getSubject();
+						return buildService.query(subject, projectScope!=null?projectScope.getProject():null, query, false, offset, count);
 					}
 
 					@Override
@@ -687,8 +689,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 	@Override
 	public JobAuthorizationContext getJobAuthorizationContext() {
-		return new JobAuthorizationContext(getProject(), getBuild().getCommitId(), 
-				getBuild().getSubmitter(), getBuild().getRequest());
+		return new JobAuthorizationContext(getProject(), getBuild().getCommitId(), getBuild().getRequest());
 	}
 	
 }

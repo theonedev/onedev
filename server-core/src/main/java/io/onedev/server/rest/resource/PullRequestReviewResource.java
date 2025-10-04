@@ -16,8 +16,8 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.PullRequestReviewManager;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.PullRequestReviewService;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -28,21 +28,21 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class PullRequestReviewResource {
 
-	private final PullRequestManager pullRequestManager;
+	private final PullRequestService pullRequestService;
 
-	private final PullRequestReviewManager pullRequestReviewManager;
+	private final PullRequestReviewService pullRequestReviewService;
 
 	@Inject
-	public PullRequestReviewResource(PullRequestReviewManager pullRequestReviewManager, PullRequestManager pullRequestManager) {
-		this.pullRequestManager = pullRequestManager;
-		this.pullRequestReviewManager = pullRequestReviewManager;
+	public PullRequestReviewResource(PullRequestReviewService pullRequestReviewService, PullRequestService pullRequestService) {
+		this.pullRequestService = pullRequestService;
+		this.pullRequestReviewService = pullRequestReviewService;
 	}
 
 	@Api(order=100)
 	@Path("/{reviewId}")
 	@GET
 	public PullRequestReview get(@PathParam("reviewId") Long reviewId) {
-		PullRequestReview review = pullRequestReviewManager.load(reviewId);
+		PullRequestReview review = pullRequestReviewService.load(reviewId);
 		if (!SecurityUtils.canReadCode(review.getRequest().getProject()))
 			throw new UnauthorizedException();
 		return review;
@@ -62,7 +62,7 @@ public class PullRequestReviewResource {
 		if (review.getRequest().isMerged())
 			throw new ExplicitException("Pull request is merged");
 		
-		pullRequestReviewManager.createOrUpdate(review);
+		pullRequestReviewService.createOrUpdate(SecurityUtils.getUser(), review);
 		return review.getId();
 	}
 
@@ -79,9 +79,9 @@ public class PullRequestReviewResource {
 		if (request.isMerged())
 			throw new ExplicitException("Pull request is merged");
 		
-		pullRequestManager.checkReviews(request, false);
+		pullRequestService.checkReviews(request, false);
 		if (review.getStatus() == PullRequestReview.Status.EXCLUDED) {
-			pullRequestReviewManager.createOrUpdate(review);
+			pullRequestReviewService.createOrUpdate(SecurityUtils.getUser(), review);
 			return Response.ok().build();
 		} else {
 			throw new NotAcceptableException("Reviewer '" + reviewer.getDisplayName()

@@ -3,7 +3,7 @@ package io.onedev.server.search.commit;
 import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -37,8 +37,8 @@ public abstract class PersonCriteria extends CommitCriteria {
 		return WildcardUtils.matchString(value, formatted);
 	}
 
-	private static UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private static UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 	
 	protected void fill(Project project, List<String> persons) {
@@ -54,7 +54,7 @@ public abstract class PersonCriteria extends CommitCriteria {
 				}
 			} else if (value.startsWith("@")) {
 				String userName = value.substring(1);
-				User user = getUserManager().findByName(userName);
+				User user = getUserService().findByName(userName);
 				if (user != null) {
 					for (EmailAddress emailAddress: user.getEmailAddresses()) {
 						if (emailAddress.isVerified())
@@ -82,7 +82,7 @@ public abstract class PersonCriteria extends CommitCriteria {
 				}
 			} else if (value.startsWith("@")) {
 				String userName = value.substring(1);
-				User user = getUserManager().findByName(userName);
+				User user = getUserService().findByName(userName);
 				if (user != null) {
 					if (user.getEmailAddresses().stream()
 							.anyMatch(it-> it.isVerified() && it.getValue().equalsIgnoreCase(personEmail))) {

@@ -21,7 +21,7 @@ import org.apache.wicket.request.resource.AbstractResource;
 import com.google.common.base.Joiner;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.security.SecurityUtils;
 
 public class ServerLogResource extends AbstractResource {
@@ -57,7 +57,7 @@ public class ServerLogResource extends AbstractResource {
 	public static List<String> readServerLog(@Nullable String server) {
 		var logPath = "logs/server.log";
 		if (server != null) 
-			return OneDev.getInstance(ClusterManager.class).runOnServer(server, () -> readLog(new File(installDir, logPath)));
+			return OneDev.getInstance(ClusterService.class).runOnServer(server, () -> readLog(new File(installDir, logPath)));
 		else 
 			return readLog(new File(installDir, logPath));
 	}

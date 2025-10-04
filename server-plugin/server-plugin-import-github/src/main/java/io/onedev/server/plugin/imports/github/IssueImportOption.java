@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -39,7 +39,7 @@ public class IssueImportOption implements Serializable {
 	}
 
 	private static GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
 	@SuppressWarnings("unused")

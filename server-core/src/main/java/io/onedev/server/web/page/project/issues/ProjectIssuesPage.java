@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.project.issues;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -15,7 +15,7 @@ public abstract class ProjectIssuesPage extends ProjectPage {
 	}
 
 	protected GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();		
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
 	@Override

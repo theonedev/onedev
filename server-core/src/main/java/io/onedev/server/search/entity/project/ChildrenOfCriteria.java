@@ -10,7 +10,7 @@ import javax.persistence.criteria.Subquery;
 
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
@@ -35,7 +35,7 @@ public class ChildrenOfCriteria extends Criteria<Project> {
 		Root<Project> parentRoot = parentQuery.from(Project.class);
 		parentQuery.select(parentRoot);
 
-		ProjectManager manager = OneDev.getInstance(ProjectManager.class);
+		ProjectService manager = OneDev.getInstance(ProjectService.class);
 		return builder.exists(parentQuery.where(
 				builder.equal(from.get(Project.PROP_PARENT), parentRoot), 
 				manager.getPathMatchPredicate(builder, parentRoot, parentPath)));

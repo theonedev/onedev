@@ -12,9 +12,9 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.imports.IssueImporter;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.taskbutton.TaskResult.HtmlMessgae;
 import io.onedev.server.web.util.ImportStep;
@@ -81,8 +81,8 @@ public class GiteaIssueImporter implements IssueImporter {
 
 	@Override
 	public TaskResult doImport(Long projectId, boolean dryRun, TaskLogger logger) {
-		return OneDev.getInstance(TransactionManager.class).call(() -> {
-			var project = OneDev.getInstance(ProjectManager.class).load(projectId);
+		return OneDev.getInstance(TransactionService.class).call(() -> {
+			var project = OneDev.getInstance(ProjectService.class).load(projectId);
 			ImportServer server = serverStep.getSetting();
 			String giteaRepo = repositoryStep.getSetting().getRepository();
 			IssueImportOption option = optionStep.getSetting();

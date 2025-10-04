@@ -1,7 +1,7 @@
 package io.onedev.server.web.editable.build.choice;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.build.choice.BuildChoiceProvider;
@@ -43,7 +43,7 @@ public class BuildSingleChoiceEditor extends PropertyEditor<Long> {
 
 		Build build;
 		if (getModelObject() != null)
-			build = OneDev.getInstance(BuildManager.class).get(getModelObject());
+			build = OneDev.getInstance(BuildService.class).get(getModelObject());
 		else
 			build = null;
 		

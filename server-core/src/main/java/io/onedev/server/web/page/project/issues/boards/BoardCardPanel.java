@@ -33,8 +33,8 @@ import org.hibernate.Hibernate;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.Input;
-import io.onedev.server.entitymanager.IssueLinkManager;
-import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.service.IssueLinkService;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Iteration;
@@ -71,7 +71,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 		setModel(new LoadableDetachableModel<>() {
 			@Override
 			protected Issue load() {
-				return OneDev.getInstance(IssueManager.class).load(issueId);
+				return OneDev.getInstance(IssueService.class).load(issueId);
 			}
 		});
 	}
@@ -215,7 +215,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 									@Override
 									protected Issue load() {
-										return OneDev.getInstance(IssueManager.class).load(issueId);
+										return OneDev.getInstance(IssueService.class).load(issueId);
 									}
 
 								}, cursor);
@@ -298,7 +298,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 			@Override
 			protected List<Issue> load() {
 				Issue issue = issueModel.getObject();
-				OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
+				OneDev.getInstance(IssueLinkService.class).loadDeepLinks(issue);
 				LinkDescriptor descriptor = new LinkDescriptor(linksPanel.getExpandedLink());
 				return issue.findLinkedIssues(descriptor.getSpec(), descriptor.isOpposite()).stream().filter(it->canAccessIssue(it)).collect(toList());
 			}
@@ -343,7 +343,7 @@ public abstract class BoardCardPanel extends GenericPanel<Issue> {
 				if (canManageIssues(getProject())) {
 					Long issueId = RequestCycle.get().getRequest().getPostParameters()
 							.getParameterValue("issue").toLong();
-					Issue issue = OneDev.getInstance(IssueManager.class).load(issueId);
+					Issue issue = OneDev.getInstance(IssueService.class).load(issueId);
 					Hibernate.initialize(issue.getProject());
 					Project parent = issue.getProject().getParent();
 					while (parent != null) {

@@ -5,7 +5,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.model.Project;
 import io.onedev.server.validation.Validatable;
@@ -108,7 +108,7 @@ public class CommitMessageFixPatterns implements Serializable, Validatable {
 	public List<IssueReference> parseFixedIssues(String commitMessage, Project currentProject) {
 		Set<IssueReference> references = new LinkedHashSet<>();
 		
-		var projectManager = OneDev.getInstance(ProjectManager.class);
+		var projectService = OneDev.getInstance(ProjectService.class);
 		for (var line: StringUtils.splitAndTrim(commitMessage, "\n")) {
 			if (mayContainReferences(commitMessage)) {
 				for (var pattern: getPatterns()) {
@@ -117,11 +117,11 @@ public class CommitMessageFixPatterns implements Serializable, Validatable {
 						Project project;
 						var projectKey = matcher.group("projectKey");
 						if (projectKey != null) {
-							project = projectManager.findByKey(projectKey);
+							project = projectService.findByKey(projectKey);
 						} else {
 							var projectPath = matcher.group("projectPath");
 							if (projectPath != null)
-								project = projectManager.findByPath(projectPath);
+								project = projectService.findByPath(projectPath);
 							else 
 								project = currentProject;
 						}

@@ -12,7 +12,7 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
-import io.onedev.server.entitymanager.*;
+import io.onedev.server.service.*;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
@@ -49,7 +49,7 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.editbean.CommitMessageBean;
-import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoService;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
@@ -134,7 +134,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 
 				@Override
 				protected Collection<CodeComment> load() {
-					CodeCommentManager manager = OneDev.getInstance(CodeCommentManager.class);
+					CodeCommentService manager = OneDev.getInstance(CodeCommentService.class);
 					return manager.query(projectModel.getObject(), getCompareWith(), resolvedRevision);
 				}
 
@@ -668,7 +668,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 			@Override
 			protected PullRequest getPullRequest() {
 				if (state.requestId != null)
-					return OneDev.getInstance(PullRequestManager.class).load(state.requestId);
+					return OneDev.getInstance(PullRequestService.class).load(state.requestId);
 				else
 					return null;
 			}
@@ -795,7 +795,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	}
 
 	private Collection<ObjectId> getDescendants() {
-		Collection<ObjectId> descendants = OneDev.getInstance(CommitInfoManager.class)
+		Collection<ObjectId> descendants = OneDev.getInstance(CommitInfoService.class)
 				.getDescendants(getProject().getId(), Sets.newHashSet(getCommit().getId()));
 		descendants.add(getCommit().getId());
 		return descendants;
@@ -804,7 +804,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	@Override
 	public CodeComment getOpenComment() {
 		if (state.commentId != null)
-			return OneDev.getInstance(CodeCommentManager.class).load(state.commentId);
+			return OneDev.getInstance(CodeCommentService.class).load(state.commentId);
 		else
 			return null;
 	}
@@ -866,22 +866,22 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	@Override
 	public void onSaveComment(CodeComment comment) {
 		if (comment.isNew())
-			OneDev.getInstance(CodeCommentManager.class).create(comment);
+			OneDev.getInstance(CodeCommentService.class).create(comment);
 		else
-			OneDev.getInstance(CodeCommentManager.class).update(comment);			
+			OneDev.getInstance(CodeCommentService.class).update(comment);
 	}
 	
 	@Override
 	public void onSaveCommentReply(CodeCommentReply reply) {
 		if (reply.isNew())
-			OneDev.getInstance(CodeCommentReplyManager.class).create(reply);
+			OneDev.getInstance(CodeCommentReplyService.class).create(reply);
 		else
-			OneDev.getInstance(CodeCommentReplyManager.class).update(reply);
+			OneDev.getInstance(CodeCommentReplyService.class).update(reply);
 	}
 
 	@Override
 	public void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
-		OneDev.getInstance(CodeCommentStatusChangeManager.class).create(change, note);
+		OneDev.getInstance(CodeCommentStatusChangeService.class).create(change, note);
 	}
 	
 	@Override
@@ -981,14 +981,14 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 	@Nullable
 	private PullRequest getPullRequest() {
 		if (state.requestId != null)
-			return OneDev.getInstance(PullRequestManager.class).load(state.requestId);
+			return OneDev.getInstance(PullRequestService.class).load(state.requestId);
 		else
 			return null;
 	}
 
 	@Override
 	public JobAuthorizationContext getJobAuthorizationContext() {
-		return new JobAuthorizationContext(getProject(), getCommit(), SecurityUtils.getAuthUser(), getPullRequest());
+		return new JobAuthorizationContext(getProject(), getCommit(), getPullRequest());
 	}
 
 	private GitService getGitService() {
@@ -1004,7 +1004,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 		if (!buildRequirement.getRequiredJobs().isEmpty())
 			return _T("This change needs to be verified by some jobs. Submit pull request instead");
 		if (protection.isCommitSignatureRequired()
-				&& OneDev.getInstance(SettingManager.class).getGpgSetting().getSigningKey() == null) {
+				&& OneDev.getInstance(SettingService.class).getGpgSetting().getSigningKey() == null) {
 			return _T("Commit signature required but no GPG signing key specified");
 		}
 		return null;

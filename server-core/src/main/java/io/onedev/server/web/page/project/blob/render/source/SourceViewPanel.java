@@ -73,10 +73,10 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.CodeCommentReplyService;
+import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
@@ -89,7 +89,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
-import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.CodeSearchService;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
@@ -153,14 +153,14 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			RevCommit commitId = context.getCommit();
 			String path = context.getBlobIdent().path;
 			
-			CodeCommentManager codeCommentManager = OneDev.getInstance(CodeCommentManager.class);
-			Map<CodeComment, PlanarRange> comments = codeCommentManager.queryInHistory(project, commitId, path);
+			CodeCommentService codeCommentService = OneDev.getInstance(CodeCommentService.class);
+			Map<CodeComment, PlanarRange> comments = codeCommentService.queryInHistory(project, commitId, path);
 
 			var problems = new HashSet<CodeProblem>();
 			Map<Integer, CoverageStatus> coverages = new HashMap<>();
 			var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
-			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-			for (var build: buildManager.query(project, commitId, null, null, null, null, new HashMap<>())) {
+			BuildService buildService = OneDev.getInstance(BuildService.class);
+			for (var build: buildService.query(project, commitId, null, null, null, null, new HashMap<>())) {
 				for (var contribution: OneDev.getExtensions(CodeProblemContribution.class)) 
 					problems.addAll(contribution.getCodeProblems(build, path, context.getProblemReport()));
 				for (var contribution: OneDev.getExtensions(LineCoverageContribution.class)) { 
@@ -201,8 +201,8 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		String blobName = context.getBlobIdent().getName();
 		SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(blobName);
 		if (extractor != null) {
-			CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
-			List<Symbol> cachedSymbols = searchManager.getSymbols(context.getProject(), blob.getBlobId(), 
+			CodeSearchService searchService = OneDev.getInstance(CodeSearchService.class);
+			List<Symbol> cachedSymbols = searchService.getSymbols(context.getProject(), blob.getBlobId(), 
 					blob.getIdent().path);
 			if (cachedSymbols != null) {
 				symbols.addAll(cachedSymbols);
@@ -431,7 +431,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 				@Override
 				protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-					OneDev.getInstance(CodeCommentManager.class).update(comment);
+					OneDev.getInstance(CodeCommentService.class).update(comment);
 					target.add(commentContainer.get("head"));
 				}
 
@@ -591,7 +591,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 								comment.setProject(context.getProject());
 								comment.setCompareContext(getCompareContext());
 								
-								OneDev.getInstance(CodeCommentManager.class).create(comment);
+								OneDev.getInstance(CodeCommentService.class).create(comment);
 								
 								CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
 
@@ -602,7 +602,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 									@Override
 									protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-										OneDev.getInstance(CodeCommentManager.class).update(comment);
+										OneDev.getInstance(CodeCommentService.class).update(comment);
 										target.add(commentContainer.get("head"));
 									}
 
@@ -660,7 +660,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 						@Override
 						protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-							OneDev.getInstance(CodeCommentManager.class).update(comment);
+							OneDev.getInstance(CodeCommentService.class).update(comment);
 							target.add(commentContainer.get("head"));
 						}
 
@@ -689,7 +689,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					commentContainer.setVisible(true);
 					target.add(commentContainer);
 					
-					CodeComment comment = OneDev.getInstance(CodeCommentManager.class).load(commentId);
+					CodeComment comment = OneDev.getInstance(CodeCommentService.class).load(commentId);
 					script = String.format("onedev.server.sourceView.onCommentOpened(%s);", 
 							convertToJson(new CodeCommentInfo(comment, range)));
 					target.appendJavaScript(script);
@@ -1263,14 +1263,14 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	private void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
 		reply.setCompareContext(getCompareContext());
 		if (reply.isNew())
-			OneDev.getInstance(CodeCommentReplyManager.class).create(reply);
+			OneDev.getInstance(CodeCommentReplyService.class).create(reply);
 		else
-			OneDev.getInstance(CodeCommentReplyManager.class).update(reply);			
+			OneDev.getInstance(CodeCommentReplyService.class).update(reply);
 	}
 	
 	private void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
 		change.setCompareContext(getCompareContext());
-		OneDev.getInstance(CodeCommentStatusChangeManager.class).create(change, note);
+		OneDev.getInstance(CodeCommentStatusChangeService.class).create(change, note);
 	}
 	
 	private SuggestionSupport getSuggestionSupport(Mark mark) {

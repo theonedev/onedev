@@ -9,7 +9,7 @@ import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.git.command.FileChange;
 import io.onedev.server.git.command.ReceivePackCommand;
 import io.onedev.server.git.command.UploadPackCommand;
@@ -47,13 +47,13 @@ public class CommandUtils {
 	public static <T> T callWithClusterCredential(GitTask<T> task) {
 		File homeDir = FileUtils.createTempDir("githome"); 
 		
-		ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
-		SecretMasker.push(text -> StringUtils.replace(text, clusterManager.getCredential(), "******"));
+		ClusterService clusterService = OneDev.getInstance(ClusterService.class);
+		SecretMasker.push(text -> StringUtils.replace(text, clusterService.getCredential(), "******"));
 		try {
 			Commandline git = newGit();
 			git.environments().put("HOME", homeDir.getAbsolutePath());
 			String extraHeader = KubernetesHelper.AUTHORIZATION + ": " 
-					+ KubernetesHelper.BEARER + " " + clusterManager.getCredential();
+					+ KubernetesHelper.BEARER + " " + clusterService.getCredential();
 			git.addArgs("config", "--global", "http.extraHeader", extraHeader);
 			git.execute(new LineConsumer() {
 

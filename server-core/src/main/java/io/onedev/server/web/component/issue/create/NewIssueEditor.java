@@ -43,8 +43,8 @@ import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Iteration;
@@ -54,7 +54,7 @@ import io.onedev.server.model.support.issue.IssueTemplate;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
-import io.onedev.server.search.entitytext.IssueTextManager;
+import io.onedev.server.search.entitytext.IssueTextService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ProjectScope;
@@ -139,10 +139,10 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			@Override
 			protected List<Issue> load() {
 				if (StringUtils.isNotBlank(editingTitle)) {
-					IssueTextManager issueTextManager = OneDev.getInstance(IssueTextManager.class);
+					IssueTextService issueTextService = OneDev.getInstance(IssueTextService.class);
 					var projectScope = new ProjectScope(getProject(), true, true);
-					var issueIds = issueTextManager.query(projectScope, editingTitle, MAX_SIMILAR_ISSUES);
-					var issues = OneDev.getInstance(IssueManager.class).loadIssues(issueIds);
+					var issueIds = issueTextService.query(projectScope, editingTitle, MAX_SIMILAR_ISSUES);
+					var issues = OneDev.getInstance(IssueService.class).loadIssues(issueIds);
 					projectScope.filter(issues);
 					return issues;
 				} else {
@@ -381,7 +381,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	}
 
 	private GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
 	@Override

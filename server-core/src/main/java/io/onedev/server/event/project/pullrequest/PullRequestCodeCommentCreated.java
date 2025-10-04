@@ -5,7 +5,7 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 
 public class PullRequestCodeCommentCreated extends PullRequestCodeCommentEvent {
 
@@ -27,7 +27,7 @@ public class PullRequestCodeCommentCreated extends PullRequestCodeCommentEvent {
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getComment(), true);
+		return OneDev.getInstance(UrlService.class).urlFor(getComment(), true);
 	}
 
 }

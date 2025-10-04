@@ -3,7 +3,7 @@ package io.onedev.server.web.page.project.pullrequests.detail.codecomments;
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
-import io.onedev.server.xodus.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
@@ -142,7 +142,7 @@ public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				if (SecurityUtils.getAuthUser() != null) 
-					OneDev.getInstance(VisitInfoManager.class).visitPullRequestCodeComments(SecurityUtils.getAuthUser(), getPullRequest());
+					OneDev.getInstance(VisitInfoService.class).visitPullRequestCodeComments(SecurityUtils.getAuthUser(), getPullRequest());
 			}
 			
 			@Override

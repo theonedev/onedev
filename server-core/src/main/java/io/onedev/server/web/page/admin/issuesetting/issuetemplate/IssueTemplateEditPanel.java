@@ -11,8 +11,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.IssueTemplate;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -80,10 +80,10 @@ abstract class IssueTemplateEditPanel extends Panel {
 					} else {
 						getSetting().getIssueTemplates().add(template);
 					}
-					OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+					OneDev.getInstance(SettingService.class).saveIssueSetting(getSetting());
 					String verb = templateIndex != -1 ? "changed" : "added";
 					String newAuditContent = VersionedXmlDoc.fromBean(template).toXML();
-					OneDev.getInstance(AuditManager.class).audit(null, verb + " issue description template", oldAuditContent, newAuditContent);
+					OneDev.getInstance(AuditService.class).audit(null, verb + " issue description template", oldAuditContent, newAuditContent);
 					onSave(target);
 				} else {
 					target.add(form);

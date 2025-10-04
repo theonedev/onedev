@@ -13,7 +13,7 @@ import org.apache.wicket.model.Model;
 import com.google.common.io.Resources;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
 
 public class MavenHelpPanel extends Panel {
@@ -29,7 +29,7 @@ public class MavenHelpPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+		var serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 		var bindings = new HashMap<String, Object>();
 		bindings.put("url", serverUrl + "/" + projectPath + "/~" + MavenPackService.SERVICE_ID);
 		bindings.put("permission", "write");

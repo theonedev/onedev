@@ -9,7 +9,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
@@ -23,7 +23,7 @@ public class AlertSettingPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		var alertSetting = OneDev.getInstance(SettingManager.class).getAlertSetting();
+		var alertSetting = OneDev.getInstance(SettingService.class).getAlertSetting();
 		var oldAuditContent = VersionedXmlDoc.fromBean(alertSetting.getNotifyUsers()).toXML();
 
 		Form<?> form = new Form<Void>("form") {
@@ -32,8 +32,8 @@ public class AlertSettingPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				var newAuditContent = VersionedXmlDoc.fromBean(alertSetting.getNotifyUsers()).toXML();
-				OneDev.getInstance(SettingManager.class).saveAlertSetting(alertSetting);
-				getAuditManager().audit(null, "changed alert settings", oldAuditContent, newAuditContent);
+				OneDev.getInstance(SettingService.class).saveAlertSetting(alertSetting);
+				auditService.audit(null, "changed alert settings", oldAuditContent, newAuditContent);
 				getSession().success(_T("Alert settings have been updated"));
 				
 				setResponsePage(AlertSettingPage.class);

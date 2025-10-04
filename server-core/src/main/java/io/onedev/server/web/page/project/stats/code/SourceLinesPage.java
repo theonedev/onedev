@@ -17,7 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoService;
 
 public class SourceLinesPage extends CodeStatsPage {
 
@@ -29,7 +29,7 @@ public class SourceLinesPage extends CodeStatsPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		Map<Integer, Map<String, Integer>> lineIncrements = OneDev.getInstance(CommitInfoManager.class)
+		Map<Integer, Map<String, Integer>> lineIncrements = OneDev.getInstance(CommitInfoService.class)
 				.getLineIncrements(getProject().getId());
 		Map<Integer, Map<String, Integer>> data = new LinkedHashMap<>();
 		for (var key: new TreeSet<>(lineIncrements.keySet())) 

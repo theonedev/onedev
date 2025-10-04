@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.report.html;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -26,7 +26,7 @@ public class HtmlReportPage extends BuildReportPage {
 		Long projectId = getProject().getId();
 		Long buildNumber = getBuild().getNumber();
 
-		var startPage = OneDev.getInstance(ProjectManager.class).runOnActiveServer(
+		var startPage = OneDev.getInstance(ProjectService.class).runOnActiveServer(
 				projectId, 
 				new ReadPublishedFile(projectId, buildNumber, getReportName(), START_PAGE));
 		

@@ -14,7 +14,7 @@ import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
@@ -60,7 +60,7 @@ public class UndefinedFieldValueResolution implements Serializable {
 	private static List<String> getValueChoices() {
 		UndefinedFieldValueContainer container = ComponentContext.get().getComponent()
 				.findParent(UndefinedFieldValueContainer.class); 
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
 		FieldSpec fieldSpec = Preconditions.checkNotNull(issueSetting.getFieldSpec(container.getFieldName()));
 		ComponentContext.push(new ComponentContext(container));
 		try {

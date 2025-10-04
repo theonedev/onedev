@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.service.EmailAddressService;
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
 import io.onedev.server.model.EmailAddress;
@@ -31,10 +31,10 @@ import io.onedev.server.search.commit.AuthorCriteria;
 import io.onedev.server.search.commit.BeforeCriteria;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.avatar.AvatarManager;
+import io.onedev.server.web.avatar.AvatarService;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.user.profile.UserProfilePage;
-import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoService;
 
 class TopContributorsResource extends AbstractResource {
 
@@ -72,11 +72,11 @@ class TopContributorsResource extends AbstractResource {
 				String fromDate = formatISO8601Date(toDate(ofEpochDay(fromDay).atStartOfDay()));
 				String toDate = formatISO8601Date(toDate(ofEpochDay(toDay).plusDays(1).atStartOfDay()));
 				
-				List<GitContributor> topContributors = OneDev.getInstance(CommitInfoManager.class)
+				List<GitContributor> topContributors = OneDev.getInstance(CommitInfoService.class)
 						.getTopContributors(project.getId(), TOP_CONTRIBUTORS, type, fromDay, toDay);
 				
-				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-				EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
+				AvatarService avatarService = OneDev.getInstance(AvatarService.class);
+				EmailAddressService emailAddressService = OneDev.getInstance(EmailAddressService.class);
 
 				List<Map<String, Object>> data = new ArrayList<>();
 				for (GitContributor contributor: topContributors) {
@@ -84,13 +84,13 @@ class TopContributorsResource extends AbstractResource {
 					PersonIdent author = contributor.getAuthor();
 					contributorData.put("authorName", author.getName());
 					contributorData.put("authorEmailAddress", author.getEmailAddress());
-					contributorData.put("authorAvatarUrl", avatarManager.getPersonAvatarUrl(author));
+					contributorData.put("authorAvatarUrl", avatarService.getPersonAvatarUrl(author));
 					contributorData.put("totalCommits", contributor.getTotalContribution().getCommits());
 					contributorData.put("totalAdditions", contributor.getTotalContribution().getAdditions());
 					contributorData.put("totalDeletions", contributor.getTotalContribution().getDeletions());
 
 					AuthorCriteria authorCriteria;
-					EmailAddress emailAddress = emailAddressManager.findByValue(author.getEmailAddress());
+					EmailAddress emailAddress = emailAddressService.findByValue(author.getEmailAddress());
 					if (emailAddress != null && emailAddress.isVerified()) {
 						var user = emailAddress.getOwner();
 						authorCriteria = new AuthorCriteria(Lists.newArrayList("@" + user.getName()));

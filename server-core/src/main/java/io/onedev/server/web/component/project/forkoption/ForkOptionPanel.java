@@ -24,12 +24,12 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.BaseAuthorizationManager;
-import io.onedev.server.entitymanager.ProjectLabelManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.BaseAuthorizationService;
+import io.onedev.server.service.ProjectLabelService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -49,8 +49,8 @@ public abstract class ForkOptionPanel extends Panel {
 		this.projectModel = projectModel;
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public abstract class ForkOptionPanel extends Panel {
 		ParentBean parentBean = new ParentBean();
 		
 		String userName = SecurityUtils.getAuthUser().getName();
-		Project parent = getProjectManager().findByPath(userName);
+		Project parent = getProjectService().findByPath(userName);
 		if (parent != null) {
 			if (SecurityUtils.canCreateChildren(parent))
 				parentBean.setParentPath(parent.getPath());
@@ -100,14 +100,15 @@ public abstract class ForkOptionPanel extends Panel {
 				super.onSubmit(target, form);
 				
 				try {
-					if (editProject.getKey() != null && getProjectManager().findByKey(editProject.getKey()) != null) {
+					if (editProject.getKey() != null && getProjectService().findByKey(editProject.getKey()) != null) {
 						editor.error(new Path(new PathNode.Named(PROP_KEY)),
 								_T("This key has already been used by another project"));
 					}
 					String projectPath = editProject.getName();
 					if (parentBean.getParentPath() != null)
 						projectPath = parentBean.getParentPath() + "/" + projectPath;
-					Project newProject = getProjectManager().setup(projectPath);
+					var subject = SecurityUtils.getSubject();
+					Project newProject = getProjectService().setup(subject, projectPath);
 					if (!newProject.isNew()) {
 						editor.error(new Path(new PathNode.Named("name")),
 								_T("This name has already been used by another project"));
@@ -122,18 +123,18 @@ public abstract class ForkOptionPanel extends Panel {
 						newProject.setCodeAnalysisSetting(getProject().getCodeAnalysisSetting());
 						newProject.setGitPackConfig(getProject().getGitPackConfig());
 						
-						OneDev.getInstance(TransactionManager.class).run(() -> {
-							getProjectManager().create(newProject);
-							getProjectManager().fork(getProject(), newProject);							
-							OneDev.getInstance(BaseAuthorizationManager.class).syncRoles(newProject, defaultRolesBean.getRoles());
-							OneDev.getInstance(ProjectLabelManager.class).sync(newProject, labelsBean.getLabels());
+						OneDev.getInstance(TransactionService.class).run(() -> {
+							getProjectService().create(SecurityUtils.getUser(subject), newProject);
+							getProjectService().fork(getProject(), newProject);							
+							OneDev.getInstance(BaseAuthorizationService.class).syncRoles(newProject, defaultRolesBean.getRoles());
+							OneDev.getInstance(ProjectLabelService.class).sync(newProject, labelsBean.getLabels());
 
 							var auditData = editor.getPropertyValues();
 							auditData.put("parent", parentBean.getParentPath());
 							auditData.put("forkedFrom", getProject().getPath());
 							auditData.put("defaultRoles", defaultRolesBean.getRoleNames());
 							auditData.put("labels", labelsBean.getLabels());
-							OneDev.getInstance(AuditManager.class).audit(newProject, "created project", null, VersionedXmlDoc.fromBean(auditData).toXML());
+							OneDev.getInstance(AuditService.class).audit(newProject, "created project", null, VersionedXmlDoc.fromBean(auditData).toXML());
 						});
 						Session.get().success(_T("Project forked"));
 						setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(newProject));

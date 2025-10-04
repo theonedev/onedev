@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.commandpalette;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.web.page.admin.ServerDetailPage;
 
 import java.util.LinkedHashMap;
@@ -21,7 +21,7 @@ public class ServerParam extends ParamSegment {
 		Map<String, String> suggestions = new LinkedHashMap<>();
 		if (matchWith.length() == 0) 
 			matchWith = null;
-		for (String server: OneDev.getInstance(ClusterManager.class).getServerAddresses()) {
+		for (String server: OneDev.getInstance(ClusterService.class).getServerAddresses()) {
 			if (matchWith == null || server.toLowerCase().contains(matchWith.toLowerCase()))
 				suggestions.put(server, server);
 		}
@@ -30,7 +30,7 @@ public class ServerParam extends ParamSegment {
 
 	@Override
 	public boolean isExactMatch(String matchWith, Map<String, String> paramValues) {
-		return OneDev.getInstance(ClusterManager.class).getServer(matchWith, false) != null;
+		return OneDev.getInstance(ClusterService.class).getServer(matchWith, false) != null;
 	}
 		
 }

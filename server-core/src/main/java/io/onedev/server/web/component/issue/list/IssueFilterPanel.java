@@ -27,9 +27,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.GroupService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -70,7 +70,7 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		var issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
         var stateChoice = new StringMultiChoice("state", new IModel<Collection<String>>() {
 
 			@Override
@@ -170,7 +170,7 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 						var users = new ArrayList<User>();
 						for (var criteria: criterias) {
 							if (criteria instanceof ChoiceFieldCriteria) {
-								var user = getUserManager().findByName(((ChoiceFieldCriteria) criteria).getValue());
+								var user = getUserService().findByName(((ChoiceFieldCriteria) criteria).getValue());
 								if (user != null)
 									users.add(user);
 							} else if (criteria instanceof FieldOperatorCriteria) {
@@ -229,7 +229,7 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 					@Override
 					public Collection<Group> getObject() {
 						var criterias = getMatchingCriterias(getModelObject().getCriteria(), ChoiceFieldCriteria.class, getFieldPredicate(field));
-						return criterias.stream().map(it->it.getValue()).map(it->getGroupManager().find(it)).filter(it->it!=null).collect(toList());
+						return criterias.stream().map(it->it.getValue()).map(it->getGroupService().find(it)).filter(it->it!=null).collect(toList());
 					}
 		
 					@Override
@@ -336,8 +336,8 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 
 			@Override
 			protected List<User> load() {
-				var users = getUserManager().query().stream().filter(it -> !it.isDisabled()).collect(toList());
-				var cache = getUserManager().cloneCache();
+				var users = getUserService().query().stream().filter(it -> !it.isDisabled()).collect(toList());
+				var cache = getUserService().cloneCache();
 				users.sort(cache.comparingDisplayName(new ArrayList<>()));
 				return users;
 			}
@@ -508,12 +508,12 @@ abstract class IssueFilterPanel extends FilterEditPanel<Issue> {
 	@Nullable
 	protected abstract Project getProject();
 
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 
-	private GroupManager getGroupManager() {
-		return OneDev.getInstance(GroupManager.class);
+	private GroupService getGroupService() {
+		return OneDev.getInstance(GroupService.class);
 	}
 
 	private <T extends FieldCriteria> Predicate<T> getFieldPredicate(FieldSpec field) {

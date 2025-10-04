@@ -15,7 +15,7 @@ import javax.validation.Valid;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -46,7 +46,7 @@ public class ProjectIssueSetting implements Serializable {
 	
 	private GlobalIssueSetting getGlobalSetting() {
 		if (setting == null)
-			setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+			setting = OneDev.getInstance(SettingService.class).getIssueSetting();
 		return setting;
 	}
 

@@ -6,8 +6,8 @@ import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.replica.BuildStorageSyncer;
@@ -61,7 +61,7 @@ public class MarkdownModule extends AbstractPluginModule {
 				Long projectId = build.getProject().getId();
 				Long buildNumber = build.getNumber();
 				
-				return getProjectManager().runOnActiveServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
+				return getProjectService().runOnActiveServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
 						.filter(it->SecurityUtils.canAccessReport(build, it.getTitle()))
 						.collect(Collectors.toList());
 			}
@@ -81,7 +81,7 @@ public class MarkdownModule extends AbstractPluginModule {
 				Long projectId = request.getProject().getId();
 				for (Build build: request.getCurrentBuilds()) {
 					Long buildNumber = build.getNumber();
-					for (PullRequestSummaryPart part: getProjectManager().runOnActiveServer(projectId, new GetPullRequestSummaryParts(projectId, buildNumber))) {
+					for (PullRequestSummaryPart part: getProjectService().runOnActiveServer(projectId, new GetPullRequestSummaryParts(projectId, buildNumber))) {
 						if (SecurityUtils.canAccessReport(build, part.getReportName()))
 							parts.add(part);
 					}
@@ -101,18 +101,18 @@ public class MarkdownModule extends AbstractPluginModule {
 				MarkdownReportPage.class)));
 
 		contribute(BuildStorageSyncer.class, ((projectId, buildNumber, activeServer) -> {
-			getProjectManager().syncDirectory(projectId, 
+			getProjectService().syncDirectory(projectId, 
 					getProjectRelativeDirPath(buildNumber) + "/" + PublishMarkdownReportStep.CATEGORY,
 					PublishMarkdownReportStep.getReportLockName(projectId, buildNumber), activeServer);
-			getProjectManager().syncDirectory(projectId, 
+			getProjectService().syncDirectory(projectId, 
 					getProjectRelativeDirPath(buildNumber) + "/" + PublishPullRequestMarkdownReportStep.CATEGORY,
 					PublishPullRequestMarkdownReportStep.getReportLockName(projectId, buildNumber), activeServer);
 		}));
 		
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 
 	private static class GetBuildTabs implements ClusterTask<List<BuildTab>> {
@@ -132,7 +132,7 @@ public class MarkdownModule extends AbstractPluginModule {
 		public List<BuildTab> call() {
 			return read(PublishMarkdownReportStep.getReportLockName(projectId, buildNumber), () -> {
 				List<BuildTab> tabs = new ArrayList<>();
-				File categoryDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), PublishMarkdownReportStep.CATEGORY);
+				File categoryDir = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), PublishMarkdownReportStep.CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (!isVersionFile(reportDir))
@@ -163,7 +163,7 @@ public class MarkdownModule extends AbstractPluginModule {
 		public List<PullRequestSummaryPart> call() {
 			return read(PublishPullRequestMarkdownReportStep.getReportLockName(projectId, buildNumber), () -> {
 				List<PullRequestSummaryPart> parts = new ArrayList<>();
-				File categoryDir = new File(OneDev.getInstance(BuildManager.class).getBuildDir(projectId, buildNumber), PublishPullRequestMarkdownReportStep.CATEGORY);
+				File categoryDir = new File(OneDev.getInstance(BuildService.class).getBuildDir(projectId, buildNumber), PublishPullRequestMarkdownReportStep.CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (!isVersionFile(reportDir))

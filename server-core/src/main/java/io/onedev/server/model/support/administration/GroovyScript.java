@@ -93,50 +93,5 @@ public class GroovyScript implements Serializable {
 			authorization = jobMatch.toString();
 		}
 	}
-
-	public Usage onDeleteUser(String userName) {
-		Usage usage = new Usage();
-		if (authorization != null && io.onedev.server.job.match.JobMatch.parse(authorization, true, false).isUsingUser(userName))
-			usage.add("authorization");
-		return usage;
-	}
-
-	public void onRenameUser(String oldName, String newName) {
-		if (authorization != null) {
-			var jobMatch = io.onedev.server.job.match.JobMatch.parse(authorization, true, false);
-			jobMatch.onRenameUser(oldName, newName);
-			authorization = jobMatch.toString();
-		}
-	}
-
-	public Usage onDeleteGroup(String groupName) {
-		Usage usage = new Usage();
-		if (authorization != null && io.onedev.server.job.match.JobMatch.parse(authorization, true, false).isUsingGroup(groupName))
-			usage.add("authorization");
-		return usage;
-	}
-
-	public void onRenameGroup(String oldName, String newName) {
-		if (authorization != null) {
-			var jobMatch = io.onedev.server.job.match.JobMatch.parse(authorization, true, false);
-			jobMatch.onRenameGroup(oldName, newName);
-			authorization = jobMatch.toString();
-		}
-	}
-
-	public Usage onDeleteRole(String roleName) {
-		Usage usage = new Usage();
-		if (authorization != null && io.onedev.server.job.match.JobMatch.parse(authorization, true, false).isUsingRole(roleName))
-			usage.add("authorization");
-		return usage;
-	}
-
-	public void onRenameRole(String oldName, String newName) {
-		if (authorization != null) {
-			var jobMatch = io.onedev.server.job.match.JobMatch.parse(authorization, true, false);
-			jobMatch.onRenameRole(oldName, newName);
-			authorization = jobMatch.toString();
-		}
-	}
 	
 }

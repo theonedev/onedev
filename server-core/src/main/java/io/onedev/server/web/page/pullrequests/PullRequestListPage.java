@@ -18,8 +18,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
@@ -57,7 +57,7 @@ public class PullRequestListPage extends LayoutPage {
 	}
 	
 	private static GlobalPullRequestSetting getPullRequestSetting() {
-		return OneDev.getInstance(SettingManager.class).getPullRequestSetting();		
+		return OneDev.getInstance(SettingService.class).getPullRequestSetting();
 	}
 
 	@Override
@@ -87,8 +87,8 @@ public class PullRequestListPage extends LayoutPage {
 				var oldAuditContent = VersionedXmlDoc.fromBean(getPullRequestSetting().getNamedQueries()).toXML();
 				getPullRequestSetting().setNamedQueries(queries);
 				var newAuditContent = VersionedXmlDoc.fromBean(getPullRequestSetting().getNamedQueries()).toXML();
-				OneDev.getInstance(SettingManager.class).savePullRequestSetting(getPullRequestSetting());
-				getAuditManager().audit(null, "changed pull request queries", oldAuditContent, newAuditContent);
+				OneDev.getInstance(SettingService.class).savePullRequestSetting(getPullRequestSetting());
+				auditService.audit(null, "changed pull request queries", oldAuditContent, newAuditContent);
 			}
 
 			@Override
@@ -162,7 +162,7 @@ public class PullRequestListPage extends LayoutPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										OneDev.getInstance(UserManager.class).update(getLoginUser(), null);
+										OneDev.getInstance(UserService.class).update(getLoginUser(), null);
 										target.add(savedQueries);
 										close();
 									}
@@ -185,8 +185,8 @@ public class PullRequestListPage extends LayoutPage {
 											verb = "changed";
 										}
 										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
-										OneDev.getInstance(SettingManager.class).savePullRequestSetting(pullRequestSetting);
-										getAuditManager().audit(null, verb + " pull request query \"" + name + "\"", oldAuditContent, newAuditContent);
+										OneDev.getInstance(SettingService.class).savePullRequestSetting(pullRequestSetting);
+										auditService.audit(null, verb + " pull request query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}
@@ -237,7 +237,7 @@ public class PullRequestListPage extends LayoutPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return _T("Pull Requests") + " - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return _T("Pull Requests") + " - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
 	}
 	
 	public static PageParameters paramsOf(int page) {

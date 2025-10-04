@@ -4,11 +4,11 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.ZipUtils;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.GpgKeyManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.SshKeyManager;
-import io.onedev.server.git.signatureverification.DefaultSignatureVerificationManager;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.GpgKeyService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.SshKeyService;
+import io.onedev.server.git.signatureverification.DefaultSignatureVerificationService;
 import io.onedev.server.git.signatureverification.VerificationSuccessful;
 import io.onedev.server.git.signatureverification.gpg.GpgSignatureVerifier;
 import io.onedev.server.git.signatureverification.gpg.GpgSigningKey;
@@ -17,6 +17,7 @@ import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GpgSetting;
 import io.onedev.server.util.GpgUtils;
+import io.onedev.server.util.ReflectionUtils;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.ObjectId;
@@ -49,16 +50,16 @@ public class SignatureVerifierTest {
 				emailAddress.setOwner(owner);
 				emailAddress.setVerificationCode(null);
 				
-				var emailAddressManager = mock(EmailAddressManager.class);
-				when(emailAddressManager.findByValue(any())).thenReturn(emailAddress);
+				var emailAddressService = mock(EmailAddressService.class);
+				when(emailAddressService.findByValue(any())).thenReturn(emailAddress);
 				
-				var sshKeyManager = mock(SshKeyManager.class);
+				var sshKeyService = mock(SshKeyService.class);
 				var sshKey = new SshKey();
 				sshKey.setOwner(owner);
-				when(sshKeyManager.findByFingerprint(any())).thenReturn(sshKey);
+				when(sshKeyService.findByFingerprint(any())).thenReturn(sshKey);
 				
-				var gpgKeyManager = mock(GpgKeyManager.class);
-				when(gpgKeyManager.findSigningKey(anyLong())).thenReturn(new GpgSigningKey() {
+				var gpgKeyService = mock(GpgKeyService.class);
+				when(gpgKeyService.findSigningKey(anyLong())).thenReturn(new GpgSigningKey() {
 					@Override
 					public PGPPublicKey getPublicKey() {
 						var armoredKey = "" +
@@ -87,14 +88,15 @@ public class SignatureVerifierTest {
 				var gpgSetting = mock(GpgSetting.class);
 				when(gpgSetting.findSigningKey(anyLong())).thenReturn(null);
 				
-				var settingManager = mock(SettingManager.class);
-				when(settingManager.getGpgSetting()).thenReturn(gpgSetting);
+				var settingService = mock(SettingService.class);
+				when(settingService.getGpgSetting()).thenReturn(gpgSetting);
 
 				var signatureVerifiers = Sets.newHashSet(
-						new SshSignatureVerifier(sshKeyManager, emailAddressManager),
-						new GpgSignatureVerifier(gpgKeyManager, settingManager)
+						new SshSignatureVerifier(sshKeyService, emailAddressService),
+						new GpgSignatureVerifier(gpgKeyService, settingService)
 				);
-				var commitSignatureManager = new DefaultSignatureVerificationManager(signatureVerifiers);
+				var commitSignatureManager = new DefaultSignatureVerificationService();
+				ReflectionUtils.setFieldValue(commitSignatureManager, "signatureVerifiers", signatureVerifiers);
 				
 				RevObject revObject = git.getRepository().parseCommit(ObjectId.fromString("2c968a0c073b0d1887aae917abea3a56629b3e0a"));
 				assert(commitSignatureManager.verifySignature(revObject) instanceof VerificationSuccessful);

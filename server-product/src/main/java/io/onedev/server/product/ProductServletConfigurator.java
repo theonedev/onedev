@@ -32,7 +32,7 @@ import io.onedev.server.security.CorsFilter;
 import io.onedev.server.security.DefaultWebEnvironment;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.img.ImageScope;
-import io.onedev.server.web.websocket.WebSocketManager;
+import io.onedev.server.web.websocket.WebSocketService;
 
 public class ProductServletConfigurator implements ServletConfigurator {
 
@@ -56,16 +56,16 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	
 	private final ServletContainer jerseyServlet;
 	
-	private final WebSocketManager webSocketManager;
+	private final WebSocketService webSocketService;
 	
 	private final ServerSocketServlet serverServlet;
 	
 	@Inject
 	public ProductServletConfigurator(ShiroFilter shiroFilter, CorsFilter corsFilter,
-									  GitFilter gitFilter, GitLfsFilter gitLfsFilter, GitPreReceiveCallback preReceiveServlet,
-									  GitPostReceiveCallback postReceiveServlet, WicketServlet wicketServlet,
-									  WebSocketManager webSocketManager, ServletContainer jerseyServlet,
-									  ServerSocketServlet serverServlet, GoGetFilter goGetFilter) {
+                                      GitFilter gitFilter, GitLfsFilter gitLfsFilter, GitPreReceiveCallback preReceiveServlet,
+                                      GitPostReceiveCallback postReceiveServlet, WicketServlet wicketServlet,
+                                      WebSocketService webSocketService, ServletContainer jerseyServlet,
+                                      ServerSocketServlet serverServlet, GoGetFilter goGetFilter) {
 		this.corsFilter = corsFilter;
 		this.shiroFilter = shiroFilter;
         this.gitFilter = gitFilter;
@@ -73,7 +73,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		this.preReceiveServlet = preReceiveServlet;
 		this.postReceiveServlet = postReceiveServlet;
 		this.wicketServlet = wicketServlet;
-		this.webSocketManager = webSocketManager;
+		this.webSocketService = webSocketService;
 		this.jerseyServlet = jerseyServlet;
 		this.serverServlet = serverServlet;
 		this.goGetFilter = goGetFilter;
@@ -116,7 +116,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 
 			@Override
 			public void sessionDestroyed(HttpSessionEvent se) {
-				webSocketManager.onDestroySession(se.getSession().getId());
+				webSocketService.onDestroySession(se.getSession().getId());
 			}
 			
 		});

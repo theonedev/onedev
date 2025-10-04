@@ -17,8 +17,8 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import io.onedev.server.entitymanager.PullRequestCommentManager;
-import io.onedev.server.entitymanager.PullRequestCommentRevisionManager;
+import io.onedev.server.service.PullRequestCommentService;
+import io.onedev.server.service.PullRequestCommentRevisionService;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestCommentRevision;
 import io.onedev.server.rest.annotation.Api;
@@ -30,21 +30,21 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class PullRequestCommentResource {
 
-	private final PullRequestCommentManager commentManager;
+	private final PullRequestCommentService commentService;
 
-	private final PullRequestCommentRevisionManager commentRevisionManager;
+	private final PullRequestCommentRevisionService commentRevisionService;
 
 	@Inject
-	public PullRequestCommentResource(PullRequestCommentManager commentManager, PullRequestCommentRevisionManager commentRevisionManager) {
-		this.commentManager = commentManager;
-		this.commentRevisionManager = commentRevisionManager;
+	public PullRequestCommentResource(PullRequestCommentService commentService, PullRequestCommentRevisionService commentRevisionService) {
+		this.commentService = commentService;
+		this.commentRevisionService = commentRevisionService;
 	}
 
 	@Api(order=100)
 	@Path("/{commentId}")
 	@GET
 	public PullRequestComment get(@PathParam("commentId") Long commentId) {
-		PullRequestComment comment = commentManager.load(commentId);
+		PullRequestComment comment = commentService.load(commentId);
     	if (!SecurityUtils.canReadCode(comment.getProject()))  
 			throw new UnauthorizedException();
     	return comment;
@@ -58,7 +58,7 @@ public class PullRequestCommentResource {
 			throw new UnauthorizedException();
 		}
 
-		commentManager.create(comment, new ArrayList<>());
+		commentService.create(comment, new ArrayList<>());
 		
 		return comment.getId();
 	}
@@ -67,21 +67,21 @@ public class PullRequestCommentResource {
 	@Path("/{commentId}")
 	@POST
 	public Response update(@PathParam("commentId") Long commentId, @NotNull String content) {
-		var comment = commentManager.load(commentId);
+		var comment = commentService.load(commentId);
 		if (!SecurityUtils.canModifyOrDelete(comment))
 			throw new UnauthorizedException();
 		var oldContent = comment.getContent();
 		if (!oldContent.equals(content)) {
 			comment.setContent(content);
 			comment.setRevisionCount(comment.getRevisionCount() + 1);
-			commentManager.update(comment);
+			commentService.update(comment);
 
 			var revision = new PullRequestCommentRevision();
 			revision.setComment(comment);
 			revision.setUser(SecurityUtils.getUser());
 			revision.setOldContent(oldContent);
 			revision.setNewContent(content);
-			commentRevisionManager.create(revision);
+			commentRevisionService.create(revision);
 		}
 
 		return Response.ok().build();
@@ -91,10 +91,10 @@ public class PullRequestCommentResource {
 	@Path("/{commentId}")
 	@DELETE
 	public Response delete(@PathParam("commentId") Long commentId) {
-		PullRequestComment comment = commentManager.load(commentId);
+		PullRequestComment comment = commentService.load(commentId);
     	if (!SecurityUtils.canModifyOrDelete(comment)) 
 			throw new UnauthorizedException();
-		commentManager.delete(comment);
+		commentService.delete(SecurityUtils.getUser(), comment);
 		return Response.ok().build();
 	}
 	

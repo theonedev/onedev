@@ -19,8 +19,8 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.SshKeyService;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -31,21 +31,21 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class SshKeyResource {
 
-	private final SshKeyManager sshKeyManager;
+	private final SshKeyService sshKeyService;
 
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 
 	@Inject
-	public SshKeyResource(SshKeyManager sshKeyManager, AuditManager auditManager) {
-		this.sshKeyManager = sshKeyManager;
-		this.auditManager = auditManager;
+	public SshKeyResource(SshKeyService sshKeyService, AuditService auditService) {
+		this.sshKeyService = sshKeyService;
+		this.auditService = auditService;
 	}
 
 	@Api(order=100)
 	@Path("/{sshKeyId}")
 	@GET
 	public SshKey getKey(@PathParam("sshKeyId") Long sshKeyId) {
-		SshKey sshKey = sshKeyManager.load(sshKeyId);
+		SshKey sshKey = sshKeyService.load(sshKeyId);
     	if (!SecurityUtils.isAdministrator() && !sshKey.getOwner().equals(getAuthUser())) 
 			throw new UnauthorizedException();
     	return sshKey;
@@ -60,10 +60,10 @@ public class SshKeyResource {
 		sshKey.setCreatedAt(new Date());
     	sshKey.generateFingerprint();
     	
-    	sshKeyManager.create(sshKey);
+    	sshKeyService.create(sshKey);
 		if (!getAuthUser().equals(sshKey.getOwner())) {
 			var newAuditContent = VersionedXmlDoc.fromBean(sshKey).toXML();
-			auditManager.audit(null, "created ssh key in account \"" + sshKey.getOwner().getName() + "\" via RESTful API", null, newAuditContent);
+			auditService.audit(null, "created ssh key in account \"" + sshKey.getOwner().getName() + "\" via RESTful API", null, newAuditContent);
 		}
     	return sshKey.getId();
 	}
@@ -72,13 +72,13 @@ public class SshKeyResource {
 	@Path("/{sshKeyId}")
 	@DELETE
 	public Response deleteKey(@PathParam("sshKeyId") Long sshKeyId) {
-		SshKey sshKey = sshKeyManager.load(sshKeyId);
+		SshKey sshKey = sshKeyService.load(sshKeyId);
     	if (!SecurityUtils.isAdministrator() && !sshKey.getOwner().equals(getAuthUser())) 
 			throw new UnauthorizedException();
-		sshKeyManager.delete(sshKey);
+		sshKeyService.delete(sshKey);
 		if (!getAuthUser().equals(sshKey.getOwner())) {
 			var oldAuditContent = VersionedXmlDoc.fromBean(sshKey).toXML();
-			auditManager.audit(null, "deleted ssh key from account \"" + sshKey.getOwner().getName() + "\" via RESTful API", oldAuditContent, null);
+			auditService.audit(null, "deleted ssh key from account \"" + sshKey.getOwner().getName() + "\" via RESTful API", oldAuditContent, null);
 		}
 		return Response.ok().build();
 	}

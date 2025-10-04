@@ -16,7 +16,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.base.Joiner;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.service.AgentService;
 import io.onedev.server.web.resource.AgentLogResource;
 import io.onedev.server.web.resource.AgentLogResourceReference;
 
@@ -38,7 +38,7 @@ public class AgentLogPage extends AgentDetailPage {
 			fragment.add(new ResourceLink<Void>("download", 
 					new AgentLogResourceReference(), AgentLogResource.paramsOf(getAgent())));
 			
-			List<String> lines = OneDev.getInstance(AgentManager.class).getAgentLog(getAgent());		
+			List<String> lines = OneDev.getInstance(AgentService.class).getAgentLog(getAgent());
 			String content;
 			if (lines.size() > MAX_DISPLAY_LINES) {
 				fragment.add(new Label("warning", MessageFormat.format(_T("Too many log entries, displaying recent {0}"), MAX_DISPLAY_LINES)));

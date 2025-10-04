@@ -20,9 +20,9 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.PullRequestCommentManager;
-import io.onedev.server.entitymanager.PullRequestCommentReactionManager;
-import io.onedev.server.entitymanager.PullRequestCommentRevisionManager;
+import io.onedev.server.service.PullRequestCommentService;
+import io.onedev.server.service.PullRequestCommentReactionService;
+import io.onedev.server.service.PullRequestCommentRevisionService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
@@ -30,7 +30,7 @@ import io.onedev.server.model.PullRequestCommentRevision;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CommentRevision;
 import io.onedev.server.model.support.EntityReaction;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.comment.CommentHistoryLink;
@@ -92,17 +92,17 @@ class PullRequestCommentPanel extends Panel {
 
 				var oldComment = entity.getContent();
 				if (!oldComment.equals(comment)) {
-					getTransactionManager().run(() -> {
+					getTransactionService().run(() -> {
 						entity.setContent(comment);
 						entity.setRevisionCount(entity.getRevisionCount() + 1);
-						getPullRequestCommentManager().update(entity);
+						getPullRequestCommentService().update(entity);
 
 						var revision = new PullRequestCommentRevision();
 						revision.setComment(entity);
 						revision.setUser(SecurityUtils.getUser());
 						revision.setOldContent(oldComment);
 						revision.setNewContent(comment);
-						getPullRequestCommentRevisionManager().create(revision);
+						getPullRequestCommentRevisionService().create(revision);
 					});
 					var page = (BasePage) getPage();
 					page.notifyObservableChange(target, PullRequest.getChangeObservable(entity.getRequest().getId()));				
@@ -154,7 +154,7 @@ class PullRequestCommentPanel extends Panel {
 					var pullRequest = PullRequestCommentPanel.this.getComment().getRequest();
 					target.appendJavaScript(String.format("$('#%s').remove();", PullRequestCommentPanel.this.getMarkupId()));
 					PullRequestCommentPanel.this.remove();
-					getPullRequestCommentManager().delete(PullRequestCommentPanel.this.getComment());
+					getPullRequestCommentService().delete(PullRequestCommentPanel.this.getComment());
 					page.notifyObservableChange(target, PullRequest.getChangeObservable(pullRequest.getId()));
 				};
 			}
@@ -170,7 +170,7 @@ class PullRequestCommentPanel extends Panel {
 		
 					@Override
 					public void onToggleEmoji(AjaxRequestTarget target, String emoji) {
-						getPullRequestCommentReactionManager().toggleEmoji(
+						getPullRequestCommentReactionService().toggleEmoji(
 								SecurityUtils.getUser(), 
 								PullRequestCommentPanel.this.getComment(), 
 								emoji);
@@ -205,20 +205,20 @@ class PullRequestCommentPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 
-	private TransactionManager getTransactionManager() {
-		return OneDev.getInstance(TransactionManager.class);
+	private TransactionService getTransactionService() {
+		return OneDev.getInstance(TransactionService.class);
 	}
 
-	private PullRequestCommentRevisionManager getPullRequestCommentRevisionManager() {
-		return OneDev.getInstance(PullRequestCommentRevisionManager.class);
+	private PullRequestCommentRevisionService getPullRequestCommentRevisionService() {
+		return OneDev.getInstance(PullRequestCommentRevisionService.class);
 	}
 
-	private PullRequestCommentManager getPullRequestCommentManager() {
-		return OneDev.getInstance(PullRequestCommentManager.class);
+	private PullRequestCommentService getPullRequestCommentService() {
+		return OneDev.getInstance(PullRequestCommentService.class);
 	}
 
-	private PullRequestCommentReactionManager getPullRequestCommentReactionManager() {
-		return OneDev.getInstance(PullRequestCommentReactionManager.class);
+	private PullRequestCommentReactionService getPullRequestCommentReactionService() {
+		return OneDev.getInstance(PullRequestCommentReactionService.class);
 	}
 
 	private PullRequestComment getComment() {

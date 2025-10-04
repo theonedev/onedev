@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.pullrequest.assignment;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -23,13 +23,13 @@ public abstract class AssigneeProvider extends AbstractUserChoiceProvider {
 	@Override
 	public void query(String term, int page, Response<User> response) {
 		PullRequest request = getPullRequest();
-		UserManager userManager = OneDev.getInstance(UserManager.class);
+		UserService userService = OneDev.getInstance(UserService.class);
 
 		List<User> users = new ArrayList<>(SecurityUtils.getAuthorizedUsers(request.getProject(), new WriteCode()));
 		
 		users.removeAll(request.getAssignees());
 		
-		UserCache cache = userManager.cloneCache();
+		UserCache cache = userService.cloneCache();
 		users.sort(cache.comparingDisplayName(request.getParticipants()));
 
 		new ResponseFiller<>(response).fill(new Similarities<>(users) {

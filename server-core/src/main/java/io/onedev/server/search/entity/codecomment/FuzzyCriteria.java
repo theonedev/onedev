@@ -13,7 +13,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.search.entitytext.CodeCommentTextManager;
+import io.onedev.server.search.entitytext.CodeCommentTextService;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -37,7 +37,7 @@ public class FuzzyCriteria extends Criteria<CodeComment> {
 			if (value.length() == 0)
 				return builder.conjunction();
 			var project = projectScope!=null? projectScope.getProject(): null;
-			commentIds = OneDev.getInstance(CodeCommentTextManager.class).query(project, value, MAX_TEXT_QUERY_COUNT);
+			commentIds = OneDev.getInstance(CodeCommentTextService.class).query(project, value, MAX_TEXT_QUERY_COUNT);
 		}
 		if (commentIds.isEmpty())
 			return builder.disjunction();
@@ -50,7 +50,7 @@ public class FuzzyCriteria extends Criteria<CodeComment> {
 		if (value.length() == 0)
 			return true;
 		else
-			return OneDev.getInstance(CodeCommentTextManager.class).matches(comment, value);
+			return OneDev.getInstance(CodeCommentTextService.class).matches(comment, value);
 	}
 
 	@Override

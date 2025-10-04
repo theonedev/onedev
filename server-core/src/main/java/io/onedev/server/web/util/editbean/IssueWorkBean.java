@@ -5,7 +5,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Markdown;
 import io.onedev.server.annotation.WithTime;
 import io.onedev.server.annotation.WorkingPeriod;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -35,7 +35,7 @@ public class IssueWorkBean implements Serializable {
 
 	@SuppressWarnings("unused")
 	private static String getSpentTimeDescription() {
-		var aggregationLink = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting().getAggregationLink();
+		var aggregationLink = OneDev.getInstance(SettingService.class).getIssueSetting().getTimeTrackingSetting().getAggregationLink();
 		if (aggregationLink != null)
 			return "Add spent time <b class='text-warning'>only for this issue</b>, not counting '" + aggregationLink + "'";
 		else

@@ -2,13 +2,13 @@ package io.onedev.server.rest.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.job.log.LogListener;
-import io.onedev.server.job.log.LogManager;
+import io.onedev.server.job.log.LogService;
 import io.onedev.server.job.log.LogSnippet;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -36,21 +36,21 @@ public class BuildLogStreamResource {
 
 	private static final int MAX_LOG_ENTRIES = 1000;
 	
-	private final BuildManager buildManager;
+	private final BuildService buildService;
 	
-	private final LogManager logManager;
+	private final LogService logService;
 	
 	private final ObjectMapper objectMapper;
 	
-	private final SessionManager sessionManager;
+	private final SessionService sessionService;
 	
 	@Inject
-	public BuildLogStreamResource(BuildManager buildManager, LogManager logManager,
-								  ObjectMapper objectMapper, SessionManager sessionManager) {
-		this.buildManager = buildManager;
-		this.logManager = logManager;
+	public BuildLogStreamResource(BuildService buildService, LogService logService,
+                                  ObjectMapper objectMapper, SessionService sessionService) {
+		this.buildService = buildService;
+		this.logService = logService;
 		this.objectMapper = objectMapper;
-		this.sessionManager = sessionManager;
+		this.sessionService = sessionService;
 	}
 	
 	@Api(order=200, description = "Streaming log of specified build")
@@ -58,7 +58,7 @@ public class BuildLogStreamResource {
 	@GET
 	@Produces(APPLICATION_OCTET_STREAM)
 	public StreamingOutput downloadLog(@PathParam("buildId") Long buildId) {
-		Build build = buildManager.load(buildId);
+		Build build = buildService.load(buildId);
 		if (!SecurityUtils.canAccessLog(build))
 			throw new UnauthorizedException();
 		
@@ -80,11 +80,11 @@ public class BuildLogStreamResource {
 				}
 
 			};
-			logManager.registerListener(logListener);
-			sessionManager.closeSession();
+			logService.registerListener(logListener);
+			sessionService.closeSession();
 			try {
 				var nextOffset = 0;
-				LogSnippet snippet = logManager.readLogSnippetReversely(projectId, buildNumber, MAX_LOG_ENTRIES + 1);
+				LogSnippet snippet = logService.readLogSnippetReversely(projectId, buildNumber, MAX_LOG_ENTRIES + 1);
 				nextOffset = snippet.offset + snippet.entries.size();
 				for (var entry : snippet.entries)
 					writeEntry(os, entry);
@@ -96,13 +96,13 @@ public class BuildLogStreamResource {
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
 						}
-						var entries = logManager.readLogEntries(projectId, buildNumber, nextOffset, 0);
+						var entries = logService.readLogEntries(projectId, buildNumber, nextOffset, 0);
 						if (!entries.isEmpty()) {
 							nextOffset += entries.size();
 							for (var entry : entries)
 								writeEntry(os, entry);
 						} else {
-							var innerBuildStatus = sessionManager.call(() -> buildManager.load(buildId).getStatus());
+							var innerBuildStatus = sessionService.call(() -> buildService.load(buildId).getStatus());
 							if (innerBuildStatus.isFinished()) {
 								writeStatus(os, innerBuildStatus);
 								break;
@@ -114,8 +114,8 @@ public class BuildLogStreamResource {
 					}
 				}
 			} finally {
-				sessionManager.openSession();
-				logManager.deregisterListener(logListener);
+				sessionService.openSession();
+				logService.deregisterListener(logListener);
 			}
 		};
 	}

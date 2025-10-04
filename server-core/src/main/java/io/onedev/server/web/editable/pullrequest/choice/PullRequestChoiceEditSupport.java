@@ -8,7 +8,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.editable.EditSupport;
@@ -37,7 +37,7 @@ public class PullRequestChoiceEditSupport implements EditSupport {
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								Long pullRequestId = model.getObject();
 								if (pullRequestId != null) {
-									PullRequest request = OneDev.getInstance(PullRequestManager.class).get(pullRequestId);
+									PullRequest request = OneDev.getInstance(PullRequestService.class).get(pullRequestId);
 									if (request != null) {
 										if (Project.get() != null && Project.get().getForkRoot().equals(request.getNumberScope()))
 											return new Label(id, "#" + request.getNumber());

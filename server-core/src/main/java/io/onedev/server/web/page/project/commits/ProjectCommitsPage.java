@@ -18,8 +18,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.CommitQueryPersonalizationService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.CommitQueryPersonalization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedCommitQuery;
@@ -58,8 +58,8 @@ public class ProjectCommitsPage extends ProjectPage {
 		compare = params.get(PARAM_COMPARE).toString();
 	}
 
-	private CommitQueryPersonalizationManager getCommitQueryPersonalizationManager() {
-		return OneDev.getInstance(CommitQueryPersonalizationManager.class);
+	private CommitQueryPersonalizationService getCommitQueryPersonalizationService() {
+		return OneDev.getInstance(CommitQueryPersonalizationService.class);
 	}
 	
 	@Override
@@ -101,8 +101,8 @@ public class ProjectCommitsPage extends ProjectPage {
 				var oldAuditContent = VersionedXmlDoc.fromBean(getProject().getNamedCommitQueries()).toXML();
 				getProject().setNamedCommitQueries(projectQueries);
 				var newAuditContent = VersionedXmlDoc.fromBean(getProject().getNamedCommitQueries()).toXML();
-				OneDev.getInstance(ProjectManager.class).update(getProject());
-				getAuditManager().audit(getProject(), "changed commit queries", oldAuditContent, newAuditContent);
+				OneDev.getInstance(ProjectService.class).update(getProject());
+				auditService.audit(getProject(), "changed commit queries", oldAuditContent, newAuditContent);
 			}
 
 		});
@@ -151,7 +151,7 @@ public class ProjectCommitsPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getCommitQueryPersonalizationManager().createOrUpdate(setting);
+										getCommitQueryPersonalizationService().createOrUpdate(setting);
 											
 										target.add(savedQueries);
 										close();
@@ -174,8 +174,8 @@ public class ProjectCommitsPage extends ProjectPage {
 											verb = "changed";
 										}
 										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
-										OneDev.getInstance(ProjectManager.class).update(getProject());
-										getAuditManager().audit(getProject(), verb + " commit query \"" + name + "\"", oldAuditContent, newAuditContent);
+										OneDev.getInstance(ProjectService.class).update(getProject());
+										auditService.audit(getProject(), verb + " commit query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}

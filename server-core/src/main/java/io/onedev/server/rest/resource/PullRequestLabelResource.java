@@ -1,6 +1,6 @@
 package io.onedev.server.rest.resource;
 
-import io.onedev.server.entitymanager.PullRequestLabelManager;
+import io.onedev.server.service.PullRequestLabelService;
 import io.onedev.server.model.PullRequestLabel;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -19,11 +19,11 @@ import javax.ws.rs.core.Response;
 @Singleton
 public class PullRequestLabelResource {
 
-	private final PullRequestLabelManager pullRequestLabelManager;
+	private final PullRequestLabelService pullRequestLabelService;
 
 	@Inject
-	public PullRequestLabelResource(PullRequestLabelManager pullRequestLabelManager) {
-		this.pullRequestLabelManager = pullRequestLabelManager;
+	public PullRequestLabelResource(PullRequestLabelService pullRequestLabelService) {
+		this.pullRequestLabelService = pullRequestLabelService;
 	}
 	
 	@Api(order=200, description="Create pull request label")
@@ -31,7 +31,7 @@ public class PullRequestLabelResource {
 	public Long create(@NotNull PullRequestLabel pullRequestLabel) {
 		if (!SecurityUtils.canModifyPullRequest(pullRequestLabel.getRequest()))
 			throw new UnauthorizedException();
-		pullRequestLabelManager.create(pullRequestLabel);
+		pullRequestLabelService.create(pullRequestLabel);
 		return pullRequestLabel.getId();
 	}
 	
@@ -39,10 +39,10 @@ public class PullRequestLabelResource {
 	@Path("/{pullRequestLabelId}")
 	@DELETE
 	public Response delete(@PathParam("pullRequestLabelId") Long pullRequestLabelId) {
-		PullRequestLabel pullRequestLabel = pullRequestLabelManager.load(pullRequestLabelId);
+		PullRequestLabel pullRequestLabel = pullRequestLabelService.load(pullRequestLabelId);
 		if (!SecurityUtils.canModifyPullRequest(pullRequestLabel.getRequest()))
 			throw new UnauthorizedException();
-		pullRequestLabelManager.delete(pullRequestLabel);
+		pullRequestLabelService.delete(pullRequestLabel);
 		return Response.ok().build();
 	}
 	

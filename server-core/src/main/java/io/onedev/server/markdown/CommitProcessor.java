@@ -7,10 +7,10 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.validation.validator.ProjectPathValidator;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jsoup.nodes.Document;
@@ -49,7 +49,7 @@ public class CommitProcessor implements HtmlProcessor {
 		
 		NodeTraversor.traverse(visitor, document);
 		
-		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+		ProjectService projectService = OneDev.getInstance(ProjectService.class);
 		for (TextNode node : visitor.getMatchedNodes()) {
 			Matcher matcher = PATTERN_COMMIT.matcher(node.getWholeText());
 			while (matcher.find()) {
@@ -59,7 +59,7 @@ public class CommitProcessor implements HtmlProcessor {
 				Project commitProject = project;
 				String commitPrefix = "";
 				if (commitProjectPath != null) {
-					commitProject = projectManager.findByPath(commitProjectPath);
+					commitProject = projectService.findByPath(commitProjectPath);
 					commitPrefix = commitProjectPath + ":";
 				}
 				if (commitProject != null) {
@@ -69,7 +69,7 @@ public class CommitProcessor implements HtmlProcessor {
 						if (RequestCycle.get() != null) 
 							url = RequestCycle.get().urlFor(CommitDetailPage.class, CommitDetailPage.paramsOf(commitProject, commitId.name())).toString();
 						else 
-							url = OneDev.getInstance(UrlManager.class).urlFor(new ProjectAndRevision(commitProject, commitId.name()), true);							
+							url = OneDev.getInstance(UrlService.class).urlFor(new ProjectAndRevision(commitProject, commitId.name()), true);
 						commitReplacement = String.format("<a href='%s' class='commit reference' data-reference='%s'>%s</a>", 
 								url, commitPrefix + commitId.name(), commitPrefix + GitUtils.abbreviateSHA(commitId.name()));
 					} else {

@@ -1,6 +1,6 @@
 package io.onedev.server.security;
 
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -12,11 +12,11 @@ import java.io.IOException;
 @Singleton
 public class CorsFilter implements Filter {
 
-	private final SettingManager settingManager;
+	private final SettingService settingService;
 	
 	@Inject
-	public CorsFilter(SettingManager settingManager) {
-		this.settingManager = settingManager;
+	public CorsFilter(SettingService settingService) {
+		this.settingService = settingService;
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public class CorsFilter implements Filter {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 		var origin = httpRequest.getHeader("Origin");
-		if (origin != null && settingManager.getSecuritySetting().getCorsAllowedOrigins().contains(origin)) {
+		if (origin != null && settingService.getSecuritySetting().getCorsAllowedOrigins().contains(origin)) {
 			httpResponse.addHeader("Access-Control-Allow-Origin", origin);
 			httpResponse.addHeader("Vary", "Origin");
 			httpResponse.addHeader("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS");

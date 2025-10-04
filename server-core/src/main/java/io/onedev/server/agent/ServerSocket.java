@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import io.onedev.agent.*;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.service.AgentService;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -24,9 +24,9 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.job.JobContext;
-import io.onedev.server.job.JobManager;
+import io.onedev.server.job.JobService;
 import io.onedev.server.job.ResourceAllocator;
-import io.onedev.server.job.log.LogManager;
+import io.onedev.server.job.log.LogService;
 import io.onedev.server.terminal.AgentShell;
 
 @WebSocket
@@ -42,7 +42,7 @@ public class ServerSocket {
 	public void onClose(int statusCode, String reason) {
 		try {
 			if (agentId != null)
-				getAgentManager().agentDisconnected(agentId);
+				getAgentService().agentDisconnected(agentId);
 
 			StringBuilder builder = new StringBuilder("Websocket closed (");
 			if (session != null && session.getRemoteAddress() != null)
@@ -69,15 +69,15 @@ public class ServerSocket {
 		}
 	}
 
-	private AgentManager getAgentManager() {
-		return OneDev.getInstance(AgentManager.class);
+	private AgentService getAgentService() {
+		return OneDev.getInstance(AgentService.class);
 	}
 
 	@OnWebSocketConnect
 	public void onConnect(Session session) {
 		this.session = session;
 		try {
-			new Message(MessageTypes.UPDATE, getAgentManager().getAgentVersion()).sendBy(session);
+			new Message(MessageTypes.UPDATE, getAgentService().getAgentVersion()).sendBy(session);
 		} catch (Exception e) {
 			logger.error("Error sending websocket message", e);
 			try {
@@ -98,7 +98,7 @@ public class ServerSocket {
 					// be assigned via Administrator
 					AgentData data = SerializationUtils.deserialize(message.getData());
 					try {
-						agentId = getAgentManager().agentConnected(data, session);
+						agentId = getAgentService().agentConnected(data, session);
 					} catch (Exception e) {
 						var explicitException = ExceptionUtils.find(e, ExplicitException.class);
 						if (explicitException != null) {
@@ -132,7 +132,7 @@ public class ServerSocket {
 						if (sessionId.length() == 0)
 							sessionId = null;
 						String logMessage = StringUtils.substringAfter(remaining, ":");
-						TaskLogger logger = OneDev.getInstance(LogManager.class).getJobLogger(jobToken);
+						TaskLogger logger = OneDev.getInstance(LogService.class).getJobLogger(jobToken);
 						if (logger != null)
 							logger.log(logMessage, sessionId);
 					} catch (Exception e) {
@@ -143,15 +143,15 @@ public class ServerSocket {
 					String dataString = new String(messageData, StandardCharsets.UTF_8);
 					String jobToken = StringUtils.substringBefore(dataString, ":");
 					String jobWorkspace = StringUtils.substringAfter(dataString, ":");
-					JobContext jobContext = getJobManager().getJobContext(jobToken, false);
+					JobContext jobContext = getJobService().getJobContext(jobToken, false);
 					if (jobContext != null)
-						getJobManager().reportJobWorkspace(jobContext, jobWorkspace);
+						getJobService().reportJobWorkspace(jobContext, jobWorkspace);
 					break;
 				case SHELL_OUTPUT:
 					dataString = new String(messageData, StandardCharsets.UTF_8);
 					String sessionId = StringUtils.substringBefore(dataString, ":");
 					String output = StringUtils.substringAfter(dataString, ":");
-					AgentShell shell = (AgentShell) getJobManager().getShell(sessionId);
+					AgentShell shell = (AgentShell) getJobService().getShell(sessionId);
 					if (shell != null)
 						shell.getTerminal().sendOutput(output);
 					break;
@@ -159,13 +159,13 @@ public class ServerSocket {
 					dataString = new String(messageData, StandardCharsets.UTF_8);
 					sessionId = StringUtils.substringBefore(dataString, ":");
 					String error = StringUtils.substringAfter(dataString, ":");
-					shell = (AgentShell) getJobManager().getShell(sessionId);
+					shell = (AgentShell) getJobService().getShell(sessionId);
 					if (shell != null)
 						shell.getTerminal().sendError(error);
 					break;
 				case SHELL_CLOSED:
 					sessionId = new String(messageData, StandardCharsets.UTF_8);
-					shell = (AgentShell) getJobManager().getShell(sessionId);
+					shell = (AgentShell) getJobService().getShell(sessionId);
 					if (shell != null)
 						shell.getTerminal().close();
 					break;
@@ -180,8 +180,8 @@ public class ServerSocket {
 		}
 	}
 
-	private JobManager getJobManager() {
-		return OneDev.getInstance(JobManager.class);
+	private JobService getJobService() {
+		return OneDev.getInstance(JobService.class);
 	}
 
 	private Serializable service(Serializable request) {

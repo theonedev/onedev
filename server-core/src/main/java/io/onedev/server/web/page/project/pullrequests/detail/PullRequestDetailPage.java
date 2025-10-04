@@ -70,15 +70,15 @@ import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.PullRequestAssignmentManager;
-import io.onedev.server.entitymanager.PullRequestChangeManager;
-import io.onedev.server.entitymanager.PullRequestLabelManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.PullRequestReactionManager;
-import io.onedev.server.entitymanager.PullRequestReviewManager;
-import io.onedev.server.entitymanager.PullRequestWatchManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.PullRequestAssignmentService;
+import io.onedev.server.service.PullRequestChangeService;
+import io.onedev.server.service.PullRequestLabelService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.PullRequestReactionService;
+import io.onedev.server.service.PullRequestReviewService;
+import io.onedev.server.service.PullRequestWatchService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.git.GitUtils;
@@ -167,7 +167,7 @@ import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.editbean.CommitMessageBean;
 import io.onedev.server.web.util.editbean.LabelsBean;
-import io.onedev.server.xodus.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoService;
 
 public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware {
 
@@ -205,7 +205,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					throw new ValidationException(MessageFormat.format(_T("Invalid pull request number: {0}"), requestNumberString));
 				}
 
-				PullRequest request = getPullRequestManager().find(getProject(), requestNumber);
+				PullRequest request = getPullRequestService().find(getProject(), requestNumber);
 				if (request == null) {
 					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find pull request #{0} in project {1}"), requestNumber, getProject().getPath()));
 				} else if (!request.getTargetProject().equals(getProject())) {
@@ -229,16 +229,16 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		return OneDev.getInstance(GitService.class);
 	}
 
-	private PullRequestManager getPullRequestManager() {
-		return OneDev.getInstance(PullRequestManager.class);
+	private PullRequestService getPullRequestService() {
+		return OneDev.getInstance(PullRequestService.class);
 	}
 
-	private PullRequestReviewManager getPullRequestReviewManager() {
-		return OneDev.getInstance(PullRequestReviewManager.class);
+	private PullRequestReviewService getPullRequestReviewService() {
+		return OneDev.getInstance(PullRequestReviewService.class);
 	}
 
-	private PullRequestChangeManager getPullRequestChangeManager() {
-		return OneDev.getInstance(PullRequestChangeManager.class);
+	private PullRequestChangeService getPullRequestChangeService() {
+		return OneDev.getInstance(PullRequestChangeService.class);
 	}
 
 	private WebMarkupContainer newRequestHead() {
@@ -339,7 +339,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				OneDev.getInstance(PullRequestChangeManager.class).changeTitle(getPullRequest(), title);
+				var user = SecurityUtils.getUser();
+				OneDev.getInstance(PullRequestChangeService.class).changeTitle(user, getPullRequest(), title);
 				notifyPullRequestChange(target);
 				isEditingTitle = false;
 
@@ -897,7 +898,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				if (SecurityUtils.getAuthUser() != null)
-					OneDev.getInstance(VisitInfoManager.class).visitPullRequest(SecurityUtils.getAuthUser(), getPullRequest());
+					OneDev.getInstance(VisitInfoService.class).visitPullRequest(SecurityUtils.getAuthUser(), getPullRequest());
 			}
 
 		});
@@ -957,7 +958,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 											@Override
 											public void onClick(AjaxRequestTarget target) {
-												OneDev.getInstance(PullRequestChangeManager.class).changeTargetBranch(getPullRequest(), branch);
+												var user = SecurityUtils.getUser();
+												OneDev.getInstance(PullRequestChangeService.class).changeTargetBranch(user, getPullRequest(), branch);
 												notifyPullRequestChange(target);
 												dropdown.close();
 											}
@@ -1064,7 +1066,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						var assignment = new PullRequestAssignment();
 						assignment.setRequest(getPullRequest());
 						assignment.setUser(SecurityUtils.getUser());
-						OneDev.getInstance(PullRequestAssignmentManager.class).create(assignment);
+						OneDev.getInstance(PullRequestAssignmentService.class).create(assignment);
 						((BasePage)getPage()).notifyObservableChange(target,
 								PullRequest.getChangeObservable(getPullRequest().getId()));
 					}
@@ -1114,7 +1116,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						@Override
 						protected void onUpdated(IPartialPageRequestHandler handler, Serializable bean, String propertyName) {
 							LabelsBean labelsBean = (LabelsBean) bean;
-							OneDev.getInstance(PullRequestLabelManager.class).sync(getPullRequest(), labelsBean.getLabels());
+							OneDev.getInstance(PullRequestLabelService.class).sync(getPullRequest(), labelsBean.getLabels());
 							handler.add(labelsContainer);
 						}
 
@@ -1161,12 +1163,12 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 					@Override
 					protected void onSaveWatch(EntityWatch watch) {
-						OneDev.getInstance(PullRequestWatchManager.class).createOrUpdate((PullRequestWatch) watch);
+						OneDev.getInstance(PullRequestWatchService.class).createOrUpdate((PullRequestWatch) watch);
 					}
 
 					@Override
 					protected void onDeleteWatch(EntityWatch watch) {
-						OneDev.getInstance(PullRequestWatchManager.class).delete((PullRequestWatch) watch);
+						OneDev.getInstance(PullRequestWatchService.class).delete((PullRequestWatch) watch);
 					}
 
 					@Override
@@ -1194,7 +1196,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							getPullRequestManager().checkAsync(getPullRequest(), false, true);
+							getPullRequestService().checkAsync(getPullRequest(), false, true);
 							Session.get().success(_T("Pull request synchronization submitted"));
 						}
 
@@ -1204,9 +1206,9 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						@Override
 						public void onClick() {
 							PullRequest request = getPullRequest();
-							getPullRequestManager().delete(request);
+							getPullRequestService().delete(request);
 							var oldAuditContent = VersionedXmlDoc.fromBean(request).toXML();
-							getAuditManager().audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
+							auditService.audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
 
 							Session.get().success(MessageFormat.format(_T("Pull request #{0} deleted"), request.getNumber()));
 
@@ -1255,7 +1257,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected List<PullRequest> query(EntityQuery<PullRequest> query,
 							int offset, int count, ProjectScope projectScope) {
-						return getPullRequestManager().query(projectScope!=null?projectScope.getProject():null, query, false, offset, count);
+						return getPullRequestService().query(SecurityUtils.getSubject(), projectScope!=null?projectScope.getProject():null, query, false, offset, count);
 					}
 
 					@Override
@@ -1323,7 +1325,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				OneDev.getInstance(PullRequestChangeManager.class).changeMergeStrategy(getPullRequest(), mergeStrategy);
+				var user = SecurityUtils.getUser();
+				OneDev.getInstance(PullRequestChangeService.class).changeMergeStrategy(user, getPullRequest(), mergeStrategy);
 				notifyPullRequestChange(target);
 			}
 
@@ -1396,7 +1399,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 										@Override
 										protected String onSave(AjaxRequestTarget target, CommitMessageBean bean) {
 											var request = getPullRequest();
-											var system = OneDev.getInstance(UserManager.class).getSystem();
+											var system = OneDev.getInstance(UserService.class).getSystem();
 											var branchProtection = getProject().getBranchProtection(request.getTargetBranch(), system);
 											var errorMessage = branchProtection.checkCommitMessage(bean.getCommitMessage(),
 													request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
@@ -1404,10 +1407,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 												return errorMessage;
 											} else {
 												autoMerge.setCommitMessage(bean.getCommitMessage());
-												getPullRequestChangeManager().changeAutoMerge(request, autoMerge);
+												var user = SecurityUtils.getUser();
+												getPullRequestChangeService().changeAutoMerge(user, request, autoMerge);
 												Session.get().success(_T("Preset commit message updated"));
 												close();
-												getPullRequestManager().checkAutoMerge(request);
+												getPullRequestService().checkAutoMerge(request);
 												return null;
 											}
 										}
@@ -1478,6 +1482,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				var request = getPullRequest();
+				var user = SecurityUtils.getUser();
 				if (autoMergeEnabled.get()) {
 					if (request.isMergeCommitMessageRequired()) {
 						var bean = new CommitMessageBean();
@@ -1504,7 +1509,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 									var autoMerge = new AutoMerge();
 									autoMerge.setEnabled(true);
 									autoMerge.setCommitMessage(bean.getCommitMessage());
-									getPullRequestChangeManager().changeAutoMerge(getPullRequest(), autoMerge);
+									getPullRequestChangeService().changeAutoMerge(user, getPullRequest(), autoMerge);
 									target.add(autoMergeContainer);
 									close();
 									return null;
@@ -1526,13 +1531,13 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						var autoMerge = new AutoMerge();
 						autoMerge.setEnabled(true);
 						autoMerge.setCommitMessage(request.getAutoMerge().getCommitMessage());
-						getPullRequestChangeManager().changeAutoMerge(request, autoMerge);
+						getPullRequestChangeService().changeAutoMerge(user, request, autoMerge);
 						target.add(autoMergeContainer);
 					}
 				} else {
 					var autoMerge = new AutoMerge();
 					autoMerge.setCommitMessage(request.getAutoMerge().getCommitMessage());
-					getPullRequestChangeManager().changeAutoMerge(request, autoMerge);
+					getPullRequestChangeService().changeAutoMerge(user, request, autoMerge);
 					target.add(autoMergeContainer);
 				}
 			}
@@ -1656,7 +1661,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
-				OneDev.getInstance(PullRequestChangeManager.class).changeDescription(getPullRequest(), comment);
+				var user = SecurityUtils.getUser();
+				OneDev.getInstance(PullRequestChangeService.class).changeDescription(user, getPullRequest(), comment);
 				((BasePage)getPage()).notifyObservableChange(target,
 						PullRequest.getChangeObservable(getPullRequest().getId()));
 			}
@@ -1726,7 +1732,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	
 					@Override
 					public void onToggleEmoji(AjaxRequestTarget target, String emoji) {
-						OneDev.getInstance(PullRequestReactionManager.class).toggleEmoji(
+						OneDev.getInstance(PullRequestReactionService.class).toggleEmoji(
 								SecurityUtils.getUser(), 
 								getPullRequest(), 
 								emoji);
@@ -1974,7 +1980,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
-							getPullRequestReviewManager().review(getPullRequest(), true, getComment());
+							getPullRequestReviewService().review(SecurityUtils.getUser(), getPullRequest(), true, getComment());
 							notifyPullRequestChange(target);
 							Session.get().success(_T("Approved"));
 							return null;
@@ -2017,7 +2023,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
-							getPullRequestReviewManager().review(getPullRequest(), false, getComment());
+							getPullRequestReviewService().review(SecurityUtils.getUser(), getPullRequest(), false, getComment());
 							notifyPullRequestChange(target);
 							Session.get().success(_T("Requested For changes"));
 							return null;
@@ -2064,7 +2070,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 								if (errorMessage != null)
 									return errorMessage;
 							}
-							getPullRequestManager().merge(SecurityUtils.getUser(), getPullRequest(), commitMessage);
+							getPullRequestService().merge(SecurityUtils.getUser(), getPullRequest(), commitMessage);
 							notifyPullRequestChange(target);
 							return null;
 						} else {
@@ -2096,7 +2102,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
-							getPullRequestManager().discard(getPullRequest(), getComment());
+							getPullRequestService().discard(SecurityUtils.getUser(), getPullRequest(), getComment());
 							notifyPullRequestChange(target);
 							return null;
 						} else {
@@ -2133,7 +2139,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
-							getPullRequestManager().reopen(getPullRequest(), getComment());
+							getPullRequestService().reopen(SecurityUtils.getUser(), getPullRequest(), getComment());
 							notifyPullRequestChange(target);
 							return null;
 						} else {
@@ -2172,7 +2178,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
-							getPullRequestManager().deleteSourceBranch(getPullRequest(), getComment());
+							getPullRequestService().deleteSourceBranch(SecurityUtils.getUser(), getPullRequest(), getComment());
 							notifyPullRequestChange(target);
 							Session.get().success(_T("Deleted source branch"));
 							return null;
@@ -2212,7 +2218,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String operate(AjaxRequestTarget target) {
 						if (canOperate()) {
-							getPullRequestManager().restoreSourceBranch(getPullRequest(), getComment());
+							getPullRequestService().restoreSourceBranch(SecurityUtils.getUser(), getPullRequest(), getComment());
 							notifyPullRequestChange(target);
 							Session.get().success(_T("Restored source branch"));
 							return null;
@@ -2274,7 +2280,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			return _T("No valid signature for head commit of target branch");
 		}
 		if (protection.isCommitSignatureRequired()
-				&& OneDev.getInstance(SettingManager.class).getGpgSetting().getSigningKey() == null) {
+				&& OneDev.getInstance(SettingService.class).getGpgSetting().getSigningKey() == null) {
 			return _T("Commit signature required but no GPG signing key specified");
 		}
 		var error = gitService.checkCommitMessages(protection, project, sourceHead, mergeCommitId, new HashMap<>());

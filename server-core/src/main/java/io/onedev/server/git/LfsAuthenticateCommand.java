@@ -23,12 +23,12 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AccessTokenManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.ssh.SshAuthenticator;
 import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.channel.ChannelSession;
@@ -89,22 +89,22 @@ public class LfsAuthenticateCommand implements Command, ServerSessionAware {
     	SshAuthenticator authenticator = OneDev.getInstance(SshAuthenticator.class);
     	Long userId = authenticator.getPublicKeyOwnerId(session);
     	OneDev.getInstance(ExecutorService.class).submit(() -> {
-			SessionManager sessionManager = OneDev.getInstance(SessionManager.class);
-			sessionManager.openSession(); 
+			SessionService sessionService = OneDev.getInstance(SessionService.class);
+			sessionService.openSession(); 
 			try {
-				String accessToken = OneDev.getInstance(AccessTokenManager.class).createTemporal(userId, 300);
+				String accessToken = OneDev.getInstance(AccessTokenService.class).createTemporal(userId, 300);
 				String projectPath = StringUtils.strip(StringUtils.substringBefore(
 						commandString.substring(COMMAND_PREFIX.length()+1), " "), "/\\");
 				
-				var projectManager = OneDev.getInstance(ProjectManager.class);
-				var project = projectManager.findByPath(projectPath);
+				var projectService = OneDev.getInstance(ProjectService.class);
+				var project = projectService.findByPath(projectPath);
 				if (project == null && projectPath.endsWith(".git")) {
 					projectPath = StringUtils.substringBeforeLast(projectPath, ".");
-					project = projectManager.findByPath(projectPath);
+					project = projectService.findByPath(projectPath);
 				}
 				if (project == null)
 					throw new ExplicitException("Project not found: " + projectPath);
-				String url = OneDev.getInstance(UrlManager.class).cloneUrlFor(project, false);
+				String url = OneDev.getInstance(UrlService.class).cloneUrlFor(project, false);
 				Map<Object, Object> response = CollectionUtils.newHashMap(
 						"href", url + ".git/info/lfs", 
 						"header", CollectionUtils.newHashMap(
@@ -116,7 +116,7 @@ public class LfsAuthenticateCommand implements Command, ServerSessionAware {
 				new PrintStream(err).println("Check server log for details");
 				callback.onExit(-1);
 			} finally {                
-				sessionManager.closeSession();
+				sessionService.closeSession();
 			}
 		});
     }

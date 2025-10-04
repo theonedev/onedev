@@ -18,8 +18,8 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.security.SecurityUtils;
@@ -102,7 +102,7 @@ public abstract class GitProtocolPanel extends Panel {
 		
 		add(newContent("content"));
 		
-		SshSetting sshSetting = OneDev.getInstance(SettingManager.class).getSshSetting();
+		SshSetting sshSetting = OneDev.getInstance(SettingService.class).getSshSetting();
 		add(new Label("fingerPrint", _T("Server fingerprint") + ": " + sshSetting.getFingerPrint()) {
 
 			@Override
@@ -140,8 +140,8 @@ public abstract class GitProtocolPanel extends Panel {
 	protected abstract Component newContent(String componentId);
 	
 	public String getProtocolUrl() {
-		UrlManager urlManager = OneDev.getInstance(UrlManager.class);
-		return urlManager.cloneUrlFor(getProject(), useSsh);
+		UrlService urlService = OneDev.getInstance(UrlService.class);
+		return urlService.cloneUrlFor(getProject(), useSsh);
 	}
 	
 }

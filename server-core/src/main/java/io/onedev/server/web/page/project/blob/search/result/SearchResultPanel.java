@@ -31,7 +31,7 @@ import io.onedev.commons.jsymbol.util.HighlightableLabel;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.search.code.hit.FileHit;
 import io.onedev.server.search.code.hit.QueryHit;
@@ -119,7 +119,7 @@ public abstract class SearchResultPanel extends Panel {
 	}
 	
 	private int getMaxQueryEntries() {
-		return OneDev.getInstance(SettingManager.class).getPerformanceSetting().getMaxCodeSearchEntries();
+		return OneDev.getInstance(SettingService.class).getPerformanceSetting().getMaxCodeSearchEntries();
 	}
 
 	@SuppressWarnings("deprecation")

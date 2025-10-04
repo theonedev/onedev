@@ -26,7 +26,7 @@ import io.onedev.server.git.GitContribution;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.user.card.PersonCardPanel;
-import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoService;
 
 public class CodeContribsPage extends CodeStatsPage {
 
@@ -74,10 +74,10 @@ public class CodeContribsPage extends CodeStatsPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 
-		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
+		CommitInfoService commitInfoService = OneDev.getInstance(CommitInfoService.class);
 		Map<Integer, Integer[]> data = new HashMap<>();
 		Map<Integer, GitContribution> overallContributions = 
-				commitInfoManager.getOverallContributions(getProject().getId());
+				commitInfoService.getOverallContributions(getProject().getId());
 		for (Map.Entry<Integer, GitContribution> entry: overallContributions.entrySet()) {
 			GitContribution contribution = entry.getValue();
 			Integer[] dataValue = new Integer[] {contribution.getCommits(), contribution.getAdditions(), contribution.getDeletions()};

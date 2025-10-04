@@ -29,9 +29,9 @@
 		<module>server-plugin-buildspec-golang</module>
 		<module>server-plugin-buildspec-rust</module>
 		<module>server-plugin-authenticator-ldap</module>
-		<module>server-plugin-mailservice-smtpimap</module>
-		<module>server-plugin-mailservice-office365</module>
-		<module>server-plugin-mailservice-gmail</module>
+		<module>server-plugin-mail-smtpimap</module>
+		<module>server-plugin-mail-office365</module>
+		<module>server-plugin-mail-gmail</module>
 		<module>server-plugin-sso-openid</module>
 		<module>server-plugin-import-github</module>
 		<module>server-plugin-import-gitlab</module>

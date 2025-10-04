@@ -3,7 +3,7 @@ package io.onedev.server.event.project.issue;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.Issue;
 
 public class IssueCommitsAttached extends IssueEvent {
@@ -11,7 +11,7 @@ public class IssueCommitsAttached extends IssueEvent {
 	private static final long serialVersionUID = 1L;
 	
 	public IssueCommitsAttached(Issue issue) {
-		super(OneDev.getInstance(UserManager.class).getSystem(), new Date(), issue);
+		super(OneDev.getInstance(UserService.class).getSystem(), new Date(), issue);
 	}
 
 	@Override

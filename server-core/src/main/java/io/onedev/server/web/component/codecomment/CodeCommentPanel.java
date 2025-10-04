@@ -46,20 +46,20 @@ import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.CodeCommentReplyService;
+import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
@@ -71,7 +71,7 @@ import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.xodus.VisitInfoManager;
+import io.onedev.server.xodus.VisitInfoService;
 
 public abstract class CodeCommentPanel extends Panel {
 
@@ -95,7 +95,7 @@ public abstract class CodeCommentPanel extends Panel {
 	}
 
 	public CodeComment getComment() {
-		return OneDev.getInstance(CodeCommentManager.class).load(commentId);
+		return OneDev.getInstance(CodeCommentService.class).load(commentId);
 	}
 	
 	private WebMarkupContainer newCommentOrReplyContainer() {
@@ -121,7 +121,7 @@ public abstract class CodeCommentPanel extends Panel {
 		viewFragment.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate()))
 				.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getCreateDate()))));
 		if (isContextDifferent(getComment().getCompareContext())) {
-			String url = OneDev.getInstance(UrlManager.class).urlFor(getComment(), false);
+			String url = OneDev.getInstance(UrlService.class).urlFor(getComment(), false);
 			viewFragment.add(new ExternalLink("context", url) {
 
 				@Override
@@ -150,7 +150,7 @@ public abstract class CodeCommentPanel extends Panel {
 			public void setObject(String object) {
 				CodeComment comment = getComment();
 				comment.setContent(object);
-				OneDev.getInstance(CodeCommentManager.class).update(comment);				
+				OneDev.getInstance(CodeCommentService.class).update(comment);
 			}
 			
 		}, null) {
@@ -358,11 +358,11 @@ public abstract class CodeCommentPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				OneDev.getInstance(TransactionManager.class).run(() -> {
+				OneDev.getInstance(TransactionService.class).run(() -> {
 					onDeleteComment(target, getComment());
 					var oldAuditContent = VersionedXmlDoc.fromBean(getComment()).toXML();
-					OneDev.getInstance(AuditManager.class).audit(getComment().getProject(), "deleted code comment on file \"" + getComment().getMark().getPath() + "\"", oldAuditContent, null);
-					OneDev.getInstance(CodeCommentManager.class).delete(getComment());	
+					OneDev.getInstance(AuditService.class).audit(getComment().getProject(), "deleted code comment on file \"" + getComment().getMark().getPath() + "\"", oldAuditContent, null);
+					OneDev.getInstance(CodeCommentService.class).delete(getComment());
 				});
 			}
 
@@ -485,7 +485,7 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				if (SecurityUtils.getAuthUser() != null)
-					OneDev.getInstance(VisitInfoManager.class).visitCodeComment(SecurityUtils.getAuthUser(), getComment());
+					OneDev.getInstance(VisitInfoService.class).visitCodeComment(SecurityUtils.getAuthUser(), getComment());
 			}
 
 		});
@@ -697,7 +697,7 @@ public abstract class CodeCommentPanel extends Panel {
 			fragment.add(new Label("date", DateUtils.formatAge(getChange().getDate()))
 					.add(new AttributeAppender("title", DateUtils.formatDateTime(getChange().getDate()))));
 			if (isContextDifferent(getChange().getCompareContext())) {
-				String url = OneDev.getInstance(UrlManager.class).urlFor(getChange(), false);
+				String url = OneDev.getInstance(UrlService.class).urlFor(getChange(), false);
 				fragment.add(new ExternalLink("context", url) {
 
 					@Override
@@ -719,7 +719,7 @@ public abstract class CodeCommentPanel extends Panel {
 		}
 
 		public CodeCommentStatusChange getChange() {
-			return OneDev.getInstance(CodeCommentStatusChangeManager.class).load(changeId);
+			return OneDev.getInstance(CodeCommentStatusChangeService.class).load(changeId);
 		}
 		
 		@Override
@@ -762,7 +762,7 @@ public abstract class CodeCommentPanel extends Panel {
 			viewFragment.add(new Label("date", DateUtils.formatAge(reply.getDate()))
 					.add(new AttributeAppender("title", DateUtils.formatDateTime(reply.getDate()))));
 			if (isContextDifferent(reply.getCompareContext())) {
-				String url = OneDev.getInstance(UrlManager.class).urlFor(reply, false);
+				String url = OneDev.getInstance(UrlService.class).urlFor(reply, false);
 				viewFragment.add(new ExternalLink("context", url) {
 
 					@Override
@@ -946,7 +946,7 @@ public abstract class CodeCommentPanel extends Panel {
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					viewFragment.remove();
-					OneDev.getInstance(CodeCommentReplyManager.class).delete(getReply());
+					OneDev.getInstance(CodeCommentReplyService.class).delete(getReply());
 					target.appendJavaScript(String.format("$('#%s').remove();", viewFragment.getMarkupId()));
 					notifyCodeCommentChange(target, getComment());					
 				}
@@ -968,7 +968,7 @@ public abstract class CodeCommentPanel extends Panel {
 		}
 		
 		public CodeCommentReply getReply() {
-			return OneDev.getInstance(CodeCommentReplyManager.class).load(replyId);
+			return OneDev.getInstance(CodeCommentReplyService.class).load(replyId);
 		}
 
 		@Override

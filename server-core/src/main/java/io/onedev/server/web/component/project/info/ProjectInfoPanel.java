@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.replica.ProjectReplica;
 import io.onedev.server.search.entity.project.ProjectQuery;
@@ -60,7 +60,7 @@ public abstract class ProjectInfoPanel extends Panel {
 	private final IModel<Map<String, ProjectReplica>> replicasModel = new LoadableDetachableModel<>() {
 		@Override
 		protected Map<String, ProjectReplica> load() {
-			return getProjectManager().getReplicas(getProject().getId());
+			return getProjectService().getReplicas(getProject().getId());
 		}
 	};
 	
@@ -132,17 +132,17 @@ public abstract class ProjectInfoPanel extends Panel {
 				&& activeServer != null);
 		forkInfo.add(forkNow);
         
-        SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-        if (settingManager.getServiceDeskSetting() != null
-        		&& settingManager.getMailService() != null 
-        		&& settingManager.getMailService().getInboxMonitor(false) != null
+        SettingService settingService = OneDev.getInstance(SettingService.class);
+        if (settingService.getServiceDeskSetting() != null
+        		&& settingService.getMailConnector() != null 
+        		&& settingService.getMailConnector().getInboxMonitor(false) != null
         		&& getProject().isIssueManagement()) {
         	
 			String serviceDeskEmailAddress;
 			if (getProject().getServiceDeskEmailAddress() != null) {
 				serviceDeskEmailAddress = getProject().getServiceDeskEmailAddress();
 			} else {
-				ParsedEmailAddress systemAddress = ParsedEmailAddress.parse(settingManager.getMailService().getSystemAddress());
+				ParsedEmailAddress systemAddress = ParsedEmailAddress.parse(settingService.getMailConnector().getSystemAddress());
 				serviceDeskEmailAddress = systemAddress.getSubaddress(getProject().getPath());
 			}
 			
@@ -186,7 +186,7 @@ public abstract class ProjectInfoPanel extends Panel {
 				var replicas = new ArrayList<>(replicasModel.getObject().entrySet());
 				var orders = new HashMap<String, Integer>();
 				var index = 0;
-				for (var server: getClusterManager().getServerAddresses()) 
+				for (var server: getClusterService().getServerAddresses()) 
 					orders.put(server, index++);					
 				return replicas.stream()
 						.filter(it -> orders.containsKey(it.getKey()) && (it.getValue().getType() != ProjectReplica.Type.REDUNDANT || it.getKey().equals(activeServer)))
@@ -199,7 +199,7 @@ public abstract class ProjectInfoPanel extends Panel {
 			protected void populateItem(ListItem<Map.Entry<String, ProjectReplica>> item) {
 				var server = item.getModelObject().getKey();
 				var replica = item.getModelObject().getValue();
-				var escapedServer = HtmlEscape.escapeHtml5(server + " (" + getClusterManager().getServerName(server) + ")");
+				var escapedServer = HtmlEscape.escapeHtml5(server + " (" + getClusterService().getServerName(server) + ")");
 				String serverInfo;
 				if (server.equals(activeServer)) 
 					serverInfo = escapedServer + " <span class='badge badge-sm badge-info ml-1'>" + _T("active") + "</span>";
@@ -214,9 +214,9 @@ public abstract class ProjectInfoPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getClusterManager().submitToServer(server, () -> {
+						getClusterService().submitToServer(server, () -> {
 							try {
-								getProjectManager().requestToSyncReplica(projectId, activeServer);
+								getProjectService().requestToSyncReplica(projectId, activeServer);
 							} catch (Exception e) {
 								logger.error(MessageFormat.format("Error requestig to sync replica of project with id \"{0}\"", projectId), e);
 							}
@@ -238,17 +238,17 @@ public abstract class ProjectInfoPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(latestVersion != -1 && OneDev.getInstance(ClusterManager.class).isClusteringSupported());
+				setVisible(latestVersion != -1 && OneDev.getInstance(ClusterService.class).isClusteringSupported());
 			}
 		});
 	}
 	
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
-	private ClusterManager getClusterManager() {
-		return OneDev.getInstance(ClusterManager.class);
+	private ClusterService getClusterService() {
+		return OneDev.getInstance(ClusterService.class);
 	}
 	
 	private Project getProject() {

@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.pack.pypi;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
 
 import static io.onedev.server.web.translation.Translation._T;
@@ -63,7 +63,7 @@ public class PypiHelpPanel extends Panel {
 	}
 
 	private String getServerUrl() {
-		return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+		return OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 	}
 	
 }

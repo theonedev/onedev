@@ -48,12 +48,12 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.PackManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.PackService;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.pack.PackSupport;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -126,12 +126,12 @@ public abstract class PackListPanel extends Panel {
 		this.showType = showType;
 	}
 	
-	private PackManager getPackManager() {
-		return OneDev.getInstance(PackManager.class);
+	private PackService getPackService() {
+		return OneDev.getInstance(PackService.class);
 	}
 
-	private TransactionManager getTransactionManager() {
-		return OneDev.getInstance(TransactionManager.class);
+	private TransactionService getTransactionService() {
+		return OneDev.getInstance(TransactionService.class);
 	}
 	
 	@Nullable
@@ -181,8 +181,8 @@ public abstract class PackListPanel extends Panel {
 		return null;
 	}
 
-	private AuditManager getAuditManager() {
-		return OneDev.getInstance(AuditManager.class);
+	private AuditService getAuditService() {
+		return OneDev.getInstance(AuditService.class);
 	}
 	
 	private void doQuery(AjaxRequestTarget target) {
@@ -278,14 +278,14 @@ public abstract class PackListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										getTransactionManager().run(()-> {
+										getTransactionService().run(()-> {
 											Collection<Pack> packs = new ArrayList<>();
 											for (IModel<Pack> each: selectionColumn.getSelections())
 												packs.add(each.getObject());
-											getPackManager().delete(packs);
+											getPackService().delete(packs);
 											for (var pack: packs) {
 												var oldAuditContent = VersionedXmlDoc.fromBean(pack).toXML();
-												getAuditManager().audit(pack.getProject(), "deleted package \"" + pack.getReference(false) + "\"", oldAuditContent, null);
+												getAuditService().audit(pack.getProject(), "deleted package \"" + pack.getReference(false) + "\"", oldAuditContent, null);
 											}												
 										});
 										target.add(countLabel);
@@ -348,15 +348,15 @@ public abstract class PackListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										getTransactionManager().run(()-> {
+										getTransactionService().run(()-> {
 											Collection<Pack> packs = new ArrayList<>();
 											for (Iterator<Pack> it = (Iterator<Pack>) dataProvider.iterator(0, packsTable.getItemCount()); it.hasNext();) {
 												packs.add(it.next());
 											}
-											getPackManager().delete(packs);
+											getPackService().delete(packs);
 											for (var pack: packs) {
 												var oldAuditContent = VersionedXmlDoc.fromBean(pack).toXML();
-												getAuditManager().audit(pack.getProject(), "deleted package \"" + pack.getReference(false) + "\"", oldAuditContent, null);
+												getAuditService().audit(pack.getProject(), "deleted package \"" + pack.getReference(false) + "\"", oldAuditContent, null);
 											}												
 										});
 										dataProvider.detach();
@@ -562,7 +562,7 @@ public abstract class PackListPanel extends Panel {
 			@Override
 			public Iterator<? extends Pack> iterator(long first, long count) {
 				try {
-					return getPackManager().query(getProject(), queryModel.getObject(), 
+					return getPackService().query(SecurityUtils.getSubject(), getProject(), queryModel.getObject(), 
 							true, (int) first, (int) count).iterator();
 				} catch (ExplicitException e) {
 					error(e.getMessage());
@@ -575,7 +575,7 @@ public abstract class PackListPanel extends Panel {
 				PackQuery query = queryModel.getObject();
 				if (query != null) {
 					try {
-						return getPackManager().count(getProject(), query.getCriteria());
+						return getPackService().count(SecurityUtils.getSubject(), getProject(), query.getCriteria());
 					} catch (ExplicitException e) {
 						error(e.getMessage());
 					}
@@ -590,7 +590,7 @@ public abstract class PackListPanel extends Panel {
 
 					@Override
 					protected Pack load() {
-						return getPackManager().load(packId);
+						return getPackService().load(packId);
 					}
 
 				};

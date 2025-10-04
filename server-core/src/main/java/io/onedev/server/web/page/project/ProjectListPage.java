@@ -18,13 +18,14 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.list.ProjectListPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
@@ -61,7 +62,7 @@ public class ProjectListPage extends LayoutPage {
 	}
 
 	private static GlobalProjectSetting getProjectSetting() {
-		return OneDev.getInstance(SettingManager.class).getProjectSetting();		
+		return OneDev.getInstance(SettingService.class).getProjectSetting();
 	}
 	
 	@Override
@@ -96,8 +97,8 @@ public class ProjectListPage extends LayoutPage {
 				var oldAuditContent = VersionedXmlDoc.fromBean(getProjectSetting().getNamedQueries()).toXML();
 				getProjectSetting().setNamedQueries(namedQueries);
 				var newAuditContent = VersionedXmlDoc.fromBean(getProjectSetting().getNamedQueries()).toXML();
-				OneDev.getInstance(SettingManager.class).saveProjectSetting(getProjectSetting());
-				getAuditManager().audit(null, "changed project queries", oldAuditContent, newAuditContent);
+				OneDev.getInstance(SettingService.class).saveProjectSetting(getProjectSetting());
+				auditService.audit(null, "changed project queries", oldAuditContent, newAuditContent);
 			}
 
 		});
@@ -166,7 +167,7 @@ public class ProjectListPage extends LayoutPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										OneDev.getInstance(UserManager.class).update(getLoginUser(), null);
+										OneDev.getInstance(UserService.class).update(getLoginUser(), null);
 										target.add(savedQueries);
 										close();
 									}
@@ -183,7 +184,7 @@ public class ProjectListPage extends LayoutPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										OneDev.getInstance(SettingManager.class).saveProjectSetting(projectSetting);
+										OneDev.getInstance(SettingService.class).saveProjectSetting(projectSetting);
 										target.add(savedQueries);
 										close();
 									}
@@ -230,12 +231,12 @@ public class ProjectListPage extends LayoutPage {
 	}
 	
 	public static PageParameters paramsOf(int page, int expectedCount) {
-		return paramsOf(OneDev.getInstance(ProjectManager.class).getFavoriteQuery(), page, expectedCount);
+		return paramsOf(OneDev.getInstance(ProjectService.class).getFavoriteQuery(SecurityUtils.getUser()), page, expectedCount);
 	}
 
 	@Override
 	protected String getPageTitle() {
-		return _T("Projects") + " - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return _T("Projects") + " - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
 	}
 	
 	@Override

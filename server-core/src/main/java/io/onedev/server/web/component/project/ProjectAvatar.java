@@ -4,7 +4,7 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebComponent;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.web.avatar.AvatarManager;
+import io.onedev.server.web.avatar.AvatarService;
 
 public class ProjectAvatar extends WebComponent {
 
@@ -13,11 +13,11 @@ public class ProjectAvatar extends WebComponent {
 	public ProjectAvatar(String id, Long projectId) {
 		super(id);
 
-		url = getAvatarManager().getProjectAvatarUrl(projectId);
+		url = getAvatarService().getProjectAvatarUrl(projectId);
 	}
 	
-	private AvatarManager getAvatarManager() {
-		return OneDev.getInstance(AvatarManager.class);
+	private AvatarService getAvatarService() {
+		return OneDev.getInstance(AvatarService.class);
 	}
 	
 	@Override

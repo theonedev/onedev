@@ -16,8 +16,8 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.GroupAuthorizationManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.GroupAuthorizationService;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -28,21 +28,21 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class GroupAuthorizationResource {
 
-	private final GroupAuthorizationManager authorizationManager;
+	private final GroupAuthorizationService authorizationService;
 
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 
 	@Inject
-	public GroupAuthorizationResource(GroupAuthorizationManager authorizationManager, AuditManager auditManager) {
-		this.authorizationManager = authorizationManager;
-		this.auditManager = auditManager;
+	public GroupAuthorizationResource(GroupAuthorizationService authorizationService, AuditService auditService) {
+		this.authorizationService = authorizationService;
+		this.auditService = auditService;
 	}
 
 	@Api(order=100, description = "Get group authorization of specified id")
 	@Path("/{authorizationId}")
 	@GET
 	public GroupAuthorization getAuthorization(@PathParam("authorizationId") Long authorizationId) {
-		var authorization = authorizationManager.load(authorizationId);
+		var authorization = authorizationService.load(authorizationId);
 		if (!SecurityUtils.canManageProject(authorization.getProject()))
 			throw new UnauthorizedException();
 		return authorization;
@@ -53,9 +53,9 @@ public class GroupAuthorizationResource {
 	public Long createAuthorization(@NotNull GroupAuthorization authorization) {
 		if (!SecurityUtils.canManageProject(authorization.getProject()))
 			throw new UnauthorizedException();
-		authorizationManager.createOrUpdate(authorization);
+		authorizationService.createOrUpdate(authorization);
 		var newAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
-		auditManager.audit(authorization.getProject(), "created group authorization via RESTful API", null, newAuditContent);
+		auditService.audit(authorization.getProject(), "created group authorization via RESTful API", null, newAuditContent);
 		return authorization.getId();
 	}
 
@@ -63,12 +63,12 @@ public class GroupAuthorizationResource {
 	@Path("/{authorizationId}")
 	@DELETE
 	public Response deleteAuthorization(@PathParam("authorizationId") Long authorizationId) {
-		var authorization = authorizationManager.load(authorizationId);
+		var authorization = authorizationService.load(authorizationId);
 		if (!SecurityUtils.canManageProject(authorization.getProject()))
 			throw new UnauthorizedException();
-		authorizationManager.delete(authorization);
+		authorizationService.delete(authorization);
 		var oldAuditContent = VersionedXmlDoc.fromBean(authorization).toXML();
-		auditManager.audit(authorization.getProject(), "deleted group authorization via RESTful API", oldAuditContent, null);
+		auditService.audit(authorization.getProject(), "deleted group authorization via RESTful API", oldAuditContent, null);
 		return Response.ok().build();
 	}
 	

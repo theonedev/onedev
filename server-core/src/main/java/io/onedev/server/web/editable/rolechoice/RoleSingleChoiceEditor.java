@@ -16,7 +16,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.RoleChoice;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.service.RoleService;
 import io.onedev.server.model.Role;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.component.rolechoice.RoleSingleChoice;
@@ -42,14 +42,14 @@ public class RoleSingleChoiceEditor extends PropertyEditor<String> {
 		try {
 			RoleChoice roleChoice = descriptor.getPropertyGetter().getAnnotation(RoleChoice.class);
 			Preconditions.checkNotNull(roleChoice);
-			choices.addAll(OneDev.getInstance(RoleManager.class).query());
+			choices.addAll(OneDev.getInstance(RoleService.class).query());
 			choices.sort(Comparator.comparing(Role::getName));
 		} finally {
 			ComponentContext.pop();
 		}
 		Role role;
 		if (getModelObject() != null)
-			role = OneDev.getInstance(RoleManager.class).find(getModelObject());
+			role = OneDev.getInstance(RoleService.class).find(getModelObject());
 		else
 			role = null;
 		

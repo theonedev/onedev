@@ -9,13 +9,13 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 
 public class UserChoiceInput {
 	
 	public static List<String> getPossibleValues() {
-		return OneDev.getInstance(UserManager.class).cloneCache().values().stream()
+		return OneDev.getInstance(UserService.class).cloneCache().values().stream()
 				.map(it->it.getName())
 				.sorted()
 				.collect(Collectors.toList());

@@ -20,9 +20,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.RoleManager;
-import io.onedev.server.entitymanager.UserAuthorizationManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.RoleService;
+import io.onedev.server.service.UserAuthorizationService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.Project;
@@ -91,7 +91,7 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 						if (!canManageProject) {
 							for (UserAuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
 								if (authorizationBean.getUserName().equals(user.getName())
-										&& authorizationBean.getRoleNames().stream().anyMatch(it -> getRoleManager().find(it).isManageProject())) {
+										&& authorizationBean.getRoleNames().stream().anyMatch(it -> getRoleService().find(it).isManageProject())) {
 									canManageProject = true;
 									break;
 								}
@@ -110,22 +110,22 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 						error(_T("Duplicate authorizations found: ") + authorizationBean.getUserName());
 						return;
 					} else {
-						var user = getUserManager().findByName(authorizationBean.getUserName());
+						var user = getUserService().findByName(authorizationBean.getUserName());
 						authorizationBean.getRoleNames().stream().forEach(it -> {
 							UserAuthorization authorization = new UserAuthorization();
 							authorization.setProject(getProject());
 							authorization.setUser(user);
-							authorization.setRole(getRoleManager().find(it));
+							authorization.setRole(getRoleService().find(it));
 							authorizations.add(authorization);
 						});
 					}
 				}
 				
 				var oldAuditContent = getAuditContent();
-				getUserAuthorizationManager().syncAuthorizations(getProject(), authorizations);
+				getUserAuthorizationService().syncAuthorizations(getProject(), authorizations);
 
 				var newAuditContent = getAuditContent();
-				getAuditManager().audit(getProject(), "changed user authorizations", oldAuditContent, newAuditContent);
+				auditService.audit(getProject(), "changed user authorizations", oldAuditContent, newAuditContent);
 
 				Session.get().success(_T("User authorizations updated"));
 			}
@@ -144,16 +144,16 @@ public class UserAuthorizationsPage extends ProjectSettingPage {
 		return VersionedXmlDoc.fromBean(auditData).toXML();
 	}
 
-	private RoleManager getRoleManager() {
-		return OneDev.getInstance(RoleManager.class);
+	private RoleService getRoleService() {
+		return OneDev.getInstance(RoleService.class);
 	}
 
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 
-	private UserAuthorizationManager getUserAuthorizationManager() {
-		return OneDev.getInstance(UserAuthorizationManager.class);
+	private UserAuthorizationService getUserAuthorizationService() {
+		return OneDev.getInstance(UserAuthorizationService.class);
 	}
 
 	@Override

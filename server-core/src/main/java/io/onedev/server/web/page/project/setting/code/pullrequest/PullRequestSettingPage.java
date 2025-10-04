@@ -11,7 +11,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.security.SecurityUtils;
@@ -40,8 +40,8 @@ public class PullRequestSettingPage extends ProjectSettingPage {
 				super.onSubmit();	
 				var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 				getProject().setPullRequestSetting(bean);
-				OneDev.getInstance(ProjectManager.class).update(getProject());
-				getAuditManager().audit(getProject(), "changed pull request settings", oldAuditContent, newAuditContent);
+				OneDev.getInstance(ProjectService.class).update(getProject());
+				auditService.audit(getProject(), "changed pull request settings", oldAuditContent, newAuditContent);
 				setResponsePage(PullRequestSettingPage.class, PullRequestSettingPage.paramsOf(getProject()));
 				Session.get().success(_T("Pull request settings updated"));
 			}

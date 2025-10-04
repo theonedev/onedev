@@ -13,8 +13,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.GroupService;
 import io.onedev.server.model.Group;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
@@ -46,16 +46,16 @@ public class NewGroupPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				GroupManager groupManager = OneDev.getInstance(GroupManager.class);
-				Group groupWithSameName = groupManager.find(group.getName());
+				GroupService groupService = OneDev.getInstance(GroupService.class);
+				Group groupWithSameName = groupService.find(group.getName());
 				if (groupWithSameName != null) {
 					editor.error(new Path(new PathNode.Named("name")),
 							_T("This name has already been used by another group"));
 				} 
 				if (editor.isValid()) {
-					groupManager.create(group);
+					groupService.create(group);
 					var newAuditContent = VersionedXmlDoc.fromBean(group).toXML();
-					OneDev.getInstance(AuditManager.class).audit(null, "created group \"" + group.getName() + "\"", null, newAuditContent);
+					OneDev.getInstance(AuditService.class).audit(null, "created group \"" + group.getName() + "\"", null, newAuditContent);
 					Session.get().success(_T("Group created"));
 					setResponsePage(GroupMembershipsPage.class, GroupMembershipsPage.paramsOf(group));
 				}

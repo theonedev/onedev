@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.issue.editabletitle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.service.IssueChangeService;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -73,7 +73,8 @@ public abstract class IssueEditableTitlePanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				OneDev.getInstance(IssueChangeManager.class).changeTitle(getIssue(), titleInput.getModelObject());
+				var user = SecurityUtils.getUser();
+				OneDev.getInstance(IssueChangeService.class).changeTitle(user, getIssue(), titleInput.getModelObject());
 				((BasePage)getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(false));
 				
 				Fragment titleViewer = newTitleViewer();

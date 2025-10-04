@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
@@ -23,7 +23,7 @@ public abstract class ReviewerProvider extends AbstractUserChoiceProvider {
 	public void query(String term, int page, Response<User> response) {
 		PullRequest request = getPullRequest();
 		
-		UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();
+		UserCache cache = OneDev.getInstance(UserService.class).cloneCache();
 		List<User> users = new ArrayList<>(cache.getUsers());
 		users.sort(cache.comparingDisplayName(request.getParticipants()));
 		

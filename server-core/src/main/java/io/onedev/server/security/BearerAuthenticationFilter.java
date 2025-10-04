@@ -1,10 +1,10 @@
 package io.onedev.server.security;
 
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.AccessTokenManager;
-import io.onedev.server.entitymanager.AgentTokenManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.job.JobManager;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.AgentTokenService;
+import io.onedev.server.service.UserService;
+import io.onedev.server.job.JobService;
 import io.onedev.server.persistence.annotation.Sessional;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.subject.Subject;
@@ -19,24 +19,24 @@ import javax.servlet.http.HttpServletRequest;
 @Singleton
 public class BearerAuthenticationFilter extends ExceptionHandleFilter {
 	
-	private final UserManager userManager;
+	private final UserService userService;
 	
-	private final AccessTokenManager accessTokenManager;
+	private final AccessTokenService accessTokenService;
 	
-	private final AgentTokenManager agentTokenManager;
+	private final AgentTokenService agentTokenService;
 	
-	private final JobManager jobManager;
+	private final JobService jobService;
 	
-	private final ClusterManager clusterManager;
+	private final ClusterService clusterService;
 	
 	@Inject
-	public BearerAuthenticationFilter(AccessTokenManager accessTokenManager, AgentTokenManager agentTokenManager, 
-									  JobManager jobManager, UserManager userManager, ClusterManager clusterManager) {
-		this.accessTokenManager = accessTokenManager;
-		this.agentTokenManager = agentTokenManager;
-		this.jobManager = jobManager;
-		this.userManager = userManager;
-		this.clusterManager = clusterManager;
+	public BearerAuthenticationFilter(AccessTokenService accessTokenService, AgentTokenService agentTokenService,
+                                      JobService jobService, UserService userService, ClusterService clusterService) {
+		this.accessTokenService = accessTokenService;
+		this.agentTokenService = agentTokenService;
+		this.jobService = jobService;
+		this.userService = userService;
+		this.clusterService = clusterService;
 	}
 
 	@Sessional
@@ -46,14 +46,14 @@ public class BearerAuthenticationFilter extends ExceptionHandleFilter {
 		if (!subject.isAuthenticated()) {
 			String bearerToken = SecurityUtils.getBearerToken((HttpServletRequest)request);
 			if (bearerToken != null) {
-				if (clusterManager.getCredential().equals(bearerToken)) {
-					ThreadContext.bind(userManager.getSystem().asSubject());
+				if (clusterService.getCredential().equals(bearerToken)) {
+					ThreadContext.bind(userService.getSystem().asSubject());
 				} else {
-					var accessToken = accessTokenManager.findByValue(bearerToken);
+					var accessToken = accessTokenService.findByValue(bearerToken);
 					if (accessToken != null) {
 						ThreadContext.bind(accessToken.asSubject());
-					} else if (agentTokenManager.find(bearerToken) == null 
-							&& jobManager.getJobContext(bearerToken, false) == null) {
+					} else if (agentTokenService.find(bearerToken) == null 
+							&& jobService.getJobContext(bearerToken, false) == null) {
 						throw new IncorrectCredentialsException("Invalid or expired access token");
 					}
 				}

@@ -14,8 +14,8 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.ProjectLabelManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.ProjectLabelService;
 import io.onedev.server.model.ProjectLabel;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -26,14 +26,14 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class ProjectLabelResource {
 
-	private final ProjectLabelManager projectLabelManager;
+	private final ProjectLabelService projectLabelService;
 
-	private final AuditManager auditManager;
+	private final AuditService auditService;
 
 	@Inject
-	public ProjectLabelResource(ProjectLabelManager projectLabelManager, AuditManager auditManager) {
-		this.projectLabelManager = projectLabelManager;
-		this.auditManager = auditManager;
+	public ProjectLabelResource(ProjectLabelService projectLabelService, AuditService auditService) {
+		this.projectLabelService = projectLabelService;
+		this.auditService = auditService;
 	}
 	
 	@Api(order=200, description="Add project label")
@@ -41,8 +41,8 @@ public class ProjectLabelResource {
 	public Long addLabel(@NotNull ProjectLabel projectLabel) {
 		if (!SecurityUtils.canManageProject(projectLabel.getProject()))
 			throw new UnauthorizedException();
-		projectLabelManager.create(projectLabel);
-		auditManager.audit(projectLabel.getProject(), "added label \"" + projectLabel.getSpec().getName() + "\" via RESTful API", null, null);
+		projectLabelService.create(projectLabel);
+		auditService.audit(projectLabel.getProject(), "added label \"" + projectLabel.getSpec().getName() + "\" via RESTful API", null, null);
 		return projectLabel.getId();
 	}
 	
@@ -50,11 +50,11 @@ public class ProjectLabelResource {
 	@Path("/{projectLabelId}")
 	@DELETE
 	public Response removeLabel(@PathParam("projectLabelId") Long projectLabelId) {
-		ProjectLabel projectLabel = projectLabelManager.load(projectLabelId);
+		ProjectLabel projectLabel = projectLabelService.load(projectLabelId);
 		if (!SecurityUtils.canManageProject(projectLabel.getProject()))
 			throw new UnauthorizedException();
-		projectLabelManager.delete(projectLabel);
-		auditManager.audit(projectLabel.getProject(), "removed label \"" + projectLabel.getSpec().getName() + "\" via RESTful API", null, null);
+		projectLabelService.delete(projectLabel);
+		auditService.audit(projectLabel.getProject(), "removed label \"" + projectLabel.getSpec().getName() + "\" via RESTful API", null, null);
 		return Response.ok().build();
 	}
 	

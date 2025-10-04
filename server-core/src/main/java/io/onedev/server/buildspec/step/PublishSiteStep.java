@@ -20,13 +20,13 @@ import io.onedev.server.annotation.Patterns;
 import io.onedev.server.annotation.ProjectChoice;
 import io.onedev.server.annotation.SubPath;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.job.JobContext;
-import io.onedev.server.job.JobManager;
+import io.onedev.server.job.JobService;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.util.patternset.PatternSet;
 
 @Editable(order=1060, name="Site", group = PUBLISH, description="This step publishes specified files to be served as project web site. "
@@ -92,13 +92,13 @@ public class PublishSiteStep extends ServerSideStep {
 
 	@Override
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
-		return OneDev.getInstance(SessionManager.class).call(() -> {
-			var build = OneDev.getInstance(BuildManager.class).load(buildId);
-			JobContext jobContext = OneDev.getInstance(JobManager.class).getJobContext(build.getId());
+		return OneDev.getInstance(SessionService.class).call(() -> {
+			var build = OneDev.getInstance(BuildService.class).load(buildId);
+			JobContext jobContext = OneDev.getInstance(JobService.class).getJobContext(build.getId());
 			if (jobContext.getJobExecutor().isSitePublishEnabled()) {
 				Project project;
 				if (projectPath != null) {
-					project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+					project = OneDev.getInstance(ProjectService.class).findByPath(projectPath);
 					if (project == null) {
 						logger.error("Unable to find project: " + projectPath);
 						return new ServerStepResult(false);
@@ -108,13 +108,13 @@ public class PublishSiteStep extends ServerSideStep {
 				}
 				var projectId = project.getId();
 				LockUtils.write(project.getSiteLockName(), () -> {
-					File projectSiteDir = OneDev.getInstance(ProjectManager.class).getSiteDir(projectId);
+					File projectSiteDir = OneDev.getInstance(ProjectService.class).getSiteDir(projectId);
 					FileUtils.cleanDir(projectSiteDir);
 					FileUtils.copyDirectory(inputDir, projectSiteDir);
-					OneDev.getInstance(ProjectManager.class).directoryModified(projectId, projectSiteDir);
+					OneDev.getInstance(ProjectService.class).directoryModified(projectId, projectSiteDir);
 					return null;
 				});
-				String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+				String serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 				logger.log("Site published as "
 						+ StringUtils.stripEnd(serverUrl, "/") + "/" + project.getPath() + "/~site");
 			} else {

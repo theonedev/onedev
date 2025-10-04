@@ -21,7 +21,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -48,35 +47,16 @@ import com.google.common.base.Throwables;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ServerConfig;
-import io.onedev.server.SubscriptionManager;
+import io.onedev.server.SubscriptionService;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.data.migration.VersionedYamlDoc;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildParamManager;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueCommentManager;
-import io.onedev.server.entitymanager.IssueLinkManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IssueWorkManager;
-import io.onedev.server.entitymanager.IterationManager;
-import io.onedev.server.entitymanager.LabelSpecManager;
-import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestAssignmentManager;
-import io.onedev.server.entitymanager.PullRequestChangeManager;
-import io.onedev.server.entitymanager.PullRequestCommentManager;
-import io.onedev.server.entitymanager.PullRequestLabelManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.PullRequestReviewManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.entityreference.PullRequestReference;
 import io.onedev.server.exception.PullRequestReviewRejectedException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.job.JobManager;
+import io.onedev.server.job.JobService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
@@ -116,10 +96,29 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildParamService;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.IssueCommentService;
+import io.onedev.server.service.IssueLinkService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IssueWorkService;
+import io.onedev.server.service.IterationService;
+import io.onedev.server.service.LabelSpecService;
+import io.onedev.server.service.LinkSpecService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestAssignmentService;
+import io.onedev.server.service.PullRequestChangeService;
+import io.onedev.server.service.PullRequestCommentService;
+import io.onedev.server.service.PullRequestLabelService;
+import io.onedev.server.service.PullRequestReviewService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 
 @Api(internal = true)
 @Path("/mcp-helper")
@@ -130,101 +129,101 @@ public class McpHelperResource {
 
     private final ObjectMapper objectMapper;
 
-    private final SettingManager settingManager;
+    private final SettingService settingService;
 
-    private final UserManager userManager;
+    private final UserService userService;
     
-    private final IssueManager issueManager;    
+    private final IssueService issueService;    
     
-    private final ProjectManager projectManager;
+    private final ProjectService projectService;
 
-    private final LinkSpecManager linkSpecManager;
+    private final LinkSpecService linkSpecService;
 
-    private final IssueLinkManager issueLinkManager;
+    private final IssueLinkService issueLinkService;
 
-    private final IssueCommentManager issueCommentManager;
+    private final IssueCommentService issueCommentService;
 
-    private final IterationManager iterationManager;
+    private final IterationService iterationService;
 
-    private final IssueChangeManager issueChangeManager;
+    private final IssueChangeService issueChangeService;
 
-    private final IssueWorkManager issueWorkManager;
+    private final IssueWorkService issueWorkService;
 
-    private final SubscriptionManager subscriptionManager;
+    private final SubscriptionService subscriptionService;
 
-    private final PullRequestManager pullRequestManager;
+    private final PullRequestService pullRequestService;
 
-    private final PullRequestChangeManager pullRequestChangeManager;
+    private final PullRequestChangeService pullRequestChangeService;
 
-    private final PullRequestAssignmentManager pullRequestAssignmentManager;
+    private final PullRequestAssignmentService pullRequestAssignmentService;
 
-    private final PullRequestReviewManager pullRequestReviewManager;
+    private final PullRequestReviewService pullRequestReviewService;
 
-    private final PullRequestLabelManager pullRequestLabelManager;
+    private final PullRequestLabelService pullRequestLabelService;
 
-    private final PullRequestCommentManager pullRequestCommentManager;
+    private final PullRequestCommentService pullRequestCommentService;
 
-    private final BuildManager buildManager;
+    private final BuildService buildService;
 
-    private final BuildParamManager buildParamManager;
+    private final BuildParamService buildParamService;
 
-    private final JobManager jobManager;
+    private final JobService jobService;
 
     private final GitService gitService;
 
-    private final LabelSpecManager labelSpecManager;
+    private final LabelSpecService labelSpecService;
 
-    private final UrlManager urlManager;
+    private final UrlService urlService;
 
     private final Validator validator;
 
     private final ServerConfig serverConfig;
 
     @Inject
-    public McpHelperResource(ObjectMapper objectMapper, SettingManager settingManager, 
-            UserManager userManager, IssueManager issueManager, ProjectManager projectManager, 
-            LinkSpecManager linkSpecManager, IssueCommentManager issueCommentManager, 
-            IterationManager iterationManager, SubscriptionManager subscriptionManager, 
-            IssueChangeManager issueChangeManager, IssueLinkManager issueLinkManager, 
-            IssueWorkManager issueWorkManager, PullRequestManager pullRequestManager, 
-            PullRequestChangeManager pullRequestChangeManager, GitService gitService, 
-            LabelSpecManager labelSpecManager, PullRequestReviewManager pullRequestReviewManager, 
-            PullRequestAssignmentManager pullRequestAssignmentManager, 
-            PullRequestLabelManager pullRequestLabelManager, UrlManager urlManager,
-            PullRequestCommentManager pullRequestCommentManager, BuildManager buildManager,
-            BuildParamManager buildParamManager, JobManager jobManager, Validator validator,
-            ServerConfig serverConfig) {
+    public McpHelperResource(ObjectMapper objectMapper, SettingService settingService,
+                             UserService userService, IssueService issueService, ProjectService projectService,
+                             LinkSpecService linkSpecService, IssueCommentService issueCommentService,
+                             IterationService iterationService, SubscriptionService subscriptionService,
+                             IssueChangeService issueChangeService, IssueLinkService issueLinkService,
+                             IssueWorkService issueWorkService, PullRequestService pullRequestService,
+                             PullRequestChangeService pullRequestChangeService, GitService gitService,
+                             LabelSpecService labelSpecService, PullRequestReviewService pullRequestReviewService,
+                             PullRequestAssignmentService pullRequestAssignmentService,
+                             PullRequestLabelService pullRequestLabelService, UrlService urlService,
+                             PullRequestCommentService pullRequestCommentService, BuildService buildService,
+                             BuildParamService buildParamService, JobService jobService, Validator validator,
+                             ServerConfig serverConfig) {
         this.objectMapper = objectMapper;
-        this.settingManager = settingManager;
-        this.issueManager = issueManager;
-        this.userManager = userManager;
-        this.projectManager = projectManager;
-        this.linkSpecManager = linkSpecManager;
-        this.issueCommentManager = issueCommentManager;
-        this.iterationManager = iterationManager;
-        this.subscriptionManager = subscriptionManager;
-        this.issueChangeManager = issueChangeManager;
-        this.issueLinkManager = issueLinkManager;
-        this.issueWorkManager = issueWorkManager;
-        this.pullRequestManager = pullRequestManager;
-        this.pullRequestChangeManager = pullRequestChangeManager;
-        this.pullRequestAssignmentManager = pullRequestAssignmentManager;
-        this.pullRequestReviewManager = pullRequestReviewManager;
+        this.settingService = settingService;
+        this.issueService = issueService;
+        this.userService = userService;
+        this.projectService = projectService;
+        this.linkSpecService = linkSpecService;
+        this.issueCommentService = issueCommentService;
+        this.iterationService = iterationService;
+        this.subscriptionService = subscriptionService;
+        this.issueChangeService = issueChangeService;
+        this.issueLinkService = issueLinkService;
+        this.issueWorkService = issueWorkService;
+        this.pullRequestService = pullRequestService;
+        this.pullRequestChangeService = pullRequestChangeService;
+        this.pullRequestAssignmentService = pullRequestAssignmentService;
+        this.pullRequestReviewService = pullRequestReviewService;
         this.gitService = gitService;
-        this.labelSpecManager = labelSpecManager;
-        this.pullRequestLabelManager = pullRequestLabelManager;
-        this.urlManager = urlManager;
-        this.pullRequestCommentManager = pullRequestCommentManager;
-        this.buildManager = buildManager;
-        this.buildParamManager = buildParamManager;
-        this.jobManager = jobManager;
+        this.labelSpecService = labelSpecService;
+        this.pullRequestLabelService = pullRequestLabelService;
+        this.urlService = urlService;
+        this.pullRequestCommentService = pullRequestCommentService;
+        this.buildService = buildService;
+        this.buildParamService = buildParamService;
+        this.jobService = jobService;
         this.validator = validator;
         this.serverConfig = serverConfig;
     }
 
     private String getIssueQueryStringDescription() {
         var stateNames = new StringBuilder();
-        for (var state: settingManager.getIssueSetting().getStateSpecs()) {
+        for (var state: settingService.getIssueSetting().getStateSpecs()) {
             stateNames.append("  - ");
             stateNames.append(state.getName());
             if (state.getDescription() != null) {
@@ -233,7 +232,7 @@ public class McpHelperResource {
             stateNames.append("\n");
         }
         var fieldCriterias = new StringBuilder();
-        for (var field: settingManager.getIssueSetting().getFieldSpecs()) {
+        for (var field: settingService.getIssueSetting().getFieldSpecs()) {
             if (field instanceof ChoiceField) {
                 var choiceField = (ChoiceField) field;
                 fieldCriterias.append("- " + field.getName().toLowerCase() + " criteria in form of: \""
@@ -285,7 +284,7 @@ public class McpHelperResource {
                     + field.getName() + "\" is empty (quotes are required)\n");
         }
         var linkCriterias = new StringBuilder();
-        for (var linkSpec: linkSpecManager.query()) {
+        for (var linkSpec: linkSpecService.query()) {
             linkCriterias.append("- criteria to list issues with any " + linkSpec.getName().toLowerCase()
                     + " issues matching certain criteria in form of: any \"" + linkSpec.getName()
                     + "\" matching(another criteria) (quotes are required)\n");
@@ -346,7 +345,7 @@ public class McpHelperResource {
             orderFields.append("- ").append(field).append("\n");
         }
 
-        var labelNames = labelSpecManager.query().stream().map(LabelSpec::getName).collect(Collectors.joining(", "));
+        var labelNames = labelSpecService.query().stream().map(LabelSpec::getName).collect(Collectors.joining(", "));
         var mergeStrategyNames = Arrays.stream(MergeStrategy.values()).map(MergeStrategy::name).collect(Collectors.joining(", "));
 
         var description = 
@@ -408,9 +407,9 @@ public class McpHelperResource {
             orderFields.append("- ").append(field).append("\n");
         }
 
-        var jobNames = buildManager.getJobNames(null).stream().collect(Collectors.joining(", "));
-        var paramNames = buildParamManager.getParamNames(null).stream().collect(Collectors.joining(", "));
-        var labelNames = labelSpecManager.query().stream().map(LabelSpec::getName).collect(Collectors.joining(", "));
+        var jobNames = buildService.getJobNames(null).stream().collect(Collectors.joining(", "));
+        var paramNames = buildParamService.getParamNames(null).stream().collect(Collectors.joining(", "));
+        var labelNames = labelSpecService.query().stream().map(LabelSpec::getName).collect(Collectors.joining(", "));
 
         var description = 
                 "A query string is one of below criteria:\n" +
@@ -469,7 +468,7 @@ public class McpHelperResource {
     }
 
     private Project getProject(String projectPath) {
-        var project = projectManager.findByPath(projectPath);
+        var project = projectService.findByPath(projectPath);
         if (project == null || !SecurityUtils.canAccessProject(project))
             throw new NotFoundException("Project not found or inaccessible: " + projectPath);
         return project;
@@ -545,7 +544,7 @@ public class McpHelperResource {
     @Path("/get-tool-input-schemas")
     @GET
     public Map<String, Object> getToolInputSchemas() {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
         var inputSchemas = new HashMap<String, Object>();
 
@@ -588,13 +587,13 @@ public class McpHelperResource {
 
         createIssueProperties.put("iterations", getArrayProperties("iteration names"));
 
-        if (subscriptionManager.isSubscriptionActive()) {
+        if (subscriptionService.isSubscriptionActive()) {
             createIssueProperties.put("ownEstimatedTime", Map.of(
                 "type", "integer",
                 "description", "Estimated time in hours for this issue only (not including linked issues)"));
         }
 
-        for (var field: settingManager.getIssueSetting().getFieldSpecs()) {
+        for (var field: settingService.getIssueSetting().getFieldSpecs()) {
             var paramName = getToolParamName(field.getName());
             var fieldProperties = getFieldProperties(field);
             createIssueProperties.put(paramName, fieldProperties);
@@ -623,13 +622,13 @@ public class McpHelperResource {
 
         editIssueProperties.put("iterations", getArrayProperties("iterations to schedule the issue in"));
 
-        if (subscriptionManager.isSubscriptionActive()) {
+        if (subscriptionService.isSubscriptionActive()) {
             editIssueProperties.put("ownEstimatedTime", Map.of(
                     "type", "integer",
                     "description", "Estimated time in hours for this issue only (not including linked issues)"));
         }
 
-        for (var field : settingManager.getIssueSetting().getFieldSpecs()) {
+        for (var field : settingService.getIssueSetting().getFieldSpecs()) {
             var paramName = getToolParamName(field.getName());
 
             var fieldProperties = getFieldProperties(field);
@@ -643,10 +642,10 @@ public class McpHelperResource {
         inputSchemas.put("editIssue", editIssueInputSchema);            
 
         var toStates = new HashSet<String>();
-        for (var transition: settingManager.getIssueSetting().getTransitionSpecs()) {
+        for (var transition: settingService.getIssueSetting().getTransitionSpecs()) {
             if (transition instanceof ManualSpec) {
                 if (transition.getToStates().isEmpty()) {
-                    toStates.addAll(settingManager.getIssueSetting().getStateSpecMap().keySet());
+                    toStates.addAll(settingService.getIssueSetting().getStateSpecMap().keySet());
                     break;
                 } else {
                     toStates.addAll(transition.getToStates());
@@ -668,7 +667,7 @@ public class McpHelperResource {
                     "type", "string",
                     "description", "comment of the state change"));
 
-            for (var field : settingManager.getIssueSetting().getFieldSpecs()) {
+            for (var field : settingService.getIssueSetting().getFieldSpecs()) {
                 var paramName = getToolParamName(field.getName());
 
                 var fieldProperties = getFieldProperties(field);
@@ -681,7 +680,7 @@ public class McpHelperResource {
             inputSchemas.put("changeIssueState", changeIssueStateInputSchema);
         }
 
-        var linkSpecs = linkSpecManager.query();
+        var linkSpecs = linkSpecService.query();
         if (!linkSpecs.isEmpty()) {
             var linkInputSchema = new HashMap<String, Object>();
             linkInputSchema.put("Type", "object");
@@ -788,7 +787,7 @@ public class McpHelperResource {
                 "uniqueItems", true,
                 "description", "Assignees of the pull request. Expects user login names"));
 
-        var labelSpecs = labelSpecManager.query();
+        var labelSpecs = labelSpecService.query();
         if (!labelSpecs.isEmpty()) {
             createPullRequestProperties.put("labels", Map.of(
                     "type", "array",
@@ -863,19 +862,19 @@ public class McpHelperResource {
     @Path("/get-login-name")
     @GET
     public String getLoginName(@QueryParam("userName") String userName) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         User user;                
         userName = StringUtils.trimToNull(userName);
         if (userName != null) {
-            user = userManager.findByName(userName);
+            user = userService.findByName(userName);
             if (user == null)
-                user = userManager.findByFullName(userName);
+                user = userService.findByFullName(userName);
             if (user == null) {
                 var matchingUsers = new ArrayList<User>();
                 var lowerCaseUserName = userName.toLowerCase();
-                for (var eachUser: userManager.query()) {
+                for (var eachUser: userService.query()) {
                     if (eachUser.getFullName() != null) {
                         if (Splitter.on(" ").trimResults().omitEmptyStrings().splitToList(eachUser.getFullName().toLowerCase()).contains(lowerCaseUserName)) {
                             matchingUsers.add(eachUser);
@@ -899,7 +898,7 @@ public class McpHelperResource {
     @Path("/get-unix-timestamp")
     @GET
     public long getUnixTimestamp(@QueryParam("dateTimeDescription") @NotNull String dateTimeDescription) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         return DateUtils.parseRelaxed(dateTimeDescription).getTime();
@@ -913,7 +912,8 @@ public class McpHelperResource {
                 @QueryParam("query") String query, 
                 @QueryParam("offset") int offset, 
                 @QueryParam("count") int count) {
-        if (SecurityUtils.getAuthUser() == null)
+        var subject = SecurityUtils.getSubject();
+        if (SecurityUtils.getUser(subject) == null)
             throw new UnauthenticatedException();
 
         var projectInfo = getProjectInfo(projectPath, currentProjectPath);
@@ -931,12 +931,12 @@ public class McpHelperResource {
         }
 
         var issues = new ArrayList<Map<String, Object>>();
-        for (var issue : issueManager.query(new ProjectScope(projectInfo.project, true, false), parsedQuery, true, offset, count)) {
+        for (var issue : issueService.query(subject, new ProjectScope(projectInfo.project, true, false), parsedQuery, true, offset, count)) {
             var issueMap = getIssueMap(projectInfo.currentProject, issue);
             for (var entry: issue.getFieldInputs().entrySet()) {
                 issueMap.put(entry.getKey(), entry.getValue().getValues());
             }
-            issueMap.put("link", urlManager.urlFor(issue, true));
+            issueMap.put("link", urlService.urlFor(issue, true));
             issues.add(issueMap);
         }
         return issues;
@@ -944,7 +944,7 @@ public class McpHelperResource {
 
     private Issue getIssue(Project currentProject, String referenceString) {
         var issueReference = IssueReference.of(referenceString, currentProject);
-        var issue = issueManager.find(issueReference.getProject(), issueReference.getNumber());
+        var issue = issueService.find(issueReference.getProject(), issueReference.getNumber());
         if (issue != null) {
             if (!SecurityUtils.canAccessIssue(issue))
                 throw new UnauthorizedException("No permission to access issue: " + referenceString);
@@ -982,7 +982,7 @@ public class McpHelperResource {
     public Map<String, Object> getIssue(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
@@ -1008,7 +1008,7 @@ public class McpHelperResource {
             }
         }
         issueMap.putAll(linkedIssues);
-        issueMap.put("link", urlManager.urlFor(issue, true));
+        issueMap.put("link", urlService.urlFor(issue, true));
 
         return issueMap;
     }
@@ -1018,7 +1018,7 @@ public class McpHelperResource {
     public List<Map<String, Object>> getIssueComments(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
@@ -1043,7 +1043,7 @@ public class McpHelperResource {
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference, 
                 @NotNull String commentContent) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
@@ -1051,9 +1051,9 @@ public class McpHelperResource {
         var comment = new IssueComment();
         comment.setIssue(issue);
         comment.setContent(commentContent);
-        comment.setUser(SecurityUtils.getAuthUser());
+        comment.setUser(SecurityUtils.getUser());
         comment.setDate(new Date());
-        issueCommentManager.create(comment);
+        issueCommentService.create(comment);
 
         return "Commented on issue " + issueReference;
     }
@@ -1064,14 +1064,14 @@ public class McpHelperResource {
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("project") String projectPath, 
                 @NotNull @Valid Map<String, Serializable> data) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var projectInfo = getProjectInfo(projectPath, currentProjectPath);
 
         normalizeIssueData(data);
 
-        var issueSetting = settingManager.getIssueSetting();
+        var issueSetting = settingService.getIssueSetting();
 
         Issue issue = new Issue();
         var title = (String) data.remove("title");
@@ -1086,7 +1086,7 @@ public class McpHelperResource {
 
         Integer ownEstimatedTime = (Integer) data.remove("ownEstimatedTime");
         if (ownEstimatedTime != null) {
-            if (!subscriptionManager.isSubscriptionActive())
+            if (!subscriptionService.isSubscriptionActive())
                 throw new NotAcceptableException("An active subscription is required for this feature");
             if (!projectInfo.project.isTimeTracking())
                 throw new NotAcceptableException("Time tracking needs to be enabled for the project");
@@ -1101,7 +1101,7 @@ public class McpHelperResource {
             if (!SecurityUtils.canScheduleIssues(projectInfo.project))
                 throw new UnauthorizedException("Issue schedule permission required to set iterations");
             for (var iterationName : iterationNames) {
-                var iteration = iterationManager.findInHierarchy(projectInfo.project, iterationName);
+                var iteration = iterationService.findInHierarchy(projectInfo.project, iterationName);
                 if (iteration == null)
                     throw new NotFoundException("Iteration '" + iterationName + "' not found");
                 IssueSchedule schedule = new IssueSchedule();
@@ -1113,14 +1113,14 @@ public class McpHelperResource {
 
         issue.setProject(projectInfo.project);
         issue.setSubmitDate(new Date());
-        issue.setSubmitter(SecurityUtils.getAuthUser());
+        issue.setSubmitter(SecurityUtils.getUser());
         issue.setState(issueSetting.getInitialStateSpec().getName());
 
         issue.setFieldValues(FieldUtils.getFieldValues(issue.getProject(), data));
 
-        issueManager.open(issue);
+        issueService.open(issue);
 
-        return "Created issue " + issue.getReference().toString(projectInfo.currentProject) + ": " + urlManager.urlFor(issue, true);
+        return "Created issue " + issue.getReference().toString(projectInfo.currentProject) + ": " + urlService.urlFor(issue, true);
     }
 
     @Path("/edit-issue")
@@ -1129,7 +1129,10 @@ public class McpHelperResource {
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference, 
                 @NotNull Map<String, Serializable> data) {
-        if (SecurityUtils.getAuthUser() == null)
+        var subject = SecurityUtils.getSubject();
+        var user = SecurityUtils.getUser(subject);
+
+        if (user == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
@@ -1142,56 +1145,51 @@ public class McpHelperResource {
 
         var title = (String) data.remove("title");
         if (title != null) 
-            issueChangeManager.changeTitle(issue, title);
+            issueChangeService.changeTitle(user, issue, title);
 
         if (data.containsKey("description")) 
-            issueChangeManager.changeDescription(issue, (String) data.remove("description"));
+            issueChangeService.changeDescription(user, issue, (String) data.remove("description"));
 
         var confidential = (Boolean) data.remove("confidential");
         if (confidential != null)
-            issueChangeManager.changeConfidential(issue, confidential);
+            issueChangeService.changeConfidential(user, issue, confidential);
 
         Integer ownEstimatedTime = (Integer) data.remove("ownEstimatedTime");
         if (ownEstimatedTime != null) {
-            if (!subscriptionManager.isSubscriptionActive())
+            if (!subscriptionService.isSubscriptionActive())
                 throw new NotAcceptableException("An active subscription is required for this feature");
             if (!issue.getProject().isTimeTracking())
                 throw new NotAcceptableException("Time tracking needs to be enabled for the project");
-            if (!SecurityUtils.canScheduleIssues(issue.getProject()))
+            if (!SecurityUtils.canScheduleIssues(subject, issue.getProject()))
                 throw new UnauthorizedException("Issue schedule permission required to set own estimated time");
-            issueChangeManager.changeOwnEstimatedTime(issue, ownEstimatedTime*60);
+            issueChangeService.changeOwnEstimatedTime(user, issue, ownEstimatedTime*60);
         }
 
         @SuppressWarnings("unchecked")
         List<String> iterationNames = (List<String>) data.remove("iterations");
         if (iterationNames != null) {
-            if (!SecurityUtils.canScheduleIssues(issue.getProject()))
+            if (!SecurityUtils.canScheduleIssues(subject, issue.getProject()))
                 throw new UnauthorizedException("Issue schedule permission required to set iterations");
             var iterations = new ArrayList<Iteration>();
             for (var iterationName : iterationNames) {
-                var iteration = iterationManager.findInHierarchy(issue.getProject(), iterationName);
+                var iteration = iterationService.findInHierarchy(issue.getProject(), iterationName);
                 if (iteration == null)
                     throw new NotFoundException("Iteration '" + iterationName + "' not found");
                 iterations.add(iteration);
             }
-            issueChangeManager.changeIterations(issue, iterations);
+            issueChangeService.changeIterations(user, issue, iterations);
         }
 
         if (!data.isEmpty()) {
-            var issueSetting = settingManager.getIssueSetting();
+            var issueSetting = settingService.getIssueSetting();
             String initialState = issueSetting.getInitialStateSpec().getName();
 
-            if (!SecurityUtils.canManageIssues(issue.getProject())
-                    && !(issue.getSubmitter().equals(SecurityUtils.getAuthUser())
-                            && issue.getState().equals(initialState))) {
+            if (!SecurityUtils.canManageIssues(subject, issue.getProject())
+                    && !(issue.getSubmitter().equals(user) && issue.getState().equals(initialState))) {
                 throw new UnauthorizedException("No permission to update issue fields");
             }
 
-            try {
-                issueChangeManager.changeFields(issue, FieldUtils.getFieldValues(issue.getProject(), data));
-            } catch (ValidationException e) {
-                throw new NotAcceptableException(e.getMessage());
-            }
+            issueChangeService.changeFields(user, issue, FieldUtils.getFieldValues(issue.getProject(), data));
         }
 
         return "Edited issue " + issueReference;
@@ -1203,7 +1201,9 @@ public class McpHelperResource {
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference, 
                 @NotNull Map<String, Serializable> data) {
-        if (SecurityUtils.getAuthUser() == null)
+        var subject = SecurityUtils.getSubject();
+        var user = SecurityUtils.getUser(subject);
+        if (user == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
@@ -1214,7 +1214,7 @@ public class McpHelperResource {
         if (state == null)
             throw new NotAcceptableException("State is required");
         var comment = (String) data.remove("comment");
-        ManualSpec transition = settingManager.getIssueSetting().getManualSpec(issue, state);
+        ManualSpec transition = settingService.getIssueSetting().getManualSpec(subject, issue, state);
         if (transition == null) {
             var message = MessageFormat.format(
                 "No applicable manual transition spec found for current user (issue: {0}, from state: {1}, to state: {2})",
@@ -1223,14 +1223,10 @@ public class McpHelperResource {
         }
 
         var fieldValues = FieldUtils.getFieldValues(issue.getProject(), data);
-        try {
-            issueChangeManager.changeState(issue, state, fieldValues, transition.getPromptFields(),
-                    transition.getRemoveFields(), comment);
-        } catch (ValidationException e) {
-            throw new NotAcceptableException(e.getMessage());
-        }
+        issueChangeService.changeState(user, issue, state, fieldValues, transition.getPromptFields(),
+                transition.getRemoveFields(), comment);
         var feedback = "Issue " + issueReference + " transited to state \"" + state + "\"";
-        var stateDescription = settingManager.getIssueSetting().getStateSpec(state).getDescription();
+        var stateDescription = settingService.getIssueSetting().getStateSpec(state).getDescription();
         if (stateDescription != null)
             feedback += ":\n\n" + stateDescription;
         return feedback;
@@ -1243,7 +1239,7 @@ public class McpHelperResource {
                 @QueryParam("sourceReference") @NotNull String sourceReference, 
                 @QueryParam("linkName") @Nullable String linkName, 
                 @QueryParam("targetReference") @NotNull String targetReference) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
@@ -1251,7 +1247,7 @@ public class McpHelperResource {
         var sourceIssue = getIssue(currentProject, sourceReference);
         var targetIssue = getIssue(currentProject, targetReference);
 
-        var linkSpec = linkSpecManager.find(linkName);
+        var linkSpec = linkSpecService.find(linkName);
         if (linkSpec == null)
             throw new NotFoundException("Link spec not found: " + linkName);
         if (!SecurityUtils.canEditIssueLink(sourceIssue.getProject(), linkSpec) 
@@ -1269,7 +1265,7 @@ public class McpHelperResource {
             link.setTarget(sourceIssue);
         }
         link.validate();
-        issueLinkManager.create(link);
+        issueLinkService.create(link);
 
         return "Issue " + targetReference + " added as \"" + linkName + "\" of " + sourceReference;
     }
@@ -1281,14 +1277,14 @@ public class McpHelperResource {
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String issueReference, 
                 @QueryParam("spentHours") int spentHours, String comment) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
 
         var issue = getIssue(currentProject, issueReference);
 
-        if (!subscriptionManager.isSubscriptionActive())
+        if (!subscriptionService.isSubscriptionActive())
             throw new NotAcceptableException("An active subscription is required for this feature");
         if (!issue.getProject().isTimeTracking())
             throw new NotAcceptableException("Time tracking needs to be enabled for the project");
@@ -1297,10 +1293,10 @@ public class McpHelperResource {
 
         var work = new IssueWork();
         work.setIssue(issue);
-        work.setUser(SecurityUtils.getAuthUser());
+        work.setUser(SecurityUtils.getUser());
         work.setMinutes(spentHours * 60);
         work.setNote(StringUtils.trimToNull(comment));
-        issueWorkManager.createOrUpdate(work);
+        issueWorkService.createOrUpdate(work);
         return "Work logged for issue " + issueReference;
     }
 
@@ -1309,7 +1305,7 @@ public class McpHelperResource {
             if (entry.getValue() instanceof String) 
                 entry.setValue(StringUtils.trimToNull((String) entry.getValue()));
         }
-        for (var field: settingManager.getIssueSetting().getFieldSpecs()) {
+        for (var field: settingService.getIssueSetting().getFieldSpecs()) {
             var paramName = getToolParamName(field.getName());
             if (!paramName.equals(field.getName()) && data.containsKey(paramName)) {
                 data.put(field.getName(), data.get(paramName));
@@ -1360,7 +1356,8 @@ public class McpHelperResource {
                 @QueryParam("query") String query, 
                 @QueryParam("offset") int offset, 
                 @QueryParam("count") int count) {
-        if (SecurityUtils.getAuthUser() == null)
+        var subject = SecurityUtils.getSubject();
+        if (SecurityUtils.getUser(subject) == null)
             throw new UnauthenticatedException();
 
         var projectInfo = getProjectInfo(projectPath, currentProjectPath);
@@ -1379,9 +1376,9 @@ public class McpHelperResource {
         }
 
         var pullRequests = new ArrayList<Map<String, Object>>();
-        for (var pullRequest : pullRequestManager.query(projectInfo.project, parsedQuery, false, offset, count)) {
+        for (var pullRequest : pullRequestService.query(subject, projectInfo.project, parsedQuery, false, offset, count)) {
             var pullRequestMap = getPullRequestMap(projectInfo.currentProject, pullRequest, false);
-            pullRequestMap.put("link", urlManager.urlFor(pullRequest, true));
+            pullRequestMap.put("link", urlService.urlFor(pullRequest, true));
             pullRequests.add(pullRequestMap);
         }
         return pullRequests;
@@ -1395,7 +1392,8 @@ public class McpHelperResource {
                 @QueryParam("query") String query, 
                 @QueryParam("offset") int offset, 
                 @QueryParam("count") int count) {
-        if (SecurityUtils.getAuthUser() == null)
+        var subject = SecurityUtils.getSubject();
+        if (SecurityUtils.getUser(subject) == null)
             throw new UnauthenticatedException();
 
         var projectInfo = getProjectInfo(projectPath, currentProjectPath);
@@ -1411,9 +1409,9 @@ public class McpHelperResource {
         }
 
         var builds = new ArrayList<Map<String, Object>>();
-        for (var build : buildManager.query(projectInfo.project, parsedQuery, false, offset, count)) {
+        for (var build : buildService.query(subject, projectInfo.project, parsedQuery, false, offset, count)) {
             var buildMap = getBuildMap(projectInfo.currentProject, build);
-            buildMap.put("link", urlManager.urlFor(build, true));
+            buildMap.put("link", urlService.urlFor(build, true));
             builds.add(buildMap);
         }
         return builds;
@@ -1424,7 +1422,7 @@ public class McpHelperResource {
     public Map<String, Object> getBuild(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String buildReference) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
@@ -1434,7 +1432,7 @@ public class McpHelperResource {
         var buildMap = getBuildMap(currentProject, build);     
         buildMap.put("params", build.getParamMap());
         buildMap.put("labels", build.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
-        buildMap.put("link", urlManager.urlFor(build, true));
+        buildMap.put("link", urlService.urlFor(build, true));
 
         return buildMap;
     }
@@ -1444,19 +1442,19 @@ public class McpHelperResource {
     public Map<String, Object> getPreviousSuccessfulSimilarBuild(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String buildReference) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
 
         var build = getBuild(currentProject, buildReference);
                 
-        var foundBuild = buildManager.findPreviousSuccessfulSimilar(build);
+        var foundBuild = buildService.findPreviousSuccessfulSimilar(build);
         if (foundBuild != null) {
             var buildMap = getBuildMap(currentProject, foundBuild);     
             buildMap.put("params", foundBuild.getParamMap());
             buildMap.put("labels", foundBuild.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
-            buildMap.put("link", urlManager.urlFor(foundBuild, true));
+            buildMap.put("link", urlService.urlFor(foundBuild, true));
             return buildMap;    
         } else {
             throw new NotFoundException("Previous successful similar build not found");
@@ -1468,7 +1466,7 @@ public class McpHelperResource {
     public Map<String, Object> getPullRequest(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String pullRequestReference) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
@@ -1494,7 +1492,7 @@ public class McpHelperResource {
         }
         pullRequestMap.put("builds", builds);
         pullRequestMap.put("labels", pullRequest.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
-        pullRequestMap.put("link", urlManager.urlFor(pullRequest, true));
+        pullRequestMap.put("link", urlService.urlFor(pullRequest, true));
 
         return pullRequestMap;
     }
@@ -1504,7 +1502,7 @@ public class McpHelperResource {
     public List<Map<String, Object>> getPullRequestComments(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String pullRequestReference) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
@@ -1526,7 +1524,7 @@ public class McpHelperResource {
     public List<Map<String, Object>> getPullRequestCodeComments(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String pullRequestReference) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
@@ -1542,7 +1540,7 @@ public class McpHelperResource {
             commentMap.put("content", comment.getContent());
             commentMap.put("replies", comment.getReplies().size());
             commentMap.put("status", comment.isResolved()?"resolved":"unresolved");
-            commentMap.put("link", urlManager.urlFor(comment, true));
+            commentMap.put("link", urlService.urlFor(comment, true));
             comments.add(commentMap);
         }
         return comments;
@@ -1554,7 +1552,7 @@ public class McpHelperResource {
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String pullRequestReference, 
                 @QueryParam("sinceLastReview") boolean sinceLastReview) {
-        var user = SecurityUtils.getAuthUser();
+        var user = SecurityUtils.getUser();
         if (user == null)
             throw new UnauthenticatedException();
 
@@ -1586,7 +1584,7 @@ public class McpHelperResource {
             }
         }
         var newCommitHash = pullRequest.getLatestUpdate().getHeadCommitHash();
-        var comparisonBase = pullRequestManager.getComparisonBase(
+        var comparisonBase = pullRequestService.getComparisonBase(
             pullRequest, ObjectId.fromString(oldCommitHash), ObjectId.fromString(newCommitHash));
 
         var patchInfo = new HashMap<String, String>();
@@ -1603,7 +1601,7 @@ public class McpHelperResource {
                 @QueryParam("targetProject") String targetProjectPath,
                 @QueryParam("sourceProject") String sourceProjectPath,
                 @NotNull Map<String, Serializable> data) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
         
         sourceProjectPath = StringUtils.trimToNull(sourceProjectPath);
@@ -1647,11 +1645,11 @@ public class McpHelperResource {
         if (target.equals(source))
             throw new NotAcceptableException("Target and source branches are the same");
 
-        PullRequest request = pullRequestManager.findOpen(target, source);
+        PullRequest request = pullRequestService.findOpen(target, source);
         if (request != null)
             throw new NotAcceptableException("Another pull request already opened for this change");
 
-        request = pullRequestManager.findEffective(target, source);
+        request = pullRequestService.findEffective(target, source);
         if (request != null) {
             if (request.isOpen())
                 throw new NotAcceptableException("Another pull request already opened for this change");
@@ -1676,7 +1674,7 @@ public class McpHelperResource {
         request.setDescription((String) data.remove("description"));
         request.setTarget(target);
         request.setSource(source);
-        request.setSubmitter(SecurityUtils.getAuthUser());
+        request.setSubmitter(SecurityUtils.getUser());
         request.setBaseCommitHash(baseCommitId.name());
 
         var mergeStrategyName = (String) data.remove("mergeStrategy");
@@ -1698,13 +1696,13 @@ public class McpHelperResource {
 
         request.generateTitleAndDescriptionIfEmpty();
 
-        pullRequestManager.checkReviews(request, false);
+        pullRequestService.checkReviews(request, false);
 
         @SuppressWarnings("unchecked")
         var reviewerNames = (List<String>) data.remove("reviewers");
         if (reviewerNames != null) {
             for (var reviewerName : reviewerNames) {
-                User reviewer = userManager.findByName(reviewerName);
+                User reviewer = userService.findByName(reviewerName);
                 if (reviewer == null)
                     throw new NotFoundException("Reviewer not found: " + reviewerName);
                 if (reviewer.equals(request.getSubmitter()))
@@ -1723,7 +1721,7 @@ public class McpHelperResource {
         var assigneeNames = (List<String>) data.remove("assignees");
         if (assigneeNames != null) {
             for (var assigneeName : assigneeNames) {
-                User assignee = userManager.findByName(assigneeName);
+                User assignee = userService.findByName(assigneeName);
                 if (assignee == null)
                     throw new NotFoundException("Assignee not found: " + assigneeName);
                 PullRequestAssignment assignment = new PullRequestAssignment();
@@ -1740,14 +1738,14 @@ public class McpHelperResource {
             }
         }
 
-        pullRequestManager.open(request);
+        pullRequestService.open(request);
 
-        return "Created pull request " + request.getReference().toString(currentProject) + ": " + urlManager.urlFor(request, true);        
+        return "Created pull request " + request.getReference().toString(currentProject) + ": " + urlService.urlFor(request, true);        
     }
 
     private PullRequest getPullRequest(Project currentProject, String referenceString) {
         var requestReference = PullRequestReference.of(referenceString, currentProject);
-        var request = pullRequestManager.find(requestReference.getProject(), requestReference.getNumber());
+        var request = pullRequestService.find(requestReference.getProject(), requestReference.getNumber());
         if (request != null) {
             if (!SecurityUtils.canReadCode(request.getProject()))
                 throw new UnauthorizedException("No permission to access pull request: " + referenceString);
@@ -1763,7 +1761,7 @@ public class McpHelperResource {
     public String editPullRequest(
                 @QueryParam("currentProject") @NotNull String currentProjectPath,
                 @QueryParam("reference") @NotNull String pullRequestReference, @NotNull Map<String, Serializable> data) {
-        var user = SecurityUtils.getAuthUser();
+        var user = SecurityUtils.getUser();
         if (user == null)
             throw new UnauthenticatedException();
 
@@ -1778,15 +1776,15 @@ public class McpHelperResource {
 
         var title = (String) data.remove("title");
         if (title != null) 
-            pullRequestChangeManager.changeTitle(request, title);
+            pullRequestChangeService.changeTitle(user, request, title);
 
         if (data.containsKey("description")) 
-            pullRequestChangeManager.changeDescription(request, (String) data.remove("description"));
+            pullRequestChangeService.changeDescription(user, request, (String) data.remove("description"));
 
         var labelNames = (List<String>) data.remove("labels");
         if (labelNames != null) {
             try {
-                pullRequestLabelManager.sync(request, labelNames);
+                pullRequestLabelService.sync(request, labelNames);
             } catch (EntityNotFoundException e) {
                 throw new NotFoundException(e.getMessage());
             }
@@ -1796,7 +1794,7 @@ public class McpHelperResource {
         if (mergeStrategyName != null) {
             if (!request.isOpen())
                 throw new NotAcceptableException("Pull request is closed");
-            pullRequestChangeManager.changeMergeStrategy(request, MergeStrategy.valueOf(mergeStrategyName));
+            pullRequestChangeService.changeMergeStrategy(user, request, MergeStrategy.valueOf(mergeStrategyName));
         }
 
         var assigneeNames = (List<String>) data.remove("assignees");
@@ -1804,19 +1802,19 @@ public class McpHelperResource {
             if (!request.isOpen())
                 throw new NotAcceptableException("Pull request is closed");
             for (var assigneeName : assigneeNames) {
-                User assignee = userManager.findByName(assigneeName);
+                User assignee = userService.findByName(assigneeName);
                 if (assignee == null)
                     throw new NotFoundException("Assignee not found: " + assigneeName);
                 if (request.getAssignments().stream().noneMatch(it -> it.getUser().equals(assignee))) {
                     PullRequestAssignment assignment = new PullRequestAssignment();
                     assignment.setRequest(request);
                     assignment.setUser(assignee);
-                    pullRequestAssignmentManager.create(assignment);
+                    pullRequestAssignmentService.create(assignment);
                 }
             }
             for (var assignee : request.getAssignments()) {
                 if (assigneeNames.stream().noneMatch(it -> it.equals(assignee.getUser().getName()))) {
-                    pullRequestAssignmentManager.delete(assignee);
+                    pullRequestAssignmentService.delete(assignee);
                 }
             }
         }
@@ -1825,8 +1823,9 @@ public class McpHelperResource {
         if (addReviewerNames != null) {
             if (!request.isOpen())
                 throw new NotAcceptableException("Pull request is closed");
+            
             for (var reviewerName : addReviewerNames) {
-                User reviewer = userManager.findByName(reviewerName);
+                User reviewer = userService.findByName(reviewerName);
                 if (reviewer == null)
                     throw new NotFoundException("Reviewer not found: " + reviewerName);
                 var review = request.getReview(reviewer);
@@ -1835,10 +1834,10 @@ public class McpHelperResource {
                     review.setRequest(request);
                     review.setUser(reviewer);
                     request.getReviews().add(review);
-                    pullRequestReviewManager.createOrUpdate(review);
+                    pullRequestReviewService.createOrUpdate(user, review);
                 } else if (review.getStatus() != PullRequestReview.Status.PENDING) {
                     review.setStatus(PullRequestReview.Status.PENDING);
-                    pullRequestReviewManager.createOrUpdate(review);
+                    pullRequestReviewService.createOrUpdate(user, review);
                 }
             }
         }
@@ -1848,7 +1847,7 @@ public class McpHelperResource {
                 throw new NotAcceptableException("Pull request is closed");
             var excludedReviews = new ArrayList<PullRequestReview>();
             for (var reviewerName : removeReviewerNames) {
-                User reviewer = userManager.findByName(reviewerName);
+                User reviewer = userService.findByName(reviewerName);
                 if (reviewer == null)
                     throw new NotFoundException("Reviewer not found: " + reviewerName);
                 var review = request.getReview(reviewer);
@@ -1857,7 +1856,7 @@ public class McpHelperResource {
                     excludedReviews.add(review);
                 }
             }
-            pullRequestManager.checkReviews(request, false);
+            pullRequestService.checkReviews(request, false);
             var requiredReviewers = excludedReviews.stream()
                     .filter(it -> it.getStatus() != PullRequestReview.Status.EXCLUDED)
                     .map(it -> it.getUser().getName())
@@ -1865,7 +1864,7 @@ public class McpHelperResource {
             if (!requiredReviewers.isEmpty())
                 throw new NotAcceptableException("Unable to remove mandatory reviewers: " + String.join(", ", requiredReviewers));
             for (var review : excludedReviews) 
-                pullRequestReviewManager.createOrUpdate(review);
+                pullRequestReviewService.createOrUpdate(user, review);
         }
 
 
@@ -1886,7 +1885,7 @@ public class McpHelperResource {
             if (errorMessage != null) 
                 throw new NotAcceptableException("Error validating param auto merge commit message: " + errorMessage);
 
-            pullRequestChangeManager.changeAutoMerge(request, autoMerge);
+            pullRequestChangeService.changeAutoMerge(user, request, autoMerge);
         }
                     
         return "Edited pull request " + pullRequestReference;
@@ -1900,7 +1899,7 @@ public class McpHelperResource {
                 @QueryParam("reference") @NotNull String pullRequestReference, 
                 @QueryParam("operation") String operation, 
                 String comment) {
-        var user = SecurityUtils.getAuthUser();
+        var user = SecurityUtils.getUser();
         if (user == null)
             throw new UnauthenticatedException();
 
@@ -1912,14 +1911,14 @@ public class McpHelperResource {
         switch (operation) {
         case "approve":
             try {
-                pullRequestReviewManager.review(pullRequest, true, comment);
+                pullRequestReviewService.review(user, pullRequest, true, comment);
             } catch (PullRequestReviewRejectedException e) {
                 throw new NotAcceptableException(e.getMessage());
             }
             return "Approved pull request " + pullRequestReference;
         case "requestChanges":
             try {
-                pullRequestReviewManager.review(pullRequest, false, comment);
+                pullRequestReviewService.review(user, pullRequest, false, comment);
             } catch (PullRequestReviewRejectedException e) {
                 throw new NotAcceptableException(e.getMessage());
             }
@@ -1934,7 +1933,7 @@ public class McpHelperResource {
             if (errorMessage != null)
                 throw new NotAcceptableException("Error validating merge commit message: " + errorMessage);
 
-            pullRequestManager.merge(user, pullRequest, comment);
+            pullRequestService.merge(user, pullRequest, comment);
 
             return "Merged pull request " + pullRequestReference;
         case "discard":
@@ -1942,7 +1941,7 @@ public class McpHelperResource {
                 throw new UnauthorizedException();
             if (!pullRequest.isOpen())
                 throw new NotAcceptableException("Pull request already closed");
-            pullRequestManager.discard(pullRequest, comment);
+            pullRequestService.discard(user, pullRequest, comment);
             return "Discarded pull request " + pullRequestReference;
         case "reopen":
             if (!SecurityUtils.canModifyPullRequest(pullRequest))
@@ -1950,7 +1949,7 @@ public class McpHelperResource {
             errorMessage = pullRequest.checkReopenCondition();
             if (errorMessage != null)
                 throw new NotAcceptableException(errorMessage);
-            pullRequestManager.reopen(pullRequest, comment);
+            pullRequestService.reopen(user, pullRequest, comment);
             return "Reopened pull request " + pullRequestReference;
         case "deleteSourceBranch":
             if (!SecurityUtils.canModifyPullRequest(pullRequest) 
@@ -1962,7 +1961,7 @@ public class McpHelperResource {
             if (errorMessage != null)
                 throw new NotAcceptableException(errorMessage); 		
             
-            pullRequestManager.deleteSourceBranch(pullRequest, comment);
+            pullRequestService.deleteSourceBranch(user, pullRequest, comment);
 
             return "Deleted source branch of pull request " + pullRequestReference;
         case "restoreSourceBranch":
@@ -1975,7 +1974,7 @@ public class McpHelperResource {
             if (errorMessage != null)
                 throw new NotAcceptableException(errorMessage);
             
-            pullRequestManager.restoreSourceBranch(pullRequest, comment);
+            pullRequestService.restoreSourceBranch(user, pullRequest, comment);
 
             return "Restored source branch of pull request " + pullRequestReference;
         default:
@@ -1990,7 +1989,7 @@ public class McpHelperResource {
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @QueryParam("reference") @NotNull String pullRequestReference, 
                 @NotNull String commentContent) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
@@ -1999,9 +1998,9 @@ public class McpHelperResource {
         var comment = new PullRequestComment();
         comment.setRequest(pullRequest);
         comment.setContent(commentContent);
-        comment.setUser(SecurityUtils.getAuthUser());
+        comment.setUser(SecurityUtils.getUser());
         comment.setDate(new Date());
-        pullRequestCommentManager.create(comment);
+        pullRequestCommentService.create(comment);
 
         return "Commented on pull request " + pullRequestReference;
     }
@@ -2042,7 +2041,10 @@ public class McpHelperResource {
     public Map<String, Object> runJob(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
                 @NotNull @Valid Map<String, Serializable> data) {
-        if (SecurityUtils.getAuthUser() == null)
+        var subject = SecurityUtils.getSubject();
+        var user = SecurityUtils.getUser(subject);
+
+        if (user == null)
             throw new UnauthenticatedException();
 
         var project = getProject(currentProjectPath);
@@ -2051,7 +2053,7 @@ public class McpHelperResource {
         if (jobName == null)
             throw new NotAcceptableException("Job name is required");
 
-        if (!SecurityUtils.canRunJob(project, jobName))		
+        if (!SecurityUtils.canRunJob(subject, project, jobName))		
             throw new UnauthorizedException();
 
         String refName;
@@ -2096,16 +2098,10 @@ public class McpHelperResource {
         if (reason == null)
             throw new NotAcceptableException("Reason is required");
             
-        Build build;
-        try {
-            build = jobManager.submit(project, ObjectId.fromString(commitHash), jobName, 
-                params, refName, SecurityUtils.getUser(), null, 
-                null, reason);
-            if (build.isFinished())
-                jobManager.resubmit(build, reason);
-        } catch (ValidationException e) {
-            throw new NotAcceptableException(e.getMessage());
-        }
+        var build = jobService.submit(user, project, ObjectId.fromString(commitHash), jobName, 
+            params, refName, null, null, reason);
+        if (build.isFinished())
+            jobService.resubmit(user, build, reason);
 
         var buildMap = getBuildMap(project, build);
         buildMap.put("id", build.getId());
@@ -2115,11 +2111,11 @@ public class McpHelperResource {
     @Path("/get-clone-roots")
     @GET
     public Map<String, String> getCloneUrl() {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var cloneRoots = new HashMap<String, String>();
-        var systemSetting = settingManager.getSystemSetting();
+        var systemSetting = settingService.getSystemSetting();
         var serverUrl = systemSetting.getServerUrl();        
         cloneRoots.put("http", serverUrl);
         if (serverConfig.getSshPort() != 0) {
@@ -2138,7 +2134,7 @@ public class McpHelperResource {
     public Response checkBuildSpec(
                 @QueryParam("project") @NotNull String projectPath, 
                 @NotNull String buildSpecString) {
-        if (SecurityUtils.getAuthUser() == null)
+        if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
 
         var project = getProject(projectPath);
@@ -2166,7 +2162,7 @@ public class McpHelperResource {
 
     private Build getBuild(Project currentProject, String referenceString) {
         var buildReference = BuildReference.of(referenceString, currentProject);
-        var build = buildManager.find(buildReference.getProject(), buildReference.getNumber());
+        var build = buildService.find(buildReference.getProject(), buildReference.getNumber());
         if (build != null) {
             if (!SecurityUtils.canAccessBuild(build))
                 throw new UnauthorizedException("No permission to access build: " + referenceString);

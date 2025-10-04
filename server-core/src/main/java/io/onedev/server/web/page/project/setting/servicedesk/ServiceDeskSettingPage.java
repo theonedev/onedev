@@ -48,7 +48,7 @@ public class ServiceDeskSettingPage extends ProjectSettingPage {
 				
 				var project = getProject();
 				if (project.getServiceDeskEmailAddress() != null) {
-					Project projectWithSameServiceDeskEmailAddress = getProjectManager().findByServiceDeskEmailAddress(project.getServiceDeskEmailAddress());
+					Project projectWithSameServiceDeskEmailAddress = getProjectService().findByServiceDeskEmailAddress(project.getServiceDeskEmailAddress());
 					if (projectWithSameServiceDeskEmailAddress != null && !projectWithSameServiceDeskEmailAddress.equals(getProject())) {
 						editor.error(new Path(new PathNode.Named(PROP_SERVICE_DESK_EMAIL_ADDRESS)),
 								"This address has already been used by another project");
@@ -56,8 +56,8 @@ public class ServiceDeskSettingPage extends ProjectSettingPage {
 				} 
 				if (editor.isValid()) {
 					var newAuditContent = VersionedXmlDoc.fromBean(getProject().getServiceDeskEmailAddress()).toXML();
-					getProjectManager().update(getProject());
-					getAuditManager().audit(getProject(), "changed service desk email address", oldAuditContent, newAuditContent);
+					getProjectService().update(getProject());
+					auditService.audit(getProject(), "changed service desk email address", oldAuditContent, newAuditContent);
 					setResponsePage(ServiceDeskSettingPage.class, ServiceDeskSettingPage.paramsOf(getProject()));
 					Session.get().success("Service desk settings updated");
 				}

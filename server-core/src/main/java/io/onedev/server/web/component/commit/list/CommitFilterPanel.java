@@ -36,7 +36,7 @@ import io.onedev.server.web.component.build.choice.BuildSingleChoice;
 import io.onedev.server.web.component.datepicker.DatePicker;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
-import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoService;
 
 abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 	
@@ -175,7 +175,7 @@ abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 
 			@Override
 			protected List<String> load() {
-				return OneDev.getInstance(CommitInfoManager.class).getFiles(getProject().getId());
+				return OneDev.getInstance(CommitInfoService.class).getFiles(getProject().getId());
 			}
 		}, true);
 		fileChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
@@ -329,7 +329,7 @@ abstract class CommitFilterPanel extends GenericPanel<CommitQuery> {
 
 			@Override
 			protected List<String> load() {
-				var users = OneDev.getInstance(CommitInfoManager.class).getUsers(getProject().getId());
+				var users = OneDev.getInstance(CommitInfoService.class).getUsers(getProject().getId());
 				return users.stream().map(it-> {
 					String content;
 					if (StringUtils.isNotBlank(it.getEmailAddress()))

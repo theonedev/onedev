@@ -58,9 +58,9 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
@@ -147,7 +147,7 @@ public class ProjectBranchesPage extends ProjectPage {
 				sources.add(new ProjectAndBranch(getProject(), branchName)); 
 			}
 			
-			return OneDev.getInstance(PullRequestManager.class).findEffectives(target, sources);
+			return OneDev.getInstance(PullRequestService.class).findEffectives(target, sources);
 		}
 		
 	};
@@ -545,8 +545,8 @@ public class ProjectBranchesPage extends ProjectPage {
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
 						Fragment fragment = new Fragment(id, "confirmDeleteBranchFrag", ProjectBranchesPage.this);
-						PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
-						if (!pullRequestManager.queryOpen(new ProjectAndBranch(getProject(), branch)).isEmpty()) {
+						PullRequestService pullRequestService = OneDev.getInstance(PullRequestService.class);
+						if (!pullRequestService.queryOpen(new ProjectAndBranch(getProject(), branch)).isEmpty()) {
 							Fragment bodyFrag = new Fragment("body", "openRequestsFrag", ProjectBranchesPage.this);
 							String query = String.format("\"%s\" %s \"%s\" %s %s", 
 									PullRequest.NAME_TARGET_BRANCH, PullRequestQuery.getRuleName(PullRequestQueryLexer.Is), 
@@ -563,7 +563,7 @@ public class ProjectBranchesPage extends ProjectPage {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								OneDev.getInstance(ProjectManager.class).deleteBranch(getProject(), branch);
+								OneDev.getInstance(ProjectService.class).deleteBranch(getProject(), branch);
 								getSession().success(MessageFormat.format(_T("Branch \"{0}\" deleted"), branch));
 								if (branch.equals(baseBranch)) {
 									baseBranch = getProject().getDefaultBranch();
@@ -708,8 +708,8 @@ public class ProjectBranchesPage extends ProjectPage {
 			
 			@Override
 			protected void onBeforeRender() {
-				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-				getProject().cacheCommitStatuses(buildManager.queryStatus(getProject(), getCommitIdsToDisplay()));
+				BuildService buildService = OneDev.getInstance(BuildService.class);
+				getProject().cacheCommitStatuses(buildService.queryStatus(getProject(), getCommitIdsToDisplay()));
 				super.onBeforeRender();
 			}
 			

@@ -6,7 +6,7 @@ import java.util.List;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.UserCache;
@@ -21,7 +21,7 @@ public class AllUsers implements ChoiceProvider {
 
 	@Override
 	public List<User> getChoices(boolean allPossible) {
-		UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();
+		UserCache cache = OneDev.getInstance(UserService.class).cloneCache();
 		
 		if (WicketUtils.getPage() instanceof IssueDetailPage) {
 			IssueDetailPage issueDetailPage = (IssueDetailPage) WicketUtils.getPage();

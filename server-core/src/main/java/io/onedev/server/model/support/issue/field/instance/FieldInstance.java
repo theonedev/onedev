@@ -14,7 +14,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -66,7 +66,7 @@ public class FieldInstance implements Serializable {
 	}
 	
 	private GlobalIssueSetting getIssueSetting() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return OneDev.getInstance(SettingService.class).getIssueSetting();
 	}
 	
 	public Set<String> getUndefinedFields() {

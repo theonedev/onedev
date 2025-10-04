@@ -44,10 +44,10 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.entitymanager.AuditManager;
+import io.onedev.server.service.AgentService;
+import io.onedev.server.service.AuditService;
 import io.onedev.server.model.Agent;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -116,8 +116,8 @@ class AgentListPanel extends Panel {
 		this.queryStringModel = queryModel;
 	}
 	
-	private AgentManager getAgentManager() {
-		return OneDev.getInstance(AgentManager.class);
+	private AgentService getAgentService() {
+		return OneDev.getInstance(AgentService.class);
 	}
 	
 	@Override
@@ -292,12 +292,12 @@ class AgentListPanel extends Panel {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								getTransactionManager().run(() -> {
+								getTransactionService().run(() -> {
 									dropdown.close();								
 									for (var model: selectionColumn.getSelections()) {
 										var agent = model.getObject();
-										getAgentManager().pause(agent);	
-										getAuditManager().audit(null, "paused agent \"" + agent.getName() + "\"", null, null);
+										getAgentService().pause(agent);	
+										getAuditService().audit(null, "paused agent \"" + agent.getName() + "\"", null, null);
 									}							
 									target.add(countLabel);
 									target.add(body);
@@ -340,12 +340,12 @@ class AgentListPanel extends Panel {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								getTransactionManager().run(() -> {
+								getTransactionService().run(() -> {
 									dropdown.close();
 									for (var model: selectionColumn.getSelections()) {
 										var agent = model.getObject();
-										getAgentManager().resume(agent);
-										getAuditManager().audit(null, "resumed agent \"" + agent.getName() + "\"", null, null);
+										getAgentService().resume(agent);
+										getAuditService().audit(null, "resumed agent \"" + agent.getName() + "\"", null, null);
 									}
 									target.add(countLabel);
 									target.add(body);
@@ -394,11 +394,11 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										getTransactionManager().run(() -> {
+										getTransactionService().run(() -> {
 											for (IModel<Agent> each: selectionColumn.getSelections()) {
 												var agent = each.getObject();
-												getAgentManager().restart(agent);
-												getAuditManager().audit(null, "restarted agent \"" + agent.getName() + "\"", null, null);
+												getAgentService().restart(agent);
+												getAuditService().audit(null, "restarted agent \"" + agent.getName() + "\"", null, null);
 											}
 											target.add(countLabel);
 											target.add(body);
@@ -460,11 +460,11 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										getTransactionManager().run(() -> {
+										getTransactionService().run(() -> {
 											for (var model: selectionColumn.getSelections()) {
 												var agent = model.getObject();
-												getAgentManager().delete(agent);
-												getAuditManager().audit(null, "removed agent \"" + agent.getName() + "\"", null, null);
+												getAgentService().delete(agent);
+												getAuditService().audit(null, "removed agent \"" + agent.getName() + "\"", null, null);
 											}
 											selectionColumn.getSelections().clear();
 											target.add(countLabel);
@@ -527,11 +527,11 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										getTransactionManager().run(() -> {
+										getTransactionService().run(() -> {
 											for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
 												var agent = it.next();
-												getAgentManager().pause(agent);
-												getAuditManager().audit(null, "paused agent \"" + agent.getName() + "\"", null, null);
+												getAgentService().pause(agent);
+												getAuditService().audit(null, "paused agent \"" + agent.getName() + "\"", null, null);
 											}
 											selectionColumn.getSelections().clear();
 											dataProvider.detach();
@@ -596,11 +596,11 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										getTransactionManager().run(() -> {
+										getTransactionService().run(() -> {
 											for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
 												var agent = it.next();
-												getAgentManager().resume(agent);
-												getAuditManager().audit(null, "resumed agent \"" + agent.getName() + "\"", null, null);
+												getAgentService().resume(agent);
+												getAuditService().audit(null, "resumed agent \"" + agent.getName() + "\"", null, null);
 											}
 											dataProvider.detach();
 											target.add(countLabel);
@@ -665,11 +665,11 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										getTransactionManager().run(() -> {
+										getTransactionService().run(() -> {
 											for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
 												var agent = it.next();
-												getAgentManager().restart(agent);
-												getAuditManager().audit(null, "restarted agent \"" + agent.getName() + "\"", null, null);
+												getAgentService().restart(agent);
+												getAuditService().audit(null, "restarted agent \"" + agent.getName() + "\"", null, null);
 											}
 											dataProvider.detach();
 											target.add(countLabel);
@@ -734,11 +734,11 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										getTransactionManager().run(() -> {
+										getTransactionService().run(() -> {
 											for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
 												var agent = it.next();
-												getAgentManager().delete(agent);
-												getAuditManager().audit(null, "removed agent \"" + agent.getName() + "\"", null, null);
+												getAgentService().delete(agent);
+												getAuditService().audit(null, "removed agent \"" + agent.getName() + "\"", null, null);
 											}
 											dataProvider.detach();
 											target.add(countLabel);
@@ -855,7 +855,7 @@ class AgentListPanel extends Panel {
 				try {
 					AgentQuery query = queryModel.getObject();
 					if (query != null)
-						return getAgentManager().query(query, (int)first, (int)count).iterator();
+						return getAgentService().query(query, (int)first, (int)count).iterator();
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				}
@@ -867,7 +867,7 @@ class AgentListPanel extends Panel {
 				try {
 					AgentQuery query = queryModel.getObject();
 					if (query != null) 
-						return getAgentManager().count(query.getCriteria());
+						return getAgentService().count(query.getCriteria());
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 				}
@@ -881,7 +881,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					protected Agent load() {
-						return getAgentManager().load(agentId);
+						return getAgentService().load(agentId);
 					}
 					
 				};
@@ -944,12 +944,12 @@ class AgentListPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 
-	private AuditManager getAuditManager() {
-		return OneDev.getInstance(AuditManager.class);
+	private AuditService getAuditService() {
+		return OneDev.getInstance(AuditService.class);
 	}
 
-	private TransactionManager getTransactionManager() {
-		return OneDev.getInstance(TransactionManager.class);
+	private TransactionService getTransactionService() {
+		return OneDev.getInstance(TransactionService.class);
 	}
 	
 }

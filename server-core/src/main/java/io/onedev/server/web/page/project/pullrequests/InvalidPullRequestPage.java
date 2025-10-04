@@ -27,7 +27,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.service.PullRequestService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
@@ -52,7 +52,7 @@ public class InvalidPullRequestPage extends ProjectPage {
 			@Override
 			protected PullRequest load() {
 				Long requestNumber = params.get(PARAM_REQUEST).toLong();
-				PullRequest request = OneDev.getInstance(PullRequestManager.class).find(getProject(), requestNumber);
+				PullRequest request = OneDev.getInstance(PullRequestService.class).find(getProject(), requestNumber);
 				if (request == null)
 					throw new EntityNotFoundException("Unable to find pull request #" + requestNumber + " in project " + getProject());
 				Preconditions.checkState(!request.isValid());
@@ -81,7 +81,7 @@ public class InvalidPullRequestPage extends ProjectPage {
 
 			@Override
 			public void onClick() {
-				OneDev.getInstance(PullRequestManager.class).delete(getPullRequest());
+				OneDev.getInstance(PullRequestService.class).delete(getPullRequest());
 				
 				Session.get().success(MessageFormat.format(_T("Pull request #{0} deleted"), getPullRequest().getNumber()));
 				

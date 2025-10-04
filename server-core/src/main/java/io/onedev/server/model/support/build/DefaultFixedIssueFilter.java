@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Project;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.IssueQuery;
@@ -50,7 +50,7 @@ public class DefaultFixedIssueFilter implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestJobNames(String matchWith) {
-		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildManager.class).getJobNames(Project.get()));
+		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildService.class).getJobNames(Project.get()));
 		Collections.sort(jobNames);
 		return SuggestionUtils.suggest(jobNames, matchWith);
 	}

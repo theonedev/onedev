@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 
 /**
  * An {@link org.apache.wicket.protocol.ws.api.IWebSocketProcessor processor} that integrates with
@@ -79,11 +79,11 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 	
 	private void run(Runnable runnable) {
 		if (OneDev.getInstance().isReady()) {
-			SessionManager sessionManager = AppLoader.getInstance(SessionManager.class);
+			SessionService sessionService = AppLoader.getInstance(SessionService.class);
 			Subject subject = (Subject) request.getHttpServletRequest()
 					.getAttribute(WebSocketFilter.SHIRO_SUBJECT);
 	        ThreadContext.bind(subject);
-	        sessionManager.run(runnable);
+	        sessionService.run(runnable);
 		}
 	}
 	

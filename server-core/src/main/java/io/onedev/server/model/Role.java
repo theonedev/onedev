@@ -31,8 +31,8 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.RoleName;
 import io.onedev.server.annotation.ShowCondition;
-import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.LinkSpecService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.role.AllIssueFields;
 import io.onedev.server.model.support.role.CodePrivilege;
 import io.onedev.server.model.support.role.IssueFieldSet;
@@ -291,7 +291,7 @@ public class Role extends AbstractEntity implements BasePermission {
 
 	@SuppressWarnings("unused")
 	private static List<String> getIssueFieldChoices() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldNames();
+		return OneDev.getInstance(SettingService.class).getIssueSetting().getFieldNames();
 	}
 	
 	@Editable(order=625, placeholder="None", description="Optionally specify issue links allowed to edit")
@@ -307,7 +307,7 @@ public class Role extends AbstractEntity implements BasePermission {
 	
 	private static Map<String, String> getIssueLinkDisplayNames() {
 		Map<String, String> choices = new LinkedHashMap<>();
-		for (LinkSpec link: OneDev.getInstance(LinkSpecManager.class).queryAndSort()) {
+		for (LinkSpec link: OneDev.getInstance(LinkSpecService.class).queryAndSort()) {
 			choices.put(link.getName(), link.getDisplayName());
 		}
 		return choices;

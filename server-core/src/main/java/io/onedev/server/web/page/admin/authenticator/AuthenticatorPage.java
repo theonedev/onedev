@@ -24,7 +24,7 @@ import com.google.common.base.Joiner;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.taskbutton.TaskButton;
@@ -52,7 +52,7 @@ public class AuthenticatorPage extends AdministrationPage {
 		super.onInitialize();
 		
 		AuthenticatorBean bean = new AuthenticatorBean();		
-		bean.setAuthenticator(OneDev.getInstance(SettingManager.class).getAuthenticator());
+		bean.setAuthenticator(OneDev.getInstance(SettingService.class).getAuthenticator());
 		oldAuditContent = VersionedXmlDoc.fromBean(bean.getAuthenticator()).toXML();
 		
 		PropertyEditor<Serializable> editor = 
@@ -63,8 +63,8 @@ public class AuthenticatorPage extends AdministrationPage {
 			public void onSubmit() {
 				super.onSubmit();
 				var newAuditContent = VersionedXmlDoc.fromBean(bean.getAuthenticator()).toXML();
-				OneDev.getInstance(SettingManager.class).saveAuthenticator(bean.getAuthenticator());
-				getAuditManager().audit(null, "changed external authenticator settings", oldAuditContent, newAuditContent);
+				OneDev.getInstance(SettingService.class).saveAuthenticator(bean.getAuthenticator());
+				auditService.audit(null, "changed external authenticator settings", oldAuditContent, newAuditContent);
 				oldAuditContent = newAuditContent;
 				getSession().success(_T("External authenticator settings saved"));
 			}

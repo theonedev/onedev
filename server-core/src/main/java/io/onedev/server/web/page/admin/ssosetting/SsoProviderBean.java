@@ -9,7 +9,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.GroupChoice;
 import io.onedev.server.annotation.UrlSegment;
-import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.service.GroupService;
 import io.onedev.server.model.SsoProvider;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.web.page.security.SsoProcessPage;
@@ -65,7 +65,7 @@ public class SsoProviderBean implements Serializable {
 		provider.setName(name);
 		provider.setConnector(connector);
 		if (defaultGroup != null)
-			provider.setDefaultGroup(OneDev.getInstance(GroupManager.class).find(defaultGroup));
+			provider.setDefaultGroup(OneDev.getInstance(GroupService.class).find(defaultGroup));
 	}
 
 	public static SsoProviderBean of(SsoProvider provider) {

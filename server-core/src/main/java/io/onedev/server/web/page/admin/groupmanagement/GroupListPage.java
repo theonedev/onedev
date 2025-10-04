@@ -34,8 +34,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.GroupService;
 import io.onedev.server.model.Group;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
@@ -209,8 +209,8 @@ public class GroupListPage extends AdministrationPage {
 					public void onClick(AjaxRequestTarget target) {
 						Group group = rowModel.getObject();
 						var oldAuditContent = VersionedXmlDoc.fromBean(group).toXML();
-						OneDev.getInstance(GroupManager.class).delete(group);
-						OneDev.getInstance(AuditManager.class).audit(null, "deleted group \"" + group.getName() + "\"", oldAuditContent, null);
+						OneDev.getInstance(GroupService.class).delete(group);
+						OneDev.getInstance(AuditService.class).audit(null, "deleted group \"" + group.getName() + "\"", oldAuditContent, null);
 						Session.get().success(MessageFormat.format(_T("Group \"{0}\" deleted"), group.getName()));
 						target.add(groupsTable);
 					}
@@ -231,12 +231,12 @@ public class GroupListPage extends AdministrationPage {
 
 			@Override
 			public Iterator<? extends Group> iterator(long first, long count) {
-				return OneDev.getInstance(GroupManager.class).query(query, (int) first, (int) count).iterator();
+				return OneDev.getInstance(GroupService.class).query(query, (int) first, (int) count).iterator();
 			}
 
 			@Override
 			public long size() {
-				return OneDev.getInstance(GroupManager.class).count(query);
+				return OneDev.getInstance(GroupService.class).count(query);
 			}
 
 			@Override
@@ -246,7 +246,7 @@ public class GroupListPage extends AdministrationPage {
 
 					@Override
 					protected Group load() {
-						return OneDev.getInstance(GroupManager.class).load(id);
+						return OneDev.getInstance(GroupService.class).load(id);
 					}
 
 				};

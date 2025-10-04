@@ -11,7 +11,7 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IterationManager;
+import io.onedev.server.service.IterationService;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.web.component.select2.ChoiceProvider;
 
@@ -32,9 +32,9 @@ public abstract class AbstractIterationChoiceProvider extends ChoiceProvider<Ite
 	@Override
 	public Collection<Iteration> toChoices(Collection<String> ids) {
 		List<Iteration> iterations = Lists.newArrayList();
-		IterationManager iterationManager = OneDev.getInstance(IterationManager.class);
+		IterationService iterationService = OneDev.getInstance(IterationService.class);
 		for (String each : ids) {
-			Iteration iteration = iterationManager.load(Long.valueOf(each));
+			Iteration iteration = iterationService.load(Long.valueOf(each));
 			Hibernate.initialize(iteration);
 			iterations.add(iteration);
 		}

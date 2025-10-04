@@ -19,7 +19,7 @@ import org.bouncycastle.openpgp.PGPSecretKeyRing;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GpgSetting;
 import io.onedev.server.util.GpgUtils;
@@ -37,7 +37,7 @@ public class GpgSigningKeyPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		GpgSetting setting = getSettingManager().getGpgSetting();
+		GpgSetting setting = getSettingService().getGpgSetting();
 		PGPSecretKeyRing signingKey = setting.getSigningKey();
 		if (signingKey != null) {
 			Fragment fragment = new Fragment("content", "definedFrag", this);
@@ -63,10 +63,10 @@ public class GpgSigningKeyPage extends AdministrationPage {
 						
 						@Override
 						protected void onConfirm(AjaxRequestTarget target) {
-							GpgSetting setting = getSettingManager().getGpgSetting();
+							GpgSetting setting = getSettingService().getGpgSetting();
 						    setting.setEncodedSigningKey(null);
-						    getSettingManager().saveGpgSetting(setting);		
-							getAuditManager().audit(null, "deleted GPG signing key", null, null);
+						    getSettingService().saveGpgSetting(setting);		
+							auditService.audit(null, "deleted GPG signing key", null, null);
 							setResponsePage(GpgSigningKeyPage.class);
 						}
 						
@@ -105,10 +105,10 @@ public class GpgSigningKeyPage extends AdministrationPage {
 						throw new RuntimeException(e);
 					}
 
-					GpgSetting setting = getSettingManager().getGpgSetting();
+					GpgSetting setting = getSettingService().getGpgSetting();
 				    setting.setEncodedSigningKey(baos.toByteArray());
-				    getSettingManager().saveGpgSetting(setting);
-					getAuditManager().audit(null, "generated GPG signing key", null, null);
+				    getSettingService().saveGpgSetting(setting);
+					auditService.audit(null, "generated GPG signing key", null, null);
 					setResponsePage(GpgSigningKeyPage.class);
 				}
 
@@ -117,8 +117,8 @@ public class GpgSigningKeyPage extends AdministrationPage {
 		}
 	}
 	
-	private SettingManager getSettingManager() {
-		return OneDev.getInstance(SettingManager.class);
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 
 	@Override

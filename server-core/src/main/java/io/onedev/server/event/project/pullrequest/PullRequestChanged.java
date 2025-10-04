@@ -5,8 +5,8 @@ import javax.annotation.Nullable;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestChangeManager;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.service.PullRequestChangeService;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
@@ -31,7 +31,7 @@ public class PullRequestChanged extends PullRequestEvent implements CommitAware 
 	}
 
 	public PullRequestChange getChange() {
-		return OneDev.getInstance(PullRequestChangeManager.class).load(changeId);
+		return OneDev.getInstance(PullRequestChangeService.class).load(changeId);
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public class PullRequestChanged extends PullRequestEvent implements CommitAware 
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getChange(), true);
+		return OneDev.getInstance(UrlService.class).urlFor(getChange(), true);
 	}
 
 	@Override

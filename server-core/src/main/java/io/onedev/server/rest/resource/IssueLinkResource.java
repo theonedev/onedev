@@ -18,7 +18,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import io.onedev.server.entitymanager.IssueLinkManager;
+import io.onedev.server.service.IssueLinkService;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.rest.annotation.Api;
 
@@ -28,18 +28,18 @@ import io.onedev.server.rest.annotation.Api;
 @Singleton
 public class IssueLinkResource {
 
-	private final IssueLinkManager linkManager;
+	private final IssueLinkService linkService;
 
 	@Inject
-	public IssueLinkResource(IssueLinkManager linkManager) {
-		this.linkManager = linkManager;
+	public IssueLinkResource(IssueLinkService linkService) {
+		this.linkService = linkService;
 	}
 
 	@Api(order=100)
 	@Path("/{linkId}")
 	@GET
 	public IssueLink getLink(@PathParam("linkId") Long linkId) {
-		var link = linkManager.load(linkId);
+		var link = linkService.load(linkId);
 		if (!canAccessIssue(link.getTarget()) && !canAccessIssue(link.getSource()))
 			throw new UnauthorizedException();
 		return link;
@@ -57,7 +57,7 @@ public class IssueLinkResource {
 		}
 		link.validate();
 				
-		linkManager.create(link);
+		linkService.create(link);
 		return link.getId();
 	}
 	
@@ -65,12 +65,12 @@ public class IssueLinkResource {
 	@Path("/{linkId}")
 	@DELETE
 	public Response deleteLink(@PathParam("linkId") Long linkId) {
-		var link = linkManager.load(linkId);
+		var link = linkService.load(linkId);
 		if (!canEditIssueLink(link.getSource().getProject(), link.getSpec()) 
 				&& !canEditIssueLink(link.getTarget().getProject(), link.getSpec())) {
 			throw new UnauthorizedException();
 		}
-		linkManager.delete(link);
+		linkService.delete(link);
 		return Response.ok().build();
 	}
 	

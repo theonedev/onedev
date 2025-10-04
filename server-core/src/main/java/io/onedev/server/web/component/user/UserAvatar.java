@@ -7,7 +7,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.User;
-import io.onedev.server.web.avatar.AvatarManager;
+import io.onedev.server.web.avatar.AvatarService;
 
 public class UserAvatar extends WebComponent {
 
@@ -17,17 +17,17 @@ public class UserAvatar extends WebComponent {
 	
 	public UserAvatar(String id, User user) {
 		super(id);
-		url = getAvatarManager().getUserAvatarUrl(user.getId());
+		url = getAvatarService().getUserAvatarUrl(user.getId());
 		system = user.isSystem();
 	}
 	
 	public UserAvatar(String id, PersonIdent personIdent) {
 		super(id);
-		url = getAvatarManager().getPersonAvatarUrl(personIdent);
+		url = getAvatarService().getPersonAvatarUrl(personIdent);
 	}
 	
-	private AvatarManager getAvatarManager() {
-		return OneDev.getInstance(AvatarManager.class);
+	private AvatarService getAvatarService() {
+		return OneDev.getInstance(AvatarService.class);
 	}
 	
 	@Override

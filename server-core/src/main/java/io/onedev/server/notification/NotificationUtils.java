@@ -1,7 +1,7 @@
 package io.onedev.server.notification;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.event.Event;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.build.BuildEvent;
@@ -36,7 +36,7 @@ public class NotificationUtils {
 		bindings.put("replyable", replyable);
 		bindings.put("unsubscribable", unsubscribable);
 
-		var templates = OneDev.getInstance(SettingManager.class).getEmailTemplates();
+		var templates = OneDev.getInstance(SettingService.class).getEmailTemplates();
 		if (event instanceof IssueEvent) {
 			template = templates.getIssueNotification();
 			bindings.put("issue", ((IssueEvent) event).getIssue());

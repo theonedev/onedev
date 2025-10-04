@@ -8,7 +8,7 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.EditContext;
@@ -59,7 +59,7 @@ public class SpecifiedBuild implements BuildProvider {
 		else
 			buildNumber = Long.parseLong(this.buildNumber);
 		
-		return OneDev.getInstance(BuildManager.class).find(project, buildNumber);
+		return OneDev.getInstance(BuildService.class).find(project, buildNumber);
 	}
 
 	@Override

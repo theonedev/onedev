@@ -15,8 +15,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.GroupService;
 import io.onedev.server.model.Group;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -69,16 +69,16 @@ public class GroupProfilePage extends GroupPage {
 				super.onSubmit();
 				
 				Group group = getGroup();
-				GroupManager groupManager = OneDev.getInstance(GroupManager.class);
-				Group groupWithSameName = groupManager.find(group.getName());
+				GroupService groupService = OneDev.getInstance(GroupService.class);
+				Group groupWithSameName = groupService.find(group.getName());
 				if (groupWithSameName != null && !groupWithSameName.equals(group)) {
 					editor.error(new Path(new PathNode.Named("name")),
 							_T("This name has already been used by another group"));
 				} 
 				if (editor.isValid()) {
 					var newAuditContent = VersionedXmlDoc.fromBean(group).toXML();
-					groupManager.update(group, oldName);
-					OneDev.getInstance(AuditManager.class).audit(null, "changed basic settings of group \"" + group.getName() + "\"", oldAuditContent, newAuditContent);
+					groupService.update(group, oldName);
+					OneDev.getInstance(AuditService.class).audit(null, "changed basic settings of group \"" + group.getName() + "\"", oldAuditContent, newAuditContent);
 					setResponsePage(GroupProfilePage.class, GroupProfilePage.paramsOf(group));
 					Session.get().success(_T("Basic settings updated"));
 				}
@@ -93,8 +93,8 @@ public class GroupProfilePage extends GroupPage {
 			@Override
 			public void onClick() {
 				var oldAuditContent = VersionedXmlDoc.fromBean(getGroup()).toXML();
-				OneDev.getInstance(GroupManager.class).delete(getGroup());
-				OneDev.getInstance(AuditManager.class).audit(null, "deleted group \"" + getGroup().getName() + "\"", oldAuditContent, null);
+				OneDev.getInstance(GroupService.class).delete(getGroup());
+				OneDev.getInstance(AuditService.class).audit(null, "deleted group \"" + getGroup().getName() + "\"", oldAuditContent, null);
 
 				Session.get().success(MessageFormat.format(_T("Group \"{0}\" deleted"), getGroup().getName()));
 				

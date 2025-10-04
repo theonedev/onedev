@@ -3,7 +3,7 @@ package io.onedev.server.search.buildmetric;
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.service.BuildParamService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.search.entity.EntityQuery;
@@ -161,7 +161,7 @@ public class BuildMetricQuery implements Serializable {
 	}
 	
 	public static void checkField(Project project, String fieldName, int operator) {
-		Collection<String> paramNames = OneDev.getInstance(BuildParamManager.class).getParamNames(null);
+		Collection<String> paramNames = OneDev.getInstance(BuildParamService.class).getParamNames(null);
 		if (!METRIC_QUERY_FIELDS.contains(fieldName) && !paramNames.contains(fieldName)) 
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {

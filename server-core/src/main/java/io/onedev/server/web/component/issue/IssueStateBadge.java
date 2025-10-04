@@ -2,7 +2,7 @@ package io.onedev.server.web.component.issue;
 
 import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.util.ColorUtils;
@@ -46,7 +46,7 @@ public class IssueStateBadge extends Label {
 	protected void onComponentTag(ComponentTag tag) {
 		super.onComponentTag(tag);
 		Issue issue = issueModel.getObject();
-		StateSpec stateSpec = OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpec(issue.getState());
+		StateSpec stateSpec = OneDev.getInstance(SettingService.class).getIssueSetting().getStateSpec(issue.getState());
 		if (stateSpec != null) {
 			String fontColor = ColorUtils.isLight(stateSpec.getColor())?"#333":"#f9f9f9";
 			String style = String.format("background-color: %s; color: %s;", stateSpec.getColor(), fontColor);

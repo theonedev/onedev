@@ -10,9 +10,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.service.IssueService;
 import io.onedev.server.model.Issue;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.web.UrlService;
 
 public class TransitIssue extends IssueActivity {
 
@@ -28,7 +28,7 @@ public class TransitIssue extends IssueActivity {
 
     @Override
     public Issue getIssue() {
-        return OneDev.getInstance(IssueManager.class).load(issueId);
+        return OneDev.getInstance(IssueService.class).load(issueId);
     }
     
     public String getState() {
@@ -38,7 +38,7 @@ public class TransitIssue extends IssueActivity {
     @Override
     public Component render(String id) {
         var issue = getIssue();
-        var url = OneDev.getInstance(UrlManager.class).urlFor(issue, false);
+        var url = OneDev.getInstance(UrlService.class).urlFor(issue, false);
         var label = MessageFormat.format(_T("Transited state of issue \"{0}\" to \"{1}\" ({2})"), "<a href=\"" + url + "\">" + issue.getReference() + "</a>", state, HtmlEscape.escapeHtml5(issue.getTitle()));
         return new Label(id, label).setEscapeModelStrings(false);
     }

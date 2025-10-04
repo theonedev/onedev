@@ -18,8 +18,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.PackQueryPersonalizationManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.PackQueryPersonalizationService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.PackQueryPersonalization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedQuery;
@@ -59,12 +59,12 @@ public class ProjectPacksPage extends ProjectPage {
 		query = getPageParameters().get(PARAM_QUERY).toOptionalString();
 	}
 
-	private PackQueryPersonalizationManager getPackQueryPersonalizationManager() {
-		return OneDev.getInstance(PackQueryPersonalizationManager.class);		
+	private PackQueryPersonalizationService getPackQueryPersonalizationService() {
+		return OneDev.getInstance(PackQueryPersonalizationService.class);
 	}
 	
 	protected GlobalPackSetting getPackSetting() {
-		return OneDev.getInstance(SettingManager.class).getPackSetting();		
+		return OneDev.getInstance(SettingService.class).getPackSetting();
 	}
 
 	@Override
@@ -111,8 +111,8 @@ public class ProjectPacksPage extends ProjectPage {
 				var oldAuditContent = getAuditContent();
 				getProject().getPackSetting().setNamedQueries(namedQueries);
 				var newAuditContent = getAuditContent();
-				getProjectManager().update(getProject());
-				getAuditManager().audit(getProject(), "changed package queries", oldAuditContent, newAuditContent);
+				getProjectService().update(getProject());
+				auditService.audit(getProject(), "changed package queries", oldAuditContent, newAuditContent);
 			}
 
 			@Override
@@ -186,7 +186,7 @@ public class ProjectPacksPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getPackQueryPersonalizationManager().createOrUpdate(setting);
+										getPackQueryPersonalizationService().createOrUpdate(setting);
 
 										target.add(savedQueries);
 										close();
@@ -211,8 +211,8 @@ public class ProjectPacksPage extends ProjectPage {
 											verb = "changed";
 										}
 										var newAuditContent = VersionedXmlDoc.fromBean(namedQuery).toXML();
-										getProjectManager().update(getProject());
-										getAuditManager().audit(getProject(), verb + " package query \"" + name + "\"", oldAuditContent, newAuditContent);
+										getProjectService().update(getProject());
+										auditService.audit(getProject(), verb + " package query \"" + name + "\"", oldAuditContent, newAuditContent);
 										target.add(savedQueries);
 										close();
 									}

@@ -3,8 +3,8 @@ package io.onedev.server.event.project.codecomment;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.web.UrlManager;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.web.UrlService;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
@@ -26,12 +26,12 @@ public abstract class CodeCommentEvent extends ProjectEvent {
 	}
 
 	public CodeComment getComment() {
-		return OneDev.getInstance(CodeCommentManager.class).load(commentId);
+		return OneDev.getInstance(CodeCommentService.class).load(commentId);
 	}
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(getComment(), true);
+		return OneDev.getInstance(UrlService.class).urlFor(getComment(), true);
 	}
 	
 }

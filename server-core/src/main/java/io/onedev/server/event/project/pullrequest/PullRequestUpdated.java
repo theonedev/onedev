@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.PullRequestUpdateManager;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.PullRequestUpdateService;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 
@@ -23,7 +23,7 @@ public class PullRequestUpdated extends PullRequestEvent {
 	}
 
 	public PullRequestUpdate getUpdate() {
-		return OneDev.getInstance(PullRequestUpdateManager.class).load(updateId);
+		return OneDev.getInstance(PullRequestUpdateService.class).load(updateId);
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class PullRequestUpdated extends PullRequestEvent {
 		if (committers == null) {
 			committers = getUpdate().getCommits()
 				.stream()
-				.map(it->OneDev.getInstance(EmailAddressManager.class).findByPersonIdent(it.getCommitterIdent()))
+				.map(it->OneDev.getInstance(EmailAddressService.class).findByPersonIdent(it.getCommitterIdent()))
 				.filter(it -> it!=null && it.isVerified())
 				.map(it->it.getOwner())
 				.collect(Collectors.toSet());

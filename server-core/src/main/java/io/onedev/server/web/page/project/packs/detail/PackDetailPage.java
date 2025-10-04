@@ -21,7 +21,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.PackManager;
+import io.onedev.server.service.PackService;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
@@ -59,7 +59,7 @@ public class PackDetailPage extends ProjectPage {
 			@Override
 			protected Pack load() {
 				Long packId = params.get(PARAM_PACK).toLong();
-				return OneDev.getInstance(PackManager.class).load(packId);
+				return OneDev.getInstance(PackService.class).load(packId);
 			}
 
 		};
@@ -108,9 +108,9 @@ public class PackDetailPage extends ProjectPage {
 
 							@Override
 							public void onClick() {
-								getPackManager().delete(getPack());
+								getPackService().delete(getPack());
 								var oldAuditContent = VersionedXmlDoc.fromBean(getPack()).toXML();
-								getAuditManager().audit(getPack().getProject(), "deleted package \"" + getPack().getReference(false) + "\"", oldAuditContent, null);
+								auditService.audit(getPack().getProject(), "deleted package \"" + getPack().getReference(false) + "\"", oldAuditContent, null);
 								
 								Session.get().success(MessageFormat.format(_T("Package {0} deleted"), getPack().getReference(false)));
 
@@ -143,7 +143,8 @@ public class PackDetailPage extends ProjectPage {
 
 					@Override
 					protected List<Pack> query(EntityQuery<Pack> query, int offset, int count, ProjectScope projectScope) {
-						return getPackManager().query(projectScope!=null?projectScope.getProject():null, query, false, offset, count);
+						var subject = SecurityUtils.getSubject();
+						return getPackService().query(subject, projectScope!=null?projectScope.getProject():null, query, false, offset, count);
 					}
 
 					@Override
@@ -170,8 +171,8 @@ public class PackDetailPage extends ProjectPage {
 		});
 	}
 	
-	private PackManager getPackManager() {
-		return OneDev.getInstance(PackManager.class);
+	private PackService getPackService() {
+		return OneDev.getInstance(PackService.class);
 	}
 
 	@Override

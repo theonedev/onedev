@@ -1,7 +1,7 @@
 package io.onedev.server.model.support.issue.changedata;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
@@ -58,7 +58,7 @@ public class IssueOwnSpentTimeChangeData extends IssueChangeData {
 
 	@Override
 	public ActivityDetail getActivityDetail() {
-		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+		var timeTrackingSetting = OneDev.getInstance(SettingService.class).getIssueSetting().getTimeTrackingSetting();
 		Map<String, String> oldFieldValues = new HashMap<>();
 		oldFieldValues.put("Own Spent Time", timeTrackingSetting.formatWorkingPeriod(oldValue, true));
 		Map<String, String> newFieldValues = new HashMap<>();

@@ -29,9 +29,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.GpgKeyManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.GpgKeyService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.GpgKey;
 import io.onedev.server.util.GpgUtils;
@@ -78,12 +78,12 @@ public class GpgKeyListPanel extends GenericPanel<List<GpgKey>> {
 				GpgKey key = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "emailAddressesFrag", GpgKeyListPanel.this);
 				RepeatingView valuesView = new RepeatingView("values");
-				EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
+				EmailAddressService emailAddressService = OneDev.getInstance(EmailAddressService.class);
 				for (String emailAddressValue: GpgUtils.getEmailAddresses(key.getPublicKeys().get(0))) {
 					WebMarkupContainer container = new WebMarkupContainer(valuesView.newChildId());
 					valuesView.add(container);
 					container.add(new Label("value", emailAddressValue));
-					EmailAddress emailAddress = emailAddressManager.findByValue(emailAddressValue);
+					EmailAddress emailAddress = emailAddressService.findByValue(emailAddressValue);
 					boolean unverified = emailAddress == null 
 							|| !emailAddress.isVerified() 
 							|| !emailAddress.getOwner().equals(key.getOwner());
@@ -136,9 +136,9 @@ public class GpgKeyListPanel extends GenericPanel<List<GpgKey>> {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						GpgKey gpgKey = rowModel.getObject();
-						OneDev.getInstance(GpgKeyManager.class).delete(gpgKey);
+						OneDev.getInstance(GpgKeyService.class).delete(gpgKey);
 						if (getPage() instanceof UserPage)
-							OneDev.getInstance(AuditManager.class).audit(null, "deleted GPG key \"" + GpgUtils.getKeyIDString(gpgKey.getKeyId()) + "\" from account \"" + gpgKey.getOwner().getName() + "\"", null, null);
+							OneDev.getInstance(AuditService.class).audit(null, "deleted GPG key \"" + GpgUtils.getKeyIDString(gpgKey.getKeyId()) + "\" from account \"" + gpgKey.getOwner().getName() + "\"", null, null);
 						Session.get().success(_T("GPG key deleted"));
 						target.add(gpgKeysTable);
 					}
@@ -181,7 +181,7 @@ public class GpgKeyListPanel extends GenericPanel<List<GpgKey>> {
 
 					@Override
 					protected GpgKey load() {
-						return OneDev.getInstance(GpgKeyManager.class).load(id);
+						return OneDev.getInstance(GpgKeyService.class).load(id);
 					}
 					
 				};

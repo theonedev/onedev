@@ -4,7 +4,7 @@ import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.User;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.security.LoginPage;
@@ -25,7 +25,7 @@ public abstract class MyPage extends LayoutPage implements UserAware {
 
 	@Override
 	protected String getPageTitle() {
-		return "My - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+		return "My - " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
 	}
 	
 }

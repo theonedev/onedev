@@ -31,8 +31,8 @@ import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.JobCacheManager;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.JobCacheService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.JobCache;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.DateUtils;
@@ -65,8 +65,8 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 				super.onSubmit();
 				var newAuditContent = VersionedXmlDoc.fromBean(bean).toXML();
 				getProject().getBuildSetting().setCachePreserveDays(bean.getPreserveDays());
-				OneDev.getInstance(ProjectManager.class).update(getProject());
-				getAuditManager().audit(getProject(), "changed job cache preserve days", oldAuditContent, newAuditContent);
+				OneDev.getInstance(ProjectService.class).update(getProject());
+				auditService.audit(getProject(), "changed job cache preserve days", oldAuditContent, newAuditContent);
 			}
 			
 		};
@@ -89,7 +89,7 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 			public void populateItem(Item<ICellPopulator<JobCache>> cellItem, String componentId,
 									 IModel<JobCache> rowModel) {
 				var cache = rowModel.getObject();
-				var cacheSize = getCacheManager().getCacheSize(cache.getProject().getId(), cache.getId());
+				var cacheSize = getCacheService().getCacheSize(cache.getProject().getId(), cache.getId());
 				if (cacheSize != null)
 					cellItem.add(new Label(componentId, FileUtils.byteCountToDisplaySize(cacheSize)));
 				else 
@@ -120,7 +120,7 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						var cache = rowModel.getObject();
-						getCacheManager().delete(cache);
+						getCacheService().delete(cache);
 						Session.get().success(MessageFormat.format(_T("Job cache \"{0}\" deleted"), cache.getKey()));
 						target.add(cachesTable);
 					}
@@ -149,12 +149,12 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 			public Iterator<? extends JobCache> iterator(long first, long count) {
 				var criteria = newCriteria();
 				criteria.addOrder(Order.desc(JobCache.PROP_ACCESS_DATE));
-				return getCacheManager().query(criteria, (int) first, (int) count).iterator();
+				return getCacheService().query(criteria, (int) first, (int) count).iterator();
 			}
 
 			@Override
 			public long size() {
-				return getCacheManager().count(newCriteria());
+				return getCacheService().count(newCriteria());
 			}
 
 			@Override
@@ -164,7 +164,7 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 
 					@Override
 					protected JobCache load() {
-						return getCacheManager().load(id);
+						return getCacheService().load(id);
 					}
 
 				};
@@ -197,8 +197,8 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 		return new Label(componentId, _T("Job Cache Management"));
 	}
 	
-	private JobCacheManager getCacheManager() {
-		return OneDev.getInstance(JobCacheManager.class);
+	private JobCacheService getCacheService() {
+		return OneDev.getInstance(JobCacheService.class);
 	}
 	
 }

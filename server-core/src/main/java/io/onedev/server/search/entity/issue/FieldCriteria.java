@@ -16,7 +16,7 @@ import javax.persistence.criteria.Subquery;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -67,7 +67,7 @@ public abstract class FieldCriteria extends Criteria<Issue> {
 	@Override
 	public Collection<String> getUndefinedFields() {
 		Set<String> undefinedFields = new HashSet<>();
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
 		if (!Issue.QUERY_FIELDS.contains(fieldName) 
 				&& issueSetting.getFieldSpec(fieldName) == null) {
 			undefinedFields.add(fieldName);
@@ -89,8 +89,8 @@ public abstract class FieldCriteria extends Criteria<Issue> {
 	}
 
 	public FieldSpec getFieldSpec() {
-		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-		return Preconditions.checkNotNull(settingManager.getIssueSetting().getFieldSpec(fieldName));
+		SettingService settingService = OneDev.getInstance(SettingService.class);
+		return Preconditions.checkNotNull(settingService.getIssueSetting().getFieldSpec(fieldName));
 	}
 	
 }

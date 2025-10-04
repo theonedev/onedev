@@ -26,9 +26,9 @@ import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
@@ -36,7 +36,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.instance.FieldInstance;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.facade.ProjectCache;
@@ -73,13 +73,13 @@ public class CreateIssueAction extends PostBuildAction {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getProjectChoices() {
-		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+		ProjectService projectService = OneDev.getInstance(ProjectService.class);
 		Project project = ((ProjectPage) WicketUtils.getPage()).getProject();
 
 		Collection<Project> projects = SecurityUtils.getAuthorizedProjects(new AccessProject());
 		projects.remove(project);
 
-		ProjectCache cache = projectManager.cloneCache();
+		ProjectCache cache = projectService.cloneCache();
 
 		List<String> choices = projects.stream().map(it->cache.get(it.getId()).getPath()).collect(Collectors.toList());
 		Collections.sort(choices);
@@ -155,15 +155,15 @@ public class CreateIssueAction extends PostBuildAction {
 	}
 	
 	private static Collection<String> getFieldNames() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldNames();
+		return OneDev.getInstance(SettingService.class).getIssueSetting().getFieldNames();
 	}
 	
 	@Override
 	public void execute(Build build) {
-		OneDev.getInstance(TransactionManager.class).run(() -> {
+		OneDev.getInstance(TransactionService.class).run(() -> {
 			Project project;
 			if (getProjectPath() != null) {
-				project = OneDev.getInstance(ProjectManager.class).findByPath(getProjectPath());
+				project = OneDev.getInstance(ProjectService.class).findByPath(getProjectPath());
 				if (project == null) 
 					throw new ExplicitException("Unable to find project: " + projectPath);
 				Subject subject = JobAuthorizationContext.get().getSubject(getAccessTokenSecret());
@@ -177,8 +177,8 @@ public class CreateIssueAction extends PostBuildAction {
 			issue.setTitle(getIssueTitle());
 			issue.setSubmitter(SecurityUtils.getUser());
 			issue.setSubmitDate(new Date());
-			SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-			GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
+			SettingService settingService = OneDev.getInstance(SettingService.class);
+			GlobalIssueSetting issueSetting = settingService.getIssueSetting();
 			issue.setState(issueSetting.getInitialStateSpec().getName());
 			
 			issue.setDescription(getIssueDescription());
@@ -188,7 +188,7 @@ public class CreateIssueAction extends PostBuildAction {
 						.convertToObject(instance.getValueProvider().getValue());
 				issue.setFieldValue(instance.getName(), fieldValue);
 			}
-			OneDev.getInstance(IssueManager.class).open(issue);
+			OneDev.getInstance(IssueService.class).open(issue);
 		});
 		
 	}
@@ -202,7 +202,7 @@ public class CreateIssueAction extends PostBuildAction {
 	public void validateWith(BuildSpec buildSpec, Job job) {
 		super.validateWith(buildSpec, job);
 		
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
 		try {
 			FieldUtils.validateFields(issueSetting.getFieldSpecMap(getFieldNames()), issueFields);
 		} catch (ValidationException e) {

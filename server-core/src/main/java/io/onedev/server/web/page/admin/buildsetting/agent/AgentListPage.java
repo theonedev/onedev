@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.NamedAgentQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.administration.AgentSetting;
@@ -51,7 +51,7 @@ public class AgentListPage extends AdministrationPage {
 	}
 
 	private static AgentSetting getAgentSetting() {
-		return OneDev.getInstance(SettingManager.class).getAgentSetting();		
+		return OneDev.getInstance(SettingService.class).getAgentSetting();
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class AgentListPage extends AdministrationPage {
 			@Override
 			protected void onSaveCommonQueries(ArrayList<NamedAgentQuery> namedQueries) {
 				getAgentSetting().setNamedQueries(namedQueries);
-				OneDev.getInstance(SettingManager.class).saveAgentSetting(getAgentSetting());
+				OneDev.getInstance(SettingService.class).saveAgentSetting(getAgentSetting());
 			}
 
 		});
@@ -153,7 +153,7 @@ public class AgentListPage extends AdministrationPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										OneDev.getInstance(SettingManager.class).saveAgentSetting(agentSetting);
+										OneDev.getInstance(SettingService.class).saveAgentSetting(agentSetting);
 										target.add(savedQueries);
 										close();
 									}

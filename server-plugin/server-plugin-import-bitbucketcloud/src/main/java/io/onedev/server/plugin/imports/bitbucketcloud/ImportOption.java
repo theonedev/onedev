@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.RoleChoice;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.service.RoleService;
 import io.onedev.server.model.Role;
 
 @Editable
@@ -30,7 +30,7 @@ public class ImportOption implements Serializable {
 	}
 	
 	public List<Role> getPublicRoles() {
-		return publicRoleNames.stream().map(name -> OneDev.getInstance(RoleManager.class).find(name)).collect(Collectors.toList());
+		return publicRoleNames.stream().map(name -> OneDev.getInstance(RoleService.class).find(name)).collect(Collectors.toList());
 	}
 
 }

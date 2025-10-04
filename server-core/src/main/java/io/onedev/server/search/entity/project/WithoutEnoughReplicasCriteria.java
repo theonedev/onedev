@@ -7,7 +7,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
@@ -18,14 +18,14 @@ public class WithoutEnoughReplicasCriteria extends Criteria<Project> {
 
 	@Override
 	public Predicate getPredicate(@Nullable ProjectScope projectScope, CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
-		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+		ProjectService projectService = OneDev.getInstance(ProjectService.class);
 		return forManyValues(builder, from.get(Project.PROP_ID),
-				projectManager.getIdsWithoutEnoughReplicas(), projectManager.getIds());
+				projectService.getIdsWithoutEnoughReplicas(), projectService.getIds());
 	}
 
 	@Override
 	public boolean matches(Project project) {
-		return OneDev.getInstance(ProjectManager.class).isWithoutEnoughReplicas(project.getId());
+		return OneDev.getInstance(ProjectService.class).isWithoutEnoughReplicas(project.getId());
 	}
 
 	@Override

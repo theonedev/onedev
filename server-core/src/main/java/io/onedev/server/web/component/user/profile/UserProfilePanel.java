@@ -41,19 +41,19 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueCommentManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.PullRequestChangeManager;
-import io.onedev.server.entitymanager.PullRequestCommentManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.mail.MailManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.CodeCommentReplyService;
+import io.onedev.server.service.CodeCommentStatusChangeService;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.IssueCommentService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.PullRequestChangeService;
+import io.onedev.server.service.PullRequestCommentService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
+import io.onedev.server.mail.MailService;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
@@ -63,7 +63,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardD
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.DateRange;
@@ -93,7 +93,7 @@ import io.onedev.server.web.page.user.password.UserPasswordPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.xodus.CommitInfoManager;
+import io.onedev.server.xodus.CommitInfoService;
 
 public abstract class UserProfilePanel extends GenericPanel<User> {
 
@@ -175,8 +175,8 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
         this.inaccessibleActivityCount = inaccessibleActivityCount;
     }
 
-    private AuditManager getAuditManager() {
-        return OneDev.getInstance(AuditManager.class);
+    private AuditService getAuditService() {
+        return OneDev.getInstance(AuditService.class);
     }
 
     @Override
@@ -237,7 +237,7 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
 				public void onClick() {
                     var user = getUser();
 					user.setPassword(null);
-					getUserManager().update(user, null);
+					getUserService().update(user, null);
 					Session.get().success(_T("Password has been removed"));
                     setResponsePage(getPage().getClass(), getPage().getPageParameters());
 				}
@@ -260,27 +260,27 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
 
 				@Override
 				protected TaskResult runTask(TaskLogger logger) {
-					var sessionManager = OneDev.getInstance(SessionManager.class);
-					return sessionManager.call(() -> {
-						SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-						if (settingManager.getMailService() != null) {
+					var sessionService = OneDev.getInstance(SessionService.class);
+					return sessionService.call(() -> {
+						SettingService settingService = OneDev.getInstance(SettingService.class);
+						if (settingService.getMailConnector() != null) {
                             var user = getUser();
 							if (user.getPrimaryEmailAddress() != null && user.getPrimaryEmailAddress().isVerified()) {
 								String passwordResetCode = CryptoUtils.generateSecret();
 								user.setPasswordResetCode(passwordResetCode);
-								getUserManager().update(user, null);
+								getUserService().update(user, null);
 
-								MailManager mailManager = OneDev.getInstance(MailManager.class);
+								MailService mailService = OneDev.getInstance(MailService.class);
 
 								Map<String, Object> bindings = new HashMap<>();
-								bindings.put("passwordResetUrl", settingManager.getSystemSetting().getServerUrl() + "/~reset-password/" + passwordResetCode);
+								bindings.put("passwordResetUrl", settingService.getSystemSetting().getServerUrl() + "/~reset-password/" + passwordResetCode);
 								bindings.put("user", user);
 
-								var template = settingManager.getEmailTemplates().getPasswordReset();
+								var template = settingService.getEmailTemplates().getPasswordReset();
 								var htmlBody = EmailTemplates.evalTemplate(true, template, bindings);
 								var textBody = EmailTemplates.evalTemplate(false, template, bindings);
 
-								mailManager.sendMail(Arrays.asList(user.getPrimaryEmailAddress().getValue()),
+								mailService.sendMail(Arrays.asList(user.getPrimaryEmailAddress().getValue()),
 										Lists.newArrayList(), Lists.newArrayList(),
 										mailSubject,
 										htmlBody, textBody, null, null, null);
@@ -305,8 +305,8 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
 
 			@Override
 			public void onClick() {
-				getUserManager().enable(getUser());
-                getAuditManager().audit(null, "enabled account \"" + getUser().getName() + "\"", null, null);
+				getUserService().enable(getUser());
+                getAuditService().audit(null, "enabled account \"" + getUser().getName() + "\"", null, null);
 				Session.get().success("User enabled");
 				setResponsePage(getPage().getClass(), getPage().getPageParameters());
 			}
@@ -323,8 +323,8 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
 
 			@Override
 			public void onClick() {
-				getUserManager().disable(getUser());
-                getAuditManager().audit(null, "disabled account \"" + getUser().getName() + "\"", null, null);
+				getUserService().disable(getUser());
+                getAuditService().audit(null, "disabled account \"" + getUser().getName() + "\"", null, null);
 				Session.get().success(_T("User disabled"));
 				setResponsePage(getPage().getClass(), getPage().getPageParameters());
 			}
@@ -358,7 +358,7 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
                     setVisible(true);
                 } else {
                     setVisible(getUser().equals(SecurityUtils.getAuthUser()) 
-                            && getSettingManager().getSecuritySetting().isEnableSelfDeregister());
+                            && getSettingService().getSecuritySetting().isEnableSelfDeregister());
                 }
             }
 		});        
@@ -434,12 +434,12 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
         setOutputMarkupId(true);
     }
 
-    private UserManager getUserManager() {
-        return OneDev.getInstance(UserManager.class);
+    private UserService getUserService() {
+        return OneDev.getInstance(UserService.class);
     }
 
-    private SettingManager getSettingManager() {
-        return OneDev.getInstance(SettingManager.class);
+    private SettingService getSettingService() {
+        return OneDev.getInstance(SettingService.class);
     }
 
     private User getUser() {
@@ -469,24 +469,24 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
 
         var user = getUser();
 
-        var commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-        for (var entry: commitInfoManager.getUserCommits(user, fromDate, toDate).entrySet()) {
+        var commitInfoService = OneDev.getInstance(CommitInfoService.class);
+        for (var entry: commitInfoService.getUserCommits(user, fromDate, toDate).entrySet()) {
             for (var entry2: entry.getValue().entrySet())
                 activities.add(new CommitCode(new Date(entry2.getValue()), entry.getKey(), entry2.getKey()));
         }
         
-        var issueManager = OneDev.getInstance(IssueManager.class);
-        for (var issue: issueManager.query(user, fromDate, toDate)) {
+        var issueService = OneDev.getInstance(IssueService.class);
+        for (var issue: issueService.query(user, fromDate, toDate)) {
             activities.add(new OpenIssue(issue));
         }
 
-        var issueCommentManager = OneDev.getInstance(IssueCommentManager.class);
-        for (var comment: issueCommentManager.query(user, fromDate, toDate)) {
+        var issueCommentService = OneDev.getInstance(IssueCommentService.class);
+        for (var comment: issueCommentService.query(user, fromDate, toDate)) {
             activities.add(new CommentIssue(comment));
         }
 
-        var issueChangeManager = OneDev.getInstance(IssueChangeManager.class);
-        for (var change: issueChangeManager.query(user, fromDate, toDate)) {
+        var issueChangeService = OneDev.getInstance(IssueChangeService.class);
+        for (var change: issueChangeService.query(user, fromDate, toDate)) {
             if (change.getData() instanceof IssueStateChangeData) {
                 IssueStateChangeData stateChangeData = (IssueStateChangeData) change.getData();
                 activities.add(new TransitIssue(change.getDate(), change.getIssue(), stateChangeData.getNewState()));
@@ -497,18 +497,18 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
             }
         }
 
-        var pullRequestManager = OneDev.getInstance(PullRequestManager.class);
-        for (var pullRequest: pullRequestManager.query(user, fromDate, toDate)) {
+        var pullRequestService = OneDev.getInstance(PullRequestService.class);
+        for (var pullRequest: pullRequestService.query(user, fromDate, toDate)) {
             activities.add(new OpenPullRequest(pullRequest));
         }
 
-        var pullRequestCommentManager = OneDev.getInstance(PullRequestCommentManager.class);
-        for (var comment: pullRequestCommentManager.query(user, fromDate, toDate)) {
+        var pullRequestCommentService = OneDev.getInstance(PullRequestCommentService.class);
+        for (var comment: pullRequestCommentService.query(user, fromDate, toDate)) {
             activities.add(new CommentPullRequest(comment));
         }
 
-        var pullRequestChangeManager = OneDev.getInstance(PullRequestChangeManager.class);
-        for (var change: pullRequestChangeManager.query(user, fromDate, toDate)) {
+        var pullRequestChangeService = OneDev.getInstance(PullRequestChangeService.class);
+        for (var change: pullRequestChangeService.query(user, fromDate, toDate)) {
             if (change.getData() instanceof PullRequestApproveData) {
                 activities.add(new ApprovePullRequest(change.getDate(), change.getRequest()));
             } else if (change.getData() instanceof PullRequestRequestedForChangesData) {
@@ -522,18 +522,18 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
             }
         }
 
-        var codeCommentManager = OneDev.getInstance(CodeCommentManager.class);
-        for (var comment: codeCommentManager.query(user, fromDate, toDate)) {
+        var codeCommentService = OneDev.getInstance(CodeCommentService.class);
+        for (var comment: codeCommentService.query(user, fromDate, toDate)) {
             activities.add(new CreateCodeComment(comment));
         }
 
-        var codeCommentReplyManager = OneDev.getInstance(CodeCommentReplyManager.class);
-        for (var reply: codeCommentReplyManager.query(user, fromDate, toDate)) {
+        var codeCommentReplyService = OneDev.getInstance(CodeCommentReplyService.class);
+        for (var reply: codeCommentReplyService.query(user, fromDate, toDate)) {
             activities.add(new ReplyCodeComment(reply));
         }
 
-        var codeCommentStatusChangeManager = OneDev.getInstance(CodeCommentStatusChangeManager.class);
-        for (var change: codeCommentStatusChangeManager.query(user, fromDate, toDate)) {
+        var codeCommentStatusChangeService = OneDev.getInstance(CodeCommentStatusChangeService.class);
+        for (var change: codeCommentStatusChangeService.query(user, fromDate, toDate)) {
             if (change.isResolved()) {
                 activities.add(new ResolveCodeComment(change.getDate(), change.getComment()));
             } else {

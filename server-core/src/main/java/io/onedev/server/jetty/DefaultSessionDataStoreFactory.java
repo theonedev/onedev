@@ -25,22 +25,22 @@ import org.eclipse.jetty.server.session.AbstractSessionDataStoreFactory;
 import org.eclipse.jetty.server.session.SessionDataStore;
 import org.eclipse.jetty.server.session.SessionHandler;
 
-import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterService;
 
 @Singleton
 public class DefaultSessionDataStoreFactory extends AbstractSessionDataStoreFactory {
 
-	private final ClusterManager clusterManager;
+	private final ClusterService clusterService;
 	
 	@Inject
-	public DefaultSessionDataStoreFactory(ClusterManager clusterManager) {
-		this.clusterManager = clusterManager;
+	public DefaultSessionDataStoreFactory(ClusterService clusterService) {
+		this.clusterService = clusterService;
 	}
 
     @Override
     public SessionDataStore getSessionDataStore(SessionHandler handler) {
         ClusterSessionDataStore sessionDataStore = new ClusterSessionDataStore();
-        sessionDataStore.setSessionDataMap(clusterManager.getHazelcastInstance().getMap("jettySessionData"));
+        sessionDataStore.setSessionDataMap(clusterService.getHazelcastInstance().getMap("jettySessionData"));
         return sessionDataStore;
     }
 

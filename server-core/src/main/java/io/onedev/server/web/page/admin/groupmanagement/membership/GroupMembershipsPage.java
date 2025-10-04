@@ -37,12 +37,12 @@ import org.hibernate.criterion.Restrictions;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.MembershipManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.MembershipService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Similarities;
@@ -116,7 +116,7 @@ public class GroupMembershipsPage extends GroupPage {
 
 			@Override
 			public void query(String term, int page, Response<User> response) {
-				UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();
+				UserCache cache = OneDev.getInstance(UserService.class).cloneCache();
 				
 				List<User> users = new ArrayList<>(cache.getUsers());
 				users.removeAll(getGroup().getMembers());
@@ -150,10 +150,10 @@ public class GroupMembershipsPage extends GroupPage {
 			protected void onSelect(AjaxRequestTarget target, User selection) {
 				Membership membership = new Membership();
 				membership.setGroup(getGroup());
-				var user = getUserManager().load(selection.getId());
+				var user = getUserService().load(selection.getId());
 				membership.setUser(user);
-				getMembershipManager().create(membership);
-				getAuditManager().audit(null, "added user \"" + user.getName() + "\" to group \"" + getGroup().getName() + "\"", null, null);
+				getMembershipService().create(membership);
+				auditService.audit(null, "added user \"" + user.getName() + "\" to group \"" + getGroup().getName() + "\"", null, null);
 				target.add(membershipsTable);
 				selectionColumn.getSelections().clear();
 				Session.get().success(_T("User added to group"));
@@ -198,14 +198,14 @@ public class GroupMembershipsPage extends GroupPage {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										getTransactionManager().run(() -> {
+										getTransactionService().run(() -> {
 											Collection<Membership> memberships = new ArrayList<>();
 											for (IModel<Membership> each: selectionColumn.getSelections())
 												memberships.add(each.getObject());
-											getMembershipManager().delete(memberships);
+											getMembershipService().delete(memberships);
 											for (var membership: memberships) {
 												var user = membership.getUser();
-												getAuditManager().audit(null, "removed user \"" + user.getName() + "\" from group \"" + getGroup().getName() + "\"", null, null);
+												auditService.audit(null, "removed user \"" + user.getName() + "\" from group \"" + getGroup().getName() + "\"", null, null);
 											}
 											selectionColumn.getSelections().clear();
 											target.add(membershipsTable);
@@ -268,14 +268,14 @@ public class GroupMembershipsPage extends GroupPage {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										getTransactionManager().run(() -> {
+										getTransactionService().run(() -> {
 											Collection<Membership> memberships = new ArrayList<>();
 											for (Iterator<Membership> it = (Iterator<Membership>) dataProvider.iterator(0, membershipsTable.getItemCount()); it.hasNext();) 
 												memberships.add(it.next());
-											getMembershipManager().delete(memberships);
+											getMembershipService().delete(memberships);
 											for (var membership: memberships) {
 												var user = membership.getUser();
-												getAuditManager().audit(null, "removed user \"" + user.getName() + "\" from group \"" + getGroup().getName() + "\"", null, null);
+												auditService.audit(null, "removed user \"" + user.getName() + "\" from group \"" + getGroup().getName() + "\"", null, null);
 											}
 											selectionColumn.getSelections().clear();
 											target.add(membershipsTable);
@@ -366,13 +366,13 @@ public class GroupMembershipsPage extends GroupPage {
 			public Iterator<? extends Membership> iterator(long first, long count) {
 				EntityCriteria<Membership> criteria = getCriteria();
 				criteria.addOrder(Order.desc("id"));
-				return OneDev.getInstance(MembershipManager.class).query(criteria, (int)first, 
+				return OneDev.getInstance(MembershipService.class).query(criteria, (int)first,
 						(int)count).iterator();
 			}
 
 			@Override
 			public long size() {
-				return OneDev.getInstance(MembershipManager.class).count(getCriteria());
+				return OneDev.getInstance(MembershipService.class).count(getCriteria());
 			}
 
 			@Override
@@ -382,7 +382,7 @@ public class GroupMembershipsPage extends GroupPage {
 
 					@Override
 					protected Membership load() {
-						return OneDev.getInstance(MembershipManager.class).load(id);
+						return OneDev.getInstance(MembershipService.class).load(id);
 					}
 					
 				};
@@ -393,16 +393,16 @@ public class GroupMembershipsPage extends GroupPage {
 				WebConstants.PAGE_SIZE, null));
 	}
 
-	private TransactionManager getTransactionManager() {
-		return OneDev.getInstance(TransactionManager.class);
+	private TransactionService getTransactionService() {
+		return OneDev.getInstance(TransactionService.class);
 	}
 
-	private MembershipManager getMembershipManager() {
-		return OneDev.getInstance(MembershipManager.class);
+	private MembershipService getMembershipService() {
+		return OneDev.getInstance(MembershipService.class);
 	}
 
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 
 }

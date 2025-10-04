@@ -2,7 +2,7 @@ package io.onedev.server.web.component.pack.choice;
 
 import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PackManager;
+import io.onedev.server.service.PackService;
 import io.onedev.server.model.Pack;
 import io.onedev.server.web.component.select2.ChoiceProvider;
 import org.hibernate.Hibernate;
@@ -28,15 +28,15 @@ public abstract class PackChoiceProvider extends ChoiceProvider<Pack> {
 	public Collection<Pack> toChoices(Collection<String> ids) {
 		List<Pack> packs = Lists.newArrayList();
 		for (String id: ids) {
-			var pack = getPackManager().load(Long.valueOf(id)); 
+			var pack = getPackService().load(Long.valueOf(id)); 
 			Hibernate.initialize(pack);
 			packs.add(pack);
 		}
 		return packs;
 	}
 	
-	private PackManager getPackManager() {
-		return OneDev.getInstance(PackManager.class);
+	private PackService getPackService() {
+		return OneDev.getInstance(PackService.class);
 	}
 	
 }

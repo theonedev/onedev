@@ -13,15 +13,15 @@ import org.apache.wicket.markup.html.panel.Panel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueWorkManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.StopwatchManager;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.IssueWorkService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.StopwatchService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.Stopwatch;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.timetracking.TimeTrackingManager;
+import io.onedev.server.timetracking.TimeTrackingService;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.editbean.IssueWorkBean;
@@ -40,7 +40,7 @@ abstract class TimingDetailPanel extends Panel {
 		
 		page = getPage();
 		
-		var timeTrackingSetting = OneDev.getInstance(SettingManager.class).getIssueSetting().getTimeTrackingSetting();
+		var timeTrackingSetting = OneDev.getInstance(SettingService.class).getIssueSetting().getTimeTrackingSetting();
 		var timeAggregationLink = timeTrackingSetting.getAggregationLink();
 		
 		boolean timeAggregation = getIssue().isAggregatingTime(timeAggregationLink);
@@ -52,8 +52,8 @@ abstract class TimingDetailPanel extends Panel {
 			fragment.add(new Label("ownEstimatedTime", timeTrackingSetting.formatWorkingPeriod(getIssue().getOwnEstimatedTime(), true)));
 			fragment.add(newEstimatedTimeEditLink("editOwnEstimatedTime"));
 			
-			int aggregatedTime = getTimeTrackingManager().aggregateSourceLinkEstimatedTime(getIssue(), timeAggregationLink);
-			aggregatedTime += getTimeTrackingManager().aggregateTargetLinkEstimatedTime(getIssue(), timeAggregationLink);
+			int aggregatedTime = getTimeTrackingService().aggregateSourceLinkEstimatedTime(getIssue(), timeAggregationLink);
+			aggregatedTime += getTimeTrackingService().aggregateTargetLinkEstimatedTime(getIssue(), timeAggregationLink);
 			
 			fragment.add(new Label("estimatedTimeAggregationLink", timeAggregationLink));
 			fragment.add(new Label("aggregatedEstimatedTime", timeTrackingSetting.formatWorkingPeriod(aggregatedTime, true)));
@@ -64,8 +64,8 @@ abstract class TimingDetailPanel extends Panel {
 			fragment.add(newLogWorkLink("logWork"));
 			fragment.add(newStartWorkLink("startWork"));
 			
-			aggregatedTime = getTimeTrackingManager().aggregateSourceLinkSpentTime(getIssue(), timeAggregationLink);
-			aggregatedTime += getTimeTrackingManager().aggregateTargetLinkSpentTime(getIssue(), timeAggregationLink);
+			aggregatedTime = getTimeTrackingService().aggregateSourceLinkSpentTime(getIssue(), timeAggregationLink);
+			aggregatedTime += getTimeTrackingService().aggregateTargetLinkSpentTime(getIssue(), timeAggregationLink);
 			fragment.add(new Label("spentTimeAggregationLink", timeAggregationLink));
 			fragment.add(new Label("aggregatedSpentTime", timeTrackingSetting.formatWorkingPeriod(aggregatedTime, true)));
 			
@@ -98,7 +98,7 @@ abstract class TimingDetailPanel extends Panel {
 
 					@Override
 					protected String onSave(AjaxRequestTarget target, EstimatedTimeEditBean bean) {
-						getIssueChangeManager().changeOwnEstimatedTime(getIssue(), bean.getEstimatedTime());
+						getIssueChangeService().changeOwnEstimatedTime(SecurityUtils.getUser(), getIssue(), bean.getEstimatedTime());
 						notifyObservablesChange(target);
 						close();
 						return null;
@@ -130,7 +130,7 @@ abstract class TimingDetailPanel extends Panel {
 						work.setMinutes(bean.getSpentTime());
 						work.setDate(bean.getStartAt());
 						work.setNote(bean.getNote());
-						OneDev.getInstance(IssueWorkManager.class).createOrUpdate(work);
+						OneDev.getInstance(IssueWorkService.class).createOrUpdate(work);
 						notifyObservablesChange(target);
 						close();
 						return null;
@@ -170,16 +170,16 @@ abstract class TimingDetailPanel extends Panel {
 		};
 	}
 	
-	private StopwatchManager getStopWatchManager() {
-		return OneDev.getInstance(StopwatchManager.class);
+	private StopwatchService getStopWatchManager() {
+		return OneDev.getInstance(StopwatchService.class);
 	}
 	
-	private TimeTrackingManager getTimeTrackingManager() {
-		return OneDev.getInstance(TimeTrackingManager.class);
+	private TimeTrackingService getTimeTrackingService() {
+		return OneDev.getInstance(TimeTrackingService.class);
 	}
 	
-	private IssueChangeManager getIssueChangeManager() {
-		return OneDev.getInstance(IssueChangeManager.class);
+	private IssueChangeService getIssueChangeService() {
+		return OneDev.getInstance(IssueChangeService.class);
 	}
 	
 	private void notifyObservablesChange(AjaxRequestTarget target) {

@@ -15,6 +15,8 @@ import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.apache.shiro.subject.Subject;
+
 import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -786,11 +788,11 @@ public class GlobalIssueSetting implements Serializable {
 	}
 
 	@Nullable
-	public ManualSpec getManualSpec(Issue issue, String state) {
+	public ManualSpec getManualSpec(Subject subject, Issue issue, String state) {
 		for (var transition: getTransitionSpecs()) {
 			if (transition instanceof ManualSpec) {
 				var manualSpec = (ManualSpec) transition;
-				if (manualSpec.canTransit(issue, state) && manualSpec.isAuthorized(issue)) {
+				if (manualSpec.canTransit(subject, issue, state) && manualSpec.isAuthorized(subject, issue)) {
 					return manualSpec;
 				}
 			}

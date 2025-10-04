@@ -16,8 +16,8 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.AccessTokenManager;
-import io.onedev.server.entitymanager.AuditManager;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.AuditService;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.User;
 import io.onedev.server.web.page.user.UserPage;
@@ -54,10 +54,10 @@ public abstract class AccessTokenListPanel extends Panel {
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
 						var token = getToken();
-						getTokenManager().delete(token);
+						getAccessTokenService().delete(token);
 						if (getPage() instanceof UserPage) {
 							var oldAuditContent = VersionedXmlDoc.fromBean(token).toXML();
-							getAuditManager().audit(null, "deleted access token \"" + token.getName() + "\" from account \"" + token.getOwner().getName() + "\"", oldAuditContent, null);
+							getAuditService().audit(null, "deleted access token \"" + token.getName() + "\" from account \"" + token.getOwner().getName() + "\"", oldAuditContent, null);
 						}
 						target.add(container);
 					}
@@ -74,7 +74,7 @@ public abstract class AccessTokenListPanel extends Panel {
 
 							@Override
 							protected AccessToken getToken() {
-								return getTokenManager().load(tokenId);
+								return getAccessTokenService().load(tokenId);
 							}
 
 							@Override
@@ -94,7 +94,7 @@ public abstract class AccessTokenListPanel extends Panel {
 
 					@Override
 					protected AccessToken getToken() {
-						return getTokenManager().load(tokenId);
+						return getAccessTokenService().load(tokenId);
 					}
 
 				};
@@ -150,12 +150,12 @@ public abstract class AccessTokenListPanel extends Panel {
 	
 	protected abstract User getUser();
 	
-	private AccessTokenManager getTokenManager() {
-		return OneDev.getInstance(AccessTokenManager.class);
+	private AccessTokenService getAccessTokenService() {
+		return OneDev.getInstance(AccessTokenService.class);
 	}
 	
-	private AuditManager getAuditManager() {
-		return OneDev.getInstance(AuditManager.class);
+	private AuditService getAuditService() {
+		return OneDev.getInstance(AuditService.class);
 	}
 	
 }

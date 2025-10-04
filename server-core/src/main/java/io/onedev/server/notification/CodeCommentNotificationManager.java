@@ -2,12 +2,12 @@ package io.onedev.server.notification;
 
 import com.google.common.collect.Lists;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.CodeCommentMentionManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.CodeCommentMentionService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.codecomment.CodeCommentEdited;
 import io.onedev.server.event.project.codecomment.CodeCommentEvent;
-import io.onedev.server.mail.MailManager;
+import io.onedev.server.mail.MailService;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentStatusChange;
@@ -28,19 +28,14 @@ import static java.util.stream.Collectors.toSet;
 @Singleton
 public class CodeCommentNotificationManager {
 
-	private final MailManager mailManager;
-
-	private final UserManager userManager;
-
-	private final CodeCommentMentionManager mentionManager;
-	
 	@Inject
-	public CodeCommentNotificationManager(MailManager mailManager, UserManager userManager, 
-										  CodeCommentMentionManager mentionManager) {
-		this.mailManager = mailManager;
-		this.userManager = userManager;
-		this.mentionManager = mentionManager;
-	}
+	private MailService mailService;
+
+	@Inject
+	private UserService userService;
+
+	@Inject
+	private CodeCommentMentionService mentionService;
 
 	@Transactional
 	@Listen
@@ -58,9 +53,9 @@ public class CodeCommentNotificationManager {
 
 			if (markdown != null) {
 				for (String userName : new MentionParser().parseMentions(markdown.getRendered())) {
-					User user = userManager.findByName(userName);
+					User user = userService.findByName(userName);
 					if (user != null) {
-						mentionManager.mention(comment, user);
+						mentionService.mention(comment, user);
 						notifyUsers.add(user);
 					}
 				}
@@ -89,7 +84,7 @@ public class CodeCommentNotificationManager {
 				String threadingReferences = "<" + comment.getProject().getPath()
 						+ "-codecomment-" + comment.getId() + "@onedev>";
 
-				mailManager.sendMailAsync(emailAddresses, Lists.newArrayList(),
+				mailService.sendMailAsync(emailAddresses, Lists.newArrayList(),
 						Lists.newArrayList(), subject,
 						getEmailBody(true, event, summary, markdown != null ? markdown.getProcessed() : null, url, false, null),
 						getEmailBody(false, event, summary, markdown != null ? markdown.getContent() : null, url, false, null),

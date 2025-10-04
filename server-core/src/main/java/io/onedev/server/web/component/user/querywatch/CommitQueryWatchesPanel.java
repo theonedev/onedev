@@ -28,13 +28,13 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.AuditManager;
-import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.CommitQueryPersonalizationService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
@@ -80,20 +80,20 @@ class CommitQueryWatchesPanel extends GenericPanel<User> {
 
             @Override
             public void onClick() {
-                OneDev.getInstance(TransactionManager.class).run(() -> {
-                    var auditManager = OneDev.getInstance(AuditManager.class);
+                OneDev.getInstance(TransactionService.class).run(() -> {
+                    var auditService = OneDev.getInstance(AuditService.class);
                     for (IModel<QueryInfo> each: selectionColumn.getSelections()) {
                         var queryInfo = each.getObject();
                          for (var personalization: getUser().getCommitQueryPersonalizations()) {
                              if (personalization.getProject().getId().equals(queryInfo.projectId)) {
                                  personalization.getQuerySubscriptions().remove(queryInfo.name);
-                                 getCommitQueryPersonalizationManager().createOrUpdate(personalization);
+                                 getCommitQueryPersonalizationService().createOrUpdate(personalization);
                                  if (getPage() instanceof UserPage)
-                                    auditManager.audit(null, "unsubscribed from commit query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\" in project \"" + personalization.getProject().getPath() + "\"", null, null);
+                                    auditService.audit(null, "unsubscribed from commit query \"" + queryInfo.name + "\" in account \"" + getUser().getName() + "\" in project \"" + personalization.getProject().getPath() + "\"", null, null);
                              }
                          }
                      }
-                     getUserManager().update(getUser(), null);
+                     getUserService().update(getUser(), null);
                 });
             }
             
@@ -141,7 +141,7 @@ class CommitQueryWatchesPanel extends GenericPanel<User> {
                     name = name.substring(PERSONAL_NAME_PREFIX.length()) + " (" + _T("personal") + ")";
                                         
                 var fragment = new Fragment(componentId, "linkFrag", CommitQueryWatchesPanel.this);
-                var project = getProjectManager().load(rowModel.getObject().projectId);
+                var project = getProjectService().load(rowModel.getObject().projectId);
                 var link = new BookmarkablePageLink<Void>("link", ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(project, rowModel.getObject().query, null));
                 link.add(new Label("label", name));
                 fragment.add(link);
@@ -154,7 +154,7 @@ class CommitQueryWatchesPanel extends GenericPanel<User> {
             @Override
             public void populateItem(Item<ICellPopulator<QueryInfo>> cellItem, String componentId,
                                      IModel<QueryInfo> rowModel) {
-                var project = getProjectManager().load(rowModel.getObject().projectId);
+                var project = getProjectService().load(rowModel.getObject().projectId);
                 var fragment = new Fragment(componentId, "linkFrag", CommitQueryWatchesPanel.this);
                 var link = new BookmarkablePageLink<Void>("link", ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project));
                 link.add(new Label("label", project.getPath()));
@@ -195,16 +195,16 @@ class CommitQueryWatchesPanel extends GenericPanel<User> {
         super.onDetach();
     }
 
-    private ProjectManager getProjectManager() {
-        return OneDev.getInstance(ProjectManager.class);
+    private ProjectService getProjectService() {
+        return OneDev.getInstance(ProjectService.class);
     }
 
-    private CommitQueryPersonalizationManager getCommitQueryPersonalizationManager() {
-        return OneDev.getInstance(CommitQueryPersonalizationManager.class);
+    private CommitQueryPersonalizationService getCommitQueryPersonalizationService() {
+        return OneDev.getInstance(CommitQueryPersonalizationService.class);
     }
     
-    private UserManager getUserManager() {
-        return OneDev.getInstance(UserManager.class);
+    private UserService getUserService() {
+        return OneDev.getInstance(UserService.class);
     }
 
     private User getUser() {

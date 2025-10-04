@@ -1,6 +1,6 @@
 package io.onedev.server.rest.resource;
 
-import io.onedev.server.entitymanager.IssueWatchManager;
+import io.onedev.server.service.IssueWatchService;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -21,18 +21,18 @@ import static io.onedev.server.security.SecurityUtils.canModifyOrDelete;
 @Singleton
 public class IssueWatchResource {
 
-	private final IssueWatchManager watchManager;
+	private final IssueWatchService watchService;
 	
 	@Inject
-	public IssueWatchResource(IssueWatchManager watchManager) {
-		this.watchManager = watchManager;
+	public IssueWatchResource(IssueWatchService watchService) {
+		this.watchService = watchService;
 	}
 
 	@Api(order=100)
 	@Path("/{watchId}")
 	@GET
 	public IssueWatch getWatch(@PathParam("watchId") Long watchId) {
-		IssueWatch watch = watchManager.load(watchId);
+		IssueWatch watch = watchService.load(watchId);
 		if (!SecurityUtils.canAccessIssue(watch.getIssue()))
 			throw new UnauthorizedException();
 		return watch;
@@ -45,7 +45,7 @@ public class IssueWatchResource {
 				|| !SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getAuthUser())) {
 			throw new UnauthorizedException();
 		}
-		watchManager.createOrUpdate(watch);
+		watchService.createOrUpdate(watch);
 		return watch.getId();
 	}
 
@@ -55,7 +55,7 @@ public class IssueWatchResource {
 	public Response updateWatch(@PathParam("watchId") Long watchId, @NotNull IssueWatch watch) {
 		if (!canModifyOrDelete(watch)) 
 			throw new UnauthorizedException();
-		watchManager.createOrUpdate(watch);
+		watchService.createOrUpdate(watch);
 		return Response.ok().build();
 	}
 	
@@ -63,10 +63,10 @@ public class IssueWatchResource {
 	@Path("/{watchId}")
 	@DELETE
 	public Response deleteWatch(@PathParam("watchId") Long watchId) {
-		IssueWatch watch = watchManager.load(watchId);
+		IssueWatch watch = watchService.load(watchId);
 		if (!canModifyOrDelete(watch)) 
 			throw new UnauthorizedException();
-		watchManager.delete(watch);
+		watchService.delete(watch);
 		return Response.ok().build();
 	}
 	

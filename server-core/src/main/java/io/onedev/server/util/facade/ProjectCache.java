@@ -19,7 +19,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.MapProxy;
 import io.onedev.server.util.Similarities;
@@ -114,8 +114,8 @@ public class ProjectCache extends MapProxy<Long, ProjectFacade> {
 	}
 
 	public Collection<Project> getProjects() {
-		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-		return keySet().stream().map(projectManager::load).collect(toSet());
+		ProjectService projectService = OneDev.getInstance(ProjectService.class);
+		return keySet().stream().map(projectService::load).collect(toSet());
 	}
 	
 	public Comparator<Project> comparingPath() {

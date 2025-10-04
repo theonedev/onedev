@@ -2,7 +2,7 @@ package io.onedev.server.web.page.security;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.model.User;
 import io.onedev.server.util.patternset.PatternSet;
 
@@ -31,7 +31,7 @@ public class SignUpBean extends User {
 	
 	@SuppressWarnings("unused")
 	private static String getEmailAddressDescription() {
-		var allowedSelfRegisterEmailDomain = OneDev.getInstance(SettingManager.class).getSecuritySetting().getAllowedSelfRegisterEmailDomain();	
+		var allowedSelfRegisterEmailDomain = OneDev.getInstance(SettingService.class).getSecuritySetting().getAllowedSelfRegisterEmailDomain();
 		if (allowedSelfRegisterEmailDomain != null) {
 			var patternSet = PatternSet.parse(allowedSelfRegisterEmailDomain);
 			var description = new StringBuilder();

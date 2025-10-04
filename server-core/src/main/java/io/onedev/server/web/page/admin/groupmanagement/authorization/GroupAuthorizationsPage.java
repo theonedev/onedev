@@ -17,9 +17,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.entitymanager.GroupAuthorizationManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.service.GroupAuthorizationService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.RoleService;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.page.admin.groupmanagement.GroupPage;
@@ -66,20 +66,20 @@ public class GroupAuthorizationsPage extends GroupPage {
 						error(MessageFormat.format(_T("Duplicate authorizations found: {0}"), authorizationBean.getProjectPath()));
 						return;
 					} else {
-						var project = getProjectManager().findByPath(authorizationBean.getProjectPath());
+						var project = getProjectService().findByPath(authorizationBean.getProjectPath());
 						authorizationBean.getRoleNames().stream().forEach(it -> {
 							GroupAuthorization authorization = new GroupAuthorization();
 							authorization.setGroup(getGroup());
 							authorization.setProject(project);
-							authorization.setRole(getRoleManager().find(it));
+							authorization.setRole(getRoleService().find(it));
 							authorizations.add(authorization);
 						});
 					}
 				}
 				
 				var newAuditContent = VersionedXmlDoc.fromBean(authorizationsBean).toXML();
-				getGroupAuthorizationManager().syncAuthorizations(getGroup(), authorizations);
-				getAuditManager().audit(null, "changed authorizations of group \"" + getGroup().getName() + "\"", oldAuditContent, newAuditContent);
+				getGroupAuthorizationService().syncAuthorizations(getGroup(), authorizations);
+				auditService.audit(null, "changed authorizations of group \"" + getGroup().getName() + "\"", oldAuditContent, newAuditContent);
 				oldAuditContent = newAuditContent;
 				Session.get().success("Project authorizations updated");
 			}
@@ -90,16 +90,16 @@ public class GroupAuthorizationsPage extends GroupPage {
 		add(form);
 	}
 
-	private RoleManager getRoleManager() {
-		return OneDev.getInstance(RoleManager.class);
+	private RoleService getRoleService() {
+		return OneDev.getInstance(RoleService.class);
 	}
 
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 	
-	private GroupAuthorizationManager getGroupAuthorizationManager() {
-		return OneDev.getInstance(GroupAuthorizationManager.class);
+	private GroupAuthorizationService getGroupAuthorizationService() {
+		return OneDev.getInstance(GroupAuthorizationService.class);
 	}
 
 }

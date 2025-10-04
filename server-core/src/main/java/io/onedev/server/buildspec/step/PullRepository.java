@@ -45,9 +45,9 @@ import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.ProjectChoice;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.CommandUtils;
@@ -57,7 +57,7 @@ import io.onedev.server.git.command.LfsFetchCommand;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.SecurityUtils;
 
 @Editable(order=1070, name="Pull from Remote", group=StepGroup.REPOSITORY_SYNC, description=""
@@ -139,12 +139,12 @@ public class PullRepository extends SyncRepository {
 
 	@Override
 	public ServerStepResult run(Long buildId, File inputDir, TaskLogger logger) {
-		return OneDev.getInstance(SessionManager.class).call(() -> {
-			var build = OneDev.getInstance(BuildManager.class).load(buildId);
+		return OneDev.getInstance(SessionService.class).call(() -> {
+			var build = OneDev.getInstance(BuildService.class).load(buildId);
 			Project project = build.getProject();
 			Project targetProject;
 			if (getTargetProject() != null) {
-				targetProject = getProjectManager().findByPath(getTargetProject());
+				targetProject = getProjectService().findByPath(getTargetProject());
 				if (targetProject == null)
 					throw new ExplicitException("Target project not found: " + getTargetProject());
 			} else {
@@ -171,17 +171,17 @@ public class PullRepository extends SyncRepository {
 			String remoteUrl = getRemoteUrlWithCredential(build);
 			Long targetProjectId = targetProject.getId();
 			var task = new PullTask(targetProjectId, userId, remoteUrl, getCertificate(), getRefs(), isForce(), isWithLfs(), getProxy(), build.getSecretMasker());
-			getProjectManager().runOnActiveServer(targetProjectId, task);
+			getProjectService().runOnActiveServer(targetProjectId, task);
 			return new ServerStepResult(true);
 		});
 	}
 	
-	private static ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
+	private static ProjectService getProjectService() {
+		return OneDev.getInstance(ProjectService.class);
 	}
 
-	private static UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
+	private static UserService getUserService() {
+		return OneDev.getInstance(UserService.class);
 	}
 	
 	private static class PullTask implements ClusterTask<Void> {
@@ -242,7 +242,7 @@ public class PullRepository extends SyncRepository {
 			var certificateFile = writeCertificate(certificate);
 			SecretMasker.push(secretMasker);
 			try {
-				Repository repository = getProjectManager().getRepository(projectId);
+				Repository repository = getProjectService().getRepository(projectId);
 
 				String defaultBranch = GitUtils.getDefaultBranch(repository);
 				Map<String, ObjectId> oldCommitIds = getRefCommits(repository);
@@ -361,7 +361,7 @@ public class PullRepository extends SyncRepository {
 					git.clearArgs();
 					configureProxy(git, proxy);
 					configureCertificate(git, certificateFile);
-					var sinceCommitIds = getProjectManager().readLfsSinceCommits(projectId);
+					var sinceCommitIds = getProjectService().readLfsSinceCommits(projectId);
 
 					if (sinceCommitIds.isEmpty()) {
 						new LfsFetchAllCommand(git.workingDir(), remoteUrl) {
@@ -379,15 +379,15 @@ public class PullRepository extends SyncRepository {
 							}
 						}.run();
 					}
-					getProjectManager().writeLfsSinceCommits(projectId, newCommitIds.values());
+					getProjectService().writeLfsSinceCommits(projectId, newCommitIds.values());
 				}
 
-				OneDev.getInstance(SessionManager.class).runAsync(() -> {
+				OneDev.getInstance(SessionService.class).runAsync(() -> {
 					try {
 						// Access db connection in a separate thread to avoid possible deadlock, as
 						// the parent thread is blocking another thread holding database connections
-						var project = getProjectManager().load(projectId);
-						var user = getUserManager().load(userId);
+						var project = getProjectService().load(projectId);
+						var user = getUserService().load(userId);
 						MapDifference<String, ObjectId> difference = difference(oldCommitIds, newCommitIds);
 						ListenerRegistry registry = OneDev.getInstance(ListenerRegistry.class);
 						for (Map.Entry<String, ObjectId> entry : difference.entriesOnlyOnLeft().entrySet()) {
