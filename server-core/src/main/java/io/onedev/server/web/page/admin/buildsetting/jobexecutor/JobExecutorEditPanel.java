@@ -25,7 +25,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static io.onedev.server.web.translation.Translation._T;
 

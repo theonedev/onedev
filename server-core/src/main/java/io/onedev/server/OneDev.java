@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;

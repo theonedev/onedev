@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.KubernetesHelper;

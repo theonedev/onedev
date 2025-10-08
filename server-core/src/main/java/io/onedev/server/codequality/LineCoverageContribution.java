@@ -2,7 +2,7 @@ package io.onedev.server.codequality;
 
 import java.util.Map;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.server.model.Build;

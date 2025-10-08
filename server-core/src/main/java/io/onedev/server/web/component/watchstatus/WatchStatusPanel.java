@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.util.watch.WatchStatus;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class WatchStatusPanel extends Panel {
 

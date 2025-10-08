@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.Validator;

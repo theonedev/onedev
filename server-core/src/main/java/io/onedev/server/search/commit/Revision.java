@@ -11,7 +11,7 @@ import static io.onedev.server.search.commit.CommitQueryLexer.UNTIL;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.eclipse.jgit.revwalk.RevCommit;
 

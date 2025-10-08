@@ -1,6 +1,6 @@
 package io.onedev.server.search.code.hit;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;

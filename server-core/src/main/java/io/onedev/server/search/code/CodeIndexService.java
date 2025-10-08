@@ -1,6 +1,6 @@
 package io.onedev.server.search.code;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 

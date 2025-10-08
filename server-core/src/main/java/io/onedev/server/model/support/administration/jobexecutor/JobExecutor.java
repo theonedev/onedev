@@ -19,7 +19,7 @@ import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.util.WicketUtils;
 import org.eclipse.jetty.http.HttpStatus;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;

@@ -2,7 +2,7 @@ package io.onedev.server.notification;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class Unsubscribable implements Serializable {
 

@@ -20,7 +20,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.unbescape.html.HtmlEscape;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class ObsoleteUpdateAwarePanel extends Panel {
 

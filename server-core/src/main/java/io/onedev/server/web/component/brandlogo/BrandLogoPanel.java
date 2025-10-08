@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.image.ExternalImage;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.File;
 import java.io.Serializable;
 

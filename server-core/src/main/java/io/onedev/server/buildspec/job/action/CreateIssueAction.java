@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 import javax.validation.constraints.NotEmpty;

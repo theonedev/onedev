@@ -5,7 +5,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.pack.PackSupport;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;

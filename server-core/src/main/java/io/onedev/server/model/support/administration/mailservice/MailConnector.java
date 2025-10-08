@@ -3,7 +3,7 @@ package io.onedev.server.model.support.administration.mailservice;
 import java.io.Serializable;
 import java.util.Collection;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.mail.InboxMonitor;

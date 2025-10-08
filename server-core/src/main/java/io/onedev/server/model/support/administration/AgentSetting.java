@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.support.NamedAgentQuery;
 import io.onedev.server.search.entity.agent.AgentQuery;

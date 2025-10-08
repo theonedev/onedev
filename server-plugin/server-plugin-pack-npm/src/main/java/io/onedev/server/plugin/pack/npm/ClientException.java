@@ -2,7 +2,7 @@ package io.onedev.server.plugin.pack.npm;
 
 import io.onedev.server.exception.HttpResponseAwareException;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 

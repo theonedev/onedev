@@ -41,7 +41,7 @@ import org.hibernate.StaleStateException;
 import org.unbescape.html.HtmlEscape;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.List;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;

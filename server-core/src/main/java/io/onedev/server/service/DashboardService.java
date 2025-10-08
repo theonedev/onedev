@@ -3,7 +3,7 @@ package io.onedev.server.service;
 import io.onedev.server.model.Dashboard;
 import io.onedev.server.model.User;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package io.onedev.server.buildspec.job;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 

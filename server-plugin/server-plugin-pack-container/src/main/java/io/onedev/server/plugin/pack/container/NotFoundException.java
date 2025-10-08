@@ -1,6 +1,6 @@
 package io.onedev.server.plugin.pack.container;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 

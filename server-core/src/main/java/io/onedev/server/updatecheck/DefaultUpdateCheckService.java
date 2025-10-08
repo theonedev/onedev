@@ -1,6 +1,6 @@
 package io.onedev.server.updatecheck;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.inject.Singleton;
 import java.util.Date;
 

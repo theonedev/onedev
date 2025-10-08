@@ -2,7 +2,7 @@ package io.onedev.server.web.component.menu;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.markup.html.WebMarkupContainer;
 

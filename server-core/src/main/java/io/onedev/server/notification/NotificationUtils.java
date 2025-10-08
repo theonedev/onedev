@@ -13,7 +13,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import org.unbescape.html.HtmlEscape;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;

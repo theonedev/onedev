@@ -3,7 +3,7 @@ package io.onedev.server.buildspec.job.action.condition;
 import static io.onedev.server.buildspec.job.action.condition.ActionCondition.getRuleName;
 import static io.onedev.server.model.Build.NAME_BRANCH;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;

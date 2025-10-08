@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.job.log.StyleBuilder;
 import io.onedev.server.web.asset.emoji.Emojis;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;

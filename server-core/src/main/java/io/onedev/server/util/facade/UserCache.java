@@ -7,7 +7,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.UserService;

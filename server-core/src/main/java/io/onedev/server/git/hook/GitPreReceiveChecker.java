@@ -5,7 +5,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import org.eclipse.jgit.lib.ObjectId;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @ExtensionPoint
 public interface GitPreReceiveChecker {

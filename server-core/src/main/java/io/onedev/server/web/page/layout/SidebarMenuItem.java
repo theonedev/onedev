@@ -6,7 +6,7 @@ import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProje
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.util.List;
 

@@ -22,7 +22,7 @@ import static io.onedev.server.search.entity.project.ProjectQueryParser.WithoutE
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;

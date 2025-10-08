@@ -2,7 +2,7 @@ package io.onedev.server.web.component.commandpalette;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class SuggestionContent implements Serializable {
 

@@ -9,7 +9,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GroovyScript;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Use abstract class instead of interface here as otherwise groovy can not invoke static methods defined here

@@ -3,7 +3,7 @@ package io.onedev.server.model.support.administration.authenticator;
 import java.io.Serializable;
 import java.util.Collection;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class Authenticated implements Serializable {
 	

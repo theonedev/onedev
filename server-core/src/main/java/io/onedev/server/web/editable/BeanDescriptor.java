@@ -5,7 +5,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.util.BeanUtils;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

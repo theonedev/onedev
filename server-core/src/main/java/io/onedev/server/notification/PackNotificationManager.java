@@ -17,7 +17,7 @@ import org.apache.shiro.authz.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Collection;

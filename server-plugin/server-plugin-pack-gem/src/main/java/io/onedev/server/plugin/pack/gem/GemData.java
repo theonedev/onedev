@@ -1,6 +1,6 @@
 package io.onedev.server.plugin.pack.gem;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.util.Map;
 

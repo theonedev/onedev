@@ -2,7 +2,7 @@ package io.onedev.server.search.code;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.lucene.search.IndexSearcher;
 import org.eclipse.jgit.lib.ObjectId;

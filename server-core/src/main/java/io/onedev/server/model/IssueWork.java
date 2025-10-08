@@ -4,7 +4,7 @@ import static io.onedev.server.model.IssueWork.PROP_DATE;
 
 import java.util.Date;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;

@@ -1,6 +1,6 @@
 package io.onedev.server.model.support.widget;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 
 public class TabState implements Serializable {

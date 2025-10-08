@@ -11,7 +11,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class CreateIssuePanel extends Panel {
 

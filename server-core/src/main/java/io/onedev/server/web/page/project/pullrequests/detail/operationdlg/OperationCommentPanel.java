@@ -12,7 +12,7 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.model.PropertyModel;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.List;
 
 public abstract class OperationCommentPanel extends ObsoleteUpdateAwarePanel {

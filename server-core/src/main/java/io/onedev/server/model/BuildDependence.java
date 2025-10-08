@@ -1,6 +1,6 @@
 package io.onedev.server.model;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;

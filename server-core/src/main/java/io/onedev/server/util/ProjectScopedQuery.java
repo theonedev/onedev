@@ -4,7 +4,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.model.Project;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ProjectScopedQuery {
 	

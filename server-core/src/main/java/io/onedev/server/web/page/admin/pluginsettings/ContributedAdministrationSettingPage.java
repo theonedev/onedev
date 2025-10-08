@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.Validator;
 
 import org.apache.wicket.Component;

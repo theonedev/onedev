@@ -5,7 +5,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class ServerDetailPage extends AdministrationPage {
 

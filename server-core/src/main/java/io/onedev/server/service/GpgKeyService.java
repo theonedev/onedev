@@ -1,6 +1,6 @@
 package io.onedev.server.service;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.git.signatureverification.gpg.GpgSigningKey;
 import io.onedev.server.model.GpgKey;

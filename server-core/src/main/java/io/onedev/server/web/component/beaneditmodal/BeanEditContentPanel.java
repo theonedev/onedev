@@ -17,7 +17,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static io.onedev.server.web.translation.Translation._T;
 

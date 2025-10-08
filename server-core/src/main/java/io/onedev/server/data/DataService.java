@@ -4,7 +4,7 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.support.administration.BackupSetting;
 import io.onedev.server.util.init.ManualConfig;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.File;
 import java.sql.Connection;
 import java.util.List;

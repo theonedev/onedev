@@ -35,7 +35,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 

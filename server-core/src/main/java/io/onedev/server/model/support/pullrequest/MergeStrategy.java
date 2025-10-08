@@ -1,6 +1,6 @@
 package io.onedev.server.model.support.pullrequest;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;

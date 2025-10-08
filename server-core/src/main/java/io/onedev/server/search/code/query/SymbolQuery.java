@@ -11,7 +11,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.List;
 
 public class SymbolQuery extends BlobQuery {

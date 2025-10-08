@@ -5,7 +5,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;

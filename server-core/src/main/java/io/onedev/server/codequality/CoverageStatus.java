@@ -1,6 +1,6 @@
 package io.onedev.server.codequality;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public enum CoverageStatus {
 	

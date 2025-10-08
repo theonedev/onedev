@@ -2,7 +2,7 @@ package io.onedev.server.service;
 
 import java.util.Collection;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;

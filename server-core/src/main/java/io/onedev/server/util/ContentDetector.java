@@ -4,7 +4,7 @@ import org.apache.tika.Tika;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

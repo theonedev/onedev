@@ -79,7 +79,7 @@ import org.eclipse.jgit.revwalk.RevObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.*;

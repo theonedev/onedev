@@ -16,7 +16,7 @@ import org.apache.wicket.request.IRequestHandlerDelegate;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.AbstractResource;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;

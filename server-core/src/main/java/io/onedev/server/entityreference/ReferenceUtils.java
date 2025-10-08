@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.select.NodeTraversor;

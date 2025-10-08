@@ -1,6 +1,6 @@
 package io.onedev.server.entityreference;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.CodeComment;

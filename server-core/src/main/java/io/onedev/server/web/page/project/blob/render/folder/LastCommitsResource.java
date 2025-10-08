@@ -21,7 +21,7 @@ import org.apache.wicket.request.resource.AbstractResource;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

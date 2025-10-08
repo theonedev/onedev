@@ -33,7 +33,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.visit.IVisitor;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;

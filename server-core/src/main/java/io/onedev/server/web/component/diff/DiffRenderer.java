@@ -1,6 +1,6 @@
 package io.onedev.server.web.component.diff;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.markup.html.panel.Panel;

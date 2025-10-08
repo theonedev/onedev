@@ -5,7 +5,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;

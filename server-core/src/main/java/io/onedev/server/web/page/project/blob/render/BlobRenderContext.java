@@ -3,7 +3,7 @@ package io.onedev.server.web.page.project.blob.render;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.eclipse.jgit.lib.ObjectId;

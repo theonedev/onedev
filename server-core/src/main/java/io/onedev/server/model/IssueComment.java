@@ -5,7 +5,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.mail.internet.InternetAddress;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;

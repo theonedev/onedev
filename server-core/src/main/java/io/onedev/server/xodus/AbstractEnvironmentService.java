@@ -10,7 +10,7 @@ import jetbrains.exodus.backup.VirtualFileDescriptor;
 import jetbrains.exodus.env.*;
 import org.eclipse.jgit.lib.ObjectId;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

@@ -6,7 +6,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.text.MessageFormat;
 import java.util.HashSet;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 

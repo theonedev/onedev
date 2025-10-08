@@ -6,7 +6,7 @@ import static io.onedev.server.web.component.iteration.burndown.BurndownIndicato
 import java.io.Serializable;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;

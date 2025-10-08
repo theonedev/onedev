@@ -10,7 +10,7 @@ import io.onedev.server.web.page.project.blob.render.source.SourceEditPanel;
 import io.onedev.server.web.page.project.blob.render.source.SourceViewPanel;
 import org.apache.wicket.Component;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.stream.IntStream;
 

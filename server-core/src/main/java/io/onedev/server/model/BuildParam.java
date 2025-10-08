@@ -3,7 +3,7 @@ package io.onedev.server.model;
 import static io.onedev.server.model.BuildParam.PROP_NAME;
 import static io.onedev.server.model.BuildParam.PROP_VALUE;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;

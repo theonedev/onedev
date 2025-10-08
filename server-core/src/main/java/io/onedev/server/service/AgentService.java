@@ -7,7 +7,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.criteria.Criteria;
 import org.eclipse.jetty.websocket.api.Session;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 

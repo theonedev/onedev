@@ -2,7 +2,7 @@ package io.onedev.server.git.signatureverification;
 
 import org.eclipse.jgit.revwalk.RevObject;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface SignatureVerificationService {
 	

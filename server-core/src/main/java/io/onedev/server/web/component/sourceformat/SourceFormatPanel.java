@@ -1,6 +1,6 @@
 package io.onedev.server.web.component.sourceformat;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.servlet.http.Cookie;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;

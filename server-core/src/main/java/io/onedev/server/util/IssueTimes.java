@@ -1,6 +1,6 @@
 package io.onedev.server.util;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 
 public class IssueTimes implements Serializable {

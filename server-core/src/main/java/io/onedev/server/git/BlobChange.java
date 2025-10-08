@@ -13,7 +13,7 @@ import io.onedev.server.web.util.DiffPlanarRange;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.ObjectId;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -134,13 +134,11 @@ public abstract class BlobChange implements Serializable {
 		return getProject().getBlob(newBlobIdent, true);
 	}
 	
-	@Nullable
-	public Blob.Text getOldText() {
+	public Blob.@Nullable Text getOldText() {
 		return getOldBlob().getText();
 	}
 	
-	@Nullable
-	public Blob.Text getNewText() {
+	public Blob.@Nullable Text getNewText() {
 		return getNewBlob().getText();
 	}
 	

@@ -7,7 +7,7 @@ import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.pack.PackSupport;
 import io.onedev.server.search.entity.SortField;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;

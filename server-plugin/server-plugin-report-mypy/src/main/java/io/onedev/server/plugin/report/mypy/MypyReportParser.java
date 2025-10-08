@@ -1,22 +1,27 @@
 package io.onedev.server.plugin.report.mypy;
 
+import static io.onedev.server.codequality.CodeProblem.Severity.LOW;
+import static io.onedev.server.codequality.CodeProblem.Severity.MEDIUM;
+import static java.lang.Integer.parseInt;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.apache.commons.lang3.math.NumberUtils;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.model.Build;
-import org.apache.commons.lang3.math.NumberUtils;
-
-import javax.annotation.Nullable;
-import java.util.*;
-
-import static io.onedev.server.codequality.CodeProblem.Severity.LOW;
-import static io.onedev.server.codequality.CodeProblem.Severity.MEDIUM;
-import static java.lang.Integer.parseInt;
-import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 public class MypyReportParser {
 	
@@ -63,7 +68,6 @@ public class MypyReportParser {
 		throw new ExplicitException("Error parsing mypy output: no message found");
 	}
 	
-	@Nullable
 	private static void populateCodeProblems(List<CodeProblem> problems, Build build, Map<String, Optional<String>> blobPaths, 
 									   ParsedLine parsedLine, TaskLogger logger) {
 		var blobPath = blobPaths.get(parsedLine.filePath);

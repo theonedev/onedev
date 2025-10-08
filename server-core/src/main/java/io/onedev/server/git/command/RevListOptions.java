@@ -10,7 +10,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 
 import io.onedev.server.git.command.RevListCommand.Order;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class RevListOptions implements Serializable {
 

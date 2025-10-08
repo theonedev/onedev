@@ -1,6 +1,6 @@
 package io.onedev.server.exception;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.Map;

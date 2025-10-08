@@ -14,7 +14,7 @@ import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;

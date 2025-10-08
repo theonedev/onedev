@@ -3,7 +3,7 @@ package io.onedev.server.web.page.admin.buildsetting.agent;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;
 import org.apache.wicket.ajax.AjaxRequestTarget;

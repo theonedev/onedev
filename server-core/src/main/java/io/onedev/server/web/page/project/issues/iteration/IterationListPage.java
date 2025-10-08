@@ -2,7 +2,7 @@ package io.onedev.server.web.page.project.issues.iteration;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.util.paginghistory.ParamPagingHistorySupport;

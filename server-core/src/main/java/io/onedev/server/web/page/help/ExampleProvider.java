@@ -2,7 +2,7 @@ package io.onedev.server.web.page.help;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 

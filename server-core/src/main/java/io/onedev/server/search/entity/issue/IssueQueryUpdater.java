@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;

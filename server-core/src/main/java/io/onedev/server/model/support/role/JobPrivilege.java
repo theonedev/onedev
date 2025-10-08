@@ -9,7 +9,7 @@ import io.onedev.server.annotation.Patterns;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.web.util.SuggestionUtils;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.ArrayList;

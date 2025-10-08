@@ -3,7 +3,7 @@ package io.onedev.server.service;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.User;
 import io.onedev.server.util.facade.UserCache;

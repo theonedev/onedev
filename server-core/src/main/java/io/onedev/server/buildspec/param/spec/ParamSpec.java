@@ -2,7 +2,7 @@ package io.onedev.server.buildspec.param.spec;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.Valid;
 
 import io.onedev.server.annotation.Multiline;

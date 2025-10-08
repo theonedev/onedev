@@ -18,7 +18,7 @@ package io.onedev.server.persistence;
 
 import java.util.concurrent.Callable;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;

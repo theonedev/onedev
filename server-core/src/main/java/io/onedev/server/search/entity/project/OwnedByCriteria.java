@@ -1,6 +1,6 @@
 package io.onedev.server.search.entity.project;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;

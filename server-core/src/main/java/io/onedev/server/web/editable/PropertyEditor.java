@@ -5,7 +5,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 

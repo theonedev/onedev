@@ -7,7 +7,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.*;
 
 import static java.util.Comparator.comparingInt;

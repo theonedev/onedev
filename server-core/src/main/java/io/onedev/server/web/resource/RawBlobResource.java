@@ -30,7 +30,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.ws.rs.core.HttpHeaders;
 import java.io.ByteArrayInputStream;

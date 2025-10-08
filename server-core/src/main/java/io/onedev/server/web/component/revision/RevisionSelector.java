@@ -42,7 +42,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;

@@ -2,7 +2,7 @@ package io.onedev.server.markdown;
 
 import java.net.URISyntaxException;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.request.cycle.RequestCycle;

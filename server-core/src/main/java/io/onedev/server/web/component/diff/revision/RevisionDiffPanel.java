@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.codec.binary.Hex;

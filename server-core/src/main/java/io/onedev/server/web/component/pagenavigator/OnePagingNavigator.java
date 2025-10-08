@@ -22,7 +22,7 @@ import org.apache.wicket.markup.html.navigation.paging.IPageable;
 import org.apache.wicket.markup.html.navigation.paging.IPagingLabelProvider;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigation;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class OnePagingNavigator extends AjaxPagingNavigator {
 

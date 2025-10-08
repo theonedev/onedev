@@ -14,7 +14,7 @@ import io.onedev.server.model.UnitTestMetric;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.dao.Dao;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.File;
 
 import static io.onedev.commons.utils.LockUtils.write;

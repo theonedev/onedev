@@ -3,7 +3,7 @@ package io.onedev.server.util.diff;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface DiffSupport extends Serializable {
 

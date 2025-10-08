@@ -9,7 +9,7 @@ import io.onedev.server.web.util.DiffPlanarRange;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;

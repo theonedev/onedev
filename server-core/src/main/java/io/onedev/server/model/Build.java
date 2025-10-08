@@ -37,7 +37,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.CascadeType;
@@ -59,6 +58,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
+import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
@@ -79,8 +79,6 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.service.AccessTokenService;
-import io.onedev.server.service.BuildService;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.git.GitUtils;
@@ -93,6 +91,8 @@ import io.onedev.server.model.support.TimeGroups;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.util.artifact.ArtifactInfo;
@@ -878,8 +878,8 @@ public class Build extends ProjectBelonging
 		}
 		return fixedIssueIds;
 	}
-	
-	public Collection<RevCommit> getCommits(@Nullable Build.Status sincePrevStatus) {
+	 
+	public Collection<RevCommit> getCommits(Build.@Nullable Status sincePrevStatus) {
 		if (commitsCache == null) 
 			commitsCache = new HashMap<>();
 		if (!commitsCache.containsKey(sincePrevStatus)) {

@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.PersonIdent;

@@ -13,7 +13,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class BuildEvent extends ProjectEvent implements CommitAware {
 

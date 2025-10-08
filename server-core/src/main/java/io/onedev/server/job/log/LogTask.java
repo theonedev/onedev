@@ -1,6 +1,6 @@
 package io.onedev.server.job.log;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;

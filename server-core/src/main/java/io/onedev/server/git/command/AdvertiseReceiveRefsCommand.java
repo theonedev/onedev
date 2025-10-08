@@ -3,7 +3,7 @@ package io.onedev.server.git.command;
 import java.io.File;
 import java.io.OutputStream;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

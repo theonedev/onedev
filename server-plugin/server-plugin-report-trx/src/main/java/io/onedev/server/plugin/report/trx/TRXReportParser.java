@@ -19,7 +19,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

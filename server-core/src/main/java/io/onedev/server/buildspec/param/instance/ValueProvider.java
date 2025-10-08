@@ -4,7 +4,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.util.List;
 

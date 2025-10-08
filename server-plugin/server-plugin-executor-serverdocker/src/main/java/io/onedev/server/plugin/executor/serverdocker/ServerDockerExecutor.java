@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;

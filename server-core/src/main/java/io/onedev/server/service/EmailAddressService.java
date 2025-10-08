@@ -1,6 +1,6 @@
 package io.onedev.server.service;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.eclipse.jgit.lib.PersonIdent;
 

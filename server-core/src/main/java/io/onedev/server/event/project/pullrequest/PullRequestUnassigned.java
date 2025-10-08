@@ -3,7 +3,7 @@ package io.onedev.server.event.project.pullrequest;
 import java.text.MessageFormat;
 import java.util.Date;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.UserService;

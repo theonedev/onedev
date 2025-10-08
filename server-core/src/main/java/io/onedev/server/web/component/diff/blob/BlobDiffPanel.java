@@ -5,7 +5,7 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.text.MessageFormat;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.Component;

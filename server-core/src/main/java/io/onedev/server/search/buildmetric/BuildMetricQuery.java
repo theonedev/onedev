@@ -9,7 +9,7 @@ import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.search.entity.EntityQuery;
 import org.antlr.v4.runtime.*;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;

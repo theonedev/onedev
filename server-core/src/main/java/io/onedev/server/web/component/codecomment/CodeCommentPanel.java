@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;

@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.Valid;
 
 import io.onedev.commons.bootstrap.Bootstrap;

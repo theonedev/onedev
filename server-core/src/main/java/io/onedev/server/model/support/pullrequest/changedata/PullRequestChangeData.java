@@ -2,7 +2,7 @@ package io.onedev.server.model.support.pullrequest.changedata;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.notification.ActivityDetail;
 

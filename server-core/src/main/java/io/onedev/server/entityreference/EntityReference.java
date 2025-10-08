@@ -2,7 +2,7 @@ package io.onedev.server.entityreference;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;

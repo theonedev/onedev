@@ -3,7 +3,7 @@ package io.onedev.server.util;
 import java.io.Serializable;
 import java.util.Stack;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;

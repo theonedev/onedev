@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.StringUtils;

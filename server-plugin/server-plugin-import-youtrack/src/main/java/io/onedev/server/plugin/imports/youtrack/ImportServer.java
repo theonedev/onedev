@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.client.Client;

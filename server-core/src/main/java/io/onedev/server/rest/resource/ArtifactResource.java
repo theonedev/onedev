@@ -12,7 +12,7 @@ import io.onedev.server.util.artifact.ArtifactInfo;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.*;

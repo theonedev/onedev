@@ -2,7 +2,7 @@ package io.onedev.server.web.component.datatable;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.extensions.ajax.markup.html.repeater.data.table.AjaxFallbackHeadersToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;

@@ -1,6 +1,6 @@
 package io.onedev.server.util.facade;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.support.code.GitPackConfig;
 

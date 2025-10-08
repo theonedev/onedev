@@ -2,7 +2,7 @@ package io.onedev.server.web.behavior.infinitescroll;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;

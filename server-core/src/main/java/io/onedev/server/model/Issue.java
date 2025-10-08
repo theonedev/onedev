@@ -40,7 +40,7 @@ import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.mail.internet.InternetAddress;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;

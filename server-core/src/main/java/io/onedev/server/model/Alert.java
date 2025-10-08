@@ -3,7 +3,7 @@ package io.onedev.server.model;
 import io.onedev.server.annotation.Editable;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
 

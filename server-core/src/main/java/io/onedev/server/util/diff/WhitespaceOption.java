@@ -3,7 +3,7 @@ package io.onedev.server.util.diff;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 

@@ -11,7 +11,7 @@ import org.apache.lucene.search.WildcardQuery;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.Model;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

@@ -2,7 +2,7 @@ package io.onedev.server.markdown;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.jsoup.nodes.Document;

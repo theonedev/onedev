@@ -5,7 +5,7 @@ import static io.onedev.server.model.IssueField.PROP_ORDINAL;
 import static io.onedev.server.model.IssueField.PROP_TYPE;
 import static io.onedev.server.model.IssueField.PROP_VALUE;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;

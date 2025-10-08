@@ -3,7 +3,7 @@ package io.onedev.server.web.component.menu;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;

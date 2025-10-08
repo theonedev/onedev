@@ -32,7 +32,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.ObjectId;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static io.onedev.server.web.translation.Translation._T;
 

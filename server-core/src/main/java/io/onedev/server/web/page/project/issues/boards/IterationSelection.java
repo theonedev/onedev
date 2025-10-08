@@ -2,7 +2,7 @@ package io.onedev.server.web.page.project.issues.boards;
 
 import io.onedev.server.model.Iteration;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface IterationSelection {
 	

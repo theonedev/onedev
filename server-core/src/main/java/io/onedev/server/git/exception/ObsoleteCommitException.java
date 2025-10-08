@@ -1,6 +1,6 @@
 package io.onedev.server.git.exception;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.ExplicitException;
 import org.eclipse.jgit.lib.ObjectId;

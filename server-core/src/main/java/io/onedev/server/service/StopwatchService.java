@@ -4,7 +4,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Stopwatch;
 import io.onedev.server.model.User;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface StopwatchService extends EntityService<Stopwatch> {
 	

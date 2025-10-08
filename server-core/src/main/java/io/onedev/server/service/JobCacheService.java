@@ -3,7 +3,7 @@ package io.onedev.server.service;
 import io.onedev.server.model.JobCache;
 import org.apache.commons.lang3.tuple.Pair;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;

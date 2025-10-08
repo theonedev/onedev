@@ -2,7 +2,7 @@ package io.onedev.server.util.facade;
 
 import io.onedev.server.model.AccessToken;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Date;
 
 public class AccessTokenFacade extends EntityFacade {

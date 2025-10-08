@@ -9,7 +9,7 @@ import io.onedev.server.annotation.RadioChoice;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;

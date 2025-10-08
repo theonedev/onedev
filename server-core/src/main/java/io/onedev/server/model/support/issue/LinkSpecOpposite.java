@@ -2,7 +2,7 @@ package io.onedev.server.model.support.issue;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import javax.validation.constraints.NotEmpty;
 

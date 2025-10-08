@@ -29,7 +29,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static io.onedev.server.web.translation.Translation._T;
 

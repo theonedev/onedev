@@ -5,7 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.imageio.ImageIO;
 import javax.xml.bind.DatatypeConverter;
 

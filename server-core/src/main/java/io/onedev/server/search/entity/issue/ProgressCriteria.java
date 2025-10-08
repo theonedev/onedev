@@ -3,7 +3,7 @@ package io.onedev.server.search.entity.issue;
 import static io.onedev.server.model.Issue.NAME_PROGRESS;
 import static io.onedev.server.model.Issue.PROP_PROGRESS;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;

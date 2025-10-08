@@ -8,7 +8,7 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import org.antlr.v4.runtime.*;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static io.onedev.server.web.translation.Translation._T;
 

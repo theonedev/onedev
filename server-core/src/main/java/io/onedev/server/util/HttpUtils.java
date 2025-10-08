@@ -2,7 +2,7 @@ package io.onedev.server.util;
 
 import org.apache.commons.codec.binary.Base64;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
 

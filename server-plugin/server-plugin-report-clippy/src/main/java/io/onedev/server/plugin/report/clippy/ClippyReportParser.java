@@ -7,7 +7,7 @@ import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.model.Build;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.*;
 
 import static java.lang.Integer.parseInt;

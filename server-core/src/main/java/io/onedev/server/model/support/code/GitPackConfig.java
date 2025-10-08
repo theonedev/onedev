@@ -4,7 +4,7 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Numeric;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 
 @Editable

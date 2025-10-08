@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.web.util.WicketUtils;
 

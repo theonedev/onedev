@@ -1,6 +1,6 @@
 package io.onedev.server.updatecheck;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface UpdateCheckService {
 

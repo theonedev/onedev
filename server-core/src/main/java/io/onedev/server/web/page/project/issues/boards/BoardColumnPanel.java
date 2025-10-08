@@ -56,7 +56,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.unbescape.html.HtmlEscape;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;

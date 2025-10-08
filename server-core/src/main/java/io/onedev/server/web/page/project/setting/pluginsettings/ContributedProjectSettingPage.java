@@ -3,7 +3,7 @@ package io.onedev.server.web.page.project.setting.pluginsettings;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.Validator;
 
 import org.apache.wicket.Component;

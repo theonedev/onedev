@@ -10,7 +10,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.http.entity.ContentType;
 

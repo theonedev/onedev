@@ -2,7 +2,7 @@ package io.onedev.server.event.project;
 
 import java.util.Date;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;

@@ -7,7 +7,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;

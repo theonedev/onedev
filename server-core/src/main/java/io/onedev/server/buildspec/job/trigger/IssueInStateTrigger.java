@@ -16,7 +16,7 @@ import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 

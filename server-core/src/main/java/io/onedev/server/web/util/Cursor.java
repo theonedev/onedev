@@ -2,7 +2,7 @@ package io.onedev.server.web.util;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.ProjectService;

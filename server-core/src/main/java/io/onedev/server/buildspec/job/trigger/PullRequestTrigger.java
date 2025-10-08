@@ -15,7 +15,7 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.eclipse.jgit.lib.Repository;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 

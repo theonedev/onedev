@@ -3,7 +3,7 @@ package io.onedev.server.util.artifact;
 import io.onedev.server.rest.annotation.Api;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

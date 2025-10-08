@@ -17,7 +17,7 @@ import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.dao.Dao;
 import org.apache.commons.lang.SerializationUtils;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.*;
 import java.util.Map;
 

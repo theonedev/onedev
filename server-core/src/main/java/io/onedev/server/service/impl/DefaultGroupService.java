@@ -4,7 +4,7 @@ import static org.hibernate.criterion.Restrictions.eq;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 

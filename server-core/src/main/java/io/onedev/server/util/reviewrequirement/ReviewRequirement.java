@@ -13,7 +13,7 @@ import io.onedev.server.util.reviewrequirement.ReviewRequirementParser.Requireme
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.*;
 
 public class ReviewRequirement {

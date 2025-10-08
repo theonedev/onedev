@@ -3,7 +3,7 @@ package io.onedev.server.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ProgrammingLanguageDetector {
 	private static final Map<String, String> PROGRAMMING_LANGUAGES = new HashMap<>();

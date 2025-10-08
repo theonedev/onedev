@@ -1,6 +1,6 @@
 package io.onedev.server.event.project.pullrequest;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.CodeCommentStatusChangeService;

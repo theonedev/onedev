@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import io.onedev.commons.loader.ExtensionPoint;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @ExtensionPoint
 public interface EditSupport extends Serializable {

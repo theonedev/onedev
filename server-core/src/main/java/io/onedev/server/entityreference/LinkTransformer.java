@@ -2,7 +2,7 @@ package io.onedev.server.entityreference;
 
 import java.util.function.BiFunction;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.unbescape.html.HtmlEscape;

@@ -2,7 +2,7 @@ package io.onedev.server.web.component.savedquery;
 
 import java.util.ArrayList;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.support.NamedQuery;
 

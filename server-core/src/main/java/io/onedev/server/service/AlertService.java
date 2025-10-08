@@ -2,7 +2,7 @@ package io.onedev.server.service;
 
 import io.onedev.server.model.Alert;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface AlertService extends EntityService<Alert> {
 	

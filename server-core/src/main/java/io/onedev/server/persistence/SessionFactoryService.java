@@ -16,7 +16,7 @@
 
 package io.onedev.server.persistence;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;

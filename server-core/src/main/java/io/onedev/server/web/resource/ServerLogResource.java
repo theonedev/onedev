@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.mime.MimeTypes;

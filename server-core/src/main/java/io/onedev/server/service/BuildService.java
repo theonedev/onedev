@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.shiro.subject.Subject;
@@ -38,9 +38,9 @@ public interface BuildService extends EntityService<Build> {
 	Build findLastFinished(Project project, String jobName, @Nullable String refName);
 
 	@Nullable
-	Build findStreamPrevious(Build build, @Nullable Build.Status status);
+	Build findStreamPrevious(Build build, Build.@Nullable Status status);
 	
-	Collection<Long> queryStreamPreviousNumbers(Build build, @Nullable Build.Status status, int limit);
+	Collection<Long> queryStreamPreviousNumbers(Build build, Build.@Nullable Status status, int limit);
 
 	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName, 
 							@Nullable String refName, @Nullable Optional<PullRequest> request, 
@@ -94,7 +94,7 @@ public interface BuildService extends EntityService<Build> {
 	
 	void delete(Collection<Build> builds);
 	
-	Collection<Build> query(Agent agent, @Nullable Build.Status status);
+	Collection<Build> query(Agent agent, Build.@Nullable Status status);
 	
 	List<ProjectBuildStatusStat> queryStatusStats(Collection<Project> projects);
 	

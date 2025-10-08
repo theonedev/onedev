@@ -3,7 +3,7 @@ package io.onedev.server.security.permission;
 import io.onedev.server.util.facade.UserFacade;
 import org.apache.shiro.authz.Permission;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Collection;
 
 public class EditIssueField implements BasePermission {

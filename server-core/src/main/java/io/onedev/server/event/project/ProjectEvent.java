@@ -11,7 +11,7 @@ import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.web.UrlService;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Optional;

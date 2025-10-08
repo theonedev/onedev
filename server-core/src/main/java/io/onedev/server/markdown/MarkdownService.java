@@ -5,7 +5,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Set;
 
 public interface MarkdownService {

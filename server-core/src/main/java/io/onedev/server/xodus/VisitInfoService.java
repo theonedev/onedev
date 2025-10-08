@@ -3,7 +3,7 @@ package io.onedev.server.xodus;
 import java.io.File;
 import java.util.Date;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Issue;

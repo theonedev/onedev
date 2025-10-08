@@ -3,7 +3,7 @@ package io.onedev.server.service;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;

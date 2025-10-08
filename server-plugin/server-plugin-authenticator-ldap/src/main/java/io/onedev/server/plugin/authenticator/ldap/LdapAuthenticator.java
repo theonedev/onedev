@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.naming.AuthenticationException;
 import javax.naming.CompositeName;
 import javax.naming.Context;

@@ -10,7 +10,7 @@ import io.onedev.server.util.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;

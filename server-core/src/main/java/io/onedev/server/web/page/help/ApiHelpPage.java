@@ -4,7 +4,7 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.lang.reflect.Method;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;

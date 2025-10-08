@@ -4,7 +4,7 @@ import io.onedev.server.model.LinkSpec;
 import io.onedev.server.util.facade.UserFacade;
 import org.apache.shiro.authz.Permission;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class EditIssueLink implements BasePermission {
 

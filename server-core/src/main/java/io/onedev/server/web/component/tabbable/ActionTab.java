@@ -4,7 +4,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class ActionTab extends Tab {
 

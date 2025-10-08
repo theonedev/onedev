@@ -1,6 +1,6 @@
 package io.onedev.server.plugin.pack.nuget;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 
 public class NugetData implements Serializable {

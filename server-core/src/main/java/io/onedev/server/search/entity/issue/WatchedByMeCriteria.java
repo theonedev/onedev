@@ -3,7 +3,7 @@ package io.onedev.server.search.entity.issue;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.WatchedByMe;
 import static io.onedev.server.web.translation.Translation._T;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;

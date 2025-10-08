@@ -58,7 +58,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;

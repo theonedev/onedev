@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.NotEmpty;
 

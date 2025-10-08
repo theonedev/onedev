@@ -3,7 +3,7 @@ package io.onedev.server.buildspecmodel.inputspec;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;

@@ -4,7 +4,7 @@ import io.onedev.server.model.support.TimeGroups;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.criteria.Path;
 
 import static io.onedev.server.web.translation.Translation._T;

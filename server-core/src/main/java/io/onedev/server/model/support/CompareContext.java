@@ -5,7 +5,7 @@ import io.onedev.server.util.diff.WhitespaceOption;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.*;
 import java.io.Serializable;
 

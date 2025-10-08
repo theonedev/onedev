@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class Pair<L, R> implements Serializable {
 	

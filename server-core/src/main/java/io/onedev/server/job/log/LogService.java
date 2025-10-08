@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;

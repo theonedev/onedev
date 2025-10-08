@@ -3,7 +3,7 @@ package io.onedev.server.buildspec.param.instance;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;

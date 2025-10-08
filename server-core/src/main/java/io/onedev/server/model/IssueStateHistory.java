@@ -2,7 +2,7 @@ package io.onedev.server.model;
 
 import io.onedev.server.model.support.TimeGroups;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.*;
 import java.util.Date;
 

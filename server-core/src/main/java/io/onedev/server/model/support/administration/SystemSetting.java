@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;

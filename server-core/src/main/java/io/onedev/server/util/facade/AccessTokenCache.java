@@ -2,7 +2,7 @@ package io.onedev.server.util.facade;
 
 import java.util.Map;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.util.MapProxy;
 

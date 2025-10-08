@@ -2,7 +2,7 @@ package io.onedev.server.model.support.pullrequest;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 

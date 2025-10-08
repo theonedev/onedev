@@ -3,7 +3,7 @@ package io.onedev.server.util.diff;
 import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import org.unbescape.html.HtmlEscape;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.LinkedHashMap;
 import java.util.List;
 

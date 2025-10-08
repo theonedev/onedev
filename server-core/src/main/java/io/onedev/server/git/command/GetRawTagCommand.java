@@ -13,7 +13,7 @@ import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.git.CommandUtils;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class GetRawTagCommand {
 

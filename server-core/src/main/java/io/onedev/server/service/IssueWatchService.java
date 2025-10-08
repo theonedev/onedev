@@ -5,7 +5,7 @@ import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.User;
 import io.onedev.server.util.watch.WatchStatus;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Collection;
 
 public interface IssueWatchService extends EntityService<IssueWatch> {

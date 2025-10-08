@@ -20,7 +20,7 @@ import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.Component;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.validation.Valid;
 import java.io.Serializable;
 import java.util.ArrayList;

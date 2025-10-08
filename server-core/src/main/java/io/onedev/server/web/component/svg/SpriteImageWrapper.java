@@ -1,6 +1,6 @@
 package io.onedev.server.web.component.svg;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.markup.html.panel.Panel;
 

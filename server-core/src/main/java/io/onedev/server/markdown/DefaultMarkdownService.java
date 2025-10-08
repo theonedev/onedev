@@ -25,7 +25,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.resource.AttachmentResource;
 import org.jsoup.nodes.Element;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ArrayList;

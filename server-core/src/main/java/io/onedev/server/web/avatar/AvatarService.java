@@ -2,7 +2,7 @@ package io.onedev.server.web.avatar;
 
 import java.io.File;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.eclipse.jgit.lib.PersonIdent;
 

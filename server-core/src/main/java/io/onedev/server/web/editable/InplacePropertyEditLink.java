@@ -2,7 +2,7 @@ package io.onedev.server.web.editable;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;

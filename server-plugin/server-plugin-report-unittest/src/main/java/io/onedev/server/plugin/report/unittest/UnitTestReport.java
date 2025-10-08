@@ -8,7 +8,7 @@ import io.onedev.server.util.patternset.PatternSet;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.*;
 import java.util.Collection;
 import java.util.List;

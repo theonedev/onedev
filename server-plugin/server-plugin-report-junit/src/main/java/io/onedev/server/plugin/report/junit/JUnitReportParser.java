@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

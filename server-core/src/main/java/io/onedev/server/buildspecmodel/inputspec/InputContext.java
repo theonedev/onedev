@@ -2,7 +2,7 @@ package io.onedev.server.buildspecmodel.inputspec;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.util.WicketUtils;

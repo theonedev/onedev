@@ -11,7 +11,7 @@ import org.apache.shiro.subject.Subject;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;

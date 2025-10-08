@@ -2,7 +2,7 @@ package io.onedev.server.search.entity.issue;
 
 import java.util.Objects;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;

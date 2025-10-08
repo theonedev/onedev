@@ -1,6 +1,6 @@
 package io.onedev.server.web.util;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.request.cycle.RequestCycle;

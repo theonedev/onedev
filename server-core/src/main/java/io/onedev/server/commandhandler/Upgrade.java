@@ -35,6 +35,7 @@ import java.util.concurrent.Callable;
 import static io.onedev.server.persistence.PersistenceUtils.*;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.valueOf;
+import static java.lang.System.lineSeparator;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 import static org.hibernate.cfg.AvailableSettings.DIALECT;
@@ -124,11 +125,12 @@ public class Upgrade extends AbstractPlugin {
 				"--add-opens=java.base/java.util=ALL-UNNAMED",
 				"--add-opens=java.base/java.text=ALL-UNNAMED",
 				"--add-opens=java.desktop/java.awt.font=ALL-UNNAMED",
-				"--add-modules=java.se",
+				"--add-modules=java.se",				
 				"--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED",
 				"--add-opens=java.management/sun.management=ALL-UNNAMED",
 				"--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED",
 				"--add-opens=java.base/sun.nio.fs=ALL-UNNAMED",
+				"-Djdk.io.File.allowDeleteReadOnlyFiles=true",
 				"-classpath", "*", bootstrapClass, 
 				command);
 		cmdline.addArgs(commandArgs);
@@ -944,6 +946,10 @@ public class Upgrade extends AbstractPlugin {
 			wrapperConf = wrapperConf.replace(
 					"wrapperConfwrapper.java.additional.30=--add-modules=java.se", 
 					"wrapper.java.additional.30=--add-modules=java.se");
+
+			if (!wrapperConf.contains("-Djdk.io.File.allowDeleteReadOnlyFiles=true")) {
+				wrapperConf += lineSeparator() + "wrapper.java.additional.150=-Djdk.io.File.allowDeleteReadOnlyFiles=true";
+			}		
 			
 			var lines = Splitter.on('\n').trimResults().splitToList(wrapperConf);
 			if (lines.stream().noneMatch(it -> it.contains("-XX:MaxRAMPercentage"))) {
