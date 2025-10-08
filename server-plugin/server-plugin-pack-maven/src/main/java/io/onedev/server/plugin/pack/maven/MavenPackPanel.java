@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.pack.maven;
 
-import static io.onedev.server.plugin.pack.maven.MavenPackService.FILE_METADATA;
-import static io.onedev.server.plugin.pack.maven.MavenPackService.NONE;
+import static io.onedev.server.plugin.pack.maven.MavenPackHandler.FILE_METADATA;
+import static io.onedev.server.plugin.pack.maven.MavenPackHandler.NONE;
 import static io.onedev.server.util.GroovyUtils.evalTemplate;
 import static io.onedev.server.web.translation.Translation._T;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -120,7 +120,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 				bindings.put("artifactId", substringAfter(getPack().getName(), ":"));
 				bindings.put("version", getPack().getVersion());
 				var serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
-				bindings.put("url", serverUrl + "/" + getPack().getProject().getPath() + "/~" + MavenPackService.SERVICE_ID);
+				bindings.put("url", serverUrl + "/" + getPack().getProject().getPath() + "/~" + MavenPackHandler.HANDLER_ID);
 				bindings.put("permission", "read");
 
 				if (packaging.equals("jar") || packaging.equals("maven-plugin") || packaging.equals("pom")) {

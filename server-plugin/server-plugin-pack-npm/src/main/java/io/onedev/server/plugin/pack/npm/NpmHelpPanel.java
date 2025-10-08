@@ -23,7 +23,7 @@ public class NpmHelpPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var registryUrl = getServerUrl() + "/" + projectPath + "/~" + NpmPackService.SERVICE_ID + "/";
+		var registryUrl = getServerUrl() + "/" + projectPath + "/~" + NpmPackHandler.HANDLER_ID + "/";
 		add(new CodeSnippetPanel("scopeRegistry", Model.of("$ npm config set @myscope:registry " + registryUrl)));
 		add(new CodeSnippetPanel("registryAuth", Model.of("$ npm config set -- '" + substringAfter(registryUrl, ":") + ":_authToken' \"onedev_access_token\"")));
 		add(new CodeSnippetPanel("publishCommand", Model.of("$ npm publish")));

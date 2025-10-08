@@ -5,6 +5,7 @@ import com.google.common.io.Resources;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.pack.PackHandler;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.service.PackBlobService;
 import io.onedev.server.service.PackService;
@@ -40,9 +41,9 @@ import static java.util.stream.Collectors.toList;
 import static javax.servlet.http.HttpServletResponse.*;
 
 @Singleton
-public class PypiPackService implements io.onedev.server.pack.PackService {
+public class PypiPackHandler implements PackHandler {
 	
-	public static final String SERVICE_ID = "pypi";
+	public static final String HANDLER_ID = "pypi";
 	
 	private static final String CONTENT_TYPE_SIMPLE = "application/vnd.pypi.simple.v1+html";
 
@@ -61,9 +62,9 @@ public class PypiPackService implements io.onedev.server.pack.PackService {
 	private final BuildService buildService;
 	
 	@Inject
-	public PypiPackService(SessionService sessionService, TransactionService transactionService,
-                           PackBlobService packBlobService, PackService packService,
-                           ProjectService projectService, BuildService buildService) {
+	public PypiPackHandler(SessionService sessionService, TransactionService transactionService,
+						   PackBlobService packBlobService, PackService packService,
+						   ProjectService projectService, BuildService buildService) {
 		this.sessionService = sessionService;
 		this.transactionService = transactionService;
 		this.packBlobService = packBlobService;
@@ -73,8 +74,8 @@ public class PypiPackService implements io.onedev.server.pack.PackService {
 	}
 	
 	@Override
-	public String getServiceId() {
-		return SERVICE_ID;
+	public String getHandlerId() {
+		return HANDLER_ID;
 	}
 
 	private String getLockName(Long projectId, String name) {
@@ -89,7 +90,7 @@ public class PypiPackService implements io.onedev.server.pack.PackService {
 	}
 	
 	@Override
-	public void service(HttpServletRequest request, HttpServletResponse response, Long projectId, 
+	public void handle(HttpServletRequest request, HttpServletResponse response, Long projectId, 
 						Long buildId, List<String> pathSegments) {
 		var method = request.getMethod();
 		
@@ -220,7 +221,7 @@ public class PypiPackService implements io.onedev.server.pack.PackService {
 						var packs = packService.queryByName(project, TYPE, name, VERSION_COMPARATOR);
 						if (!packs.isEmpty()) {
 							var bindings = new HashMap<String, Object>();
-							bindings.put("baseUrl", "/" + project.getPath() + "/~" + SERVICE_ID + "/files/" + UrlUtils.encodePath(name));
+							bindings.put("baseUrl", "/" + project.getPath() + "/~" + HANDLER_ID + "/files/" + UrlUtils.encodePath(name));
 							bindings.put("packs", packs);
 							try {
 								URL tplUrl = Resources.getResource(getClass(), "package-versions.tpl");

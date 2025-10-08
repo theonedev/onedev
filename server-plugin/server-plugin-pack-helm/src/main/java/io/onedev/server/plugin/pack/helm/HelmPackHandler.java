@@ -21,6 +21,7 @@ import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import io.onedev.server.pack.PackHandler;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -46,9 +47,9 @@ import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.Pair;
 
 @Singleton
-public class HelmPackService implements io.onedev.server.pack.PackService {
+public class HelmPackHandler implements PackHandler {
 
-    public static final String SERVICE_ID = "helm";
+    public static final String HANDLER_ID = "helm";
 
     private static final int MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -65,7 +66,7 @@ public class HelmPackService implements io.onedev.server.pack.PackService {
     private final BuildService buildService;
 
     @Inject
-    public HelmPackService(ProjectService projectService, PackService packService,
+    public HelmPackHandler(ProjectService projectService, PackService packService,
                            PackBlobService packBlobService, SessionService sessionService,
                            TransactionService transactionService, BuildService buildService) {
         this.projectService = projectService;
@@ -77,12 +78,12 @@ public class HelmPackService implements io.onedev.server.pack.PackService {
     }
 
     @Override
-    public String getServiceId() {
-        return SERVICE_ID;
+    public String getHandlerId() {
+        return HANDLER_ID;
     }
 
     @Override
-    public void service(HttpServletRequest request, HttpServletResponse response, 
+    public void handle(HttpServletRequest request, HttpServletResponse response, 
             Long projectId, Long buildId, List<String> pathSegments) {
         if (request.getMethod().equals("GET")) {
             if (pathSegments.size() == 1) {

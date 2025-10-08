@@ -24,7 +24,7 @@ public class PypiHelpPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var registryUrl = getServerUrl() + "/" + projectPath + "/~" + PypiPackService.SERVICE_ID;
+		var registryUrl = getServerUrl() + "/" + projectPath + "/~" + PypiPackHandler.HANDLER_ID;
 		add(new CodeSnippetPanel("addRepository", new AbstractReadOnlyModel<>() {
 			@Override
 			public String getObject() {

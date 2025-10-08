@@ -628,8 +628,7 @@ public class CoreModule extends AbstractPluginModule {
 	    
 	    bind(OsInfo.class).toProvider(() -> ExecutorUtils.getOsInfo()).in(Singleton.class);
 	    
-	    contributeFromPackage(LogInstruction.class, LogInstruction.class);
-	    
+	    contributeFromPackage(LogInstruction.class, LogInstruction.class);	    
 	    
 		contribute(CodeProblemContribution.class, (build, blobPath, reportName) -> newArrayList());
 	    

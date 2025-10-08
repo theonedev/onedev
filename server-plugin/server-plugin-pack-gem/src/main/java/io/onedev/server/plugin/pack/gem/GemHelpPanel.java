@@ -1,6 +1,6 @@
 package io.onedev.server.plugin.pack.gem;
 
-import static io.onedev.server.plugin.pack.gem.GemPackService.SERVICE_ID;
+import static io.onedev.server.plugin.pack.gem.GemPackHandler.HANDLER_ID;
 import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.markup.html.panel.Panel;
@@ -23,7 +23,7 @@ public class GemHelpPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var registryUrl = getServerUrl() + "/" + projectPath + "/~" + SERVICE_ID;
+		var registryUrl = getServerUrl() + "/" + projectPath + "/~" + HANDLER_ID;
 		var addSourceCommands = "" +
 				"---\n" +
 				registryUrl + ": Bearer <onedev_access_token>"; 

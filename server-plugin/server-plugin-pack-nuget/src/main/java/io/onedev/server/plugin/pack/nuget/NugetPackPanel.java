@@ -23,7 +23,7 @@ public class NugetPackPanel extends GenericPanel<Pack> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var registryUrl = getServerUrl() + "/" + getPack().getProject().getPath() + "/~" + NugetPackService.SERVICE_ID + "/index.json";
+		var registryUrl = getServerUrl() + "/" + getPack().getProject().getPath() + "/~" + NugetPackHandler.HANDLER_ID + "/index.json";
 		add(new Label("addSource", "$ dotnet nuget add source --name onedev --username <onedev_account_name> --password <onedev_password_or_access_token> --store-password-in-clear-text " + registryUrl));
 		add(new Label("addPack", "$ dotnet add package " + getPack().getName() + " -v " + getPack().getVersion()));
 		

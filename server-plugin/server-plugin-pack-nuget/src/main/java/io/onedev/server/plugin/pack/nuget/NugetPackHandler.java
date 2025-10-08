@@ -43,6 +43,7 @@ import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import io.onedev.server.pack.PackHandler;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
@@ -77,11 +78,11 @@ import io.onedev.server.util.XmlUtils;
 import io.onedev.server.web.UrlService;
 
 @Singleton
-public class NugetPackService implements io.onedev.server.pack.PackService {
+public class NugetPackHandler implements PackHandler {
 	
-	public static final String SERVICE_ID = "nuget";
+	public static final String HANDLER_ID = "nuget";
 	
-	private static final Logger logger = LoggerFactory.getLogger(NugetPackService.class);
+	private static final Logger logger = LoggerFactory.getLogger(NugetPackHandler.class);
 
 	private static final String HEADER_API_KEY = "X-NuGet-ApiKey";
 	
@@ -114,10 +115,10 @@ public class NugetPackService implements io.onedev.server.pack.PackService {
 	private final UrlService urlService;
 
 	@Inject
-	public NugetPackService(SessionService sessionService, TransactionService transactionService,
-                            PackBlobService packBlobService, PackService packService,
-                            ProjectService projectService, BuildService buildService,
-                            ObjectMapper objectMapper, UrlService urlService) {
+	public NugetPackHandler(SessionService sessionService, TransactionService transactionService,
+							PackBlobService packBlobService, PackService packService,
+							ProjectService projectService, BuildService buildService,
+							ObjectMapper objectMapper, UrlService urlService) {
 		this.sessionService = sessionService;
 		this.transactionService = transactionService;
 		this.packBlobService = packBlobService;
@@ -129,8 +130,8 @@ public class NugetPackService implements io.onedev.server.pack.PackService {
 	}
 	
 	@Override
-	public String getServiceId() {
-		return SERVICE_ID;
+	public String getHandlerId() {
+		return HANDLER_ID;
 	}
 
 	private String getLockName(Long projectId, String name) {
@@ -146,7 +147,7 @@ public class NugetPackService implements io.onedev.server.pack.PackService {
 	}
 	
 	@Override
-	public void service(HttpServletRequest request, HttpServletResponse response, Long projectId, 
+	public void handle(HttpServletRequest request, HttpServletResponse response, Long projectId, 
 						Long buildId, List<String> pathSegments) {
 		var method = request.getMethod();
 		
@@ -585,7 +586,7 @@ public class NugetPackService implements io.onedev.server.pack.PackService {
 	}
 	
 	private String getBaseUrl(Project project) {
-		return urlService.urlFor(project, true) + "/~" + SERVICE_ID;
+		return urlService.urlFor(project, true) + "/~" + HANDLER_ID;
 	}
 
 	private String getRegistrationIndexUrl(String baseUrl, String name) {

@@ -28,7 +28,7 @@ public class HelmPackPanel extends GenericPanel<Pack> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var registryUrl = getServerUrl() + "/" + getPack().getProject().getPath() + "/~" + HelmPackService.SERVICE_ID;
+		var registryUrl = getServerUrl() + "/" + getPack().getProject().getPath() + "/~" + HelmPackHandler.HANDLER_ID;
 		add(new Label("addRepo", "$ helm repo add onedev --username <onedev_account_name> --password <onedev_password_or_access_token> " + registryUrl));
 		add(new Label("installChart", "$ helm install " + getPack().getName() + " onedev/" + getPack().getName() + " --version " + getPack().getVersion()));
 		

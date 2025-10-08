@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.pack.gem;
 
 import io.onedev.commons.loader.AbstractPluginModule;
-import io.onedev.server.pack.PackService;
+import io.onedev.server.pack.PackHandler;
 import io.onedev.server.pack.PackSupport;
 
 /**
@@ -14,8 +14,8 @@ public class GemModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 
-		bind(GemPackService.class);
-		contribute(PackService.class, GemPackService.class);
+		bind(GemPackHandler.class);
+		contribute(PackHandler.class, GemPackHandler.class);
 		contribute(PackSupport.class, new GemPackSupport());
 	}
 

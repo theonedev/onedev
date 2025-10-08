@@ -2,6 +2,7 @@ package io.onedev.server.plugin.pack.maven;
 
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.pack.PackHandler;
 import io.onedev.server.service.*;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pack.PackPublished;
@@ -45,9 +46,9 @@ import static javax.servlet.http.HttpServletResponse.*;
 import static javax.ws.rs.core.HttpHeaders.LAST_MODIFIED;
 
 @Singleton
-public class MavenPackService implements io.onedev.server.pack.PackService {
+public class MavenPackHandler implements PackHandler {
 
-	public static final String SERVICE_ID = "maven";
+	public static final String HANDLER_ID = "maven";
 	
 	private static final int MAX_CHECKSUM_LEN = 1000;
 
@@ -91,11 +92,11 @@ public class MavenPackService implements io.onedev.server.pack.PackService {
 	private final BuildService buildService;
 	
 	@Inject
-	public MavenPackService(SessionService sessionService, TransactionService transactionService,
-                            PackBlobService packBlobService, PackService packService,
-                            PackBlobReferenceService packBlobReferenceService,
-                            ProjectService projectService, ListenerRegistry listenerRegistry,
-                            BuildService buildService) {
+	public MavenPackHandler(SessionService sessionService, TransactionService transactionService,
+							PackBlobService packBlobService, PackService packService,
+							PackBlobReferenceService packBlobReferenceService,
+							ProjectService projectService, ListenerRegistry listenerRegistry,
+							BuildService buildService) {
 		this.sessionService = sessionService;
 		this.transactionService = transactionService;
 		this.packBlobService = packBlobService;
@@ -107,12 +108,12 @@ public class MavenPackService implements io.onedev.server.pack.PackService {
 	}
 	
 	@Override
-	public String getServiceId() {
-		return SERVICE_ID;
+	public String getHandlerId() {
+		return HANDLER_ID;
 	}
 
 	@Override
-	public void service(HttpServletRequest request, HttpServletResponse response, Long projectId, 
+	public void handle(HttpServletRequest request, HttpServletResponse response, Long projectId, 
 						Long buildId, List<String> pathSegments) {
 		var method = request.getMethod();
 		

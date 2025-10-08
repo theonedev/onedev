@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.pack.maven;
 
 import io.onedev.commons.loader.AbstractPluginModule;
-import io.onedev.server.pack.PackService;
+import io.onedev.server.pack.PackHandler;
 import io.onedev.server.pack.PackSupport;
 
 /**
@@ -14,8 +14,8 @@ public class MavenModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 
-		bind(MavenPackService.class);
-		contribute(PackService.class, MavenPackService.class);
+		bind(MavenPackHandler.class);
+		contribute(PackHandler.class, MavenPackHandler.class);
 		contribute(PackSupport.class, new MavenPackSupport());
 	}
 

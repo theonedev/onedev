@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.pack.PackHandler;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.service.PackBlobService;
 import io.onedev.server.service.PackService;
@@ -47,9 +48,9 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.apache.commons.lang3.StringUtils.*;
 
 @Singleton
-public class NpmPackService implements io.onedev.server.pack.PackService {
+public class NpmPackHandler implements PackHandler {
 	
-	public static final String SERVICE_ID = "npm";
+	public static final String HANDLER_ID = "npm";
 	
 	private static final int MAX_UPLOAD_METADATA_LEN = 10000000;
 	
@@ -74,10 +75,10 @@ public class NpmPackService implements io.onedev.server.pack.PackService {
 	private final UrlService urlService;
 
 	@Inject
-	public NpmPackService(SessionService sessionService, TransactionService transactionService,
-                          PackBlobService packBlobService, PackService packService,
-                          ProjectService projectService, BuildService buildService,
-                          ObjectMapper objectMapper, UrlService urlService) {
+	public NpmPackHandler(SessionService sessionService, TransactionService transactionService,
+						  PackBlobService packBlobService, PackService packService,
+						  ProjectService projectService, BuildService buildService,
+						  ObjectMapper objectMapper, UrlService urlService) {
 		this.sessionService = sessionService;
 		this.transactionService = transactionService;
 		this.packBlobService = packBlobService;
@@ -89,8 +90,8 @@ public class NpmPackService implements io.onedev.server.pack.PackService {
 	}
 	
 	@Override
-	public String getServiceId() {
-		return SERVICE_ID;
+	public String getHandlerId() {
+		return HANDLER_ID;
 	}
 
 	private String getLockName(Long projectId, String name) {
@@ -122,7 +123,7 @@ public class NpmPackService implements io.onedev.server.pack.PackService {
 	}
 	
 	@Override
-	public void service(HttpServletRequest request, HttpServletResponse response, Long projectId, 
+	public void handle(HttpServletRequest request, HttpServletResponse response, Long projectId, 
 						Long buildId, List<String> pathSegments) {
 		var method = request.getMethod();
 		
@@ -290,7 +291,7 @@ public class NpmPackService implements io.onedev.server.pack.PackService {
 					var project = checkProject(projectId, false);
 					sessionService.run(() -> {
 						var packs = packService.queryByName(project, TYPE, packageName, null);
-						var npmUrl = urlService.urlFor(project, true) + "/~" + getServiceId() + "/" + encodePath(packageName);
+						var npmUrl = urlService.urlFor(project, true) + "/~" + getHandlerId() + "/" + encodePath(packageName);
 						var distTagsNode = objectMapper.createObjectNode();
 						var versionsNode = objectMapper.createObjectNode();
 						NpmData latestPackData = null;

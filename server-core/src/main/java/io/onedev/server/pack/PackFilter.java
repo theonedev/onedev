@@ -33,27 +33,21 @@ import io.onedev.server.security.ExceptionHandleFilter;
 @Singleton
 public class PackFilter extends ExceptionHandleFilter {
 	
-	private final AccessTokenService accessTokenService;
-	
-	private final ProjectService projectService;
-	
-	private final JobService jobService;
-	
-	private final SessionService sessionService;
-
-	private final Set<PackService> packServices;
+	@Inject
+	private AccessTokenService accessTokenService;
 	
 	@Inject
-	public PackFilter(AccessTokenService accessTokenService, ProjectService projectService,
-                      JobService jobService, SessionService sessionService,
-                      Set<PackService> packServices) {
-		this.accessTokenService = accessTokenService;
-		this.projectService = projectService;
-		this.jobService = jobService;
-		this.sessionService = sessionService;
-		this.packServices = packServices;
-	}
+	private ProjectService projectService;
 	
+	@Inject
+	private JobService jobService;
+	
+	@Inject
+	private SessionService sessionService;
+
+	@Inject
+	private Set<PackHandler> packHandlers;
+		
 	@Sessional
     @Override
 	protected boolean onPreHandle(ServletRequest request, ServletResponse response, Object mappedValue) {
@@ -61,13 +55,13 @@ public class PackFilter extends ExceptionHandleFilter {
 		var httpResponse = (HttpServletResponse) response;
 		var pathSegments = Splitter.on('/').trimResults().omitEmptyStrings()
 				.splitToList(httpRequest.getRequestURI());
-		for (var packService: packServices) {
-			var serviceMark = "~" + packService.getServiceId();
-			if (pathSegments.contains(serviceMark)) {
-				pathSegments = packService.normalize(pathSegments);
-				var serviceMarkIndex = pathSegments.indexOf(serviceMark);
+		for (var packHandler: packHandlers) {
+			var handlerMark = "~" + packHandler.getHandlerId();
+			if (pathSegments.contains(handlerMark)) {
+				pathSegments = packHandler.normalize(pathSegments);
+				var handlerMarkIndex = pathSegments.indexOf(handlerMark);
 				request.setAttribute(DefaultSubjectContext.SESSION_CREATION_ENABLED, Boolean.FALSE);
-				var projectPath = Joiner.on('/').join(pathSegments.subList(0, serviceMarkIndex));
+				var projectPath = Joiner.on('/').join(pathSegments.subList(0, handlerMarkIndex));
 				var projectId = sessionService.call(() -> {
 					var project = projectService.findByPath(projectPath);
 					if (project != null)
@@ -77,7 +71,7 @@ public class PackFilter extends ExceptionHandleFilter {
 				});
 
 				Long buildId = null;
-				var apiKey = packService.getApiKey(httpRequest);
+				var apiKey = packHandler.getApiKey(httpRequest);
 				if (apiKey != null) {
 					var colonIndex = apiKey.indexOf(':');
 					String jobToken;
@@ -121,8 +115,8 @@ public class PackFilter extends ExceptionHandleFilter {
 					}
 				}
 				
-				packService.service(httpRequest, httpResponse, projectId, buildId,
-						pathSegments.subList(serviceMarkIndex + 1, pathSegments.size()));
+				packHandler.handle(httpRequest, httpResponse, projectId, buildId,
+						pathSegments.subList(handlerMarkIndex + 1, pathSegments.size()));
 				return false;
 			}
 		}

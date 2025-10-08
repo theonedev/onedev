@@ -41,7 +41,7 @@ public class PypiPackPanel extends GenericPanel<Pack> {
 			throw new RuntimeException(e);
 		}
 		var indexUrl = protocol + "://<OneDev_account_name>:<OneDev_password>@" + UrlUtils.getServer(serverUrl) 
-				+ "/" + getPack().getProject().getPath() + "/~" + PypiPackService.SERVICE_ID + "/simple/";
+				+ "/" + getPack().getProject().getPath() + "/~" + PypiPackHandler.HANDLER_ID + "/simple/";
 		var installCmd = "$ python3 -m pip install --extra-index-url " + indexUrl;
 		if (protocol.equals("http"))
 			installCmd += " --trusted-host " + host;
@@ -49,7 +49,7 @@ public class PypiPackPanel extends GenericPanel<Pack> {
 		add(new Label("install", installCmd));
 
 		indexUrl = protocol + "://@job_token@:@secret:access-token@@@" + UrlUtils.getServer(serverUrl)
-				+ "/" + getPack().getProject().getPath() + "/~" + PypiPackService.SERVICE_ID + "/simple/";
+				+ "/" + getPack().getProject().getPath() + "/~" + PypiPackHandler.HANDLER_ID + "/simple/";
 		var jobCommands = "" +
 				"# " + _T("Use job token to tell OneDev the build using the package") + "\n" +
 				"# " + _T("Job secret 'access-token' should be defined in project build setting as an access token with package read permission") + "\n\n" +

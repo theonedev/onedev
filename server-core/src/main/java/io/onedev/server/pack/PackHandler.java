@@ -8,11 +8,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @ExtensionPoint
-public interface PackService {
+public interface PackHandler {
 
-	String getServiceId();
+	String getHandlerId();
 	
-	void service(HttpServletRequest request, HttpServletResponse response,
+	void handle(HttpServletRequest request, HttpServletResponse response,
 				 Long projectId, @Nullable Long buildId, List<String> pathSegments);
 
 	@Nullable

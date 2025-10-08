@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-import static io.onedev.server.plugin.pack.nuget.NugetPackService.SERVICE_ID;
+import static io.onedev.server.plugin.pack.nuget.NugetPackHandler.HANDLER_ID;
 import static io.onedev.server.web.translation.Translation._T;
 
 public class NugetHelpPanel extends Panel {
@@ -23,7 +23,7 @@ public class NugetHelpPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var registryUrl = getServerUrl() + "/" + projectPath + "/~" + SERVICE_ID + "/index.json";
+		var registryUrl = getServerUrl() + "/" + projectPath + "/~" + HANDLER_ID + "/index.json";
 		add(new CodeSnippetPanel("addSource", Model.of("$ dotnet nuget add source --name onedev --username <onedev_account_name> --password <onedev_account_password> --store-password-in-clear-text " + registryUrl)));
 
 		add(new CodeSnippetPanel("pushCommand", Model.of("$ dotnet nuget push -s onedev /path/to/<PackageId>.<PackageVersion>.nupkg")));

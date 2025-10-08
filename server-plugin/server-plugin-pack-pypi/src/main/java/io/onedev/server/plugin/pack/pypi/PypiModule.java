@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.pack.pypi;
 
 import io.onedev.commons.loader.AbstractPluginModule;
-import io.onedev.server.pack.PackService;
+import io.onedev.server.pack.PackHandler;
 import io.onedev.server.pack.PackSupport;
 
 /**
@@ -14,8 +14,8 @@ public class PypiModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 
-		bind(PypiPackService.class);
-		contribute(PackService.class, PypiPackService.class);
+		bind(PypiPackHandler.class);
+		contribute(PackHandler.class, PypiPackHandler.class);
 		contribute(PackSupport.class, new PypiPackSupport());
 	}
 

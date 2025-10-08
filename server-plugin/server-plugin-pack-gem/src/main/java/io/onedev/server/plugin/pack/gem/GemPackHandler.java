@@ -4,6 +4,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.pack.PackHandler;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.service.PackBlobService;
 import io.onedev.server.service.PackService;
@@ -56,9 +57,8 @@ import static java.util.stream.Collectors.toList;
 import static javax.servlet.http.HttpServletResponse.*;
 
 @Singleton
-public class GemPackService implements io.onedev.server.pack.PackService {
-	
-	public static final String SERVICE_ID = "rubygems";
+public class GemPackHandler implements PackHandler {
+	public static final String HANDLER_ID = "rubygems";
 	
 	private static final int MAX_METADATA_SIZE = 10000000;
 	
@@ -75,7 +75,7 @@ public class GemPackService implements io.onedev.server.pack.PackService {
 	private final BuildService buildService;
 	
 	@Inject
-	public GemPackService(SessionService sessionService, TransactionService transactionService,
+	public GemPackHandler(SessionService sessionService, TransactionService transactionService,
                           PackBlobService packBlobService, PackService packService,
                           ProjectService projectService, BuildService buildService) {
 		this.sessionService = sessionService;
@@ -87,8 +87,8 @@ public class GemPackService implements io.onedev.server.pack.PackService {
 	}
 	
 	@Override
-	public String getServiceId() {
-		return SERVICE_ID;
+	public String getHandlerId() {
+		return HANDLER_ID;
 	}
 
 	private String getLockName(Long projectId, String name) {
@@ -97,7 +97,7 @@ public class GemPackService implements io.onedev.server.pack.PackService {
 	
 	@SuppressWarnings("deprecation")
 	@Override
-	public void service(HttpServletRequest request, HttpServletResponse response, Long projectId, 
+	public void handle(HttpServletRequest request, HttpServletResponse response, Long projectId, 
 						Long buildId, List<String> pathSegments) {
 		var method = request.getMethod();
 		

@@ -22,7 +22,7 @@ public class HelmHelpPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var registryUrl = getServerUrl() + "/" + projectPath + "/~" + HelmPackService.SERVICE_ID;
+		var registryUrl = getServerUrl() + "/" + projectPath + "/~" + HelmPackHandler.HANDLER_ID;
 		add(new CodeSnippetPanel("pushChart", Model.of("$ curl -u <onedev_account_name>:<onedev_password_or_access_token> -X POST --upload-file /path/to/chart.tgz " + registryUrl)));
 		
 		add(new CodeSnippetPanel("jobCommands", Model.of("" +

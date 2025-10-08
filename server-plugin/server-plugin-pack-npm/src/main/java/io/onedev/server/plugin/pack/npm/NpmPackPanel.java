@@ -28,7 +28,7 @@ public class NpmPackPanel extends GenericPanel<Pack> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		var registryUrl = getServerUrl() + "/" + getPack().getProject().getPath() + "/~" + NpmPackService.SERVICE_ID + "/";
+		var registryUrl = getServerUrl() + "/" + getPack().getProject().getPath() + "/~" + NpmPackHandler.HANDLER_ID + "/";
 		if (getPack().getName().contains("/")) {
 			var scope = substringBefore(getPack().getName(), "/");
 			add(new Label("registryConfig", "$ npm config set " + scope + ":registry " + registryUrl));

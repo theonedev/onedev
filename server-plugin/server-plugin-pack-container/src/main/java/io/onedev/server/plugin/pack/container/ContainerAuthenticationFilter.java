@@ -64,10 +64,15 @@ public class ContainerAuthenticationFilter extends ExceptionHandleFilter {
 				}
 			} else if (authHeader.toLowerCase().startsWith("bearer ")) {
 				var authValue = substringAfter(authHeader, " ");
-				var jobContext = jobService.getJobContext(substringBefore(authValue, ":"), false);
-				if (jobContext != null)
-					request.setAttribute(ATTR_BUILD_ID, jobContext.getBuildId());
-				var bearerToken = substringAfter(authValue, ":");
+				String bearerToken;
+				if (authValue.contains(":")) {
+					var jobContext = jobService.getJobContext(substringBefore(authValue, ":"), false);
+					if (jobContext != null)
+						request.setAttribute(ATTR_BUILD_ID, jobContext.getBuildId());
+					bearerToken = substringAfter(authValue, ":");
+				} else {
+					bearerToken = authValue;
+				}
 				var accessToken = accessTokenService.findByValue(bearerToken);
 				// Do not throw IncorrectCredentialException if no access token found 
 				// as the bearer token can be a faked token for anonymous access

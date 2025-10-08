@@ -1,6 +1,6 @@
 package io.onedev.server.plugin.pack.maven;
 
-import static io.onedev.server.plugin.pack.maven.MavenPackService.NONE;
+import static io.onedev.server.plugin.pack.maven.MavenPackHandler.NONE;
 import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 

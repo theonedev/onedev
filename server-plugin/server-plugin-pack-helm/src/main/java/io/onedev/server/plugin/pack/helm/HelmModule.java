@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.pack.helm;
 
 import io.onedev.commons.loader.AbstractPluginModule;
-import io.onedev.server.pack.PackService;
+import io.onedev.server.pack.PackHandler;
 import io.onedev.server.pack.PackSupport;
 
 /**
@@ -14,8 +14,8 @@ public class HelmModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 
-		bind(HelmPackService.class);
-		contribute(PackService.class, HelmPackService.class);
+		bind(HelmPackHandler.class);
+		contribute(PackHandler.class, HelmPackHandler.class);
 		contribute(PackSupport.class, new HelmPackSupport());
 	}
 

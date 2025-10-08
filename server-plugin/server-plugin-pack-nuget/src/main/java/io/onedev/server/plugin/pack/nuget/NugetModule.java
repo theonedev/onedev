@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.pack.nuget;
 
 import io.onedev.commons.loader.AbstractPluginModule;
-import io.onedev.server.pack.PackService;
+import io.onedev.server.pack.PackHandler;
 import io.onedev.server.pack.PackSupport;
 
 /**
@@ -14,8 +14,8 @@ public class NugetModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 
-		bind(NugetPackService.class);
-		contribute(PackService.class, NugetPackService.class);
+		bind(NugetPackHandler.class);
+		contribute(PackHandler.class, NugetPackHandler.class);
 		contribute(PackSupport.class, new NugetPackSupport());
 	}
 
