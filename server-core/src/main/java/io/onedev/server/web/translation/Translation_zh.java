@@ -30,7 +30,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"'two factor authentication' should be translated to '两阶段验证'\n" + 
 			"Space should be added between English words and Chinese words\n" + 
 			"'SSO provider' should be translated as SSO 提供方\n" + 
-			"'post build' should be translated as 构建后")
+			"'post build' should be translated as 构建后\n" + 
+			"'artifact' should be translated as 制品")
 	public static void init(Map<String, String> m) {
 		m.clear();
 		m.put(" Project path can be omitted if reference from current project", "如果从当前项目引用，则可以省略项目路径");
@@ -1902,10 +1903,11 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Low Severity", "轻微");
 		m.put("MERGED", "已合并");
 		m.put("MS Teams Notifications", "MS Teams 通知");
+		m.put("Mail", "邮件");
+		m.put("Mail Connector", "邮件连接器");
+		m.put("Mail Connector Bean", "邮件连接器 Bean");
 		m.put("Mail Service", "邮件服务");
-		m.put("Mail Service Bean", "邮件服务Bean");
 		m.put("Mail Service Test", "邮件服务测试");
-		m.put("Mail service", "邮件服务");
 		m.put("Mail service not configured", "邮件服务未配置");
 		m.put("Mail service settings saved", "邮件服务设置已保存");
 		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 11 or higher</a> is installed", 
@@ -2081,7 +2083,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No any", "无任何");
 		m.put("No any matches", "没有任何匹配项");
 		m.put("No applicable transitions or no permission to transit", "没有适用的转换或没有权限转换");
-		m.put("No artifacts published", "没有发布制品");
 		m.put("No attributes defined (can only be edited when agent is online)", "没有定义属性（仅当代理在线时可编辑）");
 		m.put("No audits", "无审计记录");
 		m.put("No authorized job secret found (project: {0}, job secret: {1})", "未找到授权的任务密钥（项目：{0}，任务密钥：{1}）");
@@ -3207,6 +3208,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Set Up Your Account", "设置您的账户");
 		m.put("Set as Private", "设为私有");
 		m.put("Set as Public", "设为公开");
+		m.put("Set description", "设置描述");
 		m.put("Set reviewed", "设置为已审阅");
 		m.put("Set unreviewed", "设置为未审阅");
 		m.put("Set up Microsoft Teams notification settings. Settings will be inherited by child projects, and can be overridden by defining settings with same webhook url. ", 
@@ -4621,6 +4623,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
+		m.put("Upload artifacts", "上传制品");
 	}
 		
 	@Override

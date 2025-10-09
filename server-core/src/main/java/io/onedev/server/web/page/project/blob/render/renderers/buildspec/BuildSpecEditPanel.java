@@ -106,7 +106,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 	private void resizeWindow(AjaxRequestTarget target) {
 		((BasePage)getPage()).resizeWindow(target);
 	}
-	
+			
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

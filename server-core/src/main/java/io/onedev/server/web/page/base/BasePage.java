@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.servlet.http.Cookie;
 
@@ -53,6 +52,7 @@ import org.apache.wicket.util.time.Duration;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.jspecify.annotations.Nullable;
 import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -65,6 +65,7 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.commandhandler.Upgrade;
+import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AuditService;
@@ -82,8 +83,8 @@ import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.serverinit.ServerInitPage;
 import io.onedev.server.web.page.simple.SimplePage;
 import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.web.websocket.WebSocketService;
 import io.onedev.server.web.websocket.WebSocketMessages;
+import io.onedev.server.web.websocket.WebSocketService;
 
 public abstract class BasePage extends WebPage {
 
@@ -104,6 +105,9 @@ public abstract class BasePage extends WebPage {
 
 	@Inject
 	protected AuditService auditService;
+
+	@Inject
+	protected ListenerRegistry listenerRegistry;
 	
 	public BasePage(PageParameters params) {
 		super(params);

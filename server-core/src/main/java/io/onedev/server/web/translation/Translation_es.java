@@ -1886,10 +1886,11 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Low Severity", "Severidad Baja");
 		m.put("MERGED", "FUSIONADO");
 		m.put("MS Teams Notifications", "Notificaciones de MS Teams");
+		m.put("Mail", "Correo");
+		m.put("Mail Connector", "Conector de Correo");
+		m.put("Mail Connector Bean", "Bean de Conector de Correo");
 		m.put("Mail Service", "Servicio de Correo");
-		m.put("Mail Service Bean", "Bean del Servicio de Correo");
 		m.put("Mail Service Test", "Prueba del Servicio de Correo");
-		m.put("Mail service", "Servicio de correo");
 		m.put("Mail service not configured", "Servicio de correo no configurado");
 		m.put("Mail service settings saved", "Configuraciones del servicio de correo guardadas");
 		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 11 or higher</a> is installed", 
@@ -2065,7 +2066,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("No any", "No hay ninguno");
 		m.put("No any matches", "No hay coincidencias");
 		m.put("No applicable transitions or no permission to transit", "No hay transiciones aplicables o no hay permiso para transitar");
-		m.put("No artifacts published", "No se publicaron artefactos");
 		m.put("No attributes defined (can only be edited when agent is online)", "No hay atributos definidos (solo se pueden editar cuando el agente está en línea)");
 		m.put("No audits", "Sin auditorías");
 		m.put("No authorized job secret found (project: {0}, job secret: {1})", "No se encontró un secreto de trabajo autorizado (proyecto: {0}, secreto de trabajo: {1})");
@@ -3191,6 +3191,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Set Up Your Account", "Configure su cuenta");
 		m.put("Set as Private", "Establecer como privado");
 		m.put("Set as Public", "Establecer como público");
+		m.put("Set description", "Establecer descripción");
 		m.put("Set reviewed", "Marcar como revisado");
 		m.put("Set unreviewed", "Marcar como no revisado");
 		m.put("Set up Microsoft Teams notification settings. Settings will be inherited by child projects, and can be overridden by defining settings with same webhook url. ", 
@@ -4129,6 +4130,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Upload Strategy", "Estrategia de subida");
 		m.put("Upload a 128x128 transparent png file to be used as logo for dark mode", "Subir un archivo PNG transparente de 128x128 para usar como logo en modo oscuro");
 		m.put("Upload a 128x128 transparent png file to be used as logo for light mode", "Subir un archivo PNG transparente de 128x128 para usar como logo en modo claro");
+		m.put("Upload artifacts", "Subir artefactos");
 		m.put("Upload avatar", "Subir avatar");
 		m.put("Upload should be less than {0} Mb", "La subida debe ser menor a {0} Mb");
 		m.put("Upload to Project", "Subir al proyecto");

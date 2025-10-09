@@ -1886,10 +1886,11 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Low Severity", "낮은 심각도");
 		m.put("MERGED", "병합됨");
 		m.put("MS Teams Notifications", "MS Teams 알림");
+		m.put("Mail", "메일");
+		m.put("Mail Connector", "메일 커넥터");
+		m.put("Mail Connector Bean", "메일 커넥터 빈");
 		m.put("Mail Service", "메일 서비스");
-		m.put("Mail Service Bean", "메일 서비스 빈");
 		m.put("Mail Service Test", "메일 서비스 테스트");
-		m.put("Mail service", "메일 서비스");
 		m.put("Mail service not configured", "메일 서비스가 구성되지 않음");
 		m.put("Mail service settings saved", "메일 서비스 설정이 저장됨");
 		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 11 or higher</a> is installed", 
@@ -2065,7 +2066,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No any", "없음");
 		m.put("No any matches", "일치하는 항목이 없습니다");
 		m.put("No applicable transitions or no permission to transit", "적용 가능한 전환 없음 또는 전환 권한 없음");
-		m.put("No artifacts published", "게시된 아티팩트 없음");
 		m.put("No attributes defined (can only be edited when agent is online)", "정의된 속성 없음 (에이전트가 온라인 상태일 때만 편집 가능)");
 		m.put("No audits", "감사 없음");
 		m.put("No authorized job secret found (project: {0}, job secret: {1})", "승인된 작업 비밀 없음 (프로젝트: {0}, 작업 비밀: {1})");
@@ -3191,6 +3191,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Set Up Your Account", "계정을 설정하세요");
 		m.put("Set as Private", "비공개로 설정");
 		m.put("Set as Public", "공개로 설정");
+		m.put("Set description", "설명 설정");
 		m.put("Set reviewed", "검토됨으로 설정");
 		m.put("Set unreviewed", "미검토로 설정");
 		m.put("Set up Microsoft Teams notification settings. Settings will be inherited by child projects, and can be overridden by defining settings with same webhook url. ", 
@@ -4129,6 +4130,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Upload Strategy", "업로드 전략");
 		m.put("Upload a 128x128 transparent png file to be used as logo for dark mode", "다크 모드 로고로 사용하기 위해 128x128 투명 png 파일 업로드");
 		m.put("Upload a 128x128 transparent png file to be used as logo for light mode", "라이트 모드 로고로 사용하기 위해 128x128 투명 png 파일 업로드");
+		m.put("Upload artifacts", "아티팩트 업로드");
 		m.put("Upload avatar", "아바타 업로드");
 		m.put("Upload should be less than {0} Mb", "업로드는 {0} Mb보다 작아야 합니다");
 		m.put("Upload to Project", "프로젝트로 업로드");

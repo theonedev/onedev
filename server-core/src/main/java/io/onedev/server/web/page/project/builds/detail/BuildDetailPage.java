@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
+import javax.inject.Inject;
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,14 +38,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.BuildService;
+import io.onedev.server.event.project.build.BuildUpdated;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.job.JobAuthorizationContextAware;
 import io.onedev.server.job.JobContext;
@@ -56,27 +56,30 @@ import io.onedev.server.pack.PackSupport;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.terminal.TerminalService;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.comment.CommentPanel;
-import io.onedev.server.web.component.comment.ReactionSupport;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.joblist.JobListPanel;
 import io.onedev.server.web.component.link.BuildSpecLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.markdown.ContentVersionSupport;
+import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.modal.message.MessageModal;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
@@ -91,13 +94,27 @@ import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
-import io.onedev.server.web.util.DeleteCallback;
 
 public abstract class BuildDetailPage extends ProjectPage 
 		implements InputContext, BuildAware, JobAuthorizationContextAware {
 
 	public static final String PARAM_BUILD = "build";
 	
+	@Inject
+	protected BuildService buildService;
+
+	@Inject
+	protected JobService jobService;
+
+	@Inject
+	protected TerminalService terminalService;
+
+	@Inject
+	private Set<PackSupport> packSupports;
+
+	@Inject
+	private Set<BuildTabContribution> buildTabContributions;
+
 	protected final IModel<Build> buildModel;
 	
 	private final IModel<List<Job>> promotionsModel = new LoadableDetachableModel<List<Job>>() {
@@ -137,7 +154,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			@Override
 			protected Build load() {
 				Long buildNumber = params.get(PARAM_BUILD).toLong();
-				Build build = OneDev.getInstance(BuildService.class).find(getProject(), buildNumber);
+				Build build = buildService.find(getProject(), buildNumber);
 				if (build == null)
 					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find build #{0} in project {1}"), buildNumber, getProject()));
 				else if (!build.getProject().equals(getProject()))
@@ -251,7 +268,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 					private void resubmit(Serializable paramBean) {
 						var user = SecurityUtils.getUser();
-						OneDev.getInstance(JobService.class).resubmit(user, getBuild(), _T("Resubmitted manually"));
+						jobService.resubmit(user, getBuild(), _T("Resubmitted manually"));
 						setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild()));
 					}
 
@@ -280,7 +297,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						OneDev.getInstance(JobService.class).cancel(getBuild());
+						jobService.cancel(getBuild());
 						getSession().success(_T("Cancel request submitted"));
 					}
 
@@ -294,15 +311,11 @@ public abstract class BuildDetailPage extends ProjectPage
 
 				add(new AjaxLink<Void>("terminal") {
 
-					private TerminalService getTerminalService() {
-						return OneDev.getInstance(TerminalService.class);
-					}
-
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						if (isSubscriptionActive()) {
 							target.appendJavaScript(String.format("onedev.server.buildDetail.openTerminal('%s');",
-									getTerminalService().getTerminalUrl(getBuild())));
+									terminalService.getTerminalUrl(getBuild())));
 						} else {
 							new MessageModal(target) {
 
@@ -318,7 +331,6 @@ public abstract class BuildDetailPage extends ProjectPage
 					protected void onConfigure() {
 						super.onConfigure();
 
-						JobService jobService = OneDev.getInstance(JobService.class);
 						JobContext jobContext = jobService.getJobContext(getBuild().getId());
 						setVisible(jobContext!= null && SecurityUtils.canOpenTerminal(getBuild()));
 					}
@@ -357,6 +369,68 @@ public abstract class BuildDetailPage extends ProjectPage
 					}
 
 				});
+
+				add(new AjaxLink<Void>("setDescription") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						DescriptionBean bean = new DescriptionBean();
+						bean.setValue(getBuild().getDescription());
+						new BeanEditModalPanel<Serializable>(target, bean) {
+
+							@Override
+							protected String onSave(AjaxRequestTarget target, Serializable bean) {
+								getBuild().setDescription(((DescriptionBean)bean).getValue());
+								buildService.update(getBuild());
+								listenerRegistry.post(new BuildUpdated(getBuild()));
+								((BasePage)getPage()).notifyObservablesChange(target, getBuild().getChangeObservables());
+								close();
+								return null;
+							}
+
+						};
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(SecurityUtils.canManageBuild(getBuild()) && getBuild().isFinished());
+					}
+
+				});
+
+				add(new ModalLink("uploadArtifacts") {
+
+					@Override
+					protected Component newContent(String id, ModalPanel modal) {
+						return new ArtifactUploadPanel(id) {
+							
+							@Override
+							public void onUploaded(AjaxRequestTarget target) {
+								setResponsePage(BuildArtifactsPage.class, BuildArtifactsPage.paramsOf(getBuild()));
+							}
+							
+							@Override
+							public void onCancel(AjaxRequestTarget target) {
+								modal.close();
+							}
+							
+							@Override
+							protected Build getBuild() {
+								return BuildDetailPage.this.getBuild();
+							}
+							
+						};
+					}
+		
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(SecurityUtils.canManageBuild(getBuild()) && getBuild().isSuccessful());
+					}
+
+				});
+
 				add(newBuildObserver(getBuild().getId()));
 			}
 		});
@@ -406,81 +480,32 @@ public abstract class BuildDetailPage extends ProjectPage
 		
 		add(jobNotFoundContainer);
 		
-		add(new CommentPanel("description") {
-			
+		add(new MarkdownViewer("description", new AbstractReadOnlyModel<>() {
+
 			@Override
-			protected String getComment() {
+			public String getObject() {
 				return getBuild().getDescription();
 			}
 
-			@Override
-			protected void onSaveComment(AjaxRequestTarget target, String comment) {
-				getBuild().setDescription(comment);
-				OneDev.getInstance(BuildService.class).update(getBuild());
-			}
-			
-			@Override
-			protected Project getProject() {
-				return getBuild().getProject();
-			}
+		}, null) {
 
-			@Override
-			protected AttachmentSupport getAttachmentSupport() {
-				return null;
-			}
-
-			@Override
-			protected boolean canManageComment() {
-				return SecurityUtils.canManageBuild(getBuild());
-			}
-
-			@Override
-			protected String getRequiredLabel() {
-				return null;
-			}
-
-			@Override
-			protected String getEmptyDescription() {
-				return _T("No description");
-			}
-
-			@Override
-			protected ContentVersionSupport getContentVersionSupport() {
-				return null;
-			}
-
-			@Override
-			protected DeleteCallback getDeleteCallback() {
-				return null;
-			}
-
-			@Override
-			protected String getAutosaveKey() {
-				return "build:" + getBuild().getId() + ":description";
-			}
-
-			@Override
-			protected ReactionSupport getReactionSupport() {
-				return null;
-			}
-
-			@Override
-			protected boolean isQuoteEnabled() {
-				return false;
-			}
-			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getBuild().getDescription() != null || SecurityUtils.canManageBuild(getBuild()));
+				setVisible(getBuild().getDescription() != null);
 			}
-		});
+			
+		}.setOutputMarkupPlaceholderTag(true).add(newBuildObserver(getBuild().getId())));
 
 		add(new Tabbable("buildTabs", new LoadableDetachableModel<>() {
 
 			@Override
 			protected List<Tab> load() {
 				List<Tab> tabs = new ArrayList<>();
+
+				if (getBuild().getRootArtifacts().size() != 0) {
+					tabs.add(new BuildTab(Model.of(_T("Artifacts")), BuildArtifactsPage.class, BuildArtifactsPage.paramsOf(getBuild())));
+				}
 
 				if (SecurityUtils.canAccessLog(getBuild())) {
 					tabs.add(new BuildTab(Model.of(_T("Log")), BuildLogPage.class, BuildLogPage.paramsOf(getBuild())) {
@@ -497,13 +522,9 @@ public abstract class BuildDetailPage extends ProjectPage
 				if (SecurityUtils.canAccessPipeline(getBuild())) 
 					tabs.add(new BuildTab(Model.of(_T("Pipeline")), BuildPipelinePage.class, BuildPipelinePage.paramsOf(getBuild())));
 				
-				if (SecurityUtils.canManageBuild(getBuild()) || getBuild().getRootArtifacts().size() != 0) {
-					tabs.add(new BuildTab(Model.of(_T("Artifacts")), BuildArtifactsPage.class, BuildArtifactsPage.paramsOf(getBuild())));
-				}
-
-				var packSupports = new ArrayList<>(OneDev.getExtensions(PackSupport.class));
-				packSupports.sort(Comparator.comparing(PackSupport::getOrder));
-				for (var packSupport: packSupports) {
+				var packSupportList = new ArrayList<>(packSupports);
+				packSupportList.sort(Comparator.comparing(PackSupport::getOrder));
+				for (var packSupport: packSupportList) {
 					var packType = packSupport.getPackType();
 					if (getBuild().getPacks().stream().anyMatch(it -> it.getType().equals(packType) && SecurityUtils.canReadPack(it.getProject()))) {
 						tabs.add(new BuildTab(Model.of(packSupport.getPackType()), Model.of(packSupport.getPackIcon()), BuildPacksPage.class, BuildPacksPage.paramsOf(getBuild(), packType)) {
@@ -530,10 +551,10 @@ public abstract class BuildDetailPage extends ProjectPage
 				if (SecurityUtils.canReadCode(getProject()))
 					tabs.add(new BuildTab(Model.of(_T("Code Changes")), BuildChangesPage.class, BuildChangesPage.paramsOf(getBuild())));
 
-				List<BuildTabContribution> contributions = new ArrayList<>(OneDev.getExtensions(BuildTabContribution.class));
-				contributions.sort(Comparator.comparing(BuildTabContribution::getOrder));
+				List<BuildTabContribution> contributionList = new ArrayList<>(buildTabContributions);
+				contributionList.sort(Comparator.comparing(BuildTabContribution::getOrder));
 
-				for (BuildTabContribution contribution : contributions)
+				for (BuildTabContribution contribution : contributionList)
 					tabs.addAll(contribution.getTabs(getBuild()));
 
 				return tabs;
@@ -567,7 +588,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 							@Override
 							public void onClick() {
-								OneDev.getInstance(BuildService.class).delete(getBuild());
+								buildService.delete(getBuild());
 								var oldAuditContent = VersionedXmlDoc.fromBean(getBuild()).toXML();
 								auditService.audit(getBuild().getProject(), "deleted build \"" + getBuild().getReference().toString(getBuild().getProject()) + "\"", oldAuditContent, null);
 								
@@ -602,7 +623,6 @@ public abstract class BuildDetailPage extends ProjectPage
 
 					@Override
 					protected List<Build> query(EntityQuery<Build> query, int offset, int count, ProjectScope projectScope) {
-						BuildService buildService = OneDev.getInstance(BuildService.class);
 						var subject = SecurityUtils.getSubject();
 						return buildService.query(subject, projectScope!=null?projectScope.getProject():null, query, false, offset, count);
 					}

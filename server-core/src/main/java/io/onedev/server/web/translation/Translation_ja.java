@@ -1886,10 +1886,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Low Severity", "低い重大度");
 		m.put("MERGED", "マージ済み");
 		m.put("MS Teams Notifications", "MS Teams通知");
+		m.put("Mail", "メール");
+		m.put("Mail Connector", "メールコネクタ");
+		m.put("Mail Connector Bean", "メールコネクタビーン");
 		m.put("Mail Service", "メールサービス");
-		m.put("Mail Service Bean", "メールサービスBean");
 		m.put("Mail Service Test", "メールサービステスト");
-		m.put("Mail service", "メールサービス");
 		m.put("Mail service not configured", "メールサービスが構成されていません");
 		m.put("Mail service settings saved", "メールサービス設定が保存されました");
 		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 11 or higher</a> is installed", 
@@ -2065,7 +2066,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No any", "何もなし");
 		m.put("No any matches", "一致するものがありません");
 		m.put("No applicable transitions or no permission to transit", "適用可能な遷移がないか、遷移する権限がありません");
-		m.put("No artifacts published", "公開されたアーティファクトなし");
 		m.put("No attributes defined (can only be edited when agent is online)", "定義された属性なし（エージェントがオンラインの場合のみ編集可能）");
 		m.put("No audits", "監査なし");
 		m.put("No authorized job secret found (project: {0}, job secret: {1})", "認証済みのジョブシークレットが見つかりません（プロジェクト: {0}, ジョブシークレット: {1}）");
@@ -3191,6 +3191,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Set Up Your Account", "アカウントを設定する");
 		m.put("Set as Private", "非公開として設定");
 		m.put("Set as Public", "公開として設定");
+		m.put("Set description", "説明を設定");
 		m.put("Set reviewed", "レビュー済みとして設定");
 		m.put("Set unreviewed", "未レビューとして設定");
 		m.put("Set up Microsoft Teams notification settings. Settings will be inherited by child projects, and can be overridden by defining settings with same webhook url. ", 
@@ -4129,6 +4130,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Upload Strategy", "アップロード戦略");
 		m.put("Upload a 128x128 transparent png file to be used as logo for dark mode", "ダークモード用のロゴとして使用する128x128の透明なPNGファイルをアップロード");
 		m.put("Upload a 128x128 transparent png file to be used as logo for light mode", "ライトモード用のロゴとして使用する128x128の透明なPNGファイルをアップロード");
+		m.put("Upload artifacts", "アーティファクトをアップロード");
 		m.put("Upload avatar", "アバターをアップロード");
 		m.put("Upload should be less than {0} Mb", "アップロードは{0}MB未満である必要があります");
 		m.put("Upload to Project", "プロジェクトにアップロード");

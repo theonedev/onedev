@@ -1886,10 +1886,11 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Low Severity", "Baixa Severidade");
 		m.put("MERGED", "FUNDIDO");
 		m.put("MS Teams Notifications", "Notificações do MS Teams");
+		m.put("Mail", "Correio");
+		m.put("Mail Connector", "Conector de Correio");
+		m.put("Mail Connector Bean", "Bean do Conector de Correio");
 		m.put("Mail Service", "Serviço de Email");
-		m.put("Mail Service Bean", "Bean do Serviço de Email");
 		m.put("Mail Service Test", "Teste do Serviço de Email");
-		m.put("Mail service", "Serviço de email");
 		m.put("Mail service not configured", "Serviço de email não configurado");
 		m.put("Mail service settings saved", "Configurações do serviço de email salvas");
 		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 11 or higher</a> is installed", 
@@ -2065,7 +2066,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("No any", "Nenhum");
 		m.put("No any matches", "Nenhuma correspondência");
 		m.put("No applicable transitions or no permission to transit", "Sem transições aplicáveis ou sem permissão para transitar");
-		m.put("No artifacts published", "Sem artefatos publicados");
 		m.put("No attributes defined (can only be edited when agent is online)", "Sem atributos definidos (só podem ser editados quando o agente está online)");
 		m.put("No audits", "Sem auditorias");
 		m.put("No authorized job secret found (project: {0}, job secret: {1})", "Nenhum segredo de trabalho autorizado encontrado (projeto: {0}, segredo de trabalho: {1})");
@@ -3191,6 +3191,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Set Up Your Account", "Configure Sua Conta");
 		m.put("Set as Private", "Definir como Privado");
 		m.put("Set as Public", "Definir como Público");
+		m.put("Set description", "Definir descrição");
 		m.put("Set reviewed", "Definir como Revisado");
 		m.put("Set unreviewed", "Definir como Não Revisado");
 		m.put("Set up Microsoft Teams notification settings. Settings will be inherited by child projects, and can be overridden by defining settings with same webhook url. ", 
@@ -4129,6 +4130,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Upload Strategy", "Estratégia de Envio");
 		m.put("Upload a 128x128 transparent png file to be used as logo for dark mode", "Envie um arquivo PNG transparente 128x128 para ser usado como logotipo no modo escuro");
 		m.put("Upload a 128x128 transparent png file to be used as logo for light mode", "Envie um arquivo PNG transparente 128x128 para ser usado como logotipo no modo claro");
+		m.put("Upload artifacts", "Carregar artefatos");
 		m.put("Upload avatar", "Enviar avatar");
 		m.put("Upload should be less than {0} Mb", "O envio deve ser menor que {0} Mb");
 		m.put("Upload to Project", "Enviar para o Projeto");

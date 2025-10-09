@@ -1,23 +1,12 @@
 package io.onedev.server.web.page.project.builds.detail.artifacts;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.model.Build;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ChildrenAggregator;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.Pair;
-import io.onedev.server.util.artifact.ArtifactInfo;
-import io.onedev.server.util.artifact.DirectoryInfo;
-import io.onedev.server.util.artifact.FileInfo;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.NoRecordsBehavior;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
-import io.onedev.server.web.resource.ArtifactResource;
-import io.onedev.server.web.resource.ArtifactResourceReference;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -45,12 +34,20 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ChildrenAggregator;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.Pair;
+import io.onedev.server.util.artifact.ArtifactInfo;
+import io.onedev.server.util.artifact.DirectoryInfo;
+import io.onedev.server.util.artifact.FileInfo;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
+import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
+import io.onedev.server.web.resource.ArtifactResource;
+import io.onedev.server.web.resource.ArtifactResourceReference;
 
 public class BuildArtifactsPage extends BuildDetailPage {
 
@@ -61,39 +58,6 @@ public class BuildArtifactsPage extends BuildDetailPage {
 	@Override
 	public void onInitialize() {
 		super.onInitialize();
-		
-		add(new ModalLink("upload") {
-
-			@Override
-			protected Component newContent(String id, ModalPanel modal) {
-				return new ArtifactUploadPanel(id) {
-					
-					@Override
-					public void onUploaded(AjaxRequestTarget target) {
-						updateArtifacts(target);
-						modal.close();
-					}
-					
-					@Override
-					public void onCancel(AjaxRequestTarget target) {
-						modal.close();
-					}
-					
-					@Override
-					protected Build getBuild() {
-						return BuildArtifactsPage.this.getBuild();
-					}
-					
-				};
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canManageBuild(getBuild()));
-			}
-
-		});
 		
 		List<IColumn<Pair<String, ArtifactInfo>, Void>> columns = new ArrayList<>();
 		
@@ -142,8 +106,11 @@ public class BuildArtifactsPage extends BuildDetailPage {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							getBuildService().deleteArtifact(getBuild(), rowModel.getObject().getRight().getPath());
-							updateArtifacts(target);
+							buildService.deleteArtifact(getBuild(), rowModel.getObject().getRight().getPath());
+							if (getBuild().getRootArtifacts().size() != 0)
+								updateArtifacts(target);
+							else
+								setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild()));
 						}
 
 					};
@@ -164,7 +131,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 						if (directoryNode.getChildren() != null) {
 							return directoryNode.getChildren();
 						} else {
-							directoryNode = ((DirectoryInfo) getBuildService()
+							directoryNode = ((DirectoryInfo) buildService
 									.getArtifactInfo(getBuild(), directoryNode.getPath()));
 							return directoryNode.getChildren();
 						}
@@ -265,24 +232,10 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			}
 
 		});
-		add(new WebMarkupContainer("noArtifacts") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getBuild().getRootArtifacts().size() == 0);
-			}
-			
-		}.setOutputMarkupPlaceholderTag(true));
 	}
 	
-	private BuildService getBuildService() {
-		return OneDev.getInstance(BuildService.class);
-	}
-
 	private void updateArtifacts(AjaxRequestTarget target) {
 		target.add(get("artifacts"));
-		target.add(get("noArtifacts"));
 	}
 	
 	@Override

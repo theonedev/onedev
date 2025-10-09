@@ -655,6 +655,10 @@ public class Build extends ProjectBelonging
 	public boolean isSuccessful() {
 		return status == Status.SUCCESSFUL;
 	}
+
+	public boolean isFailed() {
+		return status == Status.FAILED;
+	}
 	
 	public Date getSubmitDate() {
 		return submitDate;

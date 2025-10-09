@@ -1886,10 +1886,11 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Low Severity", "Gravità Bassa");
 		m.put("MERGED", "UNITO");
 		m.put("MS Teams Notifications", "Notifiche MS Teams");
+		m.put("Mail", "Mail");
+		m.put("Mail Connector", "Connettore Mail");
+		m.put("Mail Connector Bean", "Bean Connettore Mail");
 		m.put("Mail Service", "Servizio di Posta");
-		m.put("Mail Service Bean", "Bean del Servizio di Posta");
 		m.put("Mail Service Test", "Test del Servizio di Posta");
-		m.put("Mail service", "Servizio di posta");
 		m.put("Mail service not configured", "Servizio di posta non configurato");
 		m.put("Mail service settings saved", "Impostazioni del servizio di posta salvate");
 		m.put("Make sure <a href=\"https://openjdk.java.net\" target=\"_blank\">Java 11 or higher</a> is installed", 
@@ -2065,7 +2066,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("No any", "Nessuno");
 		m.put("No any matches", "Nessuna corrispondenza");
 		m.put("No applicable transitions or no permission to transit", "Nessuna transizione applicabile o nessun permesso per transitare");
-		m.put("No artifacts published", "Nessun artefatto pubblicato");
 		m.put("No attributes defined (can only be edited when agent is online)", "Nessun attributo definito (modificabile solo quando l'agente è online)");
 		m.put("No audits", "Nessun controllo");
 		m.put("No authorized job secret found (project: {0}, job secret: {1})", "Nessun segreto autorizzato trovato (progetto: {0}, segreto: {1})");
@@ -3191,6 +3191,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Set Up Your Account", "Configura il Tuo Account");
 		m.put("Set as Private", "Imposta come privato");
 		m.put("Set as Public", "Imposta come pubblico");
+		m.put("Set description", "Imposta descrizione");
 		m.put("Set reviewed", "Imposta come revisionato");
 		m.put("Set unreviewed", "Imposta come non revisionato");
 		m.put("Set up Microsoft Teams notification settings. Settings will be inherited by child projects, and can be overridden by defining settings with same webhook url. ", 
@@ -4129,6 +4130,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Upload Strategy", "Strategia di caricamento");
 		m.put("Upload a 128x128 transparent png file to be used as logo for dark mode", "Carica un file PNG trasparente 128x128 da utilizzare come logo per la modalità scura");
 		m.put("Upload a 128x128 transparent png file to be used as logo for light mode", "Carica un file PNG trasparente 128x128 da utilizzare come logo per la modalità chiara");
+		m.put("Upload artifacts", "Carica artefatti");
 		m.put("Upload avatar", "Carica avatar");
 		m.put("Upload should be less than {0} Mb", "Il caricamento deve essere inferiore a {0} Mb");
 		m.put("Upload to Project", "Carica nel progetto");

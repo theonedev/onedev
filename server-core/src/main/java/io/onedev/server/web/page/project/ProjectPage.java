@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,11 +40,11 @@ import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.timetracking.TimeTrackingService;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
@@ -115,6 +116,9 @@ import io.onedev.server.web.util.ProjectAware;
 public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 	protected final IModel<Project> projectModel;
+
+	@Inject
+	protected ProjectService projectService;
 	
 	public ProjectPage(PageParameters params) {
 		super(params);

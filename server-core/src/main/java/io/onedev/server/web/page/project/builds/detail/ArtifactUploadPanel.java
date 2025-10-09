@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.builds.detail.artifacts;
+package io.onedev.server.web.page.project.builds.detail;
 
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
 import static io.onedev.server.web.translation.Translation._T;

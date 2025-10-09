@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 
 import io.onedev.server.buildspec.BuildSpec;
@@ -22,6 +23,11 @@ public class BuildSpecBlobEditPanel extends BlobEditPanel implements PlainEditSu
 	@Override
 	public FormComponentPanel<byte[]> newPlainEditor(String componentId, byte[] initialContent) {
 		return new PlainEditPanel(componentId, BuildSpec.BLOB_PATH, initialContent);
+	}
+
+	@Override
+	protected WebMarkupContainer newEditOptions(String componentId) {
+		return new BuildSpecEditOptionPanel(componentId);
 	}
 
 }
