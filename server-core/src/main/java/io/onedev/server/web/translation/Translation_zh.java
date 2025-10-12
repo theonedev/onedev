@@ -4147,6 +4147,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Upload Strategy", "上传策略");
 		m.put("Upload a 128x128 transparent png file to be used as logo for dark mode", "上传一个 128x128 的透明 PNG 文件，用作暗模式下的标志");
 		m.put("Upload a 128x128 transparent png file to be used as logo for light mode", "上传一个 128x128 的透明 PNG 文件，用作亮模式下的标志");
+		m.put("Upload artifacts", "上传制品");
 		m.put("Upload avatar", "上传头像");
 		m.put("Upload should be less than {0} Mb", "上传应该小于 {0} Mb");
 		m.put("Upload to Project", "上传到项目");
@@ -4623,7 +4624,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Upload artifacts", "上传制品");
+		m.put("Edit with AI", "使用 AI 编辑");
 	}
 		
 	@Override
