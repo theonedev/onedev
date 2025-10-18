@@ -57,6 +57,8 @@ public class CloverReportParser {
 		Map<String, Map<Integer, CoverageStatus>> coverageStatuses = new HashMap<>();
 		for (Element fileElement : fileElements) {
 			var filePath = fileElement.attributeValue("path");
+			if (filePath == null)
+				filePath = fileElement.attributeValue("name");
 			String blobPath = build.getBlobPath(filePath);
 			if (blobPath != null) {
 				var metricsElement = fileElement.element("metrics");
