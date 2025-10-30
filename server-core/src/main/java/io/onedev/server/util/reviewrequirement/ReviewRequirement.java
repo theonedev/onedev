@@ -87,7 +87,7 @@ public class ReviewRequirement {
 	}
 
 	private static String getValue(TerminalNode terminal) {
-		return StringUtils.unescape(FenceAware.unfence(terminal.getText()));
+		return StringUtils.unescape(FenceAware.unfence(terminal.getText())).trim();
 	}
 	
 	public List<User> getUsers() {
