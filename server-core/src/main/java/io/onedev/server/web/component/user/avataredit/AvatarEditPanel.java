@@ -50,7 +50,7 @@ public class AvatarEditPanel extends GenericPanel<User> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getAvatarService().getUserUploadedFile(getUser().getId()).exists());
+				setVisible(getAvatarService().getUserUploadedFile(getUser().getId(), null).exists());
 			}
 
 			@Override

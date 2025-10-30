@@ -2,6 +2,8 @@ package io.onedev.server.web.page.project.setting.avatar;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import javax.inject.Inject;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
@@ -21,16 +23,15 @@ import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
 public class AvatarEditPage extends ProjectSettingPage {
 	
+	@Inject
+	private AvatarService avatarService;
+
 	private String uploadedAvatarData;
 	
 	public AvatarEditPage(PageParameters params) {
 		super(params);
 	}
 	
-	private AvatarService getAvatarService() {
-		return OneDev.getInstance(AvatarService.class);
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -42,12 +43,12 @@ public class AvatarEditPage extends ProjectSettingPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getAvatarService().getProjectUploadedFile(getProject().getId()).exists());
+				setVisible(avatarService.getProjectUploadedFile(getProject().getId(), null).exists());
 			}
 
 			@Override
 			public void onClick() {
-				getAvatarService().useProjectAvatar(getProject().getId(), null);
+				avatarService.useProjectAvatar(getProject().getId(), null);
 				setResponsePage(AvatarEditPage.class, AvatarEditPage.paramsOf(getProject()));
 			}
 			

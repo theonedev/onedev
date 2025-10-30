@@ -61,6 +61,10 @@ public class DefaultAvatarService implements AvatarService, Serializable {
 		return new ManagedSerializedForm(AvatarService.class);
 	}
 	
+	private String getFileExtension(File file) {
+		return StringUtils.substringAfterLast(file.getName(), ".");
+	}
+
 	@Override
 	public String getUserAvatarUrl(Long userId) {
 		if (userId.equals(User.UNKNOWN_ID)) {
@@ -68,9 +72,9 @@ public class DefaultAvatarService implements AvatarService, Serializable {
 		} else if (userId.equals(User.SYSTEM_ID)) {
 			return AVATARS_BASE_URL + "onedev.png";
 		} else {
-			File uploadedFile = getUserUploadedFile(userId);
+			File uploadedFile = getUserUploadedFile(userId, null);
 			if (uploadedFile.exists())
-				return AVATARS_BASE_URL + "uploaded/users/" + userId + ".jpg?version=" + uploadedFile.lastModified();
+				return AVATARS_BASE_URL + "uploaded/users/" + userId + "." + getFileExtension(uploadedFile) + "?version=" + uploadedFile.lastModified();
 			
 			EmailAddressFacade emailAddress = emailAddressService.findPrimaryFacade(userId);
 			UserFacade user = userService.findFacadeById(userId);
@@ -154,8 +158,17 @@ public class DefaultAvatarService implements AvatarService, Serializable {
 	}
 	
 	@Override
-	public File getUserUploadedFile(Long userId) {
-		return new File(Bootstrap.getSiteDir(), "assets/avatars/uploaded/users/" + userId + ".jpg");
+	public File getUserUploadedFile(Long userId, String extension) {
+		var pathSegments = "assets/avatars/uploaded/users/";
+		if (extension != null) {
+			return new File(Bootstrap.getSiteDir(), pathSegments + userId + "." + extension);
+		} else {
+			var file = new File(Bootstrap.getSiteDir(), pathSegments + userId + ".png");
+			if (file.exists())
+				return file;
+			else
+				return new File(Bootstrap.getSiteDir(), pathSegments + userId + ".jpg");
+		}
 	}
 
 	private String getUserUploadedLockName(Long userId) {
@@ -165,18 +178,26 @@ public class DefaultAvatarService implements AvatarService, Serializable {
 	@Override
 	public void useUserAvatar(Long userId, String avatarData) {
 		clusterService.runOnAllServers(() -> write(getUserUploadedLockName(userId), () -> {
-			File avatarFile = getUserUploadedFile(userId);
+			File avatarFile = getUserUploadedFile(userId, "png");
 			createDir(avatarFile.getParentFile());
-			writeToFile(avatarFile, avatarData);
+			if (avatarData != null) {
+				writeToFile(avatarFile, avatarData);
+			} else {
+				if (avatarFile.exists())
+					FileUtils.deleteFile(avatarFile);
+				avatarFile = getUserUploadedFile(userId, "jpg");
+				if (avatarFile.exists())
+					FileUtils.deleteFile(avatarFile);
+			}
 			return null;
 		}));
 	}
 
 	@Override
 	public String getProjectAvatarUrl(Long projectId) {
-		File avatarFile = getProjectUploadedFile(projectId);
+		File avatarFile = getProjectUploadedFile(projectId, null);
 		if (avatarFile.exists())  
-			return AVATARS_BASE_URL + "uploaded/projects/" + projectId + ".jpg?version=" + avatarFile.lastModified();
+			return AVATARS_BASE_URL + "uploaded/projects/" + projectId + "." + getFileExtension(avatarFile) + "?version=" + avatarFile.lastModified();
 		else
 			return AVATARS_BASE_URL + "project.png";
 	}
@@ -184,16 +205,33 @@ public class DefaultAvatarService implements AvatarService, Serializable {
 	@Override
 	public void useProjectAvatar(Long projectId, String avatarData) {
 		clusterService.runOnAllServers(() -> write(getProjectUploadedLockName(projectId), () -> {
-			File avatarFile = getProjectUploadedFile(projectId);
+			File avatarFile = getProjectUploadedFile(projectId, "png");
 			createDir(avatarFile.getParentFile());
-			writeToFile(avatarFile, avatarData);
+			if (avatarData != null) {
+				writeToFile(avatarFile, avatarData);
+			} else {
+				if (avatarFile.exists())
+					FileUtils.deleteFile(avatarFile);
+				avatarFile = getProjectUploadedFile(projectId, "jpg");
+				if (avatarFile.exists())
+					FileUtils.deleteFile(avatarFile);
+			}
 			return null;
 		}));		
 	}
 
 	@Override
-	public File getProjectUploadedFile(Long projectId) {
-		return new File(Bootstrap.getSiteDir(), "assets/avatars/uploaded/projects/" + projectId + ".jpg");
+	public File getProjectUploadedFile(Long projectId, String extension) {
+		var pathSegments = "assets/avatars/uploaded/projects/";
+		if (extension != null) {
+			return new File(Bootstrap.getSiteDir(), pathSegments + projectId + "." + extension);
+		} else {
+			var file = new File(Bootstrap.getSiteDir(), pathSegments + projectId + ".png");
+			if (file.exists())
+				return file;
+			else
+				return new File(Bootstrap.getSiteDir(), pathSegments + projectId + ".jpg");
+		}
 	}
 	
 	private String getProjectUploadedLockName(Long projectId) {
@@ -203,10 +241,10 @@ public class DefaultAvatarService implements AvatarService, Serializable {
 	@Override
 	public void copyProjectAvatar(Long fromProjectId, Long toProjectId) {
 		clusterService.runOnAllServers(() -> {
-			var fromFile = getProjectUploadedFile(fromProjectId);
-			var toFile = getProjectUploadedFile(toProjectId);
+			var fromFile = getProjectUploadedFile(fromProjectId, null);
+			var toFile = getProjectUploadedFile(toProjectId, getFileExtension(fromFile));
 			var readLockName = getProjectUploadedLockName(fromProjectId);
-			if (read(readLockName, () -> fromFile.exists())) {
+			if (fromFile.exists()) {
 				var tempFile = new File(toFile.getParentFile(), UUID.randomUUID().toString());
 				try {
 					read(readLockName, () -> {

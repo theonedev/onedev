@@ -24,8 +24,8 @@ public class AvatarGenerator {
 				ImmutableSet.copyOf(localGraphics.getAvailableFontFamilyNames());
 	}
 	
-	private static final int DEFAULT_WIDTH = 256;
-	private static final int DEFAULT_HEIGHT = 256;
+	private static final int DEFAULT_WIDTH = 240;
+	private static final int DEFAULT_HEIGHT = 240;
 	private static final String DEFAULT_FONT = "Helvetica";
 	
 	private static final int VERSION = 1;

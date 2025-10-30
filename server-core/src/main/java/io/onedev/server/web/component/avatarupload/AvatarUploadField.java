@@ -5,7 +5,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
-import org.jspecify.annotations.Nullable;
 import javax.imageio.ImageIO;
 import javax.xml.bind.DatatypeConverter;
 
@@ -22,7 +21,6 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 
@@ -71,17 +69,13 @@ public class AvatarUploadField extends FormComponentPanel<String> {
 		setConvertedInput(dataField.getConvertedInput());
 	}
 	
-	public static void writeToFile(File file, @Nullable String avatarData) {
-		if (avatarData != null) {
-			byte[] imageBytes = DatatypeConverter.parseBase64Binary(StringUtils.substringAfter(avatarData, ","));
-			try {
-				BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
-				ImageIO.write(image, "jpeg", file);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		} else if (file.exists()) {
-			FileUtils.deleteFile(file);
+	public static void writeToFile(File file, String avatarData) {
+		byte[] imageBytes = DatatypeConverter.parseBase64Binary(StringUtils.substringAfter(avatarData, ","));
+		try {
+			BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
+			ImageIO.write(image, "png", file);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 	
