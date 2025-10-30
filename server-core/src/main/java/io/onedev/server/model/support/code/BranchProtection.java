@@ -51,7 +51,7 @@ public class BranchProtection implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private static final Pattern CONVENTIONAL_COMMIT_SUBJECT = Pattern.compile(
-			"^((\\p{L}+)(\\((\\p{L}+([\\-/ ]\\p{L}+)*)\\))?!?: [^ ].+)|^(revert \".*\")", 
+			"^((\\p{L}+)(\\(([\\p{L}\\p{N}]+([\\-/ ][\\p{L}\\p{N}]+)*)\\))?!?: [^ ].+)|^(revert \".*\")", 
 			UNICODE_CHARACTER_CLASS | CASE_INSENSITIVE);
 
 	private boolean enabled = true;
