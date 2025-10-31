@@ -8,6 +8,7 @@ import static io.onedev.server.model.support.administration.SystemSetting.PROP_D
 import static io.onedev.server.model.support.administration.SystemSetting.PROP_GIT_LOCATION;
 import static io.onedev.server.model.support.administration.SystemSetting.PROP_SSH_ROOT_URL;
 import static io.onedev.server.model.support.administration.SystemSetting.PROP_USE_AVATAR_SERVICE;
+import static io.onedev.server.model.support.administration.SystemSetting.PROP_SESSION_TIMEOUT;
 import static io.onedev.server.persistence.PersistenceUtils.tableExists;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
@@ -714,7 +715,7 @@ public class DefaultDataService implements DataService, Serializable {
 		}
 		
 		if (systemSetting != null) {
-			Collection<String> excludedProps = Sets.newHashSet(PROP_SSH_ROOT_URL, PROP_DISABLE_AUTO_UPDATE_CHECK, PROP_USE_AVATAR_SERVICE);
+			Collection<String> excludedProps = Sets.newHashSet(PROP_SSH_ROOT_URL, PROP_DISABLE_AUTO_UPDATE_CHECK, PROP_USE_AVATAR_SERVICE, PROP_SESSION_TIMEOUT);
 			if (Bootstrap.isInDocker()) {
 				excludedProps.add(PROP_GIT_LOCATION);
 				excludedProps.add(PROP_CURL_LOCATION);

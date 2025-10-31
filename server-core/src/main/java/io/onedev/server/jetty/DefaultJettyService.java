@@ -88,7 +88,8 @@ public class DefaultJettyService implements JettyService, Provider<ServletContex
         servletContextHandler.getSessionHandler().setSessionIdPathParameterName(null);
         servletContextHandler.getSessionHandler().setSameSite(SameSite.LAX);  
         servletContextHandler.getSessionHandler().setHttpOnly(true);
-		servletContextHandler.getSessionHandler().setMaxInactiveInterval(settingService.getSystemSetting().getSessionTimeout() * 60);
+		if (settingService.getSystemSetting() != null) 
+			servletContextHandler.getSessionHandler().setMaxInactiveInterval(settingService.getSystemSetting().getSessionTimeout() * 60);
 
         /*
          * By default contributions is in reverse dependency order. We reverse the order so that 

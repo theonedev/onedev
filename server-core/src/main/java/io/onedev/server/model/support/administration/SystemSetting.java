@@ -40,6 +40,8 @@ public class SystemSetting implements Serializable, Validatable {
 	public static final String PROP_CURL_LOCATION = "curlLocation";
 	
 	public static final String PROP_SSH_ROOT_URL = "sshRootUrl";
+
+	public static final String PROP_SESSION_TIMEOUT = "sessionTimeout";
 	
 	public static final String PROP_USE_AVATAR_SERVICE = "useAvatarService";
 	
