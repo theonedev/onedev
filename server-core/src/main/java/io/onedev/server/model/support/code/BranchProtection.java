@@ -6,6 +6,7 @@ import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -81,6 +82,8 @@ public class BranchProtection implements Serializable {
 	private List<String> commitTypesForFooterCheck = new ArrayList<>();
 	
 	private Integer maxCommitMessageLineLength;
+
+	private List<String> disallowedFileTypes = new ArrayList<>();
 	
 	private String reviewRequirement;
 	
@@ -262,6 +265,15 @@ public class BranchProtection implements Serializable {
 		reviewRequirement = parsedReviewRequirement.toString();
 	}
 	
+	@Editable(order=410, placeholder = "No disallowed file types", description = "Optionally specify disallowed file types by extensions (hit ENTER to add value), for instance <code>exe</code>, <code>bin</code>. Leave empty to allow all file types")
+	public List<String> getDisallowedFileTypes() {
+		return disallowedFileTypes;
+	}
+
+	public void setDisallowedFileTypes(List<String> disallowedFileTypes) {
+		this.disallowedFileTypes = disallowedFileTypes;
+	}
+
 	@Editable(order=500, name="Required Builds", placeholder="No any", description="Optionally choose required builds. You may also " +
 			"input jobs not listed here, and press ENTER to add them")
 	@JobChoice(tagsMode=true)
@@ -420,6 +432,18 @@ public class BranchProtection implements Serializable {
 		}
 
 		return false;
+	}
+
+	public Collection<String> getViolatedFileTypes(Project project, ObjectId oldObjectId, ObjectId newObjectId,
+			Map<String, String> gitEnvs) {
+		if (disallowedFileTypes.isEmpty()) {
+			return Collections.emptySet();
+		} else {
+			var changedFiles = getGitService().getChangedFiles(project, oldObjectId, newObjectId, gitEnvs);
+			return getDisallowedFileTypes().stream()
+				.filter(type -> changedFiles.stream().anyMatch(file -> file.toLowerCase().endsWith("." + type.toLowerCase())))
+				.collect(Collectors.toSet());
+		}
 	}
 
 	public BuildRequirement getBuildRequirement(Project project, ObjectId oldObjectId, ObjectId newObjectId,

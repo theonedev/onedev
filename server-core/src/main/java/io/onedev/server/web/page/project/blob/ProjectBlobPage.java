@@ -1539,11 +1539,17 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			String blobPath = FilenameUtils.sanitizeFileName(FileUpload.getFileName(item));
 			if (parentPath != null)
 				blobPath = parentPath + "/" + blobPath;
-			
+			var blobType = StringUtils.substringAfterLast(blobPath, ".");
+
+			var disallowedFileTypes = getProject().getBranchProtection(blobIdent.revision, user).getDisallowedFileTypes();
+			if (disallowedFileTypes.stream().anyMatch(type -> blobType.equalsIgnoreCase(type))) {
+				throw new BlobEditException(MessageFormat.format(_T("Not allowed file type: {0}"), blobType));
+			}
+
 			if (getProject().isReviewRequiredForModification(user, blobIdent.revision, blobPath)) 
-				throw new BlobEditException("Review required for this change. Please submit pull request instead");
+				throw new BlobEditException(_T("Review required for this change. Please submit pull request instead"));
 			else if (getProject().isBuildRequiredForModification(user, blobIdent.revision, blobPath)) 
-				throw new BlobEditException("Build required for this change. Please submit pull request instead");
+				throw new BlobEditException(_T("Build required for this change. Please submit pull request instead"));
 			else if (getProject().isCommitSignatureRequiredButNoSigningKey(user, blobIdent.revision)) 
 				signRequired = true;
 			

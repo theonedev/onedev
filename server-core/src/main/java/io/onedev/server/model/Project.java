@@ -1607,6 +1607,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		var protection = getBranchProtection(branch, user);
 		return getGitService().checkCommitMessages(protection, this, oldCommitId, newCommitId, gitEnvs);
 	}
+
+	public Collection<String> getViolatedFileTypes(String branch, User user, ObjectId oldCommitId, ObjectId newCommitId,
+												  Map<String, String> gitEnvs) {
+		var protection = getBranchProtection(branch, user);
+		return protection.getViolatedFileTypes(this, oldCommitId, newCommitId, gitEnvs);
+	}
 	
 	@Nullable
 	public List<String> readLines(BlobIdent blobIdent, WhitespaceOption whitespaceOption, boolean mustExist) {

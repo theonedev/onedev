@@ -4,8 +4,8 @@ requirement: WS* criteria (WS+ criteria)* WS* EOF;
 
 criteria: userCriteria | groupCriteria;
 
-userCriteria: USER WS* Value;
-groupCriteria: GROUP WS* Value (WS*':' WS* DIGIT)?;
+userCriteria: USER Value;
+groupCriteria: GROUP Value (':' DIGIT)?;
 
 DIGIT: [1-9][0-9]*;
 

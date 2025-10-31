@@ -1,19 +1,28 @@
 package io.onedev.server.model.support.code;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.validation.constraints.NotEmpty;
+
+import org.eclipse.jgit.lib.ObjectId;
+
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Patterns;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.usermatch.Anyone;
 import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.util.SuggestionUtils;
-
-import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 @Editable
 public class TagProtection implements Serializable {
@@ -33,6 +42,8 @@ public class TagProtection implements Serializable {
 	private boolean preventCreation = true;
 	
 	private boolean commitSignatureRequired;
+
+	private List<String> disallowedFileTypes = new ArrayList<>();
 	
 	public boolean isEnabled() {
 		return enabled;
@@ -115,6 +126,15 @@ public class TagProtection implements Serializable {
 		this.commitSignatureRequired = commitSignatureRequired;
 	}
 
+	@Editable(order=410, placeholder = "No disallowed file types", description = "Optionally specify disallowed file types by extensions (hit ENTER to add value), for instance <code>exe</code>, <code>bin</code>. Leave empty to allow all file types")
+	public List<String> getDisallowedFileTypes() {
+		return disallowedFileTypes;
+	}
+
+	public void setDisallowedFileTypes(List<String> disallowedFileTypes) {
+		this.disallowedFileTypes = disallowedFileTypes;
+	}
+
 	public void onRenameGroup(String oldName, String newName) {
 		userMatch = UserMatch.onRenameGroup(userMatch, oldName, newName);
 	}
@@ -145,4 +165,19 @@ public class TagProtection implements Serializable {
 		return usage;
 	}
 	
+	public Collection<String> getViolatedFileTypes(Project project, ObjectId objectId, Map<String, String> gitEnvs) {
+		if (disallowedFileTypes.isEmpty()) {
+			return Collections.emptySet();
+		} else {
+			var files = getGitService().getChangedFiles(project, ObjectId.zeroId(), objectId, gitEnvs);
+			return getDisallowedFileTypes().stream()
+				.filter(type -> files.stream().anyMatch(file -> file.toLowerCase().endsWith("." + type.toLowerCase())))
+				.collect(Collectors.toSet());
+		}
+	}
+
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
+	}
+
 }

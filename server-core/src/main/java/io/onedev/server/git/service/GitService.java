@@ -148,7 +148,7 @@ public interface GitService {
 	@Nullable
 	CommitMessageError checkCommitMessages(BranchProtection protection, Project project,
 										   ObjectId oldId, ObjectId newId, Map<String, String> envs);
-	
+										   
 	@Nullable
 	byte[] getRawTag(Project project, ObjectId tagId, Map<String, String> envs);
 	

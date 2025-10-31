@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.util.QuotedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,10 @@ public class ListChangedFilesCommand {
 		Commandline git = newGit().workingDir(workingDir);
 		git.environments().putAll(envs);
 		
-		git.addArgs("diff", "--name-only", "--no-renames", fromRev + ".." + toRev);
+		if (fromRev.equals(ObjectId.zeroId().name()))
+			git.addArgs("ls-tree", "--name-only", toRev);
+		else
+			git.addArgs("diff", "--name-only", "--no-renames", fromRev + ".." + toRev);
 		
 		git.execute(new LineConsumer() {
 

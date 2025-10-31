@@ -158,6 +158,12 @@ public class GitPreReceiveCallback extends HttpServlet {
 						if (commitMessageError != null)
 							errorMessages.add(commitMessageError.toString());
 					}
+					if (errorMessages.isEmpty() && !protection.getDisallowedFileTypes().isEmpty()) {
+						var violatedFileTypes = protection.getViolatedFileTypes(project, oldObjectId, newObjectId, gitEnvs);
+						if (!violatedFileTypes.isEmpty()) {
+							errorMessages.add("Your push contains disallowed file type(s): " + StringUtils.join(violatedFileTypes, ", "));
+						}
+					}
 					if (errorMessages.isEmpty() 
 							&& !oldObjectId.equals(ObjectId.zeroId()) 
 							&& !newObjectId.equals(ObjectId.zeroId()) 
@@ -201,6 +207,12 @@ public class GitPreReceiveCallback extends HttpServlet {
 							&& !project.hasValidTagSignature(newObjectId, gitEnvs)) {
 						errorMessages.add("Can not update this tag as tag protection setting requires "
 								+ "valid tag signature");
+					}
+					if (errorMessages.isEmpty() && !protection.getDisallowedFileTypes().isEmpty()) {
+						var violatedFileTypes = protection.getViolatedFileTypes(project, newObjectId, gitEnvs);
+						if (!violatedFileTypes.isEmpty()) {
+							errorMessages.add("Your push contains disallowed file type(s): " + StringUtils.join(violatedFileTypes, ", "));
+						}
 					}
 					if (errorMessages.isEmpty()) {
 						for (var preReceiveChecker : preReceiveCheckers) {

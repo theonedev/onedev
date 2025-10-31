@@ -455,6 +455,8 @@ public class PullRequest extends ProjectBelonging
 	
 	private transient Optional<CommitMessageError> commitMessageErrorOpt;
 
+	private transient Optional<Collection<String>> violatedFileTypesOpt;
+
 	public String getTitle() {
 		return title;
 	}
@@ -1197,7 +1199,10 @@ public class PullRequest extends ProjectBelonging
     		return _T("No valid signature for head commit");
 		var commitMessageError = checkCommitMessages();
 		if (commitMessageError != null)
-			return commitMessageError.toString();
+			return commitMessageError.toString();		
+		var violatedFileTypes = getViolatedFileTypes();
+		if (!violatedFileTypes.isEmpty())
+			return MessageFormat.format(_T("Disallowed file type(s): {0}"), StringUtils.join(violatedFileTypes, ", "));
 		return null;
 	}
 	
@@ -1316,6 +1321,15 @@ public class PullRequest extends ProjectBelonging
 			commitMessageErrorOpt = Optional.ofNullable(error);
 		}
 		return commitMessageErrorOpt.orElse(null);
+	}
+
+	public Collection<String> getViolatedFileTypes() {
+		if (violatedFileTypesOpt == null) {
+			var violatedFileTypes = getProject().getViolatedFileTypes(getTargetBranch(), getSubmitter(),
+					getBaseCommit().copy(), getLatestUpdate().getHeadCommit().copy(), new HashMap<>());
+			violatedFileTypesOpt = Optional.of(violatedFileTypes);
+		}
+		return violatedFileTypesOpt.get();
 	}
 
 	public static String getSerialLockName(Long requestId) {

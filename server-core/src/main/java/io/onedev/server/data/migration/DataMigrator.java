@@ -8349,4 +8349,21 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate213(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element projectElement : dom.getRootElement().elements()) {
+					for (Element branchProtectionElement : projectElement.element("branchProtections").elements()) {
+						branchProtectionElement.addElement("disallowedFileTypes");
+					}
+					for (Element tagProtectionElement : projectElement.element("tagProtections").elements()) {
+						tagProtectionElement.addElement("disallowedFileTypes");
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 }

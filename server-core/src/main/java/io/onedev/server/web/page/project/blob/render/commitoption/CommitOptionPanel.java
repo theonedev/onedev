@@ -274,16 +274,25 @@ public class CommitOptionPanel extends Panel {
 					Map<String, BlobContent> newBlobs = new HashMap<>();
 					if (newContentProvider != null) {
 						String newPath = context.getNewPath();
+						var blobType = StringUtils.substringAfterLast(newPath, ".");
+
+						var disallowedFileTypes = context.getProject().getBranchProtection(revision, user).getDisallowedFileTypes();
+						if (disallowedFileTypes.stream().anyMatch(type -> blobType.equalsIgnoreCase(type))) {
+							form.error(MessageFormat.format(_T("Not allowed file type: {0}"), blobType));
+							target.add(form);
+							return false;
+						}
+			
 						if (context.getProject().isReviewRequiredForModification(user, revision, newPath)) {
-							form.error("Review required for this change. Please submit pull request instead");
+							form.error(_T("Review required for this change. Please submit pull request instead"));
 							target.add(form);
 							return false;
 						} else if (context.getProject().isBuildRequiredForModification(user, revision, newPath)) {
-							form.error("Build required for this change. Please submit pull request instead");
+							form.error(_T("Build required for this change. Please submit pull request instead"));
 							target.add(form);
 							return false;
 						} else if (context.getProject().isCommitSignatureRequiredButNoSigningKey(user, revision)) {
-							form.error("Signature required for this change, but no signing key is specified");
+							form.error(_T("Signature required for this change, but no signing key is specified"));
 							target.add(form);
 							return false;
 						}
@@ -307,13 +316,11 @@ public class CommitOptionPanel extends Panel {
 							ExceptionUtils.find(e, ObsoleteCommitException.class);
 					
 					if (objectAlreadyExistsException != null) {
-						form.error("A path with same name already exists. "
-								+ "Please choose a different name and try again.");
+						form.error(_T("A path with same name already exists.Please choose a different name and try again."));
 						target.add(form);
 						break;
 					} else if (notTreeException != null) {
-						form.error("A file exists where you’re trying to create a subdirectory. "
-								+ "Choose a new path and try again..");
+						form.error(_T("A file exists where you’re trying to create a subdirectory. Choose a new path and try again.."));
 						target.add(form);
 						break;
 					} else if (obsoleteCommitException != null) {
@@ -333,14 +340,14 @@ public class CommitOptionPanel extends Panel {
 									if (newContentProvider != null) {
 										oldPaths.clear();
 										changesOfOthers = getBlobChange(path, pathChange, lastPrevCommitId, prevCommitId);
-										form.warn("Someone made below change since you started editing");
+										form.warn(_T("Someone made below change since you started editing"));
 										break;
 									} else {
 										newCommitId = obsoleteCommitException.getOldCommitId();
 									}
 								} else {
 									changesOfOthers = getBlobChange(path, pathChange, lastPrevCommitId, prevCommitId);
-									form.warn("Someone made below change since you started editing");
+									form.warn(_T("Someone made below change since you started editing"));
 									break;
 								}
 							} 

@@ -724,6 +724,27 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 		}.setEscapeModelStrings(false));
 
+		summaryContainer.add(new Label("fileTypesCheckError", new LoadableDetachableModel<>() {			
+			@Override
+			protected String load() {
+				var violatedFileTypes = getPullRequest().getViolatedFileTypes();
+				if (violatedFileTypes.isEmpty())
+					return null;
+				else
+					return MessageFormat.format(_T("The change contains disallowed file type(s): {0}"), StringUtils.join(violatedFileTypes, ", "));
+			}
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				PullRequest request = getPullRequest();
+				if (request.isOpen())
+					setVisible(getDefaultModelObject() != null);
+				else
+					setVisible(false);
+			}
+		}.setEscapeModelStrings(false));
+
 		summaryContainer.add(new Label("requiredJobsMessage", new AbstractReadOnlyModel<String>() {
 			@Override
 			public String getObject() {
