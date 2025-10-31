@@ -25,7 +25,6 @@ import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -48,10 +47,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.time.Duration;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.jspecify.annotations.Nullable;
 import org.unbescape.javascript.JavaScriptEscape;
 
@@ -296,11 +293,6 @@ public abstract class BasePage extends WebPage {
 		sessionFeedback.setOutputMarkupId(true);
 
 		add(rootComponents = new RepeatingView("rootComponents"));
-
-		int sessionTimeout = AppLoader.getInstance(ServletContextHandler.class)
-				.getSessionHandler().getMaxInactiveInterval();
-		add(new WebMarkupContainer("keepSessionAlive")
-				.add(new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(sessionTimeout*500L))));
 
 		add(new WebSocketBehavior() {
 

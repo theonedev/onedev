@@ -8363,6 +8363,18 @@ public class DataMigrator {
 					}
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var keyElement = element.element("key");
+					if (keyElement.getTextTrim().equals("SYSTEM")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.addElement("sessionTimeout").setText("30");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}

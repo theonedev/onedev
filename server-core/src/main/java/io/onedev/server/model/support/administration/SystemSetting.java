@@ -7,6 +7,7 @@ import java.net.URL;
 import org.jspecify.annotations.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -51,7 +52,9 @@ public class SystemSetting implements Serializable, Validatable {
 	private GitLocation gitLocation = new SystemGit();
 	
 	private CurlLocation curlLocation = new SystemCurl();
-		
+
+	private int sessionTimeout = 30;
+
 	private boolean disableAutoUpdateCheck;
 	
 	private boolean disableDashboard;
@@ -127,6 +130,16 @@ public class SystemSetting implements Serializable, Validatable {
 
 	public void setCurlLocation(CurlLocation curlLocation) {
 		this.curlLocation = curlLocation;
+	}
+
+	@Editable(order=300, description = "Specify web session timeout in minutes if no activity. Existing sessions will not be affected after changing this value.")
+	@Min(value=1, message="Session timeout should be at least 1 minute")
+	public int getSessionTimeout() {
+		return sessionTimeout;
+	}
+
+	public void setSessionTimeout(int sessionTimeout) {
+		this.sessionTimeout = sessionTimeout;
 	}
 
 	@Editable(order=400, description = "Auto update check is performed by requesting an image in " +
