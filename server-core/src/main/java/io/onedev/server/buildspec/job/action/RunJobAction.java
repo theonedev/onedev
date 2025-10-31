@@ -118,7 +118,7 @@ public class RunJobAction extends PostBuildAction {
 			var userService = OneDev.getInstance(UserService.class);
 			jobService.submit(userService.getSystem(), build.getProject(), build.getCommitId(), 
 					getJobName(), paramMap, build.getRefName(), build.getRequest(), build.getIssue(), 
-					"Post build action of job '" + build.getJobName() + "'");
+					"Triggered via post build action of job '" + build.getJobName() + "'");
 		}
 	}
 

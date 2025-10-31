@@ -9,11 +9,10 @@ import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.OmitName;
-import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.util.EditContext;
 
 @Editable(order=100, name="Last Finished of Specified Job")
@@ -26,7 +25,6 @@ public class LastFinishedBuild implements BuildProvider {
 	private String refName;
 	
 	@Editable(order=100)
-	@OmitName
 	@ChoiceProvider("getJobChoices")
 	@NotEmpty
 	public String getJobName() {

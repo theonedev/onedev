@@ -4,11 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotAcceptableException;
@@ -23,15 +21,16 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.service.AccessTokenService;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.job.JobService;
 import io.onedev.server.model.Project;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.ProjectService;
 
 @Api(description="This resource provides an alternative way to run job by passing all parameters via url")
 @Path("/trigger-job")
@@ -126,7 +125,7 @@ public class TriggerJobResource {
 			
 			RevCommit commit = project.getRevCommit(refName, false);
 			if (commit == null)
-				throw new BadRequestException("Ref not found: " + refName);
+				throw new NotAcceptableException("Ref not found: " + refName);
 			
 			Map<String, List<String>> jobParams = new HashMap<>();
 			for (Map.Entry<String, List<String>> entry: uriInfo.getQueryParameters().entrySet()) {

@@ -167,34 +167,32 @@ public class SuggestionUtils {
 	public static List<InputSuggestion> suggestRevisions(Project project, String matchWith) {
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		var scopedQuery = ProjectScopedQuery.of(project, matchWith, ':', null);
-		if (scopedQuery != null) {
-			if (SecurityUtils.canReadCode(scopedQuery.getProject())) {
-				List<String> branches = scopedQuery.getProject().getBranchRefs()
-						.stream()
-						.sorted()
-						.map(it -> GitUtils.ref2branch(it.getName()))
-						.collect(toList());
-				Collections.reverse(branches);
-				if (scopedQuery.getProject().getDefaultBranch() != null) {
-					branches.remove(scopedQuery.getProject().getDefaultBranch());
-					branches.add(0, scopedQuery.getProject().getDefaultBranch());
-				}
-
-				List<String> tags = scopedQuery.getProject().getTagRefs()
-						.stream()
-						.sorted()
-						.map(it -> GitUtils.ref2tag(it.getName()))
-						.collect(toList());
-				Collections.reverse(tags);
-
-				List<String> revisions = new ArrayList<>();
-				revisions.addAll(branches);
-				revisions.addAll(tags);
-
-				suggestions = SuggestionUtils.suggest(revisions, scopedQuery.getQuery());
-				if (project == null)
-					suggestions = prefix(suggestions, scopedQuery.getProject().getPath() + ":");
+		if (SecurityUtils.canReadCode(scopedQuery.getProject())) {
+			List<String> branches = scopedQuery.getProject().getBranchRefs()
+					.stream()
+					.sorted()
+					.map(it -> GitUtils.ref2branch(it.getName()))
+					.collect(toList());
+			Collections.reverse(branches);
+			if (scopedQuery.getProject().getDefaultBranch() != null) {
+				branches.remove(scopedQuery.getProject().getDefaultBranch());
+				branches.add(0, scopedQuery.getProject().getDefaultBranch());
 			}
+
+			List<String> tags = scopedQuery.getProject().getTagRefs()
+					.stream()
+					.sorted()
+					.map(it -> GitUtils.ref2tag(it.getName()))
+					.collect(toList());
+			Collections.reverse(tags);
+
+			List<String> revisions = new ArrayList<>();
+			revisions.addAll(branches);
+			revisions.addAll(tags);
+
+			suggestions = SuggestionUtils.suggest(revisions, scopedQuery.getQuery());
+			if (project == null)
+				suggestions = prefix(suggestions, scopedQuery.getProject().getPath() + ":");
 		}
 		if (suggestions.isEmpty() && project == null && matchWith.length() == 0)
 			suggestions.add(new InputSuggestion("path/to/project:branch-or-tag", "An example revision", null));
