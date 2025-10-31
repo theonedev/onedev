@@ -134,7 +134,7 @@ public class SystemSetting implements Serializable, Validatable {
 		this.curlLocation = curlLocation;
 	}
 
-	@Editable(order=300, description = "Specify web session timeout in minutes if no activity. Existing sessions will not be affected after changing this value.")
+	@Editable(order=300, description = "Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.")
 	@Min(value=1, message="Session timeout should be at least 1 minute")
 	public int getSessionTimeout() {
 		return sessionTimeout;

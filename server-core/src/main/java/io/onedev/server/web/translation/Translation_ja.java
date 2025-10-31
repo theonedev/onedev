@@ -99,6 +99,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"コミットメッセージのフッターを検証するための<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java正規表現</a>");
 		m.put("A child project with name \"{0}\" already exists under \"{1}\"", "\"{1}\" の下に \"{0}\" という名前の子プロジェクトがすでに存在します");
+		m.put("A file exists where you’re trying to create a subdirectory. Choose a new path and try again..", 
+			"サブディレクトリを作成しようとしている場所にファイルが存在します。新しいパスを選択して再試行してください。");
+		m.put("A path with same name already exists.Please choose a different name and try again.", 
+			"同じ名前のパスが既に存在します。別の名前を選択して再試行してください。");
 		m.put("A pull request is open for this change", "この変更に対するプルリクエストが開かれています");
 		m.put("A root project with name \"{0}\" already exists", "\"{0}\" という名前のルートプロジェクトがすでに存在します");
 		m.put("A {0} used as body of address verification email", "アドレス確認メールの本文として使用される {0}");
@@ -490,6 +494,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Build number", "ビルド番号");
 		m.put("Build preserve rules saved", "ビルド保持ルールが保存されました");
 		m.put("Build required for deletion. Submit pull request instead", "削除にはビルドが必要です。代わりにプルリクエストを送信してください");
+		m.put("Build required for this change. Please submit pull request instead", "この変更にはビルドが必要です。代わりにプルリクエストを提出してください。");
 		m.put("Build required for this change. Submit pull request instead", "この変更にはビルドが必要です。代わりにプルリクエストを送信してください");
 		m.put("Build spec not defined", "ビルド仕様が定義されていません");
 		m.put("Build spec not defined (import project: {0}, import revision: {1})", "ビルド仕様が定義されていません（インポートプロジェクト: {0}, インポートリビジョン: {1}）");
@@ -981,6 +986,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"アカウントを無効化すると、パスワードがリセットされ、アクセストークンがクリアされ、過去の活動を除く他のエンティティからのすべての参照が削除されます。本当に続行しますか？");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
 			"アカウントを無効化すると、パスワードがリセットされ、アクセストークンがクリアされ、過去の活動を除く他のエンティティからのすべての参照が削除されます。確認するには<code>yes</code>と入力してください");
+		m.put("Disallowed File Types", "許可されていないファイルタイプ");
+		m.put("Disallowed file type(s): {0}", "許可されていないファイルタイプ: {0}");
 		m.put("Discard", "破棄");
 		m.put("Discard All Queried Pull Requests", "クエリされたすべてのプルリクエストを破棄");
 		m.put("Discard Selected Pull Requests", "選択したプルリクエストを破棄");
@@ -1099,6 +1106,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Edit this secret", "このシークレットを編集");
 		m.put("Edit this state", "この状態を編集");
 		m.put("Edit title", "タイトルを編集");
+		m.put("Edit with AI", "AIで編集");
 		m.put("Edit {0}", "{0} を編集");
 		m.put("Editable Issue Fields", "編集可能な課題フィールド");
 		m.put("Editable Issue Links", "編集可能な課題リンク");
@@ -1754,6 +1762,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Job Executors", "ジョブエグゼキューター一覧");
 		m.put("Job Name", "ジョブ名");
 		m.put("Job Names", "ジョブ名一覧");
+		m.put("Job Param", "ジョブパラメータ");
+		m.put("Job Parameters", "ジョブパラメータ");
 		m.put("Job Privilege", "ジョブ権限");
 		m.put("Job Privileges", "ジョブ権限一覧");
 		m.put("Job Properties", "ジョブプロパティ");
@@ -2097,6 +2107,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No diffs", "差分なし");
 		m.put("No diffs to navigate", "ナビゲートする差分なし");
 		m.put("No directories to skip", "スキップするディレクトリなし");
+		m.put("No disallowed file types", "許可されていないファイルタイプはありません");
 		m.put("No executors defined. Jobs will use auto-discovered executors instead", "エグゼキュータが定義されていません。ジョブは自動検出されたエグゼキュータを使用します");
 		m.put("No external password authenticator", "外部パスワード認証がありません");
 		m.put("No external password authenticator to authenticate user \"{0}\"", "ユーザー\"{0}\"を認証する外部パスワード認証がありません");
@@ -2169,6 +2180,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Not Used Since", "以降使用されていません");
 		m.put("Not a verified email of signing GPG key", "署名GPGキーの確認済みメールではありません");
 		m.put("Not a verified email of signing ssh key owner", "署名sshキー所有者の確認済みメールではありません");
+		m.put("Not allowed file type: {0}", "許可されていないファイルタイプ: {0}");
 		m.put("Not assigned", "未割り当て");
 		m.put("Not authorized to create project under \"{0}\"", "\"{0}\"の下にプロジェクトを作成する権限がありません");
 		m.put("Not authorized to create root project", "ルートプロジェクトを作成する権限がありません");
@@ -2363,6 +2375,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify description of the issue", "オプションで、課題の説明を指定してください。");
 		m.put("Optionally specify directories or glob patterns inside scan path to skip. Multiple skips should be separated by space", 
 			"オプションで、スキャンパス内のスキップするディレクトリまたはグロブパターンを指定してください。複数のスキップはスペースで区切る必要があります。");
+		m.put("Optionally specify disallowed file types by extensions (hit ENTER to add value), for instance <code>exe</code>, <code>bin</code>. Leave empty to allow all file types", 
+			"拡張子で許可されていないファイルタイプを指定します（値を追加するにはENTERを押します）、例えば <code>exe</code>, <code>bin</code>。すべてのファイルタイプを許可するには空のままにします。");
 		m.put("Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. Leave empty to use docker executable in PATH", 
 			"オプションで、Docker実行ファイルを指定してください。例: <i>/usr/local/bin/docker</i>。PATH内のDocker実行ファイルを使用する場合は空のままにしてください。");
 		m.put("Optionally specify docker options to create network. Multiple options should be separated by space, and single option containing spaces should be quoted", 
@@ -3008,6 +3022,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Revert", "元に戻す");
 		m.put("Reverted successfully", "正常に元に戻しました");
 		m.put("Review required for deletion. Submit pull request instead", "削除にはレビューが必要です。代わりにプルリクエストを送信してください");
+		m.put("Review required for this change. Please submit pull request instead", "この変更にはレビューが必要です。代わりにプルリクエストを提出してください。");
 		m.put("Review required for this change. Submit pull request instead", "この変更にはレビューが必要です。代わりにプルリクエストを送信してください");
 		m.put("Reviewers", "レビュアー");
 		m.put("Revision", "リビジョン");
@@ -3170,6 +3185,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Service desk setting", "サービスデスク設定");
 		m.put("Service desk settings have been saved", "サービスデスク設定が保存されました");
 		m.put("Services", "サービス");
+		m.put("Session Timeout", "セッションタイムアウト");
 		m.put("Set", "設定");
 		m.put("Set All Queried As Root Projects", "すべてのクエリをルートプロジェクトとして設定");
 		m.put("Set All Queried Comments as Read", "すべてのクエリされたコメントを既読として設定");
@@ -3256,6 +3272,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Sign Up Bean", "サインアップBean");
 		m.put("Sign Up!", "サインアップ！");
 		m.put("Sign in", "サインイン");
+		m.put("Signature required for this change, but no signing key is specified", "この変更には署名が必要ですが、署名キーが指定されていません。");
 		m.put("Signature required for this change, please generate system GPG signing key first", "この変更には署名が必要です。まずシステムGPG署名キーを生成してください。");
 		m.put("Signature verified successfully with OneDev GPG key", "OneDev GPGキーで署名が正常に検証されました");
 		m.put("Signature verified successfully with committer's GPG key", "コミッターのGPGキーで署名が正常に検証されました");
@@ -3286,6 +3303,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Some related commits of the code comment is missing", "コードコメントに関連する一部のコミットが欠落しています");
 		m.put("Some related commits of the pull request are missing", "プルリクエストに関連する一部のコミットが欠落しています");
 		m.put("Some required builds not passed", "必要なビルドがいくつか通過していません");
+		m.put("Someone made below change since you started editing", "編集を開始してから以下の変更が行われました。");
 		m.put("Sort", "ソート");
 		m.put("Source", "ソース");
 		m.put("Source Docker Image", "ソース Docker イメージ");
@@ -3402,6 +3420,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"上記プロジェクトで課題を作成するためのアクセス トークンとして使用するシークレットを指定します。このプロジェクトが公開されていない場合に使用します");
 		m.put("Specify a secret to be used as access token to retrieve artifacts from above project. If not specified, project artifacts will be accessed anonymously", 
 			"上記プロジェクトからアーティファクトを取得するためのアクセス トークンとして使用するシークレットを指定します。指定されていない場合、プロジェクトアーティファクトは匿名でアクセスされます");
+		m.put("Specify a secret to be used as access token to trigger job in above project", "上記のプロジェクトでジョブをトリガーするためのアクセストークンとして使用するシークレットを指定します。");
 		m.put("Specify a secret whose value is an access token with upload cache permission for above project. Note that this property is not required if upload cache to current or child project and build commit is reachable from default branch", 
 			"上記プロジェクトのキャッシュアップロード権限を持つアクセス トークンとして使用するシークレットを指定します。現在または子プロジェクトにキャッシュをアップロードし、ビルドコミットがデフォルトブランチから到達可能な場合、このプロパティは不要です");
 		m.put("Specify absolute path to the config file used by kubectl to access the cluster. Leave empty to have kubectl determining cluster access information automatically", 
@@ -3430,6 +3449,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify base nodes for user search. For example: <i>cn=Users, dc=example, dc=com</i>", 
 			"ユーザー検索のベースノードを指定します。例: <i>cn=Users, dc=example, dc=com</i>");
 		m.put("Specify branch to commit suggested change", "提案された変更をコミットするブランチを指定します");
+		m.put("Specify branch to run the job against. Either branch or tag can be specified, but not both. Default branch will be used if both not specified", 
+			"ジョブを実行するブランチを指定します。ブランチまたはタグのいずれかを指定できますが、両方は指定できません。両方が指定されていない場合はデフォルトのブランチが使用されます。");
 		m.put("Specify branch, tag or commit in above project to import build spec from", "上記プロジェクトのビルド仕様をインポートするブランチ、タグ、またはコミットを指定します");
 		m.put("Specify by Build Number", "ビルド番号で指定します");
 		m.put("Specify cache upload strategy after build successful. <var>Upload If Not Hit</var> means to upload when cache is not found with cache key (not load keys), and <var>Upload If Changed</var> means to upload if some files in cache path are changed", 
@@ -3564,6 +3585,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify project to import build spec from", "ビルド仕様をインポートするプロジェクトを指定してください。");
 		m.put("Specify project to import into at OneDev side", "OneDev側でインポートするプロジェクトを指定してください。");
 		m.put("Specify project to retrieve artifacts from", "成果物を取得するプロジェクトを指定してください。");
+		m.put("Specify project to run job in", "ジョブを実行するプロジェクトを指定します。");
 		m.put("Specify projects", "プロジェクトを指定してください。");
 		m.put("Specify projects to update dependencies. Leave empty for current project", "依存関係を更新するプロジェクトを指定してください。現在のプロジェクトの場合は空欄にしてください。");
 		m.put("Specify pylint json result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with pylint json output format option, for instance <code>--exit-zero --output-format=json:pylint-result.json</code>. Note that we do not fail pylint command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
@@ -3609,6 +3631,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"ビルドボリュームのストレージサイズをリクエストするために指定してください。サイズは<a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetesリソース容量形式</a>に準拠する必要があります。例: <i>10Gi</i>");
 		m.put("Specify tab width used to calculate column value of found problems in provided report", 
 			"提供されたレポート内の問題の列値を計算するために使用されるタブ幅を指定してください。");
+		m.put("Specify tag to run the job against. Either branch or tag can be specified, but not both. Default branch will be used if both not specified", 
+			"ジョブを実行するタグを指定します。ブランチまたはタグのいずれかを指定できますが、両方は指定できません。両方が指定されていない場合はデフォルトのブランチが使用されます。");
 		m.put("Specify target param for SCP command, for instance <code>user@@host:/app</code>. <b class='text-info'>NOTE:</b> Make sure that scp command is installed on remote host", 
 			"SCPコマンドのターゲットパラメータを指定してください。例: <code>user@@host:/app</code>。<b class='text-info'>注意:</b> リモートホストにscpコマンドがインストールされていることを確認してください。");
 		m.put("Specify text to replace matched issue references with, for instance: &lt;br&gt;&lt;em&gt;$1&amp;lt;a href='http://track.example.com/issues/$2'&amp;gt;$2&amp;lt;/a&amp;gt;&lt;/em&gt; &lt;br&gt;Here $1 and $2 represent catpure groups in the example issue pattern (see issue pattern help)", 
@@ -3798,6 +3822,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Test successful: authentication passed with below information retrieved:", "テスト成功：以下の情報が取得され、認証が通過しました：");
 		m.put("Text", "テキスト");
 		m.put("The URL of the server endpoint that will receive the webhook POST requests", "WebhookのPOSTリクエストを受信するサーバーエンドポイントのURL");
+		m.put("The change contains disallowed file type(s): {0}", "変更には許可されていないファイルタイプが含まれています: {0}");
 		m.put("The first board will be the default board", "最初のボードがデフォルトボードになります");
 		m.put("The first timesheet will be the default timesheet", "最初のタイムシートがデフォルトタイムシートになります");
 		m.put("The object you are deleting/disabling is still being used", "削除/無効化しようとしているオブジェクトはまだ使用されています");
@@ -4607,7 +4632,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Edit with AI", "AIで編集");
+		m.put("Run job in another project", "別のプロジェクトでジョブを実行する");
+		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
+			"Web UIセッションのタイムアウトを分単位で指定します。この値を変更しても既存のセッションには影響しません。");
 	}
 		
 	@Override

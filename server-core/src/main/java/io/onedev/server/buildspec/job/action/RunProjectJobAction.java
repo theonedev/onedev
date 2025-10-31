@@ -39,7 +39,7 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
 
-@Editable(name="Run job in a different project", order=150)
+@Editable(name="Run job in another project", order=150)
 @ClassValidating
 public class RunProjectJobAction extends PostBuildAction implements Validatable {
 

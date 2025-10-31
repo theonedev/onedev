@@ -99,6 +99,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"커밋 메시지 푸터를 검증하기 위한 <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java 정규 표현식</a>");
 		m.put("A child project with name \"{0}\" already exists under \"{1}\"", "\"{1}\" 아래에 이름이 \"{0}\"인 하위 프로젝트가 이미 존재합니다");
+		m.put("A file exists where you’re trying to create a subdirectory. Choose a new path and try again..", 
+			"하위 디렉토리를 생성하려는 위치에 파일이 존재합니다. 새로운 경로를 선택하고 다시 시도하세요.");
+		m.put("A path with same name already exists.Please choose a different name and try again.", 
+			"같은 이름의 경로가 이미 존재합니다. 다른 이름을 선택하고 다시 시도하세요.");
 		m.put("A pull request is open for this change", "이 변경에 대한 풀 리퀘스트가 열려 있습니다");
 		m.put("A root project with name \"{0}\" already exists", "이름이 \"{0}\"인 루트 프로젝트가 이미 존재합니다");
 		m.put("A {0} used as body of address verification email", "주소 확인 이메일 본문으로 사용된 {0}");
@@ -490,6 +494,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Build number", "빌드 번호");
 		m.put("Build preserve rules saved", "빌드 보존 규칙이 저장되었습니다");
 		m.put("Build required for deletion. Submit pull request instead", "삭제를 위해 빌드가 필요합니다. 대신 풀 리퀘스트를 제출하세요");
+		m.put("Build required for this change. Please submit pull request instead", "이 변경 사항에는 빌드가 필요합니다. 대신 풀 리퀘스트를 제출하세요.");
 		m.put("Build required for this change. Submit pull request instead", "이 변경을 위해 빌드가 필요합니다. 대신 풀 리퀘스트를 제출하세요");
 		m.put("Build spec not defined", "빌드 사양이 정의되지 않았습니다");
 		m.put("Build spec not defined (import project: {0}, import revision: {1})", "빌드 사양이 정의되지 않았습니다 (프로젝트 가져오기: {0}, 리비전 가져오기: {1})");
@@ -981,6 +986,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"계정을 비활성화하면 비밀번호가 재설정되고, 액세스 토큰이 삭제되며, 과거 활동을 제외한 다른 엔티티에서 모든 참조가 제거됩니다. 계속하시겠습니까?");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
 			"계정을 비활성화하면 비밀번호가 재설정되고, 액세스 토큰이 삭제되며, 과거 활동을 제외한 다른 엔티티에서 모든 참조가 제거됩니다. 확인하려면 <code>yes</code>를 입력하세요");
+		m.put("Disallowed File Types", "허용되지 않는 파일 유형");
+		m.put("Disallowed file type(s): {0}", "허용되지 않는 파일 유형: {0}");
 		m.put("Discard", "폐기");
 		m.put("Discard All Queried Pull Requests", "쿼리된 모든 풀 리퀘스트 폐기");
 		m.put("Discard Selected Pull Requests", "선택한 풀 리퀘스트 폐기");
@@ -1099,6 +1106,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Edit this secret", "이 비밀 편집");
 		m.put("Edit this state", "이 상태 편집");
 		m.put("Edit title", "제목 편집");
+		m.put("Edit with AI", "AI로 편집");
 		m.put("Edit {0}", "{0} 편집");
 		m.put("Editable Issue Fields", "편집 가능한 이슈 필드");
 		m.put("Editable Issue Links", "편집 가능한 이슈 링크");
@@ -1754,6 +1762,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Job Executors", "작업 실행기들");
 		m.put("Job Name", "작업 이름");
 		m.put("Job Names", "작업 이름들");
+		m.put("Job Param", "작업 매개변수");
+		m.put("Job Parameters", "작업 매개변수들");
 		m.put("Job Privilege", "작업 권한");
 		m.put("Job Privileges", "작업 권한들");
 		m.put("Job Properties", "작업 속성들");
@@ -2097,6 +2107,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No diffs", "차이 없음");
 		m.put("No diffs to navigate", "탐색할 차이 없음");
 		m.put("No directories to skip", "건너뛸 디렉터리 없음");
+		m.put("No disallowed file types", "허용되지 않는 파일 유형이 없습니다.");
 		m.put("No executors defined. Jobs will use auto-discovered executors instead", "정의된 실행자가 없습니다. 작업은 자동으로 검색된 실행자를 대신 사용합니다");
 		m.put("No external password authenticator", "외부 비밀번호 인증기 없음");
 		m.put("No external password authenticator to authenticate user \"{0}\"", "사용자 \"{0}\"를 인증할 외부 비밀번호 인증기가 없습니다");
@@ -2169,6 +2180,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Not Used Since", "사용되지 않은 이후");
 		m.put("Not a verified email of signing GPG key", "GPG 키 서명의 확인된 이메일이 아닙니다");
 		m.put("Not a verified email of signing ssh key owner", "서명 ssh 키 소유자의 확인된 이메일이 아님");
+		m.put("Not allowed file type: {0}", "허용되지 않는 파일 유형: {0}");
 		m.put("Not assigned", "할당되지 않음");
 		m.put("Not authorized to create project under \"{0}\"", "\"{0}\" 아래에 프로젝트를 생성할 권한이 없습니다.");
 		m.put("Not authorized to create root project", "루트 프로젝트를 생성할 권한이 없습니다.");
@@ -2363,6 +2375,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify description of the issue", "선택적으로 문제의 설명을 지정하세요.");
 		m.put("Optionally specify directories or glob patterns inside scan path to skip. Multiple skips should be separated by space", 
 			"선택적으로 스캔 경로 내부의 디렉터리 또는 글로브 패턴을 건너뛰세요. 여러 건너뛰기는 공백으로 구분해야 합니다.");
+		m.put("Optionally specify disallowed file types by extensions (hit ENTER to add value), for instance <code>exe</code>, <code>bin</code>. Leave empty to allow all file types", 
+			"확장자로 허용되지 않는 파일 유형을 선택적으로 지정하세요 (값을 추가하려면 ENTER를 누르세요), 예를 들어 <code>exe</code>, <code>bin</code>. 모든 파일 유형을 허용하려면 비워 두세요.");
 		m.put("Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. Leave empty to use docker executable in PATH", 
 			"선택적으로 Docker 실행 파일을 지정하세요. 예를 들어 <i>/usr/local/bin/docker</i>. PATH에 있는 Docker 실행 파일을 사용하려면 비워 두세요.");
 		m.put("Optionally specify docker options to create network. Multiple options should be separated by space, and single option containing spaces should be quoted", 
@@ -3008,6 +3022,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Revert", "되돌리기");
 		m.put("Reverted successfully", "성공적으로 되돌림");
 		m.put("Review required for deletion. Submit pull request instead", "삭제를 위해 리뷰가 필요합니다. 대신 풀 리퀘스트를 제출하십시오");
+		m.put("Review required for this change. Please submit pull request instead", "이 변경 사항에는 검토가 필요합니다. 대신 풀 리퀘스트를 제출하세요.");
 		m.put("Review required for this change. Submit pull request instead", "이 변경을 위해 리뷰가 필요합니다. 대신 풀 리퀘스트를 제출하십시오");
 		m.put("Reviewers", "리뷰어");
 		m.put("Revision", "개정");
@@ -3170,6 +3185,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Service desk setting", "서비스 데스크 설정");
 		m.put("Service desk settings have been saved", "서비스 데스크 설정이 저장되었습니다");
 		m.put("Services", "서비스");
+		m.put("Session Timeout", "세션 시간 초과");
 		m.put("Set", "설정");
 		m.put("Set All Queried As Root Projects", "쿼리된 모든 항목을 루트 프로젝트로 설정");
 		m.put("Set All Queried Comments as Read", "쿼리된 모든 댓글을 읽음으로 설정");
@@ -3256,6 +3272,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Sign Up Bean", "회원가입 Bean");
 		m.put("Sign Up!", "회원가입!");
 		m.put("Sign in", "로그인");
+		m.put("Signature required for this change, but no signing key is specified", "이 변경 사항에는 서명이 필요하지만 서명 키가 지정되지 않았습니다.");
 		m.put("Signature required for this change, please generate system GPG signing key first", "이 변경에 서명이 필요합니다. 먼저 시스템 GPG 서명 키를 생성하세요.");
 		m.put("Signature verified successfully with OneDev GPG key", "OneDev GPG 키로 서명이 성공적으로 확인되었습니다");
 		m.put("Signature verified successfully with committer's GPG key", "커미터의 GPG 키로 서명이 성공적으로 확인되었습니다");
@@ -3286,6 +3303,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Some related commits of the code comment is missing", "코드 댓글과 관련된 일부 커밋이 누락되었습니다");
 		m.put("Some related commits of the pull request are missing", "풀 리퀘스트와 관련된 일부 커밋이 누락되었습니다");
 		m.put("Some required builds not passed", "필수 빌드 중 일부가 통과하지 못했습니다");
+		m.put("Someone made below change since you started editing", "편집을 시작한 이후 아래 변경 사항이 있었습니다.");
 		m.put("Sort", "정렬");
 		m.put("Source", "소스");
 		m.put("Source Docker Image", "소스 Docker 이미지");
@@ -3402,6 +3420,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"위 프로젝트에서 이슈를 생성하기 위한 액세스 토큰으로 사용할 비밀을 지정합니다. 프로젝트가 공개적으로 접근 가능하지 않은 경우에만 필요합니다");
 		m.put("Specify a secret to be used as access token to retrieve artifacts from above project. If not specified, project artifacts will be accessed anonymously", 
 			"위 프로젝트에서 아티팩트를 가져오기 위한 액세스 토큰으로 사용할 비밀을 지정합니다. 지정하지 않으면 프로젝트 아티팩트는 익명으로 접근됩니다");
+		m.put("Specify a secret to be used as access token to trigger job in above project", "위 프로젝트에서 작업을 트리거하기 위한 액세스 토큰으로 사용할 비밀을 지정하세요.");
 		m.put("Specify a secret whose value is an access token with upload cache permission for above project. Note that this property is not required if upload cache to current or child project and build commit is reachable from default branch", 
 			"위 프로젝트에 대한 캐시 업로드 권한이 있는 액세스 토큰 값을 가진 비밀을 지정합니다. 현재 또는 하위 프로젝트로 캐시를 업로드하고 기본 브랜치에서 빌드 커밋에 접근할 수 있는 경우 이 속성이 필요하지 않습니다");
 		m.put("Specify absolute path to the config file used by kubectl to access the cluster. Leave empty to have kubectl determining cluster access information automatically", 
@@ -3430,6 +3449,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify base nodes for user search. For example: <i>cn=Users, dc=example, dc=com</i>", 
 			"사용자 검색을 위한 기본 노드를 지정합니다. 예: <i>cn=Users, dc=example, dc=com</i>");
 		m.put("Specify branch to commit suggested change", "제안된 변경 사항을 커밋할 브랜치를 지정합니다");
+		m.put("Specify branch to run the job against. Either branch or tag can be specified, but not both. Default branch will be used if both not specified", 
+			"작업을 실행할 브랜치를 지정하세요. 브랜치나 태그 중 하나만 지정할 수 있으며, 둘 다 지정할 수 없습니다. 둘 다 지정하지 않으면 기본 브랜치가 사용됩니다.");
 		m.put("Specify branch, tag or commit in above project to import build spec from", "위 프로젝트에서 빌드 사양을 가져오기 위한 브랜치, 태그 또는 커밋을 지정합니다");
 		m.put("Specify by Build Number", "빌드 번호로 지정합니다");
 		m.put("Specify cache upload strategy after build successful. <var>Upload If Not Hit</var> means to upload when cache is not found with cache key (not load keys), and <var>Upload If Changed</var> means to upload if some files in cache path are changed", 
@@ -3564,6 +3585,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify project to import build spec from", "빌드 사양을 가져올 프로젝트를 지정하세요.");
 		m.put("Specify project to import into at OneDev side", "OneDev 측에서 가져올 프로젝트를 지정하세요.");
 		m.put("Specify project to retrieve artifacts from", "아티팩트를 가져올 프로젝트를 지정하세요.");
+		m.put("Specify project to run job in", "작업을 실행할 프로젝트를 지정하세요.");
 		m.put("Specify projects", "프로젝트를 지정하세요.");
 		m.put("Specify projects to update dependencies. Leave empty for current project", "종속성을 업데이트할 프로젝트를 지정하세요. 현재 프로젝트의 경우 비워 두세요.");
 		m.put("Specify pylint json result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with pylint json output format option, for instance <code>--exit-zero --output-format=json:pylint-result.json</code>. Note that we do not fail pylint command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
@@ -3609,6 +3631,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"빌드 볼륨에 요청할 저장소 크기를 지정하세요. 크기는 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes 리소스 용량 형식</a>을 따라야 합니다. 예: <i>10Gi</i>.");
 		m.put("Specify tab width used to calculate column value of found problems in provided report", 
 			"제공된 보고서에서 발견된 문제의 열 값을 계산하는 데 사용되는 탭 너비를 지정하세요.");
+		m.put("Specify tag to run the job against. Either branch or tag can be specified, but not both. Default branch will be used if both not specified", 
+			"작업을 실행할 태그를 지정하세요. 브랜치나 태그 중 하나만 지정할 수 있으며, 둘 다 지정할 수 없습니다. 둘 다 지정하지 않으면 기본 브랜치가 사용됩니다.");
 		m.put("Specify target param for SCP command, for instance <code>user@@host:/app</code>. <b class='text-info'>NOTE:</b> Make sure that scp command is installed on remote host", 
 			"SCP 명령의 대상 매개변수를 지정하십시오. 예를 들어 <code>user@@host:/app</code>. <b class='text-info'>참고:</b> 원격 호스트에 scp 명령이 설치되어 있는지 확인하십시오.");
 		m.put("Specify text to replace matched issue references with, for instance: &lt;br&gt;&lt;em&gt;$1&amp;lt;a href='http://track.example.com/issues/$2'&amp;gt;$2&amp;lt;/a&amp;gt;&lt;/em&gt; &lt;br&gt;Here $1 and $2 represent catpure groups in the example issue pattern (see issue pattern help)", 
@@ -3798,6 +3822,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Test successful: authentication passed with below information retrieved:", "테스트 성공: 아래 정보가 검색된 상태로 인증 통과:");
 		m.put("Text", "텍스트");
 		m.put("The URL of the server endpoint that will receive the webhook POST requests", "웹훅 POST 요청을 받을 서버 엔드포인트의 URL");
+		m.put("The change contains disallowed file type(s): {0}", "변경 사항에 허용되지 않는 파일 유형이 포함되어 있습니다: {0}");
 		m.put("The first board will be the default board", "첫 번째 보드가 기본 보드가 됩니다");
 		m.put("The first timesheet will be the default timesheet", "첫 번째 타임시트가 기본 타임시트가 됩니다");
 		m.put("The object you are deleting/disabling is still being used", "삭제/비활성화하려는 객체가 여전히 사용 중입니다");
@@ -4607,7 +4632,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Edit with AI", "AI로 편집");
+		m.put("Run job in another project", "다른 프로젝트에서 작업 실행");
+		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
+			"웹 UI 세션 시간 초과를 분 단위로 지정합니다. 이 값을 변경해도 기존 세션에는 영향을 미치지 않습니다.");
 	}
 		
 	@Override

@@ -31,7 +31,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"Space should be added between English words and Chinese words\n" + 
 			"'SSO provider' should be translated as SSO 提供方\n" + 
 			"'post build' should be translated as 构建后\n" + 
-			"'artifact' should be translated as 制品")
+			"'artifact' should be translated as 制品\n" + 
+			"'job' should be translated as 任务")
 	public static void init(Map<String, String> m) {
 		m.clear();
 		m.put(" Project path can be omitted if reference from current project", "如果从当前项目引用，则可以省略项目路径");
@@ -116,6 +117,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("A <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> to validate commit message footer", 
 			"用于验证提交信息页脚的<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java正则表达式</a>");
 		m.put("A child project with name \"{0}\" already exists under \"{1}\"", "在 \"{1}\" 下已存在名为 \"{0}\" 的子项目");
+		m.put("A file exists where you’re trying to create a subdirectory. Choose a new path and try again..", 
+			"您尝试创建子目录的地方已存在一个文件。请选择一个新路径并重试。");
+		m.put("A path with same name already exists.Please choose a different name and try again.", 
+			"具有相同名称的路径已存在。请选择一个不同的名称并重试。");
 		m.put("A pull request is open for this change", "一个合并请求正在审查此更改");
 		m.put("A root project with name \"{0}\" already exists", "已存在名为 \"{0}\" 的根项目");
 		m.put("A {0} used as body of address verification email", "用作邮箱验证邮件正文的 {0}");
@@ -507,6 +512,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Build number", "构建编号");
 		m.put("Build preserve rules saved", "构建保留规则已保存");
 		m.put("Build required for deletion. Submit pull request instead", "需要构建才能删除。请提交合并请求");
+		m.put("Build required for this change. Please submit pull request instead", "此更改需要构建。请提交拉取请求。");
 		m.put("Build required for this change. Submit pull request instead", "需要构建才能更改。请提交合并请求");
 		m.put("Build spec not defined", "构建规范未定义");
 		m.put("Build spec not defined (import project: {0}, import revision: {1})", "构建规范未定义（导入项目：{0}，导入版本：{1}）");
@@ -998,6 +1004,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"禁用账户将重置密码，清除访问令牌，并删除除过去活动外的所有其他实体的引用。您真的要继续吗？");
 		m.put("Disabling accounts will reset password, clear access tokens, and remove all references from other entities except for past activities. Type <code>yes</code> to confirm", 
 			"禁用账户将重置密码，清除访问令牌，并从其他实体中删除除过去活动外的所有引用。输入 <code>yes</code> 确认");
+		m.put("Disallowed File Types", "不允许的文件类型");
+		m.put("Disallowed file type(s): {0}", "不允许的文件类型：{0}");
 		m.put("Discard", "丢弃");
 		m.put("Discard All Queried Pull Requests", "放弃所有查询的合并请求");
 		m.put("Discard Selected Pull Requests", "放弃选定的合并请求");
@@ -1116,6 +1124,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Edit this secret", "编辑此密钥");
 		m.put("Edit this state", "编辑此状态");
 		m.put("Edit title", "编辑标题");
+		m.put("Edit with AI", "使用 AI 编辑");
 		m.put("Edit {0}", "编辑 {0}");
 		m.put("Editable Issue Fields", "可编辑的工单字段");
 		m.put("Editable Issue Links", "可编辑的工单链接");
@@ -2114,6 +2123,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No diffs", "没有差异");
 		m.put("No diffs to navigate", "没有差异可导航");
 		m.put("No directories to skip", "无要跳过的目录");
+		m.put("No disallowed file types", "没有不允许的文件类型");
 		m.put("No executors defined. Jobs will use auto-discovered executors instead", "未定义执行器。作业将使用自动发现的执行器");
 		m.put("No external password authenticator", "没有外部密码认证器");
 		m.put("No external password authenticator to authenticate user \"{0}\"", "没有外部密码认证器来认证用户 \"{0}\"");
@@ -2186,6 +2196,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Not Used Since", "未使用时间");
 		m.put("Not a verified email of signing GPG key", "不是签署 GPG 密钥的已验证电子邮件");
 		m.put("Not a verified email of signing ssh key owner", "不是签署 ssh 密钥所有者的验证邮箱");
+		m.put("Not allowed file type: {0}", "不允许的文件类型：{0}");
 		m.put("Not assigned", "未分配");
 		m.put("Not authorized to create project under \"{0}\"", "无权限在 \"{0}\" 下创建项目");
 		m.put("Not authorized to create root project", "无权限创建根项目");
@@ -2380,6 +2391,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify description of the issue", "可选择指定工单的描述");
 		m.put("Optionally specify directories or glob patterns inside scan path to skip. Multiple skips should be separated by space", 
 			"可选择指定要跳过的扫描路径内的目录或 glob 模式。多个跳过项应以空格分隔");
+		m.put("Optionally specify disallowed file types by extensions (hit ENTER to add value), for instance <code>exe</code>, <code>bin</code>. Leave empty to allow all file types", 
+			"可选择通过扩展名指定不允许的文件类型（按 ENTER 键添加值），例如 <code>exe</code>, <code>bin</code>。留空以允许所有文件类型");
 		m.put("Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. Leave empty to use docker executable in PATH", 
 			"可选择指定 docker 可执行文件，例如 <i>/usr/local/bin/docker</i>。留空则使用 PATH 中的 docker 可执行文件");
 		m.put("Optionally specify docker options to create network. Multiple options should be separated by space, and single option containing spaces should be quoted", 
@@ -3025,6 +3038,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Revert", "回滚");
 		m.put("Reverted successfully", "revert 成功");
 		m.put("Review required for deletion. Submit pull request instead", "需要审查才能删除。请提交合并请求");
+		m.put("Review required for this change. Please submit pull request instead", "此更改需要审核。请提交拉取请求。");
 		m.put("Review required for this change. Submit pull request instead", "需要审查才能更改。请提交合并请求");
 		m.put("Reviewers", "审查者");
 		m.put("Revision", "修订");
@@ -3187,6 +3201,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Service desk setting", "服务台设置");
 		m.put("Service desk settings have been saved", "服务台设置已保存");
 		m.put("Services", "服务");
+		m.put("Session Timeout", "会话超时");
 		m.put("Set", "设置");
 		m.put("Set All Queried As Root Projects", "设置所有查询的项目为根项目");
 		m.put("Set All Queried Comments as Read", "将所有查询的评论设置为已读");
@@ -3273,6 +3288,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Sign Up Bean", "注册 Bean");
 		m.put("Sign Up!", "注册！");
 		m.put("Sign in", "登录");
+		m.put("Signature required for this change, but no signing key is specified", "此更改需要签名，但未指定签名密钥");
 		m.put("Signature required for this change, please generate system GPG signing key first", "需要签名才能更改。请先生成系统 GPG 签名密钥");
 		m.put("Signature verified successfully with OneDev GPG key", "使用 OneDev GPG 密钥成功验证签名");
 		m.put("Signature verified successfully with committer's GPG key", "使用提交者的 GPG 密钥成功验证签名");
@@ -3303,6 +3319,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Some related commits of the code comment is missing", "与代码评论相关的提交缺失");
 		m.put("Some related commits of the pull request are missing", "与合并请求相关的提交缺失");
 		m.put("Some required builds not passed", "一些必需的构建未通过");
+		m.put("Someone made below change since you started editing", "自您开始编辑以来，有人进行了以下更改");
 		m.put("Sort", "排序");
 		m.put("Source", "源");
 		m.put("Source Docker Image", "Docker 镜像源");
@@ -4624,7 +4641,18 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Edit with AI", "使用 AI 编辑");
+		m.put("Job Param", "任务参数");
+		m.put("Job Parameters", "任务参数");
+		m.put("Run job in another project", "在另一个项目中运行任务");
+		m.put("Specify a secret to be used as access token to trigger job in above project", "指定一个秘密作为访问令牌以触发上述项目中的任务");
+		m.put("Specify branch to run the job against. Either branch or tag can be specified, but not both. Default branch will be used if both not specified", 
+			"指定要运行任务的分支。可以指定分支或标签，但不能同时指定。如果两者都未指定，将使用默认分支");
+		m.put("Specify project to run job in", "指定要运行任务的项目");
+		m.put("Specify tag to run the job against. Either branch or tag can be specified, but not both. Default branch will be used if both not specified", 
+			"指定要运行任务的标签。可以指定分支或标签，但不能同时指定。如果两者都未指定，将使用默认分支");
+		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
+			"指定 Web UI 会话超时时间（分钟）。更改此值后，现有会话将不受影响。");
+		m.put("The change contains disallowed file type(s): {0}", "更改包含不允许的文件类型：{0}");
 	}
 		
 	@Override
