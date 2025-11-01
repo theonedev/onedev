@@ -3,6 +3,7 @@ package io.onedev.server.util;
 import org.jspecify.annotations.Nullable;
 
 public class FileExtension {
+
 	@Nullable
 	public static String getExtension(@Nullable String filename) {
 		if(filename == null) {
@@ -14,7 +15,6 @@ public class FileExtension {
 			String fileExt = filename.substring(lastIndexOfDot+1);
 			return fileExt;
 		}
-		// No Extension
 		return "";
 	}
 	
@@ -30,7 +30,6 @@ public class FileExtension {
 			return filename;
 		}
 		
-		// Remove extension and '.'
 		return filename.substring(0, filename.length() - extension.length() - 1);
 	}
 }

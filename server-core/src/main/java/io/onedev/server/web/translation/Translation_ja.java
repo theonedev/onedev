@@ -3058,6 +3058,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Run docker buildx imagetools command with specified arguments. This step can only be executed by server docker executor or remote docker executor", 
 			"指定された引数でDocker Buildx Imagetoolsコマンドを実行します。このステップはサーバーDockerエグゼキューターまたはリモートDockerエグゼキューターによってのみ実行可能です");
 		m.put("Run job", "ジョブを実行");
+		m.put("Run job in another project", "別のプロジェクトでジョブを実行する");
 		m.put("Run on Bare Metal/Virtual Machine", "ベアメタル/仮想マシンで実行");
 		m.put("Run osv scanner to scan violated licenses used by various <a href='https://deps.dev/' target='_blank'>dependencies</a>. It can only be executed by docker aware executor.", 
 			"さまざまな<a href='https://deps.dev/' target='_blank'>依存関係</a>で使用されている違反ライセンスをスキャンするためにOSVスキャナーを実行します。Docker対応エグゼキューターによってのみ実行可能です");
@@ -3652,6 +3653,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify user name of the registry", "レジストリのユーザー名を指定してください。");
 		m.put("Specify user name to authenticate with", "認証に使用するユーザー名を指定してください。");
 		m.put("Specify value of the environment variable", "環境変数の値を指定してください。");
+		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
+			"Web UIセッションのタイムアウトを分単位で指定します。この値を変更しても既存のセッションには影響しません。");
 		m.put("Specify webhook url to post events", "イベントを投稿するためのWebhook URLを指定してください。");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"閉じたGitHubの問題に使用する問題状態を指定してください。<br><b>注意:</b> 適切なオプションがない場合は、OneDevの問題状態をカスタマイズすることができます。");
@@ -4632,9 +4635,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Run job in another project", "別のプロジェクトでジョブを実行する");
-		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
-			"Web UIセッションのタイムアウトを分単位で指定します。この値を変更しても既存のセッションには影響しません。");
 	}
 		
 	@Override

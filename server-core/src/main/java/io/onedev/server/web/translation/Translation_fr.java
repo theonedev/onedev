@@ -3058,6 +3058,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Run docker buildx imagetools command with specified arguments. This step can only be executed by server docker executor or remote docker executor", 
 			"Exécutez la commande docker buildx imagetools avec les arguments spécifiés. Cette étape ne peut être exécutée que par un exécuteur docker serveur ou un exécuteur docker distant");
 		m.put("Run job", "Exécuter le travail");
+		m.put("Run job in another project", "Exécuter le travail dans un autre projet");
 		m.put("Run on Bare Metal/Virtual Machine", "Exécuter sur Bare Metal/Machine Virtuelle");
 		m.put("Run osv scanner to scan violated licenses used by various <a href='https://deps.dev/' target='_blank'>dependencies</a>. It can only be executed by docker aware executor.", 
 			"Exécutez le scanner osv pour analyser les licences violées utilisées par diverses <a href='https://deps.dev/' target='_blank'>dépendances</a>. Cela ne peut être exécuté que par un exécuteur compatible avec Docker.");
@@ -3652,6 +3653,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Specify user name of the registry", "Spécifiez le nom d'utilisateur du registre");
 		m.put("Specify user name to authenticate with", "Spécifiez le nom d'utilisateur pour l'authentification");
 		m.put("Specify value of the environment variable", "Spécifiez la valeur de la variable d'environnement");
+		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
+			"Spécifiez le délai d'expiration de la session de l'interface utilisateur web en minutes. Les sessions existantes ne seront pas affectées après la modification de cette valeur.");
 		m.put("Specify webhook url to post events", "Spécifiez l'URL du webhook pour publier des événements");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"Spécifiez l'état du problème à utiliser pour les problèmes GitHub fermés.<br><b>REMARQUE :</b> Vous pouvez personnaliser les états des problèmes OneDev si aucune option appropriée n'est disponible ici");
@@ -4632,9 +4635,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Run job in another project", "Exécuter le travail dans un autre projet");
-		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
-			"Spécifiez le délai d'expiration de la session de l'interface utilisateur web en minutes. Les sessions existantes ne seront pas affectées après la modification de cette valeur.");
 	}
 		
 	@Override

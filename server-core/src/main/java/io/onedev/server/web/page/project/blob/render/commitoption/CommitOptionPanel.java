@@ -9,8 +9,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -30,6 +28,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -49,6 +48,7 @@ import io.onedev.server.git.service.PathChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.FileExtension;
 import io.onedev.server.util.Provider;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -274,10 +274,10 @@ public class CommitOptionPanel extends Panel {
 					Map<String, BlobContent> newBlobs = new HashMap<>();
 					if (newContentProvider != null) {
 						String newPath = context.getNewPath();
-						var blobType = StringUtils.substringAfterLast(newPath, ".");
+						var blobType = FileExtension.getExtension(newPath);
 
 						var disallowedFileTypes = context.getProject().getBranchProtection(revision, user).getDisallowedFileTypes();
-						if (disallowedFileTypes.stream().anyMatch(type -> blobType.equalsIgnoreCase(type))) {
+						if (disallowedFileTypes.stream().anyMatch(type -> type.equalsIgnoreCase(blobType))) {
 							form.error(MessageFormat.format(_T("Not allowed file type: {0}"), blobType));
 							target.add(form);
 							return false;

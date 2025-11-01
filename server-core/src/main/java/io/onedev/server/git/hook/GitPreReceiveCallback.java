@@ -158,7 +158,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 						if (commitMessageError != null)
 							errorMessages.add(commitMessageError.toString());
 					}
-					if (errorMessages.isEmpty() && !protection.getDisallowedFileTypes().isEmpty()) {
+					if (errorMessages.isEmpty()) {
 						var violatedFileTypes = protection.getViolatedFileTypes(project, oldObjectId, newObjectId, gitEnvs);
 						if (!violatedFileTypes.isEmpty()) {
 							errorMessages.add("Your push contains disallowed file type(s): " + StringUtils.join(violatedFileTypes, ", "));

@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
@@ -51,6 +49,7 @@ import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,9 +64,6 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.service.CodeCommentService;
-import io.onedev.server.service.PullRequestService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.event.project.CommitIndexed;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobContent;
@@ -93,6 +89,10 @@ import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.util.FileExtension;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -1539,10 +1539,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			String blobPath = FilenameUtils.sanitizeFileName(FileUpload.getFileName(item));
 			if (parentPath != null)
 				blobPath = parentPath + "/" + blobPath;
-			var blobType = StringUtils.substringAfterLast(blobPath, ".");
+			var blobType = FileExtension.getExtension(blobPath);
 
 			var disallowedFileTypes = getProject().getBranchProtection(blobIdent.revision, user).getDisallowedFileTypes();
-			if (disallowedFileTypes.stream().anyMatch(type -> blobType.equalsIgnoreCase(type))) {
+			if (disallowedFileTypes.stream().anyMatch(type -> type.equalsIgnoreCase(blobType))) {
 				throw new BlobEditException(MessageFormat.format(_T("Not allowed file type: {0}"), blobType));
 			}
 

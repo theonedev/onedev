@@ -1780,6 +1780,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Job Executors", "任务执行器");
 		m.put("Job Name", "任务名称");
 		m.put("Job Names", "任务名称");
+		m.put("Job Param", "任务参数");
+		m.put("Job Parameters", "任务参数");
 		m.put("Job Privilege", "任务权限");
 		m.put("Job Privileges", "任务权限");
 		m.put("Job Properties", "任务属性");
@@ -3074,6 +3076,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Run docker buildx imagetools command with specified arguments. This step can only be executed by server docker executor or remote docker executor", 
 			"使用指定参数运行 docker buildx imagetools 命令。此步骤只能由服务器 docker 执行器或远程 docker 执行器执行");
 		m.put("Run job", "运行任务");
+		m.put("Run job in another project", "在另一个项目中运行任务");
 		m.put("Run on Bare Metal/Virtual Machine", "在裸机/虚拟机上运行");
 		m.put("Run osv scanner to scan violated licenses used by various <a href='https://deps.dev/' target='_blank'>dependencies</a>. It can only be executed by docker aware executor.", 
 			"运行 OSV 扫描器扫描各种 <a href='https://deps.dev/' target='_blank'>依赖项</a> 使用的违反许可证。它只能由 dock er执行器执行。");
@@ -3436,6 +3439,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"如果上述项目不是公开可访问的，指定一个用作访问令牌的密钥以在其中创建工单");
 		m.put("Specify a secret to be used as access token to retrieve artifacts from above project. If not specified, project artifacts will be accessed anonymously", 
 			"指定一个用作访问令牌的密钥以从上述项目拷贝制品。如果未指定，将匿名访问项目制品");
+		m.put("Specify a secret to be used as access token to trigger job in above project", "指定一个秘密作为访问令牌以触发上述项目中的任务");
 		m.put("Specify a secret whose value is an access token with upload cache permission for above project. Note that this property is not required if upload cache to current or child project and build commit is reachable from default branch", 
 			"指定一个密钥，其值是具有上述项目上传缓存权限的访问令牌。注意，如果上传缓存到当前或子项目且构建提交可从默认分支访问，则不需要此属性");
 		m.put("Specify absolute path to the config file used by kubectl to access the cluster. Leave empty to have kubectl determining cluster access information automatically", 
@@ -3464,6 +3468,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify base nodes for user search. For example: <i>cn=Users, dc=example, dc=com</i>", 
 			"指定用户搜索的基础节点。例如：<i>cn=Users, dc=example, dc=com</i>");
 		m.put("Specify branch to commit suggested change", "指定要提交建议更改的分支");
+		m.put("Specify branch to run the job against. Either branch or tag can be specified, but not both. Default branch will be used if both not specified", 
+			"指定要运行任务的分支。可以指定分支或标签，但不能同时指定。如果两者都未指定，将使用默认分支");
 		m.put("Specify branch, tag or commit in above project to import build spec from", "指定要从上述项目导入构建规范的分支、标签或提交");
 		m.put("Specify by Build Number", "按构建编号指定");
 		m.put("Specify cache upload strategy after build successful. <var>Upload If Not Hit</var> means to upload when cache is not found with cache key (not load keys), and <var>Upload If Changed</var> means to upload if some files in cache path are changed", 
@@ -3598,6 +3604,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify project to import build spec from", "指定从中导入构建规范的项目");
 		m.put("Specify project to import into at OneDev side", "指定在 OneDev 端导入的项目");
 		m.put("Specify project to retrieve artifacts from", "指定从中拷贝制品的项目");
+		m.put("Specify project to run job in", "指定要运行任务的项目");
 		m.put("Specify projects", "指定项目");
 		m.put("Specify projects to update dependencies. Leave empty for current project", "指定要更新依赖的项目。留空表示当前项目");
 		m.put("Specify pylint json result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with pylint json output format option, for instance <code>--exit-zero --output-format=json:pylint-result.json</code>. Note that we do not fail pylint command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
@@ -3643,6 +3650,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"指定为构建卷请求的存储大小。大小应符合 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes 资源容量格式</a>，例如 <i>10Gi</i>");
 		m.put("Specify tab width used to calculate column value of found problems in provided report", 
 			"指定用于计算报告中发现问题列值的制表符宽度");
+		m.put("Specify tag to run the job against. Either branch or tag can be specified, but not both. Default branch will be used if both not specified", 
+			"指定要运行任务的标签。可以指定分支或标签，但不能同时指定。如果两者都未指定，将使用默认分支");
 		m.put("Specify target param for SCP command, for instance <code>user@@host:/app</code>. <b class='text-info'>NOTE:</b> Make sure that scp command is installed on remote host", 
 			"指定 SCP 命令的目标参数，例如 <code>user@@host:/app</code>。<b class='text-info'>注意：</b> 确保远程主机上已安装 scp 命令");
 		m.put("Specify text to replace matched issue references with, for instance: &lt;br&gt;&lt;em&gt;$1&amp;lt;a href='http://track.example.com/issues/$2'&amp;gt;$2&amp;lt;/a&amp;gt;&lt;/em&gt; &lt;br&gt;Here $1 and $2 represent catpure groups in the example issue pattern (see issue pattern help)", 
@@ -3662,6 +3671,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify user name of the registry", "指定注册表的用户名");
 		m.put("Specify user name to authenticate with", "指定用于身份验证的用户名");
 		m.put("Specify value of the environment variable", "指定环境变量的值");
+		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
+			"指定 Web UI 会话超时时间（分钟）。更改此值后，现有会话将不受影响。");
 		m.put("Specify webhook url to post events", "指定发布事件的 Webhook URL");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"指定用于已关闭 GitHub 工单的工单状态。<br><b>注意：</b> 如果此处没有合适的选项，您可以自定义 OneDev 工单状态");
@@ -3832,6 +3843,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Test successful: authentication passed with below information retrieved:", "认证成功: 认证通过，已查询到以下信息:");
 		m.put("Text", "文本");
 		m.put("The URL of the server endpoint that will receive the webhook POST requests", "接收 Webhook POST 请求的服务器端点 URL");
+		m.put("The change contains disallowed file type(s): {0}", "更改包含不允许的文件类型：{0}");
 		m.put("The first board will be the default board", "第一个看板将成为默认看板");
 		m.put("The first timesheet will be the default timesheet", "第一个时间表将成为默认时间表");
 		m.put("The object you are deleting/disabling is still being used", "您正在删除/禁用的对象仍在使用中");
@@ -4641,18 +4653,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Job Param", "任务参数");
-		m.put("Job Parameters", "任务参数");
-		m.put("Run job in another project", "在另一个项目中运行任务");
-		m.put("Specify a secret to be used as access token to trigger job in above project", "指定一个秘密作为访问令牌以触发上述项目中的任务");
-		m.put("Specify branch to run the job against. Either branch or tag can be specified, but not both. Default branch will be used if both not specified", 
-			"指定要运行任务的分支。可以指定分支或标签，但不能同时指定。如果两者都未指定，将使用默认分支");
-		m.put("Specify project to run job in", "指定要运行任务的项目");
-		m.put("Specify tag to run the job against. Either branch or tag can be specified, but not both. Default branch will be used if both not specified", 
-			"指定要运行任务的标签。可以指定分支或标签，但不能同时指定。如果两者都未指定，将使用默认分支");
-		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
-			"指定 Web UI 会话超时时间（分钟）。更改此值后，现有会话将不受影响。");
-		m.put("The change contains disallowed file type(s): {0}", "更改包含不允许的文件类型：{0}");
 	}
 		
 	@Override

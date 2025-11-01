@@ -3058,6 +3058,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Run docker buildx imagetools command with specified arguments. This step can only be executed by server docker executor or remote docker executor", 
 			"지정된 인수를 사용하여 docker buildx imagetools 명령을 실행하십시오. 이 단계는 서버 docker 실행기 또는 원격 docker 실행기에서만 실행할 수 있습니다");
 		m.put("Run job", "작업 실행");
+		m.put("Run job in another project", "다른 프로젝트에서 작업 실행");
 		m.put("Run on Bare Metal/Virtual Machine", "베어 메탈/가상 머신에서 실행");
 		m.put("Run osv scanner to scan violated licenses used by various <a href='https://deps.dev/' target='_blank'>dependencies</a>. It can only be executed by docker aware executor.", 
 			"다양한 <a href='https://deps.dev/' target='_blank'>종속성</a>에서 사용된 위반된 라이센스를 스캔하기 위해 osv 스캐너를 실행하십시오. 이는 Docker를 인식하는 실행기에서만 실행할 수 있습니다.");
@@ -3652,6 +3653,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify user name of the registry", "레지스트리의 사용자 이름을 지정하십시오.");
 		m.put("Specify user name to authenticate with", "인증에 사용할 사용자 이름을 지정하십시오.");
 		m.put("Specify value of the environment variable", "환경 변수의 값을 지정하십시오.");
+		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
+			"웹 UI 세션 시간 초과를 분 단위로 지정합니다. 이 값을 변경해도 기존 세션에는 영향을 미치지 않습니다.");
 		m.put("Specify webhook url to post events", "이벤트를 게시할 웹훅 URL을 지정하십시오.");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"닫힌 GitHub 이슈에 사용할 이슈 상태를 지정하십시오.<br><b>참고:</b> 적절한 옵션이 없는 경우 OneDev 이슈 상태를 사용자 정의할 수 있습니다.");
@@ -4632,9 +4635,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Run job in another project", "다른 프로젝트에서 작업 실행");
-		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
-			"웹 UI 세션 시간 초과를 분 단위로 지정합니다. 이 값을 변경해도 기존 세션에는 영향을 미치지 않습니다.");
 	}
 		
 	@Override
