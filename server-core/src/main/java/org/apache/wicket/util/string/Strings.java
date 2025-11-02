@@ -53,6 +53,7 @@ import org.apache.wicket.util.lang.Args;
  * 
  * @author Jonathan Locke
  */
+@SuppressWarnings("removal")
 public final class Strings
 {
 	/**

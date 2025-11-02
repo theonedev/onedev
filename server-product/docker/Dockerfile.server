@@ -7,7 +7,7 @@ FROM ubuntu:24.04
 ARG TARGETPLATFORM
 COPY app /app
 COPY entrypoint-server.sh /root/bin/entrypoint.sh
-RUN apt-get update && apt-get install -y locales iproute2 curl git git-lfs openjdk-11-jre-headless && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y locales iproute2 curl git git-lfs openjdk-17-jre-headless && rm -rf /var/lib/apt/lists/*
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen
 ENV LANG en_US.UTF-8

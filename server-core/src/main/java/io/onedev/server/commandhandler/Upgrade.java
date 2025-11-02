@@ -949,7 +949,11 @@ public class Upgrade extends AbstractPlugin {
 
 			if (!wrapperConf.contains("-Djdk.io.File.allowDeleteReadOnlyFiles=true")) {
 				wrapperConf += lineSeparator() + "wrapper.java.additional.150=-Djdk.io.File.allowDeleteReadOnlyFiles=true";
-			}		
+			}
+			
+			wrapperConf = wrapperConf.replace("wrapper.java.version.min=11", "wrapper.java.version.min=17");
+			wrapperConf = wrapperConf.replace("Java version 11", "Java version 17");
+			wrapperConf = wrapperConf.replace("Java 11 or higher", "Java 17 or higher");
 			
 			var lines = Splitter.on('\n').trimResults().splitToList(wrapperConf);
 			if (lines.stream().noneMatch(it -> it.contains("-XX:MaxRAMPercentage"))) {
