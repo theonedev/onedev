@@ -2,12 +2,14 @@ package io.onedev.server.web.behavior.inputassist;
 
 import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -17,6 +19,9 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,7 +32,10 @@ import com.google.common.base.Splitter;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.RangeUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -38,6 +46,8 @@ import io.onedev.server.web.component.floating.ComponentTarget;
 import io.onedev.server.web.component.floating.FloatingPanel;
 
 public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
+
+	private static final Logger logger = LoggerFactory.getLogger(InputAssistBehavior.class);	
 
 	public static final int MAX_SUGGESTIONS = 1000;
 	
@@ -113,9 +123,27 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 		if (type.equals("close")) {
 			if (dropdown != null)
 				dropdown.close();
+		} else if (type.equals("translate")) {
+			String toTranslate = params.getParameterValue("input").toString();
+			String translated;
+			try {
+				translated = Preconditions.checkNotNull(getNaturalLanguageTranslator()).translate(toTranslate);
+			} catch (Exception e) {
+				translated = toTranslate;
+				var explicitException = ExceptionUtils.find(e, ExplicitException.class);
+				if (explicitException != null) {
+					Session.get().error(explicitException.getMessage());
+				} else {
+					logger.error("Error translating natural language input", e);
+					Session.get().error("Error translating natural language input. Check server log for details");
+				}
+			}
+			target.appendJavaScript(
+				String.format("onedev.server.inputassist.naturalLanguageTranslated('%s', '%s');", 
+				getComponent().getMarkupId(), escapeJavaScript(translated)));
 		} else {
 			String inputContent = params.getParameterValue("input").toString();
-			Integer inputCaret = params.getParameterValue("caret").toOptionalInteger();
+			int inputCaret = params.getParameterValue("caret").toInt();
 
 			Preconditions.checkArgument(inputContent.indexOf('\r') == -1);
 			
@@ -133,7 +161,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 					getComponent().getMarkupId(), json);
 			target.appendJavaScript(script);
 			
-			if (inputCaret != null) {
+			if (inputCaret != -1) {
 				InputStatus inputStatus = new InputStatus(inputContent, inputCaret);
 				List<InputCompletion> suggestions = new ArrayList<>();				
 				ComponentContext.push(new ComponentContext(getComponent()));
@@ -159,68 +187,89 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 								hasOtherSuggestions = true;
 						}
 					}
-
+	
 					if (hasAppendSpaceSuggestions && !hasOtherSuggestions) {
 						target.appendJavaScript(
 								String.format("onedev.server.inputassist.appendSpace('%s');", 
 								getComponent().getMarkupId()));
 					} else {
-						int anchor = getAnchor(inputContent.substring(0, inputCaret));
-						if (dropdown == null) {
-							dropdown = new FloatingPanel(target, new Alignment(new ComponentTarget(getComponent(), anchor), AlignPlacement.bottom(0))) {
-
-								@Override
-								protected Component newContent(String id) {
-									return new AssistPanel(id, getComponent(), suggestions, getHints(inputStatus)) {
-
-										@Override
-										protected void onClose(AjaxRequestTarget target) {
-											close();
-										}
-
-									};
-								}
-
-								@Override
-								protected void onClosed() {
-									super.onClosed();
-									dropdown = null;
-								}
-
-							};
-							script = String.format("onedev.server.inputassist.assistOpened('%s', '%s', '%s');",
-									getComponent().getMarkupId(), dropdown.getMarkupId(), JavaScriptEscape.escapeJavaScript(inputContent));
-							target.appendJavaScript(script);
-						} else {
-							Component content = dropdown.getContent();
-							Component newContent = new AssistPanel(content.getId(), getComponent(), suggestions, getHints(inputStatus)) {
-
-								@Override
-								protected void onClose(AjaxRequestTarget target) {
-									close();
-								}
-
-							};
-							content.replaceWith(newContent);
-							target.add(newContent);
-
-							AlignTarget alignTarget = new ComponentTarget(getComponent(), anchor);
-							script = String.format("$('#%s').data('alignment').target=%s;", dropdown.getMarkupId(), alignTarget);
-							target.prependJavaScript(script);
-
-							script = String.format("onedev.server.inputassist.assistUpdated('%s', '%s', '%s');",
-									getComponent().getMarkupId(), dropdown.getMarkupId(), JavaScriptEscape.escapeJavaScript(inputContent));
-							target.appendJavaScript(script);
-						}
+						addTranslationSuggestion(inputStatus, suggestions);
+						showSuggestions(target, inputStatus, suggestions);
 					}
+				} else if (addTranslationSuggestion(inputStatus, suggestions)) {
+					showSuggestions(target, inputStatus, suggestions);
 				} else if (dropdown != null) {
 					dropdown.close();
 				}
 			} else if (dropdown != null) {
 				dropdown.close();
 			}
+
 			onInput(target, inputContent);
 		}
+	}
+
+	private boolean addTranslationSuggestion(InputStatus status, List<InputCompletion> suggestions) {
+		var queryTranslator = getNaturalLanguageTranslator();
+		if (queryTranslator != null) {
+			var contentBeforeCaret = status.getContentBeforeCaret();
+			if (StringUtils.isNotBlank(contentBeforeCaret) && suggestions.stream().noneMatch(it->!isFuzzySuggestion(it))) {
+				contentBeforeCaret += "🤖";
+				suggestions.add(0, new InputCompletion(contentBeforeCaret, contentBeforeCaret + status.getContentAfterCaret(), contentBeforeCaret.length(), _T("Natural language query via AI"), null));
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void showSuggestions(AjaxRequestTarget target, InputStatus status, List<InputCompletion> suggestions) {
+		int anchor = getAnchor(status.getContent().substring(0, status.getCaret()));
+		if (dropdown == null) {
+			dropdown = new FloatingPanel(target, new Alignment(new ComponentTarget(getComponent(), anchor), AlignPlacement.bottom(0))) {
+
+				@Override
+				protected Component newContent(String id) {
+					return new AssistPanel(id, getComponent(), suggestions, getHints(status)) {
+
+						@Override
+						protected void onClose(AjaxRequestTarget target) {
+							close();
+						}
+
+					};
+				}
+
+				@Override
+				protected void onClosed() {
+					super.onClosed();
+					dropdown = null;
+				}
+
+			};
+			var script = String.format("onedev.server.inputassist.assistOpened('%s', '%s', '%s');",
+					getComponent().getMarkupId(), dropdown.getMarkupId(), JavaScriptEscape.escapeJavaScript(status.getContent()));
+			target.appendJavaScript(script);
+		} else {
+			Component content = dropdown.getContent();
+			Component newContent = new AssistPanel(content.getId(), getComponent(), suggestions, getHints(status)) {
+
+				@Override
+				protected void onClose(AjaxRequestTarget target) {
+					close();
+				}
+
+			};
+			content.replaceWith(newContent);
+			target.add(newContent);
+
+			AlignTarget alignTarget = new ComponentTarget(getComponent(), anchor);
+			var script = String.format("$('#%s').data('alignment').target=%s;", dropdown.getMarkupId(), alignTarget);
+			target.prependJavaScript(script);
+
+			script = String.format("onedev.server.inputassist.assistUpdated('%s', '%s', '%s');",
+					getComponent().getMarkupId(), dropdown.getMarkupId(), JavaScriptEscape.escapeJavaScript(status.getContent()));
+			target.appendJavaScript(script);
+		}		
 	}
 	
 	public void close() {
@@ -242,10 +291,10 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 		translations.put("inactiveHelp", _T("<span class='keycap'>Tab</span> to complete."));
 		String script;
 		try {
-			script = String.format("onedev.server.inputassist.onDomReady('%s', %s, %s);", 
+			script = String.format("onedev.server.inputassist.onDomReady('%s', %s, %b, %s);", 
 					getComponent().getMarkupId(true), 
 					getCallbackFunction(explicit("type"), explicit("input"), explicit("caret"), explicit("event")),
-					AppLoader.getInstance(ObjectMapper.class).writeValueAsString(translations));
+					getNaturalLanguageTranslator() != null, AppLoader.getInstance(ObjectMapper.class).writeValueAsString(translations));
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -274,4 +323,10 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 	protected boolean isFuzzySuggestion(InputCompletion suggestion) {
 		return false;
 	}
+	
+	@Nullable
+	protected NaturalLanguageTranslator getNaturalLanguageTranslator() {
+		return null;
+	}
+
 }

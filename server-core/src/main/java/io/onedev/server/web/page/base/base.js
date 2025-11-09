@@ -177,7 +177,7 @@ onedev.server = {
 	setupAjaxLoadingIndicator: function() {
 		var ongoingAjaxRequests = 0;
 		Wicket.Event.subscribe('/ajax/call/beforeSend', function(e, attributes) {
-			if (ongoingAjaxRequests == 0) {
+			if (ongoingAjaxRequests == 0 && $(".ajax-loading-indicator:visible").length == 0) {				
 				var $ajaxLoadingIndicator = $("#ajax-loading-indicator");
 				if ($ajaxLoadingIndicator[0].timer)
 					clearTimeout($ajaxLoadingIndicator[0].timer);

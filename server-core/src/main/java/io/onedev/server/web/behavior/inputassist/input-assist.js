@@ -1,6 +1,7 @@
 onedev.server.inputassist = {
-	onDomReady: function(inputId, callback, translations) {
-		var $input = $("#" + inputId);
+	onDomReady: function(inputId, callback, supportNaturalLanguageInput, translations) {
+		var $input = $("#" + inputId);	
+		$input.data("supportNaturalLanguageInput", supportNaturalLanguageInput);
 		onedev.server.inputassist.translations = translations;
 		
 		onedev.server.inputassist.markErrors(inputId, []);
@@ -21,8 +22,20 @@ onedev.server.inputassist = {
 			if (value != $input.data("prevValue") || caret != $input.data("prevCaret") || !$input.data("dropdown")) {
 				$input.data("prevValue", value);
 				$input.data("prevCaret", caret);
-				if ($input.is(":focus") && e.keyCode != 27 && e.keyCode != 13) // ignore esc, enter
-					callback("input", value, caret, e.type);
+				if ($input.is(":focus") && e.keyCode != 27 && e.keyCode != 13) { // ignore esc, enter	
+					if (caret != -1 && $input.data("supportNaturalLanguageInput")) {
+						var contentBeforeCaret = value.substring(0, caret);
+						if (contentBeforeCaret.endsWith("🤖")) {
+							var contentToTranslate = contentBeforeCaret.substring(0, contentBeforeCaret.length-2);
+							onedev.server.inputassist.showNaturalLanguageTranslatingIndicator($input, caret);						
+							callback("translate", contentToTranslate, caret);
+						} else {
+							callback("input", value, caret, e.type);
+						}
+					} else {
+						callback("input", value, caret, e.type);
+					}
+				}
 			}
 			if (value.trim().length == 0)
 				onedev.server.inputassist.markErrors(inputId, []);
@@ -133,28 +146,28 @@ onedev.server.inputassist = {
 	markErrors: function(inputId, errors) {
 		var $input = $("#" + inputId);
 		$input.data("errors", errors);
-		var $parent = $input.closest("form");
-		$parent.css("position", "relative");
-		$parent.find(">.input-error-mark").remove();
+		var $form = $input.closest("form");
+		$form.css("position", "relative");
+		$form.find(">.input-error-mark").remove();
 		if ($input.val().length != 0) {
 			for (var i in errors) {
 				var error = errors[i];
 				var fromCoord = getCaretCoordinates($input[0], error.from);
 				var toCoord = getCaretCoordinates($input[0], error.to+1);
 				var $error = $("<div class='input-error-mark'></div>");
-				$error.appendTo($parent);
+				$error.appendTo($form);
 				var inputCoord = $input.offset();
-				var parentCoord = $parent.offset();
+				var parentCoord = $form.offset();
 				var textHeight = 16;
 				var errorHeight = 5;
 				var minWidth = 5;
 				var textMargin = 10;
 				var left = fromCoord.left + inputCoord.left - parentCoord.left - $input.scrollLeft();
-				if (left < $input.offset().left - $parent.offset().left + textMargin)
-					left = $input.offset().left - $parent.offset().left + textMargin;
+				if (left < $input.offset().left - $form.offset().left + textMargin)
+					left = $input.offset().left - $form.offset().left + textMargin;
 				var top = fromCoord.top + inputCoord.top - parentCoord.top + textHeight - $input.scrollTop(); 
-				if (top < $input.offset().top - $parent.offset().top + textMargin)
-					top = $input.offset().top - $parent.offset().top + textMargin;
+				if (top < $input.offset().top - $form.offset().top + textMargin)
+					top = $input.offset().top - $form.offset().top + textMargin;
 				$error.css({left: left, top: top});
 				$error.outerWidth(Math.max(toCoord.left-fromCoord.left, minWidth));
 				$error.outerHeight(errorHeight);
@@ -166,6 +179,19 @@ onedev.server.inputassist = {
 		var $input = $("#" + inputId);
 		$input.val($input.val() + " ");
 		$input.caret($input.val().length + 1);
+		$input.blur();
+		$input.focus();
+		$input.trigger("input");
+		$input.trigger("assist");
+	},
+
+	naturalLanguageTranslated: function(inputId, translatedInput) {
+		var $input = $("#" + inputId);		
+		onedev.server.inputassist.hideNaturalLanguageTranslatingIndicator($input);
+		var caret = $input.caret();
+		var content = translatedInput + $input.val().substring(caret);
+		$input.val(content);
+		$input.caret(translatedInput.length);
 		$input.blur();
 		$input.focus();
 		$input.trigger("input");
@@ -217,5 +243,36 @@ onedev.server.inputassist = {
 		} else {
 			$dropdown.find(".help .complete").empty().append(onedev.server.inputassist.translations["inactiveHelp"]);
 		}
+	},
+	
+	showNaturalLanguageTranslatingIndicator: function($input, caret) {
+		$input.prop("readonly", true);
+		var $form = $input.closest("form");
+		$form.css("position", "relative");
+		
+		var coord = getCaretCoordinates($input[0], caret);
+		var $indicator;
+		if (onedev.server.isDarkMode())
+			$indicator = $("<div class='ajax-loading-indicator natural-language-translating-indicator'><img src='/~img/dark-ajax-indicator.gif' width='16' height='16'></div>");
+		else
+			$indicator = $("<div class='ajax-loading-indicator natural-language-translating-indicator'><img src='/~img/ajax-indicator.gif' width='16' height='16'></div>");
+		$indicator.appendTo($form);
+		
+		var inputCoord = $input.offset();
+		var parentCoord = $form.offset();
+		var left = coord.left + inputCoord.left - parentCoord.left - $input.scrollLeft() + 5;
+		var top = coord.top + inputCoord.top - parentCoord.top - $input.scrollTop() - 3;
+		
+		$indicator.css({
+			position: "absolute",
+			left: left + "px",
+			top: top + "px",
+			zIndex: 1000
+		});
+	},
+	
+	hideNaturalLanguageTranslatingIndicator: function($input) {
+		$input.prop("readonly", false);
+		$input.closest("form").children(".natural-language-translating-indicator").remove();
 	}
 };

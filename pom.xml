@@ -627,6 +627,11 @@
 				<artifactId>fastexcel</artifactId>
 				<version>0.15.7</version>
 			</dependency>
+			<dependency>
+				<groupId>dev.langchain4j</groupId>
+				<artifactId>langchain4j-open-ai</artifactId>
+				<version>${langchain4j.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<repositories>
@@ -663,5 +668,6 @@
 		<servlet.version>3.1.0</servlet.version>
 		<jackson.version>2.15.0</jackson.version>
 		<tika.version>1.28.3</tika.version>
+		<langchain4j.version>1.8.0</langchain4j.version>
 	</properties>
 </project>

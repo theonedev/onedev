@@ -1,7 +1,38 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.server.model.AbstractEntity.NAME_NUMBER;
+import static io.onedev.server.search.entity.EntityQuery.getValue;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.checkField;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.getOperator;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.getRuleName;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ApprovedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.AssignedToMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.CommentedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IgnoredByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IncludesCommit;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IncludesIssue;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.MentionedMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.NeedMyAction;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.OrderBy;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.RequestedForChangesByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.SubmittedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ToBeChangedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ToBeMergedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ToBeReviewedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.WatchedByMe;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.model.IModel;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -10,28 +41,19 @@ import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.ai.QueryDescriptions;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
 import io.onedev.server.web.util.SuggestionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.model.IModel;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static io.onedev.server.model.AbstractEntity.NAME_NUMBER;
-import static io.onedev.server.search.entity.EntityQuery.getValue;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.*;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.*;
-import static io.onedev.server.web.translation.Translation._T;
 
 public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 
@@ -241,6 +263,8 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 				}
 			}
 		} 
+		if (getSettingService().getAISetting().getNaturalLanguageQueryModelSetting() == null)
+			hints.add(_T("Set up AI to use natural language query"));
 		return hints;
 	}
 
@@ -248,6 +272,27 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 	protected boolean isFuzzySuggestion(InputCompletion suggestion) {
 		return suggestion.getDescription() != null 
 				&& suggestion.getDescription().startsWith(FUZZY_SUGGESTION_DESCRIPTION_PREFIX);
+	}
+	
+	@Override
+	protected NaturalLanguageTranslator getNaturalLanguageTranslator() {
+		var naturalLanguageQueryModel = getSettingService().getAISetting().getNaturalLanguageQueryModel();
+		if (naturalLanguageQueryModel != null) {
+			return new NaturalLanguageTranslator(naturalLanguageQueryModel) {
+				
+				@Override
+				public String getQueryDescription() {
+					return QueryDescriptions.getPullRequestQueryDescription();
+				}
+
+			};
+		} else {
+			return null;
+		}
+	}
+
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 	
 }

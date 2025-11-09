@@ -6,9 +6,9 @@ import static io.onedev.server.model.User.PROP_SERVICE_ACCOUNT;
 import static io.onedev.server.model.support.administration.SystemSetting.PROP_CURL_LOCATION;
 import static io.onedev.server.model.support.administration.SystemSetting.PROP_DISABLE_AUTO_UPDATE_CHECK;
 import static io.onedev.server.model.support.administration.SystemSetting.PROP_GIT_LOCATION;
+import static io.onedev.server.model.support.administration.SystemSetting.PROP_SESSION_TIMEOUT;
 import static io.onedev.server.model.support.administration.SystemSetting.PROP_SSH_ROOT_URL;
 import static io.onedev.server.model.support.administration.SystemSetting.PROP_USE_AVATAR_SERVICE;
-import static io.onedev.server.model.support.administration.SystemSetting.PROP_SESSION_TIMEOUT;
 import static io.onedev.server.persistence.PersistenceUtils.tableExists;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
@@ -74,19 +74,13 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.commandhandler.Upgrade;
 import io.onedev.server.data.migration.DataMigrator;
 import io.onedev.server.data.migration.MigrationHelper;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AlertService;
-import io.onedev.server.service.EmailAddressService;
-import io.onedev.server.service.LinkSpecService;
-import io.onedev.server.service.RoleService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
@@ -98,6 +92,7 @@ import io.onedev.server.model.Role;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.AISetting;
 import io.onedev.server.model.support.administration.AgentSetting;
 import io.onedev.server.model.support.administration.AlertSetting;
 import io.onedev.server.model.support.administration.AuditSetting;
@@ -124,6 +119,12 @@ import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.service.AlertService;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.LinkSpecService;
+import io.onedev.server.service.RoleService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
@@ -878,11 +879,13 @@ public class DefaultDataService implements DataService, Serializable {
 		}
 
 		setting = settingService.findSetting(Key.AUDIT);
-		if (setting == null) {
-			AuditSetting auditSetting = new AuditSetting();
-			settingService.saveAuditSetting(auditSetting);
-		}
-		
+		if (setting == null) 
+			settingService.saveAuditSetting(new AuditSetting());
+
+		setting = settingService.findSetting(Key.AI);
+		if (setting == null) 
+			settingService.saveAISetting(new AISetting());
+	
 		if (roleService.get(Role.OWNER_ID) == null) {
 			Role owner = new Role();
 			owner.setName("Project Owner");

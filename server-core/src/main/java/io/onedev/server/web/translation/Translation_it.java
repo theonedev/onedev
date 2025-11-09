@@ -4635,6 +4635,10 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("AI Model", "Modello AI");
+		m.put("AI Model Provider", "Fornitore di Modelli AI");
+		m.put("Model", "Modello");
+		m.put("Open AI", "Open AI");
 	}
 		
 	@Override

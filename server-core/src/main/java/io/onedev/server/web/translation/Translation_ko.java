@@ -4635,6 +4635,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("AI Model", "AI 모델");
+		m.put("AI Model Provider", "AI 모델 제공자");
+		m.put("Model", "모델");
+		m.put("Open AI", "오픈 AI");
 	}
 		
 	@Override

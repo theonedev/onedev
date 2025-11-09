@@ -57,11 +57,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -75,9 +74,7 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.service.GroupService;
-import io.onedev.server.service.LinkSpecService;
-import io.onedev.server.service.SettingService;
+import io.onedev.server.ai.QueryDescriptions;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.LinkSpec;
@@ -100,8 +97,12 @@ import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoic
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.IssueQueryParser;
 import io.onedev.server.search.entity.project.ProjectQuery;
+import io.onedev.server.service.GroupService;
+import io.onedev.server.service.LinkSpecService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -339,8 +340,21 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					}
 					
 				}.suggest(terminalExpect);
-			} else if (spec.getRuleName().equals("Fuzzy")) {
+			} else if (spec.getRuleName().equals("Ai")) {
+				return new FenceAware(codeAssist.getGrammar(), '`', '`') {
 
+					@Override
+					protected List<InputSuggestion> match(String matchWith) {
+						return null;
+					}
+
+					@Override
+					protected String getFencingDescription() {
+						return _T("enclose with ` to query with AI");
+					}
+
+				}.suggest(terminalExpect);
+			} else if (spec.getRuleName().equals("Fuzzy")) {
 				return new FenceAware(codeAssist.getGrammar(), '~', '~') {
 
 					@Override
@@ -354,7 +368,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					}
 
 				}.suggest(terminalExpect);
-			}
+			} 
 		} 
 		return null;
 	}
@@ -397,7 +411,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected List<String> getHints(TerminalExpect terminalExpect) {
 		List<String> hints = new ArrayList<>();
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingService.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = getSettingService().getIssueSetting();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if ("criteriaValue".equals(spec.getLabel())) {
@@ -418,13 +432,35 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 				}
 			}
 		} 
+		if (getSettingService().getAISetting().getNaturalLanguageQueryModelSetting() == null)
+			hints.add(_T("Set up AI to use natural language query"));
 		return hints;
 	}
 	
 	@Override
 	protected boolean isFuzzySuggestion(InputCompletion suggestion) {
-		return suggestion.getDescription() != null 
-				&& suggestion.getDescription().startsWith(FUZZY_SUGGESTION_DESCRIPTION_PREFIX);
+		return suggestion.getDescription() != null && (suggestion.getDescription().startsWith(FUZZY_SUGGESTION_DESCRIPTION_PREFIX));
 	}
 	
+	@Override
+	protected NaturalLanguageTranslator getNaturalLanguageTranslator() {
+		var naturalLanguageQueryModel = getSettingService().getAISetting().getNaturalLanguageQueryModel();
+		if (naturalLanguageQueryModel != null) {
+			return new NaturalLanguageTranslator(naturalLanguageQueryModel) {
+				
+				@Override
+				public String getQueryDescription() {
+					return QueryDescriptions.getIssueQueryDescription();
+				}
+
+			};
+		} else {
+			return null;
+		}
+	}
+
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
+	}
+
 }

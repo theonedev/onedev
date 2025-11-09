@@ -4653,6 +4653,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
+		m.put("AI Model", "AI 模型");
+		m.put("AI Model Provider", "AI 模型提供方");
+		m.put("Model", "模型");
+		m.put("Open AI", "Open AI");
 	}
 		
 	@Override

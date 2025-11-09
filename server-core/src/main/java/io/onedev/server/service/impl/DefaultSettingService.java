@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.Validator;
@@ -21,6 +20,7 @@ import javax.validation.Validator;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.shiro.crypto.AesCipherService;
 import org.apache.shiro.crypto.CipherService;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.OneDev;
@@ -30,6 +30,7 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
+import io.onedev.server.model.support.administration.AISetting;
 import io.onedev.server.model.support.administration.AgentSetting;
 import io.onedev.server.model.support.administration.AlertSetting;
 import io.onedev.server.model.support.administration.AuditSetting;
@@ -167,6 +168,11 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 	}
 
 	@Override
+	public AISetting getAISetting() {
+		return (AISetting) getSettingValue(Key.AI);
+	}
+	
+	@Override
 	public SecuritySetting getSecuritySetting() {
 		return (SecuritySetting) getSettingValue(Key.SECURITY);
 	}
@@ -294,6 +300,12 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 	@Override
 	public void saveAuditSetting(AuditSetting auditSetting) {
 		saveSetting(Key.AUDIT, auditSetting);
+	}
+
+	@Transactional
+	@Override
+	public void saveAISetting(AISetting aiSetting) {
+		saveSetting(Key.AI, aiSetting);
 	}
 	
 	@Transactional

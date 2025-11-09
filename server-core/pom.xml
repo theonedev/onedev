@@ -394,6 +394,10 @@
 			<artifactId>kotlin-stdlib-jdk7</artifactId>
 			<version>${kotlin.version}</version>
 		</dependency>		
+		<dependency>
+			<groupId>dev.langchain4j</groupId>
+			<artifactId>langchain4j-open-ai</artifactId>
+		</dependency>
 	</dependencies>
 	<properties>
 		<kotlin.version>1.9.23</kotlin.version>
