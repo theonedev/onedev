@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.jspecify.annotations.Nullable;
 import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
@@ -51,6 +50,7 @@ import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
@@ -73,10 +73,6 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.CodeCommentService;
-import io.onedev.server.service.CodeCommentReplyService;
-import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
@@ -92,6 +88,10 @@ import io.onedev.server.model.support.Mark;
 import io.onedev.server.search.code.CodeSearchService;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.CodeCommentReplyService;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.CodeCommentStatusChangeService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.diff.DiffUtils;
@@ -115,6 +115,7 @@ import io.onedev.server.web.component.sourceformat.SourceFormatPanel;
 import io.onedev.server.web.component.suggestionapply.SuggestionApplyBean;
 import io.onedev.server.web.component.suggestionapply.SuggestionApplyModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.component.symboltooltip.SymbolContext;
 import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
@@ -135,7 +136,7 @@ import io.onedev.server.web.util.WicketUtils;
  */
 public class SourceViewPanel extends BlobViewPanel implements Positionable, SearchMenuContributor {
 
-	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);
+	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);	
 	
 	private static final String COOKIE_OUTLINE = "sourceView.outline";
 	
@@ -834,6 +835,51 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			@Override
 			protected Project getProject() {
 				return context.getProject();
+			}
+
+			@Override
+			protected String getSymbolPositionCalcFunction() {
+				return 
+					"""
+					function(symbolEl) {
+						var cm = symbolEl.closest(".CodeMirror").CodeMirror;
+						if (cm) {
+							var lineElement = symbolEl.closest('.CodeMirror-line').parentElement;
+							for (var view of cm.display.view) {
+								if (view.node === lineElement) {
+									return cm.getLineNumber(view.line);
+								}
+							}
+						}
+						return -1;
+					}""";
+			}
+
+			@Override
+			protected SymbolContext getSymbolContext(String symbolPosition, int beforeContextSize, 
+					int afterContextSize, int atStartContextSize) {
+				var lineNo = Integer.parseInt(symbolPosition);
+				var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
+				List<String> linesBefore = new ArrayList<>();
+				List<String> linesAfter = new ArrayList<>();
+				String symbolLine = lines.get(lineNo);
+				for (int i = Math.max(0, lineNo - beforeContextSize); i < lineNo; i++) {
+					linesBefore.add(lines.get(i));
+				}
+				for (int i = lineNo + 1; i <= Math.min(lineNo + afterContextSize, lines.size() - 1); i++) {
+					linesAfter.add(lines.get(i));
+				}
+				List<String> linesAtStart = new ArrayList<>();
+				for (int i = 0; i < Math.min(atStartContextSize, lines.size()); i++) {
+					linesAtStart.add(lines.get(i));
+				}
+				return new SymbolContext(
+					context.getBlobIdent().path,
+					symbolLine,
+					linesBefore,
+					linesAfter,
+					linesAtStart
+				);
 			}
 			
 		});

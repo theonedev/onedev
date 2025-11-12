@@ -127,7 +127,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 			String toTranslate = params.getParameterValue("input").toString();
 			String translated;
 			try {
-				translated = Preconditions.checkNotNull(getNaturalLanguageTranslator()).translate(toTranslate);
+				translated = getNaturalLanguageTranslator().translate(toTranslate);
 			} catch (Exception e) {
 				translated = toTranslate;
 				var explicitException = ExceptionUtils.find(e, ExplicitException.class);

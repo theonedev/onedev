@@ -12,15 +12,15 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.support.administration.AISetting;
 import io.onedev.server.service.SettingService;
-import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
-public class AISettingPage extends AdministrationPage {
+public class LiteModelPage extends AdministrationPage {
 
 	@Inject
 	private SettingService settingService;
 
-	public AISettingPage(PageParameters params) {
+	public LiteModelPage(PageParameters params) {
 		super(params);
 	}
 
@@ -39,20 +39,20 @@ public class AISettingPage extends AdministrationPage {
 				var newAuditContent = VersionedXmlDoc.fromBean(aiSetting).toXML();
 				settingService.saveAISetting(aiSetting);
 				auditService.audit(null, "changed AI settings", oldAuditContent, newAuditContent);				
-				getSession().success(_T("AI settings have been saved"));
+				getSession().success(_T("Lite AI model settings have been saved"));
 				
-				setResponsePage(AISettingPage.class);
+				setResponsePage(LiteModelPage.class);
 			}
 			
 		};
-		form.add(BeanContext.edit("editor", aiSetting));
+		form.add(PropertyContext.edit("editor", aiSetting, AISetting.PROP_LITE_MODEL_SETTING));
 		
 		add(form);
 	}
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, _T("AI Settings"));
+		return new Label(componentId, _T("Lite AI Model"));
 	}
 
 }

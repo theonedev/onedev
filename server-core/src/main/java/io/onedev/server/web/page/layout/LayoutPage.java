@@ -91,7 +91,7 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.HomePage;
-import io.onedev.server.web.page.admin.aisetting.AISettingPage;
+import io.onedev.server.web.page.admin.aisetting.LiteModelPage;
 import io.onedev.server.web.page.admin.alertsettings.AlertSettingPage;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.brandingsetting.BrandingSettingPage;
@@ -339,8 +339,12 @@ public abstract class LayoutPage extends BasePage {
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, _T("Groovy Scripts"),
 							GroovyScriptListPage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, _T("AI Settings"),
-							AISettingPage.class, new PageParameters()));
+					List<SidebarMenuItem> aiMenuItems = new ArrayList<>();
+					
+					aiMenuItems.add(new SidebarMenuItem.Page(null, _T("Lite Model"),
+							LiteModelPage.class, new PageParameters()));
+
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("AI Settings"), aiMenuItems));
 
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, _T("Branding"),
 							BrandingSettingPage.class, new PageParameters()));

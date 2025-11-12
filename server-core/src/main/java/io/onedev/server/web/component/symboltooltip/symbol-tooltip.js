@@ -1,5 +1,5 @@
 onedev.server.symboltooltip = {
-	init: function(containerId, queryCallback) {
+	init: function(containerId, callback, symbolPositionCalcFunction) {
 		var container = document.getElementById(containerId);
 		
 		var showTimer;
@@ -69,21 +69,41 @@ onedev.server.symboltooltip = {
 				});
 
 				$tooltip.data("alignment", {placement: {x: 0, y:0, offset:2, targetX: 0, targetY: 100}, target: {element: symbolEl}});
-				$tooltip.align($tooltip.data("alignment"));
-
-				queryCallback(revision, $symbol.text());
+				$tooltip.align($tooltip.data("alignment"));				
+				callback("query", revision, $symbol.text(), symbolPositionCalcFunction($symbol[0]));
 				
 				showTimer = null;
 			}, 500);
 		};
 	},
-	doneQuery: function(contentId) {
+	doneQuery: function(contentId, callback) {
 		var $content = $("#" + contentId);
 		var $container = $content.parent();
 		var $tooltip = $("#" + $container.attr("id") + "-symbol-tooltip");
 		$tooltip.removeClass("d-none");
-		if ($tooltip.length != 0) 
+		var $definitions = $content.children(".definitions");
+		if (callback) {
+			var $indicator;
+			if (onedev.server.isDarkMode())
+				$indicator = $('<div class="definition-inferring-indicator mb-2 ajax-loading-indicator"><img src="/~img/dark-ajax-indicator.gif"/> <wicket:t>Inferring the most probable...</wicket:t></div>');
+			else
+				$indicator = $('<div class="definition-inferring-indicator mb-2 ajax-loading-indicator"><img src="/~img/ajax-indicator.gif"/> <wicket:t>Inferring the most probable...</wicket:t></div>');
+			$indicator.insertBefore($definitions);
+			callback("infer");
+		} else {
+			$definitions.addClass("no-definition-infer");
+		}
+		if ($tooltip.length != 0) {
 			$tooltip.html($content.children()).align($tooltip.data("alignment"));
+		}
+	},
+
+	doneInfer: function(definitionId) {
+		var $definition = $("#" + definitionId);
+		$definition.addClass("most-probable");
+		var $tooltip = $definition.closest(".symbol-tooltip");
+		$tooltip.find(".definition-inferring-indicator").remove();
+		$tooltip.align($tooltip.data("alignment"));
 	},
 	
 	// this is public API which can be called from other components using this component

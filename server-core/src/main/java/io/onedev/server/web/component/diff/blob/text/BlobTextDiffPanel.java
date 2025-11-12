@@ -14,8 +14,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -32,6 +30,7 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.jspecify.annotations.Nullable;
 import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,7 +42,6 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.codequality.CodeProblem;
-import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.BlameCommit;
 import io.onedev.server.git.BlobChange;
@@ -54,6 +52,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.diff.DiffBlock;
@@ -66,6 +65,7 @@ import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
 import io.onedev.server.web.component.diff.blob.BlobAnnotationSupport;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
 import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.component.symboltooltip.SymbolContext;
 import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -352,7 +352,62 @@ public class BlobTextDiffPanel extends Panel {
 			protected Project getProject() {
 				return change.getProject();
 			}
-			
+
+			@Override
+			protected String getSymbolPositionCalcFunction() {
+				return 
+					"""
+					function(symbolEl) {
+						var $td = $(symbolEl).closest('td.content');
+						if ($td.hasClass('old'))
+							return 'old:' + $td.data('old');
+						else
+							return 'new:' + $td.data('new');
+					}""";
+			}
+
+			@Override
+			protected SymbolContext getSymbolContext(String symbolPosition, int beforeContextSize, 
+					int afterContextSize, int atStartContextSize) {
+				String[] parts = symbolPosition.split(":");
+				boolean isNew = parts[0].equals("new");
+				int lineNo = Integer.parseInt(parts[1]);
+				
+				List<String> lines;
+				String path;
+				if (isNew) {
+					lines = change.getNewText().getLines();
+					path = change.getNewBlobIdent().path;
+				} else {
+					lines = change.getOldText().getLines();
+					path = change.getOldBlobIdent().path;
+				}
+				
+				List<String> linesBefore = new ArrayList<>();
+				List<String> linesAfter = new ArrayList<>();
+				String symbolLine = lines.get(lineNo);
+				
+				for (int i = Math.max(0, lineNo - beforeContextSize); i < lineNo; i++) {
+					linesBefore.add(lines.get(i));
+				}
+				for (int i = lineNo + 1; i <= Math.min(lineNo + afterContextSize, lines.size() - 1); i++) {
+					linesAfter.add(lines.get(i));
+				}
+				
+				List<String> linesAtStart = new ArrayList<>();
+				for (int i = 0; i < Math.min(atStartContextSize, lines.size()); i++) {
+					linesAtStart.add(lines.get(i));
+				}
+				
+				return new SymbolContext(
+					path,
+					symbolLine,
+					linesBefore,
+					linesAfter,
+					linesAtStart
+				);
+			}
+						
 		};
 		add(symbolTooltip);
 		

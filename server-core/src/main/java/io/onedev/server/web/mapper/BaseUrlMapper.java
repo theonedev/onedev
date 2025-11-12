@@ -8,7 +8,7 @@ import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.web.asset.icon.IconScope;
-import io.onedev.server.web.page.admin.aisetting.AISettingPage;
+import io.onedev.server.web.page.admin.aisetting.LiteModelPage;
 import io.onedev.server.web.page.admin.alertsettings.AlertSettingPage;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.brandingsetting.BrandingSettingPage;
@@ -347,7 +347,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/labels", LabelManagementPage.class));
 		add(new BasePageMapper("~administration/settings/alert", AlertSettingPage.class));
 		add(new BasePageMapper("~administration/settings/performance", PerformanceSettingPage.class));
-		add(new BasePageMapper("~administration/settings/ai", AISettingPage.class));
+		add(new BasePageMapper("~administration/settings/lite-ai-model", LiteModelPage.class));
 		add(new BasePageMapper("~administration/settings/backup", DatabaseBackupPage.class));
 		add(new BasePageMapper("~administration/settings/authenticator", AuthenticatorPage.class));
 		add(new BasePageMapper("~administration/settings/sso-providers", SsoProviderListPage.class));

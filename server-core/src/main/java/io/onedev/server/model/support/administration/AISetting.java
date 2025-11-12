@@ -12,30 +12,24 @@ import io.onedev.server.model.support.AIModelSetting;
 public class AISetting implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    public static final String PROP_LITE_MODEL_SETTING = "liteModelSetting";
     
-    private AIModelSetting naturalLanguageQueryModelSetting;
+    private AIModelSetting liteModelSetting;
     
-    @Editable(order=100, name="Natural Language Query Model", description=
-        """
-        If specified, one will be able to query issues, pull requests and builds via natural language. Suggested models in terms of performance and cost for this task:
-        <ul>
-            <li>Google/gemini-2.5-flash</li>
-            <li>OpenAI/gpt-4.1-mini</li>
-            <li>Qwen/Qwen-2.5-72B-instruct</li>
-        </ul>
-        """)
+    @Editable(order=100)
     @Nullable
-    public AIModelSetting getNaturalLanguageQueryModelSetting() {
-        return naturalLanguageQueryModelSetting;
+    public AIModelSetting getLiteModelSetting() {
+        return liteModelSetting;
     }
 
-    public void setNaturalLanguageQueryModelSetting(AIModelSetting naturalLanguageQueryModelSetting) {
-        this.naturalLanguageQueryModelSetting = naturalLanguageQueryModelSetting;
+    public void setLiteModelSetting(AIModelSetting liteModelSetting) {
+        this.liteModelSetting = liteModelSetting;
     }
 
     @Nullable
-    public ChatModel getNaturalLanguageQueryModel() {
-        return naturalLanguageQueryModelSetting != null ? naturalLanguageQueryModelSetting.getChatModel() : null;
+    public ChatModel getLiteModel() {
+        return liteModelSetting != null ? liteModelSetting.getChatModel() : null;
     }
 
 }

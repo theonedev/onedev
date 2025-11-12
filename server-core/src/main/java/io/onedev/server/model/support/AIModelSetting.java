@@ -61,7 +61,7 @@ public class AIModelSetting implements Serializable {
         this.apiKey = apiKey;
     }
 
-    @Editable(order=400)
+    @Editable(order=400, name="Name")
     @ChoiceProvider("getModels")
     @NotEmpty
     public String getName() {

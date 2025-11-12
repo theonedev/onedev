@@ -1,9 +1,13 @@
 <wicket:panel>
 	<div wicket:id="content">
-		<wicket:enclosure child="declarations">
-		<div class="mb-2"><b>Possible declarations</b></div>
-		<ul class="declarations list-unstyled">
-			<li wicket:id="declarations">
+		<wicket:enclosure child="definitions">
+		<div class="mb-2"><b><wicket:t>Possible definitions</wicket:t></b></div>
+		<div wicket:id="definitionInferHint" class="mb-2 hint">
+			<wicket:svg href="bulb" class="icon icon-sm"/><wicket:t><a href="/~administration/settings/lite-ai-model" target="_blank">Set up AI</a> to mark the most probable</wicket:t>
+		</div>
+		<ul class="definitions list-unstyled">
+			<li wicket:id="definitions">				
+				<span class="most-probable-indicator"><wicket:svg href="tick" class="icon icon-sm"/></span>
 				<img wicket:id="icon">
 				<a wicket:id="delegateLink"></a>
 				<a wicket:id="link">
@@ -18,7 +22,7 @@
 		</ul>
 		</wicket:enclosure>
 		<div>
-			<a wicket:id="findOccurrences" class="find-occurrences"><b>All occurrences</b></a>
+			<a wicket:id="findOccurrences" class="find-occurrences"><b><wicket:t>All occurrences</wicket:t></b></a>
 		</div>
 	</div>
 </wicket:panel>

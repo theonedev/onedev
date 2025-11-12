@@ -258,16 +258,16 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 				}
 			}
 		} 
-		if (getSettingService().getAISetting().getNaturalLanguageQueryModelSetting() == null)
-			hints.add(_T("Set up AI to use natural language query"));
+		if (getSettingService().getAISetting().getLiteModelSetting() == null)
+			hints.add(_T("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to use natural language query"));
 		return hints;
 	}
 
 	@Override
 	protected NaturalLanguageTranslator getNaturalLanguageTranslator() {
-		var naturalLanguageQueryModel = getSettingService().getAISetting().getNaturalLanguageQueryModel();
-		if (naturalLanguageQueryModel != null) {
-			return new NaturalLanguageTranslator(naturalLanguageQueryModel) {
+		var liteModel = getSettingService().getAISetting().getLiteModel();
+		if (liteModel != null) {
+			return new NaturalLanguageTranslator(liteModel) {
 				
 				@Override
 				public String getQueryDescription() {
