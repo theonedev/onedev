@@ -26,8 +26,8 @@
 }
 
 .symbol-tooltip .definition-inferring-indicator img {
-	width: 14px;
-	height: 14px;
+	width: 16px;
+	height: 16px;
 }
 .symbol-tooltip .definitions.no-definition-infer>li .most-probable-indicator {
 	display: none;

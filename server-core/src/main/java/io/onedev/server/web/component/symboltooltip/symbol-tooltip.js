@@ -83,11 +83,8 @@ onedev.server.symboltooltip = {
 		$tooltip.removeClass("d-none");
 		var $definitions = $content.children(".definitions");
 		if (callback) {
-			var $indicator;
-			if (onedev.server.isDarkMode())
-				$indicator = $('<div class="definition-inferring-indicator mb-2 ajax-loading-indicator"><img src="/~img/dark-ajax-indicator.gif"/> <wicket:t>Inferring the most probable...</wicket:t></div>');
-			else
-				$indicator = $('<div class="definition-inferring-indicator mb-2 ajax-loading-indicator"><img src="/~img/ajax-indicator.gif"/> <wicket:t>Inferring the most probable...</wicket:t></div>');
+			var icon = onedev.server.isDarkMode()? "sparkle.gif": "sparkle-dark.gif";
+			var $indicator = $('<div class="definition-inferring-indicator mb-2 ajax-loading-indicator"><img src="/~img/' + icon + '"/> <wicket:t>Inferring the most likely...</wicket:t></div>');
 			$indicator.insertBefore($definitions);
 			callback("infer");
 		} else {
@@ -98,11 +95,13 @@ onedev.server.symboltooltip = {
 		}
 	},
 
-	doneInfer: function(definitionId) {
-		var $definition = $("#" + definitionId);
-		$definition.addClass("most-probable");
-		var $tooltip = $definition.closest(".symbol-tooltip");
+	doneInfer: function(tooltipId, index) {
+		var $tooltip = $("#" + tooltipId);
 		$tooltip.find(".definition-inferring-indicator").remove();
+		var $definitions = $tooltip.find(">.definitions>li");
+		if (index >= 0 && index < $definitions.length) {
+			$definitions.eq(index).addClass("most-probable");
+		}
 		$tooltip.align($tooltip.data("alignment"));
 	},
 	

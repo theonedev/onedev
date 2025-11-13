@@ -251,11 +251,8 @@ onedev.server.inputassist = {
 		$form.css("position", "relative");
 		
 		var coord = getCaretCoordinates($input[0], caret);
-		var $indicator;
-		if (onedev.server.isDarkMode())
-			$indicator = $("<div class='ajax-loading-indicator natural-language-translating-indicator'><img src='/~img/dark-ajax-indicator.gif' width='16' height='16'></div>");
-		else
-			$indicator = $("<div class='ajax-loading-indicator natural-language-translating-indicator'><img src='/~img/ajax-indicator.gif' width='16' height='16'></div>");
+		var icon = onedev.server.isDarkMode()? "sparkle.gif": "sparkle-dark.gif";
+		var $indicator = $("<div class='ajax-loading-indicator natural-language-translating-indicator'><img src='/~img/" + icon + "' width='16' height='16'></div>");
 		$indicator.appendTo($form);
 		
 		var inputCoord = $input.offset();

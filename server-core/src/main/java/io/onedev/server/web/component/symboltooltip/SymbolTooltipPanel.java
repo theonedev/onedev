@@ -315,6 +315,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 					target.appendJavaScript(script);
 				} else {
 					var liteModel = settingService.getAISetting().getLiteModel();
+					int index;
 					try {
 						ObjectMapper mapperCopy = objectMapper.copy();
 						mapperCopy.addMixIn(PlanarRange.class, IgnorePlanarRangeMixin.class);
@@ -344,19 +345,17 @@ public abstract class SymbolTooltipPanel extends Panel {
 								Possible symbol definitions json:
 								%s
 								""", symbolName, jsonOfSymbolContext, jsonOfSymbolHits));
-						var lineNo = Integer.parseInt(liteModel.chat(systemMessage, userMessage).aiMessage().text());
-						if (lineNo >= 0 && lineNo < symbolHits.size()) {
-							@SuppressWarnings("unchecked")
-							ListView<QueryHit> definitionsView = (ListView<QueryHit>) content.get("definitions");							
-							@SuppressWarnings("deprecation")
-							var script = String.format("onedev.server.symboltooltip.doneInfer('%s');", 
-									definitionsView.get(lineNo).getMarkupId());
-							target.appendJavaScript(script);
-						}
+						index = Integer.parseInt(liteModel.chat(systemMessage, userMessage).aiMessage().text());
+						if (index < 0 || index >= symbolHits.size())
+							Session.get().warn("Unable to find most likely definition");
 					} catch (Exception e) {
+						index = -1;
 						logger.error("Error inferring most likely symbol definition", e);
 						Session.get().error("Error inferring most likely symbol definition, check server log for details");
 					}					
+					var script = String.format("onedev.server.symboltooltip.doneInfer('%s', %d);", 
+							getMarkupId() + "-symbol-tooltip", index);
+					target.appendJavaScript(script);
 				}
 			}
 

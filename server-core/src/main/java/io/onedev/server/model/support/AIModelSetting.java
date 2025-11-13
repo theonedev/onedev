@@ -29,9 +29,7 @@ public class AIModelSetting implements Serializable {
     
     private static final long serialVersionUID = 1L;
 
-    private static final int DEFAULT_CONNECT_TIMEOUT_SECONDS = 10;
-
-    private static final int DEFAULT_READ_TIMEOUT_SECONDS = 30;
+    private static final int TIMEOUT_SECONDS = 30;
 
     private static final Logger logger = LoggerFactory.getLogger(AIModelSetting.class);
 
@@ -84,16 +82,14 @@ public class AIModelSetting implements Serializable {
             try {
                 var modelsUrl = baseUrl.endsWith("/") ? baseUrl + "models" : baseUrl + "/models";
                 
-                HttpClient client = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofSeconds(DEFAULT_CONNECT_TIMEOUT_SECONDS))
-                    .build();
+                HttpClient client = HttpClient.newBuilder().build();
                 
                 HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(modelsUrl))
                     .header("Authorization", "Bearer " + apiKey)
                     .header("Content-Type", "application/json")
                     .GET()
-                    .timeout(Duration.ofSeconds(DEFAULT_READ_TIMEOUT_SECONDS))
+                    .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
                     .build();
                 
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -128,7 +124,7 @@ public class AIModelSetting implements Serializable {
             .apiKey(apiKey)
             .baseUrl(baseUrl)
             .modelName(name)
-            .timeout(Duration.ofSeconds(DEFAULT_READ_TIMEOUT_SECONDS))
+            .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
             .build(); 
     }
 
