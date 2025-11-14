@@ -1,7 +1,11 @@
 package io.onedev.server.web.page.project.pullrequests.create;
 
+import static io.onedev.server.model.PullRequest.MAX_DESCRIPTION_LEN;
+import static io.onedev.server.model.PullRequest.MAX_TITLE_LEN;
 import static io.onedev.server.search.commit.Revision.Type.COMMIT;
 import static io.onedev.server.web.translation.Translation._T;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -16,10 +20,11 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
+import javax.inject.Inject;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
@@ -27,8 +32,9 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -47,9 +53,17 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.UserMessage;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
@@ -58,11 +72,7 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
-import io.onedev.server.service.CodeCommentService;
-import io.onedev.server.service.CodeCommentReplyService;
-import io.onedev.server.service.CodeCommentStatusChangeService;
-import io.onedev.server.service.LabelSpecService;
-import io.onedev.server.service.PullRequestService;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
@@ -87,10 +97,17 @@ import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.CodeCommentReplyService;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.CodeCommentStatusChangeService;
+import io.onedev.server.service.LabelSpecService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.branch.picker.AffinalBranchPicker;
@@ -119,9 +136,17 @@ import io.onedev.server.web.util.editbean.LabelsBean;
 
 public class NewPullRequestPage extends ProjectPage implements RevisionAnnotationSupport {
 
+	private static final Logger logger = LoggerFactory.getLogger(NewPullRequestPage.class);
+	
 	private static final String TABS_ID = "tabs";
 	
 	private static final String TAB_PANEL_ID = "tabPanel";
+	
+	@Inject
+	private SettingService settingService;
+
+	@Inject
+	private ObjectMapper objectMapper;
 	
 	private ProjectAndBranch target;
 	
@@ -262,7 +287,11 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				update.setHeadCommitHash(source.getObjectName());
 				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
 
-				request.generateTitleAndDescriptionIfEmpty();
+				var title = request.generateTitleFromCommits();
+				if (title == null && settingService.getAISetting().getLiteModelSetting() == null)
+					title = request.generateTitleFromBranch();
+				request.setTitle(title);
+				request.setDescription(request.generateDescriptionFromCommits());
 
 				getPullRequestService().checkReviews(request, false);
 
@@ -645,7 +674,140 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	}
 	
 	private Fragment newCanSendFrag() {
-		Fragment fragment = new Fragment("status", "canSendFrag", this);
+		var behavior = new AbstractPostAjaxBehavior() {
+
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				var params = RequestCycle.get().getRequest().getPostParameters();
+				var suggestTitle = params.getParameterValue("suggestTitle").toBoolean();
+				var suggestDescription = params.getParameterValue("suggestDescription").toBoolean();
+
+				String title;
+				String description;
+				try {
+					if (suggestTitle || suggestDescription) {
+						var chatModel = settingService.getAISetting().getLiteModel();
+						var sourceBranchSemantic = getPullRequest().getSourceBranchSemantic();
+						String titleSuggestInstruction;
+						if (sourceBranchSemantic.isWorkInProgress()) {
+							if (sourceBranchSemantic.getWorkType() != null) {
+								titleSuggestInstruction = """
+									When suggesting pull request title, you should not add work in progress prefix
+									or conventional commit type prefix to the title even if commit messages 
+									indicate that.
+									""";
+							} else {
+								titleSuggestInstruction = """
+									When suggesting pull request title, you should not add work in progress prefix
+									to the title even if commit messages indicate that. 
+									""";
+							}
+						} else {
+							if (sourceBranchSemantic.getWorkType() != null) {
+								titleSuggestInstruction = """
+									When suggesting pull request title, you should not add conventional commit type prefix
+									to the title even if commit messages indicate that.
+									""";
+							} else {
+								titleSuggestInstruction = "";
+							}
+						}
+
+						var userPrompt = getPullRequest().getLatestUpdate().getCommits().stream()
+								.map(it -> it.getFullMessage())
+								.collect(Collectors.toList());
+						var userMessage = new UserMessage("A json array of commit messages:\n" + objectMapper.writeValueAsString(userPrompt));
+						if (!suggestTitle) {
+							var systemMessage = new SystemMessage(String.format("""
+								You are a helpful assistant that can suggest pull request description by 
+								summarizing multiple commit messages. Maximum %d characters allowed for 
+								the description.
+								
+								IMPORTANT: only return the description, no other text or comments.
+								""", MAX_DESCRIPTION_LEN));								
+							description = chatModel.chat(systemMessage, userMessage).aiMessage().text();
+							title = "";
+						} else if (!suggestDescription) {
+							var systemMessage = new SystemMessage(String.format("""
+								You are a helpful assistant that can suggest pull request title by summarizing 
+								multiple commit messages. %s Maximum %d characters allowed for the title. 
+
+								IMPORTANT: only return the title, no other text or comments.
+								""", titleSuggestInstruction, MAX_TITLE_LEN));			
+							title = (getPullRequest().getTitlePrefix(sourceBranchSemantic) + chatModel.chat(systemMessage, userMessage).aiMessage().text()).trim();
+							description = "";
+						} else {
+							var systemMessage = new SystemMessage(String.format("""
+								You are a helpful assistant that can suggest pull request title and description 
+								by summarizing multiple commit messages. %s Maximum %d characters allowed for the title, 
+								and %d characters allowed for the description.
+
+								IMPORTANT: only return a VALID json object with "title" property set to the title and "description" 
+								property set to the description, no other text or comments.
+								""", titleSuggestInstruction, MAX_TITLE_LEN, MAX_DESCRIPTION_LEN));								
+							var responseText = chatModel.chat(systemMessage, userMessage).aiMessage().text();
+							if (responseText.startsWith("```json"))
+								responseText = responseText.substring("```json".length());
+							if (responseText.endsWith("```"))
+								responseText = responseText.substring(0, responseText.length() - "```".length());
+							var response = objectMapper.readTree(responseText);
+							if (response.has("title")) {
+								title = (getPullRequest().getTitlePrefix(sourceBranchSemantic) + response.get("title").asText()).trim();
+							} else {
+								title = "";
+							}
+							if (response.has("description"))
+								description = response.get("description").asText();
+							else
+								description = "";
+						}
+					} else {
+						title = "";
+						description = "";						
+					}
+				} catch (Exception e) {
+					title = "";
+					description = "";
+					var explicitException = ExceptionUtils.find(e, ExplicitException.class);
+					if (explicitException != null) {
+						Session.get().error(explicitException.getMessage());
+					} else {
+						logger.error("Error suggesting title/description", e);
+						Session.get().error("Error suggesting title/description, check server log for details");
+					}
+				}
+				var script = String.format("onedev.server.newPullRequest.titleAndDescriptionSuggested('%s', '%s');", 
+						escapeJavaScript(title), escapeJavaScript(description));
+				target.appendJavaScript(script);
+			}
+
+		};
+		Fragment fragment = new Fragment("status", "canSendFrag", this) {
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				
+				CharSequence callback;
+				if (settingService.getAISetting().getLiteModelSetting() != null)
+					callback = behavior.getCallbackFunction(explicit("suggestTitle"), explicit("suggestDescription"));
+				else
+					callback = "undefined";
+				var translations = new HashMap<String, String>();
+				translations.put("suggesting-title", _T("Suggesting title..."));
+				translations.put("suggesting-description", _T("Suggesting description..."));
+				try {
+					var script = String.format("onedev.server.newPullRequest.onCanSendLoad(%s, %s);", 
+							callback, objectMapper.writeValueAsString(translations));
+					response.render(OnLoadHeaderItem.forScript(script));
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+		};
+		fragment.add(behavior);
+
 		Form<?> form = new Form<Void>("form");
 		fragment.add(form);
 		
@@ -763,7 +925,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			
 		};
 		descriptionInput.add(validatable -> {
-			if (validatable.getValue().length() > PullRequest.MAX_DESCRIPTION_LEN) {
+			if (validatable.getValue().length() > MAX_DESCRIPTION_LEN) {
 				validatable.error(messageSource -> _T("Description too long"));
 			}
 		});
@@ -943,7 +1105,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new NewPullRequestCssResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new NewPullRequestResourceReference()));
 	}
 
 	@Override

@@ -7,18 +7,21 @@ import org.apache.wicket.markup.head.HeaderItem;
 
 import io.onedev.server.web.asset.revisioncompare.RevisionCompareCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
+import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
-public class NewPullRequestCssResourceReference extends BaseDependentCssResourceReference {
+public class NewPullRequestResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
-	public NewPullRequestCssResourceReference() {
-		super(NewPullRequestCssResourceReference.class, "new-pull-request.css");
+	public NewPullRequestResourceReference() {
+		super(NewPullRequestResourceReference.class, "new-pull-request.js");
 	}
 
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
+		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(
+			NewPullRequestResourceReference.class, "new-pull-request.css")));
 		dependencies.add(CssHeaderItem.forReference(new RevisionCompareCssResourceReference()));
 		return dependencies;
 	}

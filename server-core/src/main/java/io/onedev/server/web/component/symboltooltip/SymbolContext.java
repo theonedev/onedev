@@ -17,9 +17,9 @@ public class SymbolContext implements Serializable {
 
 	private final List<String> linesAtStart;
 
-	public SymbolContext(String fileName, String symbolLine, 
+	public SymbolContext(String blobPath, String symbolLine, 
             List<String> linesBeforeSymbolLine, List<String> linesAfterSymbolLine, List<String> linesAtStart) {
-		this.blobPath = fileName;
+		this.blobPath = blobPath;
 		this.symbolLine = symbolLine;
 		this.linesBeforeSymbolLine = linesBeforeSymbolLine;
 		this.linesAfterSymbolLine = linesAfterSymbolLine;

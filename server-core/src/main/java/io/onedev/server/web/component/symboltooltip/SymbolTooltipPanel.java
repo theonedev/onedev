@@ -37,8 +37,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import io.onedev.commons.jsymbol.Symbol;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
+import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
@@ -59,7 +61,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
 public abstract class SymbolTooltipPanel extends Panel {
 
-	private static final int QUERY_ENTRIES = 20;
+	private static final int QUERY_ENTRIES = 25;
 
 	private static final int BEFORE_CONTEXT_SIZE = 5;
 
@@ -321,6 +323,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 						mapperCopy.addMixIn(PlanarRange.class, IgnorePlanarRangeMixin.class);
 						mapperCopy.addMixIn(LinearRange.class, IgnoreLinearRangeMixin.class);
 						var jsonOfSymbolHits = mapperCopy.writeValueAsString(symbolHits);
+						
 						var symbolContext = getSymbolContext(symbolPosition, BEFORE_CONTEXT_SIZE, 
 								AFTER_CONTEXT_SIZE, AT_START_CONTEXT_SIZE);
 						var jsonOfSymbolContext = mapperCopy.writeValueAsString(symbolContext);
@@ -349,9 +352,14 @@ public abstract class SymbolTooltipPanel extends Panel {
 						if (index < 0 || index >= symbolHits.size())
 							Session.get().warn("Unable to find most likely definition");
 					} catch (Exception e) {
+						var explicitException = ExceptionUtils.find(e, ExplicitException.class);
+						if (explicitException != null) {
+							Session.get().error(explicitException.getMessage());
+						} else {
+							logger.error("Error inferring most likely symbol definition", e);
+							Session.get().error("Error inferring most likely symbol definition, check server log for details");
+						}
 						index = -1;
-						logger.error("Error inferring most likely symbol definition", e);
-						Session.get().error("Error inferring most likely symbol definition, check server log for details");
 					}					
 					var script = String.format("onedev.server.symboltooltip.doneInfer('%s', %d);", 
 							getMarkupId() + "-symbol-tooltip", index);

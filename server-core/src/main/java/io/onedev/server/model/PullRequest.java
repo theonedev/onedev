@@ -49,7 +49,6 @@ import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.CascadeType;
@@ -68,6 +67,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.DynamicUpdate;
+import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -76,8 +76,6 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentStorageSupport;
-import io.onedev.server.service.PullRequestService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.PullRequestReference;
 import io.onedev.server.git.GitUtils;
@@ -96,6 +94,9 @@ import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.UserService;
+import io.onedev.server.util.BranchSemantic;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.web.asset.emoji.Emojis;
@@ -1410,56 +1411,85 @@ public class PullRequest extends ProjectBelonging
 	}
 
 	// Remove issue number suffix if there is any
-	public void cleanTitle() {
+	public String cleanTitle(String title) {
         var cleanedTitle = title.replaceFirst("\\s*\\([a-zA-Z]+-\\d+\\)$", "");
         cleanedTitle = cleanedTitle.replaceFirst("\\s*\\(#\\d+\\)$", "").trim();
         if (cleanedTitle.length() != 0)
-            title = cleanedTitle;
+            return cleanedTitle;
+		else
+			return title;
 	}
 
-	public void generateTitleAndDescriptionIfEmpty() {
-		if (title == null) {
-			var commits = getLatestUpdate().getCommits();
-			if (commits.size() == 1) {
-				title = commits.get(0).getShortMessage();
-				cleanTitle();
-			} else {
-				title = getSource().getBranch().toLowerCase();
-				boolean wip = false;
-				if (title.startsWith("wip-") || title.startsWith("wip_") || title.startsWith("wip/")) {
-					wip = true;
-					title = title.substring(4);
-				}
-				var commitTypes = CONVENTIONAL_COMMIT_TYPES;
-				var branchProtection = getProject().getBranchProtection(getTargetBranch(), getSubmitter());
-				if (branchProtection.isEnforceConventionalCommits() && !branchProtection.getCommitTypes().isEmpty()) {
-					commitTypes = branchProtection.getCommitTypes();
-				}
-				boolean found = false;
-				for (var commitType: commitTypes) {
-					if (title.startsWith(commitType + "-") || title.startsWith(commitType + "_") || title.startsWith(commitType + "/")) {
-						title = commitType + ": " + StringUtils.capitalize(title.substring(commitType.length() + 1).replace('-', ' ').replace('_', ' ').replace('/', ' '));
-						found = true;
-						break;
-					}
-				}
-				if (!found) {
-					title = StringUtils.capitalize(title.replace('-', ' ').replace('_', ' ').replace('/', ' '));
-				}
-				if (wip)
-					title = "[WIP] " + title;
+	public BranchSemantic getSourceBranchSemantic() {
+		var work = getSourceBranch();
+		boolean workInProgress = false;
+		if (work.toLowerCase().startsWith("wip-") 
+				|| work.toLowerCase().startsWith("wip_") 
+				|| work.toLowerCase().startsWith("wip/")) {
+			workInProgress = true;
+			work = work.substring(4);
+		}
+		var commitTypes = CONVENTIONAL_COMMIT_TYPES;
+		var branchProtection = getProject().getBranchProtection(getTargetBranch(), getSubmitter());
+		if (branchProtection.isEnforceConventionalCommits() && !branchProtection.getCommitTypes().isEmpty()) {
+			commitTypes = branchProtection.getCommitTypes();
+		}
+		String workType = null;
+		for (var commitType: commitTypes) {
+			if (work.toLowerCase().startsWith(commitType + "-") 
+					|| work.toLowerCase().startsWith(commitType + "_") 
+					|| work.toLowerCase().startsWith(commitType + "/")) {
+				workType = commitType;
+				work = work.substring(commitType.length() + 1);
+				break;
 			}
 		}
-		if (description == null) {
-			var commits = getLatestUpdate().getCommits();
-			if (commits.size() == 1) {
-				var commit = commits.get(0);
-				var shortMessage = commits.get(0).getShortMessage();
-				description = commit.getFullMessage().substring(shortMessage.length()).trim();
-				if (description.length() == 0)
-					description = null;
-			}
-		}		
+		return new BranchSemantic(workInProgress, workType, StringUtils.trimToNull(work));
+	}
+
+	public String getTitlePrefix(BranchSemantic sourceBranchSemantic) {
+		var prefixBuilder = new StringBuilder();
+		if (sourceBranchSemantic.isWorkInProgress()) {
+			prefixBuilder.append("[WIP] ");
+		}
+		if (sourceBranchSemantic.getWorkType() != null) {
+			prefixBuilder.append(sourceBranchSemantic.getWorkType()).append(": ");
+		}
+		return prefixBuilder.toString();
+	}
+
+	public String generateTitleFromBranch() {
+		var sourceBranchSemantic = getSourceBranchSemantic();
+		var title = getTitlePrefix(sourceBranchSemantic);
+		if (sourceBranchSemantic.getWorkDescription() != null) {
+			title += StringUtils.capitalize(sourceBranchSemantic.getWorkDescription().toLowerCase().replace('-', ' ').replace('_', ' ').replace('/', ' '));
+		}
+		return title.trim();
+	}
+
+	@Nullable
+	public String generateTitleFromCommits() {
+		var commits = getLatestUpdate().getCommits();
+		if (commits.size() == 1) {
+			return cleanTitle(commits.get(0).getShortMessage());
+		} else {
+			return null;
+		}
+	}
+	
+	@Nullable
+	public String generateDescriptionFromCommits() {
+		var commits = getLatestUpdate().getCommits();
+		if (commits.size() == 1) {
+			var commit = commits.get(0);
+			var shortMessage = commit.getShortMessage();
+			var description = commit.getFullMessage().substring(shortMessage.length()).trim();
+			if (description.length() == 0)
+				description = null;
+			return description;
+		} else {
+			return null;
+		}
 	}
 
 }

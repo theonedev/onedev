@@ -38,8 +38,6 @@ import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
 import io.onedev.server.web.util.SuggestionUtils;
 
 public class BuildQueryBehavior extends ANTLRAssistBehavior {
-
-	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";
 	
 	private final IModel<Project> projectModel;
 	
@@ -286,8 +284,8 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 
 	@Override
 	protected boolean isFuzzySuggestion(InputCompletion suggestion) {
-		return suggestion.getDescription() != null 
-				&& suggestion.getDescription().startsWith(FUZZY_SUGGESTION_DESCRIPTION_PREFIX);
+		return suggestion.getLabel().startsWith("~")
+				&& suggestion.getLabel().endsWith("~");
 	}
 	
 }

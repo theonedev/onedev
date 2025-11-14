@@ -37,8 +37,6 @@ import static io.onedev.server.web.translation.Translation._T;
 
 public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 
-	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";
-	
 	private final boolean childQuery;
 	
 	public ProjectQueryBehavior(boolean childQuery) {
@@ -225,8 +223,8 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 
 	@Override
 	protected boolean isFuzzySuggestion(InputCompletion suggestion) {
-		return suggestion.getDescription() != null 
-				&& suggestion.getDescription().startsWith(FUZZY_SUGGESTION_DESCRIPTION_PREFIX);
+		return suggestion.getLabel().startsWith("~")
+				&& suggestion.getLabel().endsWith("~");
 	}
 	
 }

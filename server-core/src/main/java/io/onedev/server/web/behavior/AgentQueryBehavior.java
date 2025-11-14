@@ -30,8 +30,6 @@ import static io.onedev.server.web.translation.Translation._T;
 import static java.util.Collections.sort;
 
 public class AgentQueryBehavior extends ANTLRAssistBehavior {
-
-	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";
 	
 	private final boolean forExecutor;
 	
@@ -188,8 +186,8 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 
 	@Override
 	protected boolean isFuzzySuggestion(InputCompletion suggestion) {
-		return suggestion.getDescription() != null 
-				&& suggestion.getDescription().startsWith(FUZZY_SUGGESTION_DESCRIPTION_PREFIX);
+		return suggestion.getLabel().startsWith("~")
+				&& suggestion.getLabel().endsWith("~");
 	}
 
 }

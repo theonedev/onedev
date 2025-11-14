@@ -109,8 +109,6 @@ import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
 
 public class IssueQueryBehavior extends ANTLRAssistBehavior {
-
-	private static final String FUZZY_SUGGESTION_DESCRIPTION_PREFIX = "enclose with ~";
 	
 	private final IModel<Project> projectModel;
 	
@@ -439,7 +437,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected boolean isFuzzySuggestion(InputCompletion suggestion) {
-		return suggestion.getDescription() != null && (suggestion.getDescription().startsWith(FUZZY_SUGGESTION_DESCRIPTION_PREFIX));
+		return suggestion.getLabel().startsWith("~")
+				&& suggestion.getLabel().endsWith("~");
 	}
 	
 	@Override

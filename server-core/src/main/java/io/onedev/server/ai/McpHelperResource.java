@@ -566,7 +566,7 @@ public class McpHelperResource {
 
         createPullRequestInputSchema.put("Type", "object");
         createPullRequestInputSchema.put("Properties", createPullRequestProperties);
-        createPullRequestInputSchema.put("Required", List.of("sourceBranch", "title"));
+        createPullRequestInputSchema.put("Required", List.of("sourceBranch"));
 
         inputSchemas.put("createPullRequest", createPullRequestInputSchema);
 
@@ -1432,13 +1432,6 @@ public class McpHelperResource {
         if (baseCommitId == null)
             throw new NotAcceptableException("No common base for source and target branches");
 
-        var title = (String) data.remove("title");
-        if (title == null)
-            throw new NotAcceptableException("Title is required");
-
-        request.cleanTitle();
-        
-        request.setDescription((String) data.remove("description"));
         request.setTarget(target);
         request.setSource(source);
         request.setSubmitter(SecurityUtils.getUser());
@@ -1461,7 +1454,21 @@ public class McpHelperResource {
         update.setTargetHeadCommitHash(request.getTarget().getObjectName());
         request.getUpdates().add(update);
 
-        request.generateTitleAndDescriptionIfEmpty();
+        var title = (String) data.remove("title");
+        if (title == null)
+            title = request.generateTitleFromCommits();
+        else
+            title = request.cleanTitle(title);
+            
+        if (title == null)
+            title = request.generateTitleFromBranch();
+
+        request.setTitle(title);
+
+        var description = (String) data.remove("description");
+        if (description == null)
+            description = request.generateDescriptionFromCommits();
+        request.setDescription(description);
 
         pullRequestService.checkReviews(request, false);
 
