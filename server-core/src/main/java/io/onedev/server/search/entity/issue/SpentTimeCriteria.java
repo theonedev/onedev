@@ -16,7 +16,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 
-
 public class SpentTimeCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;

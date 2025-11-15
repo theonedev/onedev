@@ -1,6 +1,7 @@
 package io.onedev.server.ai;
 
 import static io.onedev.server.ai.QueryDescriptions.getBuildQueryDescription;
+import static io.onedev.server.ai.QueryDescriptions.getPackQueryDescription;
 import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
@@ -66,6 +67,7 @@ import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.IssueWork;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.LabelSpec;
+import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
@@ -95,6 +97,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.BuildParamService;
@@ -107,6 +110,7 @@ import io.onedev.server.service.IssueWorkService;
 import io.onedev.server.service.IterationService;
 import io.onedev.server.service.LabelSpecService;
 import io.onedev.server.service.LinkSpecService;
+import io.onedev.server.service.PackService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.PullRequestAssignmentService;
 import io.onedev.server.service.PullRequestChangeService;
@@ -165,6 +169,9 @@ public class McpHelperResource {
     private final PullRequestCommentService pullRequestCommentService;
 
     private final BuildService buildService;
+
+    @Inject
+    private PackService packService;
 
     private final JobService jobService;
 
@@ -623,6 +630,28 @@ public class McpHelperResource {
 
         inputSchemas.put("editPullRequest", editPullRequestInputSchema);
 
+        var queryPacksInputSchema = new HashMap<String, Object>();
+        var queryPacksProperties = new HashMap<String, Object>();
+
+        queryPacksProperties.put("project", Map.of(
+            "type", "string",
+            "description", "Project to query packages in. Leave empty to query in current project"));
+        queryPacksProperties.put("query", Map.of(
+                "type", "string",
+                "description", escapeHtml5(getPackQueryDescription())));
+        queryPacksProperties.put("offset", Map.of(
+                "type", "integer",
+                "description", "start position for the query (optional, defaults to 0)"));
+        queryPacksProperties.put("count", Map.of(
+                "type", "integer",
+                "description", "number of packages to return (optional, defaults to 25, max 100)"));
+
+        queryPacksInputSchema.put("Type", "object");
+        queryPacksInputSchema.put("Properties", queryPacksProperties);
+        queryPacksInputSchema.put("Required", new ArrayList<>());
+
+        inputSchemas.put("queryPacks", queryPacksInputSchema);
+        
         return inputSchemas;
     }
 
@@ -1946,6 +1975,53 @@ public class McpHelperResource {
         }
     }
     
+    @Path("/query-packs")
+    @GET
+    public List<Map<String, Object>> queryPacks(
+                @QueryParam("currentProject") @NotNull String currentProjectPath, 
+                @QueryParam("project") String projectPath, 
+                @QueryParam("query") String query, 
+                @QueryParam("offset") int offset, 
+                @QueryParam("count") int count) {
+        var subject = SecurityUtils.getSubject();
+        if (SecurityUtils.getUser(subject) == null)
+            throw new UnauthenticatedException();
+
+        var projectInfo = getProjectInfo(projectPath, currentProjectPath);
+
+        if (count > RestConstants.MAX_PAGE_SIZE)
+            throw new NotAcceptableException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
+
+        EntityQuery<Pack> parsedQuery;
+        if (query != null) {
+            parsedQuery = PackQuery.parse(projectInfo.project, query, true);
+        } else {
+            parsedQuery = new PackQuery();
+        }
+
+        var packs = new ArrayList<Map<String, Object>>();
+        for (var pack : packService.query(subject, projectInfo.project, parsedQuery, false, offset, count)) {
+            var packMap = getPackMap(projectInfo.currentProject, pack);
+            packMap.put("link", urlService.urlFor(pack, true));
+            packs.add(packMap);
+        }
+        return packs;
+    }
+
+    private Map<String, Object> getPackMap(Project currentProject, Pack pack) {
+        var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
+        var packMap = objectMapper.convertValue(pack, typeReference);
+        packMap.remove("id");
+        packMap.remove("userId");
+        packMap.put("user", pack.getUser().getName());
+        packMap.remove("buildId");
+        if (pack.getBuild() != null)
+            packMap.put("build", pack.getBuild().getReference().toString(currentProject));
+        packMap.put("project", pack.getProject().getPath());
+        
+        return packMap;
+    }
+
     private void normalizePullRequestData(Map<String, Serializable> data) {
         for (var entry : data.entrySet()) {
             if (entry.getValue() instanceof String)

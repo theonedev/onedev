@@ -1,7 +1,24 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.server.model.Pack.NAME_LABEL;
+import static io.onedev.server.model.Pack.NAME_NAME;
+import static io.onedev.server.model.Pack.NAME_TYPE;
+import static io.onedev.server.model.Pack.NAME_VERSION;
+import static io.onedev.server.model.Pack.PROP_NAME;
+import static io.onedev.server.model.Pack.PROP_VERSION;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.model.IModel;
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputCompletion;
@@ -11,25 +28,19 @@ import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.ai.QueryDescriptions;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.search.entity.pack.PackQueryLexer;
 import io.onedev.server.search.entity.pack.PackQueryParser;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
 import io.onedev.server.web.util.SuggestionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.model.IModel;
-
-import org.jspecify.annotations.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.onedev.server.model.Pack.*;
-import static io.onedev.server.web.translation.Translation._T;
 
 public class PackQueryBehavior extends ANTLRAssistBehavior {
 
@@ -216,6 +227,27 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 			}
 		} 
 		return hints;
+	}
+
+	@Override
+	protected NaturalLanguageTranslator getNaturalLanguageTranslator() {
+		var liteModel = getSettingService().getAISetting().getLiteModel();
+		if (liteModel != null) {
+			return new NaturalLanguageTranslator(liteModel) {
+				
+				@Override
+				public String getQueryDescription() {
+					return QueryDescriptions.getPackQueryDescription();
+				}
+
+			};
+		} else {
+			return null;
+		}
+	}
+
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 
 	@Override

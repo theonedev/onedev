@@ -25,12 +25,15 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.match.PatternApplied;
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.ai.QueryDescriptions;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQueryParser;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.NameAndEmail;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.xodus.CommitInfoService;
 
@@ -192,6 +195,27 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 				description = null;
 		}
 		return Optional.fromNullable(description);
+	}
+
+	@Override
+	protected NaturalLanguageTranslator getNaturalLanguageTranslator() {
+		var liteModel = getSettingService().getAISetting().getLiteModel();
+		if (liteModel != null) {
+			return new NaturalLanguageTranslator(liteModel) {
+				
+				@Override
+				public String getQueryDescription() {
+					return QueryDescriptions.getCommitQueryDescription();
+				}
+
+			};
+		} else {
+			return null;
+		}
+	}
+
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 
 	@Override

@@ -9,7 +9,7 @@ query
 criteria
 	: operator=(Roots|Leafs|ForkRoots|OwnedByMe|OwnedByNone|HasOutdatedReplicas|WithoutEnoughReplicas|MissingStorage) #OperatorCriteria
 	| operator=(OwnedBy|ForksOf|ChildrenOf) WS+ criteriaValue=multipleQuoted #OperatorValueCriteria
-    | criteriaField=Quoted WS+ operator=(Is|IsNot|Contains|IsUntil|IsSince) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|Contains|IsUntil|IsSince) WS+ criteriaValue=multipleQuoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria #AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria
@@ -36,6 +36,14 @@ Is
 IsNot
     : 'is' WS+ 'not'
     ;
+
+IsGreaterThan
+	: 'is' WS+ 'greater' WS+ 'than'
+	;
+
+IsLessThan
+	: 'is' WS+ 'less' WS+ 'than'
+	;
 
 OwnedBy
 	: 'owned' WS+ 'by'

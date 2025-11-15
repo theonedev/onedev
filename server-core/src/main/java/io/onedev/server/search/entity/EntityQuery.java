@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.persistence.criteria.Path;
 import javax.validation.ValidationException;
+
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Splitter;
 
@@ -17,7 +18,20 @@ import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.entityreference.BuildReference;
+import io.onedev.server.entityreference.IssueReference;
+import io.onedev.server.entityreference.PullRequestReference;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Group;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Iteration;
+import io.onedev.server.model.LabelSpec;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
 import io.onedev.server.service.BuildService;
+import io.onedev.server.service.GroupService;
 import io.onedev.server.service.IssueService;
 import io.onedev.server.service.IterationService;
 import io.onedev.server.service.LabelSpecService;
@@ -25,17 +39,6 @@ import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UserService;
-import io.onedev.server.entityreference.BuildReference;
-import io.onedev.server.entityreference.IssueReference;
-import io.onedev.server.entityreference.PullRequestReference;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Iteration;
-import io.onedev.server.model.LabelSpec;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.ProjectScopedRevision;
@@ -138,6 +141,13 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (user == null)
 			throw new ExplicitException("Unable to find user with login: " + loginName);
 		return user;
+	}
+
+	public static Group getGroup(String groupName) {
+		Group group = OneDev.getInstance(GroupService.class).find(groupName);
+		if (group == null)
+			throw new ExplicitException("Unable to find group: " + groupName);
+		return group;
 	}
 	
 	public static Project getProject(String projectPath) {

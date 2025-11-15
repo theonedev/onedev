@@ -1,7 +1,16 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.server.web.translation.Translation._T;
+import static java.util.Collections.sort;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -11,23 +20,19 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.service.AgentAttributeService;
-import io.onedev.server.service.AgentService;
+import io.onedev.server.ai.QueryDescriptions;
 import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.search.entity.agent.AgentQueryLexer;
 import io.onedev.server.search.entity.agent.AgentQueryParser;
+import io.onedev.server.service.AgentAttributeService;
+import io.onedev.server.service.AgentService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
 import io.onedev.server.web.util.SuggestionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.onedev.server.web.translation.Translation._T;
-import static java.util.Collections.sort;
 
 public class AgentQueryBehavior extends ANTLRAssistBehavior {
 	
@@ -48,11 +53,11 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						AgentService agentService = OneDev.getInstance(AgentService.class);
-						AgentAttributeService attributeManager = OneDev.getInstance(AgentAttributeService.class);
+						AgentAttributeService attributeService = OneDev.getInstance(AgentAttributeService.class);
 						ParseExpect criteriaValueExpect;
 						if ("criteriaField".equals(spec.getLabel())) {
 							var fields = new ArrayList<>(Agent.QUERY_FIELDS);
-							var attributeNames = new ArrayList<>(attributeManager.getAttributeNames());
+							var attributeNames = new ArrayList<>(attributeService.getAttributeNames());
 							sort(attributeNames);
 							fields.addAll(attributeNames);
 							return SuggestionUtils.suggest(fields, matchWith);
@@ -69,7 +74,7 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 								if (operator == AgentQueryLexer.EverUsedSince || operator == AgentQueryLexer.NotUsedSince) {
 									return SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 								} else if (operator == AgentQueryLexer.HasAttribute) {
-									var attributeNames = new ArrayList<>(attributeManager.getAttributeNames());									
+									var attributeNames = new ArrayList<>(attributeService.getAttributeNames());									
 									sort(attributeNames);
 									return SuggestionUtils.suggest(attributeNames, matchWith);
 								} else if (operator == AgentQueryLexer.RanBuild) { 
@@ -182,6 +187,27 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 			}
 		} 
 		return hints;
+	}
+
+	@Override
+	protected NaturalLanguageTranslator getNaturalLanguageTranslator() {
+		var liteModel = getSettingService().getAISetting().getLiteModel();
+		if (liteModel != null) {
+			return new NaturalLanguageTranslator(liteModel) {
+				
+				@Override
+				public String getQueryDescription() {
+					return QueryDescriptions.getAgentQueryDescription();
+				}
+
+			};
+		} else {
+			return null;
+		}
+	}
+
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 
 	@Override

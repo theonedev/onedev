@@ -1,7 +1,22 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.server.search.entity.project.ProjectQuery.getRuleName;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.ChildrenOf;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.HasOutdatedReplicas;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.Roots;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.WithoutEnoughReplicas;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -11,29 +26,21 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.ai.QueryDescriptions;
 import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.search.entity.project.ProjectQueryParser;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
+import io.onedev.server.web.behavior.inputassist.NaturalLanguageTranslator;
 import io.onedev.server.web.util.SuggestionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static io.onedev.server.search.entity.project.ProjectQuery.getRuleName;
-import static io.onedev.server.search.entity.project.ProjectQueryParser.*;
-import static io.onedev.server.web.translation.Translation._T;
 
 public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 
@@ -219,6 +226,27 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 			}
 		} 
 		return hints;
+	}
+
+	@Override
+	protected NaturalLanguageTranslator getNaturalLanguageTranslator() {
+		var liteModel = getSettingService().getAISetting().getLiteModel();
+		if (liteModel != null) {
+			return new NaturalLanguageTranslator(liteModel) {
+				
+				@Override
+				public String getQueryDescription() {
+					return QueryDescriptions.getProjectQueryDescription();
+				}
+
+			};
+		} else {
+			return null;
+		}
+	}
+
+	private SettingService getSettingService() {
+		return OneDev.getInstance(SettingService.class);
 	}
 
 	@Override

@@ -87,7 +87,15 @@ public abstract class EntityReference implements Serializable {
 			else
 				throw new ValidationException("Reference project not found with key: " + projectKey);
 		}
-		throw new ValidationException("Invalid entity reference: " + referenceString);
+		try {
+			var number = Long.valueOf(referenceString);
+			if (currentProject != null)
+				return EntityReference.of(type, currentProject, number);
+			else
+				throw new ValidationException("Reference project not specified: " + referenceString);
+		} catch (NumberFormatException e) {
+			throw new ValidationException("Invalid entity reference: " + referenceString);
+		}
 	}
 	
 	@Override

@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.issue;
 
+import static io.onedev.server.model.AbstractEntity.NAME_NUMBER;
 import static io.onedev.server.model.Issue.NAME_COMMENT;
 import static io.onedev.server.model.Issue.NAME_COMMENT_COUNT;
 import static io.onedev.server.model.Issue.NAME_CONFUSED_COUNT;
@@ -56,8 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
-
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -65,11 +64,11 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
@@ -80,6 +79,7 @@ import io.onedev.server.model.support.issue.field.spec.CommitField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.DateTimeField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.FloatField;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;
 import io.onedev.server.model.support.issue.field.spec.IssueChoiceField;
@@ -106,6 +106,7 @@ import io.onedev.server.search.entity.issue.IssueQueryParser.ParensCriteriaConte
 import io.onedev.server.search.entity.issue.IssueQueryParser.QueryContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.ReferenceCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.RevisionCriteriaContext;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
@@ -363,7 +364,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 										criterias.add(new RocketCountCriteria(getIntValue(value), operator));
 									} else if (fieldName.equals(NAME_EYES_COUNT)) {
 										criterias.add(new EyesCountCriteria(getIntValue(value), operator));
-									} else if (fieldName.equals(Issue.NAME_NUMBER)) {
+									} else if (fieldName.equals(NAME_NUMBER)) {
 										criterias.add(new ReferenceCriteria(project, value, operator));
 									} else if (fieldName.equals(NAME_ESTIMATED_TIME)) {
 										int intValue = timeTrackingSetting.parseWorkingPeriod(value);
@@ -384,13 +385,16 @@ public class IssueQuery extends EntityQuery<Issue> {
 										} else if (field instanceof BooleanField) {
 											criterias.add(new BooleanFieldCriteria(fieldName, getBooleanValue(value), operator));
 										} else if (field instanceof IntegerField) {
-											criterias.add(new NumericFieldCriteria(fieldName, getIntValue(value), operator));
+											criterias.add(new IntegerFieldCriteria(fieldName, getIntValue(value), operator));
 										} else if (field instanceof ChoiceField) {
 											long ordinal = getValueOrdinal((ChoiceField) field, value);
 											criterias.add(new ChoiceFieldCriteria(fieldName, value, ordinal, operator, field.isAllowMultiple()));
-										} else if (field instanceof UserChoiceField
-												|| field instanceof GroupChoiceField) {
-											criterias.add(new ChoiceFieldCriteria(fieldName, value, -1, operator, field.isAllowMultiple()));
+										} else if (field instanceof UserChoiceField) {
+											// call getUser(value) to validate the user name
+											criterias.add(new ChoiceFieldCriteria(fieldName, getUser(value).getName(), -1, operator, field.isAllowMultiple()));
+										} else if (field instanceof GroupChoiceField) {
+											// call getGroup(value) to validate the group name
+											criterias.add(new ChoiceFieldCriteria(fieldName, getGroup(value).getName(), -1, operator, field.isAllowMultiple()));
 										} else if (field instanceof IterationChoiceField) {
 											criterias.add(new IterationFieldCriteria(fieldName, value, operator, field.isAllowMultiple()));
 										} else {
@@ -443,10 +447,15 @@ public class IssueQuery extends EntityQuery<Issue> {
 											var floatValue = getFloatValue(value);
 											criterias.add(new ProgressCriteria(floatValue, operator));
 											break;
+										case NAME_NUMBER:
+											criterias.add(new ReferenceCriteria(project, value, operator));
+											break;
 										default:
 											FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
 											if (field instanceof IntegerField) {
-												criterias.add(new NumericFieldCriteria(fieldName, getIntValue(value), operator));
+												criterias.add(new IntegerFieldCriteria(fieldName, getIntValue(value), operator));
+											} else if (field instanceof FloatField) {
+												criterias.add(new FloatFieldCriteria(fieldName, getFloatValue(value), operator));
 											} else {
 												long ordinal;
 												if (validate)
@@ -600,7 +609,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 						&& !fieldName.equals(Issue.NAME_HEART_COUNT)
 						&& !fieldName.equals(Issue.NAME_ROCKET_COUNT)
 						&& !fieldName.equals(Issue.NAME_EYES_COUNT)
-						&& !fieldName.equals(Issue.NAME_NUMBER)
+						&& !fieldName.equals(NAME_NUMBER)
 						&& !fieldName.equals(IssueSchedule.NAME_ITERATION)
 						&& !(fieldSpec instanceof IssueChoiceField)
 						&& !(fieldSpec instanceof PullRequestChoiceField)
@@ -636,8 +645,9 @@ public class IssueQuery extends EntityQuery<Issue> {
 						&& !fieldName.equals(Issue.NAME_HEART_COUNT)
 						&& !fieldName.equals(Issue.NAME_ROCKET_COUNT)
 						&& !fieldName.equals(Issue.NAME_EYES_COUNT)
-						&& !fieldName.equals(Issue.NAME_NUMBER)
+						&& !fieldName.equals(NAME_NUMBER)
 						&& !(fieldSpec instanceof IntegerField)
+						&& !(fieldSpec instanceof FloatField)
 						&& !(fieldSpec instanceof ChoiceField && !fieldSpec.isAllowMultiple()))
 					throw newOperatorException(fieldName, operator);
 				break;

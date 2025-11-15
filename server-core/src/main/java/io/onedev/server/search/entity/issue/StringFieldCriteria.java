@@ -8,7 +8,6 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 
-
 public class StringFieldCriteria extends FieldCriteria {
 
 	private static final long serialVersionUID = 1L;

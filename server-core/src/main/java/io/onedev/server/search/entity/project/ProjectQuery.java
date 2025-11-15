@@ -16,6 +16,8 @@ import static io.onedev.server.search.entity.project.ProjectQueryParser.Leafs;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.MissingStorage;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.OwnedByMe;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.OwnedByNone;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.IsGreaterThan;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.IsLessThan;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.Roots;
 import static io.onedev.server.search.entity.project.ProjectQueryParser.WithoutEnoughReplicas;
 
@@ -177,6 +179,10 @@ public class ProjectQuery extends EntityQuery<Project> {
 											criterias.add(new LabelCriteria(getLabelSpec(value), operator));
 									}
 									break;
+								case IsGreaterThan:
+								case IsLessThan:
+									criterias.add(new IdCriteria(getLongValue(value), operator));
+									break;
 								case Contains:
 									criterias.add(new DescriptionCriteria(value));
 									break;
@@ -263,6 +269,12 @@ public class ProjectQuery extends EntityQuery<Project> {
 						&& !fieldName.equals(Project.NAME_LABEL)
 						&& !fieldName.equals(Project.NAME_SERVICE_DESK_EMAIL_ADDRESS)
 						&& !fieldName.equals(Project.NAME_PATH)) {
+					throw newOperatorException(fieldName, operator);
+				}
+				break;
+			case IsGreaterThan:
+			case IsLessThan:
+				if (!fieldName.equals(Project.NAME_ID)) {
 					throw newOperatorException(fieldName, operator);
 				}
 				break;
