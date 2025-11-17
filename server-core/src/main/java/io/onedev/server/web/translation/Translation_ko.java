@@ -38,12 +38,18 @@ public class Translation_ko extends TranslationResourceBundle {
 			"3. CI/CD 작업에서는 사용자 정의 settings.xml을 사용하는 것이 더 편리합니다. 예를 들어 명령 단계에서 아래 코드를 통해 가능합니다:");
 		m.put("6-digits passcode", "6자리 인증 코드");
 		m.put("7 days", "7일");
+		m.put("<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">Set up AI</a> to mark the most likely", 
+			"<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">AI 설정</a>을 통해 가장 가능성이 높은 것을 표시합니다");
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to reset password for", 
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">사용자</a>의 비밀번호를 재설정합니다");
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to verify email for", 
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">사용자</a>의 이메일을 확인합니다");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid and katex support</a>.", 
 			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub 스타일 마크다운</a>이 허용되며, <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid 및 katex 지원</a>이 포함됩니다.");
+		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language", 
+			"<a href='/~administration/settings/lite-ai-model' target='_blank'>AI 설정</a>을 통해 자연어로 질의합니다");
+		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>", 
+			"<a href='/~administration/settings/lite-ai-model' target='_blank'>AI 설정</a>을 통해 자연어로 질의합니다</a>");
 		m.put("<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>event object</a> triggering the notification", 
 			"<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>이벤트 객체</a>가 알림을 트리거합니다");
 		m.put("<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/Alert.java'>alert</a> to display", 
@@ -120,6 +126,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("A {0} used as body of user invitation email", "사용자 초대 이메일 본문으로 사용된 {0}");
 		m.put("A {0} used as body of various issue notification emails", "다양한 문제 알림 이메일 본문으로 사용된 {0}");
 		m.put("A {0} used as body of various pull request notification emails", "다양한 풀 리퀘스트 알림 이메일 본문으로 사용된 {0}");
+		m.put("AI Model Setting", "AI 모델 설정");
+		m.put("AI Setting", "AI 설정");
+		m.put("AI Settings", "AI 설정");
+		m.put("API Key", "API 키");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"예를 들어, <tt>https://your-domain.atlassian.net/rest/api/3</tt>와 같은 JIRA 클라우드 인스턴스의 API URL");
 		m.put("Able to merge without conflicts", "충돌 없이 병합 가능");
@@ -237,6 +247,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Aggregated from '<span wicket:id=\"estimatedTimeAggregationLink\"></span>':", "'<span wicket:id=\"estimatedTimeAggregationLink\"></span>'에서 집계됨:");
 		m.put("Aggregated from '<span wicket:id=\"spentTimeAggregationLink\"></span>':", "'<span wicket:id=\"spentTimeAggregationLink\"></span>'에서 집계됨:");
 		m.put("Aggregation Link", "집계 링크");
+		m.put("Ai", "AI");
 		m.put("Alert", "알림");
 		m.put("Alert Setting", "알림 설정");
 		m.put("Alert Settings", "알림 설정들");
@@ -252,6 +263,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("All files", "모든 파일");
 		m.put("All groups", "모든 그룹");
 		m.put("All issues", "모든 이슈");
+		m.put("All occurrences", "모든 발생");
 		m.put("All platforms in OCI layout", "OCI 레이아웃의 모든 플랫폼");
 		m.put("All platforms in image", "이미지의 모든 플랫폼");
 		m.put("All possible classes", "모든 가능한 클래스");
@@ -392,6 +404,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Base", "기본");
 		m.put("Base Gpg Key", "기본 Gpg 키");
 		m.put("Base Query", "기본 쿼리");
+		m.put("Base URL", "기본 URL");
+		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint", 
+			"<b class='text-info'>OpenAI 호환</b> API 엔드포인트의 기본 URL. OpenAI 공식 엔드포인트를 사용하려면 비워 두세요");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Base64로 인코딩된 PEM 형식, -----BEGIN CERTIFICATE-----로 시작하고 -----END CERTIFICATE-----로 끝남");
 		m.put("Basic Info", "기본 정보");
@@ -1144,11 +1159,11 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Enable All Queried Users", "모든 조회된 사용자를 활성화합니다");
 		m.put("Enable Anonymous Access", "익명 액세스를 활성화합니다");
 		m.put("Enable Auto Backup", "자동 백업을 활성화합니다");
+		m.put("Enable CI/CD by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "<a wicket:id=\"addFile\" class=\"link-primary\"></a>를 통해 CI/CD 활성화");
 		m.put("Enable Html Report Publish", "HTML 보고서 게시 활성화");
 		m.put("Enable Selected Users", "선택된 사용자를 활성화합니다");
 		m.put("Enable Site Publish", "사이트 게시 활성화");
 		m.put("Enable TTY Mode", "TTY 모드를 활성화합니다");
-		m.put("Enable build support by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "<a wicket:id=\"addFile\" class=\"link-primary\"></a>를 통해 빌드 지원을 활성화합니다");
 		m.put("Enable if visibility of this field depends on other fields", "이 필드의 가시성이 다른 필드에 따라 달라지는 경우 활성화합니다");
 		m.put("Enable if visibility of this param depends on other params", "이 매개변수의 가시성이 다른 매개변수에 따라 달라지는 경우 활성화합니다");
 		m.put("Enable this if the access token has same permissions as the owner", "액세스 토큰이 소유자와 동일한 권한을 가진 경우 이를 활성화합니다");
@@ -1863,6 +1878,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Links can be used to associate different issues. For instance, an issue can be linked to sub issues or related issues", 
 			"링크는 서로 다른 이슈를 연결하는 데 사용할 수 있습니다. 예를 들어, 하나의 이슈를 하위 이슈 또는 관련 이슈에 연결할 수 있습니다");
 		m.put("List", "목록");
+		m.put("Lite AI Model", "라이트 AI 모델");
+		m.put("Lite AI model settings have been saved", "라이트 AI 모델 설정이 저장되었습니다");
+		m.put("Lite Model", "라이트 모델");
+		m.put("Lite Model Setting", "라이트 모델 설정");
 		m.put("Literal", "리터럴");
 		m.put("Literal default value", "리터럴 기본값");
 		m.put("Literal value", "리터럴 값");
@@ -2043,6 +2062,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Named Pull Request Queries Bean", "Named Pull Request Queries Bean");
 		m.put("Named Pull Request Query", "Named Pull Request Query");
 		m.put("Named Query", "Named Query");
+		m.put("Natural language query via AI", "AI를 통한 자연어 질의");
 		m.put("Network Options", "네트워크 옵션");
 		m.put("Never", "절대 없음");
 		m.put("Never expire", "만료되지 않음");
@@ -2695,6 +2715,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Poll Interval", "폴링 간격");
 		m.put("Populate Tag Mappings", "태그 매핑 채우기");
 		m.put("Port", "포트");
+		m.put("Possible definitions", "가능한 정의");
 		m.put("Post", "게시");
 		m.put("Post Build Action", "빌드 후 작업");
 		m.put("Post Build Action Bean", "빌드 후 작업 빈");
@@ -3749,6 +3770,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Suffix Pattern", "접미사 패턴");
 		m.put("Suggest changes", "변경 사항 제안");
 		m.put("Suggested change", "제안된 변경 사항");
+		m.put("Suggesting description...", "설명 제안 중...");
+		m.put("Suggesting title...", "제목 제안 중...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "제안이 코드 변경 또는 풀 리퀘스트 종료로 인해 오래됨");
 		m.put("Suggestions", "제안들");
 		m.put("Summary", "요약");
@@ -3915,6 +3938,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이 문제는 프로젝트가 잘못된 Git 저장소를 가리키거나 커밋이 가비지 수집된 경우 발생할 수 있습니다.");
 		m.put("This might happen when project points to a wrong git repository, or these commits are garbage collected.", 
 			"이 문제는 프로젝트가 잘못된 Git 저장소를 가리키거나 이러한 커밋이 가비지 수집된 경우 발생할 수 있습니다.");
+		m.put("This model will be used to perform lite tasks including: <ul class=\"mb-0\"> <li>Query issues, builds, and pull requests with natural language</li> <li>Mark the most likely symbol definition in symbol navigation</li> </ul> Fast and cost-effective models are recommended, such as <code>Google/gemini-2.5-flash</code> and <code>OpenAI/gpt-4.1-mini</code>", 
+			"이 모델은 다음을 포함한 간단한 작업을 수행하는 데 사용됩니다: <ul class=\"mb-0\"> <li>자연어로 이슈, 빌드 및 풀 리퀘스트 쿼리</li> <li>심볼 탐색에서 가장 가능성이 높은 심볼 정의 표시</li> </ul> 빠르고 비용 효율적인 모델이 권장됩니다, 예를 들어 <code>Google/gemini-2.5-flash</code> 및 <code>OpenAI/gpt-4.1-mini</code>");
 		m.put("This name has already been used by another board", "이 이름은 이미 다른 보드에서 사용되었습니다");
 		m.put("This name has already been used by another group", "이 이름은 이미 다른 그룹에서 사용되었습니다");
 		m.put("This name has already been used by another issue board in the project", "이 이름은 프로젝트의 다른 이슈 보드에서 이미 사용되었습니다");
@@ -4247,7 +4272,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Verification email sent, please check it", "확인 이메일이 발송되었습니다. 확인해 주세요");
 		m.put("Verify", "확인");
 		m.put("View", "보기");
-		m.put("View Source", "소스 보기");
 		m.put("View source", "소스 보기");
 		m.put("View statistics", "통계 보기");
 		m.put("Viewer", "뷰어");
@@ -4378,8 +4402,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"CI/CD 작업에 빌드 도커 이미지 단계를 추가하고 패키지 쓰기 권한이 있는 액세스 토큰 비밀로 내장 레지스트리 로그인을 구성하여 이를 달성할 수 있습니다");
 		m.put("You have unverified <a wicket:id=\"hasUnverifiedLink\">email addresses</a>", "확인되지 않은 <a wicket:id=\"hasUnverifiedLink\">이메일 주소</a>가 있습니다");
 		m.put("You may also drop file/image to the input box, or paste image from clipboard", "파일/이미지를 입력 상자에 드롭하거나 클립보드에서 이미지를 붙여넣을 수도 있습니다");
-		m.put("You may initialize the project by <a wicket:id=\"addFiles\" class=\"link-primary\">adding files</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">setting up build spec</a>, or <a wicket:id=\"pushInstructions\" class=\"link-primary\">pushing an existing repository</a>", 
-			"프로젝트를 <a wicket:id=\"addFiles\" class=\"link-primary\">파일 추가</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">빌드 사양 설정</a>, 또는 <a wicket:id=\"pushInstructions\" class=\"link-primary\">기존 저장소 푸시</a>로 초기화할 수 있습니다");
+		m.put("You may initialize the project by <a wicket:id=\"addFiles\" class=\"link-primary\">adding files</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">setting up CI/CD</a>, or <a wicket:id=\"pushInstructions\" class=\"link-primary\">pushing an existing repository</a>", 
+			"<a wicket:id=\"addFiles\" class=\"link-primary\">파일 추가</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">CI/CD 설정</a>, 또는 <a wicket:id=\"pushInstructions\" class=\"link-primary\">기존 저장소 푸시</a>를 통해 프로젝트를 초기화할 수 있습니다");
 		m.put("You selected to delete branch \"{0}\"", "브랜치 \"{0}\" 삭제를 선택했습니다");
 		m.put("You will be notified of any activities", "활동에 대한 알림을 받게 됩니다");
 		m.put("You've been logged out", "로그아웃되었습니다");
@@ -4485,6 +4509,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("found {0} users", "{0}명의 사용자를 찾았습니다");
 		m.put("has any value of", "값이 존재합니다");
 		m.put("head", "헤드");
+		m.put("https://api.openai.com/v1", "https://api.openai.com/v1");
 		m.put("in current commit", "현재 커밋에서");
 		m.put("ineffective", "비효율적");
 		m.put("inherited", "상속됨");
@@ -4635,10 +4660,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("AI Model", "AI 모델");
-		m.put("AI Model Provider", "AI 모델 제공자");
-		m.put("Model", "모델");
-		m.put("Open AI", "오픈 AI");
+		m.put("Inferring the most likely...", "가장 가능성이 높은 것을 추론 중...");
 	}
 		
 	@Override

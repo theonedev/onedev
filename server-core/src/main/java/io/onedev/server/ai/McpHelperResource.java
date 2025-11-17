@@ -100,7 +100,6 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.service.BuildParamService;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.service.IssueChangeService;
 import io.onedev.server.service.IssueCommentService;
@@ -132,99 +131,83 @@ import io.onedev.server.web.UrlService;
 @Singleton
 public class McpHelperResource {
 
-    private final ObjectMapper objectMapper;
+    @Inject
+    private ObjectMapper objectMapper;
 
-    private final SettingService settingService;
+    @Inject
+    private SettingService settingService;
 
-    private final UserService userService;
+    @Inject
+    private UserService userService;
     
-    private final IssueService issueService;    
+    @Inject
+    private IssueService issueService;    
     
-    private final ProjectService projectService;
+    @Inject
+    private ProjectService projectService;
 
-    private final LinkSpecService linkSpecService;
+    @Inject
+    private LinkSpecService linkSpecService;
 
-    private final IssueLinkService issueLinkService;
+    @Inject
+    private IssueLinkService issueLinkService;
 
-    private final IssueCommentService issueCommentService;
+    @Inject
+    private IssueCommentService issueCommentService;
 
-    private final IterationService iterationService;
+    @Inject
+    private IterationService iterationService;
 
-    private final IssueChangeService issueChangeService;
+    @Inject
+    private IssueChangeService issueChangeService;
 
-    private final IssueWorkService issueWorkService;
+    @Inject
+    private IssueWorkService issueWorkService;
 
-    private final SubscriptionService subscriptionService;
+    @Inject
+    private SubscriptionService subscriptionService;
 
-    private final PullRequestService pullRequestService;
+    @Inject
+    private PullRequestService pullRequestService;
 
-    private final PullRequestChangeService pullRequestChangeService;
+    @Inject
+    private PullRequestChangeService pullRequestChangeService;
 
-    private final PullRequestAssignmentService pullRequestAssignmentService;
+    @Inject
+    private PullRequestAssignmentService pullRequestAssignmentService;
 
-    private final PullRequestReviewService pullRequestReviewService;
+    @Inject
+    private PullRequestReviewService pullRequestReviewService;
 
-    private final PullRequestLabelService pullRequestLabelService;
+    @Inject
+    private PullRequestLabelService pullRequestLabelService;
 
-    private final PullRequestCommentService pullRequestCommentService;
+    @Inject
+    private PullRequestCommentService pullRequestCommentService;
 
-    private final BuildService buildService;
+    @Inject
+    private BuildService buildService;
 
     @Inject
     private PackService packService;
 
-    private final JobService jobService;
-
-    private final GitService gitService;
-
-    private final LabelSpecService labelSpecService;
-
-    private final UrlService urlService;
-
-    private final Validator validator;
-
-    private final ServerConfig serverConfig;
+    @Inject
+    private JobService jobService;
 
     @Inject
-    public McpHelperResource(ObjectMapper objectMapper, SettingService settingService,
-                             UserService userService, IssueService issueService, ProjectService projectService,
-                             LinkSpecService linkSpecService, IssueCommentService issueCommentService,
-                             IterationService iterationService, SubscriptionService subscriptionService,
-                             IssueChangeService issueChangeService, IssueLinkService issueLinkService,
-                             IssueWorkService issueWorkService, PullRequestService pullRequestService,
-                             PullRequestChangeService pullRequestChangeService, GitService gitService,
-                             LabelSpecService labelSpecService, PullRequestReviewService pullRequestReviewService,
-                             PullRequestAssignmentService pullRequestAssignmentService,
-                             PullRequestLabelService pullRequestLabelService, UrlService urlService,
-                             PullRequestCommentService pullRequestCommentService, BuildService buildService,
-                             BuildParamService buildParamService, JobService jobService, Validator validator,
-                             ServerConfig serverConfig) {
-        this.objectMapper = objectMapper;
-        this.settingService = settingService;
-        this.issueService = issueService;
-        this.userService = userService;
-        this.projectService = projectService;
-        this.linkSpecService = linkSpecService;
-        this.issueCommentService = issueCommentService;
-        this.iterationService = iterationService;
-        this.subscriptionService = subscriptionService;
-        this.issueChangeService = issueChangeService;
-        this.issueLinkService = issueLinkService;
-        this.issueWorkService = issueWorkService;
-        this.pullRequestService = pullRequestService;
-        this.pullRequestChangeService = pullRequestChangeService;
-        this.pullRequestAssignmentService = pullRequestAssignmentService;
-        this.pullRequestReviewService = pullRequestReviewService;
-        this.gitService = gitService;
-        this.labelSpecService = labelSpecService;
-        this.pullRequestLabelService = pullRequestLabelService;
-        this.urlService = urlService;
-        this.pullRequestCommentService = pullRequestCommentService;
-        this.buildService = buildService;
-        this.jobService = jobService;
-        this.validator = validator;
-        this.serverConfig = serverConfig;
-    }
+    private GitService gitService;
+
+    @Inject
+    private LabelSpecService labelSpecService;
+
+    @Inject
+    private UrlService urlService;
+
+    @Inject
+    private Validator validator;
+
+    @Inject
+    private ServerConfig serverConfig;
 
     private String getToolParamName(String fieldName) {
         return fieldName.replace(" ", "_");

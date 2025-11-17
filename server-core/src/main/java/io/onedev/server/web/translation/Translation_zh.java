@@ -56,12 +56,18 @@ public class Translation_zh extends TranslationResourceBundle {
 			"3. 对于 CI/CD 任务，使用自定义 settings.xml 更方便，例如在命令步骤中使用以下代码");
 		m.put("6-digits passcode", "6 位数代码");
 		m.put("7 days", "7 天");
+		m.put("<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">Set up AI</a> to mark the most likely", 
+			"<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">设置 AI</a> 来标记最可能的");
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to reset password for", 
 			"重置密码的 <a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">用户</a>");
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to verify email for", 
 			"验证邮箱的 <a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">用户</a>");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid and katex support</a>.", 
 			"可使用 <a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub 风格的 markdown</a>，并支持 <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid 和 katex</a>。");
+		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language", 
+			"<a href='/~administration/settings/lite-ai-model' target='_blank'>设置 AI</a> 以使用自然语言查询");
+		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>", 
+			"<a href='/~administration/settings/lite-ai-model' target='_blank'>设置 AI</a> 以使用自然语言查询</a>");
 		m.put("<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>event object</a> triggering the notification", 
 			"触发通知的 <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>事件对象</a>");
 		m.put("<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/Alert.java'>alert</a> to display", 
@@ -138,6 +144,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("A {0} used as body of user invitation email", "用作用户邀请邮件正文的 {0}");
 		m.put("A {0} used as body of various issue notification emails", "用作各种工单通知邮件正文的 {0}");
 		m.put("A {0} used as body of various pull request notification emails", "用作各种合并请求通知邮件正文的 {0}");
+		m.put("AI Model Setting", "AI 模型设置");
+		m.put("AI Setting", "AI 设置");
+		m.put("AI Settings", "AI 设置");
+		m.put("API Key", "API 密钥");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"你的JIRA云实例的API地址，例如：<tt>https://your-domain.atlassian.net/rest/api/3</tt>");
 		m.put("Able to merge without conflicts", "没有冲突，可以合并");
@@ -255,6 +265,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Aggregated from '<span wicket:id=\"estimatedTimeAggregationLink\"></span>':", "聚合自 '<span wicket:id=\"estimatedTimeAggregationLink\"></span>'");
 		m.put("Aggregated from '<span wicket:id=\"spentTimeAggregationLink\"></span>':", "聚合自 '<span wicket:id=\"spentTimeAggregationLink\"></span>'");
 		m.put("Aggregation Link", "聚合链接");
+		m.put("Ai", "AI");
 		m.put("Alert", "警报");
 		m.put("Alert Setting", "警报设置");
 		m.put("Alert Settings", "告警设置");
@@ -270,6 +281,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("All files", "所有文件");
 		m.put("All groups", "所有分组");
 		m.put("All issues", "所有工单");
+		m.put("All occurrences", "所有出现");
 		m.put("All platforms in OCI layout", "所有 OCI 布局的平台");
 		m.put("All platforms in image", "所有镜像中的平台");
 		m.put("All possible classes", "所有可能的类");
@@ -410,6 +422,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Base", "基准");
 		m.put("Base Gpg Key", "基础GPG密钥");
 		m.put("Base Query", "基础查询");
+		m.put("Base URL", "基本 URL");
+		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint", 
+			"<b class='text-info'>OpenAI 兼容</b> API 端点的基本 URL。留空以使用 OpenAI 官方端点");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Base64 编码的 PEM 格式，以 -----BEGIN CERTIFICATE----- 开头，以 -----END CERTIFICATE----- 结尾");
 		m.put("Basic Info", "基本信息");
@@ -1162,11 +1177,11 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Enable All Queried Users", "启用所有查询的用户");
 		m.put("Enable Anonymous Access", "启用匿名访问");
 		m.put("Enable Auto Backup", "启用自动备份");
+		m.put("Enable CI/CD by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "通过 <a wicket:id=\"addFile\" class=\"link-primary\"></a> 启用 CI/CD");
 		m.put("Enable Html Report Publish", "启用 Html 报告发布");
 		m.put("Enable Selected Users", "启用选定的用户");
 		m.put("Enable Site Publish", "启用站点发布");
 		m.put("Enable TTY Mode", "启用 TTY 模式");
-		m.put("Enable build support by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "通过 <a wicket:id=\"addFile\" class=\"link-primary\"></a> 启用构建支持");
 		m.put("Enable if visibility of this field depends on other fields", "如果字段的可见性取决于其他字段，则启用");
 		m.put("Enable if visibility of this param depends on other params", "如果参数的可见性取决于其他参数，则启用");
 		m.put("Enable this if the access token has same permissions as the owner", "如果访问令牌具有与所有者相同的权限，则启用");
@@ -1881,6 +1896,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Links can be used to associate different issues. For instance, an issue can be linked to sub issues or related issues", 
 			"链接可用于关联不同的工单。例如，工单可以关联子工单或相关工单");
 		m.put("List", "列表");
+		m.put("Lite AI Model", "轻量 AI 模型");
+		m.put("Lite AI model settings have been saved", "轻量 AI 模型设置已保存");
+		m.put("Lite Model", "轻量模型");
+		m.put("Lite Model Setting", "轻量模型设置");
 		m.put("Literal", "字面量");
 		m.put("Literal default value", "字面量默认值");
 		m.put("Literal value", "字面量值");
@@ -2061,6 +2080,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Named Pull Request Queries Bean", "命名合并请求查询Bean");
 		m.put("Named Pull Request Query", "命名合并请求查询");
 		m.put("Named Query", "命名查询");
+		m.put("Natural language query via AI", "通过 AI 的自然语言查询");
 		m.put("Network Options", "网络选项");
 		m.put("Never", "从不");
 		m.put("Never expire", "永不过期");
@@ -2713,6 +2733,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Poll Interval", "轮询间隔");
 		m.put("Populate Tag Mappings", "填充标签映射");
 		m.put("Port", "端口");
+		m.put("Possible definitions", "可能的定义");
 		m.put("Post", "发布");
 		m.put("Post Build Action", "构建后操作");
 		m.put("Post Build Action Bean", "构建后操作 Bean");
@@ -3767,6 +3788,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Suffix Pattern", "后缀模式");
 		m.put("Suggest changes", "建议更改");
 		m.put("Suggested change", "建议更改");
+		m.put("Suggesting description...", "建议描述...");
+		m.put("Suggesting title...", "建议标题...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "建议由于代码更改或合并请求关闭而过时");
 		m.put("Suggestions", "建议");
 		m.put("Summary", "摘要");
@@ -3933,6 +3956,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"这可能发生在项目指向错误的 git 仓库，或者这些提交被垃圾回收。");
 		m.put("This might happen when project points to a wrong git repository, or these commits are garbage collected.", 
 			"这可能发生在项目指向错误的 git 仓库，或者这些提交被垃圾回收。");
+		m.put("This model will be used to perform lite tasks including: <ul class=\"mb-0\"> <li>Query issues, builds, and pull requests with natural language</li> <li>Mark the most likely symbol definition in symbol navigation</li> </ul> Fast and cost-effective models are recommended, such as <code>Google/gemini-2.5-flash</code> and <code>OpenAI/gpt-4.1-mini</code>", 
+			"此模型将用于执行轻量任务，包括：<ul class=\"mb-0\"> <li>使用自然语言查询工单、构建和拉取请求</li> <li>在符号导航中标记最可能的符号定义</li> </ul> 推荐使用快速且具成本效益的模型，例如 <code>Google/gemini-2.5-flash</code> 和 <code>OpenAI/gpt-4.1-mini</code>");
 		m.put("This name has already been used by another board", "此名称已被另一个看板使用");
 		m.put("This name has already been used by another group", "此名称已被另一个组使用");
 		m.put("This name has already been used by another issue board in the project", "此名称已被项目中的另一个工单看板使用");
@@ -4265,7 +4290,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Verification email sent, please check it", "验证电子邮件已发送，请检查");
 		m.put("Verify", "验证");
 		m.put("View", "查看");
-		m.put("View Source", "查看源码");
 		m.put("View source", "查看源代码");
 		m.put("View statistics", "查看统计信息");
 		m.put("Viewer", "查看者");
@@ -4396,8 +4420,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"您还可以通过添加一个构建 docker 镜像步骤到您的 CI/CD 任务，并配置内置注册表登录，使用具有包写权限的访问令牌密钥来实现");
 		m.put("You have unverified <a wicket:id=\"hasUnverifiedLink\">email addresses</a>", "您有未验证的 <a wicket:id=\"hasUnverifiedLink\">电子邮件地址</a>");
 		m.put("You may also drop file/image to the input box, or paste image from clipboard", "您也可以将文件/图像拖到输入框中，或从剪贴板粘贴图像");
-		m.put("You may initialize the project by <a wicket:id=\"addFiles\" class=\"link-primary\">adding files</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">setting up build spec</a>, or <a wicket:id=\"pushInstructions\" class=\"link-primary\">pushing an existing repository</a>", 
-			"您可以通过 <a wicket:id=\"addFiles\" class=\"link-primary\">添加文件</a>、<a wicket:id=\"setupBuildSpec\" class=\"link-primary\">定义构建规范</a> 或 <a wicket:id=\"pushInstructions\" class=\"link-primary\">推送现有仓库</a> 来初始化项目");
+		m.put("You may initialize the project by <a wicket:id=\"addFiles\" class=\"link-primary\">adding files</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">setting up CI/CD</a>, or <a wicket:id=\"pushInstructions\" class=\"link-primary\">pushing an existing repository</a>", 
+			"您可以通过 <a wicket:id=\"addFiles\" class=\"link-primary\">添加文件</a>，<a wicket:id=\"setupBuildSpec\" class=\"link-primary\">设置 CI/CD</a>，或 <a wicket:id=\"pushInstructions\" class=\"link-primary\">推送现有的代码库</a> 来初始化项目");
 		m.put("You selected to delete branch \"{0}\"", "您选择删除分支 \"{0}\"");
 		m.put("You will be notified of any activities", "您将收到任何活动的通知");
 		m.put("You've been logged out", "您已登出");
@@ -4503,6 +4527,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("found {0} users", "找到 {0} 个用户");
 		m.put("has any value of", "具有下列任何值");
 		m.put("head", "头部");
+		m.put("https://api.openai.com/v1", "https://api.openai.com/v1");
 		m.put("in current commit", "在当前提交中");
 		m.put("ineffective", "无效");
 		m.put("inherited", "继承");
@@ -4653,10 +4678,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("AI Model", "AI 模型");
-		m.put("AI Model Provider", "AI 模型提供方");
-		m.put("Model", "模型");
-		m.put("Open AI", "Open AI");
+		m.put("Inferring the most likely...", "推断最有可能的...");
 	}
 		
 	@Override

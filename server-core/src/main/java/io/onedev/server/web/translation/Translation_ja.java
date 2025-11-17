@@ -38,12 +38,18 @@ public class Translation_ja extends TranslationResourceBundle {
 			"3. CI/CD ジョブでは、カスタム settings.xml を使用する方が便利です。例えば、以下のコードをコマンドステップで使用してください:");
 		m.put("6-digits passcode", "6桁のパスコード");
 		m.put("7 days", "7日間");
+		m.put("<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">Set up AI</a> to mark the most likely", 
+			"<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">AIを設定</a>して最も可能性の高いものをマーク");
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to reset password for", 
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">ユーザー</a>のパスワードをリセットするため");
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to verify email for", 
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">ユーザー</a>のメールを確認するため");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid and katex support</a>.", 
 			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub フレーバードマークダウン</a>が使用可能で、<a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid と katex のサポート</a>があります。");
+		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language", 
+			"<a href='/~administration/settings/lite-ai-model' target='_blank'>AIを設定</a>して自然言語でクエリ");
+		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>", 
+			"<a href='/~administration/settings/lite-ai-model' target='_blank'>AIを設定</a>して自然言語でクエリ</a>");
 		m.put("<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>event object</a> triggering the notification", 
 			"<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>通知をトリガーするイベントオブジェクト</a>");
 		m.put("<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/Alert.java'>alert</a> to display", 
@@ -120,6 +126,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("A {0} used as body of user invitation email", "ユーザー招待メールの本文として使用される {0}");
 		m.put("A {0} used as body of various issue notification emails", "さまざまな問題通知メールの本文として使用される {0}");
 		m.put("A {0} used as body of various pull request notification emails", "さまざまなプルリクエスト通知メールの本文として使用される {0}");
+		m.put("AI Model Setting", "AIモデル設定");
+		m.put("AI Setting", "AI設定");
+		m.put("AI Settings", "AI設定");
+		m.put("API Key", "APIキー");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"例えば、<tt>https://your-domain.atlassian.net/rest/api/3</tt> のような JIRA クラウドインスタンスの API URL");
 		m.put("Able to merge without conflicts", "競合なしでマージ可能");
@@ -237,6 +247,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Aggregated from '<span wicket:id=\"estimatedTimeAggregationLink\"></span>':", "'<span wicket:id=\"estimatedTimeAggregationLink\"></span>'から集計:");
 		m.put("Aggregated from '<span wicket:id=\"spentTimeAggregationLink\"></span>':", "'<span wicket:id=\"spentTimeAggregationLink\"></span>'から集計:");
 		m.put("Aggregation Link", "集計リンク");
+		m.put("Ai", "AI");
 		m.put("Alert", "アラート");
 		m.put("Alert Setting", "アラート設定");
 		m.put("Alert Settings", "アラート設定");
@@ -252,6 +263,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("All files", "すべてのファイル");
 		m.put("All groups", "すべてのグループ");
 		m.put("All issues", "すべての課題");
+		m.put("All occurrences", "すべての出現");
 		m.put("All platforms in OCI layout", "OCIレイアウトのすべてのプラットフォーム");
 		m.put("All platforms in image", "イメージ内のすべてのプラットフォーム");
 		m.put("All possible classes", "すべての可能なクラス");
@@ -392,6 +404,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Base", "ベース");
 		m.put("Base Gpg Key", "ベースGpgキー");
 		m.put("Base Query", "ベースクエリ");
+		m.put("Base URL", "ベースURL");
+		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint", 
+			"<b class='text-info'>OpenAI互換</b>APIエンドポイントのベースURL。OpenAI公式エンドポイントを使用するには空のままにしてください");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Base64でエンコードされたPEM形式、-----BEGIN CERTIFICATE-----で始まり、-----END CERTIFICATE-----で終わる");
 		m.put("Basic Info", "基本情報");
@@ -1144,11 +1159,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Enable All Queried Users", "すべてのクエリされたユーザーを有効にする");
 		m.put("Enable Anonymous Access", "匿名アクセスを有効にする");
 		m.put("Enable Auto Backup", "自動バックアップを有効にする");
+		m.put("Enable CI/CD by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "<a wicket:id=\"addFile\" class=\"link-primary\"></a>によるCI/CDの有効化");
 		m.put("Enable Html Report Publish", "HTMLレポート公開を有効化");
 		m.put("Enable Selected Users", "選択されたユーザーを有効にする");
 		m.put("Enable Site Publish", "サイト公開を有効化");
 		m.put("Enable TTY Mode", "TTYモードを有効にする");
-		m.put("Enable build support by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "<a wicket:id=\"addFile\" class=\"link-primary\"></a>によるビルドサポートを有効にする");
 		m.put("Enable if visibility of this field depends on other fields", "このフィールドの表示が他のフィールドに依存する場合に有効にする");
 		m.put("Enable if visibility of this param depends on other params", "このパラメータの表示が他のパラメータに依存する場合に有効にする");
 		m.put("Enable this if the access token has same permissions as the owner", "アクセス トークンが所有者と同じ権限を持つ場合にこれを有効にする");
@@ -1863,6 +1878,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Links can be used to associate different issues. For instance, an issue can be linked to sub issues or related issues", 
 			"リンクを使用して異なる課題を関連付けることができます。例えば、課題をサブ課題や関連課題にリンクすることができます");
 		m.put("List", "リスト");
+		m.put("Lite AI Model", "ライトAIモデル");
+		m.put("Lite AI model settings have been saved", "ライトAIモデル設定が保存されました");
+		m.put("Lite Model", "ライトモデル");
+		m.put("Lite Model Setting", "ライトモデル設定");
 		m.put("Literal", "リテラル");
 		m.put("Literal default value", "リテラルのデフォルト値");
 		m.put("Literal value", "リテラル値");
@@ -2043,6 +2062,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Named Pull Request Queries Bean", "名前付きプルリクエストクエリBean");
 		m.put("Named Pull Request Query", "名前付きプルリクエストクエリ");
 		m.put("Named Query", "名前付きクエリ");
+		m.put("Natural language query via AI", "AIによる自然言語クエリ");
 		m.put("Network Options", "ネットワークオプション");
 		m.put("Never", "決して");
 		m.put("Never expire", "期限切れなし");
@@ -2695,6 +2715,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Poll Interval", "ポーリング間隔");
 		m.put("Populate Tag Mappings", "タグマッピングを入力");
 		m.put("Port", "ポート");
+		m.put("Possible definitions", "可能な定義");
 		m.put("Post", "投稿");
 		m.put("Post Build Action", "ビルド後のアクション");
 		m.put("Post Build Action Bean", "ビルド後のアクションBean");
@@ -3749,6 +3770,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Suffix Pattern", "接尾辞パターン");
 		m.put("Suggest changes", "変更を提案");
 		m.put("Suggested change", "提案された変更");
+		m.put("Suggesting description...", "説明を提案中...");
+		m.put("Suggesting title...", "タイトルを提案中...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "提案がコード変更またはプルリクエストのクローズにより古くなっています");
 		m.put("Suggestions", "提案");
 		m.put("Summary", "概要");
@@ -3915,6 +3938,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"これはプロジェクトが誤ったGitリポジトリを指している場合や、コミットがガベージコレクションされた場合に発生する可能性があります");
 		m.put("This might happen when project points to a wrong git repository, or these commits are garbage collected.", 
 			"これはプロジェクトが誤ったGitリポジトリを指している場合や、これらのコミットがガベージコレクションされた場合に発生する可能性があります");
+		m.put("This model will be used to perform lite tasks including: <ul class=\"mb-0\"> <li>Query issues, builds, and pull requests with natural language</li> <li>Mark the most likely symbol definition in symbol navigation</li> </ul> Fast and cost-effective models are recommended, such as <code>Google/gemini-2.5-flash</code> and <code>OpenAI/gpt-4.1-mini</code>", 
+			"このモデルは、以下を含む軽量タスクを実行するために使用されます：<ul class=\"mb-0\"> <li>自然言語での問題、ビルド、プルリクエストのクエリ</li> <li>シンボルナビゲーションで最も可能性の高いシンボル定義をマーク</li> </ul> 高速でコスト効果の高いモデルが推奨されます。例えば、<code>Google/gemini-2.5-flash</code>や<code>OpenAI/gpt-4.1-mini</code>などです。");
 		m.put("This name has already been used by another board", "この名前は別のボードで既に使用されています");
 		m.put("This name has already been used by another group", "この名前は別のグループで既に使用されています");
 		m.put("This name has already been used by another issue board in the project", "この名前はプロジェクト内の別の課題ボードで既に使用されています");
@@ -4247,7 +4272,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Verification email sent, please check it", "確認メールが送信されました。確認してください");
 		m.put("Verify", "確認する");
 		m.put("View", "表示");
-		m.put("View Source", "ソースを表示");
 		m.put("View source", "ソースを表示");
 		m.put("View statistics", "統計を表示");
 		m.put("Viewer", "ビューアー");
@@ -4378,8 +4402,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"CI/CDジョブにビルドDockerイメージステップを追加し、パッケージ書き込み権限を持つアクセストークンシークレットで組み込みレジストリログインを設定することでこれを達成できます");
 		m.put("You have unverified <a wicket:id=\"hasUnverifiedLink\">email addresses</a>", "未確認の<a wicket:id=\"hasUnverifiedLink\">メールアドレス</a>があります");
 		m.put("You may also drop file/image to the input box, or paste image from clipboard", "入力ボックスにファイル/画像をドロップするか、クリップボードから画像を貼り付けることもできます");
-		m.put("You may initialize the project by <a wicket:id=\"addFiles\" class=\"link-primary\">adding files</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">setting up build spec</a>, or <a wicket:id=\"pushInstructions\" class=\"link-primary\">pushing an existing repository</a>", 
-			"プロジェクトを初期化するには、<a wicket:id=\"addFiles\" class=\"link-primary\">ファイルを追加</a>、<a wicket:id=\"setupBuildSpec\" class=\"link-primary\">ビルド仕様を設定</a>、または<a wicket:id=\"pushInstructions\" class=\"link-primary\">既存のリポジトリをプッシュ</a>してください");
+		m.put("You may initialize the project by <a wicket:id=\"addFiles\" class=\"link-primary\">adding files</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">setting up CI/CD</a>, or <a wicket:id=\"pushInstructions\" class=\"link-primary\">pushing an existing repository</a>", 
+			"プロジェクトを初期化するには、<a wicket:id=\"addFiles\" class=\"link-primary\">ファイルを追加</a>、<a wicket:id=\"setupBuildSpec\" class=\"link-primary\">CI/CDを設定</a>、または<a wicket:id=\"pushInstructions\" class=\"link-primary\">既存のリポジトリをプッシュ</a>してください");
 		m.put("You selected to delete branch \"{0}\"", "ブランチ「{0}」を削除することを選択しました");
 		m.put("You will be notified of any activities", "すべての活動について通知されます");
 		m.put("You've been logged out", "ログアウトされました");
@@ -4485,6 +4509,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("found {0} users", "{0} ユーザーが見つかりました");
 		m.put("has any value of", "任意の値を持っています");
 		m.put("head", "ヘッド");
+		m.put("https://api.openai.com/v1", "https://api.openai.com/v1");
 		m.put("in current commit", "現在のコミット内");
 		m.put("ineffective", "無効");
 		m.put("inherited", "継承済み");
@@ -4635,10 +4660,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("AI Model", "AIモデル");
-		m.put("AI Model Provider", "AIモデルプロバイダー");
-		m.put("Model", "モデル");
-		m.put("Open AI", "Open AI");
+		m.put("Inferring the most likely...", "最も可能性の高いものを推測しています...");
 	}
 		
 	@Override

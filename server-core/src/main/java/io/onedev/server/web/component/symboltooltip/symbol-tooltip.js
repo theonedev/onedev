@@ -76,7 +76,7 @@ onedev.server.symboltooltip = {
 			}, 500);
 		};
 	},
-	doneQuery: function(contentId, callback) {
+	doneQuery: function(contentId, callback, translations) {
 		var $content = $("#" + contentId);
 		var $container = $content.parent();
 		var $tooltip = $("#" + $container.attr("id") + "-symbol-tooltip");
@@ -84,7 +84,7 @@ onedev.server.symboltooltip = {
 		var $definitions = $content.children(".definitions");
 		if (callback) {
 			var icon = onedev.server.isDarkMode()? "sparkle.gif": "sparkle-dark.gif";
-			var $indicator = $('<div class="definition-inferring-indicator mb-2 ajax-loading-indicator"><img src="/~img/' + icon + '"/> <wicket:t>Inferring the most likely...</wicket:t></div>');
+			var $indicator = $(`<div class="definition-inferring-indicator mb-2 ajax-loading-indicator"><img src="/~img/${icon}"/> ${translations["inferring-the-most-likely"]}</div>`);
 			$indicator.insertBefore($definitions);
 			callback("infer");
 		} else {

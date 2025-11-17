@@ -38,12 +38,18 @@ public class Translation_fr extends TranslationResourceBundle {
 			"3. Pour les tâches CI/CD, il est plus pratique d'utiliser un fichier settings.xml personnalisé, par exemple via le code ci-dessous dans une étape de commande :");
 		m.put("6-digits passcode", "Code d'accès à 6 chiffres");
 		m.put("7 days", "7 jours");
+		m.put("<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">Set up AI</a> to mark the most likely", 
+			"<a href=\"/~administration/settings/lite-ai-model\" target=\"_blank\">Configurer l'IA</a> pour marquer le plus probable");
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to reset password for", 
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">utilisateur</a> pour réinitialiser le mot de passe");
 		m.put("<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">user</a> to verify email for", 
 			"<a href=\"https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/User.java\">utilisateur</a> pour vérifier l'email");
 		m.put("<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">GitHub flavored markdown</a> is accepted, with <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">mermaid and katex support</a>.", 
 			"<a href=\"https://guides.github.com/features/mastering-markdown/\" target=\"_blank\">Markdown au format GitHub</a> est accepté, avec <a href=\"https://docs.onedev.io/appendix/markdown-syntax\" target=\"_blank\">support mermaid et katex</a>.");
+		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language", 
+			"<a href='/~administration/settings/lite-ai-model' target='_blank'>Configurer l'IA</a> pour interroger en langage naturel");
+		m.put("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>", 
+			"<a href='/~administration/settings/lite-ai-model' target='_blank'>Configurer l'IA</a> pour interroger en langage naturel</a>");
 		m.put("<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>event object</a> triggering the notification", 
 			"<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>objet événement</a> déclenchant la notification");
 		m.put("<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/Alert.java'>alert</a> to display", 
@@ -120,6 +126,10 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("A {0} used as body of user invitation email", "Un {0} utilisé comme corps de l'email d'invitation utilisateur");
 		m.put("A {0} used as body of various issue notification emails", "Un {0} utilisé comme corps des divers emails de notification de problème");
 		m.put("A {0} used as body of various pull request notification emails", "Un {0} utilisé comme corps des divers emails de notification de demande de tirage");
+		m.put("AI Model Setting", "Paramètre du modèle d'IA");
+		m.put("AI Setting", "Paramètre de l'IA");
+		m.put("AI Settings", "Paramètres de l'IA");
+		m.put("API Key", "Clé API");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"URL API de votre instance JIRA cloud, par exemple, <tt>https://your-domain.atlassian.net/rest/api/3</tt>");
 		m.put("Able to merge without conflicts", "Capable de fusionner sans conflits");
@@ -237,6 +247,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Aggregated from '<span wicket:id=\"estimatedTimeAggregationLink\"></span>':", "Agrégé depuis '<span wicket:id=\"estimatedTimeAggregationLink\"></span>' :");
 		m.put("Aggregated from '<span wicket:id=\"spentTimeAggregationLink\"></span>':", "Agrégé depuis '<span wicket:id=\"spentTimeAggregationLink\"></span>' :");
 		m.put("Aggregation Link", "Lien d'agrégation");
+		m.put("Ai", "IA");
 		m.put("Alert", "Alerte");
 		m.put("Alert Setting", "Paramètre d'alerte");
 		m.put("Alert Settings", "Paramètres d'alerte");
@@ -252,6 +263,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("All files", "Tous les fichiers");
 		m.put("All groups", "Tous les groupes");
 		m.put("All issues", "Tous les problèmes");
+		m.put("All occurrences", "Toutes les occurrences");
 		m.put("All platforms in OCI layout", "Toutes les plateformes dans la disposition OCI");
 		m.put("All platforms in image", "Toutes les plateformes dans l'image");
 		m.put("All possible classes", "Toutes les classes possibles");
@@ -392,6 +404,9 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Base", "Base");
 		m.put("Base Gpg Key", "Clé Gpg de base");
 		m.put("Base Query", "Requête de base");
+		m.put("Base URL", "URL de base");
+		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint", 
+			"URL de base du point de terminaison API <b class='text-info'>compatible OpenAI</b>. Laissez vide pour utiliser le point de terminaison officiel d'OpenAI");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Format PEM encodé en Base64, commençant par -----BEGIN CERTIFICATE----- et se terminant par -----END CERTIFICATE-----");
 		m.put("Basic Info", "Informations de base");
@@ -1144,11 +1159,11 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Enable All Queried Users", "Activer tous les utilisateurs interrogés");
 		m.put("Enable Anonymous Access", "Activer l'accès anonyme");
 		m.put("Enable Auto Backup", "Activer la sauvegarde automatique");
+		m.put("Enable CI/CD by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "Activer CI/CD par <a wicket:id=\"addFile\" class=\"link-primary\"></a>");
 		m.put("Enable Html Report Publish", "Activer la publication du rapport Html");
 		m.put("Enable Selected Users", "Activer les utilisateurs sélectionnés");
 		m.put("Enable Site Publish", "Activer la publication du site");
 		m.put("Enable TTY Mode", "Activer le mode TTY");
-		m.put("Enable build support by <a wicket:id=\"addFile\" class=\"link-primary\"></a>", "Activer la prise en charge de la construction par <a wicket:id=\"addFile\" class=\"link-primary\"></a>");
 		m.put("Enable if visibility of this field depends on other fields", "Activer si la visibilité de ce champ dépend d'autres champs");
 		m.put("Enable if visibility of this param depends on other params", "Activer si la visibilité de ce paramètre dépend d'autres paramètres");
 		m.put("Enable this if the access token has same permissions as the owner", "Activer ceci si le jeton d'accès a les mêmes permissions que le propriétaire");
@@ -1863,6 +1878,10 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Links can be used to associate different issues. For instance, an issue can be linked to sub issues or related issues", 
 			"Les liens peuvent être utilisés pour associer différents problèmes. Par exemple, un problème peut être lié à des sous-problèmes ou à des problèmes connexes");
 		m.put("List", "Liste");
+		m.put("Lite AI Model", "Modèle d'IA léger");
+		m.put("Lite AI model settings have been saved", "Les paramètres du modèle d'IA léger ont été enregistrés");
+		m.put("Lite Model", "Modèle léger");
+		m.put("Lite Model Setting", "Paramètre du modèle léger");
 		m.put("Literal", "Littéral");
 		m.put("Literal default value", "Valeur par défaut littérale");
 		m.put("Literal value", "Valeur littérale");
@@ -2043,6 +2062,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Named Pull Request Queries Bean", "Bean de requêtes de pull request nommé");
 		m.put("Named Pull Request Query", "Requête de pull request nommé");
 		m.put("Named Query", "Requête nommée");
+		m.put("Natural language query via AI", "Requête en langage naturel via l'IA");
 		m.put("Network Options", "Options réseau");
 		m.put("Never", "Jamais");
 		m.put("Never expire", "Ne jamais expirer");
@@ -2695,6 +2715,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Poll Interval", "Intervalle de sondage");
 		m.put("Populate Tag Mappings", "Remplir les mappages de tags");
 		m.put("Port", "Port");
+		m.put("Possible definitions", "Définitions possibles");
 		m.put("Post", "Publier");
 		m.put("Post Build Action", "Action post-build");
 		m.put("Post Build Action Bean", "Bean d'action post-build");
@@ -3749,6 +3770,8 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Suffix Pattern", "Modèle de suffixe");
 		m.put("Suggest changes", "Suggérer des modifications");
 		m.put("Suggested change", "Modification suggérée");
+		m.put("Suggesting description...", "Suggestion de description...");
+		m.put("Suggesting title...", "Suggestion de titre...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "La suggestion est obsolète en raison d'un changement de code ou de la fermeture de la demande de tirage");
 		m.put("Suggestions", "Suggestions");
 		m.put("Summary", "Résumé");
@@ -3915,6 +3938,8 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Cela peut arriver lorsque le projet pointe vers un mauvais dépôt git ou que le commit est collecté comme déchet.");
 		m.put("This might happen when project points to a wrong git repository, or these commits are garbage collected.", 
 			"Cela peut arriver lorsque le projet pointe vers un mauvais dépôt git ou que ces commits sont collectés comme déchets.");
+		m.put("This model will be used to perform lite tasks including: <ul class=\"mb-0\"> <li>Query issues, builds, and pull requests with natural language</li> <li>Mark the most likely symbol definition in symbol navigation</li> </ul> Fast and cost-effective models are recommended, such as <code>Google/gemini-2.5-flash</code> and <code>OpenAI/gpt-4.1-mini</code>", 
+			"Ce modèle sera utilisé pour effectuer des tâches légères, y compris : <ul class=\"mb-0\"> <li>Interroger les problèmes, les builds et les pull requests avec un langage naturel</li> <li>Marquer la définition de symbole la plus probable dans la navigation des symboles</li> </ul> Des modèles rapides et rentables sont recommandés, tels que <code>Google/gemini-2.5-flash</code> et <code>OpenAI/gpt-4.1-mini</code>");
 		m.put("This name has already been used by another board", "Ce nom a déjà été utilisé par un autre tableau");
 		m.put("This name has already been used by another group", "Ce nom a déjà été utilisé par un autre groupe");
 		m.put("This name has already been used by another issue board in the project", "Ce nom a déjà été utilisé par un autre tableau de problèmes dans le projet");
@@ -4247,7 +4272,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Verification email sent, please check it", "Email de vérification envoyé, veuillez le vérifier");
 		m.put("Verify", "Vérifier");
 		m.put("View", "Voir");
-		m.put("View Source", "Voir la source");
 		m.put("View source", "Voir la source");
 		m.put("View statistics", "Voir les statistiques");
 		m.put("Viewer", "Spectateur");
@@ -4378,8 +4402,8 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Vous pouvez également atteindre cet objectif en ajoutant une étape de création d'image Docker à votre tâche CI/CD et en configurant la connexion au registre intégré avec un jeton d'accès ayant des permissions d'écriture sur les packages");
 		m.put("You have unverified <a wicket:id=\"hasUnverifiedLink\">email addresses</a>", "Vous avez des <a wicket:id=\"hasUnverifiedLink\">adresses email non vérifiées</a>");
 		m.put("You may also drop file/image to the input box, or paste image from clipboard", "Vous pouvez également déposer un fichier/une image dans la boîte de saisie ou coller une image depuis le presse-papiers");
-		m.put("You may initialize the project by <a wicket:id=\"addFiles\" class=\"link-primary\">adding files</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">setting up build spec</a>, or <a wicket:id=\"pushInstructions\" class=\"link-primary\">pushing an existing repository</a>", 
-			"Vous pouvez initialiser le projet en <a wicket:id=\"addFiles\" class=\"link-primary\">ajoutant des fichiers</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">configurant les spécifications de construction</a>, ou <a wicket:id=\"pushInstructions\" class=\"link-primary\">poussant un dépôt existant</a>");
+		m.put("You may initialize the project by <a wicket:id=\"addFiles\" class=\"link-primary\">adding files</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">setting up CI/CD</a>, or <a wicket:id=\"pushInstructions\" class=\"link-primary\">pushing an existing repository</a>", 
+			"Vous pouvez initialiser le projet en <a wicket:id=\"addFiles\" class=\"link-primary\">ajoutant des fichiers</a>, <a wicket:id=\"setupBuildSpec\" class=\"link-primary\">configurant CI/CD</a>, ou <a wicket:id=\"pushInstructions\" class=\"link-primary\">poussant un dépôt existant</a>");
 		m.put("You selected to delete branch \"{0}\"", "Vous avez sélectionné de supprimer la branche \"{0}\"");
 		m.put("You will be notified of any activities", "Vous serez informé de toute activité");
 		m.put("You've been logged out", "Vous avez été déconnecté");
@@ -4485,6 +4509,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("found {0} users", "trouvé {0} utilisateurs");
 		m.put("has any value of", "a une valeur quelconque de");
 		m.put("head", "tête");
+		m.put("https://api.openai.com/v1", "https://api.openai.com/v1");
 		m.put("in current commit", "dans le commit actuel");
 		m.put("ineffective", "inefficace");
 		m.put("inherited", "hérité");
@@ -4635,10 +4660,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("AI Model", "Modèle d'IA");
-		m.put("AI Model Provider", "Fournisseur de modèle d'IA");
-		m.put("Model", "Modèle");
-		m.put("Open AI", "Open AI");
+		m.put("Inferring the most likely...", "Inférence de la plus probable...");
 	}
 		
 	@Override

@@ -257,7 +257,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 			}
 		} 
 		if (getSettingService().getAISetting().getLiteModelSetting() == null)
-			hints.add(_T("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to use natural language query"));
+			hints.add(_T("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language"));
 		return hints;
 	}
 

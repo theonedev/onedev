@@ -338,20 +338,6 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					}
 					
 				}.suggest(terminalExpect);
-			} else if (spec.getRuleName().equals("Ai")) {
-				return new FenceAware(codeAssist.getGrammar(), '`', '`') {
-
-					@Override
-					protected List<InputSuggestion> match(String matchWith) {
-						return null;
-					}
-
-					@Override
-					protected String getFencingDescription() {
-						return _T("enclose with ` to query with AI");
-					}
-
-				}.suggest(terminalExpect);
 			} else if (spec.getRuleName().equals("Fuzzy")) {
 				return new FenceAware(codeAssist.getGrammar(), '~', '~') {
 
@@ -431,7 +417,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 			}
 		} 
 		if (getSettingService().getAISetting().getLiteModelSetting() == null)
-			hints.add(_T("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to use natural language query</a>"));
+			hints.add(_T("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>"));
 		return hints;
 	}
 	

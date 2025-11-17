@@ -1,9 +1,11 @@
 package io.onedev.server.web.component.symboltooltip;
 
+import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -32,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.data.message.SystemMessage;
@@ -312,8 +315,15 @@ public abstract class SymbolTooltipPanel extends Panel {
 						callback = getCallbackFunction(explicit("action"));
 					else 
 						callback = "undefined";
-					String script = String.format("onedev.server.symboltooltip.doneQuery('%s', %s);", 
-						content.getMarkupId(), callback);
+
+					var translations = Map.of("inferring-the-most-likely", _T("Inferring the most likely..."));
+					String script;
+					try {
+						script = String.format("onedev.server.symboltooltip.doneQuery('%s', %s, %s);", 
+							content.getMarkupId(), callback, objectMapper.writeValueAsString(translations));
+					} catch (JsonProcessingException e) {
+						throw new RuntimeException(e);
+					}
 					target.appendJavaScript(script);
 				} else {
 					var liteModel = settingService.getAISetting().getLiteModel();

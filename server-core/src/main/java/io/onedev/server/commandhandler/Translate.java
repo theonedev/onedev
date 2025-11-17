@@ -35,9 +35,10 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.openai.client.okhttp.OpenAIOkHttpClient;
-import com.openai.models.ChatModel;
-import com.openai.models.chat.completions.ChatCompletionCreateParams;
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.model.openai.OpenAiChatModel;
+import java.time.Duration;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.StringUtils;
@@ -230,7 +231,13 @@ public class Translate extends CommandHandler {
 						}
 					});
 
-			var client = OpenAIOkHttpClient.fromEnv();
+			var model = OpenAiChatModel.builder()
+					.apiKey(apiKey)
+					.baseUrl(baseUrl)
+					.modelName("gpt-4o")
+					.temperature(0.0)
+					.timeout(Duration.ofSeconds(30))
+					.build();
 			
 			var javaDir = new File(projectDir, "server-core/src/main/java");
 
@@ -279,12 +286,10 @@ public class Translate extends CommandHandler {
 									}
 								}
 								logger.info("Translating {} lines...", untranslated.size());
-								var createParams = ChatCompletionCreateParams.builder()
-										.model(ChatModel.GPT_4O)
-										.temperature(0.0)
-										.addSystemMessage(systemPrompt)
-										.addUserMessage(userPromptPrefix + "\n\n\n\n" + Joiner.on("\n\n").join(untranslated));	
-								for (var line: Splitter.on('\n').split(client.chat().completions().create(createParams.build()).choices().get(0).message().content().get())) {		
+								var systemMsg = new SystemMessage(systemPrompt);
+								var userMsg = new UserMessage(userPromptPrefix + "\n\n\n\n" + Joiner.on("\n\n").join(untranslated));
+								var response = model.chat(systemMsg, userMsg).aiMessage().text();
+								for (var line: Splitter.on('\n').split(response)) {		
 									var matcher = VALID_TRANSLATION_PATTERN.matcher(line);
 									if (matcher.matches()) {
 										var index = Integer.parseInt(matcher.group(1));
