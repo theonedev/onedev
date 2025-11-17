@@ -145,6 +145,7 @@ public abstract class BasePage extends WebPage {
 		cookie.setPath("/");
 		cookie.setMaxAge(Integer.MAX_VALUE);
 		response.addCookie(cookie);
+		setResponsePage(getPageClass(), getPageParameters());
 	}
 
 	@Override
