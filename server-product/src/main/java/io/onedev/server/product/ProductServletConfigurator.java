@@ -35,8 +35,6 @@ import io.onedev.server.web.img.ImageScope;
 import io.onedev.server.web.websocket.WebSocketService;
 
 public class ProductServletConfigurator implements ServletConfigurator {
-
-	private static final int SESSION_TIMEOUT = 300;
 	
 	private final CorsFilter corsFilter;
 	
@@ -82,9 +80,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	@Override
 	public void configure(ServletContextHandler context) {
 		context.setContextPath("/");
-		
-		context.getSessionHandler().setMaxInactiveInterval(SESSION_TIMEOUT);
-		
+				
 		context.setInitParameter(EnvironmentLoader.ENVIRONMENT_CLASS_PARAM, DefaultWebEnvironment.class.getName());
 		context.addEventListener(new EnvironmentLoaderListener());
 
