@@ -1617,6 +1617,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Incompatibilities", "비호환성");
 		m.put("Inconsistent issuer in provider metadata and ID token", "제공자 메타데이터와 ID 토큰의 발급자가 일치하지 않음");
 		m.put("Indicator", "지표");
+		m.put("Inferring the most likely...", "가장 가능성이 높은 것을 추론 중...");
 		m.put("Inherit from parent", "상위에서 상속");
 		m.put("Inherited", "상속됨");
 		m.put("Input Spec", "입력 사양");
@@ -3938,8 +3939,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이 문제는 프로젝트가 잘못된 Git 저장소를 가리키거나 커밋이 가비지 수집된 경우 발생할 수 있습니다.");
 		m.put("This might happen when project points to a wrong git repository, or these commits are garbage collected.", 
 			"이 문제는 프로젝트가 잘못된 Git 저장소를 가리키거나 이러한 커밋이 가비지 수집된 경우 발생할 수 있습니다.");
-		m.put("This model will be used to perform lite tasks including: <ul class=\"mb-0\"> <li>Query issues, builds, and pull requests with natural language</li> <li>Mark the most likely symbol definition in symbol navigation</li> </ul> Fast and cost-effective models are recommended, such as <code>Google/gemini-2.5-flash</code> and <code>OpenAI/gpt-4.1-mini</code>", 
-			"이 모델은 다음을 포함한 간단한 작업을 수행하는 데 사용됩니다: <ul class=\"mb-0\"> <li>자연어로 이슈, 빌드 및 풀 리퀘스트 쿼리</li> <li>심볼 탐색에서 가장 가능성이 높은 심볼 정의 표시</li> </ul> 빠르고 비용 효율적인 모델이 권장됩니다, 예를 들어 <code>Google/gemini-2.5-flash</code> 및 <code>OpenAI/gpt-4.1-mini</code>");
+		m.put("This model will be used to perform lite tasks including: <ul class=\"mb-0\"> <li>Natural language support for various queries</li> <li>Mark the most likely symbol definition in symbol navigation</li> <li>Suggest pull request title and description if multiple commits are involved</li> </ul> Fast and cost-effective models are recommended, such as <code>Google/gemini-2.5-flash</code> and <code>OpenAI/gpt-4.1-mini</code>", 
+			"이 모델은 다음을 포함한 가벼운 작업을 수행하는 데 사용됩니다: <ul class=\"mb-0\"> <li>다양한 쿼리에 대한 자연어 지원</li> <li>심볼 탐색에서 가장 가능성 있는 심볼 정의 표시</li> <li>여러 커밋이 포함된 경우 풀 리퀘스트 제목 및 설명 제안</li> </ul> <code>Google/gemini-2.5-flash</code> 및 <code>OpenAI/gpt-4.1-mini</code>와 같은 빠르고 비용 효율적인 모델이 권장됩니다.");
 		m.put("This name has already been used by another board", "이 이름은 이미 다른 보드에서 사용되었습니다");
 		m.put("This name has already been used by another group", "이 이름은 이미 다른 그룹에서 사용되었습니다");
 		m.put("This name has already been used by another issue board in the project", "이 이름은 프로젝트의 다른 이슈 보드에서 이미 사용되었습니다");
@@ -4660,7 +4661,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Inferring the most likely...", "가장 가능성이 높은 것을 추론 중...");
 	}
 		
 	@Override

@@ -1617,6 +1617,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Incompatibilities", "非互換性");
 		m.put("Inconsistent issuer in provider metadata and ID token", "プロバイダーメタデータとIDトークンの発行者が一致しない");
 		m.put("Indicator", "インジケーター");
+		m.put("Inferring the most likely...", "最も可能性の高いものを推測しています...");
 		m.put("Inherit from parent", "親から継承");
 		m.put("Inherited", "継承済み");
 		m.put("Input Spec", "入力仕様");
@@ -3938,8 +3939,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"これはプロジェクトが誤ったGitリポジトリを指している場合や、コミットがガベージコレクションされた場合に発生する可能性があります");
 		m.put("This might happen when project points to a wrong git repository, or these commits are garbage collected.", 
 			"これはプロジェクトが誤ったGitリポジトリを指している場合や、これらのコミットがガベージコレクションされた場合に発生する可能性があります");
-		m.put("This model will be used to perform lite tasks including: <ul class=\"mb-0\"> <li>Query issues, builds, and pull requests with natural language</li> <li>Mark the most likely symbol definition in symbol navigation</li> </ul> Fast and cost-effective models are recommended, such as <code>Google/gemini-2.5-flash</code> and <code>OpenAI/gpt-4.1-mini</code>", 
-			"このモデルは、以下を含む軽量タスクを実行するために使用されます：<ul class=\"mb-0\"> <li>自然言語での問題、ビルド、プルリクエストのクエリ</li> <li>シンボルナビゲーションで最も可能性の高いシンボル定義をマーク</li> </ul> 高速でコスト効果の高いモデルが推奨されます。例えば、<code>Google/gemini-2.5-flash</code>や<code>OpenAI/gpt-4.1-mini</code>などです。");
+		m.put("This model will be used to perform lite tasks including: <ul class=\"mb-0\"> <li>Natural language support for various queries</li> <li>Mark the most likely symbol definition in symbol navigation</li> <li>Suggest pull request title and description if multiple commits are involved</li> </ul> Fast and cost-effective models are recommended, such as <code>Google/gemini-2.5-flash</code> and <code>OpenAI/gpt-4.1-mini</code>", 
+			"このモデルは、以下を含む軽量タスクを実行するために使用されます： <ul class=\"mb-0\"> <li>さまざまなクエリに対する自然言語サポート</li> <li>シンボルナビゲーションで最も可能性の高いシンボル定義をマークする</li> <li>複数のコミットが関与している場合、プルリクエストのタイトルと説明を提案する</li> </ul> 高速でコスト効果の高いモデルが推奨されます。例えば、<code>Google/gemini-2.5-flash</code>や<code>OpenAI/gpt-4.1-mini</code>などです。");
 		m.put("This name has already been used by another board", "この名前は別のボードで既に使用されています");
 		m.put("This name has already been used by another group", "この名前は別のグループで既に使用されています");
 		m.put("This name has already been used by another issue board in the project", "この名前はプロジェクト内の別の課題ボードで既に使用されています");
@@ -4660,7 +4661,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Inferring the most likely...", "最も可能性の高いものを推測しています...");
 	}
 		
 	@Override

@@ -32,6 +32,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"'SSO provider' should be translated as SSO 提供方\n" + 
 			"'post build' should be translated as 构建后\n" + 
 			"'artifact' should be translated as 制品\n" + 
+			"'pull request' should be translated as 合并请求\n" + 
 			"'job' should be translated as 任务")
 	public static void init(Map<String, String> m) {
 		m.clear();
@@ -1635,6 +1636,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Incompatibilities", "不兼容性");
 		m.put("Inconsistent issuer in provider metadata and ID token", "提供者元数据中的发行者与 ID 令牌中的发行者不一致");
 		m.put("Indicator", "指示器");
+		m.put("Inferring the most likely...", "推断最有可能的...");
 		m.put("Inherit from parent", "从父级继承");
 		m.put("Inherited", "继承");
 		m.put("Input Spec", "输入规范");
@@ -3956,8 +3958,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"这可能发生在项目指向错误的 git 仓库，或者这些提交被垃圾回收。");
 		m.put("This might happen when project points to a wrong git repository, or these commits are garbage collected.", 
 			"这可能发生在项目指向错误的 git 仓库，或者这些提交被垃圾回收。");
-		m.put("This model will be used to perform lite tasks including: <ul class=\"mb-0\"> <li>Query issues, builds, and pull requests with natural language</li> <li>Mark the most likely symbol definition in symbol navigation</li> </ul> Fast and cost-effective models are recommended, such as <code>Google/gemini-2.5-flash</code> and <code>OpenAI/gpt-4.1-mini</code>", 
-			"此模型将用于执行轻量任务，包括：<ul class=\"mb-0\"> <li>使用自然语言查询工单、构建和拉取请求</li> <li>在符号导航中标记最可能的符号定义</li> </ul> 推荐使用快速且具成本效益的模型，例如 <code>Google/gemini-2.5-flash</code> 和 <code>OpenAI/gpt-4.1-mini</code>");
 		m.put("This name has already been used by another board", "此名称已被另一个看板使用");
 		m.put("This name has already been used by another group", "此名称已被另一个组使用");
 		m.put("This name has already been used by another issue board in the project", "此名称已被项目中的另一个工单看板使用");
@@ -4678,7 +4678,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Inferring the most likely...", "推断最有可能的...");
+		m.put("This model will be used to perform lite tasks including: <ul class=\"mb-0\"> <li>Natural language support for various queries</li> <li>Mark the most likely symbol definition in symbol navigation</li> <li>Suggest pull request title and description if multiple commits are involved</li> </ul> Fast and cost-effective models are recommended, such as <code>Google/gemini-2.5-flash</code> and <code>OpenAI/gpt-4.1-mini</code>", 
+			"此模型将用于执行轻量级任务，包括：<ul class=\"mb-0\"> <li>支持各种查询的自然语言</li> <li>在符号导航中标记最可能的符号定义</li> <li>如果涉及多个提交，建议合并请求标题和描述</li> </ul> 推荐使用快速且具成本效益的模型，例如 <code>Google/gemini-2.5-flash</code> 和 <code>OpenAI/gpt-4.1-mini</code>。");
 	}
 		
 	@Override

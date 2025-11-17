@@ -1617,6 +1617,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Incompatibilities", "Inkompatibilitäten");
 		m.put("Inconsistent issuer in provider metadata and ID token", "Inkonsistenter Aussteller in Providermetadaten und ID-Token");
 		m.put("Indicator", "Indikator");
+		m.put("Inferring the most likely...", "Ermitteln der wahrscheinlichsten...");
 		m.put("Inherit from parent", "Vom Elternteil erben");
 		m.put("Inherited", "Geerbt");
 		m.put("Input Spec", "Eingabe-Spezifikation");
@@ -3938,8 +3939,8 @@ public class Translation_de extends TranslationResourceBundle {
 			"Dies könnte passieren, wenn das Projekt auf ein falsches Git-Repository verweist oder der Commit durch Garbage Collection entfernt wurde.");
 		m.put("This might happen when project points to a wrong git repository, or these commits are garbage collected.", 
 			"Dies könnte passieren, wenn das Projekt auf ein falsches Git-Repository verweist oder diese Commits durch Garbage Collection entfernt wurden.");
-		m.put("This model will be used to perform lite tasks including: <ul class=\"mb-0\"> <li>Query issues, builds, and pull requests with natural language</li> <li>Mark the most likely symbol definition in symbol navigation</li> </ul> Fast and cost-effective models are recommended, such as <code>Google/gemini-2.5-flash</code> and <code>OpenAI/gpt-4.1-mini</code>", 
-			"Dieses Modell wird verwendet, um leichte Aufgaben auszuführen, einschließlich: <ul class=\"mb-0\"> <li>Abfragen von Problemen, Builds und Pull-Anfragen mit natürlicher Sprache</li> <li>Markieren der wahrscheinlichsten Symboldefinition in der Symbolnavigation</li> </ul> Schnelle und kostengünstige Modelle werden empfohlen, wie <code>Google/gemini-2.5-flash</code> und <code>OpenAI/gpt-4.1-mini</code>");
+		m.put("This model will be used to perform lite tasks including: <ul class=\"mb-0\"> <li>Natural language support for various queries</li> <li>Mark the most likely symbol definition in symbol navigation</li> <li>Suggest pull request title and description if multiple commits are involved</li> </ul> Fast and cost-effective models are recommended, such as <code>Google/gemini-2.5-flash</code> and <code>OpenAI/gpt-4.1-mini</code>", 
+			"Dieses Modell wird verwendet, um leichte Aufgaben auszuführen, einschließlich: <ul class=\"mb-0\"> <li>Unterstützung der natürlichen Sprache für verschiedene Abfragen</li> <li>Markieren der wahrscheinlichsten Symboldefinition in der Symbolnavigation</li> <li>Vorschlagen von Pull-Request-Titel und -Beschreibung, wenn mehrere Commits beteiligt sind</li> </ul> Schnelle und kostengünstige Modelle werden empfohlen, wie <code>Google/gemini-2.5-flash</code> und <code>OpenAI/gpt-4.1-mini</code>");
 		m.put("This name has already been used by another board", "Dieser Name wurde bereits von einem anderen Board verwendet");
 		m.put("This name has already been used by another group", "Dieser Name wurde bereits von einer anderen Gruppe verwendet");
 		m.put("This name has already been used by another issue board in the project", "Dieser Name wurde bereits von einem anderen Issue-Board im Projekt verwendet");
@@ -4660,7 +4661,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Inferring the most likely...", "Ermitteln der wahrscheinlichsten...");
 	}
 			
 	@Override
