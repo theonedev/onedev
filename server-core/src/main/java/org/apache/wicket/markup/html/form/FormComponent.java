@@ -1425,6 +1425,7 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	 *            Tag to modify
 	 * @see org.apache.wicket.Component#onComponentTag(ComponentTag)
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onComponentTag(final ComponentTag tag)
 	{
