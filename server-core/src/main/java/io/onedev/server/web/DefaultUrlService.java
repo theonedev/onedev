@@ -53,9 +53,9 @@ public class DefaultUrlService implements UrlService {
 	@Override
 	public String cloneUrlFor(Project project, boolean ssh) {
 		if (ssh)
-			return settingService.getSystemSetting().getEffectiveSshRootUrl() + "/" + project.getPath();
+			return settingService.getSystemSetting().getEffectiveSshRootUrl() + "/" + project.getPath() + ".git";
 		else
-			return settingService.getSystemSetting().getServerUrl() + "/" + project.getPath();
+			return settingService.getSystemSetting().getServerUrl() + "/" + project.getPath() + ".git";
 	}
 	
 	@Override
