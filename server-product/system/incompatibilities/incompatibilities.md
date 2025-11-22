@@ -1,7 +1,7 @@
 # 13.1.0
 
 1. Java 17 is required for both server and agent
-2. Agents will stop after upgrading to this version. Make sure to pull the latest image first (`docker pull 1dev/agent`) before starting agents again
+2. Agents will be stopped after upgrading to this version. Make sure to pull the latest image first (`docker pull 1dev/agent`) before starting agents again
 
 # 12.0.1
 
