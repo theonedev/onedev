@@ -291,23 +291,25 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		commentContainer = new WebMarkupContainer("comment", Model.of((PlanarRange)null)) {
 			
 			@Override
+			protected void onBeforeRender() {
+				WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+				Cookie cookie = request.getCookie(COOKIE_COMMENT_WIDTH);
+				if (cookie != null) 
+					add(AttributeAppender.replace("style", "width:" + cookie.getValue() + "px"));
+				else 
+					add(AttributeAppender.replace("style", "width:360px"));
+
+				super.onBeforeRender();
+			}
+
+			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				response.render(OnDomReadyHeaderItem.forScript("onedev.server.sourceView.initComment();"));
 			}
 
 		};
-		
-		float commentWidth;
-		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-		Cookie cookie = request.getCookie(COOKIE_COMMENT_WIDTH);
-		if (cookie != null) 
-			commentWidth = Float.parseFloat(cookie.getValue());
-		else 
-			commentWidth = 360;
-		
-		commentContainer.add(AttributeAppender.append("style", "width:" + commentWidth + "px"));
-		
+				
 		if (context.getOpenComment() != null) {
 			for (List<CodeCommentInfo> listOfCommentInfos: annotationInfoModel.getObject().getComments().values()) {
 				for (CodeCommentInfo commentInfo: listOfCommentInfos) {
@@ -754,22 +756,25 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		outlineContainer = new WebMarkupContainer("outline") {
 
 			@Override
+			protected void onBeforeRender() {
+				WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+				var cookie = request.getCookie(COOKIE_OUTLINE_WIDTH);
+				if (cookie != null) 
+					add(AttributeAppender.replace("style", "width:" + cookie.getValue() + "px"));
+				else 
+					add(AttributeAppender.replace("style", "width:300px"));
+
+				super.onBeforeRender();
+			}
+
+			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				response.render(OnDomReadyHeaderItem.forScript("onedev.server.sourceView.initOutline();"));
 			}
 			
 		};
-		
-		float outlineWidth;
-		cookie = request.getCookie(COOKIE_OUTLINE_WIDTH);
-		if (cookie != null) 
-			outlineWidth = Float.parseFloat(cookie.getValue());
-		else 
-			outlineWidth = 300;
-		
-		outlineContainer.add(AttributeAppender.append("style", "width:" + outlineWidth + "px"));
-		
+				
 		IModel<HashSet<Symbol>> state = new Model<HashSet<Symbol>>(new HashSet<>(getChildSymbols(symbols, null)));
 		NestedTree<Symbol> tree = new NestedTree<Symbol>("content", newSymbolTreeProvider(symbols), state) {
 

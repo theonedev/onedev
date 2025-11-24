@@ -177,7 +177,7 @@ public class IssueNotificationManager {
 		if (user != null) {
 			if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
 				notifiedUsers.add(user); 
-			if (!user.isSystem() && !user.isServiceAccount())
+			if (!user.isSystem() && user.getType() != User.Type.SERVICE)
 				watchService.watch(issue, user, true);
 		}
 
@@ -208,7 +208,7 @@ public class IssueNotificationManager {
 			}
 			
 			for (User member: entry.getValue().getMembers()) {
-				if (!member.isServiceAccount()) 
+				if (member.getType() != User.Type.SERVICE) 
 					watchService.watch(issue, member, true);
 				authorizationService.authorize(issue, member);
 			}
@@ -237,7 +237,7 @@ public class IssueNotificationManager {
 			}
 			
 			for (User each: entry.getValue()) {
-				if (!each.isServiceAccount()) 
+				if (each.getType() != User.Type.SERVICE) 
 					watchService.watch(issue, each, true);
 				authorizationService.authorize(issue, each);
 			}
@@ -250,7 +250,7 @@ public class IssueNotificationManager {
 				User mentionedUser = userService.findByName(userName);
 				if (mentionedUser != null) {
 					mentionService.mention(issue, mentionedUser);
-					if (!mentionedUser.isServiceAccount())
+					if (mentionedUser.getType() != User.Type.SERVICE)
 						watchService.watch(issue, mentionedUser, true);
 					authorizationService.authorize(issue, mentionedUser);
 					if (!isNotified(notifiedEmailAddresses, mentionedUser)) {

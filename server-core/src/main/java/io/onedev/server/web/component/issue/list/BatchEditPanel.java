@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.issue.list;
 
+import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.NAME_CONFIDENTIAL;
 import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.NAME_ITERATION;
 import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.NAME_STATE;
@@ -20,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.ValidationException;
 
 import org.apache.wicket.AttributeModifier;
@@ -39,14 +39,13 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.service.IssueChangeService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
@@ -55,6 +54,8 @@ import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
 import io.onedev.server.web.behavior.RunTaskBehavior;
 import io.onedev.server.web.component.comment.CommentInput;
@@ -267,7 +268,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		});
 		
 		form.add(new CheckBox("sendNotifications", new PropertyModel<>(this, "sendNotifications"))
-				.setVisible(!SecurityUtils.getUser().isServiceAccount()));
+				.setVisible(SecurityUtils.getUser().getType() != SERVICE));
 		
 		form.add(new AjaxButton("save") {
 

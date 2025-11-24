@@ -1,6 +1,8 @@
 package io.onedev.server.web.page.layout;
 
 import static io.onedev.server.model.Alert.PROP_DATE;
+import static io.onedev.server.model.User.Type.AI;
+import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
@@ -76,6 +78,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.ai.chat.ChatPanel;
 import io.onedev.server.web.component.brandlogo.BrandLogoPanel;
 import io.onedev.server.web.component.commandpalette.CommandPalettePanel;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
@@ -151,6 +154,7 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.page.my.accesstoken.MyAccessTokensPage;
+import io.onedev.server.web.page.my.aisetting.MyModelSettingPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.basicsetting.MyBasicSettingPage;
 import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
@@ -807,6 +811,24 @@ public abstract class LayoutPage extends BasePage {
 
 		});
 
+		var chat = new ChatPanel("chat");
+		add(chat);
+
+		topbar.add(new AjaxLink<Void>("showChat") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				chat.show(target);
+			}
+		
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getLoginUser() != null && !getLoginUser().getEntitledAis().isEmpty());
+			}
+
+		});
+
 		topbar.add(new MenuLink("languageSelector") {
 
 			private void switchLanguage(Locale locale) {
@@ -1061,7 +1083,7 @@ public abstract class LayoutPage extends BasePage {
 		if (loginUser != null) {
 			userInfo.add(new UserAvatar("avatar", loginUser));
 			userInfo.add(new Label("name", loginUser.getDisplayName()));
-			if (loginUser.isServiceAccount() || loginUser.isDisabled()) {
+			if (loginUser.getType() != ORDINARY || loginUser.isDisabled()) {
 				userInfo.add(new WebMarkupContainer("hasUnverifiedLink").setVisible(false));
 				userInfo.add(new WebMarkupContainer("noPrimaryAddressLink").setVisible(false));
 			} else if (loginUser.getEmailAddresses().isEmpty()) {
@@ -1088,7 +1110,7 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof MyBasicSettingPage)
 			item.add(AttributeAppender.append("class", "active"));
 
-		if (getLoginUser() != null && !getLoginUser().isServiceAccount()) {
+		if (getLoginUser() != null && getLoginUser().getType() == ORDINARY) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("myEmailSetting", MyEmailAddressesPage.class));
 			if (getPage() instanceof MyEmailAddressesPage)
 				item.add(AttributeAppender.append("class", "active"));
@@ -1100,12 +1122,20 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof MyAvatarPage)
 			item.add(AttributeAppender.append("class", "active"));
 
-		if (loginUser != null && loginUser.getPassword() != null && !loginUser.isServiceAccount() && !loginUser.isDisabled()) {
+		if (loginUser != null && loginUser.getPassword() != null && loginUser.getType() == ORDINARY && !loginUser.isDisabled()) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("myPassword", MyPasswordPage.class));
 			if (getPage() instanceof MyPasswordPage)
 				item.add(AttributeAppender.append("class", "active"));
 		} else {
 			userInfo.add(new WebMarkupContainer("myPassword").setVisible(false));
+		}
+
+		if (loginUser != null && loginUser.getType() == AI && !loginUser.isDisabled()) {
+			userInfo.add(item = new ViewStateAwarePageLink<Void>("myAISetting", MyModelSettingPage.class));
+			if (getPage() instanceof MyModelSettingPage)
+				item.add(AttributeAppender.append("class", "active"));
+		} else {
+			userInfo.add(new WebMarkupContainer("myAISetting").setVisible(false));
 		}
 
 		if (OneDev.getInstance(ServerConfig.class).getSshPort() != 0 && loginUser != null && !loginUser.isDisabled()) {
@@ -1132,7 +1162,7 @@ public abstract class LayoutPage extends BasePage {
 			userInfo.add(new WebMarkupContainer("myAccessTokens").setVisible(false));
 		}
 
-		if (getLoginUser() != null && !getLoginUser().isServiceAccount() && !getLoginUser().isDisabled()) {
+		if (getLoginUser() != null && getLoginUser().getType() == ORDINARY && !getLoginUser().isDisabled()) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("myTwoFactorAuthentication", MyTwoFactorAuthenticationPage.class) {
 				@Override
 				protected void onConfigure() {
@@ -1146,7 +1176,7 @@ public abstract class LayoutPage extends BasePage {
 			userInfo.add(new WebMarkupContainer("myTwoFactorAuthentication").setVisible(false));
 		}
 
-		if (loginUser != null && !loginUser.isDisabled() && !loginUser.isServiceAccount()) {
+		if (loginUser != null && !loginUser.isDisabled() && loginUser.getType() == ORDINARY) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("mySsoAccounts", MySsoAccountsPage.class));
 			if (getPage() instanceof MySsoAccountsPage)
 				item.add(AttributeAppender.append("class", "active"));
@@ -1154,7 +1184,7 @@ public abstract class LayoutPage extends BasePage {
 			userInfo.add(new WebMarkupContainer("mySsoAccounts").setVisible(false));
 		}
 
-		if (getLoginUser() != null && !getLoginUser().isServiceAccount() && !getLoginUser().isDisabled()) {
+		if (getLoginUser() != null && getLoginUser().getType() == ORDINARY && !getLoginUser().isDisabled()) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("myQueryWatches", MyQueryWatchesPage.class));
 			if (getPage() instanceof MyQueryWatchesPage)
 				item.add(AttributeAppender.append("class", "active"));
@@ -1218,6 +1248,7 @@ public abstract class LayoutPage extends BasePage {
 				getUpdateCheckService().cacheNewVersionStatus(newVersionStatus);
 			}
 		});
+		
 	}
 
 	private SubscriptionService getSubscriptionService() {

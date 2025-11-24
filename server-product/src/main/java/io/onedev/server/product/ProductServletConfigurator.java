@@ -2,6 +2,7 @@ package io.onedev.server.product;
 
 import java.io.File;
 import java.util.EnumSet;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.servlet.DispatcherType;
@@ -30,53 +31,45 @@ import io.onedev.server.jetty.FileAssetServlet;
 import io.onedev.server.jetty.ServletConfigurator;
 import io.onedev.server.security.CorsFilter;
 import io.onedev.server.security.DefaultWebEnvironment;
+import io.onedev.server.web.SessionListener;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.img.ImageScope;
-import io.onedev.server.web.websocket.WebSocketService;
 
 public class ProductServletConfigurator implements ServletConfigurator {
 	
-	private final CorsFilter corsFilter;
-	
-	private final ShiroFilter shiroFilter;
-	
-    private final GitFilter gitFilter;
-    
-    private final GoGetFilter goGetFilter;
-    
-    private final GitLfsFilter gitLfsFilter;
-    
-	private final GitPreReceiveCallback preReceiveServlet;
-	
-	private final GitPostReceiveCallback postReceiveServlet;
-	
-	private final WicketServlet wicketServlet;
-	
-	private final ServletContainer jerseyServlet;
-	
-	private final WebSocketService webSocketService;
-	
-	private final ServerSocketServlet serverServlet;
+	@Inject
+	private CorsFilter corsFilter;
 	
 	@Inject
-	public ProductServletConfigurator(ShiroFilter shiroFilter, CorsFilter corsFilter,
-                                      GitFilter gitFilter, GitLfsFilter gitLfsFilter, GitPreReceiveCallback preReceiveServlet,
-                                      GitPostReceiveCallback postReceiveServlet, WicketServlet wicketServlet,
-                                      WebSocketService webSocketService, ServletContainer jerseyServlet,
-                                      ServerSocketServlet serverServlet, GoGetFilter goGetFilter) {
-		this.corsFilter = corsFilter;
-		this.shiroFilter = shiroFilter;
-        this.gitFilter = gitFilter;
-        this.gitLfsFilter = gitLfsFilter;
-		this.preReceiveServlet = preReceiveServlet;
-		this.postReceiveServlet = postReceiveServlet;
-		this.wicketServlet = wicketServlet;
-		this.webSocketService = webSocketService;
-		this.jerseyServlet = jerseyServlet;
-		this.serverServlet = serverServlet;
-		this.goGetFilter = goGetFilter;
-	}
+	private ShiroFilter shiroFilter;
 	
+	@Inject
+    private GitFilter gitFilter;
+    
+	@Inject
+    private GoGetFilter goGetFilter;
+    
+	@Inject
+    private GitLfsFilter gitLfsFilter;
+    
+	@Inject
+    private GitPreReceiveCallback preReceiveServlet;
+	
+	@Inject
+    private GitPostReceiveCallback postReceiveServlet;
+	
+	@Inject
+	private WicketServlet wicketServlet;
+
+	@Inject
+	private ServletContainer jerseyServlet;
+		
+	@Inject
+	private ServerSocketServlet serverServlet;
+
+	@Inject
+	private Set<SessionListener> sessionListener;
+		
 	@Override
 	public void configure(ServletContextHandler context) {
 		context.setContextPath("/");
@@ -107,12 +100,17 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		context.getSessionHandler().addEventListener(new HttpSessionListener() {
 
 			@Override
-			public void sessionCreated(HttpSessionEvent se) {
+			public void sessionCreated(HttpSessionEvent se) {				
+				for (var listener: sessionListener) {
+					listener.sessionCreated(se.getSession().getId());
+				}
 			}
 
 			@Override
 			public void sessionDestroyed(HttpSessionEvent se) {
-				webSocketService.onDestroySession(se.getSession().getId());
+				for (var listener: sessionListener) {
+					listener.sessionDestroyed(se.getSession().getId());
+				}
 			}
 			
 		});

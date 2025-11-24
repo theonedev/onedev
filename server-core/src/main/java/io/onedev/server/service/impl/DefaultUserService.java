@@ -1,5 +1,7 @@
 package io.onedev.server.service.impl;
 
+import static io.onedev.server.model.User.Type.SERVICE;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -18,13 +20,11 @@ import org.hibernate.query.Query;
 import com.google.common.base.Preconditions;
 import com.hazelcast.core.HazelcastInstance;
 
-import io.onedev.server.SubscriptionService;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarting;
-import io.onedev.server.exception.NoSubscriptionException;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
@@ -68,9 +68,6 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
     
     @Inject
     private ClusterService clusterService;
-
-	@Inject
-    private SubscriptionService subscriptionService;
 	
 	private volatile UserCache cache;
 
@@ -115,8 +112,6 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
     @Override
     public void create(User user) {
 		Preconditions.checkState(user.isNew());
-		if (user.isServiceAccount() && !subscriptionService.isSubscriptionActive())
-			throw new NoSubscriptionException("Service account");
 		user.setName(user.getName().toLowerCase());
 		dao.persist(user);
     }
@@ -385,7 +380,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 
 		user.setPassword(null);
 		user.setPasswordResetCode(null);
-		user.setServiceAccount(true);
+		user.setType(SERVICE);
 
 		dao.persist(user);		
 	}

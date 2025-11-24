@@ -205,13 +205,13 @@ public class GlobalIssueSetting implements Serializable {
 		
 		var branchUpdatedSpec = new BranchUpdatedSpec();
 		branchUpdatedSpec.setToState("Closed");
-		branchUpdatedSpec.setBranches("main");
+		branchUpdatedSpec.setBranches("main master");
 		branchUpdatedSpec.setIssueQuery("fixed in current commit");		
 		transitionSpecs.add(branchUpdatedSpec);
 		
 		var pullRequestOpenedSpec = new PullRequestOpenedSpec();
 		pullRequestOpenedSpec.setToState("In Review");
-		pullRequestOpenedSpec.setBranches("main");
+		pullRequestOpenedSpec.setBranches("main master");
 		pullRequestOpenedSpec.setIssueQuery("fixed in current pull request");		
 		transitionSpecs.add(pullRequestOpenedSpec);
 		

@@ -126,9 +126,10 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("A {0} used as body of user invitation email", "사용자 초대 이메일 본문으로 사용된 {0}");
 		m.put("A {0} used as body of various issue notification emails", "다양한 문제 알림 이메일 본문으로 사용된 {0}");
 		m.put("A {0} used as body of various pull request notification emails", "다양한 풀 리퀘스트 알림 이메일 본문으로 사용된 {0}");
-		m.put("AI Model Setting", "AI 모델 설정");
-		m.put("AI Setting", "AI 설정");
+		m.put("AI Model Settings", "AI 모델 설정");
 		m.put("AI Settings", "AI 설정");
+		m.put("AI entitlement settings have been saved", "AI 권한 설정이 저장되었습니다");
+		m.put("AI model settings have been saved", "AI 모델 설정이 저장되었습니다");
 		m.put("API Key", "API 키");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"예를 들어, <tt>https://your-domain.atlassian.net/rest/api/3</tt>와 같은 JIRA 클라우드 인스턴스의 API URL");
@@ -248,6 +249,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Aggregated from '<span wicket:id=\"spentTimeAggregationLink\"></span>':", "'<span wicket:id=\"spentTimeAggregationLink\"></span>'에서 집계됨:");
 		m.put("Aggregation Link", "집계 링크");
 		m.put("Ai", "AI");
+		m.put("Ai Model Setting", "AI 모델 설정");
+		m.put("Ai Setting", "AI 설정");
 		m.put("Alert", "알림");
 		m.put("Alert Setting", "알림 설정");
 		m.put("Alert Settings", "알림 설정들");
@@ -561,7 +564,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Can not find issue board: ", "이슈 보드를 찾을 수 없습니다:");
 		m.put("Can not move project \"{0}\" to be under itself or its descendants", "프로젝트 \"{0}\"를 자신 또는 하위 프로젝트 아래로 이동할 수 없습니다");
 		m.put("Can not perform this operation now", "지금 이 작업을 수행할 수 없습니다");
-		m.put("Can not reset password for service account or disabled user", "서비스 계정 또는 비활성화된 사용자의 비밀번호를 재설정할 수 없습니다");
+		m.put("Can not reset password for disabled account", "비활성화된 계정의 비밀번호를 재설정할 수 없습니다");
+		m.put("Can not reset password for service or AI account", "서비스 또는 AI 계정의 비밀번호를 재설정할 수 없습니다");
 		m.put("Can not reset password for user authenticating via external system", "외부 시스템을 통해 인증하는 사용자의 비밀번호를 재설정할 수 없습니다");
 		m.put("Can not save malformed query", "잘못된 쿼리를 저장할 수 없습니다");
 		m.put("Can not use current or descendant project as parent", "현재 또는 하위 프로젝트를 부모로 사용할 수 없습니다");
@@ -593,6 +597,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Changes since this comment", "이 댓글 이후 변경 사항");
 		m.put("Channel Notification", "채널 알림");
 		m.put("Chart Metadata", "차트 메타데이터");
+		m.put("Chat deleted", "채팅이 삭제되었습니다");
+		m.put("Chat with", "채팅 상대");
+		m.put("Chat with AI", "AI와 채팅");
 		m.put("Check <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHub's guide</a> on how to generate and use GPG keys to sign your commits", 
 			"커밋에 서명을 하기 위해 GPG 키를 생성하고 사용하는 방법에 대한 <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHub 가이드</a>를 확인하세요");
 		m.put("Check <a href=\"https://docs.onedev.io/administration-guide/agent-management\" target=\"_blank\">agent management</a> for details, including instructions on how to run agent as service", 
@@ -946,6 +953,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Delete Selected Users", "선택한 사용자 삭제");
 		m.put("Delete Source Branch", "소스 브랜치 삭제");
 		m.put("Delete Source Branch After Merge", "병합 후 소스 브랜치 삭제");
+		m.put("Delete chat", "채팅 삭제");
 		m.put("Delete dashboard", "대시보드 삭제");
 		m.put("Delete from branch {0}", "브랜치 {0}에서 삭제");
 		m.put("Delete this", "이 항목 삭제");
@@ -1191,6 +1199,11 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Enter description here", "여기에 설명을 입력하세요");
 		m.put("Enter your details to login to your account", "계정에 로그인하려면 세부 정보를 입력하세요");
 		m.put("Enter your user name or email to reset password", "비밀번호를 재설정하려면 사용자 이름 또는 이메일을 입력하세요");
+		m.put("Entitled Groups", "권한이 부여된 그룹");
+		m.put("Entitled Projects", "권한이 부여된 프로젝트");
+		m.put("Entitled Users", "권한이 부여된 사용자");
+		m.put("Entitlement", "권한 부여");
+		m.put("Entitlement Edit Bean", "권한 편집 빈");
 		m.put("Entries", "항목들");
 		m.put("Entry", "항목");
 		m.put("Enumeration", "열거형");
@@ -1997,6 +2010,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Minimum length of the password", "비밀번호의 최소 길이");
 		m.put("Missing Commit", "누락된 커밋");
 		m.put("Missing Commits", "누락된 커밋들");
+		m.put("Model", "모델");
 		m.put("Month", "월");
 		m.put("Months", "개월");
 		m.put("Months to Display", "표시할 개월 수");
@@ -2018,6 +2032,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Multiple Lines", "다중 라인");
 		m.put("Multiple On the Other Side", "다른 쪽의 다중");
 		m.put("Must not be empty", "비어 있으면 안 됨");
+		m.put("My AI Settings", "내 AI 설정");
 		m.put("My Access Tokens", "내 액세스 토큰");
 		m.put("My Basic Settings", "내 기본 설정");
 		m.put("My Email Addresses", "내 이메일 주소");
@@ -2074,6 +2089,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("New State", "새 상태");
 		m.put("New User Bean", "새 사용자 Bean");
 		m.put("New Value", "새 값");
+		m.put("New chat", "새 채팅");
 		m.put("New issue board created", "새 이슈 보드 생성됨");
 		m.put("New project created", "새 프로젝트가 생성되었습니다");
 		m.put("New user created", "새 사용자 생성됨");
@@ -2539,6 +2555,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Order Subscription", "구독 정렬");
 		m.put("Ordered List", "정렬된 목록");
 		m.put("Ordered list", "정렬된 목록");
+		m.put("Ordinary", "일반");
+		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account (working in progress)", 
+			"일반: 일반 계정<br>서비스: 서비스 계정은 비밀번호와 이메일 주소가 없으며, 활동에 대한 알림을 생성하지 않습니다<br>AI: AI 계정 (작업 진행 중)");
 		m.put("Osv License Scanner", "Osv 라이센스 스캐너");
 		m.put("Osv Vulnerability Scanner", "Osv 취약점 스캐너");
 		m.put("Other", "기타");
@@ -3171,6 +3190,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Select users to send alert email upon events such as database auto-backup failure, cluster node unreachable etc", 
 			"데이터베이스 자동 백업 실패, 클러스터 노드 연결 불가 등의 이벤트 발생 시 경고 이메일을 보낼 사용자 선택");
 		m.put("Select workspace to import from", "가져올 작업 공간 선택");
+		m.put("Send", "보내기");
 		m.put("Send Notifications", "알림 보내기");
 		m.put("Send Pull Request", "풀 리퀘스트 보내기");
 		m.put("Send notification", "알림 보내기");
@@ -3192,7 +3212,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Server is Starting...", "서버 시작 중...");
 		m.put("Server url", "서버 URL");
 		m.put("Service", "서비스");
-		m.put("Service Account", "서비스 계정");
 		m.put("Service Desk", "서비스 데스크");
 		m.put("Service Desk Email Address", "서비스 데스크 이메일 주소");
 		m.put("Service Desk Issue Open Failed", "서비스 데스크 이슈 열기 실패");
@@ -3204,9 +3223,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Service Desk Settings", "서비스 데스크 설정들");
 		m.put("Service Locator", "서비스 로케이터");
 		m.put("Service Locators", "서비스 로케이터들");
-		m.put("Service account not allowed to login", "서비스 계정은 로그인할 수 없습니다");
 		m.put("Service desk setting", "서비스 데스크 설정");
 		m.put("Service desk settings have been saved", "서비스 데스크 설정이 저장되었습니다");
+		m.put("Service or AI account not allowed to login", "서비스 또는 AI 계정은 로그인할 수 없습니다");
 		m.put("Services", "서비스");
 		m.put("Session Timeout", "세션 시간 초과");
 		m.put("Set", "설정");
@@ -3355,6 +3374,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specifies password of above manager DN", "위의 관리자 DN 비밀번호를 지정합니다");
 		m.put("Specifies the attribute containing group name inside the found group LDAP entry. Value of this attribute will be mapped to a OneDev group. This attribute is normally set to <i>cn</i>", 
 			"찾은 그룹 LDAP 항목 내부에서 그룹 이름을 포함하는 속성을 지정합니다. 이 속성의 값은 OneDev 그룹에 매핑됩니다. 일반적으로 이 속성은 <i>cn</i>으로 설정됩니다");
+		m.put("Specifies who can access this AI service", "이 AI 서비스에 접근할 수 있는 사람을 지정합니다");
 		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 .net TRX 테스트 결과 파일을 지정합니다. 예: <tt>TestResults/*.trx</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
 		m.put("Specify <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is access token with code write permission over above projects. Commits, issues, and pull requests will also be created under name of the access token owner", 
@@ -3737,6 +3757,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Steps", "단계들");
 		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>", 
 			"단계는 동일한 노드에서 직렬로 실행되며 동일한 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a>을 공유합니다.");
+		m.put("Stop", "중지");
 		m.put("Stop work", "작업 중지");
 		m.put("Stopwatch Overdue", "스톱워치 초과");
 		m.put("Storage Settings", "스토리지 설정");
@@ -3919,10 +3940,12 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이 설치의 구독이 만료되어 현재 커뮤니티 에디션으로 실행 중입니다");
 		m.put("This is a Git LFS object, but the storage file is missing", "이것은 Git LFS 객체이지만 저장 파일이 누락되었습니다");
 		m.put("This is a built-in role and can not be deleted", "이것은 내장된 역할이며 삭제할 수 없습니다");
+		m.put("This is a disabled AI account", "이것은 비활성화된 AI 계정입니다");
 		m.put("This is a disabled service account", "이것은 비활성화된 서비스 계정입니다");
 		m.put("This is a layer cache. To use the cache, add below option to your docker buildx command", 
 			"이것은 레이어 캐시입니다. 캐시를 사용하려면 아래 옵션을 Docker buildx 명령에 추가하세요");
 		m.put("This is a service account for task automation purpose", "이것은 작업 자동화를 위한 서비스 계정입니다");
+		m.put("This is an AI account", "이것은 AI 계정입니다");
 		m.put("This is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"이것은 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
 		m.put("This key has already been used by another project", "이 키는 이미 다른 프로젝트에서 사용되었습니다");
@@ -4113,6 +4136,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Type password here", "여기에 비밀번호를 입력하세요");
 		m.put("Type to filter", "필터링하려면 입력하세요");
 		m.put("Type to filter...", "필터링하려면 입력하세요...");
+		m.put("Type your message here", "여기에 메시지를 입력하세요");
 		m.put("URL", "URL");
 		m.put("Unable To Delete/Disable Right Now", "지금 삭제/비활성화할 수 없습니다");
 		m.put("Unable to apply change as otherwise you will not be able to manage this project", "이 변경을 적용할 수 없습니다. 그렇지 않으면 이 프로젝트를 관리할 수 없게 됩니다");
@@ -4339,10 +4363,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Whether or not to always pull image when run container or build images. This option should be enabled to avoid images being replaced by malicious jobs running on same node", 
 			"컨테이너를 실행하거나 이미지를 빌드할 때 항상 이미지를 가져올지 여부. 이 옵션을 활성화하면 동일한 노드에서 실행되는 악성 작업이 이미지를 교체하는 것을 방지할 수 있습니다");
 		m.put("Whether or not to be able to access time tracking info of issues", "문제의 시간 추적 정보를 액세스할 수 있는지 여부");
-		m.put("Whether or not to create as a service account for task automation purpose. Service account does not have password and email addresses, and will not generate notifications for its activities", 
-			"작업 자동화 목적으로 서비스 계정으로 생성할지 여부. 서비스 계정은 비밀번호와 이메일 주소가 없으며, 활동에 대한 알림을 생성하지 않습니다");
-		m.put("Whether or not to create as a service account for task automation purpose. Service account does not have password and email addresses, and will not generate notifications for its activities. <b class='text-warning'>NOTE:</b> Service account is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"작업 자동화 목적으로 서비스 계정으로 생성할지 여부. 서비스 계정은 비밀번호와 이메일 주소가 없으며, 활동에 대한 알림을 생성하지 않습니다. <b class='text-warning'>참고:</b> 서비스 계정은 엔터프라이즈 기능입니다. <a href='https://onedev.io/pricing' target='_blank'>30일 무료 체험</a>");
 		m.put("Whether or not to enable code management for the project", "프로젝트에 대한 코드 관리를 활성화할지 여부");
 		m.put("Whether or not to enable issue management for the project", "프로젝트에 대한 문제 관리를 활성화할지 여부");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -4661,6 +4681,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("Entitle to All Users", "모든 사용자에게 권한 부여");
 	}
 		
 	@Override

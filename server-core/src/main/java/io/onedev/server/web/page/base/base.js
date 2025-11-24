@@ -216,7 +216,7 @@ onedev.server = {
 			onedev.server.focus.$components = null;
 		},
 		
-		doFocus: function($containers) {
+		doFocus: function($containers) {	
 			/*
 			 * Do focus with a timeout as otherwise it will not work in a panel replaced
 			 * via Wicket
@@ -249,19 +249,24 @@ onedev.server = {
 					$containers.find(focusibleSelector).addBack(focusibleSelector).filter(":visible").each(function() {
 						var $this = $(this);
 						if ($this.closest(".no-autofocus").length == 0) {
+							var focused = false;
 							if ($this.hasClass("CodeMirror") && $this[0].CodeMirror.options.readOnly == false) {
 								$this[0].CodeMirror.focus();					
+								focused = true;
 							} else if ($this.attr("readonly") != "readonly" && $this.attr("disabled") != "disabled") {
 								if ($this.closest(".select2-container").length != 0) {
 									if ($this.closest(".inplace-property-edit").length != 0) {
 										$this.focus();
+										focused = true;
 										$this.closest(".select2-container").next("input").select2("open");
 									} 
 								} else {
 									$this.focus();
+									focused = true;
 								}
 							}
-							return false;
+							if (focused)
+								return false;
                         }
 					});
 				}

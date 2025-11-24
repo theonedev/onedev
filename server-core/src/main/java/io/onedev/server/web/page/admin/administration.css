@@ -54,3 +54,12 @@
 .branding-setting .dark-mode>.logo-preview>div {
 	background-color: var(--dark-mode-dark) !important;
 }
+
+.property-aiModelSetting>.value {
+	margin-top: 1rem;
+	padding: 0 0 0 1rem;
+	border-left: 3px solid var(--light-gray);
+}
+.dark-mode .property-aiModelSetting>.value {
+	border-color: var(--dark-mode-light-dark);
+}

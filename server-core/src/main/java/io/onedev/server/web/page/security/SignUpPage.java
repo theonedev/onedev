@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.security;
 
 import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
-import static io.onedev.server.model.User.PROP_SERVICE_ACCOUNT;
+import static io.onedev.server.model.User.PROP_TYPE;
 import static io.onedev.server.web.page.security.SignUpBean.PROP_EMAIL_ADDRESS;
 
 import org.apache.commons.lang3.StringUtils;
@@ -57,7 +57,7 @@ public class SignUpPage extends SimplePage {
 		super.onInitialize();
 
 		SignUpBean bean = new SignUpBean();
-		BeanEditor editor = BeanContext.edit("editor", bean, Sets.newHashSet(PROP_SERVICE_ACCOUNT, PROP_NOTIFY_OWN_EVENTS), true);
+		BeanEditor editor = BeanContext.edit("editor", bean, Sets.newHashSet(PROP_TYPE, PROP_NOTIFY_OWN_EVENTS), true);
 		
 		Form<?> form = new Form<Void>("form") {
 

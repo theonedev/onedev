@@ -2,12 +2,14 @@ package io.onedev.server.model;
 
 import static io.onedev.server.model.User.PROP_FULL_NAME;
 import static io.onedev.server.model.User.PROP_NAME;
+import static io.onedev.server.model.User.Type.AI;
+import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.security.SecurityUtils.asPrincipals;
 import static io.onedev.server.security.SecurityUtils.asUserPrincipal;
-import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -15,7 +17,6 @@ import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,6 +32,7 @@ import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
@@ -41,11 +43,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
-import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.annotation.UserName;
-import io.onedev.server.service.EmailAddressService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UserService;
+import io.onedev.server.model.support.AiSetting;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.TwoFactorAuthentication;
@@ -54,10 +53,12 @@ import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
-import io.onedev.server.web.util.WicketUtils;
 
 @Entity
 @Table(indexes={@Index(columnList=PROP_NAME), @Index(columnList=PROP_FULL_NAME)})
@@ -66,6 +67,8 @@ import io.onedev.server.web.util.WicketUtils;
 public class User extends AbstractEntity implements AuthenticationInfo {
 
 	private static final long serialVersionUID = 1L;
+
+	public enum Type {ORDINARY, SERVICE, AI};
 	
 	public static final Long UNKNOWN_ID = -2L;
 	
@@ -76,6 +79,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public static final String SYSTEM_NAME = "OneDev";
 	
 	public static final String SYSTEM_EMAIL_ADDRESS = "system@onedev";
+
+	public static final String AI_EMAIL_ADDRESS = "ai@onedev";
 	
 	public static final String UNKNOWN_NAME = "unknown";
 	
@@ -83,7 +88,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final String PROP_FULL_NAME = "fullName";
 		
-	public static final String PROP_SERVICE_ACCOUNT = "serviceAccount";
+	public static final String PROP_TYPE = "type";
 
 	public static final String PROP_DISABLED = "disabled";
 
@@ -93,7 +98,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	private static ThreadLocal<Stack<User>> stack = ThreadLocal.withInitial(() -> new Stack<>());
 	
-	private boolean serviceAccount;
+	@Column(nullable=false)
+	private Type type = Type.ORDINARY;
 
 	private boolean disabled;
 
@@ -109,6 +115,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	private String fullName;
 			
 	private boolean notifyOwnEvents;
+
+	@Lob
+	@Column(length=65535)
+	private AiSetting aiSetting = new AiSetting();
 	
 	@JsonIgnore
 	@Lob
@@ -229,6 +239,30 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@OneToMany(mappedBy=ReviewedDiff.PROP_USER, cascade=CascadeType.REMOVE)
 	private Collection<ReviewedDiff> reviewedDiffs = new ArrayList<>();
 
+	@OneToMany(mappedBy="ai", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<ProjectEntitlement> projectEntitlements = new ArrayList<>();
+
+	@OneToMany(mappedBy="ai", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<GroupEntitlement> groupEntitlements = new ArrayList<>();
+
+	@OneToMany(mappedBy="ai", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<UserEntitlement> userEntitlements = new ArrayList<>();
+
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<UserEntitlement> aiEntitlements = new ArrayList<>();
+
+	@OneToMany(mappedBy="ai", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<Chat> aiChats = new ArrayList<>();
+
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<Chat> userChats = new ArrayList<>();
+
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -283,6 +317,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     private transient Optional<EmailAddress> gitEmailAddress;
 
     private transient Optional<EmailAddress> publicEmailAddress;
+
+	private transient List<User> entitledAis;
 	
 	public QueryPersonalization<NamedProjectQuery> getProjectQueryPersonalization() {
 		return new QueryPersonalization<NamedProjectQuery>() {
@@ -531,14 +567,16 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     	return SecurityUtils.asSubject(getPrincipals());
     }
 
-	@Editable(order=50, name="Service Account", descriptionProvider = "getServiceAccountDescription")
-	@SubscriptionRequired
-	public boolean isServiceAccount() {
-		return serviceAccount;
+	@Editable(order=50, description = "" +
+		"Ordinary: Normal account<br>" +
+		"Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>" +
+		"AI: AI account (working in progress)")
+	public Type getType() {
+		return type;
 	}
 
-	public void setServiceAccount(boolean serviceAccount) {
-		this.serviceAccount = serviceAccount;
+	public void setType(Type type) {
+		this.type = type;
 	}
 
 	public boolean isDisabled() {
@@ -548,20 +586,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public void setDisabled(boolean disabled) {
 		this.disabled = disabled;
 	}			
-
-	@SuppressWarnings("unused")
-	private static String getServiceAccountDescription() {
-		if (!WicketUtils.isSubscriptionActive()) {
-			return _T("" 
-				+ "Whether or not to create as a service account for task automation purpose. Service account does not have password and email addresses, and will not generate "
-				+ "notifications for its activities. <b class='text-warning'>NOTE:</b> Service account is an enterprise feature. " 
-				+ "<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days");
-		} else {
-			return _T("" 
-				+ "Whether or not to create as a service account for task automation purpose. Service account does not have password and email addresses, and will not generate "
-				+ "notifications for its activities");
-		}
-	}
 
 	@Editable(name="Login Name", order=100)
 	@UserName
@@ -580,7 +604,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	 * time
 	 */
 	@Editable(order=150)
-	@DependsOn(property="serviceAccount", value="false")
+	@DependsOn(property="type", value="ORDINARY")
 	@Password(checkPolicy=true, autoComplete="new-password")
 	@NotEmpty
 	@Nullable
@@ -614,15 +638,23 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public void setFullName(String fullName) {
 		this.fullName = fullName;
 	}
-	
+
 	@Editable(order=400, name="Notify Own Events", description = "Whether or not to send notifications for events generated by yourself")
-	@DependsOn(property="serviceAccount", value="false")
+	@DependsOn(property="type", value="ORDINARY")
 	public boolean isNotifyOwnEvents() {
 		return notifyOwnEvents;
 	}
 
 	public void setNotifyOwnEvents(boolean sendOwnEvents) {
 		this.notifyOwnEvents = sendOwnEvents;
+	}
+
+	public AiSetting getAiSetting() {
+		return aiSetting;
+	}
+	
+	public void setAiSetting(AiSetting aiSetting) {
+		this.aiSetting = aiSetting;
 	}
 
 	public Collection<AccessToken> getAccessTokens() {
@@ -666,7 +698,13 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	}
 	
 	public PersonIdent asPerson() {
-		if (isSystem()) {
+		if (getType() == SERVICE) {
+			throw new ExplicitException("Service account does not have git identity");
+		} else if (getType() == AI) {
+			return new PersonIdent(getName(), User.AI_EMAIL_ADDRESS);
+		} else if (isUnknown()) {
+			throw new ExplicitException("Unknown user does not have git identity");
+		} else if (isSystem()) {
 			return new PersonIdent(User.SYSTEM_NAME, User.SYSTEM_EMAIL_ADDRESS);
 		} else {
 			EmailAddress emailAddress = getGitEmailAddress();
@@ -706,6 +744,38 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public void setProjectAuthorizations(Collection<UserAuthorization> projectAuthorizations) {
 		this.projectAuthorizations = projectAuthorizations;
+	}
+
+	public Collection<ProjectEntitlement> getProjectEntitlements() {
+		return projectEntitlements;
+	}
+
+	public void setProjectEntitlements(Collection<ProjectEntitlement> projectEntitlements) {
+		this.projectEntitlements = projectEntitlements;
+	}
+
+	public Collection<GroupEntitlement> getGroupEntitlements() {
+		return groupEntitlements;
+	}
+
+	public void setGroupEntitlements(Collection<GroupEntitlement> groupEntitlements) {
+		this.groupEntitlements = groupEntitlements;
+	}
+
+	public Collection<UserEntitlement> getUserEntitlements() {
+		return userEntitlements;
+	}
+
+	public void setUserEntitlements(Collection<UserEntitlement> userEntitlements) {
+		this.userEntitlements = userEntitlements;
+	}
+
+	public Collection<UserEntitlement> getAiEntitlements() {
+		return aiEntitlements;
+	}
+
+	public void setAiEntitlements(Collection<UserEntitlement> aiEntitlements) {
+		this.aiEntitlements = aiEntitlements;
 	}
 
 	public Collection<IssueAuthorization> getIssueAuthorizations() {
@@ -1106,8 +1176,37 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		getEmailAddresses().add(emailAddress);
 	}
 	
+	public List<User> getEntitledAis() {
+		if (entitledAis == null) {
+			var userService = OneDev.getInstance(UserService.class);
+			var userCache = userService.cloneCache();
+			var aiUserFacades = userCache.values().stream()
+					.filter(it -> it.getType() == AI && !it.isDisabled() && !it.getId().equals(getId()))
+					.collect(Collectors.toList());
+			if (aiUserFacades.stream().allMatch(it->it.isEntitleToAll())) {
+				entitledAis = aiUserFacades.stream()
+						.sorted(Comparator.comparing(UserFacade::getDisplayName))
+						.map(it -> userService.load(it.getId()))
+						.collect(Collectors.toList());
+			} else {
+				var entitledAiSet = aiUserFacades.stream()
+						.filter(it->it.isEntitleToAll())
+						.map(it -> userService.load(it.getId()))
+						.collect(Collectors.toSet());
+				getAiEntitlements().stream().forEach(it -> entitledAiSet.add(it.getAI()));
+
+				for (var group: getGroups()) {
+					group.getEntitlements().stream().forEach(it -> entitledAiSet.add(it.getAi()));
+				}
+				entitledAis = new ArrayList<User>(entitledAiSet);
+				entitledAis.sort(Comparator.comparing(User::getDisplayName));				
+			}
+		}
+		return entitledAis;
+	}
+
 	public UserFacade getFacade() {
-		return new UserFacade(getId(), getName(), getFullName(), isServiceAccount(), isDisabled());
+		return new UserFacade(getId(), getName(), getFullName(), getType(), isDisabled(), getAiSetting().isEntitleToAll());
 	}
 	
 }

@@ -5,6 +5,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.passwordedit.PasswordEditPanel;
 import io.onedev.server.web.page.my.MyPage;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.Component;
@@ -16,7 +17,7 @@ public class MyPasswordPage extends MyPage {
 	
 	public MyPasswordPage(PageParameters params) {
 		super(params);
-		if (getUser().isServiceAccount() || getUser().isDisabled())
+		if (getUser().getType() != ORDINARY || getUser().isDisabled())
 			throw new IllegalStateException();
 		if (getUser().getPassword() == null)
 			throw new ExplicitException(_T("Unable to change password as you are authenticating via external system"));
@@ -28,12 +29,12 @@ public class MyPasswordPage extends MyPage {
 		
 		add(new PasswordEditPanel("content", new AbstractReadOnlyModel<User>() {
 
-				@Override
-				public User getObject() {
-					return getUser();
-				}
-				
-			}));
+			@Override
+			public User getObject() {
+				return getUser();
+			}
+			
+		}));
 	}
 
 	@Override

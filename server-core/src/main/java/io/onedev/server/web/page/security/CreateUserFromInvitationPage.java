@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.security;
 
+import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
+import static io.onedev.server.model.User.PROP_TYPE;
 import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.shiro.authc.credential.PasswordService;
@@ -63,7 +65,7 @@ public class CreateUserFromInvitationPage extends SimplePage {
 		super.onInitialize();
 
 		User newUser = new User();
-		BeanEditor editor = BeanContext.edit("editor", newUser, Sets.newHashSet(User.PROP_SERVICE_ACCOUNT, User.PROP_NOTIFY_OWN_EVENTS), true);
+		BeanEditor editor = BeanContext.edit("editor", newUser, Sets.newHashSet(PROP_TYPE, PROP_NOTIFY_OWN_EVENTS), true);
 		
 		Form<?> form = new Form<Void>("form") {
 

@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.admin.usermanagement;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.shiro.authc.credential.PasswordService;
@@ -18,15 +19,16 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.EmailAddressService;
-import io.onedev.server.service.MembershipService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.AiSetting;
 import io.onedev.server.persistence.TransactionService;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.MembershipService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
@@ -63,7 +65,7 @@ public class NewUserPage extends AdministrationPage {
 							_T("User name already used by another account"));
 				} 
 				
-				if (!bean.isServiceAccount() && getEmailAddressService().findByValue(bean.getEmailAddress()) != null) {
+				if (bean.getType() == ORDINARY && getEmailAddressService().findByValue(bean.getEmailAddress()) != null) {
 					editor.error(new Path(new PathNode.Named(NewUserBean.PROP_EMAIL_ADDRESS)),
 							_T("Email address already used by another user"));
 				} 
@@ -71,9 +73,12 @@ public class NewUserPage extends AdministrationPage {
 					User user = new User();
 					user.setName(bean.getName());
 					user.setFullName(bean.getFullName());
-					user.setServiceAccount(bean.isServiceAccount());
+					user.setType(bean.getType());
+					var aiSetting = new AiSetting();
+					aiSetting.setModelSetting(bean.getAiModelSetting());
+					user.setAiSetting(aiSetting);
 					var defaultLoginGroup = getSettingService().getSecuritySetting().getDefaultGroup();
-					if (user.isServiceAccount()) {
+					if (user.getType() != ORDINARY) {
 						getTransactionService().run(new Runnable() {
 							@Override
 							public void run() {

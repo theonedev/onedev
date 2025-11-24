@@ -1374,21 +1374,25 @@ public abstract class RevisionDiffPanel extends Panel {
 		WebMarkupContainer navigationContainer = new WebMarkupContainer("navigation") {
 
 			@Override
+			protected void onBeforeRender() {
+				WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+				Cookie cookie = request.getCookie(COOKIE_NAVIGATION_WIDTH);
+				// cookie will not be sent for websocket request
+				if (cookie != null)
+					add(AttributeAppender.replace("style", "width:" + cookie.getValue() + "px"));
+				else
+					add(AttributeAppender.replace("style", "width:360px"));
+
+				super.onBeforeRender();
+			}
+
+			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				response.render(OnDomReadyHeaderItem.forScript("onedev.server.revisionDiff.initNavigation();"));
 			}
 			
 		};
-
-		float navigationWidth = 360;
-		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-		Cookie cookie = request.getCookie(COOKIE_NAVIGATION_WIDTH);
-		// cookie will not be sent for websocket request
-		if (cookie != null)
-			navigationWidth = Float.parseFloat(cookie.getValue());
-		
-		navigationContainer.add(AttributeAppender.append("style", "width:" + navigationWidth + "px"));
 		
 		var changes = new TreeMap<String, BlobChange>();
 		var treeState = new HashSet<String>();
@@ -1552,6 +1556,19 @@ public abstract class RevisionDiffPanel extends Panel {
 		WebMarkupContainer commentContainer = new WebMarkupContainer("comment", Model.of((Mark)null)) {
 
 			@Override
+			protected void onBeforeRender() {
+				WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+				Cookie cookie = request.getCookie(COOKIE_COMMENT_WIDTH);
+				// cookie will not be sent for websocket request
+				if (cookie != null)
+					add(AttributeAppender.replace("style", "width:" + cookie.getValue() + "px"));
+				else
+					add(AttributeAppender.replace("style", "width:360px"));
+				
+				super.onBeforeRender();
+			}
+
+			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				response.render(OnDomReadyHeaderItem.forScript("onedev.server.revisionDiff.initComment();"));
@@ -1559,15 +1576,6 @@ public abstract class RevisionDiffPanel extends Panel {
 
 		};
 		commentContainer.setOutputMarkupPlaceholderTag(true);
-
-		float commentWidth = 360;
-		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-		Cookie cookie = request.getCookie(COOKIE_COMMENT_WIDTH);
-		// cookie will not be sent for websocket request
-		if (cookie != null)
-			commentWidth = Float.parseFloat(cookie.getValue());
-		
-		commentContainer.add(AttributeAppender.append("style", "width:" + commentWidth + "px"));
 
 		WebMarkupContainer head = new WebMarkupContainer("head");
 		head.setOutputMarkupId(true);

@@ -19,12 +19,13 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.User;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.service.EmailAddressService;
 import io.onedev.server.service.SettingService;
-import io.onedev.server.model.EmailAddress;
-import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.security.SecurityUtils;
 
 @Path("/email-addresses")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -73,8 +74,8 @@ public class EmailAddressResource {
 			throw new UnauthorizedException();
 		else if (owner.isDisabled())
 			throw new ExplicitException("Can not set email address for disabled user");
-		else if (owner.isServiceAccount())
-			throw new ExplicitException("Can not set email address for service account");
+		else if (owner.getType() != User.Type.ORDINARY)
+			throw new ExplicitException("Can not set email address for service or ai user");
 		else if (emailAddressService.findByValue(emailAddress.getValue()) != null)
 			throw new ExplicitException("This email address is already used by another user");
 		

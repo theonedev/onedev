@@ -1,8 +1,8 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import java.util.HashSet;
+import static io.onedev.server.model.User.Type.SERVICE;
 
-import org.jspecify.annotations.Nullable;
+import java.util.HashSet;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -14,19 +14,20 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.visit.IVisitor;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.service.IssueChangeService;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.IterationService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Iteration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IterationService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
@@ -123,7 +124,7 @@ abstract class AbstractColumnPanel extends Panel implements EditContext {
 					if (getIterationSelection().getIteration() != null)
 						bean.setCurrentIteration(getIterationSelection().getIteration().getName());
 					var excludeProperties = new HashSet<String>();
-					if (SecurityUtils.getUser().isServiceAccount())
+					if (SecurityUtils.getUser().getType() == SERVICE)
 						excludeProperties.add(AddToIterationBean.PROP_SEND_NOTIFICATIONS);
 					new BeanEditModalPanel<>(target, bean, excludeProperties, true, null) {
 

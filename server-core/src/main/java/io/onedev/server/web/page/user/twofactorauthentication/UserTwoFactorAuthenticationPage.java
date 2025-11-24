@@ -5,13 +5,15 @@ import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationStatusPanel;
 import io.onedev.server.web.page.user.UserPage;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
+
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 public class UserTwoFactorAuthenticationPage extends UserPage {
 
 	public UserTwoFactorAuthenticationPage(PageParameters params) {
 		super(params);
-		if (getUser().isServiceAccount() || getUser().isDisabled())
+		if (getUser().getType() != ORDINARY || getUser().isDisabled())
 			throw new IllegalStateException();
 	}
 	

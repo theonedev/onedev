@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.user.password;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
+
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -10,7 +12,7 @@ public class UserPasswordPage extends UserPage {
 	
 	public UserPasswordPage(PageParameters params) {
 		super(params);
-		if (getUser().isServiceAccount() || getUser().isDisabled())
+		if (getUser().getType() != ORDINARY || getUser().isDisabled())
 			throw new IllegalStateException();
 	}
 

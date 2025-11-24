@@ -8382,4 +8382,19 @@ public class DataMigrator {
 	private void migrate214(File dataDir, Stack<Integer> versions) {
 	}
 
+	private void migrate215(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					Element serviceAccountElement = element.element("serviceAccount");
+					boolean isServiceAccount = Boolean.parseBoolean(serviceAccountElement.getTextTrim());
+					serviceAccountElement.detach();
+					element.addElement("type").setText(isServiceAccount ? "SERVICE" : "ORDINARY");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

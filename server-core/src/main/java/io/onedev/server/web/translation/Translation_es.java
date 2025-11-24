@@ -126,9 +126,10 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("A {0} used as body of user invitation email", "Un {0} usado como cuerpo del correo de invitación de usuario");
 		m.put("A {0} used as body of various issue notification emails", "Un {0} usado como cuerpo de varios correos de notificación de problemas");
 		m.put("A {0} used as body of various pull request notification emails", "Un {0} usado como cuerpo de varios correos de notificación de solicitudes de extracción");
-		m.put("AI Model Setting", "Configuración del Modelo de IA");
-		m.put("AI Setting", "Configuración de IA");
+		m.put("AI Model Settings", "Configuración del Modelo de IA");
 		m.put("AI Settings", "Configuraciones de IA");
+		m.put("AI entitlement settings have been saved", "Se han guardado las configuraciones de derechos de IA");
+		m.put("AI model settings have been saved", "Se han guardado las configuraciones del modelo de IA");
 		m.put("API Key", "Clave API");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"URL de la API de su instancia de JIRA en la nube, por ejemplo, <tt>https://your-domain.atlassian.net/rest/api/3</tt>");
@@ -248,6 +249,8 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Aggregated from '<span wicket:id=\"spentTimeAggregationLink\"></span>':", "Agregado desde '<span wicket:id=\"spentTimeAggregationLink\"></span>':");
 		m.put("Aggregation Link", "Enlace de agregación");
 		m.put("Ai", "IA");
+		m.put("Ai Model Setting", "Configuración del Modelo de IA");
+		m.put("Ai Setting", "Configuración de IA");
 		m.put("Alert", "Alerta");
 		m.put("Alert Setting", "Configuración de alerta");
 		m.put("Alert Settings", "Configuraciones de alerta");
@@ -561,7 +564,8 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Can not find issue board: ", "No se puede encontrar el tablero de problemas:");
 		m.put("Can not move project \"{0}\" to be under itself or its descendants", "No se puede mover el proyecto \"{0}\" para que esté bajo sí mismo o sus descendientes");
 		m.put("Can not perform this operation now", "No se puede realizar esta operación ahora");
-		m.put("Can not reset password for service account or disabled user", "No se puede restablecer la contraseña para la cuenta de servicio o usuario deshabilitado");
+		m.put("Can not reset password for disabled account", "No se puede restablecer la contraseña para una cuenta deshabilitada");
+		m.put("Can not reset password for service or AI account", "No se puede restablecer la contraseña para una cuenta de servicio o de IA");
 		m.put("Can not reset password for user authenticating via external system", "No se puede restablecer la contraseña para el usuario que se autentica a través de un sistema externo");
 		m.put("Can not save malformed query", "No se puede guardar una consulta mal formada");
 		m.put("Can not use current or descendant project as parent", "No se puede usar el proyecto actual o descendiente como padre");
@@ -593,6 +597,9 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Changes since this comment", "Cambios desde este comentario");
 		m.put("Channel Notification", "Notificación de Canal");
 		m.put("Chart Metadata", "Metadatos del Gráfico");
+		m.put("Chat deleted", "Chat eliminado");
+		m.put("Chat with", "Chat con");
+		m.put("Chat with AI", "Chat con IA");
 		m.put("Check <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHub's guide</a> on how to generate and use GPG keys to sign your commits", 
 			"Consulte <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">la guía de GitHub</a> sobre cómo generar y usar claves GPG para firmar sus commits");
 		m.put("Check <a href=\"https://docs.onedev.io/administration-guide/agent-management\" target=\"_blank\">agent management</a> for details, including instructions on how to run agent as service", 
@@ -946,6 +953,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Delete Selected Users", "Eliminar usuarios seleccionados");
 		m.put("Delete Source Branch", "Eliminar rama fuente");
 		m.put("Delete Source Branch After Merge", "Eliminar rama fuente después de la fusión");
+		m.put("Delete chat", "Eliminar chat");
 		m.put("Delete dashboard", "Eliminar tablero");
 		m.put("Delete from branch {0}", "Eliminar desde la rama {0}");
 		m.put("Delete this", "Eliminar esto");
@@ -1191,6 +1199,11 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Enter description here", "Ingrese la descripción aquí");
 		m.put("Enter your details to login to your account", "Ingrese sus datos para iniciar sesión en su cuenta");
 		m.put("Enter your user name or email to reset password", "Ingrese su nombre de usuario o correo electrónico para restablecer la contraseña");
+		m.put("Entitled Groups", "Grupos Autorizados");
+		m.put("Entitled Projects", "Proyectos Autorizados");
+		m.put("Entitled Users", "Usuarios Autorizados");
+		m.put("Entitlement", "Autorización");
+		m.put("Entitlement Edit Bean", "Editar Bean de Autorización");
 		m.put("Entries", "Entradas");
 		m.put("Entry", "Entrada");
 		m.put("Enumeration", "Enumeración");
@@ -1997,6 +2010,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Minimum length of the password", "Longitud mínima de la contraseña");
 		m.put("Missing Commit", "Commit faltante");
 		m.put("Missing Commits", "Commits faltantes");
+		m.put("Model", "Modelo");
 		m.put("Month", "Mes");
 		m.put("Months", "Meses");
 		m.put("Months to Display", "Meses para mostrar");
@@ -2018,6 +2032,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Multiple Lines", "Líneas múltiples");
 		m.put("Multiple On the Other Side", "Múltiples en el otro lado");
 		m.put("Must not be empty", "No debe estar vacío");
+		m.put("My AI Settings", "Mis Configuraciones de IA");
 		m.put("My Access Tokens", "Mis tokens de acceso");
 		m.put("My Basic Settings", "Mis configuraciones básicas");
 		m.put("My Email Addresses", "Mis direcciones de correo electrónico");
@@ -2074,6 +2089,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("New State", "Nuevo estado");
 		m.put("New User Bean", "Nuevo Bean de usuario");
 		m.put("New Value", "Nuevo valor");
+		m.put("New chat", "Nuevo chat");
 		m.put("New issue board created", "Nuevo tablero de incidencias creado");
 		m.put("New project created", "Nuevo proyecto creado");
 		m.put("New user created", "Nuevo usuario creado");
@@ -2539,6 +2555,9 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Order Subscription", "Ordenar Suscripción");
 		m.put("Ordered List", "Lista Ordenada");
 		m.put("Ordered list", "Lista ordenada");
+		m.put("Ordinary", "Ordinario");
+		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account (working in progress)", 
+			"Ordinario: Cuenta normal<br>Servicio: La cuenta de servicio no tiene contraseña ni direcciones de correo electrónico, y no generará notificaciones por sus actividades<br>IA: Cuenta de IA (en progreso)");
 		m.put("Osv License Scanner", "Escáner de Licencias Osv");
 		m.put("Osv Vulnerability Scanner", "Escáner de Vulnerabilidades Osv");
 		m.put("Other", "Otro");
@@ -3171,6 +3190,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Select users to send alert email upon events such as database auto-backup failure, cluster node unreachable etc", 
 			"Seleccionar usuarios para enviar correos de alerta ante eventos como fallos de auto-respaldo de base de datos, nodo de clúster inalcanzable, etc.");
 		m.put("Select workspace to import from", "Seleccionar espacio de trabajo para importar.");
+		m.put("Send", "Enviar");
 		m.put("Send Notifications", "Enviar notificaciones.");
 		m.put("Send Pull Request", "Enviar solicitud de extracción.");
 		m.put("Send notification", "Enviar notificación.");
@@ -3192,7 +3212,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Server is Starting...", "El servidor está iniciando...");
 		m.put("Server url", "URL del servidor.");
 		m.put("Service", "Servicio.");
-		m.put("Service Account", "Cuenta de servicio.");
 		m.put("Service Desk", "Mesa de servicio.");
 		m.put("Service Desk Email Address", "Dirección de correo electrónico de la mesa de servicio.");
 		m.put("Service Desk Issue Open Failed", "Error al abrir problema en la mesa de servicio.");
@@ -3204,9 +3223,9 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Service Desk Settings", "Configuraciones de la mesa de servicio.");
 		m.put("Service Locator", "Localizador de servicio.");
 		m.put("Service Locators", "Localizadores de servicio.");
-		m.put("Service account not allowed to login", "Cuenta de servicio no permitida para iniciar sesión");
 		m.put("Service desk setting", "Configuración del servicio de mesa");
 		m.put("Service desk settings have been saved", "Las configuraciones del servicio de mesa han sido guardadas");
+		m.put("Service or AI account not allowed to login", "No se permite el inicio de sesión para cuentas de servicio o de IA");
 		m.put("Services", "Servicios");
 		m.put("Session Timeout", "Tiempo de Espera de Sesión");
 		m.put("Set", "Establecer");
@@ -3355,6 +3374,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Specifies password of above manager DN", "Especifica la contraseña del DN del administrador mencionado anteriormente");
 		m.put("Specifies the attribute containing group name inside the found group LDAP entry. Value of this attribute will be mapped to a OneDev group. This attribute is normally set to <i>cn</i>", 
 			"Especifica el atributo que contiene el nombre del grupo dentro de la entrada LDAP del grupo encontrado. El valor de este atributo se mapeará a un grupo de OneDev. Este atributo normalmente se establece en <i>cn</i>");
+		m.put("Specifies who can access this AI service", "Especifica quién puede acceder a este servicio de IA");
 		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
 			"Especifica el archivo de resultados de prueba .net TRX relativo a <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, por ejemplo <tt>TestResults/*.trx</tt>. Usa * o ? para coincidencia de patrones");
 		m.put("Specify <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is access token with code write permission over above projects. Commits, issues, and pull requests will also be created under name of the access token owner", 
@@ -3737,6 +3757,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Steps", "Pasos");
 		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>", 
 			"Los pasos se ejecutarán en serie en el mismo nodo, compartiendo el mismo <a href='https://docs.onedev.io/concepts#job-workspace'>espacio de trabajo del trabajo</a>");
+		m.put("Stop", "Detener");
 		m.put("Stop work", "Detener trabajo");
 		m.put("Stopwatch Overdue", "Cronómetro Vencido");
 		m.put("Storage Settings", "Configuración de almacenamiento");
@@ -3919,10 +3940,12 @@ public class Translation_es extends TranslationResourceBundle {
 			"La suscripción de esta instalación ha expirado y ahora se ejecuta como la edición comunitaria");
 		m.put("This is a Git LFS object, but the storage file is missing", "Este es un objeto Git LFS, pero falta el archivo de almacenamiento");
 		m.put("This is a built-in role and can not be deleted", "Este es un rol integrado y no se puede eliminar");
+		m.put("This is a disabled AI account", "Esta es una cuenta de IA deshabilitada");
 		m.put("This is a disabled service account", "Esta es una cuenta de servicio deshabilitada");
 		m.put("This is a layer cache. To use the cache, add below option to your docker buildx command", 
 			"Este es un caché de capas. Para usar el caché, agregue la siguiente opción a su comando docker buildx");
 		m.put("This is a service account for task automation purpose", "Esta es una cuenta de servicio para propósitos de automatización de tareas");
+		m.put("This is an AI account", "Esta es una cuenta de IA");
 		m.put("This is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"Esta es una característica enterprise. <a href='https://onedev.io/pricing' target='_blank'>Pruebe gratis</a> por 30 días");
 		m.put("This key has already been used by another project", "Esta clave ya ha sido utilizada por otro proyecto");
@@ -4113,6 +4136,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Type password here", "Escriba la contraseña aquí");
 		m.put("Type to filter", "Escriba para filtrar");
 		m.put("Type to filter...", "Escriba para filtrar...");
+		m.put("Type your message here", "Escribe tu mensaje aquí");
 		m.put("URL", "URL");
 		m.put("Unable To Delete/Disable Right Now", "No se puede eliminar/deshabilitar en este momento");
 		m.put("Unable to apply change as otherwise you will not be able to manage this project", "No se puede aplicar el cambio ya que de otro modo no podrá gestionar este proyecto");
@@ -4339,10 +4363,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Whether or not to always pull image when run container or build images. This option should be enabled to avoid images being replaced by malicious jobs running on same node", 
 			"Si siempre se debe extraer la imagen al ejecutar el contenedor o construir imágenes o no. Esta opción debe estar habilitada para evitar que las imágenes sean reemplazadas por trabajos maliciosos que se ejecuten en el mismo nodo");
 		m.put("Whether or not to be able to access time tracking info of issues", "Si se puede acceder o no a la información de seguimiento de tiempo de los problemas");
-		m.put("Whether or not to create as a service account for task automation purpose. Service account does not have password and email addresses, and will not generate notifications for its activities", 
-			"Si se crea como una cuenta de servicio para propósitos de automatización de tareas o no. La cuenta de servicio no tiene contraseña ni direcciones de correo electrónico, y no generará notificaciones por sus actividades");
-		m.put("Whether or not to create as a service account for task automation purpose. Service account does not have password and email addresses, and will not generate notifications for its activities. <b class='text-warning'>NOTE:</b> Service account is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"Si se crea como una cuenta de servicio para propósitos de automatización de tareas o no. La cuenta de servicio no tiene contraseña ni direcciones de correo electrónico, y no generará notificaciones por sus actividades. <b class='text-warning'>NOTA:</b> La cuenta de servicio es una característica empresarial. <a href='https://onedev.io/pricing' target='_blank'>Prueba gratis</a> por 30 días");
 		m.put("Whether or not to enable code management for the project", "Si se habilita o no la gestión de código para el proyecto");
 		m.put("Whether or not to enable issue management for the project", "Si se habilita o no la gestión de problemas para el proyecto");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -4661,6 +4681,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("Entitle to All Users", "Conceder a Todos los Usuarios");
 	}
 		
 	@Override

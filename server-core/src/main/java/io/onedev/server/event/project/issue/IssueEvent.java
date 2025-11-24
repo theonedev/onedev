@@ -22,7 +22,7 @@ public abstract class IssueEvent extends ProjectEvent {
 	private final boolean sendNotifications;
 
 	public IssueEvent(User user, Date date, Issue issue) {
-		this(user, date, issue, !user.isServiceAccount());
+		this(user, date, issue, user.getType() != User.Type.SERVICE);
 	}
 	
 	public IssueEvent(User user, Date date, Issue issue, boolean sendNotifications) {

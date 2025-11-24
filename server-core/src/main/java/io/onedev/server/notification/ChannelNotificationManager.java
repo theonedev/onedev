@@ -72,7 +72,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	@Sessional
 	@Listen
 	public void on(PullRequestEvent event) {
-		if (!event.isMinor() && (event.getUser() == null || !event.getUser().isServiceAccount())) {
+		if (!event.isMinor() && (event.getUser() == null || event.getUser().getType() != User.Type.SERVICE)) {
 			PullRequest request = event.getRequest();
 			User user = event.getUser();
 
@@ -91,7 +91,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	@Sessional
 	@Listen
 	public void on(BuildEvent event) {
-		if (event.getUser() == null || !event.getUser().isServiceAccount()) {
+		if (event.getUser() == null || event.getUser().getType() != User.Type.SERVICE) {
 			Build build = event.getBuild();
 
 			var status = StringUtils.capitalize(build.getStatus().toString().toLowerCase());
@@ -107,7 +107,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	@Sessional
 	@Listen
 	public void on(PackEvent event) {
-		if (!event.getUser().isServiceAccount()) {
+		if (event.getUser().getType() != User.Type.SERVICE) {
 			Pack pack = event.getPack();
 			var title = format("[%s %s] Package published", pack.getType(), pack.getReference(true));
 			postIfApplicable(title, event);
@@ -134,7 +134,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	@Sessional
 	@Listen
 	public void on(CodeCommentEvent event) {
-		if (!(event instanceof CodeCommentEdited) && !event.getUser().isServiceAccount()) {
+		if (!(event instanceof CodeCommentEdited) && event.getUser().getType() != User.Type.SERVICE) {
 			CodeComment comment = event.getComment();
 
 			String title = format("[Code Comment %s:%s] %s %s", 

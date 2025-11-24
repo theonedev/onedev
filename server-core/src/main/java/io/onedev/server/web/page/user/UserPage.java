@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.user;
 
+import static io.onedev.server.model.User.Type.AI;
+import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
@@ -22,14 +24,15 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.UserService;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.admin.usermanagement.UserListPage;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.user.accesstoken.UserAccessTokensPage;
+import io.onedev.server.web.page.user.aisetting.UserModelSettingPage;
 import io.onedev.server.web.page.user.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.user.avatar.UserAvatarPage;
 import io.onedev.server.web.page.user.basicsetting.UserBasicSettingPage;
@@ -84,21 +87,23 @@ public abstract class UserPage extends LayoutPage implements UserAware {
 		var params = paramsOf(getUser());
 		tabs.add(new PageTab(Model.of(_T("Profile")), Model.of("profile"), UserProfilePage.class, params));
 		tabs.add(new PageTab(Model.of(_T("Basic Settings")), Model.of("info"), UserBasicSettingPage.class, params));
-		if (!getUser().isServiceAccount()) 
+		if (getUser().getType() == ORDINARY) 
 			tabs.add(new PageTab(Model.of(_T("Email Addresses")), Model.of("mail"), UserEmailAddressesPage.class, params));		
 		tabs.add(new PageTab(Model.of(_T("Edit Avatar")), Model.of("avatar"), UserAvatarPage.class, params));
 		if (!getUser().isDisabled()) {
-			if (!getUser().isServiceAccount())
-				tabs.add(new PageTab(Model.of(_T("Password")), Model.of("password"), UserPasswordPage.class, params));
+			if (getUser().getType() == ORDINARY)
+				tabs.add(new PageTab(Model.of(_T("Password")), Model.of("password"), UserPasswordPage.class, params));			
+			if (getUser().getType() == AI)
+				tabs.add(new PageTab(Model.of(_T("AI Settings")), Model.of("ai-setting"), UserModelSettingPage.class, params));
 			tabs.add(new PageTab(Model.of(_T("Belonging Groups")), Model.of("group"), UserMembershipsPage.class, params));
 			tabs.add(new PageTab(Model.of(_T("Authorized Projects")), Model.of("project"), UserAuthorizationsPage.class, params));
 			if (OneDev.getInstance(ServerConfig.class).getSshPort() != 0)
 				tabs.add(new PageTab(Model.of(_T("SSH Keys")), Model.of("key"), UserSshKeysPage.class, params));
 			tabs.add(new PageTab(Model.of(_T("GPG Keys")), Model.of("key"), UserGpgKeysPage.class, params));
 			tabs.add(new PageTab(Model.of(_T("Access Tokens")), Model.of("token"), UserAccessTokensPage.class, params));
-			if (!getUser().isServiceAccount() && getUser().isEnforce2FA())
+			if (getUser().getType() == ORDINARY && getUser().isEnforce2FA())
 				tabs.add(new PageTab(Model.of(_T("Two-factor Authentication")), Model.of("shield"), UserTwoFactorAuthenticationPage.class, params));
-			if (!getUser().isServiceAccount()) {
+			if (getUser().getType() == ORDINARY) {
 				tabs.add(new PageTab(Model.of(_T("SSO Accounts")), Model.of("user"), UserSsoAccountsPage.class, params));
 				tabs.add(new PageTab(Model.of(_T("Query Watches")), Model.of("bell"), UserQueryWatchesPage.class, params));
 			}

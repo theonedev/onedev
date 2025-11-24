@@ -369,6 +369,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<ProjectEntitlement> entitlements = new ArrayList<>();
+	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Audit> audits = new ArrayList<>();
 	
 	private boolean codeManagement = true;

@@ -1,9 +1,12 @@
 package io.onedev.server.web.component.user.basicsetting;
 
 import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
+import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
+
+import javax.inject.Inject;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -13,11 +16,10 @@ import org.apache.wicket.model.IModel;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.model.User;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.service.UserService;
-import io.onedev.server.model.User;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
@@ -25,6 +27,12 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.user.UserPage;
 
 public class BasicSettingPanel extends GenericPanel<User> {
+
+	@Inject
+	private UserService userService;
+
+	@Inject
+	private AuditService auditService;
 
 	private BeanEditor editor;
 	
@@ -42,8 +50,8 @@ public class BasicSettingPanel extends GenericPanel<User> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		var excludeProperties = Sets.newHashSet("password", "serviceAccount");
-		if (getUser().isServiceAccount() || getUser().isDisabled())
+		var excludeProperties = Sets.newHashSet("password", "type", "aiModelSetting");
+		if (getUser().getType() != ORDINARY || getUser().isDisabled())
 			excludeProperties.add(PROP_NOTIFY_OWN_EVENTS);
 		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
 
@@ -75,7 +83,7 @@ public class BasicSettingPanel extends GenericPanel<User> {
 				
 				User user = getUser();
 				
-				User userWithSameName = getUserService().findByName(user.getName());
+				User userWithSameName = userService.findByName(user.getName());
 				if (userWithSameName != null && !userWithSameName.equals(user)) {
 					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
 							_T("Login name already used by another account"));
@@ -83,9 +91,9 @@ public class BasicSettingPanel extends GenericPanel<User> {
 				
 				if (editor.isValid()) {
 					var newAuditContent = VersionedXmlDoc.fromBean(editor.getPropertyValues()).toXML();					
-					getUserService().update(user, oldName);
+					userService.update(user, oldName);
 					if (getPage() instanceof UserPage)
-						getAuditService().audit(null, "changed basic settings of account \"" + user.getName() + "\"", oldAuditContent, newAuditContent);
+						auditService.audit(null, "changed basic settings of account \"" + user.getName() + "\"", oldAuditContent, newAuditContent);
 					Session.get().success(_T("Basic settings updated"));
 					setResponsePage(getPage().getClass(), getPage().getPageParameters());
 				}
@@ -97,14 +105,6 @@ public class BasicSettingPanel extends GenericPanel<User> {
 		form.add(new FencedFeedbackPanel("feedback", form));		
 		
 		add(form);
-	}
-
-	private UserService getUserService() {
-		return OneDev.getInstance(UserService.class);
-	}
-
-	private AuditService getAuditService() {
-		return OneDev.getInstance(AuditService.class);
 	}
 	
 }

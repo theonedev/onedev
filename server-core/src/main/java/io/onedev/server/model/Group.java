@@ -59,6 +59,10 @@ public class Group extends AbstractEntity implements BasePermission {
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Membership> memberships = new ArrayList<>();
 	
+	@OneToMany(mappedBy="group", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<GroupEntitlement> entitlements = new ArrayList<>();
+	
 	private transient Collection<User> members;
 	
 	@Editable(order=100)
@@ -131,6 +135,14 @@ public class Group extends AbstractEntity implements BasePermission {
 
 	public void setMemberships(Collection<Membership> memberships) {
 		this.memberships = memberships;
+	}
+
+	public Collection<GroupEntitlement> getEntitlements() {
+		return entitlements;
+	}
+
+	public void setEntitlements(Collection<GroupEntitlement> groupEntitlements) {
+		this.entitlements = groupEntitlements;
 	}
 
 	public Collection<User> getMembers() {

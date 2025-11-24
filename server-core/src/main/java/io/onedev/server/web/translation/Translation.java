@@ -192,6 +192,7 @@ public class Translation extends TranslationResourceBundle {
 		m.put("severity:HIGH", "High");
 		m.put("severity:MEDIUM", "Medium");
 		m.put("severity:LOW", "Low");
+		m.put("Ai", "AI");
 	}
 
 	@Override

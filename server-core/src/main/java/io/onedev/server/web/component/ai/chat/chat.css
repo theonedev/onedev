@@ -1,0 +1,133 @@
+.chat {
+	position: fixed;
+	top: calc(var(--topbar-height) + 1rem);
+	bottom: 0;
+	right: 0;
+	z-index: 1000;
+	border-radius: 0.42rem 0 0 0;
+	background: white;
+	box-shadow: 0 0 12px rgba(0,0,0,0.2), 0 -2px 8px rgba(0,0,0,0.1);	
+}
+.chat>.head {
+	border-radius: 0.42rem 0 0 0;
+}
+.dark-mode .chat {
+	background-color: var(--dark-mode-dark);	
+	box-shadow: 0 0 20px rgb(0 0 0 / 50%), 0 -2px 15px rgb(0 0 0 / 30%);	
+}
+
+.chat .ui-resizable-handle {
+	position: absolute;
+	left: 0;
+	top: 0.42rem;
+	bottom: 0;
+	width: 3px;
+	cursor: col-resize;
+	z-index: 10;
+	background: var(--light) url(/~icon/grip3.svg) no-repeat scroll center center;
+	background-size: 18px 18px;
+}
+
+.dark-mode .chat .ui-resizable-handle {
+	background: var(--dark-mode-light-dark) url(/~icon/dark-grip3.svg) no-repeat scroll center center;
+	background-size: 18px 18px;
+}
+
+.chat>.body>.chat-selector {
+	overflow: hidden;
+	min-width: 0;
+	gap: 0.5rem;
+}
+.chat>.body>.chat-selector>:first-child {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+}
+.chat>.body>.send textarea {
+	max-height: 160px;
+}
+.chat>.body>.send a {
+	border-radius: 50px;
+	width: 27px;
+	height: 27px;
+	right: 6px;
+	bottom: 6px;
+}
+.chat>.body>.send a.disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	pointer-events: none;
+}
+
+.chat>.body>.messages>li {
+	margin-bottom: 1rem;
+}
+.chat>.body>.messages>li:last-child {
+	margin-bottom: 0;
+}
+
+.chat>.body>.messages>.request {
+	display: flex;
+	justify-content: flex-end;
+}
+.chat>.body>.messages>.response+.responding {
+	display: none;
+}
+.chat>.body>.messages>.response, .chat>.body>.messages>.error {
+	display: flex;
+	justify-content: flex-start;
+}
+.chat>.body>.messages>.response>div, .chat>.body>.messages>.error>div {
+	margin-right: 3rem;
+}
+.chat>.body>.messages>.request>div {
+	background: var(--light);
+	padding: 0.7rem;
+	border-radius: 0.42rem;
+	margin-left: 3rem;
+}
+.dark-mode .chat>.body>.messages>.request>div {
+	background: var(--dark-mode-light-dark);
+}
+
+.chat>.body>.messages>.error>div {
+	background: var(--light-danger);
+	padding: 0.7rem;
+	border-radius: 0.42rem;
+}
+.dark-mode .chat>.body>.messages>.error>div {
+	background: #3a2434;
+	color: var(--danger);
+}
+
+.chat>.body>.messages>.responding .breathing-dot {
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background-color: var(--gray-dark);
+	animation: breathing 1.5s ease-in-out infinite;
+}
+
+.dark-mode .chat>.body>.messages>.responding .breathing-dot {
+	background-color: var(--dark-mode-gray);
+}
+
+@keyframes breathing {
+	0%, 100% {
+		transform: scale(0.6);
+	}
+	50% {
+		transform: scale(1);
+	}
+}
+
+.chat>.body:has(.messages>.responding:not(.response + .responding))>.send .submit {
+	display: none;
+}
+.chat>.body:not(:has(.messages>.responding:not(.response + .responding)))>.send .stop {
+	display: none;
+}
+.chat>.body>.send .stop svg {
+	width: 12px !important;
+	height: 12px !important;
+}

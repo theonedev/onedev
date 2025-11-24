@@ -35,6 +35,12 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 	private Map<Class<?>, String> redirectUrlsAfterDelete = new ConcurrentHashMap<>(); 
 	
 	private Set<Long> expandedProjectIds = new ConcurrentHashSet<>();
+
+	private boolean chatVisible;
+		
+	private Long activeChatId;
+
+	private String chatInput;
 	
 	public WebSession(Request request) {
 		super(request);
@@ -116,6 +122,32 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 
 	public void setZoneId(@Nullable ZoneId zoneId) {
 		this.zoneId = zoneId;
+	}
+
+	public boolean isChatVisible() {
+		return chatVisible;
+	}
+
+	public void setChatVisible(boolean chatVisible) {
+		this.chatVisible = chatVisible;
+	}
+
+	@Nullable
+	public Long getActiveChatId() {
+		return activeChatId;
+	}
+
+	public void setActiveChatId(Long activeChatId) {
+		this.activeChatId = activeChatId;
+	}
+
+	@Nullable
+	public String getChatInput() {
+		return chatInput;
+	}
+
+	public void setChatInput(String chatInput) {
+		this.chatInput = chatInput;
 	}
 
 	public static WebSession from(HttpSession session) {

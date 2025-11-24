@@ -1,5 +1,6 @@
 package io.onedev.server.service.impl;
 
+import static io.onedev.server.model.User.Type.SERVICE;
 import static java.lang.Integer.MAX_VALUE;
 
 import java.util.ArrayList;
@@ -170,7 +171,7 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 	@Transactional
 	@Override
 	public void create(IssueChange change, @Nullable String note) {
-		create(change, note, !change.getUser().isServiceAccount());
+		create(change, note, change.getUser().getType() != SERVICE);
 	}
 
 	@Transactional
@@ -317,7 +318,7 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 	@Transactional
 	@Override
 	public void addSchedule(User user, Issue issue, Iteration iteration) {
-		addSchedule(user, issue, iteration, !user.isServiceAccount());
+		addSchedule(user, issue, iteration, user.getType() != SERVICE);
 	}
 
 	protected void addSchedule(User user, Issue issue, Iteration iteration, boolean sendNotifications) {
@@ -348,7 +349,7 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 	@Transactional
 	@Override
 	public void removeSchedule(User user, Issue issue, Iteration iteration) {
-		removeSchedule(user, issue, iteration, !user.isServiceAccount());
+		removeSchedule(user, issue, iteration, user.getType() != SERVICE);
 	}
 
 	@Transactional

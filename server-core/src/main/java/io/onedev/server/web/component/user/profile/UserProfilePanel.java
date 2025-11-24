@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.user.profile;
 
+import static io.onedev.server.model.User.Type.AI;
+import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.text.MessageFormat;
@@ -219,13 +221,17 @@ public abstract class UserProfilePanel extends GenericPanel<User> {
         }
 
 		WebMarkupContainer noteContainer;
-		if (user.isDisabled() && WicketUtils.isSubscriptionActive()) {
-			if (user.isServiceAccount())
+		if (user.isDisabled()) {
+			if (user.getType() == SERVICE)
 				noteContainer = new Fragment("note", "disabledServiceAccountFrag", this);
+			else if (user.getType() == AI)
+				noteContainer = new Fragment("note", "disabledAIAccountFrag", this);
 			else
 				noteContainer = new Fragment("note", "disabledFrag", this);
-		} else if (user.isServiceAccount() && WicketUtils.isSubscriptionActive()) {
+		} else if (user.getType() == SERVICE) {
 			noteContainer = new Fragment("note", "serviceAccountFrag", this);
+		} else if (user.getType() == AI) {
+			noteContainer = new Fragment("note", "aiAccountFrag", this);
 		} else if (user.getPassword() != null) {
 			noteContainer = new Fragment("note", "authViaInternalDatabaseFrag", this);
             var actions = new WebMarkupContainer("actions");

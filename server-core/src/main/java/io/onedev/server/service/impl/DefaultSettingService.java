@@ -30,7 +30,7 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
-import io.onedev.server.model.support.administration.AISetting;
+import io.onedev.server.model.support.administration.AiSetting;
 import io.onedev.server.model.support.administration.AgentSetting;
 import io.onedev.server.model.support.administration.AlertSetting;
 import io.onedev.server.model.support.administration.AuditSetting;
@@ -168,8 +168,8 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 	}
 
 	@Override
-	public AISetting getAISetting() {
-		return (AISetting) getSettingValue(Key.AI);
+	public AiSetting getAiSetting() {
+		return (AiSetting) getSettingValue(Key.AI);
 	}
 	
 	@Override
@@ -304,7 +304,7 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 
 	@Transactional
 	@Override
-	public void saveAISetting(AISetting aiSetting) {
+	public void saveAiSetting(AiSetting aiSetting) {
 		saveSetting(Key.AI, aiSetting);
 	}
 	

@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.model.support.administration.AISetting;
+import io.onedev.server.model.support.administration.AiSetting;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -28,7 +28,7 @@ public class LiteModelPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		AISetting aiSetting = settingService.getAISetting();
+		AiSetting aiSetting = settingService.getAiSetting();
 		var oldAuditContent = VersionedXmlDoc.fromBean(aiSetting).toXML();
 
 		Form<?> form = new Form<Void>("form") {
@@ -37,7 +37,7 @@ public class LiteModelPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				var newAuditContent = VersionedXmlDoc.fromBean(aiSetting).toXML();
-				settingService.saveAISetting(aiSetting);
+				settingService.saveAiSetting(aiSetting);
 				auditService.audit(null, "changed AI settings", oldAuditContent, newAuditContent);				
 				getSession().success(_T("Lite AI model settings have been saved"));
 				
@@ -45,7 +45,7 @@ public class LiteModelPage extends AdministrationPage {
 			}
 			
 		};
-		form.add(PropertyContext.edit("editor", aiSetting, AISetting.PROP_LITE_MODEL_SETTING));
+		form.add(PropertyContext.edit("editor", aiSetting, AiSetting.PROP_LITE_MODEL_SETTING));
 		
 		add(form);
 	}

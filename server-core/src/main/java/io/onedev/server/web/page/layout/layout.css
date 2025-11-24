@@ -306,6 +306,8 @@
 .topbar-right .new-version-status>img {
 	margin-top: -3px;
 }
+
+.topbar-right a.topbar-link.active, 
 .topbar-right a.topbar-link:hover, 
 .topbar-right .active>a.topbar-link, 
 .topbar-right .show>a.topbar-link {

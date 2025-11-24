@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.user.querywatch;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -14,7 +16,7 @@ public class UserQueryWatchesPage extends UserPage {
 
     public UserQueryWatchesPage(PageParameters params) {
         super(params);
-        if (getUser().isServiceAccount() || getUser().isDisabled())
+        if (getUser().getType() != ORDINARY || getUser().isDisabled())
             throw new IllegalStateException();
         tabName = params.get(PARAM_TAB).toString(QueryWatchesPanel.TAB_ISSUE);
     }

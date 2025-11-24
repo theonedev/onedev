@@ -1,5 +1,7 @@
 package io.onedev.server.rest.resource;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
+import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.security.SecurityUtils.getAuthUser;
 import static java.util.stream.Collectors.toList;
 
@@ -101,10 +103,10 @@ public class UserResource {
 	private UserData getData(User user) {
 		var data = new UserData();
 		data.setDisabled(user.isDisabled());
-		data.setServiceAccount(user.isServiceAccount());
+		data.setType(user.getType());
 		data.setName(user.getName());
 		data.setFullName(user.getFullName());
-		if (!user.isServiceAccount()) 
+		if (user.getType() != SERVICE) 
 			data.setNotifyOwnEvents(user.isNotifyOwnEvents());
 		return data;
 	}
@@ -333,14 +335,14 @@ public class UserResource {
 
 		if (userService.findByName(data.getName()) != null)
 			throw new ExplicitException("Login name is already used by another user");
-		if (!data.isServiceAccount() && emailAddressService.findByValue(data.getEmailAddress()) != null)
+		if (data.getType() == ORDINARY && emailAddressService.findByValue(data.getEmailAddress()) != null)
 			throw new ExplicitException("Email address is already used by another user");
 		
 		User user = new User();
-		user.setServiceAccount(data.isServiceAccount());
+		user.setType(data.getType());
 		user.setName(data.getName());
 		user.setFullName(data.getFullName());
-		if (data.isServiceAccount()) {
+		if (data.getType() != ORDINARY) {
 			userService.create(user);
 		} else {
 			user.setNotifyOwnEvents(data.isNotifyOwnEvents());
@@ -383,7 +385,7 @@ public class UserResource {
 		String oldName = user.getName();
 		user.setName(data.getName());
 		user.setFullName(data.getFullName());
-		if (!user.isServiceAccount())
+		if (user.getType() != SERVICE)
 			user.setNotifyOwnEvents(data.isNotifyOwnEvents());
 		userService.update(user, oldName);
 
@@ -462,9 +464,9 @@ public class UserResource {
 				auditService.audit(null, "changed password of account \"" + user.getName() + "\" via RESTful API", null, null);
 			return Response.ok().build();
 		} else if (user.isDisabled()) {
-			throw new ExplicitException("Can not set password for disabled user");
-		} else if (user.isServiceAccount()) {
-			throw new ExplicitException("Can not set password for service account");
+			throw new ExplicitException("Can not set password for disabled account");
+		} else if (user.getType() != ORDINARY) {
+			throw new ExplicitException("Can not set password for service or AI account");
 		} else if (user.equals(getAuthUser())) {
 			if (user.getPassword() == null) {
 				throw new ExplicitException("The user is currently authenticated via external system, "
@@ -488,9 +490,9 @@ public class UserResource {
 
 		User user = userService.load(userId);		
 		if (user.isDisabled()) {
-			throw new ExplicitException("Can not reset two factor authentication for disabled user");
-		} else if (user.isServiceAccount()) {
-			throw new ExplicitException("Can not reset two factor authentication for service account");
+			throw new ExplicitException("Can not reset two factor authentication for disabled account");
+		} else if (user.getType() != ORDINARY) {
+			throw new ExplicitException("Can not reset two factor authentication for service or AI account");
 		} else {
 			user.setTwoFactorAuthentication(null);
 			userService.update(user, null);
@@ -509,8 +511,8 @@ public class UserResource {
 
 		if (user.isDisabled()) 
 			throw new ExplicitException("Can not set queries and watches for disabled user");
-		else if (user.isServiceAccount()) 
-			throw new ExplicitException("Can not set queries and watches for service account");
+		else if (user.getType() != ORDINARY) 
+			throw new ExplicitException("Can not set queries and watches for service or ai account");
 
 		var oldAuditContent = VersionedXmlDoc.fromBean(getQueriesAndWatches(user)).toXML();
 
@@ -587,8 +589,8 @@ public class UserResource {
 		@Api(order=10, description="Whether or not the user is disabled")
 		private boolean disabled;
 
-		@Api(order=50, description="Whether or not the user is a service account")
-		private boolean serviceAccount;
+		@Api(order=50, description="Type of the user")
+		private User.Type type;
 
 		@Api(order=100, description="Login name of the user")
 		private String name;
@@ -607,12 +609,12 @@ public class UserResource {
 			this.disabled = disabled;
 		}
 
-		public boolean isServiceAccount() {
-			return serviceAccount;
+		public User.Type getType() {
+			return type;
 		}
 
-		public void setServiceAccount(boolean serviceAccount) {
-			this.serviceAccount = serviceAccount;
+		public void setType(User.Type type) {
+			this.type = type;
 		}
 
 		public String getName() {
@@ -645,8 +647,8 @@ public class UserResource {
 
 		private static final long serialVersionUID = 1L;
 		
-		@Api(order=50, exampleProvider="getServiceAccountExample", description="Create user as service account")
-		private boolean serviceAccount;
+		@Api(order=50, exampleProvider = "getTypeExample", description="Specify account type")
+		private User.Type type;
 
 		@Api(order=100, description="Login name of the user")
 		private String name;
@@ -662,17 +664,17 @@ public class UserResource {
 		@Api(order=400, description = "Whether or not to notify user on own events. Only required if not created as service account")
 		private boolean notifyOwnEvents;
 
-		public boolean isServiceAccount() {
-			return serviceAccount;
+		public User.Type getType() {
+			return type;
 		}
 
-		public void setServiceAccount(boolean serviceAccount) {
-			this.serviceAccount = serviceAccount;
+		public void setType(User.Type type) {
+			this.type = type;
 		}
 
 		@SuppressWarnings("unused")
-		private static boolean getServiceAccountExample() {
-			return false;
+		private static User.Type getTypeExample() {
+			return ORDINARY;
 		}
 
 		@UserName

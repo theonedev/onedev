@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.entity.watches;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
@@ -109,7 +110,7 @@ public abstract class EntityWatchesPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getAuthUser() != null && !SecurityUtils.getAuthUser().isServiceAccount());
+				setVisible(SecurityUtils.getAuthUser() != null && SecurityUtils.getAuthUser().getType() == ORDINARY);
 			}
 
 			@Override

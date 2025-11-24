@@ -1,11 +1,12 @@
 package io.onedev.server.web.component.savedquery;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
 import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
@@ -31,6 +32,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedQuery;
@@ -310,7 +312,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(!SecurityUtils.getAuthUser().isServiceAccount() && getQueryPersonalization().getQueryWatchSupport() != null);
+						setVisible(SecurityUtils.getAuthUser().getType() == ORDINARY && getQueryPersonalization().getQueryWatchSupport() != null);
 					}
 					
 				});
@@ -336,7 +338,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(!SecurityUtils.getAuthUser().isServiceAccount() && getQueryPersonalization().getQuerySubscriptionSupport() != null);
+						setVisible(SecurityUtils.getAuthUser().getType() == ORDINARY && getQueryPersonalization().getQuerySubscriptionSupport() != null);
 					}
 					
 				});
@@ -392,7 +394,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(SecurityUtils.getAuthUser() != null 
-								&& !SecurityUtils.getAuthUser().isServiceAccount()
+								&& SecurityUtils.getAuthUser().getType() == ORDINARY
 								&& getQueryPersonalization() != null 
 								&& getQueryPersonalization().getQueryWatchSupport() != null);
 					}
@@ -422,7 +424,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(SecurityUtils.getAuthUser() != null 
-								&& !SecurityUtils.getAuthUser().isServiceAccount()
+								&& SecurityUtils.getAuthUser().getType() == ORDINARY
 								&& getQueryPersonalization() != null
 								&& getQueryPersonalization().getQuerySubscriptionSupport() != null);
 					}

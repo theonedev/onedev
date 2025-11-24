@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.security;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.text.MessageFormat;
@@ -111,7 +112,7 @@ public class SsoProcessPage extends SimplePage {
 					var ssoAccount = getSsoAccountService().find(getProvider(), authenticated.getSubject());
 					if (ssoAccount != null) {
 						var user = ssoAccount.getUser();
-						if (user.isServiceAccount() || user.isDisabled()) {
+						if (user.getType() != ORDINARY || user.isDisabled()) {
 							getSsoAccountService().delete(ssoAccount);
 						} else {
 							if (authenticated.getEmail() != null) {
@@ -142,7 +143,7 @@ public class SsoProcessPage extends SimplePage {
 						if (emailAddress != null) {
 							var user = emailAddress.getOwner();
 							if (emailAddress.isVerified()) {
-								if (user.isServiceAccount()) {
+								if (user.getType() != ORDINARY) {
 									getEmailAddressService().delete(emailAddress);
 								} else if (user.isDisabled()) {
 									throw new AuthenticationException(MessageFormat.format(_T("Email address \"{0}\" used by disabled account \"{1}\""), authenticated.getEmail(), user.getName()));
@@ -246,7 +247,7 @@ public class SsoProcessPage extends SimplePage {
 		bean.setName(authenticated.getUserName());
 		bean.setFullName(authenticated.getFullName());
 		var excludedProperties = new HashSet<String>();
-		excludedProperties.add(User.PROP_SERVICE_ACCOUNT);
+		excludedProperties.add(User.PROP_TYPE);
 		excludedProperties.add(User.PROP_NOTIFY_OWN_EVENTS);
 		excludedProperties.add(User.PROP_PASSWORD);
 		if (authenticated.getEmail() != null)

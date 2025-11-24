@@ -126,9 +126,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("A {0} used as body of user invitation email", "ユーザー招待メールの本文として使用される {0}");
 		m.put("A {0} used as body of various issue notification emails", "さまざまな問題通知メールの本文として使用される {0}");
 		m.put("A {0} used as body of various pull request notification emails", "さまざまなプルリクエスト通知メールの本文として使用される {0}");
-		m.put("AI Model Setting", "AIモデル設定");
-		m.put("AI Setting", "AI設定");
+		m.put("AI Model Settings", "AIモデル設定");
 		m.put("AI Settings", "AI設定");
+		m.put("AI entitlement settings have been saved", "AI権限設定が保存されました");
+		m.put("AI model settings have been saved", "AIモデル設定が保存されました");
 		m.put("API Key", "APIキー");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"例えば、<tt>https://your-domain.atlassian.net/rest/api/3</tt> のような JIRA クラウドインスタンスの API URL");
@@ -248,6 +249,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Aggregated from '<span wicket:id=\"spentTimeAggregationLink\"></span>':", "'<span wicket:id=\"spentTimeAggregationLink\"></span>'から集計:");
 		m.put("Aggregation Link", "集計リンク");
 		m.put("Ai", "AI");
+		m.put("Ai Model Setting", "AIモデル設定");
+		m.put("Ai Setting", "AI設定");
 		m.put("Alert", "アラート");
 		m.put("Alert Setting", "アラート設定");
 		m.put("Alert Settings", "アラート設定");
@@ -561,7 +564,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Can not find issue board: ", "課題ボードが見つかりません:");
 		m.put("Can not move project \"{0}\" to be under itself or its descendants", "プロジェクト\"{0}\"を自身またはその子孫の下に移動することはできません");
 		m.put("Can not perform this operation now", "現在この操作を実行することはできません");
-		m.put("Can not reset password for service account or disabled user", "サービスアカウントまたは無効なユーザーのパスワードをリセットできません");
+		m.put("Can not reset password for disabled account", "無効なアカウントのパスワードをリセットできません");
+		m.put("Can not reset password for service or AI account", "サービスまたはAIアカウントのパスワードをリセットできません");
 		m.put("Can not reset password for user authenticating via external system", "外部システムで認証するユーザーのパスワードをリセットできません");
 		m.put("Can not save malformed query", "不正なクエリを保存することはできません");
 		m.put("Can not use current or descendant project as parent", "現在のプロジェクトまたは子孫プロジェクトを親として使用することはできません");
@@ -593,6 +597,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Changes since this comment", "このコメント以降の変更");
 		m.put("Channel Notification", "チャンネル通知");
 		m.put("Chart Metadata", "チャートメタデータ");
+		m.put("Chat deleted", "チャットが削除されました");
+		m.put("Chat with", "とのチャット");
+		m.put("Chat with AI", "AIとのチャット");
 		m.put("Check <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHub's guide</a> on how to generate and use GPG keys to sign your commits", 
 			"コミットに署名するためのGPGキーを生成して使用する方法については、<a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHubのガイド</a>を確認してください");
 		m.put("Check <a href=\"https://docs.onedev.io/administration-guide/agent-management\" target=\"_blank\">agent management</a> for details, including instructions on how to run agent as service", 
@@ -946,6 +953,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Delete Selected Users", "選択したユーザーを削除");
 		m.put("Delete Source Branch", "ソースブランチを削除");
 		m.put("Delete Source Branch After Merge", "マージ後にソースブランチを削除");
+		m.put("Delete chat", "チャットを削除");
 		m.put("Delete dashboard", "ダッシュボードを削除");
 		m.put("Delete from branch {0}", "ブランチ {0} から削除");
 		m.put("Delete this", "これを削除");
@@ -1191,6 +1199,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Enter description here", "ここに説明を入力してください");
 		m.put("Enter your details to login to your account", "アカウントにログインするための詳細を入力してください");
 		m.put("Enter your user name or email to reset password", "パスワードをリセットするには、ユーザー名またはメールを入力してください");
+		m.put("Entitled Groups", "権限を持つグループ");
+		m.put("Entitled Projects", "権限を持つプロジェクト");
+		m.put("Entitled Users", "権限を持つユーザー");
+		m.put("Entitlement", "権限");
+		m.put("Entitlement Edit Bean", "権限編集ビーン");
 		m.put("Entries", "エントリ");
 		m.put("Entry", "エントリ");
 		m.put("Enumeration", "列挙");
@@ -1997,6 +2010,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Minimum length of the password", "パスワードの最小長");
 		m.put("Missing Commit", "不足しているコミット");
 		m.put("Missing Commits", "不足しているコミット");
+		m.put("Model", "モデル");
 		m.put("Month", "月");
 		m.put("Months", "月");
 		m.put("Months to Display", "表示する月数");
@@ -2018,6 +2032,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Multiple Lines", "複数行");
 		m.put("Multiple On the Other Side", "反対側に複数");
 		m.put("Must not be empty", "空であってはなりません");
+		m.put("My AI Settings", "私のAI設定");
 		m.put("My Access Tokens", "私のアクセストークン");
 		m.put("My Basic Settings", "私の基本設定");
 		m.put("My Email Addresses", "私のメールアドレス");
@@ -2074,6 +2089,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("New State", "新しい状態");
 		m.put("New User Bean", "新しいユーザーBean");
 		m.put("New Value", "新しい値");
+		m.put("New chat", "新しいチャット");
 		m.put("New issue board created", "新しい課題ボードが作成されました");
 		m.put("New project created", "新しいプロジェクトが作成されました");
 		m.put("New user created", "新しいユーザーが作成されました");
@@ -2539,6 +2555,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Order Subscription", "サブスクリプションを注文");
 		m.put("Ordered List", "順序付きリスト");
 		m.put("Ordered list", "順序付きリスト");
+		m.put("Ordinary", "通常");
+		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account (working in progress)", 
+			"通常: 通常のアカウント<br>サービス: サービスアカウントにはパスワードとメールアドレスがなく、その活動に対する通知は生成されません<br>AI: AIアカウント（作業中）");
 		m.put("Osv License Scanner", "Osvライセンススキャナー");
 		m.put("Osv Vulnerability Scanner", "Osv脆弱性スキャナー");
 		m.put("Other", "その他");
@@ -3171,6 +3190,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Select users to send alert email upon events such as database auto-backup failure, cluster node unreachable etc", 
 			"データベースの自動バックアップ失敗やクラスターノードの到達不能などのイベント時にアラートメールを送信するユーザーを選択");
 		m.put("Select workspace to import from", "インポート元のワークスペースを選択");
+		m.put("Send", "送信");
 		m.put("Send Notifications", "通知を送信");
 		m.put("Send Pull Request", "プルリクエストを送信");
 		m.put("Send notification", "通知を送信");
@@ -3192,7 +3212,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Server is Starting...", "サーバーを起動中...");
 		m.put("Server url", "サーバーURL");
 		m.put("Service", "サービス");
-		m.put("Service Account", "サービスアカウント");
 		m.put("Service Desk", "サービスデスク");
 		m.put("Service Desk Email Address", "サービスデスクメールアドレス");
 		m.put("Service Desk Issue Open Failed", "サービスデスク課題のオープンに失敗しました");
@@ -3204,9 +3223,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Service Desk Settings", "サービスデスク設定");
 		m.put("Service Locator", "サービスロケーター");
 		m.put("Service Locators", "サービスロケーター");
-		m.put("Service account not allowed to login", "サービスアカウントはログインできません");
 		m.put("Service desk setting", "サービスデスク設定");
 		m.put("Service desk settings have been saved", "サービスデスク設定が保存されました");
+		m.put("Service or AI account not allowed to login", "サービスまたはAIアカウントはログインできません");
 		m.put("Services", "サービス");
 		m.put("Session Timeout", "セッションタイムアウト");
 		m.put("Set", "設定");
@@ -3355,6 +3374,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specifies password of above manager DN", "上記のマネージャー DN のパスワードを指定します");
 		m.put("Specifies the attribute containing group name inside the found group LDAP entry. Value of this attribute will be mapped to a OneDev group. This attribute is normally set to <i>cn</i>", 
 			"見つかったグループ LDAP エントリ内のグループ名を含む属性を指定します。この属性の値は OneDev グループにマッピングされます。この属性は通常 <i>cn</i> に設定されます");
+		m.put("Specifies who can access this AI service", "このAIサービスにアクセスできる人を指定します");
 		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する .net TRX テスト結果ファイルを指定します。例: <tt>TestResults/*.trx</tt>。パターンマッチには * または ? を使用してください");
 		m.put("Specify <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is access token with code write permission over above projects. Commits, issues, and pull requests will also be created under name of the access token owner", 
@@ -3737,6 +3757,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Steps", "ステップ");
 		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>", 
 			"ステップは同じノード上で直列に実行され、同じ<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>を共有します。");
+		m.put("Stop", "停止");
 		m.put("Stop work", "作業を停止");
 		m.put("Stopwatch Overdue", "ストップウォッチ期限切れ");
 		m.put("Storage Settings", "ストレージ設定");
@@ -3919,10 +3940,12 @@ public class Translation_ja extends TranslationResourceBundle {
 			"このインストールのサブスクリプションは期限切れで、現在コミュニティエディションとして実行されています");
 		m.put("This is a Git LFS object, but the storage file is missing", "これはGit LFSオブジェクトですが、ストレージファイルがありません");
 		m.put("This is a built-in role and can not be deleted", "これは組み込みのロールであり、削除することはできません");
+		m.put("This is a disabled AI account", "これは無効なAIアカウントです");
 		m.put("This is a disabled service account", "これは無効化されたサービスアカウントです");
 		m.put("This is a layer cache. To use the cache, add below option to your docker buildx command", 
 			"これはレイヤーキャッシュです。キャッシュを使用するには、以下のオプションをDocker buildxコマンドに追加してください");
 		m.put("This is a service account for task automation purpose", "これはタスク自動化目的のサービスアカウントです");
+		m.put("This is an AI account", "これはAIアカウントです");
 		m.put("This is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"これはエンタープライズ機能です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料でお試しください</a>");
 		m.put("This key has already been used by another project", "このキーは別のプロジェクトで既に使用されています");
@@ -4113,6 +4136,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Type password here", "ここにパスワードを入力してください");
 		m.put("Type to filter", "フィルターするために入力してください");
 		m.put("Type to filter...", "フィルターするために入力してください...");
+		m.put("Type your message here", "ここにメッセージを入力してください");
 		m.put("URL", "URL");
 		m.put("Unable To Delete/Disable Right Now", "今すぐ削除/無効化できません");
 		m.put("Unable to apply change as otherwise you will not be able to manage this project", "このプロジェクトを管理できなくなるため、変更を適用できません");
@@ -4339,10 +4363,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not to always pull image when run container or build images. This option should be enabled to avoid images being replaced by malicious jobs running on same node", 
 			"コンテナを実行したりイメージをビルドしたりするときに常にイメージをプルするかどうか。このオプションを有効にすると、同じノードで実行される悪意のあるジョブによってイメージが置き換えられるのを防ぐことができます");
 		m.put("Whether or not to be able to access time tracking info of issues", "課題のタイムトラッキング情報にアクセスできるかどうか");
-		m.put("Whether or not to create as a service account for task automation purpose. Service account does not have password and email addresses, and will not generate notifications for its activities", 
-			"タスク自動化目的のサービスアカウントとして作成するかどうか。サービスアカウントにはパスワードとメールアドレスがなく、その活動に対する通知は生成されません");
-		m.put("Whether or not to create as a service account for task automation purpose. Service account does not have password and email addresses, and will not generate notifications for its activities. <b class='text-warning'>NOTE:</b> Service account is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"タスク自動化目的のサービスアカウントとして作成するかどうか。サービスアカウントにはパスワードとメールアドレスがなく、その活動に対する通知は生成されません。<b class='text-warning'>注意:</b>サービスアカウントはエンタープライズ機能です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料で試す</a>");
 		m.put("Whether or not to enable code management for the project", "プロジェクトのコード管理を有効にするかどうか");
 		m.put("Whether or not to enable issue management for the project", "プロジェクトの課題管理を有効にするかどうか");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -4661,6 +4681,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
+		m.put("Entitle to All Users", "すべてのユーザーに権限を付与");
 	}
 		
 	@Override

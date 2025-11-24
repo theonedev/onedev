@@ -63,7 +63,7 @@ public class PullRequestNotificationManager {
 	@Transactional
 	@Listen
 	public void on(PullRequestEvent event) {
-		if (event.getUser() == null || !event.getUser().isServiceAccount()) {
+		if (event.getUser() == null || event.getUser().getType() != User.Type.SERVICE) {
 			PullRequest request = event.getRequest();
 			User user = event.getUser();
 	
@@ -131,7 +131,7 @@ public class PullRequestNotificationManager {
 			if (user != null) {
 				if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
 					notifiedUsers.add(user); 
-				if (!user.isSystem() && !user.isServiceAccount())
+				if (!user.isSystem() && user.getType() != User.Type.SERVICE)
 					watchService.watch(request, user, true);
 			}
 	
@@ -144,7 +144,7 @@ public class PullRequestNotificationManager {
 					notifiedUsers.add(committer);
 				}
 				for (User each : committers) {
-					if (!each.isSystem() && !each.isServiceAccount())
+					if (!each.isSystem() && each.getType() != User.Type.SERVICE)
 						watchService.watch(request, each, true);
 				}
 			}
@@ -206,7 +206,7 @@ public class PullRequestNotificationManager {
 			}
 	
 			for (User assignee : assignees) {
-				if (!assignee.isServiceAccount())
+				if (assignee.getType() != User.Type.SERVICE)
 					watchService.watch(request, assignee, true);
 				if (!notifiedUsers.contains(assignee)) {
 					String subject = String.format(
@@ -232,7 +232,7 @@ public class PullRequestNotificationManager {
 			}
 	
 			for (User reviewer : reviewers) {
-				if (!reviewer.isServiceAccount())
+				if (reviewer.getType() != User.Type.SERVICE)
 					watchService.watch(request, reviewer, true);
 				if (!notifiedUsers.contains(reviewer)) {
 					String subject = String.format(
@@ -264,7 +264,7 @@ public class PullRequestNotificationManager {
 					User mentionedUser = userService.findByName(userName);
 					if (mentionedUser != null) {
 						mentionService.mention(request, mentionedUser);
-						if (!mentionedUser.isServiceAccount())
+						if (mentionedUser.getType() != User.Type.SERVICE)
 							watchService.watch(request, mentionedUser, true);
 						if (!isNotified(notifiedEmailAddresses, mentionedUser)) {
 							String subject = String.format(

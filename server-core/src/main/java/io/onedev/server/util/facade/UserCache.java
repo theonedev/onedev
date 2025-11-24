@@ -6,12 +6,14 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.User;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.MapProxy;
 import io.onedev.server.util.Similarities;
 
@@ -53,19 +55,23 @@ public class UserCache extends MapProxy<Long, UserFacade> {
 	public UserCache clone() {
 		return new UserCache(new HashMap<>(delegate));
 	}
-		
-	public Collection<User> getUsers(boolean includeDisabled) {
+
+	public Collection<User> getUsers(Function<UserFacade, Boolean> filter) {
 		UserService userService = OneDev.getInstance(UserService.class);
 		return entrySet().stream()
-				.filter(it -> includeDisabled || !it.getValue().isDisabled())
+				.filter(it -> filter.apply(it.getValue()))
 				.map(it -> userService.load(it.getKey()))
 				.collect(toSet());
 	}
 
 	public Collection<User> getUsers() {
-		return getUsers(false);
+		return getUsers(it->true);
 	}
 	
+	public Comparator<User> comparingDisplayName() {
+		return comparingDisplayName(Set.of());
+	}
+
 	public Comparator<User> comparingDisplayName(Collection<User> topUsers) {
 		return (o1, o2) -> {
 			if (topUsers.contains(o1)) {

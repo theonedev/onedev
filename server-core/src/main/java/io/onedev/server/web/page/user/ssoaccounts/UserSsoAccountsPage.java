@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.user.ssoaccounts;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
+
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -11,7 +13,7 @@ public class UserSsoAccountsPage extends UserPage {
 		
 	public UserSsoAccountsPage(PageParameters params) {
 		super(params);
-		if (getUser().isDisabled() || getUser().isServiceAccount())
+		if (getUser().isDisabled() || getUser().getType() != ORDINARY)
 			throw new IllegalStateException();
 	}
 

@@ -288,7 +288,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
 
 				var title = request.generateTitleFromCommits();
-				if (title == null && settingService.getAISetting().getLiteModelSetting() == null)
+				if (title == null && settingService.getAiSetting().getLiteModelSetting() == null)
 					title = request.generateTitleFromBranch();
 				request.setTitle(title);
 				request.setDescription(request.generateDescriptionFromCommits());
@@ -686,7 +686,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				String description;
 				try {
 					if (suggestTitle || suggestDescription) {
-						var chatModel = settingService.getAISetting().getLiteModel();
+						var chatModel = settingService.getAiSetting().getLiteModel();
 						var sourceBranchSemantic = getPullRequest().getSourceBranchSemantic();
 						String titleSuggestInstruction;
 						if (sourceBranchSemantic.isWorkInProgress()) {
@@ -789,7 +789,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				super.renderHead(response);
 				
 				CharSequence callback;
-				if (settingService.getAISetting().getLiteModelSetting() != null)
+				if (settingService.getAiSetting().getLiteModelSetting() != null)
 					callback = behavior.getCallbackFunction(explicit("suggestTitle"), explicit("suggestDescription"));
 				else
 					callback = "undefined";

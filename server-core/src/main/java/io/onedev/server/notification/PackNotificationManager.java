@@ -83,7 +83,7 @@ public class PackNotificationManager {
 	@Sessional
 	@Listen
 	public void on(PackEvent event) {
-		if (!event.getUser().isServiceAccount()) {
+		if (event.getUser().getType() != User.Type.SERVICE) {
 			Project project = event.getProject();
 			Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
 			for (PackQueryPersonalization personalization: project.getPackQueryPersonalizations()) {

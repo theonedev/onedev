@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.issue.list;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.search.entity.issue.IssueQuery.merge;
 import static io.onedev.server.web.translation.Translation._T;
@@ -19,8 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.jspecify.annotations.Nullable;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
@@ -70,6 +69,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 import org.dhatim.fastexcel.Workbook;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Sets;
 
@@ -78,12 +78,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AuditService;
-import io.onedev.server.service.IssueLinkService;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.IssueWatchService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.imports.IssueImporterContribution;
 import io.onedev.server.model.Issue;
@@ -105,6 +99,12 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.IssueLinkService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IssueWatchService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.timetracking.TimeTrackingService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.LinkDescriptor;
@@ -1575,7 +1575,7 @@ public abstract class IssueListPanel extends Panel {
 					});
 				}
 
-				if (!SecurityUtils.getAuthUser().isServiceAccount()) {
+				if (SecurityUtils.getAuthUser().getType() == ORDINARY) {
 					menuItems.add(new MenuItem() {
 
 						@Override

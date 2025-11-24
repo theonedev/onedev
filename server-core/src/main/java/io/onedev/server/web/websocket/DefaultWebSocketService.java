@@ -1,19 +1,20 @@
 package io.onedev.server.web.websocket;
 
-import com.google.common.collect.Sets;
-import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.cluster.ClusterRunnable;
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.persistence.TransactionService;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.util.Pair;
-import io.onedev.server.taskschedule.SchedulableTask;
-import io.onedev.server.taskschedule.TaskScheduler;
-import io.onedev.server.web.page.base.BasePage;
+import static io.onedev.server.web.behavior.ChangeObserver.containsObservable;
+import static io.onedev.server.web.behavior.ChangeObserver.filterObservables;
+
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.apache.wicket.Application;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.apache.wicket.protocol.ws.api.registry.IKey;
@@ -21,24 +22,31 @@ import org.apache.wicket.protocol.ws.api.registry.IWebSocketConnectionRegistry;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
 import org.joda.time.DateTime;
+import org.jspecify.annotations.Nullable;
 import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.jspecify.annotations.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.Sets;
 
-import static io.onedev.server.web.behavior.ChangeObserver.containsObservable;
-import static io.onedev.server.web.behavior.ChangeObserver.filterObservables;
+import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.persistence.TransactionService;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.taskschedule.SchedulableTask;
+import io.onedev.server.taskschedule.TaskScheduler;
+import io.onedev.server.util.Pair;
+import io.onedev.server.web.SessionListener;
+import io.onedev.server.web.page.base.BasePage;
 
 @Singleton
-public class DefaultWebSocketService implements WebSocketService, Serializable {
+public class DefaultWebSocketService implements WebSocketService, SessionListener, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -93,10 +101,14 @@ public class DefaultWebSocketService implements WebSocketService, Serializable {
 	}
 	
 	@Override
-	public void onDestroySession(String sessionId) {
-		registeredObservables.remove(sessionId);
+	public void sessionCreated(String sessionId) {
 	}
 	
+	@Override
+	public void sessionDestroyed(String sessionId) {
+		registeredObservables.remove(sessionId);
+	}
+		
 	@Nullable
 	private Collection<String> getRegisteredObservables(IWebSocketConnection connection) {
 		if (connection.isOpen()) {

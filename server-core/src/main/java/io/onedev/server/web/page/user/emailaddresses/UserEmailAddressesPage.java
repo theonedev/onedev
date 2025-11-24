@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.user.emailaddresses;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
+
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -11,7 +13,7 @@ public class UserEmailAddressesPage extends UserPage {
 
 	public UserEmailAddressesPage(PageParameters params) {
 		super(params);
-		if (getUser().isServiceAccount())
+		if (getUser().getType() != ORDINARY)
 			throw new IllegalStateException();
 	}
 

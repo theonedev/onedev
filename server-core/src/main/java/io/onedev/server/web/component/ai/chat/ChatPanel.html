@@ -1,0 +1,28 @@
+<wicket:panel>
+	<div class="ui-resizable-handle ui-resizable-w"></div>
+	<div class="head d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
+		<h5 class="card-title mb-0"><wicket:t>Chat with</wicket:t> <a wicket:id="aiSelector" class="ml-2"><img wicket:id="avatar"></img> <span wicket:id="name"></span> <wicket:svg href="arrow" class="icon rotate-90"></wicket:svg></a></h5>
+		<a wicket:id="close" t:data-tippy-content="Close" class="btn btn-xs btn-icon btn-light btn-hover-primary"><wicket:svg href="times" class="icon"/></a>
+	</div>
+	<div class="body d-flex flex-column flex-grow-1 p-4 position-relative" style="overflow: hidden;">
+		<div wicket:id="chatSelectorContainer" class="chat-selector d-flex flex-shrink-0 mb-3">
+			<input wicket:id="chatSelector" t:placeholder="New chat" type="hidden" class="form-control">
+			<a wicket:id="newChat" t:data-tippy-content="New chat" class="btn btn-light btn-hover-primary btn-icon flex-shrink-0"><wicket:svg href="plus" class="icon icon-lg"></wicket:svg></a>
+			<a wicket:id="deleteChat" t:data-tippy-content="Delete chat" class="btn btn-light btn-hover-danger btn-icon flex-shrink-0"><wicket:svg href="trash" class="icon icon-lg"></wicket:svg></a>
+		</div>
+		<ul class="messages list-unstyled mb-2 flex-grow-1 overflow-auto">
+			<li wicket:id="messages" class="message">
+				<div wicket:id="content"></div>
+			</li>
+			<li wicket:id="responding" class="responding">
+				<div class="breathing-dot"></div>
+				<div wicket:id="content" class="mt-2"></div>
+			</li>			
+		</ul>
+		<form wicket:id="send" class="send flex-shrink-0 position-relative">
+			<textarea wicket:id="input" class="form-control" t:placeholder="Type your message here"></textarea>			
+			<a wicket:id="submit" class="submit position-absolute btn btn-primary btn-icon btn-sm" t:data-tippy-content="Send"><wicket:svg href="arrow2" class="icon rotate-270"></wicket:svg></a>
+			<a wicket:id="stop" class="stop position-absolute btn btn-primary btn-icon btn-sm" t:data-tippy-content="Stop"><wicket:svg href="stop" class="icon"></wicket:svg></a>
+		</form>
+	</div>
+</wicket:panel>

@@ -145,9 +145,10 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("A {0} used as body of user invitation email", "用作用户邀请邮件正文的 {0}");
 		m.put("A {0} used as body of various issue notification emails", "用作各种工单通知邮件正文的 {0}");
 		m.put("A {0} used as body of various pull request notification emails", "用作各种合并请求通知邮件正文的 {0}");
-		m.put("AI Model Setting", "AI 模型设置");
-		m.put("AI Setting", "AI 设置");
+		m.put("AI Model Settings", "AI 模型设置");
 		m.put("AI Settings", "AI 设置");
+		m.put("AI entitlement settings have been saved", "AI 权限设置已保存");
+		m.put("AI model settings have been saved", "AI 模型设置已保存");
 		m.put("API Key", "API 密钥");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"你的JIRA云实例的API地址，例如：<tt>https://your-domain.atlassian.net/rest/api/3</tt>");
@@ -267,6 +268,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Aggregated from '<span wicket:id=\"spentTimeAggregationLink\"></span>':", "聚合自 '<span wicket:id=\"spentTimeAggregationLink\"></span>'");
 		m.put("Aggregation Link", "聚合链接");
 		m.put("Ai", "AI");
+		m.put("Ai Model Setting", "AI 模型设置");
+		m.put("Ai Setting", "AI 设置");
 		m.put("Alert", "警报");
 		m.put("Alert Setting", "警报设置");
 		m.put("Alert Settings", "告警设置");
@@ -580,7 +583,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Can not find issue board: ", "找不到工单看板：");
 		m.put("Can not move project \"{0}\" to be under itself or its descendants", "不能将项目 \"{0}\" 移动到其自身或其子项目下");
 		m.put("Can not perform this operation now", "当前无法执行此操作");
-		m.put("Can not reset password for service account or disabled user", "无法重置服务账户或禁用用户的密码");
+		m.put("Can not reset password for disabled account", "无法为已禁用账户重置密码");
+		m.put("Can not reset password for service or AI account", "无法为服务或 AI 账户重置密码");
 		m.put("Can not reset password for user authenticating via external system", "无法重置通过外部系统认证的用户密码");
 		m.put("Can not save malformed query", "无法保存格式错误的查询");
 		m.put("Can not use current or descendant project as parent", "不能使用当前或子项目作为父项目");
@@ -612,6 +616,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Changes since this comment", "此评论后的变更");
 		m.put("Channel Notification", "频道通知");
 		m.put("Chart Metadata", "Chart 元数据");
+		m.put("Chat deleted", "聊天已删除");
+		m.put("Chat with", "聊天对象");
+		m.put("Chat with AI", "与 AI 聊天");
 		m.put("Check <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHub's guide</a> on how to generate and use GPG keys to sign your commits", 
 			"检查 <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHub 的指南</a> 如何生成和使用 GPG 密钥来签署您的提交");
 		m.put("Check <a href=\"https://docs.onedev.io/administration-guide/agent-management\" target=\"_blank\">agent management</a> for details, including instructions on how to run agent as service", 
@@ -965,6 +972,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Delete Selected Users", "删除选定的用户");
 		m.put("Delete Source Branch", "删除源分支");
 		m.put("Delete Source Branch After Merge", "合并后删除源分支");
+		m.put("Delete chat", "删除聊天");
 		m.put("Delete dashboard", "删除仪表板");
 		m.put("Delete from branch {0}", "从分支 {0} 删除");
 		m.put("Delete this", "删除");
@@ -1210,6 +1218,11 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Enter description here", "输入描述");
 		m.put("Enter your details to login to your account", "输入您的详细信息登录到您的账户");
 		m.put("Enter your user name or email to reset password", "输入您的用户名或邮箱以重置密码");
+		m.put("Entitled Groups", "授权组");
+		m.put("Entitled Projects", "授权项目");
+		m.put("Entitled Users", "授权用户");
+		m.put("Entitlement", "权限");
+		m.put("Entitlement Edit Bean", "权限编辑 Bean");
 		m.put("Entries", "条目");
 		m.put("Entry", "条目");
 		m.put("Enumeration", "枚举");
@@ -2016,6 +2029,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Minimum length of the password", "密码的最小长度");
 		m.put("Missing Commit", "缺失提交");
 		m.put("Missing Commits", "缺失提交");
+		m.put("Model", "模型");
 		m.put("Month", "月");
 		m.put("Months", "月");
 		m.put("Months to Display", "显示的月数");
@@ -2037,6 +2051,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Multiple Lines", "多行");
 		m.put("Multiple On the Other Side", "在另一侧允许链接多个工单");
 		m.put("Must not be empty", "不能为空");
+		m.put("My AI Settings", "我的 AI 设置");
 		m.put("My Access Tokens", "我的访问令牌");
 		m.put("My Basic Settings", "我的基本设置");
 		m.put("My Email Addresses", "我的电子邮件地址");
@@ -2093,6 +2108,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("New State", "新状态");
 		m.put("New User Bean", "新用户Bean");
 		m.put("New Value", "新值");
+		m.put("New chat", "新聊天");
 		m.put("New issue board created", "新建工单看板");
 		m.put("New project created", "新项目已创建");
 		m.put("New user created", "新用户创建成功");
@@ -2558,6 +2574,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Order Subscription", "购买订阅");
 		m.put("Ordered List", "有序列表");
 		m.put("Ordered list", "有序列表");
+		m.put("Ordinary", "普通");
+		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account (working in progress)", 
+			"普通：普通账户<br>服务：服务账户没有密码和电子邮件地址，并且不会为其活动生成通知<br>AI：AI 账户（正在进行中）");
 		m.put("Osv License Scanner", "OSV 许可证扫描器");
 		m.put("Osv Vulnerability Scanner", "OSV 漏洞扫描器");
 		m.put("Other", "其他");
@@ -3190,6 +3209,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Select users to send alert email upon events such as database auto-backup failure, cluster node unreachable etc", 
 			"选择在数据库自动备份失败、集群节点不可达等事件时发送警报邮件的用户");
 		m.put("Select workspace to import from", "选择要从中导入的工作区");
+		m.put("Send", "发送");
 		m.put("Send Notifications", "发送通知");
 		m.put("Send Pull Request", "发送合并请求");
 		m.put("Send notification", "发送通知");
@@ -3211,7 +3231,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Server is Starting...", "服务器正在启动...");
 		m.put("Server url", "服务器 URL");
 		m.put("Service", "服务");
-		m.put("Service Account", "服务帐户");
 		m.put("Service Desk", "服务台");
 		m.put("Service Desk Email Address", "服务台电子邮件地址");
 		m.put("Service Desk Issue Open Failed", "服务台工单开启失败");
@@ -3223,9 +3242,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Service Desk Settings", "服务台设置");
 		m.put("Service Locator", "服务定位器");
 		m.put("Service Locators", "服务定位器");
-		m.put("Service account not allowed to login", "服务账户不允许登录");
 		m.put("Service desk setting", "服务台设置");
 		m.put("Service desk settings have been saved", "服务台设置已保存");
+		m.put("Service or AI account not allowed to login", "服务或 AI 账户不允许登录");
 		m.put("Services", "服务");
 		m.put("Session Timeout", "会话超时");
 		m.put("Set", "设置");
@@ -3374,6 +3393,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specifies password of above manager DN", "指定上述管理员 DN 的密码");
 		m.put("Specifies the attribute containing group name inside the found group LDAP entry. Value of this attribute will be mapped to a OneDev group. This attribute is normally set to <i>cn</i>", 
 			"指定在找到的组 LDAP 条目中包含组名称的属性。此属性的值将映射到 OneDev 组。此属性通常设置为 <i>cn</i>");
+		m.put("Specifies who can access this AI service", "指定谁可以访问此 AI 服务");
 		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
 			"指定 .net TRX 测试结果文件相对 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>，例如 <tt>TestResults/*.trx</tt>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is access token with code write permission over above projects. Commits, issues, and pull requests will also be created under name of the access token owner", 
@@ -3756,6 +3776,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Steps", "步骤");
 		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>", 
 			"步骤将在同一节点上按顺序执行，共享同一 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a>");
+		m.put("Stop", "停止");
 		m.put("Stop work", "停止工作");
 		m.put("Stopwatch Overdue", "秒表逾期");
 		m.put("Storage Settings", "存储设置");
@@ -3938,10 +3959,12 @@ public class Translation_zh extends TranslationResourceBundle {
 			"此安装的订阅已过期，现在以社区版运行");
 		m.put("This is a Git LFS object, but the storage file is missing", "这是一个 Git LFS 对象，但存储文件缺失");
 		m.put("This is a built-in role and can not be deleted", "这是一个内置角色，无法删除");
+		m.put("This is a disabled AI account", "这是一个已禁用的 AI 账户");
 		m.put("This is a disabled service account", "这是一个已禁用的服务账户");
 		m.put("This is a layer cache. To use the cache, add below option to your docker buildx command", 
 			"这是一个层缓存。要使用缓存，请将以下选项添加到您的 docker buildx 命令中");
 		m.put("This is a service account for task automation purpose", "这是一个用于任务自动化的服务账户");
+		m.put("This is an AI account", "这是一个 AI 账户");
 		m.put("This is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
 			"这是一个企业功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
 		m.put("This key has already been used by another project", "此键已被其他项目使用");
@@ -3958,6 +3981,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"这可能发生在项目指向错误的 git 仓库，或者这些提交被垃圾回收。");
 		m.put("This might happen when project points to a wrong git repository, or these commits are garbage collected.", 
 			"这可能发生在项目指向错误的 git 仓库，或者这些提交被垃圾回收。");
+		m.put("This model will be used to perform lite tasks including: <ul class=\"mb-0\"> <li>Natural language support for various queries</li> <li>Mark the most likely symbol definition in symbol navigation</li> <li>Suggest pull request title and description if multiple commits are involved</li> </ul> Fast and cost-effective models are recommended, such as <code>Google/gemini-2.5-flash</code> and <code>OpenAI/gpt-4.1-mini</code>", 
+			"此模型将用于执行轻量级任务，包括：<ul class=\"mb-0\"> <li>支持各种查询的自然语言</li> <li>在符号导航中标记最可能的符号定义</li> <li>如果涉及多个提交，建议合并请求标题和描述</li> </ul> 推荐使用快速且具成本效益的模型，例如 <code>Google/gemini-2.5-flash</code> 和 <code>OpenAI/gpt-4.1-mini</code>。");
 		m.put("This name has already been used by another board", "此名称已被另一个看板使用");
 		m.put("This name has already been used by another group", "此名称已被另一个组使用");
 		m.put("This name has already been used by another issue board in the project", "此名称已被项目中的另一个工单看板使用");
@@ -4130,6 +4155,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Type password here", "在此输入密码");
 		m.put("Type to filter", "过滤");
 		m.put("Type to filter...", "输入以筛选...");
+		m.put("Type your message here", "在此输入您的消息");
 		m.put("URL", "URL");
 		m.put("Unable To Delete/Disable Right Now", "目前无法删除/禁用");
 		m.put("Unable to apply change as otherwise you will not be able to manage this project", "无法应用更改，否则您将无法管理此项目");
@@ -4356,10 +4382,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Whether or not to always pull image when run container or build images. This option should be enabled to avoid images being replaced by malicious jobs running on same node", 
 			"是否在运行容器或构建镜像时始终拉取镜像。应启用此选项，以避免同一节点上运行的恶意任务替换镜像");
 		m.put("Whether or not to be able to access time tracking info of issues", "是否能够访问工单的时间跟踪信息");
-		m.put("Whether or not to create as a service account for task automation purpose. Service account does not have password and email addresses, and will not generate notifications for its activities", 
-			"是否创建为任务自动化目的的服务账户。服务账户没有密码和电子邮件地址，也不会为其活动生成通知");
-		m.put("Whether or not to create as a service account for task automation purpose. Service account does not have password and email addresses, and will not generate notifications for its activities. <b class='text-warning'>NOTE:</b> Service account is an enterprise feature. <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"是否创建为任务自动化目的的服务账户。服务账户没有密码和电子邮件地址，也不会为其活动生成通知。<b class='text-warning'>注意：</b>服务账户是企业版功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
 		m.put("Whether or not to enable code management for the project", "是否为项目启用代码管理");
 		m.put("Whether or not to enable issue management for the project", "是否为项目启用工单管理");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -4678,8 +4700,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("This model will be used to perform lite tasks including: <ul class=\"mb-0\"> <li>Natural language support for various queries</li> <li>Mark the most likely symbol definition in symbol navigation</li> <li>Suggest pull request title and description if multiple commits are involved</li> </ul> Fast and cost-effective models are recommended, such as <code>Google/gemini-2.5-flash</code> and <code>OpenAI/gpt-4.1-mini</code>", 
-			"此模型将用于执行轻量级任务，包括：<ul class=\"mb-0\"> <li>支持各种查询的自然语言</li> <li>在符号导航中标记最可能的符号定义</li> <li>如果涉及多个提交，建议合并请求标题和描述</li> </ul> 推荐使用快速且具成本效益的模型，例如 <code>Google/gemini-2.5-flash</code> 和 <code>OpenAI/gpt-4.1-mini</code>。");
+		m.put("Entitle to All Users", "授权给所有用户");
 	}
 		
 	@Override

@@ -5,6 +5,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationStatusPanel;
 import io.onedev.server.web.page.my.MyPage;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.wicket.Component;
@@ -15,7 +16,7 @@ public class MyTwoFactorAuthenticationPage extends MyPage {
 
 	public MyTwoFactorAuthenticationPage(PageParameters params) {
 		super(params);
-		if (getUser().isServiceAccount() || getUser().isDisabled())
+		if (getUser().getType() != ORDINARY || getUser().isDisabled())
 			throw new IllegalStateException();
 		else if (!getUser().isEnforce2FA())
 			throw new ExplicitException(_T("Two-factor authentication not enabled"));		

@@ -19,19 +19,21 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.JsonParser;
 
 import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
+import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.util.EditContext;
 
 @Editable(order=100)
-public class AIModelSetting implements Serializable {
+public class AiModelSetting implements Serializable {
     
     private static final long serialVersionUID = 1L;
 
     private static final int TIMEOUT_SECONDS = 30;
 
-    private static final Logger logger = LoggerFactory.getLogger(AIModelSetting.class);
+    private static final Logger logger = LoggerFactory.getLogger(AiModelSetting.class);
 
     private String baseUrl;
 
@@ -126,6 +128,15 @@ public class AIModelSetting implements Serializable {
             .modelName(name)
             .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
             .build(); 
+    }
+
+    public StreamingChatModel getStreamingChatModel() {
+        return OpenAiStreamingChatModel.builder()
+            .apiKey(apiKey)
+            .baseUrl(baseUrl)
+            .modelName(name)
+            .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
+            .build();
     }
 
 }

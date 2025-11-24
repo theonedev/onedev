@@ -156,7 +156,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(settingService.getAISetting().getLiteModelSetting() == null && symbolHits.size() > 1);
+				setVisible(settingService.getAiSetting().getLiteModelSetting() == null && symbolHits.size() > 1);
 			}
 
 		});
@@ -311,7 +311,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 					target.add(content);
 
 					CharSequence callback;
-					if (settingService.getAISetting().getLiteModelSetting() != null && symbolHits.size() > 1)
+					if (settingService.getAiSetting().getLiteModelSetting() != null && symbolHits.size() > 1)
 						callback = getCallbackFunction(explicit("action"));
 					else 
 						callback = "undefined";
@@ -326,7 +326,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 					}
 					target.appendJavaScript(script);
 				} else {
-					var liteModel = settingService.getAISetting().getLiteModel();
+					var liteModel = settingService.getAiSetting().getLiteModel();
 					int index;
 					try {
 						ObjectMapper mapperCopy = objectMapper.copy();

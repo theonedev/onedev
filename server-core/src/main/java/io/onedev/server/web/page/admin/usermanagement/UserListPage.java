@@ -1,5 +1,8 @@
 package io.onedev.server.web.page.admin.usermanagement;
 
+import static io.onedev.server.model.User.Type.AI;
+import static io.onedev.server.model.User.Type.ORDINARY;
+import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
@@ -89,7 +92,7 @@ public class UserListPage extends AdministrationPage {
 			var emailAddresses = new HashMap<Long, Collection<String>>();
 			for (var emailAddress: emailAddressCache.values()) 
 				emailAddresses.computeIfAbsent(emailAddress.getOwnerId(), key -> new HashSet<>()).add(emailAddress.getValue());
-			List<User> users = new ArrayList<>(userCache.getUsers(state.includeDisabled));
+			List<User> users = new ArrayList<>(userCache.getUsers(it->state.includeDisabled?true:!it.isDisabled()));
 			users.sort(userCache.comparingDisplayName(Sets.newHashSet()));
 			users = new Similarities<>(users) {
 
@@ -852,7 +855,8 @@ public class UserListPage extends AdministrationPage {
 				};
 				link.add(new UserAvatar("avatar", user));
 				link.add(new Label("name", user.getName()));
-				link.add(new WebMarkupContainer("service").setVisible(user.isServiceAccount() && WicketUtils.isSubscriptionActive()));
+				link.add(new WebMarkupContainer("service").setVisible(user.getType() == SERVICE));
+				link.add(new WebMarkupContainer("ai").setVisible(user.getType() == AI));
 				link.add(new WebMarkupContainer("disabled").setVisible(user.isDisabled() && WicketUtils.isSubscriptionActive()));
 				fragment.add(link);
 				cellItem.add(fragment);
@@ -879,7 +883,7 @@ public class UserListPage extends AdministrationPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId,
 									 IModel<User> rowModel) {
-				if (rowModel.getObject().isServiceAccount()) {
+				if (rowModel.getObject().getType() != ORDINARY) {
 					cellItem.add(new Label(componentId, "<i>N/A</i>").setEscapeModelStrings(false));
 				} else {
 					EmailAddress emailAddress = rowModel.getObject().getPrimaryEmailAddress();
@@ -906,7 +910,7 @@ public class UserListPage extends AdministrationPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId, IModel<User> rowModel) {
-				if (rowModel.getObject().isServiceAccount() || rowModel.getObject().isDisabled()) {
+				if (rowModel.getObject().getType() != ORDINARY || rowModel.getObject().isDisabled()) {
 					cellItem.add(new Label(componentId, "<i>" + _T("N/A") + "</i>").setEscapeModelStrings(false));
 				} else {
 					cellItem.add(new Label(componentId, _T(rowModel.getObject().getAuthSource())));

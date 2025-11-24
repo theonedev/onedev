@@ -2,7 +2,7 @@ package io.onedev.server.data;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
-import static io.onedev.server.model.User.PROP_SERVICE_ACCOUNT;
+import static io.onedev.server.model.User.PROP_TYPE;
 import static io.onedev.server.model.support.administration.SystemSetting.PROP_CURL_LOCATION;
 import static io.onedev.server.model.support.administration.SystemSetting.PROP_DISABLE_AUTO_UPDATE_CHECK;
 import static io.onedev.server.model.support.administration.SystemSetting.PROP_GIT_LOCATION;
@@ -92,7 +92,7 @@ import io.onedev.server.model.Role;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.AISetting;
+import io.onedev.server.model.support.administration.AiSetting;
 import io.onedev.server.model.support.administration.AgentSetting;
 import io.onedev.server.model.support.administration.AlertSetting;
 import io.onedev.server.model.support.administration.AuditSetting;
@@ -674,7 +674,7 @@ public class DefaultDataService implements DataService, Serializable {
 			if (validator.validate(bean).isEmpty()) {
 				createRoot(bean);
 			} else {
-				manualConfigs.add(new ManualConfig("Create Administrator Account", null, bean, Sets.newHashSet(PROP_SERVICE_ACCOUNT, PROP_NOTIFY_OWN_EVENTS)) {
+				manualConfigs.add(new ManualConfig("Create Administrator Account", null, bean, Sets.newHashSet(PROP_TYPE, PROP_NOTIFY_OWN_EVENTS)) {
 	
 					@Override
 					public void complete() {
@@ -884,7 +884,7 @@ public class DefaultDataService implements DataService, Serializable {
 
 		setting = settingService.findSetting(Key.AI);
 		if (setting == null) 
-			settingService.saveAISetting(new AISetting());
+			settingService.saveAiSetting(new AiSetting());
 	
 		if (roleService.get(Role.OWNER_ID) == null) {
 			Role owner = new Role();

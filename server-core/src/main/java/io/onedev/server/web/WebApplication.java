@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.apache.wicket.DefaultExceptionMapper;
+import org.apache.wicket.ISessionListener;
 import org.apache.wicket.Page;
 import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.Session;
@@ -82,8 +83,8 @@ import io.onedev.server.web.translation.TranslationResolver;
 import io.onedev.server.web.translation.TranslationStringResourceLoader;
 import io.onedev.server.web.translation.TranslationTagHandler;
 import io.onedev.server.web.util.AbsoluteUrlRenderer;
-import io.onedev.server.web.websocket.WebSocketService;
 import io.onedev.server.web.websocket.WebSocketMessages;
+import io.onedev.server.web.websocket.WebSocketService;
 
 @Singleton
 public class WebApplication extends org.apache.wicket.protocol.http.WebApplication {
@@ -173,6 +174,17 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 			}
 		});
 		
+		getSessionListeners().add(new ISessionListener() {
+
+			@Override
+			public void onCreated(Session session) {
+			}
+
+			@Override
+			public void onUnbound(String sessionId) {
+			}
+						
+		});
 		getAjaxRequestTargetListeners().add(new AjaxRequestTarget.IListener() {
 			
 			@Override

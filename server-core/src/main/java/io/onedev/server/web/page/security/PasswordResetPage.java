@@ -31,6 +31,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import org.jspecify.annotations.Nullable;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.Arrays;
@@ -95,8 +96,10 @@ public class PasswordResetPage extends SimplePage {
 							user = getUserService().findByVerifiedEmailAddress(loginNameOrEmail);
 						if (user == null) {
 							throw new ExplicitException(_T("No user found with login name or email: ") + loginNameOrEmail);
-						} else if (user.isServiceAccount() || user.isDisabled()) {
-							throw new ExplicitException(_T("Can not reset password for service account or disabled user"));
+						} else if (user.isDisabled()) {
+							throw new ExplicitException(_T("Can not reset password for disabled account"));
+						} else if (user.getType() != ORDINARY) {
+							throw new ExplicitException(_T("Can not reset password for service or AI account"));
 						} else if (user.getPassword() == null) {
 							throw new ExplicitException(_T("Can not reset password for user authenticating via external system"));
 						} else {

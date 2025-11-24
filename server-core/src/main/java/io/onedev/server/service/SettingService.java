@@ -9,7 +9,7 @@ import org.jspecify.annotations.Nullable;
 import io.onedev.server.annotation.NoDBAccess;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
-import io.onedev.server.model.support.administration.AISetting;
+import io.onedev.server.model.support.administration.AiSetting;
 import io.onedev.server.model.support.administration.AgentSetting;
 import io.onedev.server.model.support.administration.AlertSetting;
 import io.onedev.server.model.support.administration.AuditSetting;
@@ -173,9 +173,9 @@ public interface SettingService extends EntityService<Setting> {
 
     PerformanceSetting getPerformanceSetting();
 
-    AISetting getAISetting();
+    AiSetting getAiSetting();
 
-    void saveAISetting(AISetting aiSetting);
+    void saveAiSetting(AiSetting aiSetting);
 
     void saveSshSetting(SshSetting sshSetting);
     

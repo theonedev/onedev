@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.security;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
+
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
@@ -46,7 +48,7 @@ public class LinkUserBean implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<User> getLinkableUsers() {
 		return OneDev.getInstance(UserService.class).query().stream()
-                .filter(it -> !it.isServiceAccount() && !it.isDisabled())
+                .filter(it -> it.getType() == ORDINARY && !it.isDisabled())
                 .sorted(Comparator.comparing(User::getDisplayName))
                 .collect(Collectors.toList());
 	}

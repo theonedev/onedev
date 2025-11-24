@@ -1,5 +1,6 @@
 package io.onedev.server.security.realm;
 
+import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.validation.validator.UserNameValidator.normalizeUserName;
 import static io.onedev.server.web.translation.Translation._T;
 
@@ -145,8 +146,8 @@ public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
 				if (user != null) {
 					if (user.isDisabled())
 						throw new DisabledAccountException(_T("Account is disabled"));
-					else if (user.isServiceAccount())
-						throw new DisabledAccountException(_T("Service account not allowed to login"));
+					else if (user.getType() != ORDINARY)
+						throw new DisabledAccountException(_T("Service or AI account not allowed to login"));
 					if (user.getPassword() == null) {
 						var authenticator = settingService.getAuthenticator();
 						if (authenticator != null) {

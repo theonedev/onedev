@@ -41,7 +41,7 @@ public class CodeCommentNotificationManager {
 	@Listen
 	public void on(CodeCommentEvent event) {
 		CodeComment comment = event.getComment();
-		if (comment.getCompareContext().getPullRequest() == null && !event.getUser().isServiceAccount()) {
+		if (comment.getCompareContext().getPullRequest() == null && event.getUser().getType() != User.Type.SERVICE) {
 			MarkdownText markdown = (MarkdownText) event.getCommentText();
 
 			Collection<User> notifyUsers = new HashSet<>();

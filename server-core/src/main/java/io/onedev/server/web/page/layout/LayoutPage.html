@@ -47,6 +47,7 @@
 		<div class="topbar-right text-nowrap">
 			<a wicket:id="alerts" t:data-tippy-content="Alerts" class="text-warning topbar-link"><wicket:svg href="exclamation-circle-o" class="icon fade-in-out"></wicket:svg></a>
 			<a wicket:id="newVersionStatus" t:data-tippy-content="New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting" class="new-version-status topbar-link"><img wicket:id="icon"/></a>
+			<a wicket:id="showChat" t:data-tippy-content="Chat with AI" class="topbar-link"><wicket:svg href="ai" class="icon"/></a>
 			<a wicket:id="darkMode" t:data-tippy-content="Toggle dark mode" class="topbar-link"><svg wicket:id="icon" class="icon"/></a>
 			<a wicket:id="showCommandPalette" class="topbar-link command-palette"></a>			
 			<a wicket:id="languageSelector" t:data-tippy-content="Language" class="topbar-link language-selector"><wicket:svg href="globe" class="icon"></wicket:svg></a>
@@ -87,6 +88,10 @@
 						<wicket:svg href="password" class="icon mr-2"></wicket:svg>
 						<wicket:t>Password</wicket:t>
 					</a>
+					<a wicket:id="myAISetting" class="dropdown-item">
+						<wicket:svg href="ai-setting" class="icon mr-2"></wicket:svg>
+						<wicket:t>AI Settings</wicket:t>
+					</a>
 					<a wicket:id="mySshKeys" class="dropdown-item">
 						<wicket:svg href="key" class="icon mr-2"></wicket:svg>
 						<wicket:t>SSH Keys</wicket:t>
@@ -117,6 +122,7 @@
 	</div>
 	<div class="main autofit d-flex flex-column resize-aware">
 		<wicket:child></wicket:child>
+		<div wicket:id="chat"></div>
 	</div>
 
 	<wicket:fragment wicket:id="menuHeaderFrag">

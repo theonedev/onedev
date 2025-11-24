@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.pullrequest.list;
 
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
+import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.merge;
 import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
@@ -12,8 +13,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.jspecify.annotations.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -52,17 +51,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AuditService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.PullRequestService;
-import io.onedev.server.service.PullRequestReviewService;
-import io.onedev.server.service.PullRequestWatchService;
 import io.onedev.server.entityreference.LinkTransformer;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -78,6 +73,11 @@ import io.onedev.server.search.entity.pullrequest.FuzzyCriteria;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestReviewService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.PullRequestWatchService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.WebConstants;
@@ -271,7 +271,7 @@ public abstract class PullRequestListPanel extends Panel {
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
 
-				if (!SecurityUtils.getAuthUser().isServiceAccount()) {
+				if (SecurityUtils.getAuthUser().getType() == ORDINARY) {
 					menuItems.add(new MenuItem() {
 
 						@Override
@@ -474,7 +474,7 @@ public abstract class PullRequestListPanel extends Panel {
 					});
 				}
 
-				if (!SecurityUtils.getAuthUser().isServiceAccount()) {
+				if (SecurityUtils.getAuthUser().getType() == ORDINARY) {
 					menuItems.add(new MenuItem() {
 
 						@Override

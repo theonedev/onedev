@@ -12,16 +12,20 @@ public class UserFacade extends EntityFacade {
 	
 	private final String fullName;
 
-	private final boolean serviceAccount;
+	private final User.Type type;	
 
 	private final boolean disabled;
+
+	private final boolean entitleToAll;
 	
-	public UserFacade(Long id, String name, @Nullable String fullName, boolean serviceAccount, boolean disabled) {
+	public UserFacade(Long id, String name, @Nullable String fullName, User.Type type, 
+				boolean disabled, boolean entitleToAll) {
 		super(id);
 		this.name = name;
 		this.fullName = fullName;
-		this.serviceAccount = serviceAccount;
+		this.type = type;
 		this.disabled = disabled;
+		this.entitleToAll = entitleToAll;
 	}
 
 	public String getName() {
@@ -58,12 +62,16 @@ public class UserFacade extends EntityFacade {
 			return null;
 	}
 
-	public boolean isServiceAccount() {
-		return serviceAccount;
+	public User.Type getType() {
+		return type;
 	}
 
 	public boolean isDisabled() {
 		return disabled;
+	}
+
+	public boolean isEntitleToAll() {
+		return entitleToAll;
 	}
 	
 }

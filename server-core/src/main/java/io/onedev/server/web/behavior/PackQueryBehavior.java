@@ -226,14 +226,14 @@ public class PackQueryBehavior extends ANTLRAssistBehavior {
 				}
 			}
 		} 
-		if (getSettingService().getAISetting().getLiteModelSetting() == null)
+		if (getSettingService().getAiSetting().getLiteModelSetting() == null)
 			hints.add(_T("<a href='/~administration/settings/lite-ai-model' target='_blank'>Set up AI</a> to query with natural language</a>"));
 		return hints;
 	}
 
 	@Override
 	protected NaturalLanguageTranslator getNaturalLanguageTranslator() {
-		var liteModel = getSettingService().getAISetting().getLiteModel();
+		var liteModel = getSettingService().getAiSetting().getLiteModel();
 		if (liteModel != null) {
 			return new NaturalLanguageTranslator(liteModel) {
 				
