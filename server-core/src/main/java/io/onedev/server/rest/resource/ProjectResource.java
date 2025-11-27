@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.Id;
 import javax.validation.Valid;
+import javax.validation.Validator;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -37,6 +37,7 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.hibernate.criterion.Restrictions;
+import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -81,26 +82,24 @@ import io.onedev.server.xodus.CommitInfoService;
 @Singleton
 public class ProjectResource {
 
-	private final ProjectService projectService;
-	
-	private final IterationService iterationService;
-	
-	private final CommitInfoService commitInfoService;
-	
-	private final UrlService urlService;
-
-	private final AuditService auditService;
+	@Inject
+	private ProjectService projectService;
 	
 	@Inject
-	public ProjectResource(ProjectService projectService, IterationService iterationService,
-                           CommitInfoService commitInfoService, UrlService urlService, AuditService auditService) {
-		this.projectService = projectService;
-		this.iterationService = iterationService;
-		this.commitInfoService = commitInfoService;
-		this.urlService = urlService;
-		this.auditService = auditService;
-	}
+	private IterationService iterationService;
 	
+	@Inject
+	private CommitInfoService commitInfoService;
+	
+	@Inject
+	private UrlService urlService;
+
+	@Inject
+	private AuditService auditService;
+
+	@Inject
+	private Validator validator;
+		
 	@Api(order=100)
 	@Path("/{projectId}")
     @GET
@@ -360,7 +359,15 @@ public class ProjectResource {
 	@Api(order=900, description="Update project settings")
 	@Path("/{projectId}/setting")
     @POST
-    public Response updateSetting(@PathParam("projectId") Long projectId, @NotNull @Valid ProjectSetting setting) {
+    public Response updateSetting(@PathParam("projectId") Long projectId, @NotNull ProjectSetting setting) {
+		for (var boardSpec: setting.getIssueSetting().getBoardSpecs())
+			boardSpec.populateEditColumns();
+		var violations = validator.validate(setting);
+		if (!violations.isEmpty()) {
+			var violation = violations.iterator().next();
+			throw new ExplicitException(violation.getPropertyPath() + ": " + violation.getMessage());
+		}
+
     	Project project = projectService.load(projectId);
     	if (!SecurityUtils.canManageProject(project)) 
 			throw new UnauthorizedException();
