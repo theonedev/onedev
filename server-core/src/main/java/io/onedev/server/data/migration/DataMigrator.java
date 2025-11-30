@@ -8391,6 +8391,20 @@ public class DataMigrator {
 					boolean isServiceAccount = Boolean.parseBoolean(serviceAccountElement.getTextTrim());
 					serviceAccountElement.detach();
 					element.addElement("type").setText(isServiceAccount ? "SERVICE" : "ORDINARY");
+					element.addElement("aiSetting").addElement("entitleToAll").setText("true");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var keyElement = element.element("key");
+					if (keyElement.getTextTrim().equals("AI")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var className = valueElement.attributeValue("class");
+							valueElement.addAttribute("class", className.replace("AISetting", "AiSetting"));
+						}
+					}
 				}
 				dom.writeToFile(file, false);
 			}
