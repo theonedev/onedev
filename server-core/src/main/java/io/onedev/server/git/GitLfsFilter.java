@@ -152,7 +152,7 @@ public class GitLfsFilter implements Filter {
 	}
 
 	private String getProjectPath(String pathInfo) {
-		String projectPath =  substringBeforeLast(pathInfo, ".git/");
+		String projectPath = substringBeforeLast(substringBeforeLast(pathInfo, ".git.git/"), ".git/");
 		if (StringUtils.isBlank(projectPath))
 			throw new ExplicitException("Project not specified");
 		return decodeFullRepoNameAsPath(projectPath);
