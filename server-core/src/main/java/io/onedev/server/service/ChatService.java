@@ -8,6 +8,8 @@ import io.onedev.server.model.Chat;
 import io.onedev.server.model.ChatMessage;
 import io.onedev.server.model.User;
 import io.onedev.server.service.support.ChatResponding;
+import io.onedev.server.service.support.ChatTool;
+import io.onedev.server.web.WebSession;
 
 public interface ChatService extends EntityService<Chat> {
 
@@ -15,9 +17,13 @@ public interface ChatService extends EntityService<Chat> {
 		
 	void createOrUpdate(Chat chat);
 
-    void sendRequest(String sessionId, ChatMessage request);
+    void sendRequest(WebSession session, ChatMessage request, List<ChatTool> tools, int timeoutSeconds);
 	
     @Nullable
-    ChatResponding getResponding(String sessionId, Chat chat);
+    ChatResponding getResponding(WebSession session, Chat chat);
+
+    long nextAnonymousChatId();
+
+    long nextAnonymousChatMessageId();
 
 }

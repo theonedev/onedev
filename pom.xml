@@ -629,7 +629,7 @@
 			</dependency>
 			<dependency>
 				<groupId>dev.langchain4j</groupId>
-				<artifactId>langchain4j-core</artifactId>
+				<artifactId>langchain4j</artifactId>
 				<version>${langchain4j.version}</version>
 			</dependency>
 			<dependency>

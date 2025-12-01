@@ -1,25 +1,20 @@
 .chat {
 	position: fixed;
-	top: calc(var(--topbar-height) + 1rem);
+	top: 0;
 	bottom: 0;
 	right: 0;
-	z-index: 1000;
-	border-radius: 0.42rem 0 0 0;
+	z-index: 2000;
 	background: white;
-	box-shadow: 0 0 12px rgba(0,0,0,0.2), 0 -2px 8px rgba(0,0,0,0.1);	
-}
-.chat>.head {
-	border-radius: 0.42rem 0 0 0;
+	box-shadow: 0 0 12px rgba(0,0,0,0.2);	
 }
 .dark-mode .chat {
 	background-color: var(--dark-mode-dark);	
-	box-shadow: 0 0 20px rgb(0 0 0 / 50%), 0 -2px 15px rgb(0 0 0 / 30%);	
+	box-shadow: 0 0 20px rgb(0 0 0 / 50%);	
 }
 
 .chat .ui-resizable-handle {
 	position: absolute;
 	left: 0;
-	top: 0.42rem;
 	bottom: 0;
 	width: 3px;
 	cursor: col-resize;

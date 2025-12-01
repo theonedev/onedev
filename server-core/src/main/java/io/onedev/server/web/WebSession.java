@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jspecify.annotations.Nullable;
 import javax.servlet.http.HttpSession;
 
 import org.apache.shiro.SecurityUtils;
@@ -14,8 +13,10 @@ import org.apache.shiro.subject.Subject;
 import org.apache.wicket.protocol.http.WicketServlet;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.util.collections.ConcurrentHashSet;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.model.Chat;
 import io.onedev.server.web.util.Cursor;
 
 public class WebSession extends org.apache.wicket.protocol.http.WebSession {
@@ -36,11 +37,13 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 	
 	private Set<Long> expandedProjectIds = new ConcurrentHashSet<>();
 
-	private boolean chatVisible;
+	private volatile boolean chatVisible;
 		
-	private Long activeChatId;
+	private volatile Long activeChatId;
 
-	private String chatInput;
+ 	private volatile Map<Long, Chat> anonymousChats = new ConcurrentHashMap<>();
+
+	private volatile String chatInput;
 	
 	public WebSession(Request request) {
 		super(request);
@@ -139,6 +142,10 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 
 	public void setActiveChatId(Long activeChatId) {
 		this.activeChatId = activeChatId;
+	}
+
+	public Map<Long, Chat> getAnonymousChats() {
+		return anonymousChats;
 	}
 
 	@Nullable

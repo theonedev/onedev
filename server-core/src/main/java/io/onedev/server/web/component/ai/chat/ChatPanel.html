@@ -1,8 +1,8 @@
 <wicket:panel>
 	<div class="ui-resizable-handle ui-resizable-w"></div>
-	<div class="head d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
-		<h5 class="card-title mb-0"><wicket:t>Chat with</wicket:t> <a wicket:id="aiSelector" class="ml-2"><img wicket:id="avatar"></img> <span wicket:id="name"></span> <wicket:svg href="arrow" class="icon rotate-90"></wicket:svg></a></h5>
-		<a wicket:id="close" t:data-tippy-content="Close" class="btn btn-xs btn-icon btn-light btn-hover-primary"><wicket:svg href="times" class="icon"/></a>
+	<div class="head d-flex align-items-center px-4 py-3 border-bottom">
+		<h5 class="card-title mb-0 mr-3"><wicket:t>Chat with</wicket:t> <a wicket:id="aiSelector" class="ml-2"><img wicket:id="avatar"></img> <span wicket:id="name"></span> <wicket:svg href="arrow" class="icon rotate-90"></wicket:svg></a></h5>
+		<a wicket:id="close" t:data-tippy-content="Close" class="ml-auto btn btn-xs btn-icon btn-light btn-hover-primary"><wicket:svg href="times" class="icon"/></a>
 	</div>
 	<div class="body d-flex flex-column flex-grow-1 p-4 position-relative" style="overflow: hidden;">
 		<div wicket:id="chatSelectorContainer" class="chat-selector d-flex flex-shrink-0 mb-3">

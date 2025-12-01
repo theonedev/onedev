@@ -176,6 +176,8 @@ public abstract class LayoutPage extends BasePage {
 
 	private AbstractDefaultAjaxBehavior newVersionStatusBehavior;
 
+	private ChatPanel chatter;
+
 	public LayoutPage(PageParameters params) {
 		super(params);
 	}
@@ -811,20 +813,20 @@ public abstract class LayoutPage extends BasePage {
 
 		});
 
-		var chat = new ChatPanel("chat");
-		add(chat);
+		chatter = new ChatPanel("chat");
+		add(chatter);
 
 		topbar.add(new AjaxLink<Void>("showChat") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				chat.show(target);
+				chatter.show(target, null);
 			}
 		
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getLoginUser() != null && !getLoginUser().getEntitledAis().isEmpty());
+				setVisible(!chatter.getEntitledAis().isEmpty());
 			}
 
 		});
@@ -1285,6 +1287,10 @@ public abstract class LayoutPage extends BasePage {
 				_T("cmd-k to show command palette"), 
 				_T("ctrl-k to show command palette"))));
 		response.render(OnLoadHeaderItem.forScript("onedev.server.layout.onLoad();"));
+	}
+
+	public ChatPanel getChatter() {
+		return chatter;
 	}
 
 	protected List<SidebarMenu> getSidebarMenus() {

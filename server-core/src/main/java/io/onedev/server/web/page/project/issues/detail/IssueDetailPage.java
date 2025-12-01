@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ValidationException;
 
@@ -31,14 +32,15 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
-import io.onedev.server.OneDev;
+import dev.langchain4j.agent.tool.ToolSpecification;
+import io.onedev.server.ai.IssueHelper;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.IssueLinkService;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -46,6 +48,10 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueLinkService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.support.ChatTool;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ChangeObserver;
@@ -65,18 +71,34 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.util.ChatToolAware;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 import io.onedev.server.xodus.VisitInfoService;
 
-public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext {
+public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext, ChatToolAware {
 
 	public static final String PARAM_ISSUE = "issue";
 	
 	private static final String KEY_SCROLL_TOP = "onedev.issue.scrollTop";
 
 	protected final IModel<Issue> issueModel;
+
+	@Inject
+	private ObjectMapper objectMapper;
+
+	@Inject
+	private IssueService issueService;
+
+	@Inject
+	private IssueLinkService issueLinkService;
+
+	@Inject
+	private VisitInfoService visitInfoService;
+
+	@Inject
+	private SettingService settingService;
 	
 	public IssueDetailPage(PageParameters params) {
 		super(params);
@@ -98,11 +120,11 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 					throw new ValidationException(MessageFormat.format(_T("Invalid issue number: {0}"), issueNumberString));
 				}
 				
-				Issue issue = getIssueService().find(getProject(), issueNumber);
+				Issue issue = issueService.find(getProject(), issueNumber);
 				if (issue == null) { 
 					throw new EntityNotFoundException(MessageFormat.format(_T("Unable to find issue #{0} in project {1}"), issueNumber, getProject()));
 				} else {
-					OneDev.getInstance(IssueLinkService.class).loadDeepLinks(issue);
+					issueLinkService.loadDeepLinks(issue);
 					if (!issue.getProject().equals(getProject())) 
 						throw new RestartResponseException(getPageClass(), paramsOf(issue));
 					return issue;
@@ -293,7 +315,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 							@Override
 							public void onClick() {
-								getIssueService().delete(getIssue());
+								issueService.delete(getIssue());
 								var oldAuditContent = VersionedXmlDoc.fromBean(getIssue()).toXML();
 								auditService.audit(getIssue().getProject(), "deleted issue \"" + getIssue().getReference().toString(getIssue().getProject()) + "\"", oldAuditContent, null);
 								
@@ -331,7 +353,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 					@Override
 					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, ProjectScope projectScope) {
-						return getIssueService().query(SecurityUtils.getSubject(), projectScope, query, false, offset, count);
+						return issueService.query(SecurityUtils.getSubject(), projectScope, query, false, offset, count);
 					}
 
 					@Override
@@ -362,11 +384,57 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				if (SecurityUtils.getAuthUser() != null) 
-					OneDev.getInstance(VisitInfoService.class).visitIssue(SecurityUtils.getAuthUser(), getIssue());
+					visitInfoService.visitIssue(SecurityUtils.getAuthUser(), getIssue());
 			}
 						
 		});	
 
+	}
+
+	@Override
+	public List<ChatTool> getChatTools() {
+		var issueId = getIssue().getId();
+		return List.of(new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentIssue")
+					.description("Get info of current issue in json format")
+					.build();
+			}
+
+			@Override
+			public String execute(JsonNode arguments) {
+				var issue = issueService.load(issueId);
+				try {
+					return objectMapper.writeValueAsString(IssueHelper.getDetail(issue.getProject(), issue));
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		}, new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentIssueComments")
+					.description("Get comments of current issue in json format")
+					.build();
+			}
+
+			@Override
+			public String execute(JsonNode arguments) {	
+				var issue = issueService.load(issueId);			
+				try {
+					return objectMapper.writeValueAsString(IssueHelper.getComments(issue));
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		});
 	}
 	
 	@Override
@@ -392,13 +460,9 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 	@Override
 	public FieldSpec getInputSpec(String inputName) {
-		return OneDev.getInstance(SettingService.class).getIssueSetting().getFieldSpec(inputName);
+		return settingService.getIssueSetting().getFieldSpec(inputName);
 	}
-	
-	private IssueService getIssueService() {
-		return OneDev.getInstance(IssueService.class);
-	}
-	
+		
 	@Override
 	protected Component newProjectTitle(String componentId) {
 		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);

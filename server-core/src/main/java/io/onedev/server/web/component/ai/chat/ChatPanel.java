@@ -6,6 +6,7 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.servlet.http.Cookie;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -31,10 +33,13 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.jspecify.annotations.Nullable;
@@ -46,6 +51,8 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.service.ChatService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.service.support.ChatResponding;
+import io.onedev.server.service.support.ChatTool;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ChangeObserver;
@@ -59,10 +66,13 @@ import io.onedev.server.web.component.select2.ChoiceProvider;
 import io.onedev.server.web.component.select2.ResponseFiller;
 import io.onedev.server.web.component.select2.Select2Choice;
 import io.onedev.server.web.component.user.UserAvatar;
+import io.onedev.server.web.util.ChatToolAware;
 
 public class ChatPanel extends Panel {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final int TIMEOUT_SECONDS = 120;
 
 	private static final String COOKIE_ACTIVE_AI = "active-ai";
 
@@ -80,6 +90,23 @@ public class ChatPanel extends Panel {
 	private RepeatingView messagesView;
 
 	private WebMarkupContainer respondingContainer;
+
+	private final IModel<List<User>> entitledAisModel = new LoadableDetachableModel<List<User>>() {
+
+		@Override
+		protected List<User> load() {
+			if (getUser() != null) {
+				return getUser().getEntitledAis();
+			} else {
+				return userService.cloneCache().values().stream()
+						.filter(it -> it.getType() == User.Type.AI && !it.isDisabled() && it.isEntitleToAll())
+						.sorted(Comparator.comparing(UserFacade::getDisplayName))
+						.map(it->userService.load(it.getId()))
+						.collect(Collectors.toList());
+			}
+		}
+
+	};
 			
 	public ChatPanel(String componentId) {
 		super(componentId);
@@ -100,7 +127,7 @@ public class ChatPanel extends Panel {
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				var activeAI = getActiveAI();
 				var menuItems = new ArrayList<MenuItem>();
-				for (var ai : getUser().getEntitledAis()) {
+				for (var ai : getEntitledAis()) {
 					menuItems.add(new MenuItem() {
 
 						@Override
@@ -150,7 +177,7 @@ public class ChatPanel extends Panel {
 		});				
 
 		var chatSelectorContainer = new WebMarkupContainer("chatSelectorContainer");
-		chatSelectorContainer.setOutputMarkupId(true);
+		chatSelectorContainer.setOutputMarkupId(true);		
 		chatSelectorContainer.add(new Select2Choice<Chat>("chatSelector", new IModel<Chat>() {
 
 			@Override
@@ -172,7 +199,16 @@ public class ChatPanel extends Panel {
 			@Override
 			public void query(String term, int page, io.onedev.server.web.component.select2.Response<Chat> response) {
 				var count = (page+1) * WebConstants.PAGE_SIZE + 1;
-				var chats = chatService.query(getUser(), getActiveAI(), term, count);
+				List<Chat> chats;
+				if (getUser() != null) {
+					chats = chatService.query(getUser(), getActiveAI(), term, count);
+				} else {
+					chats = WebSession.get().getAnonymousChats().values().stream()
+						.filter(it -> it.getAi().equals(getActiveAI()) && it.getTitle().toLowerCase().contains(term.toLowerCase()))
+						.sorted(Comparator.comparing(Chat::getId).reversed())
+						.limit(count)
+						.collect(Collectors.toList());
+				}
 				new ResponseFiller<>(response).fill(chats, page, WebConstants.PAGE_SIZE);
 			}
 
@@ -205,10 +241,6 @@ public class ChatPanel extends Panel {
 					return Collections.emptySet();
 			}
 
-			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
-				handler.add(chatSelectorContainer);
-			}
-
 		});
 		chatSelectorContainer.add(new ChangeObserver() {
 
@@ -223,10 +255,11 @@ public class ChatPanel extends Panel {
 
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
-				showNewMessages(handler);
+				if (isVisible())
+					showNewMessages(handler);
 			}
-		});
 
+		});
 
 		chatSelectorContainer.add(new AjaxLink<Void>("newChat") {
 
@@ -242,7 +275,10 @@ public class ChatPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				getSession().success(_T("Chat deleted"));
-				chatService.delete(getActiveChat());
+				if (getUser() != null) 
+					chatService.delete(getActiveChat());
+				else
+					WebSession.get().getAnonymousChats().remove(getActiveChat().getId());
 				WebSession.get().setActiveChatId(null);
 				target.add(ChatPanel.this);
 			}
@@ -299,7 +335,7 @@ public class ChatPanel extends Panel {
 				else
 					return Collections.emptySet();
 			}
-			
+						
 		});
 
 		respondingContainer.setOutputMarkupPlaceholderTag(true);
@@ -337,23 +373,55 @@ public class ChatPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				var input = WebSession.get().getChatInput().trim();
 				var chat = getActiveChat();
+				ChatMessage request = new ChatMessage();
+				request.setRequest(true);
+				request.setContent(input);
 				if (chat == null) {
 					chat = new Chat();
 					chat.setUser(getUser());
 					chat.setAi(getActiveAI());
 					chat.setTitle(_T("New chat"));
 					chat.setDate(new Date());
-					chatService.createOrUpdate(chat);
+					if (getUser() != null) {
+						chatService.createOrUpdate(chat);
+						request.setChat(chat);
+						chat.getMessages().add(request);
+						dao.persist(request);				
+					} else {
+						chat.setId(chatService.nextAnonymousChatId());
+						request.setId(chatService.nextAnonymousChatMessageId());
+						request.setChat(chat);
+						chat.getMessages().add(request);
+						WebSession.get().getAnonymousChats().put(chat.getId(), chat);
+					}
 					WebSession.get().setActiveChatId(chat.getId());
-					target.add(chatSelectorContainer);
+					target.add(chatSelectorContainer);	
+				} else {
+					if (getUser() != null) {
+						request.setChat(chat);
+						chat.getMessages().add(request);
+						dao.persist(request);				
+					} else {
+						request.setId(chatService.nextAnonymousChatMessageId());
+						chat = SerializationUtils.clone(chat);
+						request.setChat(chat);
+						chat.getMessages().add(request);
+						WebSession.get().getAnonymousChats().put(chat.getId(), chat);
+					}
 				}
-				var request = new ChatMessage();
-				request.setChat(chat);
-				request.setRequest(true);
-				request.setContent(input);
-				chat.getMessages().add(request);
-				dao.persist(request);				
-				chatService.sendRequest(getSession().getId(), request);
+
+				List<ChatTool> chatTools = new ArrayList<>();
+				if (getPage() instanceof ChatToolAware) 
+					chatTools.addAll(((ChatToolAware) getPage()).getChatTools());
+				getPage().visitChildren(ChatToolAware.class, new IVisitor<Component, Void>() {
+
+					@Override
+					public void component(Component component, IVisit<Void> visit) {
+						chatTools.addAll(((ChatToolAware) component).getChatTools());
+					}
+
+				});				
+				chatService.sendRequest(WebSession.get(), request, chatTools, TIMEOUT_SECONDS);
 
 				showNewMessages(target);
 				target.add(respondingContainer);
@@ -388,10 +456,10 @@ public class ChatPanel extends Panel {
 	private User getActiveAI() {
 		if (activeAiId != null) {
 			var ai = userService.get(activeAiId);
-			if (ai != null && getUser().getEntitledAis().contains(ai))
+			if (ai != null && getEntitledAis().contains(ai))
 				return ai;
 		}
-		return getUser().getEntitledAis().get(0);
+		return getEntitledAis().get(0);
 	}
 
 	private void setActiveAI(User ai) {
@@ -408,7 +476,11 @@ public class ChatPanel extends Panel {
 	private Chat getActiveChat() {
 		var activeChatId = WebSession.get().getActiveChatId();
 		if (activeChatId != null) {
-			var chat = chatService.get(activeChatId);
+			Chat chat;
+			if (getUser() != null) 
+				chat = chatService.get(activeChatId);
+			else
+				chat = WebSession.get().getAnonymousChats().get(activeChatId);			
 			if (chat != null && chat.getAi().equals(getActiveAI()))
 				return chat;
 		}
@@ -419,7 +491,7 @@ public class ChatPanel extends Panel {
 	private ChatResponding getResponding() {
 		var chat = getActiveChat();
 		if (chat != null)
-			return chatService.getResponding(getSession().getId(), chat);
+			return chatService.getResponding(WebSession.get(), chat);
 		else
 			return null;
 	}
@@ -434,12 +506,13 @@ public class ChatPanel extends Panel {
 
 	@SuppressWarnings("deprecation")
 	private void showNewMessages(IPartialPageRequestHandler handler) {
-		long lastMessageId;
+		long prevLastMessageId;
 		if (messagesView.size() != 0)
-			lastMessageId = (Long) messagesView.get(messagesView.size() - 1).getDefaultModelObject();
+			prevLastMessageId = (Long) messagesView.get(messagesView.size() - 1).getDefaultModelObject();
 		else
-			lastMessageId = 0;
-		getMessages().stream().filter(it -> it.getId() > lastMessageId).forEach(it -> {
+			prevLastMessageId = 0;
+		
+		getMessages().stream().filter(it -> it.getId() > prevLastMessageId).forEach(it -> {
 			var messageContainer = newMessageContainer(messagesView.newChildId(), it);
 			messagesView.add(messageContainer);
 			handler.prependJavaScript(String.format("""
@@ -447,10 +520,13 @@ public class ChatPanel extends Panel {
 				""", respondingContainer.getMarkupId(), messageContainer.getMarkupId()));
 			handler.add(messageContainer);
 		});
+
 		var lastMessage = messagesView.get(messagesView.size() - 1);
-		handler.appendJavaScript(String.format("""
-			$('#%s')[0].scrollIntoView({ block: "end" });
-			""", lastMessage.getMarkupId()));
+		if ((Long) lastMessage.getDefaultModelObject() > prevLastMessageId) {
+			handler.appendJavaScript(String.format("""
+				$('#%s')[0].scrollIntoView({ block: "end" });
+				""", lastMessage.getMarkupId()));
+		}
 	}
 
 	private Component newMessageContainer(String containerId, ChatMessage message) {
@@ -493,7 +569,7 @@ public class ChatPanel extends Panel {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(WebSession.get().isChatVisible());
+		setVisible(WebSession.get().isChatVisible() && !getEntitledAis().isEmpty());
 	}
 	
 	@Override
@@ -504,16 +580,25 @@ public class ChatPanel extends Panel {
 	}
 
 	@Override
-	public boolean isVisible() {
-		return WebSession.get().isChatVisible();
+	protected void onDetach() {
+		super.onDetach();
+		entitledAisModel.detach();
 	}
 
-	public void show(AjaxRequestTarget target) {
-		if (!isVisible()) {
-			WebSession.get().setChatVisible(true);
-			WebSession.get().setActiveChatId(null);
-			target.add(this);	
-		}
+	public List<User> getEntitledAis() {
+		return entitledAisModel.getObject();
+	}
+
+	public void show(AjaxRequestTarget target, @Nullable String prompt) {
+		WebSession.get().setChatVisible(true);
+		WebSession.get().setActiveChatId(null);
+		if (prompt != null) {
+			WebSession.get().setChatInput(prompt);
+			target.appendJavaScript("""
+				$(".chat>.body>.send .submit").click();
+				""");
+		}	
+		target.add(this);
 	}
 
 	public void hide(AjaxRequestTarget target) {

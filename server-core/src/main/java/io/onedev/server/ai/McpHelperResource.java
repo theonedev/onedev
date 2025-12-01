@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -709,16 +708,16 @@ public class McpHelperResource {
             parsedQuery = new IssueQuery();
         }
 
-        var issues = new ArrayList<Map<String, Object>>();
+        var summaries = new ArrayList<Map<String, Object>>();
         for (var issue : issueService.query(subject, new ProjectScope(projectInfo.project, true, false), parsedQuery, true, offset, count)) {
-            var issueMap = getIssueMap(projectInfo.currentProject, issue);
+            var summary = IssueHelper.getSummary(projectInfo.currentProject, issue);
             for (var entry: issue.getFieldInputs().entrySet()) {
-                issueMap.put(entry.getKey(), entry.getValue().getValues());
+                summary.put(entry.getKey(), entry.getValue().getValues());
             }
-            issueMap.put("link", urlService.urlFor(issue, true));
-            issues.add(issueMap);
+            summary.put("link", urlService.urlFor(issue, true));
+            summaries.add(summary);
         }
-        return issues;
+        return summaries;
     }
 
     private Issue getIssue(Project currentProject, String referenceString) {
@@ -732,29 +731,6 @@ public class McpHelperResource {
             throw new NotFoundException("Issue not found: " + referenceString);
         }
     }
-
-    private Map<String, Object> getIssueMap(Project currentProject, Issue issue) {
-        var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
-        var issueMap = objectMapper.convertValue(issue, typeReference);
-        issueMap.remove("id");
-        issueMap.remove("stateOrdinal");
-        issueMap.remove("uuid");
-        issueMap.remove("messageId");
-        issueMap.remove("pinDate");
-        issueMap.remove("boardPosition");
-        issueMap.remove("numberScopeId");
-        issueMap.put("reference", issue.getReference().toString(currentProject));
-        issueMap.remove("submitterId");
-        issueMap.put("submitter", issue.getSubmitter().getName());
-        issueMap.put("Project", issue.getProject().getPath());
-        issueMap.remove("lastActivity");
-        for (var it = issueMap.entrySet().iterator(); it.hasNext();) {
-            var entry = it.next();
-            if (entry.getKey().endsWith("Count"))
-                it.remove();
-        }
-        return issueMap;
-    }
     
     @Path("/get-issue")
     @GET
@@ -765,31 +741,8 @@ public class McpHelperResource {
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
-        var issue = getIssue(currentProject, issueReference);
-                
-        var issueMap = getIssueMap(currentProject, issue);
-        for (var entry : issue.getFieldInputs().entrySet()) {
-            issueMap.put(entry.getKey(), entry.getValue().getValues());
-        }
-        
-        Map<String, Collection<String>> linkedIssues = new HashMap<>();
-        for (var link: issue.getTargetLinks()) {
-            linkedIssues.computeIfAbsent(link.getSpec().getName(), k -> new ArrayList<>())
-                    .add(link.getTarget().getReference().toString(currentProject));
-        }
-        for (var link : issue.getSourceLinks()) {
-            if (link.getSpec().getOpposite() != null) {
-                linkedIssues.computeIfAbsent(link.getSpec().getOpposite().getName(), k -> new ArrayList<>())
-                        .add(link.getSource().getReference().toString(currentProject));
-            } else {
-                linkedIssues.computeIfAbsent(link.getSpec().getName(), k -> new ArrayList<>())
-                        .add(link.getSource().getReference().toString(currentProject));
-            }
-        }
-        issueMap.putAll(linkedIssues);
-        issueMap.put("link", urlService.urlFor(issue, true));
-
-        return issueMap;
+        var issue = getIssue(currentProject, issueReference);                
+        return IssueHelper.getDetail(currentProject, issue);
     }
 
     @Path("/get-issue-comments")
@@ -799,20 +752,9 @@ public class McpHelperResource {
                 @QueryParam("reference") @NotNull String issueReference) {
         if (SecurityUtils.getUser() == null)
             throw new UnauthenticatedException();
-
         var currentProject = getProject(currentProjectPath);
-
         var issue = getIssue(currentProject, issueReference);
-                
-        var comments = new ArrayList<Map<String, Object>>();
-        for (var comment : issue.getComments()) {
-            var commentMap = new HashMap<String, Object>();
-            commentMap.put("user", comment.getUser().getName());
-            commentMap.put("date", comment.getDate());
-            commentMap.put("content", comment.getContent());
-            comments.add(commentMap);
-        }
-        return comments;
+        return IssueHelper.getComments(issue);
     }
 
     @Path("/add-issue-comment")
@@ -1093,40 +1035,6 @@ public class McpHelperResource {
         }        
     }    
 
-    private Map<String, Object> getPullRequestMap(Project currentProject, 
-            PullRequest pullRequest, boolean checkMergeConditionIfOpen) {
-        var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
-        var pullRequestMap = objectMapper.convertValue(pullRequest, typeReference);
-        pullRequestMap.remove("id");
-        if (pullRequest.isOpen() && checkMergeConditionIfOpen) {
-            var errorMessage = pullRequest.checkMergeCondition();
-            if (errorMessage != null) 
-                pullRequestMap.put("status", PullRequest.Status.OPEN.name() + " (" + errorMessage + ")");
-            else
-                pullRequestMap.put("status", PullRequest.Status.OPEN.name() + " (ready to merge)");
-        } 
-        pullRequestMap.remove("uuid");
-        pullRequestMap.remove("buildCommitHash");
-        pullRequestMap.remove("submitTimeGroups");
-        pullRequestMap.remove("closeTimeGroups");
-        pullRequestMap.remove("checkError");
-        pullRequestMap.remove("numberScopeId");
-        pullRequestMap.put("reference", pullRequest.getReference().toString(currentProject));
-        pullRequestMap.remove("submitterId");
-        pullRequestMap.put("submitter", pullRequest.getSubmitter().getName());
-        pullRequestMap.put("targetProject", pullRequest.getTarget().getProject().getPath());
-        if (pullRequest.getSourceProject() != null)
-            pullRequestMap.put("sourceProject", pullRequest.getSourceProject().getPath());
-        pullRequestMap.remove("codeCommentsUpdateDate");
-        pullRequestMap.remove("lastActivity");
-        for (var it = pullRequestMap.entrySet().iterator(); it.hasNext();) {
-            var entry = it.next();
-            if (entry.getKey().endsWith("Count"))
-                it.remove();
-        }
-        return pullRequestMap;
-    }
-
     @Path("/query-pull-requests")
     @GET
     public List<Map<String, Object>> queryPullRequests(
@@ -1154,13 +1062,13 @@ public class McpHelperResource {
             parsedQuery = new PullRequestQuery();
         }
 
-        var pullRequests = new ArrayList<Map<String, Object>>();
+        var summaries = new ArrayList<Map<String, Object>>();
         for (var pullRequest : pullRequestService.query(subject, projectInfo.project, parsedQuery, false, offset, count)) {
-            var pullRequestMap = getPullRequestMap(projectInfo.currentProject, pullRequest, false);
-            pullRequestMap.put("link", urlService.urlFor(pullRequest, true));
-            pullRequests.add(pullRequestMap);
+            var summary = PullRequestHelper.getSummary(projectInfo.currentProject, pullRequest, false);
+            summary.put("link", urlService.urlFor(pullRequest, true));
+            summaries.add(summary);
         }
-        return pullRequests;
+        return summaries;
     }
 
     @Path("/query-builds")
@@ -1249,31 +1157,8 @@ public class McpHelperResource {
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
-
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
-                
-        var pullRequestMap = getPullRequestMap(currentProject, pullRequest, true);        
-        pullRequestMap.put("headCommitHash", pullRequest.getLatestUpdate().getHeadCommitHash());
-        pullRequestMap.put("assignees", pullRequest.getAssignees().stream().map(it->it.getName()).collect(Collectors.toList()));
-        var reviews = new ArrayList<Map<String, Object>>();
-        for (var review : pullRequest.getReviews()) {
-            if (review.getStatus() == PullRequestReview.Status.EXCLUDED)
-                continue;
-            var reviewMap = new HashMap<String, Object>();
-            reviewMap.put("reviewer", review.getUser().getName());
-            reviewMap.put("status", review.getStatus());
-            reviews.add(reviewMap);
-        }        
-        pullRequestMap.put("reviews", reviews);
-        var builds = new ArrayList<String>();
-        for (var build : pullRequest.getBuilds()) {
-            builds.add(build.getReference().toString(currentProject) + " (job: " + build.getJobName() + ", status: " + build.getStatus() + ")");
-        }
-        pullRequestMap.put("builds", builds);
-        pullRequestMap.put("labels", pullRequest.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
-        pullRequestMap.put("link", urlService.urlFor(pullRequest, true));
-
-        return pullRequestMap;
+        return PullRequestHelper.getDetail(currentProject, pullRequest);
     }
 
     @Path("/get-pull-request-comments")
@@ -1287,15 +1172,7 @@ public class McpHelperResource {
         var currentProject = getProject(currentProjectPath);
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
                 
-        var comments = new ArrayList<Map<String, Object>>();
-        for (var comment : pullRequest.getComments()) {
-            var commentMap = new HashMap<String, Object>();
-            commentMap.put("user", comment.getUser().getName());
-            commentMap.put("date", comment.getDate());
-            commentMap.put("content", comment.getContent());
-            comments.add(commentMap);
-        }
-        return comments;
+        return PullRequestHelper.getComments(pullRequest);
     }
 
     @Path("/get-pull-request-code-comments")

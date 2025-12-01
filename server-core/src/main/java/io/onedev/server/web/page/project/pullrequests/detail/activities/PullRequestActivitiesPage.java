@@ -61,6 +61,7 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestChangeActivity;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestCommentActivity;
@@ -409,6 +410,24 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 
 	public Component renderOptions(String componentId) {
 		Fragment fragment = new Fragment(componentId, "optionsFrag", this);
+		
+		fragment.add(new AjaxLink<Void>("aiSummarize") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				var page = (LayoutPage)getPage();
+				page.getChatter().show(target, "Summarize comments of current pull request. Display summary in " + getSession().getLocale().getDisplayLanguage());
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				var page = (LayoutPage)getPage();
+				setVisible(!page.getChatter().getEntitledAis().isEmpty());
+			}
+
+		});
+
 		fragment.add(showCommentsLink = new AjaxLink<Void>("showComments") {
 
 			@Override

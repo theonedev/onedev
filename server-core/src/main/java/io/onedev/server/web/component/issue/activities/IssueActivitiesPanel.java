@@ -39,7 +39,6 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.service.IssueCommentService;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
@@ -53,6 +52,7 @@ import io.onedev.server.model.support.issue.changedata.IssueOwnSpentTimeChangeDa
 import io.onedev.server.model.support.issue.changedata.IssueTotalEstimatedTimeChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTotalSpentTimeChangeData;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueCommentService;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentInput;
@@ -61,6 +61,7 @@ import io.onedev.server.web.component.issue.activities.activity.IssueChangeActiv
 import io.onedev.server.web.component.issue.activities.activity.IssueCommentActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueWorkActivity;
 import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -327,6 +328,23 @@ public abstract class IssueActivitiesPanel extends Panel {
 
 	public Component renderOptions(String componentId) {
 		Fragment fragment = new Fragment(componentId, "optionsFrag", this);
+
+		fragment.add(new AjaxLink<Void>("aiSummarize") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				var page = (LayoutPage)getPage();
+				page.getChatter().show(target, "Summarize comments of current issue. Display summary in " + getSession().getLocale().getDisplayLanguage());
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				var page = (LayoutPage)getPage();
+				setVisible(!page.getChatter().getEntitledAis().isEmpty());
+			}
+		});
+
 		fragment.add(showCommentsLink = new AjaxLink<Void>("showComments") {
 
 			@Override

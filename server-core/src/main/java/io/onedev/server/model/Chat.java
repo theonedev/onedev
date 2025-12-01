@@ -102,15 +102,15 @@ public class Chat extends AbstractEntity {
 	}
 	
 	public static String getChangeObservable(Long chatId) {
-		return "chat:" + chatId;
+		return Chat.class.getName() + ":" + chatId;
 	}
 
 	public static String getPartialResponseObservable(Long chatId) {
-		return "chat:" + chatId + ":partialResponse";
+		return Chat.class.getName() + ":partialResponse:" + chatId;
 	}
 
 	public static String getNewMessagesObservable(Long chatId) {
-		return "chat:" + chatId + ":newMessages";
+		return Chat.class.getName() + ":newMessages:" + chatId;
 	}
 
 }
