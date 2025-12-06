@@ -1,20 +1,23 @@
 package io.onedev.server.buildspec.step;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
-import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
+import static io.onedev.server.buildspec.step.StepGroup.UTILITIES;
 
-import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.onedev.server.buildspec.step.StepGroup.UTILITIES;
+import javax.validation.constraints.NotEmpty;
+
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
+import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 
 @Editable(order=1100, group = UTILITIES, name="Copy Files with SCP", description = "" +
 		"This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>")
@@ -80,6 +83,10 @@ public class SCPCommandStep extends CommandStep {
 
 	public void setOptions(String options) {
 		this.options = options;
+	}
+
+	static List<InputSuggestion> suggestVariables(String matchWith) {
+		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 
 	@Editable

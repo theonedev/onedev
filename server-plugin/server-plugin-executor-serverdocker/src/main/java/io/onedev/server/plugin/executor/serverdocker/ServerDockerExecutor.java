@@ -517,7 +517,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 											return null;
 										});
 									} else if (facade instanceof RunContainerFacade) {
-										RunContainerFacade runContainerFacade = (RunContainerFacade) facade;
+										RunContainerFacade runContainerFacade = ((RunContainerFacade) facade).replacePlaceholders(hostBuildHome);
 										List<String> arguments = new ArrayList<>();
 										if (runContainerFacade.getArgs() != null)
 											arguments.addAll(Arrays.asList(StringUtils.parseQuoteTokens(runContainerFacade.getArgs())));

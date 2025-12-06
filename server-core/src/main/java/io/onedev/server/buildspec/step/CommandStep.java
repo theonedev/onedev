@@ -71,6 +71,12 @@ public class CommandStep extends Step {
 	}
 	
 	static List<InputSuggestion> suggestVariables(String matchWith) {
+		/* 
+		 * We do not support dynamic variable here as:
+		 * 1. @file:@ notion will not work for workspace files generated in current step
+		 * 2. It is very easy to use file content in shell script via shell utilities 
+		 *    in regardless the file is generated in current or previous steps
+		 */
 		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
 	

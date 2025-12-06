@@ -119,6 +119,10 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		this.moreOptions = moreOptions;
 	}
 
+	static List<InputSuggestion> suggestVariables(String matchWith) {
+		return BuildSpec.suggestVariables(matchWith, true, true, false);
+	}
+
 	@Override
 	public Interpreter getInterpreter() {
 		return new DefaultInterpreter() {

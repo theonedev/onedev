@@ -45,7 +45,7 @@ public class VolumeMount implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, false, false, false);
+		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 	
 }

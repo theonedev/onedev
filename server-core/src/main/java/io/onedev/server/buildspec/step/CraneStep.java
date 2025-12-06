@@ -1,20 +1,22 @@
 package io.onedev.server.buildspec.step;
 
+import static io.onedev.agent.DockerExecutorUtils.buildDockerConfig;
+import static io.onedev.k8shelper.RegistryLoginFacade.merge;
+
+import java.util.List;
+import java.util.Map;
+
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.k8shelper.RegistryLoginFacade;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Multiline;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
-
-import java.util.List;
-import java.util.Map;
-
-import static io.onedev.agent.DockerExecutorUtils.buildDockerConfig;
-import static io.onedev.k8shelper.RegistryLoginFacade.merge;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 public abstract class CraneStep extends CommandStep {
 
@@ -68,6 +70,10 @@ public abstract class CraneStep extends CommandStep {
 	@Override
 	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
 		super.setRegistryLogins(registryLogins);
+	}
+
+	static List<InputSuggestion> suggestVariables(String matchWith) {
+		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 
 	@Override

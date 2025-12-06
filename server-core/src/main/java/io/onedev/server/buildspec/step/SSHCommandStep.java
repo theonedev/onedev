@@ -1,21 +1,24 @@
 package io.onedev.server.buildspec.step;
 
+import static io.onedev.server.buildspec.step.StepGroup.UTILITIES;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.validation.constraints.NotEmpty;
+
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-
-import javax.validation.constraints.NotEmpty;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static io.onedev.server.buildspec.step.StepGroup.UTILITIES;
 
 @Editable(order=1090, group = UTILITIES, name="Execute Commands via SSH", description = "" +
 		"This step can only be executed by a docker aware executor")
@@ -84,11 +87,15 @@ public class SSHCommandStep extends CommandStep {
 		this.options = options;
 	}
 	
+	static List<InputSuggestion> suggestVariables(String matchWith) {
+		return BuildSpec.suggestVariables(matchWith, true, true, false);
+	}
+
 	@Editable(order=300, description="Specify commands to be executed on remote machine. " +
 			"<b class='text-warning'>Note:</b> user environments will not be picked up when execute these " +
 			"commands, set up them explicitly in commands if necessary")
 	@Interpolative
-	@Code(language=Code.SHELL, variableProvider="suggestVariables")
+	@Code(language=Code.SHELL, variableProvider="suggestStaticVariables")
 	@NotEmpty
 	public String getCommands() {
 		return commands;
@@ -96,6 +103,10 @@ public class SSHCommandStep extends CommandStep {
 
 	public void setCommands(String commands) {
 		this.commands = commands;
+	}
+
+	static List<InputSuggestion> suggestStaticVariables(String matchWith) {
+		return BuildSpec.suggestVariables(matchWith, true, false, false);
 	}
 
 	@Editable
