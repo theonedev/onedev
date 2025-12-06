@@ -3,6 +3,7 @@ package io.onedev.server.web.page.security;
 import static io.onedev.server.model.User.PROP_NOTIFY_OWN_EVENTS;
 import static io.onedev.server.model.User.PROP_TYPE;
 import static io.onedev.server.web.page.security.SignUpBean.PROP_EMAIL_ADDRESS;
+import static io.onedev.server.web.translation.Translation._T;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.credential.PasswordService;
@@ -159,12 +160,12 @@ public class SignUpPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "Sign Up";
+		return _T("Sign Up");
 	}
 
 	@Override
 	protected String getSubTitle() {
-		return "Enter your details to create your account";
+		return _T("Enter your details to create your account");
 	}
 
 }

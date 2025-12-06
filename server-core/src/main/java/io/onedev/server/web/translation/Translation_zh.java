@@ -1218,6 +1218,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Enter description here", "输入描述");
 		m.put("Enter your details to login to your account", "输入您的详细信息登录到您的账户");
 		m.put("Enter your user name or email to reset password", "输入您的用户名或邮箱以重置密码");
+		m.put("Entitle to All Users", "授权给所有用户");
 		m.put("Entitled Groups", "授权组");
 		m.put("Entitled Projects", "授权项目");
 		m.put("Entitled Users", "授权用户");
@@ -4700,7 +4701,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Entitle to All Users", "授权给所有用户");
+		m.put("Enter your details to create your account", "输入您的详细信息以创建您的账户");
+		m.put("Summarize comments with AI", "使用 AI 总结评论");
 	}
 		
 	@Override

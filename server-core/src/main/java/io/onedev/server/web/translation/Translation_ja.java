@@ -1199,6 +1199,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Enter description here", "ここに説明を入力してください");
 		m.put("Enter your details to login to your account", "アカウントにログインするための詳細を入力してください");
 		m.put("Enter your user name or email to reset password", "パスワードをリセットするには、ユーザー名またはメールを入力してください");
+		m.put("Entitle to All Users", "すべてのユーザーに権限を付与");
 		m.put("Entitled Groups", "権限を持つグループ");
 		m.put("Entitled Projects", "権限を持つプロジェクト");
 		m.put("Entitled Users", "権限を持つユーザー");
@@ -4681,7 +4682,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Entitle to All Users", "すべてのユーザーに権限を付与");
+		m.put("Enter your details to create your account", "アカウントを作成するために詳細を入力してください");
+		m.put("Summarize comments with AI", "AIでコメントを要約する");
 	}
 		
 	@Override
