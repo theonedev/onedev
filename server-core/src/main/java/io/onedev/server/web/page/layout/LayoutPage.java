@@ -826,7 +826,7 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!chatter.getEntitledAis().isEmpty());
+				setVisible(WicketUtils.isSubscriptionActive() && !chatter.getEntitledAis().isEmpty());
 			}
 
 		});

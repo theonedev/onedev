@@ -17,11 +17,11 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
 		add(new Link<Void>("test") {
 
 			@Override
-			public void onClick() {
-				System.out.println("bb");
+			public void onClick() {	
 			}
 
 		});

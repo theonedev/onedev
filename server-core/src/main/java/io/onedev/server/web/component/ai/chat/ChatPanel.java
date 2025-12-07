@@ -335,7 +335,7 @@ public class ChatPanel extends Panel {
 				else
 					return Collections.emptySet();
 			}
-						
+
 		});
 
 		respondingContainer.setOutputMarkupPlaceholderTag(true);

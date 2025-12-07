@@ -21,6 +21,7 @@ import org.apache.wicket.protocol.ws.api.registry.IKey;
 import org.apache.wicket.protocol.ws.api.registry.IWebSocketConnectionRegistry;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
+import org.eclipse.jetty.websocket.api.StatusCode;
 import org.joda.time.DateTime;
 import org.jspecify.annotations.Nullable;
 import org.quartz.ScheduleBuilder;
@@ -31,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.Listen;
@@ -52,7 +52,9 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultWebSocketService.class);
 	
-	private static final int KEEP_ALIVE_INTERVAL = 30;
+	private static final int KEEP_ALIVE_INTERVAL = 60;
+
+	private static final int CHECK_MESSAGE_QUEUE_INTERVAL = 5;
 
 	@Inject
 	private Application application;
@@ -72,9 +74,11 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 	
 	private final Map<String, Pair<PageKey, Date>> notifiedObservables = new ConcurrentHashMap<>();
 	
-	private String keepAliveTaskId;
+	private volatile String keepAliveTaskId;
 
-	private String notifiedObservableCleanupTaskId;
+	private volatile String notifiedObservableCleanupTaskId;
+
+	private volatile Thread checkMessageQueueThread;
 
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(WebSocketService.class);
@@ -106,6 +110,14 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 	
 	@Override
 	public void sessionDestroyed(String sessionId) {
+		for (IWebSocketConnection connection : connectionRegistry.getConnections(application, sessionId)) {
+			try {
+				connection.close(StatusCode.NORMAL, "Session destroyed");
+				IKey pageKey = ((WebSocketConnection) connection).getPageKey().getPageId();
+				connectionRegistry.removeConnection(application, sessionId, pageKey);
+			} catch (Exception e) {
+			}
+		}
 		registeredObservables.remove(sessionId);
 	}
 		
@@ -123,12 +135,11 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 		}
 	}
 	
-	private void notifyObservables(IWebSocketConnection connection, Collection<String> observables) {
-		String message = WebSocketMessages.OBSERVABLE_CHANGED + ":" + StringUtils.join(observables, "\n"); 
-		try {
-			connection.sendMessage(message);
-		} catch (Exception e) {
-			logger.error("Error sending websocket message: " + message, e);
+	private void notifyObservablesChange(IWebSocketConnection connection, Set<String> observables) {
+		if (((WebSocketConnection) connection).queueMessage(new ObservablesChanged(observables))) {
+			var thread = checkMessageQueueThread;
+			if (thread != null) 
+				thread.interrupt();	
 		}
 	}
 
@@ -157,7 +168,7 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 								var registeredChangedObservables = 
 										filterObservables(registeredObservables, observables);
 								if (!registeredChangedObservables.isEmpty())
-									notifyObservables(connection, registeredChangedObservables);
+									notifyObservablesChange(connection, registeredChangedObservables);
 							}
 						}
 					}
@@ -194,7 +205,7 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 		
 		notifiedObservableCleanupTaskId = taskScheduler.schedule(new SchedulableTask() {
 			
-			private static final int TOLERATE_SECONDS = 10;
+			private static final int TOLERATE_SECONDS = 5;
 			
 			@Override
 			public ScheduleBuilder<?> getScheduleBuilder() {
@@ -211,10 +222,29 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 			}
 			
 		});
+
+		checkMessageQueueThread = new Thread(() -> {
+			while (checkMessageQueueThread != null) {
+				for (var connection: connectionRegistry.getConnections(application)) {
+					if (connection.isOpen()) 
+						((WebSocketConnection) connection).checkMessageQueue();
+				}
+				try {
+					Thread.sleep(CHECK_MESSAGE_QUEUE_INTERVAL * 1000);
+				} catch (InterruptedException e) {	
+				}		
+			}
+		});
+		checkMessageQueueThread.start();
 	}
 
 	@Listen
 	public void on(SystemStopping event) {
+		var thread = checkMessageQueueThread;
+		checkMessageQueueThread = null;
+		if (thread != null) 
+			thread.interrupt();		
+
 		if (keepAliveTaskId != null)
 			taskScheduler.unschedule(keepAliveTaskId);
 		if (notifiedObservableCleanupTaskId != null)
@@ -234,7 +264,7 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 	}
 
 	private void notifyPastObservables(IWebSocketConnection connection) {
-		PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
+		PageKey pageKey = ((WebSocketConnection) connection).getPageKey();		
 		Collection<String> registeredObservables = getRegisteredObservables(connection);
 		if (registeredObservables != null) {
 			Set<String> observables = new HashSet<>();
@@ -247,7 +277,7 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 				}
 			}
 			if (!observables.isEmpty())
-				notifyObservables(connection, observables);
+				notifyObservablesChange(connection, observables);
 		}
 	}
 

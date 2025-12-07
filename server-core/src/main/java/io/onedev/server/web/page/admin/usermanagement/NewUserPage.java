@@ -35,6 +35,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.user.UserCssResourceReference;
 import io.onedev.server.web.page.user.basicsetting.UserBasicSettingPage;
+import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.editbean.NewUserBean;
 
 public class NewUserPage extends AdministrationPage {
@@ -51,7 +52,10 @@ public class NewUserPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		var editor = BeanContext.edit("editor", bean, Sets.newHashSet(User.PROP_NOTIFY_OWN_EVENTS), true);
+		var excludeProperties = Sets.newHashSet(User.PROP_NOTIFY_OWN_EVENTS);
+		if (!WicketUtils.isSubscriptionActive())
+			excludeProperties.add(User.PROP_TYPE);
+		var editor = BeanContext.edit("editor", bean, excludeProperties, true);
 		
 		Form<?> form = new Form<Void>("form") {
 

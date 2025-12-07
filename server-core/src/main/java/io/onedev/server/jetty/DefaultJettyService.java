@@ -19,6 +19,8 @@ import org.eclipse.jetty.http.HttpCookie.SameSite;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
+import org.eclipse.jetty.server.session.DefaultSessionIdManager;
+import org.eclipse.jetty.server.session.HouseKeeper;
 import org.eclipse.jetty.server.session.SessionDataStoreFactory;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -43,6 +45,8 @@ import io.onedev.server.service.SettingService;
 public class DefaultJettyService implements JettyService, Provider<ServletContextHandler>, Serializable {
 
 	private static final int MAX_CONTENT_SIZE = 5000000;
+
+	private static final int SESSION_SCAVENGE_INTERVAL = 60;
 
 	@Inject
 	private SessionDataStoreFactory sessionDataStoreFactory;
@@ -75,6 +79,17 @@ public class DefaultJettyService implements JettyService, Provider<ServletContex
 	public void start() {
 		server = new Server();
 
+        var sessionIdManager = new DefaultSessionIdManager(server);
+        var houseKeeper = new HouseKeeper();				
+        try {
+			// Set the interval to clean up expired sessions
+			houseKeeper.setIntervalSec(SESSION_SCAVENGE_INTERVAL);
+		} catch (Exception e) {
+			throw ExceptionUtils.unchecked(e);
+		}
+        sessionIdManager.setSessionHouseKeeper(houseKeeper);
+        server.setSessionIdManager(sessionIdManager);
+
 		server.addBean(sessionDataStoreFactory);
 		
         servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -88,8 +103,10 @@ public class DefaultJettyService implements JettyService, Provider<ServletContex
         servletContextHandler.getSessionHandler().setSessionIdPathParameterName(null);
         servletContextHandler.getSessionHandler().setSameSite(SameSite.LAX);  
         servletContextHandler.getSessionHandler().setHttpOnly(true);
+		var sessionTimeout = 1800;
 		if (settingService.getSystemSetting() != null) 
-			servletContextHandler.getSessionHandler().setMaxInactiveInterval(settingService.getSystemSetting().getSessionTimeout() * 60);
+			sessionTimeout = settingService.getSystemSetting().getSessionTimeout() * 60;
+		servletContextHandler.getSessionHandler().setMaxInactiveInterval(sessionTimeout);		
 
         /*
          * By default contributions is in reverse dependency order. We reverse the order so that 

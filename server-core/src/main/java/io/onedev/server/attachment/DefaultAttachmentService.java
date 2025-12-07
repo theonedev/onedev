@@ -123,7 +123,7 @@ public class DefaultAttachmentService implements AttachmentService, SchedulableT
 	@Inject
 	private BatchWorkExecutionService batchWorkExecutionService;
 	
-    private String taskId;
+    private volatile String taskId;
 
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(AttachmentService.class);

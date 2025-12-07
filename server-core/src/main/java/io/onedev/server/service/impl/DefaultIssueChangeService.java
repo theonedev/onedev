@@ -166,7 +166,7 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 	@Inject
 	private TransactionService transactionService;
 	
-	private String taskId;
+	private volatile String taskId;
 
 	@Transactional
 	@Override

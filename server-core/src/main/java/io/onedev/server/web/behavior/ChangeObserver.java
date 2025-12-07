@@ -2,6 +2,7 @@ package io.onedev.server.web.behavior;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
@@ -44,9 +45,9 @@ public abstract class ChangeObserver extends Behavior {
 		}
 	}
 
-	public static Collection<String> filterObservables(Collection<String> observingObservables,
+	public static Set<String> filterObservables(Collection<String> observingObservables,
 													   Collection<String> changedObservables) {
-		Collection<String> observingChangedObservables = new HashSet<>();
+		Set<String> observingChangedObservables = new HashSet<>();
 		for (var observingObservable: observingObservables) {
 			for (var changedObservable: changedObservables) {
 				if (containsObservable(observingObservable, changedObservable))

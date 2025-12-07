@@ -22,7 +22,7 @@ public class DefaultUploadService implements UploadService, SchedulableTask {
 	@Inject
 	private TaskScheduler taskScheduler;
 	
-	private String taskId;
+	private volatile String taskId;
 	
 	private final Map<String, FileUpload> uploads = new ConcurrentHashMap<>();
 

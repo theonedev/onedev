@@ -339,29 +339,29 @@ onedev.server = {
 		}
 	},	
 
-	setupWebsocketCallback: function() {
-		var messagesToSent = [];
-		function sendMessages() {
-			if (onedev.server.ajaxRequests.count == 0) {
-				for (var i in messagesToSent)
-					Wicket.WebSocket.send(messagesToSent[i]);
-				messagesToSent = [];
-			} else {
-				setTimeout(sendMessages, 100);
-			} 
+	setupWebSocketHandler: function() {		
+		function showError($error) {
+			$error.css("left", ($(window).width()-$error.outerWidth()) / 2);
+			$error.slideDown("slow");
 		}
-		
-		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
-			if (message.indexOf("ObservableChanged:") != -1) { 
-				if (messagesToSent.indexOf(message) == -1) {
-					messagesToSent.push(message);
-					sendMessages();
-				}
-			} else if (message == "ErrorMessage") {
-				var $websocketError = $(".websocket-error");
-		        $websocketError.css("left", ($(window).width()-$websocketError.outerWidth()) / 2);
-				$websocketError.slideDown("slow");
+		function testConnection() {			
+			if (Wicket.WebSocket.INSTANCE.ws && Wicket.WebSocket.INSTANCE.ws.readyState == WebSocket.OPEN) {
+				Wicket.WebSocket.send("TestConnection");
+				setTimeout(testConnection, 60000);
 			}
+		}
+		Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
+			testConnection();			
+		});
+		Wicket.Event.subscribe("/websocket/closed", function(jqEvent) {
+			showError($(".connection-error"));
+		});
+		Wicket.Event.subscribe("/websocket/error", function(jqEvent) {
+			showError($(".connection-error"));
+		});
+		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
+			if (message == "ErrorMessage") 
+				showError($(".page-error"));
 		});
 	},
 
@@ -900,7 +900,7 @@ onedev.server = {
 		
 		onedev.server.setupAjaxLoadingIndicator();
 		onedev.server.form.setupDirtyCheck();
-		onedev.server.setupWebsocketCallback();
+		onedev.server.setupWebSocketHandler();
 		onedev.server.mouseState.track();
 		onedev.server.ajaxRequests.track();
 		onedev.server.setupInputClear();

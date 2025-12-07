@@ -10,7 +10,6 @@ import java.time.ZoneId;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -28,6 +27,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -40,8 +40,7 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.protocol.ws.api.WebSocketBehavior;
-import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
-import org.apache.wicket.protocol.ws.api.message.TextMessage;
+import org.apache.wicket.protocol.ws.api.event.WebSocketPushPayload;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
@@ -55,11 +54,9 @@ import org.unbescape.javascript.JavaScriptEscape;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.commandhandler.Upgrade;
 import io.onedev.server.event.ListenerRegistry;
@@ -80,7 +77,7 @@ import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.serverinit.ServerInitPage;
 import io.onedev.server.web.page.simple.SimplePage;
 import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.web.websocket.WebSocketMessages;
+import io.onedev.server.web.websocket.ObservablesChanged;
 import io.onedev.server.web.websocket.WebSocketService;
 
 public abstract class BasePage extends WebPage {
@@ -105,6 +102,12 @@ public abstract class BasePage extends WebPage {
 
 	@Inject
 	protected ListenerRegistry listenerRegistry;
+
+	@Inject
+	private WebSocketService webSocketService;
+
+	@Inject
+	private ObjectMapper objectMapper;
 	
 	public BasePage(PageParameters params) {
 		super(params);
@@ -146,6 +149,15 @@ public abstract class BasePage extends WebPage {
 		cookie.setMaxAge(Integer.MAX_VALUE);
 		response.addCookie(cookie);
 		setResponsePage(getPageClass(), getPageParameters());
+	}
+
+	@Override
+	public void onEvent(IEvent<?> event) {		
+		super.onEvent(event);
+		if (event.getPayload() instanceof WebSocketPushPayload payload 
+				&& payload.getMessage() instanceof ObservablesChanged observablesChanged) {
+			notifyObservablesChange(payload.getHandler(), observablesChanged.getObservables());				
+		}
 	}
 
 	@Override
@@ -205,8 +217,8 @@ public abstract class BasePage extends WebPage {
 								String.valueOf(OneDev.getInstance().getBootDate().getTime()),
 								SpriteImage.getVersionedHref(IconScope.class, null),
 								popStateBehavior.getCallbackFunction(explicit("data")).toString(), 
-								OneDev.getInstance(ObjectMapper.class).writeValueAsString(getRemoveAutosaveKeys()),
-								OneDev.getInstance(ObjectMapper.class).writeValueAsString(translations))));
+								objectMapper.writeValueAsString(getRemoveAutosaveKeys()),
+								objectMapper.writeValueAsString(translations))));
 				} catch (JsonProcessingException e) {
 					throw new RuntimeException(e);
 				}
@@ -295,20 +307,7 @@ public abstract class BasePage extends WebPage {
 
 		add(rootComponents = new RepeatingView("rootComponents"));
 
-		add(new WebSocketBehavior() {
-
-			@Override
-			protected void onMessage(WebSocketRequestHandler handler, TextMessage message) {
-				super.onMessage(handler, message);
-
-				if (message.getText().startsWith(WebSocketMessages.OBSERVABLE_CHANGED)) {
-					List<String> observables = Splitter.on('\n').splitToList(
-							message.getText().substring(WebSocketMessages.OBSERVABLE_CHANGED.length()+1));
-					notifyObservablesChange(handler, observables);
-				}
-			}
-
-		});
+		add(new WebSocketBehavior() {});
 
 		add(zoneIdDetectBehavior = new AbstractDefaultAjaxBehavior() {
 
@@ -389,7 +388,7 @@ public abstract class BasePage extends WebPage {
 
 	@Override
 	protected void onAfterRender() {
-		AppLoader.getInstance(WebSocketService.class).observe(this);
+		webSocketService.observe(this);
 		super.onAfterRender();
 	}
 

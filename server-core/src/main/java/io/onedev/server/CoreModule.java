@@ -197,7 +197,6 @@ import io.onedev.server.service.BuildMetricService;
 import io.onedev.server.service.BuildParamService;
 import io.onedev.server.service.BuildQueryPersonalizationService;
 import io.onedev.server.service.BuildService;
-import io.onedev.server.service.ChatService;
 import io.onedev.server.service.CodeCommentMentionService;
 import io.onedev.server.service.CodeCommentQueryPersonalizationService;
 import io.onedev.server.service.CodeCommentReplyService;
@@ -289,7 +288,6 @@ import io.onedev.server.service.impl.DefaultBuildMetricService;
 import io.onedev.server.service.impl.DefaultBuildParamService;
 import io.onedev.server.service.impl.DefaultBuildQueryPersonalizationService;
 import io.onedev.server.service.impl.DefaultBuildService;
-import io.onedev.server.service.impl.DefaultChatService;
 import io.onedev.server.service.impl.DefaultCodeCommentMentionService;
 import io.onedev.server.service.impl.DefaultCodeCommentQueryPersonalizationService;
 import io.onedev.server.service.impl.DefaultCodeCommentReplyService;
@@ -609,7 +607,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestDescriptionRevisionService.class).to(DefaultPullRequestDescriptionRevisionService.class);
 		bind(SsoProviderService.class).to(DefaultSsoProviderService.class);
 		bind(SsoAccountService.class).to(DefaultSsoAccountService.class);
-		bind(ChatService.class).to(DefaultChatService.class);
 		bind(BaseAuthorizationService.class).to(DefaultBaseAuthorizationService.class);
 		bind(GroupEntitlementService.class).to(DefaultGroupEntitlementService.class);
 		bind(UserEntitlementService.class).to(DefaultUserEntitlementService.class);
@@ -733,7 +730,6 @@ public class CoreModule extends AbstractPluginModule {
 		contributeFromPackage(ExceptionHandler.class, PageExpiredExceptionHandler.class);
 		contributeFromPackage(ExceptionHandler.class, WebApplicationExceptionHandler.class);
 
-		contribute(SessionListener.class, DefaultChatService.class);
 		contribute(SessionListener.class, DefaultWebSocketService.class);
 		
 		bind(UrlService.class).to(DefaultUrlService.class);

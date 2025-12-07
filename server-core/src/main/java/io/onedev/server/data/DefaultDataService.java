@@ -196,7 +196,7 @@ public class DefaultDataService implements DataService, Serializable {
 	@Inject
 	private AlertService alertService;
 	
-	private String backupTaskId;
+	private volatile String backupTaskId;
 
 	private Metadata getMetadata() {
 		return sessionFactoryService.getMetadata();

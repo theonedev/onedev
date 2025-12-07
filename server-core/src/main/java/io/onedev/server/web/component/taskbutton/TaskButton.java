@@ -279,7 +279,7 @@ public abstract class TaskButton extends AjaxButton {
 		@Inject
 		private TaskScheduler taskScheduler;
 		
-		private String taskId;
+		private volatile String taskId;
 
 		@Listen
 		public void on(SystemStarted event) {

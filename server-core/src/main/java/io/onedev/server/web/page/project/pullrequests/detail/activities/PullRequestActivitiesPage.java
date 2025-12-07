@@ -46,8 +46,6 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.PullRequestCommentService;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -57,6 +55,8 @@ import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.PullRequestCommentService;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentInput;
@@ -67,6 +67,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.activities.activity
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestCommentActivity;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestUpdateActivity;
 import io.onedev.server.web.page.security.LoginPage;
+import io.onedev.server.web.util.WicketUtils;
 
 public class PullRequestActivitiesPage extends PullRequestDetailPage {
 	
@@ -423,7 +424,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				var page = (LayoutPage)getPage();
-				setVisible(!page.getChatter().getEntitledAis().isEmpty());
+				setVisible(WicketUtils.isSubscriptionActive() && !page.getChatter().getEntitledAis().isEmpty());
 			}
 
 		});
