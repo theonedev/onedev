@@ -298,7 +298,25 @@ public class ProjectResource {
 			throw new ExplicitException("Can not use current or descendant project as parent");
 		
 		checkProjectNameDuplication(project);		
-		projectService.create(user, project);
+
+		if (project.getForkedFrom() != null) {
+			var forkedFrom = project.getForkedFrom();
+			project.getBuildSetting().setBuildPreservations(forkedFrom.getBuildSetting().getBuildPreservations());
+			project.getBuildSetting().setCachePreserveDays(forkedFrom.getBuildSetting().getCachePreserveDays());
+			project.getBuildSetting().setJobProperties(forkedFrom.getBuildSetting().getJobProperties());
+			project.getBuildSetting().setDefaultFixedIssueFilters(forkedFrom.getBuildSetting().getDefaultFixedIssueFilters());
+			project.getBuildSetting().setListParams(forkedFrom.getBuildSetting().getListParams(false));
+			project.getBuildSetting().setNamedQueries(forkedFrom.getBuildSetting().getNamedQueries());
+			project.setPackSetting(forkedFrom.getPackSetting());
+			project.setPullRequestSetting(forkedFrom.getPullRequestSetting());
+			project.setNamedCommitQueries(forkedFrom.getNamedCommitQueries());
+			project.setIssueSetting(forkedFrom.getIssueSetting());
+			project.setNamedCodeCommentQueries(forkedFrom.getNamedCodeCommentQueries());
+			projectService.create(user, project);
+			projectService.fork(forkedFrom, project);
+		} else {
+			projectService.create(user, project);
+		}
 
 		auditService.audit(project, "created project via RESTful API", null, VersionedXmlDoc.fromBean(data).toXML());
 

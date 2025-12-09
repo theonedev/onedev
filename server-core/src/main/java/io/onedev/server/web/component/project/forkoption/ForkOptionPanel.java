@@ -11,6 +11,8 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
 
+import javax.inject.Inject;
+
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -22,15 +24,14 @@ import org.apache.wicket.model.IModel;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
+import io.onedev.server.model.Project;
+import io.onedev.server.persistence.TransactionService;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.service.BaseAuthorizationService;
 import io.onedev.server.service.ProjectLabelService;
 import io.onedev.server.service.ProjectService;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.TransactionService;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
@@ -43,16 +44,27 @@ import io.onedev.server.web.util.editbean.LabelsBean;
 public abstract class ForkOptionPanel extends Panel {
 
 	private final IModel<Project> projectModel;
+
+	@Inject
+	private ProjectService projectService;
+
+	@Inject
+	private AuditService auditService;
+
+	@Inject
+	private TransactionService transactionService;
+
+	@Inject
+	private BaseAuthorizationService baseAuthorizationService;
+
+	@Inject
+	private ProjectLabelService projectLabelService;
 	
 	public ForkOptionPanel(String id, IModel<Project> projectModel) {
 		super(id);
 		this.projectModel = projectModel;
 	}
 	
-	private ProjectService getProjectService() {
-		return OneDev.getInstance(ProjectService.class);
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -64,7 +76,7 @@ public abstract class ForkOptionPanel extends Panel {
 		ParentBean parentBean = new ParentBean();
 		
 		String userName = SecurityUtils.getAuthUser().getName();
-		Project parent = getProjectService().findByPath(userName);
+		Project parent = projectService.findByPath(userName);
 		if (parent != null) {
 			if (SecurityUtils.canCreateChildren(parent))
 				parentBean.setParentPath(parent.getPath());
@@ -100,7 +112,7 @@ public abstract class ForkOptionPanel extends Panel {
 				super.onSubmit(target, form);
 				
 				try {
-					if (editProject.getKey() != null && getProjectService().findByKey(editProject.getKey()) != null) {
+					if (editProject.getKey() != null && projectService.findByKey(editProject.getKey()) != null) {
 						editor.error(new Path(new PathNode.Named(PROP_KEY)),
 								_T("This key has already been used by another project"));
 					}
@@ -108,7 +120,7 @@ public abstract class ForkOptionPanel extends Panel {
 					if (parentBean.getParentPath() != null)
 						projectPath = parentBean.getParentPath() + "/" + projectPath;
 					var subject = SecurityUtils.getSubject();
-					Project newProject = getProjectService().setup(subject, projectPath);
+					Project newProject = projectService.setup(subject, projectPath);
 					if (!newProject.isNew()) {
 						editor.error(new Path(new PathNode.Named("name")),
 								_T("This name has already been used by another project"));
@@ -122,19 +134,30 @@ public abstract class ForkOptionPanel extends Panel {
 						newProject.setTimeTracking(editProject.isTimeTracking());
 						newProject.setCodeAnalysisSetting(getProject().getCodeAnalysisSetting());
 						newProject.setGitPackConfig(getProject().getGitPackConfig());
+						newProject.getBuildSetting().setBuildPreservations(getProject().getBuildSetting().getBuildPreservations());
+						newProject.getBuildSetting().setCachePreserveDays(getProject().getBuildSetting().getCachePreserveDays());
+						newProject.getBuildSetting().setJobProperties(getProject().getBuildSetting().getJobProperties());
+						newProject.getBuildSetting().setDefaultFixedIssueFilters(getProject().getBuildSetting().getDefaultFixedIssueFilters());
+						newProject.getBuildSetting().setListParams(getProject().getBuildSetting().getListParams(false));
+						newProject.getBuildSetting().setNamedQueries(getProject().getBuildSetting().getNamedQueries());
+						newProject.setPackSetting(getProject().getPackSetting());
+						newProject.setPullRequestSetting(getProject().getPullRequestSetting());
+						newProject.setNamedCommitQueries(getProject().getNamedCommitQueries());
+						newProject.setIssueSetting(getProject().getIssueSetting());
+						newProject.setNamedCodeCommentQueries(getProject().getNamedCodeCommentQueries());
 						
-						OneDev.getInstance(TransactionService.class).run(() -> {
-							getProjectService().create(SecurityUtils.getUser(subject), newProject);
-							getProjectService().fork(getProject(), newProject);							
-							OneDev.getInstance(BaseAuthorizationService.class).syncRoles(newProject, defaultRolesBean.getRoles());
-							OneDev.getInstance(ProjectLabelService.class).sync(newProject, labelsBean.getLabels());
+						transactionService.run(() -> {
+							projectService.create(SecurityUtils.getUser(subject), newProject);
+							projectService.fork(getProject(), newProject);							
+							baseAuthorizationService.syncRoles(newProject, defaultRolesBean.getRoles());
+							projectLabelService.sync(newProject, labelsBean.getLabels());
 
 							var auditData = editor.getPropertyValues();
 							auditData.put("parent", parentBean.getParentPath());
 							auditData.put("forkedFrom", getProject().getPath());
 							auditData.put("defaultRoles", defaultRolesBean.getRoleNames());
 							auditData.put("labels", labelsBean.getLabels());
-							OneDev.getInstance(AuditService.class).audit(newProject, "created project", null, VersionedXmlDoc.fromBean(auditData).toXML());
+							auditService.audit(newProject, "created project", null, VersionedXmlDoc.fromBean(auditData).toXML());
 						});
 						Session.get().success(_T("Project forked"));
 						setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(newProject));
