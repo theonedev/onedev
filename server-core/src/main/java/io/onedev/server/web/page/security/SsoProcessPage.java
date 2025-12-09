@@ -201,7 +201,7 @@ public class SsoProcessPage extends SimplePage {
 	}
 
 	private void afterLogin(User user) {		
-		String redirectUrlAfterLogin = (String) Session.get().getAttribute(SESSION_ATTR_REDIRECT_URL);
+		String redirectUrlAfterLogin = (String) getSession().getAttribute(SESSION_ATTR_REDIRECT_URL);
 		if (StringUtils.isBlank(redirectUrlAfterLogin))
 			throw new AuthenticationException(_T("Unsolicited OIDC authentication response"));
 

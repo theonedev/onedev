@@ -12,8 +12,9 @@ public class LogoutPage extends BasePage {
 
 	public LogoutPage(PageParameters params) {
 		super(params);
-		WebSession.get().logout();
-		getSession().warn(_T("You've been logged out"));
+		var session = WebSession.get();
+		session.logout();
+		session.warn(_T("You've been logged out"));
 		throw new RestartResponseException(getApplication().getHomePage());
 	}
 	

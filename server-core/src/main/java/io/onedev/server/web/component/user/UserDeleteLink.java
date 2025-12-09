@@ -37,8 +37,9 @@ public abstract class UserDeleteLink extends Link<Void> {
 		if (getUser().equals(SecurityUtils.getAuthUser())) {
 			userService.delete(getUser());
 			auditService.audit(null, "deleted account \"" + getUser().getName() + "\"", oldAuditContent, null);
-			WebSession.get().success("Account removed");
-			WebSession.get().logout();
+			var session = WebSession.get();
+			session.logout();
+			session.success("Account removed");
 			throw new RestartResponseException(getApplication().getHomePage());
 		} else {
 			userService.delete(getUser());

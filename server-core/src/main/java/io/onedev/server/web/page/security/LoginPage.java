@@ -32,13 +32,13 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.SsoProviderService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.SsoProvider;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.realm.PasswordAuthenticatingRealm;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.SsoProviderService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationSetupPanel;
 import io.onedev.server.web.page.simple.SimpleCssResourceReference;
@@ -75,7 +75,10 @@ public class LoginPage extends SimplePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
+
+		// replace session to avoid session fixation attack
+		getSession().replaceSession();
+				
 		Fragment fragment = new Fragment("content", "passwordCheckFrag", this);
 		
 		Form<?> form = new Form<Void>("form") {
