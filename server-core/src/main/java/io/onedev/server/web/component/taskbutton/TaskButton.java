@@ -4,19 +4,14 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -29,27 +24,24 @@ import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.joda.time.DateTime;
-import org.quartz.ScheduleBuilder;
-import org.quartz.SimpleScheduleBuilder;
 
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.WordUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.log.JobLogEntry;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.job.log.StyleBuilder;
-import io.onedev.server.taskschedule.SchedulableTask;
-import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
 
 public abstract class TaskButton extends AjaxButton {
+
+	@Inject
+	private TaskFutureManager taskFutureManager;
+
+	@Inject
+	private ExecutorService executorService;
 
 	public TaskButton(String id) {
 		super(id);
@@ -64,10 +56,6 @@ public abstract class TaskButton extends AjaxButton {
 	protected void onInitialize() {
 		super.onInitialize();
 		setOutputMarkupPlaceholderTag(true);
-	}
-
-	private Map<String, TaskFuture> getTaskFutures() {
-		return TaskFutureManager.taskFutures;
 	}
 	
 	protected String getTitle() {
@@ -138,14 +126,13 @@ public abstract class TaskButton extends AjaxButton {
 	}
 	
 	protected void submitTask(AjaxRequestTarget target) {
-		String path = getPath();
-		
-		ExecutorService executorService = OneDev.getInstance(ExecutorService.class);
+		String taskId = getSession().getId() + ":" + getPath();
+
 		List<JobLogEntryEx> messages = new ArrayList<>();
 		messages.add(new JobLogEntryEx(new JobLogEntry(new Date(), _T("Please wait..."))));
 		var application = Application.get();
 		var requestCycle = RequestCycle.get();
-		TaskFuture future = getTaskFutures().put(path, new TaskFuture(executorService.submit(new Callable<TaskResult>() {
+		TaskFuture future = taskFutureManager.getTaskFutures().put(taskId, new TaskFuture(executorService.submit(new Callable<TaskResult>() {
 
 			@Override
 			public TaskResult call() throws Exception {
@@ -207,7 +194,7 @@ public abstract class TaskButton extends AjaxButton {
 			@Override
 			protected void onClosed() {
 				super.onClosed();
-				TaskFuture future = getTaskFutures().remove(path);
+				TaskFuture future = taskFutureManager.getTaskFutures().remove(taskId);
 				
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 				if (future != null && !future.isDone()) {
@@ -229,7 +216,7 @@ public abstract class TaskButton extends AjaxButton {
 
 					@Override
 					protected List<JobLogEntryEx> getLogEntries() {
-						TaskFuture future = getTaskFutures().get(path);
+						TaskFuture future = taskFutureManager.getTaskFutures().get(taskId);
 						if (future != null) 
 							return future.getLogEntries();
 						else
@@ -238,7 +225,7 @@ public abstract class TaskButton extends AjaxButton {
 
 					@Override
 					protected TaskResult getResult() {
-						TaskFuture future = getTaskFutures().get(path);
+						TaskFuture future = taskFutureManager.getTaskFutures().get(taskId);
 						if (future != null && future.isDone() && !future.isCancelled()) { 
 							try {
 								result = future.get();
@@ -265,104 +252,6 @@ public abstract class TaskButton extends AjaxButton {
 		submitTask(target);
 	}
 	
-	/**
-	 * @param logger
-	 * @return html display to user showing task execution result
-	 */
 	protected abstract TaskResult runTask(TaskLogger logger) throws InterruptedException;
-
-	@Singleton
-	public static class TaskFutureManager implements SchedulableTask {
-
-		private static final Map<String, TaskFuture> taskFutures = new ConcurrentHashMap<>();
-
-		@Inject
-		private TaskScheduler taskScheduler;
-		
-		private volatile String taskId;
-
-		@Listen
-		public void on(SystemStarted event) {
-			taskId = taskScheduler.schedule(this);
-		}
-		
-		@Listen
-		public void on(SystemStopping event) {
-			if (taskId != null)
-				taskScheduler.unschedule(taskId);
-		}
-
-		@Override
-		public void execute() {
-			for (Iterator<Map.Entry<String, TaskFuture>> it = taskFutures.entrySet().iterator(); it.hasNext();) {
-				TaskFuture taskFuture = it.next().getValue();
-				if (taskFuture.isTimedout()) {
-					if (!taskFuture.isDone())
-						taskFuture.cancel(true);
-					it.remove();
-				}
-			}
-		}
-
-		@Override
-		public ScheduleBuilder<?> getScheduleBuilder() {
-			return SimpleScheduleBuilder.repeatMinutelyForever();
-		}
-		
-	}
-	
-	private static class TaskFuture implements Future<TaskResult> {
-
-		private final Future<TaskResult> wrapped;
-		
-		private final List<JobLogEntryEx> logEntries;
-		
-		private volatile Date lastActive = new Date();
-		
-		public TaskFuture(Future<TaskResult> wrapped, List<JobLogEntryEx> logEntries) {
-			this.wrapped = wrapped;
-			this.logEntries = logEntries;
-		}
-		
-		@Override
-		public boolean cancel(boolean mayInterruptIfRunning) {
-			return wrapped.cancel(mayInterruptIfRunning);
-		}
-
-		@Override
-		public boolean isCancelled() {
-			return wrapped.isCancelled();
-		}
-
-		@Override
-		public boolean isDone() {
-			return wrapped.isDone();
-		}
-		
-		public boolean isTimedout() {
-			return lastActive.before(new DateTime().minusMinutes(1).toDate());
-		}
-
-		@Override
-		public TaskResult get() throws InterruptedException, ExecutionException {
-			return wrapped.get();
-		}
-
-		@Override
-		public TaskResult get(long timeout, TimeUnit unit)
-				throws InterruptedException, ExecutionException, TimeoutException {
-			return get(timeout, unit);
-		}
-		
-		public List<JobLogEntryEx> getLogEntries() {
-			lastActive = new Date();
-			synchronized (logEntries) {
-				List<JobLogEntryEx> copy = new ArrayList<>(logEntries);
-				logEntries.clear();
-				return copy;
-			}
-		}
-		
-	}
 	
 }

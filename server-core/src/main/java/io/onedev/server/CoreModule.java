@@ -407,7 +407,7 @@ import io.onedev.server.web.avatar.DefaultAvatarService;
 import io.onedev.server.web.component.diff.DiffRenderer;
 import io.onedev.server.web.component.markdown.SourcePositionTrackExtension;
 import io.onedev.server.web.component.markdown.emoji.EmojiExtension;
-import io.onedev.server.web.component.taskbutton.TaskButton;
+import io.onedev.server.web.component.taskbutton.TaskFutureManager;
 import io.onedev.server.web.editable.DefaultEditSupportRegistry;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
@@ -740,7 +740,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(AlertEventBroadcaster.class);
 		bind(UploadService.class).to(DefaultUploadService.class);
 		
-		bind(TaskButton.TaskFutureManager.class);
+		bind(TaskFutureManager.class);
 	}
 	
 	private void configureBuild() {
