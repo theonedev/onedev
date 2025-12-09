@@ -655,6 +655,12 @@ public class DefaultDataService implements DataService, Serializable {
     		userService.replicate(unknown);
 		}		
 		
+		// Initialize security setting first as initial password validation below relies on password policy
+		var setting = settingService.findSetting(Key.SECURITY);
+		if (setting == null) {
+			settingService.saveSecuritySetting(new SecuritySetting());
+		} 
+
 		if (userService.get(User.ROOT_ID) == null) {
 			NewUserBean bean = new NewUserBean();
 			bean.setName(System.getenv(ENV_INITIAL_USER));
@@ -685,7 +691,7 @@ public class DefaultDataService implements DataService, Serializable {
 			}
 		}
 		
-		Setting setting = settingService.findSetting(Key.SYSTEM);
+		setting = settingService.findSetting(Key.SYSTEM);
 		SystemSetting systemSetting;
 
 		String ingressUrl = OneDev.getInstance().getIngressUrl();
@@ -753,10 +759,6 @@ public class DefaultDataService implements DataService, Serializable {
             settingService.saveGpgSetting(gpgSetting);
         }
 		
-		setting = settingService.findSetting(Key.SECURITY);
-		if (setting == null) {
-			settingService.saveSecuritySetting(new SecuritySetting());
-		} 
 		setting = settingService.findSetting(Key.ISSUE);
 		if (setting == null) {
 			LinkSpec link = new LinkSpec();

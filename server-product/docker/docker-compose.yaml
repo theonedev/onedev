@@ -18,15 +18,21 @@ services:
       hibernate_connection_username: postgres
     tty: true
     depends_on:
-      - "postgres"
+      postgres:
+        condition: service_healthy
 
   postgres:
-    image: postgres:14-alpine3.15
+    image: postgres:14
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     environment:
       ### Change this
       POSTGRES_PASSWORD: "changeit"
-
       POSTGRES_USER: "postgres"
       POSTGRES_DB: "onedev"
     expose:
