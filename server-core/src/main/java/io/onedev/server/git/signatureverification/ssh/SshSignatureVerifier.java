@@ -38,7 +38,8 @@ public class SshSignatureVerifier implements SignatureVerifier {
 
 	@Override
 	public VerificationResult verify(byte[] data, byte[] signatureData, String emailAddressValue) {
-		try (var pemReader = new PemReader(new StringReader(new String(signatureData)))) {
+		var normalizedSignature = normalizePem(new String(signatureData));
+		try (var pemReader = new PemReader(new StringReader(normalizedSignature))) {
 			var signatureBlob = pemReader.readPemObject().getContent();
 			var signatureBlobReader = new TypesReader(signatureBlob);
 			var magicPreamble = new String(signatureBlobReader.readBytes(6));
@@ -119,6 +120,15 @@ public class SshSignatureVerifier implements SignatureVerifier {
 	@Override
 	public String getPrefix() {
 		return "-----BEGIN SSH SIGNATURE-----";
+	}
+
+	private String normalizePem(String pem) {
+		var lines = pem.split("\n");
+		var result = new StringBuilder();
+		for (var line : lines) {
+			result.append(line.stripLeading()).append("\n");
+		}
+		return result.toString();
 	}
 
 }
