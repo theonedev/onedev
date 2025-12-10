@@ -35,8 +35,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.SsoProvider;
 import io.onedev.server.model.User;
+import io.onedev.server.security.AuthenticatingService;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.service.AuthenticatingService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.SsoProviderService;
 import io.onedev.server.service.UserService;
