@@ -1197,6 +1197,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Enforce password policy for new users", "Aplicar política de contraseña para nuevos usuarios");
 		m.put("Enter New Password", "Ingrese nueva contraseña");
 		m.put("Enter description here", "Ingrese la descripción aquí");
+		m.put("Enter your details to create your account", "Ingrese sus datos para crear su cuenta");
 		m.put("Enter your details to login to your account", "Ingrese sus datos para iniciar sesión en su cuenta");
 		m.put("Enter your user name or email to reset password", "Ingrese su nombre de usuario o correo electrónico para restablecer la contraseña");
 		m.put("Entitle to All Users", "Conceder a Todos los Usuarios");
@@ -3797,6 +3798,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Suggesting title...", "Sugiriendo título...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "La sugerencia está desactualizada debido a un cambio de código o cierre de solicitud de extracción");
 		m.put("Suggestions", "Sugerencias");
+		m.put("Summarize comments with AI", "Resumir comentarios con IA");
 		m.put("Summary", "Resumen");
 		m.put("Support & Bug Report", "Soporte y Reporte de Errores");
 		m.put("Support Request", "Solicitud de Soporte");
@@ -4682,8 +4684,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Enter your details to create your account", "Ingrese sus datos para crear su cuenta");
-		m.put("Summarize comments with AI", "Resumir comentarios con IA");
+		m.put("Connection lost or session expired, reload to recover", "Conexión perdida o sesión expirada, recargar para recuperar");
 	}
 		
 	@Override

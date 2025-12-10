@@ -1197,6 +1197,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Enforce password policy for new users", "Appliquer la politique de mot de passe pour les nouveaux utilisateurs");
 		m.put("Enter New Password", "Entrez un nouveau mot de passe");
 		m.put("Enter description here", "Entrez la description ici");
+		m.put("Enter your details to create your account", "Entrez vos informations pour créer votre compte");
 		m.put("Enter your details to login to your account", "Entrez vos informations pour vous connecter à votre compte");
 		m.put("Enter your user name or email to reset password", "Entrez votre nom d'utilisateur ou e-mail pour réinitialiser le mot de passe");
 		m.put("Entitle to All Users", "Attribuer à tous les utilisateurs");
@@ -3797,6 +3798,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Suggesting title...", "Suggestion de titre...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "La suggestion est obsolète en raison d'un changement de code ou de la fermeture de la demande de tirage");
 		m.put("Suggestions", "Suggestions");
+		m.put("Summarize comments with AI", "Résumer les commentaires avec l'IA");
 		m.put("Summary", "Résumé");
 		m.put("Support & Bug Report", "Support & Rapport de bug");
 		m.put("Support Request", "Demande de support");
@@ -4682,8 +4684,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Enter your details to create your account", "Entrez vos informations pour créer votre compte");
-		m.put("Summarize comments with AI", "Résumer les commentaires avec l'IA");
+		m.put("Connection lost or session expired, reload to recover", "Connexion perdue ou session expirée, rechargez pour récupérer");
 	}
 		
 	@Override

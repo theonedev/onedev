@@ -1,4 +1,4 @@
-package io.onedev.server.security.service;
+package io.onedev.server.security;
 
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.subject.PrincipalCollection;

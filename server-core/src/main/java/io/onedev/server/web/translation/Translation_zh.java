@@ -1216,6 +1216,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Enforce password policy for new users", "对新用户强制执行密码策略");
 		m.put("Enter New Password", "输入新密码");
 		m.put("Enter description here", "输入描述");
+		m.put("Enter your details to create your account", "输入您的详细信息以创建您的账户");
 		m.put("Enter your details to login to your account", "输入您的详细信息登录到您的账户");
 		m.put("Enter your user name or email to reset password", "输入您的用户名或邮箱以重置密码");
 		m.put("Entitle to All Users", "授权给所有用户");
@@ -3816,6 +3817,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Suggesting title...", "建议标题...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "建议由于代码更改或合并请求关闭而过时");
 		m.put("Suggestions", "建议");
+		m.put("Summarize comments with AI", "使用 AI 总结评论");
 		m.put("Summary", "摘要");
 		m.put("Support & Bug Report", "技术支持与错误报告");
 		m.put("Support Request", "支持请求");
@@ -4701,8 +4703,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Enter your details to create your account", "输入您的详细信息以创建您的账户");
-		m.put("Summarize comments with AI", "使用 AI 总结评论");
+		m.put("Connection lost or session expired, reload to recover", "连接丢失或会话过期，重新加载以恢复");
 	}
 		
 	@Override

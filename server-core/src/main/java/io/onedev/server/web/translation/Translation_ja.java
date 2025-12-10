@@ -1197,6 +1197,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Enforce password policy for new users", "新しいユーザーに対してパスワードポリシーを強制");
 		m.put("Enter New Password", "新しいパスワードを入力");
 		m.put("Enter description here", "ここに説明を入力してください");
+		m.put("Enter your details to create your account", "アカウントを作成するために詳細を入力してください");
 		m.put("Enter your details to login to your account", "アカウントにログインするための詳細を入力してください");
 		m.put("Enter your user name or email to reset password", "パスワードをリセットするには、ユーザー名またはメールを入力してください");
 		m.put("Entitle to All Users", "すべてのユーザーに権限を付与");
@@ -3797,6 +3798,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Suggesting title...", "タイトルを提案中...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "提案がコード変更またはプルリクエストのクローズにより古くなっています");
 		m.put("Suggestions", "提案");
+		m.put("Summarize comments with AI", "AIでコメントを要約する");
 		m.put("Summary", "概要");
 		m.put("Support & Bug Report", "サポート＆バグレポート");
 		m.put("Support Request", "サポートリクエスト");
@@ -4682,8 +4684,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Enter your details to create your account", "アカウントを作成するために詳細を入力してください");
-		m.put("Summarize comments with AI", "AIでコメントを要約する");
+		m.put("Connection lost or session expired, reload to recover", "接続が失われたかセッションが期限切れです。復元するにはリロードしてください。");
 	}
 		
 	@Override

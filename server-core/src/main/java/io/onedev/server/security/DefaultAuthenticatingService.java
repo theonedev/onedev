@@ -1,4 +1,4 @@
-package io.onedev.server.security.service;
+package io.onedev.server.security;
 
 import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.validation.validator.UserNameValidator.normalizeUserName;

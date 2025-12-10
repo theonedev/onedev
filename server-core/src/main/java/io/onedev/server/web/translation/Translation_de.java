@@ -1197,6 +1197,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Enforce password policy for new users", "Passwortrichtlinie für neue Benutzer durchsetzen");
 		m.put("Enter New Password", "Neues Passwort eingeben");
 		m.put("Enter description here", "Geben Sie hier eine Beschreibung ein");
+		m.put("Enter your details to create your account", "Geben Sie Ihre Daten ein, um Ihr Konto zu erstellen");
 		m.put("Enter your details to login to your account", "Geben Sie Ihre Daten ein, um sich in Ihrem Konto anzumelden");
 		m.put("Enter your user name or email to reset password", "Geben Sie Ihren Benutzernamen oder Ihre E-Mail ein, um das Passwort zurückzusetzen");
 		m.put("Entitle to All Users", "Allen Benutzern zuweisen");
@@ -3797,6 +3798,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Suggesting title...", "Titel wird vorgeschlagen...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "Vorschlag ist veraltet, entweder aufgrund von Codeänderungen oder Schließung der Pull-Anfrage");
 		m.put("Suggestions", "Vorschläge");
+		m.put("Summarize comments with AI", "Kommentare mit KI zusammenfassen");
 		m.put("Summary", "Zusammenfassung");
 		m.put("Support & Bug Report", "Support & Fehlerbericht");
 		m.put("Support Request", "Supportanfrage");
@@ -4682,8 +4684,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Enter your details to create your account", "Geben Sie Ihre Daten ein, um Ihr Konto zu erstellen");
-		m.put("Summarize comments with AI", "Kommentare mit KI zusammenfassen");
+		m.put("Connection lost or session expired, reload to recover", "Verbindung verloren oder Sitzung abgelaufen, neu laden, um wiederherzustellen");
 	}
 			
 	@Override

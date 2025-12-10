@@ -1,4 +1,4 @@
-package io.onedev.server.security.service;
+package io.onedev.server.security;
 
 import static io.onedev.server.security.SecurityUtils.getUser;
 
@@ -28,7 +28,6 @@ import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.persistence.SessionService;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.BasePermission;
 import io.onedev.server.security.permission.ConfidentialIssuePermission;
 import io.onedev.server.security.permission.ProjectPermission;

@@ -1197,6 +1197,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Enforce password policy for new users", "새 사용자에 대한 비밀번호 정책 시행");
 		m.put("Enter New Password", "새 비밀번호 입력");
 		m.put("Enter description here", "여기에 설명을 입력하세요");
+		m.put("Enter your details to create your account", "계정을 생성하려면 세부 정보를 입력하세요");
 		m.put("Enter your details to login to your account", "계정에 로그인하려면 세부 정보를 입력하세요");
 		m.put("Enter your user name or email to reset password", "비밀번호를 재설정하려면 사용자 이름 또는 이메일을 입력하세요");
 		m.put("Entitle to All Users", "모든 사용자에게 권한 부여");
@@ -3797,6 +3798,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Suggesting title...", "제목 제안 중...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "제안이 코드 변경 또는 풀 리퀘스트 종료로 인해 오래됨");
 		m.put("Suggestions", "제안들");
+		m.put("Summarize comments with AI", "AI로 댓글 요약하기");
 		m.put("Summary", "요약");
 		m.put("Support & Bug Report", "지원 및 버그 보고");
 		m.put("Support Request", "지원 요청");
@@ -4682,8 +4684,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Enter your details to create your account", "계정을 생성하려면 세부 정보를 입력하세요");
-		m.put("Summarize comments with AI", "AI로 댓글 요약하기");
+		m.put("Connection lost or session expired, reload to recover", "연결이 끊어졌거나 세션이 만료되었습니다. 복구하려면 새로 고침하세요.");
 	}
 		
 	@Override

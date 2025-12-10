@@ -1197,6 +1197,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Enforce password policy for new users", "Impor política de senha para novos usuários");
 		m.put("Enter New Password", "Digite a Nova Senha");
 		m.put("Enter description here", "Insira a descrição aqui");
+		m.put("Enter your details to create your account", "Insira seus dados para criar sua conta");
 		m.put("Enter your details to login to your account", "Insira seus dados para fazer login na sua conta");
 		m.put("Enter your user name or email to reset password", "Digite seu nome de usuário ou email para redefinir a senha");
 		m.put("Entitle to All Users", "Conceder a Todos os Usuários");
@@ -3797,6 +3798,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Suggesting title...", "Sugerindo título...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "A sugestão está desatualizada devido a alteração de código ou fechamento do pull request");
 		m.put("Suggestions", "Sugestões");
+		m.put("Summarize comments with AI", "Resuma comentários com IA");
 		m.put("Summary", "Resumo");
 		m.put("Support & Bug Report", "Suporte & Relatório de Bug");
 		m.put("Support Request", "Solicitação de Suporte");
@@ -4682,8 +4684,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Enter your details to create your account", "Insira seus dados para criar sua conta");
-		m.put("Summarize comments with AI", "Resuma comentários com IA");
+		m.put("Connection lost or session expired, reload to recover", "Conexão perdida ou sessão expirada, recarregue para recuperar");
 	}
 		
 	@Override

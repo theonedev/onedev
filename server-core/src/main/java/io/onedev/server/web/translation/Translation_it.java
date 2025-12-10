@@ -1197,6 +1197,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Enforce password policy for new users", "Imponi politica della password per i nuovi utenti");
 		m.put("Enter New Password", "Inserisci Nuova Password");
 		m.put("Enter description here", "Inserisci qui la descrizione");
+		m.put("Enter your details to create your account", "Inserisci i tuoi dati per creare il tuo account");
 		m.put("Enter your details to login to your account", "Inserisci i tuoi dati per accedere al tuo account");
 		m.put("Enter your user name or email to reset password", "Inserisci il tuo nome utente o email per reimpostare la password");
 		m.put("Entitle to All Users", "Concedi a Tutti gli Utenti");
@@ -3797,6 +3798,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Suggesting title...", "Suggerimento titolo...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "Il suggerimento è obsoleto a causa di modifiche al codice o chiusura della pull request");
 		m.put("Suggestions", "Suggerimenti");
+		m.put("Summarize comments with AI", "Riepiloga i commenti con l'IA");
 		m.put("Summary", "Sommario");
 		m.put("Support & Bug Report", "Supporto & Segnalazione Bug");
 		m.put("Support Request", "Richiesta di Supporto");
@@ -4682,8 +4684,7 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Enter your details to create your account", "Inserisci i tuoi dati per creare il tuo account");
-		m.put("Summarize comments with AI", "Riepiloga i commenti con l'IA");
+		m.put("Connection lost or session expired, reload to recover", "Connessione persa o sessione scaduta, ricarica per recuperare");
 	}
 		
 	@Override
