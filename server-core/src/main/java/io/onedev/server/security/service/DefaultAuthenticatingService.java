@@ -1,4 +1,4 @@
-package io.onedev.server.security.realm;
+package io.onedev.server.security.service;
 
 import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.validation.validator.UserNameValidator.normalizeUserName;
@@ -7,7 +7,6 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.text.MessageFormat;
 import java.util.HashSet;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -20,56 +19,50 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authc.credential.PasswordMatcher;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.realm.AuthenticatingRealm;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.service.EmailAddressService;
-import io.onedev.server.service.GroupService;
-import io.onedev.server.service.MembershipService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.SshKeyService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
-import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.MembershipService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.SshKeyService;
+import io.onedev.server.service.UserService;
 
 @Singleton
-public class PasswordAuthenticatingRealm extends AuthenticatingRealm {
+public class DefaultAuthenticatingService extends AuthenticatingRealm implements AuthenticatingService {
 
-	private static final Logger logger = LoggerFactory.getLogger(PasswordAuthenticatingRealm.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultAuthenticatingService.class);
 	
-	private final UserService userService;
+	@Inject
+	private UserService userService;
 	
-    private final TransactionService transactionService;
+	@Inject
+	private TransactionService transactionService;
     
-    private final MembershipService membershipService;
+    @Inject
+	private MembershipService membershipService;
     
-    private final SshKeyService sshKeyService;
+    @Inject
+	private SshKeyService sshKeyService;
     
-    private final EmailAddressService emailAddressService;
+    @Inject
+	private EmailAddressService emailAddressService;
 	
-	private final SettingService settingService;
+	@Inject
+	private SettingService settingService;
     
 	@Inject
-    public PasswordAuthenticatingRealm(UserService userService, SettingService settingService,
-									   MembershipService membershipService, GroupService groupService,
-									   ProjectService projectService, SessionService sessionService,
-									   TransactionService transactionService, SshKeyService sshKeyService,
-									   PasswordService passwordService, EmailAddressService emailAddressService) {
+    public DefaultAuthenticatingService(PasswordService passwordService) {
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(passwordService);
 		setCredentialsMatcher(passwordMatcher);
-		this.userService = userService;
-    	this.transactionService = transactionService;
-    	this.membershipService = membershipService;
-    	this.sshKeyService = sshKeyService;
-    	this.emailAddressService = emailAddressService;
-		this.settingService = settingService;
     }
 
 	@Override

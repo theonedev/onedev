@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.wicket.Component;
@@ -31,13 +33,6 @@ import com.nimbusds.oauth2.sdk.ParseException;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.service.EmailAddressService;
-import io.onedev.server.service.MembershipService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.SshKeyService;
-import io.onedev.server.service.SsoAccountService;
-import io.onedev.server.service.SsoProviderService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.SsoAccount;
@@ -46,7 +41,14 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.realm.PasswordAuthenticatingRealm;
+import io.onedev.server.security.service.DefaultAuthenticatingService;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.MembershipService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.SshKeyService;
+import io.onedev.server.service.SsoAccountService;
+import io.onedev.server.service.SsoProviderService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.component.tabbable.ActionTab;
@@ -71,6 +73,30 @@ public class SsoProcessPage extends SimplePage {
 	private static final String SESSION_ATTR_REDIRECT_URL = "redirectUrl";
 
 	private static final Logger logger = LoggerFactory.getLogger(SsoProcessPage.class);
+
+	@Inject
+	private SsoAccountService ssoAccountService;
+
+	@Inject
+	private UserService userService;
+
+	@Inject
+	private EmailAddressService emailAddressService;
+
+	@Inject
+	private SettingService settingService;
+
+	@Inject
+	private MembershipService membershipService;
+
+	@Inject
+	private SshKeyService sshKeyService;
+
+	@Inject
+	private DefaultAuthenticatingService authenticatingService;
+
+	@Inject
+	private TransactionService transactionService;
 
 	private final IModel<SsoProvider> providerModel;
 	
@@ -108,28 +134,28 @@ public class SsoProcessPage extends SimplePage {
 				throw new RedirectToUrlException(getProvider().getConnector().buildAuthUrl(providerName));
 			} else {
 				authenticated = getProvider().getConnector().handleAuthResponse(providerName);
-				var aUser = getTransactionService().call(() -> {					
-					var ssoAccount = getSsoAccountService().find(getProvider(), authenticated.getSubject());
+				var aUser = transactionService.call(() -> {					
+					var ssoAccount = ssoAccountService.find(getProvider(), authenticated.getSubject());
 					if (ssoAccount != null) {
 						var user = ssoAccount.getUser();
 						if (user.getType() != ORDINARY || user.isDisabled()) {
-							getSsoAccountService().delete(ssoAccount);
+							ssoAccountService.delete(ssoAccount);
 						} else {
 							if (authenticated.getEmail() != null) {
-								var emailAddress = getEmailAddressService().findByValue(authenticated.getEmail());
+								var emailAddress = emailAddressService.findByValue(authenticated.getEmail());
 								if (emailAddress == null) {
 									emailAddress = new EmailAddress();
 									emailAddress.setValue(authenticated.getEmail());
 									emailAddress.setVerificationCode(null);
 									user.addEmailAddress(emailAddress);
-									getEmailAddressService().create(emailAddress);
+									emailAddressService.create(emailAddress);
 								} else if (emailAddress.getOwner().equals(user)) {
 									emailAddress.setVerificationCode(null);
-									getEmailAddressService().update(emailAddress);
+									emailAddressService.update(emailAddress);
 								} else if (!emailAddress.isVerified()) {
 									emailAddress.setVerificationCode(null);
 									user.addEmailAddress(emailAddress);
-									getEmailAddressService().update(emailAddress);
+									emailAddressService.update(emailAddress);
 								} else {
 									throw new AuthenticationException(MessageFormat.format(_T("Email address \"{0}\" used by account \"{1}\""), authenticated.getEmail(), user.getName()));
 								}
@@ -139,12 +165,12 @@ public class SsoProcessPage extends SimplePage {
 						}
 					} 
 					if (authenticated.getEmail() != null) {
-						var emailAddress = getEmailAddressService().findByValue(authenticated.getEmail());
+						var emailAddress = emailAddressService.findByValue(authenticated.getEmail());
 						if (emailAddress != null) {
 							var user = emailAddress.getOwner();
 							if (emailAddress.isVerified()) {
 								if (user.getType() != ORDINARY) {
-									getEmailAddressService().delete(emailAddress);
+									emailAddressService.delete(emailAddress);
 								} else if (user.isDisabled()) {
 									throw new AuthenticationException(MessageFormat.format(_T("Email address \"{0}\" used by disabled account \"{1}\""), authenticated.getEmail(), user.getName()));
 								} else {
@@ -152,13 +178,13 @@ public class SsoProcessPage extends SimplePage {
 									ssoAccount.setUser(user);
 									ssoAccount.setProvider(getProvider());
 									ssoAccount.setSubject(authenticated.getSubject());
-									getSsoAccountService().create(ssoAccount);
+									ssoAccountService.create(ssoAccount);
 
 									syncGroupsAndSshKeys(user, false);
 									return user;
 								}
 							} else {
-								getEmailAddressService().delete(emailAddress);
+								emailAddressService.delete(emailAddress);
 							}
 						} 
 					}
@@ -191,13 +217,13 @@ public class SsoProcessPage extends SimplePage {
 		if (groupNames != null) {
 			if (getProvider().getDefaultGroup() != null)
 				groupNames.add(getProvider().getDefaultGroup().getName());
-			if (getSettingService().getSecuritySetting().getDefaultGroupName() != null)
-				groupNames.add(getSettingService().getSecuritySetting().getDefaultGroupName());
-			getMembershipService().syncMemberships(user, groupNames);
+			if (settingService.getSecuritySetting().getDefaultGroupName() != null)
+				groupNames.add(settingService.getSecuritySetting().getDefaultGroupName());
+			membershipService.syncMemberships(user, groupNames);
 		}
 		
 		if (authenticated.getSshKeys() != null)
-			getSshKeyService().syncSshKeys(user, authenticated.getSshKeys());									
+			sshKeyService.syncSshKeys(user, authenticated.getSshKeys());									
 	}
 
 	private void afterLogin(User user) {		
@@ -257,18 +283,18 @@ public class SsoProcessPage extends SimplePage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				User userWithSameName = getUserService().findByName(bean.getName());
+				User userWithSameName = userService.findByName(bean.getName());
 				if (userWithSameName != null) {
 					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
 							_T("Login name already used by another account"));
 				} 
 
-				if (authenticated.getEmail() == null && getEmailAddressService().findByValue(bean.getEmailAddress()) != null) {
+				if (authenticated.getEmail() == null && emailAddressService.findByValue(bean.getEmailAddress()) != null) {
 					editor.error(new Path(new PathNode.Named(SignUpBean.PROP_EMAIL_ADDRESS)),
 							_T("Email address already used by another user"));
 				}
 				if (editor.isValid()) {					
-					var aUser = getTransactionService().call(() -> {
+					var aUser = transactionService.call(() -> {
 						User user = new User();
 						user.setName(bean.getName());
 						user.setFullName(bean.getFullName());
@@ -289,9 +315,9 @@ public class SsoProcessPage extends SimplePage {
 						ssoAccount.setProvider(getProvider());
 						ssoAccount.setSubject(authenticated.getSubject());
 	
-						getUserService().create(user);
-						getEmailAddressService().create(emailAddress);
-						getSsoAccountService().create(ssoAccount);
+						userService.create(user);
+						emailAddressService.create(emailAddress);
+						ssoAccountService.create(ssoAccount);
 						
 						syncGroupsAndSshKeys(user, true);
 						return user;
@@ -323,21 +349,21 @@ public class SsoProcessPage extends SimplePage {
 				super.onSubmit();
 
 				try {
-					var aUser = getTransactionService().call(() -> {
+					var aUser = transactionService.call(() -> {
 						var token = new UsernamePasswordToken(bean.getUserName(), bean.getPassword(), false);
-						var user = (User) getPasswordAuthenticatingRealm().getAuthenticationInfo(token);
+						var user = (User) authenticatingService.getAuthenticationInfo(token);
 						if (authenticated.getEmail() != null) {
 							var emailAddress = new EmailAddress();
 							emailAddress.setValue(authenticated.getEmail());
 							emailAddress.setVerificationCode(null);
 							user.addEmailAddress(emailAddress);
-							getEmailAddressService().create(emailAddress);							
+							emailAddressService.create(emailAddress);							
 						}
 						var ssoAccount = new SsoAccount();
 						ssoAccount.setUser(user);
 						ssoAccount.setProvider(getProvider());
 						ssoAccount.setSubject(authenticated.getSubject());
-						getSsoAccountService().create(ssoAccount);
+						ssoAccountService.create(ssoAccount);
 
 						syncGroupsAndSshKeys(user, true);
 						return user;
@@ -385,35 +411,4 @@ public class SsoProcessPage extends SimplePage {
 		return _T("Connect with your SSO account");
 	}
 	
-	private TransactionService getTransactionService() {
-		return OneDev.getInstance(TransactionService.class);
-	}
-
-	private SsoAccountService getSsoAccountService() {
-		return OneDev.getInstance(SsoAccountService.class);
-	}
-
-	private UserService getUserService() {
-		return OneDev.getInstance(UserService.class);
-	}
-
-	private EmailAddressService getEmailAddressService() {
-		return OneDev.getInstance(EmailAddressService.class);
-	}
-
-	private SettingService getSettingService() {
-		return OneDev.getInstance(SettingService.class);
-	}
-
-	private MembershipService getMembershipService() {
-		return OneDev.getInstance(MembershipService.class);
-	}
-
-	private SshKeyService getSshKeyService() {
-		return OneDev.getInstance(SshKeyService.class);
-	}
-
-	private PasswordAuthenticatingRealm getPasswordAuthenticatingRealm() {
-		return OneDev.getInstance(PasswordAuthenticatingRealm.class);
-	}
 }

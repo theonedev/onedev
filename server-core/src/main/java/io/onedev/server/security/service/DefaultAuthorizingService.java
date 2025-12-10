@@ -1,4 +1,4 @@
-package io.onedev.server.security.realm;
+package io.onedev.server.security.service;
 
 import static io.onedev.server.security.SecurityUtils.getUser;
 
@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -22,10 +23,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.server.service.GroupService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.Project;
@@ -37,32 +34,20 @@ import io.onedev.server.security.permission.ConfidentialIssuePermission;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.UserAdministration;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.facade.UserFacade;
 
-public class GeneralAuthorizingRealm extends AuthorizingRealm {
-
-    protected final UserService userService;
+@Singleton
+public class DefaultAuthorizingService extends AuthorizingRealm implements AuthorizingService {
     
-    protected final GroupService groupService;
+    @Inject
+    private SessionService sessionService;
     
-    protected final ProjectService projectService;
+    @Inject
+    private SettingService settingService;
     
-    protected final SessionService sessionService;
-    
-    protected final SettingService settingService;
-    
-	private static final MetaDataKey<Map<String, AuthorizationInfo>> AUTHORIZATION_INFOS = new MetaDataKey<>() {};    
-    
-	@Inject
-    public GeneralAuthorizingRealm(UserService userService, GroupService groupService,
-                                   ProjectService projectService, SessionService sessionService, SettingService settingService) {
-    	this.userService = userService;
-    	this.groupService = groupService;
-    	this.projectService = projectService;
-    	this.sessionService = sessionService;
-    	this.settingService = settingService;
-    }
+    private final MetaDataKey<Map<String, AuthorizationInfo>> AUTHORIZATION_INFOS = new MetaDataKey<>() {};    
 	
 	private AuthorizationInfo newAuthorizationInfo(String principal) {
 		var result = sessionService.call(() -> {
@@ -158,7 +143,7 @@ public class GeneralAuthorizingRealm extends AuthorizingRealm {
 	}
 	
 	@Override
-	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
+	public AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
 		String principal = (String) principals.getPrimaryPrincipal();
 		RequestCycle requestCycle = RequestCycle.get();
 		if (requestCycle != null) {

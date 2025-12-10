@@ -6,6 +6,8 @@ import static io.onedev.server.web.translation.Translation._T;
 
 import java.text.MessageFormat;
 
+import javax.inject.Inject;
+
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -31,11 +33,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.model.SsoProvider;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.realm.PasswordAuthenticatingRealm;
+import io.onedev.server.security.service.AuthenticatingService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.SsoProviderService;
 import io.onedev.server.service.UserService;
@@ -45,6 +46,21 @@ import io.onedev.server.web.page.simple.SimpleCssResourceReference;
 import io.onedev.server.web.page.simple.SimplePage;
 
 public class LoginPage extends SimplePage {
+
+	@Inject
+	private AuthenticatingService authenticationService;
+
+	@Inject
+	private UserService userService;
+
+	@Inject
+	private SettingService settingService;
+
+	@Inject
+	private SsoProviderService ssoProviderService;
+
+	@Inject
+	private RememberMeManager rememberMeManager;
 
 	private String userName;
 	
@@ -88,7 +104,7 @@ public class LoginPage extends SimplePage {
 				super.onSubmit();
 				try {
 					var token = new UsernamePasswordToken(userName, password, rememberMe);
-					var user = (User) OneDev.getInstance(PasswordAuthenticatingRealm.class).getAuthenticationInfo(token);
+					var user = (User) authenticationService.getAuthenticationInfo(token);
 					if (user.isEnforce2FA()) {
 						if (user.getTwoFactorAuthentication() != null) {
 							subTitle = _T("Two-factor authentication is enabled. Please input passcode displayed on your TOTP authenticator. If you encounter problems, make sure time of OneDev server and your device running TOTP authenticator is in sync");
@@ -170,15 +186,12 @@ public class LoginPage extends SimplePage {
 		
 		form.add(new ViewStateAwarePageLink<Void>("forgetPassword", PasswordResetPage.class));
 		fragment.add(form);
-		
-		SettingService settingService = OneDev.getInstance(SettingService.class);
-		
+				
 		boolean enableSelfRegister = settingService.getSecuritySetting().isEnableSelfRegister();
 		fragment.add(new ViewStateAwarePageLink<Void>("registerUser", SignUpPage.class).setVisible(enableSelfRegister));
 
 		String serverUrl = settingService.getSystemSetting().getServerUrl();
 		
-		var ssoProviderService = OneDev.getInstance(SsoProviderService.class);
 		RepeatingView ssoButtonsView = new RepeatingView("ssoButtons");
 		var ssoProviders = ssoProviderService.query();
 		for (SsoProvider provider: ssoProviders) {
@@ -192,13 +205,8 @@ public class LoginPage extends SimplePage {
 		
 		add(fragment);
 	}
-	
-	private UserService getUserService() {
-		return OneDev.getInstance(UserService.class);
-	}
-	
+		
 	private void afterLogin(User user) {
-		RememberMeManager rememberMeManager = OneDev.getInstance(RememberMeManager.class);
 		if (rememberMe) {
 			AuthenticationToken token = new UsernamePasswordToken(userName, password, rememberMe);
 			rememberMeManager.onSuccessfulLogin(SecurityUtils.getSubject(), token, user);
@@ -220,7 +228,7 @@ public class LoginPage extends SimplePage {
 			
 			@Override
 			protected User getUser() {
-				return getUserService().load(userId);
+				return userService.load(userId);
 			}
 			
 		});
@@ -233,7 +241,7 @@ public class LoginPage extends SimplePage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				User user = getUserService().load(userId);
+				User user = userService.load(userId);
 				if (user.getTwoFactorAuthentication().getTOTPCode().equals(passcode)) 
 					afterLogin(user);
 				else 
@@ -281,9 +289,9 @@ public class LoginPage extends SimplePage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				User user = getUserService().load(userId);
+				User user = userService.load(userId);
 				if (user.getTwoFactorAuthentication().getScratchCodes().remove(recoveryCode)) {
-					getUserService().update(user, null);
+					userService.update(user, null);
 					afterLogin(user);
 				} else {
 					error("Recovery code verification failed");
@@ -322,7 +330,7 @@ public class LoginPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return _T("Sign In To") + " " + OneDev.getInstance(SettingService.class).getBrandingSetting().getName();
+		return _T("Sign In To") + " " + settingService.getBrandingSetting().getName();
 	}
 
 	@Override

@@ -182,7 +182,10 @@ import io.onedev.server.security.DefaultShiroFilterConfiguration;
 import io.onedev.server.security.DefaultWebSecurityManager;
 import io.onedev.server.security.FilterChainConfigurator;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.realm.GeneralAuthorizingRealm;
+import io.onedev.server.security.service.AuthenticatingService;
+import io.onedev.server.security.service.AuthorizingService;
+import io.onedev.server.security.service.DefaultAuthenticatingService;
+import io.onedev.server.security.service.DefaultAuthorizingService;
 import io.onedev.server.service.AccessTokenAuthorizationService;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.AgentAttributeService;
@@ -651,7 +654,10 @@ public class CoreModule extends AbstractPluginModule {
 	}
 	
 	private void configureSecurity() {
-		contributeFromPackage(Realm.class, GeneralAuthorizingRealm.class);
+		bind(AuthenticatingService.class).to(DefaultAuthenticatingService.class);
+		bind(AuthorizingService.class).to(DefaultAuthorizingService.class);
+		contribute(Realm.class, DefaultAuthorizingService.class);
+		contribute(Realm.class, DefaultAuthenticatingService.class);
 
 		bind(ShiroFilterConfiguration.class).to(DefaultShiroFilterConfiguration.class);
 		bind(RememberMeManager.class).to(DefaultRememberMeManager.class);
