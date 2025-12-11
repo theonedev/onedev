@@ -340,6 +340,12 @@ onedev.server = {
 	},	
 
 	setupWebSocketHandler: function() {		
+		var pageUnloading = false;
+		
+		$(window).on("beforeunload", function() {
+			pageUnloading = true;
+		});
+		
 		function showError($error) {
 			$error.css("left", ($(window).width()-$error.outerWidth()) / 2);
 			$error.slideDown("slow");
@@ -351,18 +357,23 @@ onedev.server = {
 			}
 		}
 		Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
-			testConnection();			
+			testConnection();		
+			$(".connection-error").hide();
 		});
 		Wicket.Event.subscribe("/websocket/closed", function(jqEvent) {
-			showError($(".connection-error"));
+			if (!pageUnloading) {
+				showError($(".connection-error"));
+			}
 		});
 		Wicket.Event.subscribe("/websocket/error", function(jqEvent) {
-			showError($(".connection-error"));
+			if (!pageUnloading) {
+				showError($(".connection-error"));
+			}
 		});
 		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
 			if (message == "ErrorMessage") 
 				showError($(".page-error"));
-		});
+		});		
 	},
 
 	/*
