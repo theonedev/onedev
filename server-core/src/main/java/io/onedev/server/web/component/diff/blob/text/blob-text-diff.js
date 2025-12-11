@@ -795,7 +795,7 @@ onedev.server.blobTextDiff = {
 				});
 			} else {
 				var loginHref = $(".sign-in").attr("href");
-				$content.append(`<a class='comment' href='${loginHref}'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#warning'/></svg> ${onedev.server.blobTextDiff.translations["login-to-comment-on-selection"]}</a>`);
+				$content.append(`<a class='comment' href='${loginHref}'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#warning'/></svg> ${onedev.server.blobTextDiff.translations["login-to-comment"]}</a>`);
 			}			
 		}		
 		
