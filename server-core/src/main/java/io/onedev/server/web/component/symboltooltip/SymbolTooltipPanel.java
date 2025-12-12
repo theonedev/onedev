@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
 
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -71,6 +72,12 @@ public abstract class SymbolTooltipPanel extends Panel {
 	private static final int AFTER_CONTEXT_SIZE = 5;
 
 	private static final int AT_START_CONTEXT_SIZE = 200;
+
+	private static final String SYMBOL_BEGIN = "[SYMBOL_BEGIN]";
+
+	private static final String SYMBOL_END = "[SYMBOL_END]";
+
+	private static final String OMITTED_LINES = "...OMITTED LINES...";
 
 	private static final Logger logger = LoggerFactory.getLogger(SymbolTooltipPanel.class);
 	
@@ -334,30 +341,33 @@ public abstract class SymbolTooltipPanel extends Panel {
 						mapperCopy.addMixIn(LinearRange.class, IgnoreLinearRangeMixin.class);
 						var jsonOfSymbolHits = mapperCopy.writeValueAsString(symbolHits);
 						
-						var symbolContext = getSymbolContext(symbolPosition, BEFORE_CONTEXT_SIZE, 
-								AFTER_CONTEXT_SIZE, AT_START_CONTEXT_SIZE);
-						var jsonOfSymbolContext = mapperCopy.writeValueAsString(symbolContext);
+						var symbolContext = getSymbolContext(symbolPosition, SYMBOL_BEGIN, SYMBOL_END, OMITTED_LINES, 
+								AT_START_CONTEXT_SIZE, BEFORE_CONTEXT_SIZE, AFTER_CONTEXT_SIZE);
+						var occurrenceMap = Map.of(
+							"symbolName", symbolName,
+							"blobPath", symbolContext.getBlobPath(), 
+							"symbolContext", Joiner.on('\n').join(symbolContext.getContextLines()), 
+							"note", String.format("Symbol is between %s and %s in the context", SYMBOL_BEGIN, SYMBOL_END)
+						);
+						var jsonOfSymbolOccurrence = mapperCopy.writeValueAsString(occurrenceMap);
 						var systemMessage = new SystemMessage("""
-								You are familiar with various programming languages. Given a symbol name, a json object of 
-								symbol context, and a json array of possible symbol definitions, please determine the most 
-								likely symbol definition and return its index in the array. Symbol definition may contain 
-								parent symbol, and this is where the symbol is defined inside (namespace, package etc). 
-								The @type property in symbol definition means category/kind of the symbol (type, method, 
-								variable etc).
+								You are familiar with various programming languages. Given a json object of symbol 
+								occurrence information, and a json array of possible symbol definitions, please 
+								determine the most likely definition for occurred symbol and return its index in 
+								the array. Symbol definition may contain parent symbol, and this is where the 
+								symbol is defined inside (namespace, package etc). The @type property in symbol 
+								definition means category/kind of the symbol (type, method, variable etc).
 
 								IMPORTANT: only return index of the definition, no other text or comments.
 								""");
 
 						var userMessage = new UserMessage(String.format("""
-								Symbol name: 
-								%s
-
-								Symbol context json: 
+								Symbol occurrence information json: 
 								%s
 
 								Possible symbol definitions json:
 								%s
-								""", symbolName, jsonOfSymbolContext, jsonOfSymbolHits));
+								""", symbolName, jsonOfSymbolOccurrence, jsonOfSymbolHits));
 						index = Integer.parseInt(liteModel.chat(systemMessage, userMessage).aiMessage().text());
 						if (index < 0 || index >= symbolHits.size())
 							Session.get().warn("Unable to find most likely definition");
@@ -427,8 +437,8 @@ public abstract class SymbolTooltipPanel extends Panel {
 
 	protected abstract String getSymbolPositionCalcFunction();
 
-	protected abstract SymbolContext getSymbolContext(String symbolPosition, int beforeContextSize, 
-			int afterContextSize, int atStartContextSize);
+	protected abstract SymbolContext getSymbolContext(String symbolPosition, String symbolBegin, String symbolEnd, 
+			String truncationMark, int atStartContextSize, int beforeContextSize, int afterContextSize);
 
 }
 

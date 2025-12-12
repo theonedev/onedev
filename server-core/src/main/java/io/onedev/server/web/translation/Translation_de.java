@@ -793,6 +793,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Confirm your action", "Aktion bestätigen");
 		m.put("Connect New Agent", "Neuen Agent verbinden");
 		m.put("Connect with your SSO account", "Mit Ihrem SSO-Konto verbinden");
+		m.put("Connection lost or session expired, reload to recover", "Verbindung verloren oder Sitzung abgelaufen, neu laden, um wiederherzustellen");
 		m.put("Contact Email", "Kontakt-E-Mail");
 		m.put("Contact Name", "Kontaktname");
 		m.put("Container Image", "Container-Image");
@@ -1269,6 +1270,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Expiration Date:", "Ablaufdatum:");
 		m.put("Expire Date", "Ablaufdatum");
 		m.put("Expired", "Abgelaufen");
+		m.put("Explain selected text with AI", "Erklären Sie den ausgewählten Text mit KI");
 		m.put("Explicit SSL (StartTLS)", "Explizites SSL (StartTLS)");
 		m.put("Export", "Exportieren");
 		m.put("Export All Queried Issues To...", "Alle abgefragten Probleme exportieren nach...");
@@ -4684,7 +4686,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Connection lost or session expired, reload to recover", "Verbindung verloren oder Sitzung abgelaufen, neu laden, um wiederherzustellen");
 	}
 			
 	@Override

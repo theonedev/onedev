@@ -76,11 +76,12 @@ class BoundaryGenerator extends Generator {
 				IncorrectObjectTypeException, IOException {
 			RevCommit c = source.next();
 			if (c != null) {
-				for (int i = 0; i < c.parents.length; i++) {
+				int n = c.getParentCount();
+				for (int i = 0; i < n; i++) {
 					if (firstParent && i > 0) {
 						break;
 					}
-					RevCommit p = c.parents[i];
+					RevCommit p = c.getParent(i);
 					if ((p.flags & UNINTERESTING) != 0) {
 						held.add(p);
 					}

@@ -101,7 +101,7 @@ public interface BlobRenderContext extends Serializable {
 	void onCommentClosed(AjaxRequestTarget target);
 	
 	void onAddComment(AjaxRequestTarget target, PlanarRange range);
-	
+		
 	ObjectId uploadFiles(FileUpload upload, @Nullable String directory, String commitMessage);
 	
 	@Nullable

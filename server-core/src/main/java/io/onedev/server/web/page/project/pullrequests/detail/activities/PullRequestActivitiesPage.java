@@ -417,7 +417,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				var page = (LayoutPage)getPage();
-				page.getChatter().show(target, "Summarize comments of current pull request. Display summary in " + getSession().getLocale().getDisplayLanguage());
+				page.getChatter().show(target, "Summarize comments of current pull request. Display in " + getSession().getLocale().getDisplayLanguage());
 			}
 
 			@Override

@@ -51,7 +51,6 @@ public final class FooterKey {
 		return name;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		return "FooterKey[" + name + "]";

@@ -842,6 +842,12 @@ public abstract class RevisionDiffPanel extends Panel {
 							}
 
 							@Override
+							public void onMark(AjaxRequestTarget target, DiffPlanarRange markRange) {
+								var mark = change.getMark(markRange);
+								annotationSupport.onMark(target, mark);
+							};
+							
+							@Override
 							public void onAddComment(AjaxRequestTarget target, DiffPlanarRange commentRange) {
 								Mark mark = change.getMark(commentRange);
 								commentContainer.setDefaultModelObject(mark);
@@ -2066,6 +2072,12 @@ public abstract class RevisionDiffPanel extends Panel {
 					public void onOpenComment(AjaxRequestTarget target, CodeComment comment, DiffPlanarRange commentRange) {
 						RevisionDiffPanel.this.onOpenComment(target, comment, change.getMark(commentRange));
 						((BasePage)getPage()).resizeWindow(target);
+					}
+
+					@Override
+					public void onMark(AjaxRequestTarget target, DiffPlanarRange markRange) {
+						Mark mark = change.getMark(markRange);
+						annotationSupport.onMark(target, mark);						
 					}
 
 					@Override

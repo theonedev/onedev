@@ -8,11 +8,11 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-
 package org.eclipse.jgit.revwalk;
 
 import java.io.IOException;
 
+import org.eclipse.jgit.annotations.Nullable;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 
@@ -36,11 +36,17 @@ public class DateRevQueue extends AbstractRevQueue {
 
 	private int last = -1;
 
-	/** Create an empty date queue. */
+	/** Create an empty DateRevQueue. */
 	public DateRevQueue() {
 		super(false);
 	}
 
+	/**
+	 * Create an empty DateRevQueue.
+	 *
+	 * @param firstParent
+	 *            treat first element as a parent
+	 */
 	DateRevQueue(boolean firstParent) {
 		super(firstParent);
 	}
@@ -56,7 +62,6 @@ public class DateRevQueue extends AbstractRevQueue {
 		}
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public void add(RevCommit c) {
 		sinceLastIndex++;
@@ -102,7 +107,6 @@ public class DateRevQueue extends AbstractRevQueue {
 		}
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public RevCommit next() {
 		final Entry q = head;
@@ -135,11 +139,10 @@ public class DateRevQueue extends AbstractRevQueue {
 	 *
 	 * @return the next available commit; null if there are no commits left.
 	 */
-	public RevCommit peek() {
+	public @Nullable RevCommit peek() {
 		return head != null ? head.commit : null;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public void clear() {
 		head = null;
@@ -173,7 +176,6 @@ public class DateRevQueue extends AbstractRevQueue {
 		return outputType | SORT_COMMIT_TIME_DESC;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		final StringBuilder s = new StringBuilder();

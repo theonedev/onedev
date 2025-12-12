@@ -793,6 +793,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Confirm your action", "작업을 확인하세요");
 		m.put("Connect New Agent", "새 에이전트 연결");
 		m.put("Connect with your SSO account", "SSO 계정으로 연결");
+		m.put("Connection lost or session expired, reload to recover", "연결이 끊어졌거나 세션이 만료되었습니다. 복구하려면 새로 고침하세요.");
 		m.put("Contact Email", "연락처 이메일");
 		m.put("Contact Name", "연락처 이름");
 		m.put("Container Image", "컨테이너 이미지");
@@ -1269,6 +1270,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Expiration Date:", "만료 날짜:");
 		m.put("Expire Date", "만료 날짜");
 		m.put("Expired", "만료됨");
+		m.put("Explain selected text with AI", "선택한 텍스트를 AI로 설명하기");
 		m.put("Explicit SSL (StartTLS)", "명시적 SSL (StartTLS)");
 		m.put("Export", "내보내기");
 		m.put("Export All Queried Issues To...", "모든 조회된 이슈를 내보내기...");
@@ -4684,7 +4686,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Connection lost or session expired, reload to recover", "연결이 끊어졌거나 세션이 만료되었습니다. 복구하려면 새로 고침하세요.");
 	}
 		
 	@Override

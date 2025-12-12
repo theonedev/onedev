@@ -38,13 +38,11 @@ public class NotRevFilter extends RevFilter {
 		a = one;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public RevFilter negate() {
 		return a;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public boolean include(RevWalk walker, RevCommit c)
 			throws MissingObjectException, IncorrectObjectTypeException,
@@ -52,19 +50,16 @@ public class NotRevFilter extends RevFilter {
 		return !a.include(walker, c);
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public boolean requiresCommitBody() {
 		return a.requiresCommitBody();
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public RevFilter clone() {
 		return new NotRevFilter(a.clone());
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		return "NOT " + a.toString(); //$NON-NLS-1$

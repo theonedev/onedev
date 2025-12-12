@@ -223,7 +223,9 @@ a.tree-junction {
 	position: fixed; 
 	max-width: 75%;
 	font-weight: bold;
-	top: 0; 
+	top: 0;
+	left: 50%;
+	transform: translateX(-50%);
 	background: var(--light-danger); 
 	border-radius: 0 0 0.42rem 0.42rem;
 	color: var(--danger);

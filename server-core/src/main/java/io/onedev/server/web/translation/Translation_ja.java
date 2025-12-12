@@ -793,6 +793,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Confirm your action", "アクションを確認");
 		m.put("Connect New Agent", "新しいエージェントを接続");
 		m.put("Connect with your SSO account", "SSOアカウントで接続");
+		m.put("Connection lost or session expired, reload to recover", "接続が失われたかセッションが期限切れです。復元するにはリロードしてください。");
 		m.put("Contact Email", "連絡先メール");
 		m.put("Contact Name", "連絡先名");
 		m.put("Container Image", "コンテナイメージ");
@@ -1269,6 +1270,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Expiration Date:", "有効期限:");
 		m.put("Expire Date", "有効期限");
 		m.put("Expired", "期限切れ");
+		m.put("Explain selected text with AI", "選択したテキストをAIで説明する");
 		m.put("Explicit SSL (StartTLS)", "明示的SSL (StartTLS)");
 		m.put("Export", "エクスポート");
 		m.put("Export All Queried Issues To...", "クエリされたすべての問題をエクスポート...");
@@ -4684,7 +4686,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Connection lost or session expired, reload to recover", "接続が失われたかセッションが期限切れです。復元するにはリロードしてください。");
 	}
 		
 	@Override

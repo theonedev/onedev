@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
-
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
@@ -66,6 +64,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.jgit.util.io.NullOutputStream;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
@@ -696,8 +695,8 @@ public class GitUtils {
 		PGPPublicKey publicKey = signingKey.getPublicKey();
 
 		PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(
-				new JcaPGPContentSignerBuilder(publicKey.getAlgorithm(), HashAlgorithmTags.SHA256)
-						.setProvider(BouncyCastleProvider.PROVIDER_NAME));
+				new JcaPGPContentSignerBuilder(publicKey.getAlgorithm(), HashAlgorithmTags.SHA256).setProvider(BouncyCastleProvider.PROVIDER_NAME),
+				signingKey.getPublicKey());
 		try {
 			signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, privateKey);
 			PGPSignatureSubpacketGenerator subpackets = new PGPSignatureSubpacketGenerator();

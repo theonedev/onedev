@@ -93,10 +93,11 @@ class StartGenerator extends Generator {
 
 		final DateRevQueue pending;
 		int pendingOutputType = 0;
-		if (q instanceof DateRevQueue)
+		if (q instanceof DateRevQueue) {
 			pending = (DateRevQueue)q;
-		else
-			pending = new DateRevQueue(q);
+		} else {
+			pending = RevWalk.newDateRevQueue(q);
+		}
 		if (tf != TreeFilter.ALL) {
 			int rewriteFlag;
 			if (w.getRewriteParents()) {
@@ -125,12 +126,6 @@ class StartGenerator extends Generator {
 		}
 
 		if ((g.outputType() & NEEDS_REWRITE) != 0) {
-			// Correction for an upstream NEEDS_REWRITE is to buffer
-			// fully and then apply a rewrite generator that can
-			// pull through the rewrite chain and produce a dense
-			// output graph.
-			//
-			g = new FIFORevQueue(g);
 			g = new RewriteGenerator(g);
 		}
 

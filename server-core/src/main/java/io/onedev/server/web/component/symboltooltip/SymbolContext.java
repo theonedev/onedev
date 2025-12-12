@@ -9,41 +9,19 @@ public class SymbolContext implements Serializable {
 
 	private final String blobPath;
 
-	private final String symbolLine;
+	private final List<String> contextLines;
 
-	private final List<String> linesBeforeSymbolLine;
-
-	private final List<String> linesAfterSymbolLine;
-
-	private final List<String> linesAtStart;
-
-	public SymbolContext(String blobPath, String symbolLine, 
-            List<String> linesBeforeSymbolLine, List<String> linesAfterSymbolLine, List<String> linesAtStart) {
+	public SymbolContext(String blobPath, List<String> contextLines) {
 		this.blobPath = blobPath;
-		this.symbolLine = symbolLine;
-		this.linesBeforeSymbolLine = linesBeforeSymbolLine;
-		this.linesAfterSymbolLine = linesAfterSymbolLine;
-		this.linesAtStart = linesAtStart;
+		this.contextLines = contextLines;
 	}
 
 	public String getBlobPath() {
 		return blobPath;
 	}
 
-	public String getSymbolLine() {
-		return symbolLine;
-	}
-
-	public List<String> getLinesBeforeSymbolLine() {
-		return linesBeforeSymbolLine;
-	}
-
-	public List<String> getLinesAfterSymbolLine() {
-		return linesAfterSymbolLine;
-	}
-
-	public List<String> getLinesAtStart() {
-		return linesAtStart;
+	public List<String> getContextLines() {
+		return contextLines;
 	}
 
 }

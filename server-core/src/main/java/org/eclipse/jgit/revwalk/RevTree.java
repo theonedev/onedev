@@ -33,7 +33,6 @@ public class RevTree extends RevObject {
 		super(id);
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public final int getType() {
 		return Constants.OBJ_TREE;

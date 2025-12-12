@@ -41,6 +41,7 @@ import com.ibm.icu.text.SpoofChecker;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.ai.HighlightedTextTool;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.BlameCommit;
@@ -53,6 +54,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.support.ChatTool;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.diff.DiffBlock;
@@ -68,13 +70,16 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.symboltooltip.SymbolContext;
 import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
 import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.AnnotationInfo;
+import io.onedev.server.web.util.ChatToolAware;
 import io.onedev.server.web.util.CodeCommentInfo;
 import io.onedev.server.web.util.DiffPlanarRange;
+import io.onedev.server.web.util.WicketUtils;
 
-public class BlobTextDiffPanel extends Panel {
+public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 
 	private final BlobChange change;
 	
@@ -315,6 +320,15 @@ public class BlobTextDiffPanel extends Panel {
 					case "setActive": 
 						onActive(target);
 						break;
+					case "explainSelection":
+						var range = getRange(params, "param1", "param2", "param3", "param4", "param5");
+						getAnnotationSupport().onMark(target, range);
+						var page = (LayoutPage) getPage();
+						page.getChatter().show(target, "Help me understand highlighted text. Display in " + getSession().getLocale().getDisplayLanguage());
+						script = String.format("onedev.server.blobTextDiff.mark($('#%s'), %s);", 
+								getMarkupId(), convertToJson(range));
+						target.appendJavaScript(script);
+						break;
 				}
 			}
 
@@ -367,8 +381,8 @@ public class BlobTextDiffPanel extends Panel {
 			}
 
 			@Override
-			protected SymbolContext getSymbolContext(String symbolPosition, int beforeContextSize, 
-					int afterContextSize, int atStartContextSize) {
+			protected SymbolContext getSymbolContext(String symbolPosition, String symbolBegin, String symbolEnd, 
+					String truncationMark, int atStartContextSize, int beforeContextSize, int afterContextSize) {
 				String[] parts = symbolPosition.split(":");
 				boolean isNew = parts[0].equals("new");
 				int lineNo = Integer.parseInt(parts[1]);
@@ -385,7 +399,6 @@ public class BlobTextDiffPanel extends Panel {
 				
 				List<String> linesBefore = new ArrayList<>();
 				List<String> linesAfter = new ArrayList<>();
-				String symbolLine = lines.get(lineNo);
 				
 				for (int i = Math.max(0, lineNo - beforeContextSize); i < lineNo; i++) {
 					linesBefore.add(lines.get(i));
@@ -399,13 +412,7 @@ public class BlobTextDiffPanel extends Panel {
 					linesAtStart.add(lines.get(i));
 				}
 				
-				return new SymbolContext(
-					path,
-					symbolLine,
-					linesBefore,
-					linesAfter,
-					linesAtStart
-				);
+				return new SymbolContext(path, linesBefore);
 			}
 						
 		};
@@ -478,10 +485,17 @@ public class BlobTextDiffPanel extends Panel {
 		translations.put("show-comment", _T("Click to show comment of marked text"));
 		translations.put("loading", _T("Loading..."));
 		translations.put("invalid-selection", _T("Invalid selection, click for details"));
+		var page = (LayoutPage) getPage();
+		if (getAnnotationSupport() != null 
+				&& WicketUtils.isSubscriptionActive() 
+				&& !page.getChatter().getEntitledAis().isEmpty()) {
+			translations.put("explain-selection", _T("Explain selected text with AI"));
+		}
 		for (var severity: CodeProblem.Severity.values())
 			translations.put(severity.name(), _T("severity:" + severity.name()));
 		translations.put("add-problem-comment", _T("Add comment"));
 
+		var jsonOfMarkRange = convertToJson(markRange);
 		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s);", 
 				getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, 
@@ -489,18 +503,15 @@ public class BlobTextDiffPanel extends Panel {
 				change.getOldBlobIdent().path!=null? escapeJavaScript(change.getOldBlobIdent().path):"",
 				change.getNewBlobIdent().path!=null? escapeJavaScript(change.getNewBlobIdent().path):"",
 				callback, blameMessageBehavior.getCallback(),
-				convertToJson(markRange), convertToJson(openCommentInfo), 
+				jsonOfMarkRange, convertToJson(openCommentInfo), 
 				convertToJson(annotationInfoModel.getObject()), 
 				commentContainerId, convertToJson(translations));
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 
-		String jsonOfMarkRange;
-		if (RequestCycle.get().find(AjaxRequestTarget.class) == null && markRange != null)
-			jsonOfMarkRange = convertToJson(markRange);
-		else
-			jsonOfMarkRange = "undefined";
-		script = String.format("onedev.server.blobTextDiff.onLoad('%s', %s);", getMarkupId(), jsonOfMarkRange);
+		script = String.format("onedev.server.blobTextDiff.onLoad('%s', %s);", 
+				getMarkupId(), 
+				RequestCycle.get().find(AjaxRequestTarget.class) == null? jsonOfMarkRange: "null");
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 	
@@ -1073,6 +1084,27 @@ public class BlobTextDiffPanel extends Panel {
 
 	private boolean isConfusable(String text1, String text2) {
 		return confusableChecker.areConfusable(text1, text2) != 0;	
+	}
+
+	@Override
+	public List<ChatTool> getChatTools() {
+		var tools = new ArrayList<ChatTool>();
+		if (getAnnotationSupport() != null) {
+			var markRange = getAnnotationSupport().getMarkRange();
+			if (markRange != null) {
+				String fileName;
+				List<String> fileLines;
+				if (markRange.isLeftSide()) {
+					fileName = change.getOldBlobIdent().getName();
+					fileLines = change.getOldText().getLines();
+				} else {
+					fileName = change.getNewBlobIdent().getName();
+					fileLines = change.getNewText().getLines();
+				}
+				tools.add(new HighlightedTextTool(fileName, fileLines, markRange));				
+			}
+		}
+		return tools;
 	}
 	
 	private static class BlameInfo implements Serializable {

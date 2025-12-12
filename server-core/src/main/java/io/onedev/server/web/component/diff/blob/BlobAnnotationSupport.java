@@ -42,6 +42,8 @@ public interface BlobAnnotationSupport extends Serializable {
 
 	void onAddComment(AjaxRequestTarget target, DiffPlanarRange commentRange);
 
+	void onMark(AjaxRequestTarget target, DiffPlanarRange markRange);
+
 	Component getCommentContainer();
 
 }

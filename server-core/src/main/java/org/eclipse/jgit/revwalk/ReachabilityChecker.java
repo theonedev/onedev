@@ -28,7 +28,7 @@ import org.eclipse.jgit.errors.MissingObjectException;
 public interface ReachabilityChecker {
 
 	/**
-	 * Check if all targets are reachable from the {@code starter} commits.
+	 * Check if all targets are reachable from the {@code starters} commits.
 	 * <p>
 	 * Caller should parse the objectIds (preferably with
 	 * {@code walk.parseCommit()} and handle missing/incorrect type objects
@@ -61,7 +61,7 @@ public interface ReachabilityChecker {
 	}
 
 	/**
-	 * Check if all targets are reachable from the {@code starter} commits.
+	 * Check if all targets are reachable from the {@code starters} commits.
 	 * <p>
 	 * Caller should parse the objectIds (preferably with
 	 * {@code walk.parseCommit()} and handle missing/incorrect type objects

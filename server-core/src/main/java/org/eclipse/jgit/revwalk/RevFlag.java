@@ -67,7 +67,6 @@ public class RevFlag {
 		return walker;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		return name;

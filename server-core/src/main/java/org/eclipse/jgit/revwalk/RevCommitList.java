@@ -25,7 +25,6 @@ import org.eclipse.jgit.revwalk.filter.RevFilter;
 public class RevCommitList<E extends RevCommit> extends RevObjectList<E> {
 	private RevWalk walker;
 
-	/** {@inheritDoc} */
 	@Override
 	public void clear() {
 		super.clear();
@@ -313,7 +312,6 @@ public class RevCommitList<E extends RevCommit> extends RevObjectList<E> {
 	 * walker specified by {@link #source(RevWalk)} is pumped until the
 	 * specified commit is loaded. Callers can test the final size of the list
 	 * by {@link #size()} to determine if the high water mark specified was met.
-	 * <p>
 	 *
 	 * @param commitToLoad
 	 *            commit the caller wants this list to contain when the fill

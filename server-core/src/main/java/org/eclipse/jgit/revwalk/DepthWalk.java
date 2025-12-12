@@ -35,6 +35,8 @@ public interface DepthWalk {
 	int getDepth();
 
 	/**
+	 * Get deepen-since value
+	 *
 	 * @return the deepen-since value; if not 0, this walk only returns commits
 	 *         whose commit time is at or after this limit
 	 * @since 5.2
@@ -44,6 +46,8 @@ public interface DepthWalk {
 	}
 
 	/**
+	 * Get deepen-not values
+	 *
 	 * @return the objects specified by the client using --shallow-exclude
 	 * @since 5.2
 	 */
@@ -51,7 +55,11 @@ public interface DepthWalk {
 		return Collections.emptyList();
 	}
 
-	/** @return flag marking commits that should become unshallow. */
+	/**
+	 * Get unshallow flag
+	 *
+	 * @return flag marking commits that should become unshallow.
+	 */
 	/**
 	 * Get flag marking commits that should become unshallow.
 	 *
@@ -67,7 +75,10 @@ public interface DepthWalk {
 	RevFlag getReinterestingFlag();
 
 	/**
-	 * @return flag marking commits that are to be excluded because of --shallow-exclude
+	 * Get deepen-not flag
+	 *
+	 * @return flag marking commits that are to be excluded because of
+	 *         --shallow-exclude
 	 * @since 5.2
 	 */
 	RevFlag getDeepenNotFlag();
@@ -85,12 +96,18 @@ public interface DepthWalk {
 		 */
 		boolean makesChildBoundary;
 
-		/** @return depth of this commit, as found by the shortest path. */
+		/**
+		 * Get depth
+		 *
+		 * @return depth of this commit, as found by the shortest path.
+		 */
 		public int getDepth() {
 			return depth;
 		}
 
 		/**
+		 * Whether at least one commit was excluded due to shallow fetch
+		 *
 		 * @return true if at least one of this commit's parents was excluded
 		 *         due to a shallow fetch setting, false otherwise
 		 * @since 5.2
@@ -126,8 +143,12 @@ public interface DepthWalk {
 		private final RevFlag DEEPEN_NOT;
 
 		/**
-		 * @param repo Repository to walk
-		 * @param depth Maximum depth to return
+		 * Create RevWalk
+		 *
+		 * @param repo
+		 *            Repository to walk
+		 * @param depth
+		 *            Maximum depth to return
 		 */
 		public RevWalk(Repository repo, int depth) {
 			super(repo);
@@ -140,8 +161,12 @@ public interface DepthWalk {
 		}
 
 		/**
-		 * @param or ObjectReader to use
-		 * @param depth Maximum depth to return
+		 * Create RevWalk
+		 *
+		 * @param or
+		 *            ObjectReader to use
+		 * @param depth
+		 *            Maximum depth to return
 		 */
 		public RevWalk(ObjectReader or, int depth) {
 			super(or);
@@ -159,8 +184,11 @@ public interface DepthWalk {
 		 * @param c
 		 *            Commit to mark
 		 * @throws IOException
+		 *             if an IO error occurred
 		 * @throws IncorrectObjectTypeException
+		 *             if object has an unexpected type
 		 * @throws MissingObjectException
+		 *             if object is missing
 		 */
 		public void markRoot(RevCommit c) throws MissingObjectException,
 				IncorrectObjectTypeException, IOException {
@@ -228,6 +256,8 @@ public interface DepthWalk {
 		}
 
 		/**
+		 * Convert to ObjectWalk with same objects
+		 *
 		 * @since 4.5
 		 */
 		@Override
@@ -256,8 +286,12 @@ public interface DepthWalk {
 		private final RevFlag DEEPEN_NOT;
 
 		/**
-		 * @param repo Repository to walk
-		 * @param depth Maximum depth to return
+		 * Create ObjectWalk
+		 *
+		 * @param repo
+		 *            Repository to walk
+		 * @param depth
+		 *            Maximum depth to return
 		 */
 		public ObjectWalk(Repository repo, int depth) {
 			super(repo);
@@ -270,8 +304,12 @@ public interface DepthWalk {
 		}
 
 		/**
-		 * @param or Object Reader
-		 * @param depth Maximum depth to return
+		 * Create ObjectWalk
+		 *
+		 * @param or
+		 *            Object Reader
+		 * @param depth
+		 *            Maximum depth to return
 		 */
 		public ObjectWalk(ObjectReader or, int depth) {
 			super(or);
@@ -289,8 +327,11 @@ public interface DepthWalk {
 		 * @param o
 		 *            Commit to mark
 		 * @throws IOException
+		 *             if an IO error occurred
 		 * @throws IncorrectObjectTypeException
+		 *             if object has an unexpected type
 		 * @throws MissingObjectException
+		 *             if object is missing
 		 */
 		public void markRoot(RevObject o) throws MissingObjectException,
 				IncorrectObjectTypeException, IOException {
@@ -313,8 +354,11 @@ public interface DepthWalk {
 		 * @param c
 		 *            Commit to mark
 		 * @throws MissingObjectException
+		 *             if object is missing
 		 * @throws IncorrectObjectTypeException
+		 *             if object has an unexpected type
 		 * @throws IOException
+		 *             if an IO error occurred
 		 */
 		public void markUnshallow(RevObject c) throws MissingObjectException,
 				IncorrectObjectTypeException, IOException {

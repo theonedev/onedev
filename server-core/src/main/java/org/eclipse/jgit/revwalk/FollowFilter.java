@@ -11,6 +11,8 @@
 package org.eclipse.jgit.revwalk;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.jgit.diff.DiffConfig;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
@@ -77,7 +79,6 @@ public class FollowFilter extends TreeFilter {
 		return path.getPath();
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public boolean include(TreeWalk walker)
 			throws MissingObjectException, IncorrectObjectTypeException,
@@ -85,10 +86,14 @@ public class FollowFilter extends TreeFilter {
 		return path.include(walker) && ANY_DIFF.include(walker);
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public boolean shouldBeRecursive() {
 		return path.shouldBeRecursive() || ANY_DIFF.shouldBeRecursive();
+	}
+
+	@Override
+	public Optional<Set<byte[]>> getPathsBestEffort() {
+		return path.getPathsBestEffort();
 	}
 
 	/** {@inheritDoc} */
@@ -97,7 +102,6 @@ public class FollowFilter extends TreeFilter {
 		return new FollowFilter(path.clone(), cfg);
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		return "(FOLLOW(" + path.toString() + ")" //

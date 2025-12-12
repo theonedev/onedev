@@ -426,6 +426,18 @@ onedev.server.sourceView = {
 		$content.children("a.copy-marked").click(function() {
 			$(".selection-popover").remove();
 		});
+
+		var explainSelectionText = onedev.server.sourceView.translations["explain-selection"];
+		if (explainSelectionText) {
+			svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#ai2'/></svg>`;
+			$content.append(`<a class='explain-selection'>${svg} ${explainSelectionText}</a>`);
+			$content.children("a.explain-selection").click(function() {
+				$(".selection-popover").remove();
+				$(".source-view").data("callback")("explainSelection", selectionRange.fromRow, selectionRange.fromColumn, 
+						selectionRange.toRow, selectionRange.toColumn);
+			});
+		}
+
 		if (loggedIn) {
 			let svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#comment'/></svg>`;
 			$content.append(`<a class='comment'>${svg} ${onedev.server.sourceView.translations["add-selection-comment"]}</a>`);

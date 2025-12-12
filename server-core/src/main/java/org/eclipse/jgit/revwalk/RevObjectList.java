@@ -47,7 +47,6 @@ public class RevObjectList<E extends RevObject> extends AbstractList<E> {
 		// Initialized above.
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public void add(int index, E element) {
 		if (index != size)
@@ -58,7 +57,6 @@ public class RevObjectList<E extends RevObject> extends AbstractList<E> {
 		size++;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	@SuppressWarnings("unchecked")
 	public E set(int index, E element) {
@@ -80,7 +78,6 @@ public class RevObjectList<E extends RevObject> extends AbstractList<E> {
 		return (E) old;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	@SuppressWarnings("unchecked")
 	public E get(int index) {
@@ -95,13 +92,11 @@ public class RevObjectList<E extends RevObject> extends AbstractList<E> {
 		return s != null ? (E) s.contents[index] : null;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public int size() {
 		return size;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public void clear() {
 		contents = new Block(0);

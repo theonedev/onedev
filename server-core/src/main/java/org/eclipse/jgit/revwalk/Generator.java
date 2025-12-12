@@ -71,8 +71,11 @@ abstract class Generator {
 	 *
 	 * @return next available commit; null if no more are to be returned.
 	 * @throws MissingObjectException
+	 *             if an object is missing
 	 * @throws IncorrectObjectTypeException
+	 *             if an object has an unexpected type
 	 * @throws IOException
+	 *             if an IO error occurred
 	 */
 	abstract RevCommit next() throws MissingObjectException,
 			IncorrectObjectTypeException, IOException;

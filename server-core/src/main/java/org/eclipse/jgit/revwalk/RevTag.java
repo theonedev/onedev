@@ -39,7 +39,7 @@ import org.eclipse.jgit.util.StringUtils;
 public class RevTag extends RevObject {
 
 	private static final byte[] hSignature = Constants
-			.encodeASCII("-----BEGIN "); //$NON-NLS-1$
+			.encodeASCII("-----BEGIN PGP SIGNATURE-----"); //$NON-NLS-1$
 
 	/**
 	 * Parse an annotated tag from its canonical format.
@@ -149,7 +149,6 @@ public class RevTag extends RevObject {
 		flags |= PARSED;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public final int getType() {
 		return Constants.OBJ_TAG;

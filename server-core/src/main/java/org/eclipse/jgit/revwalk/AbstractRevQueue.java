@@ -66,7 +66,7 @@ abstract class AbstractRevQueue extends Generator {
 	 *            flag that controls admission to the queue.
 	 */
 	public final void addParents(RevCommit c, RevFlag queueControl) {
-		final RevCommit[] pList = c.parents;
+		final RevCommit[] pList = c.getParents();
 		if (pList == null) {
 			return;
 		}
@@ -79,8 +79,6 @@ abstract class AbstractRevQueue extends Generator {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>
 	 * Remove the first commit from the queue.
 	 */
 	@Override

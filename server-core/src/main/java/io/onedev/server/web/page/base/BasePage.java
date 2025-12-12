@@ -334,8 +334,9 @@ public abstract class BasePage extends WebPage {
 		for (ChangeObserver observer: findChangeObservers()) {
 			Collection<String> observingChangedObservables = 
 					filterObservables(observer.getObservables(), observables);
-			if (!observingChangedObservables.isEmpty())
+			if (!observingChangedObservables.isEmpty()) {
 				observer.onObservableChanged(handler, observingChangedObservables);
+			}
 		}
 	}
 

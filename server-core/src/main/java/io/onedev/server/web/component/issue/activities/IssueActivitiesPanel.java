@@ -334,7 +334,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				var page = (LayoutPage)getPage();
-				page.getChatter().show(target, "Summarize comments of current issue. Display summary in " + getSession().getLocale().getDisplayLanguage());
+				page.getChatter().show(target, "Summarize comments of current issue. Display in " + getSession().getLocale().getDisplayLanguage());
 			}
 
 			@Override

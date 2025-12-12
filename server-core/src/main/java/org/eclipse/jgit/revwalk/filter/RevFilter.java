@@ -264,7 +264,6 @@ public abstract class RevFilter {
 	@Override
 	public abstract RevFilter clone();
 
-	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		String n = getClass().getName();

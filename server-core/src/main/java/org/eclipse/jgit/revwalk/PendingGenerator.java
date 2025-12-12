@@ -108,8 +108,9 @@ class PendingGenerator extends Generator {
 					produce = filter.include(walker, c);
 				}
 
-				for (int i = 0; i < c.parents.length; i++) {
-					RevCommit p = c.parents[i];
+				int parentCount = c.getParentCount();
+				for (int i = 0; i < parentCount; i++) {
+					RevCommit p = c.getParent(i);
 					// If the commit is uninteresting, don't try to prune
 					// parents because we want the maximal uninteresting set.
 					if (firstParent && i > 0 && (c.flags & UNINTERESTING) == 0) {

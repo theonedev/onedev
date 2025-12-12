@@ -98,13 +98,11 @@ public abstract class CommitTimeRevFilter extends RevFilter {
 		when = (int) (ts / 1000);
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public RevFilter clone() {
 		return this;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public boolean requiresCommitBody() {
 		return false;

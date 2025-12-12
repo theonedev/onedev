@@ -318,7 +318,7 @@ public class ChatPanel extends Panel {
 			@Override
 			public String getObject() {
 				var responding = getResponding();
-				if (responding != null)
+				if (responding != null) 
 					return responding.getContent();
 				else
 					return null;

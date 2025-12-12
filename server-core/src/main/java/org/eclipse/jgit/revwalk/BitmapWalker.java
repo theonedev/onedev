@@ -50,12 +50,15 @@ public final class BitmapWalker {
 	/**
 	 * Create a BitmapWalker.
 	 *
-	 * @param walker walker to use when traversing the object graph.
-	 * @param bitmapIndex index to obtain bitmaps from.
-	 * @param pm progress monitor to report progress on.
+	 * @param walker
+	 *            walker to use when traversing the object graph.
+	 * @param bitmapIndex
+	 *            index to obtain bitmaps from.
+	 * @param pm
+	 *            progress monitor to report progress on.
 	 */
-	public BitmapWalker(
-			ObjectWalk walker, BitmapIndex bitmapIndex, ProgressMonitor pm) {
+	public BitmapWalker(ObjectWalk walker, BitmapIndex bitmapIndex,
+			ProgressMonitor pm) {
 		this.walker = walker;
 		this.bitmapIndex = bitmapIndex;
 		this.pm = (pm == null) ? NullProgressMonitor.INSTANCE : pm;
@@ -177,8 +180,9 @@ public final class BitmapWalker {
 
 		for (ObjectId obj : start) {
 			Bitmap bitmap = bitmapIndex.getBitmap(obj);
-			if (bitmap != null)
+			if (bitmap != null) {
 				bitmapResult.or(bitmap);
+			}
 		}
 
 		boolean marked = false;

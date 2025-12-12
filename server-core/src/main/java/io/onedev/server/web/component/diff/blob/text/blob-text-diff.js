@@ -480,7 +480,7 @@ onedev.server.blobTextDiff = {
 		if (markRange) {
 			$container.data("markRange", markRange);
 			onedev.server.blobTextDiff.mark($container, markRange);	
-		}			
+		}	
 	},
 	onLoad: function(containerId, markRange) {
 		var $container = $("#" + containerId);
@@ -785,6 +785,17 @@ onedev.server.blobTextDiff = {
 				clipboard.destroy();
 				$(".selection-popover").remove();
 			});
+				var explainSelectionText = onedev.server.blobTextDiff.translations["explain-selection"];
+			if (explainSelectionText) {
+				var svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#ai2'/></svg>`;
+				$content.append(`<a class='explain-selection'>${svg} ${explainSelectionText}</a>`);
+				$content.children("a.explain-selection").click(function() {
+					$(".selection-popover").remove();
+					$container.data("callback")("explainSelection", markRange.leftSide, 
+							markRange.fromRow, markRange.fromColumn, markRange.toRow, markRange.toColumn);
+				});
+			}
+
 			if (loggedIn) {
 				$content.append(`<a class='comment'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#comment'/></svg> ${onedev.server.blobTextDiff.translations["add-selection-comment"]}</a>`);
 				$content.children("a.comment").click(function() {
@@ -796,9 +807,9 @@ onedev.server.blobTextDiff = {
 			} else {
 				var loginHref = $(".sign-in").attr("href");
 				$content.append(`<a class='comment' href='${loginHref}'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#warning'/></svg> ${onedev.server.blobTextDiff.translations["login-to-comment"]}</a>`);
-			}			
-		}		
-		
+			}
+		}
+				
 		$container.selectionPopover("open", {
 			position: position,
 			content: $content

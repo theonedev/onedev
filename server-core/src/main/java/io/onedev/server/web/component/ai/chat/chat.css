@@ -20,7 +20,7 @@
 	cursor: col-resize;
 	z-index: 10;
 	background: var(--light) url(/~icon/grip3.svg) no-repeat scroll center center;
-	background-size: 18px 18px;
+	background-size: 18px 18px;	
 }
 
 .dark-mode .chat .ui-resizable-handle {
@@ -80,6 +80,7 @@
 	padding: 0.7rem;
 	border-radius: 0.42rem;
 	margin-left: 3rem;
+	word-break: break-word;
 }
 .dark-mode .chat>.body>.messages>.request>div {
 	background: var(--dark-mode-light-dark);
