@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org> and others
+ * Copyright (C) 2008, 2022 Shawn O. Pearce <spearce@spearce.org> and others
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Distribution License v. 1.0 which is available at
@@ -139,7 +139,7 @@ public class ObjectWalk extends RevWalk {
 	 *            the repository the walker will obtain data from.
 	 */
 	public ObjectWalk(Repository repo) {
-		this(repo.newObjectReader());
+		this(repo.newObjectReader(), true);
 	}
 
 	/**
@@ -151,7 +151,11 @@ public class ObjectWalk extends RevWalk {
 	 *            required.
 	 */
 	public ObjectWalk(ObjectReader or) {
-		super(or);
+		this(or, false);
+	}
+
+	private ObjectWalk(ObjectReader or, boolean closeReader) {
+		super(or, closeReader);
 		setRetainBody(false);
 		rootObjects = new ArrayList<>();
 		pendingObjects = new BlockObjQueue();
@@ -296,14 +300,12 @@ public class ObjectWalk extends RevWalk {
 			addObject(o);
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public void sort(RevSort s) {
 		super.sort(s);
 		boundary = hasRevSort(RevSort.BOUNDARY);
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public void sort(RevSort s, boolean use) {
 		super.sort(s, use);
@@ -353,7 +355,6 @@ public class ObjectWalk extends RevWalk {
 		visitationPolicy = requireNonNull(policy);
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public RevCommit next() throws MissingObjectException,
 			IncorrectObjectTypeException, IOException {
@@ -641,6 +642,8 @@ public class ObjectWalk extends RevWalk {
 	}
 
 	/**
+	 * Get the current traversal depth from the root tree object
+	 *
 	 * @return the current traversal depth from the root tree object
 	 * @since 5.4
 	 */
@@ -758,7 +761,6 @@ public class ObjectWalk extends RevWalk {
 		pathBuf = newBuf;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -767,7 +769,6 @@ public class ObjectWalk extends RevWalk {
 		freeVisit = null;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	protected void reset(int retainFlags) {
 		super.reset(retainFlags);

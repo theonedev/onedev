@@ -37,7 +37,7 @@ public class DefaultSignatureVerificationService implements SignatureVerificatio
 		int start = RawParseUtils.headerStart(header, rawCommit, 0);
 		if (start < 0)
 			return null;
-		int end = RawParseUtils.headerEnd(rawCommit, start);
+		int end = RawParseUtils.nextLfSkippingSplitLines(rawCommit, start);
 		byte[] signatureData = Arrays.copyOfRange(rawCommit, start, end);
 
 		// start is at the beginning of the header's content

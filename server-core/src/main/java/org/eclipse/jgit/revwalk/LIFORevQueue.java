@@ -34,7 +34,6 @@ public class LIFORevQueue extends BlockRevQueue {
 		super(s);
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public void add(RevCommit c) {
 		Block b = head;
@@ -47,7 +46,6 @@ public class LIFORevQueue extends BlockRevQueue {
 		b.unpop(c);
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public RevCommit next() {
 		final Block b = head;
@@ -62,7 +60,6 @@ public class LIFORevQueue extends BlockRevQueue {
 		return c;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public void clear() {
 		head = null;
@@ -89,7 +86,6 @@ public class LIFORevQueue extends BlockRevQueue {
 		return false;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		final StringBuilder s = new StringBuilder();

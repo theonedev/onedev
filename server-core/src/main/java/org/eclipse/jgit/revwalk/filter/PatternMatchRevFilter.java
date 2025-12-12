@@ -117,6 +117,7 @@ public abstract class PatternMatchRevFilter extends RevFilter {
 	protected abstract CharSequence text(RevCommit cmit);
 
 	/** {@inheritDoc} */
+	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
 		return super.toString() + "(\"" + patternText + "\")";

@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.bouncycastle.bcpg.HashAlgorithmTags;
+import org.bouncycastle.bcpg.PublicKeyPacket;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.bcpg.sig.Features;
 import org.bouncycastle.bcpg.sig.KeyFlags;
@@ -93,9 +94,9 @@ public class GpgUtils {
 		// takes parameters that allow it to generate the self
 		// signature.		
 		PGPKeyRingGenerator keyRingGen;
-		PGPKeyPair rsakp_sign = new BcPGPKeyPair(PGPPublicKey.RSA_SIGN, kpg.generateKeyPair(), new Date());
+		PGPKeyPair rsakp_sign = new BcPGPKeyPair(PublicKeyPacket.VERSION_4, PGPPublicKey.RSA_GENERAL, kpg.generateKeyPair(), new Date());
 		// Then an encryption subkey.
-		PGPKeyPair rsakp_enc = new BcPGPKeyPair(PGPPublicKey.RSA_ENCRYPT, kpg.generateKeyPair(), new Date());
+		PGPKeyPair rsakp_enc = new BcPGPKeyPair(PublicKeyPacket.VERSION_4, PGPPublicKey.RSA_GENERAL, kpg.generateKeyPair(), new Date());
 
 		// Add a self-signature on the id
 		PGPSignatureSubpacketGenerator signhashgen = new PGPSignatureSubpacketGenerator();

@@ -132,7 +132,6 @@ public abstract class RevObject extends ObjectIdOwnerMap.Entry {
 		flags &= ~set.mask;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		final StringBuilder s = new StringBuilder();

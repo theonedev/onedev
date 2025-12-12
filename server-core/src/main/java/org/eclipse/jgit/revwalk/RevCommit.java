@@ -11,20 +11,18 @@
 
 package org.eclipse.jgit.revwalk;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.eclipse.jgit.util.RawParseUtils.guessEncoding;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jgit.annotations.Nullable;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.internal.storage.commitgraph.ChangedPathFilter;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.MutableObjectId;
@@ -36,7 +34,13 @@ import org.eclipse.jgit.util.StringUtils;
 
 /**
  * A commit reference to a commit in the DAG.
+ *
+ * The state of the RevCommit isn't populated until the commit is parsed. The
+ * newly created RevCommit is unparsed and only has an objectId reference. Other
+ * states like parents, trees, commit ident, commit message, etc. are
+ * populated/available when the commit is parsed.
  */
+@SuppressWarnings("deprecation")
 public class RevCommit extends RevObject {
 	private static final int STACK_DEPTH = 500;
 
@@ -100,15 +104,35 @@ public class RevCommit extends RevObject {
 
 	static final RevCommit[] NO_PARENTS = {};
 
-	private RevTree tree;
+	/**
+	 * Tree reference of the commit.
+	 *
+	 * @since 6.5
+	 */
+	protected RevTree tree;
 
-	RevCommit[] parents;
+	/**
+	 * Avoid accessing this field directly. Use method
+	 * {@link RevCommit#getParents()} instead. RevCommit does not allow parents
+	 * to be overridden and altering parent(s) is not supported.
+	 *
+	 * @since 6.3
+	 */
+	protected RevCommit[] parents;
 
 	int commitTime; // An int here for performance, overflows in 2038
 
 	int inDegree;
 
-	private byte[] buffer;
+	/**
+	 * Raw unparsed commit body of the commit. Populated only
+	 * after {@link #parseCanonical(RevWalk, byte[])} with
+	 * {@link RevWalk#isRetainBody()} enable or after
+	 * {@link #parseBody(RevWalk)} and {@link #parse(RevWalk, byte[])}.
+	 *
+	 * @since 6.5.1
+	 */
+	protected byte[] buffer;
 
 	/**
 	 * Create a new commit reference.
@@ -146,7 +170,7 @@ public class RevCommit extends RevObject {
 		tree = walk.lookupTree(idBuffer);
 
 		int ptr = 46;
-		if (parents == null) {
+		if (getParents() == null) {
 			RevCommit[] pList = new RevCommit[1];
 			int nParents = 0;
 			for (;;) {
@@ -197,7 +221,6 @@ public class RevCommit extends RevObject {
 		flags |= PARSED;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public final int getType() {
 		return Constants.OBJ_COMMIT;
@@ -210,8 +233,8 @@ public class RevCommit extends RevObject {
 	}
 
 	private static FIFORevQueue carryFlags1(RevCommit c, int carry, int depth) {
-		for(;;) {
-			RevCommit[] pList = c.parents;
+		for (;;) {
+			RevCommit[] pList = c.getParents();
 			if (pList == null || pList.length == 0)
 				return null;
 			if (pList.length != 1) {
@@ -259,7 +282,7 @@ public class RevCommit extends RevObject {
 		// Commits in q have non-null parent arrays and have set all
 		// flags in carry. This loop finishes copying over the graph.
 		for (RevCommit c; (c = q.next()) != null;) {
-			for (RevCommit p : c.parents)
+			for (RevCommit p : c.getParents())
 				carryOneStep(q, carry, p);
 		}
 	}
@@ -267,7 +290,7 @@ public class RevCommit extends RevObject {
 	private static void carryOneStep(FIFORevQueue q, int carry, RevCommit c) {
 		if ((c.flags & carry) != carry) {
 			c.flags |= carry;
-			if (c.parents != null)
+			if (c.getParents() != null)
 				q.add(c);
 		}
 	}
@@ -313,8 +336,8 @@ public class RevCommit extends RevObject {
 	 *
 	 * @return number of parents; always a positive value but can be 0.
 	 */
-	public final int getParentCount() {
-		return parents.length;
+	public int getParentCount() {
+		return parents == null ? 0 : parents.length;
 	}
 
 	/**
@@ -327,7 +350,7 @@ public class RevCommit extends RevObject {
 	 * @throws java.lang.ArrayIndexOutOfBoundsException
 	 *             an invalid parent index was specified.
 	 */
-	public final RevCommit getParent(int nth) {
+	public RevCommit getParent(int nth) {
 		return parents[nth];
 	}
 
@@ -341,7 +364,7 @@ public class RevCommit extends RevObject {
 	 *
 	 * @return the array of parents.
 	 */
-	public final RevCommit[] getParents() {
+	public RevCommit[] getParents() {
 		return parents;
 	}
 
@@ -353,9 +376,9 @@ public class RevCommit extends RevObject {
 	 * this buffer should be very careful to ensure they do not modify its
 	 * contents during their use of it.
 	 *
-	 * @return the raw unparsed commit body. This is <b>NOT A COPY</b>.
-	 *         Altering the contents of this buffer may alter the walker's
-	 *         knowledge of this commit, and the results it produces.
+	 * @return the raw unparsed commit body. This is <b>NOT A COPY</b>. Altering
+	 *         the contents of this buffer may alter the walker's knowledge of
+	 *         this commit, and the results it produces.
 	 */
 	public final byte[] getRawBuffer() {
 		return buffer;
@@ -380,13 +403,13 @@ public class RevCommit extends RevObject {
 	 */
 	public final byte[] getRawGpgSignature() {
 		final byte[] raw = buffer;
-		final byte[] header = {'g', 'p', 'g', 's', 'i', 'g'};
+		final byte[] header = { 'g', 'p', 'g', 's', 'i', 'g' };
 		final int start = RawParseUtils.headerStart(header, raw, 0);
 		if (start < 0) {
 			return null;
 		}
 		final int end = RawParseUtils.headerEnd(raw, start);
-		return Arrays.copyOfRange(raw, start, end);
+		return RawParseUtils.headerValue(raw, start, end);
 	}
 
 	/**
@@ -459,7 +482,8 @@ public class RevCommit extends RevObject {
 		if (msgB < 0) {
 			return ""; //$NON-NLS-1$
 		}
-		return RawParseUtils.decode(guessEncoding(), raw, msgB, raw.length);
+		return RawParseUtils.decode(guessEncoding(buffer), raw, msgB,
+				raw.length);
 	}
 
 	/**
@@ -485,7 +509,8 @@ public class RevCommit extends RevObject {
 		}
 
 		int msgE = RawParseUtils.endOfParagraph(raw, msgB);
-		String str = RawParseUtils.decode(guessEncoding(), raw, msgB, msgE);
+		String str = RawParseUtils.decode(guessEncoding(buffer), raw, msgB,
+				msgE);
 		if (hasLF(raw, msgB, msgE)) {
 			str = StringUtils.replaceLineBreaksWithSpace(str);
 		}
@@ -537,14 +562,6 @@ public class RevCommit extends RevObject {
 		return RawParseUtils.parseEncoding(buffer);
 	}
 
-	private Charset guessEncoding() {
-		try {
-			return getEncoding();
-		} catch (IllegalCharsetNameException | UnsupportedCharsetException e) {
-			return UTF_8;
-		}
-	}
-
 	/**
 	 * Parse the footer lines (e.g. "Signed-off-by") for machine processing.
 	 * <p>
@@ -553,8 +570,9 @@ public class RevCommit extends RevObject {
 	 * the order of the line's appearance in the commit message itself.
 	 * <p>
 	 * A footer line's key must match the pattern {@code ^[A-Za-z0-9-]+:}, while
-	 * the value is free-form, but must not contain an LF. Very common keys seen
-	 * in the wild are:
+	 * the value is free-form. The Value may be split over multiple lines with
+	 * each subsequent line starting with at least one whitespace. Very common
+	 * keys seen in the wild are:
 	 * <ul>
 	 * <li>{@code Signed-off-by} (agrees to Developer Certificate of Origin)
 	 * <li>{@code Acked-by} (thinks change looks sane in context)
@@ -567,50 +585,14 @@ public class RevCommit extends RevObject {
 	 * @return ordered list of footer lines; empty list if no footers found.
 	 */
 	public final List<FooterLine> getFooterLines() {
-		final byte[] raw = buffer;
-		int ptr = raw.length - 1;
-		while (raw[ptr] == '\n') // trim any trailing LFs, not interesting
-			ptr--;
-
-		final int msgB = RawParseUtils.commitMessage(raw, 0);
-		final ArrayList<FooterLine> r = new ArrayList<>(4);
-		final Charset enc = guessEncoding();
-		for (;;) {
-			ptr = RawParseUtils.prevLF(raw, ptr);
-			if (ptr <= msgB)
-				break; // Don't parse commit headers as footer lines.
-
-			final int keyStart = ptr + 2;
-			if (raw[keyStart] == '\n')
-				break; // Stop at first paragraph break, no footers above it.
-
-			final int keyEnd = RawParseUtils.endOfFooterLineKey(raw, keyStart);
-			if (keyEnd < 0)
-				continue; // Not a well formed footer line, skip it.
-
-			// Skip over the ': *' at the end of the key before the value.
-			//
-			int valStart = keyEnd + 1;
-			while (valStart < raw.length && raw[valStart] == ' ')
-				valStart++;
-
-			// Value ends at the LF, and does not include it.
-			//
-			int valEnd = RawParseUtils.nextLF(raw, valStart);
-			if (raw[valEnd - 1] == '\n')
-				valEnd--;
-
-			r.add(new FooterLine(raw, enc, keyStart, keyEnd, valStart, valEnd));
-		}
-		Collections.reverse(r);
-		return r;
+		return FooterLine.fromMessage(buffer);
 	}
 
 	/**
 	 * Get the values of all footer lines with the given key.
 	 *
 	 * @param keyName
-	 *            footer key to find values of, case insensitive.
+	 *            footer key to find values of, case-insensitive.
 	 * @return values of footers with key of {@code keyName}, ordered by their
 	 *         order of appearance. Duplicates may be returned if the same
 	 *         footer appeared more than once. Empty list if no footers appear
@@ -618,30 +600,55 @@ public class RevCommit extends RevObject {
 	 * @see #getFooterLines()
 	 */
 	public final List<String> getFooterLines(String keyName) {
-		return getFooterLines(new FooterKey(keyName));
+		return FooterLine.getValues(getFooterLines(), keyName);
 	}
 
 	/**
 	 * Get the values of all footer lines with the given key.
 	 *
-	 * @param keyName
-	 *            footer key to find values of, case insensitive.
+	 * @param key
+	 *            footer key to find values of, case-insensitive.
 	 * @return values of footers with key of {@code keyName}, ordered by their
 	 *         order of appearance. Duplicates may be returned if the same
 	 *         footer appeared more than once. Empty list if no footers appear
 	 *         with the specified key, or there are no footers at all.
 	 * @see #getFooterLines()
 	 */
-	public final List<String> getFooterLines(FooterKey keyName) {
-		final List<FooterLine> src = getFooterLines();
-		if (src.isEmpty())
-			return Collections.emptyList();
-		final ArrayList<String> r = new ArrayList<>(src.size());
-		for (FooterLine f : src) {
-			if (f.matches(keyName))
-				r.add(f.getValue());
-		}
-		return r;
+	public final List<String> getFooterLines(FooterKey key) {
+		return FooterLine.getValues(getFooterLines(), key);
+	}
+
+	/**
+	 * Get the distance of the commit from the root, as defined in
+	 * {@link org.eclipse.jgit.internal.storage.commitgraph.CommitGraph}
+	 * <p>
+	 * Generation number is
+	 * {@link org.eclipse.jgit.lib.Constants#COMMIT_GENERATION_UNKNOWN} when the
+	 * commit is not in the commit-graph. If a commit-graph file was written by
+	 * a version of Git that did not compute generation numbers, then those
+	 * commits in commit-graph will have generation number represented by
+	 * {@link org.eclipse.jgit.lib.Constants#COMMIT_GENERATION_NOT_COMPUTED}.
+	 *
+	 * @return the generation number
+	 * @since 6.5
+	 */
+	int getGeneration() {
+		return Constants.COMMIT_GENERATION_UNKNOWN;
+	}
+
+	/**
+	 * Get the changed path filter of the commit.
+	 * <p>
+	 * This is null when there is no commit graph file, the commit is not in the
+	 * commit graph file, or the commit graph file was generated without changed
+	 * path filters.
+	 *
+	 * @param rw A revwalk to load the commit graph (if available)
+	 * @return the changed path filter
+	 * @since 6.7
+	 */
+	public ChangedPathFilter getChangedPathFilter(RevWalk rw) {
+		return null;
 	}
 
 	/**
@@ -670,7 +677,6 @@ public class RevCommit extends RevObject {
 		buffer = null;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		final StringBuilder s = new StringBuilder();

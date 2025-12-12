@@ -51,8 +51,11 @@ public final class RevWalkUtils {
 	 *            should be done until there are no more commits
 	 * @return the number of commits
 	 * @throws org.eclipse.jgit.errors.MissingObjectException
+	 *             if object is missing
 	 * @throws org.eclipse.jgit.errors.IncorrectObjectTypeException
+	 *             if object has unexpected type
 	 * @throws java.io.IOException
+	 *             if an IO error occurred
 	 */
 	public static int count(final RevWalk walk, final RevCommit start,
 			final RevCommit end) throws MissingObjectException,
@@ -80,8 +83,11 @@ public final class RevWalkUtils {
 	 *            should be done until there are no more commits
 	 * @return the commits found
 	 * @throws org.eclipse.jgit.errors.MissingObjectException
+	 *             if object is missing
 	 * @throws org.eclipse.jgit.errors.IncorrectObjectTypeException
+	 *             if object has unexpected type
 	 * @throws java.io.IOException
+	 *             if an IO error occurred
 	 */
 	public static List<RevCommit> find(final RevWalk walk,
 			final RevCommit start, final RevCommit end)
@@ -116,8 +122,11 @@ public final class RevWalkUtils {
 	 *            the set of branches we want to see reachability from
 	 * @return the list of branches a given commit is reachable from
 	 * @throws org.eclipse.jgit.errors.MissingObjectException
+	 *             if object is missing
 	 * @throws org.eclipse.jgit.errors.IncorrectObjectTypeException
+	 *             if object has unexpected type
 	 * @throws java.io.IOException
+	 *             if an IO error occurred
 	 */
 	public static List<Ref> findBranchesReachableFrom(RevCommit commit,
 			RevWalk revWalk, Collection<Ref> refs)
@@ -147,8 +156,11 @@ public final class RevWalkUtils {
 	 *            the callback for progress and cancellation
 	 * @return the list of branches a given commit is reachable from
 	 * @throws org.eclipse.jgit.errors.MissingObjectException
+	 *             if object is missing
 	 * @throws org.eclipse.jgit.errors.IncorrectObjectTypeException
+	 *             if object has unexpected type
 	 * @throws java.io.IOException
+	 *             if an IO error occurred
 	 * @since 5.4
 	 */
 	public static List<Ref> findBranchesReachableFrom(RevCommit commit,

@@ -33,8 +33,11 @@ class TopoNonIntermixSortGenerator extends Generator {
 	 * @param s
 	 *            generator to pull all commits out of, and into this buffer.
 	 * @throws MissingObjectException
+	 *             if an object is missing
 	 * @throws IncorrectObjectTypeException
+	 *             if an object has an unexpected type
 	 * @throws IOException
+	 *             if an IO error occurred
 	 */
 	TopoNonIntermixSortGenerator(Generator s) throws MissingObjectException,
 			IncorrectObjectTypeException, IOException {
@@ -48,7 +51,7 @@ class TopoNonIntermixSortGenerator extends Generator {
 				break;
 			}
 			if ((c.flags & TOPO_QUEUED) == 0) {
-				for (RevCommit p : c.parents) {
+				for (RevCommit p : c.getParents()) {
 					p.inDegree++;
 
 					if (firstParent) {
@@ -94,7 +97,7 @@ class TopoNonIntermixSortGenerator extends Generator {
 				continue;
 			}
 
-			for (RevCommit p : c.parents) {
+			for (RevCommit p : c.getParents()) {
 				if (--p.inDegree == 0 && (p.flags & TOPO_QUEUED) != 0) {
 					// The parent has no unproduced interesting children. unpop
 					// the parent so it goes right behind this child. This means

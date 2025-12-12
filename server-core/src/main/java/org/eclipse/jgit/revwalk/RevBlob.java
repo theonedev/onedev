@@ -33,7 +33,6 @@ public class RevBlob extends RevObject {
 		super(id);
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public final int getType() {
 		return Constants.OBJ_BLOB;

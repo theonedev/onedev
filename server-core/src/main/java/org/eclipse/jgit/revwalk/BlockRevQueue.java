@@ -45,8 +45,6 @@ abstract class BlockRevQueue extends AbstractRevQueue {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>
 	 * Reconfigure this queue to share the same free list as another.
 	 * <p>
 	 * Multiple revision queues can be connected to the same free list, making
@@ -56,6 +54,11 @@ abstract class BlockRevQueue extends AbstractRevQueue {
 	 * <p>
 	 * Free lists are not thread-safe. Applications must ensure that all queues
 	 * sharing the same free list are doing so from only a single thread.
+	 *
+	 * @param q
+	 *            another FIFO queue that wants to share our queue's free list.
+	 *
+	 * @see Generator#shareFreeList
 	 */
 	@Override
 	public void shareFreeList(BlockRevQueue q) {

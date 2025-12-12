@@ -11,6 +11,9 @@
 package org.eclipse.jgit.revwalk;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.jgit.util.RawParseUtils;
 
@@ -44,6 +47,137 @@ public final class FooterLine {
 		keyEnd = ke;
 		valStart = vs;
 		valEnd = ve;
+	}
+
+	/**
+	 * Extract the footer lines from the given message.
+	 *
+	 * @param str
+	 *            the message to extract footers from.
+	 * @return ordered list of footer lines; empty list if no footers found.
+	 * @see RevCommit#getFooterLines()
+	 * @since 6.7
+	 */
+	public static List<FooterLine> fromMessage(
+			String str) {
+		return fromMessage(str.getBytes());
+	}
+
+	/**
+	 * Extract the footer lines from the given message.
+	 *
+	 * @param raw
+	 *            the raw message to extract footers from.
+	 * @return ordered list of footer lines; empty list if no footers found.
+	 * @see RevCommit#getFooterLines()
+	 * @since 6.7
+	 */
+	public static List<FooterLine> fromMessage(
+			byte[] raw) {
+		// Find the end of the last paragraph.
+		int parEnd = raw.length;
+		for (; parEnd > 0 && (raw[parEnd - 1] == '\n'
+				|| raw[parEnd - 1] == ' '); --parEnd) {
+			// empty
+		}
+
+		// The first non-header line is never a footer.
+		int msgB = RawParseUtils.nextLfSkippingSplitLines(raw,
+				RawParseUtils.hasAnyKnownHeaders(raw)
+						? RawParseUtils.commitMessage(raw, 0)
+						: 0);
+		ArrayList<FooterLine> r = new ArrayList<>(4);
+		Charset enc = RawParseUtils.guessEncoding(raw);
+
+		// Search for the beginning of last paragraph
+		int parStart = parEnd;
+		for (; parStart > msgB; --parStart) {
+			if (parStart < 2) {
+				// Too close to beginning: this is not a raw message
+				parStart = 0;
+				break;
+			}
+			if (raw[parStart - 1] == '\n' && raw[parStart - 2] == '\n') {
+				break;
+			}
+		}
+
+		for (int ptr = parStart; ptr < parEnd;) {
+			int keyStart = ptr;
+			int keyEnd = RawParseUtils.endOfFooterLineKey(raw, ptr);
+			if (keyEnd < 0) {
+				// Not a well-formed footer line, skip it.
+				ptr = RawParseUtils.nextLF(raw, ptr);
+				continue;
+			}
+
+			// Skip over the ': *' at the end of the key before the value.
+			int valStart;
+			int valEnd;
+			for (valStart = keyEnd + 1; valStart < raw.length
+					&& raw[valStart] == ' '; ++valStart) {
+				// empty
+			}
+
+			for(ptr = valStart;;) {
+				ptr = RawParseUtils.nextLF(raw, ptr);
+				// Next line starts with whitespace for a multiline footer.
+				if (ptr == raw.length || raw[ptr] != ' ') {
+					valEnd = raw[ptr - 1] == '\n' ? ptr - 1 : ptr;
+					break;
+				}
+			}
+			if (keyStart == msgB) {
+				// Fist line cannot be a footer
+				continue;
+			}
+			r.add(new FooterLine(raw, enc, keyStart, keyEnd, valStart, valEnd));
+		}
+
+		return r;
+	}
+
+	/**
+	 * Get the values of all footer lines with the given key.
+	 *
+	 * @param footers
+	 *            list of footers to find the values in.
+	 * @param keyName
+	 *            footer key to find values of, case-insensitive.
+	 * @return values of footers with key of {@code keyName}, ordered by their
+	 *         order of appearance. Duplicates may be returned if the same
+	 *         footer appeared more than once. Empty list if no footers appear
+	 *         with the specified key, or there are no footers at all.
+	 * @see #fromMessage
+	 * @since 6.7
+	 */
+	public static List<String> getValues(List<FooterLine> footers, String keyName) {
+		return getValues(footers, new FooterKey(keyName));
+	}
+
+	/**
+	 * Get the values of all footer lines with the given key.
+	 *
+	 * @param footers
+	 *            list of footers to find the values in.
+	 * @param key
+	 *            footer key to find values of, case-insensitive.
+	 * @return values of footers with key of {@code keyName}, ordered by their
+	 *         order of appearance. Duplicates may be returned if the same
+	 *         footer appeared more than once. Empty list if no footers appear
+	 *         with the specified key, or there are no footers at all.
+	 * @see #fromMessage
+	 * @since 6.7
+	 */
+	public static List<String> getValues(List<FooterLine> footers, FooterKey key) {
+		if (footers.isEmpty())
+			return Collections.emptyList();
+		ArrayList<String> r = new ArrayList<>(footers.size());
+		for (FooterLine f : footers) {
+			if (f.matches(key))
+				r.add(f.getValue());
+		}
+		return r;
 	}
 
 	/**
@@ -90,7 +224,7 @@ public final class FooterLine {
 	 *         character encoding.
 	 */
 	public String getValue() {
-		return RawParseUtils.decode(enc, buffer, valStart, valEnd);
+		return RawParseUtils.decode(enc, buffer, valStart, valEnd).replaceAll("\n +", " "); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -117,7 +251,28 @@ public final class FooterLine {
 		return RawParseUtils.decode(enc, buffer, lt, gt - 1);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * @return start offset of the footer relative to the original raw message
+	 *         byte buffer
+	 *
+	 * @see #fromMessage(byte[])
+	 * @since 6.9
+	 */
+	public int getStartOffset() {
+		return keyStart;
+	}
+
+	/**
+	 * @return end offset of the footer relative to the original raw message
+	 *         byte buffer
+	 *
+	 * @see #fromMessage(byte[])
+	 * @since 6.9
+	 */
+	public int getEndOffset() {
+		return valEnd;
+	}
+
 	@Override
 	public String toString() {
 		return getKey() + ": " + getValue(); //$NON-NLS-1$

@@ -67,7 +67,6 @@ public abstract class SubStringRevFilter extends RevFilter {
 		pattern = new RawSubStringPattern(patternText);
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public boolean include(RevWalk walker, RevCommit cmit)
 			throws MissingObjectException, IncorrectObjectTypeException,
@@ -75,7 +74,6 @@ public abstract class SubStringRevFilter extends RevFilter {
 		return pattern.match(text(cmit)) >= 0;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public boolean requiresCommitBody() {
 		return true;
@@ -90,13 +88,12 @@ public abstract class SubStringRevFilter extends RevFilter {
 	 */
 	protected abstract RawCharSequence text(RevCommit cmit);
 
-	/** {@inheritDoc} */
 	@Override
 	public RevFilter clone() {
 		return this; // Typically we are actually thread-safe.
 	}
 
-	/** {@inheritDoc} */
+	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
 		return super.toString() + "(\"" + pattern.pattern() + "\")";

@@ -104,7 +104,7 @@ public class RevFlagSet extends AbstractSet<RevFlag> {
 	@Override
 	public Iterator<RevFlag> iterator() {
 		final Iterator<RevFlag> i = active.iterator();
-		return new Iterator<RevFlag>() {
+		return new Iterator<>() {
 			private RevFlag current;
 
 			@Override

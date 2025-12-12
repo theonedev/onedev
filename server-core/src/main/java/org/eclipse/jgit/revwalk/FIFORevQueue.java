@@ -37,7 +37,6 @@ public class FIFORevQueue extends BlockRevQueue {
 		super(s);
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public void add(RevCommit c) {
 		Block b = tail;
@@ -82,7 +81,6 @@ public class FIFORevQueue extends BlockRevQueue {
 		head = b;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public RevCommit next() {
 		final Block b = head;
@@ -99,7 +97,6 @@ public class FIFORevQueue extends BlockRevQueue {
 		return c;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public void clear() {
 		head = null;
@@ -135,7 +132,6 @@ public class FIFORevQueue extends BlockRevQueue {
 		}
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		final StringBuilder s = new StringBuilder();

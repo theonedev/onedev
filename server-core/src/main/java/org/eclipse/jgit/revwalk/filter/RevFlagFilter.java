@@ -91,13 +91,11 @@ public abstract class RevFlagFilter extends RevFilter {
 		flags = m;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public RevFilter clone() {
 		return this;
 	}
 
-	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		return super.toString() + flags;
