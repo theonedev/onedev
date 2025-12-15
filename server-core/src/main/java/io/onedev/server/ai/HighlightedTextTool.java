@@ -21,7 +21,11 @@ public class HighlightedTextTool implements ChatTool {
 
     private static final String OMITTED_LINES = "...OMITTED LINES...";
 
-    private static final int CONTEXT_SIZE = 100;
+    private static final int START_CONTEXT_SIZE = 100;
+
+    private static final int BEFORE_CONTEXT_SIZE = 50;
+
+    private static final int AFTER_CONTEXT_SIZE = 50;
 
     private final String fileName;
 
@@ -51,7 +55,7 @@ public class HighlightedTextTool implements ChatTool {
         var map = Map.of(
             "highlightedText", Joiner.on('\n').join(highlightRange.getContent(fileContent)),
             "nameOfFileContainingHighlightedText", fileName,
-            "contextOfHighlightedText", Joiner.on('\n').join(highlightRange.getContext(fileContent, HIGHLIGHT_BEGIN, HIGHLIGHT_END, OMITTED_LINES, CONTEXT_SIZE, CONTEXT_SIZE, CONTEXT_SIZE)),
+            "contextOfHighlightedText", Joiner.on('\n').join(highlightRange.getContext(fileContent, HIGHLIGHT_BEGIN, HIGHLIGHT_END, OMITTED_LINES, START_CONTEXT_SIZE, BEFORE_CONTEXT_SIZE, AFTER_CONTEXT_SIZE)),
             "note", String.format("Highlighted text is between %s and %s in the context", HIGHLIGHT_BEGIN, HIGHLIGHT_END)
         );
 

@@ -516,7 +516,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					range = getRange(params, "param1", "param2", "param3", "param4");					
 					context.onPosition(target, BlobRenderer.getSourcePosition(range));
 					var page = (LayoutPage) getPage();
-					page.getChatter().show(target, "Help me understand highlighted text of current file. Display in " + getSession().getLocale().getDisplayLanguage());
+					page.getChatter().show(target, "Help me understand highlighted text. Display in " + getSession().getLocale().getDisplayLanguage());
 					target.appendJavaScript(String.format("onedev.server.sourceView.mark(%s, false);", convertToJson(range)));
 					break;
 				case "addComment":
@@ -884,23 +884,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			protected String getSymbolPositionCalcFunction() {
 				return 
 					"""
-					function(symbolEl) {
-						function getNodeText(node) {
-							if (node.nodeType === Node.TEXT_NODE) {
-								return node.textContent;
-							} else if (node.nodeType === Node.ELEMENT_NODE) {
-								if (node.classList && node.classList.contains('cm-tab')) {
-									return '\\t';
-								}
-								var text = '';
-								for (var i = 0; i < node.childNodes.length; i++) {
-									text += getNodeText(node.childNodes[i]);
-								}
-								return text;
-							}
-							return '';
-						}
-						
+					function(symbolEl) {						
 						var cm = symbolEl.closest(".CodeMirror").CodeMirror;
 						if (cm) {
 							var lineEl = symbolEl.closest('.CodeMirror-line').parentElement;
@@ -908,17 +892,18 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 								if (view.node === lineEl) {
 									var row = cm.getLineNumber(view.line);
 									var parentEl = symbolEl.parentElement;
-									var text = '';
+									var columnStart = 1;
 									for (var i = 0; i < parentEl.childNodes.length; i++) {
 										var node = parentEl.childNodes[i];
 										if (node === symbolEl)
 											break;
-										text += getNodeText(node);
+										columnStart += node.textContent.length;
+										$(node).find('.cm-tab').addBack('.cm-tab').each(function() {
+										  columnStart -= $(this).text().length - 1;
+										});
 									}
 									row++;
-									var columnStart = text.length + 1;
-									var symbolText = getNodeText(symbolEl);
-									return row + "." + columnStart + "-" + row + "." + (columnStart + symbolText.length);
+									return row + "." + columnStart + "-" + row + "." + (columnStart + symbolEl.textContent.length);
 								}
 							}
 						}
@@ -927,13 +912,14 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			}
 
 			@Override
-			protected SymbolContext getSymbolContext(String symbolPosition, String symbolBegin, String symbolEnd, 
-					String truncationMark, int atStartContextSize, int beforeContextSize, int afterContextSize) {
-				var range = new PlanarRange(symbolPosition);
+			protected SymbolContext getSymbolContext(String symbolPosition, String symbolBeginMark, String symbolEndMark, 
+					String 	omittedLinesMark, int startContextSize, int beforeContextSize, int afterContextSize) {
+				var range = new PlanarRange(symbolPosition);				
 				var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
+				System.out.println(range.getContent(lines));
 				
-				var symbolContext = range.getContext(lines, symbolBegin, symbolEnd, truncationMark, 
-						atStartContextSize, beforeContextSize, afterContextSize);
+				var symbolContext = range.getContext(lines, symbolBeginMark, symbolEndMark, omittedLinesMark, 
+						startContextSize, beforeContextSize, afterContextSize);
 				return new SymbolContext(context.getBlobIdent().path, symbolContext);
 			}
 			

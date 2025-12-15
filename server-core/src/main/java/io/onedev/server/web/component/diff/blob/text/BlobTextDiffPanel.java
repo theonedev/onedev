@@ -39,6 +39,7 @@ import com.google.common.base.Preconditions;
 import com.ibm.icu.text.SpoofChecker;
 
 import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.ai.HighlightedTextTool;
@@ -373,19 +374,35 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 					"""
 					function(symbolEl) {
 						var $td = $(symbolEl).closest('td.content');
-						if ($td.hasClass('old'))
-							return 'old:' + $td.data('old');
-						else
-							return 'new:' + $td.data('new');
+						var side;
+						var row;
+						if ($td.hasClass('old')) {
+							side = "old";
+							row = $td.data('old');
+						} else {
+							side = "new";
+							row = $td.data('new');
+						}
+						var parentEl = symbolEl.parentElement;
+						var columnStart = 1;
+						for (var i = 0; i < parentEl.childNodes.length; i++) {
+							var node = parentEl.childNodes[i];
+							if (node === symbolEl)
+								break;
+							columnStart += node.textContent.length;
+						}
+						row++;
+						return side + ":" + row + "." + columnStart + "-" + row + "." + (columnStart + symbolEl.textContent.length);
+						
 					}""";
 			}
 
 			@Override
-			protected SymbolContext getSymbolContext(String symbolPosition, String symbolBegin, String symbolEnd, 
-					String truncationMark, int atStartContextSize, int beforeContextSize, int afterContextSize) {
+			protected SymbolContext getSymbolContext(String symbolPosition, String symbolBeginMark, String symbolEndMark, 
+					String omittedLinesMark, int startContextSize, int beforeContextSize, int afterContextSize) {
 				String[] parts = symbolPosition.split(":");
 				boolean isNew = parts[0].equals("new");
-				int lineNo = Integer.parseInt(parts[1]);
+				var range = new PlanarRange(parts[1]);
 				
 				List<String> lines;
 				String path;
@@ -397,22 +414,9 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 					path = change.getOldBlobIdent().path;
 				}
 				
-				List<String> linesBefore = new ArrayList<>();
-				List<String> linesAfter = new ArrayList<>();
+				System.out.println(range.getContent(lines));
 				
-				for (int i = Math.max(0, lineNo - beforeContextSize); i < lineNo; i++) {
-					linesBefore.add(lines.get(i));
-				}
-				for (int i = lineNo + 1; i <= Math.min(lineNo + afterContextSize, lines.size() - 1); i++) {
-					linesAfter.add(lines.get(i));
-				}
-				
-				List<String> linesAtStart = new ArrayList<>();
-				for (int i = 0; i < Math.min(atStartContextSize, lines.size()); i++) {
-					linesAtStart.add(lines.get(i));
-				}
-				
-				return new SymbolContext(path, linesBefore);
+				return new SymbolContext(path, range.getContext(lines, symbolBeginMark, symbolEndMark, omittedLinesMark, startContextSize, beforeContextSize, afterContextSize));
 			}
 						
 		};

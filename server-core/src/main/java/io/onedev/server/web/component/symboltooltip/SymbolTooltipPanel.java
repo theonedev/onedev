@@ -67,11 +67,11 @@ public abstract class SymbolTooltipPanel extends Panel {
 
 	private static final int QUERY_ENTRIES = 25;
 
+	private static final int START_CONTEXT_SIZE = 200;
+
 	private static final int BEFORE_CONTEXT_SIZE = 5;
 
 	private static final int AFTER_CONTEXT_SIZE = 5;
-
-	private static final int AT_START_CONTEXT_SIZE = 200;
 
 	private static final String SYMBOL_BEGIN = "[SYMBOL_BEGIN]";
 
@@ -342,7 +342,8 @@ public abstract class SymbolTooltipPanel extends Panel {
 						var jsonOfSymbolHits = mapperCopy.writeValueAsString(symbolHits);
 						
 						var symbolContext = getSymbolContext(symbolPosition, SYMBOL_BEGIN, SYMBOL_END, OMITTED_LINES, 
-								AT_START_CONTEXT_SIZE, BEFORE_CONTEXT_SIZE, AFTER_CONTEXT_SIZE);
+								START_CONTEXT_SIZE, BEFORE_CONTEXT_SIZE, AFTER_CONTEXT_SIZE);
+
 						var occurrenceMap = Map.of(
 							"symbolName", symbolName,
 							"blobPath", symbolContext.getBlobPath(), 
@@ -367,7 +368,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 
 								Possible symbol definitions json:
 								%s
-								""", symbolName, jsonOfSymbolOccurrence, jsonOfSymbolHits));
+								""", jsonOfSymbolOccurrence, jsonOfSymbolHits));
 						index = Integer.parseInt(liteModel.chat(systemMessage, userMessage).aiMessage().text());
 						if (index < 0 || index >= symbolHits.size())
 							Session.get().warn("Unable to find most likely definition");
@@ -437,8 +438,8 @@ public abstract class SymbolTooltipPanel extends Panel {
 
 	protected abstract String getSymbolPositionCalcFunction();
 
-	protected abstract SymbolContext getSymbolContext(String symbolPosition, String symbolBegin, String symbolEnd, 
-			String truncationMark, int atStartContextSize, int beforeContextSize, int afterContextSize);
+	protected abstract SymbolContext getSymbolContext(String symbolPosition, String symbolBeginMark, String symbolEndMark, 
+			String omittedLinesMark, int startContextSize, int beforeContextSize, int afterContextSize);
 
 }
 
