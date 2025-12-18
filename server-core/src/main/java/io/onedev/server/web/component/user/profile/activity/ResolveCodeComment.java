@@ -11,8 +11,8 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.web.UrlService;
 
 public class ResolveCodeComment extends CodeCommentActivity {
 

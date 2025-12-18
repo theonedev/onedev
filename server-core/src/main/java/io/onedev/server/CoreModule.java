@@ -75,11 +75,11 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.OsInfo;
+import io.onedev.server.ai.BuildSpecSchemaResource;
 import io.onedev.server.ai.McpHelperResource;
 import io.onedev.server.annotation.Shallow;
 import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.attachment.DefaultAttachmentService;
-import io.onedev.server.buildspec.BuildSpecSchemaResource;
 import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
 import io.onedev.server.cluster.ClusterResource;
 import io.onedev.server.codequality.CodeProblemContribution;
@@ -273,6 +273,8 @@ import io.onedev.server.service.SshKeyService;
 import io.onedev.server.service.SsoAccountService;
 import io.onedev.server.service.SsoProviderService;
 import io.onedev.server.service.StopwatchService;
+import io.onedev.server.service.TemporalFutureService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserAuthorizationService;
 import io.onedev.server.service.UserEntitlementService;
 import io.onedev.server.service.UserInvitationService;
@@ -364,6 +366,8 @@ import io.onedev.server.service.impl.DefaultSshKeyService;
 import io.onedev.server.service.impl.DefaultSsoAccountService;
 import io.onedev.server.service.impl.DefaultSsoProviderService;
 import io.onedev.server.service.impl.DefaultStopwatchService;
+import io.onedev.server.service.impl.DefaultTemporalFutureService;
+import io.onedev.server.service.impl.DefaultUrlService;
 import io.onedev.server.service.impl.DefaultUserAuthorizationService;
 import io.onedev.server.service.impl.DefaultUserEntitlementService;
 import io.onedev.server.service.impl.DefaultUserInvitationService;
@@ -398,12 +402,10 @@ import io.onedev.server.util.xstream.VersionedDocumentConverter;
 import io.onedev.server.validation.MessageInterpolator;
 import io.onedev.server.validation.ShallowValidatorProvider;
 import io.onedev.server.validation.ValidatorProvider;
-import io.onedev.server.web.DefaultUrlService;
 import io.onedev.server.web.DefaultWicketFilter;
 import io.onedev.server.web.DefaultWicketServlet;
 import io.onedev.server.web.ResourcePackScopeContribution;
 import io.onedev.server.web.SessionListener;
-import io.onedev.server.web.UrlService;
 import io.onedev.server.web.WebApplication;
 import io.onedev.server.web.avatar.AvatarService;
 import io.onedev.server.web.avatar.DefaultAvatarService;
@@ -747,6 +749,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(UploadService.class).to(DefaultUploadService.class);
 		
 		bind(TaskFutureManager.class);
+		bind(TemporalFutureService.class).to(DefaultTemporalFutureService.class);
 	}
 	
 	private void configureBuild() {

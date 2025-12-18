@@ -4,7 +4,7 @@ import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.CodeCommentStatusChangeService;
-import io.onedev.server.web.UrlService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;

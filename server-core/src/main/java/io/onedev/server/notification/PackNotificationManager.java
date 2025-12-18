@@ -2,6 +2,7 @@ package io.onedev.server.notification;
 
 import com.google.common.collect.Lists;
 import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.pack.PackEvent;
@@ -12,7 +13,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.search.entity.pack.PackQuery;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadPack;
-import io.onedev.server.web.UrlService;
+
 import org.apache.shiro.authz.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

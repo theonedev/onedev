@@ -38,8 +38,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
-import org.apache.wicket.util.visit.IVisit;
-import org.apache.wicket.util.visit.IVisitor;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.jspecify.annotations.Nullable;
@@ -51,7 +49,6 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.service.ChatService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.service.support.ChatResponding;
-import io.onedev.server.service.support.ChatTool;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
@@ -66,13 +63,12 @@ import io.onedev.server.web.component.select2.ChoiceProvider;
 import io.onedev.server.web.component.select2.ResponseFiller;
 import io.onedev.server.web.component.select2.Select2Choice;
 import io.onedev.server.web.component.user.UserAvatar;
-import io.onedev.server.web.util.ChatToolAware;
 
 public class ChatPanel extends Panel {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int TIMEOUT_SECONDS = 120;
+	private static final int TIMEOUT_SECONDS = 300;
 
 	private static final String COOKIE_ACTIVE_AI = "active-ai";
 
@@ -410,18 +406,7 @@ public class ChatPanel extends Panel {
 					}
 				}
 
-				List<ChatTool> chatTools = new ArrayList<>();
-				if (getPage() instanceof ChatToolAware) 
-					chatTools.addAll(((ChatToolAware) getPage()).getChatTools());
-				getPage().visitChildren(ChatToolAware.class, new IVisitor<Component, Void>() {
-
-					@Override
-					public void component(Component component, IVisit<Void> visit) {
-						chatTools.addAll(((ChatToolAware) component).getChatTools());
-					}
-
-				});				
-				chatService.sendRequest(WebSession.get(), request, chatTools, TIMEOUT_SECONDS);
+				chatService.sendRequest(getPage(), request, TIMEOUT_SECONDS);
 
 				showNewMessages(target);
 				target.add(respondingContainer);

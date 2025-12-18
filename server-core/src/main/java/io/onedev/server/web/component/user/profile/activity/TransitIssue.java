@@ -11,8 +11,8 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.IssueService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.model.Issue;
-import io.onedev.server.web.UrlService;
 
 public class TransitIssue extends IssueActivity {
 

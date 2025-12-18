@@ -6,7 +6,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.PullRequestChangeService;
-import io.onedev.server.web.UrlService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;

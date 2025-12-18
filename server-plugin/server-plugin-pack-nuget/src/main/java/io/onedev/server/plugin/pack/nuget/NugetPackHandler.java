@@ -66,6 +66,7 @@ import io.onedev.server.service.BuildService;
 import io.onedev.server.service.PackBlobService;
 import io.onedev.server.service.PackService;
 import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.exception.DataTooLargeException;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
@@ -75,7 +76,6 @@ import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.SemanticVersion;
 import io.onedev.server.util.XmlUtils;
-import io.onedev.server.web.UrlService;
 
 @Singleton
 public class NugetPackHandler implements PackHandler {

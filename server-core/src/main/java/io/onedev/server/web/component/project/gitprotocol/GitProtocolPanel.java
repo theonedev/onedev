@@ -19,7 +19,7 @@ import org.apache.wicket.request.http.WebResponse;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.SettingService;
-import io.onedev.server.web.UrlService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.security.SecurityUtils;

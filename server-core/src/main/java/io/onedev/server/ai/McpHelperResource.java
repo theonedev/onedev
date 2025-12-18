@@ -117,11 +117,11 @@ import io.onedev.server.service.PullRequestLabelService;
 import io.onedev.server.service.PullRequestReviewService;
 import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.web.UrlService;
 
 @Api(internal = true)
 @Path("/mcp-helper")

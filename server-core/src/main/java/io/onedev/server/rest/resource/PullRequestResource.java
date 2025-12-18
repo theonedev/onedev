@@ -35,6 +35,7 @@ import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.service.PullRequestChangeService;
 import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
@@ -57,7 +58,6 @@ import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectAndBranch;
-import io.onedev.server.web.UrlService;
 
 @Api(name="Pull Request", description="In most cases, pull request resource is operated with pull request id, which is different from pull request number. "
 		+ "To get pull request id of a particular pull request number, use the <a href='/~help/api/io.onedev.server.rest.PullRequestResource/queryBasicInfo'>Query Basic Info</a> operation with query for "

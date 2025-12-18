@@ -2,6 +2,7 @@ package io.onedev.server.event.project;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.event.Event;
 import io.onedev.server.model.Project;
@@ -9,7 +10,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.commenttext.CommentText;
-import io.onedev.server.web.UrlService;
 
 import org.jspecify.annotations.Nullable;
 import java.io.Serializable;

@@ -20,10 +20,10 @@ import com.google.common.base.Splitter;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.util.UrlUtils;
-import io.onedev.server.web.UrlService;
 
 @Singleton
 public class GoGetFilter implements Filter {

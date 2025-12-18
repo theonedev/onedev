@@ -3,8 +3,8 @@ package io.onedev.server.buildspec.job.gitcredential;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.DefaultCloneInfo;
 import io.onedev.server.OneDev;
-import io.onedev.server.web.UrlService;
 import io.onedev.server.model.Build;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.annotation.Editable;
 
 @Editable(name="Default", order=100)

@@ -8,9 +8,10 @@ import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.validation.validator.ProjectPathValidator;
-import io.onedev.server.web.UrlService;
+
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jsoup.nodes.Document;

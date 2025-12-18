@@ -1,11 +1,13 @@
 package io.onedev.server.web.page.project.issues.detail;
 
 import static io.onedev.server.web.translation.Translation._T;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 import javax.persistence.EntityNotFoundException;
@@ -17,6 +19,7 @@ import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -51,10 +54,10 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.IssueLinkService;
 import io.onedev.server.service.IssueService;
 import io.onedev.server.service.SettingService;
-import io.onedev.server.service.support.ChatTool;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.behavior.ChatTool;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
@@ -71,13 +74,13 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
-import io.onedev.server.web.util.ChatToolAware;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
+import io.onedev.server.web.websocket.ChatToolExecution;
 import io.onedev.server.xodus.VisitInfoService;
 
-public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext, ChatToolAware {
+public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext {
 
 	public static final String PARAM_ISSUE = "issue";
 	
@@ -378,6 +381,48 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			}
 			
 		});
+
+		add(new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentIssue")
+					.description("Get info of current issue in json format")
+					.build();
+			}
+
+			@Override
+			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+				try {
+					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(IssueHelper.getDetail(getIssue().getProject(), getIssue())), false));
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		});
+		
+		add(new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentIssueComments")
+					.description("Get comments of current issue in json format")
+					.build();
+			}
+
+			@Override
+			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {	
+				try {
+					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(IssueHelper.getComments(getIssue())), false));
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		});
 		
 		RequestCycle.get().getListeners().add(new AbstractRequestCycleListener() {
 						
@@ -389,52 +434,6 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 						
 		});	
 
-	}
-
-	@Override
-	public List<ChatTool> getChatTools() {
-		var issueId = getIssue().getId();
-		return List.of(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentIssue")
-					.description("Get info of current issue in json format")
-					.build();
-			}
-
-			@Override
-			public String execute(JsonNode arguments) {
-				var issue = issueService.load(issueId);
-				try {
-					return objectMapper.writeValueAsString(IssueHelper.getDetail(issue.getProject(), issue));
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			
-		}, new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentIssueComments")
-					.description("Get comments of current issue in json format")
-					.build();
-			}
-
-			@Override
-			public String execute(JsonNode arguments) {	
-				var issue = issueService.load(issueId);			
-				try {
-					return objectMapper.writeValueAsString(IssueHelper.getComments(issue));
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			
-		});
 	}
 	
 	@Override

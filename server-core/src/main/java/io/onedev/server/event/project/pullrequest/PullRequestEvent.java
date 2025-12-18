@@ -6,7 +6,7 @@ import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.PullRequestService;
-import io.onedev.server.web.UrlService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;

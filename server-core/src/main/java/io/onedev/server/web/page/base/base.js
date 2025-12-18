@@ -358,17 +358,21 @@ onedev.server = {
 		});
 		Wicket.Event.subscribe("/websocket/closed", function(jqEvent) {
 			if (!pageUnloading) {
+				$("body>.error").hide();
 				$(".connection-error").show();
 			}
 		});
 		Wicket.Event.subscribe("/websocket/error", function(jqEvent) {
 			if (!pageUnloading) {
+				$("body>.error").hide();
 				$(".connection-error").show();
 			}
 		});
 		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
-			if (message == "ErrorMessage") 
-				$(".page-error").slideDown("slow");
+			if (message == "ErrorMessage") {
+				$("body>.error").hide();
+				$(".page-error").show();
+			}
 		});		
 	},
 

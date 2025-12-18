@@ -132,7 +132,7 @@ public abstract class TaskButton extends AjaxButton {
 		messages.add(new JobLogEntryEx(new JobLogEntry(new Date(), _T("Please wait..."))));
 		var application = Application.get();
 		var requestCycle = RequestCycle.get();
-		TaskFuture future = taskFutureManager.getTaskFutures().put(taskId, new TaskFuture(executorService.submit(new Callable<TaskResult>() {
+		TaskFuture prevFuture = taskFutureManager.getTaskFutures().put(taskId, new TaskFuture(executorService.submit(new Callable<TaskResult>() {
 
 			@Override
 			public TaskResult call() throws Exception {
@@ -184,8 +184,8 @@ public abstract class TaskButton extends AjaxButton {
 			
 		}), messages));
 		
-		if (future != null && !future.isDone())
-			future.cancel(true);
+		if (prevFuture != null)
+			prevFuture.cancel(true);
 		
 		new ModalPanel(target) {
 			
@@ -197,7 +197,7 @@ public abstract class TaskButton extends AjaxButton {
 				TaskFuture future = taskFutureManager.getTaskFutures().remove(taskId);
 				
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
-				if (future != null && !future.isDone()) {
+				if (future != null) {
 					future.cancel(true);
 					onCancelled(target);
 				} else {

@@ -3,6 +3,7 @@ package io.onedev.server.git.hook;
 import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.RefUpdated;
@@ -11,7 +12,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.UrlService;
+
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.shiro.util.ThreadContext;

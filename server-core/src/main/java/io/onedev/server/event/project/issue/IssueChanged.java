@@ -2,6 +2,7 @@ package io.onedev.server.event.project.issue;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
@@ -11,7 +12,6 @@ import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
-import io.onedev.server.web.UrlService;
 
 import org.jspecify.annotations.Nullable;
 import java.util.Collection;

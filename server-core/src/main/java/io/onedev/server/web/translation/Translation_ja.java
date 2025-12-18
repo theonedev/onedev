@@ -1320,6 +1320,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("File missing or obsolete", "ファイルが欠落しているか廃止されています");
 		m.put("File name", "ファイル名");
 		m.put("File name patterns such as *.java, *.c", "ファイル名パターン（例: *.java, *.c）");
+		m.put("File path to get text content", "テキストコンテンツを取得するファイルパス");
 		m.put("Files", "ファイル一覧");
 		m.put("Files to Be Analyzed", "分析対象のファイル");
 		m.put("Filter", "フィルター");
@@ -1361,6 +1362,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Fixing Commits", "コミットの修正");
 		m.put("Fixing...", "修正中...");
 		m.put("Float", "浮動小数点");
+		m.put("Folder path to list all files and subfolders", "すべてのファイルとサブフォルダを一覧表示するフォルダパス");
 		m.put("Follow below instructions to publish packages into this project", "以下の手順に従って、このプロジェクトにパッケージを公開してください");
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
 			"以下の手順に従って、リモートマシンにエージェントをインストールしてください（Linux/Windows/Mac OS X/FreeBSD対応）:");
@@ -4141,6 +4143,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Type password here", "ここにパスワードを入力してください");
 		m.put("Type to filter", "フィルターするために入力してください");
 		m.put("Type to filter...", "フィルターするために入力してください...");
+		m.put("Type your message (shift+enter for new line)", "メッセージを入力してください（新しい行にはshift+enter）");
 		m.put("Type your message here", "ここにメッセージを入力してください");
 		m.put("URL", "URL");
 		m.put("Unable To Delete/Disable Right Now", "今すぐ削除/無効化できません");

@@ -1320,6 +1320,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("File missing or obsolete", "Datei fehlt oder ist veraltet");
 		m.put("File name", "Dateiname");
 		m.put("File name patterns such as *.java, *.c", "Dateinamenmuster wie *.java, *.c");
+		m.put("File path to get text content", "Dateipfad, um Textinhalt zu erhalten");
 		m.put("Files", "Dateien");
 		m.put("Files to Be Analyzed", "Zu analysierende Dateien");
 		m.put("Filter", "Filter");
@@ -1361,6 +1362,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Fixing Commits", "Commits beheben");
 		m.put("Fixing...", "Beheben...");
 		m.put("Float", "Fließkommazahl");
+		m.put("Folder path to list all files and subfolders", "Ordnerpfad, um alle Dateien und Unterordner aufzulisten");
 		m.put("Follow below instructions to publish packages into this project", "Befolgen Sie die unten stehenden Anweisungen, um Pakete in dieses Projekt zu veröffentlichen");
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
 			"Befolgen Sie die unten stehenden Schritte, um den Agenten auf einer Remote-Maschine zu installieren (unterstützt Linux/Windows/Mac OS X/FreeBSD):");
@@ -4141,6 +4143,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Type password here", "Geben Sie hier das Passwort ein.");
 		m.put("Type to filter", "Geben Sie ein, um zu filtern.");
 		m.put("Type to filter...", "Geben Sie ein, um zu filtern...");
+		m.put("Type your message (shift+enter for new line)", "Geben Sie Ihre Nachricht ein (Shift+Enter für neue Zeile)");
 		m.put("Type your message here", "Geben Sie hier Ihre Nachricht ein");
 		m.put("URL", "URL");
 		m.put("Unable To Delete/Disable Right Now", "Kann derzeit nicht gelöscht/deaktiviert werden");

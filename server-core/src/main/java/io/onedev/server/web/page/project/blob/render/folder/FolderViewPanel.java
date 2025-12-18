@@ -62,7 +62,7 @@ public class FolderViewPanel extends Panel {
 
 		@Override
 		protected List<BlobIdent> load() {
-			List<BlobIdent> children = getGitService().getChildren(context.getProject(), getCommitId(),
+			List<BlobIdent> children = getGitService().getChildren(context.getProject(), getCommitId().copy(),
 					context.getBlobIdent().path, BlobIdentFilter.ALL, true);
 			for (BlobIdent child : children)
 				child.revision = context.getBlobIdent().revision;

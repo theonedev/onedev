@@ -55,7 +55,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.CodeCommentService;
-import io.onedev.server.service.support.ChatTool;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.diff.DiffBlock;
@@ -75,12 +74,11 @@ import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.AnnotationInfo;
-import io.onedev.server.web.util.ChatToolAware;
 import io.onedev.server.web.util.CodeCommentInfo;
 import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.WicketUtils;
 
-public class BlobTextDiffPanel extends Panel implements ChatToolAware {
+public class BlobTextDiffPanel extends Panel {
 
 	private final BlobChange change;
 	
@@ -413,9 +411,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 					lines = change.getOldText().getLines();
 					path = change.getOldBlobIdent().path;
 				}
-				
-				System.out.println(range.getContent(lines));
-				
+								
 				return new SymbolContext(path, range.getContext(lines, symbolBeginMark, symbolEndMark, omittedLinesMark, startContextSize, beforeContextSize, afterContextSize));
 			}
 						
@@ -430,6 +426,23 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 			}
 			
 		}));
+
+		if (getAnnotationSupport() != null) {
+			var markRange = getAnnotationSupport().getMarkRange();
+			if (markRange != null) {
+				String fileName;
+				List<String> fileLines;
+				if (markRange.isLeftSide()) {
+					fileName = change.getOldBlobIdent().getName();
+					fileLines = change.getOldText().getLines();
+				} else {
+					fileName = change.getNewBlobIdent().getName();
+					fileLines = change.getNewText().getLines();
+				}
+				add(new HighlightedTextTool(fileName, fileLines, markRange));				
+			}
+		}
+			
 		setOutputMarkupId(true);
 	}
 	
@@ -1090,27 +1103,6 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		return confusableChecker.areConfusable(text1, text2) != 0;	
 	}
 
-	@Override
-	public List<ChatTool> getChatTools() {
-		var tools = new ArrayList<ChatTool>();
-		if (getAnnotationSupport() != null) {
-			var markRange = getAnnotationSupport().getMarkRange();
-			if (markRange != null) {
-				String fileName;
-				List<String> fileLines;
-				if (markRange.isLeftSide()) {
-					fileName = change.getOldBlobIdent().getName();
-					fileLines = change.getOldText().getLines();
-				} else {
-					fileName = change.getNewBlobIdent().getName();
-					fileLines = change.getNewText().getLines();
-				}
-				tools.add(new HighlightedTextTool(fileName, fileLines, markRange));				
-			}
-		}
-		return tools;
-	}
-	
 	private static class BlameInfo implements Serializable {
 		
 		Map<Integer, BlameCommit> oldBlame = new HashMap<>();

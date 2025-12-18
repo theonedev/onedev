@@ -4,10 +4,10 @@ import java.util.Date;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.PackService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.User;
-import io.onedev.server.web.UrlService;
 
 public abstract class PackEvent extends ProjectEvent {
 

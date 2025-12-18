@@ -1,4 +1,4 @@
-package io.onedev.server.web;
+package io.onedev.server.service;
 
 import io.onedev.server.model.*;
 import io.onedev.server.util.ProjectAndRevision;

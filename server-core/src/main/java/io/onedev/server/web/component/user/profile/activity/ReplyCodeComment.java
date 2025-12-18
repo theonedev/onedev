@@ -10,9 +10,9 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.CodeCommentReplyService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.web.UrlService;
 
 public class ReplyCodeComment extends CodeCommentActivity {
 

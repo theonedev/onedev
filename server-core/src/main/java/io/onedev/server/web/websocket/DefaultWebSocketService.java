@@ -16,11 +16,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.wicket.Application;
+import org.apache.wicket.protocol.ws.WebSocketSettings;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.apache.wicket.protocol.ws.api.registry.IKey;
 import org.apache.wicket.protocol.ws.api.registry.IWebSocketConnectionRegistry;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
-import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.joda.time.DateTime;
 import org.jspecify.annotations.Nullable;
@@ -69,10 +69,10 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 	private ClusterService clusterService;
 	
 	private final Map<String, Map<IKey, Collection<String>>> registeredObservables = new ConcurrentHashMap<>();
-	
-	private final IWebSocketConnectionRegistry connectionRegistry = new SimpleWebSocketConnectionRegistry();
-	
+		
 	private final Map<String, Pair<PageKey, Date>> notifiedObservables = new ConcurrentHashMap<>();
+
+	private volatile IWebSocketConnectionRegistry connectionRegistry;
 	
 	private volatile String keepAliveTaskId;
 
@@ -82,6 +82,12 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(WebSocketService.class);
+	}
+
+	private IWebSocketConnectionRegistry getConnectionRegistry() {
+		if (connectionRegistry == null) 
+			connectionRegistry = WebSocketSettings.Holder.get(application).getConnectionRegistry();
+		return connectionRegistry;
 	}
 	
 	@Override
@@ -97,7 +103,7 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 			Collection<String> observables = page.findChangeObservables();
 			Collection<String> prevObservables = observablesOfSession.put(pageKey, observables);
 			if (prevObservables != null && !observables.stream().allMatch(it -> prevObservables.stream().anyMatch(it2 -> containsObservable(it2, it)))) {
-				IWebSocketConnection connection = connectionRegistry.getConnection(application, sessionId, pageKey);
+				IWebSocketConnection connection = getConnectionRegistry().getConnection(application, sessionId, pageKey);
 				if (connection != null)
 					notifyPastObservables(connection);
 			}
@@ -110,11 +116,11 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 	
 	@Override
 	public void sessionDestroyed(String sessionId) {
-		for (IWebSocketConnection connection : connectionRegistry.getConnections(application, sessionId)) {
+		for (IWebSocketConnection connection : getConnectionRegistry().getConnections(application, sessionId)) {
 			try {
 				connection.close(StatusCode.NORMAL, "Session destroyed");
 				IKey pageKey = ((WebSocketConnection) connection).getPageKey().getPageId();
-				connectionRegistry.removeConnection(application, sessionId, pageKey);
+				getConnectionRegistry().removeConnection(application, sessionId, pageKey);
 			} catch (Exception e) {
 			}
 		}
@@ -160,7 +166,7 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 				clusterService.submitToAllServers(() -> {
 					for (var observable: observables)
 						notifiedObservables.put(observable, new Pair<>(sourcePageKey, new Date()));
-					for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
+					for (IWebSocketConnection connection: getConnectionRegistry().getConnections(application)) {
 						PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
 						if (sourcePageKey == null || !sourcePageKey.equals(pageKey)) {
 							Collection<String> registeredObservables = getRegisteredObservables(connection);
@@ -190,7 +196,7 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 			
 			@Override
 			public void execute() {
-				for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
+				for (IWebSocketConnection connection: getConnectionRegistry().getConnections(application)) {
 					if (connection.isOpen()) {
 						try {
 							connection.sendMessage(WebSocketMessages.KEEP_ALIVE);
@@ -225,7 +231,7 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 
 		checkMessageQueueThread = new Thread(() -> {
 			while (checkMessageQueueThread != null) {
-				for (var connection: connectionRegistry.getConnections(application)) {
+				for (var connection: getConnectionRegistry().getConnections(application)) {
 					if (connection.isOpen()) 
 						((WebSocketConnection) connection).checkMessageQueue();
 				}

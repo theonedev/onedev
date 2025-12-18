@@ -1320,6 +1320,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("File missing or obsolete", "파일 누락 또는 오래됨");
 		m.put("File name", "파일 이름");
 		m.put("File name patterns such as *.java, *.c", "파일 이름 패턴 예: *.java, *.c");
+		m.put("File path to get text content", "텍스트 내용을 가져올 파일 경로");
 		m.put("Files", "파일들");
 		m.put("Files to Be Analyzed", "분석할 파일들");
 		m.put("Filter", "필터");
@@ -1361,6 +1362,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Fixing Commits", "커밋 수정 중");
 		m.put("Fixing...", "수정 중...");
 		m.put("Float", "부동");
+		m.put("Folder path to list all files and subfolders", "모든 파일 및 하위 폴더를 나열할 폴더 경로");
 		m.put("Follow below instructions to publish packages into this project", "아래 지침을 따라 이 프로젝트에 패키지를 게시하세요");
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
 			"원격 머신에 에이전트를 설치하려면 아래 단계를 따르세요 (Linux/Windows/Mac OS X/FreeBSD 지원):");
@@ -4141,6 +4143,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Type password here", "여기에 비밀번호를 입력하세요");
 		m.put("Type to filter", "필터링하려면 입력하세요");
 		m.put("Type to filter...", "필터링하려면 입력하세요...");
+		m.put("Type your message (shift+enter for new line)", "메시지를 입력하세요 (새 줄을 위해 shift+enter)");
 		m.put("Type your message here", "여기에 메시지를 입력하세요");
 		m.put("URL", "URL");
 		m.put("Unable To Delete/Disable Right Now", "지금 삭제/비활성화할 수 없습니다");

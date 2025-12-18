@@ -2,7 +2,7 @@ package io.onedev.server.event.project.issue;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.IssueCommentService;
-import io.onedev.server.web.UrlService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;

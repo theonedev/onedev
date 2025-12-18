@@ -25,10 +25,11 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.ssh.SshAuthenticator;
 import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.web.UrlService;
+
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.channel.ChannelSession;

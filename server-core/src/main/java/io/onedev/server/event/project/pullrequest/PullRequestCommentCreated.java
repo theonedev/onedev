@@ -4,10 +4,10 @@ import java.util.Collection;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.PullRequestCommentService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
-import io.onedev.server.web.UrlService;
 
 public class PullRequestCommentCreated extends PullRequestEvent {
 

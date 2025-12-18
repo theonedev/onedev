@@ -1,4 +1,4 @@
-package io.onedev.server.buildspec;
+package io.onedev.server.ai;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,14 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.yaml.snakeyaml.DumperOptions;
@@ -33,6 +25,7 @@ import io.onedev.commons.loader.ImplementationRegistry;
 import io.onedev.commons.utils.ClassUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
@@ -42,10 +35,12 @@ import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.annotation.RetryCondition;
 import io.onedev.server.annotation.UserMatch;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.Import;
+import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.data.migration.MigrationHelper;
 import io.onedev.server.model.support.build.JobProperty;
-import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.util.patternset.PatternSet;
@@ -53,23 +48,11 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
 
-@Api(internal = true)
-@Path("/build-spec-schema.yml")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces("application/x-yaml")
-@Singleton
-public class BuildSpecSchemaResource {
-
-    private final ImplementationRegistry implementationRegistry;
+public class BuildSpecSchema {
     
-    private volatile String schema;
+    private static volatile String schema;
 
-    @Inject
-    public BuildSpecSchemaResource(ImplementationRegistry implementationRegistry) {
-        this.implementationRegistry = implementationRegistry;        
-    }
-
-    private void processProperty(Map<String, Object> currentNode, Object bean, PropertyDescriptor property) {
+    private static void processProperty(Map<String, Object> currentNode, Object bean, PropertyDescriptor property) {
         var descriptionSections = new ArrayList<String>();
         var descriptionSection = property.getDescription();
         if (descriptionSection != null)
@@ -166,7 +149,7 @@ public class BuildSpecSchemaResource {
         }
     }
 
-    private Object newBean(Class<?> beanClass) {
+    private static Object newBean(Class<?> beanClass) {
         try {
             return beanClass.getConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
@@ -176,7 +159,7 @@ public class BuildSpecSchemaResource {
     }
 
     @SuppressWarnings("unchecked")
-    private void processBean(Map<String, Object> currentNode, Class<?> beanClass, 
+    private static void processBean(Map<String, Object> currentNode, Class<?> beanClass, 
             Collection<Class<?>> implementations, Set<String> processedProperties) {
         var propsNode = (Map<String, Object>) currentNode.get("properties");
         if (propsNode == null) {
@@ -332,7 +315,7 @@ public class BuildSpecSchemaResource {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void processType(Map<String, Object> currentNode, Class<?> type) {
+    private static void processType(Map<String, Object> currentNode, Class<?> type) {
         if (type == String.class) {
             currentNode.put("type", "string");
         } else if (type == Boolean.class || type == boolean.class) {
@@ -366,13 +349,13 @@ public class BuildSpecSchemaResource {
     }
 
     @SuppressWarnings("unchecked")
-    private void processPolymorphic(Map<String, Object> currentNode, Class<?> baseClass) {
+    private static void processPolymorphic(Map<String, Object> currentNode, Class<?> baseClass) {
         Collection<Class<?>> implementations = new ArrayList<>();
         var implementationProvider = baseClass.getAnnotation(ImplementationProvider.class);
         if (implementationProvider != null) 
             implementations.addAll((Collection<? extends Class<? extends Serializable>>) ReflectionUtils.invokeStaticMethod(baseClass, implementationProvider.value()));
         else 
-            implementations.addAll(implementationRegistry.getImplementations(baseClass));
+            implementations.addAll(OneDev.getInstance(ImplementationRegistry.class).getImplementations(baseClass));
 
         currentNode.put("type", "object");
         
@@ -411,7 +394,7 @@ public class BuildSpecSchemaResource {
         }
     }
 
-    private void processCollectionProperty(Map<String, Object> currentNode, Class<?> collectionElementClass) {
+    private static void processCollectionProperty(Map<String, Object> currentNode, Class<?> collectionElementClass) {
         currentNode.put("type", "array");
         var itemsNode = new HashMap<String, Object>();
         currentNode.put("items", itemsNode);
@@ -425,9 +408,7 @@ public class BuildSpecSchemaResource {
         }
     }
 
-    @GET
-    @SuppressWarnings("unchecked")
-    public String getBuildSpecSchema() {
+    public static String get() {
         if (schema == null) {
             var rootNode = new HashMap<String, Object>();
             rootNode.put("$schema", "https://json-schema.org/draft/2020-12/schema");
@@ -458,6 +439,7 @@ public class BuildSpecSchemaResource {
             propsNode.put("imports", importsNode);
             processCollectionProperty(importsNode, Import.class);
             
+            @SuppressWarnings("unchecked")
             var jobPropsNode = (Map<String, Object>) ((Map<String, Object>) jobsNode.get("items")).get("properties");
             
             var stepTemplatesNode = new HashMap<String, Object>();

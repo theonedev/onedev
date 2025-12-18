@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 import javax.servlet.http.Cookie;
@@ -26,6 +27,7 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
+import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
@@ -68,6 +70,7 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.behavior.ChatTool;
 import io.onedev.server.web.behavior.ForceOrdinaryStyleBehavior;
 import io.onedev.server.web.behavior.ZoneIdBehavior;
 import io.onedev.server.web.component.svg.SpriteImage;
@@ -77,6 +80,7 @@ import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.serverinit.ServerInitPage;
 import io.onedev.server.web.page.simple.SimplePage;
 import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.web.websocket.ChatToolExecution;
 import io.onedev.server.web.websocket.ObservablesChanged;
 import io.onedev.server.web.websocket.WebSocketService;
 
@@ -154,10 +158,25 @@ public abstract class BasePage extends WebPage {
 	@Override
 	public void onEvent(IEvent<?> event) {		
 		super.onEvent(event);
-		if (event.getPayload() instanceof WebSocketPushPayload payload 
-				&& payload.getMessage() instanceof ObservablesChanged observablesChanged) {
-			notifyObservablesChange(payload.getHandler(), observablesChanged.getObservables());				
-		}
+		if (event.getPayload() instanceof WebSocketPushPayload payload) {
+			if (payload.getMessage() instanceof ObservablesChanged observablesChanged) {
+				notifyObservablesChange(payload.getHandler(), observablesChanged.getObservables());				
+			} else if (payload.getMessage() instanceof ChatToolExecution chatToolExecution) {
+				for (var behavior : findBehaviors(ChatTool.class)) {
+					if (behavior.getSpecification().name().equals(chatToolExecution.getToolName())) {
+						try {
+							var executionFuture = behavior.execute(payload.getHandler(), chatToolExecution.getToolArguments());
+							chatToolExecution.setExecutionFuture(executionFuture);
+						} catch (Throwable t) {
+							var executionFuture = new CompletableFuture<ChatToolExecution.Result>();
+							executionFuture.completeExceptionally(t);
+							chatToolExecution.setExecutionFuture(executionFuture);
+						}
+						break;
+					}
+				}
+			}
+		} 
 	}
 
 	@Override
@@ -331,7 +350,7 @@ public abstract class BasePage extends WebPage {
 	}
 
 	public void notifyObservablesChange(IPartialPageRequestHandler handler, Collection<String> observables) {
-		for (ChangeObserver observer: findChangeObservers()) {
+		for (ChangeObserver observer: findBehaviors(ChangeObserver.class)) {
 			Collection<String> observingChangedObservables = 
 					filterObservables(observer.getObservables(), observables);
 			if (!observingChangedObservables.isEmpty()) {
@@ -393,16 +412,16 @@ public abstract class BasePage extends WebPage {
 		super.onAfterRender();
 	}
 
-	private Collection<ChangeObserver> findChangeObservers() {
-		Collection<ChangeObserver> observers = new HashSet<>();
-		observers.addAll(getBehaviors(ChangeObserver.class));
-		visitChildren(Component.class, (IVisitor<Component, Void>) (object, visit) -> observers.addAll(object.getBehaviors(ChangeObserver.class)));
-		return observers;
+	public <T extends Behavior> Collection<T> findBehaviors(Class<T> type) {
+		Collection<T> behaviors = new HashSet<>();
+		behaviors.addAll(getBehaviors(type));
+		visitChildren(Component.class, (IVisitor<Component, Void>) (object, visit) -> behaviors.addAll(object.getBehaviors(type)));
+		return behaviors;
 	}
 
 	public final Collection<String> findChangeObservables() {
 		Collection<String> observables = new HashSet<>();
-		for (ChangeObserver observer: findChangeObservers())
+		for (ChangeObserver observer: findBehaviors(ChangeObserver.class))
 			observables.addAll(observer.getObservables());
 		return observables;
 	}

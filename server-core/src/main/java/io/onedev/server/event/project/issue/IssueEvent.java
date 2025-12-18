@@ -7,11 +7,11 @@ import java.util.Map;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.IssueService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
-import io.onedev.server.web.UrlService;
 
 public abstract class IssueEvent extends ProjectEvent {
 

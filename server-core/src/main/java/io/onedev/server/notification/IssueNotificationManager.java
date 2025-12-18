@@ -21,7 +21,6 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.commenttext.MarkdownText;
-import io.onedev.server.web.UrlService;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.xodus.VisitInfoService;
 import org.apache.commons.lang3.StringUtils;

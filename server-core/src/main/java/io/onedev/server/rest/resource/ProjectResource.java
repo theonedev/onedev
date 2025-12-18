@@ -71,8 +71,8 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AuditService;
 import io.onedev.server.service.IterationService;
 import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.UrlService;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.xodus.CommitInfoService;
 

@@ -6,6 +6,7 @@ import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_ME
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
 import static io.onedev.server.web.translation.Translation._T;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 import java.io.Serializable;
@@ -18,6 +19,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -112,13 +114,13 @@ import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.PullRequestWatchService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UserService;
-import io.onedev.server.service.support.ChatTool;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.behavior.ChatTool;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
@@ -166,7 +168,6 @@ import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequest
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.operationdlg.MergePullRequestOptionPanel;
 import io.onedev.server.web.page.project.pullrequests.detail.operationdlg.OperationCommentPanel;
-import io.onedev.server.web.util.ChatToolAware;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
@@ -175,9 +176,10 @@ import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.editbean.CommitMessageBean;
 import io.onedev.server.web.util.editbean.LabelsBean;
+import io.onedev.server.web.websocket.ChatToolExecution;
 import io.onedev.server.xodus.VisitInfoService;
 
-public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware, ChatToolAware {
+public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware {
 
 	public static final String PARAM_REQUEST = "request";
 
@@ -944,6 +946,48 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		});
 
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
+
+		add(new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentPullRequest")
+					.description("Get info of current pull request in json format")
+					.build();
+			}
+
+			@Override
+			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {	
+				try {
+					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(PullRequestHelper.getDetail(getPullRequest().getProject(), getPullRequest())), false));
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		});
+
+		add(new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentPullRequestComments")
+					.description("Get comments of current pull request in json format")
+					.build();
+			}
+
+			@Override
+			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {			
+				try {
+					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(PullRequestHelper.getComments(getPullRequest())), false));
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		});
 
 		RequestCycle.get().getListeners().add(new AbstractRequestCycleListener() {
 
@@ -2347,52 +2391,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	protected void onDetach() {
 		requestModel.detach();
 		super.onDetach();
-	}
-
-	@Override
-	public List<ChatTool> getChatTools() {
-		var pullRequestId = getPullRequest().getId();
-		return List.of(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentPullRequest")
-					.description("Get info of current pull request in json format")
-					.build();
-			}
-
-			@Override
-			public String execute(JsonNode arguments) {	
-				var pullRequest = pullRequestService.load(pullRequestId);
-				try {
-					return objectMapper.writeValueAsString(PullRequestHelper.getDetail(pullRequest.getProject(), pullRequest));
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			
-		}, new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentPullRequestComments")
-					.description("Get comments of current pull request in json format")
-					.build();
-			}
-
-			@Override
-			public String execute(JsonNode arguments) {			
-				var pullRequest = pullRequestService.load(pullRequestId);
-				try {
-					return objectMapper.writeValueAsString(PullRequestHelper.getComments(pullRequest));
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			
-		});
 	}
 
 	public static PageParameters paramsOf(PullRequest pullRequest) {

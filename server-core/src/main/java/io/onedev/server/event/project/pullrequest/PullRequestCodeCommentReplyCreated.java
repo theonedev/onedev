@@ -2,11 +2,11 @@ package io.onedev.server.event.project.pullrequest;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.CodeCommentReplyService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
-import io.onedev.server.web.UrlService;
 
 public class PullRequestCodeCommentReplyCreated extends PullRequestCodeCommentEvent {
 

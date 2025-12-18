@@ -10,11 +10,11 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.service.BuildService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.entityreference.PullRequestReference;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.UrlService;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;

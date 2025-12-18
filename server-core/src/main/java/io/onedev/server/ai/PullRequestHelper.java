@@ -16,7 +16,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.web.UrlService;
+import io.onedev.server.service.UrlService;
 
 public class PullRequestHelper {
     

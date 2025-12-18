@@ -1,10 +1,12 @@
-package io.onedev.server.web;
+package io.onedev.server.service.impl;
 
 import com.google.common.base.Splitter;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.SettingService;
+
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.CompareContext;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;

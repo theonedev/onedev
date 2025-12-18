@@ -1,7 +1,12 @@
 package io.onedev.server.ai;
 
+import static java.util.concurrent.CompletableFuture.completedFuture;
+
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,9 +16,10 @@ import com.google.common.base.Joiner;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
-import io.onedev.server.service.support.ChatTool;
+import io.onedev.server.web.behavior.ChatTool;
+import io.onedev.server.web.websocket.ChatToolExecution;
 
-public class HighlightedTextTool implements ChatTool {
+public class HighlightedTextTool extends ChatTool {
     
 	private static final String HIGHLIGHT_BEGIN = "[HIGHLIGHT_BEGIN]";
 
@@ -51,7 +57,7 @@ public class HighlightedTextTool implements ChatTool {
     }
 
     @Override
-    public String execute(JsonNode arguments) {
+    public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
         var map = Map.of(
             "highlightedText", Joiner.on('\n').join(highlightRange.getContent(fileContent)),
             "nameOfFileContainingHighlightedText", fileName,
@@ -60,7 +66,7 @@ public class HighlightedTextTool implements ChatTool {
         );
 
         try {
-            return OneDev.getInstance(ObjectMapper.class).writeValueAsString(map);
+            return completedFuture(new ChatToolExecution.Result(OneDev.getInstance(ObjectMapper.class).writeValueAsString(map), false));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

@@ -15,7 +15,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.UrlService;
+import io.onedev.server.service.UrlService;
 
 public class IssueHelper {
     

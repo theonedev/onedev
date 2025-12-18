@@ -46,8 +46,7 @@ public class TaskFutureManager implements SchedulableTask {
 		for (Iterator<Map.Entry<String, TaskFuture>> it = taskFutures.entrySet().iterator(); it.hasNext();) {
 			TaskFuture taskFuture = it.next().getValue();
 			if (taskFuture.isTimedout()) {
-				if (!taskFuture.isDone())
-					taskFuture.cancel(true);
+				taskFuture.cancel(true);
 				it.remove();
 			}
 		}

@@ -22,18 +22,23 @@ public class Translation_zh extends TranslationResourceBundle {
 		});
 	}
 
-	@SystemPrompt("You are good at translating from English to Simplified Chinese in DevOps software area, with below rules:\n" + 
-			"'issue' should be translated to '工单' or '问题' depending on context\n" + 
-			"'image' should be translated to '图片' or '镜像' depending on context\n" + 
-			"'docker aware executor' should be translated to 'docker 相关执行器'\n" + 
-			"When used together with 'subscription', word 'active' should be translated to '有效'\n" + 
-			"'two factor authentication' should be translated to '两阶段验证'\n" + 
-			"Space should be added between English words and Chinese words\n" + 
-			"'SSO provider' should be translated as SSO 提供方\n" + 
-			"'post build' should be translated as 构建后\n" + 
-			"'artifact' should be translated as 制品\n" + 
-			"'pull request' should be translated as 合并请求\n" + 
-			"'job' should be translated as 任务")
+	@SystemPrompt("""
+		You are good at translating from English to Simplified Chinese in DevOps software area, with below rules: 
+
+		- 'issue' should be translated to '工单' or '问题' depending on context
+		- 'image' should be translated to '图片' or '镜像' depending on context
+		- 'docker aware executor' should be translated to 'docker 相关执行器'
+		- 'Cache Key' should be translated to '缓存键'
+		- 'Load Keys' should be translated to '加载键'
+		- when used together with 'subscription', word 'active' should be translated to '有效'
+		- 'two factor authentication' should be translated to '两阶段验证'
+		- space should be added between English words and Chinese words
+		- 'SSO provider' should be translated as SSO 提供方
+		- 'post build' should be translated as 构建后
+		- 'artifact' should be translated as 制品
+		- 'pull request' should be translated as 合并请求
+		- 'job' should be translated as 任务
+		""")
 	public static void init(Map<String, String> m) {
 		m.clear();
 		m.put(" Project path can be omitted if reference from current project", "如果从当前项目引用，则可以省略项目路径");
@@ -1339,6 +1344,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("File missing or obsolete", "文件缺失或过时");
 		m.put("File name", "文件名");
 		m.put("File name patterns such as *.java, *.c", "文件名模式，如 *.java, *.c");
+		m.put("File path to get text content", "文件路径以获取文本内容");
 		m.put("Files", "文件");
 		m.put("Files to Be Analyzed", "要分析的文件");
 		m.put("Filter", "过滤");
@@ -1380,6 +1386,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Fixing Commits", "修复提交");
 		m.put("Fixing...", "修复中...");
 		m.put("Float", "浮点数");
+		m.put("Folder path to list all files and subfolders", "文件夹路径以列出所有文件和子文件夹");
 		m.put("Follow below instructions to publish packages into this project", "按照以下说明将包发布到此项目");
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
 			"按照以下步骤在远程机器上安装代理（支持 Linux/Windows/Mac OS X/FreeBSD）：");
@@ -1922,7 +1929,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Literal", "字面量");
 		m.put("Literal default value", "字面量默认值");
 		m.put("Literal value", "字面量值");
-		m.put("Load Keys", "加载密钥");
 		m.put("Loading emojis...", "加载表情符号...");
 		m.put("Loading...", "加载...");
 		m.put("Log", "日志");
@@ -4160,6 +4166,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Type password here", "在此输入密码");
 		m.put("Type to filter", "过滤");
 		m.put("Type to filter...", "输入以筛选...");
+		m.put("Type your message (shift+enter for new line)", "输入你的消息（shift+enter 换行）");
 		m.put("Type your message here", "在此输入您的消息");
 		m.put("URL", "URL");
 		m.put("Unable To Delete/Disable Right Now", "目前无法删除/禁用");
@@ -4705,6 +4712,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
+		m.put("Load Keys", "加载键");
 	}
 		
 	@Override

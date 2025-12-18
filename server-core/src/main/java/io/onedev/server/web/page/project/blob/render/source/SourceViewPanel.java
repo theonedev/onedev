@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.source;
 
 import static io.onedev.server.web.translation.Translation._T;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 import javax.servlet.http.Cookie;
@@ -26,6 +28,7 @@ import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
@@ -96,7 +99,6 @@ import io.onedev.server.service.BuildService;
 import io.onedev.server.service.CodeCommentReplyService;
 import io.onedev.server.service.CodeCommentService;
 import io.onedev.server.service.CodeCommentStatusChangeService;
-import io.onedev.server.service.support.ChatTool;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.diff.DiffUtils;
@@ -105,6 +107,7 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.behavior.ChatTool;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
 import io.onedev.server.web.component.codecomment.CodeCommentPanel;
@@ -131,9 +134,9 @@ import io.onedev.server.web.page.project.blob.render.view.Positionable;
 import io.onedev.server.web.page.project.blob.search.SearchMenuContributor;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.AnnotationInfo;
-import io.onedev.server.web.util.ChatToolAware;
 import io.onedev.server.web.util.CodeCommentInfo;
 import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.web.websocket.ChatToolExecution;
 
 /**
  * Make sure to add only one source view panel per page
@@ -141,7 +144,7 @@ import io.onedev.server.web.util.WicketUtils;
  * @author robin
  *
  */
-public class SourceViewPanel extends BlobViewPanel implements Positionable, SearchMenuContributor, ChatToolAware {
+public class SourceViewPanel extends BlobViewPanel implements Positionable, SearchMenuContributor {
 
 	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);	
 	
@@ -916,7 +919,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					String 	omittedLinesMark, int startContextSize, int beforeContextSize, int afterContextSize) {
 				var range = new PlanarRange(symbolPosition);				
 				var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
-				System.out.println(range.getContent(lines));
 				
 				var symbolContext = range.getContext(lines, symbolBeginMark, symbolEndMark, omittedLinesMark, 
 						startContextSize, beforeContextSize, afterContextSize);
@@ -924,6 +926,36 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			}
 			
 		});
+
+		add(new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentFileInformation")
+					.description("Get information of current file in json format, including file name and file content")
+					.build();
+			}
+
+			@Override
+			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+				var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
+				var map = Map.of(
+					"fileName", context.getBlobIdent().getName(),
+					"fileContent", Joiner.on('\n').join(lines)
+				);
+				return completedFuture(new ChatToolExecution.Result(convertToJson(map), false));
+			}
+
+		});
+
+		var markRange = getMarkRange();
+		if (markRange != null) {
+			add(new HighlightedTextTool(
+				context.getBlobIdent().getName(), 
+				context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines(), 
+				markRange));
+		}
 	}
 
 	private boolean isOutlineVisibleInitially() {
@@ -1428,38 +1460,4 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		};
 	}
 
-	@Override
-	public List<ChatTool> getChatTools() {
-		var tools = new ArrayList<ChatTool>();
-		tools.add(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentFileInformation")
-					.description("Get information of current file in json format, including file name and file content")
-					.build();
-			}
-
-			@Override
-			public String execute(JsonNode arguments) {
-				var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
-				var map = Map.of(
-					"fileName", context.getBlobIdent().getName(),
-					"fileContent", Joiner.on('\n').join(lines)
-				);
-				return convertToJson(map);
-			}
-
-		});
-
-		var markRange = getMarkRange();
-		if (markRange != null) {
-			tools.add(new HighlightedTextTool(
-				context.getBlobIdent().getName(), 
-				context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines(), 
-				markRange));
-		}
-		return tools;
-	}
 }

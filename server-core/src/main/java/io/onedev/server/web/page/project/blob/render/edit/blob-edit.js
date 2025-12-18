@@ -64,9 +64,7 @@ onedev.server.blobEdit = {
 		} else {
 			$body.children(".commit-options").addClass("d-flex");
         }
-		
-		$(window).resize();
-        
+		        
         if (!$tab.hasClass("save"))
         	onedev.server.viewState.getFromHistoryAndSetToView();        	
 	},

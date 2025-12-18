@@ -45,6 +45,7 @@ import io.onedev.server.service.IssueService;
 import io.onedev.server.service.IterationService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
@@ -66,7 +67,6 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.web.UrlService;
 import io.onedev.server.web.page.help.ApiHelpUtils;
 import io.onedev.server.web.page.help.ValueInfo;
 
