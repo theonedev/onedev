@@ -1,7 +1,9 @@
 package io.onedev.server.web.page.project.blob.render.noname;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -22,6 +24,11 @@ public class NoNameEditPanel extends BlobEditPanel {
 	@Override
 	protected FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent) {
 		return new NoNameFormComponent(componentId);
+	}
+
+	@Override
+	protected Component newChangesViewer(String componentId, byte[] initialContent, byte[] editingContent) {
+		return new Label(componentId, "Changes");
 	}
 
 }

@@ -34,7 +34,7 @@
 					</a>
 				</div>
 				<!-- Put all options in a single line to make :empty selector working -->
-				<div class="options d-flex align-items-center"><wicket:enclosure child="viewPlain"><label class="checkbox"><input type="checkbox" wicket:id="viewPlain"> <wicket:t>YAML</wicket:t></label></wicket:enclosure><wicket:enclosure child="blame"><label class="checkbox"><input type="checkbox" wicket:id="blame"> <wicket:t>Blame</wicket:t></label></wicket:enclosure><wicket:container wicket:id="extraOptions"></wicket:container></div>
+				<div class="options d-flex align-items-center"><label wicket:id="viewPlainContainer" class="checkbox"><input type="checkbox" wicket:id="viewPlain"> <wicket:container wicket:id="plainName"></wicket:container></label><label wicket:id="blameContainer" class="checkbox"><input type="checkbox" wicket:id="blame"> <wicket:t>Blame</wicket:t></label><wicket:container wicket:id="extraOptions"></wicket:container></div>
 				<div wicket:id="formats" class="formats d-none d-sm-block"></div>
 			</div>
 		</div>

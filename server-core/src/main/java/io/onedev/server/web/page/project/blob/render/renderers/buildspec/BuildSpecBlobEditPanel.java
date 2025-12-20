@@ -3,12 +3,16 @@ package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.Validator;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 
@@ -19,17 +23,19 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.ai.BuildSpecSchema;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.data.migration.VersionedYamlDoc;
 import io.onedev.server.service.TemporalFutureService;
-import io.onedev.server.web.behavior.ChatTool;
+import io.onedev.server.web.component.diff.text.PlainTextDiffPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.edit.BlobEditPanel;
 import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditPanel;
 import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditSupport;
 import io.onedev.server.web.websocket.ChatToolExecution;
 
-public class BuildSpecBlobEditPanel extends BlobEditPanel implements PlainEditSupport {
+public class BuildSpecBlobEditPanel extends BlobEditPanel implements PlainEditSupport, ChatToolAware {
 
 	@Inject
 	private Validator validator;
@@ -46,11 +52,57 @@ public class BuildSpecBlobEditPanel extends BlobEditPanel implements PlainEditSu
 	}
 
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
+	protected void onFlushed(IPartialPageRequestHandler handler, byte[] editingContent) {
+		CompletableFuture<ChatToolExecution.Result> future = temporalFutureService.removeFuture(getBuildSpecFutureId());
+		if (future != null) {
+			if (getCurrentTab() != Tab.SAVE) {
+				var buildSpecString = new String(editingContent, StandardCharsets.UTF_8);
+				try {
+					var buildSpec = BuildSpec.parse(buildSpecString.getBytes(StandardCharsets.UTF_8));
+					buildSpecString = VersionedYamlDoc.fromBean(buildSpec).toYaml();
+				} catch (Throwable t) {					
+				}
+				future.complete(new ChatToolExecution.Result(buildSpecString, false));
+			} else {
+				future.completeExceptionally(new ExplicitException("CI/CD spec is not being edited currently"));
+			}
+		}
+	}
 
-		if (getCurrentTab() == Tab.EDIT || getCurrentTab() == Tab.EDIT_PLAIN) {
-			add(new ChatTool() {
+	@Override
+	protected void onFlushError(IPartialPageRequestHandler handler) {
+		var future = temporalFutureService.removeFuture(getBuildSpecFutureId());
+		if (future != null) 
+			future.completeExceptionally(new ExplicitException("There are errors in current CI/CD spec, please fix first"));
+	}
+
+	@Override
+	protected FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent) {
+		return new BuildSpecEditPanel(componentId, context, initialContent);
+	}
+
+	@Override
+	public FormComponentPanel<byte[]> newPlainEditor(String componentId, byte[] initialContent) {
+		return new PlainEditPanel(componentId, BuildSpec.BLOB_PATH, initialContent);
+	}
+
+	@Override
+	public Component renderTabHead(String componentId) {
+		return new BuildSpecPlainTabHead(componentId);
+	}
+
+	@Override
+	protected Component newChangesViewer(String componentId, byte[] initialContent, byte[] editingContent) {
+		var oldLines = Arrays.asList(new String(initialContent, StandardCharsets.UTF_8).split("\n"));
+		var newLines = Arrays.asList(new String(editingContent, StandardCharsets.UTF_8).split("\n"));
+		return new PlainTextDiffPanel(componentId, oldLines, newLines, true, BuildSpec.BLOB_PATH);
+	}
+
+	@Override
+	public Collection<ChatTool> getChatTools() {
+		var tools = new ArrayList<ChatTool>();
+		if (getCurrentTab() != Tab.SAVE) {
+			tools.add(new ChatTool() {
 
 				@Override
 				public ToolSpecification getSpecification() {
@@ -89,7 +141,7 @@ public class BuildSpecBlobEditPanel extends BlobEditPanel implements PlainEditSu
 				
 			});
 			
-			add(new ChatTool() {
+			tools.add(new ChatTool() {
 	
 				@Override
 				public ToolSpecification getSpecification() {
@@ -109,7 +161,7 @@ public class BuildSpecBlobEditPanel extends BlobEditPanel implements PlainEditSu
 	
 			});
 	
-			add(new ChatTool() {
+			tools.add(new ChatTool() {
 	
 				@Override
 				public ToolSpecification getSpecification() {
@@ -124,7 +176,7 @@ public class BuildSpecBlobEditPanel extends BlobEditPanel implements PlainEditSu
 	
 				@Override
 				public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
-					if (getCurrentTab() == Tab.EDIT || getCurrentTab() == Tab.EDIT_PLAIN) {
+					if (getCurrentTab() != Tab.SAVE) {
 						var buildSpecString = arguments.get("buildSpec").asText();
 						BuildSpec buildSpec;
 						try {
@@ -149,41 +201,7 @@ public class BuildSpecBlobEditPanel extends BlobEditPanel implements PlainEditSu
 
 			});			
 		}
-	}
-
-	@Override
-	protected void onFlushed(IPartialPageRequestHandler handler, byte[] editingContent) {
-		CompletableFuture<ChatToolExecution.Result> future = temporalFutureService.removeFuture(getBuildSpecFutureId());
-		if (future != null) {
-			if (getCurrentTab() == Tab.EDIT || getCurrentTab() == Tab.EDIT_PLAIN) {
-				var buildSpecString = new String(editingContent, StandardCharsets.UTF_8);
-				try {
-					var buildSpec = BuildSpec.parse(buildSpecString.getBytes(StandardCharsets.UTF_8));
-					buildSpecString = VersionedYamlDoc.fromBean(buildSpec).toYaml();
-				} catch (Throwable t) {					
-				}
-				future.complete(new ChatToolExecution.Result(buildSpecString, false));
-			} else {
-				future.completeExceptionally(new ExplicitException("CI/CD spec is not being edited currently"));
-			}
-		}
-	}
-
-	@Override
-	protected void onFlushError(IPartialPageRequestHandler handler) {
-		var future = temporalFutureService.removeFuture(getBuildSpecFutureId());
-		if (future != null) 
-			future.completeExceptionally(new ExplicitException("There are errors in current CI/CD spec, please fix first"));
-	}
-
-	@Override
-	protected FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent) {
-		return new BuildSpecEditPanel(componentId, context, initialContent);
-	}
-
-	@Override
-	public FormComponentPanel<byte[]> newPlainEditor(String componentId, byte[] initialContent) {
-		return new PlainEditPanel(componentId, BuildSpec.BLOB_PATH, initialContent);
+		return tools;
 	}
 
 }

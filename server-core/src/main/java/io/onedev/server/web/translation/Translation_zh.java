@@ -1929,6 +1929,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Literal", "字面量");
 		m.put("Literal default value", "字面量默认值");
 		m.put("Literal value", "字面量值");
+		m.put("Load Keys", "加载键");
 		m.put("Loading emojis...", "加载表情符号...");
 		m.put("Loading...", "加载...");
 		m.put("Log", "日志");
@@ -4712,7 +4713,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Load Keys", "加载键");
+		m.put("Changes", "更改");
+		m.put("Flush", "刷新");
 	}
 		
 	@Override

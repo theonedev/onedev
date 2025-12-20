@@ -1,5 +1,9 @@
 package io.onedev.server.web.page.project.blob.render.source;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -12,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
+import io.onedev.server.web.component.diff.text.PlainTextDiffPanel;
 import io.onedev.server.web.component.sourceformat.OptionChangeCallback;
 import io.onedev.server.web.component.sourceformat.SourceFormatPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -105,6 +110,13 @@ public class SourceEditPanel extends BlobEditPanel implements Positionable {
 		else 
 			script = String.format("onedev.server.sourceEdit.mark();");
 		target.appendJavaScript(script);
+	}
+
+	@Override
+	protected Component newChangesViewer(String componentId, byte[] initialContent, byte[] editingContent) {
+		var oldLines = Arrays.asList(new String(initialContent, StandardCharsets.UTF_8).split("\n"));
+		var newLines = Arrays.asList(new String(editingContent, StandardCharsets.UTF_8).split("\n"));
+		return new PlainTextDiffPanel(componentId, oldLines, newLines, true, context.getBlobIdent().path);
 	}
 
 }

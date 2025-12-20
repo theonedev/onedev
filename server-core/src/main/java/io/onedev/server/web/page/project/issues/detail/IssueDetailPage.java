@@ -41,6 +41,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.IssueHelper;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.data.migration.VersionedXmlDoc;
@@ -57,7 +59,6 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.behavior.ChatTool;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
@@ -80,7 +81,7 @@ import io.onedev.server.web.util.CursorSupport;
 import io.onedev.server.web.websocket.ChatToolExecution;
 import io.onedev.server.xodus.VisitInfoService;
 
-public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext {
+public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext, ChatToolAware {
 
 	public static final String PARAM_ISSUE = "issue";
 	
@@ -381,48 +382,6 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			}
 			
 		});
-
-		add(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentIssue")
-					.description("Get info of current issue in json format")
-					.build();
-			}
-
-			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
-				try {
-					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(IssueHelper.getDetail(getIssue().getProject(), getIssue())), false));
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			
-		});
-		
-		add(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentIssueComments")
-					.description("Get comments of current issue in json format")
-					.build();
-			}
-
-			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {	
-				try {
-					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(IssueHelper.getComments(getIssue())), false));
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			
-		});
 		
 		RequestCycle.get().getListeners().add(new AbstractRequestCycleListener() {
 						
@@ -491,4 +450,51 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
+	@Override
+	public Collection<ChatTool> getChatTools() {
+		var tools = new ArrayList<ChatTool>();
+		tools.add(new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentIssue")
+					.description("Get info of current issue in json format")
+					.build();
+			}
+
+			@Override
+			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+				try {
+					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(IssueHelper.getDetail(getIssue().getProject(), getIssue())), false));
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		});
+		
+		tools.add(new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentIssueComments")
+					.description("Get comments of current issue in json format")
+					.build();
+			}
+
+			@Override
+			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {	
+				try {
+					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(IssueHelper.getComments(getIssue())), false));
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		});
+		return tools;
+	}
+
 }

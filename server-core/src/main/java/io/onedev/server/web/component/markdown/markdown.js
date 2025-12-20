@@ -1095,7 +1095,7 @@ onedev.server.markdown = {
 			var $this = $(this);
 			var suggestionFile = $this.data("suggestionfile");
 			if (suggestionFile) {
-				onedev.server.diff.highlightSyntax($this.children(".text-diff"), suggestionFile);
+				onedev.server.textDiff.highlightSyntaxForUnifiedDiff($this.children(".text-diff"), suggestionFile, suggestionFile);
 			} else {
 				var modeName = $this.data("language");
 				if (modeName) {

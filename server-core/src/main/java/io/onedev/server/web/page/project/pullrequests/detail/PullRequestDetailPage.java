@@ -74,6 +74,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.PullRequestHelper;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
@@ -120,7 +122,6 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.behavior.ChatTool;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
@@ -179,7 +180,7 @@ import io.onedev.server.web.util.editbean.LabelsBean;
 import io.onedev.server.web.websocket.ChatToolExecution;
 import io.onedev.server.xodus.VisitInfoService;
 
-public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware {
+public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware, ChatToolAware {
 
 	public static final String PARAM_REQUEST = "request";
 
@@ -946,48 +947,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		});
 
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
-
-		add(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentPullRequest")
-					.description("Get info of current pull request in json format")
-					.build();
-			}
-
-			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {	
-				try {
-					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(PullRequestHelper.getDetail(getPullRequest().getProject(), getPullRequest())), false));
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			
-		});
-
-		add(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentPullRequestComments")
-					.description("Get comments of current pull request in json format")
-					.build();
-			}
-
-			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {			
-				try {
-					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(PullRequestHelper.getComments(getPullRequest())), false));
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			
-		});
 
 		RequestCycle.get().getListeners().add(new AbstractRequestCycleListener() {
 
@@ -2445,6 +2404,53 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	private void notifyPullRequestChange(AjaxRequestTarget target) {
 		((BasePage)getPage()).notifyObservableChange(target,
 				PullRequest.getChangeObservable(getPullRequest().getId()));
+	}
+
+	@Override
+	public Collection<ChatTool> getChatTools() {
+		var tools = new ArrayList<ChatTool>();
+		tools.add(new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentPullRequest")
+					.description("Get info of current pull request in json format")
+					.build();
+			}
+
+			@Override
+			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {	
+				try {
+					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(PullRequestHelper.getDetail(getPullRequest().getProject(), getPullRequest())), false));
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		});
+
+		tools.add(new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentPullRequestComments")
+					.description("Get comments of current pull request in json format")
+					.build();
+			}
+
+			@Override
+			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {			
+				try {
+					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(PullRequestHelper.getComments(getPullRequest())), false));
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		});
+		return tools;
 	}
 
 }

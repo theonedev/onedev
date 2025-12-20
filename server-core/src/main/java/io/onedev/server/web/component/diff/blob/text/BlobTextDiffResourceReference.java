@@ -10,10 +10,10 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import io.onedev.server.web.asset.clipboard.ClipboardResourceReference;
 import io.onedev.server.web.asset.codeproblem.CodeProblemResourceReference;
 import io.onedev.server.web.asset.commentindicator.CommentIndicatorCssResourceReference;
-import io.onedev.server.web.asset.diff.DiffResourceReference;
 import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
 import io.onedev.server.web.asset.hover.HoverResourceReference;
 import io.onedev.server.web.asset.selectionpopover.SelectionPopoverResourceReference;
+import io.onedev.server.web.asset.textdiff.TextDiffResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
 public class BlobTextDiffResourceReference extends BaseDependentResourceReference {
@@ -27,7 +27,7 @@ public class BlobTextDiffResourceReference extends BaseDependentResourceReferenc
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
-		dependencies.add(JavaScriptHeaderItem.forReference(new DiffResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new TextDiffResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new DoneEventsResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new SelectionPopoverResourceReference()));

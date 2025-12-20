@@ -1187,9 +1187,12 @@ public abstract class RevisionDiffPanel extends Panel {
 					protected void onActive(AjaxRequestTarget target) {
 						selectedPath = change.getPath();
 						var encodedPath = encodePath(selectedPath);
-						target.appendJavaScript(String.format(
-								"onedev.server.revisionDiff.setDiffLinkActive('diff-link-%s');$('#diff-link-%s')[0].scrollIntoViewIfNeeded(false);", 
-								encodedPath, encodedPath));
+						target.appendJavaScript(String.format("""
+								onedev.server.revisionDiff.setDiffLinkActive('diff-link-%s');
+								var $diffLink = $('#diff-link-%s');
+								if ($diffLink.length > 0) 
+									$diffLink[0].scrollIntoViewIfNeeded(false);
+								""", encodedPath, encodedPath));
 					}
 					
 				};

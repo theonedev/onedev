@@ -73,6 +73,8 @@ import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.HighlightedTextTool;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.BlobTarget;
@@ -107,7 +109,6 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.behavior.ChatTool;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
 import io.onedev.server.web.component.codecomment.CodeCommentPanel;
@@ -144,7 +145,7 @@ import io.onedev.server.web.websocket.ChatToolExecution;
  * @author robin
  *
  */
-public class SourceViewPanel extends BlobViewPanel implements Positionable, SearchMenuContributor {
+public class SourceViewPanel extends BlobViewPanel implements Positionable, SearchMenuContributor, ChatToolAware {
 
 	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);	
 	
@@ -225,12 +226,12 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	
 	private BlameMessageBehavior blameMessageBehavior;
 	
-	private final boolean viewPlainMode;
+	private final String plainName;
 	
-	public SourceViewPanel(String id, BlobRenderContext context, boolean viewPlainMode) {
+	public SourceViewPanel(String id, BlobRenderContext context, @Nullable String plainName) {
 		super(id, context);
 		
-		this.viewPlainMode = viewPlainMode;
+		this.plainName = plainName;
 		
 		Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
 		
@@ -926,36 +927,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			}
 			
 		});
-
-		add(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentFileInformation")
-					.description("Get information of current file in json format, including file name and file content")
-					.build();
-			}
-
-			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
-				var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
-				var map = Map.of(
-					"fileName", context.getBlobIdent().getName(),
-					"fileContent", Joiner.on('\n').join(lines)
-				);
-				return completedFuture(new ChatToolExecution.Result(convertToJson(map), false));
-			}
-
-		});
-
-		var markRange = getMarkRange();
-		if (markRange != null) {
-			add(new HighlightedTextTool(
-				context.getBlobIdent().getName(), 
-				context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines(), 
-				markRange));
-		}
 	}
 
 	private boolean isOutlineVisibleInitially() {
@@ -1381,8 +1352,8 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	}
 	
 	@Override
-	protected boolean isViewPlainSupported() {
-		return viewPlainMode;
+	protected String getPlainName() {
+		return plainName;
 	}
 	
 	private void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
@@ -1458,6 +1429,41 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			}
 			
 		};
+	}
+
+	@Override
+	public Collection<ChatTool> getChatTools() {
+		var tools = new ArrayList<ChatTool>();
+		tools.add(new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentFileInformation")
+					.description("Get information of current file in json format, including file name and file content")
+					.build();
+			}
+
+			@Override
+			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+				var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
+				var map = Map.of(
+					"fileName", context.getBlobIdent().getName(),
+					"fileContent", Joiner.on('\n').join(lines)
+				);
+				return completedFuture(new ChatToolExecution.Result(convertToJson(map), false));
+			}
+
+		});
+
+		var markRange = getMarkRange();
+		if (markRange != null) {
+			tools.add(new HighlightedTextTool(
+				context.getBlobIdent().getName(), 
+				context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines(), 
+				markRange));
+		}
+		return tools;
 	}
 
 }

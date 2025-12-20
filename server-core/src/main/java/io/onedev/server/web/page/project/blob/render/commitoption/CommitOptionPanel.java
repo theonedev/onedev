@@ -3,9 +3,11 @@ package io.onedev.server.web.page.project.blob.render.commitoption;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,8 +55,7 @@ import io.onedev.server.util.Provider;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
-import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
-import io.onedev.server.web.component.diff.revision.DiffViewMode;
+import io.onedev.server.web.component.diff.text.PlainTextDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.blob.RevisionResolved;
@@ -70,7 +71,7 @@ public class CommitOptionPanel extends Panel {
 	
 	private CommitMessageBean commitMessageBean = new CommitMessageBean();
 	
-	private BlobChange changesOfOthers;
+	private BlobChange otherChange;
 	
 	private boolean contentModified;
 	
@@ -135,22 +136,58 @@ public class CommitOptionPanel extends Panel {
 		return OneDev.getInstance(GitService.class);
 	}
 	
-	private void newChangesOfOthersContainer(@Nullable AjaxRequestTarget target) {
-		Component changesOfOthersContainer;
-		if (changesOfOthers != null) 
-			changesOfOthersContainer = new BlobDiffPanel("changesOfOthers", changesOfOthers, DiffViewMode.UNIFIED, null);
-		else 
-			changesOfOthersContainer = new WebMarkupContainer("changesOfOthers").setVisible(false);
+	private void addOrReplaceOtherChangeContainer(@Nullable AjaxRequestTarget target) {
+		Component otherChangeContainer;
+		if (otherChange != null) {
+			List<String> oldLines;
+			List<String> newLines;
+			if (otherChange.getType() == DiffEntry.ChangeType.ADD) {
+				oldLines = new ArrayList<>();
+				if (otherChange.getNewText() != null)
+					newLines = otherChange.getNewText().getLines();
+				else
+					newLines = null;
+			} else if (otherChange.getType() == DiffEntry.ChangeType.DELETE) {
+				if (otherChange.getOldText() != null)
+					oldLines = otherChange.getOldText().getLines();
+				else
+					oldLines = null;
+				newLines = new ArrayList<>();
+			} else {
+				if (otherChange.getOldText() != null)
+					oldLines = otherChange.getOldText().getLines();
+				else
+					oldLines = null;
+				if (otherChange.getNewText() != null)
+					newLines = otherChange.getNewText().getLines();
+				else
+					newLines = null;
+			}
+			if (oldLines != null && newLines != null) {
+				if (!oldLines.equals(newLines)) {
+					form.warn(_T("Someone made below change since you started editing"));
+					otherChangeContainer = new PlainTextDiffPanel("otherChange", oldLines, newLines, true, context.getBlobIdent().path);
+				} else {
+					form.warn(_T("Someone changed file mode since you started editing"));
+					otherChangeContainer = new WebMarkupContainer("otherChange").setVisible(false);
+				}
+			} else {
+				form.warn(_T("Someone changed file type since you started editing"));
+				otherChangeContainer = new WebMarkupContainer("otherChange").setVisible(false);
+			}
+		} else {
+			otherChangeContainer = new WebMarkupContainer("otherChange").setVisible(false);
+		}
 		if (target != null) {
-			form.replace(changesOfOthersContainer);
+			form.replace(otherChangeContainer);
 			target.add(form);
-			if (changesOfOthers != null) {
+			if (otherChange != null) {
 				String script = String.format("$('#%s .commit-option input[type=submit]').val('Commit and overwrite');", 
 						getMarkupId());
 				target.appendJavaScript(script);
 			}
 		} else {
-			form.add(changesOfOthersContainer);		
+			form.add(otherChangeContainer);		
 		}
 	}
 	
@@ -163,7 +200,7 @@ public class CommitOptionPanel extends Panel {
 		add(form);
 
 		form.add(new FencedFeedbackPanel("feedback", form));
-		newChangesOfOthersContainer(null);
+		addOrReplaceOtherChangeContainer(null);
 		form.add(BeanContext.edit("commitMessage", commitMessageBean));
 
 		AjaxButton saveButton = new AjaxButton("save") {
@@ -238,7 +275,7 @@ public class CommitOptionPanel extends Panel {
 	}
 	
 	private boolean save(AjaxRequestTarget target) {
-		changesOfOthers = null;
+		otherChange = null;
 		
 		if (newContentProvider != null && StringUtils.isBlank(context.getNewPath())) {
 			form.error("Please specify file name.");
@@ -339,15 +376,13 @@ public class CommitOptionPanel extends Panel {
 								if (pathChange.getNewObjectId().equals(ObjectId.zeroId())) {
 									if (newContentProvider != null) {
 										oldPaths.clear();
-										changesOfOthers = getBlobChange(path, pathChange, lastPrevCommitId, prevCommitId);
-										form.warn(_T("Someone made below change since you started editing"));
+										otherChange = getBlobChange(path, pathChange, lastPrevCommitId, prevCommitId);
 										break;
 									} else {
 										newCommitId = obsoleteCommitException.getOldCommitId();
 									}
 								} else {
-									changesOfOthers = getBlobChange(path, pathChange, lastPrevCommitId, prevCommitId);
-									form.warn(_T("Someone made below change since you started editing"));
+									otherChange = getBlobChange(path, pathChange, lastPrevCommitId, prevCommitId);
 									break;
 								}
 							} 
@@ -362,7 +397,7 @@ public class CommitOptionPanel extends Panel {
 				target.appendJavaScript("$(window).resize();");
 				return true;
 			} else {
-				newChangesOfOthersContainer(target);
+				addOrReplaceOtherChangeContainer(target);
 				return false;
 			}
 		}

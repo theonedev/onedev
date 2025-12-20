@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.blob.render.edit;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxCallListener;
@@ -35,22 +36,20 @@ import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditSupport
 
 public abstract class BlobEditPanel extends Panel {
 
-	public static enum Tab {EDIT, EDIT_PLAIN, SAVE, FLUSH};
+	public static enum Tab {EDIT, EDIT_PLAIN, CHANGES, SAVE, FLUSH};
 	
 	protected final BlobRenderContext context;
 	
 	private Form<?> form;
 
 	private FormComponentPanel<byte[]> editor;
-	
-	private CommitOptionPanel commitOption;
+		
+	private CommitOptionPanel commitOption;	
 	
 	private AbstractDefaultAjaxBehavior recreateBehavior;
 	
 	private Tab currentTab = Tab.EDIT;
-	
-	private byte[] editingContent;
-		
+			
 	public BlobEditPanel(String id, BlobRenderContext context) {
 		super(id);
 		this.context = context;
@@ -60,7 +59,22 @@ public abstract class BlobEditPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new WebMarkupContainer("editPlainTab").setVisible(this instanceof PlainEditSupport));
+		add(new WebMarkupContainer("editPlainTab") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (BlobEditPanel.this instanceof PlainEditSupport)
+					add(((PlainEditSupport)BlobEditPanel.this).renderTabHead("tabHead"));
+				else
+					add(new WebMarkupContainer("tabHead"));
+			}
+
+		}.setVisible(this instanceof PlainEditSupport));
+
+		add(new WebMarkupContainer("changesTab")
+				.setVisible(context.getMode() != Mode.ADD || context.getNewPath() != null));
+
 		add(new WebMarkupContainer("saveTab")
 				.setVisible(context.getMode() != Mode.ADD || context.getNewPath() != null));
 		
@@ -86,7 +100,7 @@ public abstract class BlobEditPanel extends Panel {
 				
 		add(newEditOptions("editOptions"));
 		
-		add(form = new Form<Void>("content") {
+		add(form = new Form<Void>("form") {
 
 			private AjaxSubmitLink newSubmitLink(String componentId, Tab tab) {
 				return new AjaxSubmitLink(componentId) {
@@ -100,11 +114,8 @@ public abstract class BlobEditPanel extends Panel {
 									&& editor instanceof EditCompleteAware 
 									&& !((EditCompleteAware)editor).onEditComplete(target)) {
 								onError(target, form);
-							} else if (currentTab == Tab.EDIT || currentTab == Tab.EDIT_PLAIN) {
-								editingContent = editor.getModelObject();
-								onFlushed(target, editingContent);
 							} else {
-								onFlushed(target, editingContent);
+								onFlushed(target, editor.getModelObject());
 							}
 						} else {
 							if (currentTab == Tab.EDIT 
@@ -112,29 +123,29 @@ public abstract class BlobEditPanel extends Panel {
 									&& !((EditCompleteAware)editor).onEditComplete(target)) {
 								onError(target, form);
 							} else {
-								if (currentTab == Tab.EDIT && tab == Tab.EDIT_PLAIN 
-										|| currentTab == Tab.EDIT_PLAIN && tab == Tab.EDIT
-										|| tab == Tab.SAVE) {
-									editingContent = editor.getModelObject();
-								}
-								if (tab != Tab.SAVE) {
-									if (tab == Tab.EDIT)
-										editor = newEditor("editor", editingContent);
-									else
-										editor = ((PlainEditSupport)BlobEditPanel.this).newPlainEditor("editor", editingContent);
+								var editingContent = editor.getModelObject();
+								if (tab == Tab.EDIT) {
+									editor = newEditor("editor", editingContent);
 									form.replace(editor);
+									updateForm(target);
+									hideChangesViewer(target);
+								} else if (tab == Tab.EDIT_PLAIN) {
+									editor = ((PlainEditSupport)BlobEditPanel.this).newPlainEditor("editor", editingContent);
+									form.replace(editor);
+									updateForm(target);
+									hideChangesViewer(target);
+								} else if (tab == Tab.CHANGES) {
+									showChangesViewer(target);
 								} else {
 									commitOption.onContentChange(target);
+									hideChangesViewer(target);
 								}
 
 								String script = String.format(
 										"onedev.server.blobEdit.selectTab($('#%s>.blob-edit>.head>.%s'));", 
 										BlobEditPanel.this.getMarkupId(true), tab.name().toLowerCase().replace("_", "-"));
-								target.appendJavaScript(script);
-								
+								target.appendJavaScript(script);								
 								currentTab = tab;
-
-								updateForm(target);
 							}
 						}
 					}
@@ -182,6 +193,7 @@ public abstract class BlobEditPanel extends Panel {
 				
 				add(newSubmitLink("edit", Tab.EDIT));
 				add(newSubmitLink("editPlain", Tab.EDIT_PLAIN));
+				add(newSubmitLink("changes", Tab.CHANGES));
 				add(newSubmitLink("save", Tab.SAVE));
 				add(newSubmitLink("flush", Tab.FLUSH));
 
@@ -192,11 +204,13 @@ public abstract class BlobEditPanel extends Panel {
 
 		});
 		
+		add(newChangesViewerPlaceholder());
+
 		add(commitOption = new CommitOptionPanel("commitOptions", context, new Provider<byte[]>() {
 
 			@Override
 			public byte[] get() {
-				return editingContent;
+				return editor.getModelObject();
 			}
 			
 		}));
@@ -215,6 +229,26 @@ public abstract class BlobEditPanel extends Panel {
 			add(AttributeAppender.append("class", "no-autofocus"));
 		
 		setOutputMarkupId(true);
+	}
+
+	private void showChangesViewer(IPartialPageRequestHandler handler) {
+		var changesViewer = newChangesViewer("changesViewer", getInitialContent(), editor.getModelObject());
+		changesViewer.setOutputMarkupPlaceholderTag(true);
+		replace(changesViewer);
+		handler.add(changesViewer);
+	}
+
+	private void hideChangesViewer(AjaxRequestTarget target) {
+		var changesViewer = newChangesViewerPlaceholder();
+		replace(changesViewer);
+		target.add(changesViewer);	
+	}
+
+	private Component newChangesViewerPlaceholder() {
+		var changesViewer = new WebMarkupContainer("changesViewer");
+		changesViewer.setVisible(false);
+		changesViewer.setOutputMarkupPlaceholderTag(true);
+		return changesViewer;
 	}
 
 	@Override
@@ -241,6 +275,8 @@ public abstract class BlobEditPanel extends Panel {
 	
 	protected abstract FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent);
 
+	protected abstract Component newChangesViewer(String componentId, byte[] initialContent, byte[] editingContent);
+
 	public FormComponentPanel<byte[]> getEditor() {
 		return editor;
 	}
@@ -253,17 +289,35 @@ public abstract class BlobEditPanel extends Panel {
 	}
 
 	protected void updateEditingContent(IPartialPageRequestHandler handler, byte[] editingContent) {
-		this.editingContent = editingContent;
-		if (currentTab == Tab.EDIT) {
+		if (currentTab == Tab.EDIT) 
 			editor = newEditor("editor", editingContent);
-			form.replace(editor);
-		} else if (currentTab == Tab.EDIT_PLAIN) {
+		else
 			editor = ((PlainEditSupport)BlobEditPanel.this).newPlainEditor("editor", editingContent);
-			form.replace(editor);
+		form.replace(editor);
+
+		if (currentTab == Tab.EDIT || currentTab == Tab.EDIT_PLAIN) {
+			updateForm(handler);
 		} else {
+			// Update editor instead of form to keep form invisible
+			editor.setOutputMarkupId(true);
+			handler.add(editor);
+		}		
+		handler.appendJavaScript(String.format("onedev.server.form.markDirty($('#%s'));", form.getMarkupId()));
+
+		if (currentTab == Tab.CHANGES) {
+			showChangesViewer(handler);
+		} else if (currentTab == Tab.SAVE) {
 			commitOption.onContentChange(handler);
 		}
-		updateForm(handler);
+	}
+
+	private byte[] getInitialContent() {
+		if (context.getMode() == Mode.EDIT) {
+			var blob = context.getProject().getBlob(context.getBlobIdent(), true);
+			return blob.getBytes();
+		} else {
+			return new byte[0];
+		}
 	}
 
 	protected Tab getCurrentTab() {
@@ -271,7 +325,7 @@ public abstract class BlobEditPanel extends Panel {
 	}
 
 	protected void requestToFlush(IPartialPageRequestHandler handler) {
-		handler.appendJavaScript(String.format("$('#%s>.blob-edit>.body>.content>.flush').click();", getMarkupId()));
+		handler.appendJavaScript(String.format("$('#%s>.blob-edit>.body>form>.flush').click();", getMarkupId()));
 	}
 	
 	protected void onFlushed(IPartialPageRequestHandler handler, byte[] editingContent) {		

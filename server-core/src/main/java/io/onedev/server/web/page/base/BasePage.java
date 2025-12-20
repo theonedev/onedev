@@ -7,6 +7,7 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import java.io.File;
 import java.io.Serializable;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,6 +61,8 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.OneDev;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.commandhandler.Upgrade;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.model.User;
@@ -70,7 +73,6 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.behavior.ChatTool;
 import io.onedev.server.web.behavior.ForceOrdinaryStyleBehavior;
 import io.onedev.server.web.behavior.ZoneIdBehavior;
 import io.onedev.server.web.component.svg.SpriteImage;
@@ -162,10 +164,10 @@ public abstract class BasePage extends WebPage {
 			if (payload.getMessage() instanceof ObservablesChanged observablesChanged) {
 				notifyObservablesChange(payload.getHandler(), observablesChanged.getObservables());				
 			} else if (payload.getMessage() instanceof ChatToolExecution chatToolExecution) {
-				for (var behavior : findBehaviors(ChatTool.class)) {
-					if (behavior.getSpecification().name().equals(chatToolExecution.getToolName())) {
+				for (var tool : findChatTools()) {
+					if (tool.getSpecification().name().equals(chatToolExecution.getToolName())) {
 						try {
-							var executionFuture = behavior.execute(payload.getHandler(), chatToolExecution.getToolArguments());
+							var executionFuture = tool.execute(payload.getHandler(), chatToolExecution.getToolArguments());
 							chatToolExecution.setExecutionFuture(executionFuture);
 						} catch (Throwable t) {
 							var executionFuture = new CompletableFuture<ChatToolExecution.Result>();
@@ -412,10 +414,24 @@ public abstract class BasePage extends WebPage {
 		super.onAfterRender();
 	}
 
+	public Collection<ChatTool> findChatTools() {
+		var tools = new ArrayList<ChatTool>();
+		if (this instanceof ChatToolAware) 
+			tools.addAll(((ChatToolAware) this).getChatTools());
+		
+		visitChildren(ChatToolAware.class, (IVisitor<Component, Void>) (object, visit) -> {
+			tools.addAll(((ChatToolAware) object).getChatTools());
+		});
+
+		return tools;
+	}
+
 	public <T extends Behavior> Collection<T> findBehaviors(Class<T> type) {
 		Collection<T> behaviors = new HashSet<>();
 		behaviors.addAll(getBehaviors(type));
-		visitChildren(Component.class, (IVisitor<Component, Void>) (object, visit) -> behaviors.addAll(object.getBehaviors(type)));
+		visitChildren(Component.class, (IVisitor<Component, Void>) (object, visit) -> {
+			behaviors.addAll(object.getBehaviors(type));			
+		});
 		return behaviors;
 	}
 

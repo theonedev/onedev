@@ -31,7 +31,7 @@ public class MarkdownRenderer implements BlobRenderer {
 				&& isMarkdown(context.getBlobIdent().path) 
 				&& context.getProject().getBlob(context.getBlobIdent(), true).getText() != null) {
 			if (context.getPosition() != null || context.getMode() == Mode.BLAME) 
-				return new SourceViewPanel(componentId, context, false);
+				return new SourceViewPanel(componentId, context, null);
 			else
 				return new MarkdownBlobViewPanel(componentId, context);
 		} else {

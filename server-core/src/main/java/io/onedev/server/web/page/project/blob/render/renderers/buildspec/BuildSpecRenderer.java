@@ -69,9 +69,9 @@ public class BuildSpecRenderer implements BlobRenderer {
 				&& context.getBlobIdent().isFile() 
 				&& isBuildSpec(context.getBlobIdent().path)) {
 			if (BlobRenderer.getSourceRange(context.getPosition()) != null || context.getMode() == Mode.BLAME)
-				return new SourceViewPanel(componentId, context, false);
+				return new SourceViewPanel(componentId, context, null);
 			else if (context.isViewPlain()) 
-				return new SourceViewPanel(componentId, context, true);
+				return new SourceViewPanel(componentId, context, "YAML");
 			else
 				return new BuildSpecBlobViewPanel(componentId, context);
 		} else {

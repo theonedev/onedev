@@ -71,6 +71,8 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.event.project.CommitIndexed;
 import io.onedev.server.git.Blob;
@@ -106,7 +108,6 @@ import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.behavior.ChatTool;
 import io.onedev.server.web.component.commit.status.CommitStatusLink;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -141,7 +142,7 @@ import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.websocket.ChatToolExecution;
 
 public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, 
-		EditParamsAware, JobAuthorizationContextAware {
+		EditParamsAware, JobAuthorizationContextAware, ChatToolAware {
 
 	private static final String PARAM_INITIAL_NEW_PATH = "initial-new-path";
 	
@@ -377,75 +378,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			}
 			
 		});
-
-		add(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getRootFilesAndFolders")
-					.description("List files and folders under repository root in json format")
-					.build();
-			}
-
-			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
-				return completedFuture(new ChatToolExecution.Result(getFilesAndFolders(null), false));
-			}
-
-		});
-		
-		add(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getFilesAndSubfolders")
-					.description("List all files and subfolders under specified folder in json format")
-					.parameters(JsonObjectSchema.builder()
-						.addStringProperty("folderPath").description(_T("Folder path to list all files and subfolders"))
-						.required("folderPath").build())
-						.build();
-			}
-
-			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
-				return completedFuture(new ChatToolExecution.Result(getFilesAndFolders(arguments.get("folderPath").asText()), false));
-			}
-
-		});
-		add(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getTextContent")
-					.description("Get text content of specified file in json format")
-					.parameters(JsonObjectSchema.builder()
-						.addStringProperty("filePath").description(_T("File path to get text content"))
-						.required("filePath").build())
-						.build();
-				}
-
-				@Override
-				public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
-					var filePath = arguments.get("filePath").asText();
-					filePath = StringUtils.strip(filePath.replace('\\', '/'), "/");
-					var blobIdent = gitService.getBlobIdent(getProject(), getCommit().copy(), filePath);
-					if (blobIdent == null) 
-						return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "File not found")), false));		
-					if (!blobIdent.isFile())
-						return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Not a file")), false));		
-
-					var blob = getProject().getBlob(blobIdent, true);
-					if (blob.getText() != null) 
-						return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", true, "textContent", blob.getText().getContent())), false));
-					else
-						return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Not a text file")), false));
-				}
-
-			}
-		);				
 	}
 
 	/*
@@ -881,7 +813,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 						&& getBlobIdent().isFile() 
 						&& getBlob(true).getText() != null
 						&& getBlob(true).getLfsPointer() == null) {
-					blobContent = new SourceViewPanel(BLOB_CONTENT_ID, this, false);
+					blobContent = new SourceViewPanel(BLOB_CONTENT_ID, this, null);
 				} else {
 					Fragment fragment = new Fragment(BLOB_CONTENT_ID, "binaryOrLargeFileFrag", this);
 
@@ -1781,4 +1713,72 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		return convertToJson(Map.of("successful", true, "filesAndFolders", filesAndFolders));
 	}
 	
+	@Override
+	public Collection<ChatTool> getChatTools() {
+		return List.of(new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getRootFilesAndFolders")
+					.description("List files and folders under repository root in json format")
+					.build();
+			}
+
+			@Override
+			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+				return completedFuture(new ChatToolExecution.Result(getFilesAndFolders(null), false));
+			}
+
+		}, new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getFilesAndSubfolders")
+					.description("List all files and subfolders under specified folder in json format")
+					.parameters(JsonObjectSchema.builder()
+						.addStringProperty("folderPath").description(_T("Folder path to list all files and subfolders"))
+						.required("folderPath").build())
+						.build();
+			}
+
+			@Override
+			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+				return completedFuture(new ChatToolExecution.Result(getFilesAndFolders(arguments.get("folderPath").asText()), false));
+			}
+
+		}, new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getTextContent")
+					.description("Get text content of specified file in json format")
+					.parameters(JsonObjectSchema.builder()
+						.addStringProperty("filePath").description(_T("File path to get text content"))
+						.required("filePath").build())
+						.build();
+				}
+
+				@Override
+				public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+					var filePath = arguments.get("filePath").asText();
+					filePath = StringUtils.strip(filePath.replace('\\', '/'), "/");
+					var blobIdent = gitService.getBlobIdent(getProject(), getCommit().copy(), filePath);
+					if (blobIdent == null) 
+						return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "File not found")), false));		
+					if (!blobIdent.isFile())
+						return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Not a file")), false));		
+
+					var blob = getProject().getBlob(blobIdent, true);
+					if (blob.getText() != null) 
+						return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", true, "textContent", blob.getText().getContent())), false));
+					else
+						return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Not a text file")), false));
+				}
+			}
+		);
+	}
+
 }

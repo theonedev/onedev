@@ -37,10 +37,5 @@ public class VideoViewPanel extends BlobViewPanel {
 	protected boolean isEditSupported() {
 		return false;
 	}
-
-	@Override
-	protected boolean isViewPlainSupported() {
-		return false;
-	}
-
+	
 }

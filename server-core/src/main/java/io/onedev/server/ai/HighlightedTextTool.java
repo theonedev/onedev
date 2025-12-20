@@ -16,10 +16,9 @@ import com.google.common.base.Joiner;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
-import io.onedev.server.web.behavior.ChatTool;
 import io.onedev.server.web.websocket.ChatToolExecution;
 
-public class HighlightedTextTool extends ChatTool {
+public class HighlightedTextTool implements ChatTool {
     
 	private static final String HIGHLIGHT_BEGIN = "[HIGHLIGHT_BEGIN]";
 

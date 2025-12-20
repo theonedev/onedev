@@ -7,30 +7,38 @@ onedev.server.blobEdit = {
 		
 	    $head.find(".edit>a").click(function() {
             if (!$(this).parent().hasClass("active")) {
-        		$body.find(">.content>.edit.submit").click();
+        		$body.find(">form>.edit.submit").click();
             }
 	    });
 	    $head.find(".edit-plain>a").click(function() {
             if (!$(this).parent().hasClass("active")) {
-        		$body.find(">.content>.edit-plain.submit").click();
+        		$body.find(">form>.edit-plain.submit").click();
             }
 	    });
+	    $head.find(".changes>a").click(function() {
+            if (!$(this).parent().hasClass("active")) {
+				onedev.server.viewState.getFromViewAndSetToHistory();
+        		$body.find(">form>.changes.submit").click();
+			}
+	    });
 	    $head.find(".save>a").click(function() {
-    		onedev.server.viewState.getFromViewAndSetToHistory();
-	    	$body.find(">.content>.save.submit").click();
+            if (!$(this).parent().hasClass("active")) {
+				onedev.server.viewState.getFromViewAndSetToHistory();
+				$body.find(">form>.save.submit").click();
+			}
 	    });
 	    
 	    $blobEdit.on("getViewState", function(e) {
-        	var $content = $body.children(".content");
-	    	if ($content.is(":visible"))
+        	var $form = $body.children("form");
+	    	if ($form.is(":visible"))
 	    		return {scroll:{left: $body.scrollLeft(), top: $body.scrollTop()}};			
 	    	else
 	    		return undefined;
 		});
 		
 	    $blobEdit.on("setViewState", function(e, viewState) {
-        	var $content = $body.children(".content");
-			if ($content.is(":visible") && viewState.scroll) {
+        	var $form = $body.children("form");
+			if ($form.is(":visible") && viewState.scroll) {
 				$body.scrollLeft(viewState.scroll.left);
 				$body.scrollTop(viewState.scroll.top);
 			}
@@ -58,14 +66,16 @@ onedev.server.blobEdit = {
     	
 		$body.children().removeClass("d-flex");
 
-        var $content = $body.children(".content");
+        var $form = $body.children("form");
 		if ($tab.hasClass("edit") || $tab.hasClass("edit-plain")) {
-			$content.addClass("d-flex");
-		} else {
+			$form.addClass("d-flex");
+		} else if ($tab.hasClass("save")) {
 			$body.children(".commit-options").addClass("d-flex");
-        }
+        } else {
+			$body.children(".changes-viewer").addClass("d-flex");
+		}
 		        
-        if (!$tab.hasClass("save"))
+        if (!$tab.hasClass("save") && !$tab.hasClass("changes"))
         	onedev.server.viewState.getFromHistoryAndSetToView();        	
 	},
 	recordFormFlags: function(formId) {

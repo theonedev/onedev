@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.diff.diffstat;
+package io.onedev.server.web.component.diff.stat;
 
 import static io.onedev.server.web.translation.Translation._T;
 

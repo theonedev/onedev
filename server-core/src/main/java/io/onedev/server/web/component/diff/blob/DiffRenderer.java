@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.diff;
+package io.onedev.server.web.component.diff.blob;
 
 import org.jspecify.annotations.Nullable;
 

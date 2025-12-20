@@ -15,13 +15,10 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import com.google.common.base.Splitter;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.support.CommentRevision;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.diff.DiffRenderer;
-import io.onedev.server.util.diff.DiffUtils;
-import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.server.web.asset.diff.DiffResourceReference;
+import io.onedev.server.web.asset.textdiff.TextDiffResourceReference;
+import io.onedev.server.web.component.diff.text.PlainTextDiffPanel;
 
 abstract class CommentRevisionPanel extends Panel {
 
@@ -47,13 +44,8 @@ abstract class CommentRevisionPanel extends Panel {
             newLines = Splitter.on("\n").splitToList(revision.getNewContent());
         else
             newLines = new ArrayList<>();
-        var renderedDiffs = new DiffRenderer(DiffUtils.diff(oldLines, newLines, WhitespaceOption.IGNORE_TRAILING)).renderDiffs();
 
-        if (StringUtils.isNotBlank(renderedDiffs)) {
-            add(new Label("content", renderedDiffs).setEscapeModelStrings(false));
-        } else {
-            add(new Label("content", "<div class='alert alert-notice alert-light'>" + _T("No obvious changes") + "</div>").setEscapeModelStrings(false));
-        }
+        add(new PlainTextDiffPanel("content", oldLines, newLines));
 
         add(new AjaxLink<Void>("close") {
 
@@ -78,7 +70,7 @@ abstract class CommentRevisionPanel extends Panel {
     @Override
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
-        response.render(CssReferenceHeaderItem.forReference(new DiffResourceReference()));
+        response.render(CssReferenceHeaderItem.forReference(new TextDiffResourceReference()));
     }
 
     protected abstract CommentRevision getCommentRevision();

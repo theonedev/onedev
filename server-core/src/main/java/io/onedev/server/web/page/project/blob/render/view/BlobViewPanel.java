@@ -56,7 +56,10 @@ public abstract class BlobViewPanel extends Panel {
 	
 	protected abstract boolean isEditSupported();
 	
-	protected abstract boolean isViewPlainSupported();
+	@Nullable
+	protected String getPlainName() {
+		return null;
+	}
 	
 	protected WebMarkupContainer newFormats(String id) {
 		WebMarkupContainer options = new WebMarkupContainer(id);
@@ -236,15 +239,17 @@ public abstract class BlobViewPanel extends Panel {
 		add(new ResourceLink<Void>("download", new RawBlobResourceReference(), 
 				RawBlobResource.paramsOf(context.getProject(), context.getBlobIdent(), ContentDisposition.ATTACHMENT)));
 
-		add(new CheckBox("viewPlain", Model.of(context.getMode() == Mode.VIEW && context.isViewPlain())) {
-			
+		var viewPlainContainer = new WebMarkupContainer("viewPlainContainer") {
+
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(isViewPlainSupported());
+				setVisible(getPlainName() != null);
 			}
-
-		}.add(new OnChangeAjaxBehavior() {
+			
+		};
+		add(viewPlainContainer);
+		viewPlainContainer.add(new CheckBox("viewPlain", Model.of(context.getMode() == Mode.VIEW && context.isViewPlain())).add(new OnChangeAjaxBehavior() {
 			
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -260,8 +265,9 @@ public abstract class BlobViewPanel extends Panel {
 			}
 			
 		}));
+		viewPlainContainer.add(new Label("plainName", Model.of(getPlainName())));
 
-		add(new CheckBox("blame", Model.of(context.getMode() == Mode.BLAME)) {
+		var blameContainer = new WebMarkupContainer("blameContainer") {
 			
 			@Override
 			protected void onConfigure() {
@@ -269,8 +275,10 @@ public abstract class BlobViewPanel extends Panel {
 				var blob = context.getProject().getBlob(context.getBlobIdent(), true);
 				setVisible(blob.getLfsPointer() == null && blob.getText() != null);
 			}
-
-		}.add(new OnChangeAjaxBehavior() {
+			
+		};
+		add(blameContainer);
+		blameContainer.add(new CheckBox("blame", Model.of(context.getMode() == Mode.BLAME)).add(new OnChangeAjaxBehavior() {
 			
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {

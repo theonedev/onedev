@@ -409,7 +409,7 @@ import io.onedev.server.web.SessionListener;
 import io.onedev.server.web.WebApplication;
 import io.onedev.server.web.avatar.AvatarService;
 import io.onedev.server.web.avatar.DefaultAvatarService;
-import io.onedev.server.web.component.diff.DiffRenderer;
+import io.onedev.server.web.component.diff.blob.DiffRenderer;
 import io.onedev.server.web.component.markdown.SourcePositionTrackExtension;
 import io.onedev.server.web.component.markdown.emoji.EmojiExtension;
 import io.onedev.server.web.component.taskbutton.TaskFutureManager;

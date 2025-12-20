@@ -543,8 +543,8 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 	}
 
 	@Override
-	protected boolean isViewPlainSupported() {
-		return true;
+	protected String getPlainName() {
+		return "YAML";
 	}
 	
 	private abstract class ElementsViewer<T extends NamedElement> extends Fragment {

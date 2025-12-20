@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.diff.diffstat;
+package io.onedev.server.web.component.diff.stat;
 
 import org.apache.wicket.request.resource.CssResourceReference;
 

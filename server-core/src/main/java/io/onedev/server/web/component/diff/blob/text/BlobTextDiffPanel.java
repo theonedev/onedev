@@ -9,6 +9,7 @@ import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,6 +43,8 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.HighlightedTextTool;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.git.BlameBlock;
@@ -60,7 +63,7 @@ import io.onedev.server.util.Pair;
 import io.onedev.server.util.diff.DiffBlock;
 import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import io.onedev.server.util.diff.DiffUtils;
-import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.component.diff.DiffExpandSupport;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
@@ -78,11 +81,11 @@ import io.onedev.server.web.util.CodeCommentInfo;
 import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.WicketUtils;
 
-public class BlobTextDiffPanel extends Panel {
+public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 
 	private final BlobChange change;
 	
-	private final Map<Integer, Integer> contextSizes = new HashMap<>();
+	private final DiffExpandSupport expandSupport = new DiffExpandSupport();
 	
 	private final DiffViewMode diffMode;
 
@@ -255,27 +258,26 @@ public class BlobTextDiffPanel extends Panel {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				switch (params.getParameterValue("action").toString("")) {
-					case "expand":
-						if (blameInfo != null) {
-							blameInfo.lastCommitHash = null;
-							blameInfo.lastOldCommitHash = null;
-							blameInfo.lastNewCommitHash = null;
-						}
-						int index = params.getParameterValue("param1").toInt();
-						Integer lastContextSize = contextSizes.get(index);
-						if (lastContextSize == null)
-							lastContextSize = WebConstants.DIFF_CONTEXT_SIZE;
-						int contextSize = lastContextSize + WebConstants.DIFF_EXPAND_SIZE;
-						contextSizes.put(index, contextSize);
-						
-						StringBuilder builder = new StringBuilder();
-						appendEquals(builder, index, lastContextSize, contextSize);
-						
-						String expanded = StringUtils.replace(builder.toString(), "\n", "");
-						String script = String.format("onedev.server.blobTextDiff.expand('%s', %d, \"%s\");",
-								getMarkupId(), index, escapeJavaScript(expanded));
-						target.appendJavaScript(script);
-						break;
+				case "expand":
+					if (blameInfo != null) {
+						blameInfo.lastCommitHash = null;
+						blameInfo.lastOldCommitHash = null;
+						blameInfo.lastNewCommitHash = null;
+					}
+					int index = params.getParameterValue("param1").toInt();
+					int lastContextSize = expandSupport.getContextSize(index);
+					int contextSize = expandSupport.expand(index);
+					
+					StringBuilder builder = new StringBuilder();
+					DiffBlock<String> block = change.getDiffBlocks().get(index);
+					expandSupport.appendEquals(builder, index, lastContextSize, contextSize,
+							block, change.getDiffBlocks().size(), new ExpandCallbackImpl());
+					
+					String expanded = StringUtils.replace(builder.toString(), "\n", "");
+					String script = String.format("onedev.server.blobTextDiff.expand('%s', %d, \"%s\");",
+							getMarkupId(), index, escapeJavaScript(expanded));
+					target.appendJavaScript(script);
+					break;
 					case "openSelectionPopover":
 						String jsonOfPosition = String.format("{left: %d, top: %d}", 
 								params.getParameterValue("param1").toInt(), 
@@ -426,22 +428,6 @@ public class BlobTextDiffPanel extends Panel {
 			}
 			
 		}));
-
-		if (getAnnotationSupport() != null) {
-			var markRange = getAnnotationSupport().getMarkRange();
-			if (markRange != null) {
-				String fileName;
-				List<String> fileLines;
-				if (markRange.isLeftSide()) {
-					fileName = change.getOldBlobIdent().getName();
-					fileLines = change.getOldText().getLines();
-				} else {
-					fileName = change.getNewBlobIdent().getName();
-					fileLines = change.getNewText().getLines();
-				}
-				add(new HighlightedTextTool(fileName, fileLines, markRange));				
-			}
-		}
 			
 		setOutputMarkupId(true);
 	}
@@ -587,13 +573,13 @@ public class BlobTextDiffPanel extends Panel {
 					+ "</colgroup>", 
 					baseLineNumColumnWidth+newProblemsWidth, operationColumnWidth));
 		}
+		ExpandCallbackImpl callback = new ExpandCallbackImpl();
 		for (int i=0; i<change.getDiffBlocks().size(); i++) {
 			DiffBlock<String> block = change.getDiffBlocks().get(i);
 			if (block.getOperation() == Operation.EQUAL) {
-				Integer lastContextSize = contextSizes.get(i);
-				if (lastContextSize == null)
-					lastContextSize = WebConstants.DIFF_CONTEXT_SIZE;
-				appendEquals(builder, i, 0, lastContextSize);
+				int contextSize = expandSupport.getContextSize(i);
+				expandSupport.appendEquals(builder, i, 0, contextSize,
+						block, change.getDiffBlocks().size(), callback);
 			} else if (block.getOperation() == Operation.DELETE) {
 				if (i+1<change.getDiffBlocks().size()) {
 					DiffBlock<String> nextBlock = change.getDiffBlocks().get(i+1);
@@ -742,39 +728,6 @@ public class BlobTextDiffPanel extends Panel {
 			builder.append("&nbsp;");
 		else 
 			builder.append(toHtml(line, null));
-	}
-	
-	private void appendEquals(StringBuilder builder, int index, int lastContextSize, int contextSize) {
-		DiffBlock<String> block = change.getDiffBlocks().get(index);
-		if (index == 0) {
-			int start = block.getElements().size()-contextSize;
-			if (start < 0)
-				start=0;
-			else if (start > 0)
-				appendExpander(builder, index, start);
-			for (int j=start; j<block.getElements().size()-lastContextSize; j++) 
-				appendEqual(builder, block, j, lastContextSize);
-		} else if (index == change.getDiffBlocks().size()-1) {
-			int end = block.getElements().size();
-			int skipped = 0;
-			if (end > contextSize) {
-				skipped = end-contextSize;
-				end = contextSize;
-			}
-			for (int j=lastContextSize; j<end; j++)
-				appendEqual(builder, block, j, lastContextSize);
-			if (skipped != 0)
-				appendExpander(builder, index, skipped);
-		} else if (2*contextSize < block.getElements().size()) {
-			for (int j=lastContextSize; j<contextSize; j++)
-				appendEqual(builder, block, j, lastContextSize);
-			appendExpander(builder, index, block.getElements().size() - 2*contextSize);
-			for (int j=block.getElements().size()-contextSize; j<block.getElements().size()-lastContextSize; j++)
-				appendEqual(builder, block, j, lastContextSize);
-		} else {
-			for (int j=lastContextSize; j<block.getElements().size()-lastContextSize; j++)
-				appendEqual(builder, block, j, lastContextSize);
-		}
 	}
 	
 	private void appendEqual(StringBuilder builder, DiffBlock<String> block, int lineIndex, int lastContextSize) {
@@ -1115,6 +1068,39 @@ public class BlobTextDiffPanel extends Panel {
 		
 		String lastNewCommitHash;
 		
+	}
+	
+	private class ExpandCallbackImpl implements DiffExpandSupport.ExpandCallback {
+		@Override
+		public void appendEqual(StringBuilder builder, DiffBlock<String> block, int lineIndex, int lastContextSize) {
+			BlobTextDiffPanel.this.appendEqual(builder, block, lineIndex, lastContextSize);
+		}
+		
+		@Override
+		public void appendExpander(StringBuilder builder, int blockIndex, int skippedLines) {
+			BlobTextDiffPanel.this.appendExpander(builder, blockIndex, skippedLines);
+		}
+	}
+
+	@Override
+	public Collection<ChatTool> getChatTools() {
+		var tools = new ArrayList<ChatTool>();
+		if (getAnnotationSupport() != null) {
+			var markRange = getAnnotationSupport().getMarkRange();
+			if (markRange != null) {
+				String fileName;
+				List<String> fileLines;
+				if (markRange.isLeftSide()) {
+					fileName = change.getOldBlobIdent().getName();
+					fileLines = change.getOldText().getLines();
+				} else {
+					fileName = change.getNewBlobIdent().getName();
+					fileLines = change.getNewText().getLines();
+				}
+				tools.add(new HighlightedTextTool(fileName, fileLines, markRange));				
+			}
+		}
+		return tools;
 	}
 
 }

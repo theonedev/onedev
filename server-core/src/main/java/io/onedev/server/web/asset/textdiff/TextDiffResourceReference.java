@@ -1,4 +1,4 @@
-package io.onedev.server.web.asset.diff;
+package io.onedev.server.web.asset.textdiff;
 
 import java.util.List;
 
@@ -10,12 +10,12 @@ import io.onedev.server.web.asset.codemirror.CodeMirrorResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
-public class DiffResourceReference extends BaseDependentResourceReference {
+public class TextDiffResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
-	public DiffResourceReference() {
-		super(DiffResourceReference.class, "diff.js");
+	public TextDiffResourceReference() {
+		super(TextDiffResourceReference.class, "text-diff.js");
 	}
 
 	@Override
@@ -23,7 +23,7 @@ public class DiffResourceReference extends BaseDependentResourceReference {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new CodeMirrorResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(
-				DiffResourceReference.class, "diff.css")));
+				TextDiffResourceReference.class, "text-diff.css")));
 		return dependencies;
 	}
 

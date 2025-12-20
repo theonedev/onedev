@@ -34,9 +34,4 @@ public class ImageViewPanel extends BlobViewPanel {
 		return false;
 	}
 
-	@Override
-	protected boolean isViewPlainSupported() {
-		return false;
-	}
-
 }

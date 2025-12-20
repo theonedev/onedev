@@ -79,9 +79,4 @@ public class SymbolLinkPanel extends BlobViewPanel {
 		return false;
 	}
 
-	@Override
-	protected boolean isViewPlainSupported() {
-		return false;
-	}
-
 }

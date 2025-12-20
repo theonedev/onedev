@@ -41,9 +41,4 @@ public class MarkdownBlobViewPanel extends BlobViewPanel {
 		return true;
 	}
 
-	@Override
-	protected boolean isViewPlainSupported() {
-		return false;
-	}
-
 }
