@@ -3,6 +3,15 @@
 		<b><wicket:t>Digest</wicket:t></b>
 		<div wicket:id="digest" class="text-monospace text-break font-size-sm mt-2"></div>
 	</div>
+	<wicket:enclosure child="loginCommand">
+		<div class="mt-4">
+			<b><wicket:t>Login Command</wicket:t></b>
+			<div class="mt-2">
+				<span wicket:id="loginCommand" class="text-monospace text-break font-size-sm"></span>
+			</div>
+			<div class="text-muted font-size-sm mt-2"><wicket:t>Make sure to log in with an account that has package read permission for the project</wicket:t></div>
+		</div>
+	</wicket:enclosure>
 	<div wicket:id="content"></div>
 	<div wicket:id="insecureRegistryNote" class="mt-4"></div>
 	<wicket:fragment wicket:id="multiArchFrag">

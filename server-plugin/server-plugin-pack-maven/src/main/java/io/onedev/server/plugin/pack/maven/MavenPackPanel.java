@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.FileUtils;
@@ -45,12 +46,14 @@ import org.unbescape.html.HtmlEscape;
 
 import com.google.common.io.Resources;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.service.PackBlobService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.PackBlobReference;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ReadPack;
+import io.onedev.server.service.PackBlobService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
@@ -58,6 +61,12 @@ import io.onedev.server.web.util.LoadableDetachableDataProvider;
 
 public class MavenPackPanel extends GenericPanel<Pack> {
 	
+	@Inject
+	private SettingService settingService;
+
+	@Inject
+	private PackBlobService packBlobService;
+
 	private transient Map<String, PackBlob> packBlobs;
 	
 	public MavenPackPanel(String id, IModel<Pack> model) {
@@ -66,7 +75,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 
 	private byte[] readBlob(PackBlob packBlob) {
 		var baos = new ByteArrayOutputStream();
-		getPackBlobService().downloadBlob(packBlob.getProject().getId(), packBlob.getSha256Hash(), baos);
+		packBlobService.downloadBlob(packBlob.getProject().getId(), packBlob.getSha256Hash(), baos);
 		return baos.toByteArray();
 	}
 	
@@ -94,7 +103,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 				if (fileName.endsWith(".pom")) {
 					var packBlob = getPackBlobs().get(fileName);
 					var baos = new ByteArrayOutputStream();
-					getPackBlobService().downloadBlob(packBlob.getProject().getId(),
+					packBlobService.downloadBlob(packBlob.getProject().getId(),
 							packBlob.getSha256Hash(), baos);
 					try {
 						pomElement = new SAXReader().read(new ByteArrayInputStream(baos.toByteArray())).getRootElement();
@@ -119,9 +128,14 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 				bindings.put("groupId", substringBefore(getPack().getName(), ":"));
 				bindings.put("artifactId", substringAfter(getPack().getName(), ":"));
 				bindings.put("version", getPack().getVersion());
-				var serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
+				var serverUrl = settingService.getSystemSetting().getServerUrl();
 				bindings.put("url", serverUrl + "/" + getPack().getProject().getPath() + "/~" + MavenPackHandler.HANDLER_ID);
 				bindings.put("permission", "read");
+				var canAccessAnonymously = SecurityUtils.asAnonymous().isPermitted(
+						new ProjectPermission(getPack().getProject(), new ReadPack()));
+				bindings.put("canAccessAnonymously", canAccessAnonymously);
+
+				var requireSettings = !canAccessAnonymously || serverUrl.startsWith("http:");
 
 				if (packaging.equals("jar") || packaging.equals("maven-plugin") || packaging.equals("pom")) {
 					var usageFrag = new Fragment("usage", "usageFrag", this);
@@ -137,8 +151,8 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 					try {
 						var template = Resources.toString(tplUrl, UTF_8);
 						usageFrag.add(new CodeSnippetPanel("pom", Model.of(evalTemplate(template, bindings))));
-						usageFrag.add(new CodeSnippetPanel("settings", Model.of(evalTemplate(MavenPackSupport.getServersAndMirrorsTemplate(), bindings))));
-						usageFrag.add(new CodeSnippetPanel("jobCommands", Model.of(evalTemplate(MavenPackSupport.getJobCommandsTemplate(), bindings))));
+						usageFrag.add(new CodeSnippetPanel("settings", Model.of(evalTemplate(MavenPackSupport.getServersAndMirrorsTemplate(), bindings).trim())).setVisible(requireSettings));
+						usageFrag.add(new CodeSnippetPanel("jobCommands", Model.of(evalTemplate(MavenPackSupport.getJobCommandsTemplate(), bindings).trim())).setVisible(requireSettings));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -180,7 +194,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 								@Override
 								public void write(OutputStream os) {
 									var packBlob = getPackBlobs().get(fileName);
-									getPackBlobService().downloadBlob(packBlob.getProject().getId(),
+									packBlobService.downloadBlob(packBlob.getProject().getId(),
 											packBlob.getSha256Hash(), os);
 								}
 
@@ -253,10 +267,6 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 			}
 		}
 		return packBlobs;
-	}
-
-	private PackBlobService getPackBlobService() {
-		return OneDev.getInstance(PackBlobService.class);
 	}
 	
 }

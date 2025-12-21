@@ -2,6 +2,9 @@ package io.onedev.server.plugin.pack.pypi;
 
 import com.google.common.base.Joiner;
 import io.onedev.server.OneDev;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ReadPack;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Pack;
 import io.onedev.server.util.UrlUtils;
@@ -40,8 +43,12 @@ public class PypiPackPanel extends GenericPanel<Pack> {
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
-		var indexUrl = protocol + "://<OneDev_account_name>:<OneDev_password>@" + UrlUtils.getServer(serverUrl) 
+		var canAccessAnonymously = SecurityUtils.asAnonymous().isPermitted(
+				new ProjectPermission(getPack().getProject(), new ReadPack()));
+		var authPart = canAccessAnonymously ? "" : "<OneDev_account_name>:<OneDev_password>@";
+		var indexUrl = protocol + "://" + authPart + UrlUtils.getServer(serverUrl) 
 				+ "/" + getPack().getProject().getPath() + "/~" + PypiPackHandler.HANDLER_ID + "/simple/";
+		add(new WebMarkupContainer("readPermissionNote").setVisible(!canAccessAnonymously));
 		var installCmd = "$ python3 -m pip install --extra-index-url " + indexUrl;
 		if (protocol.equals("http"))
 			installCmd += " --trusted-host " + host;

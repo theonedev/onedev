@@ -1,3 +1,6 @@
+<% 
+if (!canAccessAnonymously) {
+print """
 <servers>
   <server>
     <id>onedev</id>
@@ -6,7 +9,9 @@
     <password>onedev_password_or_access_token</password>
   </server>
 </servers>
-<%
+"""
+}
+%><%
 if (url.startsWith("http:") && permission.equals("read")) {
 print """
 <!-- maven:allow-http-notice -->

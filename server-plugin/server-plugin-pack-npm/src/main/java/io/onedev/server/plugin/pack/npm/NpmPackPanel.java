@@ -2,6 +2,9 @@ package io.onedev.server.plugin.pack.npm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.OneDev;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ReadPack;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Pack;
 import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
@@ -35,7 +38,12 @@ public class NpmPackPanel extends GenericPanel<Pack> {
 		} else {
 			add(new Label("registryConfig", "$ npm config set registry " + registryUrl));
 		}
-		add(new Label("registryAuth", "$ npm config set -- '" + substringAfter(registryUrl, ":") + ":_authToken' \"onedev_access_token\""));
+		var canAccessAnonymously = SecurityUtils.asAnonymous().isPermitted(
+				new ProjectPermission(getPack().getProject(), new ReadPack()));
+		var registryAuthLabel = new Label("registryAuth", "$ npm config set -- '" + substringAfter(registryUrl, ":") + ":_authToken' \"onedev_access_token\"");
+		registryAuthLabel.setVisible(!canAccessAnonymously);
+		add(registryAuthLabel);
+		add(new WebMarkupContainer("readPermissionNote").setVisible(!canAccessAnonymously));
 		add(new Label("installPack", "$ npm install " + getPack().getReference(false)));
 
 		add(new CodeSnippetPanel("jobCommands", new LoadableDetachableModel<>() {

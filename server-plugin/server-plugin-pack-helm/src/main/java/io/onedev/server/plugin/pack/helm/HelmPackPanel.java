@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -14,8 +15,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.model.Pack;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ReadPack;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
 
 public class HelmPackPanel extends GenericPanel<Pack> {
@@ -29,7 +33,11 @@ public class HelmPackPanel extends GenericPanel<Pack> {
 		super.onInitialize();
 
 		var registryUrl = getServerUrl() + "/" + getPack().getProject().getPath() + "/~" + HelmPackHandler.HANDLER_ID;
-		add(new Label("addRepo", "$ helm repo add onedev --username <onedev_account_name> --password <onedev_password_or_access_token> " + registryUrl));
+		var canAccessAnonymously = SecurityUtils.asAnonymous().isPermitted(
+				new ProjectPermission(getPack().getProject(), new ReadPack()));
+		var authPart = canAccessAnonymously ? "" : "--username <onedev_account_name> --password <onedev_password_or_access_token> ";
+		add(new Label("addRepo", "$ helm repo add onedev " + authPart + registryUrl));
+		add(new WebMarkupContainer("readPermissionNote").setVisible(!canAccessAnonymously));
 		add(new Label("installChart", "$ helm install " + getPack().getName() + " onedev/" + getPack().getName() + " --version " + getPack().getVersion()));
 		
 		add(new CodeSnippetPanel("jobCommands", new LoadableDetachableModel<String>() {

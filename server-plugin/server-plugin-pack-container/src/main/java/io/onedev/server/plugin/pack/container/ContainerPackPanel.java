@@ -1,15 +1,13 @@
 package io.onedev.server.plugin.pack.container;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.onedev.server.OneDev;
-import io.onedev.server.service.PackBlobService;
-import io.onedev.server.util.Pair;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
-import io.onedev.server.web.component.tabbable.AjaxActionTab;
-import io.onedev.server.web.component.tabbable.Tab;
-import io.onedev.server.web.component.tabbable.Tabbable;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -22,15 +20,38 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-
 import org.jspecify.annotations.Nullable;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
-import static org.apache.commons.lang3.StringUtils.substringAfter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ReadPack;
+import io.onedev.server.service.PackBlobService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.util.Pair;
+import io.onedev.server.util.UrlUtils;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.component.tabbable.AjaxActionTab;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
 
 public class ContainerPackPanel extends Panel {
+	
+	@Inject
+	private PackBlobService packBlobService;
+	
+	@Inject
+	private ProjectService projectService;
+	
+	@Inject
+	private SettingService settingService;
+
+	@Inject
+	private ObjectMapper objectMapper;
 	
 	private final Long projectId;
 	
@@ -43,7 +64,7 @@ public class ContainerPackPanel extends Panel {
 	private final IModel<ContainerManifest> manifestIModel = new LoadableDetachableModel<>() {
 		@Override
 		protected ContainerManifest load() {
-			return new ContainerManifest(getPackBlobService().readBlob(projectId, manifestSha256Hash));
+			return new ContainerManifest(packBlobService.readBlob(projectId, manifestSha256Hash));
 		}
 
 	};
@@ -56,13 +77,9 @@ public class ContainerPackPanel extends Panel {
 		this.manifestSha256Hash = manifestSha256Hash;
 	}
 	
-	private PackBlobService getPackBlobService() {
-		return OneDev.getInstance(PackBlobService.class);
-	}
-
 	private String formatJson(JsonNode jsonNode) {
 		try {
-			return getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
+			return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -70,7 +87,7 @@ public class ContainerPackPanel extends Panel {
 	
 	private JsonNode readJson(byte[] bytes) {
 		try {
-			return getObjectMapper().readTree(bytes);
+			return objectMapper.readTree(bytes);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -82,6 +99,16 @@ public class ContainerPackPanel extends Panel {
 		
 		var digest = "sha256:" + manifestSha256Hash;
 		add(new Label("digest", digest));
+		
+		var project = projectService.load(projectId);
+		var canAccessAnonymously = SecurityUtils.asAnonymous().isPermitted(
+				new ProjectPermission(project, new ReadPack()));
+		var serverUrl = settingService.getSystemSetting().getServerUrl();
+		var server = UrlUtils.getServer(serverUrl);
+		var loginCommand = "docker login " + server;
+		var loginCommandLabel = new Label("loginCommand", loginCommand);
+		loginCommandLabel.setVisible(!canAccessAnonymously);
+		add(loginCommandLabel);
 		
 		var data = manifestIModel.getObject();
 		if (data.isImageManifest()) {
@@ -120,7 +147,7 @@ public class ContainerPackPanel extends Panel {
 				add(fragment);
 			} else if (archDigests.size() == 1) {
 				var archHash = substringAfter(archDigests.values().iterator().next(), ":");
-				var archManifestBytes = getPackBlobService().readBlob(projectId, archHash);
+				var archManifestBytes = packBlobService.readBlob(projectId, archHash);
 				add(newImagePanel("content", readJson(archManifestBytes), null));
 			} else {
 				boolean cache = false;
@@ -155,7 +182,7 @@ public class ContainerPackPanel extends Panel {
 	
 	private Component newArchImagePanel(String componentId, String archDigest) {
 		var archHash = substringAfter(archDigest, ":");
-		var archManifestBytes = getPackBlobService().readBlob(projectId, archHash);
+		var archManifestBytes = packBlobService.readBlob(projectId, archHash);
 		return newImagePanel(componentId, readJson(archManifestBytes), archDigest);
 	}
 	
@@ -166,7 +193,7 @@ public class ContainerPackPanel extends Panel {
 		fragment.add(new CopyToClipboardLink("copyPullCommand", Model.of(pullCommand)));
 		
 		var configHash = substringAfter(manifest.get("config").get("digest").asText(), ":");
-		var config = readJson(getPackBlobService().readBlob(projectId, configHash));
+		var config = readJson(packBlobService.readBlob(projectId, configHash));
 		if (archDigest != null) {
 			fragment.add(new WebMarkupContainer("osArch").setVisible(false));
 			var pullArchCommand = "docker pull " + namespace + "@" + archDigest;
@@ -223,10 +250,6 @@ public class ContainerPackPanel extends Panel {
 		return fragment;
 	}
 	
-	private ObjectMapper getObjectMapper() {
-		return OneDev.getInstance(ObjectMapper.class);
-	}
-
 	@Override
 	protected void onDetach() {
 		manifestIModel.detach();

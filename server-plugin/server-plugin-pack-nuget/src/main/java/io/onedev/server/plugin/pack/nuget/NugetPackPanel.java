@@ -1,17 +1,22 @@
 package io.onedev.server.plugin.pack.nuget;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.model.Pack;
-import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.nio.charset.StandardCharsets;
+
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.nio.charset.StandardCharsets;
+import io.onedev.server.OneDev;
+import io.onedev.server.model.Pack;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ReadPack;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
 
 public class NugetPackPanel extends GenericPanel<Pack> {
 	
@@ -24,7 +29,11 @@ public class NugetPackPanel extends GenericPanel<Pack> {
 		super.onInitialize();
 
 		var registryUrl = getServerUrl() + "/" + getPack().getProject().getPath() + "/~" + NugetPackHandler.HANDLER_ID + "/index.json";
-		add(new Label("addSource", "$ dotnet nuget add source --name onedev --username <onedev_account_name> --password <onedev_password_or_access_token> --store-password-in-clear-text " + registryUrl));
+		var canAccessAnonymously = SecurityUtils.asAnonymous().isPermitted(
+				new ProjectPermission(getPack().getProject(), new ReadPack()));
+		var authPart = canAccessAnonymously ? "" : "--username <onedev_account_name> --password <onedev_password_or_access_token> ";
+		add(new Label("addSource", "$ dotnet nuget add source --name onedev " + authPart + "--store-password-in-clear-text " + registryUrl));
+		add(new WebMarkupContainer("readPermissionNote").setVisible(!canAccessAnonymously));
 		add(new Label("addPack", "$ dotnet add package " + getPack().getName() + " -v " + getPack().getVersion()));
 		
 		add(new CodeSnippetPanel("jobCommands", new LoadableDetachableModel<String>() {

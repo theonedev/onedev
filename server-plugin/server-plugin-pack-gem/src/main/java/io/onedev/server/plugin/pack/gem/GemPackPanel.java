@@ -1,19 +1,24 @@
 package io.onedev.server.plugin.pack.gem;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.model.Pack;
-import io.onedev.server.util.UrlUtils;
-import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
+import static io.onedev.server.web.translation.Translation._T;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static io.onedev.server.web.translation.Translation._T;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.model.Pack;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ReadPack;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.util.UrlUtils;
+import io.onedev.server.web.component.codesnippet.CodeSnippetPanel;
 
 public class GemPackPanel extends GenericPanel<Pack> {
 	
@@ -34,9 +39,13 @@ public class GemPackPanel extends GenericPanel<Pack> {
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
-		var installCommand = String.format("$ gem install %s --version \"%s\" --source \"%s://<onedev_account_name>:<onedev_password>@%s/%s/~rubygems\"", 
-				pack.getName(), pack.getVersion(), protocol, UrlUtils.getServer(serverUrl), pack.getProject().getPath());
+		var canAccessAnonymously = SecurityUtils.asAnonymous().isPermitted(
+				new ProjectPermission(pack.getProject(), new ReadPack()));
+		var authPart = canAccessAnonymously ? "" : "<onedev_account_name>:<onedev_password>@";
+		var installCommand = String.format("$ gem install %s --version \"%s\" --source \"%s://%s%s/%s/~rubygems\"", 
+				pack.getName(), pack.getVersion(), protocol, authPart, UrlUtils.getServer(serverUrl), pack.getProject().getPath());
 		add(new CodeSnippetPanel("install", Model.of(installCommand)));
+		add(new WebMarkupContainer("readPermissionNote").setVisible(!canAccessAnonymously));
 		
 		var gemfileContent = String.format("" +
 						"source \"%s/%s/~rubygems\" do\n" +

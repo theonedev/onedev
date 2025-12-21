@@ -33,6 +33,7 @@ public class MavenHelpPanel extends Panel {
 		var bindings = new HashMap<String, Object>();
 		bindings.put("url", serverUrl + "/" + projectPath + "/~" + MavenPackHandler.HANDLER_ID);
 		bindings.put("permission", "write");
+		bindings.put("canAccessAnonymously", false);
 
 		try {
 			URL tplUrl = Resources.getResource(MavenHelpPanel.class, "repositories.tpl");

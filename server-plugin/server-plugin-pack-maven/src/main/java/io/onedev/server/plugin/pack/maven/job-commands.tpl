@@ -1,5 +1,7 @@
 cat << EOF > settings.xml
-<settings>
+<settings><% 
+if (!canAccessAnonymously) {
+print """
   <servers>
     <server>
       <id>onedev</id>
@@ -9,7 +11,9 @@ cat << EOF > settings.xml
       <password>@secret:access-token@</password>
     </server>
   </servers>
-<%
+"""
+} 
+%><%
 if (url.startsWith("http:") && permission.equals("read")) {
 print """
   <!-- maven:allow-http-notice -->
