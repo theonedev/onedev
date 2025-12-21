@@ -77,7 +77,7 @@
 	border-left-color: rgb(38, 76, 50) !important;
 }
 .dark-mode .blob-text-diff>.text-diff>tbody>tr>td:first-child {
-	border-left-color: var(--dark-mode-lighter-dark);
+	border-left-color: var(--dark-mode-lighter-dark) !important;
 }
 .blob-text-diff>.text-diff>tbody>tr:last-child>td {
 	border-bottom: 1px solid var(--light-gray);
