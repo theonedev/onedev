@@ -591,6 +591,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Change to another field", "다른 필드로 변경");
 		m.put("Change to another state", "다른 상태로 변경");
 		m.put("Change to another value", "다른 값으로 변경");
+		m.put("Changes", "변경 사항");
 		m.put("Changes since last review", "마지막 리뷰 이후 변경 사항");
 		m.put("Changes since last visit", "마지막 방문 이후 변경 사항");
 		m.put("Changes since this action", "이 작업 이후 변경 사항");
@@ -1362,6 +1363,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Fixing Commits", "커밋 수정 중");
 		m.put("Fixing...", "수정 중...");
 		m.put("Float", "부동");
+		m.put("Flush", "플러시");
 		m.put("Folder path to list all files and subfolders", "모든 파일 및 하위 폴더를 나열할 폴더 경로");
 		m.put("Follow below instructions to publish packages into this project", "아래 지침을 따라 이 프로젝트에 패키지를 게시하세요");
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
@@ -2178,7 +2180,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("No jobs found", "작업이 없습니다");
 		m.put("No limit", "제한 없음");
 		m.put("No mail service", "메일 서비스 없음");
-		m.put("No obvious changes", "명확한 변경 사항 없음");
 		m.put("No one", "아무도 없음");
 		m.put("No packages to delete", "삭제할 패키지 없음");
 		m.put("No parent", "상위 없음");
@@ -4689,8 +4690,19 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Changes", "변경 사항");
-		m.put("Flush", "플러시");
+		m.put("AI system prompt has been saved", "AI 시스템 프롬프트가 저장되었습니다");
+		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
+			"프로젝트를 명령줄에서 컴파일하려면 아래 내용을 $HOME/.m2/settings.xml에 추가하세요");
+		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
+			"CI/CD 작업의 경우, 아래 코드와 같이 명령 단계에서 사용자 정의 settings.xml을 사용하는 것이 더 편리합니다:");
+		m.put("Login Command", "로그인 명령");
+		m.put("Make sure to log in with an account that has package read permission for the project", 
+			"프로젝트에 대한 패키지 읽기 권한이 있는 계정으로 로그인했는지 확인하세요");
+		m.put("Nothing changed yet", "아직 변경된 것이 없습니다");
+		m.put("Someone changed file mode since you started editing", "편집을 시작한 이후로 누군가 파일 모드를 변경했습니다");
+		m.put("Someone changed file type since you started editing", "편집을 시작한 이후로 누군가 파일 유형을 변경했습니다");
+		m.put("System Prompt", "시스템 프롬프트");
+		m.put("To use this package, add below to project pom.xml", "이 패키지를 사용하려면 아래 내용을 프로젝트 pom.xml에 추가하세요");
 	}
 		
 	@Override

@@ -591,6 +591,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Change to another field", "別のフィールドに変更");
 		m.put("Change to another state", "別の状態に変更");
 		m.put("Change to another value", "別の値に変更");
+		m.put("Changes", "変更");
 		m.put("Changes since last review", "最後のレビュー以降の変更");
 		m.put("Changes since last visit", "最後の訪問以降の変更");
 		m.put("Changes since this action", "このアクション以降の変更");
@@ -1362,6 +1363,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Fixing Commits", "コミットの修正");
 		m.put("Fixing...", "修正中...");
 		m.put("Float", "浮動小数点");
+		m.put("Flush", "フラッシュ");
 		m.put("Folder path to list all files and subfolders", "すべてのファイルとサブフォルダを一覧表示するフォルダパス");
 		m.put("Follow below instructions to publish packages into this project", "以下の手順に従って、このプロジェクトにパッケージを公開してください");
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
@@ -2178,7 +2180,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No jobs found", "ジョブが見つかりません");
 		m.put("No limit", "制限なし");
 		m.put("No mail service", "メールサービスなし");
-		m.put("No obvious changes", "明らかな変更なし");
 		m.put("No one", "誰もいない");
 		m.put("No packages to delete", "削除するパッケージなし");
 		m.put("No parent", "親なし");
@@ -4689,8 +4690,19 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Changes", "変更");
-		m.put("Flush", "フラッシュ");
+		m.put("AI system prompt has been saved", "AIシステムプロンプトが保存されました");
+		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
+			"コマンドラインからプロジェクトをコンパイルしたい場合は、以下を$HOME/.m2/settings.xmlに追加してください");
+		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
+			"CI/CDジョブでは、カスタムsettings.xmlを使用する方が便利です。例えば、コマンドステップで以下のコードを使用します：");
+		m.put("Login Command", "ログインコマンド");
+		m.put("Make sure to log in with an account that has package read permission for the project", 
+			"プロジェクトのパッケージ読み取り権限を持つアカウントでログインしていることを確認してください");
+		m.put("Nothing changed yet", "まだ何も変更されていません");
+		m.put("Someone changed file mode since you started editing", "編集を開始してから誰かがファイルモードを変更しました");
+		m.put("Someone changed file type since you started editing", "編集を開始してから誰かがファイルタイプを変更しました");
+		m.put("System Prompt", "システムプロンプト");
+		m.put("To use this package, add below to project pom.xml", "このパッケージを使用するには、以下をプロジェクトのpom.xmlに追加してください");
 	}
 		
 	@Override

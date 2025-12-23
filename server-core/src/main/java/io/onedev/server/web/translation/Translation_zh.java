@@ -615,6 +615,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Change to another field", "更改为其他字段");
 		m.put("Change to another state", "更改为其他状态");
 		m.put("Change to another value", "更改为其他值");
+		m.put("Changes", "更改");
 		m.put("Changes since last review", "上次审查后的更改");
 		m.put("Changes since last visit", "自上次访问以来的更改");
 		m.put("Changes since this action", "此操作后的变更");
@@ -1386,6 +1387,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Fixing Commits", "修复提交");
 		m.put("Fixing...", "修复中...");
 		m.put("Float", "浮点数");
+		m.put("Flush", "刷新");
 		m.put("Folder path to list all files and subfolders", "文件夹路径以列出所有文件和子文件夹");
 		m.put("Follow below instructions to publish packages into this project", "按照以下说明将包发布到此项目");
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
@@ -2202,7 +2204,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No jobs found", "未找到作业");
 		m.put("No limit", "无限制");
 		m.put("No mail service", "无邮件服务");
-		m.put("No obvious changes", "无明显改动");
 		m.put("No one", "无任何人");
 		m.put("No packages to delete", "没有可删除的包");
 		m.put("No parent", "无父级");
@@ -4713,8 +4714,19 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Changes", "更改");
-		m.put("Flush", "刷新");
+		m.put("AI system prompt has been saved", "AI 系统提示已保存");
+		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
+			"如果您想从命令行编译项目，请将以下内容添加到 $HOME/.m2/settings.xml");
+		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
+			"对于 CI/CD 任务，使用自定义 settings.xml 更方便，例如通过在命令步骤中使用以下代码：");
+		m.put("Login Command", "登录命令");
+		m.put("Make sure to log in with an account that has package read permission for the project", 
+			"确保使用对项目具有包读取权限的账户登录");
+		m.put("Nothing changed yet", "尚未更改任何内容");
+		m.put("Someone changed file mode since you started editing", "自您开始编辑以来，有人更改了文件模式");
+		m.put("Someone changed file type since you started editing", "自您开始编辑以来，有人更改了文件类型");
+		m.put("System Prompt", "系统提示");
+		m.put("To use this package, add below to project pom.xml", "要使用此包，请将以下内容添加到项目 pom.xml");
 	}
 		
 	@Override

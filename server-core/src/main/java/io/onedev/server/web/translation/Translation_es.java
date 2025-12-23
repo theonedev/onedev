@@ -591,6 +591,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Change to another field", "Cambiar a otro campo");
 		m.put("Change to another state", "Cambiar a otro estado");
 		m.put("Change to another value", "Cambiar a otro valor");
+		m.put("Changes", "Cambios");
 		m.put("Changes since last review", "Cambios desde la última revisión");
 		m.put("Changes since last visit", "Cambios desde la última visita");
 		m.put("Changes since this action", "Cambios desde esta acción");
@@ -1362,6 +1363,7 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("Fixing Commits", "Corrigiendo Confirmaciones");
 		m.put("Fixing...", "Corrigiendo...");
 		m.put("Float", "Flotante");
+		m.put("Flush", "Vaciar");
 		m.put("Folder path to list all files and subfolders", "Ruta de la carpeta para listar todos los archivos y subcarpetas");
 		m.put("Follow below instructions to publish packages into this project", "Siga las instrucciones a continuación para publicar paquetes en este proyecto");
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
@@ -2178,7 +2180,6 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("No jobs found", "No se encontraron trabajos");
 		m.put("No limit", "No hay límite");
 		m.put("No mail service", "No hay servicio de correo");
-		m.put("No obvious changes", "No hay cambios evidentes");
 		m.put("No one", "No hay nadie");
 		m.put("No packages to delete", "No hay paquetes para eliminar");
 		m.put("No parent", "No hay padre");
@@ -4689,8 +4690,19 @@ public class Translation_es extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Changes", "Cambios");
-		m.put("Flush", "Vaciar");
+		m.put("AI system prompt has been saved", "El aviso del sistema de IA ha sido guardado");
+		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
+			"También agregue lo siguiente a $HOME/.m2/settings.xml si desea compilar el proyecto desde la línea de comandos");
+		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
+			"Para el trabajo de CI/CD, es más conveniente usar un settings.xml personalizado, por ejemplo, a través del siguiente código en un paso de comando:");
+		m.put("Login Command", "Comando de inicio de sesión");
+		m.put("Make sure to log in with an account that has package read permission for the project", 
+			"Asegúrese de iniciar sesión con una cuenta que tenga permiso de lectura de paquetes para el proyecto");
+		m.put("Nothing changed yet", "Nada ha cambiado aún");
+		m.put("Someone changed file mode since you started editing", "Alguien cambió el modo del archivo desde que comenzó a editar");
+		m.put("Someone changed file type since you started editing", "Alguien cambió el tipo de archivo desde que comenzó a editar");
+		m.put("System Prompt", "Aviso del sistema");
+		m.put("To use this package, add below to project pom.xml", "Para usar este paquete, agregue lo siguiente al pom.xml del proyecto");
 	}
 		
 	@Override
