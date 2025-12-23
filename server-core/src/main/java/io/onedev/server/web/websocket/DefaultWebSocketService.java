@@ -51,8 +51,9 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 	private static final long serialVersionUID = 1L;
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultWebSocketService.class);
-	
-	private static final int KEEP_ALIVE_INTERVAL = 60;
+
+	// Using 30 seconds to avoid Nginx websocket timeout (60 seconds by default)
+	private static final int KEEP_ALIVE_INTERVAL = 30;
 
 	private static final int CHECK_MESSAGE_QUEUE_INTERVAL = 5;
 

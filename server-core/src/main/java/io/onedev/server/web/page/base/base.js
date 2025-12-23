@@ -346,14 +346,7 @@ onedev.server = {
 			pageUnloading = true;
 		});
 					
-		function testConnection() {			
-			if (Wicket.WebSocket.INSTANCE.ws && Wicket.WebSocket.INSTANCE.ws.readyState == WebSocket.OPEN) {
-				Wicket.WebSocket.send("TestConnection");
-				setTimeout(testConnection, 60000);
-			}
-		}
 		Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
-			testConnection();		
 			$(".connection-error").hide();
 		});
 		Wicket.Event.subscribe("/websocket/closed", function(jqEvent) {
@@ -372,6 +365,8 @@ onedev.server = {
 			if (message == "ErrorMessage") {
 				$("body>.error").hide();
 				$(".page-error").show();
+			} else if (message == "KeepAlive") {
+				Wicket.WebSocket.send(message);
 			}
 		});		
 	},

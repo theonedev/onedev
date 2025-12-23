@@ -4,8 +4,8 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -18,6 +18,7 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
@@ -26,6 +27,7 @@ import io.onedev.server.ai.BuildSpecSchema;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.JobVariable;
 import io.onedev.server.data.migration.VersionedYamlDoc;
 import io.onedev.server.service.TemporalFutureService;
 import io.onedev.server.web.component.diff.text.PlainTextDiffPanel;
@@ -93,8 +95,16 @@ public class BuildSpecBlobEditPanel extends BlobEditPanel implements PlainEditSu
 
 	@Override
 	protected Component newChangesViewer(String componentId, byte[] initialContent, byte[] editingContent) {
-		var oldLines = Arrays.asList(new String(initialContent, StandardCharsets.UTF_8).split("\n"));
-		var newLines = Arrays.asList(new String(editingContent, StandardCharsets.UTF_8).split("\n"));
+		List<String> oldLines;
+		if (initialContent.length > 0)
+			oldLines = Splitter.on("\n").splitToList(new String(initialContent, StandardCharsets.UTF_8));
+		else
+			oldLines = new ArrayList<>();
+		List<String> newLines;
+		if (editingContent.length > 0)
+			newLines = Splitter.on("\n").splitToList(new String(editingContent, StandardCharsets.UTF_8));
+		else
+			newLines = new ArrayList<>();
 		return new PlainTextDiffPanel(componentId, oldLines, newLines, true, BuildSpec.BLOB_PATH);
 	}
 
@@ -114,28 +124,40 @@ public class BuildSpecBlobEditPanel extends BlobEditPanel implements PlainEditSu
 	
 				@Override
 				public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+					var variables = new ArrayList<String>();
+					for (JobVariable variable: JobVariable.values()) {
+						variables.add("- @%s@".formatted(variable.name().toLowerCase()));
+					}
+					variables.add("- @secret:<job secret name>@ (get value of specified job secret)");
+					variables.add("- @file:<workspace file path>@ (get content of specified workspace file generated in previous steps)");
+					
 					var instructions = """
 						OneDev CI/CD spec is a yaml file conforming to below schema:
 	
 						<!SCHEMA BEGIN!>
 						%s
 						<!SCHEMA END!>							
+
+						Available variables that can be used in CI/CD spec:
+						%s
 						
 						When editing CI/CD spec, remember that:
 
-						1. If command step is used, turn on the "run in container" if possible, unless requested by user explicitly
-						2. Different steps run in isolated environments, with shared job workspace. So it will not work installing dependencies in one step, and run commands relying on them in another step. You should put them in a single step unless requested by user explicitly
-						3. If cache step is used:
-							3.1 It should be placed before the step building or testing the project
-							3.2 If the project has lock files (package.json, pom.xml, etc.):
-								3.2.1 A generate checksum step should be placed before the cache step, to generate checksum of all relevant lock files and store it in a file named checksum.txt						
-								3.2.2 The key property should be configured as <keyname>-@file:checksum.txt@
-								3.2.3 The load keys property should be configured as <keyname>
-								3.2.4 The upload strategy property should be configured as UPLOAD_IF_NOT_HIT
-						4. If user wants to pass files between different jobs, one job should publish files via the publish artifact step, and another jobs can then download them into job workspace via job dependency
-						5. Call tools such as getRootFilesAndFolders, getFilesAndSubfolders and getTextContent to get project structure, and figure out what docker image and commands to use to build or test the project if requested by user
-						6. After editing the CI/CD spec, call saveBuildSpec tool to save the result. If saving fails, fix errors according to error messages and schema above and save again						
-						""".formatted(BuildSpecSchema.get());
+						1. Files in job workspace are shared between different steps. So you can generate workspace files in one step, and use them in another step.
+						2. If command step is used, turn on the "run in container" if possible, unless requested by user explicitly
+						3. Different steps run in isolated environments (only job workspace is shared). So it will not work installing dependencies in one step, and run commands relying on them in another step. You should put them in a single step unless requested by user explicitly
+						4. If cache step is used:
+							4.1 It should be placed before the step building or testing the project
+							4.2 If the project has lock files (package.json, pom.xml, etc.):
+								4.2.1 A generate checksum step should be placed before the cache step, to generate checksum of all relevant lock files and store it in a file named checksum.txt						
+								4.2.2 The key property should be configured as <keyname>-@file:checksum.txt@
+								4.2.3 The load keys property should be configured as <keyname>
+								4.2.4 The upload strategy property should be configured as UPLOAD_IF_NOT_HIT
+						5. If user wants to pass files between different jobs, one job should publish files via the publish artifact step, and another jobs can then download them into job workspace via job dependency
+						6. Call tools such as getRootFilesAndFolders, getFilesAndSubfolders and getTextContent to get project structure, and figure out what docker image and commands to use to build or test the project if requested by user
+						7. After editing the CI/CD spec, call saveBuildSpec tool to save the result. If saving fails, fix errors according to error messages and schema above and save again						
+						""".formatted(BuildSpecSchema.get(), Joiner.on("\n").join(variables));
+
 					return completedFuture(new ChatToolExecution.Result(instructions, true));
 				}
 				

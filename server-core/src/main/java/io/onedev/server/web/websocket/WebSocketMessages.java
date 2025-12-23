@@ -6,6 +6,4 @@ public interface WebSocketMessages {
 		
 	static final String KEEP_ALIVE = "KeepAlive";
 
-	static final String TEST_CONNECTION = "TestConnection";
-
 }
