@@ -1,22 +1,29 @@
 package io.onedev.server.service.impl;
 
-import com.google.common.base.Preconditions;
-import io.onedev.server.service.IssueFieldService;
-import io.onedev.server.service.IssueLinkService;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueLink;
-import io.onedev.server.model.LinkSpec;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.annotation.Transactional;
-import org.hibernate.Hibernate;
-import org.hibernate.query.Query;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import java.util.*;
+
+import org.hibernate.Hibernate;
+import org.hibernate.query.Query;
+
+import com.google.common.base.Preconditions;
+
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueLink;
+import io.onedev.server.model.LinkSpec;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.service.IssueFieldService;
+import io.onedev.server.service.IssueLinkService;
 
 @Singleton
 public class DefaultIssueLinkService extends BaseEntityService<IssueLink> implements IssueLinkService {
@@ -90,6 +97,10 @@ public class DefaultIssueLinkService extends BaseEntityService<IssueLink> implem
 	@Override
 	public void create(IssueLink link) {
 		Preconditions.checkState(link.isNew());
+		var maxPosition = Math.max(
+			link.getSource().getMaxLinkPosition(link.getSpec(), false), 
+			link.getTarget().getMaxLinkPosition(link.getSpec(), true));
+		link.setPosition(maxPosition + 1);		
 		dao.persist(link);
 	}
 

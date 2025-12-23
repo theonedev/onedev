@@ -56,7 +56,7 @@ public class IssueLinkResource {
 
 		}
 		link.validate();
-				
+						
 		linkService.create(link);
 		return link.getId();
 	}

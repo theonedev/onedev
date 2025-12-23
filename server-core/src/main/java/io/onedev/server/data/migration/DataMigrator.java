@@ -8411,4 +8411,17 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate216(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("IssueLinks.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var id = element.elementTextTrim("id");
+					element.addElement("position").setText(id);
+				}
+				dom.writeToFile(file, false);
+			}
+		}		
+	}
+
 }

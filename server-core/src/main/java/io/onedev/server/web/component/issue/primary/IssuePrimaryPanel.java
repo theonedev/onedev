@@ -2,6 +2,7 @@ package io.onedev.server.web.component.issue.primary;
 
 import static io.onedev.server.security.SecurityUtils.canAccessIssue;
 import static io.onedev.server.web.translation.Translation._T;
+import static java.util.stream.Collectors.toList;
 
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -9,9 +10,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
+import javax.inject.Inject;
 import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
@@ -41,24 +41,27 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
+import org.jspecify.annotations.Nullable;
 import org.unbescape.html.HtmlEscape;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.service.IssueChangeService;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.IssueReactionService;
-import io.onedev.server.service.LinkSpecService;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CommentRevision;
 import io.onedev.server.model.support.EntityReaction;
+import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueChangeService;
+import io.onedev.server.service.IssueLinkService;
+import io.onedev.server.service.IssueReactionService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.LinkSpecService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.EmailAddressUtils;
 import io.onedev.server.util.LinkDescriptor;
@@ -67,6 +70,8 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.comment.CommentHistoryLink;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.comment.ReactionSupport;
@@ -79,6 +84,7 @@ import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
@@ -92,10 +98,28 @@ public abstract class IssuePrimaryPanel extends Panel {
 
 	private static final String COOKIE_LINK_ISSUE_TAB = "linkIssue.tab";
 
+	@Inject
+	private IssueChangeService issueChangeService;
+
+	@Inject
+	private IssueReactionService issueReactionService;
+
+	@Inject
+	private LinkSpecService linkSpecService;
+
+	@Inject
+	private IssueService issueService;
+
+	@Inject
+	private IssueLinkService issueLinkService;
+
+	@Inject
+	private TransactionService transactionService;
+
 	private final IModel<List<LinkSpec>> linkSpecsModel = new LoadableDetachableModel<>() {
 		@Override
 		protected List<LinkSpec> load() {
-			return getLinkSpecService().queryAndSort();
+			return linkSpecService.queryAndSort();
 		}
 
 	};
@@ -127,16 +151,16 @@ public abstract class IssuePrimaryPanel extends Panel {
 			List<LinkGroup> linkGroups = new ArrayList<>();
 			for (LinkSpec spec : linkSpecsModel.getObject()) {
 				if (spec.getOpposite() != null) {
-					var targetIssues = getIssue().findLinkedIssues(spec, false).stream().filter(it->canAccessIssue(it)).collect(Collectors.toList());
-					if (!targetIssues.isEmpty())
-						linkGroups.add(new LinkGroup(new LinkDescriptor(spec, false), targetIssues));
-					var sourceIssues = getIssue().findLinkedIssues(spec, true).stream().filter(it->canAccessIssue(it)).collect(Collectors.toList());
-					if (!sourceIssues.isEmpty())
-						linkGroups.add(new LinkGroup(new LinkDescriptor(spec, true), sourceIssues));
+					var targetIssueLinks = getIssue().findIssueLinks(spec, false).stream().filter(it->canAccessIssue(it.getTarget())).collect(toList());
+					if (!targetIssueLinks.isEmpty())
+						linkGroups.add(new LinkGroup(new LinkDescriptor(spec, false), targetIssueLinks));
+					var sourceIssueLinks = getIssue().findIssueLinks(spec, true).stream().filter(it->canAccessIssue(it.getSource())).collect(toList());
+					if (!sourceIssueLinks.isEmpty())
+						linkGroups.add(new LinkGroup(new LinkDescriptor(spec, true), sourceIssueLinks));
 				} else {
-					var issues = getIssue().findLinkedIssues(spec, false).stream().filter(it->canAccessIssue(it)).collect(Collectors.toList());
-					if (!issues.isEmpty())
-						linkGroups.add(new LinkGroup(new LinkDescriptor(spec, false), issues));
+					var issueLinks = getIssue().findIssueLinks(spec, false).stream().filter(it->canAccessIssue(it.getLinked(getIssue()))).collect(toList());
+					if (!issueLinks.isEmpty())
+						linkGroups.add(new LinkGroup(new LinkDescriptor(spec, false), issueLinks));
 				}
 			}
 			return linkGroups;
@@ -174,7 +198,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
 				var user = SecurityUtils.getUser();
-				OneDev.getInstance(IssueChangeService.class).changeDescription(user, getIssue(), comment);
+				issueChangeService.changeDescription(user, getIssue(), comment);
 				((BasePage)getPage()).notifyObservablesChange(target, getIssue().getChangeObservables(false));
 			}
 
@@ -235,7 +259,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 					
 					@Override
 					public void onToggleEmoji(AjaxRequestTarget target, String emoji) {
-						OneDev.getInstance(IssueReactionService.class).toggleEmoji(
+						issueReactionService.toggleEmoji(
 							SecurityUtils.getUser(), 
 							getIssue(), 
 							emoji);
@@ -345,14 +369,14 @@ public abstract class IssuePrimaryPanel extends Panel {
 				item.add(new Label("name", linkName));
 				
 				RepeatingView linkedIssuesView = new RepeatingView("linkedIssues");
-				for (Issue linkedIssue: group.getIssues()) {
+				for (IssueLink issueLink: group.getIssueLinks()) {
 					LinkDeleteListener deleteListener;
 					if (canEditIssueLink) { 
 						deleteListener = new LinkDeleteListener() {
 	
 							@Override
 							void onDelete(AjaxRequestTarget target, Issue linkedIssue) {
-								getIssueChangeService().removeLink(SecurityUtils.getUser(), getLinkSpecService().load(specId), getIssue(), 
+								issueChangeService.removeLink(SecurityUtils.getUser(), linkSpecService.load(specId), getIssue(), 
 										linkedIssue, opposite);
 								notifyIssueChange(target, getIssue());
 							}
@@ -362,9 +386,39 @@ public abstract class IssuePrimaryPanel extends Panel {
 						deleteListener = null;
 					}
 					linkedIssuesView.add(newLinkedIssueContainer(linkedIssuesView.newChildId(), 
-							linkedIssue, deleteListener));
+							issueLink, deleteListener));
 				}
 				item.add(linkedIssuesView);
+				
+				if (canEditIssueLink) {
+					item.add(new SortBehavior() {
+											
+						@Override
+						protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+							transactionService.run(() -> {
+								var fromIndex = from.getItemIndex();
+								var toIndex = to.getItemIndex();
+								List<IssueLink> issueLinks = new ArrayList<>();
+								for (var it = linkedIssuesView.iterator(); it.hasNext();) {
+									var issueLinkId = (Long) it.next().getDefaultModelObject();
+									issueLinks.add(issueLinkService.load(issueLinkId));
+								}
+								
+								if (fromIndex != toIndex && fromIndex < issueLinks.size() && toIndex < issueLinks.size()) {
+									var movedIssueLink = issueLinks.remove(fromIndex);
+									issueLinks.add(toIndex, movedIssueLink);
+								}
+								
+								int minPosition = issueLinks.stream().mapToInt(IssueLink::getPosition).min().getAsInt();
+								for (IssueLink issueLink : issueLinks) {
+									issueLink.setPosition(++minPosition);
+								}
+								notifyIssueChange(target, getIssue());
+							});
+						}
+						
+					}.sortable("ul"));
+				}
 
 				boolean applicable;
 				if (spec.getOpposite() != null) {
@@ -388,7 +442,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 	}
 
 	private void onLinkIssue(AjaxRequestTarget target, Long specId, boolean opposite, String linkName) {
-		var spec = getLinkSpecService().load(specId);
+		var spec = linkSpecService.load(specId);
 		if (!opposite && !spec.isMultiple() && getIssue().findLinkedIssue(spec, false) != null 
 				|| opposite && !spec.getOpposite().isMultiple() && getIssue().findLinkedIssue(spec, true) != null) {
 			Session.get().error(MessageFormat.format(_T("An issue already linked for {0}. Unlink it first"), spec.getName(opposite)));							
@@ -400,7 +454,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 						@Override
 						protected Criteria<Issue> getTemplate() {
 							String query;
-							var spec = getLinkSpecService().load(specId);
+							var spec = linkSpecService.load(specId);
 							if (opposite)
 								query = spec.getOpposite().getIssueQuery();
 							else
@@ -426,7 +480,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 						
 						@Override
 						protected IssueQuery getBaseQuery() {
-							LinkSpec spec = getLinkSpecService().load(specId);
+							LinkSpec spec = linkSpecService.load(specId);
 							if (opposite) 
 								return spec.getOpposite().getParsedIssueQuery(getProject());
 							else 
@@ -437,7 +491,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 				}
 
 				private FormComponent<?> newLinkExistingPanel(String componentId) {
-					LinkSpec spec = getLinkSpecService().load(specId);
+					LinkSpec spec = linkSpecService.load(specId);
 					if (!opposite && spec.isMultiple() || opposite && spec.getOpposite().isMultiple()) {
 						return new SelectIssuesPanel(componentId) {
 
@@ -533,7 +587,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 							if (convertedInput instanceof Issue) {
 								var linkIssue = (Issue) convertedInput;
 								if (linkIssue.isNew()) {
-									getIssueService().open(linkIssue);
+									issueService.open(linkIssue);
 									notifyIssueChange(target, linkIssue);
 									addLink(target, linkIssue);
 									close();
@@ -552,7 +606,7 @@ public abstract class IssuePrimaryPanel extends Panel {
 						}
 
 						private boolean checkLink(AjaxRequestTarget target, Issue linkIssue) {
-							LinkSpec spec = getLinkSpecService().load(specId);
+							LinkSpec spec = linkSpecService.load(specId);
 							if (getIssue().getId().equals(linkIssue.getId())) {
 								form.error(_T("Can not link to self: " + linkIssue.getReference().toString(getProject())));
 								target.add(form);
@@ -567,8 +621,8 @@ public abstract class IssuePrimaryPanel extends Panel {
 						}
 
 						private void addLink(AjaxRequestTarget target, Issue linkIssue) {
-							LinkSpec spec = getLinkSpecService().load(specId);
-							getIssueChangeService().addLink(SecurityUtils.getUser(), spec, getIssue(), linkIssue, opposite);
+							LinkSpec spec = linkSpecService.load(specId);
+							issueChangeService.addLink(SecurityUtils.getUser(), spec, getIssue(), linkIssue, opposite);
 							notifyIssueChange(target, getIssue());
 						}
 
@@ -611,57 +665,55 @@ public abstract class IssuePrimaryPanel extends Panel {
 		}
 	}
 	
-	private Component newLinkedIssueContainer(String componentId, Issue linkedIssue, 
+	private Component newLinkedIssueContainer(String componentId, IssueLink issueLink, 
 			@Nullable LinkDeleteListener deleteListener) {
-		if (canAccessIssue(linkedIssue)) {
-			Long linkedIssueId = linkedIssue.getId();
-			Fragment fragment = new Fragment(componentId, "linkedIssueFrag", this);
+		var linkedIssue = issueLink.getLinked(getIssue());
+		Fragment fragment = new Fragment(componentId, "linkedIssueFrag", this);
+		fragment.setDefaultModel(Model.of(issueLink.getId()));
+		fragment.add(new SpriteImage("dragIndicator", "grip").setVisible(deleteListener != null));
+		var link = new BookmarkablePageLink<Void>("title", IssueActivitiesPage.class, 
+				IssueActivitiesPage.paramsOf(linkedIssue));
+		link.add(new Label("label", linkedIssue.getTitle() + " (" + linkedIssue.getReference().toString(getProject()) + ")"));
+		fragment.add(link);
+		
+		var linkedIssueId = linkedIssue.getId();
+		fragment.add(new AjaxLink<Void>("unlink") {
 
-			var link = new BookmarkablePageLink<Void>("title", IssueActivitiesPage.class, 
-					IssueActivitiesPage.paramsOf(linkedIssue));
-			link.add(new Label("label", linkedIssue.getTitle() + " (" + linkedIssue.getReference().toString(getProject()) + ")"));
-			fragment.add(link);
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener(
+						_T("Do you really want to remove this link?")));
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				Issue linkedIssue = issueService.load(linkedIssueId);
+				deleteListener.onDelete(target, linkedIssue);
+				notifyIssueChange(target, getIssue());
+			}
 			
-			fragment.add(new AjaxLink<Void>("unlink") {
+		}.setVisible(deleteListener != null));
 
-				@Override
-				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-					super.updateAjaxAttributes(attributes);
-					attributes.getAjaxCallListeners().add(new ConfirmClickListener(
-							_T("Do you really want to remove this link?")));
-				}
+		AjaxLink<Void> stateLink = new TransitionMenuLink("state") {
 
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					Issue linkedIssue = getIssueService().load(linkedIssueId);
-					deleteListener.onDelete(target, linkedIssue);
-					notifyIssueChange(target, getIssue());
-				}
-				
-			}.setVisible(deleteListener != null));
+			@Override
+			protected Issue getIssue() {
+				return issueService.load(linkedIssueId);
+			}
 
-			AjaxLink<Void> stateLink = new TransitionMenuLink("state") {
+		};
 
-				@Override
-				protected Issue getIssue() {
-					return getIssueService().load(linkedIssueId);
-				}
-
-			};
-
-			stateLink.add(new IssueStateBadge("badge", new LoadableDetachableModel<>() {
-				@Override
-				protected Issue load() {
-					return getIssueService().load(linkedIssueId);
-				}
-			}, true).add(AttributeAppender.append("class", "badge-sm")));
-			
-			fragment.add(stateLink);
-			
-			return fragment;
-		} else {
-			return new WebMarkupContainer(componentId).setVisible(false);
-		}
+		stateLink.add(new IssueStateBadge("badge", new LoadableDetachableModel<>() {
+			@Override
+			protected Issue load() {
+				return issueService.load(linkedIssueId);
+			}
+		}, true).add(AttributeAppender.append("class", "badge-sm")));
+		
+		fragment.add(stateLink);
+		
+		return fragment;
 	}
 
 	private Project getProject() {
@@ -681,23 +733,11 @@ public abstract class IssuePrimaryPanel extends Panel {
 		linkGroupsModel.detach();
 		super.onDetach();
 	}
-
-	private LinkSpecService getLinkSpecService() {
-		return OneDev.getInstance(LinkSpecService.class);
-	}
-
-	private IssueService getIssueService() {
-		return OneDev.getInstance(IssueService.class);
-	}
-	
-	private IssueChangeService getIssueChangeService() {
-		return OneDev.getInstance(IssueChangeService.class);
-	}
 	
 	private void notifyIssueChange(IPartialPageRequestHandler handler, Issue issue) {
 		((BasePage)getPage()).notifyObservablesChange(handler, issue.getChangeObservables(true));
 	}
-
+		
     protected abstract Issue getIssue();
 
 	private static abstract class LinkDeleteListener implements Serializable {

@@ -1,5 +1,8 @@
 package io.onedev.server.model;
 
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -8,6 +11,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.ValidationException;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(
@@ -23,6 +28,8 @@ public class IssueLink extends AbstractEntity {
 	
 	public static final String PROP_SPEC = "spec";
 	
+	public static final String PROP_POSITION = "position";
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Issue source;
@@ -34,6 +41,10 @@ public class IssueLink extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private LinkSpec spec;
+	
+	@JsonProperty(access = READ_ONLY)
+	@Column(nullable=false)
+	private int position;
 	
 	public Issue getSource() {
 		return source;
@@ -61,6 +72,14 @@ public class IssueLink extends AbstractEntity {
 	
 	public Issue getLinked(Issue issue) {
 		return issue.equals(source)?target:source;
+	}
+
+	public int getPosition() {
+		return position;
+	}
+
+	public void setPosition(int position) {
+		this.position = position;
 	}
 
 	public void validate() {

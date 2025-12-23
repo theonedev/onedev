@@ -46,7 +46,7 @@ public class LinkSpecOpposite implements Serializable {
 
 	@Editable(order=300, name="Linkable Issues On the Other Side", placeholder="All issues", 
 			description="Optionally specify criteria of issues which can be linked on the other side")
-	@io.onedev.server.annotation.IssueQuery
+	@io.onedev.server.annotation.IssueQuery(withOrder = false)
 	public String getIssueQuery() {
 		return issueQuery;
 	}

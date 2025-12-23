@@ -21,6 +21,7 @@ import static io.onedev.server.model.IssueSchedule.NAME_ITERATION;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.toList;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -40,7 +41,6 @@ import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.mail.internet.InternetAddress;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -62,6 +62,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
+import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
@@ -74,11 +75,6 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.buildspecmodel.inputspec.Input;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.service.GroupService;
-import io.onedev.server.service.PullRequestService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UrlService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.model.support.EntityWatch;
@@ -89,9 +85,13 @@ import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.IssueSortField;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.GroupService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UrlService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.facade.IssueFacade;
@@ -871,6 +871,18 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 			return true;
 		}
 	}
+
+	public int getMaxLinkPosition(LinkSpec spec, boolean opposite) {
+		if (spec.getOpposite() != null) {
+			if (opposite) {
+				return getSourceLinks().stream().filter(it->it.getSpec().equals(spec)).mapToInt(IssueLink::getPosition).max().orElse(0);
+			} else {
+				return getTargetLinks().stream().filter(it->it.getSpec().equals(spec)).mapToInt(IssueLink::getPosition).max().orElse(0);
+			}
+		} else {
+			return getLinks().stream().filter(it->it.getSpec().equals(spec)).mapToInt(IssueLink::getPosition).max().orElse(0);
+		}
+	}
 	
 	public Collection<String> getFieldNames() {
 		return getFields().stream().map(IssueField::getName).collect(Collectors.toSet());
@@ -1216,7 +1228,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	}
 	
 	public Collection<Iteration> getIterations() {
-		return getSchedules().stream().map(it->it.getIteration()).collect(Collectors.toList());
+		return getSchedules().stream().map(it->it.getIteration()).collect(toList());
 	}
 	
 	@Nullable
@@ -1270,52 +1282,32 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	}
 	
 	public List<Issue> findLinkedIssues(LinkSpec spec, boolean opposite) {
-		class IssueComparator implements Comparator<Issue> {
+		return findIssueLinks(spec, opposite)
+				.stream()
+				.map(it->it.getLinked(this))
+				.collect(toList());
+	}
 
-			private final List<EntitySort> sorts;
-
-			IssueComparator(List<EntitySort> sorts) {
-				this.sorts = sorts;
-			}
-
-			@Override
-			public int compare(Issue o1, Issue o2) {
-				for (EntitySort sort : sorts) {
-					int result = SORT_FIELDS.get(sort.getField()).getComparator().compare(o1, o2);
-					if (sort.getDirection() == DESCENDING)
-						result *= -1;
-					if (result != 0)
-						return result;
-				}
-				return 0;
-			}
-		}
-
+	public List<IssueLink> findIssueLinks(LinkSpec spec, boolean opposite) {
 		if (spec.getOpposite() != null) {
 			if (opposite) {
 				return getSourceLinks().stream()
 						.filter(it->it.getSpec().equals(spec))
-						.sorted()
-						.map(it->it.getSource())
-						.sorted(new IssueComparator(spec.getOpposite().getParsedIssueQuery(getProject()).getSorts()))
-						.collect(Collectors.toList());
+						.sorted(comparingInt(IssueLink::getPosition))
+						.collect(toList());
 			} else {
 				return getTargetLinks().stream()
 						.filter(it->it.getSpec().equals(spec))
-						.sorted()
-						.map(it->it.getTarget())
-						.sorted(new IssueComparator(spec.getParsedIssueQuery(getProject()).getSorts()))
-						.collect(Collectors.toList());
+						.sorted(comparingInt(IssueLink::getPosition))
+						.collect(toList());
 			}
 		} else {
 			return getLinks().stream()
 					.filter(it->it.getSpec().equals(spec))
-					.sorted()
-					.map(it->it.getLinked(this))
-					.sorted(new IssueComparator(spec.getParsedIssueQuery(getProject()).getSorts()))
-					.collect(Collectors.toList());
+					.sorted(comparingInt(IssueLink::getPosition))
+					.collect(toList());
 		}
-	}
+	}	
 	
 	public static String getSerialLockName(Long issueId) {
 		return "issue-" + issueId + "-serial";
