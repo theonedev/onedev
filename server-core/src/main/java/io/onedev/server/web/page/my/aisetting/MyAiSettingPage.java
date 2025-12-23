@@ -30,6 +30,7 @@ public abstract class MyAiSettingPage extends MyPage {
 		List<PageTab> tabs = new ArrayList<>();
 		
 		tabs.add(new PageTab(Model.of(_T("Model")), null, MyModelSettingPage.class, new PageParameters()));		
+		tabs.add(new PageTab(Model.of(_T("System Prompt")), null, MySystemPromptPage.class, new PageParameters()));		
 		tabs.add(new PageTab(Model.of(_T("Entitlement")), null, MyEntitlementSettingPage.class, new PageParameters()));		
 
 		add(new Tabbable("aiSettingTabs", tabs));

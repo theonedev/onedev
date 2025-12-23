@@ -154,7 +154,9 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.page.my.accesstoken.MyAccessTokensPage;
+import io.onedev.server.web.page.my.aisetting.MyEntitlementSettingPage;
 import io.onedev.server.web.page.my.aisetting.MyModelSettingPage;
+import io.onedev.server.web.page.my.aisetting.MySystemPromptPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.basicsetting.MyBasicSettingPage;
 import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
@@ -1134,8 +1136,11 @@ public abstract class LayoutPage extends BasePage {
 
 		if (loginUser != null && loginUser.getType() == AI && !loginUser.isDisabled()) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("myAISetting", MyModelSettingPage.class));
-			if (getPage() instanceof MyModelSettingPage)
+			if (getPage() instanceof MyModelSettingPage 
+					|| getPage() instanceof MySystemPromptPage 
+					|| getPage() instanceof MyEntitlementSettingPage) {
 				item.add(AttributeAppender.append("class", "active"));
+			}
 		} else {
 			userInfo.add(new WebMarkupContainer("myAISetting").setVisible(false));
 		}

@@ -29,6 +29,7 @@ public abstract class UserAiSettingPage extends UserPage {
 		
 		var params = paramsOf(getUser());
 		tabs.add(new PageTab(Model.of(_T("Model")), null, UserModelSettingPage.class, params));		
+		tabs.add(new PageTab(Model.of(_T("System Prompt")), null, UserSystemPromptPage.class, params));		
 		tabs.add(new PageTab(Model.of(_T("Entitlement")), null, UserEntitlementSettingPage.class, params));		
 
 		add(new Tabbable("aiSettingTabs", tabs));

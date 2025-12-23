@@ -2,6 +2,8 @@ package io.onedev.server.model.support;
 
 import java.io.Serializable;
 
+import org.jspecify.annotations.Nullable;
+
 public class AiSetting implements Serializable {
     
     private static final long serialVersionUID = 1L;
@@ -9,6 +11,8 @@ public class AiSetting implements Serializable {
     private AiModelSetting modelSetting;
 
     private boolean entitleToAll = true;
+
+    private String systemPrompt;
 
     public AiModelSetting getModelSetting() {
         return modelSetting;
@@ -25,5 +29,14 @@ public class AiSetting implements Serializable {
     public void setEntitleToAll(boolean entitleToAll) {
         this.entitleToAll = entitleToAll;
     }
-    
+
+    @Nullable
+    public String getSystemPrompt() {
+        return systemPrompt;
+    }
+
+    public void setSystemPrompt(@Nullable String systemPrompt) {
+        this.systemPrompt = systemPrompt;
+    }
+
 }

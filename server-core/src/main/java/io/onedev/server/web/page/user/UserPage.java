@@ -32,7 +32,9 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.admin.usermanagement.UserListPage;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.user.accesstoken.UserAccessTokensPage;
+import io.onedev.server.web.page.user.aisetting.UserEntitlementSettingPage;
 import io.onedev.server.web.page.user.aisetting.UserModelSettingPage;
+import io.onedev.server.web.page.user.aisetting.UserSystemPromptPage;
 import io.onedev.server.web.page.user.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.user.avatar.UserAvatarPage;
 import io.onedev.server.web.page.user.basicsetting.UserBasicSettingPage;
@@ -93,8 +95,15 @@ public abstract class UserPage extends LayoutPage implements UserAware {
 		if (!getUser().isDisabled()) {
 			if (getUser().getType() == ORDINARY)
 				tabs.add(new PageTab(Model.of(_T("Password")), Model.of("password"), UserPasswordPage.class, params));			
-			if (getUser().getType() == AI)
-				tabs.add(new PageTab(Model.of(_T("AI Settings")), Model.of("ai-setting"), UserModelSettingPage.class, params));
+			if (getUser().getType() == AI) {
+				tabs.add(new PageTab(
+					Model.of(_T("AI Settings")), 
+					Model.of("ai-setting"), 
+					UserModelSettingPage.class, 
+					params, 
+					UserSystemPromptPage.class, 
+					UserEntitlementSettingPage.class));
+			}
 			tabs.add(new PageTab(Model.of(_T("Belonging Groups")), Model.of("group"), UserMembershipsPage.class, params));
 			tabs.add(new PageTab(Model.of(_T("Authorized Projects")), Model.of("project"), UserAuthorizationsPage.class, params));
 			if (OneDev.getInstance(ServerConfig.class).getSshPort() != 0)
