@@ -79,10 +79,10 @@ public abstract class SearchResultPanel extends Panel {
 		Map<String, MatchedBlob> hitsByBlob = new LinkedHashMap<>();
 
 		for (QueryHit hit: hits) {
-			MatchedBlob blob = hitsByBlob.get(hit.getBlobPath());
+			MatchedBlob blob = hitsByBlob.get(hit.getFilePath());
 			if (blob == null) {
-				blob = new MatchedBlob(hit.getBlobPath(), new ArrayList<QueryHit>());
-				hitsByBlob.put(hit.getBlobPath(), blob);
+				blob = new MatchedBlob(hit.getFilePath(), new ArrayList<QueryHit>());
+				hitsByBlob.put(hit.getFilePath(), blob);
 			}
 			if (!(hit instanceof FileHit)) {
 				blob.getHits().add(hit);
@@ -153,7 +153,7 @@ public abstract class SearchResultPanel extends Panel {
 		else 
 			hit = new FileHit(activeBlob.getBlobPath(), null);
 		
-		BlobIdent selected = new BlobIdent(context.getBlobIdent().revision, hit.getBlobPath(), 
+		BlobIdent selected = new BlobIdent(context.getBlobIdent().revision, hit.getFilePath(), 
 				FileMode.REGULAR_FILE.getBits());
 		context.onSelect(target, selected, BlobRenderer.getSourcePosition(hit.getHitPos()));
 	}
@@ -161,7 +161,7 @@ public abstract class SearchResultPanel extends Panel {
 	private String getActiveBlobPath(ActiveIndex activeIndex) {
 		MatchedBlob activeBlob = blobs.get(activeIndex.blob);
 		if (activeIndex.hit != -1)
-			return activeBlob.getHits().get(activeIndex.hit).getBlobPath();
+			return activeBlob.getHits().get(activeIndex.hit).getFilePath();
 		else
 			return activeBlob.getBlobPath();
 	}
@@ -542,7 +542,7 @@ public abstract class SearchResultPanel extends Panel {
 								if (activeBlobIndex == blobItem.getIndex() && activeHitIndex == hitItem.getIndex())
 									add(AttributeAppender.append("class", " active"));
 
-								BlobIdent blobIdent = new BlobIdent(context.getBlobIdent().revision, hit.getBlobPath(), 
+								BlobIdent blobIdent = new BlobIdent(context.getBlobIdent().revision, hit.getFilePath(), 
 										FileMode.REGULAR_FILE.getBits());
 								ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 								state.position = BlobRenderer.getSourcePosition(hit.getHitPos());

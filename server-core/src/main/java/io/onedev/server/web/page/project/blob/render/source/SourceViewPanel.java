@@ -75,7 +75,8 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
-import io.onedev.server.ai.HighlightedTextTool;
+import io.onedev.server.ai.ChatToolUtils;
+import io.onedev.server.ai.tools.GetHighlightedText;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
@@ -520,7 +521,9 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					range = getRange(params, "param1", "param2", "param3", "param4");					
 					context.onPosition(target, BlobRenderer.getSourcePosition(range));
 					var page = (LayoutPage) getPage();
-					page.getChatter().show(target, "Help me understand highlighted text. Display in " + getSession().getLocale().getDisplayLanguage());
+					page.getChatter().show(target, 
+						"Help me understand highlighted text. Display explanation in %s"
+						.formatted(getSession().getLocale().getDisplayLanguage()));
 					target.appendJavaScript(String.format("onedev.server.sourceView.mark(%s, false);", convertToJson(range)));
 					break;
 				case "addComment":
@@ -865,7 +868,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				BlobIdent blobIdent = new BlobIdent(
-						getRevision(), hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
+						getRevision(), hit.getFilePath(), FileMode.REGULAR_FILE.getBits());
 				context.onSelect(target, blobIdent, BlobRenderer.getSourcePosition(hit.getHitPos()));
 			}
 
@@ -1451,15 +1454,15 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					"fileName", context.getBlobIdent().getName(),
 					"fileContent", Joiner.on('\n').join(lines)
 				);
-				return completedFuture(new ChatToolExecution.Result(convertToJson(map), false));
+				return completedFuture(new ChatToolExecution.Result(ChatToolUtils.convertToJson(map), false));
 			}
 
 		});
 
 		var markRange = getMarkRange();
 		if (markRange != null) {
-			tools.add(new HighlightedTextTool(
-				context.getBlobIdent().getName(), 
+			tools.add(new GetHighlightedText(
+				context.getBlobIdent().path, 
 				context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines(), 
 				markRange));
 		}

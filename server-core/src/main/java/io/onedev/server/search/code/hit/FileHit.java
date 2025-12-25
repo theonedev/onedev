@@ -17,19 +17,19 @@ public class FileHit extends QueryHit {
 
 	private final LinearRange match;
 	
-	public FileHit(String blobPath, @Nullable LinearRange match) {
-		super(blobPath, null);
+	public FileHit(String filePath, @Nullable LinearRange match) {
+		super(filePath, null);
 		this.match = match;
 	}
 
 	@Override
 	public String toString() {
-		return getBlobPath();
+		return getFilePath();
 	}
 
 	@Override
 	public Component render(String componentId) {
-		String fileName = getBlobPath();
+		String fileName = getFilePath();
 		if (fileName.contains("/")) 
 			fileName = StringUtils.substringAfterLast(fileName, "/");
 		
@@ -43,8 +43,8 @@ public class FileHit extends QueryHit {
 
 	@Override
 	public String getNamespace() {
-		if (getBlobPath().contains("/")) 
-			return StringUtils.substringBeforeLast(getBlobPath(), "/");
+		if (getFilePath().contains("/")) 
+			return StringUtils.substringBeforeLast(getFilePath(), "/");
 		else 
 			return null;
 	}

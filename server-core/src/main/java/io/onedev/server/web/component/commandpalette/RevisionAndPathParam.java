@@ -37,7 +37,7 @@ public class RevisionAndPathParam extends ParamSegment {
 						.build();
 				try {
 					for (QueryHit hit: codeSearchService.search(project, commitId, query)) {
-						String revisionAndPath = project.getDefaultBranch() + "/" + hit.getBlobPath();
+						String revisionAndPath = project.getDefaultBranch() + "/" + hit.getFilePath();
 						suggestions.put(revisionAndPath, revisionAndPath);
 					}
 				} catch (TooGeneralQueryException e) {

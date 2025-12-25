@@ -16,8 +16,8 @@ public class TextHit extends QueryHit {
 	
 	private final String line;
 	
-	public TextHit(String blobPath, PlanarRange hitPos, String line) {
-		super(blobPath, hitPos);
+	public TextHit(String filePath, PlanarRange hitPos, String line) {
+		super(filePath, hitPos);
 		this.line = line;
 	}
 
@@ -42,7 +42,7 @@ public class TextHit extends QueryHit {
 
 	@Override
 	public String getNamespace() {
-		String fileName = getBlobPath();
+		String fileName = getFilePath();
 		if (fileName.contains("/")) 
 			fileName = StringUtils.substringAfterLast(fileName, "/");
 		return fileName;

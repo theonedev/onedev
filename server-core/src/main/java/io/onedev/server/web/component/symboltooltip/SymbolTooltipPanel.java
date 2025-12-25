@@ -33,7 +33,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
@@ -56,6 +55,8 @@ import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.SymbolQuery;
 import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.service.SettingService;
+import io.onedev.server.util.IgnoreLinearRangeMixin;
+import io.onedev.server.util.IgnorePlanarRangeMixin;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.CtrlClickBehavior;
 import io.onedev.server.web.behavior.RunTaskBehavior;
@@ -346,7 +347,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 
 						var occurrenceMap = Map.of(
 							"symbolName", symbolName,
-							"blobPath", symbolContext.getBlobPath(), 
+							"filePath", symbolContext.getBlobPath(), 
 							"symbolContext", Joiner.on('\n').join(symbolContext.getContextLines()), 
 							"note", String.format("Symbol is between %s and %s in the context", SYMBOL_BEGIN, SYMBOL_END)
 						);
@@ -409,7 +410,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	}
 	
 	public PageParameters getQueryHitParams(QueryHit hit) {
-		BlobIdent blobIdent = new BlobIdent(revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
+		BlobIdent blobIdent = new BlobIdent(revision, hit.getFilePath(), FileMode.REGULAR_FILE.getBits());
 		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 		state.position = BlobRenderer.getSourcePosition(hit.getHitPos());
 		return ProjectBlobPage.paramsOf(getProject(), state);
@@ -441,12 +442,4 @@ public abstract class SymbolTooltipPanel extends Panel {
 	protected abstract SymbolContext getSymbolContext(String symbolPosition, String symbolBeginMark, String symbolEndMark, 
 			String omittedLinesMark, int startContextSize, int beforeContextSize, int afterContextSize);
 
-}
-
-@JsonIgnoreType
-interface IgnorePlanarRangeMixin {
-}
-
-@JsonIgnoreType
-interface IgnoreLinearRangeMixin {
 }

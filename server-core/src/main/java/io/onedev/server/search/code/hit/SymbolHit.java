@@ -16,8 +16,8 @@ public class SymbolHit extends QueryHit {
 	
 	private final LinearRange match;
 	
-	public SymbolHit(String blobPath, Symbol symbol, @Nullable LinearRange match) {
-		super(blobPath, symbol.getPosition());
+	public SymbolHit(String filePath, Symbol symbol, @Nullable LinearRange match) {
+		super(filePath, symbol.getPosition());
 		this.symbol = symbol;
 		this.match = match;
 	}

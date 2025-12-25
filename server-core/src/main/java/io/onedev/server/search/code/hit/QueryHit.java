@@ -12,17 +12,17 @@ public abstract class QueryHit implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private final String blobPath;
+	private final String filePath;
 	
 	private final PlanarRange hitPos;
 	
-	public QueryHit(String blobPath, @Nullable PlanarRange hitPos) {
-		this.blobPath = blobPath;
+	public QueryHit(String filePath, @Nullable PlanarRange hitPos) {
+		this.filePath = filePath;
 		this.hitPos = hitPos;
 	}
 
-	public String getBlobPath() {
-		return blobPath;
+	public String getFilePath() {
+		return filePath;
 	}
 	
 	@Nullable

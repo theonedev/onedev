@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.project.blob;
 
 import static io.onedev.server.web.translation.Translation._T;
-import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.Serializable;
@@ -14,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
@@ -57,29 +55,29 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
-import dev.langchain4j.agent.tool.ToolSpecification;
-import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
+import io.onedev.server.ai.tools.GetFileContent;
+import io.onedev.server.ai.tools.GetFilesAndSubfolders;
+import io.onedev.server.ai.tools.GetRootFilesAndFolders;
+import io.onedev.server.ai.tools.QueryCodeSnippets;
+import io.onedev.server.ai.tools.QueryFilePaths;
+import io.onedev.server.ai.tools.QuerySymbolDefinitions;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.event.project.CommitIndexed;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.LfsObject;
 import io.onedev.server.git.LfsPointer;
@@ -139,7 +137,6 @@ import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 import io.onedev.server.web.upload.FileUpload;
 import io.onedev.server.web.util.EditParamsAware;
-import io.onedev.server.web.websocket.ChatToolExecution;
 
 public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, 
 		EditParamsAware, JobAuthorizationContextAware, ChatToolAware {
@@ -175,11 +172,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	private static final String BLOB_NAVIGATOR_ID = "blobNavigator";
 
 	private static final String BLOB_CONTENT_ID = "blobContent";
-	
+		
 	private static final Logger logger = LoggerFactory.getLogger(ProjectBlobPage.class);
-
-	@Inject
-	private ObjectMapper objectMapper;
 
 	@Inject
 	private GitService gitService;
@@ -711,7 +705,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
-				BlobIdent selected = new BlobIdent(state.blobIdent.revision, hit.getBlobPath(), 
+				BlobIdent selected = new BlobIdent(state.blobIdent.revision, hit.getFilePath(), 
 						FileMode.REGULAR_FILE.getBits()); 
 				ProjectBlobPage.this.onSelect(target, selected, BlobRenderer.getSourcePosition(hit.getHitPos()));
 				modal.close();
@@ -1682,101 +1676,88 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 					ProjectDashboardPage.paramsOf(project.getId()));
 		}
 	}
-
-	private String convertToJson(Map<String, Object> map) {
-		try {
-			return objectMapper.writeValueAsString(map);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private String getFilesAndFolders(@Nullable String path) {
-		var commitId = getCommit().copy();
-		if (path != null) {
-			var blobIdent = gitService.getBlobIdent(getProject(), commitId, path);
-			if (blobIdent == null) 
-				return convertToJson(Map.of("successful", false, "failReason", "Folder not found"));
-			if (!blobIdent.isTree())
-				return convertToJson(Map.of("successful", false, "failReason", "Not a folder"));
-			path = StringUtils.strip(path.replace('\\', '/'), "/");
-		}			
-		List<BlobIdent> children = gitService.getChildren(getProject(), commitId,
-			path, BlobIdentFilter.ALL, false);
-		var filesAndFolders = new ArrayList<Map<String, Object>>();
-		for (var child : children) {
-			var fileAndFolder = new HashMap<String, Object>();
-			fileAndFolder.put("name", child.getName());
-			fileAndFolder.put("type", child.isTree() ? "folder" : "file");
-			filesAndFolders.add(fileAndFolder);
-		}
-		return convertToJson(Map.of("successful", true, "filesAndFolders", filesAndFolders));
-	}
 	
 	@Override
 	public Collection<ChatTool> getChatTools() {
-		return List.of(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getRootFilesAndFolders")
-					.description("List files and folders under repository root in json format")
-					.build();
-			}
-
-			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
-				return completedFuture(new ChatToolExecution.Result(getFilesAndFolders(null), false));
-			}
-
-		}, new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getFilesAndSubfolders")
-					.description("List all files and subfolders under specified folder in json format")
-					.parameters(JsonObjectSchema.builder()
-						.addStringProperty("folderPath").description(_T("Folder path to list all files and subfolders"))
-						.required("folderPath").build())
-						.build();
-			}
-
-			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
-				return completedFuture(new ChatToolExecution.Result(getFilesAndFolders(arguments.get("folderPath").asText()), false));
-			}
-
-		}, new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getTextContent")
-					.description("Get text content of specified file in json format")
-					.parameters(JsonObjectSchema.builder()
-						.addStringProperty("filePath").description(_T("File path to get text content"))
-						.required("filePath").build())
-						.build();
+		var commitId = getCommit().copy();
+		return List.of(
+			new GetRootFilesAndFolders() {
+				
+				@Override
+				protected Project getProject() {
+					return ProjectBlobPage.this.getProject();
 				}
+				
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return commitId;
+				}
+
+			}, 
+			new GetFilesAndSubfolders() {
+				
+				@Override
+				protected Project getProject() {
+					return ProjectBlobPage.this.getProject();
+				}
+				
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return commitId;
+				}
+
+			}, 
+			new GetFileContent() {
 
 				@Override
-				public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
-					var filePath = arguments.get("filePath").asText();
-					filePath = StringUtils.strip(filePath.replace('\\', '/'), "/");
-					var blobIdent = gitService.getBlobIdent(getProject(), getCommit().copy(), filePath);
-					if (blobIdent == null) 
-						return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "File not found")), false));		
-					if (!blobIdent.isFile())
-						return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Not a file")), false));		
-
-					var blob = getProject().getBlob(blobIdent, true);
-					if (blob.getText() != null) 
-						return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", true, "textContent", blob.getText().getContent())), false));
-					else
-						return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Not a text file")), false));
+				protected Project getProject() {
+					return ProjectBlobPage.this.getProject();
 				}
+				
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return commitId;
+				}
+
+			}, 
+			new QuerySymbolDefinitions() {
+
+				@Override
+				protected Project getProject() {
+					return ProjectBlobPage.this.getProject();
+				}
+				
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return commitId;
+				}
+
+			},
+			new QueryCodeSnippets() {
+
+				@Override
+				protected Project getProject() {
+					return ProjectBlobPage.this.getProject();
+				}
+				
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return commitId;
+				}
+
+			},
+			new QueryFilePaths() {
+				
+				@Override
+				protected Project getProject() {
+					return ProjectBlobPage.this.getProject();
+				}
+				
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return commitId;
+				}
+
 			}
 		);
 	}

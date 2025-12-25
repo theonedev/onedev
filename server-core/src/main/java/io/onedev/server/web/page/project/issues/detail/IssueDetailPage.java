@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.issues.detail;
 
+import static io.onedev.server.ai.ChatToolUtils.convertToJson;
 import static io.onedev.server.web.translation.Translation._T;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
@@ -35,9 +36,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
@@ -88,9 +87,6 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 	private static final String KEY_SCROLL_TOP = "onedev.issue.scrollTop";
 
 	protected final IModel<Issue> issueModel;
-
-	@Inject
-	private ObjectMapper objectMapper;
 
 	@Inject
 	private IssueService issueService;
@@ -465,11 +461,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 			@Override
 			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
-				try {
-					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(IssueHelper.getDetail(getIssue().getProject(), getIssue())), false));
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
+				return completedFuture(new ChatToolExecution.Result(convertToJson(IssueHelper.getDetail(getIssue().getProject(), getIssue())), false));
 			}
 			
 		});
@@ -486,11 +478,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 			@Override
 			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {	
-				try {
-					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(IssueHelper.getComments(getIssue())), false));
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
+				return completedFuture(new ChatToolExecution.Result(convertToJson(IssueHelper.getComments(getIssue())), false));
 			}
 			
 		});

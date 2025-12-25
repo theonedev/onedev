@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import org.jspecify.annotations.Nullable;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.codec.binary.Hex;
@@ -62,6 +61,7 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -77,11 +77,18 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.ChatToolAware;
+import io.onedev.server.ai.tools.GetFileContent;
+import io.onedev.server.ai.tools.GetFilesAndSubfolders;
+import io.onedev.server.ai.tools.QueryCodeSnippets;
+import io.onedev.server.ai.tools.GetRootFilesAndFolders;
+import io.onedev.server.ai.tools.QueryFilePaths;
+import io.onedev.server.ai.tools.QuerySymbolDefinitions;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.BlobTarget;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.service.PendingSuggestionApplyService;
 import io.onedev.server.event.project.CommitIndexed;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobEdits;
@@ -101,6 +108,7 @@ import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.search.code.CodeIndexService;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.PendingSuggestionApplyService;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.PathComparator;
 import io.onedev.server.util.diff.WhitespaceOption;
@@ -141,7 +149,7 @@ import io.onedev.server.web.util.WicketUtils;
  * @author robin
  *
  */
-public abstract class RevisionDiffPanel extends Panel {
+public abstract class RevisionDiffPanel extends Panel implements ChatToolAware {
 
 	private static final String COOKIE_VIEW_MODE = "onedev.server.diff.viewmode";
 	
@@ -2376,7 +2384,7 @@ public abstract class RevisionDiffPanel extends Panel {
 							}
 						}
 						return newCoverages;
-								 }
+					}
 			
 					@Override
 					public DiffPlanarRange getCommentRange(CodeComment comment) {
@@ -2394,6 +2402,84 @@ public abstract class RevisionDiffPanel extends Panel {
 			}
 		}
 		return blobAnnotationSupport.orElse(null);
+	}
+	
+	private ObjectId getCommitId(boolean oldRevision) {
+		System.out.println("oldRevision: " + oldRevision);
+		return oldRevision ? getOldCommitId().copy() : getNewCommitId().copy();
+	}
+
+	@Override
+	public Collection<ChatTool> getChatTools() {
+		return List.of(
+			new GetRootFilesAndFolders() {
+				@Override
+				protected Project getProject() {
+					return RevisionDiffPanel.this.getProject();
+				}
+				
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return RevisionDiffPanel.this.getCommitId(oldRevision);
+				}
+			},
+			new GetFilesAndSubfolders() {
+				@Override
+				protected Project getProject() {
+					return RevisionDiffPanel.this.getProject();
+				}
+				
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return RevisionDiffPanel.this.getCommitId(oldRevision);
+				}
+			}, 
+			new GetFileContent() {
+				@Override
+				protected Project getProject() {
+					return RevisionDiffPanel.this.getProject();
+				}
+				
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return RevisionDiffPanel.this.getCommitId(oldRevision);
+				}
+			},
+			new QuerySymbolDefinitions() {
+				@Override
+				protected Project getProject() {
+					return RevisionDiffPanel.this.getProject();
+				}
+				
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return RevisionDiffPanel.this.getCommitId(oldRevision);
+				}
+			},
+			new QueryCodeSnippets() {
+
+				@Override
+				protected Project getProject() {
+					return RevisionDiffPanel.this.getProject();
+				}
+				
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return RevisionDiffPanel.this.getCommitId(oldRevision);
+				}
+			},
+			new QueryFilePaths() {
+				@Override
+				protected Project getProject() {
+					return RevisionDiffPanel.this.getProject();
+				}
+				
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return RevisionDiffPanel.this.getCommitId(oldRevision);
+				}
+			}
+		);
 	}
 	
 }

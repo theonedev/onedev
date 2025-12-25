@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.pullrequests.detail;
 
+import static io.onedev.server.ai.ChatToolUtils.convertToJson;
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
@@ -68,9 +69,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jetbrains.annotations.Nullable;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
@@ -195,9 +194,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	private Long latestUpdateId;
 
 	private MergeStrategy mergeStrategy;
-
-	@Inject
-	private ObjectMapper objectMapper;
 
 	@Inject
 	private PullRequestService pullRequestService;
@@ -2421,11 +2417,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {	
-				try {
-					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(PullRequestHelper.getDetail(getPullRequest().getProject(), getPullRequest())), false));
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
+				return completedFuture(new ChatToolExecution.Result(convertToJson(PullRequestHelper.getDetail(getPullRequest().getProject(), getPullRequest())), false));
 			}
 			
 		});
@@ -2442,11 +2434,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {			
-				try {
-					return completedFuture(new ChatToolExecution.Result(objectMapper.writeValueAsString(PullRequestHelper.getComments(getPullRequest())), false));
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException(e);
-				}
+				return completedFuture(new ChatToolExecution.Result(convertToJson(PullRequestHelper.getComments(getPullRequest())), false));
 			}
 			
 		});

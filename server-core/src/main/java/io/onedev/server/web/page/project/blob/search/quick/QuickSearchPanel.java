@@ -249,7 +249,7 @@ public abstract class QuickSearchPanel extends Panel {
 				link.add(new Label("scope", hit.getNamespace()).setVisible(hit.getNamespace()!=null));
 				item.add(link);
 
-				BlobIdent blobIdent = new BlobIdent(revisionModel.getObject(), hit.getBlobPath(), 
+				BlobIdent blobIdent = new BlobIdent(revisionModel.getObject(), hit.getFilePath(), 
 						FileMode.REGULAR_FILE.getBits());
 				ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 				state.position = BlobRenderer.getSourcePosition(hit.getHitPos());

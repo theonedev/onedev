@@ -45,7 +45,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
-import io.onedev.server.ai.HighlightedTextTool;
+import io.onedev.server.ai.tools.GetHighlightedText;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.BlameCommit;
@@ -1088,16 +1088,16 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		if (getAnnotationSupport() != null) {
 			var markRange = getAnnotationSupport().getMarkRange();
 			if (markRange != null) {
-				String fileName;
+				String filePath;
 				List<String> fileLines;
 				if (markRange.isLeftSide()) {
-					fileName = change.getOldBlobIdent().getName();
+					filePath = change.getOldBlobIdent().path;
 					fileLines = change.getOldText().getLines();
 				} else {
-					fileName = change.getNewBlobIdent().getName();
+					filePath = change.getNewBlobIdent().path;
 					fileLines = change.getNewText().getLines();
 				}
-				tools.add(new HighlightedTextTool(fileName, fileLines, markRange));				
+				tools.add(new GetHighlightedText(filePath, fileLines, markRange));				
 			}
 		}
 		return tools;
