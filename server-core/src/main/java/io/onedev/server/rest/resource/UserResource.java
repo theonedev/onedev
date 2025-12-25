@@ -42,10 +42,6 @@ import io.onedev.server.SubscriptionService;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.annotation.UserName;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AuditService;
-import io.onedev.server.service.EmailAddressService;
-import io.onedev.server.service.SshKeyService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.BuildQueryPersonalization;
 import io.onedev.server.model.CodeCommentQueryPersonalization;
@@ -69,6 +65,10 @@ import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.SshKeyService;
+import io.onedev.server.service.UserService;
 
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -334,9 +334,9 @@ public class UserResource {
 			throw new UnauthorizedException();
 
 		if (userService.findByName(data.getName()) != null)
-			throw new ExplicitException("Login name is already used by another user");
+			throw new NotAcceptableException("Login name is already used by another user");
 		if (data.getType() == ORDINARY && emailAddressService.findByValue(data.getEmailAddress()) != null)
-			throw new ExplicitException("Email address is already used by another user");
+			throw new NotAcceptableException("Email address is already used by another user");
 		
 		User user = new User();
 		user.setType(data.getType());
@@ -373,7 +373,7 @@ public class UserResource {
 			
 		User existingUser = userService.findByName(data.getName());
 		if (existingUser != null && !existingUser.equals(user))
-			throw new ExplicitException("Login name is already used by another user");
+			throw new NotAcceptableException("Login name is already used by another user");
 
 		var oldData = new UserUpdateData();
 		oldData.setName(user.getName());
