@@ -5,6 +5,7 @@ import static io.onedev.server.git.command.LogCommand.Field.PARENTS;
 import static io.onedev.server.git.command.LogCommand.Field.SUBJECT;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectStreamException;
@@ -26,7 +27,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -59,6 +59,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,8 +78,6 @@ import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.DefaultBranchChanged;
 import io.onedev.server.event.project.RefUpdated;
@@ -108,6 +107,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
 
 @Singleton
 public class DefaultGitService implements GitService, Serializable {
@@ -1311,6 +1312,17 @@ public class DefaultGitService implements GitService, Serializable {
 						diffEntry.getOldMode().getBits(), diffEntry.getNewMode().getBits()));
 			}
 			return diffEntries;
+		});
+	}
+
+	@Override
+	public String getPatch(Project project, AnyObjectId oldRevId, AnyObjectId newRevId) {
+		Long projectId = project.getId();
+		return runOnProjectServer(projectId, () -> {
+			var repository = getRepository(projectId);
+			var baos = new ByteArrayOutputStream();
+			GitUtils.diff(repository, oldRevId, newRevId, baos);
+			return baos.toString(StandardCharsets.UTF_8);
 		});
 	}
 	

@@ -19,7 +19,7 @@ public class ChatMessage extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;
 
-    private static final int MAX_CONTENT_LEN = 100000;
+    public static final int MAX_CONTENT_LEN = 100000;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

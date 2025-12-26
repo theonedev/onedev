@@ -3,6 +3,7 @@ package io.onedev.server.web.component.ai.chat;
 import static io.onedev.server.security.SecurityUtils.getUser;
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -350,8 +351,11 @@ public class ChatPanel extends Panel {
 			}
 
 			@Override
-			public void setObject(String object) {
-				WebSession.get().setChatInput(object);
+			public void setObject(String object) {		
+				if (object != null && object.length() > ChatMessage.MAX_CONTENT_LEN)		
+					getSession().error(MessageFormat.format(_T("Message is too long. Max {0} characters"), ChatMessage.MAX_CONTENT_LEN));
+				else
+					WebSession.get().setChatInput(object);
 			}
 
 		}).add(new OnTypingDoneBehavior() {

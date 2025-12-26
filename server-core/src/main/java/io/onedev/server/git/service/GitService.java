@@ -137,6 +137,8 @@ public interface GitService {
 	
 	List<DiffEntryFacade> diff(Project project, AnyObjectId oldRevId, AnyObjectId newRevId);
 
+	String getPatch(Project project, AnyObjectId oldRevId, AnyObjectId newRevId);
+
 	Map<ObjectId, AheadBehind> getAheadBehinds(Project project, ObjectId baseId, 
 			Collection<ObjectId> compareIds);
 	

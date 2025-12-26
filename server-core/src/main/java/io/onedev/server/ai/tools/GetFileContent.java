@@ -22,6 +22,8 @@ import io.onedev.server.web.websocket.ChatToolExecution;
 
 public abstract class GetFileContent implements ChatTool {
         
+    private static final int MAX_FILE_LENGTH = 500000;
+    
     @Override
     public ToolSpecification getSpecification() {
         return ToolSpecification.builder()
@@ -49,10 +51,15 @@ public abstract class GetFileContent implements ChatTool {
             return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Not a file")), false));		
 
         var blob = getProject().getBlob(blobIdent, true);
-        if (blob.getText() != null) 
-            return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", true, "fileContent", blob.getText().getContent())), false));
-        else
+        if (blob.getText() != null) {
+            var content = blob.getText().getContent();
+            if (content.length() > MAX_FILE_LENGTH)
+                return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "File is too large")), false));
+            else
+                return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", true, "fileContent", content)), false));
+        } else {
             return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Not a text file")), false));
+        }
     }
 
     protected abstract Project getProject();

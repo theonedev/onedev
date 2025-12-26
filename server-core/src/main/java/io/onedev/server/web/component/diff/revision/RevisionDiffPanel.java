@@ -1,6 +1,8 @@
 package io.onedev.server.web.component.diff.revision;
 
+import static io.onedev.server.ai.ChatToolUtils.convertToJson;
 import static io.onedev.server.web.translation.Translation._T;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.stream.Collectors.toList;
 
 import java.nio.charset.StandardCharsets;
@@ -17,7 +19,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
+import javax.inject.Inject;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.codec.binary.Hex;
@@ -29,6 +33,7 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.nested.BranchItem;
@@ -63,11 +68,13 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dev.langchain4j.agent.tool.ToolSpecification;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExceptionUtils;
@@ -76,13 +83,12 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
-import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.tools.GetFileContent;
 import io.onedev.server.ai.tools.GetFilesAndSubfolders;
-import io.onedev.server.ai.tools.QueryCodeSnippets;
 import io.onedev.server.ai.tools.GetRootFilesAndFolders;
+import io.onedev.server.ai.tools.QueryCodeSnippets;
 import io.onedev.server.ai.tools.QueryFilePaths;
 import io.onedev.server.ai.tools.QuerySymbolDefinitions;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
@@ -142,6 +148,7 @@ import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.web.websocket.ChatToolExecution.Result;
 
 /**
  * Make sure to add only one revision diff panel on a page
@@ -159,6 +166,17 @@ public abstract class RevisionDiffPanel extends Panel implements ChatToolAware {
 	
 	private static final String COOKIE_NAVIGATION_WIDTH = "revisionDiff.navigation.width";
 	
+	private static final int MAX_PATCH_SIZE = 1024 * 1024;
+
+	@Inject
+	private PendingSuggestionApplyService pendingSuggestionApplyService;
+
+	@Inject
+	private CodeIndexService codeIndexService;
+
+	@Inject
+	private GitService gitService;
+
 	private final String oldRev;
 	
 	private final String newRev;
@@ -177,7 +195,7 @@ public abstract class RevisionDiffPanel extends Panel implements ChatToolAware {
 		protected List<DiffEntryFacade> load() {
 			AnyObjectId oldRevId = getProject().getObjectId(oldRev, true);
 			AnyObjectId newRevId = getProject().getObjectId(newRev, true);
-			return getGitService().diff(getProject(), oldRevId, newRevId);
+			return gitService.diff(getProject(), oldRevId, newRevId);
 		}
 
 	};
@@ -308,8 +326,7 @@ public abstract class RevisionDiffPanel extends Panel implements ChatToolAware {
 
 				@Override
 				protected List<PendingSuggestionApply> load() {
-					return OneDev.getInstance(PendingSuggestionApplyService.class)
-							.query(SecurityUtils.getAuthUser(), getPullRequest());
+					return pendingSuggestionApplyService.query(SecurityUtils.getAuthUser(), getPullRequest());
 				}
 
 			};
@@ -410,20 +427,19 @@ public abstract class RevisionDiffPanel extends Panel implements ChatToolAware {
 			protected void onConfigure() {
 				super.onConfigure();
 
-				CodeIndexService indexService = OneDev.getInstance(CodeIndexService.class);
 				ObjectId oldCommit = getOldCommitId();
 				ObjectId newCommit = getNewCommitId();
 				boolean oldCommitIndexed = oldCommit.equals(ObjectId.zeroId()) 
-						|| indexService.isIndexed(getProject().getId(), oldCommit);
+						|| codeIndexService.isIndexed(getProject().getId(), oldCommit);
 				boolean newCommitIndexed = newCommit.equals(ObjectId.zeroId()) 
-						|| indexService.isIndexed(getProject().getId(), newCommit);
+						|| codeIndexService.isIndexed(getProject().getId(), newCommit);
 				if (oldCommitIndexed && newCommitIndexed) {
 					setVisible(false);
 				} else {
 					if (!oldCommitIndexed)
-						indexService.indexAsync(getProject().getId(), oldCommit);
+						codeIndexService.indexAsync(getProject().getId(), oldCommit);
 					if (!newCommitIndexed)
-						indexService.indexAsync(getProject().getId(), newCommit);
+						codeIndexService.indexAsync(getProject().getId(), newCommit);
 					setVisible(true);
 				}
 			}
@@ -487,8 +503,7 @@ public abstract class RevisionDiffPanel extends Panel implements ChatToolAware {
 												PullRequest request = getPullRequest();
 												ObjectId commitId = request.getLatestUpdate().getHeadCommit().copy();
 												try {
-													ObjectId newCommitId = OneDev.getInstance(PendingSuggestionApplyService.class)
-															.apply(SecurityUtils.getAuthUser(), request, commitMessage);
+													ObjectId newCommitId = pendingSuggestionApplyService.apply(SecurityUtils.getAuthUser(), request, commitMessage);
 													
 													PullRequestChangesPage.State state = new PullRequestChangesPage.State();
 													state.oldCommitHash = commitId.name();
@@ -540,8 +555,7 @@ public abstract class RevisionDiffPanel extends Panel implements ChatToolAware {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										OneDev.getInstance(PendingSuggestionApplyService.class)
-												.discard(SecurityUtils.getAuthUser(), getPullRequest());
+										pendingSuggestionApplyService.discard(SecurityUtils.getAuthUser(), getPullRequest());
 										target.add(commentContainer);
 										target.add(RevisionDiffPanel.this.get("operations"));
 										dropdown.close();
@@ -1382,11 +1396,7 @@ public abstract class RevisionDiffPanel extends Panel implements ChatToolAware {
 			return null;
 		}
 	}
-	
-	private GitService getGitService() {
-		return OneDev.getInstance(GitService.class);
-	}
-	
+		
 	private WebMarkupContainer newNavigationContainer() {
 		WebMarkupContainer navigationContainer = new WebMarkupContainer("navigation") {
 
@@ -1917,7 +1927,7 @@ public abstract class RevisionDiffPanel extends Panel implements ChatToolAware {
 											pendingApply.setRequest(getPullRequest());
 											pendingApply.setUser(SecurityUtils.getAuthUser());
 											pendingApply.setSuggestion(new ArrayList<String>(suggestion));
-											OneDev.getInstance(PendingSuggestionApplyService.class).create(pendingApply);
+											pendingSuggestionApplyService.create(pendingApply);
 											onBatchChange(target);
 										}
 
@@ -1930,7 +1940,7 @@ public abstract class RevisionDiffPanel extends Panel implements ChatToolAware {
 														&& pendingApply.getUser().equals(SecurityUtils.getAuthUser())
 														&& pendingApply.getComment().equals(annotationSupport.getOpenComment())) {
 													it.remove();
-													OneDev.getInstance(PendingSuggestionApplyService.class).delete(pendingApply);
+													pendingSuggestionApplyService.delete(pendingApply);
 													break;
 												}
 											}
@@ -2477,6 +2487,27 @@ public abstract class RevisionDiffPanel extends Panel implements ChatToolAware {
 				@Override
 				protected ObjectId getCommitId(boolean oldRevision) {
 					return RevisionDiffPanel.this.getCommitId(oldRevision);
+				}
+			}, 
+			new ChatTool() {
+
+				@Override
+				public ToolSpecification getSpecification() {
+					return ToolSpecification.builder()
+						.name("getDiff")
+						.description("Get diff of old revision and new revision in json format")
+						.build();
+				}
+
+				@Override
+				public CompletableFuture<Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+					var oldCommitId = getOldCommitId().copy();
+					var newCommitId = getNewCommitId().copy();
+					var patch = gitService.getPatch(getProject(), oldCommitId, newCommitId);
+					if (patch.length() > MAX_PATCH_SIZE)
+						return completedFuture(new Result(convertToJson(Map.of("successful", false, "failReason", "Patch is too large")), false));
+					else
+						return completedFuture(new Result(convertToJson(Map.of("successful", true, "patch", patch)), false));
 				}
 			}
 		);
