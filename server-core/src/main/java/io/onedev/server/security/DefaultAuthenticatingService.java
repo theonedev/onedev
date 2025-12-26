@@ -4,6 +4,8 @@ import static io.onedev.server.model.User.Type.ORDINARY;
 import static io.onedev.server.validation.validator.UserNameValidator.normalizeUserName;
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.HashSet;
 
@@ -23,6 +25,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
@@ -36,7 +39,7 @@ import io.onedev.server.service.SshKeyService;
 import io.onedev.server.service.UserService;
 
 @Singleton
-public class DefaultAuthenticatingService extends AuthenticatingRealm implements AuthenticatingService {
+public class DefaultAuthenticatingService extends AuthenticatingRealm implements AuthenticatingService, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultAuthenticatingService.class);
 	
@@ -204,4 +207,9 @@ public class DefaultAuthenticatingService extends AuthenticatingRealm implements
 			}
 		});
 	}
+
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(AuthenticatingService.class);
+	}
+
 }

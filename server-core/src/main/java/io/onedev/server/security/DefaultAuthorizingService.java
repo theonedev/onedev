@@ -2,6 +2,8 @@ package io.onedev.server.security;
 
 import static io.onedev.server.security.SecurityUtils.getUser;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.Project;
@@ -38,7 +41,7 @@ import io.onedev.server.util.Pair;
 import io.onedev.server.util.facade.UserFacade;
 
 @Singleton
-public class DefaultAuthorizingService extends AuthorizingRealm implements AuthorizingService {
+public class DefaultAuthorizingService extends AuthorizingRealm implements AuthorizingService, Serializable {
     
     @Inject
     private SessionService sessionService;
@@ -172,4 +175,8 @@ public class DefaultAuthorizingService extends AuthorizingRealm implements Autho
 		throw new UnsupportedOperationException();
 	}
 	
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(AuthorizingService.class);
+	}
+
 }

@@ -40,7 +40,7 @@ import io.onedev.server.model.SsoProvider;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.persistence.TransactionService;
-import io.onedev.server.security.DefaultAuthenticatingService;
+import io.onedev.server.security.AuthenticatingService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.EmailAddressService;
 import io.onedev.server.service.MembershipService;
@@ -93,7 +93,7 @@ public class SsoProcessPage extends SimplePage {
 	private SshKeyService sshKeyService;
 
 	@Inject
-	private DefaultAuthenticatingService authenticatingService;
+	private AuthenticatingService authenticatingService;
 
 	@Inject
 	private TransactionService transactionService;
