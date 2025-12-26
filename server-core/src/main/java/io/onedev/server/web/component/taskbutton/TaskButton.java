@@ -38,7 +38,7 @@ import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
 public abstract class TaskButton extends AjaxButton {
 
 	@Inject
-	private TaskFutureManager taskFutureManager;
+	private TaskFutureService taskFutureService;
 
 	@Inject
 	private ExecutorService executorService;
@@ -132,7 +132,7 @@ public abstract class TaskButton extends AjaxButton {
 		messages.add(new JobLogEntryEx(new JobLogEntry(new Date(), _T("Please wait..."))));
 		var application = Application.get();
 		var requestCycle = RequestCycle.get();
-		TaskFuture prevFuture = taskFutureManager.getTaskFutures().put(taskId, new TaskFuture(executorService.submit(new Callable<TaskResult>() {
+		TaskFuture prevFuture = taskFutureService.getTaskFutures().put(taskId, new TaskFuture(executorService.submit(new Callable<TaskResult>() {
 
 			@Override
 			public TaskResult call() throws Exception {
@@ -194,7 +194,7 @@ public abstract class TaskButton extends AjaxButton {
 			@Override
 			protected void onClosed() {
 				super.onClosed();
-				TaskFuture future = taskFutureManager.getTaskFutures().remove(taskId);
+				TaskFuture future = taskFutureService.getTaskFutures().remove(taskId);
 				
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 				if (future != null) {
@@ -216,7 +216,7 @@ public abstract class TaskButton extends AjaxButton {
 
 					@Override
 					protected List<JobLogEntryEx> getLogEntries() {
-						TaskFuture future = taskFutureManager.getTaskFutures().get(taskId);
+						TaskFuture future = taskFutureService.getTaskFutures().get(taskId);
 						if (future != null) 
 							return future.getLogEntries();
 						else
@@ -225,7 +225,7 @@ public abstract class TaskButton extends AjaxButton {
 
 					@Override
 					protected TaskResult getResult() {
-						TaskFuture future = taskFutureManager.getTaskFutures().get(taskId);
+						TaskFuture future = taskFutureService.getTaskFutures().get(taskId);
 						if (future != null && future.isDone() && !future.isCancelled()) { 
 							try {
 								result = future.get();

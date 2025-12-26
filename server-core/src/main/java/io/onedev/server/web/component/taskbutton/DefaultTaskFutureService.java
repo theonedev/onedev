@@ -17,7 +17,7 @@ import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 
 @Singleton
-public class TaskFutureManager implements SchedulableTask {
+public class DefaultTaskFutureService implements SchedulableTask, TaskFutureService {
 
 	private final Map<String, TaskFuture> taskFutures = new ConcurrentHashMap<>();
 
@@ -37,6 +37,7 @@ public class TaskFutureManager implements SchedulableTask {
 			taskScheduler.unschedule(cleanupTaskId);
 	}
 
+	@Override
     public Map<String, TaskFuture> getTaskFutures() {
         return taskFutures;
     }
