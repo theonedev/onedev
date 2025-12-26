@@ -41,8 +41,6 @@ public abstract class GetFileContent implements ChatTool {
         var filePath = arguments.get("filePath").asText();
         var oldRevision = arguments.get("oldRevision") != null ? arguments.get("oldRevision").asBoolean() : false;
 
-        System.out.println("Get file content (file path: " + filePath + ")");
-
         filePath = StringUtils.strip(filePath.replace('\\', '/'), "/");
         var blobIdent = OneDev.getInstance(GitService.class).getBlobIdent(getProject(), getCommitId(oldRevision), filePath);
         if (blobIdent == null) 

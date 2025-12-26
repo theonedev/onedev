@@ -91,7 +91,7 @@ public class PullRequestUpdate extends AbstractEntity {
 			ObjectId comparisonBaseCommitId = getPullRequestService().getComparisonBase(
 					getRequest(), ObjectId.fromString(getBaseCommitHash()), headCommitId);
 			changedFiles = getGitService().getChangedFiles(
-					getRequest().getWorkProject(), headCommitId, comparisonBaseCommitId, null);
+					getRequest().getTargetProject(), headCommitId, comparisonBaseCommitId, null);
 		}
 		return changedFiles;
 	}
@@ -107,7 +107,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	public RevCommit getHeadCommit() {
-		return request.getWorkProject().getRevCommit(ObjectId.fromString(getHeadCommitHash()), true);
+		return request.getTargetProject().getRevCommit(ObjectId.fromString(getHeadCommitHash()), true);
 	}
 	
 	public List<RevCommit> getCommits() {
@@ -116,11 +116,11 @@ public class PullRequestUpdate extends AbstractEntity {
 					ObjectId.fromString(getBaseCommitHash()), 
 					ObjectId.fromString(getTargetHeadCommitHash()));
 			commits = getGitService().getReachableCommits(
-					getRequest().getWorkProject(), 
+					getRequest().getTargetProject(), 
 					Lists.newArrayList(ObjectId.fromString(getHeadCommitHash())), 
 					uninterestingCommitIds);
 			if (commits.isEmpty()) // in case source branch reverted to a previous update
-				commits.add(getGitService().getCommit(getRequest().getWorkProject(), ObjectId.fromString(getHeadCommitHash())));
+				commits.add(getGitService().getCommit(getRequest().getTargetProject(), ObjectId.fromString(getHeadCommitHash())));
 			Collections.reverse(commits);
 		}
 		return commits;

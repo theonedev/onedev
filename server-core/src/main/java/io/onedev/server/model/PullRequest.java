@@ -559,14 +559,7 @@ public class PullRequest extends ProjectBelonging
 	public String getSourceRef() {
 		return GitUtils.branch2ref(getSourceBranch());
 	}
-	
-	public Project getWorkProject() {
-		if (isNew()) 
-			return getSourceProject();
-		else
-			return getTargetProject();
-	}
-	
+		
 	public String getBaseCommitHash() {
 		return baseCommitHash;
 	}
