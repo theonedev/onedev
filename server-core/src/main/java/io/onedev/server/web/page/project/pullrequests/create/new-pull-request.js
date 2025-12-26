@@ -76,7 +76,7 @@ onedev.server.newPullRequest = {
 
         if (description) {
             $descriptionInput.val(description);
-            $descriptionInput.trigger("input");
+            $descriptionInput.trigger("preview");
         }
     }
 

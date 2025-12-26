@@ -125,10 +125,16 @@ onedev.server = {
 				$container = $(document);
 			var selector = "form.leave-confirm.dirty";
 			var $dirtyForms = $container.find(selector).addBack(selector);
-			if ($dirtyForms.length != 0) 
-				return confirm("There are unsaved changes, do you want to discard and continue?");
-			else 
+			if ($dirtyForms.length != 0) {
+				if (confirm("There are unsaved changes, do you want to discard and continue?")) {
+					onedev.server.form.markClean($dirtyForms);
+					return true;
+				} else {
+					return false;
+				}
+			} else {
 				return true;
+			}
 		}
 	},
 	isDarkMode: function() {

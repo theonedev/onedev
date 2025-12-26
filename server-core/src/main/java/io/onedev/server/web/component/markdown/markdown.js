@@ -163,30 +163,31 @@ onedev.server.markdown = {
 		
 		onedev.server.markdown.setupActionMenu($container, $head.find(".normal-mode"));
 
+		function preview() {			
+			/* 
+			 * in case an ajax call is ongoing we postpone the render 
+			 * as the ongoing call may alter the component layout
+			 */
+			if (onedev.server.ajaxRequests.count != 0) {  
+				setTimeout(preview, 10);
+			} else if ($preview.is(":visible")) {
+				callback("render", $input.val());
+			}
+		}
+
 		var previewTimeout = 500;
 		$input.doneEvents("input inserted.atwho", function() {
-			function render() {
-				if (autosaveKey) {
-					var content = $input.val();
-					if (content.trim().length != 0)
-						localStorage.setItem(autosaveKey, content);
-					else
-						localStorage.removeItem(autosaveKey);
-				}
-				
-				/* 
-				 * in case an ajax call is ongoing we postpone the render 
-				 * as the ongoing call may alter the component layout
-				 */
-				if (onedev.server.ajaxRequests.count != 0) {  
-					setTimeout(render, 10);
-				} else if ($preview.is(":visible")) {
-					callback("render", $input.val());
-				}
+			if (autosaveKey) {
+				var content = $input.val();
+				if (content.trim().length != 0)
+					localStorage.setItem(autosaveKey, content);
+				else
+					localStorage.removeItem(autosaveKey);
 			}
-
-			render();
+			preview();
 		}, previewTimeout);
+
+		$input.on("preview", preview);
 		
 		$input.doneEvents("keydown", function(e) {
 			if (e.keyCode>=33 && e.keyCode<=40 && $preview.is(":visible") 
@@ -954,7 +955,13 @@ onedev.server.markdown = {
 		var $edit = $body.children(".edit");
 		var $preview = $body.children(".preview");
 		var $input = $edit.children("textarea");
-
+		$warning.find(".clear-unsaved-change").click(function() {
+			$warning.hide();
+			$input.val("");
+			$preview.children(".markdown-rendered").html("");
+			localStorage.removeItem(autosaveKey);
+			onedev.server.form.markClean($input.closest("form"));
+		});
 		if ($body.find(".ui-resizable-handle:visible").length != 0) {
 			var defaultHeight = 200;
 			if ($container.hasClass("normal-mode")) {
