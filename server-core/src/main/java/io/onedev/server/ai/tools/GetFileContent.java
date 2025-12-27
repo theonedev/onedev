@@ -33,11 +33,13 @@ public abstract class GetFileContent implements ChatTool {
                 .addStringProperty("filePath").description("Text file path to get content")
                 .addBooleanProperty("oldRevision").description("Optionally specify whether to get file content in old revision in a diff context")
                 .required("filePath").build())
-                .build();
+            .build();
     }
 
     @Override
     public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+        if (arguments.get("filePath") == null)
+            return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Argument 'filePath' is required")), false));
         var filePath = arguments.get("filePath").asText();
         var oldRevision = arguments.get("oldRevision") != null ? arguments.get("oldRevision").asBoolean() : false;
 

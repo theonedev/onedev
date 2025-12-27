@@ -1,11 +1,13 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
+import static io.onedev.server.ai.ChatToolUtils.convertToJson;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -199,23 +201,27 @@ public class BuildSpecBlobEditPanel extends BlobEditPanel implements PlainEditSu
 				@Override
 				public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
 					if (getCurrentTab() != Tab.SAVE) {
+						if (arguments.get("buildSpec") == null)
+							return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Argument 'buildSpec' is required")), false));
 						var buildSpecString = arguments.get("buildSpec").asText();
 						BuildSpec buildSpec;
 						try {
 							buildSpec = BuildSpec.parse(buildSpecString.getBytes(StandardCharsets.UTF_8));
 						} catch (Throwable t) {					
-							return completedFuture(new ChatToolExecution.Result("Malformed CI/CD spec, please fix and save again", false));
+							return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Malformed CI/CD spec, please fix and save again")), false));
 						}
+
 						var violations = validator.validate(buildSpec);
-						String result;
+						Map<String, Object> resultData;
 						if (!violations.isEmpty()) {
-							result = "Failed to validate CI/CD spec, please fix errors below and save again:\n\n" + 
+							var errorMessage = "Failed to validate CI/CD spec, please fix errors below and save again:\n\n" + 
 									Joiner.on("\n").join(violations.stream().map(it -> String.format("\t-> Location: %s, Error: %s", it.getPropertyPath(), it.getMessage())).collect(Collectors.toList()));
+							resultData = Map.of( "successful", false, "failReason", errorMessage);
 						} else {
 							updateEditingContent(handler, buildSpecString.getBytes(StandardCharsets.UTF_8));
-							result = "CI/CD spec saved successfully";
+							resultData = Map.of("successful", true);
 						}
-						return completedFuture(new ChatToolExecution.Result(result, false));
+						return completedFuture(new ChatToolExecution.Result(convertToJson(resultData), false));
 					} else {
 						throw new ExplicitException("CI/CD spec is not being edited currently");
 					}

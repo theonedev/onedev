@@ -40,6 +40,7 @@
 }
 .chat>.body>.send textarea {
 	max-height: 160px;
+	padding-right: 36px;
 }
 .chat>.body>.send a {
 	border-radius: 50px;

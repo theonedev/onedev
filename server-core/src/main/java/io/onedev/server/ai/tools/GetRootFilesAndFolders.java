@@ -25,7 +25,7 @@ public abstract class GetRootFilesAndFolders implements ChatTool {
             .description("List files and folders under repository root in json format")
             .parameters(JsonObjectSchema.builder()
                 .addBooleanProperty("oldRevision").description("Optionally specify whether to list root files and folders in old revision in a diff context")
-                .required("oldRevision").build())
+                .build())
             .build();
     }
 

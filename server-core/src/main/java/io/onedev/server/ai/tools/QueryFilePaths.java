@@ -40,15 +40,22 @@ public abstract class QueryFilePaths implements ChatTool {
                 .addBooleanProperty("caseSensitive").description("Whether to match file names case-sensitively")
                 .addBooleanProperty("oldRevision").description("Optionally specify whether to query file paths in old revision in a diff context")
                 .addIntegerProperty("currentPage").description("Current page for the query. First page is 1")
-                .required("fileNamePattern", "currentPage").build())
-                .build();
+                .required("fileNamePattern", "caseSensitive", "currentPage")
+                .build())
+            .build();
     }
 
     @Override
     public CompletableFuture<Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+        if (arguments.get("fileNamePattern") == null)
+            return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Argument 'fileNamePattern' is required")), false));
         var fileNamePattern = arguments.get("fileNamePattern").asText();
+        if (arguments.get("caseSensitive") == null)
+            return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Argument 'caseSensitive' is required")), false));
         var caseSensitive = arguments.get("caseSensitive").asBoolean();
         var oldRevision = arguments.get("oldRevision") != null ? arguments.get("oldRevision").asBoolean() : false;
+        if (arguments.get("currentPage") == null)
+            return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Argument 'currentPage' is required")), false));
         var currentPage = arguments.get("currentPage").asInt();
 
         try {

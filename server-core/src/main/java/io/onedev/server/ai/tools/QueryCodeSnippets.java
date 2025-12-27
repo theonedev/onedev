@@ -1,5 +1,6 @@
 package io.onedev.server.ai.tools;
 
+import static io.onedev.server.ai.ChatToolUtils.convertToJson;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
-import io.onedev.server.ai.ChatToolUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.code.CodeSearchService;
@@ -50,16 +50,22 @@ public abstract class QueryCodeSnippets implements ChatTool {
                 .addBooleanProperty("caseSensitive").description("Whether to match code snippets case-sensitively")
                 .addBooleanProperty("oldRevision").description("Optionally specify whether to query code snippets in old revision in a diff context")
                 .addIntegerProperty("currentPage").description("Current page for the query. First page is 1")
-                .required("regularExpression", "currentPage").build())
-                .build();
+                .required("regularExpression", "caseSensitive", "currentPage")
+                .build())
+            .build();
     }
 
     @Override
-    public CompletableFuture<Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {        
+    public CompletableFuture<Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {      
+        if (arguments.get("regularExpression") == null)
+            return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Argument 'regularExpression' is required")), false));
         var regularExpression = arguments.get("regularExpression").asText();
-        regularExpression = "*";
+        if (arguments.get("caseSensitive") == null)
+            return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Argument 'caseSensitive' is required")), false));
         var caseSensitive = arguments.get("caseSensitive").asBoolean();
         var oldRevision = arguments.get("oldRevision") != null ? arguments.get("oldRevision").asBoolean() : false;
+        if (arguments.get("currentPage") == null)
+            return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Argument 'currentPage' is required")), false));
         var currentPage = arguments.get("currentPage").asInt();					
 
         var project = getProject();
@@ -92,13 +98,13 @@ public abstract class QueryCodeSnippets implements ChatTool {
                 "successful", true,
                 "codeSnippets", codeSnippets, 
                 "hasMorePages", textHits.size() > toIndex);
-            return completedFuture(new ChatToolExecution.Result(ChatToolUtils.convertToJson(resultData), false));	
+            return completedFuture(new ChatToolExecution.Result(convertToJson(resultData), false));	
         } catch (RuntimeException e) {
             if (ExceptionUtils.find(e, TooGeneralQueryException.class) != null) {
                 var resultData = Map.of(
                     "successful", false, 
                     "failReason", "Regular expression is too short or too general, try a more specific one");
-                return completedFuture(new ChatToolExecution.Result(ChatToolUtils.convertToJson(resultData), false));
+                return completedFuture(new ChatToolExecution.Result(convertToJson(resultData), false));
             } else {
                 throw e;
             }

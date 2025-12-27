@@ -1,5 +1,6 @@
 package io.onedev.server.ai.tools;
 
+import static io.onedev.server.ai.ChatToolUtils.convertToJson;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
 import java.util.Map;
@@ -14,7 +15,6 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
-import io.onedev.server.ai.ChatToolUtils;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.code.CodeSearchService;
@@ -39,16 +39,23 @@ public abstract class QuerySymbolDefinitions implements ChatTool {
                 .addStringProperty("fileNamePatterns").description("Optionally specify file name patterns to query definitions in. Pattern supports wildcards * and ?. Multiple patterns should be separated by comma")
                 .addBooleanProperty("oldRevision").description("Optionally specify whether to query definitions in old revision in a diff context")
                 .addIntegerProperty("currentPage").description("Current page for the query. First page is 1")
-                .required("symbolNamePattern", "caseSensitive", "currentPage").build())
-                .build();
+                .required("symbolNamePattern", "caseSensitive", "currentPage")
+                .build())
+            .build();
     }
 
     @Override
     public CompletableFuture<Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+        if (arguments.get("symbolNamePattern") == null)
+            return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Argument 'symbolNamePattern' is required")), false));
         var symbolNamePattern = arguments.get("symbolNamePattern").asText();
+        if (arguments.get("caseSensitive") == null)
+            return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Argument 'caseSensitive' is required")), false));
         var caseSensitive = arguments.get("caseSensitive").asBoolean();
         var fileNamePatterns = arguments.get("fileNamePatterns") != null ? arguments.get("fileNamePatterns").asText() : null;
         var oldRevision = arguments.get("oldRevision") != null ? arguments.get("oldRevision").asBoolean() : false;
+        if (arguments.get("currentPage") == null)
+            return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Argument 'currentPage' is required")), false));
         var currentPage = arguments.get("currentPage").asInt();
 
         try {
@@ -65,13 +72,13 @@ public abstract class QuerySymbolDefinitions implements ChatTool {
                 "successful", true,
                 "definitions", symbolHits.subList(fromIndex, toIndex), 
                 "hasMorePages", symbolHits.size() > toIndex);
-            return completedFuture(new ChatToolExecution.Result(ChatToolUtils.convertToJson(result), false));
+            return completedFuture(new ChatToolExecution.Result(convertToJson(result), false));
         } catch (RuntimeException e) {
             if (ExceptionUtils.find(e, TooGeneralQueryException.class) != null) {
                 var resultData = Map.of(
                     "successful", false, 
                     "failReason", "Symbol name pattern is too short or too general, try a more specific one");
-                return completedFuture(new ChatToolExecution.Result(ChatToolUtils.convertToJson(resultData), false));
+                return completedFuture(new ChatToolExecution.Result(convertToJson(resultData), false));
             } else {
                 throw e;
             }
