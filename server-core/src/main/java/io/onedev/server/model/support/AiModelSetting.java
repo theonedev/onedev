@@ -51,8 +51,7 @@ public class AiModelSetting implements Serializable {
         this.baseUrl = baseUrl;
     }
 
-    @Editable(order=300, name="API Key")
-    @NotEmpty
+    @Editable(order=300, name="API Key", description="Optionally specify API key for authentication")
     public String getApiKey() {
         return apiKey;
     }
@@ -80,44 +79,42 @@ public class AiModelSetting implements Serializable {
 
         var apiKey = (String) EditContext.get().getInputValue("apiKey");
         
-        if (apiKey != null) {
-            try {
-                var modelsUrl = baseUrl.endsWith("/") ? baseUrl + "models" : baseUrl + "/models";
+        try {
+            var modelsUrl = baseUrl.endsWith("/") ? baseUrl + "models" : baseUrl + "/models";
+            
+            HttpClient client = HttpClient.newBuilder().build();
+
+            var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create(modelsUrl))
+                .header("Content-Type", "application/json")
+                .GET()
+                .timeout(Duration.ofSeconds(TIMEOUT_SECONDS));
+            if (apiKey != null) 
+                requestBuilder.header("Authorization", "Bearer " + apiKey);
+
+            HttpRequest request = requestBuilder.build();
+            
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            
+            if (response.statusCode() == 200) {
+                var models = new ArrayList<String>();
+                var jsonResponse = JsonParser.parseString(response.body()).getAsJsonObject();
+                var dataArray = jsonResponse.getAsJsonArray("data");
                 
-                HttpClient client = HttpClient.newBuilder().build();
-                
-                HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(modelsUrl))
-                    .header("Authorization", "Bearer " + apiKey)
-                    .header("Content-Type", "application/json")
-                    .GET()
-                    .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
-                    .build();
-                
-                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                
-                if (response.statusCode() == 200) {
-                    var models = new ArrayList<String>();
-                    var jsonResponse = JsonParser.parseString(response.body()).getAsJsonObject();
-                    var dataArray = jsonResponse.getAsJsonArray("data");
-                    
-                    for (var element : dataArray) {
-                        models.add(element.getAsJsonObject().get("id").getAsString());
-                    }
-                    
-                    models.sort(String::compareTo);
-                    return models;
-                } else {
-                    logger.error("Error getting models (status code: {}, response body: {})", 
-                            response.statusCode(), response.body());
-                    return List.of("<Error getting models, check server log for details>");
+                for (var element : dataArray) {
+                    models.add(element.getAsJsonObject().get("id").getAsString());
                 }
-            } catch (IOException | InterruptedException e) {
-                logger.error("Error getting models", e);
+                
+                models.sort(String::compareTo);
+                return models;
+            } else {
+                logger.error("Error getting models (status code: {}, response body: {})", 
+                        response.statusCode(), response.body());
                 return List.of("<Error getting models, check server log for details>");
             }
-        } else {
-            return List.of("<Specify API key to get models>");
+        } catch (IOException | InterruptedException e) {
+            logger.error("Error getting models", e);
+            return List.of("<Error getting models, check server log for details>");
         }
     }
 
