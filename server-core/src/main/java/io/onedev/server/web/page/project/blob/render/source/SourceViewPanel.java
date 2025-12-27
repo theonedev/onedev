@@ -521,7 +521,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					range = getRange(params, "param1", "param2", "param3", "param4");					
 					context.onPosition(target, BlobRenderer.getSourcePosition(range));
 					var page = (LayoutPage) getPage();
-					page.getChatter().show(target, 
+					page.getAssistant().show(target, 
 						"Help me understand highlighted text. Display explanation in %s"
 						.formatted(getSession().getLocale().getDisplayLanguage()));
 					target.appendJavaScript(String.format("onedev.server.sourceView.mark(%s, false);", convertToJson(range)));
@@ -1073,7 +1073,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		translations.put("unsaved-changes-prompt", _T("There are unsaved changes, discard and continue?"));
 		translations.put("show-comment", _T("Click to show comment of marked text"));
 		var page = (LayoutPage)getPage();
-		if (WicketUtils.isSubscriptionActive() && !page.getChatter().getEntitledAis().isEmpty())
+		if (WicketUtils.isSubscriptionActive() && !page.getAssistant().getEntitledAis().isEmpty())
 			translations.put("explain-selection", _T("Explain selected text with AI"));
 		
 		translations.put("loading", _T("Loading..."));

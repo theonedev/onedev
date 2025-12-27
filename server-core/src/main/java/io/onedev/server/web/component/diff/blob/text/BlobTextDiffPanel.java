@@ -325,7 +325,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 						var range = getRange(params, "param1", "param2", "param3", "param4", "param5");
 						getAnnotationSupport().onMark(target, range);
 						var page = (LayoutPage) getPage();
-						page.getChatter().show(target, "Help me understand highlighted text. Display in " + getSession().getLocale().getDisplayLanguage());
+						page.getAssistant().show(target, "Help me understand highlighted text. Display in " + getSession().getLocale().getDisplayLanguage());
 						script = String.format("onedev.server.blobTextDiff.mark($('#%s'), %s);", 
 								getMarkupId(), convertToJson(range));
 						target.appendJavaScript(script);
@@ -491,7 +491,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		var page = (LayoutPage) getPage();
 		if (getAnnotationSupport() != null 
 				&& WicketUtils.isSubscriptionActive() 
-				&& !page.getChatter().getEntitledAis().isEmpty()) {
+				&& !page.getAssistant().getEntitledAis().isEmpty()) {
 			translations.put("explain-selection", _T("Explain selected text with AI"));
 		}
 		for (var severity: CodeProblem.Severity.values())

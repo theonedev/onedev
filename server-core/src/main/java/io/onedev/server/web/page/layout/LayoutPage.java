@@ -178,7 +178,7 @@ public abstract class LayoutPage extends BasePage {
 
 	private AbstractDefaultAjaxBehavior newVersionStatusBehavior;
 
-	private ChatPanel chatter;
+	private ChatPanel assistant;
 
 	public LayoutPage(PageParameters params) {
 		super(params);
@@ -815,20 +815,20 @@ public abstract class LayoutPage extends BasePage {
 
 		});
 
-		chatter = new ChatPanel("chat");
-		add(chatter);
+		assistant = new ChatPanel("chat");
+		add(assistant);
 
 		topbar.add(new AjaxLink<Void>("showChat") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				chatter.show(target, null);
+				assistant.show(target, null);
 			}
 		
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(WicketUtils.isSubscriptionActive() && !chatter.getEntitledAis().isEmpty());
+				setVisible(WicketUtils.isSubscriptionActive() && !assistant.getEntitledAis().isEmpty());
 			}
 
 		});
@@ -1294,8 +1294,8 @@ public abstract class LayoutPage extends BasePage {
 		response.render(OnLoadHeaderItem.forScript("onedev.server.layout.onLoad();"));
 	}
 
-	public ChatPanel getChatter() {
-		return chatter;
+	public ChatPanel getAssistant() {
+		return assistant;
 	}
 
 	protected List<SidebarMenu> getSidebarMenus() {

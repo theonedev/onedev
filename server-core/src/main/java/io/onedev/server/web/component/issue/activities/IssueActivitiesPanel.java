@@ -334,14 +334,14 @@ public abstract class IssueActivitiesPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				var page = (LayoutPage)getPage();
-				page.getChatter().show(target, "Summarize comments of current issue. Display in " + getSession().getLocale().getDisplayLanguage());
+				page.getAssistant().show(target, "Summarize comments of current issue. Display in " + getSession().getLocale().getDisplayLanguage());
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				var page = (LayoutPage)getPage();
-				setVisible(WicketUtils.isSubscriptionActive() && !page.getChatter().getEntitledAis().isEmpty());
+				setVisible(WicketUtils.isSubscriptionActive() && !page.getAssistant().getEntitledAis().isEmpty());
 			}
 		});
 

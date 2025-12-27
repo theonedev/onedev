@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.pullrequests.detail;
 
 import static io.onedev.server.ai.ChatToolUtils.convertToJson;
+import static io.onedev.server.ai.PullRequestHelper.getDetail;
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
@@ -2417,7 +2418,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {	
-				return completedFuture(new ChatToolExecution.Result(convertToJson(PullRequestHelper.getDetail(getPullRequest().getProject(), getPullRequest())), false));
+				return completedFuture(new ChatToolExecution.Result(convertToJson(getDetail(getProject(), getPullRequest())), false));
 			}
 			
 		});

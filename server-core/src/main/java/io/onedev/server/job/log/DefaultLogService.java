@@ -35,13 +35,8 @@ import javax.inject.Singleton;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Splitter;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
@@ -55,14 +50,14 @@ import io.onedev.server.buildspec.job.log.instruction.LogInstructionParser.Param
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.build.BuildFinished;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.web.websocket.WebSocketService;
 
 @Singleton
@@ -74,10 +69,6 @@ public class DefaultLogService implements LogService, Serializable {
 
 	private static final int MAX_CACHE_ENTRIES = 10000;
 	
-	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormat.forPattern("HH:mm:ss");	
-	
-	private static final Pattern EOL_PATTERN = Pattern.compile("\r?\n");
-
 	@Inject
 	private WebSocketService webSocketService;
 
@@ -476,7 +467,7 @@ public class DefaultLogService implements LogService, Serializable {
 				if (snippet != null) {
 					StringBuilder builder = new StringBuilder();
 					for (JobLogEntryEx entry: snippet.entries)
-						builder.append(renderAsText(entry) + "\n");
+						builder.append(entry.render() + "\n");
 					recentBuffer = builder.toString().getBytes(StandardCharsets.UTF_8);
 				}
 			} catch (Exception e) {
@@ -484,29 +475,13 @@ public class DefaultLogService implements LogService, Serializable {
 				throw ExceptionUtils.unchecked(e);
 			}
 		}
-		
-		private String renderAsText(JobLogEntryEx entry) {
-			String prefix = DATE_FORMATTER.print(new DateTime(entry.getDate())) + " ";
-			StringBuilder builder = new StringBuilder();
-			for (String line: Splitter.on(EOL_PATTERN).split(entry.getMessageText())) {
-				if (builder.length() == 0) {
-					builder.append(prefix).append(line);
-				} else {
-					builder.append("\n");
-					for (int i=0; i<prefix.length(); i++)
-						builder.append(" ");
-					builder.append(line);
-				}
-			}
-			return builder.toString();
-		}
-		
+				
 		@Override
 		public int read() throws IOException {
 			if (pos == buffer.length) {
 				if (ois != null) {
 					try {
-						buffer = (renderAsText(readLogEntry(ois)) + "\n").getBytes(StandardCharsets.UTF_8);
+						buffer = (readLogEntry(ois).render() + "\n").getBytes(StandardCharsets.UTF_8);
 					} catch (EOFException e) {
 						ois.close();
 						ois = null;

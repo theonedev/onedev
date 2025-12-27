@@ -429,7 +429,7 @@ onedev.server.sourceView = {
 
 		var explainSelectionText = onedev.server.sourceView.translations["explain-selection"];
 		if (explainSelectionText) {
-			svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#ai2'/></svg>`;
+			svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#question-circle'/></svg>`;
 			$content.append(`<a class='explain-selection'>${svg} ${explainSelectionText}</a>`);
 			$content.children("a.explain-selection").click(function() {
 				$(".selection-popover").remove();

@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.issues.detail;
 
 import static io.onedev.server.ai.ChatToolUtils.convertToJson;
+import static io.onedev.server.ai.IssueHelper.getDetail;
 import static io.onedev.server.web.translation.Translation._T;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
@@ -461,7 +462,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 			@Override
 			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
-				return completedFuture(new ChatToolExecution.Result(convertToJson(IssueHelper.getDetail(getIssue().getProject(), getIssue())), false));
+				return completedFuture(new ChatToolExecution.Result(convertToJson(getDetail(getProject(), getIssue())), false));
 			}
 			
 		});

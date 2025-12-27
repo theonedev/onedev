@@ -417,14 +417,14 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				var page = (LayoutPage)getPage();
-				page.getChatter().show(target, "Summarize comments of current pull request. Display in " + getSession().getLocale().getDisplayLanguage());
+				page.getAssistant().show(target, "Summarize comments of current pull request. Display in " + getSession().getLocale().getDisplayLanguage());
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				var page = (LayoutPage)getPage();
-				setVisible(WicketUtils.isSubscriptionActive() && !page.getChatter().getEntitledAis().isEmpty());
+				setVisible(WicketUtils.isSubscriptionActive() && !page.getAssistant().getEntitledAis().isEmpty());
 			}
 
 		});

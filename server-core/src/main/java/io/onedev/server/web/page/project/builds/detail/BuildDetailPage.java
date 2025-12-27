@@ -1,6 +1,9 @@
 package io.onedev.server.web.page.project.builds.detail;
 
+import static io.onedev.server.ai.BuildHelper.getDetail;
+import static io.onedev.server.ai.ChatToolUtils.convertToJson;
 import static io.onedev.server.web.translation.Translation._T;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -8,7 +11,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 import javax.persistence.EntityNotFoundException;
@@ -35,19 +40,31 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 
+import dev.langchain4j.agent.tool.ToolSpecification;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.ChatToolAware;
+import io.onedev.server.ai.tools.GetFileContent;
+import io.onedev.server.ai.tools.QueryFilePaths;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.event.project.build.BuildUpdated;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.job.JobAuthorizationContextAware;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobService;
+import io.onedev.server.job.log.LogService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
@@ -94,9 +111,14 @@ import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
+import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.web.websocket.ChatToolExecution;
+import io.onedev.server.web.websocket.ChatToolExecution.Result;
 
 public abstract class BuildDetailPage extends ProjectPage 
-		implements InputContext, BuildAware, JobAuthorizationContextAware {
+		implements InputContext, BuildAware, JobAuthorizationContextAware, ChatToolAware {
+
+	private static final int MAX_PATCH_SIZE = 1024 * 1024;
 
 	public static final String PARAM_BUILD = "build";
 	
@@ -104,10 +126,16 @@ public abstract class BuildDetailPage extends ProjectPage
 	protected BuildService buildService;
 
 	@Inject
-	protected JobService jobService;
+	private JobService jobService;
 
 	@Inject
-	protected TerminalService terminalService;
+	private TerminalService terminalService;
+
+	@Inject
+	private LogService logService;
+
+	@Inject
+	private GitService gitService;
 
 	@Inject
 	private Set<PackSupport> packSupports;
@@ -336,6 +364,24 @@ public abstract class BuildDetailPage extends ProjectPage
 					}
 
 				}.setOutputMarkupId(true));
+
+				add(new AjaxLink<Void>("failureInvestigation") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						getAssistant().show(target, "Investigate why this build failed. Display in " + getSession().getLocale().getDisplayLanguage());
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getBuild().isFailed() 
+								&& SecurityUtils.canReadCode(getProject()) 
+								&& WicketUtils.isSubscriptionActive() 
+								&& !getAssistant().getEntitledAis().isEmpty());
+					}
+
+				});
 
 				add(new DropdownLink("promotions") {
 
@@ -712,4 +758,152 @@ public abstract class BuildDetailPage extends ProjectPage
 		return new JobAuthorizationContext(getProject(), getBuild().getCommitId(), getBuild().getRequest());
 	}
 	
+	@Override
+	public Collection<ChatTool> getChatTools() {
+		var tools = new ArrayList<ChatTool>();
+		tools.add(new ChatTool() {
+
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentBuild")
+					.description("Get info of current build in json format")
+					.build();
+			}
+
+			@Override
+			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+				return completedFuture(new ChatToolExecution.Result(convertToJson(getDetail(getProject(), getBuild())), false));
+			}
+			
+		});	
+		if (getBuild().isFailed()) {
+			var previousSuccessfulSimilarBuild = buildService.findPreviousSuccessfulSimilar(getBuild());
+			tools.add(new ChatTool() {
+
+				@Override
+				public ToolSpecification getSpecification() {
+					return ToolSpecification.builder()
+						.name("getBuildFailureInvestigationInstructions")
+						.description("Get instructions to investigate build failure")
+						.build();
+				}
+
+				@Override
+				public CompletableFuture<Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+					var instructions = """
+						Follow below steps to investigate build failure:
+						- Call 'getCurrentBuild' tool to get detail of current build
+						- Call 'getBuildLog' tool to get the build log
+						- Call 'getBuildSpec' tool to get content of CI/CD spec used to run the build
+						""";
+
+						if (previousSuccessfulSimilarBuild != null) 
+							instructions += "- If necessary, use tool 'getChangesSincePreviousSuccessfulBuild' to understand what has been changed since the previous successful build";
+						instructions += "- If necessary, use tools 'queryFilePaths' and 'getFileContent' to search and read files mentioned in build log";
+
+					return completedFuture(new Result(instructions, true));
+				}
+
+			});
+
+			if (previousSuccessfulSimilarBuild != null) {
+				tools.add(new ChatTool() {
+
+					@Override
+					public ToolSpecification getSpecification() {
+						return ToolSpecification.builder()
+							.name("getChangesSincePreviousSuccessfulBuild")
+							.description("Get file changes since previous successful build in json format")
+							.build();
+					}
+
+					@Override
+					public CompletableFuture<Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+						var oldCommitId = previousSuccessfulSimilarBuild.getCommitId();
+						var newCommitId = getBuild().getCommitId();
+						var patch = gitService.getPatch(getProject(), oldCommitId, newCommitId);
+						if (patch.length() > MAX_PATCH_SIZE)
+							return completedFuture(new Result(convertToJson(Map.of("successful", false, "failReason", "Patch is too large")), false));
+						else
+							return completedFuture(new Result(convertToJson(Map.of("successful", true, "patch", patch)), false));	
+					}
+					
+				});
+			}
+		}			
+		if (getBuild().isFinished() && SecurityUtils.canAccessLog(getBuild())) {
+			tools.add(new ChatTool() {
+
+				private static final int MAX_LOG_ENTRIES = 2000;
+
+				@Override
+				public ToolSpecification getSpecification() {				
+					return ToolSpecification.builder()
+						.name("getBuildLog")
+						.description("Get log of finished build. Will truncate to show recent lines if it is too long")
+						.build();
+				}
+	
+				@Override
+				public CompletableFuture<Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+					var snippet = logService.readLogSnippetReversely(
+							getBuild().getProject().getId(), getBuild().getNumber(), MAX_LOG_ENTRIES);
+					var builder = new StringBuilder();
+					for (var entry : snippet.entries) {
+						builder.append(entry.render()).append("\n");
+					}
+					return completedFuture(new Result(builder.toString(), false));
+				}
+				
+			});	
+		}
+		if (SecurityUtils.canReadCode(getProject())) {
+			tools.add(new ChatTool() {
+
+				@Override
+				public ToolSpecification getSpecification() {
+					return ToolSpecification.builder()
+						.name("getBuildSpec")
+						.description("Get content of CI/CD spec used to run the build")
+						.build();
+				}
+
+				@Override
+				public CompletableFuture<Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+					var blobIdent = new BlobIdent(getBuild().getCommitId().name(), BuildSpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits());
+					return completedFuture(new Result(getProject().getBlob(blobIdent, true).getText().getContent(), false));
+				}
+
+			});
+			tools.add(new QueryFilePaths() {
+				
+				@Override
+				protected Project getProject() {
+					return BuildDetailPage.this.getProject();
+				}
+				
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return getBuild().getCommitId();
+				}
+
+			});
+			tools.add(new GetFileContent() {
+
+				@Override
+				protected Project getProject() {
+					return BuildDetailPage.this.getProject();
+				}
+				
+				@Override
+				protected ObjectId getCommitId(boolean oldRevision) {
+					return getBuild().getCommitId();
+				}
+
+			});
+		}
+		return tools;
+	}
+
 }

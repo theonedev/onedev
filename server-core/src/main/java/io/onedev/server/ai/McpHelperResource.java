@@ -1097,9 +1097,9 @@ public class McpHelperResource {
 
         var builds = new ArrayList<Map<String, Object>>();
         for (var build : buildService.query(subject, projectInfo.project, parsedQuery, false, offset, count)) {
-            var buildMap = getBuildMap(projectInfo.currentProject, build);
-            buildMap.put("link", urlService.urlFor(build, true));
-            builds.add(buildMap);
+            var summary = BuildHelper.getSummary(projectInfo.currentProject, build);
+            summary.put("link", urlService.urlFor(build, true));
+            builds.add(summary);
         }
         return builds;
     }
@@ -1113,15 +1113,8 @@ public class McpHelperResource {
             throw new UnauthenticatedException();
 
         var currentProject = getProject(currentProjectPath);
-
         var build = getBuild(currentProject, buildReference);
-                
-        var buildMap = getBuildMap(currentProject, build);     
-        buildMap.put("params", build.getParamMap());
-        buildMap.put("labels", build.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
-        buildMap.put("link", urlService.urlFor(build, true));
-
-        return buildMap;
+        return BuildHelper.getDetail(currentProject, build);
     }
     
     @Path("/get-previous-successful-similar-build")
@@ -1137,15 +1130,10 @@ public class McpHelperResource {
         var build = getBuild(currentProject, buildReference);
                 
         var foundBuild = buildService.findPreviousSuccessfulSimilar(build);
-        if (foundBuild != null) {
-            var buildMap = getBuildMap(currentProject, foundBuild);     
-            buildMap.put("params", foundBuild.getParamMap());
-            buildMap.put("labels", foundBuild.getLabels().stream().map(it->it.getSpec().getName()).collect(Collectors.toList()));
-            buildMap.put("link", urlService.urlFor(foundBuild, true));
-            return buildMap;    
-        } else {
+        if (foundBuild != null) 
+            return BuildHelper.getDetail(currentProject, foundBuild);
+        else 
             throw new NotFoundException("Previous successful similar build not found");
-        }
     }
 
     @Path("/get-pull-request")
@@ -1668,36 +1656,6 @@ public class McpHelperResource {
         return "Commented on pull request " + pullRequestReference;
     }
 
-    private Map<String, Object> getBuildMap(Project currentProject, Build build) {
-        var typeReference = new TypeReference<LinkedHashMap<String, Object>>() {};
-        var buildMap = objectMapper.convertValue(build, typeReference);
-        buildMap.remove("id");
-        buildMap.remove("uuid");
-        buildMap.remove("numberScopeId");
-        buildMap.remove("workspacePath");
-        buildMap.remove("checkoutPaths");
-        buildMap.remove("submitSequence");
-        buildMap.remove("finishTimeGroups");        
-        buildMap.put("reference", build.getReference().toString(currentProject));
-        buildMap.remove("submitterId");
-        buildMap.put("submitter", build.getSubmitter().getName());
-        buildMap.remove("cancellerId");
-        if (build.getCanceller() != null)
-            buildMap.put("canceller", build.getCanceller().getName());
-        buildMap.remove("requestId");
-        if (build.getRequest() != null)
-            buildMap.put("pullRequest", build.getRequest().getReference().toString(currentProject));
-        buildMap.remove("issueId");
-        if (build.getIssue() != null)
-            buildMap.put("issue", build.getIssue().getReference().toString(currentProject));
-        buildMap.remove("agentId");
-        if (build.getAgent() != null)
-            buildMap.put("agent", build.getAgent().getName());
-        
-        buildMap.put("project", build.getProject().getPath());
-        return buildMap;
-    }
-
     @SuppressWarnings("unchecked")
     @Path("/run-job")
     @POST
@@ -1766,9 +1724,9 @@ public class McpHelperResource {
         if (build.isFinished())
             jobService.resubmit(user, build, reason);
 
-        var buildMap = getBuildMap(project, build);
-        buildMap.put("id", build.getId());
-        return buildMap;
+        var summary = BuildHelper.getSummary(project, build);
+        summary.put("id", build.getId());
+        return summary;
     }
 
     @Path("/get-clone-roots")

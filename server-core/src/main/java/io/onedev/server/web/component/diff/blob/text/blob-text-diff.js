@@ -592,7 +592,7 @@ onedev.server.blobTextDiff = {
 			});
 				var explainSelectionText = onedev.server.blobTextDiff.translations["explain-selection"];
 			if (explainSelectionText) {
-				var svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#ai2'/></svg>`;
+				var svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#question-circle'/></svg>`;
 				$content.append(`<a class='explain-selection'>${svg} ${explainSelectionText}</a>`);
 				$content.children("a.explain-selection").click(function() {
 					$(".selection-popover").remove();

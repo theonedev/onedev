@@ -1,11 +1,5 @@
 package io.onedev.server.buildspec.job.log;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
-import io.onedev.server.job.log.StyleBuilder;
-import io.onedev.server.web.asset.emoji.Emojis;
-
-import org.jspecify.annotations.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,10 +7,26 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.regex.Pattern;
+
+import org.jspecify.annotations.Nullable;
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+
+import io.onedev.server.job.log.StyleBuilder;
+import io.onedev.server.web.asset.emoji.Emojis;
 
 public class JobLogEntryEx implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");	
+	
+	private static final Pattern EOL_PATTERN = Pattern.compile("\r?\n");
 
 	private final Date date;
 	
@@ -289,6 +299,23 @@ public class JobLogEntryEx implements Serializable {
 		return builder.toString();
 	}
 	
+	public String render() {
+		LocalTime time = getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+		String prefix = DATE_FORMATTER.format(time) + " ";
+		StringBuilder builder = new StringBuilder();
+		for (String line: Splitter.on(EOL_PATTERN).split(getMessageText())) {
+			if (builder.length() == 0) {
+				builder.append(prefix).append(line);
+			} else {
+				builder.append("\n");
+				for (int i=0; i<prefix.length(); i++)
+					builder.append(" ");
+				builder.append(line);
+			}
+		}
+		return builder.toString();
+	}
+
 	@Nullable
 	public JobLogEntry getSpaceEfficientVersion() {
 		StringBuilder builder = new StringBuilder();
