@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -14,6 +13,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import org.joda.time.DateTime;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 
@@ -35,14 +35,10 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestTargetBr
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.service.PullRequestChangeService;
-import io.onedev.server.service.PullRequestDescriptionRevisionService;
 
 @Singleton
 public class DefaultPullRequestChangeService extends BaseEntityService<PullRequestChange>
 		implements PullRequestChangeService {
-
-	@Inject
-	private PullRequestDescriptionRevisionService descriptionRevisionService;
 
 	@Inject
 	private ListenerRegistry listenerRegistry;
@@ -137,7 +133,7 @@ public class DefaultPullRequestChangeService extends BaseEntityService<PullReque
 			revision.setUser(user);
 			revision.setOldContent(prevDescription);
 			revision.setNewContent(description);
-			descriptionRevisionService.create(revision);
+			dao.persist(revision);
 		}
 	}
 	

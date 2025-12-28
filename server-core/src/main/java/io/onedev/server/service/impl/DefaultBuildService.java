@@ -39,7 +39,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -61,6 +60,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.hibernate.query.criteria.internal.path.SingularAttributePath;
+import org.jspecify.annotations.Nullable;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
@@ -76,12 +76,6 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.StorageService;
 import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.service.BuildDependenceService;
-import io.onedev.server.service.BuildLabelService;
-import io.onedev.server.service.BuildParamService;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
@@ -108,6 +102,11 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildLabelService;
+import io.onedev.server.service.BuildParamService;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.ProjectBuildStatusStat;
@@ -135,10 +134,7 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 	
 	@Inject
 	private BuildParamService buildParamService;
-	
-	@Inject
-	private BuildDependenceService buildDependenceService;
-	
+		
 	@Inject
 	private ProjectService projectService;
 	
@@ -591,7 +587,7 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 		for (BuildParam param: build.getParams())
 			buildParamService.create(param);
 		for (BuildDependence dependence: build.getDependencies())
-			buildDependenceService.create(dependence);
+			dao.persist(dependence);
 	}
 
 	private Collection<Predicate> getPredicates(Subject subject, @Nullable Project project, From<Build, Build> root, CriteriaBuilder builder) {

@@ -16,7 +16,6 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -28,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.websocket.api.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +61,6 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.service.AgentAttributeService;
-import io.onedev.server.service.AgentLastUsedDateService;
 import io.onedev.server.service.AgentService;
 import io.onedev.server.service.AgentTokenService;
 import io.onedev.server.util.criteria.Criteria;
@@ -86,9 +85,6 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 
 	@Inject
 	private ClusterService clusterService;
-
-	@Inject
-	private AgentLastUsedDateService lastUsedDateService;
 	
 	private final String agentVersion;
 	
@@ -195,8 +191,7 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 
 			AgentLastUsedDate lastUsedDate = new AgentLastUsedDate();
 			agent.setLastUsedDate(lastUsedDate);
-			lastUsedDateService.create(lastUsedDate);
-
+			dao.persist(lastUsedDate);
 			dao.persist(agent);
 			
 			for (Map.Entry<String, String> entry: data.getAttributes().entrySet()) {
@@ -390,7 +385,7 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 		var token = agent.getToken();
 		removeReferences(agent);
 		dao.remove(agent);
-		lastUsedDateService.delete(agent.getLastUsedDate());
+		dao.remove(agent.getLastUsedDate());
 		
 		transactionService.runAfterCommit(() -> {
 			String server = agentServers.remove(agentId);

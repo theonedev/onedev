@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -30,6 +29,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
+import org.jspecify.annotations.Nullable;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
@@ -103,7 +103,6 @@ import io.onedev.server.search.entity.issue.LastActivityDateCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.IssueChangeService;
-import io.onedev.server.service.IssueDescriptionRevisionService;
 import io.onedev.server.service.IssueFieldService;
 import io.onedev.server.service.IssueLinkService;
 import io.onedev.server.service.IssueScheduleService;
@@ -135,9 +134,6 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 
 	@Inject
 	private IssueFieldService issueFieldService;
-
-	@Inject
-	private IssueDescriptionRevisionService descriptionRevisionService;
 
 	@Inject
 	private ProjectService projectService;
@@ -295,7 +291,7 @@ public class DefaultIssueChangeService extends BaseEntityService<IssueChange>
 			revision.setUser(user);
 			revision.setOldContent(prevDescription);
 			revision.setNewContent(description);
-			descriptionRevisionService.create(revision);
+			dao.persist(revision);
 		}
 	}
 	

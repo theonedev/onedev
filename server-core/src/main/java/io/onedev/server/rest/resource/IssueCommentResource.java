@@ -20,12 +20,12 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import io.onedev.server.service.IssueCommentService;
-import io.onedev.server.service.IssueCommentRevisionService;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueCommentRevision;
+import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueCommentService;
 
 @Path("/issue-comments")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -33,16 +33,12 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class IssueCommentResource {
 
-	private final IssueCommentService commentService;
-	
-	private final IssueCommentRevisionService commentRevisionService;
+	@Inject
+	private Dao dao;
 
 	@Inject
-	public IssueCommentResource(IssueCommentService commentService, IssueCommentRevisionService commentRevisionService) {
-		this.commentService = commentService;
-		this.commentRevisionService = commentRevisionService;
-	}
-
+	private IssueCommentService commentService;
+	
 	@Api(order=100)
 	@Path("/{commentId}")
 	@GET
@@ -82,7 +78,7 @@ public class IssueCommentResource {
 			revision.setUser(SecurityUtils.getUser());
 			revision.setOldContent(oldContent);
 			revision.setNewContent(content);
-			commentRevisionService.create(revision);
+			dao.persist(revision);
 		}
 		return Response.ok().build();
 	}
