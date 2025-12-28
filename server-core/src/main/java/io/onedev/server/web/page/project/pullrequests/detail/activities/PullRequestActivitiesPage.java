@@ -67,7 +67,6 @@ import io.onedev.server.web.page.project.pullrequests.detail.activities.activity
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestCommentActivity;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestUpdateActivity;
 import io.onedev.server.web.page.security.LoginPage;
-import io.onedev.server.web.util.WicketUtils;
 
 public class PullRequestActivitiesPage extends PullRequestDetailPage {
 	
@@ -424,7 +423,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				var page = (LayoutPage)getPage();
-				setVisible(WicketUtils.isSubscriptionActive() && !page.getAssistant().getEntitledAis().isEmpty());
+				setVisible(!page.getAssistant().getEntitledAis().isEmpty());
 			}
 
 		});

@@ -2,6 +2,7 @@ package io.onedev.server.service;
 
 import java.util.Collection;
 
+import org.eclipse.jgit.lib.ObjectId;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.PullRequest;
@@ -16,4 +17,6 @@ public interface PullRequestReviewService extends EntityService<PullRequestRevie
 
     void createOrUpdate(User user, PullRequestReview review);
 	
+    ObjectId getLastReviewedCommit(PullRequest request, User user);
+    
 }

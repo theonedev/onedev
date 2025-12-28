@@ -8,8 +8,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -39,18 +37,17 @@ import org.apache.wicket.request.cycle.AbstractRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.ChatToolAware;
+import io.onedev.server.ai.ToolUtils;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AuditService;
-import io.onedev.server.service.CodeCommentService;
-import io.onedev.server.service.CodeCommentReplyService;
-import io.onedev.server.service.CodeCommentStatusChangeService;
-import io.onedev.server.service.UrlService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.CodeCommentStatusChange;
@@ -59,6 +56,11 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.CodeCommentReplyService;
+import io.onedev.server.service.CodeCommentService;
+import io.onedev.server.service.CodeCommentStatusChangeService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -73,7 +75,7 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.xodus.VisitInfoService;
 
-public abstract class CodeCommentPanel extends Panel {
+public abstract class CodeCommentPanel extends Panel implements ChatToolAware {
 
 	private final Long commentId;
 	
@@ -737,6 +739,11 @@ public abstract class CodeCommentPanel extends Panel {
 			return getChange().getUser();
 		}
 
+	}
+
+	@Override
+	public List<ChatTool> getChatTools() {
+		return ToolUtils.wrapForChat(getComment().getTools());
 	}
 	
 	public class CodeCommentReplyActivity implements CodeCommentActivity {

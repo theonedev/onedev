@@ -2003,6 +2003,23 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public File getDir() {
 		return OneDev.getInstance(ProjectService.class).getProjectDir(getId());
 	}
+
+	public Collection<ProjectEntitlement> getEntitlements() {
+		return entitlements;
+	}
+
+	public void setEntitlements(Collection<ProjectEntitlement> entitlements) {
+		this.entitlements = entitlements;
+	}
+	
+	public boolean isEntitledToAi(User ai) {
+		if (ai.getAiSetting().isEntitleToAll())
+			return true;
+		var hierarchyProjects = new ArrayList<Project>();
+		hierarchyProjects.addAll(getAncestors());
+		hierarchyProjects.add(this);
+		return hierarchyProjects.stream().anyMatch(it -> it.getEntitlements().stream().anyMatch(it2 -> it2.getAi().equals(ai)));
+	}
 	
 	public static String encodePathAsRepoName(String projectPath) {
 		return projectPath.replace("/", FAKED_GITHUB_REPO_PATH_SEPARATOR);

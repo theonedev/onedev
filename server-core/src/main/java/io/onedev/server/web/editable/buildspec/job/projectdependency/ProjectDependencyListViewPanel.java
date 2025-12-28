@@ -29,8 +29,8 @@ import org.apache.wicket.model.Model;
 
 import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
-import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
-import io.onedev.server.web.component.offcanvas.OffCanvasPanel;
+import io.onedev.server.web.component.draw.DrawCardPanel;
+import io.onedev.server.web.component.draw.DrawPanel;
 import io.onedev.server.web.editable.BeanContext;
 
 class ProjectDependencyListViewPanel extends Panel {
@@ -79,7 +79,7 @@ class ProjectDependencyListViewPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						new OffCanvasCardPanel(target, OffCanvasPanel.Placement.RIGHT, null) {
+						new DrawCardPanel(target, DrawPanel.Placement.RIGHT, null) {
 
 							@Override
 							protected Component newTitle(String componentId) {

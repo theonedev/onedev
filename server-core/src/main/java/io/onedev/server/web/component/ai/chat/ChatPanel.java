@@ -43,17 +43,18 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 import org.jspecify.annotations.Nullable;
 
+import io.onedev.server.ai.ChatService;
 import io.onedev.server.model.Chat;
 import io.onedev.server.model.ChatMessage;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.service.ChatService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.service.support.ChatResponding;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.behavior.DisplayNoneBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -438,7 +439,7 @@ public class ChatPanel extends Panel {
 
 		add(form);		
 
-		add(AttributeAppender.append("class", "chat d-flex flex-column"));		
+		add(AttributeAppender.append("class", "chat flex-column"));		
 		setOutputMarkupPlaceholderTag(true);
 	}
 
@@ -549,9 +550,9 @@ public class ChatPanel extends Panel {
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie cookie = request.getCookie("chat.width");
 		if (cookie != null) 
-			add(AttributeAppender.replace("style", "width:" + cookie.getValue() + "px"));
+			add(AttributeAppender.append("style", "width:" + cookie.getValue() + "px;"));
 		else
-			add(AttributeAppender.replace("style", "width:400px"));				
+			add(AttributeAppender.append("style", "width:400px;"));				
 		super.onBeforeRender();
 	}
 
@@ -583,16 +584,20 @@ public class ChatPanel extends Panel {
 		WebSession.get().setActiveChatId(null);
 		if (prompt != null) {
 			WebSession.get().setChatInput(prompt);
-			target.appendJavaScript("""
-				$(".chat>.body>.send .submit").click();
-				""");
+			target.appendJavaScript("$('.chat>.body>.send .submit').click();");
 		}	
+		add(new DisplayNoneBehavior());		
 		target.add(this);
+		target.appendJavaScript("$('.chat').show('slide', {direction: 'right'}, 160);");	
 	}
 
 	public void hide(AjaxRequestTarget target) {
 		WebSession.get().setChatVisible(false);
-		target.add(this);
+		target.appendJavaScript("""
+			$('.chat').hide('slide', {direction: 'right'}, 160, function() {
+				$('.chat').removeClass().empty();
+			});
+			""");
 	}
 	
 }

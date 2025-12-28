@@ -63,6 +63,7 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
+import io.onedev.server.ai.ToolExecutionResult;
 import io.onedev.server.commandhandler.Upgrade;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.model.User;
@@ -82,7 +83,7 @@ import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.serverinit.ServerInitPage;
 import io.onedev.server.web.page.simple.SimplePage;
 import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.web.websocket.ChatToolExecution;
+import io.onedev.server.web.websocket.AiToolExecution;
 import io.onedev.server.web.websocket.ObservablesChanged;
 import io.onedev.server.web.websocket.WebSocketService;
 
@@ -161,18 +162,19 @@ public abstract class BasePage extends WebPage {
 	public void onEvent(IEvent<?> event) {		
 		super.onEvent(event);
 		if (event.getPayload() instanceof WebSocketPushPayload payload) {
-			if (payload.getMessage() instanceof ObservablesChanged observablesChanged) {
-				notifyObservablesChange(payload.getHandler(), observablesChanged.getObservables());				
-			} else if (payload.getMessage() instanceof ChatToolExecution chatToolExecution) {
+			if (payload.getMessage() instanceof ObservablesChanged changed) {
+				notifyObservablesChange(payload.getHandler(), changed.getObservables());				
+			} else if (payload.getMessage() instanceof AiToolExecution execution) {
+				var subject = SecurityUtils.getSubject();
 				for (var tool : findChatTools()) {
-					if (tool.getSpecification().name().equals(chatToolExecution.getToolName())) {
+					if (tool.getSpecification().name().equals(execution.getToolName())) {
 						try {
-							var executionFuture = tool.execute(payload.getHandler(), chatToolExecution.getToolArguments());
-							chatToolExecution.setExecutionFuture(executionFuture);
+							var future = tool.execute(payload.getHandler(), subject, execution.getToolArguments());
+							execution.setFuture(future);
 						} catch (Throwable t) {
-							var executionFuture = new CompletableFuture<ChatToolExecution.Result>();
-							executionFuture.completeExceptionally(t);
-							chatToolExecution.setExecutionFuture(executionFuture);
+							var future = new CompletableFuture<ToolExecutionResult>();
+							future.completeExceptionally(t);
+							execution.setFuture(future);
 						}
 						break;
 					}

@@ -22,13 +22,13 @@ public class EntitlementEditBean implements Serializable{
 
     private boolean entitleToAll;
 
-    private List<String> entitledProjects;
+    private List<String> entitledUsers;
 
     private List<String> entitledGroups;
 
-    private List<String> entitledUsers;
+    private List<String> entitledProjects;
 
-    @Editable(order=100, name="Entitle to All Users")
+    @Editable(order=100, name="Entitle to All Users and Projects")
     public boolean isEntitleToAll() {
         return entitleToAll;
     }
@@ -37,29 +37,7 @@ public class EntitlementEditBean implements Serializable{
         this.entitleToAll = entitleToAll;
     }
 
-    @Editable(order=200)
-    @ProjectChoice
-    @DependsOn(property="entitleToAll", value="false")
-    public List<String> getEntitledProjects() {
-        return entitledProjects;
-    }
-
-    public void setEntitledProjects(List<String> entitledProjects) {
-        this.entitledProjects = entitledProjects;
-    }
-
-    @Editable(order=300)
-    @GroupChoice
-    @DependsOn(property="entitleToAll", value="false")
-    public List<String> getEntitledGroups() {
-        return entitledGroups;
-    }
-
-    public void setEntitledGroups(List<String> entitledGroups) {
-        this.entitledGroups = entitledGroups;
-    }
-
-    @Editable(order=300)
+    @Editable(order=200, description="Entitled users will be able to access this AI service")
     @UserChoice("getUsers")
     @DependsOn(property="entitleToAll", value="false")
     public List<String> getEntitledUsers() {
@@ -78,5 +56,27 @@ public class EntitlementEditBean implements Serializable{
                 .sorted(cache.comparingDisplayName())
                 .collect(Collectors.toList());
     }
-    
+
+    @Editable(order=300, description="All members of entitled groups will be able to access this AI service")
+    @GroupChoice
+    @DependsOn(property="entitleToAll", value="false")
+    public List<String> getEntitledGroups() {
+        return entitledGroups;
+    }
+
+    public void setEntitledGroups(List<String> entitledGroups) {
+        this.entitledGroups = entitledGroups;
+    }
+
+    @Editable(order=400, description="Entitled projects will be able to access this AI service")
+    @ProjectChoice
+    @DependsOn(property="entitleToAll", value="false")
+    public List<String> getEntitledProjects() {
+        return entitledProjects;
+    }
+
+    public void setEntitledProjects(List<String> entitledProjects) {
+        this.entitledProjects = entitledProjects;
+    }
+
 }

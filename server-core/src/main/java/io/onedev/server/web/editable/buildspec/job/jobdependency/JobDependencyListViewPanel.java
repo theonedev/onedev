@@ -2,8 +2,8 @@ package io.onedev.server.web.editable.buildspec.job.jobdependency;
 
 import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
-import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
-import io.onedev.server.web.component.offcanvas.OffCanvasPanel;
+import io.onedev.server.web.component.draw.DrawCardPanel;
+import io.onedev.server.web.component.draw.DrawPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.util.TextUtils;
 import org.apache.wicket.Component;
@@ -82,7 +82,7 @@ class JobDependencyListViewPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						new OffCanvasCardPanel(target, OffCanvasPanel.Placement.RIGHT, null) {
+						new DrawCardPanel(target, DrawPanel.Placement.RIGHT, null) {
 
 							@Override
 							protected Component newTitle(String componentId) {

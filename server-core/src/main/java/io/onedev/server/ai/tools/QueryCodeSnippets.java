@@ -1,14 +1,13 @@
 package io.onedev.server.ai.tools;
 
-import static io.onedev.server.ai.ChatToolUtils.convertToJson;
-import static java.util.concurrent.CompletableFuture.completedFuture;
+import static io.onedev.server.ai.ToolUtils.convertToJson;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,17 +16,18 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.TaskTool;
+import io.onedev.server.ai.ToolExecutionResult;
+import io.onedev.server.ai.ToolUtils;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.model.Project;
 import io.onedev.server.search.code.CodeSearchService;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
-import io.onedev.server.web.websocket.ChatToolExecution;
-import io.onedev.server.web.websocket.ChatToolExecution.Result;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.ProjectService;
 
-public abstract class QueryCodeSnippets implements ChatTool {
+public abstract class QueryCodeSnippets implements TaskTool {
 
     private static final int PAGE_SIZE = 25;
 
@@ -39,36 +39,50 @@ public abstract class QueryCodeSnippets implements ChatTool {
 
     private static final String OMITTED_LINES = "...OMITTED LINES...";
 
-    
+    private final boolean inDiffContext;
+
+    public QueryCodeSnippets(boolean inDiffContext) {
+        this.inDiffContext = inDiffContext;
+    }
+
     @Override
     public ToolSpecification getSpecification() {
+        var paramsBuilder = JsonObjectSchema.builder()
+            .addStringProperty("regularExpression").description("Perl-compatible regular expression to query code")
+            .addBooleanProperty("caseSensitive").description("Whether to match code snippets case-sensitively");
+            
+        if (inDiffContext) 
+            paramsBuilder.addBooleanProperty("oldRevision").description("Specify whether to query code snippets from old revision");
+
+        paramsBuilder.addIntegerProperty("currentPage").description("Current page for the query. First page is 1")
+            .required(ToolUtils.required(inDiffContext, "regularExpression", "caseSensitive", "currentPage"));
+
         return ToolSpecification.builder()
             .name("queryCodeSnippets")
             .description("Query code snippets matching specified perl-compatible regular expression and return result in json format")
-            .parameters(JsonObjectSchema.builder()
-                .addStringProperty("regularExpression").description("Perl-compatible regular expression to query code")
-                .addBooleanProperty("caseSensitive").description("Whether to match code snippets case-sensitively")
-                .addBooleanProperty("oldRevision").description("Optionally specify whether to query code snippets in old revision in a diff context")
-                .addIntegerProperty("currentPage").description("Current page for the query. First page is 1")
-                .required("regularExpression", "caseSensitive", "currentPage")
-                .build())
+            .parameters(paramsBuilder.build())
             .build();
     }
 
     @Override
-    public CompletableFuture<Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {      
+    public ToolExecutionResult execute(Subject subject, JsonNode arguments) {      
+        var project = OneDev.getInstance(ProjectService.class).load(getProjectId());
+        if (!SecurityUtils.canReadCode(subject, project))
+            throw new UnauthorizedException();
+
         if (arguments.get("regularExpression") == null)
-            return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Argument 'regularExpression' is required")), false));
+            return new ToolExecutionResult(convertToJson(Map.of("successful", false, "failReason", "Argument 'regularExpression' is required")), false);
         var regularExpression = arguments.get("regularExpression").asText();
         if (arguments.get("caseSensitive") == null)
-            return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Argument 'caseSensitive' is required")), false));
+            return new ToolExecutionResult(convertToJson(Map.of("successful", false, "failReason", "Argument 'caseSensitive' is required")), false);
         var caseSensitive = arguments.get("caseSensitive").asBoolean();
+        if (inDiffContext && arguments.get("oldRevision") == null)
+            return new ToolExecutionResult(convertToJson(Map.of("successful", false, "failReason", "Argument 'oldRevision' is required")), false);
         var oldRevision = arguments.get("oldRevision") != null ? arguments.get("oldRevision").asBoolean() : false;
         if (arguments.get("currentPage") == null)
-            return completedFuture(new ChatToolExecution.Result(convertToJson(Map.of("successful", false, "failReason", "Argument 'currentPage' is required")), false));
+            return new ToolExecutionResult(convertToJson(Map.of("successful", false, "failReason", "Argument 'currentPage' is required")), false);
         var currentPage = arguments.get("currentPage").asInt();					
 
-        var project = getProject();
         var commitId = getCommitId(oldRevision);
         try {
             BlobQuery query = new TextQuery.Builder(regularExpression)
@@ -98,20 +112,20 @@ public abstract class QueryCodeSnippets implements ChatTool {
                 "successful", true,
                 "codeSnippets", codeSnippets, 
                 "hasMorePages", textHits.size() > toIndex);
-            return completedFuture(new ChatToolExecution.Result(convertToJson(resultData), false));	
+            return new ToolExecutionResult(convertToJson(resultData), false);	
         } catch (RuntimeException e) {
             if (ExceptionUtils.find(e, TooGeneralQueryException.class) != null) {
                 var resultData = Map.of(
                     "successful", false, 
                     "failReason", "Regular expression is too short or too general, try a more specific one");
-                return completedFuture(new ChatToolExecution.Result(convertToJson(resultData), false));
+                return new ToolExecutionResult(convertToJson(resultData), false);
             } else {
                 throw e;
             }
         }
     }
 
-    protected abstract Project getProject();
+    protected abstract Long getProjectId();
 
     protected abstract ObjectId getCommitId(boolean oldRevision);
 

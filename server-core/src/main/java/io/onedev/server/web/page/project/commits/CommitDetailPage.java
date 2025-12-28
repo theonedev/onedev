@@ -6,6 +6,8 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.codequality.CodeProblem;
@@ -84,11 +86,13 @@ import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.*;
 
+import static io.onedev.server.ai.ToolUtils.getDiffTools;
+import static io.onedev.server.ai.ToolUtils.wrapForChat;
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 import static io.onedev.server.web.translation.Translation._T;
 import static java.util.stream.Collectors.toList;
 
-public class CommitDetailPage extends ProjectPage implements RevisionAnnotationSupport, JobAuthorizationContextAware {
+public class CommitDetailPage extends ProjectPage implements RevisionAnnotationSupport, JobAuthorizationContextAware, ChatToolAware {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitDetailPage.class);
 
@@ -1072,6 +1076,14 @@ public class CommitDetailPage extends ProjectPage implements RevisionAnnotationS
 
 	public List<String> getOperateBranches() {
 		return operateBranches;
+	}
+
+	@Override
+	public List<ChatTool> getChatTools() {
+		var projectId = getProject().getId();
+		var oldCommitId = getCompareWith().copy();
+		var newCommitId = getCommit().copy();
+		return wrapForChat(getDiffTools(projectId, oldCommitId, newCommitId, null));
 	}
 
 }

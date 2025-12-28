@@ -38,6 +38,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		- 'artifact' should be translated as 制品
 		- 'pull request' should be translated as 合并请求
 		- 'job' should be translated as 任务
+		- 'entitled' should be translated as 被授权的
 		""")
 	public static void init(Map<String, String> m) {
 		m.clear();
@@ -154,6 +155,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("AI Settings", "AI 设置");
 		m.put("AI entitlement settings have been saved", "AI 权限设置已保存");
 		m.put("AI model settings have been saved", "AI 模型设置已保存");
+		m.put("AI system prompt has been saved", "AI 系统提示已保存");
 		m.put("API Key", "API 密钥");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"你的JIRA云实例的API地址，例如：<tt>https://your-domain.atlassian.net/rest/api/3</tt>");
@@ -303,6 +305,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Allow Multiple", "允许多个");
 		m.put("Allowed Licenses", "允许的许可证");
 		m.put("Allowed Self Sign-Up Email Domain", "允许自助注册的邮箱域名");
+		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
+			"如果您想从命令行编译项目，请将以下内容添加到 $HOME/.m2/settings.xml");
 		m.put("Always", "总是");
 		m.put("Always Pull Image", "始终拉取镜像");
 		m.put("An issue already linked for {0}. Unlink it first", "已链接到 {0}。先取消链接");
@@ -447,6 +451,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Belonging Groups", "所属组");
 		m.put("Below are some common criterias. Type in search box above to view the complete list and available combinations.", 
 			"以下是一些常见的条件。在搜索框中输入以查看完整列表和可用组合。");
+		m.put("Below content is restored from an unsaved change. <a class=\"clear-unsaved-change\">Clear</a> to discard", 
+			"以下内容是从未保存的更改中恢复的。<a class=\"clear-unsaved-change\">清除</a>以丢弃");
 		m.put("Below content is restored from an unsaved change. Clear to discard", "以下内容从未保存的更改中恢复。清除以丢弃");
 		m.put("Below information will also be sent", "以下信息也将被发送");
 		m.put("Binary file.", "二进制文件");
@@ -622,9 +628,13 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Changes since this comment", "此评论后的变更");
 		m.put("Channel Notification", "频道通知");
 		m.put("Chart Metadata", "Chart 元数据");
+		m.put("Chat Preserve Days", "聊天保留天数");
 		m.put("Chat deleted", "聊天已删除");
+		m.put("Chat preserve days setting has been saved", "聊天保留天数设置已保存");
 		m.put("Chat with", "聊天对象");
 		m.put("Chat with AI", "与 AI 聊天");
+		m.put("Chats older than the specified number of days will be automatically deleted during daily maintenance.", 
+			"超过指定天数的聊天将在每日维护期间自动删除。");
 		m.put("Check <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHub's guide</a> on how to generate and use GPG keys to sign your commits", 
 			"检查 <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHub 的指南</a> 如何生成和使用 GPG 密钥来签署您的提交");
 		m.put("Check <a href=\"https://docs.onedev.io/administration-guide/agent-management\" target=\"_blank\">agent management</a> for details, including instructions on how to run agent as service", 
@@ -1226,7 +1236,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Enter your details to create your account", "输入您的详细信息以创建您的账户");
 		m.put("Enter your details to login to your account", "输入您的详细信息登录到您的账户");
 		m.put("Enter your user name or email to reset password", "输入您的用户名或邮箱以重置密码");
-		m.put("Entitle to All Users", "授权给所有用户");
+		m.put("Entitle to All Users and Projects", "授权给所有用户和项目");
 		m.put("Entitled Groups", "授权组");
 		m.put("Entitled Projects", "授权项目");
 		m.put("Entitled Users", "授权用户");
@@ -1345,7 +1355,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("File missing or obsolete", "文件缺失或过时");
 		m.put("File name", "文件名");
 		m.put("File name patterns such as *.java, *.c", "文件名模式，如 *.java, *.c");
-		m.put("File path to get text content", "文件路径以获取文本内容");
 		m.put("Files", "文件");
 		m.put("Files to Be Analyzed", "要分析的文件");
 		m.put("Filter", "过滤");
@@ -1388,13 +1397,14 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Fixing...", "修复中...");
 		m.put("Float", "浮点数");
 		m.put("Flush", "刷新");
-		m.put("Folder path to list all files and subfolders", "文件夹路径以列出所有文件和子文件夹");
 		m.put("Follow below instructions to publish packages into this project", "按照以下说明将包发布到此项目");
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
 			"按照以下步骤在远程机器上安装代理（支持 Linux/Windows/Mac OS X/FreeBSD）：");
 		m.put("For CI/CD job, add this gem to Gemfile like below", "对于 CI/CD 任务，将此 gem 添加到 Gemfile 中，如下所示");
 		m.put("For CI/CD job, add this package to requirements.txt and run below to install the package via command step", 
 			"对于 CI/CD 任务，将此包添加到 requirements.txt 中，并运行以下命令通过命令步骤安装包");
+		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
+			"对于 CI/CD 任务，使用自定义 settings.xml 更方便，例如通过在命令步骤中使用以下代码：");
 		m.put("For CI/CD job, run below to add package repository via command step", "对于 CI/CD 任务，运行以下命令通过命令步骤添加包仓库");
 		m.put("For CI/CD job, run below to add package source via command step", "对于 CI/CD 任务，运行以下命令通过命令步骤添加包源");
 		m.put("For CI/CD job, run below to add source via command step", "对于 CI/CD 任务，运行以下命令通过命令步骤添加源");
@@ -1702,6 +1712,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"无效的状态。请确保您使用系统设置中指定的服务器URL访问OneDev");
 		m.put("Invalid subscription key", "无效的订阅密钥");
 		m.put("Invalid working period", "无效的工作时间");
+		m.put("Investigate build failure with AI", "使用 AI 调查构建失败");
 		m.put("Invitation sent to \"{0}\"", "邀请已发送至 \"{0}\"");
 		m.put("Invitation to \"{0}\" deleted", "邀请已取消: \"{0}\"");
 		m.put("Invitations", "邀请");
@@ -1938,6 +1949,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Log Work", "记录工作");
 		m.put("Log not available for offline agent", "离线代理的日志不可用");
 		m.put("Log work", "记录工作");
+		m.put("Login Command", "登录命令");
 		m.put("Login Name", "登录名称");
 		m.put("Login and generate refresh token", "登录并生成刷新令牌");
 		m.put("Login name already used by another account", "登录名已被另一个账户使用");
@@ -1983,6 +1995,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Make sure the account has package ${permission} permission over the project", "确保账户对项目具有包 ${permission} 权限");
 		m.put("Make sure the account has package read permission over the project", "确保账户对项目具有包读权限");
 		m.put("Make sure the user has package write permission over the project", "确保用户对项目具有包写权限");
+		m.put("Make sure to log in with an account that has package read permission for the project", 
+			"确保使用对项目具有包读取权限的账户登录");
 		m.put("Malformed %sbase query", "解析%s基准查询时出错");
 		m.put("Malformed %squery", "解析%s查询时出错");
 		m.put("Malformed build spec (import project: {0}, import revision: {1})", "构建规范格式错误（导入项目：{0}，导入版本：{1}）");
@@ -2034,6 +2048,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Merged", "合并");
 		m.put("Merged pull request \"{0}\" ({1})", "合并合并请求 \"{0}\"（{1}）");
 		m.put("Merges pull request", "合并请求");
+		m.put("Message is too long. Max {0} characters", "消息太长。最大 {0} 个字符");
 		m.put("Meta", "元");
 		m.put("Meta Info", "元数据");
 		m.put("Microsoft 365", "Microsoft 365");
@@ -2263,6 +2278,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Not run", "未运行");
 		m.put("Not specified", "未指定");
 		m.put("Note", "备注");
+		m.put("Nothing changed yet", "尚未更改任何内容");
 		m.put("Nothing to preview", "没有预览内容");
 		m.put("Notification", "通知");
 		m.put("Notifications", "通知");
@@ -2374,6 +2390,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择指定 <span class='text-info'>逗号分隔</span> 的平台，例如 <tt>linux/amd64,linux/arm64</tt>。留空则构建为运行任务的节点的平台");
 		m.put("Optionally specify <span class='text-info'>comma separated</span> platforms to scan, for instance <tt>linux/amd64,linux/arm64</tt>. Leave empty to scan all platforms in OCI layout", 
 			"可选择指定 <span class='text-info'>逗号分隔</span> 的平台，例如 <tt>linux/amd64,linux/arm64</tt>。留空则扫描 OCI 布局中的所有平台");
+		m.put("Optionally specify API key for authentication", "可选地指定 API 密钥进行身份验证");
 		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a> 的 Dockerfile。留空则使用上面指定的构建路径下的文件 <tt>Dockerfile</tt>");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "可选择指定用于 Renovate CLI 的 JavaScript 配置");
@@ -2587,8 +2604,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Ordered List", "有序列表");
 		m.put("Ordered list", "有序列表");
 		m.put("Ordinary", "普通");
-		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account (working in progress)", 
-			"普通：普通账户<br>服务：服务账户没有密码和电子邮件地址，并且不会为其活动生成通知<br>AI：AI 账户（正在进行中）");
+		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account to answer questions about the code base, edit CI/CD spec, investigate job failure, or review pull request", 
+			"普通：普通账户<br>服务：服务账户没有密码和电子邮件地址，并且不会为其活动生成通知<br>AI：AI 账户用于回答关于代码库的问题，编辑 CI/CD 规范，调查任务失败或审查合并请求");
 		m.put("Osv License Scanner", "OSV 许可证扫描器");
 		m.put("Osv Vulnerability Scanner", "OSV 漏洞扫描器");
 		m.put("Other", "其他");
@@ -3376,6 +3393,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Some related commits of the code comment is missing", "与代码评论相关的提交缺失");
 		m.put("Some related commits of the pull request are missing", "与合并请求相关的提交缺失");
 		m.put("Some required builds not passed", "一些必需的构建未通过");
+		m.put("Someone changed file mode since you started editing", "自您开始编辑以来，有人更改了文件模式");
+		m.put("Someone changed file type since you started editing", "自您开始编辑以来，有人更改了文件类型");
 		m.put("Someone made below change since you started editing", "自您开始编辑以来，有人进行了以下更改");
 		m.put("Sort", "排序");
 		m.put("Source", "源");
@@ -3406,6 +3425,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specifies the attribute containing group name inside the found group LDAP entry. Value of this attribute will be mapped to a OneDev group. This attribute is normally set to <i>cn</i>", 
 			"指定在找到的组 LDAP 条目中包含组名称的属性。此属性的值将映射到 OneDev 组。此属性通常设置为 <i>cn</i>");
 		m.put("Specifies who can access this AI service", "指定谁可以访问此 AI 服务");
+		m.put("Specifies who can access this AI service. AI service can be accessed in below approaches:", 
+			"指定谁可以访问此 AI 服务。AI 服务可以通过以下方式访问：");
 		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
 			"指定 .net TRX 测试结果文件相对 <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>，例如 <tt>TestResults/*.trx</tt>。使用 * 或 ? 进行模式匹配");
 		m.put("Specify <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is access token with code write permission over above projects. Commits, issues, and pull requests will also be created under name of the access token owner", 
@@ -3849,6 +3870,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("System Date", "系统日期");
 		m.put("System Email Address", "系统电子邮件地址");
 		m.put("System Maintenance", "系统维护");
+		m.put("System Prompt", "系统提示");
 		m.put("System Setting", "系统设置");
 		m.put("System Settings", "系统设置");
 		m.put("System email address defined in mail setting should be used as recipient of such email, and project name may be appended to this address using to indicate where to create issues. For instance, if system email address is specified as <tt>support@example.com</tt>, sending email to <tt>support+myproject@example.com</tt> will create issue in <tt>myproject</tt>. If project name is not appended, OneDev will look up the project using project designation information below", 
@@ -4074,6 +4096,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"为避免重复，此处显示的估计/剩余时间不包括从 \"{0}\" 聚合的时间");
 		m.put("To avoid duplication, spent time showing here does not include those aggregated from \"{0}\"", 
 			"为避免重复，这里显示的时间不包括从 \"{0}\" 聚合的时间");
+		m.put("To use this package, add below to project pom.xml", "要使用此包，请将以下内容添加到项目 pom.xml");
 		m.put("Toggle change history", "切换更改历史");
 		m.put("Toggle comments", "切换评论");
 		m.put("Toggle commits", "切换提交");
@@ -4329,6 +4352,9 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Verification Code", "验证码");
 		m.put("Verification email sent, please check it", "验证电子邮件已发送，请检查");
 		m.put("Verify", "验证");
+		m.put("Via chat interface", "通过聊天界面");
+		m.put("Via mention in issue or pull request comments", "通过在工单或合并请求评论中提到");
+		m.put("Via pull request reviewer", "通过合并请求审查者");
 		m.put("View", "查看");
 		m.put("View source", "查看源代码");
 		m.put("View statistics", "查看统计信息");
@@ -4620,6 +4646,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("pull request to branches \"{0}\" is discarded", "分支 \"{0}\" 的合并请求被放弃");
 		m.put("pull request to branches \"{0}\" is merged", "分支 \"{0}\" 的合并请求被合并");
 		m.put("pull request to branches \"{0}\" is opened", "分支 \"{0}\" 的合并请求被创建");
+		m.put("pull request {0}", "合并请求 {0}");
 		m.put("pull requests", "合并请求");
 		m.put("reconciliation (need administrator permission)", "一致性检查（需要管理员权限）");
 		m.put("reports", "报告");
@@ -4714,19 +4741,15 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("AI system prompt has been saved", "AI 系统提示已保存");
-		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
-			"如果您想从命令行编译项目，请将以下内容添加到 $HOME/.m2/settings.xml");
-		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
-			"对于 CI/CD 任务，使用自定义 settings.xml 更方便，例如通过在命令步骤中使用以下代码：");
-		m.put("Login Command", "登录命令");
-		m.put("Make sure to log in with an account that has package read permission for the project", 
-			"确保使用对项目具有包读取权限的账户登录");
-		m.put("Nothing changed yet", "尚未更改任何内容");
-		m.put("Someone changed file mode since you started editing", "自您开始编辑以来，有人更改了文件模式");
-		m.put("Someone changed file type since you started editing", "自您开始编辑以来，有人更改了文件类型");
-		m.put("System Prompt", "系统提示");
-		m.put("To use this package, add below to project pom.xml", "要使用此包，请将以下内容添加到项目 pom.xml");
+		m.put("All members of entitled groups will be able to access this AI service", "被授权的组的所有成员将能够访问此 AI 服务");
+		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
+			"被授权的项目可以将 AI 用户添加为合并请求的审查者。在这种情况下，AI 用户使用其自身的权限执行任务。");
+		m.put("Entitled projects will be able to access this AI service", "被授权的项目将能够访问此 AI 服务");
+		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
+			"被授权的用户可以通过聊天界面与 AI 用户互动，以执行诸如理解代码库、编写 CI/CD 规范或调查 CI/CD 任务失败等任务。在此模式下，AI 用户以与与其互动的用户相同的权限操作，忽略分配给 AI 用户本身的权限。");
+		m.put("Entitled users can mention the AI user in issue or pull request comments to request assistance. In this case, the AI user executes tasks using its own permissions.", 
+			"被授权的用户可以在工单或合并请求评论中提及 AI 用户以请求帮助。在这种情况下，AI 用户使用其自身的权限执行任务。");
+		m.put("Entitled users will be able to access this AI service", "被授权的用户将能够访问此 AI 服务");
 	}
 		
 	@Override

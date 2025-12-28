@@ -1,14 +1,12 @@
 package io.onedev.server.web.page.project.pullrequests.detail;
 
-import static io.onedev.server.ai.ChatToolUtils.convertToJson;
-import static io.onedev.server.ai.PullRequestHelper.getDetail;
+import static io.onedev.server.ai.ToolUtils.wrapForChat;
 import static io.onedev.server.entityreference.ReferenceUtils.transformReferences;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
 import static io.onedev.server.web.translation.Translation._T;
-import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 import java.io.Serializable;
@@ -21,7 +19,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -70,13 +67,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jetbrains.annotations.Nullable;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 
-import dev.langchain4j.agent.tool.ToolSpecification;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
-import io.onedev.server.ai.PullRequestHelper;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.data.migration.VersionedXmlDoc;
@@ -177,7 +171,6 @@ import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.editbean.CommitMessageBean;
 import io.onedev.server.web.util.editbean.LabelsBean;
-import io.onedev.server.web.websocket.ChatToolExecution;
 import io.onedev.server.xodus.VisitInfoService;
 
 public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware, ChatToolAware {
@@ -2404,42 +2397,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	}
 
 	@Override
-	public Collection<ChatTool> getChatTools() {
-		var tools = new ArrayList<ChatTool>();
-		tools.add(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentPullRequest")
-					.description("Get info of current pull request in json format")
-					.build();
-			}
-
-			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {	
-				return completedFuture(new ChatToolExecution.Result(convertToJson(getDetail(getProject(), getPullRequest())), false));
-			}
-			
-		});
-
-		tools.add(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentPullRequestComments")
-					.description("Get comments of current pull request in json format")
-					.build();
-			}
-
-			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {			
-				return completedFuture(new ChatToolExecution.Result(convertToJson(PullRequestHelper.getComments(getPullRequest())), false));
-			}
-			
-		});
-		return tools;
+	public List<ChatTool> getChatTools() {
+		return wrapForChat(getPullRequest().getTools());
 	}
 
 }

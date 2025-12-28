@@ -1,4 +1,4 @@
-package io.onedev.server.service;
+package io.onedev.server.ai;
 
 import java.util.List;
 
@@ -8,6 +8,7 @@ import org.jspecify.annotations.Nullable;
 import io.onedev.server.model.Chat;
 import io.onedev.server.model.ChatMessage;
 import io.onedev.server.model.User;
+import io.onedev.server.service.EntityService;
 import io.onedev.server.service.support.ChatResponding;
 import io.onedev.server.web.WebSession;
 
@@ -22,9 +23,9 @@ public interface ChatService extends EntityService<Chat> {
      * 
      * @param page the page that the request is sent from
      * @param request the request to send
-     * @param timeout the timeout in seconds
+     * @param timeoutSeconds the timeout in seconds
      */
-    void sendRequest(Page page, ChatMessage request, int timeout);
+    void sendRequest(Page page, ChatMessage request, int timeoutSeconds);
 	
     @Nullable
     ChatResponding getResponding(WebSession session, Chat chat);

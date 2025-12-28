@@ -1,17 +1,51 @@
 package io.onedev.server.notification;
 
+import static io.onedev.server.notification.NotificationUtils.getEmailBody;
+import static io.onedev.server.notification.NotificationUtils.isNotified;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
+import org.apache.shiro.authz.Permission;
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import io.onedev.server.service.PullRequestMentionService;
-import io.onedev.server.service.PullRequestWatchService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UserService;
+
+import io.onedev.server.ai.AiTask;
+import io.onedev.server.ai.TaskTool;
+import io.onedev.server.ai.responsehandlers.AddCodeCommentReply;
+import io.onedev.server.ai.responsehandlers.AddPullRequestComment;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.project.pullrequest.*;
+import io.onedev.server.event.project.pullrequest.PullRequestAssigned;
+import io.onedev.server.event.project.pullrequest.PullRequestChanged;
+import io.onedev.server.event.project.pullrequest.PullRequestCodeCommentCreated;
+import io.onedev.server.event.project.pullrequest.PullRequestCodeCommentEvent;
+import io.onedev.server.event.project.pullrequest.PullRequestCodeCommentReplyCreated;
+import io.onedev.server.event.project.pullrequest.PullRequestCommentCreated;
+import io.onedev.server.event.project.pullrequest.PullRequestEvent;
+import io.onedev.server.event.project.pullrequest.PullRequestOpened;
+import io.onedev.server.event.project.pullrequest.PullRequestReviewRequested;
+import io.onedev.server.event.project.pullrequest.PullRequestUpdated;
 import io.onedev.server.mail.MailService;
 import io.onedev.server.markdown.MentionParser;
-import io.onedev.server.model.*;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestAssignment;
+import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
+import io.onedev.server.model.PullRequestWatch;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
@@ -24,23 +58,18 @@ import io.onedev.server.search.entity.QueryWatchBuilder;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.service.PullRequestMentionService;
+import io.onedev.server.service.PullRequestWatchService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.commenttext.MarkdownText;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.xodus.VisitInfoService;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.WordUtils;
-import org.apache.shiro.authz.Permission;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static io.onedev.server.notification.NotificationUtils.getEmailBody;
-import static io.onedev.server.notification.NotificationUtils.isNotified;
 
 @Singleton
 public class PullRequestNotificationManager {
+
+	private static final int AI_TASK_TIMEOUT_SECONDS = 300;
 
 	@Inject
 	private MailService mailService;
@@ -131,7 +160,7 @@ public class PullRequestNotificationManager {
 			if (user != null) {
 				if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
 					notifiedUsers.add(user); 
-				if (!user.isSystem() && user.getType() != User.Type.SERVICE)
+				if (!user.isSystem() && user.getType() != User.Type.AI)
 					watchService.watch(request, user, true);
 			}
 	
@@ -144,7 +173,7 @@ public class PullRequestNotificationManager {
 					notifiedUsers.add(committer);
 				}
 				for (User each : committers) {
-					if (!each.isSystem() && each.getType() != User.Type.SERVICE)
+					if (!each.isSystem() && each.getType() != User.Type.AI)
 						watchService.watch(request, each, true);
 				}
 			}
@@ -182,20 +211,27 @@ public class PullRequestNotificationManager {
 						|| changeData instanceof PullRequestRequestedForChangesData
 						|| changeData instanceof PullRequestDiscardData)
 						&& request.getSubmitter() != null && !notifiedUsers.contains(request.getSubmitter())) {
-					String subject = String.format(
-							"[Pull Request %s] (%s) %s", 
-							request.getReference(),
-							WordUtils.capitalize(changeData.getActivity()), 
-							emojis.apply(request.getTitle()));
-					String threadingReferences = String.format("<%s-%s@onedev>",
-							changeData.getActivity().replace(' ', '-'), request.getUUID());
-					EmailAddress emailAddress = request.getSubmitter().getPrimaryEmailAddress();
-					if (emailAddress != null && emailAddress.isVerified()) {
-						mailService.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
-								Lists.newArrayList(), Lists.newArrayList(), subject,
-								getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null),
-								getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
-								replyAddress, senderName, threadingReferences);
+					if (request.getSubmitter().getType() != User.Type.AI) {
+						String subject = String.format(
+								"[Pull Request %s] (%s) %s", 
+								request.getReference(),
+								WordUtils.capitalize(changeData.getActivity()), 
+								emojis.apply(request.getTitle()));
+						String threadingReferences = String.format("<%s-%s@onedev>",
+								changeData.getActivity().replace(' ', '-'), request.getUUID());
+						EmailAddress emailAddress = request.getSubmitter().getPrimaryEmailAddress();
+						if (emailAddress != null && emailAddress.isVerified()) {
+							mailService.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
+									Lists.newArrayList(), Lists.newArrayList(), subject,
+									getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null),
+									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
+									replyAddress, senderName, threadingReferences);
+						}
+					} else if (changeData instanceof PullRequestRequestedForChangesData 
+							&& isAiEntitled(user, request, request.getSubmitter())) {
+						new AddPullRequestComment(request.getId()).onResponse(
+							request.getSubmitter(), 
+							"I don't know how to improve the pull request yet");
 					}
 					notifiedUsers.add(request.getSubmitter());
 				}
@@ -206,53 +242,72 @@ public class PullRequestNotificationManager {
 			}
 	
 			for (User assignee : assignees) {
-				if (assignee.getType() != User.Type.SERVICE)
+				if (assignee.getType() != User.Type.AI)
 					watchService.watch(request, assignee, true);
 				if (!notifiedUsers.contains(assignee)) {
-					String subject = String.format(
-							"[Pull Request %s] (Assigned) %s",
-							request.getReference(), 
-							emojis.apply(request.getTitle()));
-					String threadingReferences = String.format("<assigned-%s@onedev>", request.getUUID());
-					String assignmentSummary;
-					if (user != null)
-						assignmentSummary = user.getDisplayName() + " assigned to you";
-					else
-						assignmentSummary = "Assigned to you";
-					EmailAddress emailAddress = assignee.getPrimaryEmailAddress();
-					if (emailAddress != null && emailAddress.isVerified()) {
-						mailService.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
-								Lists.newArrayList(), Lists.newArrayList(), subject,
-								getEmailBody(true, event, assignmentSummary, event.getHtmlBody(), url, replyable, null),
-								getEmailBody(false, event, assignmentSummary, event.getTextBody(), url, replyable, null),
-								replyAddress, senderName, threadingReferences);
+					if (assignee.getType() != User.Type.AI) {
+						String subject = String.format(
+								"[Pull Request %s] (Assigned) %s",
+								request.getReference(), 
+								emojis.apply(request.getTitle()));
+						String threadingReferences = String.format("<assigned-%s@onedev>", request.getUUID());
+						String assignmentSummary;
+						if (user != null)
+							assignmentSummary = user.getDisplayName() + " assigned to you";
+						else
+							assignmentSummary = "Assigned to you";
+						EmailAddress emailAddress = assignee.getPrimaryEmailAddress();
+						if (emailAddress != null && emailAddress.isVerified()) {
+							mailService.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
+									Lists.newArrayList(), Lists.newArrayList(), subject,
+									getEmailBody(true, event, assignmentSummary, event.getHtmlBody(), url, replyable, null),
+									getEmailBody(false, event, assignmentSummary, event.getTextBody(), url, replyable, null),
+									replyAddress, senderName, threadingReferences);
+						}
+					} else if (isAiEntitled(user, request, assignee)) {
+						new AddPullRequestComment(request.getId()).onResponse(assignee, "I don't know how to work as assignee yet");
 					}
 					notifiedUsers.add(assignee);
 				}
 			}
 	
 			for (User reviewer : reviewers) {
-				if (reviewer.getType() != User.Type.SERVICE)
+				if (reviewer.getType() != User.Type.AI)
 					watchService.watch(request, reviewer, true);
 				if (!notifiedUsers.contains(reviewer)) {
-					String subject = String.format(
+					if (reviewer.getType() != User.Type.AI) {
+						String subject = String.format(
 							"[Pull Request %s] (Review Request) %s",
 							request.getReference(), 
 							emojis.apply(request.getTitle()));
-					String threadingReferences = String.format("<review-invitation-%s@onedev>", request.getUUID());
-					String reviewInvitationSummary;
-					if (user != null)
-						reviewInvitationSummary = user.getDisplayName() + " requested review from you";
-					else
-						reviewInvitationSummary = "Requested review from you";
-	
-					EmailAddress emailAddress = reviewer.getPrimaryEmailAddress();
-					if (emailAddress != null && emailAddress.isVerified()) {
-						mailService.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
-								Lists.newArrayList(), Lists.newArrayList(), subject,
-								getEmailBody(true, event, reviewInvitationSummary, event.getHtmlBody(), url, replyable, null),
-								getEmailBody(false, event, reviewInvitationSummary, event.getTextBody(), url, replyable, null),
-								replyAddress, senderName, threadingReferences);
+						String threadingReferences = String.format("<review-invitation-%s@onedev>", request.getUUID());
+						String reviewInvitationSummary;
+						if (user != null)
+							reviewInvitationSummary = user.getDisplayName() + " requested review from you";
+						else
+							reviewInvitationSummary = "Requested review from you";
+		
+						EmailAddress emailAddress = reviewer.getPrimaryEmailAddress();
+						if (emailAddress != null && emailAddress.isVerified()) {
+							mailService.sendMailAsync(Lists.newArrayList(emailAddress.getValue()),
+									Lists.newArrayList(), Lists.newArrayList(), subject,
+									getEmailBody(true, event, reviewInvitationSummary, event.getHtmlBody(), url, replyable, null),
+									getEmailBody(false, event, reviewInvitationSummary, event.getTextBody(), url, replyable, null),
+									replyAddress, senderName, threadingReferences);
+						}
+					} else if (isAiEntitled(null, request, reviewer)) {
+						var task = new AiTask(
+							null,
+							"""
+								Review current pull request for major issues (ignore styling/format/documentation issues) \
+								introduced in the change. Check full content of relevant files to understand the change \
+								if necessary. Check existing comments for conversation context. Approve the pull request \
+								if you are satisfied with it, or request for changes if you think it needs more work. \
+								Summarize found issues in response and for each issue, make sure to quote relevant code \
+								snippets if applicable""",
+							request.getTools(), 
+							new AddPullRequestComment(request.getId()));
+						userService.execute(reviewer, task, AI_TASK_TIMEOUT_SECONDS);
 					}
 					notifiedUsers.add(reviewer);
 				}
@@ -264,22 +319,52 @@ public class PullRequestNotificationManager {
 					User mentionedUser = userService.findByName(userName);
 					if (mentionedUser != null) {
 						mentionService.mention(request, mentionedUser);
-						if (mentionedUser.getType() != User.Type.SERVICE)
+						if (mentionedUser.getType() != User.Type.AI) 
 							watchService.watch(request, mentionedUser, true);
 						if (!isNotified(notifiedEmailAddresses, mentionedUser)) {
-							String subject = String.format(
-									"[Pull Request %s] (Mentioned You) %s", 
-									request.getReference(), 
-									emojis.apply(request.getTitle()));
-							String threadingReferences = String.format("<mentioned-%s@onedev>", request.getUUID());
-	
-							EmailAddress emailAddress = mentionedUser.getPrimaryEmailAddress();
-							if (emailAddress != null && emailAddress.isVerified()) {
-								mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()),
-										Sets.newHashSet(), Sets.newHashSet(), subject,
-										getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null),
-										getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
-										replyAddress, senderName, threadingReferences);
+							if (mentionedUser.getType() != User.Type.AI) {
+								String subject = String.format(
+										"[Pull Request %s] (Mentioned You) %s", 
+										request.getReference(), 
+										emojis.apply(request.getTitle()));
+								String threadingReferences = String.format("<mentioned-%s@onedev>", request.getUUID());
+		
+								EmailAddress emailAddress = mentionedUser.getPrimaryEmailAddress();
+								if (emailAddress != null && emailAddress.isVerified()) {
+									mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()),
+											Sets.newHashSet(), Sets.newHashSet(), subject,
+											getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null),
+											getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
+											replyAddress, senderName, threadingReferences);
+								}
+							} else if (isAiEntitled(user, request, mentionedUser)) {
+								if (event instanceof PullRequestOpened || event instanceof PullRequestCommentCreated) {
+									var systemPrompt = """
+										You are mentioned in a pull request. The content mentioning you is presented as user \
+										prompt. Use existing comments as conversation context. Call relevant tools to get \
+										information about the pull request if necessary""";
+									var task = new AiTask(
+										systemPrompt.formatted(mentionedUser.getName()), 
+										event.getTextBody(), 
+										request.getTools(), 
+										new AddPullRequestComment(request.getId()));
+									userService.execute(mentionedUser, task, AI_TASK_TIMEOUT_SECONDS);
+								} else if (event instanceof PullRequestCodeCommentCreated || event instanceof PullRequestCodeCommentReplyCreated) {
+									String systemPrompt = """
+										You are mentioned in a pull request code comment. The content mentioning you is presented \
+										as user prompt. Use existing comments as conversation context. Call relevant tools to get \
+										information about the code comment and pull request if necessary""";
+									var tools = new ArrayList<TaskTool>(request.getTools());
+									var codeCommentEvent = (PullRequestCodeCommentEvent) event;
+									var comment = codeCommentEvent.getComment();
+									tools.addAll(comment.getTools());			
+									var task = new AiTask(
+										systemPrompt.formatted(mentionedUser.getName()), 
+										event.getTextBody(), 
+										tools, 
+										new AddCodeCommentReply(comment.getId()));
+									userService.execute(mentionedUser, task, AI_TASK_TIMEOUT_SECONDS);
+								}
 							}
 							notifiedUsers.add(mentionedUser);
 						}
@@ -326,6 +411,24 @@ public class PullRequestNotificationManager {
 							replyAddress, senderName, threadingReferences);
 				}
 			}			
+		}
+	}
+
+	private boolean isAiEntitled(@Nullable User user, PullRequest request, User ai) {
+		if (user != null && user.isOrdinary()) {
+			if (user.isEntitledToAi(ai)) {
+				return true;
+			} else {
+				new AddPullRequestComment(request.getId()).onResponse(user, "@%s sorry but you are not entitled to access me".formatted(user.getName()));				
+				return false;
+			}
+		} else {
+			if (request.getProject().isEntitledToAi(ai)) {
+				return true;
+			} else {
+				new AddPullRequestComment(request.getId()).onResponse(ai, "Sorry but this project is not entitled to access me");				
+				return false;
+			}
 		}
 	}
 

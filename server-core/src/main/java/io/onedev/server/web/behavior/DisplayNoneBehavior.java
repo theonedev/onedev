@@ -7,7 +7,7 @@ import org.apache.wicket.model.Model;
 public class DisplayNoneBehavior extends AttributeAppender {
 	
 	public DisplayNoneBehavior() {
-		super("style", Model.of("display:none"));
+		super("style", Model.of("display:none;"));
 	}
 
 	@Override

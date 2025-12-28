@@ -341,7 +341,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				var page = (LayoutPage)getPage();
-				setVisible(WicketUtils.isSubscriptionActive() && !page.getAssistant().getEntitledAis().isEmpty());
+				setVisible(!page.getAssistant().getEntitledAis().isEmpty());
 			}
 		});
 

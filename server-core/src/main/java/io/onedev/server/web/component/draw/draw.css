@@ -1,4 +1,4 @@
-.floating.off-canvas {
+.floating.draw {
 	position: fixed;
 	top: 0;
 	bottom: 0;
@@ -7,16 +7,16 @@
 	border-radius: 0;
 }
 
-.floating.off-canvas>.content {
+.floating.draw>.content {
 	height: 100%;
 }
-.floating.off-canvas-left {
+.floating.draw-left {
 	left: 0;
 }
-.floating.off-canvas-right {
+.floating.draw-right {
 	right: 0;
 }
-.floating.off-canvas>.content>.card {
+.floating.draw>.content>.card {
 	box-shadow: none;
 	border-radius: 0;
 }

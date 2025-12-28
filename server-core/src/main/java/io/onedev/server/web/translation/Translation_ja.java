@@ -130,6 +130,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("AI Settings", "AI設定");
 		m.put("AI entitlement settings have been saved", "AI権限設定が保存されました");
 		m.put("AI model settings have been saved", "AIモデル設定が保存されました");
+		m.put("AI system prompt has been saved", "AIシステムプロンプトが保存されました");
 		m.put("API Key", "APIキー");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"例えば、<tt>https://your-domain.atlassian.net/rest/api/3</tt> のような JIRA クラウドインスタンスの API URL");
@@ -279,6 +280,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Allow Multiple", "複数を許可");
 		m.put("Allowed Licenses", "許可されたライセンス");
 		m.put("Allowed Self Sign-Up Email Domain", "許可されたセルフサインアップメールドメイン");
+		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
+			"コマンドラインからプロジェクトをコンパイルしたい場合は、以下を$HOME/.m2/settings.xmlに追加してください");
 		m.put("Always", "常に");
 		m.put("Always Pull Image", "常にイメージをプル");
 		m.put("An issue already linked for {0}. Unlink it first", "{0}に既にリンクされた課題があります。まずリンクを解除してください");
@@ -423,6 +426,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Belonging Groups", "所属グループ");
 		m.put("Below are some common criterias. Type in search box above to view the complete list and available combinations.", 
 			"以下は一般的な条件です。上の検索ボックスに入力して完全なリストと利用可能な組み合わせを表示してください。");
+		m.put("Below content is restored from an unsaved change. <a class=\"clear-unsaved-change\">Clear</a> to discard", 
+			"以下の内容は未保存の変更から復元されました。<a class=\"clear-unsaved-change\">クリア</a>して破棄");
 		m.put("Below content is restored from an unsaved change. Clear to discard", "以下の内容は未保存の変更から復元されました。クリアして破棄してください");
 		m.put("Below information will also be sent", "以下の情報も送信されます");
 		m.put("Binary file.", "バイナリファイル");
@@ -598,9 +603,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Changes since this comment", "このコメント以降の変更");
 		m.put("Channel Notification", "チャンネル通知");
 		m.put("Chart Metadata", "チャートメタデータ");
+		m.put("Chat Preserve Days", "チャット保存日数");
 		m.put("Chat deleted", "チャットが削除されました");
+		m.put("Chat preserve days setting has been saved", "チャット保存日数の設定が保存されました");
 		m.put("Chat with", "とのチャット");
 		m.put("Chat with AI", "AIとのチャット");
+		m.put("Chats older than the specified number of days will be automatically deleted during daily maintenance.", 
+			"指定された日数より古いチャットは、日次メンテナンス中に自動的に削除されます。");
 		m.put("Check <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHub's guide</a> on how to generate and use GPG keys to sign your commits", 
 			"コミットに署名するためのGPGキーを生成して使用する方法については、<a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHubのガイド</a>を確認してください");
 		m.put("Check <a href=\"https://docs.onedev.io/administration-guide/agent-management\" target=\"_blank\">agent management</a> for details, including instructions on how to run agent as service", 
@@ -1202,7 +1211,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Enter your details to create your account", "アカウントを作成するために詳細を入力してください");
 		m.put("Enter your details to login to your account", "アカウントにログインするための詳細を入力してください");
 		m.put("Enter your user name or email to reset password", "パスワードをリセットするには、ユーザー名またはメールを入力してください");
-		m.put("Entitle to All Users", "すべてのユーザーに権限を付与");
+		m.put("Entitle to All Users and Projects", "すべてのユーザーとプロジェクトに権限を付与");
 		m.put("Entitled Groups", "権限を持つグループ");
 		m.put("Entitled Projects", "権限を持つプロジェクト");
 		m.put("Entitled Users", "権限を持つユーザー");
@@ -1321,7 +1330,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("File missing or obsolete", "ファイルが欠落しているか廃止されています");
 		m.put("File name", "ファイル名");
 		m.put("File name patterns such as *.java, *.c", "ファイル名パターン（例: *.java, *.c）");
-		m.put("File path to get text content", "テキストコンテンツを取得するファイルパス");
 		m.put("Files", "ファイル一覧");
 		m.put("Files to Be Analyzed", "分析対象のファイル");
 		m.put("Filter", "フィルター");
@@ -1364,13 +1372,14 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Fixing...", "修正中...");
 		m.put("Float", "浮動小数点");
 		m.put("Flush", "フラッシュ");
-		m.put("Folder path to list all files and subfolders", "すべてのファイルとサブフォルダを一覧表示するフォルダパス");
 		m.put("Follow below instructions to publish packages into this project", "以下の手順に従って、このプロジェクトにパッケージを公開してください");
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
 			"以下の手順に従って、リモートマシンにエージェントをインストールしてください（Linux/Windows/Mac OS X/FreeBSD対応）:");
 		m.put("For CI/CD job, add this gem to Gemfile like below", "CI/CDジョブの場合、以下のようにGemfileにこのgemを追加してください");
 		m.put("For CI/CD job, add this package to requirements.txt and run below to install the package via command step", 
 			"CI/CDジョブの場合、requirements.txtにこのパッケージを追加し、以下のコマンドステップでパッケージをインストールしてください");
+		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
+			"CI/CDジョブでは、カスタムsettings.xmlを使用する方が便利です。例えば、コマンドステップで以下のコードを使用します：");
 		m.put("For CI/CD job, run below to add package repository via command step", "CI/CDジョブの場合、以下のコマンドステップでパッケージリポジトリを追加してください");
 		m.put("For CI/CD job, run below to add package source via command step", "CI/CDジョブの場合、以下のコマンドステップでパッケージソースを追加してください");
 		m.put("For CI/CD job, run below to add source via command step", "CI/CDジョブの場合、以下のコマンドステップでソースを追加してください");
@@ -1678,6 +1687,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"無効な状態です。システム設定で指定されたサーバーURLを使用してOneDevを訪問していることを確認してください");
 		m.put("Invalid subscription key", "無効なサブスクリプションキー");
 		m.put("Invalid working period", "無効な作業期間");
+		m.put("Investigate build failure with AI", "AIでビルド失敗を調査");
 		m.put("Invitation sent to \"{0}\"", "\"{0}\"に招待を送信しました");
 		m.put("Invitation to \"{0}\" deleted", "\"{0}\"への招待を削除しました");
 		m.put("Invitations", "招待");
@@ -1914,6 +1924,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Log Work", "作業ログ");
 		m.put("Log not available for offline agent", "オフラインエージェントではログは利用できません");
 		m.put("Log work", "作業ログ");
+		m.put("Login Command", "ログインコマンド");
 		m.put("Login Name", "ログイン名");
 		m.put("Login and generate refresh token", "ログインしてリフレッシュトークンを生成");
 		m.put("Login name already used by another account", "ログイン名は他のアカウントで既に使用されています");
@@ -1959,6 +1970,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Make sure the account has package ${permission} permission over the project", "アカウントがプロジェクトに対するパッケージ${permission}権限を持っていることを確認してください");
 		m.put("Make sure the account has package read permission over the project", "アカウントがプロジェクトに対するパッケージ読み取り権限を持っていることを確認してください");
 		m.put("Make sure the user has package write permission over the project", "ユーザーがプロジェクトに対するパッケージ書き込み権限を持っていることを確認してください");
+		m.put("Make sure to log in with an account that has package read permission for the project", 
+			"プロジェクトのパッケージ読み取り権限を持つアカウントでログインしていることを確認してください");
 		m.put("Malformed %sbase query", "不正な%sbaseクエリ");
 		m.put("Malformed %squery", "不正な%sクエリ");
 		m.put("Malformed build spec (import project: {0}, import revision: {1})", "不正なビルド仕様（インポートプロジェクト: {0}, インポートリビジョン: {1}）");
@@ -2010,6 +2023,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Merged", "マージ済み");
 		m.put("Merged pull request \"{0}\" ({1})", "プルリクエスト「{0}」({1})がマージされました");
 		m.put("Merges pull request", "プルリクエストをマージします");
+		m.put("Message is too long. Max {0} characters", "メッセージが長すぎます。最大{0}文字");
 		m.put("Meta", "メタ");
 		m.put("Meta Info", "メタ情報");
 		m.put("Microsoft 365", "Microsoft 365");
@@ -2239,6 +2253,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Not run", "未実行");
 		m.put("Not specified", "未指定");
 		m.put("Note", "注記");
+		m.put("Nothing changed yet", "まだ何も変更されていません");
 		m.put("Nothing to preview", "プレビューするものがありません");
 		m.put("Notification", "通知");
 		m.put("Notifications", "通知一覧");
@@ -2350,6 +2365,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、ビルドするプラットフォームを<span class='text-info'>カンマ区切り</span>で指定してください。例: <tt>linux/amd64,linux/arm64</tt>。ジョブを実行しているノードのプラットフォームでビルドする場合は空のままにしてください。");
 		m.put("Optionally specify <span class='text-info'>comma separated</span> platforms to scan, for instance <tt>linux/amd64,linux/arm64</tt>. Leave empty to scan all platforms in OCI layout", 
 			"オプションで、スキャンするプラットフォームを<span class='text-info'>カンマ区切り</span>で指定してください。例: <tt>linux/amd64,linux/arm64</tt>。OCIレイアウト内のすべてのプラットフォームをスキャンする場合は空のままにしてください。");
+		m.put("Optionally specify API key for authentication", "認証のためにAPIキーを任意で指定");
 		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"オプションで、<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>に対するDockerfileの相対パスを指定してください。上記で指定したビルドパスの下にある<tt>Dockerfile</tt>ファイルを使用する場合は空のままにしてください。");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "オプションで、Renovate CLIで使用するJavaScript設定を指定してください。");
@@ -2563,8 +2579,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Ordered List", "順序付きリスト");
 		m.put("Ordered list", "順序付きリスト");
 		m.put("Ordinary", "通常");
-		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account (working in progress)", 
-			"通常: 通常のアカウント<br>サービス: サービスアカウントにはパスワードとメールアドレスがなく、その活動に対する通知は生成されません<br>AI: AIアカウント（作業中）");
+		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account to answer questions about the code base, edit CI/CD spec, investigate job failure, or review pull request", 
+			"通常: 通常のアカウント<br>サービス: サービスアカウントにはパスワードとメールアドレスがなく、その活動に対する通知は生成されません<br>AI: コードベースに関する質問に答えたり、CI/CD仕様を編集したり、ジョブの失敗を調査したり、プルリクエストをレビューするAIアカウント");
 		m.put("Osv License Scanner", "Osvライセンススキャナー");
 		m.put("Osv Vulnerability Scanner", "Osv脆弱性スキャナー");
 		m.put("Other", "その他");
@@ -3352,6 +3368,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Some related commits of the code comment is missing", "コードコメントに関連する一部のコミットが欠落しています");
 		m.put("Some related commits of the pull request are missing", "プルリクエストに関連する一部のコミットが欠落しています");
 		m.put("Some required builds not passed", "必要なビルドがいくつか通過していません");
+		m.put("Someone changed file mode since you started editing", "編集を開始してから誰かがファイルモードを変更しました");
+		m.put("Someone changed file type since you started editing", "編集を開始してから誰かがファイルタイプを変更しました");
 		m.put("Someone made below change since you started editing", "編集を開始してから以下の変更が行われました。");
 		m.put("Sort", "ソート");
 		m.put("Source", "ソース");
@@ -3382,6 +3400,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specifies the attribute containing group name inside the found group LDAP entry. Value of this attribute will be mapped to a OneDev group. This attribute is normally set to <i>cn</i>", 
 			"見つかったグループ LDAP エントリ内のグループ名を含む属性を指定します。この属性の値は OneDev グループにマッピングされます。この属性は通常 <i>cn</i> に設定されます");
 		m.put("Specifies who can access this AI service", "このAIサービスにアクセスできる人を指定します");
+		m.put("Specifies who can access this AI service. AI service can be accessed in below approaches:", 
+			"このAIサービスにアクセスできる人を指定します。AIサービスには以下の方法でアクセスできます：");
 		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する .net TRX テスト結果ファイルを指定します。例: <tt>TestResults/*.trx</tt>。パターンマッチには * または ? を使用してください");
 		m.put("Specify <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is access token with code write permission over above projects. Commits, issues, and pull requests will also be created under name of the access token owner", 
@@ -3825,6 +3845,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("System Date", "システム日付");
 		m.put("System Email Address", "システムメールアドレス");
 		m.put("System Maintenance", "システムメンテナンス");
+		m.put("System Prompt", "システムプロンプト");
 		m.put("System Setting", "システム設定");
 		m.put("System Settings", "システム設定");
 		m.put("System email address defined in mail setting should be used as recipient of such email, and project name may be appended to this address using to indicate where to create issues. For instance, if system email address is specified as <tt>support@example.com</tt>, sending email to <tt>support+myproject@example.com</tt> will create issue in <tt>myproject</tt>. If project name is not appended, OneDev will look up the project using project designation information below", 
@@ -4050,6 +4071,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"重複を避けるため、ここに表示される推定/残り時間には\"{0}\"から集計されたものは含まれていません");
 		m.put("To avoid duplication, spent time showing here does not include those aggregated from \"{0}\"", 
 			"重複を避けるため、ここに表示される費やした時間には\"{0}\"から集計されたものは含まれていません");
+		m.put("To use this package, add below to project pom.xml", "このパッケージを使用するには、以下をプロジェクトのpom.xmlに追加してください");
 		m.put("Toggle change history", "変更履歴を切り替える");
 		m.put("Toggle comments", "コメントを切り替える");
 		m.put("Toggle commits", "コミットを切り替える");
@@ -4305,6 +4327,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Verification Code", "確認コード");
 		m.put("Verification email sent, please check it", "確認メールが送信されました。確認してください");
 		m.put("Verify", "確認する");
+		m.put("Via chat interface", "チャットインターフェースを通じて");
+		m.put("Via mention in issue or pull request comments", "問題やプルリクエストのコメントでの言及を通じて");
+		m.put("Via pull request reviewer", "プルリクエストのレビュアーを通じて");
 		m.put("View", "表示");
 		m.put("View source", "ソースを表示");
 		m.put("View statistics", "統計を表示");
@@ -4596,6 +4621,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("pull request to branches \"{0}\" is discarded", "ブランチ \"{0}\" へのプルリクエストは破棄されました");
 		m.put("pull request to branches \"{0}\" is merged", "ブランチ \"{0}\" へのプルリクエストはマージされました");
 		m.put("pull request to branches \"{0}\" is opened", "ブランチ \"{0}\" へのプルリクエストは開かれました");
+		m.put("pull request {0}", "プルリクエスト{0}");
 		m.put("pull requests", "プルリクエスト");
 		m.put("reconciliation (need administrator permission)", "調整 (管理者権限が必要)");
 		m.put("reports", "レポート");
@@ -4690,19 +4716,15 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("AI system prompt has been saved", "AIシステムプロンプトが保存されました");
-		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
-			"コマンドラインからプロジェクトをコンパイルしたい場合は、以下を$HOME/.m2/settings.xmlに追加してください");
-		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
-			"CI/CDジョブでは、カスタムsettings.xmlを使用する方が便利です。例えば、コマンドステップで以下のコードを使用します：");
-		m.put("Login Command", "ログインコマンド");
-		m.put("Make sure to log in with an account that has package read permission for the project", 
-			"プロジェクトのパッケージ読み取り権限を持つアカウントでログインしていることを確認してください");
-		m.put("Nothing changed yet", "まだ何も変更されていません");
-		m.put("Someone changed file mode since you started editing", "編集を開始してから誰かがファイルモードを変更しました");
-		m.put("Someone changed file type since you started editing", "編集を開始してから誰かがファイルタイプを変更しました");
-		m.put("System Prompt", "システムプロンプト");
-		m.put("To use this package, add below to project pom.xml", "このパッケージを使用するには、以下をプロジェクトのpom.xmlに追加してください");
+		m.put("All members of entitled groups will be able to access this AI service", "権限を持つグループのすべてのメンバーは、このAIサービスにアクセスできます。");
+		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
+			"権限を持つプロジェクトは、AIユーザーをプルリクエストのレビュアーとして追加できます。このシナリオでは、AIユーザーは自身の権限を使用してタスクを実行します。");
+		m.put("Entitled projects will be able to access this AI service", "権限を持つプロジェクトは、このAIサービスにアクセスできます。");
+		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
+			"権限を持つユーザーは、チャットインターフェースを通じてAIユーザーと対話し、コードベースの理解、CI/CD仕様の作成、CI/CDジョブの失敗の調査などのタスクを実行できます。このモードでは、AIユーザーはそれと対話するユーザーと同じ権限で動作し、AIユーザー自身に割り当てられた権限を無視します。");
+		m.put("Entitled users can mention the AI user in issue or pull request comments to request assistance. In this case, the AI user executes tasks using its own permissions.", 
+			"権限を持つユーザーは、問題やプルリクエストのコメントでAIユーザーに言及して支援を求めることができます。この場合、AIユーザーは自身の権限を使用してタスクを実行します。");
+		m.put("Entitled users will be able to access this AI service", "権限を持つユーザーは、このAIサービスにアクセスできます。");
 	}
 		
 	@Override

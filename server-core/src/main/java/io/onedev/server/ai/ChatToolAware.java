@@ -1,10 +1,10 @@
 package io.onedev.server.ai;
 
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.List;
 
 public interface ChatToolAware extends Serializable {
 
-	Collection<ChatTool> getChatTools();
+	List<ChatTool> getChatTools();
 
 }

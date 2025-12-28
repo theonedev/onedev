@@ -106,6 +106,18 @@ public class Mark implements Serializable {
 	public BlobIdent getBlobIdent() {
 		return new BlobIdent(commitHash, path);
 	}
+
+	@Nullable
+	public Mark permanentize(Project project, ObjectId oldCommitId, ObjectId newCommitId, ObjectId comparisonBase) {
+		if (getCommitHash().equals(comparisonBase.name())) {
+			return mapTo(project, oldCommitId);
+		} else if (getCommitHash().equals(oldCommitId.name()) 
+					|| getCommitHash().equals(newCommitId.name())) {
+			return this;
+		} else {
+			return null;
+		}
+	}
 	
 	@Nullable
 	public Mark mapTo(Project project, ObjectId commitId) {

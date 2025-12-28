@@ -267,7 +267,7 @@ import io.onedev.server.service.SshKeyService;
 import io.onedev.server.service.SsoAccountService;
 import io.onedev.server.service.SsoProviderService;
 import io.onedev.server.service.StopwatchService;
-import io.onedev.server.service.TemporalFutureService;
+import io.onedev.server.service.ManagedFutureService;
 import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserAuthorizationService;
 import io.onedev.server.service.UserEntitlementService;
@@ -354,7 +354,7 @@ import io.onedev.server.service.impl.DefaultSshKeyService;
 import io.onedev.server.service.impl.DefaultSsoAccountService;
 import io.onedev.server.service.impl.DefaultSsoProviderService;
 import io.onedev.server.service.impl.DefaultStopwatchService;
-import io.onedev.server.service.impl.DefaultTemporalFutureService;
+import io.onedev.server.service.impl.DefaultManagedFutureService;
 import io.onedev.server.service.impl.DefaultUrlService;
 import io.onedev.server.service.impl.DefaultUserAuthorizationService;
 import io.onedev.server.service.impl.DefaultUserEntitlementService;
@@ -733,7 +733,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(UploadService.class).to(DefaultUploadService.class);
 		
 		bind(TaskFutureService.class).to(DefaultTaskFutureService.class);
-		bind(TemporalFutureService.class).to(DefaultTemporalFutureService.class);
+		bind(ManagedFutureService.class).to(DefaultManagedFutureService.class);
 	}
 	
 	private void configureBuild() {

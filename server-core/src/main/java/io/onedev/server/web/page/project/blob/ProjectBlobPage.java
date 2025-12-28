@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.blob;
 
+import static io.onedev.server.ai.ToolUtils.wrapForChat;
 import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
@@ -1678,14 +1679,42 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	}
 	
 	@Override
-	public Collection<ChatTool> getChatTools() {
+	public List<ChatTool> getChatTools() {
+		var projectId = getProject().getId();
 		var commitId = getCommit().copy();
+
 		return List.of(
-			new GetRootFilesAndFolders() {
+			wrapForChat(new GetRootFilesAndFolders() {
 				
 				@Override
-				protected Project getProject() {
-					return ProjectBlobPage.this.getProject();
+				protected Long getProjectId() {
+					return projectId;
+				}
+				
+				@Override
+				protected ObjectId getCommitId() {
+					return commitId;
+				}
+
+			}), 
+			wrapForChat(new GetFilesAndSubfolders() {
+				
+				@Override
+				protected Long getProjectId() {
+					return projectId;
+				}
+				
+				@Override
+				protected ObjectId getCommitId() {
+					return commitId;
+				}
+
+			}), 
+			wrapForChat(new GetFileContent(false) {
+
+				@Override
+				protected Long getProjectId() {
+					return projectId;
 				}
 				
 				@Override
@@ -1693,25 +1722,12 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 					return commitId;
 				}
 
-			}, 
-			new GetFilesAndSubfolders() {
-				
-				@Override
-				protected Project getProject() {
-					return ProjectBlobPage.this.getProject();
-				}
-				
-				@Override
-				protected ObjectId getCommitId(boolean oldRevision) {
-					return commitId;
-				}
-
-			}, 
-			new GetFileContent() {
+			}), 
+			wrapForChat(new QuerySymbolDefinitions(false) {
 
 				@Override
-				protected Project getProject() {
-					return ProjectBlobPage.this.getProject();
+				protected Long getProjectId() {
+					return projectId;
 				}
 				
 				@Override
@@ -1719,12 +1735,12 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 					return commitId;
 				}
 
-			}, 
-			new QuerySymbolDefinitions() {
+			}),
+			wrapForChat(new QueryCodeSnippets(false) {
 
 				@Override
-				protected Project getProject() {
-					return ProjectBlobPage.this.getProject();
+				protected Long getProjectId() {
+					return projectId;
 				}
 				
 				@Override
@@ -1732,33 +1748,39 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 					return commitId;
 				}
 
-			},
-			new QueryCodeSnippets() {
-
+			}),
+			wrapForChat(new QueryFilePaths() {
+				
 				@Override
-				protected Project getProject() {
-					return ProjectBlobPage.this.getProject();
+				protected Long getProjectId() {
+					return projectId;
+				}
+				
+				@Override
+				protected ObjectId getCommitId() {
+					return commitId;
+				}
+
+			})
+			/* 
+			wrapForChat(new AddCodeComment(false) {
+			
+				@Override
+				protected Long getProjectId() {
+					return projectId;
+				}
+				
+				@Override
+				protected Long getPullRequestId() {
+					return null;
 				}
 				
 				@Override
 				protected ObjectId getCommitId(boolean oldRevision) {
 					return commitId;
 				}
-
-			},
-			new QueryFilePaths() {
-				
-				@Override
-				protected Project getProject() {
-					return ProjectBlobPage.this.getProject();
-				}
-				
-				@Override
-				protected ObjectId getCommitId(boolean oldRevision) {
-					return commitId;
-				}
-
-			}
+			})
+			*/
 		);
 	}
 

@@ -78,6 +78,19 @@ public interface PullRequestService extends EntityService<PullRequest> {
             @Nullable Criteria<PullRequest> pullRequestCriteria, 
             @Nullable Date startDate, @Nullable Date endDate, StatsGroup statsGroup);
 
+    /**
+     * When compare oldCommitId and newCommitId in context of pull request, assume below scenario:
+     * 1. Pull request is created
+     * 2. Add some commits to target branch
+     * 3. Merge target branch into source branch
+     * When show pull request changes in this case, we compare newCommitId with the comparison base 
+     * instead of oldCommitId to exclude commits added in step 2
+     * 
+     * @param request
+     * @param oldCommitId
+     * @param newCommitId
+     * @return
+     */
 	ObjectId getComparisonBase(PullRequest request, ObjectId oldCommitId, ObjectId newCommitId);
 
 	List<PullRequest> query(User submitter, Date fromDate, Date toDate);

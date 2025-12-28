@@ -1,8 +1,28 @@
 package io.onedev.server.notification;
 
+import static io.onedev.server.notification.NotificationUtils.getEmailBody;
+import static io.onedev.server.notification.NotificationUtils.isNotified;
+import static io.onedev.server.util.EmailAddressUtils.describe;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.mail.internet.InternetAddress;
+
+import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import io.onedev.server.service.*;
+
+import io.onedev.server.ai.AiTask;
+import io.onedev.server.ai.responsehandlers.AddIssueComment;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.issue.IssueCommentCreated;
 import io.onedev.server.event.project.issue.IssueEvent;
@@ -10,7 +30,12 @@ import io.onedev.server.event.project.issue.IssueOpened;
 import io.onedev.server.event.project.issue.IssuesMoved;
 import io.onedev.server.mail.MailService;
 import io.onedev.server.markdown.MentionParser;
-import io.onedev.server.model.*;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.Group;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.IssueWatch;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -19,25 +44,23 @@ import io.onedev.server.search.entity.QueryWatchBuilder;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.IssueAuthorizationService;
+import io.onedev.server.service.IssueMentionService;
+import io.onedev.server.service.IssueQueryPersonalizationService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IssueWatchService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UrlService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.commenttext.MarkdownText;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.xodus.VisitInfoService;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.mail.internet.InternetAddress;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static io.onedev.server.notification.NotificationUtils.getEmailBody;
-import static io.onedev.server.notification.NotificationUtils.isNotified;
-import static io.onedev.server.util.EmailAddressUtils.describe;
-import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @Singleton
 public class IssueNotificationManager {
+
+	private static final int AI_TASK_TIMEOUT_SECONDS = 300;
 
 	@Inject
 	private MailService mailService;
@@ -176,7 +199,7 @@ public class IssueNotificationManager {
 		if (user != null) {
 			if (!user.isNotifyOwnEvents() || isNotified(notifiedEmailAddresses, user))
 				notifiedUsers.add(user); 
-			if (!user.isSystem() && user.getType() != User.Type.SERVICE)
+			if (!user.isSystem() && user.getType() != User.Type.AI)
 				watchService.watch(issue, user, true);
 		}
 
@@ -195,19 +218,23 @@ public class IssueNotificationManager {
 			String threadingReferences = String.format("<you-in-field-%s-%s@onedev>", entry.getKey(), issue.getUUID());
 			for (User member: entry.getValue().getMembers()) {
 				if (!member.equals(user)) {
-					EmailAddress emailAddress = member.getPrimaryEmailAddress();
-					if (emailAddress != null && emailAddress.isVerified()) {
-						mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
-								Lists.newArrayList(), Lists.newArrayList(), subject, 
-								getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null), 
-								getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
-								replyAddress, senderName, threadingReferences);
+					if (member.getType() != User.Type.AI) {
+						EmailAddress emailAddress = member.getPrimaryEmailAddress();
+						if (emailAddress != null && emailAddress.isVerified()) {
+							mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
+									Lists.newArrayList(), Lists.newArrayList(), subject, 
+									getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null), 
+									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
+									replyAddress, senderName, threadingReferences);
+						}
+					} else if (isAiEntitled(user, issue, member)) {
+						new AddIssueComment(issue.getId()).onResponse(member, "I don't know how to work as role '%s' yet".formatted(entry.getKey()));
 					}
 				}
 			}
 			
 			for (User member: entry.getValue().getMembers()) {
-				if (member.getType() != User.Type.SERVICE) 
+				if (member.getType() != User.Type.AI) 
 					watchService.watch(issue, member, true);
 				authorizationService.authorize(issue, member);
 			}
@@ -224,19 +251,23 @@ public class IssueNotificationManager {
 			String threadingReferences = String.format("<you-in-field-%s-%s@onedev>", entry.getKey(), issue.getUUID());
 			for (User member: entry.getValue()) {
 				if (!member.equals(user)) {
-					EmailAddress emailAddress = member.getPrimaryEmailAddress();
-					if (emailAddress != null && emailAddress.isVerified()) {
-						mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
-								Lists.newArrayList(), Lists.newArrayList(), subject, 
-								getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null), 
-								getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
-								replyAddress, senderName, threadingReferences);
-					}					
+					if (member.getType() != User.Type.AI) {
+						EmailAddress emailAddress = member.getPrimaryEmailAddress();
+						if (emailAddress != null && emailAddress.isVerified()) {
+							mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
+									Lists.newArrayList(), Lists.newArrayList(), subject, 
+									getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null), 
+									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null), 
+									replyAddress, senderName, threadingReferences);
+						}					
+					} else if (isAiEntitled(user, issue, member)) {
+						new AddIssueComment(issue.getId()).onResponse(member, "I don't know how to work as role '%s' yet".formatted(entry.getKey()));
+					}
 				}
 			}
 			
 			for (User each: entry.getValue()) {
-				if (each.getType() != User.Type.SERVICE) 
+				if (each.getType() != User.Type.AI) 
 					watchService.watch(issue, each, true);
 				authorizationService.authorize(issue, each);
 			}
@@ -249,23 +280,38 @@ public class IssueNotificationManager {
 				User mentionedUser = userService.findByName(userName);
 				if (mentionedUser != null) {
 					mentionService.mention(issue, mentionedUser);
-					if (mentionedUser.getType() != User.Type.SERVICE)
-						watchService.watch(issue, mentionedUser, true);
 					authorizationService.authorize(issue, mentionedUser);
-					if (!isNotified(notifiedEmailAddresses, mentionedUser)) {
-						String subject = String.format(
-								"[Issue %s] (Mentioned You) %s", 
-								issue.getReference(), 
-								emojis.apply(issue.getTitle()));
-						String threadingReferences = String.format("<mentioned-%s@onedev>", issue.getUUID());
-						
-						EmailAddress emailAddress = mentionedUser.getPrimaryEmailAddress();
-						if (emailAddress != null && emailAddress.isVerified()) {
-							mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
-									Sets.newHashSet(), Sets.newHashSet(), subject, 
-									getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null), 
-									getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
-									replyAddress, senderName, threadingReferences);
+					if (mentionedUser.getType() != User.Type.AI) 
+						watchService.watch(issue, mentionedUser, true);
+					if (!isNotified(notifiedEmailAddresses, mentionedUser)) {						
+						if (mentionedUser.getType() != User.Type.AI) {
+							String subject = String.format(
+									"[Issue %s] (Mentioned You) %s", 
+									issue.getReference(), 
+									emojis.apply(issue.getTitle()));
+							String threadingReferences = String.format("<mentioned-%s@onedev>", issue.getUUID());
+							
+							EmailAddress emailAddress = mentionedUser.getPrimaryEmailAddress();
+							if (emailAddress != null && emailAddress.isVerified()) {
+								mailService.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
+										Sets.newHashSet(), Sets.newHashSet(), subject, 
+										getEmailBody(true, event, summary, event.getHtmlBody(), url, replyable, null), 
+										getEmailBody(false, event, summary, event.getTextBody(), url, replyable, null),
+										replyAddress, senderName, threadingReferences);
+							}
+						} else if (isAiEntitled(user, issue, mentionedUser)) {
+							if (event instanceof IssueOpened || event instanceof IssueCommentCreated) {
+								var systemPrompt = """
+									You are mentioned in an issue. The content mentioning you is presented as user prompt. \
+									Use existing comments as conversation context. Call relevant tools to get information \
+									about the issue if necessary""";
+								var task = new AiTask(
+									systemPrompt.formatted(mentionedUser.getName()), 
+									event.getTextBody(), 
+									issue.getTools(), 
+									new AddIssueComment(issue.getId()));
+								userService.execute(mentionedUser, task, AI_TASK_TIMEOUT_SECONDS);
+							}		
 						}
 						notifiedUsers.add(mentionedUser);
 					}
@@ -389,4 +435,22 @@ public class IssueNotificationManager {
 		}
 	}
 	
+	private boolean isAiEntitled(@Nullable User user, Issue issue, User ai) {
+		if (user != null && user.isOrdinary()) {
+			if (user.isEntitledToAi(ai)) {
+				return true;
+			} else {
+				new AddIssueComment(issue.getId()).onResponse(user, "@%s sorry but you are not entitled to access me".formatted(user.getName()));				
+				return false;
+			}
+		} else {
+			if (issue.getProject().isEntitledToAi(ai)) {
+				return true;
+			} else {
+				new AddIssueComment(issue.getId()).onResponse(ai, "Sorry but this project is not entitled to access me");				
+				return false;
+			}
+		}
+	}
+
 }

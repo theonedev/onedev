@@ -88,8 +88,6 @@ import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoic
 import io.onedev.server.model.support.issue.transitionspec.ManualSpec;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.resource.support.RestConstants;
 import io.onedev.server.search.entity.EntityQuery;
@@ -1204,37 +1202,16 @@ public class McpHelperResource {
 
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
-        var oldCommitHash = pullRequest.getBaseCommitHash();
-        if (sinceLastReview) {
-            Date sinceDate = null;
-            for (var change: pullRequest.getChanges()) {
-                if ((sinceDate == null || change.getDate().after(sinceDate)) 
-                        && change.getUser().equals(user)
-                        && (change.getData() instanceof PullRequestApproveData || change.getData() instanceof PullRequestRequestedForChangesData)) {
-                    sinceDate = change.getDate();
-                }
-            }
-            for (var comment: pullRequest.getComments()) {
-                if ((sinceDate == null || comment.getDate().after(sinceDate)) 
-                        && comment.getUser().equals(user)) {
-                    sinceDate = comment.getDate();
-                }
-            }
-            if (sinceDate != null) {
-                for (PullRequestUpdate update: pullRequest.getSortedUpdates()) {
-                    if (update.getDate().before(sinceDate))
-                        oldCommitHash = update.getHeadCommitHash();
-                }
-            }
-        }
-        var newCommitHash = pullRequest.getLatestUpdate().getHeadCommitHash();
-        var comparisonBase = pullRequestService.getComparisonBase(
-            pullRequest, ObjectId.fromString(oldCommitHash), ObjectId.fromString(newCommitHash));
+        var oldCommitId = ObjectId.fromString(pullRequest.getBaseCommitHash());
+        if (sinceLastReview) 
+            oldCommitId = pullRequestReviewService.getLastReviewedCommit(pullRequest, user);
+        var newCommitId = ObjectId.fromString(pullRequest.getLatestUpdate().getHeadCommitHash());
+        var comparisonBase = pullRequestService.getComparisonBase(pullRequest, oldCommitId, newCommitId);
 
         var patchInfo = new HashMap<String, String>();
         patchInfo.put("projectId", pullRequest.getProject().getId().toString());
         patchInfo.put("oldCommitHash", comparisonBase.name());
-        patchInfo.put("newCommitHash", newCommitHash);        
+        patchInfo.put("newCommitHash", newCommitId.name());        
         return patchInfo;
     }
 

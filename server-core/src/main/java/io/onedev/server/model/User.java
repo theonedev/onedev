@@ -6,6 +6,7 @@ import static io.onedev.server.model.User.Type.AI;
 import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.security.SecurityUtils.asPrincipals;
 import static io.onedev.server.security.SecurityUtils.asUserPrincipal;
+import static io.onedev.server.security.SecurityUtils.isAdministrator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -570,7 +571,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Editable(order=50, description = "" +
 		"Ordinary: Normal account<br>" +
 		"Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>" +
-		"AI: AI account (working in progress)")
+		"AI: AI account to answer questions about the code base, edit CI/CD spec, investigate job failure, or review pull request")
 	public Type getType() {
 		return type;
 	}
@@ -1183,26 +1184,40 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 			var aiUserFacades = userCache.values().stream()
 					.filter(it -> it.getType() == AI && !it.isDisabled() && !it.getId().equals(getId()))
 					.collect(Collectors.toList());
-			if (aiUserFacades.stream().allMatch(it->it.isEntitleToAll())) {
+			if (isAdministrator(asSubject())) {
 				entitledAis = aiUserFacades.stream()
 						.sorted(Comparator.comparing(UserFacade::getDisplayName))
 						.map(it -> userService.load(it.getId()))
 						.collect(Collectors.toList());
 			} else {
-				var entitledAiSet = aiUserFacades.stream()
-						.filter(it->it.isEntitleToAll())
-						.map(it -> userService.load(it.getId()))
-						.collect(Collectors.toSet());
-				getAiEntitlements().stream().forEach(it -> entitledAiSet.add(it.getAI()));
-
-				for (var group: getGroups()) {
-					group.getEntitlements().stream().forEach(it -> entitledAiSet.add(it.getAi()));
-				}
-				entitledAis = new ArrayList<User>(entitledAiSet);
-				entitledAis.sort(Comparator.comparing(User::getDisplayName));				
+				if (aiUserFacades.stream().allMatch(it->it.isEntitleToAll())) {
+					entitledAis = aiUserFacades.stream()
+							.sorted(Comparator.comparing(UserFacade::getDisplayName))
+							.map(it -> userService.load(it.getId()))
+							.collect(Collectors.toList());
+				} else {
+					var entitledAiSet = aiUserFacades.stream()
+							.filter(it->it.isEntitleToAll())
+							.map(it -> userService.load(it.getId()))
+							.collect(Collectors.toSet());
+					getAiEntitlements().stream().forEach(it -> entitledAiSet.add(it.getAI()));
+	
+					for (var group: getGroups()) {
+						group.getEntitlements().stream().forEach(it -> entitledAiSet.add(it.getAi()));
+					}
+					entitledAis = new ArrayList<User>(entitledAiSet);
+					entitledAis.sort(Comparator.comparing(User::getDisplayName));				
+				}	
 			}
 		}
 		return entitledAis;
+	}
+
+	public boolean isEntitledToAi(User ai) {
+		return isAdministrator(asSubject()) 
+				|| ai.getAiSetting().isEntitleToAll() 
+				|| getAiEntitlements().stream().anyMatch(it -> it.getAI().equals(ai)) 
+				|| getGroups().stream().anyMatch(it -> it.getEntitlements().stream().anyMatch(it2 -> it2.getAi().equals(ai)));
 	}
 
 	public UserFacade getFacade() {

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
+import io.onedev.server.ai.AiTask;
 import io.onedev.server.model.User;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
@@ -94,7 +95,9 @@ public interface UserService extends EntityService<User> {
 	List<User> query(@Nullable String term, int firstResult, int maxResults);
 	
 	int count(String term);
-		
+
+	void execute(User ai, AiTask task, int timeoutSeconds);
+	
 	UserCache cloneCache();
 	
 }

@@ -1,7 +1,8 @@
 package io.onedev.server.web.page.project.builds.detail;
 
 import static io.onedev.server.ai.BuildHelper.getDetail;
-import static io.onedev.server.ai.ChatToolUtils.convertToJson;
+import static io.onedev.server.ai.ToolUtils.convertToJson;
+import static io.onedev.server.ai.ToolUtils.wrapForChat;
 import static io.onedev.server.web.translation.Translation._T;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
@@ -19,6 +20,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.subject.Subject;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
@@ -49,6 +52,8 @@ import com.google.common.collect.Sets;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
+import io.onedev.server.ai.ToolExecutionResult;
+import io.onedev.server.ai.tools.GetBuildSpecEditInstructions;
 import io.onedev.server.ai.tools.GetFileContent;
 import io.onedev.server.ai.tools.QueryFilePaths;
 import io.onedev.server.buildspec.BuildSpec;
@@ -111,9 +116,6 @@ import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
-import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.web.websocket.ChatToolExecution;
-import io.onedev.server.web.websocket.ChatToolExecution.Result;
 
 public abstract class BuildDetailPage extends ProjectPage 
 		implements InputContext, BuildAware, JobAuthorizationContextAware, ChatToolAware {
@@ -377,7 +379,6 @@ public abstract class BuildDetailPage extends ProjectPage
 						super.onConfigure();
 						setVisible(getBuild().isFailed() 
 								&& SecurityUtils.canReadCode(getProject()) 
-								&& WicketUtils.isSubscriptionActive() 
 								&& !getAssistant().getEntitledAis().isEmpty());
 					}
 
@@ -759,7 +760,8 @@ public abstract class BuildDetailPage extends ProjectPage
 	}
 	
 	@Override
-	public Collection<ChatTool> getChatTools() {
+	public List<ChatTool> getChatTools() {
+		var projectId = getProject().getId();
 		var tools = new ArrayList<ChatTool>();
 		tools.add(new ChatTool() {
 
@@ -772,8 +774,8 @@ public abstract class BuildDetailPage extends ProjectPage
 			}
 
 			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
-				return completedFuture(new ChatToolExecution.Result(convertToJson(getDetail(getProject(), getBuild())), false));
+			public CompletableFuture<ToolExecutionResult> execute(IPartialPageRequestHandler handler, Subject subject, JsonNode arguments) {
+				return completedFuture(new ToolExecutionResult(convertToJson(getDetail(getProject(), getBuild())), false));
 			}
 			
 		});	
@@ -790,7 +792,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				}
 
 				@Override
-				public CompletableFuture<Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+				public CompletableFuture<ToolExecutionResult> execute(IPartialPageRequestHandler handler, Subject subject, JsonNode arguments) {
 					var instructions = """
 						Follow below steps to investigate build failure:
 						- Call 'getCurrentBuild' tool to get detail of current build
@@ -799,10 +801,11 @@ public abstract class BuildDetailPage extends ProjectPage
 						""";
 
 						if (previousSuccessfulSimilarBuild != null) 
-							instructions += "- If necessary, use tool 'getChangesSincePreviousSuccessfulBuild' to understand what has been changed since the previous successful build";
-						instructions += "- If necessary, use tools 'queryFilePaths' and 'getFileContent' to search and read files mentioned in build log";
+							instructions += "- If necessary, use tool 'getChangesSincePreviousSuccessfulBuild' to understand what has been changed since the previous successful build\n";
+						instructions += "- If necessary, use tools 'queryFilePaths' and 'getFileContent' to search and read files mentioned in build log\n";
+						instructions += "- If necessary, use tool 'getBuildSpecEditInstructions' to get instructions on how to edit CI/CD spec";
 
-					return completedFuture(new Result(instructions, true));
+					return completedFuture(new ToolExecutionResult(instructions, true));
 				}
 
 			});
@@ -819,20 +822,22 @@ public abstract class BuildDetailPage extends ProjectPage
 					}
 
 					@Override
-					public CompletableFuture<Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+					public CompletableFuture<ToolExecutionResult> execute(IPartialPageRequestHandler handler, Subject subject, JsonNode arguments) {
+						if (!SecurityUtils.canReadCode(subject, getProject()))
+							throw new UnauthorizedException();
 						var oldCommitId = previousSuccessfulSimilarBuild.getCommitId();
 						var newCommitId = getBuild().getCommitId();
 						var patch = gitService.getPatch(getProject(), oldCommitId, newCommitId);
 						if (patch.length() > MAX_PATCH_SIZE)
-							return completedFuture(new Result(convertToJson(Map.of("successful", false, "failReason", "Patch is too large")), false));
+							return completedFuture(new ToolExecutionResult(convertToJson(Map.of("successful", false, "failReason", "Patch is too large")), false));
 						else
-							return completedFuture(new Result(convertToJson(Map.of("successful", true, "patch", patch)), false));	
+							return completedFuture(new ToolExecutionResult(convertToJson(Map.of("successful", true, "patch", patch)), false));	
 					}
 					
 				});
 			}
 		}			
-		if (getBuild().isFinished() && SecurityUtils.canAccessLog(getBuild())) {
+		if (getBuild().isFinished()) {
 			tools.add(new ChatTool() {
 
 				private static final int MAX_LOG_ENTRIES = 2000;
@@ -846,63 +851,66 @@ public abstract class BuildDetailPage extends ProjectPage
 				}
 	
 				@Override
-				public CompletableFuture<Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+				public CompletableFuture<ToolExecutionResult> execute(IPartialPageRequestHandler handler, Subject subject, JsonNode arguments) {
+					if (!SecurityUtils.canAccessLog(subject, getBuild()))
+						throw new UnauthorizedException();
 					var snippet = logService.readLogSnippetReversely(
 							getBuild().getProject().getId(), getBuild().getNumber(), MAX_LOG_ENTRIES);
 					var builder = new StringBuilder();
 					for (var entry : snippet.entries) {
 						builder.append(entry.render()).append("\n");
 					}
-					return completedFuture(new Result(builder.toString(), false));
+					return completedFuture(new ToolExecutionResult(builder.toString(), false));
 				}
 				
 			});	
 		}
-		if (SecurityUtils.canReadCode(getProject())) {
-			tools.add(new ChatTool() {
+		tools.add(new ChatTool() {
 
-				@Override
-				public ToolSpecification getSpecification() {
-					return ToolSpecification.builder()
-						.name("getBuildSpec")
-						.description("Get content of CI/CD spec used to run the build")
-						.build();
-				}
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getBuildSpec")
+					.description("Get content of CI/CD spec used to run the build")
+					.build();
+			}
 
-				@Override
-				public CompletableFuture<Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
-					var blobIdent = new BlobIdent(getBuild().getCommitId().name(), BuildSpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits());
-					return completedFuture(new Result(getProject().getBlob(blobIdent, true).getText().getContent(), false));
-				}
+			@Override
+			public CompletableFuture<ToolExecutionResult> execute(IPartialPageRequestHandler handler, Subject subject, JsonNode arguments) {
+				if (!SecurityUtils.canReadCode(subject, getProject()))
+					throw new UnauthorizedException();
+				var blobIdent = new BlobIdent(getBuild().getCommitId().name(), BuildSpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits());
+				return completedFuture(new ToolExecutionResult(getProject().getBlob(blobIdent, true).getText().getContent(), false));
+			}
 
-			});
-			tools.add(new QueryFilePaths() {
-				
-				@Override
-				protected Project getProject() {
-					return BuildDetailPage.this.getProject();
-				}
-				
-				@Override
-				protected ObjectId getCommitId(boolean oldRevision) {
-					return getBuild().getCommitId();
-				}
+		});
+		tools.add(wrapForChat(new GetBuildSpecEditInstructions(false)));
+		tools.add(wrapForChat(new QueryFilePaths() {
+			
+			@Override
+			protected Long getProjectId() {
+				return projectId;
+			}
+			
+			@Override
+			protected ObjectId getCommitId() {
+				return getBuild().getCommitId();
+			}
 
-			});
-			tools.add(new GetFileContent() {
+		}));
+		tools.add(wrapForChat(new GetFileContent(false) {
 
-				@Override
-				protected Project getProject() {
-					return BuildDetailPage.this.getProject();
-				}
-				
-				@Override
-				protected ObjectId getCommitId(boolean oldRevision) {
-					return getBuild().getCommitId();
-				}
+			@Override
+			protected Long getProjectId() {
+				return projectId;
+			}
+			
+			@Override
+			protected ObjectId getCommitId(boolean oldRevision) {
+				return getBuild().getCommitId();
+			}
 
-			});
-		}
+		}));
 		return tools;
 	}
 

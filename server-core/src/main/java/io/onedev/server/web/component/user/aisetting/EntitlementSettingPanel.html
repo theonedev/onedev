@@ -1,6 +1,25 @@
 <wicket:panel>
-    <div class="alert alert-light">
-        <wicket:t>Specifies who can access this AI service</wicket:t>
+    <div class="alert alert-notice alert-light">        
+        <wicket:t>Specifies who can access this AI service. AI service can be accessed in below approaches:</wicket:t>        
+        <dl class="mt-2 mb-0">
+            <dt><wicket:t>Via chat interface</wicket:t></dt>
+            <dd class="small mt-1">
+                <wicket:t>Entitled users can interact with the AI user through the chat interface to perform tasks 
+                such as understanding codebase, authoring CI/CD spec, or investigating 
+                CI/CD job failures. In this mode, the AI user operates with same permissions as the 
+                user interacting with it, ignoring permissions assigned to the AI user itself.</wicket:t>                
+            </dd>
+            <dt><wicket:t>Via mention in issue or pull request comments</wicket:t></dt>
+            <dd class="small mt-1">
+                <wicket:t>Entitled users can mention the AI user in issue or pull request comments to request assistance. 
+                In this case, the AI user executes tasks using its own permissions.</wicket:t>
+            </dd>
+            <dt><wicket:t>Via pull request reviewer</wicket:t></dt>
+            <dd class="small mt-1">
+                <wicket:t>Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user 
+                executes tasks using its own permissions.</wicket:t>
+            </dd>
+        </dl>
     </div>
     <form wicket:id="form" class="leave-confirm">
         <div wicket:id="editor" class="mb-4"></div>

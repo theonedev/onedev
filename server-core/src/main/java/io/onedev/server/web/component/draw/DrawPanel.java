@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.offcanvas;
+package io.onedev.server.web.component.draw;
 
 import org.jspecify.annotations.Nullable;
 
@@ -10,13 +10,13 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.util.Animation;
 
-public abstract class OffCanvasPanel extends FloatingPanel {
+public abstract class DrawPanel extends FloatingPanel {
 
 	public enum Placement {LEFT, RIGHT}
 	
-	public OffCanvasPanel(AjaxRequestTarget target, Placement placement, @Nullable String width) {
+	public DrawPanel(AjaxRequestTarget target, Placement placement, @Nullable String width) {
 		super(target, null, false, false, Animation.valueOf(placement.name()));
-		add(AttributeAppender.append("class", "off-canvas off-canvas-" + placement.name().toLowerCase()));
+		add(AttributeAppender.append("class", "draw draw-" + placement.name().toLowerCase()));
 		if (width != null)
 			add(AttributeAppender.append("style", "width: " + width).setSeparator(";"));
 	}
@@ -25,7 +25,7 @@ public abstract class OffCanvasPanel extends FloatingPanel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(new OffCanvasCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new DrawCssResourceReference()));
 	}
 	
 }

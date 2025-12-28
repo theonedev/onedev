@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.offcanvas;
+package io.onedev.server.web.component.draw;
 
 import org.jspecify.annotations.Nullable;
 
@@ -8,9 +8,9 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 
-abstract class OffCanvasCardSupportPanel extends Panel {
+abstract class DrawCardSupportPanel extends Panel {
 
-	public OffCanvasCardSupportPanel(String id) {
+	public DrawCardSupportPanel(String id) {
 		super(id);
 	}
 

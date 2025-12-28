@@ -28,8 +28,8 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
-import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
-import io.onedev.server.web.component.offcanvas.OffCanvasPanel.Placement;
+import io.onedev.server.web.component.draw.DrawCardPanel;
+import io.onedev.server.web.component.draw.DrawPanel.Placement;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
 
@@ -175,7 +175,7 @@ class ServiceLocatorListViewPanel extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					new OffCanvasCardPanel(target, Placement.RIGHT, null) {
+					new DrawCardPanel(target, Placement.RIGHT, null) {
 
 						@Override
 						protected Component newTitle(String componentId) {

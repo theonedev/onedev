@@ -94,6 +94,7 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.HomePage;
+import io.onedev.server.web.page.admin.aisetting.ChatPreserveDaysPage;
 import io.onedev.server.web.page.admin.aisetting.LiteModelPage;
 import io.onedev.server.web.page.admin.alertsettings.AlertSettingPage;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
@@ -351,6 +352,9 @@ public abstract class LayoutPage extends BasePage {
 					
 					aiMenuItems.add(new SidebarMenuItem.Page(null, _T("Lite Model"),
 							LiteModelPage.class, new PageParameters()));
+					
+					aiMenuItems.add(new SidebarMenuItem.Page(null, _T("Chat Preserve Days"),
+							ChatPreserveDaysPage.class, new PageParameters()));
 
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("AI Settings"), aiMenuItems));
 
@@ -828,7 +832,7 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(WicketUtils.isSubscriptionActive() && !assistant.getEntitledAis().isEmpty());
+				setVisible(!assistant.getEntitledAis().isEmpty());
 			}
 
 		});

@@ -488,7 +488,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canAccessLog(Build build) {
-		return getSubject().isPermitted(new ProjectPermission(build.getProject(), 
+		return canAccessLog(getSubject(), build);
+	}
+
+	public static boolean canAccessLog(Subject subject, Build build) {
+		return subject.isPermitted(new ProjectPermission(build.getProject(), 
 				new JobPermission(build.getJobName(), new AccessBuildLog())));
 	}
 

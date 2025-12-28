@@ -130,6 +130,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("AI Settings", "KI-Einstellungen");
 		m.put("AI entitlement settings have been saved", "AI-Berechtigungseinstellungen wurden gespeichert");
 		m.put("AI model settings have been saved", "AI-Modell-Einstellungen wurden gespeichert");
+		m.put("AI system prompt has been saved", "AI-Systemaufforderung wurde gespeichert");
 		m.put("API Key", "API-Schlüssel");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"API-URL Ihrer JIRA-Cloud-Instanz, beispielsweise <tt>https://your-domain.atlassian.net/rest/api/3</tt>");
@@ -279,6 +280,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Allow Multiple", "Mehrfach erlauben");
 		m.put("Allowed Licenses", "Zulässige Lizenzen");
 		m.put("Allowed Self Sign-Up Email Domain", "Zulässige E-Mail-Domain für Selbstregistrierung");
+		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
+			"Fügen Sie auch Folgendes zu $HOME/.m2/settings.xml hinzu, wenn Sie das Projekt von der Befehlszeile aus kompilieren möchten");
 		m.put("Always", "Immer");
 		m.put("Always Pull Image", "Image immer ziehen");
 		m.put("An issue already linked for {0}. Unlink it first", "Ein Issue ist bereits für {0} verlinkt. Entfernen Sie es zuerst");
@@ -423,6 +426,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Belonging Groups", "Zugehörige Gruppen");
 		m.put("Below are some common criterias. Type in search box above to view the complete list and available combinations.", 
 			"Unten sind einige häufige Kriterien. Geben Sie im Suchfeld oben ein, um die vollständige Liste und verfügbare Kombinationen anzuzeigen.");
+		m.put("Below content is restored from an unsaved change. <a class=\"clear-unsaved-change\">Clear</a> to discard", 
+			"Der untenstehende Inhalt wurde aus einer ungespeicherten Änderung wiederhergestellt. <a class=\"clear-unsaved-change\">Löschen</a>, um zu verwerfen");
 		m.put("Below content is restored from an unsaved change. Clear to discard", "Der untenstehende Inhalt wurde aus einer nicht gespeicherten Änderung wiederhergestellt. Löschen, um zu verwerfen");
 		m.put("Below information will also be sent", "Die untenstehenden Informationen werden ebenfalls gesendet");
 		m.put("Binary file.", "Binärdatei.");
@@ -598,9 +603,13 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Changes since this comment", "Änderungen seit diesem Kommentar");
 		m.put("Channel Notification", "Kanalbenachrichtigung");
 		m.put("Chart Metadata", "Diagramm-Metadaten");
+		m.put("Chat Preserve Days", "Chat-Aufbewahrungstage");
 		m.put("Chat deleted", "Chat gelöscht");
+		m.put("Chat preserve days setting has been saved", "Einstellung der Chat-Aufbewahrungstage wurde gespeichert");
 		m.put("Chat with", "Chat mit");
 		m.put("Chat with AI", "Chat mit AI");
+		m.put("Chats older than the specified number of days will be automatically deleted during daily maintenance.", 
+			"Chats, die älter als die angegebene Anzahl von Tagen sind, werden während der täglichen Wartung automatisch gelöscht.");
 		m.put("Check <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHub's guide</a> on how to generate and use GPG keys to sign your commits", 
 			"Sehen Sie sich <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHubs Anleitung</a> an, wie Sie GPG-Schlüssel generieren und verwenden, um Ihre Commits zu signieren");
 		m.put("Check <a href=\"https://docs.onedev.io/administration-guide/agent-management\" target=\"_blank\">agent management</a> for details, including instructions on how to run agent as service", 
@@ -1202,7 +1211,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Enter your details to create your account", "Geben Sie Ihre Daten ein, um Ihr Konto zu erstellen");
 		m.put("Enter your details to login to your account", "Geben Sie Ihre Daten ein, um sich in Ihrem Konto anzumelden");
 		m.put("Enter your user name or email to reset password", "Geben Sie Ihren Benutzernamen oder Ihre E-Mail ein, um das Passwort zurückzusetzen");
-		m.put("Entitle to All Users", "Allen Benutzern zuweisen");
+		m.put("Entitle to All Users and Projects", "Allen Benutzern und Projekten zuweisen");
 		m.put("Entitled Groups", "Berechtigte Gruppen");
 		m.put("Entitled Projects", "Berechtigte Projekte");
 		m.put("Entitled Users", "Berechtigte Benutzer");
@@ -1321,7 +1330,6 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("File missing or obsolete", "Datei fehlt oder ist veraltet");
 		m.put("File name", "Dateiname");
 		m.put("File name patterns such as *.java, *.c", "Dateinamenmuster wie *.java, *.c");
-		m.put("File path to get text content", "Dateipfad, um Textinhalt zu erhalten");
 		m.put("Files", "Dateien");
 		m.put("Files to Be Analyzed", "Zu analysierende Dateien");
 		m.put("Filter", "Filter");
@@ -1364,13 +1372,14 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Fixing...", "Beheben...");
 		m.put("Float", "Fließkommazahl");
 		m.put("Flush", "Leeren");
-		m.put("Folder path to list all files and subfolders", "Ordnerpfad, um alle Dateien und Unterordner aufzulisten");
 		m.put("Follow below instructions to publish packages into this project", "Befolgen Sie die unten stehenden Anweisungen, um Pakete in dieses Projekt zu veröffentlichen");
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
 			"Befolgen Sie die unten stehenden Schritte, um den Agenten auf einer Remote-Maschine zu installieren (unterstützt Linux/Windows/Mac OS X/FreeBSD):");
 		m.put("For CI/CD job, add this gem to Gemfile like below", "Für CI/CD-Job, fügen Sie dieses Gem wie unten gezeigt zur Gemfile hinzu");
 		m.put("For CI/CD job, add this package to requirements.txt and run below to install the package via command step", 
 			"Für CI/CD-Job, fügen Sie dieses Paket zu requirements.txt hinzu und führen Sie unten aus, um das Paket über den Befehls-Schritt zu installieren");
+		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
+			"Für CI/CD-Jobs ist es bequemer, eine benutzerdefinierte settings.xml zu verwenden, zum Beispiel über den folgenden Code in einem Befehlschritt:");
 		m.put("For CI/CD job, run below to add package repository via command step", "Für CI/CD-Job, führen Sie unten aus, um das Paket-Repository über den Befehls-Schritt hinzuzufügen");
 		m.put("For CI/CD job, run below to add package source via command step", "Für CI/CD-Job, führen Sie unten aus, um die Paketquelle über den Befehls-Schritt hinzuzufügen");
 		m.put("For CI/CD job, run below to add source via command step", "Für CI/CD-Job, führen Sie unten aus, um die Quelle über den Befehls-Schritt hinzuzufügen");
@@ -1678,6 +1687,7 @@ public class Translation_de extends TranslationResourceBundle {
 			"Ungültiger Zustand. Bitte stellen Sie sicher, dass Sie OneDev über die in den Systemeinstellungen angegebene Server-URL besuchen");
 		m.put("Invalid subscription key", "Ungültiger Abonnement-Schlüssel");
 		m.put("Invalid working period", "Ungültiger Arbeitszeitraum");
+		m.put("Investigate build failure with AI", "Untersuche Build-Fehler mit KI");
 		m.put("Invitation sent to \"{0}\"", "Einladung gesendet an \"{0}\"");
 		m.put("Invitation to \"{0}\" deleted", "Einladung zu \"{0}\" gelöscht");
 		m.put("Invitations", "Einladungen");
@@ -1914,6 +1924,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Log Work", "Arbeitsprotokoll");
 		m.put("Log not available for offline agent", "Protokoll für Offline-Agent nicht verfügbar");
 		m.put("Log work", "Arbeitsprotokoll");
+		m.put("Login Command", "Anmeldebefehl");
 		m.put("Login Name", "Anmeldename");
 		m.put("Login and generate refresh token", "Anmelden und Aktualisierungstoken generieren");
 		m.put("Login name already used by another account", "Anmeldename wird bereits von einem anderen Konto verwendet");
@@ -1959,6 +1970,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Make sure the account has package ${permission} permission over the project", "Stellen Sie sicher, dass das Konto Paketberechtigung ${permission} im Projekt hat");
 		m.put("Make sure the account has package read permission over the project", "Stellen Sie sicher, dass das Konto Leseberechtigung für Pakete im Projekt hat");
 		m.put("Make sure the user has package write permission over the project", "Stellen Sie sicher, dass der Benutzer Schreibberechtigung für Pakete im Projekt hat");
+		m.put("Make sure to log in with an account that has package read permission for the project", 
+			"Stellen Sie sicher, dass Sie sich mit einem Konto anmelden, das Leseberechtigungen für das Projektpaket hat");
 		m.put("Malformed %sbase query", "Fehlerhafte %sbase-Abfrage");
 		m.put("Malformed %squery", "Fehlerhafte %squery");
 		m.put("Malformed build spec (import project: {0}, import revision: {1})", "Fehlerhafte Build-Spezifikation (Importprojekt: {0}, Importrevision: {1})");
@@ -2010,6 +2023,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Merged", "Zusammengeführt");
 		m.put("Merged pull request \"{0}\" ({1})", "Zusammengeführter Pull-Request \"{0}\" ({1})");
 		m.put("Merges pull request", "Pull-Request zusammenführen");
+		m.put("Message is too long. Max {0} characters", "Nachricht ist zu lang. Maximal {0} Zeichen");
 		m.put("Meta", "Meta");
 		m.put("Meta Info", "Meta-Info");
 		m.put("Microsoft 365", "Microsoft 365");
@@ -2239,6 +2253,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Not run", "Nicht ausgeführt");
 		m.put("Not specified", "Nicht angegeben");
 		m.put("Note", "Notiz");
+		m.put("Nothing changed yet", "Noch nichts geändert");
 		m.put("Nothing to preview", "Nichts zu Vorschau anzeigen");
 		m.put("Notification", "Benachrichtigung");
 		m.put("Notifications", "Benachrichtigungen");
@@ -2350,6 +2365,7 @@ public class Translation_de extends TranslationResourceBundle {
 			"Optional geben Sie <span class='text-info'>kommagetrennte</span> Plattformen zum Erstellen an, beispielsweise <tt>linux/amd64,linux/arm64</tt>. Lassen Sie das Feld leer, um die Plattform des Knotens zu verwenden, der den Job ausführt");
 		m.put("Optionally specify <span class='text-info'>comma separated</span> platforms to scan, for instance <tt>linux/amd64,linux/arm64</tt>. Leave empty to scan all platforms in OCI layout", 
 			"Optional geben Sie <span class='text-info'>kommagetrennte</span> Plattformen zum Scannen an, beispielsweise <tt>linux/amd64,linux/arm64</tt>. Lassen Sie das Feld leer, um alle Plattformen im OCI-Layout zu scannen");
+		m.put("Optionally specify API key for authentication", "Optional API-Schlüssel für Authentifizierung angeben");
 		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"Optional geben Sie die Dockerfile relativ zu <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job-Arbeitsbereich</a> an. Lassen Sie das Feld leer, um die Datei <tt>Dockerfile</tt> unter dem oben angegebenen Build-Pfad zu verwenden");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "Optional geben Sie die JavaScript-Konfiguration an, die von der Renovate-CLI verwendet werden soll");
@@ -2563,8 +2579,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Ordered List", "Geordnete Liste");
 		m.put("Ordered list", "Geordnete Liste");
 		m.put("Ordinary", "Gewöhnlich");
-		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account (working in progress)", 
-			"Gewöhnlich: Normales Konto<br>Service: Servicekonto hat keine Passwörter und E-Mail-Adressen und generiert keine Benachrichtigungen für seine Aktivitäten<br>AI: AI-Konto (in Arbeit)");
+		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account to answer questions about the code base, edit CI/CD spec, investigate job failure, or review pull request", 
+			"Normal: Normales Konto<br>Dienst: Dienstkonto hat kein Passwort und keine E-Mail-Adressen und generiert keine Benachrichtigungen für seine Aktivitäten<br>KI: KI-Konto, um Fragen zur Codebasis zu beantworten, CI/CD-Spezifikationen zu bearbeiten, Job-Fehler zu untersuchen oder Pull-Requests zu überprüfen");
 		m.put("Osv License Scanner", "Osv-Lizenzscanner");
 		m.put("Osv Vulnerability Scanner", "Osv-Schwachstellenscanner");
 		m.put("Other", "Andere");
@@ -3352,6 +3368,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Some related commits of the code comment is missing", "Einige zugehörige Commits des Code-Kommentars fehlen");
 		m.put("Some related commits of the pull request are missing", "Einige zugehörige Commits des Pull-Requests fehlen");
 		m.put("Some required builds not passed", "Einige erforderliche Builds sind nicht bestanden");
+		m.put("Someone changed file mode since you started editing", "Jemand hat den Dateimodus geändert, seit Sie mit der Bearbeitung begonnen haben");
+		m.put("Someone changed file type since you started editing", "Jemand hat den Dateityp geändert, seit Sie mit der Bearbeitung begonnen haben");
 		m.put("Someone made below change since you started editing", "Jemand hat die folgende Änderung vorgenommen, seit Sie mit der Bearbeitung begonnen haben");
 		m.put("Sort", "Sortieren");
 		m.put("Source", "Quelle");
@@ -3382,6 +3400,8 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Specifies the attribute containing group name inside the found group LDAP entry. Value of this attribute will be mapped to a OneDev group. This attribute is normally set to <i>cn</i>", 
 			"Gibt das Attribut an, das den Gruppennamen innerhalb des gefundenen Gruppen-LDAP-Eintrags enthält. Der Wert dieses Attributs wird einer OneDev-Gruppe zugeordnet. Dieses Attribut wird normalerweise auf <i>cn</i> gesetzt");
 		m.put("Specifies who can access this AI service", "Gibt an, wer auf diesen AI-Dienst zugreifen kann");
+		m.put("Specifies who can access this AI service. AI service can be accessed in below approaches:", 
+			"Gibt an, wer auf diesen KI-Dienst zugreifen kann. Der KI-Dienst kann auf folgende Weise zugegriffen werden:");
 		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
 			"Gibt die relative .net TRX-Testergebnisdatei zum <a href='https://docs.onedev.io/concepts#job-workspace'>Job-Arbeitsbereich</a> an, z. B. <tt>TestResults/*.trx</tt>. Verwenden Sie * oder ? für Musterabgleich");
 		m.put("Specify <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is access token with code write permission over above projects. Commits, issues, and pull requests will also be created under name of the access token owner", 
@@ -3825,6 +3845,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("System Date", "Systemdatum");
 		m.put("System Email Address", "System-E-Mail-Adresse");
 		m.put("System Maintenance", "Systemwartung");
+		m.put("System Prompt", "Systemaufforderung");
 		m.put("System Setting", "Systemeinstellung");
 		m.put("System Settings", "Systemeinstellungen");
 		m.put("System email address defined in mail setting should be used as recipient of such email, and project name may be appended to this address using to indicate where to create issues. For instance, if system email address is specified as <tt>support@example.com</tt>, sending email to <tt>support+myproject@example.com</tt> will create issue in <tt>myproject</tt>. If project name is not appended, OneDev will look up the project using project designation information below", 
@@ -4050,6 +4071,7 @@ public class Translation_de extends TranslationResourceBundle {
 			"Um Duplikate zu vermeiden, wird die hier angezeigte geschätzte/verbleibende Zeit nicht mit der aus \"{0}\" aggregierten Zeit kombiniert");
 		m.put("To avoid duplication, spent time showing here does not include those aggregated from \"{0}\"", 
 			"Um Duplikate zu vermeiden, wird die hier angezeigte verbrachte Zeit nicht mit der aus \"{0}\" aggregierten Zeit kombiniert");
+		m.put("To use this package, add below to project pom.xml", "Um dieses Paket zu verwenden, fügen Sie Folgendes zur Projekt-pom.xml hinzu");
 		m.put("Toggle change history", "Änderungsverlauf umschalten");
 		m.put("Toggle comments", "Kommentare umschalten");
 		m.put("Toggle commits", "Commits umschalten");
@@ -4305,6 +4327,9 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("Verification Code", "Verifizierungscode");
 		m.put("Verification email sent, please check it", "Verifizierungs-E-Mail gesendet, bitte überprüfen");
 		m.put("Verify", "Verifizieren");
+		m.put("Via chat interface", "Über die Chat-Oberfläche");
+		m.put("Via mention in issue or pull request comments", "Über Erwähnung in Kommentaren zu Issues oder Pull-Requests");
+		m.put("Via pull request reviewer", "Über Pull-Request-Reviewer");
 		m.put("View", "Ansehen");
 		m.put("View source", "Quelle anzeigen");
 		m.put("View statistics", "Statistiken anzeigen");
@@ -4596,6 +4621,7 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("pull request to branches \"{0}\" is discarded", "Pull-Request zu Branches \"{0}\" wird verworfen");
 		m.put("pull request to branches \"{0}\" is merged", "Pull-Request zu Branches \"{0}\" wird zusammengeführt");
 		m.put("pull request to branches \"{0}\" is opened", "Pull-Request zu Branches \"{0}\" wird geöffnet");
+		m.put("pull request {0}", "Pull-Request {0}");
 		m.put("pull requests", "Pull-Requests");
 		m.put("reconciliation (need administrator permission)", "Abgleich (Administratorberechtigung erforderlich)");
 		m.put("reports", "Berichte");
@@ -4690,19 +4716,15 @@ public class Translation_de extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("AI system prompt has been saved", "AI-Systemaufforderung wurde gespeichert");
-		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
-			"Fügen Sie auch Folgendes zu $HOME/.m2/settings.xml hinzu, wenn Sie das Projekt von der Befehlszeile aus kompilieren möchten");
-		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
-			"Für CI/CD-Jobs ist es bequemer, eine benutzerdefinierte settings.xml zu verwenden, zum Beispiel über den folgenden Code in einem Befehlschritt:");
-		m.put("Login Command", "Anmeldebefehl");
-		m.put("Make sure to log in with an account that has package read permission for the project", 
-			"Stellen Sie sicher, dass Sie sich mit einem Konto anmelden, das Leseberechtigungen für das Projektpaket hat");
-		m.put("Nothing changed yet", "Noch nichts geändert");
-		m.put("Someone changed file mode since you started editing", "Jemand hat den Dateimodus geändert, seit Sie mit der Bearbeitung begonnen haben");
-		m.put("Someone changed file type since you started editing", "Jemand hat den Dateityp geändert, seit Sie mit der Bearbeitung begonnen haben");
-		m.put("System Prompt", "Systemaufforderung");
-		m.put("To use this package, add below to project pom.xml", "Um dieses Paket zu verwenden, fügen Sie Folgendes zur Projekt-pom.xml hinzu");
+		m.put("All members of entitled groups will be able to access this AI service", "Alle Mitglieder der berechtigten Gruppen können auf diesen KI-Dienst zugreifen.");
+		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
+			"Berechtigte Projekte können den KI-Benutzer als Prüfer für Pull-Anfragen hinzufügen. In diesem Szenario führt der KI-Benutzer Aufgaben mit seinen eigenen Berechtigungen aus.");
+		m.put("Entitled projects will be able to access this AI service", "Berechtigte Projekte können auf diesen KI-Dienst zugreifen.");
+		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
+			"Berechtigte Benutzer können über die Chat-Oberfläche mit dem KI-Benutzer interagieren, um Aufgaben wie das Verstehen des Codebestands, das Erstellen von CI/CD-Spezifikationen oder das Untersuchen von CI/CD-Jobfehlern auszuführen. In diesem Modus arbeitet der KI-Benutzer mit denselben Berechtigungen wie der Benutzer, der mit ihm interagiert, und ignoriert die dem KI-Benutzer selbst zugewiesenen Berechtigungen.");
+		m.put("Entitled users can mention the AI user in issue or pull request comments to request assistance. In this case, the AI user executes tasks using its own permissions.", 
+			"Berechtigte Benutzer können den KI-Benutzer in Kommentaren zu Problemen oder Pull-Anfragen erwähnen, um Unterstützung anzufordern. In diesem Fall führt der KI-Benutzer Aufgaben mit seinen eigenen Berechtigungen aus.");
+		m.put("Entitled users will be able to access this AI service", "Berechtigte Benutzer können auf diesen KI-Dienst zugreifen.");
 	}
 			
 	@Override

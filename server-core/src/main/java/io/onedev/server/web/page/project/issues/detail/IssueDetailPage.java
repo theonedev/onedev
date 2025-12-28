@@ -1,15 +1,12 @@
 package io.onedev.server.web.page.project.issues.detail;
 
-import static io.onedev.server.ai.ChatToolUtils.convertToJson;
-import static io.onedev.server.ai.IssueHelper.getDetail;
+import static io.onedev.server.ai.ToolUtils.wrapForChat;
 import static io.onedev.server.web.translation.Translation._T;
-import static java.util.concurrent.CompletableFuture.completedFuture;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 import javax.persistence.EntityNotFoundException;
@@ -21,7 +18,6 @@ import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -37,13 +33,10 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 
-import dev.langchain4j.agent.tool.ToolSpecification;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
-import io.onedev.server.ai.IssueHelper;
 import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.Issue;
@@ -78,7 +71,6 @@ import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
-import io.onedev.server.web.websocket.ChatToolExecution;
 import io.onedev.server.xodus.VisitInfoService;
 
 public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext, ChatToolAware {
@@ -448,42 +440,8 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 	}
 	
 	@Override
-	public Collection<ChatTool> getChatTools() {
-		var tools = new ArrayList<ChatTool>();
-		tools.add(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentIssue")
-					.description("Get info of current issue in json format")
-					.build();
-			}
-
-			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
-				return completedFuture(new ChatToolExecution.Result(convertToJson(getDetail(getProject(), getIssue())), false));
-			}
-			
-		});
-		
-		tools.add(new ChatTool() {
-
-			@Override
-			public ToolSpecification getSpecification() {
-				return ToolSpecification.builder()
-					.name("getCurrentIssueComments")
-					.description("Get comments of current issue in json format")
-					.build();
-			}
-
-			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {	
-				return completedFuture(new ChatToolExecution.Result(convertToJson(IssueHelper.getComments(getIssue())), false));
-			}
-			
-		});
-		return tools;
+	public List<ChatTool> getChatTools() {
+		return wrapForChat(getIssue().getTools());
 	}
 
 }

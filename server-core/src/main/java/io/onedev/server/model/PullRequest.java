@@ -1,6 +1,9 @@
 package io.onedev.server.model;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+import static io.onedev.server.ai.PullRequestHelper.getDetail;
+import static io.onedev.server.ai.ToolUtils.convertToJson;
+import static io.onedev.server.ai.ToolUtils.getDiffTools;
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.PullRequest.PROP_CLOSE_DAY;
 import static io.onedev.server.model.PullRequest.PROP_CLOSE_MONTH;
@@ -64,6 +67,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.DynamicUpdate;
@@ -71,13 +76,19 @@ import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+import dev.langchain4j.agent.tool.ToolSpecification;
 import io.onedev.server.OneDev;
+import io.onedev.server.ai.PullRequestHelper;
+import io.onedev.server.ai.TaskTool;
+import io.onedev.server.ai.ToolExecutionResult;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.PullRequestReference;
+import io.onedev.server.exception.PullRequestReviewRejectedException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.CommitMessageError;
 import io.onedev.server.git.service.GitService;
@@ -94,6 +105,7 @@ import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.PullRequestReviewService;
 import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.BranchSemantic;
@@ -1483,6 +1495,127 @@ public class PullRequest extends ProjectBelonging
 		} else {
 			return null;
 		}
+	}
+
+	public List<TaskTool> getTools() {
+		var projectId = getProject().getId();
+		var requestId = getId();
+		var oldCommitId = ObjectId.fromString(getBaseCommitHash());
+		var newCommitId = ObjectId.fromString(getLatestUpdate().getHeadCommitHash());
+
+		var tools = new ArrayList<TaskTool>(List.of(
+			new TaskTool() {
+
+				@Override
+				public ToolSpecification getSpecification() {
+					return ToolSpecification.builder()
+						.name("getCurrentPullRequest")
+						.description("Get info of current OneDev pull request in json format")
+						.build();
+				}
+
+				@Override
+				public ToolExecutionResult execute(Subject subject, JsonNode arguments) {	
+					var request = getPullRequest(requestId);
+					var project = request.getProject();
+					if (!SecurityUtils.canReadCode(subject, project))
+						throw new UnauthorizedException();
+					return new ToolExecutionResult(convertToJson(getDetail(project, request)), false);
+				}
+				
+			},
+			new TaskTool() {
+
+				@Override
+				public ToolSpecification getSpecification() {
+					return ToolSpecification.builder()
+						.name("getCurrentPullRequestComments")
+						.description("Get comments of current OneDev pull request in json format")
+						.build();
+				}
+
+				@Override
+				public ToolExecutionResult execute(Subject subject, JsonNode arguments) {	
+					var request = getPullRequest(requestId);
+					if (!SecurityUtils.canReadCode(subject, request.getProject()))
+						throw new UnauthorizedException();
+					return new ToolExecutionResult(convertToJson(PullRequestHelper.getComments(request)), false);
+				}
+				
+			},		
+			new TaskTool() {
+
+				@Override
+				public ToolSpecification getSpecification() {
+					return ToolSpecification.builder()
+						.name("approvePullRequest")
+						.description("Approve current OneDev pull request")
+						.build();
+				}
+
+				@Override
+				public ToolExecutionResult execute(Subject subject, JsonNode arguments) {
+					var request = getPullRequest(requestId);
+					var user = SecurityUtils.getUser(subject);
+					if (!SecurityUtils.canReadCode(subject, request.getProject()) || user == null)
+						throw new UnauthorizedException();
+
+					try {
+						getPullRequestReviewService().review(user, request, true, null);
+						return new ToolExecutionResult(convertToJson(Map.of("successful", true)), false);
+					} catch (PullRequestReviewRejectedException e) {
+						var data = Map.of(
+							"successful", false, 
+							"failReason", "You are not a reviewer and is not allowed to approve this pull request. Add your option as comment instead");
+						return new ToolExecutionResult(convertToJson(data), false);
+					}
+				}
+
+			},
+			new TaskTool() {
+
+				@Override
+				public ToolSpecification getSpecification() {
+					return ToolSpecification.builder()
+						.name("requestChangesForPullRequest")
+						.description("Request changes for current OneDev pull request")
+						.build();
+				}
+
+				@Override
+				public ToolExecutionResult execute(Subject subject, JsonNode arguments) {
+					var request = getPullRequest(requestId);
+					var user = SecurityUtils.getUser(subject);
+					if (!SecurityUtils.canReadCode(subject, request.getProject()) || user == null)
+						throw new UnauthorizedException();
+
+					try {
+						getPullRequestReviewService().review(user, request, false, null);
+						return new ToolExecutionResult(convertToJson(Map.of("successful", true)), false);
+					} catch (PullRequestReviewRejectedException e) {
+						var data = Map.of(
+							"successful", false, 
+							"failReason", "You are not a reviewer and is not allowed to request changes for this pull request. Add your option as comment instead");
+						return new ToolExecutionResult(convertToJson(data), false);
+					}
+				}
+
+			}
+		));
+		tools.addAll(getDiffTools(projectId, oldCommitId, newCommitId, requestId));
+		return tools;
+	}
+
+	private static PullRequestService getPullRequestService() {
+		return OneDev.getInstance(PullRequestService.class);
+	}
+
+	private static PullRequestReviewService getPullRequestReviewService() {
+		return OneDev.getInstance(PullRequestReviewService.class);
+	}
+
+	private static PullRequest getPullRequest(Long requestId) {
+		return getPullRequestService().load(requestId);
 	}
 
 }

@@ -38,7 +38,7 @@ public class LiteModelPage extends AdministrationPage {
 				super.onSubmit();
 				var newAuditContent = VersionedXmlDoc.fromBean(aiSetting).toXML();
 				settingService.saveAiSetting(aiSetting);
-				auditService.audit(null, "changed AI settings", oldAuditContent, newAuditContent);				
+				auditService.audit(null, "changed lite AI model settings", oldAuditContent, newAuditContent);				
 				getSession().success(_T("Lite AI model settings have been saved"));
 				
 				setResponsePage(LiteModelPage.class);

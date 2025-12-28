@@ -4,6 +4,7 @@
 	bottom: 0;
 	right: 0;
 	z-index: 1040;
+	display: flex;
 	background: white;
 	box-shadow: 0 0 12px rgba(0,0,0,0.2);	
 }

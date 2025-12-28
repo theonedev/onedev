@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.pullrequests.create;
 
+import static io.onedev.server.ai.ToolUtils.getDiffTools;
+import static io.onedev.server.ai.ToolUtils.wrapForChat;
 import static io.onedev.server.model.PullRequest.MAX_DESCRIPTION_LEN;
 import static io.onedev.server.model.PullRequest.MAX_TITLE_LEN;
 import static io.onedev.server.search.commit.Revision.Type.COMMIT;
@@ -65,6 +67,8 @@ import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PlanarRange;
+import io.onedev.server.ai.ChatTool;
+import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.CodeProblem;
@@ -133,7 +137,7 @@ import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.editbean.LabelsBean;
 
-public class NewPullRequestPage extends ProjectPage implements RevisionAnnotationSupport {
+public class NewPullRequestPage extends ProjectPage implements RevisionAnnotationSupport, ChatToolAware {
 
 	private static final Logger logger = LoggerFactory.getLogger(NewPullRequestPage.class);
 	
@@ -1296,6 +1300,18 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(project, 0));
 		else
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+	}
+
+	@Override
+	public List<ChatTool> getChatTools() {
+		if (!getPullRequest().isMerged()) {
+			var projectId = getProject().getId();
+			var oldCommitId = ObjectId.fromString(getPullRequest().getBaseCommitHash());
+			var newCommitId = ObjectId.fromString(getPullRequest().getLatestUpdate().getHeadCommitHash());
+			return wrapForChat(getDiffTools(projectId, oldCommitId, newCommitId, null));
+		} else {
+			return new ArrayList<>();
+		}
 	}
 	
 }

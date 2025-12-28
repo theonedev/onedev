@@ -1,9 +1,14 @@
 package io.onedev.server.service.impl;
 
+import static io.onedev.server.ai.ToolUtils.getToolArguments;
 import static io.onedev.server.model.User.Type.SERVICE;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -16,10 +21,21 @@ import javax.persistence.criteria.Subquery;
 import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.hazelcast.core.HazelcastInstance;
 
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.ai.AiTask;
+import io.onedev.server.ai.TaskTool;
+import io.onedev.server.ai.ToolUtils;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
@@ -32,12 +48,15 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.persistence.IdService;
+import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.EmailAddressService;
 import io.onedev.server.service.IssueFieldService;
+import io.onedev.server.service.ManagedFutureService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UserService;
@@ -47,6 +66,8 @@ import io.onedev.server.util.usage.Usage;
 
 @Singleton
 public class DefaultUserService extends BaseEntityService<User> implements UserService {
+	
+	private static final Logger logger = LoggerFactory.getLogger(DefaultUserService.class);
 	
 	@Inject
     private ProjectService projectService;
@@ -68,6 +89,15 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
     
     @Inject
     private ClusterService clusterService;
+
+	@Inject
+	private ExecutorService executorService;
+
+	@Inject
+	private SessionService sessionService;
+
+	@Inject
+	private ManagedFutureService managedFutureService;
 	
 	private volatile UserCache cache;
 
@@ -476,6 +506,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 			cache.put(user.getId(), user.getFacade());
     }
 
+
 	private Predicate[] getPredicates(CriteriaBuilder builder, CriteriaQuery<?> query, 
 			Root<User> root, String term) {
 		if (term != null) {
@@ -537,6 +568,87 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 			return null;
 	}
 
+	@Sessional
+	@Override
+	public void execute(User ai, AiTask task, int timeoutSeconds) {
+		Preconditions.checkState(ai.getType() == User.Type.AI);
+		var taskId = UUID.randomUUID().toString();
+		var subject = ai.asSubject();
+		var aiSetting = ai.getAiSetting();
+		transactionService.runAfterCommit(() -> {
+			var future = executorService.submit(() -> {
+				try {
+					var chatModel = aiSetting.getModelSetting().getChatModel();
+					var messages = new ArrayList<ChatMessage>();
+					messages.add(new SystemMessage("Your name is %s".formatted(ai.getName())));
+					if (aiSetting.getSystemPrompt() != null)
+						messages.add(new SystemMessage(aiSetting.getSystemPrompt()));
+					if (task.getSystemPrompt() != null)
+						messages.add(new SystemMessage(task.getSystemPrompt()));
+					messages.add(new UserMessage(task.getUserPrompt()));
+					var tools = task.getTools();
+					var toolSpecifications = tools.stream()
+							.map(TaskTool::getSpecification)
+							.collect(Collectors.toList());
+					ToolUtils.filterDuplications(toolSpecifications);
+					while (true) {
+						var chatRequest = ChatRequest.builder()
+							.messages(messages)
+							.toolSpecifications(toolSpecifications)
+							.build();
+						var response = chatModel.chat(chatRequest);
+						var aiMessage = response.aiMessage();
+						
+						if (!aiMessage.hasToolExecutionRequests()) {
+							sessionService.run(() -> {
+								task.getResponseHandler().onResponse(
+									Preconditions.checkNotNull(SecurityUtils.getUser(subject)), 
+									aiMessage.text());
+							});
+							break;
+						}
+						
+						messages.add(aiMessage);      
+						sessionService.run(() -> {
+							for (var toolRequest : aiMessage.toolExecutionRequests()) {
+								var toolName = toolRequest.name();  
+								try {        
+									var tool = tools.stream()
+										.filter(it -> it.getSpecification().name().equals(toolName))
+										.findFirst()
+										.orElseThrow(() -> new ExplicitException("Tool not found: " + toolName));     
+									tool.execute(subject, getToolArguments(toolRequest)).addToMessages(messages, toolRequest);
+								} catch (Throwable t) {
+									ToolUtils.handleCallException(toolName, t);
+								}
+							}
+						});
+					}
+				} catch (Exception e) {
+					sessionService.run(() -> {
+						var user = Preconditions.checkNotNull(SecurityUtils.getUser(subject));
+						var explicitException = ExceptionUtils.find(e, ExplicitException.class);
+						if (explicitException != null) {
+							task.getResponseHandler().onResponse(user, explicitException.getMessage());
+						} else if (ExceptionUtils.find(e, InterruptedException.class) == null) {
+							logger.error("Error running AI task", e);
+							task.getResponseHandler().onResponse(user, "Error running AI task, check server log for details");
+						}
+					});
+				} finally {
+					managedFutureService.removeFuture(taskId);
+				}
+			});
+			managedFutureService.addFuture(taskId, future, timeoutSeconds, f -> {
+				sessionService.run(() -> {
+					task.getResponseHandler().onResponse(
+						Preconditions.checkNotNull(SecurityUtils.getUser(subject)), 
+						"Timed out getting response");
+				});
+			});
+		});
+	}
+
 	@Override
 	public UserCache cloneCache() {
 		return cache.clone();
@@ -562,5 +674,5 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 			transactionService.runAfterCommit(() -> cache.remove(id));
 		}
 	}
-	
+
 }

@@ -8424,4 +8424,22 @@ public class DataMigrator {
 		}		
 	}
 
+	private void migrate217(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var keyElement = element.element("key");
+					if (keyElement.getTextTrim().equals("AI")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.addElement("chatPreserveDays").setText("30");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

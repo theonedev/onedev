@@ -324,7 +324,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
-		
+
 		criteriaQuery.where(buildPredicates(subject, projectScope, issueQuery.getCriteria(), criteriaQuery, builder, root));
 		var criteria = issueQuery.getCriteria();
 		List<javax.persistence.criteria.Order> preferOrders = new ArrayList<>();

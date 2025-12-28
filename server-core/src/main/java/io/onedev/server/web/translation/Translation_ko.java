@@ -130,6 +130,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("AI Settings", "AI 설정");
 		m.put("AI entitlement settings have been saved", "AI 권한 설정이 저장되었습니다");
 		m.put("AI model settings have been saved", "AI 모델 설정이 저장되었습니다");
+		m.put("AI system prompt has been saved", "AI 시스템 프롬프트가 저장되었습니다");
 		m.put("API Key", "API 키");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"예를 들어, <tt>https://your-domain.atlassian.net/rest/api/3</tt>와 같은 JIRA 클라우드 인스턴스의 API URL");
@@ -279,6 +280,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Allow Multiple", "다중 허용");
 		m.put("Allowed Licenses", "허용된 라이선스");
 		m.put("Allowed Self Sign-Up Email Domain", "허용된 자체 가입 이메일 도메인");
+		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
+			"프로젝트를 명령줄에서 컴파일하려면 아래 내용을 $HOME/.m2/settings.xml에 추가하세요");
 		m.put("Always", "항상");
 		m.put("Always Pull Image", "항상 이미지 가져오기");
 		m.put("An issue already linked for {0}. Unlink it first", "{0}에 대해 이미 연결된 이슈가 있습니다. 먼저 연결을 해제하세요");
@@ -423,6 +426,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Belonging Groups", "소속 그룹");
 		m.put("Below are some common criterias. Type in search box above to view the complete list and available combinations.", 
 			"아래는 일반적인 기준입니다. 위의 검색 상자에 입력하여 전체 목록과 사용 가능한 조합을 확인하세요.");
+		m.put("Below content is restored from an unsaved change. <a class=\"clear-unsaved-change\">Clear</a> to discard", 
+			"아래 내용은 저장되지 않은 변경 사항에서 복원되었습니다. <a class=\"clear-unsaved-change\">지우기</a>하여 폐기");
 		m.put("Below content is restored from an unsaved change. Clear to discard", "아래 내용은 저장되지 않은 변경 사항에서 복원되었습니다. 삭제하려면 지우세요.");
 		m.put("Below information will also be sent", "아래 정보도 전송됩니다");
 		m.put("Binary file.", "바이너리 파일.");
@@ -598,9 +603,13 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Changes since this comment", "이 댓글 이후 변경 사항");
 		m.put("Channel Notification", "채널 알림");
 		m.put("Chart Metadata", "차트 메타데이터");
+		m.put("Chat Preserve Days", "채팅 보존 일수");
 		m.put("Chat deleted", "채팅이 삭제되었습니다");
+		m.put("Chat preserve days setting has been saved", "채팅 보존 일수 설정이 저장되었습니다");
 		m.put("Chat with", "채팅 상대");
 		m.put("Chat with AI", "AI와 채팅");
+		m.put("Chats older than the specified number of days will be automatically deleted during daily maintenance.", 
+			"지정된 일수보다 오래된 채팅은 일일 유지보수 중 자동으로 삭제됩니다.");
 		m.put("Check <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHub's guide</a> on how to generate and use GPG keys to sign your commits", 
 			"커밋에 서명을 하기 위해 GPG 키를 생성하고 사용하는 방법에 대한 <a href=\"https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification\" target=\"_blank\">GitHub 가이드</a>를 확인하세요");
 		m.put("Check <a href=\"https://docs.onedev.io/administration-guide/agent-management\" target=\"_blank\">agent management</a> for details, including instructions on how to run agent as service", 
@@ -1202,7 +1211,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Enter your details to create your account", "계정을 생성하려면 세부 정보를 입력하세요");
 		m.put("Enter your details to login to your account", "계정에 로그인하려면 세부 정보를 입력하세요");
 		m.put("Enter your user name or email to reset password", "비밀번호를 재설정하려면 사용자 이름 또는 이메일을 입력하세요");
-		m.put("Entitle to All Users", "모든 사용자에게 권한 부여");
+		m.put("Entitle to All Users and Projects", "모든 사용자 및 프로젝트에 권한 부여");
 		m.put("Entitled Groups", "권한이 부여된 그룹");
 		m.put("Entitled Projects", "권한이 부여된 프로젝트");
 		m.put("Entitled Users", "권한이 부여된 사용자");
@@ -1321,7 +1330,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("File missing or obsolete", "파일 누락 또는 오래됨");
 		m.put("File name", "파일 이름");
 		m.put("File name patterns such as *.java, *.c", "파일 이름 패턴 예: *.java, *.c");
-		m.put("File path to get text content", "텍스트 내용을 가져올 파일 경로");
 		m.put("Files", "파일들");
 		m.put("Files to Be Analyzed", "분석할 파일들");
 		m.put("Filter", "필터");
@@ -1364,13 +1372,14 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Fixing...", "수정 중...");
 		m.put("Float", "부동");
 		m.put("Flush", "플러시");
-		m.put("Folder path to list all files and subfolders", "모든 파일 및 하위 폴더를 나열할 폴더 경로");
 		m.put("Follow below instructions to publish packages into this project", "아래 지침을 따라 이 프로젝트에 패키지를 게시하세요");
 		m.put("Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):", 
 			"원격 머신에 에이전트를 설치하려면 아래 단계를 따르세요 (Linux/Windows/Mac OS X/FreeBSD 지원):");
 		m.put("For CI/CD job, add this gem to Gemfile like below", "CI/CD 작업의 경우, 아래와 같이 Gemfile에 이 gem을 추가하세요");
 		m.put("For CI/CD job, add this package to requirements.txt and run below to install the package via command step", 
 			"CI/CD 작업의 경우, requirements.txt에 이 패키지를 추가하고 아래 명령 단계를 실행하여 패키지를 설치하세요");
+		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
+			"CI/CD 작업의 경우, 아래 코드와 같이 명령 단계에서 사용자 정의 settings.xml을 사용하는 것이 더 편리합니다:");
 		m.put("For CI/CD job, run below to add package repository via command step", "CI/CD 작업의 경우, 아래 명령 단계를 실행하여 패키지 저장소를 추가하세요");
 		m.put("For CI/CD job, run below to add package source via command step", "CI/CD 작업의 경우, 아래 명령 단계를 실행하여 패키지 소스를 추가하세요");
 		m.put("For CI/CD job, run below to add source via command step", "CI/CD 작업의 경우, 아래 명령 단계를 실행하여 소스를 추가하세요");
@@ -1678,6 +1687,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"유효하지 않은 상태입니다. 시스템 설정에 지정된 서버 URL을 사용하여 OneDev를 방문하고 있는지 확인하세요");
 		m.put("Invalid subscription key", "잘못된 구독 키");
 		m.put("Invalid working period", "잘못된 작업 기간");
+		m.put("Investigate build failure with AI", "AI로 빌드 실패 조사");
 		m.put("Invitation sent to \"{0}\"", "\"{0}\"로 초대장이 발송되었습니다");
 		m.put("Invitation to \"{0}\" deleted", "\"{0}\"에 대한 초대장이 삭제되었습니다");
 		m.put("Invitations", "초대장");
@@ -1914,6 +1924,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Log Work", "작업 로그");
 		m.put("Log not available for offline agent", "오프라인 에이전트에서는 로그를 사용할 수 없습니다");
 		m.put("Log work", "작업 로그");
+		m.put("Login Command", "로그인 명령");
 		m.put("Login Name", "로그인 이름");
 		m.put("Login and generate refresh token", "로그인하고 새로 고침 토큰 생성");
 		m.put("Login name already used by another account", "다른 계정에서 이미 사용 중인 로그인 이름");
@@ -1959,6 +1970,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Make sure the account has package ${permission} permission over the project", "계정이 프로젝트에 대한 패키지 ${permission} 권한이 있는지 확인하세요");
 		m.put("Make sure the account has package read permission over the project", "계정이 프로젝트에 대한 패키지 읽기 권한이 있는지 확인하세요");
 		m.put("Make sure the user has package write permission over the project", "사용자가 프로젝트에 대한 패키지 쓰기 권한이 있는지 확인하세요");
+		m.put("Make sure to log in with an account that has package read permission for the project", 
+			"프로젝트에 대한 패키지 읽기 권한이 있는 계정으로 로그인했는지 확인하세요");
 		m.put("Malformed %sbase query", "잘못된 %sbase 쿼리");
 		m.put("Malformed %squery", "잘못된 %s쿼리");
 		m.put("Malformed build spec (import project: {0}, import revision: {1})", "잘못된 빌드 사양 (프로젝트 가져오기: {0}, 리비전 가져오기: {1})");
@@ -2010,6 +2023,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Merged", "병합됨");
 		m.put("Merged pull request \"{0}\" ({1})", "병합된 풀 리퀘스트 \"{0}\" ({1})");
 		m.put("Merges pull request", "풀 리퀘스트 병합");
+		m.put("Message is too long. Max {0} characters", "메시지가 너무 깁니다. 최대 {0}자");
 		m.put("Meta", "메타");
 		m.put("Meta Info", "메타 정보");
 		m.put("Microsoft 365", "Microsoft 365");
@@ -2239,6 +2253,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Not run", "실행되지 않음");
 		m.put("Not specified", "지정되지 않음");
 		m.put("Note", "노트");
+		m.put("Nothing changed yet", "아직 변경된 것이 없습니다");
 		m.put("Nothing to preview", "미리 볼 내용이 없습니다");
 		m.put("Notification", "알림");
 		m.put("Notifications", "알림들");
@@ -2350,6 +2365,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 <span class='text-info'>쉼표로 구분된</span> 빌드 플랫폼을 지정하세요. 예를 들어 <tt>linux/amd64,linux/arm64</tt>. 작업을 실행하는 노드의 플랫폼으로 빌드하려면 비워 두세요.");
 		m.put("Optionally specify <span class='text-info'>comma separated</span> platforms to scan, for instance <tt>linux/amd64,linux/arm64</tt>. Leave empty to scan all platforms in OCI layout", 
 			"선택적으로 <span class='text-info'>쉼표로 구분된</span> 스캔 플랫폼을 지정하세요. 예를 들어 <tt>linux/amd64,linux/arm64</tt>. OCI 레이아웃의 모든 플랫폼을 스캔하려면 비워 두세요.");
+		m.put("Optionally specify API key for authentication", "인증을 위해 API 키를 선택적으로 지정");
 		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 워크스페이스</a>에 상대적인 Dockerfile을 지정하세요. 위에서 지정한 빌드 경로 아래의 <tt>Dockerfile</tt> 파일을 사용하려면 비워 두세요.");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "선택적으로 Renovate CLI에서 사용할 JavaScript 구성을 지정하세요.");
@@ -2563,8 +2579,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Ordered List", "정렬된 목록");
 		m.put("Ordered list", "정렬된 목록");
 		m.put("Ordinary", "일반");
-		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account (working in progress)", 
-			"일반: 일반 계정<br>서비스: 서비스 계정은 비밀번호와 이메일 주소가 없으며, 활동에 대한 알림을 생성하지 않습니다<br>AI: AI 계정 (작업 진행 중)");
+		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account to answer questions about the code base, edit CI/CD spec, investigate job failure, or review pull request", 
+			"일반: 일반 계정<br>서비스: 서비스 계정은 비밀번호와 이메일 주소가 없으며, 활동에 대한 알림을 생성하지 않습니다<br>AI: 코드 베이스에 대한 질문에 답변하고, CI/CD 사양을 편집하며, 작업 실패를 조사하거나 풀 리퀘스트를 검토하는 AI 계정");
 		m.put("Osv License Scanner", "Osv 라이센스 스캐너");
 		m.put("Osv Vulnerability Scanner", "Osv 취약점 스캐너");
 		m.put("Other", "기타");
@@ -3352,6 +3368,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Some related commits of the code comment is missing", "코드 댓글과 관련된 일부 커밋이 누락되었습니다");
 		m.put("Some related commits of the pull request are missing", "풀 리퀘스트와 관련된 일부 커밋이 누락되었습니다");
 		m.put("Some required builds not passed", "필수 빌드 중 일부가 통과하지 못했습니다");
+		m.put("Someone changed file mode since you started editing", "편집을 시작한 이후로 누군가 파일 모드를 변경했습니다");
+		m.put("Someone changed file type since you started editing", "편집을 시작한 이후로 누군가 파일 유형을 변경했습니다");
 		m.put("Someone made below change since you started editing", "편집을 시작한 이후 아래 변경 사항이 있었습니다.");
 		m.put("Sort", "정렬");
 		m.put("Source", "소스");
@@ -3382,6 +3400,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specifies the attribute containing group name inside the found group LDAP entry. Value of this attribute will be mapped to a OneDev group. This attribute is normally set to <i>cn</i>", 
 			"찾은 그룹 LDAP 항목 내부에서 그룹 이름을 포함하는 속성을 지정합니다. 이 속성의 값은 OneDev 그룹에 매핑됩니다. 일반적으로 이 속성은 <i>cn</i>으로 설정됩니다");
 		m.put("Specifies who can access this AI service", "이 AI 서비스에 접근할 수 있는 사람을 지정합니다");
+		m.put("Specifies who can access this AI service. AI service can be accessed in below approaches:", 
+			"이 AI 서비스에 접근할 수 있는 대상을 지정합니다. AI 서비스는 아래 방법으로 접근할 수 있습니다:");
 		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 .net TRX 테스트 결과 파일을 지정합니다. 예: <tt>TestResults/*.trx</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
 		m.put("Specify <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is access token with code write permission over above projects. Commits, issues, and pull requests will also be created under name of the access token owner", 
@@ -3825,6 +3845,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("System Date", "시스템 날짜");
 		m.put("System Email Address", "시스템 이메일 주소");
 		m.put("System Maintenance", "시스템 유지보수");
+		m.put("System Prompt", "시스템 프롬프트");
 		m.put("System Setting", "시스템 설정");
 		m.put("System Settings", "시스템 설정");
 		m.put("System email address defined in mail setting should be used as recipient of such email, and project name may be appended to this address using to indicate where to create issues. For instance, if system email address is specified as <tt>support@example.com</tt>, sending email to <tt>support+myproject@example.com</tt> will create issue in <tt>myproject</tt>. If project name is not appended, OneDev will look up the project using project designation information below", 
@@ -4050,6 +4071,7 @@ public class Translation_ko extends TranslationResourceBundle {
 			"중복을 피하기 위해 여기 표시된 추정/남은 시간은 \"{0}\"에서 집계된 시간을 포함하지 않습니다");
 		m.put("To avoid duplication, spent time showing here does not include those aggregated from \"{0}\"", 
 			"중복을 피하기 위해 여기 표시된 소요 시간은 \"{0}\"에서 집계된 시간을 포함하지 않습니다");
+		m.put("To use this package, add below to project pom.xml", "이 패키지를 사용하려면 아래 내용을 프로젝트 pom.xml에 추가하세요");
 		m.put("Toggle change history", "변경 기록 토글");
 		m.put("Toggle comments", "댓글 토글");
 		m.put("Toggle commits", "커밋 토글");
@@ -4305,6 +4327,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Verification Code", "확인 코드");
 		m.put("Verification email sent, please check it", "확인 이메일이 발송되었습니다. 확인해 주세요");
 		m.put("Verify", "확인");
+		m.put("Via chat interface", "채팅 인터페이스를 통해");
+		m.put("Via mention in issue or pull request comments", "이슈 또는 풀 리퀘스트 댓글에서 언급을 통해");
+		m.put("Via pull request reviewer", "풀 리퀘스트 리뷰어를 통해");
 		m.put("View", "보기");
 		m.put("View source", "소스 보기");
 		m.put("View statistics", "통계 보기");
@@ -4596,6 +4621,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("pull request to branches \"{0}\" is discarded", "브랜치 \"{0}\"에 대한 풀 리퀘스트가 폐기됨");
 		m.put("pull request to branches \"{0}\" is merged", "브랜치 \"{0}\"에 대한 풀 리퀘스트가 병합됨");
 		m.put("pull request to branches \"{0}\" is opened", "브랜치 \"{0}\"에 대한 풀 리퀘스트가 열림");
+		m.put("pull request {0}", "풀 리퀘스트 {0}");
 		m.put("pull requests", "풀 리퀘스트들");
 		m.put("reconciliation (need administrator permission)", "조정 (관리자 권한 필요)");
 		m.put("reports", "보고서");
@@ -4690,19 +4716,15 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("AI system prompt has been saved", "AI 시스템 프롬프트가 저장되었습니다");
-		m.put("Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
-			"프로젝트를 명령줄에서 컴파일하려면 아래 내용을 $HOME/.m2/settings.xml에 추가하세요");
-		m.put("For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
-			"CI/CD 작업의 경우, 아래 코드와 같이 명령 단계에서 사용자 정의 settings.xml을 사용하는 것이 더 편리합니다:");
-		m.put("Login Command", "로그인 명령");
-		m.put("Make sure to log in with an account that has package read permission for the project", 
-			"프로젝트에 대한 패키지 읽기 권한이 있는 계정으로 로그인했는지 확인하세요");
-		m.put("Nothing changed yet", "아직 변경된 것이 없습니다");
-		m.put("Someone changed file mode since you started editing", "편집을 시작한 이후로 누군가 파일 모드를 변경했습니다");
-		m.put("Someone changed file type since you started editing", "편집을 시작한 이후로 누군가 파일 유형을 변경했습니다");
-		m.put("System Prompt", "시스템 프롬프트");
-		m.put("To use this package, add below to project pom.xml", "이 패키지를 사용하려면 아래 내용을 프로젝트 pom.xml에 추가하세요");
+		m.put("All members of entitled groups will be able to access this AI service", "권한이 있는 그룹의 모든 구성원은 이 AI 서비스에 접근할 수 있습니다.");
+		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
+			"권한이 있는 프로젝트는 AI 사용자를 풀 리퀘스트 리뷰어로 추가할 수 있습니다. 이 시나리오에서는 AI 사용자가 자신의 권한을 사용하여 작업을 수행합니다.");
+		m.put("Entitled projects will be able to access this AI service", "권한이 있는 프로젝트는 이 AI 서비스에 접근할 수 있습니다.");
+		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
+			"권한이 있는 사용자는 채팅 인터페이스를 통해 AI 사용자와 상호 작용하여 코드베이스 이해, CI/CD 사양 작성, CI/CD 작업 실패 조사와 같은 작업을 수행할 수 있습니다. 이 모드에서는 AI 사용자가 상호 작용하는 사용자와 동일한 권한으로 작동하며, AI 사용자에게 할당된 권한은 무시됩니다.");
+		m.put("Entitled users can mention the AI user in issue or pull request comments to request assistance. In this case, the AI user executes tasks using its own permissions.", 
+			"권한이 있는 사용자는 이슈나 풀 리퀘스트 댓글에서 AI 사용자를 언급하여 도움을 요청할 수 있습니다. 이 경우 AI 사용자가 자신의 권한을 사용하여 작업을 수행합니다.");
+		m.put("Entitled users will be able to access this AI service", "권한이 있는 사용자는 이 AI 서비스에 접근할 수 있습니다.");
 	}
 		
 	@Override

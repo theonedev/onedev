@@ -9,7 +9,6 @@ import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,6 +44,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
+import io.onedev.server.ai.ToolUtils;
 import io.onedev.server.ai.tools.GetHighlightedText;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.git.BlameBlock;
@@ -63,10 +63,10 @@ import io.onedev.server.util.Pair;
 import io.onedev.server.util.diff.DiffBlock;
 import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import io.onedev.server.util.diff.DiffUtils;
-import io.onedev.server.web.component.diff.DiffExpandSupport;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
+import io.onedev.server.web.component.diff.DiffExpandSupport;
 import io.onedev.server.web.component.diff.blob.BlobAnnotationSupport;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
 import io.onedev.server.web.component.svg.SpriteImage;
@@ -79,7 +79,6 @@ import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.AnnotationInfo;
 import io.onedev.server.web.util.CodeCommentInfo;
 import io.onedev.server.web.util.DiffPlanarRange;
-import io.onedev.server.web.util.WicketUtils;
 
 public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 
@@ -489,11 +488,8 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 		translations.put("loading", _T("Loading..."));
 		translations.put("invalid-selection", _T("Invalid selection, click for details"));
 		var page = (LayoutPage) getPage();
-		if (getAnnotationSupport() != null 
-				&& WicketUtils.isSubscriptionActive() 
-				&& !page.getAssistant().getEntitledAis().isEmpty()) {
+		if (getAnnotationSupport() != null && !page.getAssistant().getEntitledAis().isEmpty()) 
 			translations.put("explain-selection", _T("Explain selected text with AI"));
-		}
 		for (var severity: CodeProblem.Severity.values())
 			translations.put(severity.name(), _T("severity:" + severity.name()));
 		translations.put("add-problem-comment", _T("Add comment"));
@@ -1083,7 +1079,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 	}
 
 	@Override
-	public Collection<ChatTool> getChatTools() {
+	public List<ChatTool> getChatTools() {
 		var tools = new ArrayList<ChatTool>();
 		if (getAnnotationSupport() != null) {
 			var markRange = getAnnotationSupport().getMarkRange();
@@ -1097,7 +1093,7 @@ public class BlobTextDiffPanel extends Panel implements ChatToolAware {
 					filePath = change.getNewBlobIdent().path;
 					fileLines = change.getNewText().getLines();
 				}
-				tools.add(new GetHighlightedText(filePath, fileLines, markRange));				
+				tools.add(ToolUtils.wrapForChat(new GetHighlightedText(filePath, fileLines, markRange)));				
 			}
 		}
 		return tools;

@@ -18,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.servlet.http.Cookie;
 
+import org.apache.shiro.subject.Subject;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxChannel;
@@ -75,7 +76,8 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ai.ChatTool;
 import io.onedev.server.ai.ChatToolAware;
-import io.onedev.server.ai.ChatToolUtils;
+import io.onedev.server.ai.ToolExecutionResult;
+import io.onedev.server.ai.ToolUtils;
 import io.onedev.server.ai.tools.GetHighlightedText;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.BlobTarget;
@@ -138,7 +140,6 @@ import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.AnnotationInfo;
 import io.onedev.server.web.util.CodeCommentInfo;
 import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.web.websocket.ChatToolExecution;
 
 /**
  * Make sure to add only one source view panel per page
@@ -1073,7 +1074,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		translations.put("unsaved-changes-prompt", _T("There are unsaved changes, discard and continue?"));
 		translations.put("show-comment", _T("Click to show comment of marked text"));
 		var page = (LayoutPage)getPage();
-		if (WicketUtils.isSubscriptionActive() && !page.getAssistant().getEntitledAis().isEmpty())
+		if (!page.getAssistant().getEntitledAis().isEmpty())
 			translations.put("explain-selection", _T("Explain selected text with AI"));
 		
 		translations.put("loading", _T("Loading..."));
@@ -1435,7 +1436,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	}
 
 	@Override
-	public Collection<ChatTool> getChatTools() {
+	public List<ChatTool> getChatTools() {
 		var tools = new ArrayList<ChatTool>();
 		tools.add(new ChatTool() {
 
@@ -1448,23 +1449,23 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			}
 
 			@Override
-			public CompletableFuture<ChatToolExecution.Result> execute(IPartialPageRequestHandler handler, JsonNode arguments) {
+			public CompletableFuture<ToolExecutionResult> execute(IPartialPageRequestHandler handler, Subject subject, JsonNode arguments) {
 				var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
 				var map = Map.of(
 					"fileName", context.getBlobIdent().getName(),
 					"fileContent", Joiner.on('\n').join(lines)
 				);
-				return completedFuture(new ChatToolExecution.Result(ChatToolUtils.convertToJson(map), false));
+				return completedFuture(new ToolExecutionResult(ToolUtils.convertToJson(map), false));
 			}
 
 		});
 
 		var markRange = getMarkRange();
 		if (markRange != null) {
-			tools.add(new GetHighlightedText(
+			tools.add(ToolUtils.wrapForChat(new GetHighlightedText(
 				context.getBlobIdent().path, 
 				context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines(), 
-				markRange));
+				markRange)));
 		}
 		return tools;
 	}

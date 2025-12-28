@@ -10,7 +10,7 @@ public class AiSetting implements Serializable {
 
     private AiModelSetting modelSetting;
 
-    private boolean entitleToAll = true;
+    private boolean entitleToAll;
 
     private String systemPrompt;
 
