@@ -466,7 +466,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 										ownerChanged.set(false);
 									}
 									if (facade instanceof CommandFacade) {
-										CommandFacade commandFacade = (CommandFacade) facade;
+										CommandFacade commandFacade = ((CommandFacade) facade).replacePlaceholders(hostBuildHome);
 
 										if (commandFacade.getImage() == null) {
 											throw new ExplicitException("This step can only be executed by server shell "

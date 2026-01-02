@@ -60,7 +60,7 @@ public class CommandStep extends Step {
 	
 	@Editable(order=100, name="container:image", description="Specify container image to execute commands inside")
 	@DependsOn(property="runInContainer")
-	@Interpolative(variableSuggester="suggestVariables")
+	@Interpolative(variableSuggester="suggestDynamicVariables")
 	@NotEmpty
 	public String getImage() {
 		return image;
@@ -68,16 +68,6 @@ public class CommandStep extends Step {
 
 	public void setImage(String image) {
 		this.image = image;
-	}
-	
-	static List<InputSuggestion> suggestVariables(String matchWith) {
-		/* 
-		 * We do not support dynamic variable here as:
-		 * 1. @file:@ notion will not work for workspace files generated in current step
-		 * 2. It is very easy to use file content in shell script via shell utilities 
-		 *    in regardless the file is generated in current or previous steps
-		 */
-		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
 	
 	@Editable(order=110)
@@ -158,6 +148,20 @@ public class CommandStep extends Step {
 			return executor instanceof DockerAware;
 		else 
 			return !(executor instanceof DockerAware);
+	}
+
+	static List<InputSuggestion> suggestDynamicVariables(String matchWith) {
+		return BuildSpec.suggestVariables(matchWith, true, true, false);
+	}
+	
+	static List<InputSuggestion> suggestVariables(String matchWith) {
+		/* 
+		 * We do not support dynamic variable here as:
+		 * 1. @file:@ notion will not work for workspace files generated in current step
+		 * 2. It is very easy to use file content in shell script via shell utilities 
+		 *    in regardless the file is generated in current or previous steps
+		 */
+		return BuildSpec.suggestVariables(matchWith, true, false, false);
 	}
 
 }
