@@ -1,33 +1,31 @@
 package io.onedev.server.agent;
 
-import io.onedev.agent.Agent;
-import io.onedev.server.OneDev;
-import io.onedev.server.exception.ServerNotReadyException;
-import io.onedev.server.service.AgentTokenService;
-import io.onedev.server.security.SecurityUtils;
-import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+
+import java.io.IOException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
-import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
+import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+
+import io.onedev.agent.Agent;
+import io.onedev.server.OneDev;
+import io.onedev.server.exception.ServerNotReadyException;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AgentTokenService;
 
 @Singleton
 public class ServerSocketServlet extends WebSocketServlet {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final AgentTokenService tokenService;
-
 	@Inject
-	public ServerSocketServlet(AgentTokenService tokenService) {
-		this.tokenService = tokenService;
-	}
+	private AgentTokenService tokenService;
 	
 	@Override
 	public void configure(WebSocketServletFactory factory) {

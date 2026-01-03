@@ -2,7 +2,10 @@ package io.onedev.server.ai;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +31,6 @@ import org.apache.wicket.protocol.ws.WebSocketSettings;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.joda.time.DateTime;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
@@ -53,7 +55,9 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.Listen;
+import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.model.Chat;
 import io.onedev.server.model.ChatMessage;
@@ -451,12 +455,12 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 	}
 
 	@Listen
-	public void on(io.onedev.server.event.system.SystemStarted event) {
+	public void on(SystemStarted event) {
 		taskId = taskScheduler.schedule(this);
 	}
 
 	@Listen
-	public void on(io.onedev.server.event.system.SystemStopping event) {
+	public void on(SystemStopping event) {
 		if (taskId != null)
 			taskScheduler.unschedule(taskId);
 	}
@@ -493,7 +497,7 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 			public void doWorks(List<Prioritized> works) {
 				transactionService.run(() -> {
 					var preserveDays = settingService.getAiSetting().getChatPreserveDays();
-					var threshold = new DateTime().minusDays(preserveDays).toDate();
+					var threshold = Date.from(Instant.now().minus(preserveDays, ChronoUnit.DAYS));
 					var criteria = newCriteria();
 					criteria.add(Restrictions.lt(Chat.PROP_DATE, threshold));
 					var deletedCount = 0;

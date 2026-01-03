@@ -31,6 +31,7 @@ import io.onedev.server.jetty.FileAssetServlet;
 import io.onedev.server.jetty.ServletConfigurator;
 import io.onedev.server.security.CorsFilter;
 import io.onedev.server.security.DefaultWebEnvironment;
+import io.onedev.server.web.KeepSessionAliveServlet;
 import io.onedev.server.web.SessionListener;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.img.ImageScope;
@@ -96,6 +97,8 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 		context.addServlet(new ServletHolder(new ClasspathAssetServlet(ImageScope.class)), "/~img/*");
 		context.addServlet(new ServletHolder(new ClasspathAssetServlet(IconScope.class)), "/~icon/*");
+		
+		context.addServlet(new ServletHolder(new KeepSessionAliveServlet()), "/~keep-session-alive");
 		
 		context.getSessionHandler().addEventListener(new HttpSessionListener() {
 

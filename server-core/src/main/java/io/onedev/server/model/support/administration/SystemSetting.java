@@ -55,7 +55,7 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	private CurlLocation curlLocation = new SystemCurl();
 
-	private int sessionTimeout = 30;
+	private Integer sessionTimeout;
 
 	private boolean disableAutoUpdateCheck;
 	
@@ -134,13 +134,15 @@ public class SystemSetting implements Serializable, Validatable {
 		this.curlLocation = curlLocation;
 	}
 
-	@Editable(order=300, description = "Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.")
-	@Min(value=1, message="Session timeout should be at least 1 minute")
-	public int getSessionTimeout() {
+	@Editable(order=300, placeholder="Never expire", description = """
+		Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. \
+		Existing sessions will not be affected after changing this value.""")
+	@Min(value=5, message="Session timeout should be at least 5 minutes if specified")
+	public Integer getSessionTimeout() {
 		return sessionTimeout;
 	}
 
-	public void setSessionTimeout(int sessionTimeout) {
+	public void setSessionTimeout(Integer sessionTimeout) {
 		this.sessionTimeout = sessionTimeout;
 	}
 

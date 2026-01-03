@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.codec.binary.Base64;
@@ -51,6 +52,7 @@ import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.jspecify.annotations.Nullable;
 import org.unbescape.javascript.JavaScriptEscape;
 
@@ -69,6 +71,7 @@ import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AuditService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.asset.icon.IconScope;
@@ -108,6 +111,9 @@ public abstract class BasePage extends WebPage {
 	protected AuditService auditService;
 
 	@Inject
+	private SettingService settingService;
+
+	@Inject
 	protected ListenerRegistry listenerRegistry;
 
 	@Inject
@@ -115,6 +121,9 @@ public abstract class BasePage extends WebPage {
 
 	@Inject
 	private ObjectMapper objectMapper;
+
+	@Inject
+	private Provider<ServletContextHandler> servletContextHandlerProvider;
 	
 	public BasePage(PageParameters params) {
 		super(params);
@@ -407,6 +416,14 @@ public abstract class BasePage extends WebPage {
 				"var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone; %s", 
 				zoneIdDetectBehavior.getCallbackFunctionBody(explicit("timezone")));
 			response.render(OnDomReadyHeaderItem.forScript(script));
+		}
+		if (settingService.getSystemSetting() == null || settingService.getSystemSetting().getSessionTimeout() == null) {
+			int sessionTimeout = servletContextHandlerProvider.get().getSessionHandler().getMaxInactiveInterval();
+			response.render(OnDomReadyHeaderItem.forScript("""
+				setInterval(function() { 
+					fetch('/~keep-session-alive'); 
+				}, %d);"""
+				.formatted(sessionTimeout*500)));
 		}
 	}
 
