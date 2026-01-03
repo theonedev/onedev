@@ -53,7 +53,9 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.Listen;
+import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.ExceptionUtils;
 import io.onedev.server.model.Chat;
 import io.onedev.server.model.ChatMessage;
@@ -451,12 +453,12 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 	}
 
 	@Listen
-	public void on(io.onedev.server.event.system.SystemStarted event) {
+	public void on(SystemStarted event) {
 		taskId = taskScheduler.schedule(this);
 	}
 
 	@Listen
-	public void on(io.onedev.server.event.system.SystemStopping event) {
+	public void on(SystemStopping event) {
 		if (taskId != null)
 			taskScheduler.unschedule(taskId);
 	}

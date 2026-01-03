@@ -48,12 +48,14 @@ public class DefaultJettyService implements JettyService, Provider<ServletContex
 
 	private static final int SESSION_SCAVENGE_INTERVAL = 60;
 
+	private static final int DEFAULT_SESSION_TIMEOUT = 300;
+
 	@Inject
 	private SessionDataStoreFactory sessionDataStoreFactory;
 	
-	private Server server;
+	private volatile Server server;
 	
-	private ServletContextHandler servletContextHandler;
+	private volatile ServletContextHandler servletContextHandler;
 
 	@Inject
 	private Provider<Set<ServerConfigurator>> serverConfiguratorsProvider;
@@ -103,8 +105,8 @@ public class DefaultJettyService implements JettyService, Provider<ServletContex
         servletContextHandler.getSessionHandler().setSessionIdPathParameterName(null);
         servletContextHandler.getSessionHandler().setSameSite(SameSite.LAX);  
         servletContextHandler.getSessionHandler().setHttpOnly(true);
-		var sessionTimeout = 1800;
-		if (settingService.getSystemSetting() != null) 
+		var sessionTimeout = DEFAULT_SESSION_TIMEOUT;
+		if (settingService.getSystemSetting() != null && settingService.getSystemSetting().getSessionTimeout() != null) 
 			sessionTimeout = settingService.getSystemSetting().getSessionTimeout() * 60;
 		servletContextHandler.getSessionHandler().setMaxInactiveInterval(sessionTimeout);		
 
@@ -178,7 +180,10 @@ public class DefaultJettyService implements JettyService, Provider<ServletContex
 
 							@Override
 							public Void call() throws Exception {
-								servletContextHandler.getSessionHandler().setMaxInactiveInterval(systemSetting.getSessionTimeout() * 60);
+								if (systemSetting.getSessionTimeout() != null) 
+									servletContextHandler.getSessionHandler().setMaxInactiveInterval(systemSetting.getSessionTimeout() * 60);
+								else 
+									servletContextHandler.getSessionHandler().setMaxInactiveInterval(DEFAULT_SESSION_TIMEOUT);
 								return null;
 							}
 							

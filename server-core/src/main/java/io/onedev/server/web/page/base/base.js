@@ -351,28 +351,41 @@ onedev.server = {
 		$(window).on("beforeunload", function() {
 			pageUnloading = true;
 		});
-					
+
+		// 30 seconds to tolerate Nginx default timeout (60 seconds)		
+		var keepAliveInterval = 30000;
+		var keepAlive;
+		var keepAliveResponded = true;
 		Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
 			$(".connection-error").hide();
+			keepAlive = setInterval(function() {
+				if (!keepAliveResponded) {
+					onConnectionError();
+				} else {
+					Wicket.WebSocket.send("KeepAlive");
+					keepAliveResponded = false;
+				}
+			}, keepAliveInterval); 
 		});
+		function onConnectionError() {
+			if (!pageUnloading) {
+				$("body>.error").hide();
+				$(".connection-error").show();
+			}
+			if (keepAlive) {
+				clearInterval(keepAlive);
+				keepAlive = undefined;
+			}
+		}
 		Wicket.Event.subscribe("/websocket/closed", function(jqEvent) {
-			if (!pageUnloading) {
-				$("body>.error").hide();
-				$(".connection-error").show();
-			}
-		});
-		Wicket.Event.subscribe("/websocket/error", function(jqEvent) {
-			if (!pageUnloading) {
-				$("body>.error").hide();
-				$(".connection-error").show();
-			}
+			onConnectionError();
 		});
 		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
 			if (message == "ErrorMessage") {
 				$("body>.error").hide();
 				$(".page-error").show();
 			} else if (message == "KeepAlive") {
-				Wicket.WebSocket.send(message);
+				keepAliveResponded = true;
 			}
 		});		
 	},
