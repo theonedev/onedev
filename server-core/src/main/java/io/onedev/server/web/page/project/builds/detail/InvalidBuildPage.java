@@ -69,7 +69,7 @@ public class InvalidBuildPage extends ProjectPage {
 			public void onClick() {
 				OneDev.getInstance(BuildService.class).delete(getBuild());
 				
-				Session.get().success(MessageFormat.format(_T("Build #{0} deleted"), getBuild().getNumber()));
+				Session.get().success(MessageFormat.format(_T("Build {0} deleted"), getBuild().getReference().toString(getBuild().getProject())));
 				
 				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Build.class);
 				if (redirectUrlAfterDelete != null)

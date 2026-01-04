@@ -312,7 +312,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 								var oldAuditContent = VersionedXmlDoc.fromBean(getIssue()).toXML();
 								auditService.audit(getIssue().getProject(), "deleted issue \"" + getIssue().getReference().toString(getIssue().getProject()) + "\"", oldAuditContent, null);
 								
-								Session.get().success(MessageFormat.format(_T("Issue #{0} deleted"), getIssue().getNumber()));
+								Session.get().success(MessageFormat.format(_T("Issue {0} deleted"), getIssue().getReference().toString(getIssue().getProject())));
 								
 								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Issue.class);
 								if (redirectUrlAfterDelete != null)

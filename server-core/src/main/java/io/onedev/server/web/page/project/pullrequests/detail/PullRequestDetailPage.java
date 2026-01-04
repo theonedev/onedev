@@ -1255,7 +1255,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							var oldAuditContent = VersionedXmlDoc.fromBean(request).toXML();
 							auditService.audit(request.getProject(), "deleted pull request \"" + request.getReference().toString(request.getProject()) + "\"", oldAuditContent, null);
 
-							Session.get().success(MessageFormat.format(_T("Pull request #{0} deleted"), request.getNumber()));
+							Session.get().success(MessageFormat.format(_T("Pull request {0} deleted"), request.getReference().toString(request.getProject())));
 
 							String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(PullRequest.class);
 							if (redirectUrlAfterDelete != null)

@@ -639,7 +639,7 @@ public abstract class BuildDetailPage extends ProjectPage
 								var oldAuditContent = VersionedXmlDoc.fromBean(getBuild()).toXML();
 								auditService.audit(getBuild().getProject(), "deleted build \"" + getBuild().getReference().toString(getBuild().getProject()) + "\"", oldAuditContent, null);
 								
-								Session.get().success(MessageFormat.format(_T("Build #{0} deleted"), getBuild().getNumber()));
+								Session.get().success(MessageFormat.format(_T("Build {0} deleted"), getBuild().getReference().toString(getBuild().getProject())));
 								
 								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Build.class);
 								if (redirectUrlAfterDelete != null)

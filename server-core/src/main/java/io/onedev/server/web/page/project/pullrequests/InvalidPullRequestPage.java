@@ -83,7 +83,7 @@ public class InvalidPullRequestPage extends ProjectPage {
 			public void onClick() {
 				OneDev.getInstance(PullRequestService.class).delete(getPullRequest());
 				
-				Session.get().success(MessageFormat.format(_T("Pull request #{0} deleted"), getPullRequest().getNumber()));
+				Session.get().success(MessageFormat.format(_T("Pull request {0} deleted"), getPullRequest().getReference().toString(getPullRequest().getProject())));
 				
 				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(PullRequest.class);
 				if (redirectUrlAfterDelete != null)
