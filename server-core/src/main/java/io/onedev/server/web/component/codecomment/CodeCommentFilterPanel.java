@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
@@ -19,7 +20,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityQuery;
@@ -29,6 +29,7 @@ import io.onedev.server.search.entity.codecomment.LastActivityDateCriteria;
 import io.onedev.server.search.entity.codecomment.ResolvedCriteria;
 import io.onedev.server.search.entity.codecomment.StatusCriteria;
 import io.onedev.server.search.entity.codecomment.UnresolvedCriteria;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.datepicker.DatePicker;
@@ -211,6 +212,8 @@ class CodeCommentFilterPanel extends FilterEditPanel<CodeComment> {
 			
 		});
 		add(notActiveSincePicker);				
+
+		add(AttributeModifier.append("class", "no-autofocus"));
 	}
 	
 	private static UserService getUserService() {

@@ -12,15 +12,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.LabelSpecService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -35,6 +33,9 @@ import io.onedev.server.search.entity.pack.PublishedViaProjectCriteria;
 import io.onedev.server.search.entity.pack.TypeCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.service.LabelSpecService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.datepicker.DatePicker;
@@ -300,6 +301,8 @@ class PackFilterPanel extends FilterEditPanel<Pack> {
 			
 		});
 		add(publishedBeforePicker);					
+
+		add(AttributeModifier.append("class", "no-autofocus"));
 	}
 	
 	private ProjectService getProjectService() {

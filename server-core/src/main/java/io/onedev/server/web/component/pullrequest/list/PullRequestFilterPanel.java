@@ -14,14 +14,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.LabelSpecService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityQuery;
@@ -35,6 +34,8 @@ import io.onedev.server.search.entity.pullrequest.OpenCriteria;
 import io.onedev.server.search.entity.pullrequest.StatusCriteria;
 import io.onedev.server.search.entity.pullrequest.SubmittedByCriteria;
 import io.onedev.server.search.entity.pullrequest.SubmittedByUserCriteria;
+import io.onedev.server.service.LabelSpecService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.datepicker.DatePicker;
@@ -315,6 +316,8 @@ class PullRequestFilterPanel extends FilterEditPanel<PullRequest> {
 			
 		});
 		add(notActiveSincePicker);				
+
+		add(AttributeModifier.append("class", "no-autofocus"));
 	}
 
 	private LabelSpecService getLabelSpecService() {

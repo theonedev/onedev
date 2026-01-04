@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.CheckBox;
@@ -20,9 +21,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.LabelSpecService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityQuery;
@@ -36,6 +34,9 @@ import io.onedev.server.search.entity.project.OwnedByUserCriteria;
 import io.onedev.server.search.entity.project.RootsCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.service.LabelSpecService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.datepicker.DatePicker;
@@ -371,6 +372,7 @@ class ProjectFilterPanel extends FilterEditPanel<Project> {
 			
 		});
 		add(notActiveSincePicker);
+		add(AttributeModifier.append("class", "no-autofocus"));
 	}
 
 	private LabelSpecService getLabelSpecService() {

@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.CheckBox;
@@ -18,7 +19,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.AgentService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.agent.AgentQueryLexer;
@@ -31,6 +31,7 @@ import io.onedev.server.search.entity.agent.OsArchCriteria;
 import io.onedev.server.search.entity.agent.OsCriteria;
 import io.onedev.server.search.entity.agent.PausedCriteria;
 import io.onedev.server.search.entity.agent.StatusCriteria;
+import io.onedev.server.service.AgentService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.datepicker.DatePicker;
@@ -294,6 +295,8 @@ class AgentFilterPanel extends FilterEditPanel<Agent> {
 			
 		});
 		add(notUsedSincePicker);			
+
+		add(AttributeModifier.append("class", "no-autofocus"));
 	}
 	
 	private static AgentService getAgentService() {
