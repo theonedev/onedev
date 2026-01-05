@@ -352,22 +352,14 @@ onedev.server = {
 			pageUnloading = true;
 		});
 
-		// 30 seconds to tolerate Nginx default timeout (60 seconds)		
-		var keepAliveInterval = 30000;
 		var keepAlive;
-		var keepAliveResponded = true;
 		Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
 			$(".connection-error").hide();
 			keepAlive = setInterval(function() {
-				if (!keepAliveResponded) {
-					onConnectionError();
-				} else {
-					Wicket.WebSocket.send("KeepAlive");
-					keepAliveResponded = false;
-				}
-			}, keepAliveInterval); 
+				Wicket.WebSocket.send("KeepAlive");
+			}, 30000); // 30 seconds to tolerate Nginx default timeout (60 seconds)		
 		});
-		function onConnectionError() {
+		Wicket.Event.subscribe("/websocket/closed", function(jqEvent) {
 			if (!pageUnloading) {
 				$("body>.error").hide();
 				$(".connection-error").show();
@@ -376,16 +368,11 @@ onedev.server = {
 				clearInterval(keepAlive);
 				keepAlive = undefined;
 			}
-		}
-		Wicket.Event.subscribe("/websocket/closed", function(jqEvent) {
-			onConnectionError();
 		});
 		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
 			if (message == "ErrorMessage") {
 				$("body>.error").hide();
 				$(".page-error").show();
-			} else if (message == "KeepAlive") {
-				keepAliveResponded = true;
 			}
 		});		
 	},

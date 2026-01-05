@@ -267,6 +267,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("All files", "모든 파일");
 		m.put("All groups", "모든 그룹");
 		m.put("All issues", "모든 이슈");
+		m.put("All members of entitled groups will be able to access this AI service", "권한이 있는 그룹의 모든 구성원은 이 AI 서비스에 접근할 수 있습니다.");
 		m.put("All occurrences", "모든 발생");
 		m.put("All platforms in OCI layout", "OCI 레이아웃의 모든 플랫폼");
 		m.put("All platforms in image", "이미지의 모든 플랫폼");
@@ -478,7 +479,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Bug Report", "버그 보고");
 		m.put("Build", "빌드");
 		m.put("Build #{0} already finished", "빌드 #{0}는 이미 완료되었습니다");
-		m.put("Build #{0} deleted", "빌드 #{0}가 삭제되었습니다");
 		m.put("Build #{0} not finished yet", "빌드 #{0}는 아직 완료되지 않았습니다");
 		m.put("Build Artifact Storage", "빌드 아티팩트 저장소");
 		m.put("Build Commit", "빌드 커밋");
@@ -1215,6 +1215,13 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Entitled Groups", "권한이 부여된 그룹");
 		m.put("Entitled Projects", "권한이 부여된 프로젝트");
 		m.put("Entitled Users", "권한이 부여된 사용자");
+		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
+			"권한이 있는 프로젝트는 AI 사용자를 풀 리퀘스트 리뷰어로 추가할 수 있습니다. 이 시나리오에서는 AI 사용자가 자신의 권한을 사용하여 작업을 수행합니다.");
+		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
+			"권한이 있는 사용자는 채팅 인터페이스를 통해 AI 사용자와 상호 작용하여 코드베이스 이해, CI/CD 사양 작성, CI/CD 작업 실패 조사와 같은 작업을 수행할 수 있습니다. 이 모드에서는 AI 사용자가 상호 작용하는 사용자와 동일한 권한으로 작동하며, AI 사용자에게 할당된 권한은 무시됩니다.");
+		m.put("Entitled users can mention the AI user in issue or pull request comments to request assistance. In this case, the AI user executes tasks using its own permissions.", 
+			"권한이 있는 사용자는 이슈나 풀 리퀘스트 댓글에서 AI 사용자를 언급하여 도움을 요청할 수 있습니다. 이 경우 AI 사용자가 자신의 권한을 사용하여 작업을 수행합니다.");
+		m.put("Entitled users will be able to access this AI service", "권한이 있는 사용자는 이 AI 서비스에 접근할 수 있습니다.");
 		m.put("Entitlement", "권한 부여");
 		m.put("Entitlement Edit Bean", "권한 편집 빈");
 		m.put("Entries", "항목들");
@@ -1696,7 +1703,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Invite Users", "사용자 초대");
 		m.put("Is Site Admin", "사이트 관리자 여부");
 		m.put("Issue", "이슈");
-		m.put("Issue #{0} deleted", "이슈 #{0}이 삭제되었습니다");
 		m.put("Issue Board", "이슈 보드");
 		m.put("Issue Boards", "이슈 보드들");
 		m.put("Issue Close States", "이슈 종료 상태");
@@ -2881,7 +2887,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Pull from Remote", "원격에서 풀");
 		m.put("Pull request", "풀 리퀘스트");
 		m.put("Pull request #{0} already closed", "풀 리퀘스트 #{0}가 이미 닫혔습니다");
-		m.put("Pull request #{0} deleted", "풀 리퀘스트 #{0}가 삭제되었습니다");
 		m.put("Pull request administrative permission inside a project, including batch operations over multiple pull requests", 
 			"프로젝트 내에서 풀 리퀘스트 관리 권한, 여러 풀 리퀘스트에 대한 배치 작업 포함");
 		m.put("Pull request already closed", "풀 리퀘스트가 이미 닫혔습니다");
@@ -3722,8 +3727,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify user name of the registry", "레지스트리의 사용자 이름을 지정하십시오.");
 		m.put("Specify user name to authenticate with", "인증에 사용할 사용자 이름을 지정하십시오.");
 		m.put("Specify value of the environment variable", "환경 변수의 값을 지정하십시오.");
-		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
-			"웹 UI 세션 시간 초과를 분 단위로 지정합니다. 이 값을 변경해도 기존 세션에는 영향을 미치지 않습니다.");
 		m.put("Specify webhook url to post events", "이벤트를 게시할 웹훅 URL을 지정하십시오.");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"닫힌 GitHub 이슈에 사용할 이슈 상태를 지정하십시오.<br><b>참고:</b> 적절한 옵션이 없는 경우 OneDev 이슈 상태를 사용자 정의할 수 있습니다.");
@@ -4716,15 +4719,13 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("All members of entitled groups will be able to access this AI service", "권한이 있는 그룹의 모든 구성원은 이 AI 서비스에 접근할 수 있습니다.");
-		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
-			"권한이 있는 프로젝트는 AI 사용자를 풀 리퀘스트 리뷰어로 추가할 수 있습니다. 이 시나리오에서는 AI 사용자가 자신의 권한을 사용하여 작업을 수행합니다.");
-		m.put("Entitled projects will be able to access this AI service", "권한이 있는 프로젝트는 이 AI 서비스에 접근할 수 있습니다.");
-		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
-			"권한이 있는 사용자는 채팅 인터페이스를 통해 AI 사용자와 상호 작용하여 코드베이스 이해, CI/CD 사양 작성, CI/CD 작업 실패 조사와 같은 작업을 수행할 수 있습니다. 이 모드에서는 AI 사용자가 상호 작용하는 사용자와 동일한 권한으로 작동하며, AI 사용자에게 할당된 권한은 무시됩니다.");
-		m.put("Entitled users can mention the AI user in issue or pull request comments to request assistance. In this case, the AI user executes tasks using its own permissions.", 
-			"권한이 있는 사용자는 이슈나 풀 리퀘스트 댓글에서 AI 사용자를 언급하여 도움을 요청할 수 있습니다. 이 경우 AI 사용자가 자신의 권한을 사용하여 작업을 수행합니다.");
-		m.put("Entitled users will be able to access this AI service", "권한이 있는 사용자는 이 AI 서비스에 접근할 수 있습니다.");
+		m.put("Build {0} deleted", "빌드 {0} 삭제됨");
+		m.put("Entitled projects and all the sub-projects will be able to access this AI service", 
+			"권한이 부여된 프로젝트와 모든 하위 프로젝트는 이 AI 서비스를 이용할 수 있습니다");
+		m.put("Issue {0} deleted", "이슈 {0} 삭제됨");
+		m.put("Pull request {0} deleted", "풀 리퀘스트 {0} 삭제됨");
+		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
+			"웹 UI 세션 타임아웃을 분 단위로 지정하세요. 브라우저가 열려 있을 때 만료되지 않으려면 비워 두세요. 이 값을 변경해도 기존 세션에는 영향을 미치지 않습니다.");
 	}
 		
 	@Override

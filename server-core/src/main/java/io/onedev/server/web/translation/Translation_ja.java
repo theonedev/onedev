@@ -267,6 +267,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("All files", "すべてのファイル");
 		m.put("All groups", "すべてのグループ");
 		m.put("All issues", "すべての課題");
+		m.put("All members of entitled groups will be able to access this AI service", "権限を持つグループのすべてのメンバーは、このAIサービスにアクセスできます。");
 		m.put("All occurrences", "すべての出現");
 		m.put("All platforms in OCI layout", "OCIレイアウトのすべてのプラットフォーム");
 		m.put("All platforms in image", "イメージ内のすべてのプラットフォーム");
@@ -478,7 +479,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Bug Report", "バグ報告");
 		m.put("Build", "ビルド");
 		m.put("Build #{0} already finished", "ビルド#{0}はすでに終了しています");
-		m.put("Build #{0} deleted", "ビルド#{0}が削除されました");
 		m.put("Build #{0} not finished yet", "ビルド#{0}はまだ終了していません");
 		m.put("Build Artifact Storage", "ビルドアーティファクトストレージ");
 		m.put("Build Commit", "ビルドコミット");
@@ -1215,6 +1215,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Entitled Groups", "権限を持つグループ");
 		m.put("Entitled Projects", "権限を持つプロジェクト");
 		m.put("Entitled Users", "権限を持つユーザー");
+		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
+			"権限を持つプロジェクトは、AIユーザーをプルリクエストのレビュアーとして追加できます。このシナリオでは、AIユーザーは自身の権限を使用してタスクを実行します。");
+		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
+			"権限を持つユーザーは、チャットインターフェースを通じてAIユーザーと対話し、コードベースの理解、CI/CD仕様の作成、CI/CDジョブの失敗の調査などのタスクを実行できます。このモードでは、AIユーザーはそれと対話するユーザーと同じ権限で動作し、AIユーザー自身に割り当てられた権限を無視します。");
+		m.put("Entitled users can mention the AI user in issue or pull request comments to request assistance. In this case, the AI user executes tasks using its own permissions.", 
+			"権限を持つユーザーは、問題やプルリクエストのコメントでAIユーザーに言及して支援を求めることができます。この場合、AIユーザーは自身の権限を使用してタスクを実行します。");
+		m.put("Entitled users will be able to access this AI service", "権限を持つユーザーは、このAIサービスにアクセスできます。");
 		m.put("Entitlement", "権限");
 		m.put("Entitlement Edit Bean", "権限編集ビーン");
 		m.put("Entries", "エントリ");
@@ -1696,7 +1703,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Invite Users", "ユーザーを招待する");
 		m.put("Is Site Admin", "サイト管理者である");
 		m.put("Issue", "課題");
-		m.put("Issue #{0} deleted", "課題 #{0} を削除しました");
 		m.put("Issue Board", "課題ボード");
 		m.put("Issue Boards", "課題ボード一覧");
 		m.put("Issue Close States", "課題終了状態");
@@ -2881,7 +2887,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Pull from Remote", "リモートからプル");
 		m.put("Pull request", "プルリクエスト");
 		m.put("Pull request #{0} already closed", "プルリクエスト#{0}はすでにクローズされています");
-		m.put("Pull request #{0} deleted", "プルリクエスト#{0}が削除されました");
 		m.put("Pull request administrative permission inside a project, including batch operations over multiple pull requests", 
 			"プロジェクト内でのプルリクエスト管理権限、複数のプルリクエストに対するバッチ操作を含む");
 		m.put("Pull request already closed", "プルリクエストはすでにクローズされています");
@@ -3722,8 +3727,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify user name of the registry", "レジストリのユーザー名を指定してください。");
 		m.put("Specify user name to authenticate with", "認証に使用するユーザー名を指定してください。");
 		m.put("Specify value of the environment variable", "環境変数の値を指定してください。");
-		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
-			"Web UIセッションのタイムアウトを分単位で指定します。この値を変更しても既存のセッションには影響しません。");
 		m.put("Specify webhook url to post events", "イベントを投稿するためのWebhook URLを指定してください。");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"閉じたGitHubの問題に使用する問題状態を指定してください。<br><b>注意:</b> 適切なオプションがない場合は、OneDevの問題状態をカスタマイズすることができます。");
@@ -4716,15 +4719,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("All members of entitled groups will be able to access this AI service", "権限を持つグループのすべてのメンバーは、このAIサービスにアクセスできます。");
-		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
-			"権限を持つプロジェクトは、AIユーザーをプルリクエストのレビュアーとして追加できます。このシナリオでは、AIユーザーは自身の権限を使用してタスクを実行します。");
-		m.put("Entitled projects will be able to access this AI service", "権限を持つプロジェクトは、このAIサービスにアクセスできます。");
-		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
-			"権限を持つユーザーは、チャットインターフェースを通じてAIユーザーと対話し、コードベースの理解、CI/CD仕様の作成、CI/CDジョブの失敗の調査などのタスクを実行できます。このモードでは、AIユーザーはそれと対話するユーザーと同じ権限で動作し、AIユーザー自身に割り当てられた権限を無視します。");
-		m.put("Entitled users can mention the AI user in issue or pull request comments to request assistance. In this case, the AI user executes tasks using its own permissions.", 
-			"権限を持つユーザーは、問題やプルリクエストのコメントでAIユーザーに言及して支援を求めることができます。この場合、AIユーザーは自身の権限を使用してタスクを実行します。");
-		m.put("Entitled users will be able to access this AI service", "権限を持つユーザーは、このAIサービスにアクセスできます。");
+		m.put("Build {0} deleted", "ビルド {0} が削除されました");
+		m.put("Entitled projects and all the sub-projects will be able to access this AI service", 
+			"権限を持つプロジェクトとすべてのサブプロジェクトは、このAIサービスにアクセスできます");
+		m.put("Issue {0} deleted", "課題 {0} が削除されました");
+		m.put("Pull request {0} deleted", "プルリクエスト {0} が削除されました");
+		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
+			"Web UIセッションのタイムアウトを分単位で指定してください。ブラウザが開いている場合は期限切れにならないように空欄にしてください。この値を変更しても既存のセッションには影響しません。");
 	}
 		
 	@Override

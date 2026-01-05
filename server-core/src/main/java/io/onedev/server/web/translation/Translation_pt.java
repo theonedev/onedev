@@ -267,6 +267,7 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("All files", "Todos os arquivos");
 		m.put("All groups", "Todos os grupos");
 		m.put("All issues", "Todos os problemas");
+		m.put("All members of entitled groups will be able to access this AI service", "Todos os membros dos grupos autorizados poderão acessar este serviço de IA");
 		m.put("All occurrences", "Todas as ocorrências");
 		m.put("All platforms in OCI layout", "Todas as plataformas no layout OCI");
 		m.put("All platforms in image", "Todas as plataformas na imagem");
@@ -478,7 +479,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Bug Report", "Relatório de Bug");
 		m.put("Build", "Build");
 		m.put("Build #{0} already finished", "Build #{0} já finalizado");
-		m.put("Build #{0} deleted", "Build #{0} excluído");
 		m.put("Build #{0} not finished yet", "Build #{0} ainda não finalizado");
 		m.put("Build Artifact Storage", "Armazenamento de Artefatos de Build");
 		m.put("Build Commit", "Commit de Build");
@@ -1215,6 +1215,13 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Entitled Groups", "Grupos Autorizados");
 		m.put("Entitled Projects", "Projetos Autorizados");
 		m.put("Entitled Users", "Usuários Autorizados");
+		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
+			"Projetos autorizados podem adicionar o usuário de IA como revisor de pull request. Neste cenário, o usuário de IA executa tarefas usando suas próprias permissões.");
+		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
+			"Usuários autorizados podem interagir com o usuário de IA através da interface de chat para realizar tarefas como entender a base de código, criar especificações de CI/CD ou investigar falhas em jobs de CI/CD. Neste modo, o usuário de IA opera com as mesmas permissões do usuário que está interagindo com ele, ignorando as permissões atribuídas ao próprio usuário de IA.");
+		m.put("Entitled users can mention the AI user in issue or pull request comments to request assistance. In this case, the AI user executes tasks using its own permissions.", 
+			"Usuários autorizados podem mencionar o usuário de IA em comentários de issues ou pull requests para solicitar assistência. Neste caso, o usuário de IA executa tarefas usando suas próprias permissões.");
+		m.put("Entitled users will be able to access this AI service", "Usuários autorizados poderão acessar este serviço de IA");
 		m.put("Entitlement", "Autorização");
 		m.put("Entitlement Edit Bean", "Editar Bean de Autorização");
 		m.put("Entries", "Entradas");
@@ -1696,7 +1703,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Invite Users", "Convidar Usuários");
 		m.put("Is Site Admin", "É Administrador do Site");
 		m.put("Issue", "Problema");
-		m.put("Issue #{0} deleted", "Problema #{0} excluído");
 		m.put("Issue Board", "Quadro de Problemas");
 		m.put("Issue Boards", "Quadros de Problemas");
 		m.put("Issue Close States", "Estados de Fechamento de Problemas");
@@ -2881,7 +2887,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Pull from Remote", "Pull do Remoto");
 		m.put("Pull request", "Solicitação de Pull");
 		m.put("Pull request #{0} already closed", "Solicitação de Pull #{0} já fechada");
-		m.put("Pull request #{0} deleted", "Solicitação de Pull #{0} excluída");
 		m.put("Pull request administrative permission inside a project, including batch operations over multiple pull requests", 
 			"Permissão administrativa de solicitação de pull dentro de um projeto, incluindo operações em lote sobre múltiplas solicitações de pull");
 		m.put("Pull request already closed", "Solicitação de Pull já fechada");
@@ -3722,8 +3727,6 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("Specify user name of the registry", "Especifique o nome de usuário do registro");
 		m.put("Specify user name to authenticate with", "Especifique o nome de usuário para autenticação");
 		m.put("Specify value of the environment variable", "Especifique o valor da variável de ambiente");
-		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
-			"Especificar o tempo limite da sessão da interface web em minutos. Sessões existentes não serão afetadas após a alteração deste valor.");
 		m.put("Specify webhook url to post events", "Especifique a URL do webhook para postar eventos");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"Especifique qual estado de problema usar para problemas fechados no GitHub.<br><b>NOTA: </b> Você pode personalizar os estados de problemas do OneDev caso não haja uma opção apropriada aqui");
@@ -4716,15 +4719,13 @@ public class Translation_pt extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("All members of entitled groups will be able to access this AI service", "Todos os membros dos grupos autorizados poderão acessar este serviço de IA");
-		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
-			"Projetos autorizados podem adicionar o usuário de IA como revisor de pull request. Neste cenário, o usuário de IA executa tarefas usando suas próprias permissões.");
-		m.put("Entitled projects will be able to access this AI service", "Projetos autorizados poderão acessar este serviço de IA");
-		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
-			"Usuários autorizados podem interagir com o usuário de IA através da interface de chat para realizar tarefas como entender a base de código, criar especificações de CI/CD ou investigar falhas em jobs de CI/CD. Neste modo, o usuário de IA opera com as mesmas permissões do usuário que está interagindo com ele, ignorando as permissões atribuídas ao próprio usuário de IA.");
-		m.put("Entitled users can mention the AI user in issue or pull request comments to request assistance. In this case, the AI user executes tasks using its own permissions.", 
-			"Usuários autorizados podem mencionar o usuário de IA em comentários de issues ou pull requests para solicitar assistência. Neste caso, o usuário de IA executa tarefas usando suas próprias permissões.");
-		m.put("Entitled users will be able to access this AI service", "Usuários autorizados poderão acessar este serviço de IA");
+		m.put("Build {0} deleted", "Build {0} excluído");
+		m.put("Entitled projects and all the sub-projects will be able to access this AI service", 
+			"Projetos autorizados e todos os subprojetos poderão acessar este serviço de IA");
+		m.put("Issue {0} deleted", "Problema {0} excluído");
+		m.put("Pull request {0} deleted", "Solicitação de pull {0} excluída");
+		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
+			"Especifique o tempo limite da sessão da interface web em minutos. Deixe vazio para nunca expirar quando o navegador estiver aberto. Sessões existentes não serão afetadas após alterar este valor.");
 	}
 		
 	@Override

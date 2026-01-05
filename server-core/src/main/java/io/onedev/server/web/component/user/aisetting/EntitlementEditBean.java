@@ -68,7 +68,7 @@ public class EntitlementEditBean implements Serializable{
         this.entitledGroups = entitledGroups;
     }
 
-    @Editable(order=400, description="Entitled projects will be able to access this AI service")
+    @Editable(order=400, description="Entitled projects and all the sub-projects will be able to access this AI service")
     @ProjectChoice
     @DependsOn(property="entitleToAll", value="false")
     public List<String> getEntitledProjects() {

@@ -267,6 +267,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("All files", "Tous les fichiers");
 		m.put("All groups", "Tous les groupes");
 		m.put("All issues", "Tous les problèmes");
+		m.put("All members of entitled groups will be able to access this AI service", "Tous les membres des groupes autorisés pourront accéder à ce service d'IA");
 		m.put("All occurrences", "Toutes les occurrences");
 		m.put("All platforms in OCI layout", "Toutes les plateformes dans la disposition OCI");
 		m.put("All platforms in image", "Toutes les plateformes dans l'image");
@@ -478,7 +479,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Bug Report", "Rapport de bug");
 		m.put("Build", "Construire");
 		m.put("Build #{0} already finished", "Construction #{0} déjà terminée");
-		m.put("Build #{0} deleted", "Construction #{0} supprimée");
 		m.put("Build #{0} not finished yet", "Construction #{0} pas encore terminée");
 		m.put("Build Artifact Storage", "Stockage des artefacts de construction");
 		m.put("Build Commit", "Commit de construction");
@@ -1215,6 +1215,13 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Entitled Groups", "Groupes autorisés");
 		m.put("Entitled Projects", "Projets autorisés");
 		m.put("Entitled Users", "Utilisateurs autorisés");
+		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
+			"Les projets autorisés peuvent ajouter l'utilisateur IA en tant que réviseur de demande de tirage. Dans ce scénario, l'utilisateur IA exécute des tâches en utilisant ses propres autorisations.");
+		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
+			"Les utilisateurs autorisés peuvent interagir avec l'utilisateur IA via l'interface de chat pour effectuer des tâches telles que comprendre la base de code, rédiger des spécifications CI/CD ou enquêter sur les échecs de tâches CI/CD. Dans ce mode, l'utilisateur IA opère avec les mêmes autorisations que l'utilisateur interagissant avec lui, en ignorant les autorisations attribuées à l'utilisateur IA lui-même.");
+		m.put("Entitled users can mention the AI user in issue or pull request comments to request assistance. In this case, the AI user executes tasks using its own permissions.", 
+			"Les utilisateurs autorisés peuvent mentionner l'utilisateur IA dans les commentaires des problèmes ou des demandes de tirage pour demander de l'aide. Dans ce cas, l'utilisateur IA exécute des tâches en utilisant ses propres autorisations.");
+		m.put("Entitled users will be able to access this AI service", "Les utilisateurs autorisés pourront accéder à ce service d'IA");
 		m.put("Entitlement", "Autorisation");
 		m.put("Entitlement Edit Bean", "Modifier l'autorisation Bean");
 		m.put("Entries", "Entrées");
@@ -1696,7 +1703,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Invite Users", "Inviter des utilisateurs");
 		m.put("Is Site Admin", "Est administrateur du site");
 		m.put("Issue", "Problème");
-		m.put("Issue #{0} deleted", "Problème #{0} supprimé");
 		m.put("Issue Board", "Tableau des problèmes");
 		m.put("Issue Boards", "Tableaux des problèmes");
 		m.put("Issue Close States", "États de clôture des problèmes");
@@ -2881,7 +2887,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Pull from Remote", "Tirer depuis le distant");
 		m.put("Pull request", "Demande de tirage");
 		m.put("Pull request #{0} already closed", "Demande de tirage #{0} déjà fermée");
-		m.put("Pull request #{0} deleted", "Demande de tirage #{0} supprimée");
 		m.put("Pull request administrative permission inside a project, including batch operations over multiple pull requests", 
 			"Permission administrative de demande de tirage dans un projet, y compris les opérations par lot sur plusieurs demandes de tirage");
 		m.put("Pull request already closed", "Demande de tirage déjà fermée");
@@ -3722,8 +3727,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Specify user name of the registry", "Spécifiez le nom d'utilisateur du registre");
 		m.put("Specify user name to authenticate with", "Spécifiez le nom d'utilisateur pour l'authentification");
 		m.put("Specify value of the environment variable", "Spécifiez la valeur de la variable d'environnement");
-		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
-			"Spécifiez le délai d'expiration de la session de l'interface utilisateur web en minutes. Les sessions existantes ne seront pas affectées après la modification de cette valeur.");
 		m.put("Specify webhook url to post events", "Spécifiez l'URL du webhook pour publier des événements");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"Spécifiez l'état du problème à utiliser pour les problèmes GitHub fermés.<br><b>REMARQUE :</b> Vous pouvez personnaliser les états des problèmes OneDev si aucune option appropriée n'est disponible ici");
@@ -4716,15 +4719,13 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("All members of entitled groups will be able to access this AI service", "Tous les membres des groupes autorisés pourront accéder à ce service d'IA");
-		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
-			"Les projets autorisés peuvent ajouter l'utilisateur IA en tant que réviseur de demande de tirage. Dans ce scénario, l'utilisateur IA exécute des tâches en utilisant ses propres autorisations.");
-		m.put("Entitled projects will be able to access this AI service", "Les projets autorisés pourront accéder à ce service d'IA");
-		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
-			"Les utilisateurs autorisés peuvent interagir avec l'utilisateur IA via l'interface de chat pour effectuer des tâches telles que comprendre la base de code, rédiger des spécifications CI/CD ou enquêter sur les échecs de tâches CI/CD. Dans ce mode, l'utilisateur IA opère avec les mêmes autorisations que l'utilisateur interagissant avec lui, en ignorant les autorisations attribuées à l'utilisateur IA lui-même.");
-		m.put("Entitled users can mention the AI user in issue or pull request comments to request assistance. In this case, the AI user executes tasks using its own permissions.", 
-			"Les utilisateurs autorisés peuvent mentionner l'utilisateur IA dans les commentaires des problèmes ou des demandes de tirage pour demander de l'aide. Dans ce cas, l'utilisateur IA exécute des tâches en utilisant ses propres autorisations.");
-		m.put("Entitled users will be able to access this AI service", "Les utilisateurs autorisés pourront accéder à ce service d'IA");
+		m.put("Build {0} deleted", "Build {0} supprimé");
+		m.put("Entitled projects and all the sub-projects will be able to access this AI service", 
+			"Les projets autorisés et tous les sous-projets pourront accéder à ce service d'IA");
+		m.put("Issue {0} deleted", "Problème {0} supprimé");
+		m.put("Pull request {0} deleted", "Demande de tirage {0} supprimée");
+		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
+			"Spécifiez le délai d'expiration de la session de l'interface utilisateur web en minutes. Laissez vide pour ne jamais expirer lorsque le navigateur est ouvert. Les sessions existantes ne seront pas affectées après la modification de cette valeur.");
 	}
 		
 	@Override

@@ -292,6 +292,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("All files", "所有文件");
 		m.put("All groups", "所有分组");
 		m.put("All issues", "所有工单");
+		m.put("All members of entitled groups will be able to access this AI service", "被授权的组的所有成员将能够访问此 AI 服务");
 		m.put("All occurrences", "所有出现");
 		m.put("All platforms in OCI layout", "所有 OCI 布局的平台");
 		m.put("All platforms in image", "所有镜像中的平台");
@@ -503,7 +504,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Bug Report", "错误报告");
 		m.put("Build", "构建");
 		m.put("Build #{0} already finished", "构建 #{0} 已完成");
-		m.put("Build #{0} deleted", "构建 #{0} 已删除");
 		m.put("Build #{0} not finished yet", "构建 #{0} 未完成");
 		m.put("Build Artifact Storage", "构建制品存储");
 		m.put("Build Commit", "构建提交");
@@ -1240,6 +1240,13 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Entitled Groups", "授权组");
 		m.put("Entitled Projects", "授权项目");
 		m.put("Entitled Users", "授权用户");
+		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
+			"被授权的项目可以将 AI 用户添加为合并请求的审查者。在这种情况下，AI 用户使用其自身的权限执行任务。");
+		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
+			"被授权的用户可以通过聊天界面与 AI 用户互动，以执行诸如理解代码库、编写 CI/CD 规范或调查 CI/CD 任务失败等任务。在此模式下，AI 用户以与与其互动的用户相同的权限操作，忽略分配给 AI 用户本身的权限。");
+		m.put("Entitled users can mention the AI user in issue or pull request comments to request assistance. In this case, the AI user executes tasks using its own permissions.", 
+			"被授权的用户可以在工单或合并请求评论中提及 AI 用户以请求帮助。在这种情况下，AI 用户使用其自身的权限执行任务。");
+		m.put("Entitled users will be able to access this AI service", "被授权的用户将能够访问此 AI 服务");
 		m.put("Entitlement", "权限");
 		m.put("Entitlement Edit Bean", "权限编辑 Bean");
 		m.put("Entries", "条目");
@@ -1721,7 +1728,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Invite Users", "邀请用户");
 		m.put("Is Site Admin", "是否为站点管理员");
 		m.put("Issue", "工单");
-		m.put("Issue #{0} deleted", "工单 #{0} 已删除");
 		m.put("Issue Board", "看板");
 		m.put("Issue Boards", "工单看板");
 		m.put("Issue Close States", "工单关闭状态");
@@ -2906,7 +2912,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Pull from Remote", "从远程拉取");
 		m.put("Pull request", "合并请求");
 		m.put("Pull request #{0} already closed", "合并请求 #{0} 已关闭");
-		m.put("Pull request #{0} deleted", "合并请求 #{0} 已删除");
 		m.put("Pull request administrative permission inside a project, including batch operations over multiple pull requests", 
 			"在项目中对多个合并请求进行批量操作的权限");
 		m.put("Pull request already closed", "合并请求已关闭");
@@ -3747,8 +3752,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify user name of the registry", "指定注册表的用户名");
 		m.put("Specify user name to authenticate with", "指定用于身份验证的用户名");
 		m.put("Specify value of the environment variable", "指定环境变量的值");
-		m.put("Specify web UI session timeout in minutes. Existing sessions will not be affected after changing this value.", 
-			"指定 Web UI 会话超时时间（分钟）。更改此值后，现有会话将不受影响。");
 		m.put("Specify webhook url to post events", "指定发布事件的 Webhook URL");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"指定用于已关闭 GitHub 工单的工单状态。<br><b>注意：</b> 如果此处没有合适的选项，您可以自定义 OneDev 工单状态");
@@ -4741,15 +4744,13 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("All members of entitled groups will be able to access this AI service", "被授权的组的所有成员将能够访问此 AI 服务");
-		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
-			"被授权的项目可以将 AI 用户添加为合并请求的审查者。在这种情况下，AI 用户使用其自身的权限执行任务。");
-		m.put("Entitled projects will be able to access this AI service", "被授权的项目将能够访问此 AI 服务");
-		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
-			"被授权的用户可以通过聊天界面与 AI 用户互动，以执行诸如理解代码库、编写 CI/CD 规范或调查 CI/CD 任务失败等任务。在此模式下，AI 用户以与与其互动的用户相同的权限操作，忽略分配给 AI 用户本身的权限。");
-		m.put("Entitled users can mention the AI user in issue or pull request comments to request assistance. In this case, the AI user executes tasks using its own permissions.", 
-			"被授权的用户可以在工单或合并请求评论中提及 AI 用户以请求帮助。在这种情况下，AI 用户使用其自身的权限执行任务。");
-		m.put("Entitled users will be able to access this AI service", "被授权的用户将能够访问此 AI 服务");
+		m.put("Build {0} deleted", "构建 {0} 已删除");
+		m.put("Entitled projects and all the sub-projects will be able to access this AI service", 
+			"被授权的项目和所有子项目将能够访问此 AI 服务");
+		m.put("Issue {0} deleted", "工单 {0} 已删除");
+		m.put("Pull request {0} deleted", "合并请求 {0} 已删除");
+		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
+			"指定 Web UI 会话超时时间（分钟）。留空表示在浏览器打开时永不过期。更改此值后，现有会话将不受影响。");
 	}
 		
 	@Override
