@@ -352,27 +352,42 @@ onedev.server = {
 			pageUnloading = true;
 		});
 
-		var keepAlive;
+		var keepAliveTimer;
+		var lastKeepAliveMessageReceived = true;
 		Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
 			$(".connection-error").hide();
-			keepAlive = setInterval(function() {
-				Wicket.WebSocket.send("KeepAlive");
-			}, 30000); // 30 seconds to tolerate Nginx default timeout (60 seconds)		
+			keepAliveTimer = setInterval(function() {
+				if (!lastKeepAliveMessageReceived) {
+					console.debug(new Date().toLocaleTimeString() + ": Last websocket keep alive message not received");
+					onConnectionError();
+				} else {
+					console.debug(new Date().toLocaleTimeString() + ": Sending websocket keep alive message");
+					Wicket.WebSocket.send("KeepAlive");
+					lastKeepAliveMessageReceived = false;
+				}
+			}, 30000); // 30 seconds to tolerate Nginx default timeout (60 seconds)
 		});
-		Wicket.Event.subscribe("/websocket/closed", function(jqEvent) {
+		function onConnectionError() {
 			if (!pageUnloading) {
 				$("body>.error").hide();
 				$(".connection-error").show();
 			}
-			if (keepAlive) {
-				clearInterval(keepAlive);
-				keepAlive = undefined;
+			if (keepAliveTimer) {
+				clearInterval(keepAliveTimer);
+				keepAliveTimer = undefined;
 			}
+		}
+		Wicket.Event.subscribe("/websocket/closed", function(jqEvent) {
+			console.debug(new Date().toLocaleTimeString() + ": Websocket closed");
+			onConnectionError();
 		});
 		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
 			if (message == "ErrorMessage") {
 				$("body>.error").hide();
 				$(".page-error").show();
+			} else if (message == "KeepAlive") {
+				lastKeepAliveMessageReceived = true;
+				console.debug(new Date().toLocaleTimeString() + ": Received websocket keep alive message");
 			}
 		});		
 	},

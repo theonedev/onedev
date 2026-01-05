@@ -1,13 +1,10 @@
 package io.onedev.server.model;
 
-import java.util.LinkedHashMap;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -29,13 +26,8 @@ public class ChatMessage extends AbstractEntity {
 
 	private boolean request;
 
-	@Lob
 	@Column(nullable=false, length=MAX_CONTENT_LEN)
     private String content;
-
-	@Lob
-    @Column(nullable=false, length=65535)
-    private LinkedHashMap<String, String> attachments = new LinkedHashMap<>();
 
 	public Chat getChat() {
 		return chat;
@@ -67,14 +59,6 @@ public class ChatMessage extends AbstractEntity {
 	
 	public void setContent(String content) {
 		this.content = StringUtils.abbreviate(content, MAX_CONTENT_LEN);
-	}
-	
-	public LinkedHashMap<String, String> getAttachments() {
-		return attachments;
-	}
-
-	public void setAttachments(LinkedHashMap<String, String> attachments) {
-		this.attachments = attachments;
 	}
 	
 }

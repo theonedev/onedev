@@ -415,7 +415,7 @@ public class PullRequestNotificationManager {
 	}
 
 	private boolean isAiEntitled(@Nullable User user, PullRequest request, User ai) {
-		if (user != null && user.isOrdinary()) {
+		if (user != null && user.getId() > 0) {
 			if (user.isEntitledToAi(ai)) {
 				return true;
 			} else {

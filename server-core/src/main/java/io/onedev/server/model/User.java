@@ -734,11 +734,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public boolean isUnknown() {
 		return UNKNOWN_ID.equals(getId());
 	}
-	
-	public boolean isOrdinary() {
-		return getId() > 0;
-	}
-	
+		
 	public Collection<UserAuthorization> getProjectAuthorizations() {
 		return projectAuthorizations;
 	}

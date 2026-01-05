@@ -8442,4 +8442,12 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate218(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Chats.xml") || file.getName().startsWith("ChatMessages.xml")) {
+				FileUtils.deleteFile(file);
+			}
+		}
+	}
+
 }

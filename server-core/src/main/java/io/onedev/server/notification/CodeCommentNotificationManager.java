@@ -85,7 +85,7 @@ public class CodeCommentNotificationManager {
 			}
 
 			Set<String> emailAddresses = notifyUsers.stream()
-					.filter(it -> it.isOrdinary()
+					.filter(it -> it.getId() > 0
 							&& it.getType() != User.Type.AI
 							&& (!it.equals(event.getUser()) || it.isNotifyOwnEvents())
 							&& it.getPrimaryEmailAddress() != null
@@ -118,7 +118,7 @@ public class CodeCommentNotificationManager {
 	}
 
 	private boolean isAiEntitled(@Nullable User user, CodeComment comment, User ai) {
-		if (user != null && user.isOrdinary()) {
+		if (user != null && user.getId() > 0) {
 			if (user.isEntitledToAi(ai)) {
 				return true;
 			} else {

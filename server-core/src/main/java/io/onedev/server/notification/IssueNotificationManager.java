@@ -436,7 +436,7 @@ public class IssueNotificationManager {
 	}
 	
 	private boolean isAiEntitled(@Nullable User user, Issue issue, User ai) {
-		if (user != null && user.isOrdinary()) {
+		if (user != null && user.getId() > 0) {
 			if (user.isEntitledToAi(ai)) {
 				return true;
 			} else {
