@@ -686,6 +686,15 @@ public class Upgrade extends AbstractPlugin {
 		cleanAndCopy(Bootstrap.getLibDir(), new File(upgradeDir, "lib"));
 
 		FileUtils.createDir(new File(upgradeDir, "site/assets"));
+		if (!new File(upgradeDir, "site/assets/prefetch.json").exists()) {
+			try {
+				FileUtils.copyFile(
+						new File(Bootstrap.getSiteDir(), "assets/prefetch.json"),
+						new File(upgradeDir, "site/assets/prefetch.json"));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 		if (new File(upgradeDir, "site/robots.txt").exists()) {
 			try {
 				FileUtils.copyFile(
