@@ -43,7 +43,6 @@ import org.apache.wicket.Application;
 import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.protocol.http.WicketServlet;
 import org.eclipse.jetty.server.session.SessionDataStoreFactory;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.hibernate.CallbackException;
@@ -442,7 +441,6 @@ public class CoreModule extends AbstractPluginModule {
 		
 		bind(ListenerRegistry.class).to(DefaultListenerRegistry.class);
 		bind(JettyService.class).to(DefaultJettyService.class);
-		bind(ServletContextHandler.class).toProvider(DefaultJettyService.class);
 		
 		bind(ObjectMapper.class).toProvider(ObjectMapperProvider.class).in(Singleton.class);
 		

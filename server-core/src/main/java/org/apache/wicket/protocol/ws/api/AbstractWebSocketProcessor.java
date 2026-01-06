@@ -215,15 +215,6 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 
 		if (connection != null && (connection.isOpen() || isSpecialMessage(message))) 
 		{
-			if (message instanceof TextMessage textMessage && textMessage.getText().equals(WebSocketMessages.KEEP_ALIVE)) {
-				try {
-					connection.sendMessage(WebSocketMessages.KEEP_ALIVE);
-				} catch (Exception e) {
-					LOG.error("An error occurred while sending back keep alive message", e);
-				}
-				return;
-			}
-
 			Application oldApplication = ThreadContext.getApplication();
 			Session oldSession = ThreadContext.getSession();
 			RequestCycle oldRequestCycle = ThreadContext.getRequestCycle();

@@ -345,49 +345,45 @@ onedev.server = {
 		}
 	},	
 
-	setupWebSocketHandler: function() {		
+	setupWebSocket: function(webSocketTimeout, sessionKeepAliveInterval) {		
 		var pageUnloading = false;
 		
 		$(window).on("beforeunload", function() {
 			pageUnloading = true;
 		});
 
-		var keepAliveTimer;
-		var lastKeepAliveMessageReceived = true;
+		function onWebSocketTimeout() {
+			$("body>.error").hide();
+			$(".connection-error").show();
+		}
+
+		webSocketTimeoutTimer = setTimeout(onWebSocketTimeout, webSocketTimeout);
+
 		Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
 			$(".connection-error").hide();
-			keepAliveTimer = setInterval(function() {
-				if (!lastKeepAliveMessageReceived) {
-					console.debug(new Date().toLocaleTimeString() + ": Last websocket keep alive message not received");
-					onConnectionError();
-				} else {
-					console.debug(new Date().toLocaleTimeString() + ": Sending websocket keep alive message");
-					Wicket.WebSocket.send("KeepAlive");
-					lastKeepAliveMessageReceived = false;
-				}
-			}, 30000); // 30 seconds to tolerate Nginx default timeout (60 seconds)
 		});
-		function onConnectionError() {
+		Wicket.Event.subscribe("/websocket/closed", function(jqEvent) {
 			if (!pageUnloading) {
 				$("body>.error").hide();
 				$(".connection-error").show();
 			}
-			if (keepAliveTimer) {
-				clearInterval(keepAliveTimer);
-				keepAliveTimer = undefined;
-			}
-		}
-		Wicket.Event.subscribe("/websocket/closed", function(jqEvent) {
-			console.debug(new Date().toLocaleTimeString() + ": Websocket closed");
-			onConnectionError();
 		});
+		var lastSessionKeepAliveTime = new Date().getTime();
 		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
 			if (message == "ErrorMessage") {
 				$("body>.error").hide();
 				$(".page-error").show();
-			} else if (message == "KeepAlive") {
-				lastKeepAliveMessageReceived = true;
-				console.debug(new Date().toLocaleTimeString() + ": Received websocket keep alive message");
+			} else if (message == "KeepAlive") {				
+				Wicket.WebSocket.send("KeepAlive");
+				clearTimeout(webSocketTimeoutTimer);
+				webSocketTimeoutTimer = setTimeout(onWebSocketTimeout, webSocketTimeout);
+				if (sessionKeepAliveInterval > 0) {
+					var now = new Date().getTime();
+					if (now - lastSessionKeepAliveTime > sessionKeepAliveInterval) {
+						fetch('/~keep-session-alive');
+						lastSessionKeepAliveTime = now;
+					}
+				}
 			}
 		});		
 	},
@@ -887,7 +883,7 @@ onedev.server = {
 		else
 			return translations["{0}s"].replace("{0}", "0");
 	},
-	onDomReady: function(bootTimestamp, icons, popStateCallback, removeAutosaveKeys, translations) {
+	onDomReady: function(bootTimestamp, icons, popStateCallback, removeAutosaveKeys, webSocketTimeout, sessionKeepAliveInterval, translations) {
 		onedev.server.translations = translations;
 
 		onedev.server.bootTimestamp = bootTimestamp;
@@ -927,7 +923,7 @@ onedev.server = {
 		
 		onedev.server.setupAjaxLoadingIndicator();
 		onedev.server.form.setupDirtyCheck();
-		onedev.server.setupWebSocketHandler();
+		onedev.server.setupWebSocket(webSocketTimeout, sessionKeepAliveInterval);
 		onedev.server.mouseState.track();
 		onedev.server.ajaxRequests.track();
 		onedev.server.setupInputClear();

@@ -26,6 +26,8 @@ import org.joda.time.DateTime;
 import org.jspecify.annotations.Nullable;
 import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
@@ -34,6 +36,8 @@ import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -44,11 +48,11 @@ import io.onedev.server.web.SessionListener;
 import io.onedev.server.web.page.base.BasePage;
 
 @Singleton
-public class DefaultWebSocketService implements WebSocketService, SessionListener, Serializable, SchedulableTask {
+public class DefaultWebSocketService implements WebSocketService, SessionListener, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int NOTIFY_TOLERATE_SECONDS = 5;
+	private static final Logger logger = LoggerFactory.getLogger(DefaultWebSocketService.class);
 
 	private static final int CHECK_MESSAGE_QUEUE_INTERVAL = 5;
 
@@ -63,14 +67,16 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 
 	@Inject
 	private ClusterService clusterService;
-	
+		
 	private final Map<String, Map<IKey, Collection<String>>> registeredObservables = new ConcurrentHashMap<>();
 		
 	private final Map<String, Pair<PageKey, Date>> notifiedObservables = new ConcurrentHashMap<>();
 
 	private volatile IWebSocketConnectionRegistry connectionRegistry;
 	
-	private volatile String taskId;
+	private volatile String keepAliveTaskId;
+
+	private volatile String notifiedObservableCleanupTaskId;
 
 	private volatile Thread checkMessageQueueThread;
 
@@ -178,10 +184,58 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 			
 		});
 	}
+	
+	/*
+	 * Need to set up websocket keep alive task early to prevent session timeout while we are set up the server
+	 * which is happening before getting SystemStarted event.
+	 * @param event
+	 */
+	@Listen
+	public void on(SystemStarting event) {
+		keepAliveTaskId = taskScheduler.schedule(new SchedulableTask() {
+			
+			@Override
+			public ScheduleBuilder<?> getScheduleBuilder() {
+				return SimpleScheduleBuilder.repeatSecondlyForever(KEEP_ALIVE_INTERVAL);
+			}
+			
+			@Override
+			public void execute() {
+				for (IWebSocketConnection connection: getConnectionRegistry().getConnections(application)) {
+					if (connection.isOpen()) {
+						try {
+							connection.sendMessage(WebSocketMessages.KEEP_ALIVE);
+						} catch (Exception e) {
+							logger.error("Error sending websocket keep alive message", e);
+						}
+					}
+				}
+			}
+			
+		});
+	}
 
 	@Listen
 	public void on(SystemStarted event) {		
-		taskId = taskScheduler.schedule(this);
+		notifiedObservableCleanupTaskId = taskScheduler.schedule(new SchedulableTask() {
+			
+			private static final int TOLERATE_SECONDS = 5;
+			
+			@Override
+			public ScheduleBuilder<?> getScheduleBuilder() {
+				return SimpleScheduleBuilder.repeatSecondlyForever(TOLERATE_SECONDS);
+			}
+			
+			@Override
+			public void execute() {
+				Date threshold = new DateTime().minusSeconds(TOLERATE_SECONDS).toDate();
+				for (var it = notifiedObservables.entrySet().iterator(); it.hasNext();) {
+					if (it.next().getValue().getRight().before(threshold))
+						it.remove();
+				}
+			}
+			
+		});
 
 		checkMessageQueueThread = new Thread(() -> {
 			while (checkMessageQueueThread != null) {
@@ -204,8 +258,17 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 		checkMessageQueueThread = null;
 		if (thread != null) 
 			thread.interrupt();		
-		if (taskId != null)
-			taskScheduler.unschedule(taskId);
+
+		if (keepAliveTaskId != null)
+			taskScheduler.unschedule(keepAliveTaskId);
+		if (notifiedObservableCleanupTaskId != null)
+			taskScheduler.unschedule(notifiedObservableCleanupTaskId);
+	}
+
+	@Listen
+	public void on(SystemStopped event) {
+		if (keepAliveTaskId != null)
+			taskScheduler.unschedule(keepAliveTaskId);
 	}
 	
 	/**
@@ -235,20 +298,6 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 			}
 			if (!observables.isEmpty())
 				notifyObservablesChange(connection, observables);
-		}
-	}
-
-	@Override
-	public ScheduleBuilder<?> getScheduleBuilder() {
-		return SimpleScheduleBuilder.repeatSecondlyForever(NOTIFY_TOLERATE_SECONDS);
-	}
-	
-	@Override
-	public void execute() {
-		Date threshold = new DateTime().minusSeconds(NOTIFY_TOLERATE_SECONDS).toDate();
-		for (var it = notifiedObservables.entrySet().iterator(); it.hasNext();) {
-			if (it.next().getValue().getRight().before(threshold))
-				it.remove();
 		}
 	}
 

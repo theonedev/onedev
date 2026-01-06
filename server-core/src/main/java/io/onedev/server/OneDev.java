@@ -148,6 +148,7 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 
 		clusterService.start();
 		sessionFactoryService.start();
+		taskScheduler.start();
 
 		var databasePopulated = clusterService.getHazelcastInstance().getCPSubsystem()
 				.getAtomicLong("databasePopulated");
@@ -239,7 +240,6 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 
 		// workaround for issue https://bugs.eclipse.org/bugs/show_bug.cgi?id=566170
 		FileStoreAttributes.setBackground(true);
-		taskScheduler.start();
 	}
 
 	@Sessional
@@ -284,11 +284,10 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		SecurityUtils.bindAsSystem();
 
 		try {
-			taskScheduler.stop();
-
 			jettyLauncherProvider.get().stop();
 			sessionService.run(() -> listenerRegistry.post(new SystemStopped()));
-
+			
+			taskScheduler.stop();
 			sessionFactoryService.stop();
 			clusterService.stop();
 			executorService.shutdown();

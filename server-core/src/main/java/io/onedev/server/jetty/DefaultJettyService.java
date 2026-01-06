@@ -42,13 +42,13 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.service.SettingService;
 
 @Singleton
-public class DefaultJettyService implements JettyService, Provider<ServletContextHandler>, Serializable {
+public class DefaultJettyService implements JettyService, Serializable {
+
+	private static final int DEFAULT_SESSION_TIMEOUT = 300;
 
 	private static final int MAX_CONTENT_SIZE = 5000000;
 
 	private static final int SESSION_SCAVENGE_INTERVAL = 60;
-
-	private static final int DEFAULT_SESSION_TIMEOUT = 300;
 
 	@Inject
 	private SessionDataStoreFactory sessionDataStoreFactory;
@@ -72,11 +72,6 @@ public class DefaultJettyService implements JettyService, Provider<ServletContex
 	@Inject
 	private ClusterService clusterService;
 	
-	@Override
-	public ServletContextHandler get() {
-		return servletContextHandler;
-	}
-
 	@Override
 	public void start() {
 		server = new Server();
@@ -159,6 +154,11 @@ public class DefaultJettyService implements JettyService, Provider<ServletContex
 				throw ExceptionUtils.unchecked(e);
 			}
 		}
+	}
+
+	@Override
+	public ServletContextHandler getServletContextHandler() {
+		return servletContextHandler;
 	}
 	
 	@Listen

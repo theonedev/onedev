@@ -15,7 +15,6 @@ import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.codec.binary.Base64;
@@ -52,7 +51,6 @@ import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.jspecify.annotations.Nullable;
 import org.unbescape.javascript.JavaScriptEscape;
 
@@ -68,6 +66,7 @@ import io.onedev.server.ai.ChatToolAware;
 import io.onedev.server.ai.ToolExecutionResult;
 import io.onedev.server.commandhandler.Upgrade;
 import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.jetty.JettyService;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AuditService;
@@ -123,7 +122,7 @@ public abstract class BasePage extends WebPage {
 	private ObjectMapper objectMapper;
 
 	@Inject
-	private Provider<ServletContextHandler> servletContextHandlerProvider;
+	private JettyService jettyService;
 	
 	public BasePage(PageParameters params) {
 		super(params);
@@ -243,13 +242,19 @@ public abstract class BasePage extends WebPage {
 				translations.put("{0}d", _T("{0}d"));
 				translations.put("{0}s", _T("{0}s"));
 				
+				var sessionKeepAliveInterval = 0;
+				if (settingService.getSystemSetting() == null || settingService.getSystemSetting().getSessionTimeout() == null) 
+					sessionKeepAliveInterval = jettyService.getServletContextHandler().getSessionHandler().getMaxInactiveInterval() * 500;
+		
 				try {
 					response.render(OnDomReadyHeaderItem.forScript(
-						String.format("onedev.server.onDomReady('%s', '%s', %s, %s, %s);",
+						String.format("onedev.server.onDomReady('%s', '%s', %s, %s, %d, %d, %s);",
 								String.valueOf(OneDev.getInstance().getBootDate().getTime()),
 								SpriteImage.getVersionedHref(IconScope.class, null),
 								popStateBehavior.getCallbackFunction(explicit("data")).toString(), 
 								objectMapper.writeValueAsString(getRemoveAutosaveKeys()),
+								WebSocketService.KEEP_ALIVE_INTERVAL*2000,
+								sessionKeepAliveInterval,
 								objectMapper.writeValueAsString(translations))));
 				} catch (JsonProcessingException e) {
 					throw new RuntimeException(e);
@@ -416,14 +421,6 @@ public abstract class BasePage extends WebPage {
 				"var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone; %s", 
 				zoneIdDetectBehavior.getCallbackFunctionBody(explicit("timezone")));
 			response.render(OnDomReadyHeaderItem.forScript(script));
-		}
-		if (settingService.getSystemSetting() == null || settingService.getSystemSetting().getSessionTimeout() == null) {
-			int sessionTimeout = servletContextHandlerProvider.get().getSessionHandler().getMaxInactiveInterval();
-			response.render(OnDomReadyHeaderItem.forScript("""
-				setInterval(function() { 
-					fetch('/~keep-session-alive'); 
-				}, %d);"""
-				.formatted(sessionTimeout*500)));
 		}
 	}
 

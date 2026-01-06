@@ -65,7 +65,8 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 		
 	@Override
 	public void onWebSocketText(final String message) {
-		onMessage(message);			
+		if (!message.equals(WebSocketMessages.KEEP_ALIVE))
+			onMessage(message);
 	}
 
 	@Override
