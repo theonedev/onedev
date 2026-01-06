@@ -299,7 +299,7 @@ onedev.server = {
 
 			onedev.server.focus.doFocus($(document));
 
-			$(document).on("afterElementReplace", function(event, componentId) {
+			$(document).on("afterElementReplace", function(event, componentId) {				
 				if (onedev.server.focus.$components != null)
 					onedev.server.focus.$components = onedev.server.focus.$components.add("#" + componentId);
 			});			

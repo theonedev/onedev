@@ -43,7 +43,7 @@ public class DefaultWicketServlet extends WicketServlet {
 			var httpRes = (HttpServletResponse) res;
 			httpRes.setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
 			// Disable cloudflare suggested prefetch to fix OD-2120
-			httpRes.setHeader("Speculation-Rules", "/prefetch.json");
+			httpRes.setHeader("Speculation-Rules", "\"/prefetch.json\"");
 			try {
 				super.service(req, res);
 			} catch (ServletException | IOException e) {

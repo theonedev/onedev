@@ -34,7 +34,7 @@ public class PasswordPropertyEditor extends PropertyEditor<String> {
 		add(input);
 
 		Password password = getDescriptor().getPropertyGetter().getAnnotation(Password.class);
-		String autoComplete = password.autoComplete();
+		String autoComplete = password.autocomplete();
 		if (StringUtils.isNotBlank(autoComplete))
 			input.add(AttributeModifier.replace("autocomplete", autoComplete));
 		input.add(new OnTypingDoneBehavior() {

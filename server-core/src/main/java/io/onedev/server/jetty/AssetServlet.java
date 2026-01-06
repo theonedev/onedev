@@ -39,7 +39,7 @@ public abstract class AssetServlet extends DefaultServlet {
 			@Override
 			protected void putHeaders(HttpServletResponse response, HttpContent content, long contentLength) {
 				super.putHeaders(response, content, contentLength);
-				
+								
 				HttpFields fields;
 				if (response instanceof Response)
 					fields = ((Response) response).getHttpFields();
@@ -58,6 +58,8 @@ public abstract class AssetServlet extends DefaultServlet {
 					 * page request.
 					 */
 					fields.put(HttpHeader.CACHE_CONTROL, "max-age=86400,public");
+				} else if (requestHolder.get().getRequestURI().equals("/prefetch.json")) {
+					fields.put(HttpHeader.CONTENT_TYPE, "application/speculationrules+json");
 				}
 			}
 			

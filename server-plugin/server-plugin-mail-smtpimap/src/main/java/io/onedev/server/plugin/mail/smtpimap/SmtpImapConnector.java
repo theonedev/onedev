@@ -69,7 +69,7 @@ public class SmtpImapConnector implements MailConnector {
 	}
 
 	@Editable(order=400, name="SMTP Password")
-	@Password(autoComplete="new-password")
+	@Password(autocomplete="new-password")
 	public String getSmtpPassword() {
 		return smtpPassword;
 	}

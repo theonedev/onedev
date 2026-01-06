@@ -42,7 +42,7 @@ public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 		add(inputAgain);
 		
 		Password password = getDescriptor().getPropertyGetter().getAnnotation(Password.class);
-		String autoComplete = password.autoComplete();
+		String autoComplete = password.autocomplete();
 		if (StringUtils.isNotBlank(autoComplete)) {
 			input.add(AttributeAppender.replace("autocomplete", autoComplete));
 			inputAgain.add(AttributeAppender.replace("autocomplete", autoComplete));

@@ -58,7 +58,7 @@ public class InboxPollSetting implements Serializable {
 	}
 
 	@Editable(order=400, name="IMAP Password")
-	@Password(autoComplete="new-password")
+	@Password(autocomplete="new-password")
 	@NotEmpty
 	public String getImapPassword() {
 		return imapPassword;

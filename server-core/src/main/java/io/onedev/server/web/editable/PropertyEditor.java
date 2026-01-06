@@ -5,7 +5,6 @@ import static io.onedev.server.web.translation.Translation._T;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -20,6 +19,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.visit.IVisitor;
 import org.apache.wicket.validation.INullAcceptingValidator;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.annotation.OmitName;
@@ -143,4 +143,5 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 			
 		});		
 	}
+
 }

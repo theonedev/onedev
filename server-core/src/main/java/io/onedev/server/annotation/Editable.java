@@ -24,6 +24,8 @@ public @interface Editable {
 	String rootPlaceholderProvider() default "";
 	
 	boolean displayPlaceholderAsValue() default false;
+
+	String autocomplete() default "";
 	
 	int order() default 0;
 	

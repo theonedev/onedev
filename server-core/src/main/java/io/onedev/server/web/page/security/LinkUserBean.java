@@ -35,7 +35,7 @@ public class LinkUserBean implements Serializable {
     }
 
     @Editable(order=200, description="Password of the user")
-    @Password(autoComplete="current-password")
+    @Password(autocomplete="current-password")
     @NotEmpty
     public String getPassword() {
         return password;

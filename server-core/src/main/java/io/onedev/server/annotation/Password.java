@@ -23,6 +23,6 @@ public @interface Password {
 	
 	boolean checkPolicy() default false;
 	
-	String autoComplete() default "";
+	String autocomplete() default "";
 	
 }

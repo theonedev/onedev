@@ -588,7 +588,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.disabled = disabled;
 	}			
 
-	@Editable(name="Login Name", order=100)
+	@Editable(name="Login Name", order=100, autocomplete="off")
 	@UserName
 	@NotEmpty
 	public String getName() {
@@ -606,7 +606,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	 */
 	@Editable(order=150)
 	@DependsOn(property="type", value="ORDINARY")
-	@Password(checkPolicy=true, autoComplete="new-password")
+	@Password(checkPolicy=true, autocomplete="new-password")
 	@NotEmpty
 	@Nullable
 	public String getPassword() {
