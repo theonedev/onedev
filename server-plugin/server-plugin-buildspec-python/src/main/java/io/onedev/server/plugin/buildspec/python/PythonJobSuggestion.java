@@ -1,14 +1,34 @@
 package io.onedev.server.plugin.buildspec.python;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+
 import com.google.common.collect.Lists;
 import com.moandjiezana.toml.Toml;
+
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
-import io.onedev.server.buildspec.step.*;
+import io.onedev.server.buildspec.step.CheckoutStep;
+import io.onedev.server.buildspec.step.CommandStep;
+import io.onedev.server.buildspec.step.GenerateChecksumStep;
+import io.onedev.server.buildspec.step.SetBuildVersionStep;
+import io.onedev.server.buildspec.step.SetupCacheStep;
 import io.onedev.server.buildspec.step.commandinterpreter.ShellInterpreter;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
@@ -17,18 +37,6 @@ import io.onedev.server.plugin.report.cobertura.PublishCoberturaReportStep;
 import io.onedev.server.plugin.report.coverage.PublishCoverageReportStep;
 import io.onedev.server.plugin.report.junit.PublishJUnitReportStep;
 import io.onedev.server.plugin.report.ruff.PublishRuffReportStep;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-
-import org.jspecify.annotations.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class PythonJobSuggestion implements JobSuggestion {
 	
@@ -353,7 +361,8 @@ public class PythonJobSuggestion implements JobSuggestion {
 				job.getSteps().add(setupCache);
 
 				var blobContent = blob.getText().getContent();
-				Map<String, Object> environments = new Yaml().load(blobContent);
+				var options = new LoaderOptions();
+				Map<String, Object> environments = new Yaml(new SafeConstructor(options)).load(blobContent);
 				CommandStep buildAndTest = new CommandStep();
 				buildAndTest.setName("build and test");
 				buildAndTest.setImage("1dev/conda:1.0.4");

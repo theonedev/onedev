@@ -21,28 +21,30 @@ import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import io.onedev.server.pack.PackHandler;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.PackBlobService;
-import io.onedev.server.service.PackService;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.exception.DataTooLargeException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Pack;
 import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
+import io.onedev.server.pack.PackHandler;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.PackBlobService;
+import io.onedev.server.service.PackService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.Pair;
 
@@ -190,9 +192,12 @@ public class HelmPackHandler implements PackHandler {
                 while ((entry = is.getNextEntry()) != null) {
                     String entryName = entry.getName();
                     if (entryName.equals("Chart.yaml") || entryName.endsWith("/Chart.yaml")) {
+                        if (entry.getSize() > MAX_FILE_SIZE)
+                            throw new ClientException(SC_BAD_REQUEST, "Chart.yaml is too large");
                         byte[] content = new byte[(int) entry.getSize()];
                         is.read(content);
-                        metadata = new Yaml().load(new ByteArrayInputStream(content));
+                        var options = new LoaderOptions();
+                        metadata = new Yaml(new SafeConstructor(options)).load(new ByteArrayInputStream(content));
                         break;
                     }
                 }                
