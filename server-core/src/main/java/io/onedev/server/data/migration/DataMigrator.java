@@ -8470,11 +8470,9 @@ public class DataMigrator {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
 					var aiSettingElement = element.element("aiSetting");
-					aiSettingElement.addElement("chatTimeoutSeconds").setText("300");
-					aiSettingElement.addElement("taskTimeoutSeconds").setText("600");
 					Element modelSettingElement = aiSettingElement.element("modelSetting");
 					if (modelSettingElement != null) 
-						modelSettingElement.addElement("timeoutSeconds").setText("120");
+						modelSettingElement.addElement("timeoutSeconds").setText("60");
 				}
 				dom.writeToFile(file, false);
 			}

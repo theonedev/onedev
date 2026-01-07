@@ -87,7 +87,7 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultChatService.class);
 	
-	private static final int TIMEOUT_SECONDS = 300;
+	private static final int TIMEOUT_SECONDS = 600;
 
 	private static final int MAX_HISTORY_MESSAGES = 25;
 
