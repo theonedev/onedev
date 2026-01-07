@@ -1468,9 +1468,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 					state.mode = Mode.VIEW;
 					onResolvedRevisionChange(target);
 				}
-		
-				// fix the issue that sometimes indexing indicator of new commit does not disappear 
-				target.appendJavaScript("Wicket.WebSocket.send('RenderCallback');");	    			
 			}
 		}
 	}
