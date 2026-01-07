@@ -69,6 +69,8 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultUserService.class);
 	
+	private static final int TIMEOUT_SECONDS = 600;
+
 	@Inject
     private ProjectService projectService;
     
@@ -570,7 +572,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 
 	@Sessional
 	@Override
-	public void execute(User ai, AiTask task, int timeoutSeconds) {
+	public void execute(User ai, AiTask task) {
 		Preconditions.checkState(ai.getType() == User.Type.AI);
 		var taskId = UUID.randomUUID().toString();
 		var subject = ai.asSubject();
@@ -639,7 +641,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 					managedFutureService.removeFuture(taskId);
 				}
 			});
-			managedFutureService.addFuture(taskId, future, timeoutSeconds, f -> {
+			managedFutureService.addFuture(taskId, future, TIMEOUT_SECONDS, f -> {
 				sessionService.run(() -> {
 					task.getResponseHandler().onResponse(
 						Preconditions.checkNotNull(SecurityUtils.getUser(subject)), 

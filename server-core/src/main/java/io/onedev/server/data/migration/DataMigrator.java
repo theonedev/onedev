@@ -8391,7 +8391,7 @@ public class DataMigrator {
 					boolean isServiceAccount = Boolean.parseBoolean(serviceAccountElement.getTextTrim());
 					serviceAccountElement.detach();
 					element.addElement("type").setText(isServiceAccount ? "SERVICE" : "ORDINARY");
-					element.addElement("aiSetting").addElement("entitleToAll").setText("true");
+					element.addElement("aiSetting").addElement("entitleToAll").setText("false");
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
@@ -8446,6 +8446,37 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Chats.xml") || file.getName().startsWith("ChatMessages.xml")) {
 				FileUtils.deleteFile(file);
+			}
+		}
+	}
+
+	private void migrate219(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var keyElement = element.element("key");
+					if (keyElement.getTextTrim().equals("AI")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							Element liteModelSettingElement = valueElement.element("liteModelSetting");
+							if (liteModelSettingElement != null) 
+								liteModelSettingElement.addElement("timeoutSeconds").setText("30");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var aiSettingElement = element.element("aiSetting");
+					aiSettingElement.addElement("chatTimeoutSeconds").setText("300");
+					aiSettingElement.addElement("taskTimeoutSeconds").setText("600");
+					Element modelSettingElement = aiSettingElement.element("modelSetting");
+					if (modelSettingElement != null) 
+						modelSettingElement.addElement("timeoutSeconds").setText("120");
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}

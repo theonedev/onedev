@@ -96,7 +96,7 @@ public interface UserService extends EntityService<User> {
 	
 	int count(String term);
 
-	void execute(User ai, AiTask task, int timeoutSeconds);
+	void execute(User ai, AiTask task);
 	
 	UserCache cloneCache();
 	

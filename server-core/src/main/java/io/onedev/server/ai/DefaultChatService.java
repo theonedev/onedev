@@ -87,6 +87,8 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultChatService.class);
 	
+	private static final int TIMEOUT_SECONDS = 300;
+
 	private static final int MAX_HISTORY_MESSAGES = 25;
 
 	private static final int MAX_HISTORY_MESSAGE_LEN = 1024;
@@ -155,7 +157,7 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 
 	@Transactional
 	@Override
-	public void sendRequest(Page page, ChatMessage request, int timeoutSeconds) {
+	public void sendRequest(Page page, ChatMessage request) {
 		var toolSpecifications = ((BasePage) page).findChatTools()
 			.stream()
 			.map(ChatTool::getSpecification)
@@ -171,7 +173,8 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 		var chatId = request.getChat().getId();
 		var anonymous = request.getChat().getUser() == null;
 
-		var modelSetting = request.getChat().getAi().getAiSetting().getModelSetting();
+		var aiSetting = request.getChat().getAi().getAiSetting();
+		var modelSetting = aiSetting.getModelSetting();
 		var streamingChatModel = modelSetting.getStreamingChatModel();
 		var chatModel = modelSetting.getChatModel();
 		
@@ -386,7 +389,7 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 							}
 						}
 					});		
-					var response = responseFuture.get(timeoutSeconds, TimeUnit.SECONDS);
+					var response = responseFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
 					if (StringUtils.isBlank(response))
 						throw new ExplicitException("Received empty response");		
 					createResponse(response, false);

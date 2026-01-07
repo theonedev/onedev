@@ -70,8 +70,6 @@ public class ChatPanel extends Panel {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int TIMEOUT_SECONDS = 300;
-
 	private static final String COOKIE_ACTIVE_AI = "active-ai";
 
 	@Inject
@@ -411,7 +409,7 @@ public class ChatPanel extends Panel {
 					}
 				}
 
-				chatService.sendRequest(getPage(), request, TIMEOUT_SECONDS);
+				chatService.sendRequest(getPage(), request);
 
 				showNewMessages(target);
 				target.add(respondingContainer);

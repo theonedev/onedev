@@ -23,9 +23,8 @@ public interface ChatService extends EntityService<Chat> {
      * 
      * @param page the page that the request is sent from
      * @param request the request to send
-     * @param timeoutSeconds the timeout in seconds
      */
-    void sendRequest(Page page, ChatMessage request, int timeoutSeconds);
+    void sendRequest(Page page, ChatMessage request);
 	
     @Nullable
     ChatResponding getResponding(WebSession session, Chat chat);

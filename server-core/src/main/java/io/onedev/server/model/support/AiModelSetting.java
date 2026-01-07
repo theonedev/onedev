@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
@@ -31,7 +32,7 @@ public class AiModelSetting implements Serializable {
     
     private static final long serialVersionUID = 1L;
 
-    private static final int TIMEOUT_SECONDS = 30;
+    private static final int MODEL_LIST_TIMEOUT_SECONDS = 30;
 
     private static final Logger logger = LoggerFactory.getLogger(AiModelSetting.class);
 
@@ -40,6 +41,8 @@ public class AiModelSetting implements Serializable {
     private String apiKey;
 
     private String name;
+
+    private int timeoutSeconds = 30;
 
     @Editable(order=200, name="Base URL", placeholder="https://api.openai.com/v1", description="Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint")
     @Pattern(regexp="https?://.+", message="Base URL should be a valid http/https URL")
@@ -71,6 +74,16 @@ public class AiModelSetting implements Serializable {
         this.name = name;
     }
 
+    @Editable(order=500, name="Timeout", description="Specify how long to wait for the model response in seconds")
+    @Min(value = 5, message = "Timeout should be at least 5 seconds")
+    public int getTimeoutSeconds() {
+        return timeoutSeconds;
+    }
+
+    public void setTimeoutSeconds(int timeoutSeconds) {
+        this.timeoutSeconds = timeoutSeconds;
+    }
+
     @SuppressWarnings("unused")
     private static List<String> getModels() {
         var baseUrl = (String) EditContext.get().getInputValue("baseUrl");
@@ -88,7 +101,7 @@ public class AiModelSetting implements Serializable {
                 .uri(URI.create(modelsUrl))
                 .header("Content-Type", "application/json")
                 .GET()
-                .timeout(Duration.ofSeconds(TIMEOUT_SECONDS));
+                .timeout(Duration.ofSeconds(MODEL_LIST_TIMEOUT_SECONDS));
             if (apiKey != null) 
                 requestBuilder.header("Authorization", "Bearer " + apiKey);
 
@@ -123,7 +136,7 @@ public class AiModelSetting implements Serializable {
             .apiKey(apiKey)
             .baseUrl(baseUrl)
             .modelName(name)
-            .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
+            .timeout(Duration.ofSeconds(timeoutSeconds))
             .build(); 
     }
 
@@ -132,7 +145,7 @@ public class AiModelSetting implements Serializable {
             .apiKey(apiKey)
             .baseUrl(baseUrl)
             .modelName(name)
-            .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
+            .timeout(Duration.ofSeconds(timeoutSeconds))
             .build();
     }
 

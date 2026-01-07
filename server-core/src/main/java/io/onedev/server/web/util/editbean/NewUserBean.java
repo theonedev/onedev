@@ -22,6 +22,10 @@ public class NewUserBean extends User {
 
 	private AiModelSetting aiModelSetting = new AiModelSetting();
 
+	public NewUserBean() {
+		aiModelSetting.setTimeoutSeconds(60);
+	}
+
 	@Editable(order=1000)
 	@DependsOn(property="type", value="ORDINARY")
 	@NotEmpty

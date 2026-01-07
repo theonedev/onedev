@@ -60,8 +60,6 @@ import io.onedev.server.xodus.VisitInfoService;
 @Singleton
 public class IssueNotificationManager {
 
-	private static final int AI_TASK_TIMEOUT_SECONDS = 300;
-
 	@Inject
 	private MailService mailService;
 
@@ -310,7 +308,7 @@ public class IssueNotificationManager {
 									event.getTextBody(), 
 									issue.getTools(), 
 									new AddIssueComment(issue.getId()));
-								userService.execute(mentionedUser, task, AI_TASK_TIMEOUT_SECONDS);
+								userService.execute(mentionedUser, task);
 							}		
 						}
 						notifiedUsers.add(mentionedUser);

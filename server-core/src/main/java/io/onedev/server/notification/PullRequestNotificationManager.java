@@ -69,8 +69,6 @@ import io.onedev.server.xodus.VisitInfoService;
 @Singleton
 public class PullRequestNotificationManager {
 
-	private static final int AI_TASK_TIMEOUT_SECONDS = 300;
-
 	@Inject
 	private MailService mailService;
 
@@ -307,7 +305,7 @@ public class PullRequestNotificationManager {
 								snippets if applicable""",
 							request.getTools(), 
 							new AddPullRequestComment(request.getId()));
-						userService.execute(reviewer, task, AI_TASK_TIMEOUT_SECONDS);
+						userService.execute(reviewer, task);
 					}
 					notifiedUsers.add(reviewer);
 				}
@@ -348,7 +346,7 @@ public class PullRequestNotificationManager {
 										event.getTextBody(), 
 										request.getTools(), 
 										new AddPullRequestComment(request.getId()));
-									userService.execute(mentionedUser, task, AI_TASK_TIMEOUT_SECONDS);
+									userService.execute(mentionedUser, task);
 								} else if (event instanceof PullRequestCodeCommentCreated || event instanceof PullRequestCodeCommentReplyCreated) {
 									String systemPrompt = """
 										You are mentioned in a pull request code comment. The content mentioning you is presented \
@@ -363,7 +361,7 @@ public class PullRequestNotificationManager {
 										event.getTextBody(), 
 										tools, 
 										new AddCodeCommentReply(comment.getId()));
-									userService.execute(mentionedUser, task, AI_TASK_TIMEOUT_SECONDS);
+									userService.execute(mentionedUser, task);
 								}
 							}
 							notifiedUsers.add(mentionedUser);

@@ -34,8 +34,6 @@ import io.onedev.server.util.commenttext.MarkdownText;
 @Singleton
 public class CodeCommentNotificationManager {
 
-	private static final int AI_TASK_TIMEOUT_SECONDS = 300;
-
 	@Inject
 	private MailService mailService;
 
@@ -75,7 +73,7 @@ public class CodeCommentNotificationManager {
 									event.getTextBody(), 
 									comment.getTools(), 
 									new AddCodeCommentReply(comment.getId()));
-								userService.execute(mentionedUser, task, AI_TASK_TIMEOUT_SECONDS);						
+								userService.execute(mentionedUser, task);						
 							}
 						} else {
 							notifyUsers.add(mentionedUser);
