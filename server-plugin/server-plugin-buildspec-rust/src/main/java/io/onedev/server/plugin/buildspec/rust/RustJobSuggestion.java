@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.List;
 
 public class RustJobSuggestion implements JobSuggestion {
-
 	
 	private GenerateChecksumStep newChecksumGenerateStep(String name, String files) {
 		var generateChecksum = new GenerateChecksumStep();

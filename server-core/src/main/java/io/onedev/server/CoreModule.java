@@ -612,6 +612,7 @@ public class CoreModule extends AbstractPluginModule {
 			@Override
 			public void execute(Runnable command) {
 				try {
+					Thread.currentThread().setContextClassLoader(OneDev.class.getClassLoader());
 					super.execute(SecurityUtils.inheritSubject(command));
 				} catch (RejectedExecutionException e) {
 					if (!isShutdown())

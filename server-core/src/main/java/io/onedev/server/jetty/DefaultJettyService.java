@@ -30,6 +30,7 @@ import com.google.inject.servlet.GuiceFilter;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
@@ -92,7 +93,7 @@ public class DefaultJettyService implements JettyService, Serializable {
         servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setMaxFormContentSize(MAX_CONTENT_SIZE);
 
-        servletContextHandler.setClassLoader(DefaultJettyService.class.getClassLoader());
+        servletContextHandler.setClassLoader(OneDev.class.getClassLoader());
         
         servletContextHandler.setErrorHandler(new ErrorPageErrorHandler());
         servletContextHandler.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
