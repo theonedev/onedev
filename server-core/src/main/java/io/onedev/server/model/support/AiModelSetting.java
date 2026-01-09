@@ -44,7 +44,10 @@ public class AiModelSetting implements Serializable {
 
     private int timeoutSeconds = 30;
 
-    @Editable(order=200, name="Base URL", placeholder="https://api.openai.com/v1", description="Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint")
+    @Editable(order=200, name="Base URL", placeholder="https://api.openai.com/v1", description="""
+        Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint. 
+        <b class='text-danger'>NOTE:</b> Make sure base URL specified here supports HTTP/2 connection. HTTP/1.1 is not 
+        supported and will get a connection timeout error""")
     @Pattern(regexp="https?://.+", message="Base URL should be a valid http/https URL")
     public String getBaseUrl() {
         return baseUrl;
@@ -63,7 +66,9 @@ public class AiModelSetting implements Serializable {
         this.apiKey = apiKey;
     }
 
-    @Editable(order=400, name="Name")
+    @Editable(order=400, name="Name", description="""
+        Specify the model name to use. <b class='text-danger'>NOTE: </b> Right now OneDev only supports 
+        models with chat completions API. OpenAI models with the new responses API is not supported yet""")
     @ChoiceProvider("getModels")
     @NotEmpty
     public String getName() {
