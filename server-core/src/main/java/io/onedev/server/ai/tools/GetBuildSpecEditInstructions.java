@@ -25,7 +25,7 @@ public class GetBuildSpecEditInstructions implements TaskTool {
     public ToolSpecification getSpecification() {
         return ToolSpecification.builder()
             .name("getBuildSpecEditInstructions")
-            .description("Get instructions on how to edit CI/CD spec")
+            .description("Get instructions on how to edit various parts of CI/CD spec, including jobs, services, step templates, properties, and imports")
             .build();
     }
     

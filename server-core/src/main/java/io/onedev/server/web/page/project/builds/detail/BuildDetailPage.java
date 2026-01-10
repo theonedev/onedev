@@ -794,7 +794,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				@Override
 				public CompletableFuture<ToolExecutionResult> execute(IPartialPageRequestHandler handler, Subject subject, JsonNode arguments) {
 					var instructions = """
-						Follow below steps to investigate build failure:
+						Follow below steps when investigate build failure:
 						- Call 'getCurrentBuild' tool to get detail of current build
 						- Call 'getBuildLog' tool to get the build log
 						- Call 'getBuildSpec' tool to get content of CI/CD spec used to run the build
