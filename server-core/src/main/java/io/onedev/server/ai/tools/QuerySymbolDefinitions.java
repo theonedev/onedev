@@ -38,8 +38,7 @@ public abstract class QuerySymbolDefinitions implements TaskTool {
     public ToolSpecification getSpecification() {
         var paramsBuilder = JsonObjectSchema.builder()
             .addStringProperty("symbolNamePattern").description("Symbol name pattern to query definitions (supports wildcards * and ?)")
-            .addBooleanProperty("caseSensitive").description("Whether to match symbol names case-sensitively")
-            .addStringProperty("fileNamePatterns").description("Optionally specify file name patterns to query definitions in. Pattern supports wildcards * and ?. Multiple patterns should be separated by comma");
+            .addBooleanProperty("caseSensitive").description("Whether to match symbol names case-sensitively");
         
         if (inDiffContext) 
             paramsBuilder.addBooleanProperty("oldRevision").description("Specify whether to query definitions from old revision");
@@ -66,7 +65,6 @@ public abstract class QuerySymbolDefinitions implements TaskTool {
         if (arguments.get("caseSensitive") == null)
             return new ToolExecutionResult(convertToJson(Map.of("successful", false, "failReason", "Argument 'caseSensitive' is required")), false);
         var caseSensitive = arguments.get("caseSensitive").asBoolean();
-        var fileNamePatterns = arguments.get("fileNamePatterns") != null ? arguments.get("fileNamePatterns").asText() : null;
         if (inDiffContext && arguments.get("oldRevision") == null)
             return new ToolExecutionResult(convertToJson(Map.of("successful", false, "failReason", "Argument 'oldRevision' is required")), false);
         var oldRevision = arguments.get("oldRevision") != null ? arguments.get("oldRevision").asBoolean() : false;
@@ -77,7 +75,6 @@ public abstract class QuerySymbolDefinitions implements TaskTool {
         try {
             BlobQuery query = new SymbolQuery.Builder(symbolNamePattern)
                     .caseSensitive(caseSensitive)
-                    .fileNames(fileNamePatterns)
                     .local(false)
                     .count(currentPage * PAGE_SIZE + 1)
                     .build();
