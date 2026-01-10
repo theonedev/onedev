@@ -19,11 +19,10 @@ onedev.server.avatarUpload = {
 						autoCropArea: 1,
 						crop: function(event) {
 							var $cropped = $container.find(".cropped");
-							var data = this.cropper.getCroppedCanvas({
-								width: $cropped.width(),
-								height: $cropped.height(), 
-								fillColor: "#FFF" 
-							}).toDataURL("image/jpeg");
+						var data = this.cropper.getCroppedCanvas({
+							width: $cropped.width(),
+							height: $cropped.height()
+						}).toDataURL("image/png");
 							$cropped.find("img").attr("src", data);
 							$data.val(data);
 						}
