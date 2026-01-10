@@ -23,7 +23,7 @@ public class ContainerHelpPanel extends Panel {
 		var serverUrl = OneDev.getInstance(SettingService.class).getSystemSetting().getServerUrl();
 		var server = UrlUtils.getServer(serverUrl);
 		add(new CodeSnippetPanel("loginCommand", Model.of("$ docker login " + server)));
-		add(new CodeSnippetPanel("pushCommand", Model.of("$ docker push " + server + "/" + projectPath + "/<repository>:<tag>")));
+		add(new CodeSnippetPanel("pushCommand", Model.of("$ docker push " + server + "/" + projectPath.toLowerCase() + "/<repository>:<tag>")));
 		add(new InsecureRegistryNotePanel("insecureRegistryNote"));
 	}
 }
