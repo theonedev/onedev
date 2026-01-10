@@ -25,8 +25,7 @@ public class ToolExecutionResult {
                 toolRequest.id(), toolRequest.name(), "Result returned as system message");
             messages.add(toolResultMessage);
         } else {
-            var toolResultMessage = ToolExecutionResultMessage.from(
-                toolRequest.id(), toolRequest.name(), content);
+            var toolResultMessage = ToolExecutionResultMessage.from(toolRequest.id(), toolRequest.name(), content);
             messages.add(toolResultMessage);
         }
     }

@@ -275,7 +275,9 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 									var connection = connectionRegistry.getConnection(application, sessionId, pageKey);
 									if (connection == null || !connection.isOpen())
 										throw new ExplicitException("Conversation context lost");
-									for (var toolRequest: toolRequests) {										
+									for (var toolRequest: toolRequests) {
+										if (responseFuture.isDone())										
+											return;
 										String toolName = toolRequest.name();
 										try {
 											var toolExecution = new AiToolExecution(toolName, ToolUtils.getToolArguments(toolRequest));
@@ -283,12 +285,14 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 											var toolExecutionFuture = toolExecution.getFuture();
 											if (toolExecutionFuture == null)
 												throw new ExplicitException("Tool not found: " + toolName);
-											while (!responseFuture.isDone()) {
+											while (true) {
 												try {
 													var toolExecutionResult = toolExecutionFuture.get(1, TimeUnit.SECONDS);
 													toolExecutionResult.addToMessages(langchain4jMessages, toolRequest);
 													break;
 												} catch (TimeoutException e) {
+													if (responseFuture.isDone())
+														return;
 												} catch (CancellationException e) {
 													// may get cancelled in DefaultManagedFutureService
 													throw new ExplicitException("Timed out calling tool: " + toolName);
@@ -298,6 +302,9 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 											ToolUtils.handleCallException(toolName, t);
 										}
 									}
+									
+									if (responseFuture.isDone())
+										return;
 									
 									var handler = newResponseHandler(SecurityUtils.getSubject());
 									var langchain4jChatRequest = ChatRequest.builder()

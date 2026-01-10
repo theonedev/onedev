@@ -594,6 +594,8 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 							.collect(Collectors.toList());
 					ToolUtils.filterDuplications(toolSpecifications);
 					while (true) {
+						if (Thread.interrupted())
+							throw new InterruptedException();								
 						var chatRequest = ChatRequest.builder()
 							.messages(messages)
 							.toolSpecifications(toolSpecifications)
@@ -613,6 +615,8 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 						messages.add(aiMessage);      
 						sessionService.run(() -> {
 							for (var toolRequest : aiMessage.toolExecutionRequests()) {
+								if (Thread.interrupted())
+									throw new RuntimeException(new InterruptedException());								
 								var toolName = toolRequest.name();  
 								try {        
 									var tool = tools.stream()
@@ -626,7 +630,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 							}
 						});
 					}
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					sessionService.run(() -> {
 						var user = Preconditions.checkNotNull(SecurityUtils.getUser(subject));
 						var explicitException = ExceptionUtils.find(e, ExplicitException.class);
