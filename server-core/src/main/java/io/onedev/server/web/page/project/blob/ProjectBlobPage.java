@@ -1677,108 +1677,112 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	
 	@Override
 	public List<ChatTool> getChatTools() {
-		var projectId = getProject().getId();
-		var commitId = getCommit().copy();
-
-		return List.of(
-			wrapForChat(new GetRootFilesAndFolders() {
+		if (getCommit() != null) {
+			var projectId = getProject().getId();		
+			var commitId = getCommit().copy();
+	
+			return List.of(
+				wrapForChat(new GetRootFilesAndFolders() {
+					
+					@Override
+					protected Long getProjectId() {
+						return projectId;
+					}
+					
+					@Override
+					protected ObjectId getCommitId() {
+						return commitId;
+					}
+	
+				}), 
+				wrapForChat(new GetFilesAndSubfolders() {
+					
+					@Override
+					protected Long getProjectId() {
+						return projectId;
+					}
+					
+					@Override
+					protected ObjectId getCommitId() {
+						return commitId;
+					}
+	
+				}), 
+				wrapForChat(new GetFileContent(false) {
+	
+					@Override
+					protected Long getProjectId() {
+						return projectId;
+					}
+					
+					@Override
+					protected ObjectId getCommitId(boolean oldRevision) {
+						return commitId;
+					}
+	
+				}), 
+				wrapForChat(new QuerySymbolDefinitions(false) {
+	
+					@Override
+					protected Long getProjectId() {
+						return projectId;
+					}
+					
+					@Override
+					protected ObjectId getCommitId(boolean oldRevision) {
+						return commitId;
+					}
+	
+				}),
+				wrapForChat(new QueryCodeSnippets(false) {
+	
+					@Override
+					protected Long getProjectId() {
+						return projectId;
+					}
+					
+					@Override
+					protected ObjectId getCommitId(boolean oldRevision) {
+						return commitId;
+					}
+	
+				}),
+				wrapForChat(new QueryFilePaths() {
+					
+					@Override
+					protected Long getProjectId() {
+						return projectId;
+					}
+					
+					@Override
+					protected ObjectId getCommitId() {
+						return commitId;
+					}
+	
+				})
+				/* 
+				wrapForChat(new AddCodeComment(false) {
 				
-				@Override
-				protected Long getProjectId() {
-					return projectId;
-				}
-				
-				@Override
-				protected ObjectId getCommitId() {
-					return commitId;
-				}
-
-			}), 
-			wrapForChat(new GetFilesAndSubfolders() {
-				
-				@Override
-				protected Long getProjectId() {
-					return projectId;
-				}
-				
-				@Override
-				protected ObjectId getCommitId() {
-					return commitId;
-				}
-
-			}), 
-			wrapForChat(new GetFileContent(false) {
-
-				@Override
-				protected Long getProjectId() {
-					return projectId;
-				}
-				
-				@Override
-				protected ObjectId getCommitId(boolean oldRevision) {
-					return commitId;
-				}
-
-			}), 
-			wrapForChat(new QuerySymbolDefinitions(false) {
-
-				@Override
-				protected Long getProjectId() {
-					return projectId;
-				}
-				
-				@Override
-				protected ObjectId getCommitId(boolean oldRevision) {
-					return commitId;
-				}
-
-			}),
-			wrapForChat(new QueryCodeSnippets(false) {
-
-				@Override
-				protected Long getProjectId() {
-					return projectId;
-				}
-				
-				@Override
-				protected ObjectId getCommitId(boolean oldRevision) {
-					return commitId;
-				}
-
-			}),
-			wrapForChat(new QueryFilePaths() {
-				
-				@Override
-				protected Long getProjectId() {
-					return projectId;
-				}
-				
-				@Override
-				protected ObjectId getCommitId() {
-					return commitId;
-				}
-
-			})
-			/* 
-			wrapForChat(new AddCodeComment(false) {
-			
-				@Override
-				protected Long getProjectId() {
-					return projectId;
-				}
-				
-				@Override
-				protected Long getPullRequestId() {
-					return null;
-				}
-				
-				@Override
-				protected ObjectId getCommitId(boolean oldRevision) {
-					return commitId;
-				}
-			})
-			*/
-		);
+					@Override
+					protected Long getProjectId() {
+						return projectId;
+					}
+					
+					@Override
+					protected Long getPullRequestId() {
+						return null;
+					}
+					
+					@Override
+					protected ObjectId getCommitId(boolean oldRevision) {
+						return commitId;
+					}
+				})
+				*/
+			);	
+		} else {
+			return List.of();
+		}
 	}
 
 }

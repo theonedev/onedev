@@ -4,7 +4,6 @@ onedev.server.codeSupport = {
 		var minHeight = $input.parent().data("minHeight");
 		
 		var height = $input.next().find(".CodeMirror-sizer").outerHeight();
-		console.log(height);
 		if (height > maxHeight)
 			height = maxHeight;
 		if (height < minHeight)
