@@ -104,9 +104,9 @@ public class ProjectScopedCommit implements Serializable {
 		} else {
 			ComponentContext componentContext = ComponentContext.get();
 			if (componentContext != null) {
-				CommitAware commitAware = WicketUtils.findInnermost(componentContext.getComponent(), CommitAware.class);
+				ProjectScopedCommitAware commitAware = WicketUtils.findInnermost(componentContext.getComponent(), ProjectScopedCommitAware.class);
 				if (commitAware != null) 
-					return commitAware.getCommit();
+					return commitAware.getProjectScopedCommit();
 			}
 			return null;
 		}

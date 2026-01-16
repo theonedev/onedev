@@ -3,10 +3,10 @@ package io.onedev.server.event.project;
 import java.util.Date;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.util.CommitAware;
+import io.onedev.server.util.ProjectScopedCommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 
-public class DefaultBranchChanged extends ProjectEvent implements CommitAware {
+public class DefaultBranchChanged extends ProjectEvent implements ProjectScopedCommitAware {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -27,7 +27,7 @@ public class DefaultBranchChanged extends ProjectEvent implements CommitAware {
 	}
 
 	@Override
-	public ProjectScopedCommit getCommit() {
+	public ProjectScopedCommit getProjectScopedCommit() {
 		return new ProjectScopedCommit(getProject(), getProject().getObjectId(defaultBranch, true));
 	}
 

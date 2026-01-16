@@ -14,12 +14,12 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.util.CommitAware;
+import io.onedev.server.util.ProjectScopedCommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 
-public class IssueOpened extends IssueEvent implements CommitAware {
+public class IssueOpened extends IssueEvent implements ProjectScopedCommitAware {
 
 	private static final long serialVersionUID = 1L;
 
@@ -84,7 +84,7 @@ public class IssueOpened extends IssueEvent implements CommitAware {
 	}
 
 	@Override
-	public ProjectScopedCommit getCommit() {
+	public ProjectScopedCommit getProjectScopedCommit() {
 		var project = getIssue().getProject();
 		if (project.getDefaultBranch() != null)
 			return new ProjectScopedCommit(project, project.getObjectId(project.getDefaultBranch(), true));

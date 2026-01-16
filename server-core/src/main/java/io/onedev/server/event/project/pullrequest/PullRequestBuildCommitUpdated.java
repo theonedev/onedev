@@ -5,10 +5,10 @@ import java.util.Date;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.util.CommitAware;
+import io.onedev.server.util.ProjectScopedCommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 
-public class PullRequestBuildCommitUpdated extends PullRequestEvent implements CommitAware {
+public class PullRequestBuildCommitUpdated extends PullRequestEvent implements ProjectScopedCommitAware {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -27,7 +27,7 @@ public class PullRequestBuildCommitUpdated extends PullRequestEvent implements C
 	}
 
 	@Override
-	public ProjectScopedCommit getCommit() {
+	public ProjectScopedCommit getProjectScopedCommit() {
 		if (getRequest().getBuildCommitHash() != null)
 			return new ProjectScopedCommit(getProject(), ObjectId.fromString(getRequest().getBuildCommitHash()));
 		else

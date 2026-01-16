@@ -17,6 +17,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.web.component.modal.message.MessageModal;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.xodus.CommitInfoService;
@@ -123,8 +124,8 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 						}
 
 						@Override
-						protected Project getProject() {
-							return RunJobLink.this.getProject();
+						protected ProjectScopedCommit getProjectScopedCommit() {
+							return new ProjectScopedCommit(getProject(), commitId);
 						}
 
 						@Override

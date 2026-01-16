@@ -9,10 +9,14 @@ import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.build.BuildFinished;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
+import io.onedev.server.util.ProjectScopedCommit;
 
 import static io.onedev.server.buildspec.param.ParamUtils.isCoveredBy;
 import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
 import static java.util.stream.Collectors.toSet;
+
+import java.util.List;
+import java.util.Map;
 
 @Editable(order=500, name="Dependency job finished")
 public class DependencyFinishedTrigger extends JobTrigger {
@@ -30,9 +34,16 @@ public class DependencyFinishedTrigger extends JobTrigger {
 					var secretParamNames = dependency.getParamMatrix().stream()
 							.filter(ParamInstances::isSecret)
 							.map(ParamInstances::getName)
-							.collect(toSet());					
-					for (var paramMap: resolveParams(null, null, 
-							dependency.getParamMatrix(), dependency.getExcludeParamMaps())) {
+							.collect(toSet());	
+					List<Map<String, List<String>>> paramMaps;
+					ProjectScopedCommit.push(new ProjectScopedCommit(build.getProject(), build.getCommitId()));
+					try {
+						paramMaps = resolveParams(null, null, 
+							dependency.getParamMatrix(), dependency.getExcludeParamMaps());
+					} finally {
+						ProjectScopedCommit.pop();
+					}
+					for (var paramMap: paramMaps) {
 						if (isCoveredBy(build.getParamMap(), paramMap, secretParamNames)) {
 							return new TriggerMatch(build.getRefName(), build.getRequest(), build.getIssue(), getParamMatrix(),
 									getExcludeParamMaps(), "Dependency job '" + dependency.getJobName() + "' is finished");

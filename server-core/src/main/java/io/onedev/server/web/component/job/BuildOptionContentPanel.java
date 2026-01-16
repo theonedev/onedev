@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import io.onedev.server.model.Project;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -22,9 +21,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.util.ProjectScopedCommitAware;
 import io.onedev.server.web.editable.BeanContext;
 
-abstract class BuildOptionContentPanel extends Panel {
+abstract class BuildOptionContentPanel extends Panel implements ProjectScopedCommitAware {
 
 	private final List<String> refNames;
 	
@@ -85,14 +85,14 @@ abstract class BuildOptionContentPanel extends Panel {
 
 				var branch = GitUtils.ref2branch(refName);
 				if (branch != null) {
- 					if (getProject().getTagRef(branch) != null)
+ 					if (getProjectScopedCommit().getProject().getTagRef(branch) != null)
 						item.add(new Label("label", refName));
 					 else
 						item.add(new Label("label", branch));						 
 				} else {
 					var tag = GitUtils.ref2tag(refName);
 					if (tag != null) {
-						if (getProject().getBranchRef(tag) != null)
+						if (getProjectScopedCommit().getProject().getBranchRef(tag) != null)
 							item.add(new Label("label", refName));
 						else
 							item.add(new Label("label", tag));
@@ -151,7 +151,5 @@ abstract class BuildOptionContentPanel extends Panel {
 			Serializable populatedParamBean);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
-	
-	protected abstract Project getProject();
-	
+			
 }

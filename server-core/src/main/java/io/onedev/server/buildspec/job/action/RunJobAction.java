@@ -4,6 +4,7 @@ import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.ValidationException;
@@ -30,6 +31,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.service.UserService;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -113,7 +115,14 @@ public class RunJobAction extends PostBuildAction {
 	
 	@Override
 	public void execute(Build build) {
-		for (var paramMap: resolveParams(build, build.getParamCombination(), getParamMatrix(), getExcludeParamMaps())) {
+		List<Map<String, List<String>>> paramMaps;
+		ProjectScopedCommit.push(new ProjectScopedCommit(build.getProject(), build.getCommitId()));
+		try {
+			paramMaps = resolveParams(build, build.getParamCombination(), getParamMatrix(), getExcludeParamMaps());
+		} finally {
+			ProjectScopedCommit.pop();
+		}
+		for (var paramMap: paramMaps) {
 			JobService jobService = OneDev.getInstance(JobService.class);
 			var userService = OneDev.getInstance(UserService.class);
 			jobService.submit(userService.getSystem(), build.getProject(), build.getCommitId(), 

@@ -41,7 +41,7 @@ public class ParamUtils {
 		}
 	}
 	
-	public static void validateParamMatrix(List<ParamSpec> paramSpecs, Map<String, List<List<String>>> paramMatrix) {
+	private static void validateParamMatrix(List<ParamSpec> paramSpecs, Map<String, List<List<String>>> paramMatrix) {
 		Map<String, ParamSpec> paramSpecMap = ParamUtils.getParamSpecMap(paramSpecs);
 		validateParamNames(paramSpecMap.keySet(), paramMatrix.keySet());
 		for (Map.Entry<String, List<List<String>>> entry: paramMatrix.entrySet()) {
@@ -126,8 +126,8 @@ public class ParamUtils {
 		Map<String, List<List<String>>> evaledParamMatrix = new HashMap<>();
 		for (ParamInstances param: paramMatrix) {
 			List<List<String>> values;
-			if (param.getValuesProvider() instanceof SpecifiedValues)
-				values = param.getValuesProvider().getValues(null, null);
+			if (param.getValuesProvider() instanceof SpecifiedValues specifiedValues)
+				values = specifiedValues.getValues();
 			else
 				values = null;
 			if (evaledParamMatrix.put(param.getName(), values) != null)
@@ -140,8 +140,8 @@ public class ParamUtils {
 		Map<String, List<String>> evaledParamMap = new HashMap<>();
 		for (ParamInstance param: paramMap) {
 			List<String> value;
-			if (param.getValueProvider() instanceof SpecifiedValue)
-				value = param.getValueProvider().getValue(null, null);
+			if (param.getValueProvider() instanceof SpecifiedValue specifiedValue)
+				value = specifiedValue.getValue();
 			else
 				value = null;
 			if (evaledParamMap.put(param.getName(), value) != null)
@@ -229,7 +229,7 @@ public class ParamUtils {
 		return paramMaps;
 	}
 	
-	public static Map<String, List<List<String>>> evalParamMatrix(@Nullable Build build,
+	private static Map<String, List<List<String>>> evalParamMatrix(@Nullable Build build,
 																  @Nullable ParamCombination paramCombination,
 																  List<ParamInstances> paramMatrix) {
 		Map<String, List<List<String>>> evaledParamMatrix = new LinkedHashMap<>();
@@ -256,7 +256,7 @@ public class ParamUtils {
 		return evaledParamMatrix;
 	}
 
-	public static Map<String, List<String>> evalParamMap(@Nullable Build build,
+	private static Map<String, List<String>> evalParamMap(@Nullable Build build,
 															   @Nullable ParamCombination paramCombination,
 															   List<ParamInstance> paramMap) {
 		Map<String, List<String>> evaledParamMap = new LinkedHashMap<>();

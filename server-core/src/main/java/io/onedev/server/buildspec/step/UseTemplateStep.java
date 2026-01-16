@@ -13,6 +13,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.web.editable.BeanEditor;
 
@@ -20,6 +21,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.onedev.server.buildspec.param.ParamUtils.resolveParams;
@@ -110,10 +112,22 @@ public class UseTemplateStep extends CompositeStep {
 		
 		List<Action> actions = new ArrayList<>();
 		AtomicInteger repeatRef = new AtomicInteger(0);
-		var paramMaps = resolveParams(build, paramCombination, getParamMatrix(), getExcludeParamMaps());
+		List<Map<String, List<String>>> paramMaps;
+		var projectScopedCommit = new ProjectScopedCommit(build.getProject(), build.getCommitId());
+		ProjectScopedCommit.push(projectScopedCommit);
+		try {
+			paramMaps = resolveParams(build, paramCombination, getParamMatrix(), getExcludeParamMaps());
+		} finally {
+			ProjectScopedCommit.pop();
+		}
 		for (var paramMap: paramMaps) {
 			int repeat = repeatRef.incrementAndGet();
-			ParamUtils.validateParamMap(template.getParamSpecs(), paramMap);
+			ProjectScopedCommit.push(projectScopedCommit);
+			try {	
+				ParamUtils.validateParamMap(template.getParamSpecs(), paramMap);
+			} finally {
+				ProjectScopedCommit.pop();
+			}
 
 			ParamCombination newParamCombination = new ParamCombination(template.getParamSpecs(), paramMap);
 			VariableInterpolator interpolator = new VariableInterpolator(build, newParamCombination);

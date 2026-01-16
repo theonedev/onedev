@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -21,24 +19,27 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.service.BuildService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.ProjectScopedCommitAware;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.build.minilist.MiniBuildListPanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 
-public abstract class JobListPanel extends Panel {
+public abstract class JobListPanel extends Panel implements ProjectScopedCommitAware {
 
 	private final ObjectId commitId;
 	
@@ -185,6 +186,11 @@ public abstract class JobListPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new JobListCssResourceReference()));
+	}
+	
+	@Override
+	public ProjectScopedCommit getProjectScopedCommit() {
+		return new ProjectScopedCommit(getProject(), commitId);
 	}
 	
 }

@@ -8,7 +8,7 @@ import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommitAware;
+import io.onedev.server.util.ProjectScopedCommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
@@ -17,7 +17,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
-public class IssueChanged extends IssueEvent implements CommitAware {
+public class IssueChanged extends IssueEvent implements ProjectScopedCommitAware {
 
 	private static final long serialVersionUID = 1L;
 
@@ -85,7 +85,7 @@ public class IssueChanged extends IssueEvent implements CommitAware {
 	}
 
 	@Override
-	public ProjectScopedCommit getCommit() {
+	public ProjectScopedCommit getProjectScopedCommit() {
 		if (getChange().getData() instanceof IssueStateChangeData) {
 			var project = getIssue().getProject();
 			if (project.getDefaultBranch() != null)

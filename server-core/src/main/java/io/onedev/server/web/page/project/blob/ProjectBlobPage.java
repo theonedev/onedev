@@ -104,6 +104,8 @@ import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.util.FileExtension;
 import io.onedev.server.util.FilenameUtils;
+import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.ProjectScopedCommitAware;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ChangeObserver;
@@ -140,7 +142,7 @@ import io.onedev.server.web.upload.FileUpload;
 import io.onedev.server.web.util.EditParamsAware;
 
 public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, 
-		EditParamsAware, JobAuthorizationContextAware, ChatToolAware {
+		EditParamsAware, JobAuthorizationContextAware, ChatToolAware, ProjectScopedCommitAware {
 
 	private static final String PARAM_INITIAL_NEW_PATH = "initial-new-path";
 	
@@ -1783,6 +1785,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		} else {
 			return List.of();
 		}
+	}
+
+	@Override
+	public ProjectScopedCommit getProjectScopedCommit() {
+		return new ProjectScopedCommit(getProject(), getCommit().copy());
 	}
 
 }

@@ -1,14 +1,15 @@
 package io.onedev.server.web.component.job;
 
-import io.onedev.server.buildspecmodel.inputspec.InputContext;
-import io.onedev.server.model.Project;
-import io.onedev.server.web.component.modal.ModalPanel;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.web.component.modal.ModalPanel;
 
 public abstract class BuildOptionModalPanel extends ModalPanel implements InputContext {
 
@@ -39,8 +40,8 @@ public abstract class BuildOptionModalPanel extends ModalPanel implements InputC
 			}
 
 			@Override
-			protected Project getProject() {
-				return BuildOptionModalPanel.this.getProject();
+			public ProjectScopedCommit getProjectScopedCommit() {
+				return BuildOptionModalPanel.this.getProjectScopedCommit();
 			}
 
 		};
@@ -52,6 +53,6 @@ public abstract class BuildOptionModalPanel extends ModalPanel implements InputC
 	protected void onCancel(AjaxRequestTarget target) {
 	}
 	
-	protected abstract Project getProject();
+	protected abstract ProjectScopedCommit getProjectScopedCommit();
 	
 }

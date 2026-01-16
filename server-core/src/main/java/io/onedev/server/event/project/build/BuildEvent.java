@@ -10,12 +10,12 @@ import io.onedev.server.service.UrlService;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
-import io.onedev.server.util.CommitAware;
+import io.onedev.server.util.ProjectScopedCommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 
 import org.jspecify.annotations.Nullable;
 
-public abstract class BuildEvent extends ProjectEvent implements CommitAware {
+public abstract class BuildEvent extends ProjectEvent implements ProjectScopedCommitAware {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -31,7 +31,7 @@ public abstract class BuildEvent extends ProjectEvent implements CommitAware {
 	}
 
 	@Override
-	public ProjectScopedCommit getCommit() {
+	public ProjectScopedCommit getProjectScopedCommit() {
 		Build build = getBuild();
 		return new ProjectScopedCommit(build.getProject(), ObjectId.fromString(build.getCommitHash()));
 	}

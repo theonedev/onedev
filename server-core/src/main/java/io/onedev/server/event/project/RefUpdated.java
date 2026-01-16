@@ -13,12 +13,12 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.service.UrlService;
-import io.onedev.server.util.CommitAware;
+import io.onedev.server.util.ProjectScopedCommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.PlainText;
 
-public class RefUpdated extends ProjectEvent implements CommitAware {
+public class RefUpdated extends ProjectEvent implements ProjectScopedCommitAware {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -69,7 +69,7 @@ public class RefUpdated extends ProjectEvent implements CommitAware {
 	}
 
 	@Override
-	public ProjectScopedCommit getCommit() {
+	public ProjectScopedCommit getProjectScopedCommit() {
 		if (commit == null)
 			commit = new ProjectScopedCommit(getProject(), newCommitId);
 		return commit;

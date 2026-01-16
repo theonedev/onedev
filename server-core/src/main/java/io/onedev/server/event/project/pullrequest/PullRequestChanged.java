@@ -11,12 +11,12 @@ import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
-import io.onedev.server.util.CommitAware;
+import io.onedev.server.util.ProjectScopedCommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 
-public class PullRequestChanged extends PullRequestEvent implements CommitAware {
+public class PullRequestChanged extends PullRequestEvent implements ProjectScopedCommitAware {
 
 	private static final long serialVersionUID = 1L;
 
@@ -50,7 +50,7 @@ public class PullRequestChanged extends PullRequestEvent implements CommitAware 
 	}
 
 	@Override
-	public ProjectScopedCommit getCommit() {
+	public ProjectScopedCommit getProjectScopedCommit() {
 		ObjectId commitId;
 		if (getChange().getData() instanceof PullRequestMergeData) {
 			MergePreview preview = getRequest().checkMergePreview();

@@ -157,7 +157,8 @@ import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.terminal.WebShell;
-import io.onedev.server.util.CommitAware;
+import io.onedev.server.util.ProjectScopedCommitAware;
+import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.concurrent.BatchWorkExecutionService;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
@@ -342,11 +343,11 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		build.setRequest(request);
 		build.setIssue(issue);
 
-		Project.push(project);
+		ProjectScopedCommit.push(new ProjectScopedCommit(project, commitId));
 		try {
 			ParamUtils.validateParamMap(build.getJob().getParamSpecs(), paramMap);
 		} finally {
-			Project.pop();
+			ProjectScopedCommit.pop();
 		}
 
 		Map<String, List<String>> paramMapToQuery = new HashMap<>(paramMap);
@@ -383,8 +384,14 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 			for (JobDependency dependency : build.getJob().getJobDependencies()) {
 				JobDependency interpolated = interpolator.interpolateProperties(dependency);
-				var dependencyParamMaps = resolveParams(build, build.getParamCombination(), 
-						interpolated.getParamMatrix(), interpolated.getExcludeParamMaps());
+				List<Map<String, List<String>>> dependencyParamMaps;
+				ProjectScopedCommit.push(new ProjectScopedCommit(project, commitId));
+				try {
+					dependencyParamMaps = resolveParams(build, build.getParamCombination(), 
+							interpolated.getParamMatrix(), interpolated.getExcludeParamMaps());
+				} finally {
+					ProjectScopedCommit.pop();
+				}
 				for (var dependencyParamMap: dependencyParamMaps) {
 					Build dependencyBuild = doSubmit(user, project, commitId, interpolated.getJobName(), 
 							dependencyParamMap, refName, request, issue, reason);
@@ -397,7 +404,6 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 					build.getDependencies().add(dependence);
 				}
 			}
-
 			for (ProjectDependency dependency : build.getJob().getProjectDependencies()) {
 				dependency = interpolator.interpolateProperties(dependency);
 				Project dependencyProject = projectService.findByPath(dependency.getProjectPath());
@@ -774,8 +780,8 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	@Sessional
 	@Listen
 	public void on(ProjectEvent event) {
-		if (event instanceof CommitAware && ((CommitAware) event).getCommit() != null) {
-			ObjectId commitId = ((CommitAware) event).getCommit().getCommitId();
+		if (event instanceof ProjectScopedCommitAware && ((ProjectScopedCommitAware) event).getProjectScopedCommit() != null) {
+			ObjectId commitId = ((ProjectScopedCommitAware) event).getProjectScopedCommit().getCommitId();
 			if (!commitId.equals(ObjectId.zeroId())) {
 				PullRequest request = null;
 				if (event instanceof PullRequestEvent)
@@ -789,8 +795,14 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 						for (Job job : buildSpec.getJobMap().values()) {
 							TriggerMatch match = job.getTriggerMatch(event);
 							if (match != null) {
-								var paramMaps = resolveParams(null, null, 
-										match.getParamMatrix(), match.getExcludeParamMaps());
+								List<Map<String, List<String>>> paramMaps;
+								ProjectScopedCommit.push(new ProjectScopedCommit(event.getProject(), commitId));
+								try {
+									paramMaps = resolveParams(null, null, 
+											match.getParamMatrix(), match.getExcludeParamMaps());
+								} finally {
+									ProjectScopedCommit.pop();
+								}
 								Long projectId = event.getProject().getId();
 
 								// run asynchrously as session may get closed due to exception
@@ -1132,8 +1144,14 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 										var commitId = schedule.getCommitId();
 										var nextFireTime = schedule.getCronExpression().getNextValidTimeAfter(currentTime);
 										if (nextFireTime != null && !nextFireTime.after(nextCheckTime)) {
-											var paramMaps = resolveParams(null, null,
-													match.getParamMatrix(), match.getExcludeParamMaps());
+											List<Map<String, List<String>>> paramMaps;
+											ProjectScopedCommit.push(new ProjectScopedCommit(project, commitId));
+											try {
+												paramMaps = resolveParams(null, null,
+														match.getParamMatrix(), match.getExcludeParamMaps());
+											} finally {
+												ProjectScopedCommit.pop();
+											}
 											for (var paramMap : paramMaps) {
 												var build = submit(user, project, commitId, schedule.getJobName(), paramMap, 
 														match.getRefName(), null, null, match.getReason());
