@@ -46,21 +46,34 @@ public abstract class AssetServlet extends DefaultServlet {
 				else
 					fields = ((Response)((HttpServletResponseWrapper) response).getResponse()).getHttpFields();
 				
-				if (requestHolder.get().getDispatcherType() == DispatcherType.ERROR) {
+				HttpServletRequest request = requestHolder.get();
+				if (request == null)
+					return;
+				
+				String requestUri = request.getRequestURI();
+				if (request.getDispatcherType() == DispatcherType.ERROR) {
 					/*
 					 * Do not cache error page and also makes sure that error page is not eligible for 
 					 * modification check. That is, error page will be always retrieved.
 					 */
 		            fields.put(HttpHeader.CACHE_CONTROL, "must-revalidate,no-cache,no-store");
-				} else if (requestHolder.get().getRequestURI().equals("/favicon.ico")) {
+				} else if (requestUri.equals("/favicon.ico")) {
 					/*
 					 * Make sure favicon request is cached. Otherwise, it will be requested for every 
 					 * page request.
 					 */
 					fields.put(HttpHeader.CACHE_CONTROL, "max-age=86400,public");
-				} else if (requestHolder.get().getRequestURI().equals("/prefetch.json")) {
+				} else if (requestUri.equals("/prefetch.json")) {
 					fields.put(HttpHeader.CONTENT_TYPE, "application/speculationrules+json");
 				}
+				
+				/*
+				 * Some browsers enforce a JavaScript MIME type for module scripts. Jetty's default
+				 * mime mapping does not always include .mjs, which breaks dynamic imports (for
+				 * instance, pdf.js modules).
+				 */
+				if (requestUri.endsWith(".mjs"))
+					fields.put(HttpHeader.CONTENT_TYPE, "text/javascript");
 			}
 			
 		});
@@ -141,13 +154,12 @@ public abstract class AssetServlet extends DefaultServlet {
 	protected abstract URL loadResource(String relativePath);
 	
 	@Override
-	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
-			requestHolder.set((HttpServletRequest) request);
-			super.doGet(request, response);
+			requestHolder.set(request);
+			super.service(request, response);
 		} finally {
-			requestHolder.set(null);
+			requestHolder.remove();
 		}
 	}
 

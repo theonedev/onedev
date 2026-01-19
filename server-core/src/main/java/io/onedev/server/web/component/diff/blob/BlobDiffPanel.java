@@ -4,8 +4,9 @@ import static io.onedev.server.util.diff.DiffUtils.MAX_LINE_LEN;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.text.MessageFormat;
+import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
+import javax.inject.Inject;
 
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.Component;
@@ -24,8 +25,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.FileMode;
+import org.jspecify.annotations.Nullable;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
@@ -61,6 +62,9 @@ public class BlobDiffPanel extends Panel {
 
 	private boolean collapsed;
 
+	@Inject
+	private Set<DiffRenderer> diffRenderers;
+
 	public BlobDiffPanel(String id, BlobChange change, DiffViewMode diffMode, @Nullable IModel<Boolean> blameModel) {
 		super(id);
 
@@ -95,7 +99,7 @@ public class BlobDiffPanel extends Panel {
 
 	private void showBlob(Blob blob) {
 		Component diffPanel = null;
-		for (DiffRenderer renderer : OneDev.getExtensions(DiffRenderer.class)) {
+		for (DiffRenderer renderer : diffRenderers) {
 			if (blob.getLfsPointer() != null
 					&& !new LfsObject(change.getProject().getId(), blob.getLfsPointer().getObjectId()).exists()) {
 				diffPanel = newMessageFragment(_T("Storage file missing"), true);
@@ -307,7 +311,7 @@ public class BlobDiffPanel extends Panel {
 				Component diffPanel = null;
 
 				if (oldMediaType.equals(newMediaType)) {
-					for (DiffRenderer renderer : OneDev.getExtensions(DiffRenderer.class)) {
+					for (DiffRenderer renderer : diffRenderers) {
 						diffPanel = renderer.render(BODY_ID, newMediaType, change, diffMode);
 						if (diffPanel != null)
 							break;

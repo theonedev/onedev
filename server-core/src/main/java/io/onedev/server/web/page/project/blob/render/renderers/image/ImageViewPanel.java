@@ -26,7 +26,7 @@ public class ImageViewPanel extends BlobViewPanel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ImageViewResourceReference()));
+		response.render(CssHeaderItem.forReference(new ImageViewCssResourceReference()));
 	}
 
 	@Override

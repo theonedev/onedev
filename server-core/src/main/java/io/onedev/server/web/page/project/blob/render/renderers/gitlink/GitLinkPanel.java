@@ -72,7 +72,7 @@ public class GitLinkPanel extends BlobViewPanel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(new GitLinkResourceReference()));
+		response.render(CssHeaderItem.forReference(new GitLinkCssResourceReference()));
 	}
 
 	@Override

@@ -1,16 +1,18 @@
 package io.onedev.server.web.component.diff.blob.image;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.util.Provider;
-import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.request.resource.ResourceReference;
 
 public class BlobImageDiffPanel extends Panel {
 
@@ -26,23 +28,33 @@ public class BlobImageDiffPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(newImage("old", change.getOldBlobIdent(), new Provider<Blob>() {
+		Image oldImage = newImage("old", change.getOldBlobIdent(), new Provider<Blob>() {
 
 			@Override
 			public Blob get() {
 				return change.getOldBlob();
 			}
 			
-		}));
+		});
+		add(oldImage);
 		
-		add(newImage("new", change.getNewBlobIdent(), new Provider<Blob>() {
+		Label oldPlaceholder = new Label("oldPlaceholder", _T("Not available"));
+		oldPlaceholder.setVisible(!oldImage.isVisible());
+		add(oldPlaceholder);
+		
+		Image newImage = newImage("new", change.getNewBlobIdent(), new Provider<Blob>() {
 
 			@Override
 			public Blob get() {
 				return change.getNewBlob();
 			}
 			
-		}));
+		});
+		add(newImage);
+		
+		Label newPlaceholder = new Label("newPlaceholder", _T("Not available"));
+		newPlaceholder.setVisible(!newImage.isVisible());
+		add(newPlaceholder);
 		
 		add(AttributeAppender.append("class", "border border-top-0 rounded-bottom blob-image-diff d-flex"));
 	}
@@ -50,12 +62,12 @@ public class BlobImageDiffPanel extends Panel {
 	private Image newImage(String id, BlobIdent blobIdent, Provider<Blob> blobProvider) {
 		Image image;
 		if (blobIdent.path != null) {
-			add(image = new Image(id, new RawBlobResourceReference(), 
-					RawBlobResource.paramsOf(change.getProject(), blobIdent)));
+			image = new Image(id, new RawBlobResourceReference(), 
+					RawBlobResource.paramsOf(change.getProject(), blobIdent));
+			image.setVisible(true);
 		} else {
-			BasePage page = (BasePage) getPage();
-			String blank = page.isDarkMode()?"blank-dark.png":"blank.png";
-			add(image = new Image(id, new PackageResourceReference(BlobImageDiffPanel.class, blank)));
+			image = new Image(id, (ResourceReference) null);
+			image.setVisible(false);
 		}
 		return image;
 	}
