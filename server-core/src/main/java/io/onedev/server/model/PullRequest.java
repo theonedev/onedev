@@ -99,6 +99,7 @@ import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.model.support.TimeGroups;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.BuildRequirement;
+import io.onedev.server.model.support.code.ConventionalCommitChecker;
 import io.onedev.server.model.support.pullrequest.AutoMerge;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
@@ -1436,8 +1437,9 @@ public class PullRequest extends ProjectBelonging
 		}
 		var commitTypes = CONVENTIONAL_COMMIT_TYPES;
 		var branchProtection = getProject().getBranchProtection(getTargetBranch(), getSubmitter());
-		if (branchProtection.isEnforceConventionalCommits() && !branchProtection.getCommitTypes().isEmpty()) {
-			commitTypes = branchProtection.getCommitTypes();
+		if (branchProtection.getCommitMessageChecker() instanceof ConventionalCommitChecker conventionalCommitChecker 
+				&& !conventionalCommitChecker.getCommitTypes().isEmpty()) {
+			commitTypes = conventionalCommitChecker.getCommitTypes();
 		}
 		String workType = null;
 		for (var commitType: commitTypes) {

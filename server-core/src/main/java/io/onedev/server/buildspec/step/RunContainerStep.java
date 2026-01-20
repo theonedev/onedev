@@ -7,16 +7,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
+
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.RunContainerFacade;
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.RegEx;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
@@ -75,7 +76,7 @@ public class RunContainerStep extends Step {
 	@Editable(order=250, name="Run As", group = "More Settings", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
 			"<b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or " +
 			"using user namespace remapping")
-	@RegEx(pattern="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
+	@Pattern(regexp="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
 	public String getRunAs() {
 		return runAs;
 	}

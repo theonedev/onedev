@@ -5,17 +5,14 @@ import java.util.regex.Pattern;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import io.onedev.server.annotation.RegEx;
+import io.onedev.server.annotation.RegExp;
 
-public class RegExValidator implements ConstraintValidator<RegEx, String> {
-
-	private Pattern pattern;
+public class RegExpValidator implements ConstraintValidator<RegExp, String> {
 	
 	private String message;
 	
 	@Override
-	public void initialize(RegEx constaintAnnotation) {
-		pattern = Pattern.compile(constaintAnnotation.pattern());
+	public void initialize(RegExp constaintAnnotation) {
 		message = constaintAnnotation.message();
 	}
 
@@ -23,13 +20,18 @@ public class RegExValidator implements ConstraintValidator<RegEx, String> {
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
 		if (value == null) 
 			return true;
-		if (pattern.matcher(value).matches()) {
-			return true;
-		} else {
+		try {
+			Pattern.compile(value);
+		} catch (Exception e) {
+			String message = this.message;
+			if (message.length() == 0) {
+				message = "Not a valid regular expression";
+			}
 			constraintContext.disableDefaultConstraintViolation();
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
 		}
+		return true;
 	}
 	
 }

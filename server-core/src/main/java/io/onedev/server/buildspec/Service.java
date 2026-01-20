@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
@@ -16,7 +17,6 @@ import io.onedev.k8shelper.ServiceFacade;
 import io.onedev.server.annotation.DnsName;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.RegEx;
 import io.onedev.server.annotation.SuggestionProvider;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.step.RegistryLogin;
@@ -113,7 +113,7 @@ public class Service implements NamedElement {
 	@Editable(order=450, name="Run As", group = "More Settings", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
 			"<b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or " +
 			"using user namespace remapping")
-	@RegEx(pattern="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
+	@Pattern(regexp="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
 	public String getRunAs() {
 		return runAs;
 	}

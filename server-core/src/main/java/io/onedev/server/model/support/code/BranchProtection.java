@@ -1,8 +1,5 @@
 package io.onedev.server.model.support.code;
 
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
-import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,33 +9,30 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 
 import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
-import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.JobChoice;
 import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.service.BuildService;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usage.Usage;
@@ -50,10 +44,6 @@ import io.onedev.server.web.util.SuggestionUtils;
 public class BranchProtection implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
-	private static final Pattern CONVENTIONAL_COMMIT_SUBJECT = Pattern.compile(
-			"^((\\p{L}+)(\\(([\\p{L}\\p{N}]+([\\-/ ][\\p{L}\\p{N}]+)*)\\))?!?: [^ ].+)|^(revert \".*\")", 
-			UNICODE_CHARACTER_CLASS | CASE_INSENSITIVE);
 
 	private boolean enabled = true;
 	
@@ -69,17 +59,7 @@ public class BranchProtection implements Serializable {
 	
 	private boolean commitSignatureRequired = false;
 
-	private boolean enforceConventionalCommits;
-	
-	private List<String> commitTypes = new ArrayList<>();
-
-	private List<String> commitScopes = new ArrayList<>();
-
-	private boolean checkCommitMessageFooter;
-	
-	private String commitMessageFooterPattern;
-	
-	private List<String> commitTypesForFooterCheck = new ArrayList<>();
+	private CommitMessageChecker commitMessageChecker;
 	
 	private Integer maxCommitMessageLineLength;
 
@@ -167,70 +147,16 @@ public class BranchProtection implements Serializable {
 		this.commitSignatureRequired = commitSignatureRequired;
 	}
 
-	@Editable(order=370, description = "Check this to require <a href='https://www.conventionalcommits.org' target='_blank'>conventional commits</a>. " +
-			"Note this is applicable for non-merge commits")
-	public boolean isEnforceConventionalCommits() {
-		return enforceConventionalCommits;
+	@Editable(order=370, name="Commit Message Checker", placeholder = "No commit message checker", description = """
+			Optionally specify a commit message checker to validate commit messages. Only applicable for non-merge commits""")
+	@Valid
+	@Nullable
+	public CommitMessageChecker getCommitMessageChecker() {
+		return commitMessageChecker;
 	}
 
-	public void setEnforceConventionalCommits(boolean enforceConventionalCommits) {
-		this.enforceConventionalCommits = enforceConventionalCommits;
-	}
-
-	@Editable(order=380, placeholder = "Arbitrary type", description = "Optionally specify valid " +
-			"types of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary type")
-	@DependsOn(property="enforceConventionalCommits")
-	public List<String> getCommitTypes() {
-		return commitTypes;
-	}
-
-	public void setCommitTypes(List<String> commitTypes) {
-		this.commitTypes = commitTypes;
-	}
-
-	@Editable(order=390, placeholder = "Arbitrary scope", description = "Optionally specify valid " +
-			"scopes of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary scope")
-	@DependsOn(property="enforceConventionalCommits")
-	public List<String> getCommitScopes() {
-		return commitScopes;
-	}
-
-	public void setCommitScopes(List<String> commitScopes) {
-		this.commitScopes = commitScopes;
-	}
-
-	@Editable(order=391)
-	@DependsOn(property="enforceConventionalCommits")
-	public boolean isCheckCommitMessageFooter() {
-		return checkCommitMessageFooter;
-	}
-
-	public void setCheckCommitMessageFooter(boolean checkCommitMessageFooter) {
-		this.checkCommitMessageFooter = checkCommitMessageFooter;
-	}
-
-	@Editable(order=393, description = "A " +
-			"<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> " +
-			"to validate commit message footer")
-	@DependsOn(property="checkCommitMessageFooter")
-	@NotEmpty
-	public String getCommitMessageFooterPattern() {
-		return commitMessageFooterPattern;
-	}
-
-	public void setCommitMessageFooterPattern(String commitMessageFooterPattern) {
-		this.commitMessageFooterPattern = commitMessageFooterPattern;
-	}
-
-	@Editable(order=394, description = "Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). " +
-			"Leave empty to all types")
-	@DependsOn(property="checkCommitMessageFooter")
-	public List<String> getCommitTypesForFooterCheck() {
-		return commitTypesForFooterCheck;
-	}
-
-	public void setCommitTypesForFooterCheck(List<String> commitTypesForFooterCheck) {
-		this.commitTypesForFooterCheck = commitTypesForFooterCheck;
+	public void setCommitMessageChecker(CommitMessageChecker commitMessageChecker) {
+		this.commitMessageChecker = commitMessageChecker;
 	}
 
 	@Editable(order=395, placeholder = "No limit")
@@ -477,38 +403,10 @@ public class BranchProtection implements Serializable {
 		if (lines.isEmpty())
 			return "Message is empty";
 		
-		if (!merged && enforceConventionalCommits) {
-			var matcher = CONVENTIONAL_COMMIT_SUBJECT.matcher(lines.get(0));
-			if (matcher.matches()) {
-				if (matcher.group(1) != null) {
-					var type = matcher.group(2);
-					if (!commitTypes.isEmpty() && !commitTypes.contains(type))
-						return "Line 1: Unexpected type '" + type + "': Should be one of [" + Joiner.on(',').join(commitTypes) + "]";
-					var scope = matcher.group(4);
-					if (scope != null && !commitScopes.isEmpty() && !commitScopes.contains(scope))
-						return "Line 1: Unexpected scope '" + scope + "': Should be one of [" + Joiner.on(',').join(commitScopes) + "]";
-					if (checkCommitMessageFooter && (commitTypesForFooterCheck.isEmpty() || commitTypesForFooterCheck.contains(type))) {
-						var size = lines.size();
-						if (size < 3 || lines.get(size-1).length() == 0 
-								|| lines.get(size-2).length() != 0 || lines.get(size-3).length() == 0) {
-							return "A footer is expected as last line and exactly one blank line should precede the footer";
-						} else if (!lines.get(size-1).matches(commitMessageFooterPattern)) {
-							return "Unexpected footer format: Should match pattern '" + commitMessageFooterPattern + "'";
-						}
-					}
-				}
-			} else {
-				return "Line 1: Subject is expected of either a git revert message, or format: <type>[optional (scope)][!]: <description>";
-			}
-		}
-	
-		for (int i=1; i<lines.size(); i++) {
-			var line = lines.get(i);
-			if (line.length() != 0) {
-				if (i != 2) 
-					return "One and only one blank line is expected between subject and body/footer";
-				break;
-			}
+		if (commitMessageChecker != null) {
+			var error = commitMessageChecker.checkCommitMessage(commitMessage, merged);
+			if (error != null)
+				return error;
 		}
 		
 		if (maxCommitMessageLineLength != null) {
@@ -519,6 +417,6 @@ public class BranchProtection implements Serializable {
 			}
 		}
 		return null;
-	} 
-	
+	}
+			
 }

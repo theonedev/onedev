@@ -49,6 +49,7 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.PathChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.code.ConventionalCommitChecker;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.FileExtension;
 import io.onedev.server.util.Provider;
@@ -127,7 +128,7 @@ public class CommitOptionPanel extends Panel {
 				commitMessage = MessageFormat.format(_T("Rename {0}"), oldName);
 			}
 		}
-		if (context.getProject().getBranchProtection(context.getBlobIdent().revision, SecurityUtils.getUser()).isEnforceConventionalCommits())
+		if (context.getProject().getBranchProtection(context.getBlobIdent().revision, SecurityUtils.getUser()).getCommitMessageChecker() instanceof ConventionalCommitChecker)
 			commitMessage = "chore: " + commitMessage;
 		return commitMessage;
 	}

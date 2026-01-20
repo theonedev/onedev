@@ -4,13 +4,13 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.JobMatch;
-import io.onedev.server.annotation.RegEx;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.util.usage.Usage;
 
@@ -30,7 +30,7 @@ public class GroovyScript implements Serializable {
 	private String authorization;
 
 	@Editable(order=100)
-	@RegEx(pattern ="^(?!" + BUILTIN_PREFIX + ").*$", message="Name is not allowed to start with '" + BUILTIN_PREFIX + "'")
+	@Pattern(regexp ="^(?!" + BUILTIN_PREFIX + ").*$", message="Name is not allowed to start with '" + BUILTIN_PREFIX + "'")
 	@NotEmpty
 	public String getName() {
 		return name;

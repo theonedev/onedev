@@ -9,13 +9,13 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.RegEx;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
@@ -85,7 +85,7 @@ public class CommandStep extends Step {
 			"<b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or " +
 			"using user namespace remapping")
 	@DependsOn(property="runInContainer")
-	@RegEx(pattern="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
+	@Pattern(regexp="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
 	public String getRunAs() {
 		return runAs;
 	}

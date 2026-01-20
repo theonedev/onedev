@@ -13,18 +13,11 @@ public class PdfRenderer implements BlobRenderer {
 
 	@Override
 	public Component render(String componentId, BlobRenderContext context) {
-		MediaType mediaType = context.getProject().detectMediaType(context.getBlobIdent());
-		if (context.getMode() == Mode.VIEW && isPdf(mediaType)) { 
+		if (context.getMode() == Mode.VIEW && context.getProject().detectMediaType(context.getBlobIdent()).equals(MediaType.application("pdf"))) { 
 			return new PdfViewPanel(componentId, context);
 		} else { 
 			return null;
 		}
-	}
-
-	private boolean isPdf(MediaType mediaType) {
-		return mediaType != null
-				&& mediaType.getType().equalsIgnoreCase("application")
-				&& (mediaType.getSubtype().equalsIgnoreCase("pdf") || mediaType.getSubtype().equalsIgnoreCase("x-pdf"));
 	}
 
 }

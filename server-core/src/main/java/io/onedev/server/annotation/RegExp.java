@@ -8,16 +8,14 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import io.onedev.server.validation.validator.RegExValidator;
+import io.onedev.server.validation.validator.RegExpValidator;
 
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy=RegExValidator.class) 
-public @interface RegEx {
-
-	String pattern();
+@Constraint(validatedBy=RegExpValidator.class) 
+public @interface RegExp {
 	
-    String message() default "Not matching specified regular expression";
+    String message() default "";
 
     Class<?>[] groups() default {};
 

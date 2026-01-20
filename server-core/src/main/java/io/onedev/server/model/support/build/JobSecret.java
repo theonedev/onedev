@@ -1,13 +1,14 @@
 package io.onedev.server.model.support.build;
 
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.JobMatch;
-import io.onedev.server.annotation.RegEx;
-import io.onedev.server.annotation.Secret;
-import io.onedev.server.job.match.OnBranchCriteria;
+import java.io.Serializable;
 
 import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
+import javax.validation.constraints.Pattern;
+
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.JobMatch;
+import io.onedev.server.annotation.Secret;
+import io.onedev.server.job.match.OnBranchCriteria;
 
 @Editable
 public class JobSecret implements Serializable {
@@ -23,7 +24,7 @@ public class JobSecret implements Serializable {
 	private boolean archived;
 	
 	@Editable(order=100)
-	@RegEx(pattern="[^@]+", message="Character '@' not allowed in secret name")
+	@Pattern(regexp="[^@]+", message="Character '@' not allowed in secret name")
 	@NotEmpty
 	public String getName() {
 		return name;

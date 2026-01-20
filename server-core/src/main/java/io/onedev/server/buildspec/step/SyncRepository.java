@@ -1,23 +1,30 @@
 package io.onedev.server.buildspec.step;
 
-import com.google.common.base.Preconditions;
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.command.Commandline;
-import io.onedev.server.annotation.*;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
-
-import org.jspecify.annotations.Nullable;
-import javax.validation.constraints.NotEmpty;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
+
+import org.jspecify.annotations.Nullable;
+
+import com.google.common.base.Preconditions;
+
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.command.Commandline;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Multiline;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 
 @Editable
 public abstract class SyncRepository extends ServerSideStep {
@@ -38,7 +45,7 @@ public abstract class SyncRepository extends ServerSideStep {
 
 	@Editable(order=100, name="Remote URL", description="Specify URL of remote git repository. "
 			+ "Only http/https protocol is supported")
-	@RegEx(pattern = "^http(s)?://.*", message="Only http/https protocol is supported")
+	@Pattern(regexp = "^http(s)?://.*", message="Only http/https protocol is supported")
 	@Interpolative(variableSuggester="suggestVariables", exampleVar = "http://localhost/test")
 	@NotEmpty
 	public String getRemoteUrl() {

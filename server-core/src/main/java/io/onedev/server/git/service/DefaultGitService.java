@@ -1434,7 +1434,7 @@ public class DefaultGitService implements GitService, Serializable {
 												  ObjectId oldId, ObjectId newId,
 												  Map<String, String> envs) {
 		Long projectId = project.getId();
-		if (protection.getMaxCommitMessageLineLength() != null || protection.isEnforceConventionalCommits()) {
+		if (protection.getMaxCommitMessageLineLength() != null || protection.getCommitMessageChecker() != null) {
 			return runOnProjectServer(projectId, () -> {
 				Map<ObjectId, String> commitMessages = new LinkedHashMap<>();
 				Set<ObjectId> mergeCommits = new HashSet<>();

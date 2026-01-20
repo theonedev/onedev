@@ -8479,4 +8479,45 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate220(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					for (Element branchProtectionElement : element.element("branchProtections").elements()) {
+						Element enforceConventionalCommitsElement = branchProtectionElement.element("enforceConventionalCommits");
+						Element commitTypesElement = branchProtectionElement.element("commitTypes");
+						Element commitScopesElement = branchProtectionElement.element("commitScopes");
+						Element checkCommitMessageFooterElement = branchProtectionElement.element("checkCommitMessageFooter");
+						Element commitMessageFooterPatternElement = branchProtectionElement.element("commitMessageFooterPattern");
+						Element commitTypesForFooterCheckElement = branchProtectionElement.element("commitTypesForFooterCheck");
+
+						commitTypesElement.detach();
+						commitScopesElement.detach();
+						checkCommitMessageFooterElement.detach();
+						if (commitMessageFooterPatternElement != null)
+							commitMessageFooterPatternElement.detach();
+						commitTypesForFooterCheckElement.detach();	
+					
+						if ("true".equals(enforceConventionalCommitsElement.getTextTrim())) {
+							Element commitMessageCheckerElement = branchProtectionElement.addElement("commitMessageChecker");
+							commitMessageCheckerElement.addAttribute("class", "io.onedev.server.model.support.code.ConventionalCommitChecker");
+
+							commitMessageCheckerElement.add(commitTypesElement);
+							commitMessageCheckerElement.add(commitScopesElement);							
+							commitMessageCheckerElement.add(checkCommitMessageFooterElement);
+							
+							if (commitMessageFooterPatternElement != null) 
+								commitMessageCheckerElement.add(commitMessageFooterPatternElement);
+							
+							commitMessageCheckerElement.add(commitTypesForFooterCheckElement);
+						}						
+						enforceConventionalCommitsElement.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }
