@@ -11,11 +11,11 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -47,7 +47,6 @@ public abstract class TransitionSpec implements Serializable {
 
 	@Editable(order=9900, name="Applicable Issues", placeholder="All", description=""
 			+ "Optionally specify issues applicable for this transition. Leave empty for all issues. ")
-	@io.onedev.server.annotation.IssueQuery(withOrder = false)
 	public String getIssueQuery() {
 		return issueQuery;
 	}
