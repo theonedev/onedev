@@ -2407,6 +2407,29 @@ public class BuildSpec implements Serializable, Validatable {
 							valueNode.setValue("OsvSourceScannerStep");
 						} else if (valueNode.getValue().equals("OsvLicenseScannerStep")) {					
 							itStepNode.remove();
+						} else if (valueNode.getValue().equals("FSScannerStep")
+								|| valueNode.getValue().equals("ImageScannerStep")
+								|| valueNode.getValue().equals("RootFSScannerStep")) {
+							for (var itStepTuple2 = stepNode.getValue().iterator(); itStepTuple2.hasNext();) {
+								var stepTuple2 = itStepTuple2.next();
+								var keyNode2 = (ScalarNode) stepTuple2.getKeyNode();
+								if (keyNode2.getValue().equals("detectVulnerabilities")) {
+									keyNode2.setValue("checkVulnerabilities");
+								} else if (keyNode2.getValue().equals("licenseSetting")) {
+									MappingNode licenseSettingNode = (MappingNode) stepTuple2.getValueNode();
+									var foundIngoredLicenses = false;
+									for (var licenseSettingTuple: licenseSettingNode.getValue()) {
+										var licenseSettingKeyNode = (ScalarNode) licenseSettingTuple.getKeyNode();
+										if (licenseSettingKeyNode.getValue().equals("ignoredLicenses")) {
+											licenseSettingKeyNode.setValue("allowedLicenses");
+											foundIngoredLicenses = true;
+										}
+									}
+									if (!foundIngoredLicenses) 
+										itStepTuple2.remove();			
+								}
+							}
+
 						}
 						break;
 					}
