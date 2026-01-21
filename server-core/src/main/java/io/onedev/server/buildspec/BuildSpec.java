@@ -2394,4 +2394,25 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
+	@SuppressWarnings("unused")
+	private void migrate44(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
+				MappingNode stepNode = (MappingNode) itStepNode.next();
+				for (var stepTuple: stepNode.getValue()) {
+					var keyNode = (ScalarNode) stepTuple.getKeyNode();
+					if (keyNode.getValue().equals("type")) {
+						var valueNode = (ScalarNode) stepTuple.getValueNode();
+						if (valueNode.getValue().equals("OsvVulnerScannerStep")) {
+							valueNode.setValue("OsvSourceScannerStep");
+						} else if (valueNode.getValue().equals("OsvLicenseScannerStep")) {					
+							itStepNode.remove();
+						}
+						break;
+					}
+				}
+			}
+		});
+	}	
+
 }
