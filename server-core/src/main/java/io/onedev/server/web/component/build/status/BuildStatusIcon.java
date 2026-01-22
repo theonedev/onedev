@@ -1,19 +1,21 @@
 package io.onedev.server.web.component.build.status;
 
-import com.google.common.collect.Sets;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Build.Status;
-import io.onedev.server.web.behavior.ChangeObserver;
-import io.onedev.server.web.component.svg.SpriteImage;
+import java.util.Collection;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-
 import org.jspecify.annotations.Nullable;
-import java.util.Collection;
+
+import com.google.common.collect.Sets;
+
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
+import io.onedev.server.web.behavior.ChangeObserver;
+import io.onedev.server.web.component.svg.SpriteImage;
 
 public class BuildStatusIcon extends SpriteImage {
 

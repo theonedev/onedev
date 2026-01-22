@@ -29,7 +29,6 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.persistence.SessionService;
@@ -75,10 +74,10 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 	
 	private void run(Runnable runnable) {
 		if (OneDev.getInstance().isReady()) {
-			SessionService sessionService = AppLoader.getInstance(SessionService.class);
+			SessionService sessionService = OneDev.getInstance(SessionService.class);
 			Subject subject = (Subject) request.getHttpServletRequest().getAttribute(WebSocketFilter.SHIRO_SUBJECT);
-	        ThreadContext.bind(subject);
-	        sessionService.run(runnable);
+			ThreadContext.bind(subject);
+			sessionService.run(runnable);
 		}
 	}
 	

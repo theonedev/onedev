@@ -128,6 +128,10 @@ public class WicketUtils {
 		}
 		return null;
 	}
+
+	public static String getRequestLockName(String sessionId) {
+		return "web-request:" + sessionId;
+	}
 	
 	public static boolean isDevice() {
 		HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();

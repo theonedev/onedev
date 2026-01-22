@@ -1,8 +1,6 @@
 package io.onedev.server.web;
 
-import io.onedev.server.persistence.SessionService;
-import org.apache.wicket.protocol.http.WicketFilter;
-import org.apache.wicket.protocol.http.WicketServlet;
+import java.io.IOException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -10,7 +8,11 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.apache.wicket.protocol.http.WicketFilter;
+import org.apache.wicket.protocol.http.WicketServlet;
+
+import io.onedev.server.persistence.SessionService;
 
 @Singleton
 public class DefaultWicketServlet extends WicketServlet {
@@ -45,7 +47,7 @@ public class DefaultWicketServlet extends WicketServlet {
 			// Disable cloudflare suggested prefetch to fix OD-2120
 			httpRes.setHeader("Speculation-Rules", "\"/prefetch.json\"");
 			try {
-				super.service(req, res);
+				DefaultWicketServlet.super.service(req, res);
 			} catch (ServletException | IOException e) {
 				throw new RuntimeException(e);
 			}

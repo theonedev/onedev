@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
@@ -119,7 +120,8 @@ public class WebSocketConnection implements IWebSocketConnection {
 		if (!messageQueue.isEmpty() && !working) {
 			ThreadContext.bind(subject);
 			working = true;
-			OneDev.getInstance(SessionService.class).runAsync(new Runnable() {
+
+			OneDev.getInstance(ExecutorService.class).execute(new Runnable() {
 
 				@Nullable
 				private IWebSocketPushMessage getNextMessage() {
@@ -141,7 +143,17 @@ public class WebSocketConnection implements IWebSocketConnection {
 						while (true) {
 							IWebSocketPushMessage message = getNextMessage();
 							if (message != null) {
-								webSocketProcessor.broadcastMessage(message);
+								/*
+								 * Process each message in a separate session to make sure database entities 
+								 * are refreshed 
+								 */
+								OneDev.getInstance(SessionService.class).run(new Runnable() {
+	
+									@Override
+									public void run() {
+										webSocketProcessor.broadcastMessage(message);
+									}
+								});
 							} else {
 								break;
 							}
@@ -158,7 +170,7 @@ public class WebSocketConnection implements IWebSocketConnection {
 						}
 					}
 				}
-			});	
+			});
 		}
 	}
 	
