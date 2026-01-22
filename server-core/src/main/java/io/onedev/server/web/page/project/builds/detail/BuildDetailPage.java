@@ -362,7 +362,7 @@ public abstract class BuildDetailPage extends ProjectPage
 						super.onConfigure();
 
 						JobContext jobContext = jobService.getJobContext(getBuild().getId());
-						setVisible(jobContext!= null && SecurityUtils.canOpenTerminal(getBuild()));
+						setVisible(jobContext!= null && !getBuild().isFinished() && SecurityUtils.canOpenTerminal(getBuild()));
 					}
 
 				}.setOutputMarkupId(true));
