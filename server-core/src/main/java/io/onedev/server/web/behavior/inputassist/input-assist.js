@@ -46,6 +46,12 @@ onedev.server.inputassist = {
 		$input.on("blur", function(e) {
 			$input.data("prevCaret", -1);
 		});
+		$input.on("focus", function(e) {
+			if (!$input.data("programmaticFocus")) {
+				$input.select();
+			}
+			$input.data("programmaticFocus", false);
+		});
 
 		$input.data("update", function($item) {
 			var value = $item.data("content");
@@ -55,6 +61,7 @@ onedev.server.inputassist = {
 				if (caret != undefined)
 					$input.caret(caret);
 				$input.blur();
+				$input.data("programmaticFocus", true);
 				$input.focus();
 				$input.trigger("input");
 				$input.trigger("assist");
@@ -180,6 +187,7 @@ onedev.server.inputassist = {
 		$input.val($input.val() + " ");
 		$input.caret($input.val().length + 1);
 		$input.blur();
+		$input.data("programmaticFocus", true);
 		$input.focus();
 		$input.trigger("input");
 		$input.trigger("assist");
@@ -193,6 +201,7 @@ onedev.server.inputassist = {
 		$input.val(content);
 		$input.caret(translatedInput.length);
 		$input.blur();
+		$input.data("programmaticFocus", true);
 		$input.focus();
 		$input.trigger("input");
 		$input.trigger("assist");
@@ -214,6 +223,7 @@ onedev.server.inputassist = {
 		var $dropdown = $("#" + dropdownId);
 		$dropdown.data("inputContent", inputContent);
 		$dropdown.click(function() {
+			$input.data("programmaticFocus", true);
 			$input.focus();
 		});
 		var $item = $dropdown.find(".suggestion");
