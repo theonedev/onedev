@@ -11,8 +11,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jspecify.annotations.Nullable;
-
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -22,9 +20,11 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.event.project.RefUpdated;
+import io.onedev.server.git.command.RevListCommand.Order;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQueryParser.CriteriaContext;
@@ -122,6 +122,18 @@ public class CommitQuery implements Serializable {
 							criteriaValues.computeIfAbsent(RevisionCriteria.class, k->new ArrayList<>()).add(new Revision(type, getValue(valueNode), isSince));
 						}
 					}
+				} else if (criteria.orderCriteria() != null) {
+					Order orderValue;
+					if (criteria.orderCriteria().OrderByDate() != null) {
+						orderValue = Order.DATE;
+					} else if (criteria.orderCriteria().OrderByAuthorDate() != null) {
+						orderValue = Order.AUTHOR_DATE;
+					} else if (criteria.orderCriteria().OrderByTopo() != null) {
+						orderValue = Order.TOPO;
+					} else {
+						throw new ExplicitException("Unknown order: " + criteria.orderCriteria().getText());
+					}
+					criteriaValues.computeIfAbsent(OrderCriteria.class, k->new ArrayList<>()).add(orderValue);
 				}
 			}
 			

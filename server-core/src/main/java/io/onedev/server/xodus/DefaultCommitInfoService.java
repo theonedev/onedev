@@ -773,18 +773,20 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 
 	private void processCommitRange(Project project, ObjectId untilCommitId,
 									@Nullable ObjectId sinceCommitId, CommitRangeProcessor commitRangeProcessor) {
-		RevListCommand revList = new RevListCommand(projectService.getGitDir(project.getId()));
+		var gitDir = projectService.getGitDir(project.getId());
+		
+		RevListCommand revList = new RevListCommand(gitDir);
 		List<String> revisions = new ArrayList<>();
 		revisions.add(untilCommitId.name());
 		if (sinceCommitId != null)
 			revisions.add("^" + sinceCommitId.name());
-		revList.options().revisions(revisions).order(Order.TOPO);
+		revList.options().revisions(revisions).orders(List.of(Order.TOPO));
 
 		List<ObjectId> historyIds = new ArrayList<>();
 		for (String commitHash : revList.run())
 			historyIds.add(ObjectId.fromString(commitHash));
 
-		revList = new RevListCommand(projectService.getGitDir(project.getId()));
+		revList = new RevListCommand(gitDir);
 		revList.options().revisions(revisions).firstParent(true);
 
 		Set<ObjectId> firstParentIds = new HashSet<>();

@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import io.onedev.commons.utils.command.Commandline;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
+import io.onedev.commons.utils.command.Commandline;
 import io.onedev.server.git.command.RevListCommand.Order;
-
-import org.jspecify.annotations.Nullable;
 
 public class RevListOptions implements Serializable {
 
@@ -28,7 +26,7 @@ public class RevListOptions implements Serializable {
     
     private int skip;
     
-    private Order order;
+    private List<Order> orders = new ArrayList<>();
     
     private boolean firstParent;
 	
@@ -58,13 +56,12 @@ public class RevListOptions implements Serializable {
 		return this;
 	}
 
-	@Nullable
-	public Order order() {
-		return order;
+	public List<Order> orders() {
+		return orders;
 	}
 	
-	public RevListOptions order(@Nullable Order order) {
-		this.order = order;
+	public RevListOptions orders(List<Order> orders) {
+		this.orders = orders;
 		return this;
 	}
 	
@@ -182,12 +179,19 @@ public class RevListOptions implements Serializable {
 		if (skip() != 0)
 			git.addArgs("--skip=" + skip());
 
-		if (order() == Order.DATE)
-			git.addArgs("--date-order");
-		else if (order() == Order.AUTHOR_DATE)
-			git.addArgs("--author-date-order");
-		else if (order() == Order.TOPO)
-			git.addArgs("--topo-order");
+		for (Order order: orders()) {
+			switch (order) {
+				case DATE:
+					git.addArgs("--date-order");
+					break;
+				case AUTHOR_DATE:
+					git.addArgs("--author-date-order");
+					break;
+				case TOPO:
+					git.addArgs("--topo-order");
+					break;
+			}
+		}
 
 		if (firstParent())
 			git.addArgs("--first-parent");

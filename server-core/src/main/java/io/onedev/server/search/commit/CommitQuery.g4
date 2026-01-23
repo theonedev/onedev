@@ -13,7 +13,8 @@ criteria
 	| authorCriteria 
 	| pathCriteria
 	| messageCriteria
-	| fuzzyCriteria
+	| orderCriteria
+	| fuzzyCriteria	
 	;
 
 revisionCriteria
@@ -44,6 +45,12 @@ pathCriteria
 
 messageCriteria
 	: MESSAGE Value+
+	;
+
+orderCriteria
+	: OrderByDate
+	| OrderByAuthorDate
+	| OrderByTopo
 	;
 
 SINCE
@@ -104,6 +111,18 @@ CommittedByMe
 
 DefaultBranch
 	: 'default-branch'
+	;
+
+OrderByDate
+	: 'order-by-date'
+	;
+
+OrderByAuthorDate
+	: 'order-by-author-date'
+	;
+
+OrderByTopo
+	: 'order-by-topo'
 	;
 
 WS
