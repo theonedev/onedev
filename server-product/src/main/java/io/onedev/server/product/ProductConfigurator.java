@@ -23,14 +23,26 @@ public class ProductConfigurator implements ServerConfigurator {
 	
 	@Override
 	public void configure(Server server) {
-		ServerConnector connector = new ServerConnector(server);
-		connector.setHost(serverConfig.getHttpHost());
-		connector.setPort(serverConfig.getHttpPort());
 		HttpConfiguration configuration = new HttpConfiguration();
 		configuration.setRequestHeaderSize(REQUEST_HEADER_SIZE);
 		configuration.setSendServerVersion(false);
+		
+		ServerConnector connector = new ServerConnector(server);
+		connector.setHost(serverConfig.getHttpHost());
+		connector.setPort(serverConfig.getHttpPort());
 		connector.addConnectionFactory(new HttpConnectionFactory(configuration));
 		server.addConnector(connector);
+		
+		// If http_host is a specific IP (not 0.0.0.0), also bind to localhost as curl needs to access localhost
+		// for git operations
+		String httpHost = serverConfig.getHttpHost();
+		if (!"0.0.0.0".equals(httpHost) && !"127.0.0.1".equals(httpHost) && !"localhost".equals(httpHost)) {
+			ServerConnector localhostConnector = new ServerConnector(server);
+			localhostConnector.setHost("127.0.0.1");
+			localhostConnector.setPort(serverConfig.getHttpPort());
+			localhostConnector.addConnectionFactory(new HttpConnectionFactory(configuration));
+			server.addConnector(localhostConnector);
+		}
 	}
 
 }

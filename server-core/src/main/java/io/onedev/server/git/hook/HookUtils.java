@@ -44,12 +44,7 @@ public class HookUtils {
 		envs.put("ONEDEV_HOOK_TOKEN", HOOK_TOKEN);
 		envs.put("ONEDEV_USER_ID", principal);
 		envs.put("ONEDEV_REPOSITORY_ID", projectId.toString());
-		
-        envs.put("GITPLEX_CURL", curl);
-		envs.put("GITPLEX_URL", hookUrl);
-		envs.put("GITPLEX_USER_ID", principal);
-		envs.put("GITPLEX_REPOSITORY_ID", projectId.toString());
-		
+				
 		return envs;
 	}
 	
