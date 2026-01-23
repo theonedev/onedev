@@ -13,6 +13,14 @@ onedev.server.inputassist = {
 				$input.blur();
 		});
 		$input.on("paste click keyup assist", function(e) {
+			// For click events, defer caret reading to allow browser to update position
+			if (e.type === "click") {
+				setTimeout(function() {
+					$input.trigger("keyup");
+				}, 0);
+				return;
+			}
+			
 			var value = $input.val();
 			var caret;
 			if ($input.is(":focus"))
