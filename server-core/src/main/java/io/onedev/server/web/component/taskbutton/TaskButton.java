@@ -121,10 +121,7 @@ public abstract class TaskButton extends AjaxButton {
 
 	protected void onCompleted(AjaxRequestTarget target, boolean successful) {
 	}
-	
-	protected void onCancelled(AjaxRequestTarget target) {
-	}
-	
+		
 	protected void submitTask(AjaxRequestTarget target) {
 		String taskId = getSession().getId() + ":" + getPath();
 
@@ -197,12 +194,9 @@ public abstract class TaskButton extends AjaxButton {
 				TaskFuture future = taskFutureService.getTaskFutures().remove(taskId);
 				
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
-				if (future != null) {
+				if (future != null) 
 					future.cancel(true);
-					onCancelled(target);
-				} else {
-					onCompleted(target, result != null && result.isSuccessful());
-				}
+				onCompleted(target, result != null && result.isSuccessful());
 			}
 
 			@Override
