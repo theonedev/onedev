@@ -997,7 +997,7 @@ public class ProjectListPanel extends Panel {
 			
 		});
 		
-		if (getParentProject() == null && canCreateProjects) {
+		if (canCreateProjects) {
 			add(new MenuLink("importProjects") {
 	
 				@Override
@@ -1028,8 +1028,9 @@ public class ProjectListPanel extends Panel {
 	
 							@Override
 							public WebMarkupContainer newLink(String id) {
+								String parentProjectPath = getParentProject() != null ? getParentProject().getPath() : null;
 								return new BookmarkablePageLink<Void>(id, ProjectImportPage.class, 
-										ProjectImportPage.paramsOf(importer.getName()));
+										ProjectImportPage.paramsOf(importer.getName(), parentProjectPath));
 							}
 							
 						});

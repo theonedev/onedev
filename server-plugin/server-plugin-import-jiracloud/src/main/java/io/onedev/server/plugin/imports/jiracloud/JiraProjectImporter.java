@@ -1,6 +1,12 @@
 package io.onedev.server.plugin.imports.jiracloud;
 
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.util.List;
+
 import com.google.common.collect.Lists;
+
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.imports.ProjectImporter;
@@ -8,12 +14,7 @@ import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.util.ImportStep;
 
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.io.Serializable;
-import java.util.List;
-
-public class JiraProjectImporter implements ProjectImporter {
+public class JiraProjectImporter extends ProjectImporter {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -44,7 +45,11 @@ public class JiraProjectImporter implements ProjectImporter {
 
 		@Override
 		protected ImportProjects newSetting() {
-			ImportProjects projects = new ImportProjects();
+			ImportProjects projects;
+			if (getParentProjectPath() != null)
+				projects = new ChildrenImportProjects();
+			else
+				projects = new ImportProjects();
 			projects.server = serverStep.getSetting();
 			return projects;
 		}
@@ -75,8 +80,10 @@ public class JiraProjectImporter implements ProjectImporter {
 	@Override
 	public TaskResult doImport(boolean dryRun, TaskLogger logger) {
 		return OneDev.getInstance(TransactionService.class).call(() -> {
-			return serverStep.getSetting().importProjects(
-					projectsStep.getSetting(), optionStep.getSetting(), dryRun, logger);
+			ImportProjects projects = projectsStep.getSetting();
+			if (getParentProjectPath() != null) 
+				projects.setParentOneDevProject(getParentProjectPath());
+			return serverStep.getSetting().importProjects(projects, optionStep.getSetting(), dryRun, logger);
 		});
 	}
 

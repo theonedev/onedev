@@ -9,7 +9,7 @@ import io.onedev.server.web.util.ImportStep;
 import java.io.Serializable;
 import java.util.List;
 
-public class UrlProjectImporter implements ProjectImporter {
+public class UrlProjectImporter extends ProjectImporter {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -24,7 +24,10 @@ public class UrlProjectImporter implements ProjectImporter {
 
 		@Override
 		protected ImportServer newSetting() {
-			return new ImportServer();
+			if (getParentProjectPath() != null)
+				return new ChildrenImportServer();
+			else
+				return new ImportServer();
 		}
 		
 	};
@@ -36,7 +39,7 @@ public class UrlProjectImporter implements ProjectImporter {
 	
 	@Override
 	public TaskResult doImport(boolean dryRun, TaskLogger logger) {
-		return serverStep.getSetting().importProject(dryRun, logger);
+		return serverStep.getSetting().importProject(getParentProjectPath(), dryRun, logger);
 	}
 
 	@Override

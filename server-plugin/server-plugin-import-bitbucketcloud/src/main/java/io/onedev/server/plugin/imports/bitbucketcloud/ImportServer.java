@@ -34,13 +34,13 @@ import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AuditService;
-import io.onedev.server.service.BaseAuthorizationService;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.BaseAuthorizationService;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
@@ -181,17 +181,16 @@ public class ImportServer implements Serializable, Validatable {
 		}
 	}
 	
-	TaskResult importProjects(ImportRepositories repositories, ImportOption option, boolean dryRun, TaskLogger logger) {
+	TaskResult importProjects(ImportRepositories repositories, 
+			ImportOption option, boolean dryRun, TaskLogger logger) {
 		Client client = newClient();
 		try {
 			for (var bitbucketRepository : repositories.getImportRepositories()) {
 				OneDev.getInstance(TransactionService.class).run(() -> {
 					try {
-						String oneDevProjectPath;
+						String oneDevProjectPath = bitbucketRepository;
 						if (repositories.getParentOneDevProject() != null)
-							oneDevProjectPath = repositories.getParentOneDevProject() + "/" + bitbucketRepository;
-						else
-							oneDevProjectPath = bitbucketRepository;
+							oneDevProjectPath = repositories.getParentOneDevProject() + "/" + oneDevProjectPath;
 
 						logger.log("Importing from '" + bitbucketRepository + "' to '" + oneDevProjectPath + "'...");
 

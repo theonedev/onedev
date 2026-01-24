@@ -501,8 +501,8 @@ public class ImportServer implements Serializable, Validatable {
 		}
 	}
 	
-	TaskResult importProjects(ImportRepositories repositories, ProjectImportOption option,
-							  boolean dryRun, TaskLogger logger) {
+	TaskResult importProjects(ImportRepositories repositories, 
+			ProjectImportOption option, boolean dryRun, TaskLogger logger) {
 		Client client = newClient();
 		try {
 			Map<String, Optional<Long>> userIds = new HashMap<>();
@@ -510,11 +510,9 @@ public class ImportServer implements Serializable, Validatable {
 			for (var giteaRepository : repositories.getImportRepositories()) {
 				OneDev.getInstance(TransactionService.class).run(() -> {
 					try {
-						String oneDevProjectPath;
+						String oneDevProjectPath = giteaRepository;
 						if (repositories.getParentOneDevProject() != null)
-							oneDevProjectPath = repositories.getParentOneDevProject() + "/" + giteaRepository;
-						else
-							oneDevProjectPath = giteaRepository;
+							oneDevProjectPath = repositories.getParentOneDevProject() + "/" + oneDevProjectPath;
 
 						logger.log("Importing from '" + giteaRepository + "' to '" + oneDevProjectPath + "'...");
 

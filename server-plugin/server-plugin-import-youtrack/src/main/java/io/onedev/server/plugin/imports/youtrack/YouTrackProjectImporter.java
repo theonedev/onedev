@@ -1,17 +1,18 @@
 package io.onedev.server.plugin.imports.youtrack;
 
-import com.google.common.collect.Lists;
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.imports.ProjectImporter;
-import io.onedev.server.web.component.taskbutton.TaskResult;
-import io.onedev.server.web.util.ImportStep;
-
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class YouTrackProjectImporter implements ProjectImporter {
+import com.google.common.collect.Lists;
+
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.imports.ProjectImporter;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.util.ImportStep;
+
+public class YouTrackProjectImporter extends ProjectImporter {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -42,7 +43,11 @@ public class YouTrackProjectImporter implements ProjectImporter {
 
 		@Override
 		protected ImportProjects newSetting() {
-			ImportProjects projects = new ImportProjects();
+			ImportProjects projects;
+			if (getParentProjectPath() != null)
+				projects = new ChildrenImportProjects();
+			else
+				projects = new ImportProjects();
 			projects.server = serverStep.getSetting();
 			return projects;
 		}
@@ -76,6 +81,8 @@ public class YouTrackProjectImporter implements ProjectImporter {
 	public TaskResult doImport(boolean dryRun, TaskLogger logger) {
 		ImportServer server = serverStep.getSetting();
 		ImportProjects projects = projectsStep.getSetting();
+		if (getParentProjectPath() != null) 
+			projects.setParentOneDevProject(getParentProjectPath());
 		ImportOption option = optionStep.getSetting();
 		return server.importProjects(projects, option, dryRun, logger);
 	}

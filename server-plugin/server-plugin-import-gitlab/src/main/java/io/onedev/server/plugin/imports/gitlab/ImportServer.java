@@ -282,7 +282,8 @@ public class ImportServer implements Serializable, Validatable {
 		return iteration;
 	}
 	
-	TaskResult importProjects(ImportProjects projects, ProjectImportOption option, boolean dryRun, TaskLogger logger) {
+	TaskResult importProjects(ImportProjects projects, 
+			ProjectImportOption option, boolean dryRun, TaskLogger logger) {
 		Client client = newClient();
 		try {
 			Map<String, Optional<Long>> userIds = new HashMap<>();
@@ -290,11 +291,9 @@ public class ImportServer implements Serializable, Validatable {
 			for (var gitLabProject: projects.getImportProjects()) {
 				OneDev.getInstance(TransactionService.class).run(() -> {
 					try {
-						String oneDevProjectPath;
+						String oneDevProjectPath = gitLabProject;
 						if (projects.getParentOneDevProject() != null)
-							oneDevProjectPath = projects.getParentOneDevProject() + "/" + gitLabProject;
-						else
-							oneDevProjectPath = gitLabProject;
+							oneDevProjectPath = projects.getParentOneDevProject() + "/" + oneDevProjectPath;
 
 						logger.log("Importing from '" + gitLabProject + "' to '" + oneDevProjectPath + "'...");
 

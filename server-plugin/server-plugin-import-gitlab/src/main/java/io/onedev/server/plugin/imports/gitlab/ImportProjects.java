@@ -2,19 +2,25 @@ package io.onedev.server.plugin.imports.gitlab;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.Size;
 
 import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.ClassValidating;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.ProjectChoice;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.editable.BeanEditor;
 
 @Editable
-public class ImportProjects extends ImportGroup {
+@ClassValidating
+public class ImportProjects extends ImportGroup implements Validatable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -28,13 +34,19 @@ public class ImportProjects extends ImportGroup {
 
 	@Editable(order=200, name="Parent OneDev Project", description = "Optionally specify a OneDev project " +
 			"to be used as parent of imported projects. Leave empty to import as root projects")
-	@ProjectChoice
+	@ChoiceProvider("getParentOneDevProjectChoices")
 	public String getParentOneDevProject() {
 		return parentOneDevProject;
 	}
 
 	public void setParentOneDevProject(String parentOneDevProject) {
 		this.parentOneDevProject = parentOneDevProject;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<String> getParentOneDevProjectChoices() {
+		return SecurityUtils.getAuthorizedProjects(new CreateChildren()).stream()
+				.map(it->it.getPath()).sorted().collect(Collectors.toList());
 	}
 	
 	@Editable(order=300, name="Import All Projects")
@@ -83,4 +95,18 @@ public class ImportProjects extends ImportGroup {
 			return getGitLabProjects();	
 	} 
 	
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		if (parentOneDevProject == null && !SecurityUtils.canCreateRootProjects()) {
+			context.disableDefaultConstraintViolation();
+			var errorMessage = "No permission to import as root projects, please specify parent project";
+			context.buildConstraintViolationWithTemplate(errorMessage)
+					.addPropertyNode("parentOneDevProject")
+					.addConstraintViolation();
+			return false;
+		} else {
+			return true;
+		}
+	}
+
 }

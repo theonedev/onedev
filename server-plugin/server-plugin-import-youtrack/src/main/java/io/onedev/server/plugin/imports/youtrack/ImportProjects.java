@@ -23,7 +23,7 @@ import io.onedev.server.web.editable.BeanEditor;
 public class ImportProjects implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	ImportServer server;
 
 	private String parentOneDevProject;

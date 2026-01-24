@@ -552,7 +552,8 @@ public class ImportServer implements Serializable, Validatable {
 		}
 	}
 
-	TaskResult importProjects(ImportRepositories repositories, ProjectImportOption option, boolean dryRun, TaskLogger logger) {
+	TaskResult importProjects(ImportRepositories repositories, 
+			ProjectImportOption option, boolean dryRun, TaskLogger logger) {
 		Client client = newClient();
 		try {
 			Map<String, Optional<Long>> userIds = new HashMap<>();
@@ -560,11 +561,9 @@ public class ImportServer implements Serializable, Validatable {
 			for (var gitHubRepository: repositories.getImportRepositories()) {
 				OneDev.getInstance(TransactionService.class).run(() -> {
 					try {
-						String oneDevProjectPath;
+						String oneDevProjectPath = gitHubRepository;
 						if (repositories.getParentOneDevProject() != null)
-							oneDevProjectPath = repositories.getParentOneDevProject() + "/" + gitHubRepository;
-						else
-							oneDevProjectPath = gitHubRepository;
+							oneDevProjectPath = repositories.getParentOneDevProject() + "/" + oneDevProjectPath;
 
 						logger.log("Importing from '" + gitHubRepository + "' to '" + oneDevProjectPath + "'...");
 

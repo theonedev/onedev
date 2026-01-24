@@ -38,5 +38,5 @@ public abstract class ImportStep<T extends Serializable> implements WizardStep {
 	public T getSetting() {
 		return setting;
 	}
-	
+		
 }

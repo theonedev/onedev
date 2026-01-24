@@ -92,7 +92,7 @@ public class ImportServer implements Serializable, Validatable {
 		return null;
 	}
 	
-	TaskResult importProject(boolean dryRun, TaskLogger logger) {
+	TaskResult importProject(@Nullable String parentProjectPath, boolean dryRun, TaskLogger logger) {
 		return OneDev.getInstance(TransactionService.class).call(() -> {
 			try {
 				String projectPath = getProject();
@@ -100,6 +100,9 @@ public class ImportServer implements Serializable, Validatable {
 					projectPath = deriveProjectPath(getUrl());
 				if (projectPath == null)
 					throw new ExplicitException("Invalid url: " + getUrl());
+				
+				if (parentProjectPath != null)
+					projectPath = parentProjectPath + "/" + projectPath;
 
 				logger.log("Importing from '" + getUrl() + "' to '" + projectPath + "'...");
 

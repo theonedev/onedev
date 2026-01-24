@@ -106,6 +106,10 @@ public class ProjectChildrenPage extends ProjectPage {
 		return params;
 	}
 	
+	public static PageParameters paramsOf(String projectPath) {
+		return ProjectPage.paramsOf(projectPath);
+	}
+	
 	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, _T("Child Projects"));

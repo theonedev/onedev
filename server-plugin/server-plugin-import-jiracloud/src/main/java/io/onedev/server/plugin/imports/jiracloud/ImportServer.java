@@ -354,11 +354,9 @@ public class ImportServer implements Serializable, Validatable {
 			ImportResult result = new ImportResult();
 			for (var jiraProject: projects.getImportProjects()) {
 				OneDev.getInstance(TransactionService.class).run(() -> {
-					String oneDevProjectPath;
+					String oneDevProjectPath = jiraProject;
 					if (projects.getParentOneDevProject() != null)
-						oneDevProjectPath = projects.getParentOneDevProject() + "/" + jiraProject;
-					else
-						oneDevProjectPath = jiraProject;
+						oneDevProjectPath = projects.getParentOneDevProject() + "/" + oneDevProjectPath;
 
 					logger.log("Importing from '" + jiraProject + "' to '" + oneDevProjectPath + "'...");
 

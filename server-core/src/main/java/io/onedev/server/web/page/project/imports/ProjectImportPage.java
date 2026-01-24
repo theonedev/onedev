@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
@@ -24,17 +25,22 @@ import io.onedev.server.web.component.taskbutton.TaskResult;
 import io.onedev.server.web.component.wizard.WizardPanel;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.ProjectListPage;
+import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 
 public class ProjectImportPage extends LayoutPage {
 
 	private static final String PARAM_IMPORTER = "importer";
 	
-	private ProjectImporter importer;
+	private static final String PARAM_PARENT_PROJECT = "parentProject";
 	
+	private ProjectImporter importer;
+		
 	public ProjectImportPage(PageParameters params) {
 		super(params);
 		
 		String importerName = params.get(PARAM_IMPORTER).toString();
+		var parentProjectPath = params.get(PARAM_PARENT_PROJECT).toOptionalString();
+		
 		for (ProjectImporterContribution contribution: OneDev.getExtensions(ProjectImporterContribution.class)) {
 			for (ProjectImporter importer: contribution.getImporters()) {
 				if (importer.getName().equals(importerName)) {
@@ -46,6 +52,7 @@ public class ProjectImportPage extends LayoutPage {
 		
 		if (importer == null)
 			throw new RuntimeException("Undefined importer: " + importerName);
+		importer.setParentProjectPath(parentProjectPath);
 	}
 
 	@Override
@@ -65,9 +72,14 @@ public class ProjectImportPage extends LayoutPage {
 						super.onCompleted(target, successful);
 
 						if (successful) {
-							ProjectQuery query = new ProjectQuery();
-							PageParameters params = ProjectListPage.paramsOf(query.toString(), 0, 0);
-							throw new RestartResponseException(ProjectListPage.class, params); 
+							if (importer.getParentProjectPath() != null) {
+								throw new RestartResponseException(ProjectChildrenPage.class, 
+										ProjectChildrenPage.paramsOf(importer.getParentProjectPath()));
+							} else {
+								ProjectQuery query = new ProjectQuery();
+								PageParameters params = ProjectListPage.paramsOf(query.toString(), 0, 0);
+								throw new RestartResponseException(ProjectListPage.class, params);
+							}
 						}
 					}
 
@@ -126,8 +138,14 @@ public class ProjectImportPage extends LayoutPage {
 	}
 	
 	public static PageParameters paramsOf(String importer) {
+		return paramsOf(importer, null);
+	}
+	
+	public static PageParameters paramsOf(String importer, @Nullable String parentProjectPath) {
 		PageParameters params = new PageParameters();
 		params.add(PARAM_IMPORTER, importer);
+		if (parentProjectPath != null)
+			params.add(PARAM_PARENT_PROJECT, parentProjectPath);
 		return params;
 	}
 	

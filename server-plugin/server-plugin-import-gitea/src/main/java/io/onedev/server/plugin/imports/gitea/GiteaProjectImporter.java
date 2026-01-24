@@ -1,17 +1,18 @@
 package io.onedev.server.plugin.imports.gitea;
 
-import com.google.common.collect.Lists;
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.imports.ProjectImporter;
-import io.onedev.server.web.component.taskbutton.TaskResult;
-import io.onedev.server.web.util.ImportStep;
-
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class GiteaProjectImporter implements ProjectImporter {
+import com.google.common.collect.Lists;
+
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.imports.ProjectImporter;
+import io.onedev.server.web.component.taskbutton.TaskResult;
+import io.onedev.server.web.util.ImportStep;
+
+public class GiteaProjectImporter extends ProjectImporter {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -42,11 +43,15 @@ public class GiteaProjectImporter implements ProjectImporter {
 
 		@Override
 		protected ImportRepositories newSetting() {
-			ImportRepositories repositories = new ImportRepositories();
+			ImportRepositories repositories;
+			if (getParentProjectPath() != null)
+				repositories = new ChildrenImportRepositories();
+			else
+				repositories = new ImportRepositories();
 			repositories.server = serverStep.getSetting();
 			return repositories;
 		}
-		
+				
 	};
 	
 	private final ImportStep<ProjectImportOption> optionStep = new ImportStep<ProjectImportOption>() {
@@ -75,6 +80,8 @@ public class GiteaProjectImporter implements ProjectImporter {
 	@Override
 	public TaskResult doImport(boolean dryRun, TaskLogger logger) {
 		ImportRepositories repositories = repositoriesStep.getSetting();
+		if (getParentProjectPath() != null) 
+			repositories.setParentOneDevProject(getParentProjectPath());
 		ProjectImportOption option = optionStep.getSetting();
 		return serverStep.getSetting().importProjects(repositories, option, dryRun, logger);
 	}
