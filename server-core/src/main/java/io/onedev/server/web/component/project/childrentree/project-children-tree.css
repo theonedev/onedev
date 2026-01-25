@@ -7,3 +7,7 @@
 .child-projects.tree-theme-human>div>div:first-child>.tree-node {
 	padding-top: 0;
 } 
+.child-projects img.avatar {
+	width: 16px;
+	height: 16px;
+}

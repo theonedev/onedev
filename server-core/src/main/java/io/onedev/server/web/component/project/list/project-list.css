@@ -19,3 +19,6 @@
 .project-list .issue-info a:hover {
 	filter: brightness(125%);
 }
+.project-list .dropdown-triangle-indicator {
+	margin-top: 2px;
+}

@@ -14,11 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
-
-import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -52,17 +48,11 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.AuditService;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.PackService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.PullRequestService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.imports.ProjectImporterContribution;
 import io.onedev.server.model.Build;
@@ -77,6 +67,13 @@ import io.onedev.server.search.entity.project.FuzzyCriteria;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
+import io.onedev.server.service.AuditService;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.PackService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.ProjectBuildStatusStat;
 import io.onedev.server.util.ProjectIssueStateStat;
 import io.onedev.server.util.ProjectPackTypeStat;
@@ -84,6 +81,7 @@ import io.onedev.server.util.ProjectPullRequestStatusStat;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.asset.dropdowntriangleindicator.DropdownTriangleIndicatorCssResourceReference;
 import io.onedev.server.web.behavior.ProjectQueryBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
@@ -112,6 +110,7 @@ import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.imports.ProjectImportPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.paginghistory.PagingHistorySupport;
 
 public class ProjectListPanel extends Panel {
@@ -1284,25 +1283,6 @@ public class ProjectListPanel extends Panel {
 				List<ProjectFacade> children = WicketUtils.getProjectCache().getChildren(projectId);
 				if (!children.isEmpty()) {
 					Fragment childrenFrag = new Fragment("children", "childrenFrag", ProjectListPanel.this);
-					childrenFrag.add(new AjaxLink<Void>("toggle") {
-
-						@Override
-						public void onClick(AjaxRequestTarget target) {
-							if (WebSession.get().getExpandedProjectIds().contains(projectId))
-								WebSession.get().getExpandedProjectIds().remove(projectId);
-							else
-								WebSession.get().getExpandedProjectIds().add(projectId);
-							target.add(childrenFrag);
-						}
-						
-					}.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-
-						@Override
-						protected String load() {
-							return WebSession.get().getExpandedProjectIds().contains(projectId)? "expanded": "collapsed";
-						}
-						
-					})));
 					
  					childrenFrag.add(new BookmarkablePageLink<Void>("link", ProjectChildrenPage.class, 
  							ProjectChildrenPage.paramsOf(projectId)) {
@@ -1314,22 +1294,16 @@ public class ProjectListPanel extends Panel {
 						}
  						
  					});
-					
-					childrenFrag.add(new ProjectChildrenTree("tree", projectId) {
-						
-						@Override
-						protected void onConfigure() {
-							super.onConfigure();
-							setVisible(WebSession.get().getExpandedProjectIds().contains(projectId));
-						}
+
+					childrenFrag.add(new DropdownLink("treeTrigger") {
 
 						@Override
-						protected Set<Long> getExpandedProjectIds() {
-							return WebSession.get().getExpandedProjectIds();
+						protected Component newContent(String id, FloatingPanel dropdown) {
+							return new ProjectChildrenTree(id, projectId);
 						}
-						
+					
 					});
-		
+					 		
 					childrenFrag.setOutputMarkupId(true);
 					fragment.add(childrenFrag);
 				} else {
@@ -1377,6 +1351,7 @@ public class ProjectListPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new DropdownTriangleIndicatorCssResourceReference()));
 		response.render(CssHeaderItem.forReference(new ProjectListCssResourceReference()));
 	}
 		

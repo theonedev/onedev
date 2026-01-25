@@ -2,7 +2,6 @@ package io.onedev.server.web;
 
 import java.time.ZoneId;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpSession;
@@ -10,7 +9,6 @@ import javax.servlet.http.HttpSession;
 import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.protocol.http.WicketServlet;
 import org.apache.wicket.request.Request;
-import org.apache.wicket.util.collections.ConcurrentHashSet;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
@@ -33,8 +31,6 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 	
 	private Map<Class<?>, String> redirectUrlsAfterDelete = new ConcurrentHashMap<>(); 
 	
-	private Set<Long> expandedProjectIds = new ConcurrentHashSet<>();
-
 	private volatile boolean chatVisible;
 		
 	private volatile Long activeChatId;
@@ -65,7 +61,6 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 		pullRequestCursor = null;
 		zoneId = null;
 		redirectUrlsAfterDelete.clear();
-		expandedProjectIds.clear();
 		chatVisible = false;
 		activeChatId = null;
 		anonymousChats.clear();
@@ -116,10 +111,6 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 		redirectUrlsAfterDelete.put(clazz, redirectUrlAfterDelete);
 	}
 	
-	public Set<Long> getExpandedProjectIds() {
-		return expandedProjectIds;
-	}
-
 	@Nullable
 	public ZoneId getZoneId() {
 		return zoneId;
