@@ -102,6 +102,7 @@ public class UserResource {
 
 	private UserData getData(User user) {
 		var data = new UserData();
+		data.setId(user.getId());
 		data.setDisabled(user.isDisabled());
 		data.setType(user.getType());
 		data.setName(user.getName());
@@ -586,6 +587,9 @@ public class UserResource {
 
 		private static final long serialVersionUID = 1L;
 		
+		@Api(order=5, description="ID of the user")
+		private Long id;
+
 		@Api(order=10, description="Whether or not the user is disabled")
 		private boolean disabled;
 
@@ -600,6 +604,14 @@ public class UserResource {
 
 		@Api(order=300, description = "Whether or not to notify user on own events. Only meaningful for non service account")
 		private boolean notifyOwnEvents;
+
+		public Long getId() {
+			return id;
+		}
+
+		public void setId(Long id) {
+			this.id = id;
+		}
 
 		public boolean isDisabled() {
 			return disabled;
