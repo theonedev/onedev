@@ -123,8 +123,10 @@ public class GroovyUtils {
     }
     
 	public static String evalTemplate(String template, Map<String, Object> bindings) {
+		// Make a copy of the bindings as the template engine will modify the bindings
+		var bindingsCopy = new HashMap<>(bindings);
 		try {
-			return new SimpleTemplateEngine().createTemplate(template).make(bindings).toString();
+			return new SimpleTemplateEngine().createTemplate(template).make(bindingsCopy).toString();
 		} catch (CompilationFailedException | ClassNotFoundException | IOException e) {
 			throw new RuntimeException(e);
 		}
