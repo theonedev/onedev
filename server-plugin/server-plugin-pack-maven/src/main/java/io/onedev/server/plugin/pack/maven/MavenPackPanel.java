@@ -150,7 +150,7 @@ public class MavenPackPanel extends GenericPanel<Pack> {
 
 					try {
 						var template = Resources.toString(tplUrl, UTF_8);
-						usageFrag.add(new CodeSnippetPanel("pom", Model.of(evalTemplate(template, bindings))));
+						usageFrag.add(new CodeSnippetPanel("pom", Model.of(evalTemplate(template, bindings).trim())));
 						usageFrag.add(new CodeSnippetPanel("settings", Model.of(evalTemplate(MavenPackSupport.getServersAndMirrorsTemplate(), bindings).trim())).setVisible(requireSettings));
 						usageFrag.add(new CodeSnippetPanel("jobCommands", Model.of(evalTemplate(MavenPackSupport.getJobCommandsTemplate(), bindings).trim())).setVisible(requireSettings));
 					} catch (IOException e) {

@@ -38,9 +38,9 @@ public class MavenHelpPanel extends Panel {
 		try {
 			URL tplUrl = Resources.getResource(MavenHelpPanel.class, "repositories.tpl");
 			String template = Resources.toString(tplUrl, StandardCharsets.UTF_8);
-			add(new CodeSnippetPanel("pom", Model.of(evalTemplate(template, bindings))));
-			add(new CodeSnippetPanel("settings", Model.of(evalTemplate(MavenPackSupport.getServersAndMirrorsTemplate(), bindings))));
-			add(new CodeSnippetPanel("jobCommands", Model.of(evalTemplate(MavenPackSupport.getJobCommandsTemplate(), bindings))));
+			add(new CodeSnippetPanel("pom", Model.of(evalTemplate(template, bindings).trim())));
+			add(new CodeSnippetPanel("settings", Model.of(evalTemplate(MavenPackSupport.getServersAndMirrorsTemplate(), bindings).trim())));
+			add(new CodeSnippetPanel("jobCommands", Model.of(evalTemplate(MavenPackSupport.getJobCommandsTemplate(), bindings).trim())));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
