@@ -1,3 +1,9 @@
+# 14.1.0
+
+### Enterprise Edition
+
+1. The OSV license check step has been removed from CI/CD job. Use the check licenses option in OSV source scanner step instead
+
 # 13.1.0
 
 1. Java 17 is required for both server and agent
