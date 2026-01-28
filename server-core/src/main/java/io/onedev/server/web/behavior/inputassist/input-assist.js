@@ -12,21 +12,35 @@ onedev.server.inputassist = {
 			if (e.keyCode == 75 && (e.ctrlKey || e.metaKey) && !e.shiftKey) // command palette
 				$input.blur();
 		});
-		$input.on("paste click keyup assist", function(e) {
+		$input.on("paste click keyup assist", function(e) {		
 			// For click events, defer caret reading to allow browser to update position
 			if (e.type === "click") {
 				setTimeout(function() {
-					$input.trigger("keyup");
+					$input.trigger("assist");
 				}, 0);
 				return;
 			}
 			
 			var value = $input.val();
 			var caret;
-			if ($input.is(":focus"))
-				caret = $input.caret();
-			else
+			var selectionStart, selectionEnd;
+			if ($input.is(":focus")) {
+				selectionStart = $input[0].selectionStart;
+				selectionEnd = $input[0].selectionEnd;
+				caret = selectionEnd;
+			} else {
 				caret = -1;
+				selectionStart = -1;
+				selectionEnd = -1;
+			}
+			
+			// For suggestion logic, treat selections as if they are cleared
+			if (selectionStart !== -1 && selectionStart !== selectionEnd) {
+				// Remove the selected portion from value and set caret at selection start
+				value = value.substring(0, selectionStart) + value.substring(selectionEnd);
+				caret = selectionStart;
+			}
+			
 			if (value != $input.data("prevValue") || caret != $input.data("prevCaret") || !$input.data("dropdown")) {
 				$input.data("prevValue", value);
 				$input.data("prevCaret", caret);
@@ -164,11 +178,33 @@ onedev.server.inputassist = {
 		var $form = $input.closest("form");
 		$form.css("position", "relative");
 		$form.find(">.input-error-mark").remove();
+		
+		// If there's a selection, errors were calculated based on effective value 
+		// (with selection treated as deleted). Map error positions back to actual value.
+		var selectionStart = $input[0].selectionStart;
+		var selectionEnd = $input[0].selectionEnd;
+		var selectionLength = selectionEnd - selectionStart;
+		
 		if ($input.val().length != 0) {
 			for (var i in errors) {
 				var error = errors[i];
-				var fromCoord = getCaretCoordinates($input[0], error.from);
-				var toCoord = getCaretCoordinates($input[0], error.to+1);
+				var errorFrom = error.from;
+				var errorTo = error.to;
+				
+				// Map error positions from effective value back to actual value
+				if (selectionLength > 0) {
+					// Errors at or after selectionStart need to be shifted by selectionLength
+					// because in the actual value, the selection still exists
+					if (errorFrom >= selectionStart) {
+						errorFrom += selectionLength;
+					}
+					if (errorTo >= selectionStart) {
+						errorTo += selectionLength;
+					}
+				}
+				
+				var fromCoord = getCaretCoordinates($input[0], errorFrom);
+				var toCoord = getCaretCoordinates($input[0], errorTo+1);
 				var $error = $("<div class='input-error-mark'></div>");
 				$error.appendTo($form);
 				var inputCoord = $input.offset();
