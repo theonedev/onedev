@@ -412,8 +412,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Base Gpg Key", "Chiave Gpg di base");
 		m.put("Base Query", "Query di base");
 		m.put("Base URL", "URL di base");
-		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint", 
-			"URL di base del <b class='text-info'>endpoint API compatibile con OpenAI</b>. Lascia vuoto per utilizzare l'endpoint ufficiale di OpenAI");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Formato PEM codificato in Base64, che inizia con -----BEGIN CERTIFICATE----- e termina con -----END CERTIFICATE-----");
 		m.put("Basic Info", "Informazioni di base");
@@ -526,6 +524,7 @@ public class Translation_it extends TranslationResourceBundle {
 			"Le statistiche di build sono una funzionalità enterprise. <a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
 		m.put("Build version", "Versione della build");
 		m.put("Build with Persistent Volume", "Build con Volume Persistente");
+		m.put("Build {0} deleted", "Build {0} eliminato");
 		m.put("Builds", "Build");
 		m.put("Builds are {0}", "Le build sono {0}");
 		m.put("Buildx Builder", "Buildx Builder");
@@ -631,8 +630,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Check this to prevent tag creation", "Seleziona questa opzione per impedire la creazione di tag");
 		m.put("Check this to prevent tag deletion", "Seleziona questa opzione per impedire l'eliminazione di tag");
 		m.put("Check this to prevent tag update", "Seleziona questa opzione per impedire l'aggiornamento di tag");
-		m.put("Check this to require <a href='https://www.conventionalcommits.org' target='_blank'>conventional commits</a>. Note this is applicable for non-merge commits", 
-			"Seleziona questa opzione per richiedere <a href='https://www.conventionalcommits.org' target='_blank'>commit convenzionali</a>. Nota che è applicabile ai commit non di merge");
 		m.put("Check this to require valid signature of head commit", "Seleziona questa opzione per richiedere una firma valida del commit principale");
 		m.put("Check this to retrieve Git LFS files", "Seleziona questa opzione per recuperare i file Git LFS");
 		m.put("Checkbox", "Casella di controllo");
@@ -999,9 +996,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Description too long", "Descrizione troppo lunga");
 		m.put("Destination Path", "Percorso di destinazione");
 		m.put("Destinations", "Destinazioni");
-		m.put("Detect Licenses", "Rileva licenze");
-		m.put("Detect Secrets", "Rileva segreti");
-		m.put("Detect Vulnerabilities", "Rileva vulnerabilità");
 		m.put("Diff is too large to be displayed.", "Il diff è troppo grande per essere visualizzato.");
 		m.put("Diff options", "Opzioni diff");
 		m.put("Digest", "Digest");
@@ -1202,7 +1196,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Enable to allow to upload build cache generated during CI/CD job. Uploaded cache can be used by subsequent builds of the project as long as cache key matches", 
 			"Abilita per consentire il caricamento della cache di build generata durante il lavoro CI/CD. La cache caricata può essere utilizzata dalle build successive del progetto finché la chiave della cache corrisponde");
 		m.put("End Point", "Punto di Accesso");
-		m.put("Enforce Conventional Commits", "Imponi Commit Convenzionali");
 		m.put("Enforce Password Policy", "Imponi Politica della Password");
 		m.put("Enforce Two-factor Authentication", "Imponi Autenticazione a Due Fattori");
 		m.put("Enforce password policy for new users", "Imponi politica della password per i nuovi utenti");
@@ -1215,6 +1208,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Entitled Groups", "Gruppi Autorizzati");
 		m.put("Entitled Projects", "Progetti Autorizzati");
 		m.put("Entitled Users", "Utenti Autorizzati");
+		m.put("Entitled projects and all the sub-projects will be able to access this AI service", 
+			"I progetti autorizzati e tutti i sotto-progetti potranno accedere a questo servizio AI");
 		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
 			"I progetti autorizzati possono aggiungere l'utente AI come revisore delle pull request. In questo scenario, l'utente AI esegue compiti utilizzando le proprie autorizzazioni.");
 		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
@@ -1592,7 +1587,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Ignore this param", "Ignora questo parametro");
 		m.put("Ignore trailing", "Ignora finali");
 		m.put("Ignore trailing whitespace", "Ignora spazi finali");
-		m.put("Ignored Licenses", "Licenze ignorate");
 		m.put("Image", "Immagine");
 		m.put("Image Labels", "Etichette immagine");
 		m.put("Image Manifest", "Manifesto immagine");
@@ -1772,6 +1766,7 @@ public class Translation_it extends TranslationResourceBundle {
 			"Le statistiche dei problemi sono una funzionalità aziendale. <a href='https://onedev.io/pricing' target='_blank'>Prova gratis</a> per 30 giorni");
 		m.put("Issue workflow changed, <a wicket:id=\"reconcile\" class=\"link-primary\">reconciliation</a> needs to be performed to make data consistent. You may do this after making all necessary changes", 
 			"Il workflow dei problemi è cambiato, <a wicket:id=\"reconcile\" class=\"link-primary\">riconciliazione</a> deve essere eseguita per rendere i dati consistenti. Puoi farlo dopo aver apportato tutte le modifiche necessarie");
+		m.put("Issue {0} deleted", "Problema {0} eliminato");
 		m.put("Issues", "Problemi");
 		m.put("Issues can be created in this project by sending email to this address", "I problemi possono essere creati in questo progetto inviando un'email a questo indirizzo");
 		m.put("Issues copied", "Problemi copiati");
@@ -2183,7 +2178,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("No groups claim returned", "Nessuna rivendicazione di gruppi restituita");
 		m.put("No groups to remove from", "Nessun gruppo da cui rimuovere");
 		m.put("No ignore file", "Nessun file di ignoranza");
-		m.put("No ignored licenses", "Nessuna licenza ignorata");
 		m.put("No image attachments", "Nessun allegato di immagine");
 		m.put("No imports defined", "Nessuna importazione definita");
 		m.put("No issue boards defined", "Nessuna bacheca di problemi definita");
@@ -2408,8 +2402,6 @@ public class Translation_it extends TranslationResourceBundle {
 			"Specifica facoltativamente origini <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS' target='_blank'>CORS</a> consentite. Per una richiesta CORS semplice o preflight, se il valore dell'intestazione della richiesta <code>Origin</code> è incluso qui, l'intestazione della risposta <code>Access-Control-Allow-Origin</code> verrà impostata sullo stesso valore");
 		m.put("Optionally specify allowed email domain for self sign-up users. Use '*' or '?' for pattern match", 
 			"Specifica facoltativamente il dominio email consentito per gli utenti che si registrano autonomamente. Usa '*' o '?' per la corrispondenza del modello");
-		m.put("Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). Leave empty to all types", 
-			"Specifica facoltativamente i tipi di commit applicabili per il controllo del piè di pagina del messaggio di commit (premi INVIO per aggiungere un valore). Lascia vuoto per tutti i tipi");
 		m.put("Optionally specify applicable jobs of this executor", "Specifica facoltativamente i lavori applicabili di questo executor");
 		m.put("Optionally specify applicable users who pushed the change", "Specifica facoltativamente gli utenti applicabili che hanno effettuato il push della modifica");
 		m.put("Optionally specify arguments to run above image", "Specifica facoltativamente gli argomenti per eseguire l'immagine sopra");
@@ -2426,7 +2418,6 @@ public class Translation_it extends TranslationResourceBundle {
 			"Specifica facoltativamente il percorso di build relativo a <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. Lascia vuoto per utilizzare il job workspace stesso");
 		m.put("Optionally specify cluster role the job pods service account binding to. This is necessary if you want to do things such as running other Kubernetes pods in job command", 
 			"Specifica facoltativamente il ruolo del cluster a cui è associato l'account di servizio dei pod del job. Questo è necessario se vuoi fare cose come eseguire altri pod Kubernetes nel comando del job");
-		m.put("Optionally specify comma separated licenses to be ignored", "Specifica facoltativamente le licenze separate da virgola da ignorare");
 		m.put("Optionally specify container arguments separated by space. Single argument containing space should be quoted. <b class='text-warning'>Note: </b> do not confuse this with container options which should be specified in executor setting", 
 			"Specifica facoltativamente gli argomenti del container separati da spazio. Un singolo argomento contenente spazio dovrebbe essere quotato. <b class='text-warning'>Nota: </b> non confondere questo con le opzioni del container che dovrebbero essere specificate nelle impostazioni dell'esecutore");
 		m.put("Optionally specify cpu limit for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
@@ -2492,8 +2483,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Optionally specify path protection rules", "Specifica facoltativamente le regole di protezione del percorso");
 		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>ignore file</a>", 
 			"Specifica facoltativamente il percorso relativo a <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> da utilizzare come file di ignoranza di trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>ignore file</a>");
-		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/scanner/secret/#configuration' target='_blank'>secret config</a>", 
-			"Specifica facoltativamente il percorso relativo a <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> da utilizzare come configurazione segreta di trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/scanner/secret/#configuration' target='_blank'>secret config</a>");
 		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to publish artifacts from. Leave empty to use job workspace itself", 
 			"Specifica facoltativamente il percorso relativo a <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> per pubblicare gli artefatti. Lascia vuoto per utilizzare il job workspace stesso");
 		m.put("Optionally specify platform to pull, for instance <tt>linux/amd64</tt>. Leave empty to pull all platforms in image", 
@@ -2587,8 +2576,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Ordinary", "Ordinario");
 		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account to answer questions about the code base, edit CI/CD spec, investigate job failure, or review pull request", 
 			"Ordinario: Account normale<br>Servizio: L'account di servizio non ha password e indirizzi email, e non genererà notifiche per le sue attività<br>AI: Account AI per rispondere a domande sulla base di codice, modificare le specifiche CI/CD, indagare sui fallimenti dei job o rivedere le pull request");
-		m.put("Osv License Scanner", "Scanner di Licenze Osv");
-		m.put("Osv Vulnerability Scanner", "Scanner di Vulnerabilità Osv");
 		m.put("Other", "Altro");
 		m.put("Outline", "Schema");
 		m.put("Outline Search", "Ricerca Schema");
@@ -2929,6 +2916,7 @@ public class Translation_it extends TranslationResourceBundle {
 			"La pull request sarà unita automaticamente quando pronta. Questa opzione sarà disabilitata aggiungendo nuovi commit, cambiando la strategia di unione o cambiando il branch di destinazione");
 		m.put("Pull request will be merged automatically with a preset <a wicket:id=\"commitMessage\">commit message</a> when ready. This option will be disabled upon adding new commits, changing merge strategy, or switching target branch", 
 			"La pull request sarà unita automaticamente con un <a wicket:id=\"commitMessage\">messaggio di commit</a> preimpostato quando pronta. Questa opzione sarà disabilitata aggiungendo nuovi commit, cambiando la strategia di unione o cambiando il branch di destinazione");
+		m.put("Pull request {0} deleted", "Richiesta di pull {0} eliminata");
 		m.put("Push Image", "Push Immagine");
 		m.put("Push chart to the repository", "Push del grafico nel repository");
 		m.put("Push docker image from OCI layout via crane. This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor", 
@@ -3129,10 +3117,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Run job", "Esegui lavoro");
 		m.put("Run job in another project", "Esegui il job in un altro progetto");
 		m.put("Run on Bare Metal/Virtual Machine", "Esegui su Bare Metal/Macchina Virtuale");
-		m.put("Run osv scanner to scan violated licenses used by various <a href='https://deps.dev/' target='_blank'>dependencies</a>. It can only be executed by docker aware executor.", 
-			"Esegui lo scanner osv per analizzare le licenze violate utilizzate da varie <a href='https://deps.dev/' target='_blank'>dipendenze</a>. Può essere eseguito solo da un esecutore consapevole di Docker.");
-		m.put("Run osv scanner to scan vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
-			"Esegui lo scanner osv per analizzare le vulnerabilità in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>vari file di blocco</a>. Può essere eseguito solo da un esecutore consapevole di Docker.");
 		m.put("Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKSPACE</code>. <b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote docker executor", 
 			"Esegui il contenitore Docker specificato. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Workspace del lavoro</a> è montato nel contenitore e il suo percorso è posizionato nella variabile di ambiente <code>ONEDEV_WORKSPACE</code>. <b class='text-warning'>Nota: </b> questo passaggio può essere eseguito solo dall'esecutore docker del server o dall'esecutore docker remoto");
 		m.put("Run specified step template", "Esegui il modello di passaggio specificato");
@@ -3506,8 +3490,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Specify additional users able to access this confidential issue besides those granted via role. Users mentioned in the issue will be authorized automatically", 
 			"Specifica utenti aggiuntivi in grado di accedere a questo problema confidenziale oltre a quelli autorizzati tramite ruolo. Gli utenti menzionati nel problema saranno autorizzati automaticamente");
 		m.put("Specify agents applicable for this executor", "Specifica gli agenti applicabili per questo executor");
-		m.put("Specify allowed <a href='https://spdx.org/licenses/' target='_blank'>spdx license identifiers</a> <span class='text-warning'>separated by comma</span>", 
-			"Specifica gli identificatori di licenza <a href='https://spdx.org/licenses/' target='_blank'>spdx consentiti</a> <span class='text-warning'>separati da virgola</span>");
 		m.put("Specify an email address sharing same inbox as the system email address in mail setting definition. Emails sent to this address will be created as issues in this project. The default value takes form of <tt>&lt;system email address name&gt;+&lt;project path&gt;@&lt;system email address domain&gt;</tt>", 
 			"Specifica un indirizzo email che condivide la stessa casella di posta dell'indirizzo email di sistema nella definizione delle impostazioni di posta. Le email inviate a questo indirizzo saranno create come problemi in questo progetto. Il valore predefinito assume la forma di <tt>&lt;nome indirizzo email di sistema&gt;+&lt;percorso progetto&gt;@&lt;dominio indirizzo email di sistema&gt;</tt>");
 		m.put("Specify applicable projects for above option. Multiple projects should be separated by space. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for all projects", 
@@ -3727,6 +3709,8 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Specify user name of the registry", "Specifica il nome utente del registro");
 		m.put("Specify user name to authenticate with", "Specifica il nome utente per l'autenticazione");
 		m.put("Specify value of the environment variable", "Specifica il valore della variabile di ambiente");
+		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
+			"Specifica il timeout della sessione dell'interfaccia web in minuti. Lascia vuoto per non scadere mai quando il browser è aperto. Le sessioni esistenti non saranno influenzate dopo aver modificato questo valore.");
 		m.put("Specify webhook url to post events", "Specifica l'URL del webhook per pubblicare eventi");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"Specifica quale stato dell'issue utilizzare per le issue chiuse su GitHub.<br><b>NOTA: </b> Puoi personalizzare gli stati delle issue di OneDev nel caso non ci sia un'opzione appropriata qui");
@@ -4424,7 +4408,6 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("Whether or not to retrieve submodules. Refer to <a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on how to set up clone credential above to retrieve submodules", 
 			"Se recuperare i sottomoduli o meno. Consulta <a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>questo tutorial</a> su come configurare le credenziali di clone sopra per recuperare i sottomoduli");
 		m.put("Whether or not to run this step inside container", "Se eseguire questo passaggio all'interno del container o meno");
-		m.put("Whether or not to scan recursively in above paths", "Se eseguire la scansione ricorsiva nei percorsi sopra o meno");
 		m.put("Whether or not to send notifications for events generated by yourself", "Se inviare notifiche per eventi generati da te stesso o meno");
 		m.put("Whether or not to send notifications to issue watchers for this change", "Se inviare notifiche agli osservatori del problema per questa modifica o meno");
 		m.put("Whether or not to show branch/tag column", "Se mostrare la colonna branch/tag o meno");
@@ -4719,13 +4702,48 @@ public class Translation_it extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Build {0} deleted", "Build {0} eliminato");
-		m.put("Entitled projects and all the sub-projects will be able to access this AI service", 
-			"I progetti autorizzati e tutti i sotto-progetti potranno accedere a questo servizio AI");
-		m.put("Issue {0} deleted", "Problema {0} eliminato");
-		m.put("Pull request {0} deleted", "Richiesta di pull {0} eliminata");
-		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
-			"Specifica il timeout della sessione dell'interfaccia web in minuti. Lascia vuoto per non scadere mai quando il browser è aperto. Le sessioni esistenti non saranno influenzate dopo aver modificato questo valore.");
+		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint.\n<b class='text-danger'>NOTE:</b> Make sure base URL specified here supports HTTP/2 connection. HTTP/1.1 is not\nsupported and will get a connection timeout error", 
+			"URL di base dell'endpoint API <b class='text-info'>compatibile con OpenAI</b>. Lascia vuoto per utilizzare l'endpoint ufficiale di OpenAI.");
+		m.put("Check Licenses", "Controlla Licenze");
+		m.put("Check Secrets", "Controlla Segreti");
+		m.put("Check Vulnerabilities", "Controlla Vulnerabilità");
+		m.put("Child Project", "Progetto Figlio");
+		m.put("Children Import Projects", "Progetti di Importazione Figli");
+		m.put("Children Import Repositories", "Repository di Importazione Figli");
+		m.put("Children Import Server", "Server di Importazione Figli");
+		m.put("Commit Message Checker", "Controllo del Messaggio di Commit");
+		m.put("Conventional Commit", "Commit Convenzionale");
+		m.put("Explanation", "Spiegazione");
+		m.put("Extra Options", "Opzioni Extra");
+		m.put("No commit message checker", "Nessun controllo del messaggio di commit");
+		m.put("No explanation", "Nessuna spiegazione");
+		m.put("Not available", "Non disponibile");
+		m.put("Optionally specify a commit message checker to validate commit messages. Only applicable for non-merge commits", 
+			"Specifica facoltativamente un controllo del messaggio di commit per convalidare i messaggi di commit. Applicabile solo per commit non di unione");
+		m.put("Optionally specify an explanation for the regular expression. This will be displayed to the user if validation fails", 
+			"Specifica facoltativamente una spiegazione per l'espressione regolare. Questa verrà mostrata all'utente se la convalida fallisce");
+		m.put("Optionally specify comma separated <a href='https://spdx.org/licenses/'>SPDX license identifiers</a> to be ignored", 
+			"Specifica facoltativamente <a href='https://spdx.org/licenses/'>identificatori di licenza SPDX</a> separati da virgola da ignorare");
+		m.put("Optionally specify commit types applicable for commit message footer check (hit ENTER to add value). Leave empty to all types", 
+			"Specifica facoltativamente i tipi di commit applicabili per il controllo del piè di pagina del messaggio di commit (premi INVIO per aggiungere valore). Lascia vuoto per tutti i tipi");
+		m.put("Optionally specify extra options for osv source scanner. Multiple options need to be separated with space", 
+			"Specifica facoltativamente opzioni extra per lo scanner di origine osv. Più opzioni devono essere separate con uno spazio");
+		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>secret config</a>", 
+			"Specifica facoltativamente il percorso relativo allo <a href='https://docs.onedev.io/concepts#job-workspace'>spazio di lavoro del lavoro</a> da utilizzare come <a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>configurazione segreta</a> di trivy");
+		m.put("Osv Source Scanner", "Scanner di Origine Osv");
+		m.put("Run osv scanner to scan project source for vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
+			"Esegui lo scanner osv per scansionare il codice sorgente del progetto alla ricerca di vulnerabilità in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>vari file di blocco</a>. Può essere eseguito solo da un esecutore compatibile con docker.");
+		m.put("Specify a <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> pattern to validate the entire commit message. Use <code>(?s)</code> flag at the beginning for multi-line matching", 
+			"Specifica un pattern di <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>espressione regolare Java</a> per convalidare l'intero messaggio di commit. Usa il flag <code>(?s)</code> all'inizio per il matching su più righe");
+		m.put("Specify allowed <a href='https://spdx.org/licenses/'>SPDX license identifiers</a> separated by comma", 
+			"Specifica <a href='https://spdx.org/licenses/'>identificatori di licenza SPDX</a> consentiti separati da virgola");
+		m.put("Specify child project to import into at OneDev side", "Specifica il progetto figlio da importare nel lato OneDev");
+		m.put("Specify how long to wait for the model response in seconds", "Specifica quanto tempo aspettare per la risposta del modello in secondi");
+		m.put("Specify the model name to use. <b class='text-danger'>NOTE: </b> Right now OneDev only supports\nmodels with chat completions API. OpenAI models with the new responses API is not supported yet", 
+			"Specifica il nome del modello da utilizzare. <b class='text-danger'>NOTA: </b> Al momento OneDev supporta solo modelli con API di completamento chat. I modelli OpenAI con la nuova API di risposte non sono ancora supportati");
+		m.put("Whether or not to scan recursively in above paths. Applicable only for directories", 
+			"Se eseguire o meno la scansione ricorsiva nei percorsi sopra. Applicabile solo per le directory");
+		m.put("{0} will be transcoded to UTF-8 upon commit", "{0} sarà transcodificato in UTF-8 al momento del commit");
 	}
 		
 	@Override

@@ -437,8 +437,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Base Gpg Key", "基础GPG密钥");
 		m.put("Base Query", "基础查询");
 		m.put("Base URL", "基本 URL");
-		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint", 
-			"<b class='text-info'>OpenAI 兼容</b> API 端点的基本 URL。留空以使用 OpenAI 官方端点");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Base64 编码的 PEM 格式，以 -----BEGIN CERTIFICATE----- 开头，以 -----END CERTIFICATE----- 结尾");
 		m.put("Basic Info", "基本信息");
@@ -551,6 +549,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"构建统计是企业版功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
 		m.put("Build version", "构建版本");
 		m.put("Build with Persistent Volume", "使用持久卷构建");
+		m.put("Build {0} deleted", "构建 {0} 已删除");
 		m.put("Builds", "构建");
 		m.put("Builds are {0}", "构建是 {0}");
 		m.put("Buildx Builder", "Buildx构建器");
@@ -656,8 +655,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Check this to prevent tag creation", "勾选此项以禁止创建标签");
 		m.put("Check this to prevent tag deletion", "勾选此项以禁止删除标签");
 		m.put("Check this to prevent tag update", "勾选此项以禁止更新标签");
-		m.put("Check this to require <a href='https://www.conventionalcommits.org' target='_blank'>conventional commits</a>. Note this is applicable for non-merge commits", 
-			"勾选此项以要求使用<a href='https://www.conventionalcommits.org' target='_blank'>规范化提交</a>。注意，该设置仅适用于非合并提交");
 		m.put("Check this to require valid signature of head commit", "勾选此项以要求主提交具有有效签名");
 		m.put("Check this to retrieve Git LFS files", "勾选此项以获取 Git LFS 文件");
 		m.put("Checkbox", "复选框");
@@ -1024,9 +1021,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Description too long", "描述过长");
 		m.put("Destination Path", "目标路径");
 		m.put("Destinations", "目标");
-		m.put("Detect Licenses", "检测许可证");
-		m.put("Detect Secrets", "检测敏感信息");
-		m.put("Detect Vulnerabilities", "检测漏洞");
 		m.put("Diff is too large to be displayed.", "差异太大，无法显示");
 		m.put("Diff options", "比较选项");
 		m.put("Digest", "摘要");
@@ -1227,7 +1221,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Enable to allow to upload build cache generated during CI/CD job. Uploaded cache can be used by subsequent builds of the project as long as cache key matches", 
 			"启用此选项以允许上传在 CI/CD 任务期间生成的构建缓存。上传的缓存可以被项目后续的构建使用，只要缓存密钥匹配");
 		m.put("End Point", "端点");
-		m.put("Enforce Conventional Commits", "强制执行 Conventional Commits");
 		m.put("Enforce Password Policy", "强制执行密码策略");
 		m.put("Enforce Two-factor Authentication", "强制执行两阶段认证");
 		m.put("Enforce password policy for new users", "对新用户强制执行密码策略");
@@ -1240,6 +1233,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Entitled Groups", "授权组");
 		m.put("Entitled Projects", "授权项目");
 		m.put("Entitled Users", "授权用户");
+		m.put("Entitled projects and all the sub-projects will be able to access this AI service", 
+			"被授权的项目和所有子项目将能够访问此 AI 服务");
 		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
 			"被授权的项目可以将 AI 用户添加为合并请求的审查者。在这种情况下，AI 用户使用其自身的权限执行任务。");
 		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
@@ -1617,7 +1612,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Ignore this param", "忽略此参数");
 		m.put("Ignore trailing", "忽略后缀");
 		m.put("Ignore trailing whitespace", "忽略结束的空白");
-		m.put("Ignored Licenses", "忽略的许可证");
 		m.put("Image", "容器镜像");
 		m.put("Image Labels", "镜像标签");
 		m.put("Image Manifest", "镜像 Manifest");
@@ -1797,6 +1791,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"工单统计是企业版功能。<a href='https://onedev.io/pricing' target='_blank'>免费试用</a> 30 天");
 		m.put("Issue workflow changed, <a wicket:id=\"reconcile\" class=\"link-primary\">reconciliation</a> needs to be performed to make data consistent. You may do this after making all necessary changes", 
 			"工单工作流已更改，需要执行 <a wicket:id=\"reconcile\" class=\"link-primary\">一致性检查</a> 以使数据一致。您可以在完成所有必要更改后执行此操作");
+		m.put("Issue {0} deleted", "工单 {0} 已删除");
 		m.put("Issues", "工单");
 		m.put("Issues can be created in this project by sending email to this address", "通过发送电子邮件到此地址，可以在本项目中创建工单");
 		m.put("Issues copied", "工单已复制");
@@ -2208,7 +2203,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("No groups claim returned", "没有返回组声明");
 		m.put("No groups to remove from", "没有可移除的组");
 		m.put("No ignore file", "无忽略文件");
-		m.put("No ignored licenses", "无忽略的许可证");
 		m.put("No image attachments", "没有图片附件");
 		m.put("No imports defined", "无导入");
 		m.put("No issue boards defined", "未定义工单看板");
@@ -2433,8 +2427,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择指定允许的 <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS' target='_blank'>CORS</a> 来源。对于 CORS 简单请求或预检请求，如果请求头 <code>Origin</code> 的值包含在此处，响应头 <code>Access-Control-Allow-Origin</code> 将设置为相同的值");
 		m.put("Optionally specify allowed email domain for self sign-up users. Use '*' or '?' for pattern match", 
 			"可选择指定允许自行注册用户的电子邮件域名。使用 '*' 或 '?' 进行模式匹配");
-		m.put("Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). Leave empty to all types", 
-			"可选择指定适用于提交消息页脚检查的提交类型（按 ENTER 添加值）。留空则适用于所有类型");
 		m.put("Optionally specify applicable jobs of this executor", "可选地指定此执行器适用的作业");
 		m.put("Optionally specify applicable users who pushed the change", "可选地指定推送更改的适用用户");
 		m.put("Optionally specify arguments to run above image", "可选择指定运行上述镜像的参数");
@@ -2451,7 +2443,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>任务工作区</a> 的构建路径。留空则使用任务工作区本身");
 		m.put("Optionally specify cluster role the job pods service account binding to. This is necessary if you want to do things such as running other Kubernetes pods in job command", 
 			"可选择指定任务 pod 服务账户绑定的集群角色。如果要执行诸如在任务命令中运行其他 Kubernetes pod 之类的操作，这是必需的");
-		m.put("Optionally specify comma separated licenses to be ignored", "可选择指定要忽略的以逗号分隔的许可证");
 		m.put("Optionally specify container arguments separated by space. Single argument containing space should be quoted. <b class='text-warning'>Note: </b> do not confuse this with container options which should be specified in executor setting", 
 			"可选择指定以空格分隔的容器参数。包含空格的单个参数应加引号。<b class='text-warning'>注意：</b>不要与应在执行器设置中指定的容器选项混淆");
 		m.put("Optionally specify cpu limit for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
@@ -2517,8 +2508,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify path protection rules", "可选择指定路径保护规则");
 		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>ignore file</a>", 
 			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的路径，用作 trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>忽略文件</a>");
-		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/scanner/secret/#configuration' target='_blank'>secret config</a>", 
-			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的路径，用作 trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/scanner/secret/#configuration' target='_blank'>密钥配置</a>");
 		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to publish artifacts from. Leave empty to use job workspace itself", 
 			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的路径来发布制品。留空则使用任务工作区本身");
 		m.put("Optionally specify platform to pull, for instance <tt>linux/amd64</tt>. Leave empty to pull all platforms in image", 
@@ -2612,8 +2601,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Ordinary", "普通");
 		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account to answer questions about the code base, edit CI/CD spec, investigate job failure, or review pull request", 
 			"普通：普通账户<br>服务：服务账户没有密码和电子邮件地址，并且不会为其活动生成通知<br>AI：AI 账户用于回答关于代码库的问题，编辑 CI/CD 规范，调查任务失败或审查合并请求");
-		m.put("Osv License Scanner", "OSV 许可证扫描器");
-		m.put("Osv Vulnerability Scanner", "OSV 漏洞扫描器");
 		m.put("Other", "其他");
 		m.put("Outline", "大纲");
 		m.put("Outline Search", "大纲搜索");
@@ -2954,6 +2941,7 @@ public class Translation_zh extends TranslationResourceBundle {
 			"合并请求将在准备好时自动合并。此选项将在添加新提交、更改合并策略或切换目标分支时禁用");
 		m.put("Pull request will be merged automatically with a preset <a wicket:id=\"commitMessage\">commit message</a> when ready. This option will be disabled upon adding new commits, changing merge strategy, or switching target branch", 
 			"合并请求将在准备好时自动合并，并使用预设的<a wicket:id=\"commitMessage\">提交消息</a>。此选项将在添加新提交、更改合并策略或切换目标分支时禁用");
+		m.put("Pull request {0} deleted", "合并请求 {0} 已删除");
 		m.put("Push Image", "推送镜像");
 		m.put("Push chart to the repository", "推送 Chart 到仓库");
 		m.put("Push docker image from OCI layout via crane. This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor", 
@@ -3154,10 +3142,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Run job", "运行任务");
 		m.put("Run job in another project", "在另一个项目中运行任务");
 		m.put("Run on Bare Metal/Virtual Machine", "在裸机/虚拟机上运行");
-		m.put("Run osv scanner to scan violated licenses used by various <a href='https://deps.dev/' target='_blank'>dependencies</a>. It can only be executed by docker aware executor.", 
-			"运行 OSV 扫描器扫描各种 <a href='https://deps.dev/' target='_blank'>依赖项</a> 使用的违反许可证。它只能由 dock er执行器执行。");
-		m.put("Run osv scanner to scan vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
-			"运行 OSV 扫描器扫描各种 <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>锁定文件</a> 中的漏洞。它只能由 docker 相关执行器执行。");
 		m.put("Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKSPACE</code>. <b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote docker executor", 
 			"运行指定的 docker 容器。<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> 挂载到容器中，其路径放置在环境变量 <code>ONEDEV_WORKSPACE</code> 中。<b class='text-warning'>注意：</b> 此步骤只能由服务器 docker 执行器或远程 docker 执行器执行");
 		m.put("Run specified step template", "运行指定的步骤模板");
@@ -3531,8 +3515,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify additional users able to access this confidential issue besides those granted via role. Users mentioned in the issue will be authorized automatically", 
 			"指定额外用户可以访问此机密工单，除了通过角色授予的用户。提及在工单中的用户将自动被授权");
 		m.put("Specify agents applicable for this executor", "指定适用于此执行器的代理");
-		m.put("Specify allowed <a href='https://spdx.org/licenses/' target='_blank'>spdx license identifiers</a> <span class='text-warning'>separated by comma</span>", 
-			"指定允许的 <a href='https://spdx.org/licenses/' target='_blank'>SPDX 许可证标识符</a> <span class='text-warning'>以逗号分隔</span>");
 		m.put("Specify an email address sharing same inbox as the system email address in mail setting definition. Emails sent to this address will be created as issues in this project. The default value takes form of <tt>&lt;system email address name&gt;+&lt;project path&gt;@&lt;system email address domain&gt;</tt>", 
 			"指定一个与邮件设置定义中的系统电子邮件地址共享同一收件箱的电子邮件地址。发送到此地址的电子邮件将在此项目中创建为工单。默认值采用以下形式：<tt>&lt;系统电子邮件地址名称&gt;+&lt;项目路径&gt;@&lt;系统电子邮件地址域名&gt;</tt>");
 		m.put("Specify applicable projects for above option. Multiple projects should be separated by space. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for all projects", 
@@ -3752,6 +3734,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify user name of the registry", "指定注册表的用户名");
 		m.put("Specify user name to authenticate with", "指定用于身份验证的用户名");
 		m.put("Specify value of the environment variable", "指定环境变量的值");
+		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
+			"指定 Web UI 会话超时时间（分钟）。留空表示在浏览器打开时永不过期。更改此值后，现有会话将不受影响。");
 		m.put("Specify webhook url to post events", "指定发布事件的 Webhook URL");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"指定用于已关闭 GitHub 工单的工单状态。<br><b>注意：</b> 如果此处没有合适的选项，您可以自定义 OneDev 工单状态");
@@ -4449,7 +4433,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Whether or not to retrieve submodules. Refer to <a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on how to set up clone credential above to retrieve submodules", 
 			"是否获取子模块。请参阅 <a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>此教程</a>，了解如何设置上述克隆凭据以获取子模块");
 		m.put("Whether or not to run this step inside container", "是否在容器内运行此步骤");
-		m.put("Whether or not to scan recursively in above paths", "是否在上述路径中递归扫描");
 		m.put("Whether or not to send notifications for events generated by yourself", "是否为自身生成的事件发送通知");
 		m.put("Whether or not to send notifications to issue watchers for this change", "是否为此更改向工单观察者发送通知");
 		m.put("Whether or not to show branch/tag column", "是否显示分支/标签列");
@@ -4744,13 +4727,48 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Build {0} deleted", "构建 {0} 已删除");
-		m.put("Entitled projects and all the sub-projects will be able to access this AI service", 
-			"被授权的项目和所有子项目将能够访问此 AI 服务");
-		m.put("Issue {0} deleted", "工单 {0} 已删除");
-		m.put("Pull request {0} deleted", "合并请求 {0} 已删除");
-		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
-			"指定 Web UI 会话超时时间（分钟）。留空表示在浏览器打开时永不过期。更改此值后，现有会话将不受影响。");
+		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint.\n<b class='text-danger'>NOTE:</b> Make sure base URL specified here supports HTTP/2 connection. HTTP/1.1 is not\nsupported and will get a connection timeout error", 
+			"<b class='text-info'>OpenAI compatible</b> API 端点的基本 URL。留空以使用 OpenAI 官方端点。 <b class='text-danger'>注意：</b>请确保此处指定的基本 URL 支持 HTTP/2 连接。HTTP/1.1 不支持，并将导致连接超时错误。");
+		m.put("Check Licenses", "检查许可证");
+		m.put("Check Secrets", "检查密钥");
+		m.put("Check Vulnerabilities", "检查漏洞");
+		m.put("Child Project", "子项目");
+		m.put("Children Import Projects", "子导入项目");
+		m.put("Children Import Repositories", "子导入代码库");
+		m.put("Children Import Server", "子导入服务器");
+		m.put("Commit Message Checker", "提交信息检查器");
+		m.put("Conventional Commit", "约定式提交");
+		m.put("Explanation", "解释");
+		m.put("Extra Options", "额外选项");
+		m.put("No commit message checker", "无提交信息检查器");
+		m.put("No explanation", "无解释");
+		m.put("Not available", "不可用");
+		m.put("Optionally specify a commit message checker to validate commit messages. Only applicable for non-merge commits", 
+			"可选指定一个提交信息检查器以验证提交信息。仅适用于非合并提交");
+		m.put("Optionally specify an explanation for the regular expression. This will be displayed to the user if validation fails", 
+			"可选指定正则表达式的解释。如果验证失败，这将显示给用户");
+		m.put("Optionally specify comma separated <a href='https://spdx.org/licenses/'>SPDX license identifiers</a> to be ignored", 
+			"可选指定要忽略的逗号分隔的 <a href='https://spdx.org/licenses/'>SPDX 许可证标识符</a>");
+		m.put("Optionally specify commit types applicable for commit message footer check (hit ENTER to add value). Leave empty to all types", 
+			"可选指定适用于提交信息页脚检查的提交类型（按 ENTER 键添加值）。留空以适用于所有类型");
+		m.put("Optionally specify extra options for osv source scanner. Multiple options need to be separated with space", 
+			"可选指定 osv 源扫描器的额外选项。多个选项需要用空格分隔");
+		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>secret config</a>", 
+			"可选指定相对于 <a href='https://docs.onedev.io/concepts#job-workspace'>任务工作区</a> 的路径，以用作 trivy <a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>密钥配置</a>");
+		m.put("Osv Source Scanner", "Osv 源扫描器");
+		m.put("Run osv scanner to scan project source for vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
+			"运行 osv 扫描器以扫描项目源中的漏洞，位于<a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>各种锁定文件</a>中。它只能由 docker 相关执行器执行。");
+		m.put("Specify a <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> pattern to validate the entire commit message. Use <code>(?s)</code> flag at the beginning for multi-line matching", 
+			"指定一个 <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java 正则表达式</a> 模式以验证整个提交信息。在开头使用 <code>(?s)</code> 标志进行多行匹配");
+		m.put("Specify allowed <a href='https://spdx.org/licenses/'>SPDX license identifiers</a> separated by comma", 
+			"指定允许的逗号分隔的 <a href='https://spdx.org/licenses/'>SPDX 许可证标识符</a>");
+		m.put("Specify child project to import into at OneDev side", "指定要在 OneDev 端导入的子项目");
+		m.put("Specify how long to wait for the model response in seconds", "指定等待模型响应的时间（以秒为单位）");
+		m.put("Specify the model name to use. <b class='text-danger'>NOTE: </b> Right now OneDev only supports\nmodels with chat completions API. OpenAI models with the new responses API is not supported yet", 
+			"指定要使用的模型名称。<b class='text-danger'>注意：</b>目前 OneDev 仅支持具有聊天完成 API 的模型。尚不支持具有新响应 API 的 OpenAI 模型");
+		m.put("Whether or not to scan recursively in above paths. Applicable only for directories", 
+			"是否在上述路径中递归扫描。仅适用于目录");
+		m.put("{0} will be transcoded to UTF-8 upon commit", "{0} 将在提交时转码为 UTF-8");
 	}
 		
 	@Override

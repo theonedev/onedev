@@ -412,8 +412,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Base Gpg Key", "ベースGpgキー");
 		m.put("Base Query", "ベースクエリ");
 		m.put("Base URL", "ベースURL");
-		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint", 
-			"<b class='text-info'>OpenAI互換</b>APIエンドポイントのベースURL。OpenAI公式エンドポイントを使用するには空のままにしてください");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Base64でエンコードされたPEM形式、-----BEGIN CERTIFICATE-----で始まり、-----END CERTIFICATE-----で終わる");
 		m.put("Basic Info", "基本情報");
@@ -526,6 +524,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"ビルド統計はエンタープライズ機能です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料でお試しください</a>");
 		m.put("Build version", "ビルドバージョン");
 		m.put("Build with Persistent Volume", "永続ボリュームを使用したビルド");
+		m.put("Build {0} deleted", "ビルド {0} が削除されました");
 		m.put("Builds", "ビルド");
 		m.put("Builds are {0}", "ビルドは{0}です");
 		m.put("Buildx Builder", "Buildxビルダー");
@@ -631,8 +630,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Check this to prevent tag creation", "タグ作成を防止するにはこれをチェックしてください");
 		m.put("Check this to prevent tag deletion", "タグ削除を防止するにはこれをチェックしてください");
 		m.put("Check this to prevent tag update", "タグ更新を防止するにはこれをチェックしてください");
-		m.put("Check this to require <a href='https://www.conventionalcommits.org' target='_blank'>conventional commits</a>. Note this is applicable for non-merge commits", 
-			"これをチェックして<a href='https://www.conventionalcommits.org' target='_blank'>従来のコミット</a>を要求します。これは非マージコミットに適用されます");
 		m.put("Check this to require valid signature of head commit", "これをチェックしてヘッドコミットの有効な署名を要求します");
 		m.put("Check this to retrieve Git LFS files", "これをチェックしてGit LFSファイルを取得します");
 		m.put("Checkbox", "チェックボックス");
@@ -999,9 +996,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Description too long", "説明が長すぎます");
 		m.put("Destination Path", "宛先パス");
 		m.put("Destinations", "宛先");
-		m.put("Detect Licenses", "ライセンスを検出");
-		m.put("Detect Secrets", "シークレットを検出");
-		m.put("Detect Vulnerabilities", "脆弱性を検出");
 		m.put("Diff is too large to be displayed.", "差分が大きすぎて表示できません。");
 		m.put("Diff options", "差分オプション");
 		m.put("Digest", "ダイジェスト");
@@ -1202,7 +1196,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Enable to allow to upload build cache generated during CI/CD job. Uploaded cache can be used by subsequent builds of the project as long as cache key matches", 
 			"CI/CDジョブ中に生成されたビルドキャッシュをアップロードできるようにするにはこれを有効にします。アップロードされたキャッシュは、キャッシュキーが一致する限りプロジェクトの後続のビルドで使用できます");
 		m.put("End Point", "エンドポイント");
-		m.put("Enforce Conventional Commits", "従来のコミットを強制する");
 		m.put("Enforce Password Policy", "パスワードポリシーを強制");
 		m.put("Enforce Two-factor Authentication", "二要素認証を強制する");
 		m.put("Enforce password policy for new users", "新しいユーザーに対してパスワードポリシーを強制");
@@ -1215,6 +1208,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Entitled Groups", "権限を持つグループ");
 		m.put("Entitled Projects", "権限を持つプロジェクト");
 		m.put("Entitled Users", "権限を持つユーザー");
+		m.put("Entitled projects and all the sub-projects will be able to access this AI service", 
+			"権限を持つプロジェクトとすべてのサブプロジェクトは、このAIサービスにアクセスできます");
 		m.put("Entitled projects can add the AI user as a pull request reviewer. In this scenario, the AI user executes tasks using its own permissions.", 
 			"権限を持つプロジェクトは、AIユーザーをプルリクエストのレビュアーとして追加できます。このシナリオでは、AIユーザーは自身の権限を使用してタスクを実行します。");
 		m.put("Entitled users can interact with the AI user through the chat interface to perform tasks such as understanding codebase, authoring CI/CD spec, or investigating CI/CD job failures. In this mode, the AI user operates with same permissions as the user interacting with it, ignoring permissions assigned to the AI user itself.", 
@@ -1592,7 +1587,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Ignore this param", "このパラメータを無視");
 		m.put("Ignore trailing", "末尾を無視");
 		m.put("Ignore trailing whitespace", "末尾の空白を無視");
-		m.put("Ignored Licenses", "無視されたライセンス");
 		m.put("Image", "画像");
 		m.put("Image Labels", "画像ラベル");
 		m.put("Image Manifest", "画像マニフェスト");
@@ -1772,6 +1766,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"課題統計はエンタープライズ機能です。<a href='https://onedev.io/pricing' target='_blank'>30日間無料でお試しください</a>");
 		m.put("Issue workflow changed, <a wicket:id=\"reconcile\" class=\"link-primary\">reconciliation</a> needs to be performed to make data consistent. You may do this after making all necessary changes", 
 			"課題ワークフローが変更されました。<a wicket:id=\"reconcile\" class=\"link-primary\">整合性を取る</a>必要があります。必要な変更をすべて行った後に実行できます");
+		m.put("Issue {0} deleted", "課題 {0} が削除されました");
 		m.put("Issues", "課題一覧");
 		m.put("Issues can be created in this project by sending email to this address", "このプロジェクトでは、このアドレスにメールを送信することで課題を作成できます");
 		m.put("Issues copied", "課題をコピーしました");
@@ -2183,7 +2178,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No groups claim returned", "返されたグループクレームなし");
 		m.put("No groups to remove from", "削除するグループがありません");
 		m.put("No ignore file", "無視ファイルなし");
-		m.put("No ignored licenses", "無視されたライセンスなし");
 		m.put("No image attachments", "画像添付なし");
 		m.put("No imports defined", "定義されたインポートなし");
 		m.put("No issue boards defined", "定義された課題ボードなし");
@@ -2408,8 +2402,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、許可された<a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS' target='_blank'>CORS</a>オリジンを指定してください。CORSのシンプルまたはプリフライトリクエストの場合、リクエストヘッダー<code>Origin</code>の値がここに含まれている場合、レスポンスヘッダー<code>Access-Control-Allow-Origin</code>は同じ値に設定されます。");
 		m.put("Optionally specify allowed email domain for self sign-up users. Use '*' or '?' for pattern match", 
 			"オプションで、自己登録ユーザーの許可されたメールドメインを指定してください。パターンマッチには'*'または'?'を使用してください。");
-		m.put("Optionally specify applicable commit types for commit message footer check (hit ENTER to add value). Leave empty to all types", 
-			"オプションで、コミットメッセージフッターのチェックに適用されるコミットタイプを指定してください（ENTERキーを押して値を追加）。すべてのタイプを適用する場合は空のままにしてください。");
 		m.put("Optionally specify applicable jobs of this executor", "このエグゼキュータに適用可能なジョブを任意で指定してください");
 		m.put("Optionally specify applicable users who pushed the change", "変更をプッシュした適用可能なユーザーを任意で指定");
 		m.put("Optionally specify arguments to run above image", "オプションで、上記のイメージを実行するための引数を指定してください。");
@@ -2426,7 +2418,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>に対するビルドパスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
 		m.put("Optionally specify cluster role the job pods service account binding to. This is necessary if you want to do things such as running other Kubernetes pods in job command", 
 			"オプションで、ジョブポッドのサービスアカウントがバインドされるクラスター役割を指定してください。これは、ジョブコマンドで他のKubernetesポッドを実行するなどの操作を行いたい場合に必要です。");
-		m.put("Optionally specify comma separated licenses to be ignored", "オプションで、無視するライセンスをカンマ区切りで指定してください。");
 		m.put("Optionally specify container arguments separated by space. Single argument containing space should be quoted. <b class='text-warning'>Note: </b> do not confuse this with container options which should be specified in executor setting", 
 			"オプションで、スペースで区切られたコンテナ引数を指定してください。スペースを含む単一の引数は引用符で囲む必要があります。<b class='text-warning'>注意: </b>これはエグゼキューター設定で指定する必要があるコンテナオプションと混同しないでください。");
 		m.put("Optionally specify cpu limit for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
@@ -2492,8 +2483,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify path protection rules", "オプションで、パス保護ルールを指定してください。");
 		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>ignore file</a>", 
 			"オプションで、trivy<a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>無視ファイル</a>として使用する<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する相対パスを指定してください。");
-		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/scanner/secret/#configuration' target='_blank'>secret config</a>", 
-			"オプションで、trivy<a href='https://aquasecurity.github.io/trivy/v0.50/docs/scanner/secret/#configuration' target='_blank'>シークレット設定</a>として使用する<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する相対パスを指定してください。");
 		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to publish artifacts from. Leave empty to use job workspace itself", 
 			"オプションで、アーティファクトを公開するための<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
 		m.put("Optionally specify platform to pull, for instance <tt>linux/amd64</tt>. Leave empty to pull all platforms in image", 
@@ -2587,8 +2576,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Ordinary", "通常");
 		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account to answer questions about the code base, edit CI/CD spec, investigate job failure, or review pull request", 
 			"通常: 通常のアカウント<br>サービス: サービスアカウントにはパスワードとメールアドレスがなく、その活動に対する通知は生成されません<br>AI: コードベースに関する質問に答えたり、CI/CD仕様を編集したり、ジョブの失敗を調査したり、プルリクエストをレビューするAIアカウント");
-		m.put("Osv License Scanner", "Osvライセンススキャナー");
-		m.put("Osv Vulnerability Scanner", "Osv脆弱性スキャナー");
 		m.put("Other", "その他");
 		m.put("Outline", "アウトライン");
 		m.put("Outline Search", "アウトライン検索");
@@ -2929,6 +2916,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"プルリクエストは準備が整ったら自動的にマージされます。このオプションは、新しいコミットの追加、マージ戦略の変更、またはターゲットブランチの切り替え時に無効になります");
 		m.put("Pull request will be merged automatically with a preset <a wicket:id=\"commitMessage\">commit message</a> when ready. This option will be disabled upon adding new commits, changing merge strategy, or switching target branch", 
 			"プルリクエストは準備が整ったらプリセットされた<a wicket:id=\"commitMessage\">コミットメッセージ</a>で自動的にマージされます。このオプションは、新しいコミットの追加、マージ戦略の変更、またはターゲットブランチの切り替え時に無効になります");
+		m.put("Pull request {0} deleted", "プルリクエスト {0} が削除されました");
 		m.put("Push Image", "イメージをプッシュ");
 		m.put("Push chart to the repository", "リポジトリにチャートをプッシュ");
 		m.put("Push docker image from OCI layout via crane. This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor", 
@@ -3129,10 +3117,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Run job", "ジョブを実行");
 		m.put("Run job in another project", "別のプロジェクトでジョブを実行する");
 		m.put("Run on Bare Metal/Virtual Machine", "ベアメタル/仮想マシンで実行");
-		m.put("Run osv scanner to scan violated licenses used by various <a href='https://deps.dev/' target='_blank'>dependencies</a>. It can only be executed by docker aware executor.", 
-			"さまざまな<a href='https://deps.dev/' target='_blank'>依存関係</a>で使用されている違反ライセンスをスキャンするためにOSVスキャナーを実行します。Docker対応エグゼキューターによってのみ実行可能です");
-		m.put("Run osv scanner to scan vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
-			"さまざまな<a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>ロックファイル</a>の脆弱性をスキャンするためにOSVスキャナーを実行します。Docker対応エグゼキューターによってのみ実行可能です");
 		m.put("Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKSPACE</code>. <b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote docker executor", 
 			"指定されたDockerコンテナを実行します。<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>がコンテナにマウントされ、そのパスが環境変数<code>ONEDEV_WORKSPACE</code>に配置されます。<b class='text-warning'>注意: </b>このステップはサーバーDockerエグゼキューターまたはリモートDockerエグゼキューターによってのみ実行可能です");
 		m.put("Run specified step template", "指定されたステップテンプレートを実行");
@@ -3506,8 +3490,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify additional users able to access this confidential issue besides those granted via role. Users mentioned in the issue will be authorized automatically", 
 			"役割を通じて付与されたユーザー以外でこの機密課題にアクセスできる追加ユーザーを指定します。課題に記載されたユーザーは自動的に承認されます");
 		m.put("Specify agents applicable for this executor", "このエグゼキューターに適用可能なエージェントを指定します");
-		m.put("Specify allowed <a href='https://spdx.org/licenses/' target='_blank'>spdx license identifiers</a> <span class='text-warning'>separated by comma</span>", 
-			"<a href='https://spdx.org/licenses/' target='_blank'>spdx ライセンス識別子</a>を指定します <span class='text-warning'>カンマで区切る</span>");
 		m.put("Specify an email address sharing same inbox as the system email address in mail setting definition. Emails sent to this address will be created as issues in this project. The default value takes form of <tt>&lt;system email address name&gt;+&lt;project path&gt;@&lt;system email address domain&gt;</tt>", 
 			"メール設定定義のシステムメールアドレスと同じ受信トレイを共有するメールアドレスを指定します。このアドレスに送信されたメールはこのプロジェクトの課題として作成されます。デフォルト値は <tt>&lt;システムメールアドレス名&gt;+&lt;プロジェクトパス&gt;@&lt;システムメールアドレスドメイン&gt;</tt> の形式を取ります");
 		m.put("Specify applicable projects for above option. Multiple projects should be separated by space. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for all projects", 
@@ -3727,6 +3709,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify user name of the registry", "レジストリのユーザー名を指定してください。");
 		m.put("Specify user name to authenticate with", "認証に使用するユーザー名を指定してください。");
 		m.put("Specify value of the environment variable", "環境変数の値を指定してください。");
+		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
+			"Web UIセッションのタイムアウトを分単位で指定してください。ブラウザが開いている場合は期限切れにならないように空欄にしてください。この値を変更しても既存のセッションには影響しません。");
 		m.put("Specify webhook url to post events", "イベントを投稿するためのWebhook URLを指定してください。");
 		m.put("Specify which issue state to use for closed GitHub issues.<br><b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here", 
 			"閉じたGitHubの問題に使用する問題状態を指定してください。<br><b>注意:</b> 適切なオプションがない場合は、OneDevの問題状態をカスタマイズすることができます。");
@@ -4424,7 +4408,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not to retrieve submodules. Refer to <a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on how to set up clone credential above to retrieve submodules", 
 			"サブモジュールを取得するかどうか。サブモジュールを取得するためのクローン資格情報を設定する方法については、<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>このチュートリアル</a>を参照してください");
 		m.put("Whether or not to run this step inside container", "このステップをコンテナ内で実行するかどうか");
-		m.put("Whether or not to scan recursively in above paths", "上記のパスで再帰的にスキャンするかどうか");
 		m.put("Whether or not to send notifications for events generated by yourself", "自分自身が生成したイベントの通知を送信するかどうか");
 		m.put("Whether or not to send notifications to issue watchers for this change", "この変更について課題ウォッチャーに通知を送信するかどうか");
 		m.put("Whether or not to show branch/tag column", "ブランチ/タグ列を表示するかどうか");
@@ -4719,13 +4702,48 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Build {0} deleted", "ビルド {0} が削除されました");
-		m.put("Entitled projects and all the sub-projects will be able to access this AI service", 
-			"権限を持つプロジェクトとすべてのサブプロジェクトは、このAIサービスにアクセスできます");
-		m.put("Issue {0} deleted", "課題 {0} が削除されました");
-		m.put("Pull request {0} deleted", "プルリクエスト {0} が削除されました");
-		m.put("Specify web UI session timeout in minutes. Leave empty to never expire when browser is open. Existing sessions will not be affected after changing this value.", 
-			"Web UIセッションのタイムアウトを分単位で指定してください。ブラウザが開いている場合は期限切れにならないように空欄にしてください。この値を変更しても既存のセッションには影響しません。");
+		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint.\n<b class='text-danger'>NOTE:</b> Make sure base URL specified here supports HTTP/2 connection. HTTP/1.1 is not\nsupported and will get a connection timeout error", 
+			"<b class='text-info'>OpenAI互換</b>APIエンドポイントのベースURL。OpenAI公式エンドポイントを使用するには空のままにしてください。");
+		m.put("Check Licenses", "ライセンスを確認");
+		m.put("Check Secrets", "シークレットを確認");
+		m.put("Check Vulnerabilities", "脆弱性を確認");
+		m.put("Child Project", "子プロジェクト");
+		m.put("Children Import Projects", "子インポートプロジェクト");
+		m.put("Children Import Repositories", "子インポートリポジトリ");
+		m.put("Children Import Server", "子インポートサーバー");
+		m.put("Commit Message Checker", "コミットメッセージチェッカー");
+		m.put("Conventional Commit", "従来のコミット");
+		m.put("Explanation", "説明");
+		m.put("Extra Options", "追加オプション");
+		m.put("No commit message checker", "コミットメッセージチェッカーなし");
+		m.put("No explanation", "説明なし");
+		m.put("Not available", "利用不可");
+		m.put("Optionally specify a commit message checker to validate commit messages. Only applicable for non-merge commits", 
+			"コミットメッセージを検証するためのコミットメッセージチェッカーを任意で指定します。マージ以外のコミットにのみ適用されます");
+		m.put("Optionally specify an explanation for the regular expression. This will be displayed to the user if validation fails", 
+			"正規表現の説明を任意で指定します。検証が失敗した場合にユーザーに表示されます");
+		m.put("Optionally specify comma separated <a href='https://spdx.org/licenses/'>SPDX license identifiers</a> to be ignored", 
+			"無視する<a href='https://spdx.org/licenses/'>SPDXライセンス識別子</a>をカンマで区切って任意で指定します");
+		m.put("Optionally specify commit types applicable for commit message footer check (hit ENTER to add value). Leave empty to all types", 
+			"コミットメッセージフッターチェックに適用されるコミットタイプを任意で指定します（値を追加するにはENTERを押します）。すべてのタイプには空のままにします");
+		m.put("Optionally specify extra options for osv source scanner. Multiple options need to be separated with space", 
+			"osvソーススキャナーの追加オプションを任意で指定します。複数のオプションはスペースで区切る必要があります");
+		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>secret config</a>", 
+			"trivy<a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>シークレット設定</a>として使用する<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する相対パスを任意で指定します");
+		m.put("Osv Source Scanner", "Osvソーススキャナー");
+		m.put("Run osv scanner to scan project source for vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
+			"プロジェクトソースの脆弱性を<a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>さまざまなロックファイル</a>でスキャンするためにosvスキャナーを実行します。これはdocker対応のエグゼキューターによってのみ実行可能です。");
+		m.put("Specify a <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> pattern to validate the entire commit message. Use <code>(?s)</code> flag at the beginning for multi-line matching", 
+			"コミットメッセージ全体を検証するための<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java正規表現</a>パターンを指定します。複数行のマッチングには<code>(?s)</code>フラグを先頭に使用します");
+		m.put("Specify allowed <a href='https://spdx.org/licenses/'>SPDX license identifiers</a> separated by comma", 
+			"カンマで区切られた許可された<a href='https://spdx.org/licenses/'>SPDXライセンス識別子</a>を指定します");
+		m.put("Specify child project to import into at OneDev side", "OneDev側にインポートする子プロジェクトを指定します");
+		m.put("Specify how long to wait for the model response in seconds", "モデルの応答を待つ時間を秒で指定します");
+		m.put("Specify the model name to use. <b class='text-danger'>NOTE: </b> Right now OneDev only supports\nmodels with chat completions API. OpenAI models with the new responses API is not supported yet", 
+			"使用するモデル名を指定します。<b class='text-danger'>注意: </b> 現在、OneDevはチャット完了APIを持つモデルのみをサポートしています。OpenAIの新しい応答APIを持つモデルはまだサポートされていません");
+		m.put("Whether or not to scan recursively in above paths. Applicable only for directories", 
+			"上記のパスで再帰的にスキャンするかどうか。ディレクトリにのみ適用されます");
+		m.put("{0} will be transcoded to UTF-8 upon commit", "{0}はコミット時にUTF-8にトランスコードされます");
 	}
 		
 	@Override

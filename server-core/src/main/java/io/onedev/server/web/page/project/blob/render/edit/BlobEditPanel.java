@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.edit;
 
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.Arrays;
 
 import org.apache.wicket.Component;
@@ -33,6 +34,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.blob.render.commitoption.CommitOptionPanel;
 import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditSupport;
+import static io.onedev.server.web.translation.Translation._T;
 
 public abstract class BlobEditPanel extends Panel {
 
@@ -180,9 +182,12 @@ public abstract class BlobEditPanel extends Panel {
 					var blob = context.getProject().getBlob(context.getBlobIdent(), true);
 					bytes = blob.getBytes();
 					if (blob.getText() != null && !Arrays.equals(bytes, blob.getText().getContent().getBytes(StandardCharsets.UTF_8))) {
-						var message = String.format(
-								"<svg class='icon icon-sm mr-1'><use xlink:href='%s'/></svg> %s will be transcoded to UTF-8 upon commit",
-								SpriteImage.getVersionedHref("warning-o"), blob.getText().getCharset().name());
+						var message = MessageFormat.format(
+							_T("{0} will be transcoded to UTF-8 upon commit"), 
+							blob.getText().getCharset().name());
+						message = MessageFormat.format(
+								"<svg class='icon icon-sm mr-1'><use xlink:href='{0}'/></svg> {1}",
+								SpriteImage.getVersionedHref("warning-o"), message);
 						BlobEditPanel.this.add(new Label("transcodeWarning", message).setEscapeModelStrings(false));
 					}
 				} else {
