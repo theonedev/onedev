@@ -91,8 +91,11 @@ public class PackNotificationManager {
 				for (String name: personalization.getQuerySubscriptionSupport().getQuerySubscriptions()) {
 					String commonName = NamedQuery.getCommonName(name);
 					if (commonName != null) {
-						fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
-								NamedQuery.find(project.getNamedPackQueries(), commonName));
+						// Skip common query subscription if a personal query with same name exists
+						if (NamedQuery.find(personalization.getQueries(), commonName) == null) {
+							fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
+									NamedQuery.find(project.getNamedPackQueries(), commonName));
+						}
 					}
 					String personalName = NamedQuery.getPersonalName(name);
 					if (personalName != null) {
@@ -133,8 +136,11 @@ public class PackNotificationManager {
 				for (String name: user.getPackQueryPersonalization().getQuerySubscriptionSupport().getQuerySubscriptions()) {
 					String globalName = NamedQuery.getCommonName(name);
 					if (globalName != null) {
-						fillSubscribedQueryStrings(subscribedQueryStrings, user, 
-								NamedQuery.find(settingService.getPackSetting().getNamedQueries(), globalName));
+						// Skip common query subscription if a personal query with same name exists
+						if (NamedQuery.find(user.getPackQueryPersonalization().getQueries(), globalName) == null) {
+							fillSubscribedQueryStrings(subscribedQueryStrings, user, 
+									NamedQuery.find(settingService.getPackSetting().getNamedQueries(), globalName));
+						}
 					}
 					String personalName = NamedQuery.getPersonalName(name);
 					if (personalName != null) {

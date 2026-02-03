@@ -52,6 +52,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -94,7 +95,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.criteria.Criteria;

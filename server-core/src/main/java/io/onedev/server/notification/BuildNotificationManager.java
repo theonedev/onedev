@@ -116,8 +116,11 @@ public class BuildNotificationManager {
 				for (String name : personalization.getQuerySubscriptionSupport().getQuerySubscriptions()) {
 					String commonName = NamedQuery.getCommonName(name);
 					if (commonName != null) {
-						fillSubscribedQueryStrings(subscribedQueryStrings, user,
-								NamedQuery.find(project.getNamedBuildQueries(), commonName));
+						// Skip common query subscription if a personal query with same name exists
+						if (NamedQuery.find(personalization.getQueries(), commonName) == null) {
+							fillSubscribedQueryStrings(subscribedQueryStrings, user,
+									NamedQuery.find(project.getNamedBuildQueries(), commonName));
+						}
 					}
 					String personalName = NamedQuery.getPersonalName(name);
 					if (personalName != null) {
@@ -164,8 +167,11 @@ public class BuildNotificationManager {
 				for (String name: user.getBuildQueryPersonalization().getQuerySubscriptionSupport().getQuerySubscriptions()) {
 					String globalName = NamedQuery.getCommonName(name);
 					if (globalName != null) {
-						fillSubscribedQueryStrings(subscribedQueryStrings, user, 
-								NamedQuery.find(settingService.getBuildSetting().getNamedQueries(), globalName));
+						// Skip common query subscription if a personal query with same name exists
+						if (NamedQuery.find(user.getBuildQueryPersonalization().getQueries(), globalName) == null) {
+							fillSubscribedQueryStrings(subscribedQueryStrings, user, 
+									NamedQuery.find(settingService.getBuildSetting().getNamedQueries(), globalName));
+						}
 					}
 					String personalName = NamedQuery.getPersonalName(name);
 					if (personalName != null) {

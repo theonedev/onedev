@@ -17,7 +17,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 
-
 public abstract class QueryWatchBuilder<T extends AbstractEntity> {
 	
 	private static final Logger logger = LoggerFactory.getLogger(QueryWatchBuilder.class);
@@ -31,9 +30,12 @@ public abstract class QueryWatchBuilder<T extends AbstractEntity> {
 			for (Map.Entry<String, Boolean> entry: personalization.getQueryWatchSupport().getQueryWatches().entrySet()) {
 				String globalName = NamedQuery.getCommonName(entry.getKey());
 				if (globalName != null) {
-					if (matches(NamedQuery.find(getNamedQueries(), globalName), personalization.getUser())) {
-						watches.putIfAbsent(personalization.getUser(), entry.getValue());
-						break;
+					// Skip common query watch if a personal query with same name exists
+					if (NamedQuery.find(personalization.getQueries(), globalName) == null) {
+						if (matches(NamedQuery.find(getNamedQueries(), globalName), personalization.getUser())) {
+							watches.putIfAbsent(personalization.getUser(), entry.getValue());
+							break;
+						}
 					}
 				}
 				String personalName = NamedQuery.getPersonalName(entry.getKey());

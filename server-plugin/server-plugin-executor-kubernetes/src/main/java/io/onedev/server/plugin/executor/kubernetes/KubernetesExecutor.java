@@ -39,6 +39,7 @@ import org.jspecify.annotations.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -93,7 +94,6 @@ import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
-import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.web.util.Testable;
 
 @Editable(order=KubernetesExecutor.ORDER, description="This executor runs build jobs as pods in a kubernetes cluster. "
@@ -307,7 +307,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 	public boolean execute(JobContext jobContext, TaskLogger jobLogger) {
 		var clusterService = OneDev.getInstance(ClusterService.class);
 		var servers = clusterService.getServerAddresses();
-		var server = servers.get(RandomUtils.nextInt(0, servers.size()));
+		var server = servers.get(RandomUtils.secure().randomInt(0, servers.size()));
 		return getJobService().runJob(server, ()-> getJobService().runJob(jobContext, new JobRunnable() {
 
 			private static final long serialVersionUID = 1L;

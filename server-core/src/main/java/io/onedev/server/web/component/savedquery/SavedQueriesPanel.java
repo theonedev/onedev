@@ -357,9 +357,18 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
 			@Override
 			protected List<T> load() {
+				Set<String> personalQueryNames = new HashSet<>();
+				QueryPersonalization<T> personalization = getQueryPersonalization();
+				if (personalization != null) {
+					for (T query: personalization.getQueries())
+						personalQueryNames.add(query.getName());
+				}
+				
 				List<T> namedQueries = new ArrayList<>();
-				for (T namedQuery: getCommonQueries()!=null?getCommonQueries():getInheritedCommonQueries())
-					namedQueries.add(namedQuery);
+				for (T namedQuery: getCommonQueries()!=null?getCommonQueries():getInheritedCommonQueries()) {
+					if (!personalQueryNames.contains(namedQuery.getName()))
+						namedQueries.add(namedQuery);
+				}
 				return namedQueries;
 			}
 			

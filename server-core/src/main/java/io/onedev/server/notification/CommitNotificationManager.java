@@ -68,8 +68,11 @@ public class CommitNotificationManager {
 					for (String name : personalization.getQuerySubscriptionSupport().getQuerySubscriptions()) {
 						String globalName = NamedQuery.getCommonName(name);
 						if (globalName != null) {
-							fillSubscribedQueryStrings(subscribedQueryStrings, user,
-									NamedQuery.find(project.getNamedCommitQueries(), globalName));
+							// Skip common query subscription if a personal query with same name exists
+							if (NamedQuery.find(personalization.getQueries(), globalName) == null) {
+								fillSubscribedQueryStrings(subscribedQueryStrings, user,
+										NamedQuery.find(project.getNamedCommitQueries(), globalName));
+							}
 						}
 						String personalName = NamedQuery.getPersonalName(name);
 						if (personalName != null) {
