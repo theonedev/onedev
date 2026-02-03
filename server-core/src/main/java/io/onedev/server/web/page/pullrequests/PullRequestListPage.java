@@ -79,7 +79,7 @@ public class PullRequestListPage extends LayoutPage {
 
 			@Override
 			protected QueryPersonalization<NamedPullRequestQuery> getQueryPersonalization() {
-				return getLoginUser().getPullRequestQueryPersonalization();
+				return getLoginUser() != null ? getLoginUser().getPullRequestQueryPersonalization() : null;
 			}
 
 			@Override

@@ -66,7 +66,12 @@ public class Revision implements Serializable {
 
 	public RevCommit getRevCommit(Project project) {
 		if (type == Type.BRANCH) {
-			var branch = value != null? value: project.getDefaultBranch();
+			String branch = value;
+			if (branch == null) {
+				branch = project.getDefaultBranch();
+				if (branch == null) 
+					throw new ExplicitException("No default branch");
+			}
 			return project.getRevCommit(GitUtils.branch2ref(branch), true);
 		} else if (type == Type.TAG) {
 			return project.getRevCommit(GitUtils.tag2ref(value), true);

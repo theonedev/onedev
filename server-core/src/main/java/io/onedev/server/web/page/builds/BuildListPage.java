@@ -79,7 +79,7 @@ public class BuildListPage extends LayoutPage {
 
 			@Override
 			protected QueryPersonalization<NamedBuildQuery> getQueryPersonalization() {
-				return getLoginUser().getBuildQueryPersonalization();
+				return getLoginUser() != null ? getLoginUser().getBuildQueryPersonalization() : null;
 			}
 
 			@Override

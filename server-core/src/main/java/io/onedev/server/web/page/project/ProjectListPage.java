@@ -83,7 +83,7 @@ public class ProjectListPage extends LayoutPage {
 
 			@Override
 			protected QueryPersonalization<NamedProjectQuery> getQueryPersonalization() {
-				return getLoginUser().getProjectQueryPersonalization();
+				return getLoginUser() != null ? getLoginUser().getProjectQueryPersonalization() : null;
 			}
 
 			@Override

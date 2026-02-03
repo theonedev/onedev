@@ -89,7 +89,7 @@ public class IssueListPage extends LayoutPage {
 
 			@Override
 			protected QueryPersonalization<NamedIssueQuery> getQueryPersonalization() {
-				return getLoginUser().getIssueQueryPersonalization();
+				return getLoginUser() != null ? getLoginUser().getIssueQueryPersonalization() : null;
 			}
 
 			@Override
