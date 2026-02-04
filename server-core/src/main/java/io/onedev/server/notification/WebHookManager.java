@@ -43,9 +43,9 @@ public class WebHookManager {
 	@Sessional
 	@Listen
 	public void on(ProjectEvent event) {
-		String jsonOfEvent;
+		String eventJson;
 		try {
-			jsonOfEvent = mapper.writeValueAsString(event);
+			eventJson = mapper.writeValueAsString(event);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -57,7 +57,7 @@ public class WebHookManager {
 						try (var client = HttpClients.createDefault()) {
 							HttpPost httpPost = new HttpPost(webHook.getPostUrl());
 
-							StringEntity entity = new StringEntity(jsonOfEvent, UTF_8.name());
+							StringEntity entity = new StringEntity(eventJson, UTF_8.name());
 							httpPost.setEntity(entity);
 							httpPost.setHeader(HttpHeaders.ACCEPT, APPLICATION_JSON);
 							httpPost.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);

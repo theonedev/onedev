@@ -1,20 +1,23 @@
 package io.onedev.server.event.project;
 
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Optional;
+
+import org.jspecify.annotations.Nullable;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.onedev.server.OneDev;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.UrlService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.event.Event;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.notification.ActivityDetail;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.UrlService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.commenttext.CommentText;
-
-import org.jspecify.annotations.Nullable;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Optional;
 
 public abstract class ProjectEvent extends Event implements Serializable {
 
@@ -117,4 +120,9 @@ public abstract class ProjectEvent extends Event implements Serializable {
 		return false;
 	}
 	
+	@JsonProperty("type")
+	public String getType() {
+		return getClass().getSimpleName();
+	}
+
 }

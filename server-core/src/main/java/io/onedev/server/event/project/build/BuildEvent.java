@@ -3,17 +3,16 @@ package io.onedev.server.event.project.build;
 import java.util.Date;
 
 import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.UrlService;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
-import io.onedev.server.util.ProjectScopedCommitAware;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.UrlService;
 import io.onedev.server.util.ProjectScopedCommit;
-
-import org.jspecify.annotations.Nullable;
+import io.onedev.server.util.ProjectScopedCommitAware;
 
 public abstract class BuildEvent extends ProjectEvent implements ProjectScopedCommitAware {
 
