@@ -76,6 +76,7 @@ import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.util.concurrent.BatchWorkExecutionService;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
+import io.onedev.server.ai.tools.TaskComplete;
 import io.onedev.server.web.SessionListener;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.page.base.BasePage;
@@ -162,6 +163,9 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 			.stream()
 			.map(ChatTool::getSpecification)
 			.collect(Collectors.toList());
+		
+		// Add the taskComplete tool - this must always be present
+		toolSpecifications.add(TaskComplete.getSpecification());
 
 		ToolUtils.filterDuplications(toolSpecifications);
 
@@ -190,6 +194,7 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 		var systemPrompt = request.getChat().getAi().getAiSetting().getSystemPrompt();
 		if (systemPrompt != null)
 			langchain4jMessages.add(new SystemMessage(systemPrompt));
+		langchain4jMessages.add(new SystemMessage(TaskComplete.SYSTEM_MESSAGE));
 		langchain4jMessages.addAll(messages.stream()
 			.map(it -> {
 				var content = it.getContent();
@@ -204,6 +209,8 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 
 		var responseFuture = new CompletableFuture<String>();
 		var executionFuture = executorService.submit(new Runnable() {
+
+			private int noToolRetryCount = 0;
 
 			private StreamingChatResponseHandler newResponseHandler(Subject subject) {
 				return new StreamingChatResponseHandler() {
@@ -279,6 +286,14 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 										if (responseFuture.isDone())										
 											return;
 										String toolName = toolRequest.name();
+										
+										// Handle taskComplete specially - it signals conversation completion
+										var taskCompleteResponse = TaskComplete.getResponse(toolRequest);
+										if (taskCompleteResponse != null) {
+											responseFuture.complete(taskCompleteResponse);
+											return;
+										}
+										
 										try {
 											var toolExecution = new AiToolExecution(toolName, ToolUtils.getToolArguments(toolRequest));
 											connection.sendMessage(toolExecution);
@@ -313,7 +328,25 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 											.build();							
 									streamingChatModel.chat(langchain4jChatRequest, handler);
 								} else {
-									responseFuture.complete(aiMessage.text());
+									// LLM didn't call any tool - prompt it to continue or call taskComplete
+									noToolRetryCount++;
+									if (noToolRetryCount <= TaskComplete.MAX_NO_TOOL_RETRIES) {
+										var text = aiMessage.text();
+										if (StringUtils.isNotBlank(text)) {
+											langchain4jMessages.add(aiMessage);
+										}
+										langchain4jMessages.add(new UserMessage(TaskComplete.CONTINUATION_PROMPT));
+										
+										var handler = newResponseHandler(SecurityUtils.getSubject());
+										var langchain4jChatRequest = ChatRequest.builder()
+												.messages(new ArrayList<>(langchain4jMessages))
+												.toolSpecifications(toolSpecifications)
+												.build();
+										streamingChatModel.chat(langchain4jChatRequest, handler);
+									} else {
+										// Max retries exceeded, accept whatever response we have
+										responseFuture.complete(aiMessage.text());
+									}
 								}	
 							} catch (Throwable t) {
 								responseFuture.completeExceptionally(t);

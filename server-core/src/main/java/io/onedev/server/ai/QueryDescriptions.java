@@ -503,7 +503,7 @@ public class QueryDescriptions {
                     ;
 
                 revision
-                    : 'commit(' CommitHash ')'
+                    : 'commit(' CommitHash ')' 
                     | 'build(' '#'Number ')'
                     | 'branch(' BranchName ')'
                     | 'tag(' TagName ')'
