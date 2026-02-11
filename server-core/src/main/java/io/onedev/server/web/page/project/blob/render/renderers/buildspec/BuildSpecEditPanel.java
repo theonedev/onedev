@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -40,6 +39,9 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Throwables;
@@ -87,6 +89,8 @@ import io.onedev.server.web.util.AjaxPayload;
 
 public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements BuildSpecAware, EditCompleteAware {
 
+	private static final Logger logger = LoggerFactory.getLogger(BuildSpecEditPanel.class);
+	
 	private final BlobRenderContext context;
 	
 	private Serializable parseResult;
@@ -361,8 +365,13 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 									List<Job> suggestedJobs = new ArrayList<>();
 									
 									if (context.getBlobIdent().revision != null) {
-										for (JobSuggestion suggestion: OneDev.getExtensions(JobSuggestion.class)) 
-											suggestedJobs.addAll(suggestion.suggestJobs(context.getProject(), context.getCommit()));
+										for (JobSuggestion suggestion: OneDev.getExtensions(JobSuggestion.class)) {
+											try {
+												suggestedJobs.addAll(suggestion.suggestJobs(context.getProject(), context.getCommit()));
+											} catch (Exception e) {
+												logger.warn("Error suggesting jobs", e);
+											}
+										}
 									}
 									
 									if (!suggestedJobs.isEmpty()) {
