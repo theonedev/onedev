@@ -20,7 +20,8 @@ onedev.server.sourceView = {
 			matchBrackets: true,
 			scrollbarStyle: "simple",
 			highlightIdentifiers: {delay: 500},
-			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+			specialChars: /[\u0000-\u001f\u007f-\u009f\u00ad\u061c\u200b\u200e\u200f\u2028\u2029\u202d\u202e\u2066\u2067\u2069\ufff9-\ufffc]/g
 		});
 
 		onedev.server.codemirror.setModeByFileName(cm, filePath);

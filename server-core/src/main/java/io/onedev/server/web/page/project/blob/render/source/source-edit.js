@@ -19,6 +19,7 @@ onedev.server.sourceEdit = {
 			matchBrackets: true,
 			scrollbarStyle: "simple",
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+			specialChars: /[\u0000-\u001f\u007f-\u009f\u00ad\u061c\u200b\u200e\u200f\u2028\u2029\u202d\u202e\u2066\u2067\u2069\ufff9-\ufffc]/g,
 			highlightIdentifiers: {delay: 500}
 		});
 		
