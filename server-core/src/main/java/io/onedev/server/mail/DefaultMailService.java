@@ -197,6 +197,7 @@ public class DefaultMailService implements MailService, Serializable {
 							  @Nullable String senderName, @Nullable String references) {
 		transactionService.runAfterCommit(() -> executorService.execute(() -> {
 			try {
+				SecurityUtils.bindAsSystem();
 				sendMail(toList, ccList, bccList, subject, htmlBody, textBody, replyAddress, 
 						senderName, references);
 			} catch (Exception e) {
