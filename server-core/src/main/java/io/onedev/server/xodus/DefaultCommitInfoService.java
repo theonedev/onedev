@@ -508,7 +508,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 		Store userCommitsStore = getStore(env, USER_COMMITS_STORE);
 
 		Repository repository = projectService.getRepository(project.getId());
-		PatternSet filePatterns = PatternSet.parse(project.findCodeAnalysisPatterns());
+		PatternSet filePatterns = PatternSet.parse(project.findCodeAnalysisFiles());
 
 		ObjectId lastCommitId = env.computeInTransaction(txn -> {
 			ObjectId innerLastCommitId;
@@ -705,7 +705,7 @@ public class DefaultCommitInfoService extends AbstractEnvironmentService
 			return null;
 		});
 
-		PatternSet filePatterns = PatternSet.parse(project.findCodeAnalysisPatterns());
+		PatternSet filePatterns = PatternSet.parse(project.findCodeAnalysisFiles());
 		if (lastCommitId == null) {
 			env.executeInTransaction(txn -> {
 				Map<Integer, Map<String, Integer>> lineStats = new HashMap<>();

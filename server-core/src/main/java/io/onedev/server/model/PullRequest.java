@@ -1499,53 +1499,55 @@ public class PullRequest extends ProjectBelonging
 		}
 	}
 
-	public List<TaskTool> getTools() {
+	public List<TaskTool> getTools(boolean includeReviewActions) {
 		var projectId = getProject().getId();
 		var requestId = getId();
 		var oldCommitId = ObjectId.fromString(getBaseCommitHash());
 		var newCommitId = ObjectId.fromString(getLatestUpdate().getHeadCommitHash());
 
-		var tools = new ArrayList<TaskTool>(List.of(
-			new TaskTool() {
+		var tools = new ArrayList<TaskTool>();
+		tools.add(new TaskTool() {
 
-				@Override
-				public ToolSpecification getSpecification() {
-					return ToolSpecification.builder()
-						.name("getCurrentPullRequest")
-						.description("Get info of current OneDev pull request in json format")
-						.build();
-				}
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentPullRequest")
+					.description("Get info of current OneDev pull request in json format")
+					.build();
+			}
 
-				@Override
-				public ToolExecutionResult execute(Subject subject, JsonNode arguments) {	
-					var request = getPullRequest(requestId);
-					var project = request.getProject();
-					if (!SecurityUtils.canReadCode(subject, project))
-						throw new UnauthorizedException();
-					return new ToolExecutionResult(convertToJson(getDetail(project, request)), false);
-				}
-				
-			},
-			new TaskTool() {
+			@Override
+			public ToolExecutionResult execute(Subject subject, JsonNode arguments) {	
+				var request = getPullRequest(requestId);
+				var project = request.getProject();
+				if (!SecurityUtils.canReadCode(subject, project))
+					throw new UnauthorizedException();
+				return new ToolExecutionResult(convertToJson(getDetail(project, request)), false);
+			}
+			
+		});
+		tools.add(new TaskTool() {
 
-				@Override
-				public ToolSpecification getSpecification() {
-					return ToolSpecification.builder()
-						.name("getCurrentPullRequestComments")
-						.description("Get comments of current OneDev pull request in json format")
-						.build();
-				}
+			@Override
+			public ToolSpecification getSpecification() {
+				return ToolSpecification.builder()
+					.name("getCurrentPullRequestComments")
+					.description("Get comments of current OneDev pull request in json format")
+					.build();
+			}
 
-				@Override
-				public ToolExecutionResult execute(Subject subject, JsonNode arguments) {	
-					var request = getPullRequest(requestId);
-					if (!SecurityUtils.canReadCode(subject, request.getProject()))
-						throw new UnauthorizedException();
-					return new ToolExecutionResult(convertToJson(PullRequestHelper.getComments(request)), false);
-				}
-				
-			},		
-			new TaskTool() {
+			@Override
+			public ToolExecutionResult execute(Subject subject, JsonNode arguments) {	
+				var request = getPullRequest(requestId);
+				if (!SecurityUtils.canReadCode(subject, request.getProject()))
+					throw new UnauthorizedException();
+				return new ToolExecutionResult(convertToJson(PullRequestHelper.getComments(request)), false);
+			}
+			
+		});
+		
+		if (includeReviewActions) {
+			tools.add(new TaskTool() {
 
 				@Override
 				public ToolSpecification getSpecification() {
@@ -1573,8 +1575,8 @@ public class PullRequest extends ProjectBelonging
 					}
 				}
 
-			},
-			new TaskTool() {
+			});
+			tools.add(new TaskTool() {
 
 				@Override
 				public ToolSpecification getSpecification() {
@@ -1602,8 +1604,8 @@ public class PullRequest extends ProjectBelonging
 					}
 				}
 
-			}
-		));
+			});
+		}
 		tools.addAll(getDiffTools(projectId, oldCommitId, newCommitId, requestId));
 		return tools;
 	}

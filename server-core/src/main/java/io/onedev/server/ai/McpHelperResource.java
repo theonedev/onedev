@@ -1192,8 +1192,7 @@ public class McpHelperResource {
     @GET
     public Map<String, String> getPullRequestPatchInfo(
                 @QueryParam("currentProject") @NotNull String currentProjectPath, 
-                @QueryParam("reference") @NotNull String pullRequestReference, 
-                @QueryParam("sinceLastReview") boolean sinceLastReview) {
+                @QueryParam("reference") @NotNull String pullRequestReference) {
         var user = SecurityUtils.getUser();
         if (user == null)
             throw new UnauthenticatedException();
@@ -1203,8 +1202,6 @@ public class McpHelperResource {
         var pullRequest = getPullRequest(currentProject, pullRequestReference);
 
         var oldCommitId = ObjectId.fromString(pullRequest.getBaseCommitHash());
-        if (sinceLastReview) 
-            oldCommitId = pullRequestReviewService.getLastReviewedCommit(pullRequest, user);
         var newCommitId = ObjectId.fromString(pullRequest.getLatestUpdate().getHeadCommitHash());
         var comparisonBase = pullRequestService.getComparisonBase(pullRequest, oldCommitId, newCommitId);
 

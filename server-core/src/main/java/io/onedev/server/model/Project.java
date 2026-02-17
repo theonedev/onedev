@@ -106,6 +106,7 @@ import io.onedev.server.git.signatureverification.VerificationSuccessful;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.CodeAnalysisSetting;
 import io.onedev.server.model.support.LabelSupport;
+import io.onedev.server.model.support.ProjectAiSetting;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.WebHook;
@@ -390,6 +391,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Lob
 	@Column(length=65535)
 	private CodeAnalysisSetting codeAnalysisSetting = new CodeAnalysisSetting();
+	
+	@Lob
+	@Column(length=65535)
+	private ProjectAiSetting aiSetting = new ProjectAiSetting();
 	
 	// SQL Server does not allow duplicate null values for unique column. So we use 
 	// special prefix to indicate null
@@ -1086,6 +1091,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public void setCodeAnalysisSetting(CodeAnalysisSetting codeAnalysisSetting) {
 		this.codeAnalysisSetting = codeAnalysisSetting;
+	}
+
+	public ProjectAiSetting getAiSetting() {
+		return aiSetting;
+	}
+
+	public void setAiSetting(ProjectAiSetting aiSetting) {
+		this.aiSetting = aiSetting;
 	}
 
 	public ProjectIssueSetting getIssueSetting() {
@@ -1918,7 +1931,19 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			return null;
 	}
 	
-	public String findCodeAnalysisPatterns() {
+	@Nullable
+	public String findExcludedAiReviewFiles() {
+		Project current = this;
+		do {
+			if (current.getAiSetting().getExcludedReviewFiles() != null)
+				return current.getAiSetting().getExcludedReviewFiles();
+			current = current.getParent();
+		} while (current != null);
+		
+		return null;
+	}
+	
+	public String findCodeAnalysisFiles() {
 		Project current = this;
 		do {
 			if (current.getCodeAnalysisSetting().getAnalyzeFiles() != null)

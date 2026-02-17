@@ -35,7 +35,7 @@ public abstract class GetDiffPatch implements TaskTool {
         var project = OneDev.getInstance(ProjectService.class).load(getProjectId());
         if (!SecurityUtils.canReadCode(subject, project))
             throw new UnauthorizedException();
-        var patch = OneDev.getInstance(GitService.class).getPatch(project, getOldCommitId(), getNewCommitId());
+        var patch = OneDev.getInstance(GitService.class).getPatch(project, getOldCommitId(), getNewCommitId(), project.findExcludedAiReviewFiles());
         if (patch.length() > MAX_PATCH_SIZE)
             return new ToolExecutionResult(convertToJson(Map.of("successful", false, "failReason", "Patch is too large")), false);
         else

@@ -303,7 +303,7 @@ public class PullRequestNotificationManager {
 								if you are satisfied with it, or request for changes if you think it needs more work. \
 								Summarize found issues in response and for each issue, make sure to quote relevant code \
 								snippets if applicable""",
-							request.getTools(), 
+							request.getTools(true), 
 							new AddPullRequestComment(request.getId()));
 						userService.execute(reviewer, task);
 					}
@@ -344,7 +344,7 @@ public class PullRequestNotificationManager {
 									var task = new AiTask(
 										systemPrompt.formatted(mentionedUser.getName()), 
 										event.getTextBody(), 
-										request.getTools(), 
+										request.getTools(false), 
 										new AddPullRequestComment(request.getId()));
 									userService.execute(mentionedUser, task);
 								} else if (event instanceof PullRequestCodeCommentCreated || event instanceof PullRequestCodeCommentReplyCreated) {
@@ -352,7 +352,7 @@ public class PullRequestNotificationManager {
 										You are mentioned in a pull request code comment. The content mentioning you is presented \
 										as user prompt. Use existing comments as conversation context. Call relevant tools to get \
 										information about the code comment and pull request if necessary""";
-									var tools = new ArrayList<TaskTool>(request.getTools());
+									var tools = new ArrayList<TaskTool>(request.getTools(false));
 									var codeCommentEvent = (PullRequestCodeCommentEvent) event;
 									var comment = codeCommentEvent.getComment();
 									tools.addAll(comment.getTools());			

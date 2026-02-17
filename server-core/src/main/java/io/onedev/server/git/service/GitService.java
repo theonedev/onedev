@@ -139,6 +139,8 @@ public interface GitService {
 
 	String getPatch(Project project, AnyObjectId oldRevId, AnyObjectId newRevId);
 
+	String getPatch(Project project, AnyObjectId oldRevId, AnyObjectId newRevId, @Nullable String excludedFiles);
+
 	Map<ObjectId, AheadBehind> getAheadBehinds(Project project, ObjectId baseId, 
 			Collection<ObjectId> compareIds);
 	

@@ -137,6 +137,7 @@ import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
+import io.onedev.server.web.page.project.setting.ai.ProjectAiSettingPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
 import io.onedev.server.web.page.project.setting.build.CacheManagementPage;
@@ -475,6 +476,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~settings/build/cache-management", CacheManagementPage.class));
 		add(new ProjectPageMapper("${project}/~settings/service-desk", ServiceDeskSettingPage.class));
 		add(new ProjectPageMapper("${project}/~settings/web-hooks", WebHooksPage.class));
+		add(new ProjectPageMapper("${project}/~settings/ai", ProjectAiSettingPage.class));
 		add(new ProjectPageMapper("${project}/~settings/${" + ContributedProjectSettingPage.PARAM_SETTING + "}", 
 				ContributedProjectSettingPage.class));
 		add(new ProjectPageMapper("${project}/~no-storage", NoProjectStoragePage.class));

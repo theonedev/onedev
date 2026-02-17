@@ -1317,11 +1317,16 @@ public class DefaultGitService implements GitService, Serializable {
 
 	@Override
 	public String getPatch(Project project, AnyObjectId oldRevId, AnyObjectId newRevId) {
+		return getPatch(project, oldRevId, newRevId, null);
+	}
+
+	@Override
+	public String getPatch(Project project, AnyObjectId oldRevId, AnyObjectId newRevId, String excludedFiles) {
 		Long projectId = project.getId();
 		return runOnProjectServer(projectId, () -> {
 			var repository = getRepository(projectId);
 			var baos = new ByteArrayOutputStream();
-			GitUtils.diff(repository, oldRevId, newRevId, baos);
+			GitUtils.diff(repository, oldRevId, newRevId, excludedFiles, baos);
 			return baos.toString(StandardCharsets.UTF_8);
 		});
 	}

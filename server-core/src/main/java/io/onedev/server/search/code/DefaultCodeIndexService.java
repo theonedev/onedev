@@ -330,7 +330,7 @@ public class DefaultCodeIndexService implements CodeIndexService, Serializable {
 			try {
 				logger.debug("Indexing commit (project: {}, commit: {})...", project.getPath(), commit.getName());
 				IndexResult indexResult = index(projectService.getRepository(project.getId()), 
-						commit, writer, searcher, PatternSet.parse(project.findCodeAnalysisPatterns()));
+						commit, writer, searcher, PatternSet.parse(project.findCodeAnalysisFiles()));
 				writer.commit();
 				logger.debug("Indexed commit (project: {}, commit: {})", project.getPath(), commit.getName());
 				return indexResult;

@@ -75,6 +75,7 @@ import com.google.common.collect.Iterables;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.git.command.IsAncestorCommand;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
@@ -82,6 +83,7 @@ import io.onedev.server.git.exception.RefUpdateException;
 import io.onedev.server.git.service.DiffEntryFacade;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.util.GpgUtils;
+import io.onedev.server.util.patternset.PatternSet;
 
 public class GitUtils {
 
@@ -128,7 +130,7 @@ public class GitUtils {
 		}
 	}
 
-	public static void diff(Repository repository, AnyObjectId oldRevId, AnyObjectId newRevId, OutputStream stdout) {
+	public static void diff(Repository repository, AnyObjectId oldRevId, AnyObjectId newRevId, @Nullable String excludedFiles, OutputStream stdout) {
 		try (var diffFormatter = new DiffFormatter(stdout);
 			 var revWalk = new RevWalk(repository);
 			 var reader = repository.newObjectReader()) {
@@ -144,7 +146,24 @@ public class GitUtils {
 			if (!newRevId.equals(ObjectId.zeroId()))
 				newTreeParser.reset(reader, revWalk.parseCommit(newRevId).getTree());
 
-			diffFormatter.format(oldTreeParser, newTreeParser);
+			if (excludedFiles != null) {
+				var patternSet = PatternSet.parse(excludedFiles);
+				var matcher = new PathMatcher();
+				for (var entry : diffFormatter.scan(oldTreeParser, newTreeParser)) {
+					var oldPath = entry.getOldPath();
+					if (DiffEntry.DEV_NULL.equals(oldPath))
+						oldPath = null;
+					var newPath = entry.getNewPath();
+					if (DiffEntry.DEV_NULL.equals(newPath))
+						newPath = null;
+					boolean shouldExclude = (oldPath != null && patternSet.matches(matcher, oldPath))
+							|| (newPath != null && patternSet.matches(matcher, newPath));
+					if (!shouldExclude)
+						diffFormatter.format(entry);
+				}
+			} else {
+				diffFormatter.format(oldTreeParser, newTreeParser);
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

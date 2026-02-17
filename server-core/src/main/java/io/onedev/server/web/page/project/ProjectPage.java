@@ -92,6 +92,7 @@ import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.page.project.setting.authorization.GroupAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.authorization.UserAuthorizationsPage;
+import io.onedev.server.web.page.project.setting.ai.ProjectAiSettingPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
 import io.onedev.server.web.page.project.setting.build.CacheManagementPage;
@@ -320,6 +321,9 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			SidebarMenuItem webHooksItem = new SidebarMenuItem.Page(null, _T("Web Hooks"), 
 					WebHooksPage.class, WebHooksPage.paramsOf(getProject()));			
 			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("Notification"), Lists.newArrayList(webHooksItem)));	
+
+			settingMenuItems.add(new SidebarMenuItem.Page(null, _T("AI"),
+					ProjectAiSettingPage.class, ProjectAiSettingPage.paramsOf(getProject())));
 
 			menuItems.add(new SidebarMenuItem.SubMenu("sliders", _T("Settings"), settingMenuItems));
 		}

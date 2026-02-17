@@ -2398,7 +2398,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 	@Override
 	public List<ChatTool> getChatTools() {
-		return wrapForChat(getPullRequest().getTools());
+		return wrapForChat(getPullRequest().getTools(false));
 	}
 
 }

@@ -25,10 +25,10 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.IOUtils;
 
 public class PatchResource extends AbstractResource {
@@ -40,6 +40,8 @@ public class PatchResource extends AbstractResource {
 	private static final String PARAM_OLD_COMMIT = "old-commit";
 
 	private static final String PARAM_NEW_COMMIT = "new-commit";
+
+	private static final String PARAM_FOR_CODE_REVIEW = "for-code-review";
 		
 	@Override
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
@@ -48,9 +50,17 @@ public class PatchResource extends AbstractResource {
 		Long projectId = params.get(PARAM_PROJECT).toLong();
 		var oldCommitId = ObjectId.fromString(params.get(PARAM_OLD_COMMIT).toString());
 		var newCommitId = ObjectId.fromString(params.get(PARAM_NEW_COMMIT).toString());
+		var forCodeReview = params.get(PARAM_FOR_CODE_REVIEW).toBoolean(false);
 		
+		String excludedFiles;
+		if (forCodeReview) {
+			Project project = getProjectService().load(projectId);
+			excludedFiles = project.findExcludedAiReviewFiles();
+		} else {
+			excludedFiles = null;
+		}
 		if (!SecurityUtils.isSystem()) {
-			Project project = OneDev.getInstance(ProjectService.class).load(projectId);
+			Project project = getProjectService().load(projectId);
 			if (!SecurityUtils.canReadCode(project))
 				throw new UnauthorizedException();
 		}
@@ -67,26 +77,25 @@ public class PatchResource extends AbstractResource {
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
 				String activeServer = getProjectService().getActiveServer(projectId, true);
-				ClusterService clusterService = OneDev.getInstance(ClusterService.class);
-				if (activeServer.equals(clusterService.getLocalServerAddress())) {
+				if (activeServer.equals(getClusterService().getLocalServerAddress())) {
 					try (var os = attributes.getResponse().getOutputStream()) {
 						var repository = getProjectService().getRepository(projectId);
-						GitUtils.diff(repository, oldCommitId, newCommitId, os);
+						GitUtils.diff(repository, oldCommitId, newCommitId, excludedFiles, os);
 					}
 				} else {
 	    			Client client = ClientBuilder.newClient();
 	    			try {
-	    				String activeServerUrl = clusterService.getServerUrl(activeServer);
+	    				String activeServerUrl = getClusterService().getServerUrl(activeServer);
 	    				var pathAndQuery = Url.parse(RequestCycle.get().urlFor(
 	    						new PatchResourceReference(), 
-	    						PatchResource.paramsOf(projectId, oldCommitId, newCommitId)));
+	    						PatchResource.paramsOf(projectId, oldCommitId, newCommitId, forCodeReview)));
 							    				
 	    				WebTarget target = client.target(activeServerUrl).path(pathAndQuery.getPath());
 						for (var entry: pathAndQuery.getQueryParameters()) 
 							target = target.queryParam(entry.getName(), entry.getValue());
 	    				Invocation.Builder builder =  target.request();
 	    				builder.header(HttpHeaders.AUTHORIZATION, 
-	    						KubernetesHelper.BEARER + " " + clusterService.getCredential());
+	    						KubernetesHelper.BEARER + " " + getClusterService().getCredential());
 	    				
 	    				try (Response response = builder.get()) {
 	    					KubernetesHelper.checkStatus(response);
@@ -106,17 +115,26 @@ public class PatchResource extends AbstractResource {
 
 		return response;
 	}
-		
+
 	private ProjectService getProjectService() {
 		return OneDev.getInstance(ProjectService.class);
 	}
-	
+
+	private ClusterService getClusterService() {
+		return OneDev.getInstance(ClusterService.class);
+	}
+		
 	public static PageParameters paramsOf(Long projectId, ObjectId oldCommitId, ObjectId newCommitId) {
+		return paramsOf(projectId, oldCommitId, newCommitId, false);
+	}
+
+	public static PageParameters paramsOf(Long projectId, ObjectId oldCommitId, ObjectId newCommitId, boolean forCodeReview) {
 		PageParameters params = new PageParameters();
 		params.add(PARAM_PROJECT, projectId);
 		params.add(PARAM_OLD_COMMIT, oldCommitId.name());
 		params.set(PARAM_NEW_COMMIT, newCommitId.name());
-		
+		params.set(PARAM_FOR_CODE_REVIEW, forCodeReview);
+
 		return params;
 	}
 	
