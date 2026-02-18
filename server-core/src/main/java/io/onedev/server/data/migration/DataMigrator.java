@@ -8524,8 +8524,12 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element : dom.getRootElement().elements()) {
-					element.addElement("aiSetting");
+				for (Element projectElement : dom.getRootElement().elements()) {
+					projectElement.addElement("aiSetting");
+					Element webHooksElement = projectElement.element("webHooks");
+					for (Element webHookElement : webHooksElement.elements()) {
+						webHookElement.addElement("headers");
+					}
 				}
 				dom.writeToFile(file, false);
 			}

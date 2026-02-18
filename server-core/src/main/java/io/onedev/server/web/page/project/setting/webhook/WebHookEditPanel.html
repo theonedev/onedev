@@ -1,0 +1,15 @@
+<wicket:panel>
+	<form wicket:id="form" class="webhook-edit leave-confirm">
+		<div class="modal-header">
+			<h5 id="modal-title" class="modal-title"><wicket:t>Web Hook</wicket:t></h5>
+			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+		</div>
+		<div class="modal-body">
+			<div wicket:id="editor"></div>
+		</div>
+		<div class="modal-footer">
+			<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" t:value="Save">
+			<a wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></a>
+		</div>
+	</form>
+</wicket:panel>
