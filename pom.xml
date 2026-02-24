@@ -676,8 +676,8 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>3.2.4</commons.version>
-		<agent.version>2.4.4</agent.version>
+		<commons.version>3.2.5</commons.version>
+		<agent.version>2.4.5</agent.version>
 		<slf4j.version>2.0.9</slf4j.version>
 		<logback.version>1.4.14</logback.version>
 		<antlr.version>4.7.2</antlr.version>
