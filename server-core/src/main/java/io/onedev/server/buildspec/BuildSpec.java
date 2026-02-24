@@ -2436,6 +2436,42 @@ public class BuildSpec implements Serializable, Validatable {
 				}
 			}
 		});
-	}	
+	}
+
+	@SuppressWarnings("unused")
+	private void migrate45(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (Node stepsNodeItem : stepsNode.getValue()) {
+				MappingNode stepNode = (MappingNode) stepsNodeItem;
+				var tagValue = stepNode.getTag().getValue();
+				if (tagValue.equals("!FSScannerStep") || tagValue.equals("!ImageScannerStep")
+						|| tagValue.equals("!RootFSScannerStep")) {
+					stepNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "publishJSONReportAsArtifact"),
+							new ScalarNode(Tag.BOOL, "false")));
+				} else if (tagValue.equals("!OsvSourceScannerStep")) {
+					stepNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "publishJSONReportAsArtifact"),
+							new ScalarNode(Tag.BOOL, "false")));
+				}
+			}
+		});
+	}
+
+	@SuppressWarnings("unused")
+	private void migrate46(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			for (Node stepsNodeItem : stepsNode.getValue()) {
+				MappingNode stepNode = (MappingNode) stepsNodeItem;
+				var tagValue = stepNode.getTag().getValue();
+				if (tagValue.equals("!FSScannerStep") || tagValue.equals("!ImageScannerStep")
+						|| tagValue.equals("!RootFSScannerStep")) {
+					stepNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "publishJSONReportAsArtifact"),
+							new ScalarNode(Tag.BOOL, "false")));
+				}
+			}
+		});
+	}
 
 }
