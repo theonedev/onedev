@@ -1,7 +1,8 @@
 onedev.server.inputassist = {
-	onDomReady: function(inputId, callback, supportNaturalLanguageInput, translations) {
+	onDomReady: function(inputId, callback, supportNaturalLanguageInput, translations, selectOnFocus) {
 		var $input = $("#" + inputId);	
 		$input.data("supportNaturalLanguageInput", supportNaturalLanguageInput);
+		$input.data("selectOnFocus", selectOnFocus !== false);
 		onedev.server.inputassist.translations = translations;
 		
 		onedev.server.inputassist.markErrors(inputId, []);
@@ -69,7 +70,7 @@ onedev.server.inputassist = {
 			$input.data("prevCaret", -1);
 		});
 		$input.on("focus", function(e) {
-			if (!$input.data("programmaticFocus")) {
+			if (!$input.data("programmaticFocus") && $input.data("selectOnFocus")) {
 				$input.select();
 			}
 			$input.data("programmaticFocus", false);

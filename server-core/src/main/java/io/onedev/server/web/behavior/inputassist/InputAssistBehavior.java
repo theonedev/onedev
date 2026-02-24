@@ -291,10 +291,11 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 		translations.put("inactiveHelp", _T("<span class='keycap'>Tab</span> to complete."));
 		String script;
 		try {
-			script = String.format("onedev.server.inputassist.onDomReady('%s', %s, %b, %s);", 
+			script = String.format("onedev.server.inputassist.onDomReady('%s', %s, %b, %s, %b);", 
 					getComponent().getMarkupId(true), 
 					getCallbackFunction(explicit("type"), explicit("input"), explicit("caret"), explicit("event")),
-					getNaturalLanguageTranslator() != null, AppLoader.getInstance(ObjectMapper.class).writeValueAsString(translations));
+					getNaturalLanguageTranslator() != null, AppLoader.getInstance(ObjectMapper.class).writeValueAsString(translations),
+					isSelectOnFocus());
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -327,6 +328,10 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 	@Nullable
 	protected NaturalLanguageTranslator getNaturalLanguageTranslator() {
 		return null;
+	}
+
+	protected boolean isSelectOnFocus() {
+		return true;
 	}
 
 }

@@ -370,7 +370,7 @@ public class Issue extends ProjectBelonging implements AttachmentStorageSupport 
 	
 	private Date pinDate;
 	
-	private int boardPosition;
+	private int boardPosition;	
 	
 	@Lob
 	@Column(nullable=false, length=65535)
