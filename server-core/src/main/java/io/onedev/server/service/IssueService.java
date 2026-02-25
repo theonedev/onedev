@@ -102,5 +102,7 @@ public interface IssueService extends EntityService<Issue> {
 	Collection<Long> getProjectIds();
 
 	List<Issue> query(User submitter, Date fromDate, Date toDate);
+
+	String suggestBranch(Issue issue);
 	
 }

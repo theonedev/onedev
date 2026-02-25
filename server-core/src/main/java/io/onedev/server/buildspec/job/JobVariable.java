@@ -1,16 +1,17 @@
 package io.onedev.server.buildspec.job;
 
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.OneDev;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.model.Build;
-import io.onedev.server.util.UrlUtils;
+import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_PREFIX;
+import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_SUFFIX;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_PREFIX;
-import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_SUFFIX;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
+import io.onedev.server.model.Build;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.util.UrlUtils;
 
 public enum JobVariable {
 
@@ -115,6 +116,15 @@ public enum JobVariable {
 				return null;
 		}
 	},
+	ISSUE_BRANCH {
+		@Override
+		public String getValue(Build build) {
+			if (build.getIssue() != null) 
+				return OneDev.getInstance(IssueService.class).suggestBranch(build.getIssue());
+			else 
+				return null;
+		}
+	},
 	SERVER {
 		@Override
 		public String getValue(Build build) {
@@ -141,5 +151,5 @@ public enum JobVariable {
 	};
 
 	public abstract String getValue(Build build);
-	
+
 }

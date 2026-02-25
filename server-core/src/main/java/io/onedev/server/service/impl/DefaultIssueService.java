@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -31,10 +30,12 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
 import org.apache.shiro.subject.Subject;
+import org.eclipse.jgit.lib.Repository;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.hibernate.query.criteria.internal.path.SingularAttributePath;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,24 +43,15 @@ import com.google.common.base.Preconditions;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.UserMessage;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.entityreference.ReferenceMigrator;
-import io.onedev.server.service.IssueAuthorizationService;
-import io.onedev.server.service.IssueFieldService;
-import io.onedev.server.service.IssueLinkService;
-import io.onedev.server.service.IssueQueryPersonalizationService;
-import io.onedev.server.service.IssueScheduleService;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.IssueTouchService;
-import io.onedev.server.service.LinkSpecService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.RoleService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityPersisted;
@@ -71,6 +63,7 @@ import io.onedev.server.event.project.issue.IssuesCopied;
 import io.onedev.server.event.project.issue.IssuesDeleted;
 import io.onedev.server.event.project.issue.IssuesMoved;
 import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAuthorization;
@@ -103,6 +96,18 @@ import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessConfidentialIssues;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.service.IssueAuthorizationService;
+import io.onedev.server.service.IssueFieldService;
+import io.onedev.server.service.IssueLinkService;
+import io.onedev.server.service.IssueQueryPersonalizationService;
+import io.onedev.server.service.IssueScheduleService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.IssueTouchService;
+import io.onedev.server.service.LinkSpecService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.RoleService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.IssueTimes;
 import io.onedev.server.util.IterationAndIssueState;
 import io.onedev.server.util.ProjectIssueStateStat;
@@ -1320,6 +1325,36 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 		criteriaQuery.distinct(true);
 		
 		return getSession().createQuery(criteriaQuery).getResultList();
+	}
+
+	@Sessional
+	@Override
+	public String suggestBranch(Issue issue) {
+		var chatModel = settingService.getAiSetting().getLiteModel();
+		if (chatModel != null) {
+			var systemMessage = new SystemMessage("""
+				Convert the given title into a short slug for a git branch name.
+				Rules: use only lowercase letters, numbers and hyphens; no spaces or other special characters;
+				replace spaces with single hyphens; output only the slug, nothing else; maximum 50 characters.""");
+			for (int attempt = 0; attempt < 3; attempt++) {
+				try {
+					var userMessage = new UserMessage(issue.getTitle());
+					var response = chatModel.chat(systemMessage, userMessage).aiMessage().text();
+					response = StringUtils.trimToNull(response);
+					if (response != null && Repository.isValidRefName(GitUtils.branch2ref(response)))
+						return "issue-" + issue.getNumber() + "-" + response;
+				} catch (Exception e) {
+					logger.warn("Error calling AI model to get normalized title for branch: {}", e);
+					break;
+				}
+			}
+		}
+
+		var normalizedTitle = GitUtils.normalizeForBranch(issue.getTitle());
+		if (normalizedTitle != null)
+			return "issue-" + issue.getNumber() + "-" + normalizedTitle;
+		else
+			return "issue-" + issue.getNumber();
 	}
 
 }

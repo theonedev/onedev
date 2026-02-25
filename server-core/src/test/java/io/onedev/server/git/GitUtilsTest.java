@@ -454,4 +454,26 @@ public class GitUtilsTest extends AbstractGitTest {
 		}			
 	}	
 		
+	@Test
+	public void testNormalizeForBranch() {
+		assertEquals("", GitUtils.normalizeForBranch(""));
+		assertEquals("", GitUtils.normalizeForBranch("   "));
+		assertEquals("", GitUtils.normalizeForBranch("---"));
+		assertEquals("", GitUtils.normalizeForBranch("中文测试"));
+
+		assertEquals("fix-bug", GitUtils.normalizeForBranch("Fix bug"));
+		assertEquals("fix-bug", GitUtils.normalizeForBranch("Fix  bug"));
+		assertEquals("fix-bug", GitUtils.normalizeForBranch("  Fix bug  "));
+		assertEquals("fix-bug", GitUtils.normalizeForBranch("-Fix bug-"));
+
+		assertEquals("add-feature-123", GitUtils.normalizeForBranch("Add feature #123"));
+		assertEquals("some-title", GitUtils.normalizeForBranch("Some Title!"));
+		assertEquals("issue-with-special-chars",
+				GitUtils.normalizeForBranch("Issue with special chars: *?[]\\"));
+
+		assertEquals("already-valid", GitUtils.normalizeForBranch("already-valid"));
+		assertEquals("lowercase", GitUtils.normalizeForBranch("LOWERCASE"));
+		assertEquals("abc123", GitUtils.normalizeForBranch("ABC123"));
+	}
+
 }

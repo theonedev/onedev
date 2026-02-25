@@ -1078,9 +1078,6 @@ public class PullRequest extends ProjectBelonging
 				for (RevCommit commit: update.getCommits())
 					fixedIssueIds.addAll(getProject().parseFixedIssueIds(commit.getFullMessage()));
 			}
-			fixedIssueIds.addAll(getProject().parseFixedIssueIds(getTitle()));
-			if (getDescription() != null)
-				fixedIssueIds.addAll(getProject().parseFixedIssueIds(getDescription()));
 		}
 		return fixedIssueIds;
 	}

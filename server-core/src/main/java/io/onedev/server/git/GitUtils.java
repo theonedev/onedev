@@ -736,4 +736,18 @@ public class GitUtils {
 		}
 	}
 
+	/**
+	 * Normalizes a string for use as part of a git branch name (e.g. issue title).
+	 * Keeps only alphanumeric characters, collapses and trims hyphens, lowercases.
+	 */
+	@Nullable
+	public static String normalizeForBranch(String text) {
+		var branch = text
+				.replaceAll("[^a-zA-Z0-9]", "-")
+				.replaceAll("-+", "-")
+				.replaceAll("^-|-$", "")
+				.toLowerCase();
+		return StringUtils.trimToNull(branch);
+	}
+
 }
