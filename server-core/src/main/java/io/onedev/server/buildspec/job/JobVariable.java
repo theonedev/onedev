@@ -116,7 +116,7 @@ public enum JobVariable {
 				return null;
 		}
 	},
-	ISSUE_BRANCH {
+	SUGGESTED_ISSUE_BRANCH {
 		@Override
 		public String getValue(Build build) {
 			if (build.getIssue() != null) 

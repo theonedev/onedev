@@ -456,10 +456,10 @@ public class GitUtilsTest extends AbstractGitTest {
 		
 	@Test
 	public void testNormalizeForBranch() {
-		assertEquals("", GitUtils.normalizeForBranch(""));
-		assertEquals("", GitUtils.normalizeForBranch("   "));
-		assertEquals("", GitUtils.normalizeForBranch("---"));
-		assertEquals("", GitUtils.normalizeForBranch("中文测试"));
+		assertNull(GitUtils.normalizeForBranch(""));
+		assertNull(GitUtils.normalizeForBranch("   "));
+		assertNull(GitUtils.normalizeForBranch("---"));
+		assertNull(GitUtils.normalizeForBranch("中文测试"));
 
 		assertEquals("fix-bug", GitUtils.normalizeForBranch("Fix bug"));
 		assertEquals("fix-bug", GitUtils.normalizeForBranch("Fix  bug"));

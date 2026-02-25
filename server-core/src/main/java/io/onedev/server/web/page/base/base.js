@@ -373,7 +373,7 @@ onedev.server = {
 			if (message == "ErrorMessage") {
 				$("body>.error").hide();
 				$(".page-error").show();
-			} else if (message == "KeepAlive") {				
+			} else if (message == "KeepAlive") {	
 				Wicket.WebSocket.send("KeepAlive");
 				clearTimeout(webSocketTimeoutTimer);
 				webSocketTimeoutTimer = setTimeout(onWebSocketTimeout, webSocketTimeout);
