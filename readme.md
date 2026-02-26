@@ -152,7 +152,7 @@ query to get notified of interesting events.
 
 MCP server for managing issues, pull requests, and builds. Streamline DevOps workflows, configure CI/CD jobs, 
 and investigate build failures through conversations.
-[**Tutorial**](https://docs.onedev.io/tutorials/misc/working-with-mcp)
+[**Tutorial**](https://docs.onedev.io/tutorials/ai/working-with-mcp)
 
 ![mcp](./doc/images/mcp.png)
 
