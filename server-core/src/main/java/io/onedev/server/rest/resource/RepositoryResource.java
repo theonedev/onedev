@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotEmpty;
@@ -33,6 +32,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
+import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,7 +40,6 @@ import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
@@ -60,7 +59,9 @@ import io.onedev.server.rest.resource.support.FileCreateOrUpdateRequest;
 import io.onedev.server.rest.resource.support.FileEditRequest;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.RevisionAndPath;
+import io.onedev.server.workspace.WorkspaceService;
 
 @Path("/repositories")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -70,19 +71,18 @@ public class RepositoryResource {
 
 	private static final int MAX_COMMITS = 10000;
 	
-	private final ProjectService projectService;
+	@Inject
+	private ProjectService projectService;
 
-	private final GitService gitService;
-	
-	private final ObjectMapper mapper;
+	@Inject
+	private GitService gitService;
+
+	@Inject
+	private WorkspaceService workspaceService;
 	
 	@Inject
-	public RepositoryResource(ProjectService projectService, GitService gitService, ObjectMapper mapper) {
-		this.projectService = projectService;
-		this.gitService = gitService;
-		this.mapper = mapper;
-	}
-
+	private ObjectMapper objectMapper;
+	
 	@Api(order=10, description="List all branches")
 	@Path("/{projectId}/branches")
 	@GET
@@ -119,7 +119,7 @@ public class RepositoryResource {
 			throw new UnauthorizedException();
 
 		try {
-			project.setDefaultBranch(mapper.readValue(defaultBranch, String.class));
+			project.setDefaultBranch(objectMapper.readValue(defaultBranch, String.class));
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -181,8 +181,11 @@ public class RepositoryResource {
 	public Response deleteBranch(@PathParam("projectId") Long projectId, 
 			@PathParam("branch") @Api(example="test-branch") String branchName) {
 		Project project = projectService.load(projectId);
-		if (!SecurityUtils.canDeleteBranch(project, branchName)) {
+		if (!SecurityUtils.canDeleteBranch(project, branchName)) 
 			throw new UnauthorizedException();
+		
+		if (workspaceService.count(project, branchName) > 0) {
+			throw new NotAcceptableException("Can not delete branch '" + branchName + "' as there are workspaces on it");
 		}
 
 		projectService.deleteBranch(project, branchName);

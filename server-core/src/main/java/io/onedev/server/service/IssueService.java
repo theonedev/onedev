@@ -48,19 +48,19 @@ public interface IssueService extends EntityService<Issue> {
 	
 	List<Issue> queryPinned(Subject subject, Project project);
 
-	Predicate[] buildPredicates(Subject subject, @Nullable ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria,
-								CriteriaQuery<?> query, CriteriaBuilder builder, From<Issue, Issue> issue);
+	Predicate[] buildPredicates(Subject subject, @Nullable ProjectScope projectScope, 
+			@Nullable Criteria<Issue> criteria, CriteriaQuery<?> query, CriteriaBuilder builder, 
+			From<Issue, Issue> issue);
 	
 	List<javax.persistence.criteria.Order> buildOrders(EntityQuery<Issue> query, CriteriaBuilder builder, 
-													   From<Issue, Issue> issue, 
-													   List<javax.persistence.criteria.Order> preferOrders);
+			From<Issue, Issue> issue, List<javax.persistence.criteria.Order> preferOrders);
 	
-	List<Issue> query(Subject subject, @Nullable ProjectScope projectScope, EntityQuery<Issue> issueQuery, 
+	List<Issue> query(Subject subject, @Nullable ProjectScope projectScope, EntityQuery<Issue> query, 
 			boolean loadExtraInfo, int firstResult, int maxResults);
 	
-	int count(Subject subject, @Nullable ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria);
+	int count(Subject subject, @Nullable ProjectScope projectScope, @Nullable Criteria<Issue> criteria);
 	
-	IssueTimes queryTimes(Subject subject, ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria);
+	IssueTimes queryTimes(Subject subject, ProjectScope projectScope, @Nullable Criteria<Issue> criteria);
 	
 	Collection<String> getUndefinedStates();
 	

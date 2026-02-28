@@ -17,6 +17,7 @@ import io.onedev.server.model.support.administration.BackupSetting;
 import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.model.support.administration.ClusterSetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
+import io.onedev.server.model.support.administration.GlobalWorkspaceSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.GlobalPackSetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
@@ -32,6 +33,7 @@ import io.onedev.server.model.support.administration.authenticator.Authenticator
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.mailservice.MailConnector;
+import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -130,6 +132,10 @@ public interface SettingService extends EntityService<Setting> {
 	
 	void saveJobExecutors(List<JobExecutor> jobExecutors);
 
+	List<WorkspaceProvisioner> getWorkspaceProvisioners();
+
+	void saveWorkspaceProvisioners(List<WorkspaceProvisioner> workspaceProvisioners);
+
 	EmailTemplates getEmailTemplates();
 	
 	void saveEmailTemplates(EmailTemplates emailTemplates);
@@ -150,6 +156,10 @@ public interface SettingService extends EntityService<Setting> {
 	GlobalBuildSetting getBuildSetting();
 	
 	void saveBuildSetting(GlobalBuildSetting buildSetting);
+
+	GlobalWorkspaceSetting getWorkspaceSetting();
+
+	void saveWorkspaceSetting(GlobalWorkspaceSetting workspaceSetting);
 	
 	GlobalPackSetting getPackSetting();
 

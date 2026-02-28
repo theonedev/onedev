@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -35,14 +36,13 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -65,6 +65,7 @@ import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.BuildImageFacade;
+import io.onedev.k8shelper.CachePathFacade;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.k8shelper.CompositeFacade;
 import io.onedev.k8shelper.KubernetesHelper;
@@ -81,19 +82,19 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.job.JobContext;
-import io.onedev.server.job.JobService;
 import io.onedev.server.job.JobRunnable;
+import io.onedev.server.job.JobService;
+import io.onedev.server.job.JobTerminal;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.KubernetesAware;
 import io.onedev.server.model.support.administration.jobexecutor.NodeSelectorEntry;
 import io.onedev.server.model.support.administration.jobexecutor.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
 import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
-import io.onedev.server.terminal.Terminal;
 import io.onedev.server.web.util.Testable;
 
 @Editable(order=KubernetesExecutor.ORDER, description="This executor runs build jobs as pods in a kubernetes cluster. "
@@ -308,7 +309,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 		var clusterService = OneDev.getInstance(ClusterService.class);
 		var servers = clusterService.getServerAddresses();
 		var server = servers.get(RandomUtils.secure().randomInt(0, servers.size()));
-		return getJobService().runJob(server, ()-> getJobService().runJob(jobContext, new JobRunnable() {
+		return clusterService.runOnServer(server, ()-> getJobService().runJob(jobContext, new JobRunnable() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -340,7 +341,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 			}
 
 			@Override
-			public Shell openShell(JobContext jobContext, Terminal terminal) {
+			public Shell openShell(JobContext jobContext, JobTerminal terminal) {
 				String containerNameCopy = containerName;
 				if (containerNameCopy != null) {
 					Commandline kubectl = newKubeCtl();
@@ -942,19 +943,19 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 
 				List<Map<Object, Object>> containerSpecs = new ArrayList<>();
 				
-				var containerBuildHome = "/onedev-build";
-				var containerWorkspace = containerBuildHome +"/workspace";
-				var containerCommandDir = containerBuildHome + "/command";
-				var containerTrustCertsDir = containerBuildHome + "/trust-certs";
+				var containerBuildDirPath = "/onedev-build";
+				var containerWorkDirPath = containerBuildDirPath +"/workspace";
+				var containerCommandDirPath = containerBuildDirPath + "/command";
+				var containerTrustCertsDirPath = containerBuildDirPath + "/trust-certs";
 
-				Map<String, String> buildHomeMount = newLinkedHashMap(
+				Map<String, String> buildDirMount = newLinkedHashMap(
 						"name", "build-home", 
-						"mountPath", containerBuildHome);
+						"mountPath", containerBuildDirPath);
 				Map<String, String> trustCertsMount = newLinkedHashMap(
 						"name", "trust-certs", 
-						"mountPath", containerTrustCertsDir);
+						"mountPath", containerTrustCertsDirPath);
 				
-				var commonVolumeMounts = newArrayList(buildHomeMount);
+				var commonVolumeMounts = newArrayList(buildDirMount);
 				if (trustCertsConfigMapName != null)
 					commonVolumeMounts.add(trustCertsMount);
 				
@@ -981,11 +982,15 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 						"name", ENV_JOB_TOKEN, 
 						"value", jobToken));
 				commonEnvs.add(newLinkedHashMap(
-						"name", "ONEDEV_WORKSPACE",
-						"value", containerWorkspace
+						"name", "ONEDEV_WORKDIR",
+						"value", containerWorkDirPath
 						));
-
-				Collection<String> cachePaths = new HashSet<>();
+				commonEnvs.add(newLinkedHashMap(
+					"name", "ONEDEV_WORKSPACE",
+					"value", containerWorkDirPath
+					));
+	
+				Collection<CachePathFacade> cachePaths = new LinkedHashSet<>();
 				entryFacade.traverse((facade, position) -> {
 					String containerName = getContainerName(position);
 					containerNames.add(containerName);
@@ -1033,7 +1038,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 					if (stepContainerSpec != null) {
 						String positionStr = stringifyStepPosition(position);
 						stepContainerSpec.put("command", newArrayList("sh"));
-						stepContainerSpec.put("args", newArrayList(containerCommandDir + "/" + positionStr + ".sh"));
+						stepContainerSpec.put("args", newArrayList(containerCommandDirPath + "/" + positionStr + ".sh"));
 
 						Map<Object, Object> requestsSpec = newLinkedHashMap(
 								"cpu", "0",
@@ -1108,18 +1113,18 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 				if (!getNodeSelector().isEmpty())
 					podSpec.put("nodeSelector", toMap(getNodeSelector()));
 				
-				Map<Object, Object> buildHomeVolume;
+				Map<Object, Object> buildDirVolume;
 				if (isBuildWithPV()) {
-					buildHomeVolume = newLinkedHashMap(
+					buildDirVolume = newLinkedHashMap(
 							"name", "build-home", 
 							"persistentVolumeClaim", newLinkedHashMap(
 									"claimName", "build-home"));
 				} else {
-					buildHomeVolume = newLinkedHashMap(
+					buildDirVolume = newLinkedHashMap(
 							"name", "build-home",
 							"emptyDir", newLinkedHashMap());
 				}
-				List<Object> volumes = newArrayList(buildHomeVolume);
+				List<Object> volumes = newArrayList(buildDirVolume);
 				if (trustCertsConfigMapName != null) {
 					volumes.add(newLinkedHashMap(
 							"name", "trust-certs", 
@@ -1271,14 +1276,14 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 		}
 	}
 	
-	private ArrayList<Object> buildVolumeMounts(Collection<String> cachePaths) {
+	private ArrayList<Object> buildVolumeMounts(Collection<io.onedev.k8shelper.CachePathFacade> cachePaths) {
 		var volumeMounts = new ArrayList<>();
 		int index = 1;
 		for (var cachePath: cachePaths) {
-			if (FilenameUtils.getPrefixLength(cachePath) > 0) {
+			if (cachePath.isAbsolute()) {
 				var volumeMount = newLinkedHashMap(
 						"name", "build-home",
-						"mountPath", cachePath,
+						"mountPath", cachePath.getPathValue(),
 						"subPath", "cache/" + index);
 				volumeMounts.add(volumeMount);
 			}

@@ -1,0 +1,37 @@
+<wicket:extend>
+	<div class="workspace-specs">
+		<div class="alert alert-notice bg-white shadow mb-5 text-gray">
+			<wicket:svg href="bulb" class="icon mr-2"></wicket:svg>
+			<wicket:t>Define workspace specs for the project. Child projects inherit specs from parent projects. 
+			Specs defined in child project override those with the same name from parent project</wicket:t>
+		</div>
+		
+		<div class="body">
+			<div wicket:id="workspaceSpecSetting">
+				<ul class="list-unstyled">
+					<li wicket:id="specs" class="spec mb-5"><div wicket:id="spec"></div></li>
+				</ul>
+				<div wicket:id="newSpec"></div>
+			</div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="editNewFrag">
+		<div class="spec card">
+			<div class="card-header">
+				<div class="card-title"><wicket:t>New Workspace Spec</wicket:t></div>
+			</div>
+			<div class="card-body">
+				<div wicket:id="editor"></div>
+			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="addNewLinkFrag">
+		<div class="card">
+			<div class="card-header">
+				<div class="card-title">
+					<a wicket:id="link" class="d-flex align-items-center add-new"><wicket:svg href="plus-circle-o" class="icon align-middle mr-2"></wicket:svg> <span><wicket:t>Add Spec</wicket:t></span></a>
+				</div>
+			</div>
+		</div>
+	</wicket:fragment>
+</wicket:extend>

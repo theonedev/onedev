@@ -16,7 +16,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.cluster.ConnectionLost;
+import io.onedev.server.event.cluster.NodeDisconnected;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.mail.MailService;
 import io.onedev.server.model.Alert;
@@ -61,7 +61,7 @@ public class DefaultAlertService extends BaseEntityService<Alert> implements Ale
 		criteria.add(Restrictions.eq(PROP_SUBJECT, subject));
 		var alert = find(criteria);
 		if (alert == null) {
-			alert = new Alert();
+		alert = new Alert();
 			alert.setSubject(subject);
 			alert.setDetail(detail);
 			alert.setMailError(mailError);
@@ -76,8 +76,8 @@ public class DefaultAlertService extends BaseEntityService<Alert> implements Ale
 	}
 
 	@Listen
-	public void on(ConnectionLost event) {
-		if (clusterService.isLeaderServer()) {
+	public void on(NodeDisconnected event) {
+		if (clusterService.isLeaderServer() && event.isAbnormal()) {
 			var server = event.getServer() + " (" + clusterService.getServerName(event.getServer()) + ")";
 			alert("Server '" + server + "' can not be reached", 
 					"Server '" + server + "' is part of OneDev cluster, but can not be reached for some reason", 

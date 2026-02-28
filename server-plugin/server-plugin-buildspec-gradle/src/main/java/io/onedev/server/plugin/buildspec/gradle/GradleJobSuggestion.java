@@ -7,6 +7,7 @@ import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import io.onedev.server.buildspec.step.*;
+import io.onedev.server.buildspec.step.CachePath;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
@@ -33,21 +34,16 @@ public class GradleJobSuggestion implements JobSuggestion {
 			checkout.setName("checkout code");
 			job.getSteps().add(checkout);
 
-			var generateChecksum = new GenerateChecksumStep();
-			generateChecksum.setName("generate gradle checksum");
-			generateChecksum.setFiles("**/build.gradle **/build.gradle.kts");
-			generateChecksum.setTargetFile("checksum");
-			job.getSteps().add(generateChecksum);
-
 			var setupCache = new SetupCacheStep();
 			setupCache.setName("set up gradle cache");
-			setupCache.setKey("gradle_@file:checksum@");
+			setupCache.setKey("gradle");
+
+			setupCache.setChecksumFiles("**/build.gradle **/build.gradle.kts");
 			setupCache.setPaths(Lists.newArrayList(
-					"/home/gradle/.gradle/caches",
-					"/home/gradle/.gradle/jdks",
-					"/home/gradle/.gradle/native",
-					"/home/gradle/.gradle/wrapper"));
-			setupCache.getLoadKeys().add("gradle");
+					CachePath.of(false, "/home/gradle/.gradle/caches"),
+					CachePath.of(false, "/home/gradle/.gradle/jdks"),
+					CachePath.of(false, "/home/gradle/.gradle/native"),
+					CachePath.of(false, "/home/gradle/.gradle/wrapper")));
 			job.getSteps().add(setupCache);
 			
 			String imageName = "gradle";

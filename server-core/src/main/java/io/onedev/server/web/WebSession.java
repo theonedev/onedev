@@ -27,6 +27,8 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 	
 	private volatile Cursor pullRequestCursor; 
 
+	private volatile Cursor workspaceCursor;
+
 	private volatile ZoneId zoneId;
 	
 	private Map<Class<?>, String> redirectUrlsAfterDelete = new ConcurrentHashMap<>(); 
@@ -59,6 +61,7 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 		buildCursor = null;
 		packCursor = null;
 		pullRequestCursor = null;
+		workspaceCursor = null;
 		zoneId = null;
 		redirectUrlsAfterDelete.clear();
 		chatVisible = false;
@@ -100,6 +103,15 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 	
 	public void setPullRequestCursor(@Nullable Cursor pullRequestCursor) {
 		this.pullRequestCursor = pullRequestCursor;
+	}
+
+	@Nullable
+	public Cursor getWorkspaceCursor() {
+		return workspaceCursor;
+	}
+
+	public void setWorkspaceCursor(@Nullable Cursor workspaceCursor) {
+		this.workspaceCursor = workspaceCursor;
 	}
 	
 	@Nullable

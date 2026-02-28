@@ -106,14 +106,12 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 					var linkSpecService = OneDev.getInstance(LinkSpecService.class);
 					var auditService = OneDev.getInstance(AuditService.class);
 					LinkSpec specWithSameName = linkSpecService.find(getSpec().getName());
-					if (getSpec().isNew() && specWithSameName != null 
-							|| !getSpec().isNew() && specWithSameName != null && !specWithSameName.equals(getSpec())) {
+					if (specWithSameName != null && !specWithSameName.equals(getSpec())) {
 						editor.error(new Path(new PathNode.Named("name")), _T("Name already used by another link"));
 						target.add(form);
 					} else if (getSpec().getOpposite() != null) {
 						specWithSameName = linkSpecService.find(getSpec().getOpposite().getName());
-						if (getSpec().isNew() && specWithSameName != null 
-								|| !getSpec().isNew() && specWithSameName != null && !specWithSameName.equals(getSpec())) {
+						if (specWithSameName != null && !specWithSameName.equals(getSpec())) {
 							String errorMessage = _T("Name already used by another link");
 							editor.error(new Path(new PathNode.Named("opposite"), new PathNode.Named("name")), errorMessage);
 							target.add(form);

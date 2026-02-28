@@ -1,0 +1,10 @@
+<wicket:panel>
+	<a wicket:id="link" class="nav-link nav-link-terminal d-inline-block flex-grow-1">
+		<svg wicket:id="icon" class="icon mr-1"/>
+		<wicket:container wicket:id="label"></wicket:container>
+	</a>
+	<a wicket:id="close" class="nav-link nav-link-close d-inline-block flex-grow-1" t:data-tippy-content="Close terminal">
+		<wicket:svg href="times" class="icon"></wicket:svg>
+	</a>
+	<span wicket:id="readOnlyNotice" class="nav-link nav-link-read-only-notice d-inline-block flex-grow-1" t:data-tippy-content="This terminal is read only"><wicket:svg href="warning-o" class="icon"></wicket:svg></span>
+</wicket:panel>

@@ -183,8 +183,12 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 				if (maintenanceFile.exists()) {
 					logger.info("Maintenance requested, trying to stop all servers...");
 					clusterService.submitToAllServers(() -> {
-						if (!localServer.equals(clusterService.getLocalServerAddress()))
-							restart();
+						try {
+							if (!localServer.equals(clusterService.getLocalServerAddress()))
+								restart();
+						} catch (Throwable t) {
+							logger.error("Error restarting server", t);
+						}
 						return null;
 					});
 					while (thread != null && clusterService.getServerAddresses().size() != 1) {
@@ -432,8 +436,12 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 			if (maintenanceFile.exists()) {
 				logger.info("Maintenance requested, trying to stop all servers...");
 				clusterService.submitToAllServers(() -> {
-					if (!localServer.equals(clusterService.getLocalServerAddress()))
-						restart();
+					try {
+						if (!localServer.equals(clusterService.getLocalServerAddress()))
+							restart();
+					} catch (Throwable t) {
+						logger.error("Error restarting server", t);
+					}
 					return null;
 				});
 				while (thread != null && clusterService.getServerAddresses().size() != 1) {

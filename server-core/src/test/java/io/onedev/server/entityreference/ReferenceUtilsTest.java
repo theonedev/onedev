@@ -88,6 +88,13 @@ public class ReferenceUtilsTest extends AppLoaderMocker {
 		assertEquals(1, references.size());
 		assertTrue(references.get(0) instanceof PullRequestReference);
 		assertEquals(3L, references.get(0).getNumber().longValue());
+
+		references = extractReferences("feat(docs): this is doc (workspace ONE-3, workspace #4)", project1);
+		assertEquals(2, references.size());
+		assertTrue(references.get(0) instanceof WorkspaceReference);
+		assertEquals(3L, references.get(0).getNumber().longValue());
+		assertTrue(references.get(1) instanceof WorkspaceReference);
+		assertEquals(4L, references.get(1).getNumber().longValue());
     }
 
 	@Override

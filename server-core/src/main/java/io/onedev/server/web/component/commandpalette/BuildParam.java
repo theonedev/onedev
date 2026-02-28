@@ -44,7 +44,7 @@ public class BuildParam extends ParamSegment {
 		List<Build> builds = buildService.query(SecurityUtils.getSubject(), project, query, false, 0, count);
 		
 		for (Build build: builds) 
-			suggestions.put(build.getSummary(project), String.valueOf(build.getNumber()));
+			suggestions.put(build.getCaption(project), String.valueOf(build.getNumber()));
 		return suggestions;
 	}
 

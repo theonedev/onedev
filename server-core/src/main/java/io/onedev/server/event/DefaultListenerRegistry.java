@@ -122,8 +122,8 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 					} else {
 						sessionService.run(() -> invokeListeners(event));
 					}
-				} catch (Exception e) {
-					logger.error("Error invoking listeners", e);
+				} catch (Throwable t) {
+					logger.error("Error invoking listeners", t);
 				}
 				return null;
 			}));
@@ -135,8 +135,8 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 				transactionService.runAfterCommit(() -> clusterService.submitToServer(activeServer, () -> {
 					try {
 						sessionService.run(() -> invokeListeners(event));
-					} catch (Exception e) {
-						logger.error("Error invoking listeners", e);
+					} catch (Throwable t) {
+						logger.error("Error invoking listeners", t);
 					}
 					return null;
 				}));
@@ -146,8 +146,8 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 			transactionService.runAfterCommit(() -> clusterService.submitToServer(activeServerChanged.getActiveServer(), () -> {
 				try {
 					sessionService.run(() -> invokeListeners(event));
-				} catch (Exception e) {
-					logger.error("Error invoking listeners", e);
+				} catch (Throwable t) {
+					logger.error("Error invoking listeners", t);
 				}
 				return null;
 			}));

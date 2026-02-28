@@ -24,6 +24,8 @@ import org.eclipse.jetty.server.session.HouseKeeper;
 import org.eclipse.jetty.server.session.SessionDataStoreFactory;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.servlet.GuiceFilter;
 
@@ -45,6 +47,8 @@ import io.onedev.server.service.SettingService;
 @Singleton
 public class DefaultJettyService implements JettyService, Serializable {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultJettyService.class);
+	
 	private static final int DEFAULT_SESSION_TIMEOUT = 300;
 
 	private static final int MAX_CONTENT_SIZE = 5000000;
@@ -181,10 +185,14 @@ public class DefaultJettyService implements JettyService, Serializable {
 
 							@Override
 							public Void call() throws Exception {
-								if (systemSetting.getSessionTimeout() != null) 
-									servletContextHandler.getSessionHandler().setMaxInactiveInterval(systemSetting.getSessionTimeout() * 60);
-								else 
-									servletContextHandler.getSessionHandler().setMaxInactiveInterval(DEFAULT_SESSION_TIMEOUT);
+								try {
+									if (systemSetting.getSessionTimeout() != null) 
+										servletContextHandler.getSessionHandler().setMaxInactiveInterval(systemSetting.getSessionTimeout() * 60);
+									else 
+										servletContextHandler.getSessionHandler().setMaxInactiveInterval(DEFAULT_SESSION_TIMEOUT);
+								} catch (Throwable t) {
+									logger.error("Error setting session timeout", t);
+								}
 								return null;
 							}
 							

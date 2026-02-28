@@ -3,7 +3,6 @@ package io.onedev.server.web.component.job;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.param.ParamUtils;
@@ -36,7 +35,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizationContextAware {
+
+	@Inject
+	private CommitInfoService commitInfoService;
+
+	@Inject
+	private JobService jobService;
 
 	private final String refName;
 	
@@ -63,7 +70,7 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 		try {
 			BuildSpec buildSpec = Preconditions.checkNotNull(getProject().getBuildSpec(commitId));
 
-			Collection<ObjectId> descendants = OneDev.getInstance(CommitInfoService.class)
+			Collection<ObjectId> descendants = commitInfoService
 					.getDescendants(getProject().getId(), Sets.newHashSet(commitId));
 			descendants.add(commitId);
 
@@ -108,7 +115,7 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 									job, populatedParamBean, job.getParamSpecMap().keySet());
 							List<Build> builds = new ArrayList<>();
 							for (String refName : selectedRefNames) {
-								builds.add(getJobService().submit(user, getProject(), commitId, job.getName(),
+								builds.add(jobService.submit(user, getProject(), commitId, job.getName(),
 										paramMap, refName, getPullRequest(), null, _T("Submitted manually")));
 							}
 							if (builds.size() == 1)
@@ -119,7 +126,7 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 							var user = SecurityUtils.getUser();
 							for (var build: builds) {
 								if (build.isFinished())
-									getJobService().resubmit(user, build, _T("Rebuild manually"));
+									jobService.resubmit(user, build, _T("Rebuild manually"));
 							}
 						}
 
@@ -140,12 +147,12 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 
 					};
 				} else {
-					Build build = getJobService().submit(user, getProject(), commitId, job.getName(),
+					Build build = jobService.submit(user, getProject(), commitId, job.getName(),
 							new HashMap<>(), refNames.iterator().next(), getPullRequest(), null, 
 							_T("Submitted manually"));
 					setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
 					if (build.isFinished())
-						getJobService().resubmit(SecurityUtils.getUser(), build, _T("Rebuild manually"));
+						jobService.resubmit(SecurityUtils.getUser(), build, _T("Rebuild manually"));
 				}
 			} else {
 				new MessageModal(target) {
@@ -160,10 +167,6 @@ public abstract class RunJobLink extends AjaxLink<Void> implements JobAuthorizat
 		} finally {
 			ComponentContext.pop();
 		}
-	}
-	
-	private JobService getJobService() {
-		return OneDev.getInstance(JobService.class);
 	}
 
 	@Override

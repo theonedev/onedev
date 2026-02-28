@@ -2,10 +2,10 @@ package io.onedev.server.terminal;
 
 public interface Shell {
 
-	void sendInput(String input);
+	void writeToStdin(String data);
 	
 	void resize(int rows, int cols);
 	
-	void exit();
+	void terminate();
 
 }

@@ -96,7 +96,7 @@ public class PlainTextDiffPanel extends Panel {
     private String renderDiffs() {        
         boolean hasChanges = diffBlocks.stream().anyMatch(block -> block.getOperation() != Operation.EQUAL);
         if (!hasChanges) {
-            return "<div class='alert alert-notice alert-light-warning'>" + _T("Nothing changed yet") + "</div>";
+            return "<div class='text-muted text-center p-4'>" + _T("Nothing changed yet") + "</div>";
         }
         
         StringBuilder builder = new StringBuilder();

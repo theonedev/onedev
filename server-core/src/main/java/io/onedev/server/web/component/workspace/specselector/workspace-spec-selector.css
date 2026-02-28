@@ -1,0 +1,13 @@
+.workspace-spec-selector .specs, .workspace-spec-selector .no-specs {
+	height: 400px;
+}
+
+.workspace-spec-selector {
+	min-width: 250px;
+}
+.workspace-spec-selector input {
+	padding-right: 2rem;
+}
+.workspace-spec-selector input+.icon {
+	margin-left: -1.8rem;
+}

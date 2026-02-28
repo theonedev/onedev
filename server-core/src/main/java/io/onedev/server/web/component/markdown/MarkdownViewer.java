@@ -28,6 +28,7 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entityreference.BuildReference;
+import io.onedev.server.entityreference.WorkspaceReference;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.entityreference.PullRequestReference;
@@ -51,6 +52,7 @@ import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.workspace.WorkspaceService;
 
 public class MarkdownViewer extends GenericPanel<String> {
 
@@ -97,6 +99,9 @@ public class MarkdownViewer extends GenericPanel<String> {
 
 	@Inject
 	private ProjectService projectService;
+
+	@Inject
+	private WorkspaceService workspaceService;
 	
 	private final IModel<String> renderedModel = new LoadableDetachableModel<String>() {
 
@@ -301,8 +306,20 @@ public class MarkdownViewer extends GenericPanel<String> {
 						target.appendJavaScript("onedev.server.markdown.renderCommitTooltip();");
 					}
 					break;
-				default:
-					throw new RuntimeException("Unrecognized reference type: " + referenceType);
+			case "workspace":
+				var workspaceRef = WorkspaceReference.of(referenceId, null);
+				var workspace = workspaceService.find(workspaceRef.getProject(), workspaceRef.getNumber());
+				if (workspace != null && SecurityUtils.canReadCode(workspace.getProject())) {
+					String title = workspace.getUser().getDisplayName() + " on " + workspace.getBranch() + " for " + workspace.getSpecName() + " (" + workspace.getStatus().name() + ")";
+					String script = String.format("onedev.server.markdown.renderWorkspaceTooltip('%s');",
+							JavaScriptEscape.escapeJavaScript(title));
+					target.appendJavaScript(script);
+				} else {
+					target.appendJavaScript("onedev.server.markdown.renderWorkspaceTooltip();");
+				}
+				break;
+			default:
+				throw new RuntimeException("Unrecognized reference type: " + referenceType);
 				}
 			}
 			

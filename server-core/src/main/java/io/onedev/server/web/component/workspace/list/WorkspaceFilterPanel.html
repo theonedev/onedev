@@ -1,0 +1,28 @@
+<wicket:extend>
+    <div class="form-group">
+        <label class="control-label"><wicket:t>Status</wicket:t></label>
+        <input wicket:id="status" type="hidden" class="form-control">
+    </div>
+    <div class="form-group">
+        <label class="control-label"><wicket:t>Created By</wicket:t></label>
+        <input wicket:id="createdBy" type="hidden" class="form-control">
+    </div>
+    <div class="form-group">
+        <label class="control-label"><wicket:t>Created After</wicket:t></label>
+        <div class="clearable-wrapper">
+            <input wicket:id="createdAfter" type="text" class="form-control">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label"><wicket:t>Created Before</wicket:t></label>
+        <div class="clearable-wrapper">
+            <input wicket:id="createdBefore" type="text" class="form-control">
+        </div>
+    </div>
+    <wicket:enclosure>
+    <div class="form-group">
+        <label class="control-label"><wicket:t>Spec</wicket:t></label>
+        <input wicket:id="spec" type="hidden" class="form-control">
+    </div>
+    </wicket:enclosure>
+</wicket:extend>

@@ -16,8 +16,8 @@ import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import io.onedev.server.buildspec.step.CheckoutStep;
 import io.onedev.server.buildspec.step.CommandStep;
-import io.onedev.server.buildspec.step.GenerateChecksumStep;
 import io.onedev.server.buildspec.step.SetupCacheStep;
+import io.onedev.server.buildspec.step.CachePath;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -31,14 +31,6 @@ import io.onedev.server.util.interpolative.VariableInterpolator;
 public class GolangJobSuggestion implements JobSuggestion {
 
 	public static final String DETERMINE_GO_VERSION = "golang:determine-go-version";
-	
-	private GenerateChecksumStep newChecksumGenerateStep(String name, String files) {
-		var generateChecksum = new GenerateChecksumStep();
-		generateChecksum.setName(name);
-		generateChecksum.setFiles(files);
-		generateChecksum.setTargetFile("checksum");
-		return generateChecksum;
-	}
 	
 	private Job newJob() {
 		Job job = new Job();
@@ -90,12 +82,15 @@ public class GolangJobSuggestion implements JobSuggestion {
 		List<Job> jobs = new ArrayList<>();
 		if (project.getBlob(new BlobIdent(commitId.name(), "go.mod", FileMode.TYPE_FILE), false) != null) {
 			Job job = newJob();
-			job.getSteps().add(newChecksumGenerateStep("generate dependency checksum", "**/go.mod"));
 			var setupCache = new SetupCacheStep();
 			setupCache.setName("set up dependency cache");
-			setupCache.setKey("go_cache_@file:checksum@");
-			setupCache.setPaths(Lists.newArrayList("/root/.cache/go_build", "/root/.cache/golangci-lint", "/go/pkg/mod"));
-			setupCache.getLoadKeys().add("go_cache");
+			setupCache.setKey("go_cache");
+
+			setupCache.setChecksumFiles("**/go.mod");
+			setupCache.setPaths(Lists.newArrayList(
+				CachePath.of(false, "/root/.cache/go_build"), 
+				CachePath.of(false, "/root/.cache/golangci-lint"), 
+				CachePath.of(false, "/go/pkg/mod")));
 			job.getSteps().add(setupCache);
 
 			CommandStep buildAndTest = new CommandStep();

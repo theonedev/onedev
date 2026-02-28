@@ -116,6 +116,7 @@ import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.VisitInfoService;
 
 @Entity
@@ -1050,6 +1051,10 @@ public class PullRequest extends ProjectBelonging
 	private GitService getGitService() {
 		return OneDev.getInstance(GitService.class);
 	}
+
+	private WorkspaceService getWorkspaceService() {
+		return OneDev.getInstance(WorkspaceService.class);
+	}
 	
 	public static String getChangeObservable(Long requestId) {
 		return PullRequest.class.getName() + ":" + requestId;
@@ -1243,8 +1248,7 @@ public class PullRequest extends ProjectBelonging
 			return _T("Source project no longer exists");
 		if (getSource().getObjectName(false) == null)
 			return _T("Source branch no longer exists");
-		PullRequestService manager = OneDev.getInstance(PullRequestService.class);
-		PullRequest request = manager.findEffective(getTarget(), getSource());
+		PullRequest request = getPullRequestService().findEffective(getTarget(), getSource());
 		if (request != null) {
 			if (request.isOpen())
 				return _T("Another pull request already open for this change");
@@ -1270,6 +1274,8 @@ public class PullRequest extends ProjectBelonging
 			return _T("Source branch no longer exists");
 		if (getSource().isDefault())
 			return _T("Source branch is default branch");
+		if (getWorkspaceService().count(getSourceProject(), getSourceBranch()) > 0)
+			return _T("There are workspaces on source branch");
 		MergePreview preview = checkMergePreview();
 		if (preview == null)
 			return _T("Merge preview not calculated yet");

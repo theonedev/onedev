@@ -1,18 +1,20 @@
 package io.onedev.server.cluster;
 
-import com.hazelcast.cluster.Member;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.cp.IAtomicLong;
-import io.onedev.server.annotation.NoDBAccess;
-import io.onedev.server.replica.ProjectReplica;
-
-import org.jspecify.annotations.Nullable;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+
+import org.jspecify.annotations.Nullable;
+
+import com.hazelcast.cluster.Member;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.cp.IAtomicLong;
+
+import io.onedev.server.annotation.NoDBAccess;
+import io.onedev.server.replica.ProjectReplica;
 
 public interface ClusterService {
 

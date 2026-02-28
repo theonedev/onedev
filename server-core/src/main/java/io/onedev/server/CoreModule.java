@@ -66,20 +66,17 @@ import com.thoughtworks.xstream.core.JVM;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 import com.vladsch.flexmark.util.misc.Extension;
 
-import io.onedev.agent.ExecutorUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.k8shelper.OsInfo;
 import io.onedev.server.ai.BuildSpecSchemaResource;
 import io.onedev.server.ai.McpHelperResource;
 import io.onedev.server.annotation.Shallow;
 import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.attachment.DefaultAttachmentService;
-import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
 import io.onedev.server.cluster.ClusterResource;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.LineCoverageContribution;
@@ -116,11 +113,9 @@ import io.onedev.server.jetty.DefaultJettyService;
 import io.onedev.server.jetty.DefaultSessionDataStoreFactory;
 import io.onedev.server.jetty.JettyService;
 import io.onedev.server.job.DefaultJobService;
-import io.onedev.server.job.DefaultResourceAllocator;
 import io.onedev.server.job.JobService;
-import io.onedev.server.job.ResourceAllocator;
-import io.onedev.server.job.log.DefaultLogService;
-import io.onedev.server.job.log.LogService;
+import io.onedev.server.logging.DefaultLogService;
+import io.onedev.server.logging.LogService;
 import io.onedev.server.mail.DefaultMailService;
 import io.onedev.server.mail.MailService;
 import io.onedev.server.markdown.DefaultMarkdownService;
@@ -135,6 +130,7 @@ import io.onedev.server.notification.IssueNotificationManager;
 import io.onedev.server.notification.PackNotificationManager;
 import io.onedev.server.notification.PullRequestNotificationManager;
 import io.onedev.server.notification.WebHookManager;
+import io.onedev.server.notification.WorkspaceNotificationManager;
 import io.onedev.server.pack.PackFilter;
 import io.onedev.server.persistence.DefaultIdService;
 import io.onedev.server.persistence.DefaultSessionFactoryService;
@@ -176,6 +172,7 @@ import io.onedev.server.security.AuthorizingService;
 import io.onedev.server.security.BasicAuthenticationFilter;
 import io.onedev.server.security.BearerAuthenticationFilter;
 import io.onedev.server.security.CodePullAuthorizationSource;
+import io.onedev.server.security.CodePushAuthorizationSource;
 import io.onedev.server.security.DefaultAuthenticatingService;
 import io.onedev.server.security.DefaultAuthorizingService;
 import io.onedev.server.security.DefaultFilterChainResolver;
@@ -231,7 +228,6 @@ import io.onedev.server.service.IssueVoteService;
 import io.onedev.server.service.IssueWatchService;
 import io.onedev.server.service.IssueWorkService;
 import io.onedev.server.service.IterationService;
-import io.onedev.server.service.JobCacheService;
 import io.onedev.server.service.LabelSpecService;
 import io.onedev.server.service.LinkAuthorizationService;
 import io.onedev.server.service.LinkSpecService;
@@ -260,8 +256,10 @@ import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.PullRequestTouchService;
 import io.onedev.server.service.PullRequestUpdateService;
 import io.onedev.server.service.PullRequestWatchService;
+import io.onedev.server.service.ResourceService;
 import io.onedev.server.service.ReviewedDiffService;
 import io.onedev.server.service.RoleService;
+import io.onedev.server.service.RunCacheService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.SshKeyService;
 import io.onedev.server.service.SsoAccountService;
@@ -318,7 +316,6 @@ import io.onedev.server.service.impl.DefaultIssueVoteService;
 import io.onedev.server.service.impl.DefaultIssueWatchService;
 import io.onedev.server.service.impl.DefaultIssueWorkService;
 import io.onedev.server.service.impl.DefaultIterationService;
-import io.onedev.server.service.impl.DefaultJobCacheService;
 import io.onedev.server.service.impl.DefaultLabelSpecService;
 import io.onedev.server.service.impl.DefaultLinkAuthorizationService;
 import io.onedev.server.service.impl.DefaultLinkSpecService;
@@ -347,8 +344,10 @@ import io.onedev.server.service.impl.DefaultPullRequestService;
 import io.onedev.server.service.impl.DefaultPullRequestTouchService;
 import io.onedev.server.service.impl.DefaultPullRequestUpdateService;
 import io.onedev.server.service.impl.DefaultPullRequestWatchService;
+import io.onedev.server.service.impl.DefaultResourceService;
 import io.onedev.server.service.impl.DefaultReviewedDiffService;
 import io.onedev.server.service.impl.DefaultRoleService;
+import io.onedev.server.service.impl.DefaultRunCacheService;
 import io.onedev.server.service.impl.DefaultSettingService;
 import io.onedev.server.service.impl.DefaultSshKeyService;
 import io.onedev.server.service.impl.DefaultSsoAccountService;
@@ -419,6 +418,12 @@ import io.onedev.server.web.websocket.DefaultWebSocketService;
 import io.onedev.server.web.websocket.IssueEventBroadcaster;
 import io.onedev.server.web.websocket.PullRequestEventBroadcaster;
 import io.onedev.server.web.websocket.WebSocketService;
+import io.onedev.server.web.websocket.WorkspaceEventBroadcaster;
+import io.onedev.server.workspace.DefaultWorkspaceQueryPersonalizationService;
+import io.onedev.server.workspace.DefaultWorkspaceService;
+import io.onedev.server.workspace.WorkspacePostCommitCallback;
+import io.onedev.server.workspace.WorkspaceQueryPersonalizationService;
+import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.CommitInfoService;
 import io.onedev.server.xodus.DefaultCommitInfoService;
 import io.onedev.server.xodus.DefaultIssueInfoService;
@@ -504,7 +509,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestReviewService.class).to(DefaultPullRequestReviewService.class);
 		bind(BuildService.class).to(DefaultBuildService.class);
 		bind(JobService.class).to(DefaultJobService.class);
-		bind(JobCacheService.class).to(DefaultJobCacheService.class);
+		bind(RunCacheService.class).to(DefaultRunCacheService.class);
 		bind(LogService.class).to(DefaultLogService.class);
 		bind(MailService.class).to(DefaultMailService.class);
 		bind(IssueService.class).to(DefaultIssueService.class);
@@ -533,6 +538,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CommitNotificationManager.class);
 		bind(BuildNotificationManager.class);
 		bind(PackNotificationManager.class);
+		bind(WorkspaceNotificationManager.class);
 		bind(IssueNotificationManager.class);
 		bind(CodeCommentNotificationManager.class);
 		bind(CodeCommentService.class).to(DefaultCodeCommentService.class);
@@ -550,6 +556,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CommitQueryPersonalizationService.class).to(DefaultCommitQueryPersonalizationService.class);
 		bind(BuildQueryPersonalizationService.class).to(DefaultBuildQueryPersonalizationService.class);
 		bind(PackQueryPersonalizationService.class).to(DefaultPackQueryPersonalizationService.class);
+		bind(WorkspaceQueryPersonalizationService.class).to(DefaultWorkspaceQueryPersonalizationService.class);
 		bind(PullRequestAssignmentService.class).to(DefaultPullRequestAssignmentService.class);
 		bind(SshKeyService.class).to(DefaultSshKeyService.class);
 		bind(BuildMetricService.class).to(DefaultBuildMetricService.class);
@@ -571,6 +578,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(DashboardUserShareService.class).to(DefaultDashboardUserShareService.class);
 		bind(DashboardGroupShareService.class).to(DefaultDashboardGroupShareService.class);
 		bind(DashboardVisitService.class).to(DefaultDashboardVisitService.class);
+		bind(WorkspaceService.class).to(DefaultWorkspaceService.class);
+		bind(WorkspacePostCommitCallback.class);
 		bind(LabelSpecService.class).to(DefaultLabelSpecService.class);
 		bind(ProjectLabelService.class).to(DefaultProjectLabelService.class);
 		bind(BuildLabelService.class).to(DefaultBuildLabelService.class);
@@ -602,6 +611,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(WebHookManager.class);
 		
 		contribute(CodePullAuthorizationSource.class, DefaultJobService.class);
+		contribute(CodePullAuthorizationSource.class, DefaultWorkspaceService.class);
+		contribute(CodePushAuthorizationSource.class, DefaultWorkspaceService.class);
         
 		bind(CodeIndexService.class).to(DefaultCodeIndexService.class);
 		bind(CodeSearchService.class).to(DefaultCodeSearchService.class);
@@ -623,11 +634,7 @@ public class CoreModule extends AbstractPluginModule {
         };
 
 	    bind(ExecutorService.class).toProvider(() -> Bootstrap.executorService).in(Singleton.class);
-	    
-	    bind(OsInfo.class).toProvider(() -> ExecutorUtils.getOsInfo()).in(Singleton.class);
-	    
-	    contributeFromPackage(LogInstruction.class, LogInstruction.class);	    
-	    
+	    	    	    
 		contribute(CodeProblemContribution.class, (build, blobPath, reportName) -> newArrayList());
 	    
 		contribute(LineCoverageContribution.class, (build, blobPath, reportName) -> new HashMap<>());
@@ -728,6 +735,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestEventBroadcaster.class);
 		bind(IssueEventBroadcaster.class);
 		bind(BuildEventBroadcaster.class);
+		bind(WorkspaceEventBroadcaster.class);
 		bind(AlertEventBroadcaster.class);
 		bind(UploadService.class).to(DefaultUploadService.class);
 		
@@ -736,7 +744,7 @@ public class CoreModule extends AbstractPluginModule {
 	}
 	
 	private void configureBuild() {
-		bind(ResourceAllocator.class).to(DefaultResourceAllocator.class);
+		bind(ResourceService.class).to(DefaultResourceService.class);
 		bind(AgentService.class).to(DefaultAgentService.class);
 		bind(AgentTokenService.class).to(DefaultAgentTokenService.class);
 		bind(AgentAttributeService.class).to(DefaultAgentAttributeService.class);

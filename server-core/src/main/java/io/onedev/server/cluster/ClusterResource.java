@@ -32,22 +32,17 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import io.onedev.server.annotation.NoDBAccess;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.Repository;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TarUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.StorageService;
+import io.onedev.server.annotation.NoDBAccess;
 import io.onedev.server.attachment.AttachmentService;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.JobCacheService;
-import io.onedev.server.service.PackBlobService;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitUtils;
@@ -59,6 +54,11 @@ import io.onedev.server.model.PackBlob;
 import io.onedev.server.model.Project;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.PackBlobService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.RunCacheService;
+import io.onedev.server.service.support.CacheQueryResult;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.concurrent.WorkExecutionService;
 import io.onedev.server.util.patternset.PatternSet;
@@ -71,41 +71,33 @@ import io.onedev.server.xodus.VisitInfoService;
 @Singleton
 public class ClusterResource {
 
-	private final ProjectService projectService;
-	
-	private final AttachmentService attachmentService;
-	
-	private final CommitInfoService commitInfoService;
-	
-	private final VisitInfoService visitInfoService;
-	
-	private final StorageService storageService;
-	
-	private final PackBlobService packBlobService;
-	
-	private final BuildService buildService;
-	
-	private final JobCacheService jobCacheService;
-	
-	private final WorkExecutionService workExecutionService;
+	@Inject
+	private ProjectService projectService;
 	
 	@Inject
-	public ClusterResource(ProjectService projectService, CommitInfoService commitInfoService,
-						   AttachmentService attachmentService, VisitInfoService visitInfoService,
-						   WorkExecutionService workExecutionService, StorageService storageService,
-						   PackBlobService packBlobService, BuildService buildService,
-						   JobCacheService jobCacheService) {
-		this.commitInfoService = commitInfoService;
-		this.projectService = projectService;
-		this.workExecutionService = workExecutionService;
-		this.attachmentService = attachmentService;
-		this.visitInfoService = visitInfoService;
-		this.storageService = storageService;
-		this.packBlobService = packBlobService;
-		this.buildService = buildService;
-		this.jobCacheService = jobCacheService;
-	}
-
+	private AttachmentService attachmentService;
+	
+	@Inject
+	private CommitInfoService commitInfoService;
+	
+	@Inject
+	private VisitInfoService visitInfoService;
+	
+	@Inject
+	private StorageService storageService;
+	
+	@Inject
+	private PackBlobService packBlobService;
+	
+	@Inject
+	private BuildService buildService;
+	
+	@Inject
+	private RunCacheService cacheService;
+	
+	@Inject
+	private WorkExecutionService workExecutionService;
+	
 	@Path("/project-files")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@GET
@@ -241,11 +233,12 @@ public class ClusterResource {
 	public Response downloadCache(
 			@QueryParam("projectId") Long projectId, 
 			@QueryParam("cacheId") Long cacheId, 
-			@QueryParam("cachePaths") String joinedCachePaths) {
+			@QueryParam("exactMatch") boolean exactMatch,
+			@QueryParam("cachePathsString") String cachePathsString) {
 		if (!SecurityUtils.isSystem())
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
-		var cachePaths = Splitter.on('\n').splitToList(joinedCachePaths);
-		StreamingOutput out = os -> jobCacheService.downloadCache(projectId, cacheId, cachePaths, os);
+		var cacheQueryResult = new CacheQueryResult(projectId, cacheId, exactMatch);
+		StreamingOutput out = os -> cacheService.downloadCache(cacheQueryResult, cachePathsString, os);
 		return ok(out).build();
 	}
 
@@ -294,7 +287,7 @@ public class ClusterResource {
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 		
 			StreamingOutput os = output -> {
-				Map<String, String> hookEnvs = HookUtils.getHookEnvs(projectId, principal);
+				Map<String, String> hookEnvs = HookUtils.getReceiveHookEnvs(projectId, principal);
 				
 				try {
 					File gitDir = projectService.getGitDir(projectId);
@@ -468,11 +461,11 @@ public class ClusterResource {
 	public Response uploadCache(
 			@QueryParam("projectId") Long projectId,
 			@QueryParam("cacheId") Long cacheId,
-			@QueryParam("cachePaths") String cachePaths,
+			@QueryParam("cachePathsString") String cachePathsString,
 			InputStream cacheStream) {
 		if (!SecurityUtils.isSystem())
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
-		jobCacheService.uploadCache(projectId, cacheId, Splitter.on('\n').splitToList(cachePaths), cacheStream);
+		cacheService.uploadCache(projectId, cacheId, cachePathsString, cacheStream);
 		return ok().build();
 	}
 	

@@ -50,7 +50,7 @@ public class StepTemplate implements NamedElement {
 		return new ArrayList<>();
 	}
 	
-	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>")
+	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>")
 	@Valid
 	public List<Step> getSteps() {
 		return steps;

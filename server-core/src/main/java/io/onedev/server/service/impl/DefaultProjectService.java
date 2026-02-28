@@ -58,7 +58,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -91,6 +90,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.hibernate.query.criteria.internal.path.SingularAttributePath;
+import org.jspecify.annotations.Nullable;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
@@ -119,7 +119,9 @@ import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.cluster.ConnectionEvent;
+import io.onedev.server.event.cluster.NodeConnected;
+import io.onedev.server.event.cluster.NodeDisconnected;
+import io.onedev.server.event.cluster.NodeEvent;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.project.ActiveServerChanged;
@@ -196,6 +198,7 @@ import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.avatar.AvatarService;
+import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.CommitInfoService;
 import io.onedev.server.xodus.VisitInfoService;
 
@@ -281,6 +284,9 @@ public class DefaultProjectService extends BaseEntityService<Project>
 
 	@Inject
 	private PackBlobService packBlobService;
+
+	@Inject
+	private WorkspaceService workspaceService;
 
 	@Inject
 	private ProjectLabelService labelService;
@@ -424,7 +430,11 @@ public class DefaultProjectService extends BaseEntityService<Project>
 				if (replicasOfProject != null) {
 					for (var server: replicasOfProject.keySet()) {
 						clusterService.submitToServer(server, () -> {
-							markStorageForDelete(projectId);
+							try {
+								markStorageForDelete(projectId);
+							} catch (Throwable e) {
+								logger.error("Error marking project storage for delete", e);
+							}
 							return null;
 						});
 					}
@@ -659,7 +669,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 				}
 			}
 
-			HookUtils.checkHooks(toGitDir);
+			HookUtils.checkReceiveHooks(toGitDir);
 			checkGitConfig(toId, gitPackConfig);
 			commitInfoService.cloneInfo(fromId, toId);
 			avatarService.copyProjectAvatar(fromId, toId);
@@ -679,7 +689,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 			new CloneCommand(gitDir, repositoryUrl).mirror(true).noLfs(true).run();
 			storageService.initLfsDir(projectId);
 			new LfsFetchAllCommand(gitDir, repositoryUrl).run();
-			HookUtils.checkHooks(gitDir);
+			HookUtils.checkReceiveHooks(gitDir);
 			checkGitConfig(projectId, project.getGitPackConfig());
 			return null;
 		});
@@ -703,8 +713,8 @@ public class DefaultProjectService extends BaseEntityService<Project>
 							}
 						}
 					});
-				} catch (Exception e) {
-					logger.error("Error posting ref updated event", e);
+				} catch (Throwable t) {
+					logger.error("Error posting ref updated event", t);
 				}					
 				return null;				
 			});
@@ -826,7 +836,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 			if (project != null) {
 				logger.debug("Checking project (path: {})...", project.getPath());
 				checkGitDir(projectId);
-				HookUtils.checkHooks(getGitDir(projectId));
+				HookUtils.checkReceiveHooks(getGitDir(projectId));
 				checkGitConfig(projectId, project.getGitPackConfig());
 				
 				LinkedHashMap<String, ProjectReplica> newReplicasOfProject;
@@ -859,8 +869,8 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	}
 
 	@Listen
-	public void on(ConnectionEvent event) {
-		if (clusterService.isLeaderServer()) {
+	public void on(NodeEvent event) {
+		if (clusterService.isLeaderServer() && (event instanceof NodeConnected nodeConnected && nodeConnected.isRecovered() || event instanceof NodeDisconnected nodeDisconnected && nodeDisconnected.isAbnormal())) {
 			logger.info("Updating active servers upon cluster member change...");
 			updateActiveServers();
 		}
@@ -1015,23 +1025,23 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	}
 
 	@SuppressWarnings("rawtypes")
-	private CriteriaQuery<Project> buildCriteriaQuery(Subject subject, Session session, EntityQuery<Project> projectQuery) {
+	private CriteriaQuery<Project> buildCriteriaQuery(Subject subject, Session session, EntityQuery<Project> query) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Project> query = builder.createQuery(Project.class);
-		Root<Project> root = query.from(Project.class);
-		query.select(root);
+		CriteriaQuery<Project> criteriaQuery = builder.createQuery(Project.class);
+		Root<Project> root = criteriaQuery.from(Project.class);
+		criteriaQuery.select(root);
 
-		query.where(getPredicates(subject, projectQuery.getCriteria(), query, root, builder));
+		criteriaQuery.where(getPredicates(subject, query.getCriteria(), criteriaQuery, root, builder));
 
 		List<Order> orders = new ArrayList<>();
 
-		for (EntitySort sort : projectQuery.getSorts()) 
+		for (EntitySort sort : query.getSorts()) 
 			orders.add(getOrder(sort, builder, root));
 
-		if (projectQuery.getCriteria() != null)
-			orders.addAll(projectQuery.getCriteria().getPreferOrders(builder, root));
+		if (query.getCriteria() != null)
+			orders.addAll(query.getCriteria().getPreferOrders(builder, root));
 
-		for (EntitySort sort : projectQuery.getBaseSorts()) 
+		for (EntitySort sort : query.getBaseSorts()) 
 			orders.add(getOrder(sort, builder, root));
 
 		var found = false;
@@ -1049,9 +1059,9 @@ public class DefaultProjectService extends BaseEntityService<Project>
 		if (!found)
 			orders.add(builder.desc(ProjectQuery.getPath(root, Project.PROP_LAST_ACTIVITY_DATE + "." + ProjectLastActivityDate.PROP_VALUE)));	
 		
-		query.orderBy(orders);
+		criteriaQuery.orderBy(orders);
 
-		return query;
+		return criteriaQuery;
 	}
 
 	private Predicate[] getPredicates(Subject subject, @Nullable Criteria<Project> criteria, CriteriaQuery<?> query,
@@ -1075,10 +1085,10 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	@Override
 	public List<Project> query(Subject subject, EntityQuery<Project> query, boolean loadLabels, int firstResult, int maxResults) {
 		CriteriaQuery<Project> criteriaQuery = buildCriteriaQuery(subject, getSession(), query);
-		Query<Project> projectQuery = getSession().createQuery(criteriaQuery);
-		projectQuery.setFirstResult(firstResult);
-		projectQuery.setMaxResults(maxResults);
-		var projects = projectQuery.getResultList();
+		Query<Project> hibernateQuery = getSession().createQuery(criteriaQuery);
+		hibernateQuery.setFirstResult(firstResult);
+		hibernateQuery.setMaxResults(maxResults);
+		var projects = hibernateQuery.getResultList();
 
 		if (!projects.isEmpty() && loadLabels) 
 			labelService.populateLabels(projects);
@@ -1088,12 +1098,12 @@ public class DefaultProjectService extends BaseEntityService<Project>
 
 	@Sessional
 	@Override
-	public int count(Subject subject, Criteria<Project> projectCriteria) {
+	public int count(Subject subject, Criteria<Project> criteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Project> root = criteriaQuery.from(Project.class);
 
-		criteriaQuery.where(getPredicates(subject, projectCriteria, criteriaQuery, root, builder));
+		criteriaQuery.where(getPredicates(subject, criteria, criteriaQuery, root, builder));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
@@ -1385,7 +1395,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	private void initGit(Long projectId, GitPackConfig gitPackConfig) {
 		checkGitDir(projectId);
 		var gitDir = getGitDir(projectId);
-		HookUtils.checkHooks(gitDir);
+		HookUtils.checkReceiveHooks(gitDir);
 		checkGitConfig(projectId, gitPackConfig);
 	}
 	
@@ -1539,7 +1549,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 				clusterService.submitToServer(server, () -> {
 					try {
 						requestToSyncReplica(projectId, syncWithServer);
-					} catch (Exception e) {
+					} catch (Throwable e) {
 						logger.error("Error requesting replica sync of project with id '" + projectId + "'", e);
 					}
 					return null;
@@ -1711,6 +1721,7 @@ public class DefaultProjectService extends BaseEntityService<Project>
 						if (version < remoteVersion) {
 							logger.debug("Syncing project (project: {}, server: {})...", project.getPath(), syncWithServer);
 							syncGit(projectId, syncWithServer);
+							workspaceService.syncWorkspaces(projectId, syncWithServer);
 							attachmentService.syncAttachments(projectId, syncWithServer);
 							buildService.syncBuilds(projectId, syncWithServer);
 							visitInfoService.syncVisitInfo(projectId, syncWithServer);
@@ -1907,7 +1918,11 @@ public class DefaultProjectService extends BaseEntityService<Project>
 									if (!newReplicasOfProject.equals(replicasOfProject)) {
 										if (replicas.replace(projectId, replicasOfProject, newReplicasOfProject)) {
 											redundantServers.forEach(it -> clusterService.submitToServer(it, () -> {
-												markStorageForDelete(projectId);
+												try {
+													markStorageForDelete(projectId);
+												} catch (Throwable e) {
+													logger.error("Error marking project storage directory for deletion", e);
+												}
 												return null;
 											}));									
 											break;

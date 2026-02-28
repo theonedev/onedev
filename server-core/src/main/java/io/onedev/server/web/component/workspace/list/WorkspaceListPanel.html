@@ -1,0 +1,55 @@
+<wicket:panel>
+	<div class="workspace-list card no-autofocus">
+		<div class="card-body">
+			<div class="d-flex mb-4">
+				<form wicket:id="query" class="clearable-wrapper flex-grow-1">
+					<div class="input-group">
+						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" t:placeholder="Query/order workspaces">
+						<span class="input-group-append">
+							<button wicket:id="submit" type="submit" class="btn btn-icon btn-outline-secondary" t:data-tippy-content="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+						</span>
+			</div>
+			</form>
+			<a wicket:id="createWorkspace" class="btn btn-primary btn-icon flex-shrink-0 ml-3" t:data-tippy-content="Create Workspace"><wicket:svg href="plus" class="icon"/></a>
+			</div>
+			<div class="mb-4">
+				<a wicket:id="showSavedQueries" class="show-saved-queries text-gray d-inline-block mb-2 mr-4 text-nowrap">
+					<wicket:svg href="eye" class="icon"></wicket:svg> <wicket:t>Show Saved Queries</wicket:t>
+				</a>
+				<a wicket:id="saveQuery" class="save-query text-gray d-inline-block mb-2 mr-4 text-nowrap">
+					<wicket:svg href="save" class="icon"></wicket:svg> <wicket:t>Save Query</wicket:t>
+				</a>
+				<a wicket:id="filter" class="filter text-gray mr-4 mb-2 d-inline-block text-nowrap">
+					<wicket:svg href="filter" class="icon"></wicket:svg> <wicket:t>Filter</wicket:t>
+				</a>
+				<a wicket:id="orderBy" class="order-by text-gray mr-4 mb-2 d-inline-block text-nowrap">
+					<wicket:svg href="sort" class="icon"></wicket:svg> <wicket:t>Order By</wicket:t>
+				</a>
+				<a wicket:id="operations" class="operations text-gray mr-4 mb-2 d-inline-block text-nowrap">
+					<wicket:svg href="ellipsis-circle" class="icon"></wicket:svg> <wicket:t>Operations</wicket:t>
+				</a>
+				<span wicket:id="count" class="float-right text-gray"></span>
+			</div>
+			<div wicket:id="body">
+				<div wicket:id="feedback"></div>
+				<table wicket:id="workspaces" class="table"></table>
+			</div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="workspaceFrag">		
+		<a wicket:id="link">
+			<svg wicket:id="icon" class="icon mr-1"></svg>
+			<span wicket:id="label"></span>
+		</a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="branchFrag">
+		<a wicket:id="branch"></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="userFrag">
+		<a wicket:id="link"></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="specFrag">		
+		<span wicket:id="label"></span>
+		<span wicket:id="invalidSpec" class="text-warning ml-1"></span>
+	</wicket:fragment>
+</wicket:panel>

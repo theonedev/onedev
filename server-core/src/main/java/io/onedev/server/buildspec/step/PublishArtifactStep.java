@@ -23,7 +23,7 @@ import java.util.List;
 
 import static io.onedev.server.buildspec.step.StepGroup.PUBLISH;
 
-@Editable(order=1050, group= PUBLISH, name="Artifacts", description="This step copies files from job workspace " + 
+@Editable(order=1050, group= PUBLISH, name="Artifacts", description="This step copies files from job workdir " + 
 		"to build artifacts directory, so that they can be accessed after job is completed")
 public class PublishArtifactStep extends ServerSideStep {
 
@@ -34,8 +34,8 @@ public class PublishArtifactStep extends ServerSideStep {
 	private String artifacts;
 	
 	@Editable(order=50, name="From Directory", placeholder="Job workspace", description="Optionally specify path "
-			+ "relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to publish "
-			+ "artifacts from. Leave empty to use job workspace itself")
+			+ "relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to publish "
+			+ "artifacts from. Leave empty to use job workdir itself")
 	@Interpolative(variableSuggester="suggestVariables")
 	@SubPath
 	@Override

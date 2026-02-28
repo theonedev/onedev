@@ -45,7 +45,7 @@ public class LabelSpec extends AbstractEntity {
 
 	@OneToMany(mappedBy="spec", cascade=CascadeType.REMOVE)
 	private Collection<PackLabel> packLabels = new ArrayList<>();
-	
+
 	@OneToMany(mappedBy="spec", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestLabel> pullRequestLabels = new ArrayList<>();
 	

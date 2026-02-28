@@ -50,6 +50,7 @@ import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.TwoFactorAuthentication;
 import io.onedev.server.model.support.build.NamedBuildQuery;
+import io.onedev.server.model.support.workspace.NamedWorkspaceQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
@@ -188,7 +189,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<PackQueryPersonalization> packQueryPersonalizations = new ArrayList<>();
-	
+
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<WorkspaceQueryPersonalization> workspaceQueryPersonalizations = new ArrayList<>();
+
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestQueryPersonalization> pullRequestQueryPersonalizations = new ArrayList<>();
     
@@ -264,6 +268,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Chat> userChats = new ArrayList<>();
 
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<Workspace> workspaces = new ArrayList<>();
+
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -288,7 +296,12 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private ArrayList<NamedPackQuery> packQueries = new ArrayList<>();
-	
+
+	@JsonIgnore
+	@Lob
+	@Column(nullable=false, length=65535)
+	private ArrayList<NamedWorkspaceQuery> workspaceQueries = new ArrayList<>();
+
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -308,7 +321,12 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashSet<String> packQuerySubscriptions = new LinkedHashSet<>();
-	
+
+	@JsonIgnore
+	@Lob
+	@Column(nullable=false, length=65535)
+	private LinkedHashSet<String> workspaceQuerySubscriptions = new LinkedHashSet<>();
+
     private transient Collection<Group> groups;
     
     private transient List<EmailAddress> sortedEmailAddresses;
@@ -553,7 +571,55 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 		};
 	}
-	
+
+	public QueryPersonalization<NamedWorkspaceQuery> getWorkspaceQueryPersonalization() {
+		return new QueryPersonalization<>() {
+
+			@Override
+			public Project getProject() {
+				return null;
+			}
+
+			@Override
+			public User getUser() {
+				return User.this;
+			}
+
+			@Override
+			public ArrayList<NamedWorkspaceQuery> getQueries() {
+				return workspaceQueries;
+			}
+
+			@Override
+			public void setQueries(ArrayList<NamedWorkspaceQuery> userQueries) {
+				workspaceQueries = userQueries;
+			}
+
+			@Override
+			public QueryWatchSupport<NamedWorkspaceQuery> getQueryWatchSupport() {
+				return null;
+			}
+
+			@Override
+			public QuerySubscriptionSupport<NamedWorkspaceQuery> getQuerySubscriptionSupport() {
+				return new QuerySubscriptionSupport<>() {
+
+					@Override
+					public LinkedHashSet<String> getQuerySubscriptions() {
+						return workspaceQuerySubscriptions;
+					}
+
+				};
+			}
+
+			@Override
+			public void onUpdated() {
+				OneDev.getInstance(UserService.class).update(User.this, null);
+			}
+
+		};
+	}
+
 	@Override
     public PrincipalCollection getPrincipals() {
 		return asPrincipals(asUserPrincipal(getId()));		
@@ -775,6 +841,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.aiEntitlements = aiEntitlements;
 	}
 
+	public Collection<Workspace> getWorkspaces() {
+		return workspaces;
+	}
+
 	public Collection<IssueAuthorization> getIssueAuthorizations() {
 		return issueAuthorizations;
 	}
@@ -963,6 +1033,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.packQueryPersonalizations = packQueryPersonalizations;
 	}
 
+	public Collection<WorkspaceQueryPersonalization> getWorkspaceQueryPersonalizations() {
+		return workspaceQueryPersonalizations;
+	}
+
+	public void setWorkspaceQueryPersonalizations(Collection<WorkspaceQueryPersonalization> workspaceQueryPersonalizations) {
+		this.workspaceQueryPersonalizations = workspaceQueryPersonalizations;
+	}
+
 	public Collection<PullRequestQueryPersonalization> getPullRequestQueryPersonalizations() {
 		return pullRequestQueryPersonalizations;
 	}
@@ -1111,7 +1189,24 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		}
 		return null;
 	}
-	
+
+	public ArrayList<NamedWorkspaceQuery> getWorkspaceQueries() {
+		return workspaceQueries;
+	}
+
+	public void setWorkspaceQueries(ArrayList<NamedWorkspaceQuery> workspaceQueries) {
+		this.workspaceQueries = workspaceQueries;
+	}
+
+	@Nullable
+	public NamedWorkspaceQuery getWorkspaceQuery(String name) {
+		for (var query: getWorkspaceQueries()) {
+			if (query.getName().equals(name))
+				return query;
+		}
+		return null;
+	}
+
 	public LinkedHashSet<String> getBuildQuerySubscriptions() {
 		return buildQuerySubscriptions;
 	}
@@ -1126,6 +1221,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public void setPackQuerySubscriptions(LinkedHashSet<String> packQuerySubscriptions) {
 		this.packQuerySubscriptions = packQuerySubscriptions;
+	}
+
+	public LinkedHashSet<String> getWorkspaceQuerySubscriptions() {
+		return workspaceQuerySubscriptions;
+	}
+
+	public void setWorkspaceQuerySubscriptions(LinkedHashSet<String> workspaceQuerySubscriptions) {
+		this.workspaceQuerySubscriptions = workspaceQuerySubscriptions;
 	}
 
 	public boolean isEnforce2FA() {

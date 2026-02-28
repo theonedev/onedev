@@ -69,7 +69,8 @@ import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.job.JobAuthorizationContextAware;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobService;
-import io.onedev.server.job.log.LogService;
+import io.onedev.server.job.JobTerminalService;
+import io.onedev.server.logging.LogService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
@@ -79,7 +80,6 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.BuildService;
-import io.onedev.server.terminal.TerminalService;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -131,7 +131,7 @@ public abstract class BuildDetailPage extends ProjectPage
 	private JobService jobService;
 
 	@Inject
-	private TerminalService terminalService;
+	private JobTerminalService terminalService;
 
 	@Inject
 	private LogService logService;
@@ -238,11 +238,11 @@ public abstract class BuildDetailPage extends ProjectPage
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("summary", new AbstractReadOnlyModel<String>() {
+		add(new Label("caption", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return getBuild().getSummary(getProject());
+				return getBuild().getCaption(getProject());
 			}
 			
 		}) {
@@ -256,11 +256,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 		});
 		
-		WebMarkupContainer statusContainer = new WebMarkupContainer("status");
-		add(statusContainer);
-		statusContainer.add(newBuildObserver(getBuild().getId()));
-		statusContainer.setOutputMarkupId(true);
-		statusContainer.add(new BuildStatusIcon("statusIcon", new AbstractReadOnlyModel<Status>() {
+		add(new BuildStatusIcon("statusIcon", new AbstractReadOnlyModel<Status>() {
 
 			@Override
 			public Status getObject() {
@@ -275,14 +271,14 @@ public abstract class BuildDetailPage extends ProjectPage
 			}
 			
 		});
-		statusContainer.add(new Label("statusLabel", new AbstractReadOnlyModel<String>() {
+		add(new Label("statusLabel", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
 				return _T(buildModel.getObject().getStatus().toString());
 			}
 			
-		}));
+		}).add(newBuildObserver(getBuild().getId())));
 		
 		add(new WebMarkupContainer("actions") {
 			@Override
@@ -854,8 +850,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				public CompletableFuture<ToolExecutionResult> execute(IPartialPageRequestHandler handler, Subject subject, JsonNode arguments) {
 					if (!SecurityUtils.canAccessLog(subject, getBuild()))
 						throw new UnauthorizedException();
-					var snippet = logService.readLogSnippetReversely(
-							getBuild().getProject().getId(), getBuild().getNumber(), MAX_LOG_ENTRIES);
+					var snippet = logService.readLogSnippetReversely(getBuild().getLoggingSupport(), MAX_LOG_ENTRIES);
 					var builder = new StringBuilder();
 					for (var entry : snippet.entries) {
 						builder.append(entry.render()).append("\n");

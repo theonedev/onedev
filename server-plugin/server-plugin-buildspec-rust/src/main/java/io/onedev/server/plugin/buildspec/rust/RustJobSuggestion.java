@@ -8,6 +8,7 @@ import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import io.onedev.server.buildspec.step.*;
+import io.onedev.server.buildspec.step.CachePath;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
@@ -22,14 +23,6 @@ import java.util.Collection;
 import java.util.List;
 
 public class RustJobSuggestion implements JobSuggestion {
-	
-	private GenerateChecksumStep newChecksumGenerateStep(String name, String files) {
-		var generateChecksum = new GenerateChecksumStep();
-		generateChecksum.setName(name);
-		generateChecksum.setFiles(files);
-		generateChecksum.setTargetFile("checksum");
-		return generateChecksum;
-	}
 	
 	private Job newJob() {
 		Job job = new Job();
@@ -95,12 +88,12 @@ public class RustJobSuggestion implements JobSuggestion {
 				job.getSteps().add(setBuildVersion);
 			}
 			
-			job.getSteps().add(newChecksumGenerateStep("generate dependency checksum", "**/Cargo.toml **/Cargo.lock"));
 			var setupCache = new SetupCacheStep();
 			setupCache.setName("set up dependency cache");
-			setupCache.setKey("rust_cache_@file:checksum@");
-			setupCache.setPaths(Lists.newArrayList("/root/.cache/cargo"));
-			setupCache.getLoadKeys().add("rust_cache");
+			setupCache.setKey("rust_cache");
+
+			setupCache.setChecksumFiles("**/Cargo.toml **/Cargo.lock");
+			setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "/root/.cache/cargo")));
 			job.getSteps().add(setupCache);
 
 			CommandStep buildAndTest = new CommandStep();

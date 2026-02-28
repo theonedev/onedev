@@ -76,10 +76,5 @@ public abstract class ReferenceInputBehavior extends InputAssistBehavior {
 		return inputContent.lastIndexOf('#');
 	}
 
-	@Override
-	protected boolean isSelectOnFocus() {
-		return false;
-	}
-
 	protected abstract Project getProject();
 }

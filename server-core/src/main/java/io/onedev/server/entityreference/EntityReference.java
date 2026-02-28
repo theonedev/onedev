@@ -46,6 +46,8 @@ public abstract class EntityReference implements Serializable {
 			return new IssueReference(project, number);
 		else if (type.equalsIgnoreCase(BuildReference.TYPE))
 			return new BuildReference(project, number);
+		else if (type.equalsIgnoreCase(WorkspaceReference.TYPE))
+			return new WorkspaceReference(project, number);
 		else
 			return new PullRequestReference(project, number);
 	}

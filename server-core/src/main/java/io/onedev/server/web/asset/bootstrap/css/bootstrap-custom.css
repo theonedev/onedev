@@ -1254,6 +1254,16 @@ input[type="radio"], input[type="checkbox"] {
     border-color: #187DE4;
 }
 
+/* Hide the internal seam when a split button is disabled as a pair */
+.btn-group>.btn:first-child:disabled {
+	border-right-color: transparent;
+}
+
+.btn-group>.btn:first-child:disabled+.dropdown-toggle:disabled {
+	margin-left: 0;
+	border-left-color: transparent;
+}
+
 .btn.btn-secondary {
     color: var(--gray-dark);
     background-color: var(--secondary);

@@ -26,6 +26,8 @@ public abstract class QueryWatchesPanel extends GenericPanel<User> {
     
     public static final String TAB_PACK = "pack";
 
+    public static final String TAB_DEV_SESSION = "workspace";
+
     public static final String TAB_COMMIT = "commit";
 
     private final String tabName;
@@ -73,6 +75,14 @@ public abstract class QueryWatchesPanel extends GenericPanel<User> {
         };
         tabs.add(packTab);
 
+        var workspaceTab = new AjaxActionTab(Model.of(_T("Workspace")), null) {
+            @Override
+            protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+                onTabSelected(target, TAB_DEV_SESSION);
+            }
+        };
+        tabs.add(workspaceTab);
+
         var commitTab = new AjaxActionTab(Model.of(_T("Commit")), null) {
             @Override
             protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -93,6 +103,9 @@ public abstract class QueryWatchesPanel extends GenericPanel<User> {
         } else if (tabName.equals(TAB_PACK)) {
             packTab.setSelected(true);
             add(new PackQueryWatchesPanel("content", getModel()));
+        } else if (tabName.equals(TAB_DEV_SESSION)) {
+            workspaceTab.setSelected(true);
+            add(new WorkspaceQueryWatchesPanel("content", getModel()));
         } else if (tabName.equals(TAB_COMMIT)) {
             commitTab.setSelected(true);
             add(new CommitQueryWatchesPanel("content", getModel()));

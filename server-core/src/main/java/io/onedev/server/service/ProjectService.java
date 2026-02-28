@@ -82,7 +82,7 @@ public interface ProjectService extends EntityService<Project> {
 	
 	List<Project> query(Subject subject, EntityQuery<Project> query, boolean loadLabels, int firstResult, int maxResults);
 	
-	int count(Subject subject, Criteria<Project> criteria);
+	int count(Subject subject, @Nullable Criteria<Project> criteria);
 
 	Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> path, String pathPattern);
 		

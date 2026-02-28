@@ -30,7 +30,7 @@ public class PublishGTestReportStep extends PublishUnitTestReportStep {
 
 	private static final long serialVersionUID = 1L;
 
-	@Editable(order=100, description="Specify GoogleTest XML result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. " +
+	@Editable(order=100, description="Specify GoogleTest XML result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. " +
 			"This report can be generated with environment variable <tt>GTEST_OUTPUT</tt> when running tests, " +
 			"For instance, <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>. " +
 			"Use * or ? for pattern match")

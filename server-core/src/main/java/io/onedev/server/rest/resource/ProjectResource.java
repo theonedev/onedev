@@ -60,6 +60,7 @@ import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.GitPackConfig;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
+import io.onedev.server.model.support.workspace.ProjectWorkspaceSetting;
 import io.onedev.server.model.support.pack.ProjectPackSetting;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.persistence.dao.EntityCriteria;
@@ -309,6 +310,7 @@ public class ProjectResource {
 			project.getBuildSetting().setNamedQueries(forkedFrom.getBuildSetting().getNamedQueries());
 			project.setPackSetting(forkedFrom.getPackSetting());
 			project.setPullRequestSetting(forkedFrom.getPullRequestSetting());
+			project.setWorkspaceSetting(forkedFrom.getWorkspaceSetting());
 			project.setNamedCommitQueries(forkedFrom.getNamedCommitQueries());
 			project.setIssueSetting(forkedFrom.getIssueSetting());
 			project.setNamedCodeCommentQueries(forkedFrom.getNamedCodeCommentQueries());
@@ -675,6 +677,8 @@ public class ProjectResource {
 		private ProjectPackSetting packSetting = new ProjectPackSetting();
 		
 		private ProjectPullRequestSetting pullRequestSetting = new ProjectPullRequestSetting();
+
+		private ProjectWorkspaceSetting workspaceSetting = new ProjectWorkspaceSetting();
 		
 		private ArrayList<NamedCommitQuery> namedCommitQueries = new ArrayList<>();
 		
@@ -739,6 +743,15 @@ public class ProjectResource {
 		}
 
 		@Valid
+		public ProjectWorkspaceSetting getWorkspaceSetting() {
+			return workspaceSetting;
+		}
+
+		public void setWorkspaceSetting(ProjectWorkspaceSetting workspaceSetting) {
+			this.workspaceSetting = workspaceSetting;
+		}
+
+		@Valid
 		public ArrayList<NamedCommitQuery> getNamedCommitQueries() {
 			return namedCommitQueries;
 		}
@@ -783,6 +796,7 @@ public class ProjectResource {
 			project.setNamedCodeCommentQueries(getNamedCodeCommentQueries());
 			project.setNamedCommitQueries(getNamedCommitQueries());
 			project.setPullRequestSetting(getPullRequestSetting());
+			project.setWorkspaceSetting(getWorkspaceSetting());
 			project.setWebHooks(getWebHooks());
 			var contributedSettings = new LinkedHashMap<String, ContributedProjectSetting>();
 			for (var contributedSetting: getContributedSettings())
@@ -800,6 +814,7 @@ public class ProjectResource {
 			setting.setNamedCodeCommentQueries(project.getNamedCodeCommentQueries());
 			setting.setNamedCommitQueries(project.getNamedCommitQueries());
 			setting.setPullRequestSetting(project.getPullRequestSetting());
+			setting.setWorkspaceSetting(project.getWorkspaceSetting());
 			setting.setWebHooks(project.getWebHooks());
 			setting.getContributedSettings().addAll(project.getContributedSettings().values());
 

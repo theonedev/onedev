@@ -38,6 +38,7 @@ import io.onedev.server.model.support.administration.BackupSetting;
 import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.model.support.administration.ClusterSetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
+import io.onedev.server.model.support.administration.GlobalWorkspaceSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.GlobalPackSetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
@@ -53,6 +54,7 @@ import io.onedev.server.model.support.administration.authenticator.Authenticator
 import io.onedev.server.model.support.administration.emailtemplates.EmailTemplates;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.mailservice.MailConnector;
+import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.service.SettingService;
@@ -86,9 +88,8 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 	@Sessional
 	@Listen
 	public void on(SystemStarting event) {
-		for (var setting: query()) {
+		for (var setting: query()) 
 			cache.put(setting.getKey(), Optional.ofNullable(setting.getValue()));
-		}
 	}
 	
 	@Sessional
@@ -198,6 +199,12 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 		return (List<JobExecutor>) getSettingValue(Key.JOB_EXECUTORS);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<WorkspaceProvisioner> getWorkspaceProvisioners() {
+		return (List<WorkspaceProvisioner>) getSettingValue(Key.WORKSPACE_PROVISIONERS);
+	}
+
 	@Override
 	public EmailTemplates getEmailTemplates() {
 		return (EmailTemplates) getSettingValue(Key.EMAIL_TEMPLATES);
@@ -217,6 +224,11 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 	@Override
 	public GlobalBuildSetting getBuildSetting() {
 		return (GlobalBuildSetting) getSettingValue(Key.BUILD);
+	}
+
+	@Override
+	public GlobalWorkspaceSetting getWorkspaceSetting() {
+		return (GlobalWorkspaceSetting) getSettingValue(Key.WORKSPACE);
 	}
 
 	@Override
@@ -340,6 +352,12 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 
 	@Transactional
 	@Override
+	public void saveWorkspaceProvisioners(List<WorkspaceProvisioner> workspaceProvisioners) {
+		saveSetting(Key.WORKSPACE_PROVISIONERS, (Serializable) workspaceProvisioners);
+	}
+
+	@Transactional
+	@Override
 	public void saveEmailTemplates(EmailTemplates emailTemplates) {
 		saveSetting(Key.EMAIL_TEMPLATES, emailTemplates);
 	}
@@ -366,6 +384,12 @@ public class DefaultSettingService extends BaseEntityService<Setting> implements
 	@Override
 	public void saveBuildSetting(GlobalBuildSetting buildSetting) {
 		saveSetting(Key.BUILD, buildSetting);
+	}
+
+	@Transactional
+	@Override
+	public void saveWorkspaceSetting(GlobalWorkspaceSetting workspaceSetting) {
+		saveSetting(Key.WORKSPACE, workspaceSetting);
 	}
 
 	@Transactional

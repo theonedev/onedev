@@ -1,0 +1,5 @@
+@media(min-width: 768px) {
+.user-config.floating.draw {
+    width: 600px;
+}
+}

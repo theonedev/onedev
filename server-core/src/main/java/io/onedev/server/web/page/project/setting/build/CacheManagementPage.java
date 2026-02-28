@@ -1,6 +1,6 @@
 package io.onedev.server.web.page.project.setting.build;
 
-import static io.onedev.server.model.JobCache.PROP_PROJECT;
+import static io.onedev.server.model.RunCache.PROP_PROJECT;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.text.MessageFormat;
@@ -31,10 +31,10 @@ import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.data.migration.VersionedXmlDoc;
-import io.onedev.server.service.JobCacheService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.model.JobCache;
+import io.onedev.server.model.RunCache;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.RunCacheService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
@@ -46,7 +46,7 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 	
 	private static final String PARAM_PAGE = "page";
 	
-	private DataTable<JobCache, Void> cachesTable;
+	private DataTable<RunCache, Void> cachesTable;
 	
 	public CacheManagementPage(PageParameters params) {
 		super(params);
@@ -73,21 +73,33 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 		form.add(BeanContext.edit("editor", bean));
 		add(form);
 
-		List<IColumn<JobCache, Void>> columns = new ArrayList<>();
+		List<IColumn<RunCache, Void>> columns = new ArrayList<>();
 
 		columns.add(new AbstractColumn<>(Model.of(_T("Key"))) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobCache>> cellItem, String componentId, IModel<JobCache> rowModel) {
+			public void populateItem(Item<ICellPopulator<RunCache>> cellItem, String componentId, IModel<RunCache> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getKey()));
+			}
+		});
+
+		columns.add(new AbstractColumn<>(Model.of(_T("Checksum"))) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<RunCache>> cellItem, String componentId, IModel<RunCache> rowModel) {
+				var checksum = rowModel.getObject().getChecksum();
+				if (checksum != null)
+					cellItem.add(new Label(componentId, checksum));
+				else
+					cellItem.add(new Label(componentId, "<i>N/A</i>").setEscapeModelStrings(false));
 			}
 		});
 		
 		columns.add(new AbstractColumn<>(Model.of(_T("Size"))) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobCache>> cellItem, String componentId,
-									 IModel<JobCache> rowModel) {
+			public void populateItem(Item<ICellPopulator<RunCache>> cellItem, String componentId,
+									 IModel<RunCache> rowModel) {
 				var cache = rowModel.getObject();
 				var cacheSize = getCacheService().getCacheSize(cache.getProject().getId(), cache.getId());
 				if (cacheSize != null)
@@ -101,8 +113,8 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 		columns.add(new AbstractColumn<>(Model.of(_T("Last Accessed"))) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobCache>> cellItem, String componentId,
-									 IModel<JobCache> rowModel) {
+			public void populateItem(Item<ICellPopulator<RunCache>> cellItem, String componentId,
+									 IModel<RunCache> rowModel) {
 				var cache = rowModel.getObject();
 				cellItem.add(new Label(componentId, DateUtils.formatDate(cache.getAccessDate())));
 			}
@@ -112,7 +124,7 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 		columns.add(new AbstractColumn<>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobCache>> cellItem, String componentId, IModel<JobCache> rowModel) {
+			public void populateItem(Item<ICellPopulator<RunCache>> cellItem, String componentId, IModel<RunCache> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionFrag", CacheManagementPage.this);
 
 				fragment.add(new AjaxLink<Void>("delete") {
@@ -137,18 +149,18 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 
 		});
 
-		SortableDataProvider<JobCache, Void> dataProvider = new SortableDataProvider<>() {
+		SortableDataProvider<RunCache, Void> dataProvider = new SortableDataProvider<>() {
 
-			private EntityCriteria<JobCache> newCriteria() {
-				var criteria = EntityCriteria.of(JobCache.class);
+			private EntityCriteria<RunCache> newCriteria() {
+				var criteria = EntityCriteria.of(RunCache.class);
 				criteria.add(Restrictions.eq(PROP_PROJECT, getProject()));
 				return criteria;
 			}
 			
 			@Override
-			public Iterator<? extends JobCache> iterator(long first, long count) {
+			public Iterator<? extends RunCache> iterator(long first, long count) {
 				var criteria = newCriteria();
-				criteria.addOrder(Order.desc(JobCache.PROP_ACCESS_DATE));
+				criteria.addOrder(Order.desc(RunCache.PROP_ACCESS_DATE));
 				return getCacheService().query(criteria, (int) first, (int) count).iterator();
 			}
 
@@ -158,12 +170,12 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 			}
 
 			@Override
-			public IModel<JobCache> model(JobCache object) {
+			public IModel<RunCache> model(RunCache object) {
 				Long id = object.getId();
 				return new LoadableDetachableModel<>() {
 
 					@Override
-					protected JobCache load() {
+					protected RunCache load() {
 						return getCacheService().load(id);
 					}
 
@@ -197,8 +209,8 @@ public class CacheManagementPage extends ProjectBuildSettingPage {
 		return new Label(componentId, _T("Job Cache Management"));
 	}
 	
-	private JobCacheService getCacheService() {
-		return OneDev.getInstance(JobCacheService.class);
+	private RunCacheService getCacheService() {
+		return OneDev.getInstance(RunCacheService.class);
 	}
 	
 }

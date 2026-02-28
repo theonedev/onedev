@@ -77,7 +77,7 @@ class PostBuildActionListViewPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						new DrawCardPanel(target, DrawPanel.Placement.RIGHT, null) {
+						new DrawCardPanel(target, DrawPanel.Placement.RIGHT) {
 
 							@Override
 							protected Component newTitle(String componentId) {

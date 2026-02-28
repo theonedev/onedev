@@ -112,7 +112,7 @@ class SshCommand implements Command, ServerSessionAware {
 		if (clusterAccess || activeServerAddress.equals(clusterService.getLocalServerAddress())) {
 	        File gitDir = OneDev.getInstance(ProjectService.class).getGitDir(projectFacade.getId());
 			String principal = (String) SecurityUtils.getSubject().getPrincipal();
-	        Map<String, String> hookEnvs = HookUtils.getHookEnvs(projectFacade.getId(), principal);
+	        Map<String, String> hookEnvs = HookUtils.getReceiveHookEnvs(projectFacade.getId(), principal);
 
 	        if (!clusterAccess) {
 		        SessionService sessionService = OneDev.getInstance(SessionService.class);

@@ -175,7 +175,7 @@ class ServiceLocatorListViewPanel extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					new DrawCardPanel(target, Placement.RIGHT, null) {
+					new DrawCardPanel(target, Placement.RIGHT) {
 
 						@Override
 						protected Component newTitle(String componentId) {

@@ -1,6 +1,6 @@
 package io.onedev.server.buildspec.step;
 
-import static io.onedev.agent.DockerExecutorUtils.buildDockerConfig;
+import static io.onedev.agent.AgentUtils.buildDockerConfig;
 import static io.onedev.k8shelper.RegistryLoginFacade.merge;
 
 import java.util.List;

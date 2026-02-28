@@ -36,7 +36,7 @@ public class PublishHtmlReportStep extends PublishReportStep {
 
 	private String startPage;
 
-	@Editable(order=1000, description="Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance: api/index.html")
+	@Editable(order=1000, description="Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance: api/index.html")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getStartPage() {

@@ -96,6 +96,8 @@ public class Role extends AbstractEntity implements BasePermission {
 	private boolean managePullRequests;
 	
 	private boolean manageCodeComments;
+
+	private boolean manageWorkspaces;
 	
 	private CodePrivilege codePrivilege = CodePrivilege.NONE;
 	
@@ -199,6 +201,17 @@ public class Role extends AbstractEntity implements BasePermission {
 		this.managePullRequests = managePullRequests;
 	}
 	
+	@Editable(order=255, name="Workspace Management", description="Workspace administrative permission inside a project, "
+			+ "including batch operations over multiple workspaces")
+	@DependsOn(property="manageProject", value="false")
+	public boolean isManageWorkspaces() {
+		return manageWorkspaces;
+	}	
+
+	public void setManageWorkspaces(boolean manageWorkspaces) {
+		this.manageWorkspaces = manageWorkspaces;
+	}
+
 	@Editable(order=260, name="Code Comment Management", description="Code comment administrative permission inside a project, "
 			+ "including batch operations over multiple code comments")
 	@DependsOn(property="manageProject", value="false")

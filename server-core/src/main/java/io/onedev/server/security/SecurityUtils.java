@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import org.jspecify.annotations.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
 
@@ -20,18 +19,13 @@ import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.shiro.web.mgt.WebSecurityManager;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.service.AccessTokenService;
-import io.onedev.server.service.BaseAuthorizationService;
-import io.onedev.server.service.GroupService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
@@ -53,6 +47,7 @@ import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.model.Workspace;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.AccessBuildLog;
 import io.onedev.server.security.permission.AccessBuildPipeline;
@@ -73,6 +68,7 @@ import io.onedev.server.security.permission.ManageIssues;
 import io.onedev.server.security.permission.ManageJob;
 import io.onedev.server.security.permission.ManageProject;
 import io.onedev.server.security.permission.ManagePullRequests;
+import io.onedev.server.security.permission.ManageWorkspaces;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.security.permission.ReadPack;
@@ -82,6 +78,12 @@ import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.UploadCache;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.security.permission.WritePack;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.BaseAuthorizationService;
+import io.onedev.server.service.GroupService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
@@ -465,6 +467,14 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canManagePullRequests(Subject subject, Project project) {
 		return subject.isPermitted(new ProjectPermission(project, new ManagePullRequests()));
 	}
+
+	public static boolean canManageWorkspaces(Project project) {
+		return canManageWorkspaces(getSubject(), project);
+	}
+
+	public static boolean canManageWorkspaces(Subject subject, Project project) {
+		return subject.isPermitted(new ProjectPermission(project, new ManageWorkspaces()));
+	}
 	
 	public static boolean canManageCodeComments(Project project) {
 		return canManageCodeComments(getSubject(), project);
@@ -538,6 +548,15 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static boolean isAdministrator(Subject subject) {
 		return subject.isPermitted(new SystemAdministration());
+	}
+
+	public static boolean canModifyOrDelete(Workspace workspace) {
+		return canModifyOrDelete(getSubject(), workspace);
+	}
+
+	public static boolean canModifyOrDelete(Subject subject, Workspace workspace) {
+		return canManageWorkspaces(subject, workspace.getProject()) 
+				|| workspace.getUser().equals(getAuthUser(subject));
 	}
 	
 	public static boolean canModifyOrDelete(CodeComment comment) {

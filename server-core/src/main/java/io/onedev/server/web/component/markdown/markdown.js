@@ -512,17 +512,15 @@ onedev.server.markdown = {
 	    	function matchReference(atChar) {
 	    		var input = $input.val().substring(0, $input.caret());
 	    		var match;
-				if (atChar === '#')
-					match = new RegExp("(^|\\W+)((?<type>pull\\s*request|pr|issue|build)\\s+)?(?<project>" + projectPathPattern + ")?#(?<query>\\S*)$", 'gi').exec(input);
-				else
-					match = new RegExp("(^|\\W+)((?<type>pull\\s*request|pr|issue|build)\\s+)?(?<project>" + projectKeyPattern + ")-(?<query>\\S*)$", 'gi').exec(input);					
+			if (atChar === '#')
+				match = new RegExp("(^|\\W+)((?<type>pull\\s*request|pr|issue|build|workspace)\\s+)?(?<project>" + projectPathPattern + ")?#(?<query>\\S*)$", 'gi').exec(input);
+			else
+				match = new RegExp("(^|\\W+)((?<type>pull\\s*request|pr|issue|build|workspace)\\s+)?(?<project>" + projectKeyPattern + ")-(?<query>\\S*)$", 'gi').exec(input);					
 	    		if (match) {
 					var index = match.index + match[1].length;
 					if (match[2])
 						index += match[2].length;
 	    			var type = match.groups.type;
-	    			if (type)
-	    				type = type.replace(/\s+/g, '').toLowerCase();
 	    			return {
 	    				type: type,
 	    				project: match.groups.project,
@@ -1211,6 +1209,8 @@ onedev.server.markdown = {
 				referenceType = "user";
 			} else if ($reference.hasClass("commit")) {
 				referenceType = "commit";
+			} else if ($reference.hasClass("workspace")) {
+				referenceType = "workspace";
 			}
 			if (referenceType) {
 				var $tooltip = $("<div id='reference-tooltip'>" + onedev.server.markdown.translations["loading"] + "</div>");
@@ -1275,6 +1275,16 @@ onedev.server.markdown = {
 			$tooltip.find(".title").text(title);
 		} else {
 			$tooltip.empty().append("<i>" + onedev.server.markdown.translations["build-not-exist-or-access-denied"] + "</i>");			
+		}
+		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
+	},
+	renderWorkspaceTooltip: function(title) {
+		var $tooltip = $("#reference-tooltip");
+		if (title) {
+			$tooltip.empty().append("<span class='title'></span>");
+			$tooltip.find(".title").text(title);
+		} else {
+			$tooltip.empty().append("<i>" + onedev.server.markdown.translations["workspace-not-exist-or-access-denied"] + "</i>");
 		}
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},

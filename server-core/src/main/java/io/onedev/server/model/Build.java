@@ -85,6 +85,8 @@ import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.job.JobAuthorizationContext;
+import io.onedev.server.logging.BuildLoggingSupport;
+import io.onedev.server.logging.LoggingSupport;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.ProjectBelonging;
@@ -373,10 +375,10 @@ public class Build extends ProjectBelonging
 	
 	@JsonIgnore
 	@Column(nullable=false)
-	private String jobToken;
+	private String token;
 	
 	@Column
-	private String workspacePath;
+	private String workDirPath;
 	
 	@Lob
 	@Column(nullable=false)
@@ -529,21 +531,21 @@ public class Build extends ProjectBelonging
 		this.jobName = jobName;
 	}
 
-	public String getJobToken() {
-		return jobToken;
+	public String getToken() {
+		return token;
 	}
 
-	public void setJobToken(String jobToken) {
-		this.jobToken = jobToken;
+	public void setToken(String token) {
+		this.token = token;
 	}
 
 	@Nullable
-	public String getWorkspacePath() {
-		return workspacePath;
+	public String getWorkDirPath() {
+		return workDirPath;
 	}
 
-	public void setWorkspacePath(String workspacePath) {
-		this.workspacePath = workspacePath;
+	public void setWorkDirPath(String workDirPath) {
+		this.workDirPath = workDirPath;
 	}
 
 	public Collection<String> getCheckoutPaths() {
@@ -921,7 +923,7 @@ public class Build extends ProjectBelonging
 	
 	public Collection<String> getMaskSecrets() {
 		Collection<String> maskSecrets = new HashSet<>();
-		maskSecrets.add(getJobToken());
+		maskSecrets.add(getToken());
 		maskSecrets.add(OneDev.getInstance(ClusterService.class).getCredential());
 
 		for (JobSecret secret: getProject().getHierarchyJobSecrets()) 
@@ -1024,7 +1026,7 @@ public class Build extends ProjectBelonging
 	}
 	
 	public static String getDetailChangeObservable(Long buildId) {
-		return Build.class.getName() + ":" + buildId;
+		return "build:" + buildId;
 	}
 	
 	public static String getCommitStatusChangeObservable(Long projectId, String commitHash) {
@@ -1123,8 +1125,8 @@ public class Build extends ProjectBelonging
 	
 	@Nullable
 	public String getBlobPath(String filePath) {
-		if (FilenameUtils.getPrefix(filePath).length() == 0 && workspacePath != null)
-			filePath = workspacePath + "/" + filePath;
+		if (FilenameUtils.getPrefix(filePath).length() == 0 && workDirPath != null)
+			filePath = workDirPath + "/" + filePath;
 		filePath = filePath.replace('\\', '/');
 		filePath = Paths.get(filePath).normalize().toString();
 		filePath = filePath.replace('\\', '/');
@@ -1140,11 +1142,14 @@ public class Build extends ProjectBelonging
 		return null;
 	}
 	
-	public String getSummary(@Nullable Project currentProject) {
-		var summary = getJobName();
+	public String getCaption(@Nullable Project currentProject) {
+		var caption = getJobName();
 		if (getVersion() != null)
-			summary += ": " + getVersion();
-		return summary + " (" + getReference().toString(currentProject) + ")";
+			caption += ": " + getVersion();
+		return caption + " (" + getReference().toString(currentProject) + ")";
 	}
 	
+	public LoggingSupport getLoggingSupport() {
+		return new BuildLoggingSupport(this);
+	}
 }

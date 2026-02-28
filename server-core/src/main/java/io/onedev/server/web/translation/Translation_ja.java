@@ -1397,8 +1397,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"デフォルトブランチから到達できないビルドコミットの場合、<a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>ジョブシークレット</a>を作成タグ権限付きのアクセストークンとして指定する必要があります");
 		m.put("For build commit not reachable from default branch, a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> should be specified as access token with manage issue permission", 
 			"デフォルトブランチから到達できないビルドコミットの場合、<a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>ジョブシークレット</a>を問題管理権限付きのアクセストークンとして指定する必要があります");
-		m.put("For docker aware executors, this path is inside container, and accepts both absolute path and relative path (relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>). For shell related executors which runs on host machine directly, only relative path is accepted", 
-			"Docker対応エグゼキューターの場合、このパスはコンテナ内にあり、絶対パスと相対パス（<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>に対する相対パス）を受け入れます。ホストマシンで直接実行されるシェル関連エグゼキューターの場合、相対パスのみが受け入れられます");
+		m.put("For docker aware executors, this path is inside container, and accepts both absolute path and relative path (relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>). For shell related executors which runs on host machine directly, only relative path is accepted", 
+			"Docker対応エグゼキューターの場合、このパスはコンテナ内にあり、絶対パスと相対パス（<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対する相対パス）を受け入れます。ホストマシンで直接実行されるシェル関連エグゼキューターの場合、相対パスのみが受け入れられます");
 		m.put("For each build, OneDev calculates a list of fixed issues since previous build automatically. This setting provides a default query to further filter/order this list. For a given job, the first matching entry will be used.", 
 			"各ビルドに対して、OneDevは前回のビルド以降に修正された問題のリストを自動的に計算します。この設定は、このリストをさらにフィルター/順序付けするためのデフォルトクエリを提供します。特定のジョブの場合、最初に一致するエントリが使用されます。");
 		m.put("For each selected branch/tag, a separate build will be generated with branch/tag set to corresponding value", 
@@ -2346,7 +2346,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally filter issues", "課題を任意でフィルタリング");
 		m.put("Optionally filter pull requests", "プルリクエストを任意でフィルタリング");
 		m.put("Optionally leave a note", "任意で注記を残す");
-		m.put("Optionally mount directories or files under job workspace into container", "ジョブワークスペース内のディレクトリやファイルをコンテナにマウントすることを任意で選択");
+		m.put("Optionally mount directories or files under job workdir into container", "ジョブワークスペース内のディレクトリやファイルをコンテナにマウントすることを任意で選択");
 		m.put("Optionally select fields to prompt when this button is pressed", "このボタンが押されたときにプロンプトするフィールドを任意で選択");
 		m.put("Optionally select fields to remove when this transition happens", "この遷移が発生したときに削除するフィールドを任意で選択");
 		m.put("Optionally specifies name of the attribute inside the user LDAP entry whose value will be taken as user email. This field is normally set to <i>mail</i> according to RFC 2798", 
@@ -2366,8 +2366,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify <span class='text-info'>comma separated</span> platforms to scan, for instance <tt>linux/amd64,linux/arm64</tt>. Leave empty to scan all platforms in OCI layout", 
 			"オプションで、スキャンするプラットフォームを<span class='text-info'>カンマ区切り</span>で指定してください。例: <tt>linux/amd64,linux/arm64</tt>。OCIレイアウト内のすべてのプラットフォームをスキャンする場合は空のままにしてください。");
 		m.put("Optionally specify API key for authentication", "認証のためにAPIキーを任意で指定");
-		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
-			"オプションで、<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>に対するDockerfileの相対パスを指定してください。上記で指定したビルドパスの下にある<tt>Dockerfile</tt>ファイルを使用する場合は空のままにしてください。");
+		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
+			"オプションで、<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対するDockerfileの相対パスを指定してください。上記で指定したビルドパスの下にある<tt>Dockerfile</tt>ファイルを使用する場合は空のままにしてください。");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "オプションで、Renovate CLIで使用するJavaScript設定を指定してください。");
 		m.put("Optionally specify SSH root URL, which will be used to construct project clone url via SSH protocol. Leave empty to derive from server url", 
 			"オプションで、SSHルートURLを指定してください。これはSSHプロトコルを介してプロジェクトクローンURLを構築するために使用されます。サーバーURLから派生する場合は空のままにしてください。");
@@ -2385,8 +2385,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、データベース自動バックアップをスケジュールするためのcron式を指定してください。cron式の形式は<em>&lt;秒&gt; &lt;分&gt; &lt;時&gt; &lt;日&gt; &lt;月&gt; &lt;曜日&gt;</em>です。例えば、<em>0 0 1 * * ?</em>は毎日午前1時を意味します。形式の詳細については、<a href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format' target='_blank'>Quartzチュートリアル</a>を参照してください。バックアップファイルはOneDevインストールディレクトリの<em>db-backup</em>フォルダに配置されます。複数のサーバーがクラスターを形成する場合、自動バックアップは<a href='https://docs.onedev.io/concepts#lead-server' target='_blank'>リードサーバー</a>で行われます。このプロパティを空のままにしておくと、データベース自動バックアップは有効になりません。");
 		m.put("Optionally specify a date field to hold due date information.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"オプションで、期限情報を保持する日付フィールドを指定してください。<br><b>注意: </b>適切なオプションがない場合は、OneDev課題フィールドをカスタマイズすることができます。");
-		m.put("Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to put retrieved artifacts. Leave empty to use job workspace itself", 
-			"オプションで、取得したアーティファクトを配置する<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
+		m.put("Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to put retrieved artifacts. Leave empty to use job workdir itself", 
+			"オプションで、取得したアーティファクトを配置する<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
 		m.put("Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume is only used to hold temporary build files", 
 			"オプションで、ビルドボリュームを動的に割り当てるためのストレージクラスを指定してください。デフォルトのストレージクラスを使用する場合は空のままにしてください。<b class='text-warning'>注意:</b> ストレージクラスの再利用ポリシーは<code>Delete</code>に設定する必要があります。ボリュームは一時的なビルドファイルを保持するためだけに使用されます。");
 		m.put("Optionally specify a working period field to hold estimated time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
@@ -2405,17 +2405,17 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify applicable jobs of this executor", "このエグゼキュータに適用可能なジョブを任意で指定してください");
 		m.put("Optionally specify applicable users who pushed the change", "変更をプッシュした適用可能なユーザーを任意で指定");
 		m.put("Optionally specify arguments to run above image", "オプションで、上記のイメージを実行するための引数を指定してください。");
-		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
-			"オプションで、依存関係から<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に取得するアーティファクトを指定してください。公開されたアーティファクト（アーティファクト公開ステップを介して）だけが取得可能です。アーティファクトを取得しない場合は空のままにしてください。");
+		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
+			"オプションで、依存関係から<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に取得するアーティファクトを指定してください。公開されたアーティファクト（アーティファクト公開ステップを介して）だけが取得可能です。アーティファクトを取得しない場合は空のままにしてください。");
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"オプションで、このボタンを押すための認証済みロールを指定してください。指定されていない場合、すべてのユーザーが許可されます。");
 		m.put("Optionally specify base query of the list", "オプションで、リストの基本クエリを指定してください。");
 		m.put("Optionally specify branches/users/groups allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
 			"オプションで、このシークレットにアクセスできるブランチ/ユーザー/グループを指定してください。空のままにすると、外部プルリクエストを介してトリガーされたジョブを含む、任意のジョブがこのシークレットにアクセスできます。");
-		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. Leave empty to use job workspace itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
-			"オプションで、<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>に対するビルドコンテキストパスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。<code>Dockerfile</code>ファイルはビルドコンテキストディレクトリに存在することが期待されますが、オプション<code>--dockerfile</code>で異なる場所を指定することもできます。");
-		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. Leave empty to use job workspace itself", 
-			"オプションで、<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>に対するビルドパスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
+		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>. Leave empty to use job workdir itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
+			"オプションで、<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対するビルドコンテキストパスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。<code>Dockerfile</code>ファイルはビルドコンテキストディレクトリに存在することが期待されますが、オプション<code>--dockerfile</code>で異なる場所を指定することもできます。");
+		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>. Leave empty to use job workdir itself", 
+			"オプションで、<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対するビルドパスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
 		m.put("Optionally specify cluster role the job pods service account binding to. This is necessary if you want to do things such as running other Kubernetes pods in job command", 
 			"オプションで、ジョブポッドのサービスアカウントがバインドされるクラスター役割を指定してください。これは、ジョブコマンドで他のKubernetesポッドを実行するなどの操作を行いたい場合に必要です。");
 		m.put("Optionally specify container arguments separated by space. Single argument containing space should be quoted. <b class='text-warning'>Note: </b> do not confuse this with container options which should be specified in executor setting", 
@@ -2478,13 +2478,13 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、sshコマンドのオプションを指定してください。複数のオプションはスペースで区切る必要があります。");
 		m.put("Optionally specify options passed to renovate cli. Multiple options should be separated by space, and single option containing spaces should be quoted", 
 			"オプションで、Renovate CLIに渡されるオプションを指定してください。複数のオプションはスペースで区切る必要があり、スペースを含む単一のオプションは引用符で囲む必要があります。");
-		m.put("Optionally specify osv scanner <a href='https://google.github.io/osv-scanner/configuration/' target='_blank'>config file</a> under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. You may ignore particular vulnerabilities via this file", 
-			"オプションで、<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>内のosvスキャナー<a href='https://google.github.io/osv-scanner/configuration/' target='_blank'>設定ファイル</a>を指定してください。このファイルを使用して特定の脆弱性を無視することができます。");
+		m.put("Optionally specify osv scanner <a href='https://google.github.io/osv-scanner/configuration/' target='_blank'>config file</a> under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>. You may ignore particular vulnerabilities via this file", 
+			"オプションで、<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>内のosvスキャナー<a href='https://google.github.io/osv-scanner/configuration/' target='_blank'>設定ファイル</a>を指定してください。このファイルを使用して特定の脆弱性を無視することができます。");
 		m.put("Optionally specify path protection rules", "オプションで、パス保護ルールを指定してください。");
-		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>ignore file</a>", 
-			"オプションで、trivy<a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>無視ファイル</a>として使用する<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する相対パスを指定してください。");
-		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to publish artifacts from. Leave empty to use job workspace itself", 
-			"オプションで、アーティファクトを公開するための<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
+		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>ignore file</a>", 
+			"オプションで、trivy<a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>無視ファイル</a>として使用する<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを指定してください。");
+		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to publish artifacts from. Leave empty to use job workdir itself", 
+			"オプションで、アーティファクトを公開するための<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
 		m.put("Optionally specify platform to pull, for instance <tt>linux/amd64</tt>. Leave empty to pull all platforms in image", 
 			"オプションで、プルするプラットフォームを指定してください。例: <tt>linux/amd64</tt>。イメージ内のすべてのプラットフォームをプルする場合は空のままにしてください。");
 		m.put("Optionally specify project to show builds of. Leave empty to show builds of all projects with permissions", 
@@ -2498,12 +2498,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify registry logins to override those defined in job executor. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token secret for password secret", 
 			"オプションで、ジョブエグゼキューターで定義されたものを上書きするためのレジストリログインを指定してください。組み込みレジストリの場合、レジストリURLには<code>@server_url@</code>、ユーザー名には<code>@job_token@</code>、パスワードシークレットにはアクセストークンシークレットを使用してください。");
 		m.put("Optionally specify relative directory to put uploaded files", "オプションで、アップロードされたファイルを配置する相対ディレクトリを指定してください。");
-		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to clone code into. Leave empty to use job workspace itself", 
-			"オプションで、コードをクローンするための<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
-		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to scan. Leave empty to use job workspace itself", 
-			"オプションで、スキャンするための<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
-		m.put("Optionally specify relative paths under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to scan dependency vulnerabilities. Multiple paths can be specified and should be separated with space. Leave empty to use job workspace itself", 
-			"オプションで、依存関係の脆弱性をスキャンするための<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する相対パスを指定してください。複数のパスを指定することができ、スペースで区切る必要があります。ジョブワークスペース自体を使用する場合は空のままにしてください。");
+		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to clone code into. Leave empty to use job workdir itself", 
+			"オプションで、コードをクローンするための<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
+		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to scan. Leave empty to use job workdir itself", 
+			"オプションで、スキャンするための<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
+		m.put("Optionally specify relative paths under <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to scan dependency vulnerabilities. Multiple paths can be specified and should be separated with space. Leave empty to use job workdir itself", 
+			"オプションで、依存関係の脆弱性をスキャンするための<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを指定してください。複数のパスを指定することができ、スペースで区切る必要があります。ジョブワークスペース自体を使用する場合は空のままにしてください。");
 		m.put("Optionally specify required reviewers for changes of specified branch", "オプションで、指定されたブランチの変更に対する必要なレビュアーを指定してください。");
 		m.put("Optionally specify revision to create branch from. Leave empty to create from build commit", 
 			"オプションで、ブランチを作成するためのリビジョンを指定してください。ビルドコミットから作成する場合は空のままにしてください。");
@@ -3117,8 +3117,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Run job", "ジョブを実行");
 		m.put("Run job in another project", "別のプロジェクトでジョブを実行する");
 		m.put("Run on Bare Metal/Virtual Machine", "ベアメタル/仮想マシンで実行");
-		m.put("Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKSPACE</code>. <b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote docker executor", 
-			"指定されたDockerコンテナを実行します。<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>がコンテナにマウントされ、そのパスが環境変数<code>ONEDEV_WORKSPACE</code>に配置されます。<b class='text-warning'>注意: </b>このステップはサーバーDockerエグゼキューターまたはリモートDockerエグゼキューターによってのみ実行可能です");
+		m.put("Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>Job workspace</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKDIR</code>. <b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote docker executor", 
+			"指定されたDockerコンテナを実行します。<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>がコンテナにマウントされ、そのパスが環境変数<code>ONEDEV_WORKDIR</code>に配置されます。<b class='text-warning'>注意: </b>このステップはサーバーDockerエグゼキューターまたはリモートDockerエグゼキューターによってのみ実行可能です");
 		m.put("Run specified step template", "指定されたステップテンプレートを実行");
 		m.put("Run this job", "このジョブを実行");
 		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>. It can only be executed by docker aware executor.", 
@@ -3391,47 +3391,47 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specifies who can access this AI service", "このAIサービスにアクセスできる人を指定します");
 		m.put("Specifies who can access this AI service. AI service can be accessed in below approaches:", 
 			"このAIサービスにアクセスできる人を指定します。AIサービスには以下の方法でアクセスできます：");
-		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する .net TRX テスト結果ファイルを指定します。例: <tt>TestResults/*.trx</tt>。パターンマッチには * または ? を使用してください");
+		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する .net TRX テスト結果ファイルを指定します。例: <tt>TestResults/*.trx</tt>。パターンマッチには * または ? を使用してください");
 		m.put("Specify <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is access token with code write permission over above projects. Commits, issues, and pull requests will also be created under name of the access token owner", 
 			"<a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>ジョブシークレット</a>を指定します。この値はコード書き込み権限を持つアクセス トークンです。コミット、課題、プルリクエストはアクセス トークン所有者の名前で作成されます");
-		m.put("Specify <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json output file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with clippy json output option, for instance <code>cargo clippy --message-format json>check-result.json</code>. Use * or ? for pattern match", 
-			"<a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> の JSON 出力ファイルを <a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対して指定します。このファイルは clippy の JSON 出力オプションで生成できます。例: <code>cargo clippy --message-format json>check-result.json</code>。パターンマッチには * または ? を使用してください");
+		m.put("Specify <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json output file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with clippy json output option, for instance <code>cargo clippy --message-format json>check-result.json</code>. Use * or ? for pattern match", 
+			"<a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> の JSON 出力ファイルを <a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対して指定します。このファイルは clippy の JSON 出力オプションで生成できます。例: <code>cargo clippy --message-format json>check-result.json</code>。パターンマッチには * または ? を使用してください");
 		m.put("Specify Build Options", "ビルドオプションを指定します");
-		m.put("Specify CPD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/cpd.xml</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する CPD 結果 XML ファイルを指定します。例: <tt>target/cpd.xml</tt>。パターンマッチには * または ? を使用してください");
+		m.put("Specify CPD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/cpd.xml</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する CPD 結果 XML ファイルを指定します。例: <tt>target/cpd.xml</tt>。パターンマッチには * または ? を使用してください");
 		m.put("Specify Commit Message", "コミットメッセージを指定します");
-		m.put("Specify ESLint report file in checkstyle format under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with ESLint option <tt>'-f checkstyle'</tt> and <tt>'-o'</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>内の checkstyle フォーマットで ESLint レポートファイルを指定します。このファイルは ESLint オプション <tt>'-f checkstyle'</tt> および <tt>'-o'</tt> を使用して生成できます。パターンマッチには * または ? を使用してください");
+		m.put("Specify ESLint report file in checkstyle format under <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with ESLint option <tt>'-f checkstyle'</tt> and <tt>'-o'</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>内の checkstyle フォーマットで ESLint レポートファイルを指定します。このファイルは ESLint オプション <tt>'-f checkstyle'</tt> および <tt>'-o'</tt> を使用して生成できます。パターンマッチには * または ? を使用してください");
 		m.put("Specify GitHub API url, for instance <tt>https://api.github.com</tt>", "GitHub API URL を指定します。例: <tt>https://api.github.com</tt>");
 		m.put("Specify GitLab API url, for instance <tt>https://gitlab.example.com/api/v4</tt>", "GitLab API URL を指定します。例: <tt>https://gitlab.example.com/api/v4</tt>");
 		m.put("Specify Gitea API url, for instance <tt>https://gitea.example.com/api/v1</tt>", "Gitea API URL を指定します。例: <tt>https://gitea.example.com/api/v1</tt>");
-		m.put("Specify GoogleTest XML result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This report can be generated with environment variable <tt>GTEST_OUTPUT</tt> when running tests, For instance, <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する GoogleTest XML 結果ファイルを指定します。このレポートはテスト実行時に環境変数 <tt>GTEST_OUTPUT</tt> を使用して生成できます。例: <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>。パターンマッチには * または ? を使用してください");
+		m.put("Specify GoogleTest XML result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This report can be generated with environment variable <tt>GTEST_OUTPUT</tt> when running tests, For instance, <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する GoogleTest XML 結果ファイルを指定します。このレポートはテスト実行時に環境変数 <tt>GTEST_OUTPUT</tt> を使用して生成できます。例: <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>。パターンマッチには * または ? を使用してください");
 		m.put("Specify IMAP user name.<br><b class='text-danger'>NOTE: </b> This account should be able to receive emails sent to system email address specified above", 
 			"IMAP ユーザー名を指定します。<br><b class='text-danger'>注意: </b>このアカウントは上記で指定されたシステムメールアドレスに送信されたメールを受信できる必要があります");
-		m.put("Specify JUnit test result file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>target/surefire-reports/TEST-*.xml</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する JUnit テスト結果ファイル (XML フォーマット) を指定します。例: <tt>target/surefire-reports/TEST-*.xml</tt>。パターンマッチには * または ? を使用してください");
-		m.put("Specify JaCoCo coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/site/jacoco/jacoco.xml</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する JaCoCo カバレッジ XML レポートファイルを指定します。例: <tt>target/site/jacoco/jacoco.xml</tt>。パターンマッチには * または ? を使用してください");
-		m.put("Specify Jest coverage report file in clover format relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>coverage/clover.xml</tt>. This file can be generated with Jest option <tt>'--coverage'</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する Jest カバレッジレポートファイル (clover フォーマット) を指定します。例: <tt>coverage/clover.xml</tt>。このファイルは Jest オプション <tt>'--coverage'</tt> を使用して生成できます。パターンマッチには * または ? を使用してください");
-		m.put("Specify Jest test result file in json format relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated via Jest option <tt>'--json'</tt> and <tt>'--outputFile'</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する Jest テスト結果ファイル (JSON フォーマット) を指定します。このファイルは Jest オプション <tt>'--json'</tt> および <tt>'--outputFile'</tt> を使用して生成できます。パターンマッチには * または ? を使用してください");
-		m.put("Specify OCI layout directory of the image to scan. This directory can be generated via build image step or pull image step. It should be relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"スキャン対象のイメージの OCI レイアウトディレクトリを指定します。このディレクトリはイメージビルドステップまたはイメージプルステップで生成できます。<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>に対して相対的である必要があります");
-		m.put("Specify OCI layout directory relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to push from", 
-			"プッシュ元として使用する OCI レイアウトディレクトリを <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>に対して指定します");
+		m.put("Specify JUnit test result file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance <tt>target/surefire-reports/TEST-*.xml</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する JUnit テスト結果ファイル (XML フォーマット) を指定します。例: <tt>target/surefire-reports/TEST-*.xml</tt>。パターンマッチには * または ? を使用してください");
+		m.put("Specify JaCoCo coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/site/jacoco/jacoco.xml</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する JaCoCo カバレッジ XML レポートファイルを指定します。例: <tt>target/site/jacoco/jacoco.xml</tt>。パターンマッチには * または ? を使用してください");
+		m.put("Specify Jest coverage report file in clover format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance <tt>coverage/clover.xml</tt>. This file can be generated with Jest option <tt>'--coverage'</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する Jest カバレッジレポートファイル (clover フォーマット) を指定します。例: <tt>coverage/clover.xml</tt>。このファイルは Jest オプション <tt>'--coverage'</tt> を使用して生成できます。パターンマッチには * または ? を使用してください");
+		m.put("Specify Jest test result file in json format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated via Jest option <tt>'--json'</tt> and <tt>'--outputFile'</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する Jest テスト結果ファイル (JSON フォーマット) を指定します。このファイルは Jest オプション <tt>'--json'</tt> および <tt>'--outputFile'</tt> を使用して生成できます。パターンマッチには * または ? を使用してください");
+		m.put("Specify OCI layout directory of the image to scan. This directory can be generated via build image step or pull image step. It should be relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
+			"スキャン対象のイメージの OCI レイアウトディレクトリを指定します。このディレクトリはイメージビルドステップまたはイメージプルステップで生成できます。<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対して相対的である必要があります");
+		m.put("Specify OCI layout directory relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to push from", 
+			"プッシュ元として使用する OCI レイアウトディレクトリを <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対して指定します");
 		m.put("Specify OpenID scopes to request", "要求する OpenID スコープを指定します");
-		m.put("Specify PMD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/pmd.xml</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する PMD 結果 XML ファイルを指定します。例: <tt>target/pmd.xml</tt>。パターンマッチには * または ? を使用してください");
-		m.put("Specify PowerShell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>.<br><b class='text-warning'>NOTE: </b> OneDev checks exit code of the script to determine if step is successful. Since PowerShell always exit with 0 even if there are script errors, you should handle errors in the script and exit with non-zero code, or add line <code>$ErrorActionPreference = &quot;Stop&quot;</code> at start of your script<br>", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>内で実行する PowerShell コマンドを指定します。<br><b class='text-warning'>注意: </b>OneDev はスクリプトの終了コードをチェックしてステップが成功したかどうかを判断します。PowerShell はスクリプトエラーがあっても常に 0 を返すため、スクリプト内でエラーを処理して非ゼロコードで終了するか、スクリプトの冒頭に <code>$ErrorActionPreference = &quot;Stop&quot;</code> を追加してください<br>");
-		m.put("Specify Roslynator diagnostics output file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with <i>-o</i> option. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する Roslynator 診断出力ファイル (XML フォーマット) を指定します。このファイルは <i>-o</i> オプションで生成できます。パターンマッチには * または ? を使用してください");
+		m.put("Specify PMD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/pmd.xml</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する PMD 結果 XML ファイルを指定します。例: <tt>target/pmd.xml</tt>。パターンマッチには * または ? を使用してください");
+		m.put("Specify PowerShell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>.<br><b class='text-warning'>NOTE: </b> OneDev checks exit code of the script to determine if step is successful. Since PowerShell always exit with 0 even if there are script errors, you should handle errors in the script and exit with non-zero code, or add line <code>$ErrorActionPreference = &quot;Stop&quot;</code> at start of your script<br>", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>内で実行する PowerShell コマンドを指定します。<br><b class='text-warning'>注意: </b>OneDev はスクリプトの終了コードをチェックしてステップが成功したかどうかを判断します。PowerShell はスクリプトエラーがあっても常に 0 を返すため、スクリプト内でエラーを処理して非ゼロコードで終了するか、スクリプトの冒頭に <code>$ErrorActionPreference = &quot;Stop&quot;</code> を追加してください<br>");
+		m.put("Specify Roslynator diagnostics output file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with <i>-o</i> option. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する Roslynator 診断出力ファイル (XML フォーマット) を指定します。このファイルは <i>-o</i> オプションで生成できます。パターンマッチには * または ? を使用してください");
 		m.put("Specify Shell/Batch Commands to Run", "実行するシェル/バッチコマンドを指定します");
-		m.put("Specify SpotBugs result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/spotbugsXml.xml</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する SpotBugs 結果 XML ファイルを指定します。例: <tt>target/spotbugsXml.xml</tt>。パターンマッチには * または ? を使用してください");
+		m.put("Specify SpotBugs result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/spotbugsXml.xml</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する SpotBugs 結果 XML ファイルを指定します。例: <tt>target/spotbugsXml.xml</tt>。パターンマッチには * または ? を使用してください");
 		m.put("Specify System Settings", "システム設定を指定します");
 		m.put("Specify URL of remote git repository. Only http/https protocol is supported", "リモート Git リポジトリの URL を指定します。http/https プロトコルのみサポートされています");
 		m.put("Specify YouTrack login name. This account should have permission to:<ul><li>Read full information and issues of the projects you want to import<li>Read issue tags<li>Read user basic information</ul>", 
@@ -3466,14 +3466,14 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify a Docker Image to Test Against", "テスト対象の Docker イメージを指定します");
 		m.put("Specify a custom field of Enum type", "Enum 型のカスタムフィールドを指定します");
 		m.put("Specify a default query to filter/order fixed issues of specified jobs", "指定されたジョブの修正済み課題をフィルタリング/並べ替えるためのデフォルトクエリを指定します");
-		m.put("Specify a file relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to write checksum into", 
-			"チェックサムを書き込むためのファイルを <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>に対して指定します");
+		m.put("Specify a file relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to write checksum into", 
+			"チェックサムを書き込むためのファイルを <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対して指定します");
 		m.put("Specify a multi-value user field to hold assignees information.<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"担当者情報を保持するための複数値ユーザーフィールドを指定します。<b>注意: </b>適切なオプションがない場合は OneDev の課題フィールドをカスタマイズすることができます");
 		m.put("Specify a multi-value user field to hold assignees information.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"担当者情報を保持するための複数値ユーザーフィールドを指定します。<br><b>注意: </b>適切なオプションがない場合は OneDev の課題フィールドをカスタマイズすることができます");
 		m.put("Specify a path inside container to be used as mount target", "マウントターゲットとして使用するコンテナ内のパスを指定します");
-		m.put("Specify a path relative to job workspace to be used as mount source. Leave empty to mount job workspace itself", 
+		m.put("Specify a path relative to job workdir to be used as mount source. Leave empty to mount job workdir itself", 
 			"マウントソースとして使用するジョブワークスペースに対するパスを指定します。空欄の場合、ジョブワークスペース自体をマウントします");
 		m.put("Specify a secret to be used as access token to create issue in above project if it is not publicly accessible", 
 			"上記プロジェクトで課題を作成するためのアクセス トークンとして使用するシークレットを指定します。このプロジェクトが公開されていない場合に使用します");
@@ -3499,8 +3499,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify application (client) ID of the app registered in Entra ID", "Entra ID に登録されたアプリのアプリケーション (クライアント) ID を指定します");
 		m.put("Specify arguments for imagetools. For instance <code>create -t myorg/myrepo:1.0.0 myorg/myrepo@&lt;arm64 manifest digest&gt; myorg/myrepo@&lt;amd64 manifest digest&gt;</code>", 
 			"イメージツールの引数を指定します。例: <code>create -t myorg/myrepo:1.0.0 myorg/myrepo@&lt;arm64 manifest digest&gt; myorg/myrepo@&lt;amd64 manifest digest&gt;</code>");
-		m.put("Specify artifacts to retrieve into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved.", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に取得するアーティファクトを指定します。公開されたアーティファクト (アーティファクト公開ステップを通じて) のみ取得可能です");
+		m.put("Specify artifacts to retrieve into <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. Only published artifacts (via artifact publish step) can be retrieved.", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に取得するアーティファクトを指定します。公開されたアーティファクト (アーティファクト公開ステップを通じて) のみ取得可能です");
 		m.put("Specify at least 10 alphanumeric chars to be used as secret, and then add an inbound parse entry at SendGrid side:<ul><li><code>Destination URL</code> should be set to <i>&lt;OneDev root url&gt;/~sendgrid/&lt;secret&gt;</i>, for instance, <i>https://onedev.example.com/~sendgrid/1234567890</i>. Note that in production environment, <a href='https://docs.onedev.io/administration-guide/https-setup' target='_blank'>https should be enabled</a> to protect the secret</li><li><code>Receiving domain</code> should be the same as domain part of system email address specified above</li><li>Option <code>POST the raw, full MIME message</code> is enabled</li></ul>", 
 			"少なくとも 10 文字の英数字をシークレットとして指定し、SendGrid 側でインバウンド解析エントリを追加します:<ul><li><code>送信先 URL</code> は <i>&lt;OneDev ルート URL&gt;/~sendgrid/&lt;シークレット&gt;</i> に設定する必要があります。例: <i>https://onedev.example.com/~sendgrid/1234567890</i>。本番環境では、<a href='https://docs.onedev.io/administration-guide/https-setup' target='_blank'>https を有効にする必要があります</a> シークレットを保護するため</li><li><code>受信ドメイン</code> は上記で指定されたシステムメールアドレスのドメイン部分と同じである必要があります</li><li>オプション <code>生の完全な MIME メッセージを POST</code> が有効になっています</li></ul>");
 		m.put("Specify base nodes for user search. For example: <i>cn=Users, dc=example, dc=com</i>", 
@@ -3516,13 +3516,13 @@ public class Translation_ja extends TranslationResourceBundle {
 			"リモートリポジトリに自己署名証明書を使用している場合に信頼する証明書を指定します");
 		m.put("Specify certificates to trust if you are using self-signed certificates for your docker registries", 
 			"Docker レジストリに自己署名証明書を使用している場合に信頼する証明書を指定します");
-		m.put("Specify checkstyle result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/checkstyle-result.xml</tt>. Refer to <a href='https://checkstyle.org/'>checkstyle documentation</a> on how to generate the result xml file. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する checkstyle 結果 XML ファイルを指定します。例: <tt>target/checkstyle-result.xml</tt>。結果 XML ファイルの生成方法については <a href='https://checkstyle.org/'>checkstyle ドキュメント</a> を参照してください。パターンマッチには * または ? を使用してください");
+		m.put("Specify checkstyle result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/checkstyle-result.xml</tt>. Refer to <a href='https://checkstyle.org/'>checkstyle documentation</a> on how to generate the result xml file. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する checkstyle 結果 XML ファイルを指定します。例: <tt>target/checkstyle-result.xml</tt>。結果 XML ファイルの生成方法については <a href='https://checkstyle.org/'>checkstyle ドキュメント</a> を参照してください。パターンマッチには * または ? を使用してください");
 		m.put("Specify client secret of the app registered in Entra ID", "Entra ID に登録されたアプリのクライアントシークレットを指定します");
-		m.put("Specify clover coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/site/clover/clover.xml</tt>. Refer to <a href='https://openclover.org/documentation'>OpenClover documentation</a> on how to generate clover xml file. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する clover カバレッジ XML レポートファイルを指定します。例: <tt>target/site/clover/clover.xml</tt>。clover XML ファイルの生成方法については <a href='https://openclover.org/documentation'>OpenClover ドキュメント</a> を参照してください。パターンマッチには * または ? を使用してください");
-		m.put("Specify cobertura coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/site/cobertura/coverage.xml</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する cobertura カバレッジ XML レポートファイルを指定します。例: <tt>target/site/cobertura/coverage.xml</tt>。パターンマッチには * または ? を使用してください");
+		m.put("Specify clover coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/site/clover/clover.xml</tt>. Refer to <a href='https://openclover.org/documentation'>OpenClover documentation</a> on how to generate clover xml file. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する clover カバレッジ XML レポートファイルを指定します。例: <tt>target/site/clover/clover.xml</tt>。clover XML ファイルの生成方法については <a href='https://openclover.org/documentation'>OpenClover ドキュメント</a> を参照してください。パターンマッチには * または ? を使用してください");
+		m.put("Specify cobertura coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/site/cobertura/coverage.xml</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する cobertura カバレッジ XML レポートファイルを指定します。例: <tt>target/site/cobertura/coverage.xml</tt>。パターンマッチには * または ? を使用してください");
 		m.put("Specify color of the state for displaying purpose", "表示目的の状態の色を指定します");
 		m.put("Specify columns of the board. Each column corresponds to a value of the issue field specified above", 
 			"ボードの列を指定します。各列は上記で指定された課題フィールドの値に対応します");
@@ -3535,8 +3535,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"OpenIDプロバイダーの構成検出URLを指定してください。例: <code>https://openid.example.com/.well-known/openid-configuration</code>。OneDevはトークンの有効性を確保するためにTLS暗号化に依存しているため、HTTPSプロトコルを使用してください。");
 		m.put("Specify container image to execute commands inside", "コマンドを実行するためのコンテナイメージを指定してください。");
 		m.put("Specify container image to run", "実行するコンテナイメージを指定してください。");
-		m.put("Specify cppcheck xml result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with cppcheck xml output option, for instance <code>cppcheck src --xml 2>check-result.xml</code>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対するcppcheckのXML結果ファイルを指定してください。このファイルはcppcheckのXML出力オプションで生成できます。例: <code>cppcheck src --xml 2>check-result.xml</code>。パターンマッチには*や?を使用してください。");
+		m.put("Specify cppcheck xml result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with cppcheck xml output option, for instance <code>cppcheck src --xml 2>check-result.xml</code>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対するcppcheckのXML結果ファイルを指定してください。このファイルはcppcheckのXML出力オプションで生成できます。例: <code>cppcheck src --xml 2>check-result.xml</code>。パターンマッチには*や?を使用してください。");
 		m.put("Specify cpu request for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"このエグゼキューターを使用する各ジョブ/サービスのCPUリクエストを指定してください。詳細は<a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetesリソース管理</a>を確認してください。");
 		m.put("Specify default assignees of pull requests submitted to this project. Only users with the write code permission to the project can be selected", 
@@ -3545,8 +3545,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify destinations, for instance <tt>registry-server:5000/myorg/myrepo:latest</tt>. Make sure to use <b>same host</b> as specified in server url of system settings if you want to push to built-in registry, or simply use the form <tt>@server@/&lt;project path&gt;/&lt;repo name&gt;:&lt;tag name&gt;</tt>. Multiple destinations should be separated with space", 
 			"送信先を指定してください。例: <tt>registry-server:5000/myorg/myrepo:latest</tt>。組み込みレジストリにプッシュする場合、システム設定のサーバーURLで指定された<b>同じホスト</b>を使用するか、単に<tt>@server@/&lt;project path&gt;/&lt;repo name&gt;:&lt;tag name&gt;</tt>の形式を使用してください。複数の送信先はスペースで区切ってください。");
 		m.put("Specify directory (tenant) ID of the app registered in Entra ID", "Entra IDに登録されたアプリのディレクトリ（テナント）IDを指定してください。");
-		m.put("Specify directory relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to store OCI layout", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>に対するOCIレイアウトを保存するディレクトリを指定してください。");
+		m.put("Specify directory relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to store OCI layout", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対するOCIレイアウトを保存するディレクトリを指定してください。");
 		m.put("Specify docker image of the service", "サービスのDockerイメージを指定してください。");
 		m.put("Specify dockerx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
 			"Dockerイメージをビルドするために使用するdockerxビルダーを指定してください。OneDevはビルダーが存在しない場合、自動的に作成します。例えば、非セキュアなレジストリへの公開を許可するためにビルダーをカスタマイズする方法については<a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>このチュートリアル</a>を確認してください。");
@@ -3557,10 +3557,10 @@ public class Translation_ja extends TranslationResourceBundle {
 			"依存関係の更新を調整するためにRenovateによって作成されたさまざまな課題のフィールドを指定してください。");
 		m.put("Specify fields to be displayed in the issue list", "課題リストに表示するフィールドを指定してください。");
 		m.put("Specify fields to display in board card", "ボードカードに表示するフィールドを指定してください。");
-		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be published. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する公開するファイルを指定してください。パターンマッチには*や?を使用してください。");
-		m.put("Specify files to create md5 checksum from. Multiple files should be separated by space. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> patterns accepted. Non-absolute file is considered to be relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"md5チェックサムを作成するファイルを指定してください。複数のファイルはスペースで区切ってください。<a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a>パターンが使用可能です。絶対パスでないファイルは<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>に対する相対パスとみなされます。");
+		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to be published. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する公開するファイルを指定してください。パターンマッチには*や?を使用してください。");
+		m.put("Specify files to create md5 checksum from. Multiple files should be separated by space. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> patterns accepted. Non-absolute file is considered to be relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
+			"md5チェックサムを作成するファイルを指定してください。複数のファイルはスペースで区切ってください。<a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a>パターンが使用可能です。絶対パスでないファイルは<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対する相対パスとみなされます。");
 		m.put("Specify files under above directory to be published", "上記のディレクトリ内で公開するファイルを指定");
 		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> <code>index.html</code> should be included in these files to be served as site start page", 
 			"上記のディレクトリ内で公開するファイルを指定してください。パターンマッチには*や?を使用してください。<b>注意:</b> サイトの開始ページとして提供される<code>index.html</code>をこれらのファイルに含める必要があります。");
@@ -3604,8 +3604,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify manager DN to authenticate OneDev itself to Active Directory. The manager DN should be specified in form of <i>&lt;account name&gt;@&lt;domain&gt;</i>, for instance: <i>manager@example.com</i>", 
 			"OneDev自身をActive Directoryに認証するためのマネージャーDNを指定してください。マネージャーDNは<i>&lt;アカウント名&gt;@&lt;ドメイン&gt;</i>の形式で指定する必要があります。例: <i>manager@example.com</i>");
 		m.put("Specify manager DN to authenticate OneDev itself to LDAP server", "OneDev自身をLDAPサーバーに認証するためのマネージャーDNを指定してください。");
-		m.put("Specify markdown file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be published", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する公開するMarkdownファイルを指定してください。");
+		m.put("Specify markdown file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to be published", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する公開するMarkdownファイルを指定してください。");
 		m.put("Specify max git LFS file size in mega bytes", "Git LFSファイルの最大サイズをメガバイト単位で指定してください。");
 		m.put("Specify max number of CPU intensive tasks the server can run concurrently, such as Git repository pull/push, repository index, etc.", 
 			"サーバーが同時に実行できるCPU集約型タスクの最大数を指定してください。例: Gitリポジトリのプル/プッシュ、リポジトリのインデックス作成など。");
@@ -3621,8 +3621,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"Webインターフェースを介してアップロードされるファイルの最大サイズをメガバイト単位で指定してください。これにはリポジトリにアップロードされるファイル、Markdownコンテンツ（課題コメントなど）、およびビルド成果物が含まれます。");
 		m.put("Specify memory request for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"このエグゼキューターを使用する各ジョブ/サービスのメモリリクエストを指定してください。詳細は<a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetesリソース管理</a>を確認してください。");
-		m.put("Specify mypy output file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated by redirecting mypy output <b>without option '--pretty'</b>, for instance <code>mypy --exclude=.git --exclude=.venv . > mypy-output</code>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対するmypy出力ファイルを指定してください。このファイルはmypy出力をリダイレクトすることで生成できます。<b>オプション'--pretty'を使用しない</b>例: <code>mypy --exclude=.git --exclude=.venv . > mypy-output</code>。パターンマッチには*や?を使用してください。");
+		m.put("Specify mypy output file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated by redirecting mypy output <b>without option '--pretty'</b>, for instance <code>mypy --exclude=.git --exclude=.venv . > mypy-output</code>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対するmypy出力ファイルを指定してください。このファイルはmypy出力をリダイレクトすることで生成できます。<b>オプション'--pretty'を使用しない</b>例: <code>mypy --exclude=.git --exclude=.venv . > mypy-output</code>。パターンマッチには*や?を使用してください。");
 		m.put("Specify name of the branch", "ブランチ名を指定してください。");
 		m.put("Specify name of the environment variable", "環境変数の名前を指定してください。");
 		m.put("Specify name of the iteration", "イテレーションの名前を指定してください。");
@@ -3645,23 +3645,23 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify project to run job in", "ジョブを実行するプロジェクトを指定します。");
 		m.put("Specify projects", "プロジェクトを指定してください。");
 		m.put("Specify projects to update dependencies. Leave empty for current project", "依存関係を更新するプロジェクトを指定してください。現在のプロジェクトの場合は空欄にしてください。");
-		m.put("Specify pylint json result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with pylint json output format option, for instance <code>--exit-zero --output-format=json:pylint-result.json</code>. Note that we do not fail pylint command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対するpylintのJSON結果ファイルを指定してください。このファイルはpylintのJSON出力形式オプションで生成できます。例: <code>--exit-zero --output-format=json:pylint-result.json</code>。違反があってもpylintコマンドは失敗しません。このステップは設定された閾値に基づいてビルドを失敗させます。パターンマッチには*や?を使用してください。");
+		m.put("Specify pylint json result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with pylint json output format option, for instance <code>--exit-zero --output-format=json:pylint-result.json</code>. Note that we do not fail pylint command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対するpylintのJSON結果ファイルを指定してください。このファイルはpylintのJSON出力形式オプションで生成できます。例: <code>--exit-zero --output-format=json:pylint-result.json</code>。違反があってもpylintコマンドは失敗しません。このステップは設定された閾値に基づいてビルドを失敗させます。パターンマッチには*や?を使用してください。");
 		m.put("Specify registry logins if necessary. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token for password", 
 			"必要に応じてレジストリログインを指定してください。組み込みレジストリの場合、レジストリURLには<code>@server_url@</code>、ユーザー名には<code>@job_token@</code>、パスワードにはアクセストークンを使用してください。");
 		m.put("Specify registry url. Leave empty for official registry", "レジストリURLを指定してください。公式レジストリの場合は空欄にしてください。");
-		m.put("Specify relative path under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to store OCI layout", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>に対するOCIレイアウトを保存する相対パスを指定してください。");
+		m.put("Specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to store OCI layout", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対するOCIレイアウトを保存する相対パスを指定してください。");
 		m.put("Specify repositories", "リポジトリを指定してください。");
 		m.put("Specify required reviewers if specified path is changed. Note that the user submitting the change is considered to reviewed the change automatically", 
 			"指定されたパスが変更された場合に必要なレビュアーを指定してください。変更を提出したユーザーは自動的に変更をレビューしたとみなされます。");
 		m.put("Specify root URL to access this server", "このサーバーにアクセスするためのルートURLを指定してください。");
-		m.put("Specify ruff json result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with ruff json output format option, for instance <code>--exit-zero --output-format json --output-file ruff-result.json</code>. Note that we do not fail ruff command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対するruffのJSON結果ファイルを指定してください。このファイルはruffのJSON出力形式オプションで生成できます。例: <code>--exit-zero --output-format json --output-file ruff-result.json</code>。違反があってもruffコマンドは失敗しません。このステップは設定された閾値に基づいてビルドを失敗させます。パターンマッチには*や?を使用してください。");
-		m.put("Specify shell commands (on Linux/Unix) or batch commands (on Windows) to execute under the <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>で実行するシェルコマンド（Linux/Unix）またはバッチコマンド（Windows）を指定してください。");
-		m.put("Specify shell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>で実行するシェルコマンドを指定してください。");
+		m.put("Specify ruff json result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with ruff json output format option, for instance <code>--exit-zero --output-format json --output-file ruff-result.json</code>. Note that we do not fail ruff command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対するruffのJSON結果ファイルを指定してください。このファイルはruffのJSON出力形式オプションで生成できます。例: <code>--exit-zero --output-format json --output-file ruff-result.json</code>。違反があってもruffコマンドは失敗しません。このステップは設定された閾値に基づいてビルドを失敗させます。パターンマッチには*や?を使用してください。");
+		m.put("Specify shell commands (on Linux/Unix) or batch commands (on Windows) to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>で実行するシェルコマンド（Linux/Unix）またはバッチコマンド（Windows）を指定してください。");
+		m.put("Specify shell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>で実行するシェルコマンドを指定してください。");
 		m.put("Specify shell to be used", "使用するシェルを指定してください。");
 		m.put("Specify source param for SCP command, for instance <code>app.tar.gz</code>", "SCPコマンドのソースパラメータを指定してください。例: <code>app.tar.gz</code>");
 		m.put("Specify space separated refs to pull from remote. '*' can be used in ref name for wildcard match<br><b class='text-danger'>NOTE:</b> branch/tag protection rule will be ignored when update branches/tags via this step", 
@@ -3680,10 +3680,10 @@ public class Translation_ja extends TranslationResourceBundle {
 			"このエントリに適用されるスペース区切りの送信者メールアドレスを指定してください。ワイルドカードマッチには'*'または'?'を使用してください。'-'で始めると除外されます。すべての送信者に一致させる場合は空欄にしてください。");
 		m.put("Specify space-separated tags to be protected. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude", 
 			"保護するスペース区切りのタグを指定してください。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には'**'、'*'、または'?'を使用してください。'-'で始めると除外されます。");
-		m.put("Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance: <tt>manual/index.md</tt>", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対するレポートの開始ページを指定してください。例: <tt>manual/index.md</tt>");
-		m.put("Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance: api/index.html", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対するレポートの開始ページを指定してください。例: api/index.html");
+		m.put("Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance: <tt>manual/index.md</tt>", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対するレポートの開始ページを指定してください。例: <tt>manual/index.md</tt>");
+		m.put("Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance: api/index.html", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対するレポートの開始ページを指定してください。例: api/index.html");
 		m.put("Specify storage size to request for the build volume. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
 			"ビルドボリュームのストレージサイズをリクエストするために指定してください。サイズは<a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetesリソース容量形式</a>に準拠する必要があります。例: <i>10Gi</i>");
 		m.put("Specify tab width used to calculate column value of found problems in provided report", 
@@ -3769,8 +3769,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Step Templates", "ステップテンプレート");
 		m.put("Step {0} of {1}: ", "{0}のステップ{1}:");
 		m.put("Steps", "ステップ");
-		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>", 
-			"ステップは同じノード上で直列に実行され、同じ<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>を共有します。");
+		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>", 
+			"ステップは同じノード上で直列に実行され、同じ<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>を共有します。");
 		m.put("Stop", "停止");
 		m.put("Stop work", "作業を停止");
 		m.put("Stopwatch Overdue", "ストップウォッチ期限切れ");
@@ -4008,9 +4008,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("This shows number of issues in various states over time", "これは、時間の経過に伴うさまざまな状態の課題の数を示します");
 		m.put("This shows number of open and merged pull requests over time", "これは、時間の経過に伴うオープンおよびマージされたプルリクエストの数を示します");
 		m.put("This step can only be executed by a docker aware executor", "このステップはDocker対応エグゼキュータによってのみ実行可能です");
-		m.put("This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"このステップはDocker対応エグゼキュータによってのみ実行可能です。<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>ジョブワークスペース</a>で実行されます");
-		m.put("This step copies files from job workspace to build artifacts directory, so that they can be accessed after job is completed", 
+		m.put("This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
+			"このステップはDocker対応エグゼキュータによってのみ実行可能です。<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>で実行されます");
+		m.put("This step copies files from job workdir to build artifacts directory, so that they can be accessed after job is completed", 
 			"このステップは、ジョブのワークスペースからビルド成果物ディレクトリにファイルをコピーし、ジョブが完了した後にアクセスできるようにします");
 		m.put("This step publishes specified files to be served as project web site. Project web site can be accessed publicly via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>", 
 			"このステップは指定されたファイルをプロジェクトウェブサイトとして公開します。プロジェクトウェブサイトは<code>http://&lt;onedev base url&gt;/path/to/project/~site</code>で公開アクセス可能です");
@@ -4728,8 +4728,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"コミットメッセージフッターチェックに適用されるコミットタイプを任意で指定します（値を追加するにはENTERを押します）。すべてのタイプには空のままにします");
 		m.put("Optionally specify extra options for osv source scanner. Multiple options need to be separated with space", 
 			"osvソーススキャナーの追加オプションを任意で指定します。複数のオプションはスペースで区切る必要があります");
-		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>secret config</a>", 
-			"trivy<a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>シークレット設定</a>として使用する<a href='https://docs.onedev.io/concepts#job-workspace'>ジョブワークスペース</a>に対する相対パスを任意で指定します");
+		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to be used as trivy <a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>secret config</a>", 
+			"trivy<a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>シークレット設定</a>として使用する<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを任意で指定します");
 		m.put("Osv Source Scanner", "Osvソーススキャナー");
 		m.put("Run osv scanner to scan project source for vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
 			"プロジェクトソースの脆弱性を<a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>さまざまなロックファイル</a>でスキャンするためにosvスキャナーを実行します。これはdocker対応のエグゼキューターによってのみ実行可能です。");

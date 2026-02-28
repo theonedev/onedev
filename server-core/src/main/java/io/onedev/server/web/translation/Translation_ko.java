@@ -1397,8 +1397,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"기본 브랜치에서 접근할 수 없는 빌드 커밋의 경우, <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>작업 비밀</a>을 생성 태그 권한이 있는 액세스 토큰으로 지정해야 합니다");
 		m.put("For build commit not reachable from default branch, a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> should be specified as access token with manage issue permission", 
 			"기본 브랜치에서 접근할 수 없는 빌드 커밋의 경우, <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>작업 비밀</a>을 문제 관리 권한이 있는 액세스 토큰으로 지정해야 합니다");
-		m.put("For docker aware executors, this path is inside container, and accepts both absolute path and relative path (relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>). For shell related executors which runs on host machine directly, only relative path is accepted", 
-			"도커 인식 실행기의 경우, 이 경로는 컨테이너 내부에 있으며 절대 경로와 상대 경로( <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 공간</a> 기준 상대 경로)를 모두 허용합니다. 호스트 머신에서 직접 실행되는 쉘 관련 실행기의 경우, 상대 경로만 허용됩니다");
+		m.put("For docker aware executors, this path is inside container, and accepts both absolute path and relative path (relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>). For shell related executors which runs on host machine directly, only relative path is accepted", 
+			"도커 인식 실행기의 경우, 이 경로는 컨테이너 내부에 있으며 절대 경로와 상대 경로( <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 공간</a> 기준 상대 경로)를 모두 허용합니다. 호스트 머신에서 직접 실행되는 쉘 관련 실행기의 경우, 상대 경로만 허용됩니다");
 		m.put("For each build, OneDev calculates a list of fixed issues since previous build automatically. This setting provides a default query to further filter/order this list. For a given job, the first matching entry will be used.", 
 			"각 빌드마다 OneDev는 이전 빌드 이후 수정된 문제 목록을 자동으로 계산합니다. 이 설정은 이 목록을 추가로 필터링/정렬하기 위한 기본 쿼리를 제공합니다. 특정 작업의 경우, 첫 번째 일치 항목이 사용됩니다.");
 		m.put("For each selected branch/tag, a separate build will be generated with branch/tag set to corresponding value", 
@@ -2346,7 +2346,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally filter issues", "선택적으로 이슈를 필터링하십시오");
 		m.put("Optionally filter pull requests", "선택적으로 풀 리퀘스트를 필터링하십시오");
 		m.put("Optionally leave a note", "선택적으로 노트를 남기십시오");
-		m.put("Optionally mount directories or files under job workspace into container", "선택적으로 작업 공간의 디렉토리 또는 파일을 컨테이너에 마운트하십시오");
+		m.put("Optionally mount directories or files under job workdir into container", "선택적으로 작업 공간의 디렉토리 또는 파일을 컨테이너에 마운트하십시오");
 		m.put("Optionally select fields to prompt when this button is pressed", "선택적으로 이 버튼을 눌렀을 때 프롬프트할 필드를 선택하십시오");
 		m.put("Optionally select fields to remove when this transition happens", "선택적으로 이 전환이 발생할 때 제거할 필드를 선택하십시오");
 		m.put("Optionally specifies name of the attribute inside the user LDAP entry whose value will be taken as user email. This field is normally set to <i>mail</i> according to RFC 2798", 
@@ -2366,8 +2366,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify <span class='text-info'>comma separated</span> platforms to scan, for instance <tt>linux/amd64,linux/arm64</tt>. Leave empty to scan all platforms in OCI layout", 
 			"선택적으로 <span class='text-info'>쉼표로 구분된</span> 스캔 플랫폼을 지정하세요. 예를 들어 <tt>linux/amd64,linux/arm64</tt>. OCI 레이아웃의 모든 플랫폼을 스캔하려면 비워 두세요.");
 		m.put("Optionally specify API key for authentication", "인증을 위해 API 키를 선택적으로 지정");
-		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
-			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 워크스페이스</a>에 상대적인 Dockerfile을 지정하세요. 위에서 지정한 빌드 경로 아래의 <tt>Dockerfile</tt> 파일을 사용하려면 비워 두세요.");
+		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
+			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 워크스페이스</a>에 상대적인 Dockerfile을 지정하세요. 위에서 지정한 빌드 경로 아래의 <tt>Dockerfile</tt> 파일을 사용하려면 비워 두세요.");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "선택적으로 Renovate CLI에서 사용할 JavaScript 구성을 지정하세요.");
 		m.put("Optionally specify SSH root URL, which will be used to construct project clone url via SSH protocol. Leave empty to derive from server url", 
 			"선택적으로 SSH 루트 URL을 지정하세요. 이는 SSH 프로토콜을 통해 프로젝트 클론 URL을 구성하는 데 사용됩니다. 서버 URL에서 파생하려면 비워 두세요.");
@@ -2385,8 +2385,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 데이터베이스 자동 백업을 예약하기 위한 크론 표현식을 지정하세요. 크론 표현식 형식은 <em>&lt;초&gt; &lt;분&gt; &lt;시간&gt; &lt;일&gt; &lt;월&gt; &lt;요일&gt;</em>입니다. 예를 들어, <em>0 0 1 * * ?</em>는 매일 오전 1시를 의미합니다. 형식에 대한 자세한 내용은 <a href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format' target='_blank'>Quartz 튜토리얼</a>을 참조하세요. 백업 파일은 OneDev 설치 디렉터리 아래의 <em>db-backup</em> 폴더에 저장됩니다. 여러 서버가 클러스터를 형성하기 위해 연결된 경우, 자동 백업은 <a href='https://docs.onedev.io/concepts#lead-server' target='_blank'>리드 서버</a>에서 수행됩니다. 데이터베이스 자동 백업을 활성화하지 않으려면 이 속성을 비워 두세요.");
 		m.put("Optionally specify a date field to hold due date information.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"선택적으로 마감일 정보를 보유할 날짜 필드를 지정하세요.<br><b>참고: </b> 적절한 옵션이 없는 경우 OneDev 문제 필드를 사용자 정의할 수 있습니다.");
-		m.put("Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to put retrieved artifacts. Leave empty to use job workspace itself", 
-			"선택적으로 검색된 아티팩트를 저장할 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 워크스페이스</a>에 상대적인 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요.");
+		m.put("Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to put retrieved artifacts. Leave empty to use job workdir itself", 
+			"선택적으로 검색된 아티팩트를 저장할 <a href='https://docs.onedev.io/concepts#job-workdir'>작업 워크스페이스</a>에 상대적인 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요.");
 		m.put("Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume is only used to hold temporary build files", 
 			"선택적으로 빌드 볼륨을 동적으로 할당할 스토리지 클래스를 지정하세요. 기본 스토리지 클래스를 사용하려면 비워 두세요. <b class='text-warning'>참고:</b> 스토리지 클래스의 복구 정책은 <code>Delete</code>로 설정되어야 합니다. 볼륨은 임시 빌드 파일을 저장하는 데만 사용됩니다.");
 		m.put("Optionally specify a working period field to hold estimated time infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
@@ -2405,17 +2405,17 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify applicable jobs of this executor", "선택적으로 이 실행자에 적용 가능한 작업을 지정합니다");
 		m.put("Optionally specify applicable users who pushed the change", "변경 사항을 푸시한 적용 가능한 사용자를 선택적으로 지정");
 		m.put("Optionally specify arguments to run above image", "선택적으로 위 이미지 실행을 위한 인수를 지정하세요.");
-		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
-			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 워크스페이스</a>로 종속 항목에서 검색할 아티팩트를 지정하세요. 게시된 아티팩트(아티팩트 게시 단계에서 게시된 것)만 검색할 수 있습니다. 아티팩트를 검색하지 않으려면 비워 두세요.");
+		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
+			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workdir'>작업 워크스페이스</a>로 종속 항목에서 검색할 아티팩트를 지정하세요. 게시된 아티팩트(아티팩트 게시 단계에서 게시된 것)만 검색할 수 있습니다. 아티팩트를 검색하지 않으려면 비워 두세요.");
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"선택적으로 이 버튼을 누를 수 있는 권한이 있는 역할을 지정하세요. 지정하지 않으면 모든 사용자가 허용됩니다.");
 		m.put("Optionally specify base query of the list", "선택적으로 목록의 기본 쿼리를 지정하세요.");
 		m.put("Optionally specify branches/users/groups allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
 			"선택적으로 이 비밀에 액세스할 수 있는 브랜치/사용자/그룹을 지정하세요. 비워 두면 외부 풀 요청을 통해 트리거된 작업을 포함하여 모든 작업이 이 비밀에 액세스할 수 있습니다.");
-		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. Leave empty to use job workspace itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
-			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 워크스페이스</a>에 상대적인 빌드 컨텍스트 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요. <code>Dockerfile</code> 파일은 빌드 컨텍스트 디렉터리에 존재해야 하며, 옵션 <code>--dockerfile</code>로 다른 위치를 지정하지 않는 한 그렇습니다.");
-		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. Leave empty to use job workspace itself", 
-			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 워크스페이스</a>에 상대적인 빌드 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요.");
+		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>. Leave empty to use job workdir itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
+			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 워크스페이스</a>에 상대적인 빌드 컨텍스트 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요. <code>Dockerfile</code> 파일은 빌드 컨텍스트 디렉터리에 존재해야 하며, 옵션 <code>--dockerfile</code>로 다른 위치를 지정하지 않는 한 그렇습니다.");
+		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>. Leave empty to use job workdir itself", 
+			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 워크스페이스</a>에 상대적인 빌드 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요.");
 		m.put("Optionally specify cluster role the job pods service account binding to. This is necessary if you want to do things such as running other Kubernetes pods in job command", 
 			"선택적으로 작업 포드 서비스 계정이 바인딩되는 클러스터 역할을 지정하세요. 이는 작업 명령에서 다른 Kubernetes 포드를 실행하는 등의 작업을 수행하려는 경우 필요합니다.");
 		m.put("Optionally specify container arguments separated by space. Single argument containing space should be quoted. <b class='text-warning'>Note: </b> do not confuse this with container options which should be specified in executor setting", 
@@ -2478,13 +2478,13 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 ssh 명령의 옵션을 지정하세요. 여러 옵션은 공백으로 구분해야 합니다.");
 		m.put("Optionally specify options passed to renovate cli. Multiple options should be separated by space, and single option containing spaces should be quoted", 
 			"선택적으로 Renovate CLI에 전달된 옵션을 지정하세요. 여러 옵션은 공백으로 구분해야 하며, 공백이 포함된 단일 옵션은 따옴표로 묶어야 합니다.");
-		m.put("Optionally specify osv scanner <a href='https://google.github.io/osv-scanner/configuration/' target='_blank'>config file</a> under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. You may ignore particular vulnerabilities via this file", 
-			"선택적으로 <a href='https://google.github.io/osv-scanner/configuration/' target='_blank'>OSV 스캐너 구성 파일</a>을 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 워크스페이스</a> 아래에 지정하세요. 이 파일을 통해 특정 취약점을 무시할 수 있습니다.");
+		m.put("Optionally specify osv scanner <a href='https://google.github.io/osv-scanner/configuration/' target='_blank'>config file</a> under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>. You may ignore particular vulnerabilities via this file", 
+			"선택적으로 <a href='https://google.github.io/osv-scanner/configuration/' target='_blank'>OSV 스캐너 구성 파일</a>을 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 워크스페이스</a> 아래에 지정하세요. 이 파일을 통해 특정 취약점을 무시할 수 있습니다.");
 		m.put("Optionally specify path protection rules", "선택적으로 경로 보호 규칙을 지정하세요.");
-		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>ignore file</a>", 
-			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 워크스페이스</a>에 상대적인 경로를 지정하여 trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>무시 파일</a>로 사용하세요.");
-		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to publish artifacts from. Leave empty to use job workspace itself", 
-			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 워크스페이스</a>에서 아티팩트를 게시할 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요.");
+		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>ignore file</a>", 
+			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workdir'>작업 워크스페이스</a>에 상대적인 경로를 지정하여 trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>무시 파일</a>로 사용하세요.");
+		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to publish artifacts from. Leave empty to use job workdir itself", 
+			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workdir'>작업 워크스페이스</a>에서 아티팩트를 게시할 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요.");
 		m.put("Optionally specify platform to pull, for instance <tt>linux/amd64</tt>. Leave empty to pull all platforms in image", 
 			"선택적으로 가져올 플랫폼을 지정하세요. 예를 들어 <tt>linux/amd64</tt>. 이미지의 모든 플랫폼을 가져오려면 비워 두세요.");
 		m.put("Optionally specify project to show builds of. Leave empty to show builds of all projects with permissions", 
@@ -2498,12 +2498,12 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify registry logins to override those defined in job executor. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token secret for password secret", 
 			"선택적으로 작업 실행자에 정의된 레지스트리 로그인을 재정의하세요. 내장 레지스트리의 경우, 레지스트리 URL로 <code>@server_url@</code>, 사용자 이름으로 <code>@job_token@</code>, 비밀번호 비밀로 액세스 토큰 비밀을 사용하세요.");
 		m.put("Optionally specify relative directory to put uploaded files", "선택적으로 업로드된 파일을 저장할 상대 디렉터리를 지정하세요.");
-		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to clone code into. Leave empty to use job workspace itself", 
-			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 워크스페이스</a> 아래에 코드를 클론할 상대 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요.");
-		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to scan. Leave empty to use job workspace itself", 
-			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 워크스페이스</a> 아래에 스캔할 상대 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요.");
-		m.put("Optionally specify relative paths under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to scan dependency vulnerabilities. Multiple paths can be specified and should be separated with space. Leave empty to use job workspace itself", 
-			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 워크스페이스</a> 아래에 종속성 취약점을 스캔할 상대 경로를 지정하세요. 여러 경로를 지정할 수 있으며 공백으로 구분해야 합니다. 작업 워크스페이스 자체를 사용하려면 비워 두세요.");
+		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to clone code into. Leave empty to use job workdir itself", 
+			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workdir'>작업 워크스페이스</a> 아래에 코드를 클론할 상대 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요.");
+		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to scan. Leave empty to use job workdir itself", 
+			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workdir'>작업 워크스페이스</a> 아래에 스캔할 상대 경로를 지정하세요. 작업 워크스페이스 자체를 사용하려면 비워 두세요.");
+		m.put("Optionally specify relative paths under <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to scan dependency vulnerabilities. Multiple paths can be specified and should be separated with space. Leave empty to use job workdir itself", 
+			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workdir'>작업 워크스페이스</a> 아래에 종속성 취약점을 스캔할 상대 경로를 지정하세요. 여러 경로를 지정할 수 있으며 공백으로 구분해야 합니다. 작업 워크스페이스 자체를 사용하려면 비워 두세요.");
 		m.put("Optionally specify required reviewers for changes of specified branch", "선택적으로 지정된 브랜치 변경 사항에 대한 필요한 검토자를 지정하세요.");
 		m.put("Optionally specify revision to create branch from. Leave empty to create from build commit", 
 			"선택적으로 브랜치를 생성할 리비전을 지정하세요. 빌드 커밋에서 생성하려면 비워 두세요.");
@@ -3117,8 +3117,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Run job", "작업 실행");
 		m.put("Run job in another project", "다른 프로젝트에서 작업 실행");
 		m.put("Run on Bare Metal/Virtual Machine", "베어 메탈/가상 머신에서 실행");
-		m.put("Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>Job workspace</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKSPACE</code>. <b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote docker executor", 
-			"지정된 Docker 컨테이너를 실행하십시오. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 워크스페이스</a>가 컨테이너에 마운트되고 해당 경로가 환경 변수 <code>ONEDEV_WORKSPACE</code>에 배치됩니다. <b class='text-warning'>참고: </b> 이 단계는 서버 Docker 실행기 또는 원격 Docker 실행기에서만 실행할 수 있습니다");
+		m.put("Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>Job workspace</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKDIR</code>. <b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote docker executor", 
+			"지정된 Docker 컨테이너를 실행하십시오. <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 워크스페이스</a>가 컨테이너에 마운트되고 해당 경로가 환경 변수 <code>ONEDEV_WORKDIR</code>에 배치됩니다. <b class='text-warning'>참고: </b> 이 단계는 서버 Docker 실행기 또는 원격 Docker 실행기에서만 실행할 수 있습니다");
 		m.put("Run specified step template", "지정된 단계 템플릿 실행");
 		m.put("Run this job", "이 작업 실행");
 		m.put("Run trivy container image scanner to find issues in specified image. For vulnerabilities, it checks various <a href='https://aquasecurity.github.io/trivy/v0.50/docs/coverage/language/#supported-languages' target='_blank'>distribution files</a>. It can only be executed by docker aware executor.", 
@@ -3391,47 +3391,47 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specifies who can access this AI service", "이 AI 서비스에 접근할 수 있는 사람을 지정합니다");
 		m.put("Specifies who can access this AI service. AI service can be accessed in below approaches:", 
 			"이 AI 서비스에 접근할 수 있는 대상을 지정합니다. AI 서비스는 아래 방법으로 접근할 수 있습니다:");
-		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 .net TRX 테스트 결과 파일을 지정합니다. 예: <tt>TestResults/*.trx</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 상대 경로로 .net TRX 테스트 결과 파일을 지정합니다. 예: <tt>TestResults/*.trx</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
 		m.put("Specify <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is access token with code write permission over above projects. Commits, issues, and pull requests will also be created under name of the access token owner", 
 			"<a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>작업 비밀</a>을 지정하여 위 프로젝트에 대한 코드 쓰기 권한이 있는 액세스 토큰 값을 사용합니다. 커밋, 이슈 및 풀 요청은 액세스 토큰 소유자의 이름으로 생성됩니다");
-		m.put("Specify <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json output file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with clippy json output option, for instance <code>cargo clippy --message-format json>check-result.json</code>. Use * or ? for pattern match", 
-			"<a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json 출력 파일을 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 지정합니다. 이 파일은 clippy json 출력 옵션으로 생성할 수 있습니다. 예: <code>cargo clippy --message-format json>check-result.json</code>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json output file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with clippy json output option, for instance <code>cargo clippy --message-format json>check-result.json</code>. Use * or ? for pattern match", 
+			"<a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json 출력 파일을 <a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 상대 경로로 지정합니다. 이 파일은 clippy json 출력 옵션으로 생성할 수 있습니다. 예: <code>cargo clippy --message-format json>check-result.json</code>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
 		m.put("Specify Build Options", "빌드 옵션을 지정합니다");
-		m.put("Specify CPD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/cpd.xml</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 CPD 결과 xml 파일을 지정합니다. 예: <tt>target/cpd.xml</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify CPD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/cpd.xml</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 상대 경로로 CPD 결과 xml 파일을 지정합니다. 예: <tt>target/cpd.xml</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
 		m.put("Specify Commit Message", "커밋 메시지를 지정합니다");
-		m.put("Specify ESLint report file in checkstyle format under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with ESLint option <tt>'-f checkstyle'</tt> and <tt>'-o'</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 아래에서 체크스타일 형식의 ESLint 보고서 파일을 지정합니다. 이 파일은 ESLint 옵션 <tt>'-f checkstyle'</tt> 및 <tt>'-o'</tt>로 생성할 수 있습니다. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify ESLint report file in checkstyle format under <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with ESLint option <tt>'-f checkstyle'</tt> and <tt>'-o'</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 아래에서 체크스타일 형식의 ESLint 보고서 파일을 지정합니다. 이 파일은 ESLint 옵션 <tt>'-f checkstyle'</tt> 및 <tt>'-o'</tt>로 생성할 수 있습니다. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
 		m.put("Specify GitHub API url, for instance <tt>https://api.github.com</tt>", "GitHub API URL을 지정합니다. 예: <tt>https://api.github.com</tt>");
 		m.put("Specify GitLab API url, for instance <tt>https://gitlab.example.com/api/v4</tt>", "GitLab API URL을 지정합니다. 예: <tt>https://gitlab.example.com/api/v4</tt>");
 		m.put("Specify Gitea API url, for instance <tt>https://gitea.example.com/api/v1</tt>", "Gitea API URL을 지정합니다. 예: <tt>https://gitea.example.com/api/v1</tt>");
-		m.put("Specify GoogleTest XML result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This report can be generated with environment variable <tt>GTEST_OUTPUT</tt> when running tests, For instance, <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 GoogleTest XML 결과 파일을 지정합니다. 이 보고서는 테스트 실행 시 환경 변수 <tt>GTEST_OUTPUT</tt>로 생성할 수 있습니다. 예: <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify GoogleTest XML result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This report can be generated with environment variable <tt>GTEST_OUTPUT</tt> when running tests, For instance, <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 상대 경로로 GoogleTest XML 결과 파일을 지정합니다. 이 보고서는 테스트 실행 시 환경 변수 <tt>GTEST_OUTPUT</tt>로 생성할 수 있습니다. 예: <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
 		m.put("Specify IMAP user name.<br><b class='text-danger'>NOTE: </b> This account should be able to receive emails sent to system email address specified above", 
 			"IMAP 사용자 이름을 지정합니다.<br><b class='text-danger'>참고: </b> 이 계정은 위에 지정된 시스템 이메일 주소로 전송된 이메일을 받을 수 있어야 합니다");
-		m.put("Specify JUnit test result file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>target/surefire-reports/TEST-*.xml</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 XML 형식의 JUnit 테스트 결과 파일을 지정합니다. 예: <tt>target/surefire-reports/TEST-*.xml</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
-		m.put("Specify JaCoCo coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/site/jacoco/jacoco.xml</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 JaCoCo 커버리지 xml 보고서 파일을 지정합니다. 예: <tt>target/site/jacoco/jacoco.xml</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
-		m.put("Specify Jest coverage report file in clover format relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance <tt>coverage/clover.xml</tt>. This file can be generated with Jest option <tt>'--coverage'</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 클로버 형식의 Jest 커버리지 보고서 파일을 지정합니다. 예: <tt>coverage/clover.xml</tt>. 이 파일은 Jest 옵션 <tt>'--coverage'</tt>로 생성할 수 있습니다. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
-		m.put("Specify Jest test result file in json format relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated via Jest option <tt>'--json'</tt> and <tt>'--outputFile'</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 json 형식의 Jest 테스트 결과 파일을 지정합니다. 이 파일은 Jest 옵션 <tt>'--json'</tt> 및 <tt>'--outputFile'</tt>로 생성할 수 있습니다. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
-		m.put("Specify OCI layout directory of the image to scan. This directory can be generated via build image step or pull image step. It should be relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"스캔할 이미지의 OCI 레이아웃 디렉토리를 지정합니다. 이 디렉토리는 이미지 빌드 단계 또는 이미지 가져오기 단계에서 생성할 수 있습니다. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 공간</a> 상대 경로여야 합니다");
-		m.put("Specify OCI layout directory relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to push from", 
-			"푸시할 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 공간</a> 상대 경로의 OCI 레이아웃 디렉토리를 지정합니다");
+		m.put("Specify JUnit test result file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance <tt>target/surefire-reports/TEST-*.xml</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 상대 경로로 XML 형식의 JUnit 테스트 결과 파일을 지정합니다. 예: <tt>target/surefire-reports/TEST-*.xml</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify JaCoCo coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/site/jacoco/jacoco.xml</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 상대 경로로 JaCoCo 커버리지 xml 보고서 파일을 지정합니다. 예: <tt>target/site/jacoco/jacoco.xml</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify Jest coverage report file in clover format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance <tt>coverage/clover.xml</tt>. This file can be generated with Jest option <tt>'--coverage'</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 상대 경로로 클로버 형식의 Jest 커버리지 보고서 파일을 지정합니다. 예: <tt>coverage/clover.xml</tt>. 이 파일은 Jest 옵션 <tt>'--coverage'</tt>로 생성할 수 있습니다. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify Jest test result file in json format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated via Jest option <tt>'--json'</tt> and <tt>'--outputFile'</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 상대 경로로 json 형식의 Jest 테스트 결과 파일을 지정합니다. 이 파일은 Jest 옵션 <tt>'--json'</tt> 및 <tt>'--outputFile'</tt>로 생성할 수 있습니다. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify OCI layout directory of the image to scan. This directory can be generated via build image step or pull image step. It should be relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
+			"스캔할 이미지의 OCI 레이아웃 디렉토리를 지정합니다. 이 디렉토리는 이미지 빌드 단계 또는 이미지 가져오기 단계에서 생성할 수 있습니다. <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 공간</a> 상대 경로여야 합니다");
+		m.put("Specify OCI layout directory relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to push from", 
+			"푸시할 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 공간</a> 상대 경로의 OCI 레이아웃 디렉토리를 지정합니다");
 		m.put("Specify OpenID scopes to request", "요청할 OpenID 범위를 지정합니다");
-		m.put("Specify PMD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/pmd.xml</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 PMD 결과 xml 파일을 지정합니다. 예: <tt>target/pmd.xml</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
-		m.put("Specify PowerShell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>.<br><b class='text-warning'>NOTE: </b> OneDev checks exit code of the script to determine if step is successful. Since PowerShell always exit with 0 even if there are script errors, you should handle errors in the script and exit with non-zero code, or add line <code>$ErrorActionPreference = &quot;Stop&quot;</code> at start of your script<br>", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 공간</a> 아래에서 실행할 PowerShell 명령을 지정합니다.<br><b class='text-warning'>참고: </b> OneDev는 스크립트의 종료 코드를 확인하여 단계가 성공했는지 판단합니다. PowerShell은 스크립트 오류가 있어도 항상 0으로 종료되므로, 스크립트에서 오류를 처리하고 0이 아닌 코드로 종료하거나 스크립트 시작 부분에 <code>$ErrorActionPreference = &quot;Stop&quot;</code>를 추가해야 합니다<br>");
-		m.put("Specify Roslynator diagnostics output file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with <i>-o</i> option. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 XML 형식의 Roslynator 진단 출력 파일을 지정합니다. 이 파일은 <i>-o</i> 옵션으로 생성할 수 있습니다. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify PMD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/pmd.xml</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 상대 경로로 PMD 결과 xml 파일을 지정합니다. 예: <tt>target/pmd.xml</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify PowerShell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>.<br><b class='text-warning'>NOTE: </b> OneDev checks exit code of the script to determine if step is successful. Since PowerShell always exit with 0 even if there are script errors, you should handle errors in the script and exit with non-zero code, or add line <code>$ErrorActionPreference = &quot;Stop&quot;</code> at start of your script<br>", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 공간</a> 아래에서 실행할 PowerShell 명령을 지정합니다.<br><b class='text-warning'>참고: </b> OneDev는 스크립트의 종료 코드를 확인하여 단계가 성공했는지 판단합니다. PowerShell은 스크립트 오류가 있어도 항상 0으로 종료되므로, 스크립트에서 오류를 처리하고 0이 아닌 코드로 종료하거나 스크립트 시작 부분에 <code>$ErrorActionPreference = &quot;Stop&quot;</code>를 추가해야 합니다<br>");
+		m.put("Specify Roslynator diagnostics output file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with <i>-o</i> option. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 상대 경로로 XML 형식의 Roslynator 진단 출력 파일을 지정합니다. 이 파일은 <i>-o</i> 옵션으로 생성할 수 있습니다. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
 		m.put("Specify Shell/Batch Commands to Run", "실행할 Shell/Batch 명령을 지정합니다");
-		m.put("Specify SpotBugs result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/spotbugsXml.xml</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 SpotBugs 결과 xml 파일을 지정합니다. 예: <tt>target/spotbugsXml.xml</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify SpotBugs result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/spotbugsXml.xml</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 상대 경로로 SpotBugs 결과 xml 파일을 지정합니다. 예: <tt>target/spotbugsXml.xml</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
 		m.put("Specify System Settings", "시스템 설정을 지정합니다");
 		m.put("Specify URL of remote git repository. Only http/https protocol is supported", "원격 git 저장소의 URL을 지정합니다. http/https 프로토콜만 지원됩니다");
 		m.put("Specify YouTrack login name. This account should have permission to:<ul><li>Read full information and issues of the projects you want to import<li>Read issue tags<li>Read user basic information</ul>", 
@@ -3466,14 +3466,14 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify a Docker Image to Test Against", "테스트할 Docker 이미지를 지정합니다");
 		m.put("Specify a custom field of Enum type", "Enum 유형의 사용자 정의 필드를 지정합니다");
 		m.put("Specify a default query to filter/order fixed issues of specified jobs", "지정된 작업의 고정된 이슈를 필터링/정렬하기 위한 기본 쿼리를 지정합니다");
-		m.put("Specify a file relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to write checksum into", 
-			"체크섬을 기록할 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 공간</a> 상대 경로의 파일을 지정합니다");
+		m.put("Specify a file relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to write checksum into", 
+			"체크섬을 기록할 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 공간</a> 상대 경로의 파일을 지정합니다");
 		m.put("Specify a multi-value user field to hold assignees information.<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"담당자 정보를 저장할 다중 값 사용자 필드를 지정합니다.<b>참고: </b> 적절한 옵션이 없는 경우 OneDev 이슈 필드를 사용자 정의할 수 있습니다");
 		m.put("Specify a multi-value user field to hold assignees information.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"담당자 정보를 저장할 다중 값 사용자 필드를 지정합니다.<br><b>참고: </b> 적절한 옵션이 없는 경우 OneDev 이슈 필드를 사용자 정의할 수 있습니다");
 		m.put("Specify a path inside container to be used as mount target", "마운트 대상으로 사용할 컨테이너 내부 경로를 지정합니다");
-		m.put("Specify a path relative to job workspace to be used as mount source. Leave empty to mount job workspace itself", 
+		m.put("Specify a path relative to job workdir to be used as mount source. Leave empty to mount job workdir itself", 
 			"마운트 소스로 사용할 작업 공간 상대 경로를 지정합니다. 비워두면 작업 공간 자체를 마운트합니다");
 		m.put("Specify a secret to be used as access token to create issue in above project if it is not publicly accessible", 
 			"위 프로젝트에서 이슈를 생성하기 위한 액세스 토큰으로 사용할 비밀을 지정합니다. 프로젝트가 공개적으로 접근 가능하지 않은 경우에만 필요합니다");
@@ -3499,8 +3499,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify application (client) ID of the app registered in Entra ID", "Entra ID에 등록된 앱의 애플리케이션(클라이언트) ID를 지정합니다");
 		m.put("Specify arguments for imagetools. For instance <code>create -t myorg/myrepo:1.0.0 myorg/myrepo@&lt;arm64 manifest digest&gt; myorg/myrepo@&lt;amd64 manifest digest&gt;</code>", 
 			"imagetools에 대한 인수를 지정합니다. 예: <code>create -t myorg/myrepo:1.0.0 myorg/myrepo@&lt;arm64 manifest digest&gt; myorg/myrepo@&lt;amd64 manifest digest&gt;</code>");
-		m.put("Specify artifacts to retrieve into <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. Only published artifacts (via artifact publish step) can be retrieved.", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a>으로 가져올 아티팩트를 지정합니다. 아티팩트는 아티팩트 게시 단계에서 게시된 것만 가져올 수 있습니다");
+		m.put("Specify artifacts to retrieve into <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. Only published artifacts (via artifact publish step) can be retrieved.", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a>으로 가져올 아티팩트를 지정합니다. 아티팩트는 아티팩트 게시 단계에서 게시된 것만 가져올 수 있습니다");
 		m.put("Specify at least 10 alphanumeric chars to be used as secret, and then add an inbound parse entry at SendGrid side:<ul><li><code>Destination URL</code> should be set to <i>&lt;OneDev root url&gt;/~sendgrid/&lt;secret&gt;</i>, for instance, <i>https://onedev.example.com/~sendgrid/1234567890</i>. Note that in production environment, <a href='https://docs.onedev.io/administration-guide/https-setup' target='_blank'>https should be enabled</a> to protect the secret</li><li><code>Receiving domain</code> should be the same as domain part of system email address specified above</li><li>Option <code>POST the raw, full MIME message</code> is enabled</li></ul>", 
 			"비밀로 사용할 최소 10자리의 영숫자를 지정한 후 SendGrid 측에서 인바운드 파싱 항목을 추가합니다:<ul><li><code>Destination URL</code>은 <i>&lt;OneDev 루트 URL&gt;/~sendgrid/&lt;비밀&gt;</i>로 설정해야 합니다. 예: <i>https://onedev.example.com/~sendgrid/1234567890</i>. 프로덕션 환경에서는 <a href='https://docs.onedev.io/administration-guide/https-setup' target='_blank'>https를 활성화</a>하여 비밀을 보호해야 합니다</li><li><code>Receiving domain</code>은 위에 지정된 시스템 이메일 주소의 도메인 부분과 동일해야 합니다</li><li>옵션 <code>POST the raw, full MIME message</code>가 활성화되어야 합니다</li></ul>");
 		m.put("Specify base nodes for user search. For example: <i>cn=Users, dc=example, dc=com</i>", 
@@ -3516,13 +3516,13 @@ public class Translation_ko extends TranslationResourceBundle {
 			"원격 저장소에 대해 자체 서명 인증서를 사용하는 경우 신뢰할 인증서를 지정합니다");
 		m.put("Specify certificates to trust if you are using self-signed certificates for your docker registries", 
 			"도커 레지스트리에 대해 자체 서명 인증서를 사용하는 경우 신뢰할 인증서를 지정합니다");
-		m.put("Specify checkstyle result xml file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/checkstyle-result.xml</tt>. Refer to <a href='https://checkstyle.org/'>checkstyle documentation</a> on how to generate the result xml file. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 체크스타일 결과 xml 파일을 지정합니다. 예: <tt>target/checkstyle-result.xml</tt>. 체크스타일 결과 xml 파일을 생성하는 방법은 <a href='https://checkstyle.org/'>체크스타일 문서</a>를 참조하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify checkstyle result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/checkstyle-result.xml</tt>. Refer to <a href='https://checkstyle.org/'>checkstyle documentation</a> on how to generate the result xml file. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 상대 경로로 체크스타일 결과 xml 파일을 지정합니다. 예: <tt>target/checkstyle-result.xml</tt>. 체크스타일 결과 xml 파일을 생성하는 방법은 <a href='https://checkstyle.org/'>체크스타일 문서</a>를 참조하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
 		m.put("Specify client secret of the app registered in Entra ID", "Entra ID에 등록된 앱의 클라이언트 비밀을 지정합니다");
-		m.put("Specify clover coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/site/clover/clover.xml</tt>. Refer to <a href='https://openclover.org/documentation'>OpenClover documentation</a> on how to generate clover xml file. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 클로버 커버리지 xml 보고서 파일을 지정합니다. 예: <tt>target/site/clover/clover.xml</tt>. 클로버 xml 파일을 생성하는 방법은 <a href='https://openclover.org/documentation'>OpenClover 문서</a>를 참조하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
-		m.put("Specify cobertura coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance, <tt>target/site/cobertura/coverage.xml</tt>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 상대 경로로 cobertura 커버리지 xml 보고서 파일을 지정합니다. 예: <tt>target/site/cobertura/coverage.xml</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify clover coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/site/clover/clover.xml</tt>. Refer to <a href='https://openclover.org/documentation'>OpenClover documentation</a> on how to generate clover xml file. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 상대 경로로 클로버 커버리지 xml 보고서 파일을 지정합니다. 예: <tt>target/site/clover/clover.xml</tt>. 클로버 xml 파일을 생성하는 방법은 <a href='https://openclover.org/documentation'>OpenClover 문서</a>를 참조하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
+		m.put("Specify cobertura coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/site/cobertura/coverage.xml</tt>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 상대 경로로 cobertura 커버리지 xml 보고서 파일을 지정합니다. 예: <tt>target/site/cobertura/coverage.xml</tt>. 패턴 매칭을 위해 * 또는 ?를 사용하세요");
 		m.put("Specify color of the state for displaying purpose", "표시 목적으로 상태의 색상을 지정합니다");
 		m.put("Specify columns of the board. Each column corresponds to a value of the issue field specified above", 
 			"보드의 열을 지정합니다. 각 열은 위에 지정된 이슈 필드의 값에 해당합니다");
@@ -3535,8 +3535,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"OpenID 제공자의 구성 검색 URL을 지정하세요. 예: <code>https://openid.example.com/.well-known/openid-configuration</code>. OneDev는 토큰 유효성을 보장하기 위해 TLS 암호화에 의존하므로 HTTPS 프로토콜을 사용해야 합니다.");
 		m.put("Specify container image to execute commands inside", "명령을 실행할 컨테이너 이미지를 지정하세요.");
 		m.put("Specify container image to run", "실행할 컨테이너 이미지를 지정하세요.");
-		m.put("Specify cppcheck xml result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with cppcheck xml output option, for instance <code>cppcheck src --xml 2>check-result.xml</code>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 기준으로 cppcheck XML 결과 파일을 지정하세요. 이 파일은 cppcheck XML 출력 옵션으로 생성할 수 있습니다. 예: <code>cppcheck src --xml 2>check-result.xml</code>. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
+		m.put("Specify cppcheck xml result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with cppcheck xml output option, for instance <code>cppcheck src --xml 2>check-result.xml</code>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 기준으로 cppcheck XML 결과 파일을 지정하세요. 이 파일은 cppcheck XML 출력 옵션으로 생성할 수 있습니다. 예: <code>cppcheck src --xml 2>check-result.xml</code>. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
 		m.put("Specify cpu request for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"이 실행자를 사용하는 각 작업/서비스에 대한 CPU 요청을 지정하세요. 자세한 내용은 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes 리소스 관리</a>를 확인하세요.");
 		m.put("Specify default assignees of pull requests submitted to this project. Only users with the write code permission to the project can be selected", 
@@ -3545,8 +3545,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify destinations, for instance <tt>registry-server:5000/myorg/myrepo:latest</tt>. Make sure to use <b>same host</b> as specified in server url of system settings if you want to push to built-in registry, or simply use the form <tt>@server@/&lt;project path&gt;/&lt;repo name&gt;:&lt;tag name&gt;</tt>. Multiple destinations should be separated with space", 
 			"대상지를 지정하세요. 예: <tt>registry-server:5000/myorg/myrepo:latest</tt>. 내장 레지스트리에 푸시하려면 시스템 설정의 서버 URL에 지정된 <b>동일한 호스트</b>를 사용하거나 단순히 <tt>@server@/&lt;project path&gt;/&lt;repo name&gt;:&lt;tag name&gt;</tt> 형식을 사용하세요. 여러 대상은 공백으로 구분해야 합니다.");
 		m.put("Specify directory (tenant) ID of the app registered in Entra ID", "Entra ID에 등록된 앱의 디렉터리(테넌트) ID를 지정하세요.");
-		m.put("Specify directory relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to store OCI layout", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 공간</a> 기준으로 OCI 레이아웃을 저장할 디렉터리를 지정하세요.");
+		m.put("Specify directory relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to store OCI layout", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 공간</a> 기준으로 OCI 레이아웃을 저장할 디렉터리를 지정하세요.");
 		m.put("Specify docker image of the service", "서비스의 도커 이미지를 지정하세요.");
 		m.put("Specify dockerx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
 			"도커 이미지를 빌드하는 데 사용되는 dockerx 빌더를 지정하세요. OneDev는 빌더가 존재하지 않을 경우 자동으로 생성합니다. 예를 들어 비보안 레지스트리에 게시를 허용하도록 빌더를 사용자 정의하는 방법에 대한 <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>이 튜토리얼</a>을 확인하세요.");
@@ -3557,10 +3557,10 @@ public class Translation_ko extends TranslationResourceBundle {
 			"종속성 업데이트를 조정하기 위해 Renovate가 생성한 다양한 문제의 필드를 지정하세요.");
 		m.put("Specify fields to be displayed in the issue list", "문제 목록에 표시할 필드를 지정하세요.");
 		m.put("Specify fields to display in board card", "보드 카드에 표시할 필드를 지정하세요.");
-		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be published. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 기준으로 게시할 파일을 지정하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
-		m.put("Specify files to create md5 checksum from. Multiple files should be separated by space. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> patterns accepted. Non-absolute file is considered to be relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"md5 체크섬을 생성할 파일을 지정하세요. 여러 파일은 공백으로 구분해야 합니다. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> 패턴이 허용됩니다. 절대 경로가 아닌 파일은 <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 공간</a> 기준으로 간주됩니다.");
+		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to be published. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 기준으로 게시할 파일을 지정하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
+		m.put("Specify files to create md5 checksum from. Multiple files should be separated by space. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> patterns accepted. Non-absolute file is considered to be relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
+			"md5 체크섬을 생성할 파일을 지정하세요. 여러 파일은 공백으로 구분해야 합니다. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> 패턴이 허용됩니다. 절대 경로가 아닌 파일은 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 공간</a> 기준으로 간주됩니다.");
 		m.put("Specify files under above directory to be published", "위 디렉토리 아래에 게시할 파일 지정");
 		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> <code>index.html</code> should be included in these files to be served as site start page", 
 			"위 디렉터리 아래에서 게시할 파일을 지정하세요. 패턴 매칭을 위해 * 또는 ?를 사용하세요. <b>참고:</b> <code>index.html</code>은 사이트 시작 페이지로 제공되기 위해 이러한 파일에 포함되어야 합니다.");
@@ -3604,8 +3604,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify manager DN to authenticate OneDev itself to Active Directory. The manager DN should be specified in form of <i>&lt;account name&gt;@&lt;domain&gt;</i>, for instance: <i>manager@example.com</i>", 
 			"OneDev 자체를 Active Directory에 인증하기 위한 관리자 DN을 지정하세요. 관리자 DN은 <i>&lt;계정 이름&gt;@&lt;도메인&gt;</i> 형식으로 지정해야 합니다. 예: <i>manager@example.com</i>.");
 		m.put("Specify manager DN to authenticate OneDev itself to LDAP server", "OneDev 자체를 LDAP 서버에 인증하기 위한 관리자 DN을 지정하세요.");
-		m.put("Specify markdown file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be published", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 기준으로 게시할 마크다운 파일을 지정하세요.");
+		m.put("Specify markdown file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to be published", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 기준으로 게시할 마크다운 파일을 지정하세요.");
 		m.put("Specify max git LFS file size in mega bytes", "Git LFS 파일의 최대 크기(메가바이트)를 지정하세요.");
 		m.put("Specify max number of CPU intensive tasks the server can run concurrently, such as Git repository pull/push, repository index, etc.", 
 			"서버가 동시에 실행할 수 있는 CPU 집약적인 작업의 최대 수를 지정하세요. 예: Git 저장소 가져오기/푸시, 저장소 인덱스 등.");
@@ -3621,8 +3621,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"웹 인터페이스를 통해 업로드된 파일의 최대 크기(메가바이트)를 지정하세요. 이는 저장소에 업로드된 파일, 마크다운 콘텐츠(문제 댓글 등), 빌드 아티팩트에 적용됩니다.");
 		m.put("Specify memory request for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"이 실행자를 사용하는 각 작업/서비스에 대한 메모리 요청을 지정하세요. 자세한 내용은 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes 리소스 관리</a>를 확인하세요.");
-		m.put("Specify mypy output file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated by redirecting mypy output <b>without option '--pretty'</b>, for instance <code>mypy --exclude=.git --exclude=.venv . > mypy-output</code>. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 기준으로 mypy 출력 파일을 지정하세요. 이 파일은 <b>'--pretty' 옵션 없이</b> mypy 출력을 리디렉션하여 생성할 수 있습니다. 예: <code>mypy --exclude=.git --exclude=.venv . > mypy-output</code>. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
+		m.put("Specify mypy output file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated by redirecting mypy output <b>without option '--pretty'</b>, for instance <code>mypy --exclude=.git --exclude=.venv . > mypy-output</code>. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 기준으로 mypy 출력 파일을 지정하세요. 이 파일은 <b>'--pretty' 옵션 없이</b> mypy 출력을 리디렉션하여 생성할 수 있습니다. 예: <code>mypy --exclude=.git --exclude=.venv . > mypy-output</code>. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
 		m.put("Specify name of the branch", "브랜치 이름을 지정하세요.");
 		m.put("Specify name of the environment variable", "환경 변수 이름을 지정하세요.");
 		m.put("Specify name of the iteration", "반복 이름을 지정하세요.");
@@ -3645,23 +3645,23 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify project to run job in", "작업을 실행할 프로젝트를 지정하세요.");
 		m.put("Specify projects", "프로젝트를 지정하세요.");
 		m.put("Specify projects to update dependencies. Leave empty for current project", "종속성을 업데이트할 프로젝트를 지정하세요. 현재 프로젝트의 경우 비워 두세요.");
-		m.put("Specify pylint json result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with pylint json output format option, for instance <code>--exit-zero --output-format=json:pylint-result.json</code>. Note that we do not fail pylint command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 기준으로 pylint JSON 결과 파일을 지정하세요. 이 파일은 pylint JSON 출력 형식 옵션으로 생성할 수 있습니다. 예: <code>--exit-zero --output-format=json:pylint-result.json</code>. 이 단계는 구성된 임계값에 따라 빌드를 실패시키므로 위반 시 pylint 명령을 실패시키지 않습니다. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
+		m.put("Specify pylint json result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with pylint json output format option, for instance <code>--exit-zero --output-format=json:pylint-result.json</code>. Note that we do not fail pylint command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 기준으로 pylint JSON 결과 파일을 지정하세요. 이 파일은 pylint JSON 출력 형식 옵션으로 생성할 수 있습니다. 예: <code>--exit-zero --output-format=json:pylint-result.json</code>. 이 단계는 구성된 임계값에 따라 빌드를 실패시키므로 위반 시 pylint 명령을 실패시키지 않습니다. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
 		m.put("Specify registry logins if necessary. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token for password", 
 			"필요한 경우 레지스트리 로그인을 지정하세요. 내장 레지스트리의 경우 레지스트리 URL에 <code>@server_url@</code>, 사용자 이름에 <code>@job_token@</code>, 비밀번호에 액세스 토큰을 사용하세요.");
 		m.put("Specify registry url. Leave empty for official registry", "레지스트리 URL을 지정하세요. 공식 레지스트리의 경우 비워 두세요.");
-		m.put("Specify relative path under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to store OCI layout", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 공간</a> 기준으로 OCI 레이아웃을 저장할 상대 경로를 지정하세요.");
+		m.put("Specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to store OCI layout", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 공간</a> 기준으로 OCI 레이아웃을 저장할 상대 경로를 지정하세요.");
 		m.put("Specify repositories", "저장소를 지정하세요.");
 		m.put("Specify required reviewers if specified path is changed. Note that the user submitting the change is considered to reviewed the change automatically", 
 			"지정된 경로가 변경된 경우 필요한 검토자를 지정하세요. 변경을 제출한 사용자는 자동으로 변경을 검토한 것으로 간주됩니다.");
 		m.put("Specify root URL to access this server", "이 서버에 액세스할 루트 URL을 지정하세요.");
-		m.put("Specify ruff json result file relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>. This file can be generated with ruff json output format option, for instance <code>--exit-zero --output-format json --output-file ruff-result.json</code>. Note that we do not fail ruff command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 기준으로 ruff JSON 결과 파일을 지정하세요. 이 파일은 ruff JSON 출력 형식 옵션으로 생성할 수 있습니다. 예: <code>--exit-zero --output-format json --output-file ruff-result.json</code>. 이 단계는 구성된 임계값에 따라 빌드를 실패시키므로 위반 시 ruff 명령을 실패시키지 않습니다. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
-		m.put("Specify shell commands (on Linux/Unix) or batch commands (on Windows) to execute under the <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 공간</a> 아래에서 실행할 셸 명령(Linux/Unix) 또는 배치 명령(Windows)을 지정하세요.");
-		m.put("Specify shell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 공간</a> 아래에서 실행할 셸 명령을 지정하세요.");
+		m.put("Specify ruff json result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with ruff json output format option, for instance <code>--exit-zero --output-format json --output-file ruff-result.json</code>. Note that we do not fail ruff command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 기준으로 ruff JSON 결과 파일을 지정하세요. 이 파일은 ruff JSON 출력 형식 옵션으로 생성할 수 있습니다. 예: <code>--exit-zero --output-format json --output-file ruff-result.json</code>. 이 단계는 구성된 임계값에 따라 빌드를 실패시키므로 위반 시 ruff 명령을 실패시키지 않습니다. 패턴 매칭을 위해 * 또는 ?를 사용하세요.");
+		m.put("Specify shell commands (on Linux/Unix) or batch commands (on Windows) to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 공간</a> 아래에서 실행할 셸 명령(Linux/Unix) 또는 배치 명령(Windows)을 지정하세요.");
+		m.put("Specify shell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 공간</a> 아래에서 실행할 셸 명령을 지정하세요.");
 		m.put("Specify shell to be used", "사용할 셸을 지정하세요.");
 		m.put("Specify source param for SCP command, for instance <code>app.tar.gz</code>", "SCP 명령의 소스 매개변수를 지정하세요. 예: <code>app.tar.gz</code>.");
 		m.put("Specify space separated refs to pull from remote. '*' can be used in ref name for wildcard match<br><b class='text-danger'>NOTE:</b> branch/tag protection rule will be ignored when update branches/tags via this step", 
@@ -3680,10 +3680,10 @@ public class Translation_ko extends TranslationResourceBundle {
 			"이 항목에 적용 가능한 공백으로 구분된 발신자 이메일 주소를 지정하세요. 와일드카드 매칭을 위해 '*' 또는 '?'를 사용하세요. 제외하려면 '-'로 접두어를 붙이세요. 모든 발신자와 일치하려면 비워 두세요.");
 		m.put("Specify space-separated tags to be protected. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude", 
 			"보호할 공백으로 구분된 태그를 지정하세요. <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매칭</a>을 위해 '**', '*' 또는 '?'를 사용하세요. 제외하려면 '-'로 접두어를 붙이세요.");
-		m.put("Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance: <tt>manual/index.md</tt>", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 기준으로 보고서의 시작 페이지를 지정하세요. 예: <tt>manual/index.md</tt>.");
-		m.put("Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance: api/index.html", 
-			"<a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a> 기준으로 보고서의 시작 페이지를 지정하세요. 예: api/index.html.");
+		m.put("Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance: <tt>manual/index.md</tt>", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 기준으로 보고서의 시작 페이지를 지정하세요. 예: <tt>manual/index.md</tt>.");
+		m.put("Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance: api/index.html", 
+			"<a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a> 기준으로 보고서의 시작 페이지를 지정하세요. 예: api/index.html.");
 		m.put("Specify storage size to request for the build volume. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
 			"빌드 볼륨에 요청할 저장소 크기를 지정하세요. 크기는 <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes 리소스 용량 형식</a>을 따라야 합니다. 예: <i>10Gi</i>.");
 		m.put("Specify tab width used to calculate column value of found problems in provided report", 
@@ -3769,8 +3769,8 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Step Templates", "단계 템플릿들");
 		m.put("Step {0} of {1}: ", "{0}단계 중 {1}단계:");
 		m.put("Steps", "단계들");
-		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>", 
-			"단계는 동일한 노드에서 직렬로 실행되며 동일한 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a>을 공유합니다.");
+		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>", 
+			"단계는 동일한 노드에서 직렬로 실행되며 동일한 <a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a>을 공유합니다.");
 		m.put("Stop", "중지");
 		m.put("Stop work", "작업 중지");
 		m.put("Stopwatch Overdue", "스톱워치 초과");
@@ -4008,9 +4008,9 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("This shows number of issues in various states over time", "이 그래프는 시간에 따른 다양한 상태의 이슈 수를 보여줍니다");
 		m.put("This shows number of open and merged pull requests over time", "이 그래프는 시간에 따른 열려 있는 풀 리퀘스트와 병합된 풀 리퀘스트의 수를 보여줍니다");
 		m.put("This step can only be executed by a docker aware executor", "이 단계는 Docker를 인식하는 실행자만 실행할 수 있습니다");
-		m.put("This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>", 
-			"이 단계는 Docker를 인식하는 실행자만 실행할 수 있습니다. <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>작업 워크스페이스</a>에서 실행됩니다");
-		m.put("This step copies files from job workspace to build artifacts directory, so that they can be accessed after job is completed", 
+		m.put("This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
+			"이 단계는 Docker를 인식하는 실행자만 실행할 수 있습니다. <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 워크스페이스</a>에서 실행됩니다");
+		m.put("This step copies files from job workdir to build artifacts directory, so that they can be accessed after job is completed", 
 			"이 단계는 작업 공간에서 빌드 아티팩트 디렉토리로 파일을 복사하여 작업이 완료된 후에도 액세스할 수 있도록 합니다");
 		m.put("This step publishes specified files to be served as project web site. Project web site can be accessed publicly via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>", 
 			"이 단계는 지정된 파일을 프로젝트 웹 사이트로 제공하도록 게시합니다. 프로젝트 웹 사이트는 <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>를 통해 공개적으로 액세스할 수 있습니다");
@@ -4728,8 +4728,8 @@ public class Translation_ko extends TranslationResourceBundle {
 			"커밋 메시지 바닥글 검사를 위한 커밋 유형을 선택적으로 지정하세요 (값을 추가하려면 ENTER를 누르세요). 모든 유형을 위해 비워 두세요.");
 		m.put("Optionally specify extra options for osv source scanner. Multiple options need to be separated with space", 
 			"osv 소스 스캐너에 대한 추가 옵션을 선택적으로 지정하세요. 여러 옵션은 공백으로 구분해야 합니다.");
-		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be used as trivy <a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>secret config</a>", 
-			"trivy <a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>비밀 구성</a>으로 사용할 <a href='https://docs.onedev.io/concepts#job-workspace'>작업 공간</a>에 상대적인 경로를 선택적으로 지정하세요.");
+		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to be used as trivy <a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>secret config</a>", 
+			"trivy <a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>비밀 구성</a>으로 사용할 <a href='https://docs.onedev.io/concepts#job-workdir'>작업 공간</a>에 상대적인 경로를 선택적으로 지정하세요.");
 		m.put("Osv Source Scanner", "Osv 소스 스캐너");
 		m.put("Run osv scanner to scan project source for vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
 			"프로젝트 소스를 <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>다양한 잠금 파일</a>의 취약점을 위해 osv 스캐너를 실행하세요. 이는 도커 인식 실행자에 의해서만 실행될 수 있습니다.");

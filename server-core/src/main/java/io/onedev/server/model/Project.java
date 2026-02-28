@@ -25,7 +25,6 @@ import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -57,6 +56,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -78,19 +78,6 @@ import io.onedev.server.annotation.ProjectKey;
 import io.onedev.server.annotation.ProjectName;
 import io.onedev.server.annotation.SubscriptionRequired;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.BuildQueryPersonalizationService;
-import io.onedev.server.service.CodeCommentQueryPersonalizationService;
-import io.onedev.server.service.CommitQueryPersonalizationService;
-import io.onedev.server.service.EmailAddressService;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.IssueQueryPersonalizationService;
-import io.onedev.server.service.PackQueryPersonalizationService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.PullRequestQueryPersonalizationService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UrlService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
@@ -106,9 +93,9 @@ import io.onedev.server.git.signatureverification.VerificationSuccessful;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.CodeAnalysisSetting;
 import io.onedev.server.model.support.LabelSupport;
-import io.onedev.server.model.support.ProjectAiSetting;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
+import io.onedev.server.model.support.ProjectAiSetting;
 import io.onedev.server.model.support.WebHook;
 import io.onedev.server.model.support.build.BuildPreservation;
 import io.onedev.server.model.support.build.DefaultFixedIssueFilter;
@@ -116,7 +103,10 @@ import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.build.ProjectBuildSetting;
+import io.onedev.server.model.support.workspace.NamedWorkspaceQuery;
+import io.onedev.server.model.support.workspace.ProjectWorkspaceSetting;
 import io.onedev.server.model.support.code.BranchProtection;
+import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.model.support.code.GitPackConfig;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.model.support.issue.BoardSpec;
@@ -130,6 +120,19 @@ import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.BuildQueryPersonalizationService;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.CodeCommentQueryPersonalizationService;
+import io.onedev.server.service.CommitQueryPersonalizationService;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.IssueQueryPersonalizationService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.PackQueryPersonalizationService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestQueryPersonalizationService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UrlService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.diff.WhitespaceOption;
@@ -139,6 +142,7 @@ import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.workspace.WorkspaceQueryPersonalizationService;
 import io.onedev.server.xodus.CommitInfoService;
 
 @Entity
@@ -274,7 +278,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
     private Collection<Build> builds = new ArrayList<>();
 
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<JobCache> jobCaches = new ArrayList<>();
+	private Collection<RunCache> jobCaches = new ArrayList<>();
 	
 	@OneToMany(mappedBy= "project")
 	private Collection<PackBlob> packBlobs = new ArrayList<>();
@@ -363,7 +367,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<PackQueryPersonalization> packQueryPersonalizations = new ArrayList<>();
-	
+
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<WorkspaceQueryPersonalization> workspaceQueryPersonalizations = new ArrayList<>();
+
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Iteration> iterations = new ArrayList<>();
@@ -375,6 +382,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Audit> audits = new ArrayList<>();
+	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<Workspace> workspaces = new ArrayList<>();
+
+	@Lob
+	@Column(nullable=false, length=65535)
+	private ArrayList<WorkspaceSpec> workspaceSpecs = new ArrayList<>();
 	
 	private boolean codeManagement = true;
 	
@@ -416,7 +431,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ProjectPackSetting packSetting = new ProjectPackSetting();
-	
+
+	@Lob
+	@Column(length=65535, nullable=false)
+	private ProjectWorkspaceSetting workspaceSetting = new ProjectWorkspaceSetting();
+
 	@Lob
 	@Column(length=65535)
 	private ArrayList<NamedCommitQuery> namedCommitQueries;
@@ -447,9 +466,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
     
     private transient Optional<CodeCommentQueryPersonalization> codeCommentQueryPersonalizationOfCurrentUserHolder;
     
-    private transient Optional<BuildQueryPersonalization> buildQueryPersonalizationOfCurrentUserHolder;
+	private transient Optional<BuildQueryPersonalization> buildQueryPersonalizationOfCurrentUserHolder;
 
 	private transient Optional<PackQueryPersonalization> packQueryPersonalizationOfCurrentUserHolder;
+
+	private transient Optional<WorkspaceQueryPersonalization> workspaceQueryPersonalizationOfCurrentUserHolder;
 	
     private transient Optional<CommitQueryPersonalization> commitQueryPersonalizationOfCurrentUserHolder;
     
@@ -1062,6 +1083,25 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public void setPackManagement(boolean packManagement) {
 		this.packManagement = packManagement;
 	}
+
+	public ArrayList<WorkspaceSpec> getWorkspaceSpecs() {
+		return workspaceSpecs;
+	}
+
+	public void setWorkspaceSpecs(ArrayList<WorkspaceSpec> workspaceSpecs) {
+		this.workspaceSpecs = workspaceSpecs;
+	}
+
+	public List<WorkspaceSpec> getHierarchyWorkspaceSpecs() {
+		var specMap = new LinkedHashMap<String, WorkspaceSpec>();
+		for (var spec : getWorkspaceSpecs())
+			specMap.put(spec.getName(), spec);
+		if (getParent() != null) {
+			for (var spec : getParent().getHierarchyWorkspaceSpecs())
+				specMap.putIfAbsent(spec.getName(), spec);
+		}
+		return new ArrayList<>(specMap.values());
+	}
 	
 	@Editable(order=500, placeholder="Default", description="Specify an email address sharing same inbox as " +
 			"the system email address in mail setting definition. Emails sent to this address will be " +
@@ -1123,6 +1163,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public void setPackSetting(ProjectPackSetting packSetting) {
 		this.packSetting = packSetting;
+	}
+
+	public ProjectWorkspaceSetting getWorkspaceSetting() {
+		return workspaceSetting;
+	}
+
+	public void setWorkspaceSetting(ProjectWorkspaceSetting workspaceSetting) {
+		this.workspaceSetting = workspaceSetting;
 	}
 
 	public List<JobSecret> getHierarchyJobSecrets() {
@@ -1268,6 +1316,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.packQueryPersonalizations = packQueryPersonalizations;
 	}
 
+	public Collection<WorkspaceQueryPersonalization> getWorkspaceQueryPersonalizations() {
+		return workspaceQueryPersonalizations;
+	}
+
+	public void setWorkspaceQueryPersonalizations(Collection<WorkspaceQueryPersonalization> workspaceQueryPersonalizations) {
+		this.workspaceQueryPersonalizations = workspaceQueryPersonalizations;
+	}
+
 	public Collection<Build> getBuilds() {
 		return builds;
 	}
@@ -1276,11 +1332,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.builds = builds;
 	}
 
-	public Collection<JobCache> getJobCaches() {
+	public Collection<RunCache> getJobCaches() {
 		return jobCaches;
 	}
 
-	public void setJobCaches(Collection<JobCache> jobCaches) {
+	public void setJobCaches(Collection<RunCache> jobCaches) {
 		this.jobCaches = jobCaches;
 	}
 
@@ -1525,6 +1581,26 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			}
 		}
 		return packQueryPersonalizationOfCurrentUserHolder.orNull();
+	}
+
+	@Nullable
+	public WorkspaceQueryPersonalization getWorkspaceQueryPersonalizationOfCurrentUser() {
+		if (workspaceQueryPersonalizationOfCurrentUserHolder == null) {
+			User user = SecurityUtils.getAuthUser();
+			if (user != null) {
+				WorkspaceQueryPersonalization personalization =
+						OneDev.getInstance(WorkspaceQueryPersonalizationService.class).find(this, user);
+				if (personalization == null) {
+					personalization = new WorkspaceQueryPersonalization();
+					personalization.setProject(this);
+					personalization.setUser(user);
+				}
+				workspaceQueryPersonalizationOfCurrentUserHolder = Optional.of(personalization);
+			} else {
+				workspaceQueryPersonalizationOfCurrentUserHolder = Optional.absent();
+			}
+		}
+		return workspaceQueryPersonalizationOfCurrentUserHolder.orNull();
 	}
 	
 	@Nullable
@@ -1856,6 +1932,27 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 		return getSettingService().getPackSetting().getNamedQueries();
 	}
+
+	public List<NamedWorkspaceQuery> getNamedWorkspaceQueries() {
+		Project current = this;
+		do {
+			List<NamedWorkspaceQuery> namedQueries = current.getWorkspaceSetting().getNamedQueries();
+			if (namedQueries != null)
+				return namedQueries;
+			current = current.getParent();
+		} while (current != null);
+
+		return getSettingService().getWorkspaceSetting().getNamedQueries();
+	}
+
+	@Nullable
+	public NamedWorkspaceQuery getNamedWorkspaceQuery(String name) {
+		for (NamedWorkspaceQuery namedQuery : getNamedWorkspaceQueries()) {
+			if (namedQuery.getName().equals(name))
+				return namedQuery;
+		}
+		return null;
+	}
 	
 	public List<NamedPullRequestQuery> getNamedPullRequestQueries() {
 		Project current = this;
@@ -2035,6 +2132,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public void setEntitlements(Collection<ProjectEntitlement> entitlements) {
 		this.entitlements = entitlements;
+	}
+
+	public Collection<Workspace> getWorkspaces() {
+		return workspaces;
 	}
 	
 	public boolean isEntitledToAi(User ai) {

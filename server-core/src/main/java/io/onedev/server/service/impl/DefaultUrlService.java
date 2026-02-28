@@ -203,6 +203,16 @@ public class DefaultUrlService implements UrlService {
 	public String urlFor(Pack pack, boolean withRootUrl) {
 		return urlFor(pack.getProject(), withRootUrl) + "/~packages/" + pack.getId();
 	}
+
+	@Override
+	public String urlFor(Workspace workspace, boolean withRootUrl) {
+		return urlForWorkspace(workspace.getProject(), workspace.getNumber(), withRootUrl);
+	}
+
+	@Override
+	public String urlForWorkspace(Project project, Long workspaceNumber, boolean withRootUrl) {
+		return urlFor(project, withRootUrl) + "/~workspaces/" + workspaceNumber;
+	}
 	
 	@Override
 	public String urlFor(IssueComment comment, boolean withRootUrl) {

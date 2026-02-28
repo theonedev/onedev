@@ -37,6 +37,10 @@ public interface UrlService {
 	String urlFor(CodeComment comment, boolean withRootUrl);
 
 	String urlFor(Pack pack, boolean withRootUrl);
+
+	String urlFor(Workspace workspace, boolean withRootUrl);
+
+	String urlForWorkspace(Project project, Long workspaceNumber, boolean withRootUrl);
 	
 	String urlFor(CodeCommentReply reply, boolean withRootUrl);
 	

@@ -20,7 +20,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 
 @Editable(order=1100, group = UTILITIES, name="Copy Files with SCP", description = "" +
-		"This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>")
+		"This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>")
 public class SCPCommandStep extends CommandStep {
 
 	private static final long serialVersionUID = 1L;

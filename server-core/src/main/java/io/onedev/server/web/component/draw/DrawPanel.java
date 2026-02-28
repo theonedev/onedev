@@ -1,7 +1,5 @@
 package io.onedev.server.web.component.draw;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -14,11 +12,9 @@ public abstract class DrawPanel extends FloatingPanel {
 
 	public enum Placement {LEFT, RIGHT}
 	
-	public DrawPanel(AjaxRequestTarget target, Placement placement, @Nullable String width) {
+	public DrawPanel(AjaxRequestTarget target, Placement placement) {
 		super(target, null, false, false, Animation.valueOf(placement.name()));
 		add(AttributeAppender.append("class", "draw draw-" + placement.name().toLowerCase()));
-		if (width != null)
-			add(AttributeAppender.append("style", "width: " + width).setSeparator(";"));
 	}
 	
 	@Override

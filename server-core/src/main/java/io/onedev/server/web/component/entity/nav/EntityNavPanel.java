@@ -65,7 +65,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 				super.onComponentTag(tag);
 				if (getCursor() == null || getCursor().getOffset() <= 0)
 					tag.put("disabled", "disabled");
-				tag.put("title", MessageFormat.format(_T("Previous {0}"), _T(entityName)));
+				tag.put("data-tippy-content", MessageFormat.format(_T("Previous {0}"), _T(entityName)));
 			}
 
 			@Override
@@ -100,7 +100,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 				super.onComponentTag(tag);
 				if (getCursor() == null || getCursor().getOffset() >= getCursor().getCount()-1)
 					tag.put("disabled", "disabled");
-				tag.put("title", MessageFormat.format(_T("Next {0}"), _T(entityName)));
+				tag.put("data-tippy-content", MessageFormat.format(_T("Next {0}"), _T(entityName)));
 			}
 
 			@Override
@@ -130,9 +130,9 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 			@Override
 			public String getObject() {
 				if (getCursor() != null)
-					return _T(entityName) + " " + (getCursor().getOffset() + 1) + "/" + getCursor().getCount();				
+					return (getCursor().getOffset() + 1) + "/" + getCursor().getCount();				
 				else
-					return _T(entityName) + " 1/1";
+					return "1/1";
 			}
 			
 		}));

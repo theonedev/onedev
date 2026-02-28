@@ -11,6 +11,7 @@ import io.onedev.server.service.IssueService;
 import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -23,6 +24,7 @@ import io.onedev.server.util.Similarities;
 import io.onedev.server.web.component.markdown.AtWhoReferenceSupport;
 import io.onedev.server.web.component.markdown.MarkdownEditor;
 import io.onedev.server.web.component.markdown.UserMentionSupport;
+import io.onedev.server.workspace.WorkspaceService;
 
 public abstract class CommentInput extends MarkdownEditor {
 
@@ -107,6 +109,11 @@ public abstract class CommentInput extends MarkdownEditor {
 			@Override
 			public List<Build> queryBuilds(Project project, String query, int count) {
 				return OneDev.getInstance(BuildService.class).query(SecurityUtils.getSubject(), project, query, count);
+			}
+
+			@Override
+			public List<Workspace> queryWorkspaces(Project project, String query, int count) {
+				return OneDev.getInstance(WorkspaceService.class).query(SecurityUtils.getSubject(), project, query, count);
 			}
 			
 		};

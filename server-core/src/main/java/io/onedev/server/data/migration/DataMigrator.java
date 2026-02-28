@@ -35,7 +35,6 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
@@ -44,6 +43,7 @@ import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.digest.BuiltinDigests;
 import org.dom4j.Element;
 import org.dom4j.Node;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +56,6 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.Issue;
@@ -66,6 +65,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.TimeGroups;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.DateUtils;
@@ -8530,6 +8530,89 @@ public class DataMigrator {
 					for (Element webHookElement : webHooksElement.elements()) {
 						webHookElement.addElement("headers");
 					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate222(File dataDir, Stack<Integer> versions) {
+		String template;
+		try (InputStream is = getClass().getResourceAsStream("migrate173_default_notification.tpl")) {
+			Preconditions.checkNotNull(is);
+			template = IOUtils.toString(is, UTF_8);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("JobCaches.xml")) {
+				File renamedFile = new File(dataDir, file.getName().replace("JobCaches.xml", "RunCaches.xml"));
+				try {
+					FileUtils.moveFile(file, renamedFile);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		for (File file : dataDir.listFiles()) {
+			if (file.isFile()) {
+				try {
+					String content = FileUtils.readFileToString(file, UTF_8.name());
+					if (content.contains("io.onedev.server.model.JobCache")) {
+						content = StringUtils.replace(content,
+								"io.onedev.server.model.JobCache",
+								"io.onedev.server.model.RunCache");
+						FileUtils.writeFile(file, content, UTF_8);
+					}
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element projectElement : dom.getRootElement().elements()) {
+					projectElement.addElement("workspaceSetting");
+					projectElement.addElement("workspaceSpecs");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element userElement : dom.getRootElement().elements()) {
+					userElement.addElement("workspaceQueries");
+					userElement.addElement("workspaceQuerySubscriptions");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Roles.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element roleElement : dom.getRootElement().elements()) {
+					roleElement.addElement("manageWorkspaces").setText("false");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					Element keyElement = element.element("key");
+					if (keyElement != null && keyElement.getTextTrim().equals("EMAIL_TEMPLATES")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.addElement("workspaceNotification").setText(template);
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element buildElement : dom.getRootElement().elements()) {
+					Element workspacePathElement = buildElement.element("workspacePath");
+					if (workspacePathElement != null)
+						workspacePathElement.setName("workDirPath");
+					Element tokenElement = buildElement.element("jobToken");
+					if (tokenElement != null)
+						tokenElement.setName("token");
 				}
 				dom.writeToFile(file, false);
 			}

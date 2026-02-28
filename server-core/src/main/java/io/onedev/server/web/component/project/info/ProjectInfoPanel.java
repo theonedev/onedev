@@ -217,7 +217,7 @@ public abstract class ProjectInfoPanel extends Panel {
 						getClusterService().submitToServer(server, () -> {
 							try {
 								getProjectService().requestToSyncReplica(projectId, activeServer);
-							} catch (Exception e) {
+							} catch (Throwable e) {
 								logger.error(MessageFormat.format("Error requestig to sync replica of project with id \"{0}\"", projectId), e);
 							}
 							return null;

@@ -115,3 +115,13 @@
 .dark-mode .cm-s-eclipse .CodeMirror-matchingbracket {
 	background: var(--primary);
 }
+
+.cm-conflict-marker {
+	color: #9c6500 !important;
+	background: #fff3cd;
+	font-weight: bold;
+}
+.dark-mode .cm-conflict-marker {
+	color: #d4a857 !important;
+	background: #3d3520;
+}

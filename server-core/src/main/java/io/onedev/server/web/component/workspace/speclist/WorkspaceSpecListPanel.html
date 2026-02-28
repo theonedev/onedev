@@ -1,0 +1,14 @@
+<wicket:panel>
+	<div class="workspace-spec-list">
+		<div wicket:id="specs" class="spec">
+			<div class="head text-nowrap d-flex align-items-center px-3 py-2 bg-light border-top">
+				<b wicket:id="name" class="mr-auto"></b>
+				<a wicket:id="showInList" class="ml-2 d-flex align-items-center" t:data-tippy-content="Show in workspace list"><wicket:svg href="unordered-list" class="icon"></wicket:svg></a>
+				<a wicket:id="create" class="ml-2 d-flex align-items-center" t:data-tippy-content="Create workspace with this spec"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+			</div>
+			<div class="body">
+				<div wicket:id="detail"></div>
+			</div>
+		</div>
+	</div>
+</wicket:panel>

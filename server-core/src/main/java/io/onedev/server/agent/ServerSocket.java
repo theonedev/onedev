@@ -5,10 +5,6 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 
-import io.onedev.agent.*;
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.service.AgentService;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -19,15 +15,26 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.agent.AgentData;
+import io.onedev.agent.CallData;
+import io.onedev.agent.Message;
+import io.onedev.agent.MessageTypes;
+import io.onedev.agent.WaitingForAgentResourceToBeReleased;
+import io.onedev.agent.WantToDisconnectAgent;
+import io.onedev.agent.WebsocketUtils;
+import io.onedev.agent.shell.ShellOutputRequest;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.OneDev;
 import io.onedev.server.exception.ServerNotReadyException;
+import io.onedev.server.job.AgentShell;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobService;
-import io.onedev.server.job.ResourceAllocator;
-import io.onedev.server.job.log.LogService;
-import io.onedev.server.terminal.AgentShell;
+import io.onedev.server.logging.LogService;
+import io.onedev.server.service.AgentService;
+import io.onedev.server.service.ResourceService;
 
 @WebSocket
 public class ServerSocket {
@@ -132,7 +139,7 @@ public class ServerSocket {
 						if (sessionId.length() == 0)
 							sessionId = null;
 						String logMessage = StringUtils.substringAfter(remaining, ":");
-						TaskLogger logger = OneDev.getInstance(LogService.class).getJobLogger(jobToken);
+						TaskLogger logger = OneDev.getInstance(LogService.class).getLogger(jobToken);
 						if (logger != null)
 							logger.log(logMessage, sessionId);
 					} catch (Exception e) {
@@ -142,32 +149,16 @@ public class ServerSocket {
 				case REPORT_JOB_WORKSPACE:
 					String dataString = new String(messageData, StandardCharsets.UTF_8);
 					String jobToken = StringUtils.substringBefore(dataString, ":");
-					String jobWorkspace = StringUtils.substringAfter(dataString, ":");
+					String jobWorkDir = StringUtils.substringAfter(dataString, ":");
 					JobContext jobContext = getJobService().getJobContext(jobToken, false);
 					if (jobContext != null)
-						getJobService().reportJobWorkspace(jobContext, jobWorkspace);
+						getJobService().reportJobWorkDir(jobContext, jobWorkDir);
 					break;
-				case SHELL_OUTPUT:
-					dataString = new String(messageData, StandardCharsets.UTF_8);
-					String sessionId = StringUtils.substringBefore(dataString, ":");
-					String output = StringUtils.substringAfter(dataString, ":");
+				case SHELL_EXIT:
+					String sessionId = new String(messageData, StandardCharsets.UTF_8);
 					AgentShell shell = (AgentShell) getJobService().getShell(sessionId);
 					if (shell != null)
-						shell.getTerminal().sendOutput(output);
-					break;
-				case SHELL_ERROR:
-					dataString = new String(messageData, StandardCharsets.UTF_8);
-					sessionId = StringUtils.substringBefore(dataString, ":");
-					String error = StringUtils.substringAfter(dataString, ":");
-					shell = (AgentShell) getJobService().getShell(sessionId);
-					if (shell != null)
-						shell.getTerminal().sendError(error);
-					break;
-				case SHELL_CLOSED:
-					sessionId = new String(messageData, StandardCharsets.UTF_8);
-					shell = (AgentShell) getJobService().getShell(sessionId);
-					if (shell != null)
-						shell.getTerminal().close();
+						shell.getTerminal().onShellExit();
 					break;
 				default:
 			}
@@ -188,7 +179,12 @@ public class ServerSocket {
 		try {
 			if (request instanceof WantToDisconnectAgent || request instanceof WaitingForAgentResourceToBeReleased) {
 				if (agentId != null)
-					OneDev.getInstance(ResourceAllocator.class).agentDisconnecting(agentId);
+					OneDev.getInstance(ResourceService.class).agentDisconnecting(agentId);
+				return null;
+			} else if (request instanceof ShellOutputRequest shellOutputRequest) {
+				AgentShell shell = (AgentShell) getJobService().getShell(shellOutputRequest.getSessionId());
+				if (shell != null)
+					shell.getTerminal().onShellOutput(shellOutputRequest.getBase64Data());
 				return null;
 			} else {
 				throw new ExplicitException("Unknown request: " + request.getClass());

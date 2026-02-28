@@ -1,0 +1,111 @@
+<wicket:extend>
+	<div class="workspace-changes d-flex flex-grow-1 position-relative">
+		<div wicket:id="changesSidebar" class="changes-sidebar autofit d-flex flex-column flex-grow-1 border-right">
+			<div wicket:id="statusError" class="alert alert-light-danger m-3"></div>
+			<div class="sync-info d-flex align-items-center p-3">
+				<div class="pull-info flex-grow-1 d-flex align-items-center">
+					<span wicket:id="behindCount" class="mr-1"></span>
+					<a wicket:id="pull" t:data-tippy-content="Pull"><wicket:svg href="arrow3" class="icon rotate-90"/></a>
+				</div>
+				<a wicket:id="sync" t:data-tippy-content="Sync" class="mx-2">
+					<wicket:svg href="refresh" class="icon"/>
+				</a>
+				<div class="push-info flex-grow-1 d-flex align-items-center justify-content-end">
+					<span wicket:id="aheadCount" class="mr-1"></span>
+					<a wicket:id="push" t:data-tippy-content="Push"><wicket:svg href="arrow3" class="icon rotate-270"/></a>
+				</div>
+			</div>
+			<form wicket:id="commitForm" class="commit-form px-3 pt-2 pb-4">
+				<div class="d-flex">
+					<textarea wicket:id="commitMessage" class="form-control form-control-sm" rows="3" t:placeholder="Commit message"></textarea>
+				</div>
+				<div class="d-flex btn-group flex-grow-1 mt-4">
+					<button wicket:id="commitButton" class="dirty-aware btn btn-sm btn-primary flex-grow-1"><wicket:t>Commit</wicket:t></button>
+					<button wicket:id="dropdownToggle" type="button" class="dirty-aware btn btn-sm btn-icon btn-primary dropdown-toggle flex-grow-0" data-toggle="dropdown" aria-expanded="false"></button>
+					<div class="dropdown-menu dropdown-menu-right">
+						<a wicket:id="amendButton" class="dropdown-item"><wicket:t>Amend</wicket:t></a>
+					</div>
+				</div>
+				<div wicket:id="mergeHint" class="text-info font-size-sm mt-2"><wicket:t>Commit to conclude the merge, or</wicket:t> <a wicket:id="abortMerge" class="text-danger" href="#"><wicket:t>abort merge</wicket:t></a></div>
+			</form>
+			<div wicket:id="noChangedFiles" class="alert alert-light mx-3">No changed files to commit</div>
+			<div class="file-sections flex-grow-1 overflow-auto">
+				<div wicket:id="conflictSection" class="file-section conflict-section">
+					<div class="section-header d-flex align-items-center">
+						<span class="font-weight-bold font-size-sm"><wicket:t>CONFLICTS</wicket:t></span>
+						<span wicket:id="conflictCount" class="badge badge-sm badge-danger ml-1 mr-2"></span>
+						<a wicket:id="abortMerge" class="btn btn-xs btn-icon btn-hover-danger ml-auto" t:data-tippy-content="Abort Merge">
+							<wicket:svg href="undo" class="icon"/>
+						</a>
+					</div>
+					<ul class="file-list list-unstyled mb-0">
+						<li wicket:id="conflictFiles" class="d-flex align-items-center">
+							<a wicket:id="fileLink" class="flex-grow-1 d-flex align-items-center min-width-0">
+								<span wicket:id="conflictType" class="conflict-type mr-1 flex-shrink-0"></span>
+								<span class="file-names"><span wicket:id="fileName" class="file-name"></span><span wicket:id="fileDir" class="file-dir"></span></span>
+							</a>
+							<a wicket:id="markResolved" class="btn btn-xs btn-icon btn-hover-primary flex-shrink-0 ml-1" t:data-tippy-content="Mark Resolved">
+									<wicket:svg href="plus" class="icon"/>
+							</a>
+						</li>
+					</ul>
+				</div>
+				<div wicket:id="stagedSection" class="file-section">
+					<div class="section-header d-flex align-items-center">
+						<span class="font-weight-bold font-size-sm"><wicket:t>STAGED</wicket:t></span>
+						<span wicket:id="stagedCount" class="badge badge-sm badge-secondary ml-1 mr-2"></span>
+						<a wicket:id="unstageAll" class="btn btn-xs btn-icon btn-hover-primary ml-auto" t:data-tippy-content="Unstage All">
+							<wicket:svg href="minus" class="icon"/>
+						</a>
+					</div>
+					<ul class="file-list list-unstyled mb-0">
+						<li wicket:id="stagedFiles" class="d-flex align-items-center">
+							<a wicket:id="fileLink" class="flex-grow-1 d-flex align-items-center min-width-0">
+								<span wicket:id="status" class="file-status mr-1 flex-shrink-0"></span>
+								<span class="file-names"><span wicket:id="fileName" class="file-name"></span><span wicket:id="fileDir" class="file-dir"></span></span>
+							</a>
+							<a wicket:id="unstage" class="btn btn-xs btn-icon btn-hover-primary flex-shrink-0 ml-1" t:data-tippy-content="Unstage">
+								<wicket:svg href="minus" class="icon"/>
+							</a>
+						</li>
+					</ul>
+				</div>
+				<div wicket:id="unstagedSection" class="file-section">
+					<div class="section-header d-flex align-items-center">
+						<span class="font-weight-bold font-size-sm"><wicket:t>UNSTAGED</wicket:t></span>
+						<span wicket:id="unstagedCount" class="badge badge-sm badge-secondary ml-1 mr-2"></span>
+						<a wicket:id="discardAll" class="btn btn-xs btn-icon btn-hover-danger ml-auto" t:data-tippy-content="Discard All">
+							<wicket:svg href="undo2" class="icon"/>
+						</a>
+						<a wicket:id="stageAll" class="btn btn-xs btn-icon btn-hover-primary ml-1" t:data-tippy-content="Stage All">
+							<wicket:svg href="plus" class="icon"/>
+						</a>
+					</div>
+					<ul class="file-list list-unstyled mb-0">
+						<li wicket:id="unstagedFiles" class="d-flex align-items-center">
+							<a wicket:id="fileLink" class="flex-grow-1 d-flex align-items-center min-width-0">
+								<span wicket:id="status" class="file-status mr-1 flex-shrink-0"></span>
+								<span class="file-names"><span wicket:id="fileName" class="file-name"></span><span wicket:id="fileDir" class="file-dir"></span></span>
+							</a>
+							<a wicket:id="discard" class="btn btn-xs btn-icon btn-hover-danger flex-shrink-0 ml-1" t:data-tippy-content="Discard Changes">
+								<wicket:svg href="undo2" class="icon"/>
+							</a>
+							<a wicket:id="stage" class="btn btn-xs btn-icon btn-hover-primary flex-shrink-0 ml-1" t:data-tippy-content="Stage">
+								<wicket:svg href="plus" class="icon"/>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div wicket:id="diffContent" class="diff-content autofit d-flex flex-column flex-grow-1">
+			<div class="diff-header d-flex align-items-center px-3 py-2 border-bottom">
+				<span wicket:id="diffFileName" class="font-weight-bold text-truncate"></span>
+			</div>
+			<div wicket:id="diffPanel" class="diff-panel flex-grow-1 overflow-auto"></div>
+		</div>
+		<div wicket:id="noSelection" class="no-selection autofit d-flex flex-grow-1 align-items-center justify-content-center text-muted text-center">
+			<wicket:t>Select a file to view changes</wicket:t>
+		</div>
+	</div>	
+</wicket:extend>

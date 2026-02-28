@@ -38,9 +38,9 @@ public interface AgentService extends EntityService<Agent> {
 	
 	Collection<String> getOsArchs();
 	
-	List<Agent> query(EntityQuery<Agent> agentQuery, int firstResult, int maxResults);
+	List<Agent> query(EntityQuery<Agent> query, int firstResult, int maxResults);
 	
-	int count(@Nullable Criteria<Agent> agentCriteria);
+	int count(@Nullable Criteria<Agent> criteria);
 	
 	void restart(Agent agent);
 	

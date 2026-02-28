@@ -42,7 +42,7 @@ public enum JobVariable {
 	JOB_TOKEN {
 		@Override
 		public String getValue(Build build) {
-			return build.getJobToken();
+			return build.getToken();
 		}
 	},
 	REF {

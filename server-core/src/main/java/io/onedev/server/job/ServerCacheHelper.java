@@ -1,21 +1,9 @@
 package io.onedev.server.job;
 
-import com.google.common.base.Joiner;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.k8shelper.CacheHelper;
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.k8shelper.SetupCacheFacade;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.service.AccessTokenService;
-import io.onedev.server.service.JobCacheService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionService;
-import io.onedev.server.security.SecurityUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.glassfish.jersey.client.ClientProperties;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -25,39 +13,49 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
+
+import org.glassfish.jersey.client.ClientProperties;
+import org.jspecify.annotations.Nullable;
+
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.CacheAvailability;
+import io.onedev.k8shelper.CacheHelper;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.k8shelper.SetupCacheFacade;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.model.Project;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.RunCacheService;
+import io.onedev.server.service.support.CacheQueryResult;
 
 public class ServerCacheHelper extends CacheHelper {
 	
 	private final JobContext jobContext;
 	
-	public ServerCacheHelper(File buildHome, JobContext jobContext, TaskLogger logger) {
-		super(buildHome, logger);
+	public ServerCacheHelper(File buildDir, JobContext jobContext, TaskLogger logger) {
+		super(buildDir, logger);
 		this.jobContext = jobContext;
 	}
 
 	@Override
-	protected boolean downloadCache(String cacheKey, List<String> cachePaths, List<File> cacheDirs) {
-		var cacheInfo = getCacheService().getCacheInfoForDownload(jobContext.getProjectId(), cacheKey);
-		return downloadCache(cacheInfo, cachePaths, cacheDirs);
+	protected CacheAvailability downloadCache(String key, @Nullable String checksum,
+									String cachePathsString, List<File> cacheDirs) {
+		var cacheQueryResult = getCacheService().queryCache(jobContext.getProjectId(), key, checksum);
+		return downloadCache(cacheQueryResult, cachePathsString, cacheDirs);
 	}
 
-	@Override
-	protected boolean downloadCache(List<String> loadKeys, List<String> cachePaths, List<File> cacheDirs) {
-		var cacheInfo = getCacheService().getCacheInfoForDownload(jobContext.getProjectId(), loadKeys);
-		return downloadCache(cacheInfo, cachePaths, cacheDirs);		
-	}
-
-	private boolean downloadCache(Pair<Long, Long> cacheInfo, List<String> cachePaths, List<File> cacheDirs) {
-		if (cacheInfo != null) {
-			var projectId = cacheInfo.getLeft();
-			var cacheId = cacheInfo.getRight();
+	private CacheAvailability downloadCache(@Nullable CacheQueryResult cacheQueryResult, String cachePathsString, List<File> cacheDirs) {
+		if (cacheQueryResult != null) {
+			var projectId = cacheQueryResult.getProjectId();
+			var cacheId = cacheQueryResult.getCacheId();
 			var activeServer = getProjectService().getActiveServer(projectId, true);
 			if (activeServer.equals(getClusterService().getLocalServerAddress())) {
-				return getCacheService().downloadCache(projectId, cacheId, cachePaths, is -> untar(cacheDirs, is));
+				return getCacheService().downloadCache(cacheQueryResult, cachePathsString, is -> untar(cacheDirs, is));
 			} else {
 				Client client = ClientBuilder.newClient();
 				client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
@@ -67,19 +65,18 @@ public class ServerCacheHelper extends CacheHelper {
 							.path("~api/cluster/cache")
 							.queryParam("projectId", projectId)
 							.queryParam("cacheId", cacheId)
-							.queryParam("cachePaths", Joiner.on('\n').join(cachePaths));
+							.queryParam("exactMatch", cacheQueryResult.isExactMatch())
+							.queryParam("cachePathsString", cachePathsString);
 					Invocation.Builder builder = target.request();
 					builder.header(HttpHeaders.AUTHORIZATION,
 							KubernetesHelper.BEARER + " " + getClusterService().getCredential());
 					try (Response response = builder.get()) {
 						KubernetesHelper.checkStatus(response);
 						try (var is = response.readEntity(InputStream.class)) {
-							if (is.read() == 1) {
+							var cacheAvailability = CacheAvailability.values()[is.read()];
+							if (cacheAvailability != CacheAvailability.NOT_FOUND) 
 								untar(cacheDirs, is);
-								return true;
-							} else {
-								return false;
-							}
+							return cacheAvailability;
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
@@ -89,16 +86,17 @@ public class ServerCacheHelper extends CacheHelper {
 				}
 			}
 		} else {
-			return false;
+			return CacheAvailability.NOT_FOUND;
 		}
 	}
 
 	@Override
 	protected boolean uploadCache(SetupCacheFacade cacheConfig, List<File> cacheDirs) {
-		var cacheKey = cacheConfig.getKey();
+		var key = cacheConfig.getKey();
+		var checksum = cacheConfig.getChecksum();
 		var projectPath = cacheConfig.getUploadProjectPath();
 		var accessTokenValue = cacheConfig.getUploadAccessToken();
-		var cachePaths = cacheConfig.getPaths();
+		var cachePathsString = cacheConfig.getPathsAsString();
 		var projectId = getSessionService().call(() -> {
 			Project project;
 			if (projectPath != null) {
@@ -119,10 +117,10 @@ public class ServerCacheHelper extends CacheHelper {
 		});
 		
 		if (projectId != null) {
-			Long cacheId = getCacheService().getCacheIdForUpload(projectId, cacheKey);
+			Long cacheId = getCacheService().createCache(projectId, key, checksum);
 			var activeServer = getProjectService().getActiveServer(projectId, true);
 			if (activeServer.equals(getClusterService().getLocalServerAddress())) {
-				getCacheService().uploadCache(projectId, cacheId, cachePaths, os -> tar(cacheDirs, os));
+				getCacheService().uploadCache(projectId, cacheId, cachePathsString, os -> tar(cacheDirs, os));
 			} else {
 				Client client = ClientBuilder.newClient();
 				client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
@@ -132,7 +130,7 @@ public class ServerCacheHelper extends CacheHelper {
 							.path("~api/cluster/cache")
 							.queryParam("projectId", projectId)
 							.queryParam("cacheId", cacheId)
-							.queryParam("cachePaths", Joiner.on('\n').join(cachePaths));
+							.queryParam("cachePathsString", cachePathsString);
 					Invocation.Builder builder = target.request();
 					builder.header(HttpHeaders.AUTHORIZATION,
 							KubernetesHelper.BEARER + " " + getClusterService().getCredential());
@@ -166,8 +164,8 @@ public class ServerCacheHelper extends CacheHelper {
 		return OneDev.getInstance(AccessTokenService.class);
 	}
 	
-	private JobCacheService getCacheService() {
-		return OneDev.getInstance(JobCacheService.class);
+	private RunCacheService getCacheService() {
+		return OneDev.getInstance(RunCacheService.class);
 	}
 	
 }

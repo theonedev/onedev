@@ -1,0 +1,36 @@
+<wicket:extend>
+	<div class="workspace-detail d-flex flex-column flex-grow-1">
+		<div class="head d-flex align-items-center px-3 py-2">
+            <div class="left d-flex align-items-center">
+				<div class="summary mr-4">
+					<a wicket:id="user"></a> on <a wicket:id="branch"></a> for <span wicket:id="spec"></span>	
+					<span wicket:id="invalidSpec" class="text-warning ml-1"></span>
+				</div>
+	            <div class="status text-nowrap mr-4">
+	                <svg wicket:id="statusIcon" class="mr-2"></svg>
+	                <span wicket:id="statusLabel"></span>
+	            </div>		
+				<a wicket:id="openTerminal" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-4" t:data-tippy-content="Open terminal">
+					<wicket:svg href="terminal" class="icon"></wicket:svg>
+				</a>		
+			</div>
+			<div class="right d-flex align-items-center ml-auto">
+				<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" t:data-tippy-content="Delete this workspace">
+					<wicket:svg href="trash" class="icon"></wicket:svg>
+				</a>
+				<div wicket:id="entityNav" class="d-xl-block d-none ml-4"></div>
+			</div>
+		</div>
+		<div class="body d-flex flex-column flex-grow-1">
+			<ul wicket:id="workspaceTabs" class="tabs nav nav-tabs nav-tabs-line nav-bold"></ul>
+			<wicket:child></wicket:child>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="projectTitleFrag">
+		<span class="d-flex align-items-center">
+			<a wicket:id="workspaces" class="text-nowrap"><wicket:t>Workspaces</wicket:t></a>
+			<span class="dot"></span>
+			<span wicket:id="workspaceNumber"></span>
+		</span>
+	</wicket:fragment>
+</wicket:extend>

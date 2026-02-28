@@ -46,6 +46,7 @@ import io.onedev.server.model.AccessToken;
 import io.onedev.server.model.BuildQueryPersonalization;
 import io.onedev.server.model.CodeCommentQueryPersonalization;
 import io.onedev.server.model.CommitQueryPersonalization;
+import io.onedev.server.model.WorkspaceQueryPersonalization;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.IssueQueryPersonalization;
 import io.onedev.server.model.IssueVote;
@@ -60,6 +61,8 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.build.NamedBuildQuery;
+import io.onedev.server.model.support.workspace.NamedWorkspaceQuery;
+import io.onedev.server.model.support.pack.NamedPackQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.rest.annotation.Api;
@@ -249,7 +252,17 @@ public class UserResource {
 			throw new UnauthorizedException();
     	return user.getPullRequestQueryPersonalizations();
     }
-	
+
+	@Api(order=1350)
+	@Path("/{userId}/project-workspace-query-personalizations")
+    @GET
+    public Collection<WorkspaceQueryPersonalization> getProjectWorkspaceQueryPersonalizations(@PathParam("userId") Long userId) {
+    	User user = userService.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(getAuthUser())) 
+			throw new UnauthorizedException();
+    	return user.getWorkspaceQueryPersonalizations();
+    }
+
 	@Api(order=1400)
 	@Path("/{userId}/pull-request-assignments")
     @GET
@@ -289,6 +302,10 @@ public class UserResource {
 		queriesAndWatches.issueQueries = user.getIssueQueries();
 		queriesAndWatches.projectQueries = user.getProjectQueries();
 		queriesAndWatches.pullRequestQueries = user.getPullRequestQueries();
+		queriesAndWatches.packQueries = user.getPackQueries();
+		queriesAndWatches.packQuerySubscriptions = user.getPackQuerySubscriptions();
+		queriesAndWatches.workspaceQueries = user.getWorkspaceQueries();
+		queriesAndWatches.workspaceQuerySubscriptions = user.getWorkspaceQuerySubscriptions();
 		return queriesAndWatches;
 	}
 	
@@ -522,9 +539,12 @@ public class UserResource {
 		user.setPullRequestQueryWatches(queriesAndWatches.pullRequestQueryWatches);
 		user.setBuildQueries(queriesAndWatches.buildQueries);
 		user.setIssueQueries(queriesAndWatches.issueQueries);
-		user.setIssueQueryWatches(queriesAndWatches.issueQueryWatches);
 		user.setProjectQueries(queriesAndWatches.projectQueries);
 		user.setPullRequestQueries(queriesAndWatches.pullRequestQueries);
+		user.setPackQueries(queriesAndWatches.packQueries);
+		user.setPackQuerySubscriptions(queriesAndWatches.packQuerySubscriptions);
+		user.setWorkspaceQueries(queriesAndWatches.workspaceQueries);
+		user.setWorkspaceQuerySubscriptions(queriesAndWatches.workspaceQuerySubscriptions);
 		userService.update(user, null);
 
 		if (!getAuthUser().equals(user)) {
@@ -794,6 +814,14 @@ public class UserResource {
 		ArrayList<NamedBuildQuery> buildQueries;
 
 		LinkedHashSet<String> buildQuerySubscriptions;
+
+		ArrayList<NamedPackQuery> packQueries;
+
+		LinkedHashSet<String> packQuerySubscriptions;
+
+		ArrayList<NamedWorkspaceQuery> workspaceQueries;
+
+		LinkedHashSet<String> workspaceQuerySubscriptions;
 	}
 	
 }

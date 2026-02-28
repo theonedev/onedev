@@ -4,6 +4,7 @@ import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.AgentTokenService;
 import io.onedev.server.service.UserService;
+import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.job.JobService;
 import io.onedev.server.persistence.annotation.Sessional;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -19,26 +20,24 @@ import javax.servlet.http.HttpServletRequest;
 @Singleton
 public class BearerAuthenticationFilter extends ExceptionHandleFilter {
 	
-	private final UserService userService;
-	
-	private final AccessTokenService accessTokenService;
-	
-	private final AgentTokenService agentTokenService;
-	
-	private final JobService jobService;
-	
-	private final ClusterService clusterService;
+	@Inject
+	private UserService userService;
 	
 	@Inject
-	public BearerAuthenticationFilter(AccessTokenService accessTokenService, AgentTokenService agentTokenService,
-                                      JobService jobService, UserService userService, ClusterService clusterService) {
-		this.accessTokenService = accessTokenService;
-		this.agentTokenService = agentTokenService;
-		this.jobService = jobService;
-		this.userService = userService;
-		this.clusterService = clusterService;
-	}
+	private AccessTokenService accessTokenService;
+	
+	@Inject
+	private AgentTokenService agentTokenService;
+	
+	@Inject
+	private JobService jobService;
 
+	@Inject
+	private WorkspaceService workspaceService;
+	
+	@Inject
+	private ClusterService clusterService;
+	
 	@Sessional
     @Override
 	protected boolean onPreHandle(ServletRequest request, ServletResponse response, Object mappedValue) {
@@ -52,9 +51,15 @@ public class BearerAuthenticationFilter extends ExceptionHandleFilter {
 					var accessToken = accessTokenService.findByValue(bearerToken);
 					if (accessToken != null) {
 						ThreadContext.bind(accessToken.asSubject());
-					} else if (agentTokenService.find(bearerToken) == null 
-							&& jobService.getJobContext(bearerToken, false) == null) {
-						throw new IncorrectCredentialsException("Invalid or expired access token");
+					} else {
+						var workspaceContext = workspaceService.getWorkspaceContext(bearerToken, false);
+						if (workspaceContext != null) {
+							var workspace = workspaceService.load(workspaceContext.getWorkspaceId());
+							ThreadContext.bind(workspace.getUser().asSubject());
+						} else if (agentTokenService.find(bearerToken) == null 
+								&& jobService.getJobContext(bearerToken, false) == null) {
+							throw new IncorrectCredentialsException("Invalid or expired access token");
+						}
 					}
 				}
 	        } 

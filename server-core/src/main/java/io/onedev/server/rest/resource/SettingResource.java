@@ -27,6 +27,7 @@ import io.onedev.server.service.AuditService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.model.support.administration.BackupSetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
+import io.onedev.server.model.support.administration.GlobalWorkspaceSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
@@ -167,6 +168,16 @@ public class SettingResource {
     	return settingService.getPullRequestSetting();
     }
 	
+	@Api(order=1150)
+	@Path("/workspace")
+    @GET
+    public GlobalWorkspaceSetting getWorkspaceSetting() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingService.getWorkspaceSetting();
+    }
+
+
 	@Api(order=1200)
 	@Path("/security")
     @GET
@@ -353,7 +364,20 @@ public class SettingResource {
 				oldAuditContent, VersionedXmlDoc.fromBean(pullRequestSetting).toXML());
     	return Response.ok().build();
     }
-	
+
+	@Api(order=2450)
+	@Path("/workspace")
+	@POST
+    public Response setWorkspaceSetting(@NotNull @Valid GlobalWorkspaceSetting workspaceSetting) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+		var oldAuditContent = VersionedXmlDoc.fromBean(settingService.getWorkspaceSetting()).toXML();
+    	settingService.saveWorkspaceSetting(workspaceSetting);
+		auditService.audit(null, "changed workspace settings via RESTful API", 
+				oldAuditContent, VersionedXmlDoc.fromBean(workspaceSetting).toXML());
+    	return Response.ok().build();
+    }
+
 	@Api(order=2500)
 	@Path("/security")
 	@POST

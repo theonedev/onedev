@@ -67,10 +67,10 @@ public interface BuildService extends EntityService<Build> {
 	
 	List<Build> query(Subject subject, Project project, String fuzzyQuery, int count);
 
-	List<Build> query(Subject subject, @Nullable Project project, EntityQuery<Build> buildQuery, 
+	List<Build> query(Subject subject, @Nullable Project project, EntityQuery<Build> query, 
 					  boolean loadLabels, int firstResult, int maxResults);
 
-	int count(Subject subject, @Nullable Project project, Criteria<Build> buildCriteria);
+	int count(Subject subject, @Nullable Project project, @Nullable Criteria<Build> criteria);
 
 	Collection<Long> getNumbers(Long projectId);
 

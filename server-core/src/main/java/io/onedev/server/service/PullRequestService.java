@@ -61,22 +61,22 @@ public interface PullRequestService extends EntityService<PullRequest> {
 	void checkAutoMerge(PullRequest request);
 
 	List<PullRequest> query(Subject subject, @Nullable Project targetProject, 
-            EntityQuery<PullRequest> requestQuery, boolean loadExtraInfo, 
+            EntityQuery<PullRequest> query, boolean loadExtraInfo, 
             int firstResult, int maxResults);
 
-	int count(Subject subject, @Nullable Project targetProject, 
-            @Nullable Criteria<PullRequest> requestCriteria);
+	int count(Subject subject, @Nullable Project targetProject, @Nullable Criteria<PullRequest> criteria);
 
 	void delete(Collection<PullRequest> requests, Project project);
 
 	List<ProjectPullRequestStatusStat> queryStatusStats(Collection<Project> projects);
 
-	Map<Integer, Integer> queryDurationStats(Subject subject, Project project, @Nullable Criteria<PullRequest> pullRequestCriteria, 
-            @Nullable Date startDate, @Nullable Date endDate, StatsGroup statsGroup);
+	Map<Integer, Integer> queryDurationStats(Subject subject, Project project, 
+            @Nullable Criteria<PullRequest> criteria, @Nullable Date startDate, @Nullable Date endDate, 
+            StatsGroup statsGroup);
 
 	Map<Integer, Pair<Integer, Integer>> queryFrequencyStats(Subject subject, Project project,
-            @Nullable Criteria<PullRequest> pullRequestCriteria, 
-            @Nullable Date startDate, @Nullable Date endDate, StatsGroup statsGroup);
+            @Nullable Criteria<PullRequest> criteria, @Nullable Date startDate, @Nullable Date endDate, 
+            StatsGroup statsGroup);
 
     /**
      * When compare oldCommitId and newCommitId in context of pull request, assume below scenario:

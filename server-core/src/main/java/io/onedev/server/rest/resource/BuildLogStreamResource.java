@@ -3,9 +3,11 @@ package io.onedev.server.rest.resource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;
 import io.onedev.server.service.BuildService;
-import io.onedev.server.job.log.LogListener;
-import io.onedev.server.job.log.LogService;
-import io.onedev.server.job.log.LogSnippet;
+import io.onedev.server.logging.BuildLoggingSupport;
+import io.onedev.server.logging.LogListener;
+import io.onedev.server.logging.LogService;
+import io.onedev.server.logging.LogSnippet;
+import io.onedev.server.logging.LoggingSupport;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.persistence.SessionService;
@@ -62,8 +64,7 @@ public class BuildLogStreamResource {
 		if (!SecurityUtils.canAccessLog(build))
 			throw new UnauthorizedException();
 		
-		var projectId = build.getProject().getId();
-		var buildNumber = build.getNumber();
+		var loggingSupport = build.getLoggingSupport();
 		var buildStatus = build.getStatus();
 
 		return os -> {
@@ -71,8 +72,9 @@ public class BuildLogStreamResource {
 			var logListener = new LogListener() {
 
 				@Override
-				public void logged(Long loggedBuildId) {
-					if (loggedBuildId.equals(buildId)) {
+				public void logged(LoggingSupport loggingSupport) {
+					if (loggingSupport instanceof BuildLoggingSupport buildLoggingSupport 
+							&& buildLoggingSupport.getBuildId().equals(buildId)) {
 						synchronized (os) {
 							os.notify();
 						}
@@ -84,7 +86,7 @@ public class BuildLogStreamResource {
 			sessionService.closeSession();
 			try {
 				var nextOffset = 0;
-				LogSnippet snippet = logService.readLogSnippetReversely(projectId, buildNumber, MAX_LOG_ENTRIES + 1);
+				LogSnippet snippet = logService.readLogSnippetReversely(loggingSupport, MAX_LOG_ENTRIES + 1);
 				nextOffset = snippet.offset + snippet.entries.size();
 				for (var entry : snippet.entries)
 					writeEntry(os, entry);
@@ -96,7 +98,7 @@ public class BuildLogStreamResource {
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
 						}
-						var entries = logService.readLogEntries(projectId, buildNumber, nextOffset, 0);
+						var entries = logService.readLogEntries(loggingSupport, nextOffset, 0);
 						if (!entries.isEmpty()) {
 							nextOffset += entries.size();
 							for (var entry : entries)

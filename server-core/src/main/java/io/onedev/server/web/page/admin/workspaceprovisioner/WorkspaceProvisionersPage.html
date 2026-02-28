@@ -1,0 +1,34 @@
+<wicket:extend>
+	<div class="workspace-provisioners">
+		<div class="body">
+			<div wicket:id="workspaceProvisionerSetting">
+				<div wicket:id="noProvisioners" class="alert alert-info mb-5">
+					<wicket:t>No workspace provisioners defined</wicket:t>
+				</div>
+				<ul class="list-unstyled">
+					<li wicket:id="provisioners" class="provisioner mb-5"><div wicket:id="provisioner"></div></li>
+				</ul>
+				<div wicket:id="newProvisioner"></div>
+			</div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="editNewFrag">
+		<div class="provisioner card">
+			<div class="card-header">
+				<div class="card-title"><wicket:t>Edit Provisioner</wicket:t></div>
+			</div>
+			<div class="card-body">
+				<div wicket:id="editor"></div>
+			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="addNewLinkFrag">
+		<div class="card">
+			<div class="card-header">
+				<div class="card-title">
+					<a wicket:id="link" class="add-new d-flex align-items-center"><wicket:svg href="plus-circle-o" class="icon mr-2"></wicket:svg> <span><wicket:t>Add Provisioner</wicket:t></span></a>
+				</div>
+			</div>
+		</div>
+	</wicket:fragment>
+</wicket:extend>

@@ -18,9 +18,11 @@ import java.util.Map;
 
 public class HookUtils {
 
-	public static final String HOOK_TOKEN = CryptoUtils.generateSecret(); 
+	public static final String RECEIVE_HOOK_TOKEN = CryptoUtils.generateSecret(); 
 	
 	private static final String gitReceiveHook;
+
+	private static final String gitWorkspacePostCommitHook;
 	
 	static {
         try (InputStream is = HookUtils.class.getClassLoader().getResourceAsStream("git-receive-hook")) {
@@ -29,9 +31,15 @@ public class HookUtils {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+		try (InputStream is = HookUtils.class.getClassLoader().getResourceAsStream("git-workspace-postcommit-hook")) {
+			Preconditions.checkNotNull(is);
+			gitWorkspacePostCommitHook = StringUtils.join(IOUtils.readLines(is, Charset.defaultCharset()), "\n");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
-	
-	public static Map<String, String> getHookEnvs(Long projectId, String principal) {
+
+	public static Map<String, String> getCommonHookEnvs() {
 		ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class);
 		SettingService settingService = OneDev.getInstance(SettingService.class);
 		String hookUrl = "http://localhost:" + serverConfig.getHttpPort();
@@ -41,14 +49,19 @@ public class HookUtils {
 		
         envs.put("ONEDEV_CURL", curl);
 		envs.put("ONEDEV_URL", hookUrl);
-		envs.put("ONEDEV_HOOK_TOKEN", HOOK_TOKEN);
-		envs.put("ONEDEV_USER_ID", principal);
-		envs.put("ONEDEV_REPOSITORY_ID", projectId.toString());
 				
 		return envs;
 	}
+
+	public static Map<String, String> getReceiveHookEnvs(Long projectId, String principal) {		
+		var envs = getCommonHookEnvs();
+		envs.put("ONEDEV_HOOK_TOKEN", RECEIVE_HOOK_TOKEN);
+		envs.put("ONEDEV_USER_ID", principal);
+		envs.put("ONEDEV_REPOSITORY_ID", projectId.toString());				
+		return envs;
+	}
 	
-	public static boolean isHookValid(File gitDir, String hookName) {
+	public static boolean isReceiveHookValid(File gitDir, String hookName) {
         File hookFile = new File(gitDir, "hooks/" + hookName);
         if (!hookFile.exists()) 
         	return false;
@@ -67,9 +80,30 @@ public class HookUtils {
         return true;
 	}
 	
-	public static void checkHooks(File gitDir) {
-		if (!isHookValid(gitDir, "pre-receive") 
-				|| !isHookValid(gitDir, "post-receive")) {
+	public static Map<String, String> getWorkspacePostCommitHookEnvs(String workspaceToken) {
+		var envs = getCommonHookEnvs();
+		envs.put("ONEDEV_HOOK_TOKEN", workspaceToken);
+		return envs;
+	}
+
+	public static void setupWorkspacePostCommitHook(File gitDir, boolean lfsEnabled) {
+		File hooksDir = new File(gitDir, "hooks");
+		FileUtils.createDir(hooksDir);
+		File postCommitHookFile = new File(hooksDir, "post-commit");
+
+		String lfsAwareHook;
+		if (lfsEnabled) {
+			lfsAwareHook = String.format(gitWorkspacePostCommitHook, "git lfs post-commit \"$@\"");
+		} else {
+			lfsAwareHook = String.format(gitWorkspacePostCommitHook, "");
+		}
+
+		FileUtils.writeFile(postCommitHookFile, lfsAwareHook);
+		postCommitHookFile.setExecutable(true);
+	}
+
+	public static void checkReceiveHooks(File gitDir) {
+		if (!isReceiveHookValid(gitDir, "pre-receive") || !isReceiveHookValid(gitDir, "post-receive")) {
             File hooksDir = new File(gitDir, "hooks");
 
             File gitPreReceiveHookFile = new File(hooksDir, "pre-receive");

@@ -164,19 +164,23 @@ public class DefaultWebSocketService implements WebSocketService, SessionListene
 			@Override
 			public void run() {
 				clusterService.submitToAllServers(() -> {
-					for (var observable: observables)
-						notifiedObservables.put(observable, new Pair<>(sourcePageKey, new Date()));
-					for (IWebSocketConnection connection: getConnectionRegistry().getConnections(application)) {
-						PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
-						if (sourcePageKey == null || !sourcePageKey.equals(pageKey)) {
-							Collection<String> registeredObservables = getRegisteredObservables(connection);
-							if (registeredObservables != null) {
-								var registeredChangedObservables = 
-										filterObservables(registeredObservables, observables);
-								if (!registeredChangedObservables.isEmpty())
-									notifyObservablesChange(connection, registeredChangedObservables);
+					try {
+						for (var observable: observables)
+							notifiedObservables.put(observable, new Pair<>(sourcePageKey, new Date()));
+						for (IWebSocketConnection connection: getConnectionRegistry().getConnections(application)) {
+							PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
+							if (sourcePageKey == null || !sourcePageKey.equals(pageKey)) {
+								Collection<String> registeredObservables = getRegisteredObservables(connection);
+								if (registeredObservables != null) {
+									var registeredChangedObservables = 
+											filterObservables(registeredObservables, observables);
+									if (!registeredChangedObservables.isEmpty())
+										notifyObservablesChange(connection, registeredChangedObservables);
+								}
 							}
 						}
+					} catch (Throwable t) {
+						logger.error("Error notifying observables change", t);
 					}
 					return null;
 				});

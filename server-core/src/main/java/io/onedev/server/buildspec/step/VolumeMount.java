@@ -20,8 +20,8 @@ public class VolumeMount implements Serializable {
 	
 	private String target;
 
-	@Editable(order = 100, placeholder = "Job workspace", description = "Specify a path relative to job workspace " +
-			"to be used as mount source. Leave empty to mount job workspace itself")
+	@Editable(order = 100, placeholder = "Job workspace", description = "Specify a path relative to job workdir " +
+			"to be used as mount source. Leave empty to mount job workdir itself")
 	@Interpolative(variableSuggester="suggestVariables")
 	@SubPath
 	public String getSourcePath() {

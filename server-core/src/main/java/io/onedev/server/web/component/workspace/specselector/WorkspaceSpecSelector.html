@@ -1,0 +1,15 @@
+<wicket:panel>
+	<div class="workspace-spec-selector py-4 px-3">
+		<div class="mb-3 font-weight-bold font-size-lg border-bottom pb-3"><wicket:t>Select Spec</wicket:t></div>
+		<div class="d-flex align-items-center">
+			<input wicket:id="search" class="form-control form-control-sm spec" t:placeholder="Search spec"></input>
+			<wicket:svg href="magnify" class="icon text-muted icon-magnify"></wicket:svg>
+		</div>
+		<ul wicket:id="specs" class="list-unstyled specs overflow-auto mb-0 mt-3">
+			<li wicket:id="specs" class="spec selectable">
+				<a wicket:id="link"><span wicket:id="label"></span></a>
+			</li>
+		</ul>
+		<div wicket:id="noSpecs" class="no-specs mb-0 mt-4"><div class="alert alert-notice alert-light-warning"><wicket:t>No specs found</wicket:t></div></div>
+	</div>
+</wicket:panel>

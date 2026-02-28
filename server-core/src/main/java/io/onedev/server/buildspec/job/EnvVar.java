@@ -7,7 +7,7 @@ import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.annotation.EnvironmentName;
+import io.onedev.server.annotation.EnvVarName;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 
@@ -22,7 +22,7 @@ public class EnvVar implements Serializable {
 
 	@Editable(order=100, description="Specify name of the environment variable")
 	@Interpolative(variableSuggester="suggestVariables")
-	@EnvironmentName
+	@EnvVarName
 	@NotEmpty
 	public String getName() {
 		return name;

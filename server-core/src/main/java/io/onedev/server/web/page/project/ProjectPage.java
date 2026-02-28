@@ -81,6 +81,8 @@ import io.onedev.server.web.page.project.issues.iteration.IterationEditPage;
 import io.onedev.server.web.page.project.issues.iteration.IterationListPage;
 import io.onedev.server.web.page.project.issues.iteration.NewIterationPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.page.project.workspaces.ProjectWorkspacesPage;
+import io.onedev.server.web.page.project.workspaces.detail.WorkspaceDetailPage;
 import io.onedev.server.web.page.project.packs.ProjectPacksPage;
 import io.onedev.server.web.page.project.packs.detail.PackDetailPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
@@ -108,6 +110,7 @@ import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPa
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.page.project.setting.servicedesk.ServiceDeskSettingPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
+import io.onedev.server.web.page.project.setting.workspacespec.WorkspaceSpecsPage;
 import io.onedev.server.web.page.project.stats.code.CodeContribsPage;
 import io.onedev.server.web.page.project.stats.code.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
@@ -252,7 +255,14 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					ProjectPacksPage.class, ProjectPacksPage.paramsOf(getProject(), 0),
 					Lists.newArrayList(PackDetailPage.class)));
 		}
-		
+
+		if (getProject().isCodeManagement() && SecurityUtils.canWriteCode(getProject()) 
+				&& !getProject().getHierarchyWorkspaceSpecs().isEmpty()) {
+			menuItems.add(new SidebarMenuItem.Page("workspace", _T("Workspaces"),
+					ProjectWorkspacesPage.class, ProjectWorkspacesPage.paramsOf(getProject(), 0),
+					Lists.newArrayList(WorkspaceDetailPage.class)));
+		}
+
 		List<SidebarMenuItem> statsMenuItems = new ArrayList<>();
 		
 		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject())) {
@@ -312,7 +322,9 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					CacheManagementPage.class, CacheManagementPage.paramsOf(getProject())));
 			
 			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("Build"), buildSettingMenuItems));
-			
+			settingMenuItems.add(new SidebarMenuItem.Page(null, _T("Workspace Specs"),
+					WorkspaceSpecsPage.class, WorkspaceSpecsPage.paramsOf(getProject())));
+
 			if (getSettingService().getServiceDeskSetting() != null && getProject().isIssueManagement()) {
 				settingMenuItems.add(new SidebarMenuItem.Page(null, _T("Service Desk"), 
 						ServiceDeskSettingPage.class, ServiceDeskSettingPage.paramsOf(getProject())));

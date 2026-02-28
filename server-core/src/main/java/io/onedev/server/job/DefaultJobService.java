@@ -36,7 +36,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +52,7 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.joda.time.DateTime;
+import org.jspecify.annotations.Nullable;
 import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
@@ -119,12 +119,13 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.HttpResponseAwareException;
+import io.onedev.server.exception.ServerNotFoundException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.job.log.LogService;
-import io.onedev.server.job.log.ServerJobLogger;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
+import io.onedev.server.logging.LogService;
+import io.onedev.server.logging.ServerLogger;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.BuildDependence;
@@ -155,10 +156,8 @@ import io.onedev.server.service.UserService;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
 import io.onedev.server.terminal.Shell;
-import io.onedev.server.terminal.Terminal;
-import io.onedev.server.terminal.WebShell;
-import io.onedev.server.util.ProjectScopedCommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.ProjectScopedCommitAware;
 import io.onedev.server.util.concurrent.BatchWorkExecutionService;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
@@ -252,6 +251,9 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	@Inject
 	private WorkExecutionService workExecutionService;
 
+	@Inject
+	private JobTerminalService jobTerminalService;
+
 	private volatile Thread thread;
 
 	private final Map<String, JobContext> jobContexts = new ConcurrentHashMap<>();
@@ -315,8 +317,8 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			return doSubmit(user, project, commitId, jobName, paramMap, refName, request, issue, reason);
 		} catch (ValidationException e) {
 			throw new HttpResponseAwareException(SC_BAD_REQUEST, e.getMessage());
-		} catch (Throwable e) {
-			throw ExceptionUtils.unchecked(e);
+		} catch (Throwable t) {
+			throw ExceptionUtils.unchecked(t);
 		} finally {
 			JobAuthorizationContext.pop();
 		}
@@ -334,7 +336,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		build.setProject(project);
 		build.setCommitHash(commitId.name());
 		build.setJobName(jobName);
-		build.setJobToken(UUID.randomUUID().toString());
+		build.setToken(UUID.randomUUID().toString());
 		build.setSubmitDate(new Date());
 		build.setStatus(Build.Status.WAITING);
 		build.setSubmitReason(reason);
@@ -569,16 +571,16 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 						}
 					}
 				}
-				throw new ExplicitException("No applicable job executor discovered for current job");
+				throw new ExplicitException("No applicable executor discovered for current job");
 			}
 		}
 	}
 
 	private Future<Boolean> execute(Build build) {		
-		String jobToken = build.getJobToken();
+		String jobToken = build.getToken();
 		VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 
-		TaskLogger jobLogger = logService.newLogger(build);
+		TaskLogger jobLogger = logService.newLogger(build.getLoggingSupport());
 		String jobExecutorName = interpolator.interpolate(build.getJob().getJobExecutor());
 		JobExecutor jobExecutor = interpolator.interpolateProperties(getJobExecutor(build, jobExecutorName, jobLogger));
 		String sequentialGroup = interpolator.interpolate(build.getJob().getSequentialGroup());
@@ -643,7 +645,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 				// Store original job actions as the copy in job context will be fetched from cluster and 
 				// some transient fields (such as step object in ServerSideFacade) will not be preserved 
 				jobActions.put(jobToken, actions);
-				logService.addJobLogger(jobToken, jobLogger);
+				logService.addLogger(jobToken, jobLogger);
 				serverStepThreads.put(jobToken, new ArrayList<>());
 				try {
 					var future = executorService.submit(() -> jobExecutor.execute(jobContext, jobLogger));
@@ -680,11 +682,13 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 						for (Thread thread : threads)
 							thread.interrupt();
 					}
-					logService.removeJobLogger(jobToken);
+					logService.removeLogger(jobToken);
 					jobActions.remove(jobToken);
 					
 					if (sequentialKey != null)
 						sequentialKeys.remove(sequentialKey);
+
+					jobTerminalService.terminateShells(buildId);
 				}
 			}
 		});
@@ -760,7 +764,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 	private void markBuildError(Build build, String errorMessage) {
 		build.setStatus(Build.Status.FAILED);
-		logService.newLogger(build).error(errorMessage);
+		logService.newLogger(build.getLoggingSupport()).error(errorMessage);
 		build.setFinishDate(new Date());
 		buildService.update(build);
 		listenerRegistry.post(new BuildFinished(build));
@@ -829,10 +833,10 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 							}
 						}
 					}
-				} catch (Throwable e) {
+				} catch (Throwable t) {
 					String message = String.format("Error checking job triggers (project: %s, commit: %s)",
 							event.getProject().getPath(), commitId.name());
-					logger.error(message, e);
+					logger.error(message, t);
 				} finally {
 					JobAuthorizationContext.pop();
 				}
@@ -865,7 +869,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 				build.setStatus(Build.Status.WAITING);
 				build.setSubmitSequence(build.getSubmitSequence()+1);
-				build.setJobToken(UUID.randomUUID().toString());
+				build.setToken(UUID.randomUUID().toString());
 				build.setFinishDate(null);
 				build.setPendingDate(null);
 				build.setRetryDate(null);
@@ -886,8 +890,8 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			}
 
 			var systemUser = userService.getSystem();
-			for (BuildDependence dependence : build.getDependencies()) {
-				Build dependency = dependence.getDependency();			
+			for (var dependence : build.getDependencies()) {
+				var dependency = dependence.getDependency();			
 				if (dependence.isRequireSuccessful() && !dependency.isSuccessful())
 					resubmit(systemUser, dependency, "Resubmitted by dependent build");
 			}
@@ -899,10 +903,10 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	@Transactional
 	@Override
 	public void resume(Build build) {
-		Long buildId = build.getId();
-		JobContext jobContext = getJobContext(buildId);
+		var buildId = build.getId();
+		var jobContext = getJobContext(buildId);
 		if (jobContext != null) {
-			String jobServer = jobServers.get(jobContext.getJobToken());
+			var jobServer = jobServers.get(jobContext.getJobToken());
 			if (jobServer != null) {
 				clusterService.runOnServer(jobServer, new ClusterTask<Void>() {
 
@@ -910,9 +914,9 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 					@Override
 					public Void call() {
-						JobContext jobContext = getJobContext(buildId);
+						var jobContext = getJobContext(buildId);
 						if (jobContext != null) {
-							JobRunnable jobRunnable = jobRunnables.get(jobContext.getJobToken());
+							var jobRunnable = jobRunnables.get(jobContext.getJobToken());
 							if (jobRunnable != null)
 								jobRunnable.resume(jobContext);
 						}
@@ -928,17 +932,17 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 	@Sessional
 	@Override
-	public WebShell openShell(Build build, Terminal terminal) {
-		JobContext jobContext = getJobContext(build.getId());
+	public JobShell openShell(Build build, JobTerminal terminal) {
+		var jobContext = getJobContext(build.getId());
 		if (jobContext != null) {
-			String jobToken = jobContext.getJobToken();
-			String shellServer = jobServers.get(jobToken);
+			var jobToken = jobContext.getJobToken();
+			var shellServer = jobServers.get(jobToken);
 			if (shellServer != null) {
 				clusterService.runOnServer(shellServer, () -> {
-					JobContext innerJobContext = getJobContext(jobToken, true);
-					JobRunnable jobRunnable = jobRunnables.get(innerJobContext.getJobToken());
+					var innerJobContext = getJobContext(jobToken, true);
+					var jobRunnable = jobRunnables.get(innerJobContext.getJobToken());
 					if (jobRunnable != null) {
-						Shell shell = jobRunnable.openShell(innerJobContext, terminal);
+						var shell = jobRunnable.openShell(innerJobContext, terminal);
 						jobShells.put(terminal.getSessionId(), shell);
 					} else {
 						throw new ExplicitException("Job shell not ready");
@@ -946,18 +950,18 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 					return null;
 				});
 
-				return new WebShell(build.getId(), terminal.getSessionId()) {
+				return new JobShell(build.getId(), terminal.getSessionId()) {
 
 					private static final long serialVersionUID = 1L;
 
 					@Override
-					public void sendInput(String input) {
-						clusterService.submitToServer(shellServer, () -> {
+					public void writeToStdin(String data) {
+						clusterService.runOnServer(shellServer, () -> {
 							try {
-								Shell shell = jobShells.get(terminal.getSessionId());
+								var shell = jobShells.get(terminal.getSessionId());
 								if (shell != null)
-									shell.sendInput(input);
-							} catch (Exception e) {
+									shell.writeToStdin(data);
+							} catch (Throwable e) {
 								logger.error("Error sending shell input", e);
 							}
 							return null;
@@ -968,10 +972,10 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 					public void resize(int rows, int cols) {
 						clusterService.submitToServer(shellServer, () -> {
 							try {
-								Shell shell = jobShells.get(terminal.getSessionId());
+								var shell = jobShells.get(terminal.getSessionId());
 								if (shell != null)
 									shell.resize(rows, cols);
-							} catch (Exception e) {
+							} catch (Throwable e) {
 								logger.error("Error resizing shell", e);
 							}
 							return null;
@@ -979,13 +983,13 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 					}
 
 					@Override
-					public void exit() {
+					public void terminate() {
 						clusterService.submitToServer(shellServer, () -> {
 							try {
-								Shell shell = jobShells.remove(terminal.getSessionId());
+								var shell = jobShells.remove(terminal.getSessionId());
 								if (shell != null)
-									shell.exit();
-							} catch (Exception e) {
+									shell.terminate();
+							} catch (Throwable e) {
 								logger.error("Error exiting shell", e);
 							}
 							return null;
@@ -1008,9 +1012,9 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 	@Override
 	public JobContext getJobContext(Long buildId) {
-		Map<String, JobContext> result = clusterService.runOnAllServers(() -> {
+		var result = clusterService.runOnAllServers(() -> {
 			for (Map.Entry<String, JobContext> entry : jobContexts.entrySet()) {
-				JobContext jobContext = entry.getValue();
+				var jobContext = entry.getValue();
 				if (jobContext.getBuildId().equals(buildId))
 					return jobContext;
 			}
@@ -1022,9 +1026,9 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	@Transactional
 	@Override
 	public void cancel(Build build) {
-		Long projectId = build.getProject().getId();
-		Long buildId = build.getId();
-		Long userId = User.idOf(SecurityUtils.getUser());
+		var projectId = build.getProject().getId();
+		var buildId = build.getId();
+		var userId = User.idOf(SecurityUtils.getUser());
 		projectService.runOnActiveServer(projectId, () -> {
 			var future = jobFutures.get(buildId);
 			if (future != null) {
@@ -1104,7 +1108,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			
 			@Override
 			public void execute() {
-				batchWorkExecutionService.submit(new BatchWorker("job-manager-maintenance") {
+				batchWorkExecutionService.submit(new BatchWorker("job-service-maintenance") {
 
 					@Override
 					public void doWorks(List<Prioritized> works) {
@@ -1213,7 +1217,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		while (!jobFutures.isEmpty() || thread != null) {
 			if (thread == null) {
 				if (!jobFutures.isEmpty())
-					logger.info("Waiting for jobs to finish...");
+					logger.info("Callelling running builds...");
 				for (var execution: jobFutures.values()) {
 					if (!execution.isDone())
 						execution.cancel(true);
@@ -1237,44 +1241,50 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 						var server = entry.getKey();
 						var buildIdsOfServer = entry.getValue();
 						futures.add(clusterService.submitToServer(server, () -> {
-							transactionService.run(() -> {
-								for (var buildId : buildIdsOfServer) {
-									var build = buildService.load(buildId);
-									if (build.getStatus() == Status.WAITING) {
-										if (build.getDependencies().stream().anyMatch(it -> it.isRequireSuccessful()
-												&& it.getDependency().isFinished()
-												&& it.getDependency().getStatus() != Status.SUCCESSFUL)) {
-											markBuildError(build, "Some dependencies are required to be successful but failed");
-										} else if (build.getDependencies().stream().allMatch(it -> it.getDependency().isFinished())) {
-											build.setStatus(Status.PENDING);
-											build.setPendingDate(new Date());
-											listenerRegistry.post(new BuildPending(build));
-										}
-									} else if (build.getStatus() == Status.PENDING) {
-										var future = jobFutures.get(build.getId());
-										if (future == null && thread != null) {
-											try {
-												jobFutures.put(build.getId(), execute(build));
-											} catch (Throwable t) {
-												ExplicitException explicitException = find(t, ExplicitException.class);
-												if (explicitException != null)
-													markBuildError(build, explicitException.getMessage());
-												else
-													markBuildError(build, Throwables.getStackTraceAsString(t));
+							try {
+								while (thread == null)
+									Thread.sleep(1000);	
+								transactionService.run(() -> {
+									for (var buildId : buildIdsOfServer) {
+										var build = buildService.load(buildId);
+										if (build.getStatus() == Status.WAITING) {
+											if (build.getDependencies().stream().anyMatch(it -> it.isRequireSuccessful()
+													&& it.getDependency().isFinished()
+													&& it.getDependency().getStatus() != Status.SUCCESSFUL)) {
+												markBuildError(build, "Some dependencies are required to be successful but failed");
+											} else if (build.getDependencies().stream().allMatch(it -> it.getDependency().isFinished())) {
+												build.setStatus(Status.PENDING);
+												build.setPendingDate(new Date());
+												listenerRegistry.post(new BuildPending(build));
+											}
+										} else if (build.getStatus() == Status.PENDING) {
+											var future = jobFutures.get(build.getId());
+											if (future == null && thread != null) {
+												try {
+													jobFutures.put(build.getId(), execute(build));
+												} catch (Throwable t) {
+													ExplicitException explicitException = find(t, ExplicitException.class);
+													if (explicitException != null)
+														markBuildError(build, explicitException.getMessage());
+													else
+														markBuildError(build, Throwables.getStackTraceAsString(t));
+												}
+											}
+										} else if (build.getStatus() == Status.RUNNING) {
+											if (jobFutures.get(build.getId()) == null) {
+												build.setRunningDate(null);
+												build.setPendingDate(new Date());
+												build.setRetryDate(null);
+												build.getCheckoutPaths().clear();
+												build.setStatus(Status.PENDING);
+												listenerRegistry.post(new BuildPending(build));
 											}
 										}
-									} else if (build.getStatus() == Status.RUNNING) {
-										if (jobFutures.get(build.getId()) == null) {
-											build.setRunningDate(null);
-											build.setPendingDate(new Date());
-											build.setRetryDate(null);
-											build.getCheckoutPaths().clear();
-											build.setStatus(Status.PENDING);
-											listenerRegistry.post(new BuildPending(build));
-										}
 									}
-								}
-							});
+								});
+							} catch (Throwable t) {
+								logger.error("Error checking unfinished builds", t);
+							}
 							return null;
 						}));
 					}
@@ -1297,7 +1307,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 							future.cancel(true);
 						} else if (future.isDone()) {
 							it.remove();
-							var jobLogger = logService.newLogger(build);
+							var jobLogger = logService.newLogger(build.getLoggingSupport());
 							try {
 								if (future.get())
 									build.setStatus(Status.SUCCESSFUL);
@@ -1321,8 +1331,9 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 					}
 				});
 				Thread.sleep(CHECK_INTERVAL);
-			} catch (Throwable e) {
-				logger.error("Error checking unfinished builds", e);
+			} catch (Throwable t) {
+				if (ExceptionUtils.find(t, ServerNotFoundException.class) == null)
+					logger.error("Error checking builds", t);
 			}
 		}
 	}
@@ -1368,25 +1379,6 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	}
 
 	@Override
-	public boolean runJob(String server, ClusterTask<Boolean> runnable) {
-		Future<Boolean> future = null;
-		try {
-			future = clusterService.submitToServer(server, runnable);
-
-			// future.get() here does not respond to thread interruption
-			while (!future.isDone())
-				Thread.sleep(1000);
-			return future.get(); 
-		} catch (InterruptedException e) {
-			if (future != null)
-				future.cancel(true);
-			throw new RuntimeException(e);
-		} catch (ExecutionException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
 	public boolean runJob(JobContext jobContext, JobRunnable runnable) {
 		while (thread == null) {
 			try {
@@ -1401,15 +1393,15 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		jobContexts.put(jobToken, jobContext);
 		jobRunnables.put(jobToken, runnable);
 		try {
-			TaskLogger jobLogger = logService.getJobLogger(jobToken);
+			TaskLogger jobLogger = logService.getLogger(jobToken);
 			if (jobLogger == null) {
 				var activeServer = projectService.getActiveServer(jobContext.getProjectId(), true);
-				jobLogger = new ServerJobLogger(activeServer, jobContext.getJobToken());
-				logService.addJobLogger(jobToken, jobLogger);
+				jobLogger = new ServerLogger(activeServer, jobContext.getJobToken());
+				logService.addLogger(jobToken, jobLogger);
 				try {
 					return runnable.run(jobLogger);
 				} finally {
-					logService.removeJobLogger(jobToken);
+					logService.removeLogger(jobToken);
 				}
 			} else {
 				return runnable.run(jobLogger);
@@ -1429,15 +1421,15 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	}
 
 	@Override
-	public void reportJobWorkspace(JobContext jobContext, String workspacePath) {
+	public void reportJobWorkDir(JobContext jobContext, String workDirPath) {
 		transactionService.run(() -> {
 			Build build = buildService.load(jobContext.getBuildId());
-			build.setWorkspacePath(normalizeFilePath(workspacePath));
+			build.setWorkDirPath(normalizeFilePath(workDirPath));
 			CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
 			entryFacade.traverse((LeafVisitor<Void>) (executable, position) -> {
 				if (executable instanceof CheckoutFacade) {
 					CheckoutFacade checkoutFacade = (CheckoutFacade) executable;
-					var checkoutPath = workspacePath;
+					var checkoutPath = workDirPath;
 					if (checkoutFacade.getCheckoutPath() != null)
 						checkoutPath += "/" + checkoutFacade.getCheckoutPath();
 					build.getCheckoutPaths().add(normalizeFilePath(checkoutPath));

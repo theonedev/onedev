@@ -270,7 +270,7 @@ public class DefaultIssueInfoService extends AbstractEnvironmentService
 			public Void call() {
 				try {
 					event.getIssueIds().forEach(it -> remove(sourceProjectId, it));
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					logger.error("Error removing issue info", e);
 				}
 				return null;

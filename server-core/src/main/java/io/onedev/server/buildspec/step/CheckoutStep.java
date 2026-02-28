@@ -76,9 +76,9 @@ public class CheckoutStep extends Step {
 		this.cloneDepth = cloneDepth;
 	}
 
-	@Editable(order=300, placeholder="Job workspace", description="Optionally specify relative path under "
-			+ "<a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to clone code into. "
-			+ "Leave empty to use job workspace itself")
+	@Editable(order=300, placeholder="Job workdir", description="Optionally specify relative path under "
+			+ "<a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to clone code into. "
+			+ "Leave empty to use job workdir itself")
 	@Interpolative(variableSuggester="suggestVariables")
 	@SubPath
 	public String getCheckoutPath() {

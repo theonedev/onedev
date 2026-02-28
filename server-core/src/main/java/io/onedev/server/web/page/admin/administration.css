@@ -7,29 +7,36 @@
 	width: 50%;
 }
 
-.job-executor>.card-header .toggle {
+.job-executor>.card-header .toggle,
+.workspace-provisioner>.card-header .toggle {
 	vertical-align: bottom;
 }
-.job-executor>.card-header .toggle>.icon {
+.job-executor>.card-header .toggle>.icon,
+.workspace-provisioner>.card-header .toggle>.icon {
 	width: 30px;
 	height: 30px;
 	margin-top: 2px;
 	margin-left: -8px;
 }
 
-.job-executor>.card-header .badge {
+.job-executor>.card-header .badge,
+.workspace-provisioner>.card-header .badge {
 	font-size: 0.9rem;
 }
-.job-executor>.card-body {
+.job-executor>.card-body,
+.workspace-provisioner>.card-body {
 	display: none;
 }
-.job-executor.expanded>.card-header .toggle>.icon {
+.job-executor.expanded>.card-header .toggle>.icon,
+.workspace-provisioner.expanded>.card-header .toggle>.icon {
 	transform: rotate(0deg);
 }
-.job-executor.expanded>.card-body {
+.job-executor.expanded>.card-body,
+.workspace-provisioner.expanded>.card-body {
 	display: block;
 }
-.job-executor>.card-body .bean-viewer .type-description {
+.job-executor>.card-body .bean-viewer .type-description,
+.workspace-provisioner>.card-body .bean-viewer .type-description {
 	display: none;
 }
 

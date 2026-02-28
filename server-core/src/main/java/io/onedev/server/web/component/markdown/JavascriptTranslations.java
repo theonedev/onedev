@@ -32,6 +32,7 @@ public class JavascriptTranslations {
               map.put("pull-request-not-exist-or-access-denied", _T("Pull request not exist or access denied"));
               map.put("build-not-exist-or-access-denied", _T("Build not exist or access denied"));
               map.put("commit-not-exist-or-access-denied", _T("Commit not exist or access denied"));
+              map.put("workspace-not-exist-or-access-denied", _T("Dev session not exist or access denied"));
               map.put("enter-description-here", _T("Enter description here"));
 
               return OneDev.getInstance(ObjectMapper.class).writeValueAsString(map);

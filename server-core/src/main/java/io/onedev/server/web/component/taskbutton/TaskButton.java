@@ -31,7 +31,7 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.buildspec.job.log.JobLogEntry;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;
-import io.onedev.server.job.log.StyleBuilder;
+import io.onedev.server.logging.StyleBuilder;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
 

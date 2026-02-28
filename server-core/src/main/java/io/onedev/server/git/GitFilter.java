@@ -2,6 +2,7 @@ package io.onedev.server.git;
 
 import static io.onedev.server.model.Project.decodeFullRepoNameAsPath;
 import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static io.onedev.server.workspace.WorkspaceService.GIT_PREFIX;
 import static org.apache.commons.lang3.StringUtils.strip;
 
 import java.io.File;
@@ -9,6 +10,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -39,20 +41,23 @@ import org.eclipse.jgit.http.server.GitSmartHttpTools;
 import org.eclipse.jgit.http.server.ServletUtils;
 import org.eclipse.jgit.transport.PacketLineOut;
 import org.glassfish.jersey.client.ClientProperties;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.service.ProjectService;
 import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.git.command.AdvertiseReceiveRefsCommand;
 import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.Workspace;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.security.CodePullAuthorizationSource;
+import io.onedev.server.security.CodePushAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.ProjectService;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.OutputStreamWrapper;
 import io.onedev.server.util.concurrent.WorkExecutionService;
@@ -76,16 +81,20 @@ public class GitFilter implements Filter {
 	
 	private final Set<CodePullAuthorizationSource> codePullAuthorizationSources;
 	
+	private final Set<CodePushAuthorizationSource> codePushAuthorizationSources;
+	
 	@Inject
 	public GitFilter(OneDev oneDev, ProjectService projectService, WorkExecutionService workExecutionService,
                      SessionService sessionService, ClusterService clusterService,
-                     Set<CodePullAuthorizationSource> codePullAuthorizationSources) {
+                     Set<CodePullAuthorizationSource> codePullAuthorizationSources,
+                     Set<CodePushAuthorizationSource> codePushAuthorizationSources) {
 		this.onedev = oneDev;
 		this.projectService = projectService;
 		this.workExecutionService = workExecutionService;
 		this.sessionService = sessionService;
 		this.clusterService = clusterService;
 		this.codePullAuthorizationSources = codePullAuthorizationSources;
+		this.codePushAuthorizationSources = codePushAuthorizationSources;
 	}
 	
 	private String getPathInfo(HttpServletRequest request) {
@@ -118,26 +127,69 @@ public class GitFilter implements Filter {
 		response.setHeader("Pragma", "no-cache");
 		response.setHeader("Cache-Control", "no-cache, max-age=0, must-revalidate");
 	}
-	
+
+	@Nullable
+	private File getWorkspaceGitDir(String projectInfo) {
+		projectInfo = strip(projectInfo, "/");
+		int idx = projectInfo.indexOf(GIT_PREFIX);
+		if (idx < 0)
+			return null;
+		String projectPath = strip(projectInfo.substring(0, idx), "/");
+		String numberStr = projectInfo.substring(idx + GIT_PREFIX.length());
+		numberStr = strip(numberStr, "/");
+		var facade = projectService.findFacadeByPath(projectPath);
+		if (facade == null)
+			throw new EntityNotFoundException("Project not found: " + projectPath);
+		long workspaceNumber = Long.parseLong(numberStr);
+		File gitDir = new File(Workspace.getWorkDir(facade.getId(), workspaceNumber), ".git");
+		if (!gitDir.exists())
+			throw new ExplicitException("Workspace git directory not found");
+		return gitDir;
+	}
+
 	protected void processPack(final HttpServletRequest request, final HttpServletResponse response) 
 			throws IOException, InterruptedException, ExecutionException {
-		String principal = (String) SecurityUtils.getSubject().getPrincipal();
-		boolean clusterAccess = SecurityUtils.isSystem(principal);
-		
 		boolean upload = GitSmartHttpTools.isUploadPack(request);
 		
-		String pathInfo = getPathInfo(request);
-		
+		String pathInfo = getPathInfo(request);	
 		String service = StringUtils.substringAfterLast(pathInfo, "/");
-
 		String projectInfo = StringUtils.substringBeforeLast(pathInfo, "/");
+
+		String principal = (String) SecurityUtils.getSubject().getPrincipal();
+		boolean clusterAccess = SecurityUtils.isSystem(principal);
+
+		File workspaceGitDir = getWorkspaceGitDir(projectInfo);
+		if (workspaceGitDir != null) {
+			if (!clusterAccess)
+				throw new UnauthorizedException("Cluster credential required to access workspace git");
+			if (!upload)
+				throw new ExplicitException("Push to workspace git is not supported");
+
+			doNotCache(response);
+			response.setHeader("Content-Type", "application/x-" + service + "-result");
+
+			InputStream stdin = new FilterInputStream(ServletUtils.getInputStream(request)) {
+				@Override
+				public void close() {
+				}
+			};
+			OutputStream stdout = new OutputStreamWrapper(response.getOutputStream()) {
+				@Override
+				public void close() {
+				}
+			};
+
+			String protocol = request.getHeader("Git-Protocol");
+			CommandUtils.uploadPack(workspaceGitDir, Collections.emptyMap(), protocol, stdin, stdout);
+			return;
+		}
 		var projectPath = decodeFullRepoNameAsPath(strip(projectInfo, "/"));
 		Long projectId = getProjectId(projectPath, clusterAccess, upload);
 		
 		doNotCache(response);
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
 
-		var hookEnvs = HookUtils.getHookEnvs(projectId, principal);
+		var hookEnvs = HookUtils.getReceiveHookEnvs(projectId, principal);
 		
 		InputStream stdin = new FilterInputStream(ServletUtils.getInputStream(request)) {
 
@@ -162,12 +214,10 @@ public class GitFilter implements Filter {
 				Project project = projectService.load(projectId);
 				if (!canAccessProject(request, project))
 					reportProjectNotFoundOrInaccessible(projectPath);
-				if (upload) {
+				if (upload) 
 					checkPullPermission(request, project);
-				} else {
-					if (!SecurityUtils.canWriteCode(project))
-						throw new UnauthorizedException("You do not have permission to push to this project.");
-				}			
+				else 
+					checkPushPermission(request, project);
 			} finally {
 				sessionService.closeSession();
 			}
@@ -226,11 +276,11 @@ public class GitFilter implements Filter {
 						KubernetesHelper.checkStatus(gitResponse);
 						try (InputStream is = gitResponse.readEntity(InputStream.class)) {
 							byte[] buffer = new byte[BUFFER_SIZE];
-					        int length;
-				            while ((length = is.read(buffer)) > 0) {
-			            		stdout.write(buffer, 0, length);
-			            		stdout.flush();
-				            }
+							int length;
+							while ((length = is.read(buffer)) > 0) {
+								stdout.write(buffer, 0, length);
+								stdout.flush();
+							}
 						} finally {
 							stdout.close();
 						}
@@ -250,7 +300,7 @@ public class GitFilter implements Filter {
 				// Run immediately. See above for reason
 				CommandUtils.receivePack(gitDir, hookEnvs, protocol, stdin, stdout);
 			}			
-		}
+		}	
 	}
 	
 	private void writeInitial(HttpServletResponse response, String service) throws IOException {
@@ -277,6 +327,20 @@ public class GitFilter implements Filter {
 		}
 	}
 
+	private void checkPushPermission(HttpServletRequest request, Project project) {
+		if (!SecurityUtils.canWriteCode(project)) {
+			boolean isAuthorized = false;
+			for (CodePushAuthorizationSource source: codePushAuthorizationSources) {
+				if (source.canPushCode(request, project)) {
+					isAuthorized = true;
+					break;
+				}
+			}
+			if (!isAuthorized)
+				throw new UnauthorizedException("You do not have permission to push to this project.");
+		}
+	}
+
 	private boolean canAccessProject(HttpServletRequest request, Project project) {
 		if (!SecurityUtils.canAccessProject(project)) {
 			for (CodePullAuthorizationSource source: codePullAuthorizationSources) {
@@ -290,8 +354,6 @@ public class GitFilter implements Filter {
 	}
 	
 	protected void processRefs(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		boolean clusterAccess = SecurityUtils.isSystem();
-		
 		String service = request.getParameter("service");
 		boolean upload = service.contains("upload");
 		
@@ -299,6 +361,27 @@ public class GitFilter implements Filter {
 		pathInfo = StringUtils.stripStart(pathInfo, "/");
 
 		String projectInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
+
+		boolean clusterAccess = SecurityUtils.isSystem();
+		File workspaceGitDir = getWorkspaceGitDir(projectInfo);
+		if (workspaceGitDir != null) {
+			if (!clusterAccess)
+				throw new UnauthorizedException("Cluster credential required to access workspace git");
+			if (!upload)
+				throw new ExplicitException("Push to workspace git is not supported");
+
+			writeInitial(response, service);
+
+			OutputStream output = new OutputStreamWrapper(response.getOutputStream()) {
+				@Override
+				public void close() throws IOException {
+				}
+			};
+
+			String protocol = request.getHeader("Git-Protocol");
+			new AdvertiseUploadRefsCommand(workspaceGitDir, output).protocol(protocol).run();
+			return;
+		} 
 		var projectPath = decodeFullRepoNameAsPath(strip(projectInfo, "/"));
 		Long projectId = getProjectId(projectPath, clusterAccess, upload);
 				
@@ -312,8 +395,7 @@ public class GitFilter implements Filter {
 					checkPullPermission(request, project);
 					writeInitial(response, service);
 				} else {
-					if (!SecurityUtils.canWriteCode(project))
-						throw new UnauthorizedException("You do not have permission to push to this project.");
+					checkPushPermission(request, project);
 					writeInitial(response, service);
 				}
 			} finally {
@@ -363,7 +445,7 @@ public class GitFilter implements Filter {
 			} finally {
 				client.close();
 			}
-		}
+		}	
 	}
 
 	@Override

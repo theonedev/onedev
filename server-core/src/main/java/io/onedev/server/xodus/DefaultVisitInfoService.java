@@ -57,16 +57,12 @@ public class DefaultVisitInfoService extends AbstractEnvironmentService
 
 	private static final String ISSUE_STORE = "issueVisit";
 	
-	private final ProjectService projectService;
-	
-	private final ClusterService clusterService;
+	@Inject
+	private ProjectService projectService;
 	
 	@Inject
-	public DefaultVisitInfoService(ProjectService projectService, ClusterService clusterService) {
-		this.projectService = projectService;
-		this.clusterService = clusterService;
-	}
-	
+	private ClusterService clusterService;
+		
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(VisitInfoService.class);
 	}
@@ -111,7 +107,7 @@ public class DefaultVisitInfoService extends AbstractEnvironmentService
 					long time = new DateTime().plusSeconds(1).getMillis();
 					writeLong(store, txn, new LongsByteIterable(Lists.newArrayList(userId, issueId)), time);
 				});
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				logger.error("Error writing issue visit timestamp", e);
 			}
 			return null;
@@ -131,7 +127,7 @@ public class DefaultVisitInfoService extends AbstractEnvironmentService
 					long time = new DateTime().plusSeconds(1).getMillis();
 					writeLong(store, txn, new LongsByteIterable(Lists.newArrayList(userId, requestId)), time);
 				});
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				logger.error("Error writing pull request visit timestamp", e);
 			}
 			return null;
@@ -151,7 +147,7 @@ public class DefaultVisitInfoService extends AbstractEnvironmentService
 					long time = new DateTime().plusSeconds(1).getMillis();
 					writeLong(store, txn, new LongsByteIterable(Lists.newArrayList(userId, commentId)), time);
 				});
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				logger.error("Error writing code comment visit timestamp", e);
 			}
 			return null;
@@ -171,7 +167,7 @@ public class DefaultVisitInfoService extends AbstractEnvironmentService
 					long time = new DateTime().plusSeconds(1).getMillis();
 					writeLong(store, txn, new LongsByteIterable(Lists.newArrayList(userId, requestId)), time);
 				});
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				logger.error("Error writing pull request code comments visit timestamp", e);
 			}
 			return null;

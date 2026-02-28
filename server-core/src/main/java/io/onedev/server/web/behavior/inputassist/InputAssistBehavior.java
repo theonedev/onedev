@@ -331,7 +331,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 	}
 
 	protected boolean isSelectOnFocus() {
-		return true;
+		return false;
 	}
 
 }

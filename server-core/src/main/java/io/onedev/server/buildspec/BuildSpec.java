@@ -14,7 +14,6 @@ import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.jspecify.annotations.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
@@ -23,6 +22,7 @@ import javax.validation.Validator;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
+import org.jspecify.annotations.Nullable;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
@@ -2471,6 +2471,123 @@ public class BuildSpec implements Serializable, Validatable {
 							new ScalarNode(Tag.BOOL, "false")));
 				}
 			}
+		});
+	}
+
+	private static String getStepType(MappingNode stepNode) {
+		for (var tuple : stepNode.getValue()) {
+			if (((ScalarNode) tuple.getKeyNode()).getValue().equals("type"))
+				return ((ScalarNode) tuple.getValueNode()).getValue();
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unused")
+	private void migrate47(VersionedYamlDoc doc, Stack<Integer> versions) {
+		migrateSteps(doc, versions, stepsNode -> {
+			Map<String, String> checksumMap = new LinkedHashMap<>();
+			for (Node stepsNodeItem : stepsNode.getValue()) {
+				MappingNode stepNode = (MappingNode) stepsNodeItem;
+				if ("GenerateChecksumStep".equals(getStepType(stepNode))) {
+					String targetFile = null;
+					String files = null;
+					for (var stepTuple : stepNode.getValue()) {
+						var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
+						if (propName.equals("targetFile"))
+							targetFile = ((ScalarNode) stepTuple.getValueNode()).getValue();
+						else if (propName.equals("files"))
+							files = ((ScalarNode) stepTuple.getValueNode()).getValue();
+					}
+					if (targetFile != null && files != null)
+						checksumMap.put(targetFile, files);
+				}
+			}
+
+			for (Node stepsNodeItem : stepsNode.getValue()) {
+				MappingNode stepNode = (MappingNode) stepsNodeItem;
+				if ("SetupCacheStep".equals(getStepType(stepNode))) {
+					String checksumFiles = null;
+					for (var stepTuple : stepNode.getValue()) {
+						var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
+						if (propName.equals("key")) {
+							var keyNode = (ScalarNode) stepTuple.getValueNode();
+							var key = keyNode.getValue();
+							var sb = new StringBuilder();
+							int pos = 0;
+							while (pos < key.length()) {
+								int start = key.indexOf("@file:", pos);
+								if (start == -1) {
+									sb.append(key, pos, key.length());
+									break;
+								}
+								sb.append(key, pos, start);
+								int end = key.indexOf("@", start + 6);
+								if (end == -1) {
+									sb.append(key, start, key.length());
+									break;
+								}
+								String filePath = key.substring(start + 6, end);
+								String files = checksumMap.get(filePath);
+								if (files != null) {
+									if (checksumFiles == null)
+										checksumFiles = files;
+									else
+										checksumFiles += " " + files;
+								} else {
+									sb.append(key, start, end + 1);
+								}
+								pos = end + 1;
+							}
+							keyNode.setValue(sb.toString());
+						}
+					}
+					if (checksumFiles != null) {
+						stepNode.getValue().add(new NodeTuple(
+								new ScalarNode(Tag.STR, "checksumFiles"),
+								new ScalarNode(Tag.STR, checksumFiles)));
+					}
+
+					for (var itStepTuple = stepNode.getValue().iterator(); itStepTuple.hasNext();) {
+						var stepTuple = itStepTuple.next();
+						var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
+						if (propName.equals("loadKeys"))
+							itStepTuple.remove();
+					}
+
+					for (var stepTuple : stepNode.getValue()) {
+						var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
+						if (propName.equals("uploadStrategy")) {
+							var valueNode = (ScalarNode) stepTuple.getValueNode();
+							if ("UPLOAD_IF_NOT_HIT".equals(valueNode.getValue()))
+								valueNode.setValue("UPLOAD_IF_NOT_EXACT_MATCH");
+						}
+					}
+
+					for (var stepTuple : stepNode.getValue()) {
+						var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
+						if (propName.equals("paths")) {
+							SequenceNode pathsNode = (SequenceNode) stepTuple.getValueNode();
+							List<Node> newPathNodes = new ArrayList<>();
+							for (Node pathNode : pathsNode.getValue()) {
+								String pathValue = ((ScalarNode) pathNode).getValue();
+								var cachePathNode = new MappingNode(Tag.MAP, new ArrayList<>(), FlowStyle.BLOCK);
+								cachePathNode.getValue().add(new NodeTuple(
+										new ScalarNode(Tag.STR, "relativeToHomeIfNotAbsolute"),
+										new ScalarNode(Tag.BOOL, "false")));
+								cachePathNode.getValue().add(new NodeTuple(
+										new ScalarNode(Tag.STR, "pathValue"),
+										new ScalarNode(Tag.STR, pathValue)));
+								newPathNodes.add(cachePathNode);
+							}
+							pathsNode.getValue().clear();
+							pathsNode.getValue().addAll(newPathNodes);
+						}
+					}
+				}
+			}
+
+			stepsNode.getValue().removeIf(node ->
+					"GenerateChecksumStep".equals(getStepType((MappingNode) node)));
 		});
 	}
 

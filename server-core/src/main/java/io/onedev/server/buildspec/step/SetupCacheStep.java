@@ -1,14 +1,17 @@
 package io.onedev.server.buildspec.step;
 
-import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.UPLOAD_IF_NOT_HIT;
+import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.UPLOAD_IF_NOT_EXACT_MATCH;
 import static java.util.stream.Collectors.toList;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.SetupCacheFacade;
@@ -23,21 +26,23 @@ import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.util.patternset.PatternSet;
 
-@Editable(order=55, name="Set Up Cache", description = "Set up job cache to speed up job execution. " +
-		"Check <a href='https://docs.onedev.io/tutorials/cicd/job-cache' target='_blank'>this tutorial</a> " +
-		"on how to use job cache")
+@Editable(order=55, name="Set Up Cache", description = """
+		Set up job cache to speed up job execution. \
+		Check <a href='https://docs.onedev.io/tutorials/cicd/job-cache' target='_blank'>this tutorial</a> \
+		on how to use job cache""")
 public class SetupCacheStep extends Step {
 
 	private static final long serialVersionUID = 1L;
 	
 	private String key;
 	
-	private List<String> loadKeys = new ArrayList<>();
+	private String checksumFiles;
 	
-	private List<String> paths;
+	private List<CachePath> paths;
 	
-	private SetupCacheFacade.UploadStrategy uploadStrategy = UPLOAD_IF_NOT_HIT;
+	private SetupCacheFacade.UploadStrategy uploadStrategy = UPLOAD_IF_NOT_EXACT_MATCH;
 	
 	private String changeDetectionExcludes;
 	
@@ -45,12 +50,11 @@ public class SetupCacheStep extends Step {
 	
 	private String uploadAccessTokenSecret;
 
-	@Editable(order=100, name="Cache Key", description = "This key is used to determine if there is a cache hit in " +
-			"project hierarchy (search from current project to root project in order, same for load keys below). " +
-			"A cache is considered hit if its key is exactly the same as the key defined here.<br>" + 
-			"<b>NOTE:</b> In case your project has lock files(package.json, pom.xml, etc.) able to represent cache state, " + 
-			"this key should be defined as &lt;cache name&gt;-@file:checksum.txt@, where checksum.txt is generated " + 
-			"from these lock files with the <b>generate checksum step</b> defined before this step")
+	@Editable(order=100, name="Cache Key", description = """
+			This key will be used to identify the cache in project hierarchy (search from current 
+			project to root project in order), together with checksum (see below). An exact match 
+			means that both key and checksum match, and a partial match means that only key 
+			matches""")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getKey() {
@@ -61,36 +65,39 @@ public class SetupCacheStep extends Step {
 		this.key = key;
 	}
 
-	@Editable(order=200, name="Load Keys", description = "In case cache is not hit via above key, " +
-			"OneDev will loop through load keys defined here in order until a matching cache is found " +
-			"in project hierarchy. A cache is considered matching if its key is prefixed with the load " +
-			"key. If multiple caches matches, the most recent cache will be returned")
+	@Editable(order=175, name="Checksum Files", description = """
+			Optionally specify files to compute checksum from. This is useful when your project 
+			has lock files (package-lock.json, pom.xml, etc.) that represent cache state. When 
+			checksum changes, cache can still be loaded as a partial match, but 
+			will be re-uploaded with the new checksum if upload strategy is set to <i>Upload If Not Exact Match</i>. 
+			Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. 
+			Multiple files should be separated by space, and single file containing space should be quoted. 
+			Non-absolute file is relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>.<br> 
+			<b>NOTE: </b> An empty checksum is assumed if this property is empty.""")
 	@Interpolative(variableSuggester="suggestVariables")
-	public List<String> getLoadKeys() {
-		return loadKeys;
+	public String getChecksumFiles() {
+		return checksumFiles;
 	}
 
-	public void setLoadKeys(List<String> loadKeys) {
-		this.loadKeys = loadKeys;
+	public void setChecksumFiles(String checksumFiles) {
+		this.checksumFiles = checksumFiles;
 	}
-		
-	@Editable(order=300, name="Cache Paths", description = "For docker aware executors, this path is inside container, " +
-			"and accepts both absolute path and relative path (relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>). " +
-			"For shell related executors which runs on host machine directly, only relative path is accepted")
-	@Interpolative(variableSuggester="suggestVariables")
+
+	@Editable(order=300, name="Cache Paths")
+	@Valid
 	@Size(min=1, max=100)
-	public List<String> getPaths() {
+	public List<CachePath> getPaths() {
 		return paths;
 	}
 
-	public void setPaths(List<String> paths) {
+	public void setPaths(List<CachePath> paths) {
 		this.paths = paths;
 	}
 
-	@Editable(order=400, description = "Specify cache upload strategy after build successful. " +
-			"<var>Upload If Not Hit</var> means to upload when cache is not found with " +
-			"cache key (not load keys), and <var>Upload If Changed</var> means to upload if some files " +
-			"in cache path are changed")
+	@Editable(order=400, description = """
+			Specify cache upload strategy after build successful. <i>Upload If Not Exact Match</i> 
+			means to upload when no cache found with matching key and checksum , and 
+			<i>Upload If Changed</i> means to upload if some files in cache path are changed""")
 	@NotNull
 	public SetupCacheFacade.UploadStrategy getUploadStrategy() {
 		return uploadStrategy;
@@ -100,9 +107,10 @@ public class SetupCacheStep extends Step {
 		this.uploadStrategy = uploadStrategy;
 	}
 
-	@Editable(order=425, description = "Optionally specify files relative to cache path to ignore when " +
-			"detect cache changes. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. " +
-			"Multiple files should be separated by space, and single file containing space should be quoted")
+	@Editable(order=425, description = """
+			Optionally specify files relative to cache path to ignore when detect cache changes. 
+			Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. 
+			Multiple files should be separated by space, and single file containing space should be quoted""")
 	@Interpolative(variableSuggester="suggestVariables")
 	@DependsOn(property="uploadStrategy", value="UPLOAD_IF_CHANGED")
 	public String getChangeDetectionExcludes() {
@@ -113,8 +121,9 @@ public class SetupCacheStep extends Step {
 		this.changeDetectionExcludes = changeDetectionExcludes;
 	}
 	
-	@Editable(order=450, name="Upload to Project", placeholder = "Current project", description = "In case cache needs to be uploaded, this property " +
-			"specifies target project for the upload. Leave empty for current project")
+	@Editable(order=450, name="Upload to Project", placeholder = "Current project", description = """
+			In case cache needs to be uploaded, this property specifies target project for the upload. 
+			Leave empty for current project""")
 	@ProjectChoice
 	public String getUploadProjectPath() {
 		return uploadProjectPath;
@@ -129,9 +138,11 @@ public class SetupCacheStep extends Step {
 		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 	
-	@Editable(order=500, description = "Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is an access token with upload cache permission " +
-			"for above project. Note that this property is not required if upload cache to current or child project " +
-			"and build commit is reachable from default branch")
+	@Editable(order=500, description = """
+			Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> 
+			whose value is an access token with upload cache permission for above project. 
+			Note that this property is not required if upload cache to current or child 
+			project and build commit is reachable from default branch""")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	public String getUploadAccessTokenSecret() {
 		return uploadAccessTokenSecret;
@@ -154,8 +165,16 @@ public class SetupCacheStep extends Step {
 			uploadAccessToken = build.getJobAuthorizationContext().getSecretValue(getUploadAccessTokenSecret());
 		else
 			uploadAccessToken = null;
-		return new SetupCacheFacade(getKey(), getLoadKeys(), getPaths(), getUploadStrategy(), 
-				getChangeDetectionExcludes(), getUploadProjectPath(), uploadAccessToken);
+		var pathFacades = getPaths().stream()
+				.map(CachePath::toFacade)
+				.collect(toList());
+		Pair<Set<String>, Set<String>> parsedChecksumFiles = null;
+		if (checksumFiles != null) {
+			var patterns = PatternSet.parse(checksumFiles);
+			parsedChecksumFiles = Pair.of(patterns.getIncludes(), patterns.getExcludes());
+		}
+		return new SetupCacheFacade(getKey(), parsedChecksumFiles, pathFacades, 
+				getUploadStrategy(), getChangeDetectionExcludes(), getUploadProjectPath(), uploadAccessToken);
 	}
 	
 	@Override
@@ -164,4 +183,3 @@ public class SetupCacheStep extends Step {
 	}
 
 }
- 

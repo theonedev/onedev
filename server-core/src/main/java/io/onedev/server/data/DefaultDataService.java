@@ -100,6 +100,7 @@ import io.onedev.server.model.support.administration.BackupSetting;
 import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.model.support.administration.ClusterSetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
+import io.onedev.server.model.support.administration.GlobalWorkspaceSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.GlobalPackSetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
@@ -788,6 +789,9 @@ public class DefaultDataService implements DataService, Serializable {
 		setting = settingService.findSetting(Key.JOB_EXECUTORS);
 		if (setting == null) 
 			settingService.saveJobExecutors(new ArrayList<>());
+		setting = settingService.findSetting(Key.WORKSPACE_PROVISIONERS);
+		if (setting == null) 
+			settingService.saveWorkspaceProvisioners(new ArrayList<>());
 		setting = settingService.findSetting(Key.GROOVY_SCRIPTS);
 		if (setting == null) {
 			settingService.saveGroovyScripts(Lists.newArrayList());
@@ -803,6 +807,10 @@ public class DefaultDataService implements DataService, Serializable {
 		setting = settingService.findSetting(Key.PACK);
 		if (setting == null) {
 			settingService.savePackSetting(new GlobalPackSetting());
+		}
+		setting = settingService.findSetting(Key.WORKSPACE);
+		if (setting == null) {
+			settingService.saveWorkspaceSetting(new GlobalWorkspaceSetting());
 		}
 		setting = settingService.findSetting(Key.PROJECT);
 		if (setting == null) {
@@ -960,7 +968,11 @@ public class DefaultDataService implements DataService, Serializable {
 
 							@Override
 							public Void call() throws Exception {
-								scheduleBackup(backupSetting);
+								try {
+									scheduleBackup(backupSetting);
+								} catch (Throwable t) {
+									logger.error("Error scheduling backup", t);
+								}
 								return null;
 							}
 							

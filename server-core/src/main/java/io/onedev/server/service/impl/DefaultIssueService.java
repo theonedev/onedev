@@ -324,23 +324,23 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 
 	@Sessional
 	@Override
-	public List<Issue> query(Subject subject, ProjectScope projectScope, EntityQuery<Issue> issueQuery, 
+	public List<Issue> query(Subject subject, ProjectScope projectScope, EntityQuery<Issue> query, 
 			boolean loadExtraInfo, int firstResult, int maxResults) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 
-		criteriaQuery.where(buildPredicates(subject, projectScope, issueQuery.getCriteria(), criteriaQuery, builder, root));
-		var criteria = issueQuery.getCriteria();
+		criteriaQuery.where(buildPredicates(subject, projectScope, query.getCriteria(), criteriaQuery, builder, root));
+		var criteria = query.getCriteria();
 		List<javax.persistence.criteria.Order> preferOrders = new ArrayList<>();
 		if (criteria != null)
 			preferOrders.addAll(criteria.getPreferOrders(builder, root));
-		criteriaQuery.orderBy(buildOrders(issueQuery, builder, root, preferOrders));
+		criteriaQuery.orderBy(buildOrders(query, builder, root, preferOrders));
 		
-		Query<Issue> query = getSession().createQuery(criteriaQuery);
-		query.setFirstResult(firstResult);
-		query.setMaxResults(maxResults);
-		List<Issue> issues = query.getResultList();
+		Query<Issue> hibernateQuery = getSession().createQuery(criteriaQuery);
+		hibernateQuery.setFirstResult(firstResult);
+		hibernateQuery.setMaxResults(maxResults);
+		List<Issue> issues = hibernateQuery.getResultList();
 		if (loadExtraInfo && !issues.isEmpty()) {
 			fieldService.populateFields(issues);
 			linkService.populateLinks(issues);
@@ -358,12 +358,12 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 	
 	@Sessional
 	@Override
-	public int count(Subject subject, ProjectScope projectScope, Criteria<Issue> issueCriteria) {
+	public int count(Subject subject, ProjectScope projectScope, Criteria<Issue> criteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 
-		criteriaQuery.where(buildPredicates(subject, projectScope, issueCriteria, criteriaQuery, builder, root));
+		criteriaQuery.where(buildPredicates(subject, projectScope, criteria, criteriaQuery, builder, root));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
@@ -371,12 +371,12 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 
 	@Sessional
 	@Override
-	public IssueTimes queryTimes(Subject subject, ProjectScope projectScope, Criteria<Issue> issueCriteria) {
+	public IssueTimes queryTimes(Subject subject, ProjectScope projectScope, Criteria<Issue> criteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<IssueTimes> criteriaQuery = builder.createQuery(IssueTimes.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 
-		criteriaQuery.where(buildPredicates(subject, projectScope, issueCriteria, criteriaQuery, builder, root));
+		criteriaQuery.where(buildPredicates(subject, projectScope, criteria, criteriaQuery, builder, root));
 		
 		criteriaQuery.multiselect(
 				builder.sum(root.get(PROP_OWN_ESTIMATED_TIME)), 
@@ -385,7 +385,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 	}
 	
 	@Override
-	public Predicate[] buildPredicates(Subject subject, ProjectScope projectScope, Criteria<Issue> issueCriteria,
+	public Predicate[] buildPredicates(Subject subject, ProjectScope projectScope, Criteria<Issue> criteria,
 									   CriteriaQuery<?> query, CriteriaBuilder builder, From<Issue, Issue> issue) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (projectScope != null) {
@@ -424,8 +424,8 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 				predicates.add(builder.disjunction());
 			}
 		}
-		if (issueCriteria != null)
-			predicates.add(issueCriteria.getPredicate(projectScope, query, issue, builder));
+		if (criteria != null)
+			predicates.add(criteria.getPredicate(projectScope, query, issue, builder));
 
 		return predicates.toArray(new Predicate[predicates.size()]);
 	}
@@ -936,8 +936,7 @@ public class DefaultIssueService extends BaseEntityService<Issue> implements Iss
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Issue) {
 			var cacheKey = getCacheKey((Issue) event.getEntity());
-			transactionService.runAfterCommit(() -> idCache.remove(cacheKey));
-			
+			transactionService.runAfterCommit(() -> idCache.remove(cacheKey));			
 		} else if (event.getEntity() instanceof Project) {
 			Project project = (Project) event.getEntity();
 	    	if (project.getForkRoot().equals(project))

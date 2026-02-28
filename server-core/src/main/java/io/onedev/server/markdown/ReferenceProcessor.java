@@ -12,12 +12,14 @@ import io.onedev.server.OneDev;
 import io.onedev.server.service.BuildService;
 import io.onedev.server.service.UrlService;
 import io.onedev.server.entityreference.BuildReference;
+import io.onedev.server.entityreference.WorkspaceReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.entityreference.PullRequestReference;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
+import io.onedev.server.web.page.project.workspaces.detail.dashboard.WorkspaceDashboardPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
@@ -56,6 +58,14 @@ public class ReferenceProcessor implements HtmlProcessor {
 				else
 					url = OneDev.getInstance(UrlService.class).urlForPullRequest(reference.getProject(), reference.getNumber(), true);
 				return String.format("<a href='%s' class='pull-request reference' data-reference='%s'>%s</a>",
+						url, reference, text);
+			} else if (reference instanceof WorkspaceReference) {
+				String url;
+				if (RequestCycle.get() != null)
+					url = RequestCycle.get().urlFor(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(reference.getProject(), reference.getNumber())).toString();
+				else
+					url = OneDev.getInstance(UrlService.class).urlForWorkspace(reference.getProject(), reference.getNumber(), true);
+				return String.format("<a href='%s' class='workspace reference' data-reference='%s'>%s</a>",
 						url, reference, text);
 			} else {
 				return text;

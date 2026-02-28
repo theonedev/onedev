@@ -1,0 +1,15 @@
+.workspace-status-pending {
+	color: var(--warning) !important;
+}
+.workspace-status-active {
+	color: var(--success) !important;
+}
+.workspace-status-error {
+	color: var(--danger) !important;
+}
+.workspace-status-none {
+	color: #CCC !important;
+}
+.dark-mode .workspace-status-none {
+	color: var(--dark-mode-gray) !important;
+}

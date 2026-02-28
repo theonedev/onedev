@@ -119,6 +119,7 @@ import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.revision.RevisionPicker;
+import io.onedev.server.web.component.workspace.speclist.WorkspaceSpecListPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.navigator.BlobNavigator;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -192,7 +193,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 	@Inject
 	private SettingService settingService;
-	
+
 	@Inject
 	private PullRequestService pullRequestService;
 
@@ -271,8 +272,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		super.onInitialize();
 
 		newRevisionPicker(null);
-		newCommitStatus(null);
-		newBlobNavigator(null);
+		newCommitStatusLink(null);
+		newWorkspacesLink(null);
+		newBlobNavigator(null);		
 		newBlobOperations(null);
 		
 		add(revisionIndexing = new WebMarkupContainer("revisionIndexing") {
@@ -901,10 +903,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		replaceState(target, url.toString(), state);
 	}
 	
-	private void newCommitStatus(@Nullable AjaxRequestTarget target) {
-		Component commitStatus;
+	private void newCommitStatusLink(@Nullable AjaxRequestTarget target) {
+		Component commitStatusLink;
 		if (resolvedRevision != null) {
-			commitStatus = new CommitStatusLink("buildStatus", resolvedRevision, getRefName()) {
+			commitStatusLink = new CommitStatusLink("buildStatus", resolvedRevision, getRefName()) {
 
 				@Override
 				protected Project getProject() {
@@ -918,19 +920,55 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				
 			};
 		} else {
-			commitStatus = new WebMarkupContainer("buildStatus").add(AttributeAppender.append("class", "d-none"));
+			commitStatusLink = new WebMarkupContainer("buildStatus").add(AttributeAppender.append("class", "d-none"));
 		}
 		
-		commitStatus.setOutputMarkupPlaceholderTag(true);
+		commitStatusLink.setOutputMarkupPlaceholderTag(true);
 		
 		if (target != null) {
-			replace(commitStatus);
-			target.add(commitStatus);
+			replace(commitStatusLink);
+			target.add(commitStatusLink);
 		} else {
-			add(commitStatus);
+			add(commitStatusLink);
 		}
 	}
 	
+	private void newWorkspacesLink(@Nullable AjaxRequestTarget target) {
+		var workspacesLink = new DropdownLink("workspaces") {
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				var currentRefName = getRefName();
+				var currentBranch = currentRefName != null ? GitUtils.ref2branch(currentRefName) : "main";
+				return new WorkspaceSpecListPanel(id, currentBranch) {
+
+					@Override
+					protected Project getProject() {
+						return ProjectBlobPage.this.getProject();
+					}
+
+				};
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(isOnBranch() && SecurityUtils.canWriteCode(getProject())
+						&& !getProject().getHierarchyWorkspaceSpecs().isEmpty());
+			}
+
+		};
+
+		workspacesLink.setOutputMarkupPlaceholderTag(true);
+
+		if (target != null) {
+			replace(workspacesLink);
+			target.add(workspacesLink);
+		} else {
+			add(workspacesLink);
+		}
+	}
+
 	private void newBuildSupportNote(@Nullable AjaxRequestTarget target) {
 		Component buildSupportNote = new WebMarkupContainer("buildSupportNote") {
 
@@ -1065,7 +1103,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		resolvedRevision = getProject().getRevCommit(state.blobIdent.revision, true).copy();
 		
 		newRevisionPicker(target);
-		newCommitStatus(target);
+		newCommitStatusLink(target);
 		target.add(revisionIndexing);
 		newBlobNavigator(target);
 		newBlobOperations(target);
@@ -1260,6 +1298,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			state.requestId = null;
 			newSearchResult(target, null);
 			onResolvedRevisionChange(target);
+			newWorkspacesLink(target);
 			resizeWindow(target);
 		} else if (!Objects.equal(state.blobIdent.path, blobIdent.path)) {
 			state.blobIdent.path = blobIdent.path;

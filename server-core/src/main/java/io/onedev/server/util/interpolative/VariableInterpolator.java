@@ -4,7 +4,7 @@ import static io.onedev.k8shelper.KubernetesHelper.ATTRIBUTES;
 import static io.onedev.k8shelper.KubernetesHelper.PAUSE;
 import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_PREFIX;
 import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_SUFFIX;
-import static io.onedev.k8shelper.KubernetesHelper.WORKSPACE;
+import static io.onedev.k8shelper.KubernetesHelper.WORKDIR;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.util.ArrayList;
@@ -114,7 +114,7 @@ public class VariableInterpolator {
 				else
 					return "";
 			} else if (t.startsWith(PREFIX_FILE)) {
-				return PLACEHOLDER_PREFIX + WORKSPACE + "/" + t.substring(PREFIX_FILE.length()) + PLACEHOLDER_SUFFIX;
+				return PLACEHOLDER_PREFIX + WORKDIR + "/" + t.substring(PREFIX_FILE.length()) + PLACEHOLDER_SUFFIX;
 			} else if (t.startsWith(PREFIX_ATTRIBUTE)) {
 				return PLACEHOLDER_PREFIX + ATTRIBUTES + "/" + t.substring(PREFIX_ATTRIBUTE.length()) + PLACEHOLDER_SUFFIX;
 			} else if (t.equals(PAUSE)) {

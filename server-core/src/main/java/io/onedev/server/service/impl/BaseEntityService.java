@@ -41,8 +41,8 @@ public abstract class BaseEntityService<T extends AbstractEntity> implements Ent
 	}
 
 	@Override
-	public void delete(T iteration) {
-		dao.remove(iteration);
+	public void delete(T entity) {
+		dao.remove(entity);
 	}
 
 	@Override

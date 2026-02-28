@@ -53,8 +53,8 @@ public class PublishSiteStep extends ServerSideStep {
 	}
 	
 	@Editable(order=50, name="From Directory", placeholder="Job workspace", description="Optionally specify path "
-			+ "relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to publish "
-			+ "artifacts from. Leave empty to use job workspace itself")
+			+ "relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to publish "
+			+ "artifacts from. Leave empty to use job workdir itself")
 	@Interpolative(variableSuggester="suggestVariables")
 	@SubPath
 	@Override

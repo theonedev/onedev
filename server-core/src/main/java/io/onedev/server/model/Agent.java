@@ -39,8 +39,8 @@ import io.onedev.agent.AgentData;
 import io.onedev.k8shelper.OsInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.service.AgentService;
 import io.onedev.server.search.entity.SortField;
+import io.onedev.server.service.AgentService;
 
 @Entity
 @Table(indexes={
@@ -108,7 +108,7 @@ public class Agent extends AbstractEntity {
 	
 	@OneToMany(mappedBy="agent")
 	private Collection<Build> builds = new ArrayList<>();
-	
+		
 	@Column(nullable=false)
 	private String name;
 	

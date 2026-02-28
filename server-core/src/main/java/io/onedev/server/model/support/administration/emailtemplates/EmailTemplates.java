@@ -49,6 +49,8 @@ public class EmailTemplates implements Serializable {
 
 	public static final String PROP_PACK_NOTIFICATION = "packNotification";
 
+	public static final String PROP_DEV_SESSION_NOTIFICATION = "workspaceNotification";
+
 	public static final String PROP_COMMIT_NOTIFICATION = "commitNotification";
 	
 	public static final String PROP_ISSUE_NOTIFICATION_UNSUBSCRIBED = "issueNotificationUnsubscribed";
@@ -115,6 +117,8 @@ public class EmailTemplates implements Serializable {
 	private String buildNotification = DEFAULT_SIMPLE_NOTIFICATION;
 	
 	private String packNotification = DEFAULT_SIMPLE_NOTIFICATION;
+
+	private String workspaceNotification = DEFAULT_SIMPLE_NOTIFICATION;
 
 	private String commitNotification = DEFAULT_SIMPLE_NOTIFICATION;
 	
@@ -230,6 +234,18 @@ public class EmailTemplates implements Serializable {
 
 	public void setPackNotification(String packNotification) {
 		this.packNotification = packNotification;
+	}
+
+	@Editable(order=565)
+	@Code(language=Code.GROOVY_TEMPLATE)
+	@OmitName
+	@NotEmpty
+	public String getWorkspaceNotification() {
+		return workspaceNotification;
+	}
+
+	public void setWorkspaceNotification(String workspaceNotification) {
+		this.workspaceNotification = workspaceNotification;
 	}
 
 	@Editable(order=570)

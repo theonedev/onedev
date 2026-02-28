@@ -1,38 +1,10 @@
 package io.onedev.server.plugin.executor.kubernetes;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.TarUtils;
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.k8shelper.K8sJobData;
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.service.JobCacheService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.job.JobContext;
-import io.onedev.server.job.JobService;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.SessionService;
-import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.IOUtils;
-import org.apache.commons.lang.SerializationUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.glassfish.jersey.client.ClientProperties;
+import static io.onedev.k8shelper.KubernetesHelper.readInt;
+import static io.onedev.k8shelper.KubernetesHelper.readString;
+import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static org.apache.commons.io.IOUtils.copy;
 
-import org.jspecify.annotations.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,10 +13,48 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.onedev.k8shelper.KubernetesHelper.readInt;
-import static io.onedev.k8shelper.KubernetesHelper.readString;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
-import static org.apache.commons.io.IOUtils.copy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+
+import org.apache.commons.lang.SerializationUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.glassfish.jersey.client.ClientProperties;
+import org.jspecify.annotations.Nullable;
+
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TarUtils;
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.CacheAvailability;
+import io.onedev.k8shelper.K8sJobData;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.job.JobContext;
+import io.onedev.server.job.JobService;
+import io.onedev.server.model.Project;
+import io.onedev.server.persistence.SessionService;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.RunCacheService;
+import io.onedev.server.util.IOUtils;
 
 @Api(internal=true)
 @Path("/k8s")
@@ -52,38 +62,32 @@ import static org.apache.commons.io.IOUtils.copy;
 @Singleton
 public class KubernetesResource {
 
-	private final JobService jobService;
+	@Inject
+	private JobService jobService;
 	
-	private final JobCacheService jobCacheService;
+	@Inject
+	private RunCacheService cacheService;
 	
-	private final SessionService sessionService;
+	@Inject
+	private SessionService sessionService;
 	
-	private final ProjectService projectService;
+	@Inject
+	private ProjectService projectService;
 	
-	private final ClusterService clusterService;
+	@Inject
+	private ClusterService clusterService;
 	
     @Context
     private HttpServletRequest request;
-    
-    @Inject
-    public KubernetesResource(JobService jobService, JobCacheService jobCacheService,
-                              SessionService sessionService, ProjectService projectService,
-                              ClusterService clusterService) {
-    	this.jobService = jobService;
-		this.jobCacheService = jobCacheService;
-    	this.sessionService = sessionService;
-		this.projectService = projectService;
-		this.clusterService = clusterService;
-	}
-    
+        
 	@Path("/job-data")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
     @GET
     public byte[] getJobData(@QueryParam("jobToken") String jobToken, 
-							 @QueryParam("jobWorkspace") @Nullable String jobWorkspace) {
+							 @QueryParam("jobWorkDir") @Nullable String jobWorkDir) {
 		JobContext jobContext = jobService.getJobContext(jobToken, true);
-		if (StringUtils.isNotBlank(jobWorkspace))
-			jobService.reportJobWorkspace(jobContext, jobWorkspace);	
+		if (StringUtils.isNotBlank(jobWorkDir))
+			jobService.reportJobWorkDir(jobContext, jobWorkDir);	
 		K8sJobData k8sJobData = new K8sJobData(
 				jobContext.getJobExecutor().getName(), 
 				jobContext.getRefName(),
@@ -166,25 +170,18 @@ public class KubernetesResource {
 	@GET
 	public StreamingOutput downloadCache(
 			@QueryParam("jobToken") String jobToken,
-			@QueryParam("cacheKey") @Nullable String cacheKey, 
-			@QueryParam("loadKeys") @Nullable String joinedLoadKeys, 
-			@QueryParam("cachePaths") String joinedCachePaths) {
+			@QueryParam("key") String key, 
+			@QueryParam("checksum") @Nullable String checksum, 
+			@QueryParam("cachePathsString") String cachePathsString) {
 		return os -> {
 			sessionService.closeSession();
 			try {
 				var jobContext = jobService.getJobContext(jobToken, true);
-				Pair<Long, Long> cacheInfo;
-				if (cacheKey != null) {
-					cacheInfo = jobCacheService.getCacheInfoForDownload(jobContext.getProjectId(), cacheKey);
-				} else {
-					var loadKeys = Splitter.on('\n').splitToList(joinedLoadKeys);
-					cacheInfo = jobCacheService.getCacheInfoForDownload(jobContext.getProjectId(), loadKeys);
-				}
-				if (cacheInfo != null) {
-					var cachePaths = Splitter.on('\n').splitToList(joinedCachePaths); 					
-					var activeServer = projectService.getActiveServer(cacheInfo.getLeft(), true);
+				var cacheQueryResult = cacheService.queryCache(jobContext.getProjectId(), key, checksum);
+				if (cacheQueryResult != null) {
+					var activeServer = projectService.getActiveServer(cacheQueryResult.getProjectId(), true);
 					if (activeServer.equals(clusterService.getLocalServerAddress())) {
-						jobCacheService.downloadCache(cacheInfo.getLeft(), cacheInfo.getRight(), cachePaths, os);
+						cacheService.downloadCache(cacheQueryResult, cachePathsString, os);
 					} else {
 						Client client = ClientBuilder.newClient();
 						client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
@@ -192,9 +189,10 @@ public class KubernetesResource {
 							String serverUrl = clusterService.getServerUrl(activeServer);
 							var target = client.target(serverUrl)
 									.path("~api/cluster/cache")
-									.queryParam("projectId", cacheInfo.getLeft())
-									.queryParam("cacheId", cacheInfo.getRight())
-									.queryParam("cachePaths", Joiner.on('\n').join(cachePaths));
+									.queryParam("projectId", cacheQueryResult.getProjectId())
+									.queryParam("cacheId", cacheQueryResult.getCacheId())
+									.queryParam("exactMatch", cacheQueryResult.isExactMatch())
+									.queryParam("cachePathsString", cachePathsString);
 							Invocation.Builder builder = target.request();
 							builder.header(HttpHeaders.AUTHORIZATION,
 									KubernetesHelper.BEARER + " " + clusterService.getCredential());
@@ -211,7 +209,7 @@ public class KubernetesResource {
 						}
 					}						
 				} else {
-					os.write(0);					
+					os.write(CacheAvailability.NOT_FOUND.ordinal());					
 				}
 			} finally {
 				sessionService.openSession();
@@ -247,17 +245,17 @@ public class KubernetesResource {
 	public Response uploadCache(
 			@QueryParam("jobToken") String jobToken,
 			@QueryParam("projectPath") @Nullable String projectPath,
-			@QueryParam("cacheKey") String cacheKey, 
-			@QueryParam("cachePaths") String joinedCachePaths, 
+			@QueryParam("key") String key, 
+			@QueryParam("checksum") @Nullable String checksum,
+			@QueryParam("cachePathsString") String cachePathsString, 
 			InputStream is) {
 		var projectId = checkUploadCache(jobToken, projectPath);
 		sessionService.closeSession();
 		try {
-			Long cacheId = jobCacheService.getCacheIdForUpload(projectId, cacheKey);
-			var cachePaths = Splitter.on('\n').splitToList(joinedCachePaths);
+			Long cacheId = cacheService.createCache(projectId, key, checksum);
 			var activeServer = projectService.getActiveServer(projectId, true);
 			if (activeServer.equals(clusterService.getLocalServerAddress())) {
-				jobCacheService.uploadCache(projectId, cacheId, cachePaths, is);
+				cacheService.uploadCache(projectId, cacheId, cachePathsString, is);
 			} else {
 				Client client = ClientBuilder.newClient();
 				client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
@@ -267,7 +265,7 @@ public class KubernetesResource {
 							.path("~api/cluster/cache")
 							.queryParam("projectId", projectId)
 							.queryParam("cacheId", cacheId)
-							.queryParam("cachePaths", joinedCachePaths);
+							.queryParam("cachePathsString", cachePathsString);
 					Invocation.Builder builder = target.request();
 					builder.header(HttpHeaders.AUTHORIZATION,
 							KubernetesHelper.BEARER + " " + clusterService.getCredential());

@@ -15,9 +15,9 @@ import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import io.onedev.server.buildspec.step.CheckoutStep;
 import io.onedev.server.buildspec.step.CommandStep;
-import io.onedev.server.buildspec.step.GenerateChecksumStep;
 import io.onedev.server.buildspec.step.SetBuildVersionStep;
 import io.onedev.server.buildspec.step.SetupCacheStep;
+import io.onedev.server.buildspec.step.CachePath;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
@@ -37,18 +37,13 @@ public class MavenJobSuggestion implements JobSuggestion {
 			CheckoutStep checkout = new CheckoutStep();
 			checkout.setName("checkout code");
 			job.getSteps().add(checkout);
-			
-			var generateChecksum = new GenerateChecksumStep();
-			generateChecksum.setName("generate pom checksum");
-			generateChecksum.setFiles("**/pom.xml");
-			generateChecksum.setTargetFile("checksum");
-			job.getSteps().add(generateChecksum);
 
 			var setupCache = new SetupCacheStep();
 			setupCache.setName("set up maven cache");
-			setupCache.setKey("maven_repository_@file:checksum@");
-			setupCache.setPaths(Lists.newArrayList("/root/.m2/repository"));
-			setupCache.getLoadKeys().add("maven_repository");
+			setupCache.setKey("maven_repository");
+
+			setupCache.setChecksumFiles("**/pom.xml");
+			setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "/root/.m2/repository")));
 			job.getSteps().add(setupCache);
 			
 			CommandStep runTests = new CommandStep();

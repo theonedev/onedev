@@ -1,10 +1,9 @@
 package io.onedev.server.job;
 
+import java.io.Serializable;
+
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.terminal.Shell;
-import io.onedev.server.terminal.Terminal;
-
-import java.io.Serializable;
 
 public interface JobRunnable extends Serializable {
 	
@@ -12,6 +11,6 @@ public interface JobRunnable extends Serializable {
 
 	void resume(JobContext jobContext);
 
-	Shell openShell(JobContext jobContext, Terminal terminal);
+	Shell openShell(JobContext jobContext, JobTerminal terminal);
 	
 }

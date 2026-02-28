@@ -1,5 +1,12 @@
 package io.onedev.server.plugin.executor.remoteshell;
 
+import static io.onedev.agent.WebsocketUtils.call;
+
+import java.util.UUID;
+import java.util.concurrent.TimeoutException;
+
+import org.eclipse.jetty.websocket.api.Session;
+
 import io.onedev.agent.Message;
 import io.onedev.agent.MessageTypes;
 import io.onedev.agent.job.ShellJobData;
@@ -10,22 +17,20 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Numeric;
 import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.service.AgentService;
-import io.onedev.server.job.*;
-import io.onedev.server.job.log.LogService;
-import io.onedev.server.job.log.ServerJobLogger;
+import io.onedev.server.job.AgentShell;
+import io.onedev.server.job.JobContext;
+import io.onedev.server.job.JobRunnable;
+import io.onedev.server.job.JobService;
+import io.onedev.server.job.JobTerminal;
+import io.onedev.server.logging.LogService;
+import io.onedev.server.logging.ServerLogger;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.plugin.executor.servershell.ServerShellExecutor;
 import io.onedev.server.search.entity.agent.AgentQuery;
-import io.onedev.server.terminal.AgentShell;
+import io.onedev.server.service.AgentService;
+import io.onedev.server.service.ResourceService;
+import io.onedev.server.service.support.AgentRunnable;
 import io.onedev.server.terminal.Shell;
-import io.onedev.server.terminal.Terminal;
-import org.eclipse.jetty.websocket.api.Session;
-
-import java.util.UUID;
-import java.util.concurrent.TimeoutException;
-
-import static io.onedev.agent.WebsocketUtils.call;
 
 @Editable(order=500, name="Remote Shell Executor", description=""
 		+ "This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br>"
@@ -72,7 +77,7 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 	
 	@Override
 	public boolean execute(JobContext jobContext, TaskLogger jobLogger) {
-		AgentRunnable runnable = (agentId) -> getJobService().runJob(jobContext, new JobRunnable() {
+		AgentRunnable<Boolean> runnable = (agentId) -> getJobService().runJob(jobContext, new JobRunnable() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -116,7 +121,7 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 			}
 
 			@Override
-			public Shell openShell(JobContext jobContext, Terminal terminal) {
+			public Shell openShell(JobContext jobContext, JobTerminal terminal) {
 				if (agentSession != null)
 					return new AgentShell(terminal, agentSession, jobContext.getJobToken());
 				else
@@ -126,8 +131,8 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 		});
 
 		jobLogger.log("Pending resource allocation...");
-		return getResourceAllocator().runAgentJob(AgentQuery.parse(agentQuery, true), getName(), 
-				getConcurrencyNumber(), 1, runnable);
+		return getResourceService().runAgentJob(AgentQuery.parse(agentQuery, true), 
+				getName(), getConcurrencyNumber(), 1, runnable);
 	}
 	
 	private LogService getLogService() {
@@ -142,8 +147,8 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 		return OneDev.getInstance(JobService.class);
 	}
 	
-	private ResourceAllocator getResourceAllocator() {
-		return OneDev.getInstance(ResourceAllocator.class);
+	private ResourceService getResourceService() {
+		return OneDev.getInstance(ResourceService.class);
 	}
 
 	private AgentService getAgentService() {
@@ -157,12 +162,12 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
 		String jobToken = UUID.randomUUID().toString();
-		getLogService().addJobLogger(jobToken, jobLogger);
+		getLogService().addLogger(jobToken, jobLogger);
 		try {
 			String testServer = getClusterService().getLocalServerAddress();
 			jobLogger.log("Pending resource allocation...");
-			AgentRunnable runnable = agentId -> {
-				TaskLogger currentJobLogger = new ServerJobLogger(testServer, jobToken);
+			AgentRunnable<Boolean> runnable = agentId -> {
+				TaskLogger currentJobLogger = new ServerLogger(testServer, jobToken);
 				var agentData = getSessionService().call(
 						() -> getAgentService().load(agentId).getAgentData());
 
@@ -175,15 +180,15 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 				TestShellJobData jobData = new TestShellJobData(jobToken, testData.getCommands());
 
 				long timeout = 300*1000L;
-				if (getLogService().getJobLogger(jobToken) == null) {
-					getLogService().addJobLogger(jobToken, currentJobLogger);
+				if (getLogService().getLogger(jobToken) == null) {
+					getLogService().addLogger(jobToken, currentJobLogger);
 					try {
 						return call(agentSession, jobData, timeout);
 					} catch (InterruptedException | TimeoutException e) {
 						new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
 						throw new RuntimeException(e);
 					} finally {
-						getLogService().removeJobLogger(jobToken);
+						getLogService().removeLogger(jobToken);
 					}
 				} else {
 					try {
@@ -195,10 +200,10 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 				}
 			};
 
-			getResourceAllocator().runAgentJob(AgentQuery.parse(agentQuery, true), getName(),
-					getConcurrencyNumber(), 1, runnable);
+			getResourceService().runAgentJob(AgentQuery.parse(agentQuery, true), 
+					getName(), getConcurrencyNumber(), 1, runnable);
 		} finally {
-			getLogService().removeJobLogger(jobToken);
+			getLogService().removeLogger(jobToken);
 		}
 	}
 

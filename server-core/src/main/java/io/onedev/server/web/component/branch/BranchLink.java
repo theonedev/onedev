@@ -16,10 +16,17 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 public class BranchLink extends ViewStateAwarePageLink<Void> {
 
 	private final ProjectAndBranch projectAndBranch;
-	
+
+	private final boolean neverShowFQN;
+
 	public BranchLink(String id, ProjectAndBranch projectAndBranch) {
-		super(id, ProjectBlobPage.class, paramsOf(projectAndBranch));
+		this(id, projectAndBranch, false);
+	}
+
+	public BranchLink(String id, ProjectAndBranch projectAndBranch, boolean neverShowFQN) {
+		super(id, ProjectBlobPage.class, paramsOf(projectAndBranch));		
 		this.projectAndBranch = projectAndBranch;
+		this.neverShowFQN = neverShowFQN;
 	}
 	
 	private static PageParameters paramsOf(ProjectAndBranch projectAndBranch) {
@@ -46,14 +53,18 @@ public class BranchLink extends ViewStateAwarePageLink<Void> {
 	@Override
 	public IModel<?> getBody() {
 		String label;
-		if (getPage() instanceof ProjectPage) {
-			ProjectPage page = (ProjectPage) getPage();
-			if (page.getProject().equals(projectAndBranch.getProject())) 
-				label = projectAndBranch.getBranch();
-			else 
-				label = projectAndBranch.getFQN();
+		if (neverShowFQN) {
+			label = projectAndBranch.getBranch();
 		} else {
-			label = projectAndBranch.getFQN();
+			if (getPage() instanceof ProjectPage) {
+				ProjectPage page = (ProjectPage) getPage();
+				if (page.getProject().equals(projectAndBranch.getProject())) 
+					label = projectAndBranch.getBranch();
+				else 
+					label = projectAndBranch.getFQN();
+			} else {
+				label = projectAndBranch.getFQN();
+			}
 		}
 		return Model.of(label);
 	}

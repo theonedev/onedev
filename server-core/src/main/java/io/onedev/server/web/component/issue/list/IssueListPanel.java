@@ -467,6 +467,11 @@ public abstract class IssueListPanel extends Panel {
 				target.add(saveQueryLink);
 			}
 			
+			@Override
+			protected boolean isSelectOnFocus() {
+				return true;
+			}
+
 		});
 		
 		queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {

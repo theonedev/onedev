@@ -1,5 +1,19 @@
 package io.onedev.server.git;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.eclipse.jgit.util.QuotedString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.onedev.agent.Agent;
 import io.onedev.commons.bootstrap.SecretMasker;
 import io.onedev.commons.utils.FileUtils;
@@ -14,20 +28,6 @@ import io.onedev.server.git.command.FileChange;
 import io.onedev.server.git.command.ReceivePackCommand;
 import io.onedev.server.git.command.UploadPackCommand;
 import io.onedev.server.git.location.GitLocation;
-import org.apache.commons.lang3.SystemUtils;
-import org.eclipse.jgit.util.QuotedString;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class CommandUtils {
 
@@ -37,10 +37,7 @@ public class CommandUtils {
 	
 	public static Commandline newGit() {
 		Commandline cmdline = new Commandline(OneDev.getInstance(GitLocation.class).getExecutable());
-		if (SystemUtils.IS_OS_MAC_OSX) {
-			String path = System.getenv("PATH") + ":/usr/local/bin";
-			cmdline.environments().put("PATH", path);
-		}
+		KubernetesHelper.addMacUsrLocalBinToPath(cmdline);
 		return cmdline;
 	}
 	

@@ -96,8 +96,12 @@ public abstract class SymbolTooltipPanel extends Panel {
 	@Inject
 	private SettingService settingService;
 
-	@Inject
-	private ObjectMapper objectMapper;
+	private static final ObjectMapper objectMapper = new ObjectMapper();
+
+	static {
+		objectMapper.addMixIn(PlanarRange.class, IgnorePlanarRangeMixin.class);
+		objectMapper.addMixIn(LinearRange.class, IgnoreLinearRangeMixin.class);
+	}
 
 	public SymbolTooltipPanel(String id) {
 		super(id);
@@ -337,10 +341,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 					var liteModel = settingService.getAiSetting().getLiteModel();
 					int index;
 					try {
-						ObjectMapper mapperCopy = objectMapper.copy();
-						mapperCopy.addMixIn(PlanarRange.class, IgnorePlanarRangeMixin.class);
-						mapperCopy.addMixIn(LinearRange.class, IgnoreLinearRangeMixin.class);
-						var jsonOfSymbolHits = mapperCopy.writeValueAsString(symbolHits);
+						var jsonOfSymbolHits = objectMapper.writeValueAsString(symbolHits);
 						
 						var symbolContext = getSymbolContext(symbolPosition, SYMBOL_BEGIN, SYMBOL_END, OMITTED_LINES, 
 								START_CONTEXT_SIZE, BEFORE_CONTEXT_SIZE, AFTER_CONTEXT_SIZE);
@@ -351,7 +352,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 							"symbolContext", Joiner.on('\n').join(symbolContext.getContextLines()), 
 							"note", String.format("Symbol is between %s and %s in the context", SYMBOL_BEGIN, SYMBOL_END)
 						);
-						var jsonOfSymbolOccurrence = mapperCopy.writeValueAsString(occurrenceMap);
+						var jsonOfSymbolOccurrence = objectMapper.writeValueAsString(occurrenceMap);
 						var systemMessage = new SystemMessage("""
 								You are familiar with various programming languages. Given a json object of symbol 
 								occurrence information, and a json array of possible symbol definitions, please 

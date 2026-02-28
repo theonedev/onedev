@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import io.onedev.server.service.*;
 import org.jspecify.annotations.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,24 +37,12 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.JobVariable;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.service.AgentAttributeService;
-import io.onedev.server.service.AgentService;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.BuildMetricService;
-import io.onedev.server.service.GroupService;
-import io.onedev.server.service.IssueService;
-import io.onedev.server.service.LabelSpecService;
-import io.onedev.server.service.LinkSpecService;
-import io.onedev.server.service.PackService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.PullRequestService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.model.support.build.JobSecret;
@@ -72,6 +61,7 @@ import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import io.onedev.server.workspace.WorkspaceService;
 import io.onedev.server.xodus.CommitInfoService;
 
 public class SuggestionUtils {
@@ -141,6 +131,14 @@ public class SuggestionUtils {
 		if (suggestions.isEmpty() && project == null && matchWith.length() == 0) 
 			suggestions.add(new InputSuggestion("path/to/project:mybranch", "An example branch", null));
 		return suggestions;
+	}
+
+	public static List<InputSuggestion> suggestWorkspaceSpecs(Project project, String matchWith) {
+		List<String> names = project.getHierarchyWorkspaceSpecs().stream()
+				.map(WorkspaceSpec::getName)
+				.sorted()
+				.collect(toList());
+		return suggest(names, matchWith);
 	}
 	
 	public static List<InputSuggestion> suggestTags(@Nullable Project project, String matchWith) {
@@ -441,6 +439,29 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
+	public static List<InputSuggestion> suggestWorkspaces(@Nullable Project project, String matchWith, int count) {
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		var scopedQuery = ProjectScopedQuery.of(project, matchWith, '#', null);
+		if (scopedQuery != null) {
+			var subject = SecurityUtils.getSubject();
+			for (var session : OneDev.getInstance(WorkspaceService.class)
+					.query(subject, scopedQuery.getProject(), scopedQuery.getQuery(), count)) {
+				String ref;
+				if (project != null && project.equals(scopedQuery.getProject()))
+					ref = "#" + session.getNumber();
+				else
+					ref = session.getProject().getPath() + "#" + session.getNumber();
+				suggestions.add(new InputSuggestion(ref, session.getBranch(), null));
+			}
+		}
+		if (suggestions.isEmpty() && matchWith.length() == 0) {
+			suggestions.add(new InputSuggestion("path/to/project#100", "An example workspace", null));
+			if (project != null)
+				suggestions.add(new InputSuggestion("#100", "An example workspace", null));
+		}
+		return suggestions;
+	}
+
 	public static List<InputSuggestion> suggestGroups(String matchWith) {
 		List<String> groupNames = OneDev.getInstance(GroupService.class).query()
 				.stream()

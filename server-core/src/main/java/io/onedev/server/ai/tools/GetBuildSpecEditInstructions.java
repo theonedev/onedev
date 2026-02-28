@@ -50,17 +50,15 @@ public class GetBuildSpecEditInstructions implements TaskTool {
             
             When editing CI/CD spec, remember that:
 
-            1. Files in job workspace are shared between different steps. So you can generate workspace files in one step, and use them in another step.
+            1. Files in job workdir are shared between different steps. So you can generate workspace files in one step, and use them in another step.
             2. If command step is used, turn on the "run in container" if possible, unless requested by user explicitly
-            3. Different steps run in isolated environments (only job workspace is shared). So it will not work installing dependencies in one step, and run commands relying on them in another step. You should put them in a single step unless requested by user explicitly
+            3. Different steps run in isolated environments (only job workdir is shared). So it will not work installing dependencies in one step, and run commands relying on them in another step. You should put them in a single step unless requested by user explicitly
             4. If cache step is used:
                 4.1 It should be placed before the step building or testing the project
                 4.2 If the project has lock files (package.json, pom.xml, etc.):
-                    4.2.1 A generate checksum step should be placed before the cache step, to generate checksum of all relevant lock files and store it in a file named checksum.txt						
-                    4.2.2 The key property should be configured as <keyname>-@file:checksum.txt@
-                    4.2.3 The load keys property should be configured as <keyname>
+                    4.2.1 The checksum files property should be specified to include all relevant lock files		
                     4.2.4 The upload strategy property should be configured as UPLOAD_IF_NOT_HIT
-            5. If user wants to pass files between different jobs, one job should publish files via the publish artifact step, and another jobs can then download them into job workspace via job dependency
+            5. If user wants to pass files between different jobs, one job should publish files via the publish artifact step, and another jobs can then download them into job workdir via job dependency
             6. Call tools such as getRootFilesAndFolders, getFilesAndSubfolders and getTextContent to get project structure, and figure out what docker image and commands to use to build or test the project if requested by user"""
             .formatted(BuildSpecSchema.get(), Joiner.on("\n").join(variables));
 

@@ -8,6 +8,7 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.step.*;
+import io.onedev.server.buildspec.step.CachePath;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
@@ -221,18 +222,14 @@ public class NodeJobSuggestion implements JobSuggestion {
 	}
 	
 	private List<Step> newCacheSteps() {
-		var generateChecksum = new GenerateChecksumStep();
-		generateChecksum.setName("generate package checksum");
-		generateChecksum.setFiles("package-lock.json yarn.lock");
-		generateChecksum.setTargetFile("checksum");
-		
 		var setupCache = new SetupCacheStep();
 		setupCache.setName("set up npm cache");
-		setupCache.setKey("node_modules_@file:checksum@");
-		setupCache.setPaths(Lists.newArrayList("node_modules"));
-		setupCache.getLoadKeys().add("node_modules");
+		setupCache.setKey("node_modules");
+
+		setupCache.setChecksumFiles("package-lock.json yarn.lock");
+		setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "node_modules")));
 		
-		return Lists.newArrayList(generateChecksum, setupCache);
+		return Lists.newArrayList(setupCache);
 	}
 
 	private void setupTriggers(Job job) {

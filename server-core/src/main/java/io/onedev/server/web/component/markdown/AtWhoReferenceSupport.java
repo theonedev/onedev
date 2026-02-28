@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.markdown;
 
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -17,5 +18,7 @@ public interface AtWhoReferenceSupport extends Serializable {
 	List<Issue> queryIssues(Project project, String query, int count);
 	
 	List<Build> queryBuilds(Project project, String query, int count);
+
+	List<Workspace> queryWorkspaces(Project project, String query, int count);
 	
 }

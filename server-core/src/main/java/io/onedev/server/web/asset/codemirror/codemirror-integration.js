@@ -71,6 +71,19 @@ onedev.server.codemirror = {
 		if (modeInfo)
 			onedev.server.codemirror.setMode(cm, modeInfo);
 	},
+	setConflictAwareModeByFileName: function(cm, fileName) {
+		var modeInfo = onedev.server.codemirror.findModeByFileName(fileName);
+		if (modeInfo) {
+			var modeMime = onedev.server.codemirror.getModeMime(modeInfo);
+			if (!CodeMirror.modes.hasOwnProperty(modeInfo.mode)) {
+				CodeMirror.requireMode(modeInfo.mode, function() {
+					cm.setOption("mode", {name: "conflict-aware", inner: modeMime});
+				});
+			} else {
+				cm.setOption("mode", {name: "conflict-aware", inner: modeMime});
+			}
+		}
+	},
 	getModeMime: function(modeInfo) {
         if (modeInfo.mode === "gfm")
             return "gfm";
@@ -209,6 +222,70 @@ onedev.server.codemirror = {
 		}
 	}
 };
+
+CodeMirror.defineMode("conflict-aware", function(config, parserConfig) {
+	var innerMode = CodeMirror.getMode(config, parserConfig.inner || "text/plain");
+	return {
+		startState: function() {
+			return {
+				innerState: CodeMirror.startState(innerMode),
+				rightState: null,
+				conflictRegion: null
+			};
+		},
+		copyState: function(state) {
+			return {
+				innerState: CodeMirror.copyState(innerMode, state.innerState),
+				rightState: state.rightState ? CodeMirror.copyState(innerMode, state.rightState) : null,
+				conflictRegion: state.conflictRegion
+			};
+		},
+		token: function(stream, state) {
+			if (stream.sol()) {
+				if (stream.match(/^<{7}(\s|$)/)) {
+					state.conflictRegion = "left";
+					state.rightState = CodeMirror.copyState(innerMode, state.innerState);
+					stream.skipToEnd();
+					return "conflict-marker";
+				}
+				if (stream.match(/^\|{7}(\s|$)/) || stream.match(/^={7}(\s|$)/)) {
+					state.conflictRegion = "right";
+					stream.skipToEnd();
+					return "conflict-marker";
+				}
+				if (stream.match(/^>{7}(\s|$)/)) {
+					state.conflictRegion = null;
+					state.rightState = null;
+					stream.skipToEnd();
+					return "conflict-marker";
+				}
+			}
+			if (state.conflictRegion === "right") {
+				return innerMode.token(stream, state.rightState);
+			}
+			return innerMode.token(stream, state.innerState);
+		},
+		blankLine: function(state) {
+			if (innerMode.blankLine) {
+				if (state.conflictRegion === "right") {
+					innerMode.blankLine(state.rightState);
+				} else {
+					innerMode.blankLine(state.innerState);
+				}
+			}
+		},
+		indent: function(state, textAfter, line) {
+			if (innerMode.indent) {
+				return innerMode.indent(state.innerState, textAfter, line);
+			}
+			return CodeMirror.Pass;
+		},
+		electricChars: innerMode.electricChars,
+		innerMode: function(state) {
+			return {state: state.innerState, mode: innerMode};
+		}
+	};
+});
 
 $(document).on("beforeElementReplace", function(event, componentId) {
 	var $component = $("#" + componentId);

@@ -240,9 +240,13 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 	}
 
 	private void removeReferences(Agent agent) {
-    	Query<?> query = getSession().createQuery("update Build set agent=null where agent=:agent");
-    	query.setParameter("agent", agent);
-    	query.executeUpdate();
+		Query<?> query = getSession().createQuery("update Build set agent=null where agent=:agent");
+		query.setParameter("agent", agent);
+		query.executeUpdate();
+
+		query = getSession().createQuery("update Workspace set agent=null where agent=:agent");
+		query.setParameter("agent", agent);
+		query.executeUpdate();
 	}
 	
 	@Sessional
@@ -290,17 +294,17 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 		return osArchs.keySet();
 	}
 	
-	private CriteriaQuery<Agent> buildCriteriaQuery(org.hibernate.Session session, EntityQuery<Agent> agentQuery) {
+	private CriteriaQuery<Agent> buildCriteriaQuery(org.hibernate.Session session, EntityQuery<Agent> query) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Agent> query = builder.createQuery(Agent.class);
-		Root<Agent> root = query.from(Agent.class);
-		query.select(root);
+		CriteriaQuery<Agent> criteriaQuery = builder.createQuery(Agent.class);
+		Root<Agent> root = criteriaQuery.from(Agent.class);
+		criteriaQuery.select(root);
 
-		if (agentQuery.getCriteria() != null)
-			query.where(agentQuery.getCriteria().getPredicate(null, query, root, builder));
+		if (query.getCriteria() != null)
+			criteriaQuery.where(query.getCriteria().getPredicate(null, criteriaQuery, root, builder));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
-		for (EntitySort sort: agentQuery.getSorts()) {
+		for (EntitySort sort: query.getSorts()) {
 			if (sort.getDirection() == ASCENDING)
 				orders.add(builder.asc(AgentQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 			else
@@ -309,31 +313,31 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 
 		if (orders.isEmpty())
 			orders.add(builder.asc(AgentQuery.getPath(root, Agent.PROP_NAME)));
-		query.orderBy(orders);
+		criteriaQuery.orderBy(orders);
 		
-		return query;
+		return criteriaQuery;
 	}
 	
 	@Sessional
 	@Override
-	public List<Agent> query(EntityQuery<Agent> agentQuery, int firstResult, int maxResults) {
-		CriteriaQuery<Agent> criteriaQuery = buildCriteriaQuery(getSession(), agentQuery);
-		Query<Agent> query = getSession().createQuery(criteriaQuery);
-		query.setFirstResult(firstResult);
-		query.setMaxResults(maxResults);
-		query.setCacheable(true);
-		return query.getResultList();
+	public List<Agent> query(EntityQuery<Agent> query, int firstResult, int maxResults) {
+		CriteriaQuery<Agent> criteriaQuery = buildCriteriaQuery(getSession(), query);
+		Query<Agent> hibernateQuery = getSession().createQuery(criteriaQuery);
+		hibernateQuery.setFirstResult(firstResult);
+		hibernateQuery.setMaxResults(maxResults);
+		hibernateQuery.setCacheable(true);
+		return hibernateQuery.getResultList();
 	}
 
 	@Sessional
 	@Override
-	public int count(Criteria<Agent> agentCriteria) {
+	public int count(Criteria<Agent> criteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Agent> root = criteriaQuery.from(Agent.class);
 		
-		if (agentCriteria != null)
-			criteriaQuery.where(agentCriteria.getPredicate(null, criteriaQuery, root, builder));
+		if (criteria != null)
+			criteriaQuery.where(criteria.getPredicate(null, criteriaQuery, root, builder));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
@@ -351,7 +355,7 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 					Session session = agentSessions.get(agentId);
 					if (session != null)
 						new Message(MessageTypes.RESTART, new byte[0]).sendBy(session);
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					logger.error("Error restarting agent '" + agentName + "'", e);
 				}
 				return null;
@@ -368,7 +372,7 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 					Session session = agentSessions.get(agentId);
 					if (session != null)
 						session.disconnect();
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					logger.error("Error disconnecting agent with id '" + agentId + "'", e);
 				}
 				return null;
@@ -397,7 +401,7 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 							new Message(MessageTypes.STOP, new byte[0]).sendBy(prevSession);
 							prevSession.disconnect();
 						}
-					} catch (Exception e) {
+					} catch (Throwable e) {
 						logger.error("Error disconnecting agent '" + agentName + "'", e);						
 					}
 					return null;
@@ -435,7 +439,7 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 						byte[] attributeBytes = SerializationUtils.serialize((Serializable) attributes);
 						new Message(MessageTypes.UPDATE_ATTRIBUTES, attributeBytes).sendBy(session);
 					}
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					logger.error("Error updating attributes of agent '" + agentName + "'", e);
 				}
 				return null;

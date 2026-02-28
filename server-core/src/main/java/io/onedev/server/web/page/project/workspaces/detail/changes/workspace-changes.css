@@ -1,0 +1,170 @@
+.workspace-changes>.changes-sidebar {
+	max-width: 360px !important;
+	min-width: 360px !important;
+	background: white;
+}
+@media (max-width: 1199.98px) {
+	.workspace-changes>.changes-sidebar {
+		max-width: 320px !important;
+		min-width: 320px !important;
+	}
+}
+@media (max-width: 767.98px) {
+	.workspace-changes>.changes-sidebar {
+		max-width: 240px !important;
+		min-width: 240px !important;
+	}
+}
+.dark-mode .workspace-changes>.changes-sidebar {
+	background: var(--dark-mode-dark);
+	border-right-color: var(--dark-mode-lighter-dark) !important;
+}
+.workspace-changes>.changes-sidebar a.with-working-indicator {
+	display: none;
+}
+.workspace-changes>.changes-sidebar>.sync-info {
+	font-size: 1.1rem;
+	font-weight: bold;
+}
+/* .icon is fixed 16px in base.css; scale all sync bar SVGs to match larger text */
+.workspace-changes>.changes-sidebar>.sync-info .icon {
+	width: 20px;
+	height: 20px;
+}
+.dark-mode .workspace-changes>.changes-sidebar>.sync-info {
+	border-bottom-color: var(--dark-mode-lighter-dark) !important;
+}
+.workspace-changes>.changes-sidebar>.commit-form textarea {
+	resize: vertical;
+}
+.dark-mode .workspace-changes>.changes-sidebar>.commit-form {
+	border-bottom-color: var(--dark-mode-lighter-dark) !important;
+}
+.workspace-changes>.changes-sidebar>.commit-form .btn-group {
+	position: relative;
+}
+.workspace-changes>.changes-sidebar .file-section>.section-header {
+	background: var(--light);
+	border-top: 1px solid var(--light-gray);
+	border-bottom: 1px solid var(--light-gray);
+	line-height: 2;
+	padding: 0.3rem 0.25rem 0.3rem 1rem;
+}
+.workspace-changes>.changes-sidebar .file-list>li {
+	padding-right: 0.25rem;
+}
+.workspace-changes>.changes-sidebar .file-list>li>a:first-child {
+	padding: 0.3rem 0 0.3rem 1rem;
+}
+.dark-mode .workspace-changes>.changes-sidebar .file-section>.section-header {
+	background: var(--dark-mode-light-dark);
+	border-top-color: var(--dark-mode-lighter-dark);
+	border-bottom-color: var(--dark-mode-lighter-dark);
+}
+.workspace-changes>.changes-sidebar .conflict-section>.section-header {
+	background: var(--light-danger);
+	color: var(--danger);
+	border-color: #f1c0c0;
+}
+.dark-mode .workspace-changes>.changes-sidebar .conflict-section>.section-header {
+	background: rgba(241, 65, 108, 0.15);
+	color: var(--danger);
+	border-color: rgb(97, 48, 63);
+}
+.workspace-changes>.changes-sidebar .file-section>.section-header>.btn {
+	display: none;
+}
+.workspace-changes>.changes-sidebar .file-section:hover>.section-header>.btn {
+	display: inline;
+}
+.workspace-changes>.changes-sidebar .file-list>li>.btn {
+	display: none;
+}
+.workspace-changes>.changes-sidebar .file-list>li:hover>.btn {
+	display: inline;
+}
+.workspace-changes>.changes-sidebar .conflict-action {
+	font-size: 0.7rem;
+	padding: 0 0.25rem;
+	line-height: 1.4;
+}
+.workspace-changes>.changes-sidebar .conflict-type {
+	font-weight: 600;
+	font-size: 0.8rem;
+	color: var(--danger);
+	white-space: nowrap;
+	text-align: center;
+	flex-shrink: 0;
+}
+.workspace-changes>.changes-sidebar .file-list>li:hover {
+	background-color: var(--light-warning);
+	border-color: var(--light-warning);
+}
+.workspace-changes>.changes-sidebar .file-list>li.active {
+	background-color: var(--light-primary);
+	border-color: #BBDFF9;
+}
+.workspace-changes>.changes-sidebar .file-list>li>a {
+	color: var(--gray-dark);
+	min-width: 0;
+}
+.dark-mode .workspace-changes>.changes-sidebar .file-list>li:hover {
+	background-color: var(--dark-mode-light-warning);
+	border-color: var(--dark-mode-light-warning);
+}
+.dark-mode .workspace-changes>.changes-sidebar .file-list>li.active {
+	background-color: var(--dark-mode-light-primary);
+	border-color: rgb(48, 68, 107);
+}
+.dark-mode .workspace-changes>.changes-sidebar .file-list>li>a {
+	color: var(--dark-mode-light-gray);
+}
+.workspace-changes>.changes-sidebar .file-names {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.workspace-changes>.changes-sidebar .file-dir {
+	font-size: 0.8rem;
+	color: var(--text-muted);
+	margin-left: 0.4em;
+}
+.dark-mode .workspace-changes>.changes-sidebar .file-dir {
+	color: var(--dark-mode-muted);
+}
+.workspace-changes>.changes-sidebar .file-status {
+	font-weight: 600;
+	font-size: 0.8rem;
+	width: 1rem;
+	text-align: center;
+	flex-shrink: 0;
+}
+.workspace-changes>.changes-sidebar .file-status.status-M,
+.workspace-changes>.changes-sidebar .file-status.status-T {
+	color: var(--warning);
+}
+.workspace-changes>.changes-sidebar .file-status.status-A {
+	color: var(--success);
+}
+.workspace-changes>.changes-sidebar .file-status.status-D {
+	color: var(--danger);
+}
+.workspace-changes>.changes-sidebar .file-status.status-U {
+	color: var(--muted);
+}
+.workspace-changes>.diff-content {
+	background: white;
+}
+.dark-mode .workspace-changes>.diff-content {
+	background: var(--dark-mode-dark);
+}
+.workspace-changes>.diff-content>.diff-header {
+	background: var(--light);
+	border-bottom-color: var(--light-gray) !important;
+}
+.dark-mode .workspace-changes>.diff-content>.diff-header {
+	background: var(--dark-mode-light-dark);
+	border-bottom-color: var(--dark-mode-lighter-dark) !important;
+}

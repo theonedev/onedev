@@ -220,13 +220,17 @@ public abstract class EntityTextService<T extends ProjectBelonging> implements S
 	public void on(ProjectDeleted event) {
 		Long projectId = event.getProjectId();
 		clusterService.submitToAllServers(() -> {
-			callWithWriter(writer -> {
-				try {
-					return writer.deleteDocuments(newExactQuery(FIELD_PROJECT_ID, projectId));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			});
+			try {
+				callWithWriter(writer -> {
+					try {
+						return writer.deleteDocuments(newExactQuery(FIELD_PROJECT_ID, projectId));
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				});
+			} catch (Throwable t) {	
+				logger.error("Error deleting lucene documents", t);
+			}
 			return null;
 		});
 	}

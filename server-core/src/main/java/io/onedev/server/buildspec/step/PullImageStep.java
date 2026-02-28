@@ -38,7 +38,7 @@ public class PullImageStep extends CraneStep {
 		this.srcImage = srcImage;
 	}
 
-	@Editable(order=200, name="OCI Layout Directory", description = "Specify directory relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a> to store OCI layout")
+	@Editable(order=200, name="OCI Layout Directory", description = "Specify directory relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to store OCI layout")
 	@Interpolative(variableSuggester="suggestVariables")
 	@SubPath
 	@NoSpace

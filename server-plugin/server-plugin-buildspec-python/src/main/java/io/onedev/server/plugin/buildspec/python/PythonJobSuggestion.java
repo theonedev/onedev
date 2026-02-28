@@ -26,9 +26,9 @@ import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import io.onedev.server.buildspec.step.CheckoutStep;
 import io.onedev.server.buildspec.step.CommandStep;
-import io.onedev.server.buildspec.step.GenerateChecksumStep;
 import io.onedev.server.buildspec.step.SetBuildVersionStep;
 import io.onedev.server.buildspec.step.SetupCacheStep;
+import io.onedev.server.buildspec.step.CachePath;
 import io.onedev.server.buildspec.step.commandinterpreter.ShellInterpreter;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
@@ -76,9 +76,10 @@ public class PythonJobSuggestion implements JobSuggestion {
 	private SetupCacheStep newPipCacheSetupStep() {
 		var setupCache = new SetupCacheStep();
 		setupCache.setName("set up dependency cache");
-		setupCache.setKey("pip_cache_@file:checksum@");
-		setupCache.setPaths(Lists.newArrayList("/root/.cache/pip"));
-		setupCache.getLoadKeys().add("pip_cache");
+		setupCache.setKey("pip_cache");
+
+		setupCache.setChecksumFiles("requirements.txt setup.py setup.cfg pyproject.toml");
+		setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "/root/.cache/pip")));
 		return setupCache;
 	}
 	
@@ -105,14 +106,6 @@ public class PythonJobSuggestion implements JobSuggestion {
 		buildAndTest.setImage("python");
 		interpreter.setCommands("set -e\n" + dependencyInstallCommand + "\n" + "pip install " + getCoveragePackage(withPytest) + " ruff\n" + getCoverageAndRuffCommand(withPytest, ""));
 		return buildAndTest;
-	}
-	
-	private GenerateChecksumStep newChecksumGenerateStep(String files) {
-		var generateChecksum = new GenerateChecksumStep();
-		generateChecksum.setName("generate dependency checksum");
-		generateChecksum.setFiles(files);
-		generateChecksum.setTargetFile("checksum");
-		return generateChecksum;
 	}
 	
 	@Nullable
@@ -189,12 +182,12 @@ public class PythonJobSuggestion implements JobSuggestion {
 			Blob blob;
 			if ((blob = project.getBlob(new BlobIdent(commitId.name(), "tox.ini", FileMode.TYPE_FILE), false)) != null) {
 				var job = newJob();
-				job.getSteps().add(newChecksumGenerateStep("tox.ini"));
 				var setupCache = new SetupCacheStep();
 				setupCache.setName("set up dependency cache");
-				setupCache.setKey("tox_cache_@file:checksum@");
-				setupCache.setPaths(Lists.newArrayList(".tox"));
-				setupCache.getLoadKeys().add("tox_cache");
+				setupCache.setKey("tox_cache");
+		
+				setupCache.setChecksumFiles("tox.ini");
+				setupCache.setPaths(Lists.newArrayList(CachePath.of(false, ".tox")));
 				job.getSteps().add(setupCache);
 
 				CommandStep buildAndTest = new CommandStep();
@@ -208,13 +201,13 @@ public class PythonJobSuggestion implements JobSuggestion {
 				jobs.add(job);
 			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "poetry.lock", FileMode.TYPE_FILE), false)) != null) {
 				var job = newJob();
-				job.getSteps().add(newChecksumGenerateStep("poetry.lock"));
 
 				var setupCache = new SetupCacheStep();
 				setupCache.setName("set up dependency cache");
-				setupCache.setKey("poetry_cache_@file:checksum@");
-				setupCache.setPaths(Lists.newArrayList("/root/.cache/pypoetry"));
-				setupCache.getLoadKeys().add("poetry_cache");
+				setupCache.setKey("poetry_cache");
+		
+				setupCache.setChecksumFiles("poetry.lock");
+				setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "/root/.cache/pypoetry")));
 				job.getSteps().add(setupCache);
 
 				var pyproject = project.getBlob(new BlobIdent(commitId.name(), "pyproject.toml", FileMode.TYPE_FILE), false);
@@ -258,18 +251,10 @@ public class PythonJobSuggestion implements JobSuggestion {
 				jobs.add(job);
 			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "pyproject.toml", FileMode.TYPE_FILE), false)) != null) {
 				var job = newJob();
-				var dependencyFiles = "pyproject.toml";
 				var setupPy = project.getBlob(new BlobIdent(commitId.name(), "setup.py", FileMode.TYPE_FILE), false);
-				if (setupPy != null)
-					dependencyFiles += " setup.py";
 				var setupCfg = project.getBlob(new BlobIdent(commitId.name(), "setup.cfg", FileMode.TYPE_FILE), false);
-				if (setupCfg != null)
-					dependencyFiles += " setup.cfg";
 				var requirements = project.getBlob(new BlobIdent(commitId.name(), "requirements.txt", FileMode.TYPE_FILE), false);
-				if (requirements != null)
-					dependencyFiles += " requirements.txt";
 
-				job.getSteps().add(newChecksumGenerateStep(dependencyFiles));
 				job.getSteps().add(newPipCacheSetupStep());
 
 				var blobContent = blob.getText().getContent();
@@ -309,15 +294,9 @@ public class PythonJobSuggestion implements JobSuggestion {
 				jobs.add(job);
 			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "setup.py", FileMode.TYPE_FILE), false)) != null) {
 				var job = newJob();
-				var dependencyFiles = "setup.py";
 				var setupCfg = project.getBlob(new BlobIdent(commitId.name(), "setup.cfg", FileMode.TYPE_FILE), false);
-				if (setupCfg != null)
-					dependencyFiles += " setup.cfg";
 				var requirements = project.getBlob(new BlobIdent(commitId.name(), "requirements.txt", FileMode.TYPE_FILE), false);
-				if (requirements != null)
-					dependencyFiles += " requirements.txt";
-				
-				job.getSteps().add(newChecksumGenerateStep(dependencyFiles));
+
 				job.getSteps().add(newPipCacheSetupStep());
 
 				var blobContent = blob.getText().getContent();
@@ -340,7 +319,6 @@ public class PythonJobSuggestion implements JobSuggestion {
 				jobs.add(job);
 			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "requirements.txt", FileMode.TYPE_FILE), false)) != null) {
 				var job = newJob();
-				job.getSteps().add(newChecksumGenerateStep("requirements.txt"));
 				job.getSteps().add(newPipCacheSetupStep());
 
 				var withPytest = blob.getText().getContent().contains("pytest");
@@ -351,13 +329,13 @@ public class PythonJobSuggestion implements JobSuggestion {
 				jobs.add(job);
 			} else if ((blob = project.getBlob(new BlobIdent(commitId.name(), "environment.yml", FileMode.TYPE_FILE), false)) != null) {
 				var job = newJob();
-				job.getSteps().add(newChecksumGenerateStep("environment.yml"));
 
 				var setupCache = new SetupCacheStep();
 				setupCache.setName("set up dependency cache");
-				setupCache.setKey("conda_cache_@file:checksum@");
-				setupCache.setPaths(Lists.newArrayList("/root/miniconda3/envs"));
-				setupCache.getLoadKeys().add("conda_cache");
+				setupCache.setKey("conda_cache");
+		
+				setupCache.setChecksumFiles("environment.yml");
+				setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "/root/miniconda3/envs")));
 				job.getSteps().add(setupCache);
 
 				var blobContent = blob.getText().getContent();

@@ -5,6 +5,7 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.event.Event;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.build.BuildEvent;
+import io.onedev.server.event.project.workspace.WorkspaceEvent;
 import io.onedev.server.event.project.issue.IssueEvent;
 import io.onedev.server.event.project.pack.PackEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
@@ -49,6 +50,9 @@ public class NotificationUtils {
 		} else if (event instanceof PackEvent) {
 			template = templates.getPackNotification();
 			bindings.put("pack", ((PackEvent) event).getPack());
+		} else if (event instanceof WorkspaceEvent) {
+			template = templates.getWorkspaceNotification();
+			bindings.put("workspace", ((WorkspaceEvent) event).getWorkspace());
 		} else if (event instanceof RefUpdated) {
 			var refUpdated = (RefUpdated) event;
 			template = templates.getCommitNotification();

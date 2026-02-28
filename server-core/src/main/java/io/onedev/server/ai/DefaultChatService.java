@@ -433,18 +433,18 @@ public class DefaultChatService extends BaseEntityService<Chat> implements ChatS
 					if (StringUtils.isBlank(response))
 						throw new ExplicitException("Received empty response");		
 					createResponse(response, false);
-				} catch (Throwable e) {
-					if (ExceptionUtils.find(e, InterruptedException.class) != null) {
+				} catch (Throwable t) {
+					if (ExceptionUtils.find(t, InterruptedException.class) != null) {
 						createIncompleteResponse("Conversation cancelled");
-					} else if (ExceptionUtils.find(e, TimeoutException.class) != null) {
+					} else if (ExceptionUtils.find(t, TimeoutException.class) != null) {
 						createIncompleteResponse("Conversation timed out");
 					} else {
-						var explicitException = ExceptionUtils.find(e, ExplicitException.class);
+						var explicitException = ExceptionUtils.find(t, ExplicitException.class);
 						if (explicitException != null) {
 							createResponse(explicitException.getMessage(), true);
 						} else {
 							createResponse("Error getting chat response, check server log for details", true);
-							logger.error("Error getting chat response", e);
+							logger.error("Error getting chat response", t);
 						}
 					}
 				} finally {

@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import javax.inject.Inject;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -23,7 +25,6 @@ import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
@@ -40,6 +41,9 @@ import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 
 public abstract class JobListPanel extends Panel implements ProjectScopedCommitAware {
+
+	@Inject
+	private BuildService buildService;
 
 	private final ObjectId commitId;
 	
@@ -141,7 +145,6 @@ public abstract class JobListPanel extends Panel implements ProjectScopedCommitA
 
 				@Override
 				protected List<Build> load() {
-					BuildService buildService = OneDev.getInstance(BuildService.class);
 					List<Build> builds = new ArrayList<>(buildService.query(getProject(), 
 							commitId, job.getName(), refName, Optional.ofNullable(getPullRequest()), 
 							null, new HashMap<>()));

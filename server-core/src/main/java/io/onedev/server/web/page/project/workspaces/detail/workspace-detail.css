@@ -1,0 +1,52 @@
+.WorkspaceDetailPage .topbar {
+    box-shadow: none;
+    border-bottom: 1px solid var(--light-gray);
+}
+.dark-mode.WorkspaceDetailPage .topbar {
+    border-bottom-color: var(--dark-mode-lighter-dark);
+}
+.workspace-detail {
+	background: white;
+}
+.dark-mode .workspace-detail {
+	background: var(--dark-mode-dark);
+}
+.workspace-detail>.head {
+	border-bottom: 1px solid var(--light-gray);
+	min-height: 40px;
+}
+.dark-mode .workspace-detail>.head {
+	border-bottom-color: var(--dark-mode-lighter-dark);
+}
+.workspace-detail>.body>.tabs .nav-item {
+	display: inline-flex;
+	align-items: center;
+	padding: 0 0.75rem !important;
+}
+.workspace-detail>.body>.tabs .nav-item:first-child {
+	padding-left: 1.5rem !important;
+}
+
+.workspace-detail>.body>.tabs .nav-link {
+    border: 0;
+    border-bottom: 3px solid transparent !important;
+	margin-right: 0 !important;
+}
+.workspace-detail>.body>.tabs .nav-item.active .nav-link {
+	border-bottom: 3px solid var(--primary) !important;
+}
+.workspace-detail>.body>.tabs .nav-item .nav-link.nav-link-close,
+.workspace-detail>.body>.tabs .nav-item .nav-link.nav-link-read-only-notice {
+	padding-left: 0.5rem !important;
+}
+.workspace-detail>.body>.tabs .nav-item.active .nav-link.nav-link-close:hover,
+.workspace-detail>.body>.tabs .nav-item.active .nav-link.nav-link-close:hover .icon {
+	color: #0065ca !important;	
+}
+.dark-mode .workspace-detail>.body>.tabs .nav-item.active .nav-link.nav-link-close:hover,
+.dark-mode .workspace-detail>.body>.tabs .nav-item.active .nav-link.nav-link-close:hover .icon {
+	color: rgb(127, 196, 255) !important;	
+}
+.workspace-detail>.body>.log>.log {
+    padding: 1.6rem;
+}

@@ -7,8 +7,8 @@ import org.jspecify.annotations.Nullable;
 
 public abstract class DrawCardPanel extends DrawPanel {
 
-	public DrawCardPanel(AjaxRequestTarget target, Placement placement, @Nullable String width) {
-		super(target, placement, width);
+	public DrawCardPanel(AjaxRequestTarget target, Placement placement) {
+		super(target, placement);
 		add(AttributeAppender.append("class", "draw-card"));
 	}
 

@@ -22,6 +22,7 @@ import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -38,6 +39,7 @@ import io.onedev.server.web.component.markdown.MarkdownEditor;
 import io.onedev.server.web.component.markdown.UserMentionSupport;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
+import io.onedev.server.workspace.WorkspaceService;
 
 class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 
@@ -137,13 +139,18 @@ class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 						}
 					}
 
-					@Override
-					public List<Build> queryBuilds(Project project, String query, int count) {
-						var subject = SecurityUtils.getSubject();
-						return OneDev.getInstance(BuildService.class).query(subject, project, query, count);
-					}
-					
-				};
+				@Override
+				public List<Build> queryBuilds(Project project, String query, int count) {
+					var subject = SecurityUtils.getSubject();
+					return OneDev.getInstance(BuildService.class).query(subject, project, query, count);
+				}
+
+				@Override
+				public List<Workspace> queryWorkspaces(Project project, String query, int count) {
+					return OneDev.getInstance(WorkspaceService.class).query(SecurityUtils.getSubject(), project, query, count);
+				}
+				
+			};
 			}
 
 		});

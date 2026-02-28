@@ -22,6 +22,8 @@ public class XtermResourceReference extends BaseDependentResourceReference {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
 				XtermResourceReference.class, "xterm-addon-fit.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
+				XtermResourceReference.class, "xterm-addon-webgl.js")));
 		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(
 				XtermResourceReference.class, "xterm.css")));
 		return dependencies;

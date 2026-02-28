@@ -10,6 +10,7 @@ import java.util.stream.IntStream;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.model.Pack;
@@ -479,6 +480,61 @@ public class QueryDescriptions {
                     getLabelSpecs().stream().map(it->"'" + it.getName() + "'").collect(joining("\n    | ")).trim(), 
                     Pack.SORT_FIELDS.keySet().stream().map(it->"'" + it + "'").collect(joining("\n    | ")).trim());
         
+        return description;
+    }
+
+    public static String getWorkspaceQueryDescription() {
+        var description = String.format("""
+                A structured query should conform to below ANTLR grammar:
+
+                workspaceQuery
+                    : criteria ('order by' '"'OrderField'"' ('asc'|'desc') (',' '"'OrderField'"' ('asc'|'desc'))*)?
+                    ;
+
+                criteria
+                    : 'pending'
+                    | 'active'
+                    | 'error'
+                    | 'created by me'
+                    | 'created by' '"'LoginNameOfUser'"'
+                    | '"Number"' 'is' ('not')? '"'EntityReference'"'
+                    | '"Number"' 'is' ('greater'|'less') 'than' '"'EntityReference'"'
+                    | '"Project"' 'is' ('not')? '"'ProjectPathOrPattern'"'
+                    | '"Branch"' 'is' ('not')? '"'BranchNameOrPattern'"'
+                    | '"Spec"' 'is' ('not')? '"'WorkspaceSpecName'"'
+                    | '"Create Date"' 'is' ('until'|'since') '"'DateDescription'"'
+                    | '"Active Date"' 'is' ('until'|'since') '"'DateDescription'"'
+                    | '"Error Date"' 'is' ('until'|'since') '"'DateDescription'"'
+                    | criteria 'and' criteria
+                    | criteria 'or' criteria
+                    | 'not('criteria')'
+                    | '('criteria')'
+                    ;
+
+                EntityReference
+                    : '#'Number
+                    | ProjectPath'#'Number
+                    | ProjectKey'-'Number
+                    ;
+
+                LabelName
+                    : %s
+                    ;
+
+                OrderField
+                    : %s
+                    ;
+
+                WS
+                    : [ ]+ -> skip
+                    ;
+
+                Please note:
+                    1. "LoginNameOfUser" should be retrieved via tool 'getLoginName' if available, with parameter set to user name
+                    2. Use an empty query to list all accessible workspaces""",
+                getLabelSpecs().stream().map(it -> "'" + it.getName() + "'").collect(joining("\n    | ")).trim(),
+                Workspace.SORT_FIELDS.keySet().stream().map(it -> "'" + it + "'").collect(joining("\n    | ")).trim());
+
         return description;
     }
 

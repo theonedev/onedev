@@ -222,5 +222,5 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		else 
 			return Optional.of(_T("space"));
 	}
-	
+		
 }

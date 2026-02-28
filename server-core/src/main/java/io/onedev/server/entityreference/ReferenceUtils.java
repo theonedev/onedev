@@ -33,7 +33,7 @@ public class ReferenceUtils {
 	
 	private static final Collection<String> IGNORED_TAGS = ImmutableSet.of("code", "a");
 
-	private static final Pattern PATTERN = compile(format("(?<prefix>^|\\W+)(?<type>(issue|build|pr|(pull\\s+request))\\s+)?(?<reference>(((?<projectPath>%s)?#)|((?<projectKey>%s)-))(?<number>\\d+))(?=$|[\\W]+)", ProjectPathValidator.PATTERN.pattern(), ProjectKeyValidator.PATTERN.pattern()), CASE_INSENSITIVE);
+	private static final Pattern PATTERN = compile(format("(?<prefix>^|\\W+)(?<type>(issue|build|workspace|pr|(pull\\s+request))\\s+)?(?<reference>(((?<projectPath>%s)?#)|((?<projectKey>%s)-))(?<number>\\d+))(?=$|[\\W]+)", ProjectPathValidator.PATTERN.pattern(), ProjectKeyValidator.PATTERN.pattern()), CASE_INSENSITIVE);
 	
 	public static List<EntityReference> extractReferences(String text, @Nullable Project currentProject) {
 		Set<EntityReference> references = new LinkedHashSet<>();

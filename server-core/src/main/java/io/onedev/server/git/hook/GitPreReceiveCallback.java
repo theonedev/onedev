@@ -68,7 +68,7 @@ public class GitPreReceiveCallback extends HttpServlet {
         List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 3);
         
-        if (!fields.get(2).equals(HookUtils.HOOK_TOKEN)) {
+        if (!fields.get(2).equals(HookUtils.RECEIVE_HOOK_TOKEN)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN,
                     "Git hook callbacks can only be accessed by OneDev itself");
             return;

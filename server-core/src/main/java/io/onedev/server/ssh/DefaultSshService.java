@@ -23,11 +23,12 @@ import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.pubkey.CachingPublicKeyAuthenticator;
 import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.shell.UnknownCommand;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.service.SettingService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
@@ -35,10 +36,13 @@ import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.TransactionService;
+import io.onedev.server.service.SettingService;
 
 @Singleton
 public class DefaultSshService implements SshService, Serializable {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultSshService.class);
+	
 	private static final int CLIENT_VERIFY_TIMEOUT = 5000;
 	
 	private static final int CLIENT_AUTH_TIMEOUT = 5000;
@@ -191,8 +195,12 @@ public class DefaultSshService implements SshService, Serializable {
 			var setting = (Setting) event.getEntity();
 			if (setting.getKey() == Setting.Key.SSH) {
 				transactionService.runAfterCommit(() -> clusterService.submitToAllServers(() -> {
-					stop();
-					start();
+					try {
+						stop();
+						start();
+					} catch (Throwable t) {
+						logger.error("Error restarting SSH server", t);
+					}
 					return null;
 				}));
 			}

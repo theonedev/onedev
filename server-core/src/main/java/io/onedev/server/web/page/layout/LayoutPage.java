@@ -109,6 +109,7 @@ import io.onedev.server.web.page.admin.emailtemplates.CommitNotificationTemplate
 import io.onedev.server.web.page.admin.emailtemplates.EmailVerificationTemplatePage;
 import io.onedev.server.web.page.admin.emailtemplates.IssueNotificationTemplatePage;
 import io.onedev.server.web.page.admin.emailtemplates.IssueNotificationUnsubscribedTemplatePage;
+import io.onedev.server.web.page.admin.emailtemplates.WorkspaceNotificationTemplatePage;
 import io.onedev.server.web.page.admin.emailtemplates.PackNotificationTemplatePage;
 import io.onedev.server.web.page.admin.emailtemplates.PasswordResetTemplatePage;
 import io.onedev.server.web.page.admin.emailtemplates.PullRequestNotificationTemplatePage;
@@ -151,6 +152,7 @@ import io.onedev.server.web.page.admin.usermanagement.InvitationListPage;
 import io.onedev.server.web.page.admin.usermanagement.NewInvitationPage;
 import io.onedev.server.web.page.admin.usermanagement.NewUserPage;
 import io.onedev.server.web.page.admin.usermanagement.UserListPage;
+import io.onedev.server.web.page.admin.workspaceprovisioner.WorkspaceProvisionersPage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.my.MyPage;
@@ -286,8 +288,10 @@ public abstract class LayoutPage extends BasePage {
 
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("Issue Settings"), issueSettingMenuItems));
 
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, _T("Job Executors"),
-							JobExecutorsPage.class, new PageParameters()));
+				administrationMenuItems.add(new SidebarMenuItem.Page(null, _T("Job Executors"),
+						JobExecutorsPage.class, new PageParameters()));
+				administrationMenuItems.add(new SidebarMenuItem.Page(null, _T("Workspace Provisioners"),
+						WorkspaceProvisionersPage.class, new PageParameters()));
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, _T("Agents"),
 							AgentListPage.class, AgentListPage.paramsOf(0), Lists.newArrayList(AgentDetailPage.class)));
 
@@ -319,7 +323,10 @@ public abstract class LayoutPage extends BasePage {
 							BuildNotificationTemplatePage.class, new PageParameters()));
 
  					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, _T("Package Notification"),
-							PackNotificationTemplatePage.class, new PageParameters()));
+						PackNotificationTemplatePage.class, new PageParameters()));
+
+					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, _T("Workspace Notification"),
+							WorkspaceNotificationTemplatePage.class, new PageParameters()));
 
 					emailTemplatesMenuItems.add(new SidebarMenuItem.Page(null, _T("Commit Notification"),
 							CommitNotificationTemplatePage.class, new PageParameters()));

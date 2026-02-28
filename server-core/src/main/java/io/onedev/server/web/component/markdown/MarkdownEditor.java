@@ -59,6 +59,7 @@ import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.markdown.MarkdownService;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -224,7 +225,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				return fragment;
 			}
 			
-		}.add(AttributeAppender.append("data-tippy-content", "Reference issue, build, or pull request")).setVisible(referenceSupport != null));
+		}.add(AttributeAppender.append("data-tippy-content", "Reference issue, build, pull request, or workspace")).setVisible(referenceSupport != null));
 		
 		container.add(new DropdownLink("actionMenuTrigger") {
 
@@ -480,6 +481,16 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 								referenceMap.put("searchKey", build.getNumber() + " " + StringUtils.deleteWhitespace(title));
 								referenceList.add(referenceMap);
 							}
+						} else if ("workspace".equals(type)) {
+							for (Workspace workspace: referenceSupport.queryWorkspaces(project, query, ATWHO_LIMIT)) {
+								Map<String, String> referenceMap = new HashMap<>();
+								referenceMap.put("type", "workspace");
+								referenceMap.put("reference", workspace.getReference().toString(currentProject));
+								String title = workspace.getUser().getDisplayName() + " on " + workspace.getBranch() + " for " + workspace.getSpecName();
+								referenceMap.put("title", title);
+								referenceMap.put("searchKey", workspace.getNumber() + " " + StringUtils.deleteWhitespace(title));
+								referenceList.add(referenceMap);
+							}
 						}
 					}
 					
@@ -571,16 +582,19 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		var issueItem = new WebMarkupContainer("issue");
 		var pullRequestItem = new WebMarkupContainer("pullRequest");
 		var buildItem = new WebMarkupContainer("build");
+		var workspaceItem = new WebMarkupContainer("workspace");
 		var projectKey = referenceSupport.getCurrentProject().getKey();
 		if (projectKey != null) {
 			var keyAppender = AttributeAppender.append("data-key", projectKey);
 			issueItem.add(keyAppender);
 			pullRequestItem.add(keyAppender);
 			buildItem.add(keyAppender);
+			workspaceItem.add(keyAppender);
 		}
 		fragment.add(issueItem);
 		fragment.add(pullRequestItem);
 		fragment.add(buildItem);
+		fragment.add(workspaceItem);
 	}
 
 	@Override
