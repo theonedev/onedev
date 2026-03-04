@@ -4,14 +4,14 @@ import javax.lang.model.SourceVersion;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import io.onedev.server.annotation.EnvironmentName;
+import io.onedev.server.annotation.EnvName;
 
-public class EnvironmentNameValidator implements ConstraintValidator<EnvironmentName, String> {
+public class EnvNameValidator implements ConstraintValidator<EnvName, String> {
 
 	private String message;
 	
 	@Override
-	public void initialize(EnvironmentName constaintAnnotation) {
+	public void initialize(EnvName constaintAnnotation) {
 		message = constaintAnnotation.message();
 	}
 

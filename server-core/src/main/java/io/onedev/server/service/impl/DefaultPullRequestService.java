@@ -866,7 +866,7 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 		}
 	}
 
-	private Predicate[] getPredicates(Subject subject, Project targetProject, Criteria<PullRequest> criteria,
+	private Predicate[] getPredicates(Subject subject, Project targetProject, @Nullable Criteria<PullRequest> criteria,
 			CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (targetProject != null) {
@@ -899,21 +899,21 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 
 	@SuppressWarnings("rawtypes")
 	private CriteriaQuery<PullRequest> buildCriteriaQuery(Subject subject, Session session, 
-			@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery) {
+			@Nullable Project targetProject, EntityQuery<PullRequest> query) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<PullRequest> query = builder.createQuery(PullRequest.class);
-		Root<PullRequest> root = query.from(PullRequest.class);
+		CriteriaQuery<PullRequest> criteriaQuery = builder.createQuery(PullRequest.class);
+		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
 
-		query.where(getPredicates(subject, targetProject, requestQuery.getCriteria(), query, root, builder));
+		criteriaQuery.where(getPredicates(subject, targetProject, query.getCriteria(), criteriaQuery, root, builder));
 
 		List<Order> orders = new ArrayList<>();
-		for (EntitySort sort: requestQuery.getSorts()) 
+		for (EntitySort sort: query.getSorts()) 
 			orders.add(getOrder(sort, builder, root));
 
-		if (requestQuery.getCriteria() != null)
-			orders.addAll(requestQuery.getCriteria().getPreferOrders(builder, root));
+		if (query.getCriteria() != null)
+			orders.addAll(query.getCriteria().getPreferOrders(builder, root));
 
-		for (EntitySort sort: requestQuery.getBaseSorts()) 
+		for (EntitySort sort: query.getBaseSorts()) 
 			orders.add(getOrder(sort, builder, root));
 
 		var found = false;
@@ -931,22 +931,22 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 		if (!found)
 			orders.add(builder.desc(PullRequestQuery.getPath(root, PullRequest.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
 		
-		query.orderBy(orders);
+		criteriaQuery.orderBy(orders);
 
-		return query;
+		return criteriaQuery;
 	}
 
 	@Sessional
 	@Override
 	public List<PullRequest> query(Subject subject, Project targetProject, 
-			EntityQuery<PullRequest> requestQuery, boolean loadExtraInfo, 
+			EntityQuery<PullRequest> query, boolean loadExtraInfo, 
 			int firstResult, int maxResults) {
-		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(subject, getSession(), targetProject, requestQuery);
-		Query<PullRequest> query = getSession().createQuery(criteriaQuery);
-		query.setFirstResult(firstResult);
-		query.setMaxResults(maxResults);
+		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(subject, getSession(), targetProject, query);
+		Query<PullRequest> hibernateQuery = getSession().createQuery(criteriaQuery);
+		hibernateQuery.setFirstResult(firstResult);
+		hibernateQuery.setMaxResults(maxResults);
 
-		List<PullRequest> requests = query.getResultList();
+		List<PullRequest> requests = hibernateQuery.getResultList();
 		if (!requests.isEmpty() && loadExtraInfo) {
 			reviewService.populateReviews(requests);
 			buildService.populateBuilds(requests);
@@ -958,12 +958,12 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 
 	@Sessional
 	@Override
-	public int count(Subject subject, Project targetProject,  Criteria<PullRequest> requestCriteria) {
+	public int count(Subject subject, Project targetProject,  Criteria<PullRequest> criteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
 
-		criteriaQuery.where(getPredicates(subject, targetProject, requestCriteria, criteriaQuery, root, builder));
+		criteriaQuery.where(getPredicates(subject, targetProject, criteria, criteriaQuery, root, builder));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
@@ -1026,13 +1026,13 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	@Sessional
 	@Override
 	public Map<Integer, Integer> queryDurationStats(Subject subject, Project project, 
-			Criteria<PullRequest> pullRequestCriteria, Date startDate, Date endDate, 
+			Criteria<PullRequest> criteria, Date startDate, Date endDate, 
 			StatsGroup statsGroup) {
 		CriteriaBuilder builder = dao.getSession().getCriteriaBuilder();
 		CriteriaQuery<Object[]> criteriaQuery = builder.createQuery(Object[].class);
 		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
 
-		var predicates = new ArrayList<Predicate>(asList(getPredicates(subject, project, pullRequestCriteria, criteriaQuery, root, builder)));
+		var predicates = new ArrayList<Predicate>(asList(getPredicates(subject, project, criteria, criteriaQuery, root, builder)));
 		predicates.add(builder.equal(root.get(PROP_STATUS), MERGED));
 		predicates.add(builder.isNotNull(root.get(PROP_DURATION)));
 		if (startDate != null)
@@ -1058,13 +1058,13 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	@Sessional
 	@Override
 	public Map<Integer, Pair<Integer, Integer>> queryFrequencyStats(Subject subject, 
-			Project project, Criteria<PullRequest> pullRequestCriteria, Date startDate, 
+			Project project, Criteria<PullRequest> criteria, Date startDate, 
 			Date endDate, StatsGroup statsGroup) {
 		CriteriaBuilder builder = dao.getSession().getCriteriaBuilder();
 		CriteriaQuery<Object[]> criteriaQuery = builder.createQuery(Object[].class);
 		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
 
-		var pullRequestPredicates = asList(getPredicates(subject, project, pullRequestCriteria, criteriaQuery, root, builder));
+		var pullRequestPredicates = asList(getPredicates(subject, project, criteria, criteriaQuery, root, builder));
 
 		var predicates = new ArrayList<>(pullRequestPredicates);
 		predicates.add(builder.equal(root.get(PROP_STATUS), OPEN));

@@ -562,23 +562,25 @@ public abstract class PackListPanel extends Panel {
 			@Override
 			public Iterator<? extends Pack> iterator(long first, long count) {
 				try {
-					return getPackService().query(SecurityUtils.getSubject(), getProject(), queryModel.getObject(), 
-							true, (int) first, (int) count).iterator();
+					var query = queryModel.getObject();
+					if (query != null) {
+						return getPackService().query(SecurityUtils.getSubject(), getProject(), query, 
+								true, (int) first, (int) count).iterator();
+					}
 				} catch (ExplicitException e) {
 					error(e.getMessage());
-					return new ArrayList<Pack>().iterator();
 				}
+				return new ArrayList<Pack>().iterator();
 			}
 
 			@Override
 			public long calcSize() {
-				PackQuery query = queryModel.getObject();
-				if (query != null) {
-					try {
+				try {
+					PackQuery query = queryModel.getObject();
+					if (query != null) 
 						return getPackService().count(SecurityUtils.getSubject(), getProject(), query.getCriteria());
-					} catch (ExplicitException e) {
-						error(e.getMessage());
-					}
+				} catch (ExplicitException e) {
+					error(e.getMessage());
 				}
 				return 0;
 			}

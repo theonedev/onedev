@@ -1015,23 +1015,23 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	}
 
 	@SuppressWarnings("rawtypes")
-	private CriteriaQuery<Project> buildCriteriaQuery(Subject subject, Session session, EntityQuery<Project> projectQuery) {
+	private CriteriaQuery<Project> buildCriteriaQuery(Subject subject, Session session, EntityQuery<Project> query) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Project> query = builder.createQuery(Project.class);
-		Root<Project> root = query.from(Project.class);
-		query.select(root);
+		CriteriaQuery<Project> criteriaQuery = builder.createQuery(Project.class);
+		Root<Project> root = criteriaQuery.from(Project.class);
+		criteriaQuery.select(root);
 
-		query.where(getPredicates(subject, projectQuery.getCriteria(), query, root, builder));
+		criteriaQuery.where(getPredicates(subject, query.getCriteria(), criteriaQuery, root, builder));
 
 		List<Order> orders = new ArrayList<>();
 
-		for (EntitySort sort : projectQuery.getSorts()) 
+		for (EntitySort sort : query.getSorts()) 
 			orders.add(getOrder(sort, builder, root));
 
-		if (projectQuery.getCriteria() != null)
-			orders.addAll(projectQuery.getCriteria().getPreferOrders(builder, root));
+		if (query.getCriteria() != null)
+			orders.addAll(query.getCriteria().getPreferOrders(builder, root));
 
-		for (EntitySort sort : projectQuery.getBaseSorts()) 
+		for (EntitySort sort : query.getBaseSorts()) 
 			orders.add(getOrder(sort, builder, root));
 
 		var found = false;
@@ -1049,9 +1049,9 @@ public class DefaultProjectService extends BaseEntityService<Project>
 		if (!found)
 			orders.add(builder.desc(ProjectQuery.getPath(root, Project.PROP_LAST_ACTIVITY_DATE + "." + ProjectLastActivityDate.PROP_VALUE)));	
 		
-		query.orderBy(orders);
+		criteriaQuery.orderBy(orders);
 
-		return query;
+		return criteriaQuery;
 	}
 
 	private Predicate[] getPredicates(Subject subject, @Nullable Criteria<Project> criteria, CriteriaQuery<?> query,
@@ -1075,10 +1075,10 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	@Override
 	public List<Project> query(Subject subject, EntityQuery<Project> query, boolean loadLabels, int firstResult, int maxResults) {
 		CriteriaQuery<Project> criteriaQuery = buildCriteriaQuery(subject, getSession(), query);
-		Query<Project> projectQuery = getSession().createQuery(criteriaQuery);
-		projectQuery.setFirstResult(firstResult);
-		projectQuery.setMaxResults(maxResults);
-		var projects = projectQuery.getResultList();
+		Query<Project> hibernateQuery = getSession().createQuery(criteriaQuery);
+		hibernateQuery.setFirstResult(firstResult);
+		hibernateQuery.setMaxResults(maxResults);
+		var projects = hibernateQuery.getResultList();
 
 		if (!projects.isEmpty() && loadLabels) 
 			labelService.populateLabels(projects);
@@ -1088,12 +1088,12 @@ public class DefaultProjectService extends BaseEntityService<Project>
 
 	@Sessional
 	@Override
-	public int count(Subject subject, Criteria<Project> projectCriteria) {
+	public int count(Subject subject, Criteria<Project> criteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Project> root = criteriaQuery.from(Project.class);
 
-		criteriaQuery.where(getPredicates(subject, projectCriteria, criteriaQuery, root, builder));
+		criteriaQuery.where(getPredicates(subject, criteria, criteriaQuery, root, builder));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();

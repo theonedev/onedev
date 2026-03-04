@@ -649,28 +649,28 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 	}
 	
 	private CriteriaQuery<Build> buildCriteriaQuery(Subject subject, @Nullable Project project, 
-			Session session,  EntityQuery<Build> buildQuery) {
+			Session session,  EntityQuery<Build> query) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Build> query = builder.createQuery(Build.class);
-		Root<Build> root = query.from(Build.class);
-		query.select(root);
+		CriteriaQuery<Build> criteriaQuery = builder.createQuery(Build.class);
+		Root<Build> root = criteriaQuery.from(Build.class);
+		criteriaQuery.select(root);
 		
-		query.where(getPredicates(subject, project, buildQuery.getCriteria(), query, root, builder));
+		criteriaQuery.where(getPredicates(subject, project, query.getCriteria(), criteriaQuery, root, builder));
 
-		applyOrders(root, query, builder, buildQuery);
+		applyOrders(root, criteriaQuery, builder, query);
 		
-		return query;
+		return criteriaQuery;
 	}
 	
 	@Sessional
 	@Override
-	public List<Build> query(Subject subject, Project project, EntityQuery<Build> buildQuery, 
+	public List<Build> query(Subject subject, Project project, EntityQuery<Build> query, 
 			boolean loadLabels, int firstResult, int maxResults) {
-		CriteriaQuery<Build> criteriaQuery = buildCriteriaQuery(subject, project, getSession(), buildQuery);
-		Query<Build> query = getSession().createQuery(criteriaQuery);
-		query.setFirstResult(firstResult);
-		query.setMaxResults(maxResults);
-		var builds = query.getResultList();
+		CriteriaQuery<Build> criteriaQuery = buildCriteriaQuery(subject, project, getSession(), query);
+		Query<Build> hibernateQuery = getSession().createQuery(criteriaQuery);
+		hibernateQuery.setFirstResult(firstResult);
+		hibernateQuery.setMaxResults(maxResults);
+		var builds = hibernateQuery.getResultList();
 		if (!builds.isEmpty() && loadLabels) 
 			labelService.populateLabels(builds);
 		return builds;		
@@ -678,9 +678,9 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 
 	@SuppressWarnings("rawtypes")
 	private void applyOrders(From<Build, Build> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder builder, 
-			EntityQuery<Build> buildQuery) {
+			EntityQuery<Build> query) {
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
-		for (EntitySort sort: buildQuery.getSorts()) {
+		for (EntitySort sort: query.getSorts()) {
 			if (sort.getDirection() == ASCENDING)
 				orders.add(builder.asc(BuildQuery.getPath(root, SORT_FIELDS.get(sort.getField()).getProperty())));
 			else
@@ -702,33 +702,32 @@ public class DefaultBuildService extends BaseEntityService<Build> implements Bui
 	}
 	
 	@Sessional
-	protected Collection<Long> queryIds(Project project, EntityQuery<Build> buildQuery, 
-			int firstResult, int maxResults) {
+	protected Collection<Long> queryIds(Project project, EntityQuery<Build> query, int firstResult, int maxResults) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Build> root = criteriaQuery.from(Build.class);
 		criteriaQuery.select(root.get(Build.PROP_ID));
 
 		var subject = userService.getSystem().asSubject();
-		criteriaQuery.where(getPredicates(subject, project, buildQuery.getCriteria(), criteriaQuery, root, builder));
+		criteriaQuery.where(getPredicates(subject, project, query.getCriteria(), criteriaQuery, root, builder));
 
-		applyOrders(root, criteriaQuery, builder, buildQuery);
+		applyOrders(root, criteriaQuery, builder, query);
 
-		Query<Long> query = getSession().createQuery(criteriaQuery);
-		query.setFirstResult(firstResult);
-		query.setMaxResults(maxResults);
+		Query<Long> hibernateQuery = getSession().createQuery(criteriaQuery);
+		hibernateQuery.setFirstResult(firstResult);
+		hibernateQuery.setMaxResults(maxResults);
 		
-		return query.list();
+		return hibernateQuery.list();
 	}
 	
 	@Sessional
 	@Override
-	public int count(Subject subject, Project project, Criteria<Build> buildCriteria) {
+	public int count(Subject subject, Project project, Criteria<Build> criteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Build> root = criteriaQuery.from(Build.class);
 
-		criteriaQuery.where(getPredicates(subject, project, buildCriteria, criteriaQuery, root, builder));
+		criteriaQuery.where(getPredicates(subject, project, criteria, criteriaQuery, root, builder));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();

@@ -8,12 +8,12 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import io.onedev.server.validation.validator.EnvironmentNameValidator;
+import io.onedev.server.validation.validator.EnvNameValidator;
 
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy=EnvironmentNameValidator.class) 
-public @interface EnvironmentName {
+@Constraint(validatedBy=EnvNameValidator.class) 
+public @interface EnvName {
 
 	String message() default "name should start with letter and can only consist of "
 			+ "alphanumeric and underscore characters";
