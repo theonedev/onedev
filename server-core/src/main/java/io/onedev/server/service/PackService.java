@@ -21,7 +21,7 @@ public interface PackService extends EntityService<Pack> {
 	List<Pack> query(Subject subject, @Nullable Project project, EntityQuery<Pack> packQuery, 
 					 boolean loadLabelsAndBlobs, int firstResult, int maxResults);
 
-	int count(Subject subject, @Nullable Project project, Criteria<Pack> packCriteria);
+	int count(Subject subject, @Nullable Project project, @Nullable Criteria<Pack> criteria);
 
 	List<Pack> queryPrevComparables(Pack compareWith, String fuzzyQuery, int count);
 	

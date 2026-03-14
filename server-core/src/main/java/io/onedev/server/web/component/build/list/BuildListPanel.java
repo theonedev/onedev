@@ -1041,25 +1041,25 @@ public abstract class BuildListPanel extends Panel {
 			@Override
 			public Iterator<? extends Build> iterator(long first, long count) {
 				try {
-					var subject = SecurityUtils.getSubject();
-					return getBuildService().query(subject, getProject(), queryModel.getObject(),
-							true, (int) first, (int) count).iterator();
+					var query = queryModel.getObject();
+					if (query != null) {
+						return getBuildService().query(SecurityUtils.getSubject(), getProject(), query,
+								true, (int) first, (int) count).iterator();
+					}
 				} catch (ExplicitException e) {
 					error(e.getMessage());
-					return new ArrayList<Build>().iterator();
 				}
+				return new ArrayList<Build>().iterator();
 			}
 
 			@Override
 			public long calcSize() {
-				BuildQuery query = queryModel.getObject();
-				if (query != null) {
-					try {
-						var subject = SecurityUtils.getSubject();
-						return getBuildService().count(subject, getProject(), query.getCriteria());
-					} catch (ExplicitException e) {
-						error(e.getMessage());
-					}
+				try {
+					BuildQuery query = queryModel.getObject();
+					if (query != null) 
+						return getBuildService().count(SecurityUtils.getSubject(), getProject(), query.getCriteria());
+				} catch (ExplicitException e) {
+					error(e.getMessage());
 				}
 				return 0;
 			}

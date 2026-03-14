@@ -84,18 +84,17 @@ public class DefaultPackService extends BaseEntityService<Pack>
 	@Inject
 	private ListenerRegistry listenerRegistry;
 
-	private CriteriaQuery<Pack> buildCriteriaQuery(Subject subject, Project project, 
-			Session session, EntityQuery<Pack> packQuery) {
+	private CriteriaQuery<Pack> buildCriteriaQuery(Subject subject, Project project, Session session, EntityQuery<Pack> query) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Pack> query = builder.createQuery(Pack.class);
-		Root<Pack> root = query.from(Pack.class);
-		query.select(root);
+		CriteriaQuery<Pack> criteriaQuery = builder.createQuery(Pack.class);
+		Root<Pack> root = criteriaQuery.from(Pack.class);
+		criteriaQuery.select(root);
 
-		query.where(getPredicates(subject, project, packQuery.getCriteria(), query, root, builder));
+		criteriaQuery.where(getPredicates(subject, project, query.getCriteria(), criteriaQuery, root, builder));
 
-		applyOrders(root, query, builder, packQuery.getSorts());
+		applyOrders(root, criteriaQuery, builder, query.getSorts());
 
-		return query;
+		return criteriaQuery;
 	}
 
 	private void applyOrders(From<Pack, Pack> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder builder,
@@ -115,13 +114,13 @@ public class DefaultPackService extends BaseEntityService<Pack>
 	
 	@Sessional
 	@Override
-	public List<Pack> query(Subject subject, Project project, EntityQuery<Pack> packQuery, 
+	public List<Pack> query(Subject subject, Project project, EntityQuery<Pack> query, 
 							boolean loadLabelsAndBlobs, int firstResult, int maxResults) {
-		CriteriaQuery<Pack> criteriaQuery = buildCriteriaQuery(subject, project, getSession(), packQuery);
-		Query<Pack> query = getSession().createQuery(criteriaQuery);
-		query.setFirstResult(firstResult);
-		query.setMaxResults(maxResults);
-		var packs = query.getResultList();
+		CriteriaQuery<Pack> criteriaQuery = buildCriteriaQuery(subject, project, getSession(), query);
+		Query<Pack> hibernateQuery = getSession().createQuery(criteriaQuery);
+		hibernateQuery.setFirstResult(firstResult);
+		hibernateQuery.setMaxResults(maxResults);
+		var packs = hibernateQuery.getResultList();
 		
 		if (!packs.isEmpty() && loadLabelsAndBlobs) {
 			labelService.populateLabels(packs);
@@ -164,12 +163,12 @@ public class DefaultPackService extends BaseEntityService<Pack>
 
 	@Sessional
 	@Override
-	public int count(Subject subject, Project project, Criteria<Pack> packCriteria) {
+	public int count(Subject subject, Project project, Criteria<Pack> criteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Pack> root = criteriaQuery.from(Pack.class);
 
-		criteriaQuery.where(getPredicates(subject, project, packCriteria, criteriaQuery, root, builder));
+		criteriaQuery.where(getPredicates(subject, project, criteria, criteriaQuery, root, builder));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
