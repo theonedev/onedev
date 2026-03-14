@@ -24,6 +24,8 @@ import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
+
 public class GTestReportParser {
 
 	public static List<TestCase> parse(Build build, Document doc) {
@@ -121,8 +123,8 @@ public class GTestReportParser {
 			String url = RequestCycle.get().urlFor(ProjectBlobPage.class, params).toString();
 			var html = String.format("<a href='%s'>%s</a><br>%s", 
 					url, 
-					HtmlEscape.escapeHtml5(StringUtils.substringBefore(message, "\n").trim()), 
-					HtmlEscape.escapeHtml5(StringUtils.substringAfter(message, "\n")));
+					escapeHtml5(StringUtils.substringBefore(message, "\n").trim()), 
+					escapeHtml5(StringUtils.substringAfter(message, "\n")));
 			return new Label(componentId, html).setEscapeModelStrings(false);
 		} else if (message != null) {
 			return new Label(componentId, message);
