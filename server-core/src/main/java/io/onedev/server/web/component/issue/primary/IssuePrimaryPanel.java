@@ -14,21 +14,26 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.http.Cookie;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.ChoiceRenderer;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
+import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -44,6 +49,10 @@ import org.apache.wicket.request.http.WebResponse;
 import org.jspecify.annotations.Nullable;
 import org.unbescape.html.HtmlEscape;
 
+import io.onedev.server.ai.dispatch.AiDispatchAgent;
+import io.onedev.server.ai.dispatch.AiDispatchManager;
+import io.onedev.server.ai.dispatch.AiDispatchModelUtils;
+import io.onedev.server.ai.dispatch.AiDispatchPromptUtils;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.model.Issue;
@@ -62,6 +71,7 @@ import io.onedev.server.service.IssueLinkService;
 import io.onedev.server.service.IssueReactionService;
 import io.onedev.server.service.IssueService;
 import io.onedev.server.service.LinkSpecService;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.EmailAddressUtils;
 import io.onedev.server.util.LinkDescriptor;
@@ -92,6 +102,7 @@ import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.pullrequests.detail.airuns.PullRequestAiRunsPage;
 import io.onedev.server.web.util.DeleteCallback;
 
 public abstract class IssuePrimaryPanel extends Panel {
@@ -115,6 +126,12 @@ public abstract class IssuePrimaryPanel extends Panel {
 
 	@Inject
 	private TransactionService transactionService;
+
+	@Inject
+	private AiDispatchManager aiDispatchManager;
+
+	@Inject
+	private SettingService settingService;
 
 	private final IModel<List<LinkSpec>> linkSpecsModel = new LoadableDetachableModel<>() {
 		@Override
@@ -274,9 +291,129 @@ public abstract class IssuePrimaryPanel extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(!addibleLinkDescriptorsModel.getObject().isEmpty() || getIssue().getDescriptionRevisionCount() != 0);
+						setVisible(isAiDispatchAvailable()
+								|| !addibleLinkDescriptorsModel.getObject().isEmpty()
+								|| getIssue().getDescriptionRevisionCount() != 0);
 					}
 				};
+				fragment.add(new AjaxLink<Void>("assignAiTask") {
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						new ModalPanel(target) {
+							@Override
+							protected Component newContent(String id) {
+								var frag = new Fragment(id, "assignAiTaskFrag", IssuePrimaryPanel.this);
+								var form = new Form<Void>("form");
+								frag.add(form);
+								form.setOutputMarkupId(true);
+								form.add(new FencedFeedbackPanel("feedback", form).setOutputMarkupPlaceholderTag(true));
+
+								var agentModel = Model.of(AiDispatchAgent.CLAUDE);
+								var agentChoice = new DropDownChoice<>("agent",
+										agentModel,
+										List.of(AiDispatchAgent.values()),
+										new ChoiceRenderer<AiDispatchAgent>() {
+											private static final long serialVersionUID = 1L;
+
+											@Override
+											public Object getDisplayValue(AiDispatchAgent object) {
+												return "@" + object.getMentionName();
+											}
+										});
+								agentChoice.setOutputMarkupId(true);
+								form.add(agentChoice);
+
+								var modelModel = Model.of("");
+								var modelChoices = new LoadableDetachableModel<List<String>>() {
+									@Override
+									protected List<String> load() {
+										var choices = new ArrayList<>(AiDispatchModelUtils.availableModels(
+												settingService.getAiSetting(), agentModel.getObject()));
+										choices.add(0, "");
+										return choices;
+									}
+								};
+								var modelChoice = new DropDownChoice<>("model",
+										modelModel,
+										modelChoices,
+										new ChoiceRenderer<String>() {
+											private static final long serialVersionUID = 1L;
+
+											@Override
+											public Object getDisplayValue(String object) {
+												return StringUtils.isBlank(object) ? _T("Default configured model") : object;
+											}
+										});
+								modelChoice.setOutputMarkupId(true);
+								form.add(modelChoice);
+								var modelHelp = new Label("modelHelp", new LoadableDetachableModel<String>() {
+									@Override
+									protected String load() {
+										return _T("Leave unset to use the configured default for @")
+												+ agentModel.getObject().getMentionName()
+												+ _T(". CLI backends receive --model when supported.");
+									}
+								});
+								modelHelp.setOutputMarkupId(true);
+								form.add(modelHelp);
+								agentChoice.add(new org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior("change") {
+									@Override
+									protected void onUpdate(AjaxRequestTarget target) {
+										modelChoices.detach();
+										if (!modelChoices.getObject().contains(modelModel.getObject()))
+											modelModel.setObject("");
+										target.add(modelChoice);
+										target.add(modelHelp);
+									}
+								});
+
+								var promptModel = Model.of(AiDispatchPromptUtils.buildIssuePrompt(getIssue(), null));
+								form.add(new TextArea<>("prompt", promptModel));
+
+								form.add(new AjaxButton("start", form) {
+									@Override
+									protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+										try {
+											var request = aiDispatchManager.startFromIssue(getIssue(), agentModel.getObject(),
+													StringUtils.trimToNull(modelModel.getObject()),
+													StringUtils.trimToEmpty(promptModel.getObject()),
+													SecurityUtils.getUser());
+											close();
+											setResponsePage(PullRequestAiRunsPage.class, PullRequestAiRunsPage.paramsOf(request));
+										} catch (Exception e) {
+											error(e.getMessage());
+											target.add(form);
+										}
+									}
+
+									@Override
+									protected void onError(AjaxRequestTarget target, Form<?> form) {
+										target.add(form);
+									}
+								});
+								form.add(new AjaxLink<Void>("close") {
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										close();
+									}
+								});
+								form.add(new AjaxLink<Void>("cancel") {
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										close();
+									}
+								});
+								return frag;
+							}
+						};
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(isAiDispatchAvailable());
+					}
+				});
 				fragment.add(new MenuLink("linkIssues") {
 
 					@Override
@@ -718,6 +855,12 @@ public abstract class IssuePrimaryPanel extends Panel {
 
 	private Project getProject() {
 		return getIssue().getProject();
+	}
+
+	private boolean isAiDispatchAvailable() {
+		return settingService.getAiSetting().isDispatchEnabled()
+				&& SecurityUtils.getUser() != null
+				&& SecurityUtils.canWriteCode(getProject());
 	}
 
 	@Override

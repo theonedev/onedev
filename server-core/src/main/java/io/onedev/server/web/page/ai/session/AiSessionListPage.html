@@ -1,0 +1,182 @@
+<wicket:extend>
+<div class="px-4 py-3">
+<ul class="nav nav-tabs mb-4">
+<li class="nav-item"><a wicket:id="showSessionsTab" class="nav-link"><wicket:t>Sessions</wicket:t></a></li>
+<li class="nav-item"><a wicket:id="showAgentsTab" class="nav-link"><wicket:t>Agents</wicket:t></a></li>
+</ul>
+<div wicket:id="sessionsTab">
+<div class="mb-4 d-flex flex-wrap align-items-center gap-2">
+<div class="btn-group btn-group-sm">
+<a wicket:id="showActive" class="btn btn-outline-primary"><wicket:t>Active</wicket:t></a>
+<a wicket:id="showHistory" class="btn btn-outline-primary"><wicket:t>History</wicket:t></a>
+<a wicket:id="showAll" class="btn btn-outline-primary"><wicket:t>All</wicket:t></a>
+</div>
+<a wicket:id="newTaskToggle" class="btn btn-sm btn-primary ml-auto"><wicket:t>+ New Task</wicket:t></a>
+</div>
+<div class="row mb-4">
+<div class="col-lg-4 col-md-6 mb-3">
+<label class="form-label"><wicket:t>Agent Filter</wicket:t></label>
+<select wicket:id="agentFilter" class="form-control"></select>
+</div>
+<div class="col-lg-4 col-md-6 mb-3">
+<label class="form-label"><wicket:t>Project Filter</wicket:t></label>
+<select wicket:id="projectFilter" class="form-control"></select>
+</div>
+<div class="col-lg-4 col-md-6 mb-3">
+<label class="form-label"><wicket:t>Status Filter</wicket:t></label>
+<select wicket:id="runStateFilter" class="form-control"></select>
+</div>
+</div>
+<div class="d-flex justify-content-end mb-4">
+<a wicket:id="clearFilters" class="btn btn-sm btn-light"><wicket:t>Clear Filters</wicket:t></a>
+</div>
+<div wicket:id="newTaskPanel" class="card mb-4 border-primary" style="display:none">
+<div class="card-body">
+<h6 class="card-title mb-3"><wicket:t>Start a new AI task</wicket:t></h6>
+<form wicket:id="newTaskForm">
+<div wicket:id="newTaskFeedback" class="mb-3"></div>
+<div class="row mb-3">
+<div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+<label class="form-label"><wicket:t>Project</wicket:t></label>
+<select wicket:id="projectSelect" class="form-control"></select>
+</div>
+<div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+<label class="form-label"><wicket:t>Base Branch</wicket:t></label>
+<select wicket:id="branchSelect" class="form-control"></select>
+</div>
+<div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+<label class="form-label"><wicket:t>Agent</wicket:t></label>
+<select wicket:id="agentSelect" class="form-control"></select>
+</div>
+<div class="col-lg-3 col-md-6">
+<label class="form-label"><wicket:t>Model Override</wicket:t></label>
+<select wicket:id="modelSelect" class="form-control"></select>
+<small wicket:id="modelHelp" class="form-text text-muted"></small>
+</div>
+</div>
+<div class="mb-3">
+<label class="form-label"><wicket:t>Prompt</wicket:t></label>
+<textarea wicket:id="promptInput" class="form-control" rows="4" t:placeholder="Describe the task for the AI agent..."></textarea>
+</div>
+<div class="d-flex gap-2">
+<button wicket:id="startTask" type="submit" class="btn btn-primary"><wicket:t>Start Task</wicket:t></button>
+<a wicket:id="cancelNewTask" class="btn btn-outline-secondary"><wicket:t>Cancel</wicket:t></a>
+</div>
+</form>
+</div>
+</div>
+<div wicket:id="container">
+<div class="row mb-4">
+<div class="col-lg-4 col-md-6 mb-3">
+<div class="card h-100 border-0 shadow-sm">
+<div class="card-body">
+<div class="text-muted text-uppercase font-size-xs mb-2"><wicket:t>Active</wicket:t></div>
+<div wicket:id="activeCount" class="display-4 font-weight-bold text-info mb-0"></div>
+</div>
+</div>
+</div>
+<div class="col-lg-4 col-md-6 mb-3">
+<div class="card h-100 border-0 shadow-sm">
+<div class="card-body">
+<div class="text-muted text-uppercase font-size-xs mb-2"><wicket:t>Completed</wicket:t></div>
+<div wicket:id="completedCount" class="display-4 font-weight-bold text-success mb-0"></div>
+</div>
+</div>
+</div>
+<div class="col-lg-4 col-md-6 mb-3">
+<div class="card h-100 border-0 shadow-sm">
+<div class="card-body">
+<div class="text-muted text-uppercase font-size-xs mb-2"><wicket:t>Failed</wicket:t></div>
+<div wicket:id="failedCount" class="display-4 font-weight-bold text-danger mb-0"></div>
+</div>
+</div>
+</div>
+</div>
+<div wicket:id="feedback" class="mb-4"></div>
+<div wicket:id="empty" class="alert alert-light-info mb-0">
+<wicket:t>No AI sessions visible in this scope.</wicket:t>
+</div>
+<div wicket:id="runs">
+<div class="card mb-3">
+<div class="card-header ai-run-summary d-flex flex-wrap align-items-center" wicket:id="summary">
+<div>
+<span class="font-weight-bold text-uppercase" wicket:id="agent"></span>
+<span wicket:id="state" class="ml-2"></span>
+</div>
+<div class="text-muted font-size-sm ml-auto ai-run-meta">
+<a wicket:id="requestLink">
+<span wicket:id="projectPath"></span> · <span wicket:id="requestReference"></span>
+</a>
+· <span wicket:id="commitCount"></span> <wicket:t>commit(s)</wicket:t> ·
+<wicket:t>started</wicket:t> <span wicket:id="started"></span> ·
+<span wicket:id="modelMeta"></span>
+<wicket:t>triggered by</wicket:t> <span wicket:id="triggeredBy"></span>
+</div>
+<div class="prompt-preview mt-1 w-100" wicket:id="promptPreview"></div>
+</div>
+<div wicket:id="detail" class="card-body ai-run-detail">
+<div wicket:id="statusBanner" class="ai-run-status-banner mb-3"></div>
+<div class="ai-run-detail-actions mb-3">
+<a wicket:id="openRequest" class="btn btn-sm btn-light"><wicket:t>Open PR</wicket:t></a>
+<a wicket:id="openAiRun" class="btn btn-sm btn-primary"><wicket:t>Open AI Run Page</wicket:t></a>
+</div>
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-2 ai-run-feed-header">
+<div class="font-weight-bold"><wicket:t>Live feed</wicket:t></div>
+<div class="text-muted small"><wicket:t>Streaming updates, guidance, progress, and provider events</wicket:t></div>
+</div>
+<div class="ai-run-conversation mb-3">
+<div wicket:id="messages" class="ai-run-message">
+<div class="d-flex align-items-center flex-wrap mb-1">
+<span class="font-weight-bold" wicket:id="speaker"></span>
+<span wicket:id="eventTag" class="ai-run-event-tag ml-2"></span>
+</div>
+<div wicket:id="content"></div>
+</div>
+</div>
+<div class="mb-2">
+<span wicket:id="terminalToggle" class="ai-run-terminal-toggle">▶ <wicket:t>Show raw terminal</wicket:t></span>
+</div>
+<div wicket:id="terminalWrapper" style="display:none">
+<div wicket:id="terminal" class="ai-run-terminal"></div>
+<pre wicket:id="logData" class="d-none"></pre>
+</div>
+<div wicket:id="guidanceUnavailable" class="alert alert-light-info mb-3 mt-3">
+<wicket:t>The agent is still responding. Guidance unlocks after the current turn finishes, and the live feed will keep updating meanwhile.</wicket:t>
+</div>
+<form wicket:id="inputForm" class="ai-run-input-form mt-3">
+<div class="ai-run-command-shortcuts">
+<span class="text-muted small mr-2"><wicket:t>Slash commands</wicket:t></span>
+<button type="button" class="btn btn-sm btn-light ai-run-slash-command" data-ai-slash-command="/plan " onclick="return onedev.server.aiRun.insertSlashCommand(this);">/plan</button>
+<button type="button" class="btn btn-sm btn-light ai-run-slash-command" data-ai-slash-command="/review " onclick="return onedev.server.aiRun.insertSlashCommand(this);">/review</button>
+<button type="button" class="btn btn-sm btn-light ai-run-slash-command" data-ai-slash-command="/diagnose " onclick="return onedev.server.aiRun.insertSlashCommand(this);">/diagnose</button>
+<button type="button" class="btn btn-sm btn-light ai-run-slash-command" data-ai-slash-command="/fix " onclick="return onedev.server.aiRun.insertSlashCommand(this);">/fix</button>
+<button type="button" class="btn btn-sm btn-light ai-run-slash-command" data-ai-slash-command="/test " onclick="return onedev.server.aiRun.insertSlashCommand(this);">/test</button>
+</div>
+<textarea wicket:id="input" class="form-control" rows="2" t:placeholder="Send the next prompt"></textarea>
+<div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-start ai-run-inline-actions">
+<button wicket:id="send" type="submit" class="btn btn-primary mb-2"><wicket:t>Send</wicket:t></button>
+<a wicket:id="end" class="btn btn-secondary"><wicket:t>End Session</wicket:t></a>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div wicket:id="agentsTab">
+<div wicket:id="agentsFeedback" class="mb-4"></div>
+<div class="alert alert-notice alert-light mb-4">
+<wicket:t>
+Manage AI dispatch agents globally here. Choose each agent backend, select model-backed routing, and tune shared Copilot API/session limits without opening a PR.
+</wicket:t>
+</div>
+<div wicket:id="adminRequired" class="alert alert-light-warning mb-0">
+<wicket:t>Only administrators can manage global AI agent routing and model settings.</wicket:t>
+</div>
+<form wicket:id="agentForm" class="leave-confirm">
+<div wicket:id="agentEditor" class="mb-4"></div>
+<input type="submit" class="btn btn-primary dirty-aware" t:value="Save Agent Settings">
+</form>
+</div>
+</div>
+</wicket:extend>

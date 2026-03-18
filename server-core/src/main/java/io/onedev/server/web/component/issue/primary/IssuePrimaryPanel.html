@@ -21,12 +21,44 @@
 	<wicket:fragment wicket:id="moreIssueActionsFrag">
 		<wicket:enclosure>
 		<span class="d-first-child-none dot mr-2"></span>
+		<a wicket:id="assignAiTask" class="text-muted text-hover-primary mr-2"><wicket:t>Assign to AI Agent</wicket:t></a>
+		</wicket:enclosure>
+		<wicket:enclosure>
+		<span class="d-first-child-none dot mr-2"></span>
 		<a wicket:id="linkIssues" class="text-muted text-hover-primary mr-2"><wicket:t>Links</wicket:t></a>
 		</wicket:enclosure>
 		<wicket:enclosure>
 		<span class="d-first-child-none dot mr-2"></span>
 		<a wicket:id="history" class="text-muted text-hover-primary mr-2"><wicket:t>History</wicket:t></a>
 		</wicket:enclosure>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="assignAiTaskFrag">
+		<form wicket:id="form" class="leave-confirm">
+			<div class="modal-header">
+				<h5 class="modal-title"><wicket:t>Assign issue to AI agent</wicket:t></h5>
+				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+			</div>
+			<div class="modal-body">
+				<div wicket:id="feedback" class="mb-3"></div>
+				<div class="form-group">
+					<label class="form-label"><wicket:t>Agent</wicket:t></label>
+					<select wicket:id="agent" class="form-control"></select>
+				</div>
+				<div class="form-group">
+					<label class="form-label"><wicket:t>Model Override</wicket:t></label>
+					<select wicket:id="model" class="form-control"></select>
+					<small wicket:id="modelHelp" class="form-text text-muted"></small>
+				</div>
+				<div class="form-group mb-0">
+					<label class="form-label"><wicket:t>Prompt</wicket:t></label>
+					<textarea wicket:id="prompt" class="form-control" rows="8"></textarea>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button wicket:id="start" type="submit" class="btn btn-primary"><wicket:t>Start Task</wicket:t></button>
+				<a wicket:id="cancel" class="btn btn-secondary"><wicket:t>Cancel</wicket:t></a>
+			</div>
+		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="addLinkFrag">
 		<form wicket:id="form" class="leave-confirm">

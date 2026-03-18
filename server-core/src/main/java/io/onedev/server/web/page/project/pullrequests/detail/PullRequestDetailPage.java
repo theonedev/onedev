@@ -159,6 +159,7 @@ import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
+import io.onedev.server.web.page.project.pullrequests.detail.airuns.PullRequestAiRunsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.operationdlg.MergePullRequestOptionPanel;
@@ -934,6 +935,21 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				fragment.add(link);
 				return fragment;
 			}
+		});
+		tabs.add(new PageTab(Model.of(_T("AI Run")), PullRequestAiRunsPage.class, PullRequestAiRunsPage.paramsOf(getPullRequest())) {
+
+			@Override
+			public Component render(String componentId) {
+				return new PageTabHead(componentId, this) {
+
+					@Override
+					protected Link<?> newLink(String componentId, Class<? extends Page> pageClass, PageParameters pageParams) {
+						return new ViewStateAwarePageLink<Void>(componentId, pageClass, pageParams, KEY_SCROLL_TOP);
+					}
+
+				};
+			}
+
 		});
 
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));

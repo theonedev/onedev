@@ -68,9 +68,11 @@ import io.onedev.server.ServerConfig;
 import io.onedev.server.SubscriptionService;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.model.Alert;
+import io.onedev.server.model.AiDispatchRun;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AiDispatchRunService;
 import io.onedev.server.service.AlertService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.updatecheck.UpdateCheckService;
@@ -95,6 +97,7 @@ import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.admin.aisetting.ChatPreserveDaysPage;
+import io.onedev.server.web.page.admin.aisetting.DispatchSettingsPage;
 import io.onedev.server.web.page.admin.aisetting.LiteModelPage;
 import io.onedev.server.web.page.admin.alertsettings.AlertSettingPage;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
@@ -151,6 +154,7 @@ import io.onedev.server.web.page.admin.usermanagement.InvitationListPage;
 import io.onedev.server.web.page.admin.usermanagement.NewInvitationPage;
 import io.onedev.server.web.page.admin.usermanagement.NewUserPage;
 import io.onedev.server.web.page.admin.usermanagement.UserListPage;
+import io.onedev.server.web.page.ai.session.AiSessionListPage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.my.MyPage;
@@ -356,6 +360,9 @@ public abstract class LayoutPage extends BasePage {
 					aiMenuItems.add(new SidebarMenuItem.Page(null, _T("Chat Preserve Days"),
 							ChatPreserveDaysPage.class, new PageParameters()));
 
+					aiMenuItems.add(new SidebarMenuItem.Page(null, _T("Dispatch Settings"),
+							DispatchSettingsPage.class, new PageParameters()));
+
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("AI Settings"), aiMenuItems));
 
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, _T("Branding"),
@@ -386,6 +393,11 @@ public abstract class LayoutPage extends BasePage {
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, _T("System Maintenance"), maintenanceMenuItems));
 
 					menuItems.add(new SidebarMenuItem.SubMenu("gear", _T("Administration"), administrationMenuItems));
+				}
+
+				if (getLoginUser() != null && !getLoginUser().isDisabled()) {
+					menuItems.add(new SidebarMenuItem.Page("ai", _T("AI Console"),
+							AiSessionListPage.class, new PageParameters()));
 				}
 
 				var menu = new SidebarMenu(null, menuItems);
@@ -589,6 +601,65 @@ public abstract class LayoutPage extends BasePage {
 		add(topbar);
 
 		topbar.add(newTopbarTitle("title"));
+
+		DropdownLink aiSessionsLink;
+		topbar.add(aiSessionsLink = new DropdownLink("aiSessions") {
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				var fragment = new Fragment(id, "aiSessionsFrag", LayoutPage.this);
+				fragment.add(new ListView<AiDispatchRun>("sessions", new LoadableDetachableModel<List<AiDispatchRun>>() {
+					@Override
+					protected List<AiDispatchRun> load() {
+						return getVisibleActiveSessions();
+					}
+				}) {
+					@Override
+					protected void populateItem(ListItem<AiDispatchRun> item) {
+						var run = item.getModelObject();
+						var sessionLink = new BookmarkablePageLink<Void>("sessionLink",
+								io.onedev.server.web.page.project.pullrequests.detail.airuns.PullRequestAiRunsPage.class,
+								io.onedev.server.web.page.project.pullrequests.detail.airuns.PullRequestAiRunsPage.paramsOf(run.getRequest()));
+						sessionLink.add(new Label("agent", run.getAgent().getMentionName()));
+						sessionLink.add(new Label("projectPath", run.getRequest().getProject().getPath()));
+						sessionLink.add(new Label("requestReference", run.getRequest().getReference().toString(run.getRequest().getProject())));
+						sessionLink.add(new Label("state", run.getState().name().toLowerCase(Locale.ROOT)));
+						sessionLink.add(new Label("started", run.getStartedAt() != null
+								? DateUtils.formatAge(run.getStartedAt())
+								: DateUtils.formatAge(run.getCreatedAt())));
+						item.add(sessionLink);
+					}
+				});
+				fragment.add(new ViewStateAwarePageLink<Void>("viewAll", AiSessionListPage.class));
+				return fragment;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getVisibleActiveSessions().isEmpty());
+			}
+
+		});
+		aiSessionsLink.setOutputMarkupPlaceholderTag(true);
+		aiSessionsLink.add(new Label("count", new LoadableDetachableModel<String>() {
+			@Override
+			protected String load() {
+				return String.valueOf(getVisibleActiveSessions().size());
+			}
+		}));
+
+		topbar.add(new ChangeObserver() {
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
+				handler.add(aiSessionsLink);
+			}
+
+			@Override
+			protected Collection<String> findObservables() {
+				return Sets.newHashSet(AiDispatchRun.getSessionsChangeObservable());
+			}
+		});
 
 		DropdownLink alertsLink;
 		topbar.add(alertsLink = new DropdownLink("alerts") {
@@ -1149,6 +1220,14 @@ public abstract class LayoutPage extends BasePage {
 			userInfo.add(new WebMarkupContainer("myAISetting").setVisible(false));
 		}
 
+		if (loginUser != null && !loginUser.isDisabled()) {
+			userInfo.add(item = new ViewStateAwarePageLink<Void>("myAiSessions", AiSessionListPage.class));
+			if (getPage() instanceof AiSessionListPage)
+				item.add(AttributeAppender.append("class", "active"));
+		} else {
+			userInfo.add(new WebMarkupContainer("myAiSessions").setVisible(false));
+		}
+
 		if (OneDev.getInstance(ServerConfig.class).getSshPort() != 0 && loginUser != null && !loginUser.isDisabled()) {
 			userInfo.add(item = new ViewStateAwarePageLink<Void>("mySshKeys", MySshKeysPage.class));
 			if (getPage() instanceof MySshKeysPage)
@@ -1260,6 +1339,15 @@ public abstract class LayoutPage extends BasePage {
 			}
 		});
 		
+	}
+
+	private List<AiDispatchRun> getVisibleActiveSessions() {
+		if (getLoginUser() == null || getLoginUser().isDisabled())
+			return List.of();
+		return OneDev.getInstance(AiDispatchRunService.class).queryUnfinished().stream()
+				.filter(it -> SecurityUtils.canReadCode(it.getRequest().getProject()))
+				.limit(10)
+				.toList();
 	}
 
 	private SubscriptionService getSubscriptionService() {

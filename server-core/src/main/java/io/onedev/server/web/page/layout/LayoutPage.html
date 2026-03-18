@@ -45,6 +45,10 @@
 			<div wicket:id="title" class="topbar-title"></div>
 		</div>
 		<div class="topbar-right text-nowrap">
+			<a wicket:id="aiSessions" t:data-tippy-content="Active AI sessions" class="topbar-link">
+				<wicket:svg href="ai" class="icon"></wicket:svg>
+				<span wicket:id="count" class="badge badge-sm badge-danger ml-1"></span>
+			</a>
 			<a wicket:id="alerts" t:data-tippy-content="Alerts" class="text-warning topbar-link"><wicket:svg href="exclamation-circle-o" class="icon fade-in-out"></wicket:svg></a>
 			<a wicket:id="newVersionStatus" t:data-tippy-content="New version available. Red for security/critical update, yellow for bug fix, blue for feature update. Click to show changes. Disable in system setting" class="new-version-status topbar-link"><img wicket:id="icon"/></a>
 			<a wicket:id="showChat" t:data-tippy-content="Chat with AI" class="topbar-link"><wicket:svg href="ai" class="icon"/></a>
@@ -91,6 +95,10 @@
 					<a wicket:id="myAISetting" class="dropdown-item">
 						<wicket:svg href="ai-setting" class="icon mr-2"></wicket:svg>
 						<wicket:t>AI Settings</wicket:t>
+					</a>
+					<a wicket:id="myAiSessions" class="dropdown-item">
+						<wicket:svg href="ai" class="icon mr-2"></wicket:svg>
+						<wicket:t>AI Console</wicket:t>
 					</a>
 					<a wicket:id="mySshKeys" class="dropdown-item">
 						<wicket:svg href="key" class="icon mr-2"></wicket:svg>
@@ -149,6 +157,27 @@
 			<table wicket:id="alerts" class="table"></table>
 			<div class="px-2 pb-2">
 				<a wicket:id="clear" class="btn btn-sm btn-block btn-light-primary"><wicket:t>Delete All</wicket:t></a>
+			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="aiSessionsFrag">
+		<div class="alerts">
+			<div class="text-center font-size-h6 border-bottom bg-light px-3 py-2 mb-2"><wicket:t>Active AI Sessions</wicket:t></div>
+			<div wicket:id="sessions">
+				<a wicket:id="sessionLink" class="dropdown-item">
+					<div class="d-flex align-items-center">
+						<div>
+							<div class="font-weight-bold text-uppercase"><span wicket:id="agent"></span></div>
+							<div class="font-size-sm text-muted">
+								<span wicket:id="projectPath"></span> · <span wicket:id="requestReference"></span> · <span wicket:id="state"></span>
+							</div>
+						</div>
+						<div class="ml-auto font-size-sm text-muted"><span wicket:id="started"></span></div>
+					</div>
+				</a>
+			</div>
+			<div class="px-2 pb-2">
+				<a wicket:id="viewAll" class="btn btn-sm btn-block btn-light-primary"><wicket:t>View All Sessions</wicket:t></a>
 			</div>
 		</div>
 	</wicket:fragment>

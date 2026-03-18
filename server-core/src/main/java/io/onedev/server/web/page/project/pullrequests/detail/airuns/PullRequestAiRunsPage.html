@@ -1,0 +1,95 @@
+<wicket:extend>
+<div wicket:id="container">
+<div wicket:id="feedback" class="mb-4"></div>
+<div wicket:id="empty" class="alert alert-light-info mb-0">
+<wicket:t>No AI runs yet. Start one by adding a pull request comment beginning with @claude, @copilot, or @codex.</wicket:t>
+</div>
+<div wicket:id="workspace" class="ai-run-shell">
+<div class="ai-run-sidebar">
+<div class="ai-run-sidebar-header">
+<div class="font-weight-bold"><wicket:t>AI sessions</wicket:t></div>
+<div class="text-muted small"><wicket:t>Pick a run to open its chat timeline.</wicket:t></div>
+</div>
+<div wicket:id="runs" class="ai-run-list">
+<a wicket:id="summary" class="ai-run-nav">
+<div class="d-flex align-items-center justify-content-between flex-wrap mb-2">
+<span class="font-weight-bold text-uppercase" wicket:id="agent"></span>
+<span wicket:id="state"></span>
+</div>
+<div class="text-muted small">
+<wicket:t>started</wicket:t> <span wicket:id="started"></span> ·
+<span wicket:id="commitCount"></span> <wicket:t>commit(s)</wicket:t>
+</div>
+<div class="text-muted small mt-1"><wicket:t>triggered by</wicket:t> <span wicket:id="triggeredBy"></span></div>
+<div class="prompt-preview mt-2" wicket:id="promptPreview"></div>
+</a>
+</div>
+</div>
+<div wicket:id="selectedRun" class="ai-run-stage">
+<div class="card ai-run-stage-card">
+<div class="card-body ai-run-stage-body">
+<div class="ai-run-stage-head">
+<div class="ai-run-stage-title">
+<div class="d-flex align-items-center flex-wrap mb-2">
+<span class="font-weight-bold text-uppercase mr-2" wicket:id="agent"></span>
+<span wicket:id="state"></span>
+</div>
+<div class="text-muted small">
+<span wicket:id="requestReference"></span> ·
+<span wicket:id="commitCount"></span> <wicket:t>commit(s)</wicket:t> ·
+<wicket:t>started</wicket:t> <span wicket:id="started"></span> ·
+<wicket:t>triggered by</wicket:t> <span wicket:id="triggeredBy"></span>
+</div>
+<div class="prompt-preview mt-2" wicket:id="promptPreview"></div>
+</div>
+<div class="ai-run-stage-actions">
+<a wicket:id="openRequest" class="btn btn-sm btn-light"><wicket:t>Open PR</wicket:t></a>
+</div>
+</div>
+<div wicket:id="statusBanner" class="ai-run-status-banner mb-3"></div>
+<div class="ai-run-feed-header mb-2">
+<div class="font-weight-bold"><wicket:t>Conversation</wicket:t></div>
+<div class="text-muted small"><wicket:t>Chat with the agent, follow progress, and inspect tool output.</wicket:t></div>
+</div>
+<div class="ai-run-conversation mb-3">
+<div wicket:id="messages" class="ai-run-message">
+<div class="d-flex align-items-center flex-wrap mb-1">
+<span class="font-weight-bold" wicket:id="speaker"></span>
+<span wicket:id="eventTag" class="ai-run-event-tag ml-2"></span>
+</div>
+<div wicket:id="content"></div>
+</div>
+</div>
+<div class="mb-2">
+<span wicket:id="terminalToggle" class="ai-run-terminal-toggle">▶ <wicket:t>Show raw terminal</wicket:t></span>
+</div>
+<div wicket:id="terminalWrapper" style="display:none">
+<div wicket:id="terminal" class="ai-run-terminal"></div>
+<pre wicket:id="logData" class="d-none"></pre>
+</div>
+<div wicket:id="guidanceUnavailable" class="alert alert-light-info mb-3 mt-3">
+<wicket:t>The agent is still responding. Guidance unlocks after the current turn finishes, and the live feed will keep updating meanwhile.</wicket:t>
+</div>
+<form wicket:id="inputForm" class="ai-run-input-form mt-3">
+<div class="ai-run-command-shortcuts">
+<span class="text-muted small mr-2"><wicket:t>Slash commands</wicket:t></span>
+<button type="button" class="btn btn-sm btn-light ai-run-slash-command" data-ai-slash-command="/plan " onclick="return onedev.server.aiRun.insertSlashCommand(this);">/plan</button>
+<button type="button" class="btn btn-sm btn-light ai-run-slash-command" data-ai-slash-command="/review " onclick="return onedev.server.aiRun.insertSlashCommand(this);">/review</button>
+<button type="button" class="btn btn-sm btn-light ai-run-slash-command" data-ai-slash-command="/diagnose " onclick="return onedev.server.aiRun.insertSlashCommand(this);">/diagnose</button>
+<button type="button" class="btn btn-sm btn-light ai-run-slash-command" data-ai-slash-command="/fix " onclick="return onedev.server.aiRun.insertSlashCommand(this);">/fix</button>
+<button type="button" class="btn btn-sm btn-light ai-run-slash-command" data-ai-slash-command="/test " onclick="return onedev.server.aiRun.insertSlashCommand(this);">/test</button>
+</div>
+<div class="ai-run-input-row">
+<textarea wicket:id="input" class="form-control" rows="3" t:placeholder="Message the agent"></textarea>
+<div class="ai-run-action-buttons">
+<button wicket:id="send" type="submit" class="btn btn-primary"><wicket:t>Send</wicket:t></button>
+<a wicket:id="end" class="btn btn-secondary"><wicket:t>End Session</wicket:t></a>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+</div>
+</wicket:extend>

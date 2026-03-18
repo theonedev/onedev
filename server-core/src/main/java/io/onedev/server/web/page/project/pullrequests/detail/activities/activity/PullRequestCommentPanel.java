@@ -13,12 +13,17 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.jetbrains.annotations.Nullable;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.model.AiDispatchRun;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.model.Project;
@@ -31,9 +36,11 @@ import io.onedev.server.model.support.EntityReaction;
 import io.onedev.server.persistence.TransactionService;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.AiDispatchRunService;
 import io.onedev.server.service.PullRequestCommentReactionService;
 import io.onedev.server.service.PullRequestCommentService;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.comment.CommentHistoryLink;
 import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.component.comment.ReactionSupport;
@@ -41,6 +48,7 @@ import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.project.pullrequests.detail.airuns.PullRequestAiRunsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.SinceChangesLink;
 import io.onedev.server.web.util.DeleteCallback;
 
@@ -58,6 +66,9 @@ class PullRequestCommentPanel extends Panel {
 	@Inject
 	private PullRequestCommentReactionService pullRequestCommentReactionService;
 
+	@Inject
+	private AiDispatchRunService aiDispatchRunService;
+
 	public PullRequestCommentPanel(String id) {
 		super(id);
 	}
@@ -70,6 +81,47 @@ class PullRequestCommentPanel extends Panel {
 		add(new UserIdentPanel("name", getComment().getUser(), Mode.NAME));
 		add(new Label("age", DateUtils.formatAge(getComment().getDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getDate()))));
+
+		var aiRunLink = new BookmarkablePageLink<Void>("aiRun", PullRequestAiRunsPage.class,
+				PullRequestAiRunsPage.paramsOf(getComment().getRequest())) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getLatestAiRun() != null);
+			}
+		};
+		aiRunLink.setOutputMarkupPlaceholderTag(true);
+		aiRunLink.add(new Label("label", new LoadableDetachableModel<String>() {
+			@Override
+			protected String load() {
+				var run = getLatestAiRun();
+				if (run == null)
+					return "";
+				return run.getAgent().getMentionName() + " · " + run.getState().name().toLowerCase();
+			}
+		}));
+		aiRunLink.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+			@Override
+			public String getObject() {
+				var run = getLatestAiRun();
+				if (run == null)
+					return "";
+				return "badge " + getAiRunStateClass(run);
+			}
+		}));
+		aiRunLink.add(new ChangeObserver() {
+			@Override
+			public void onObservableChanged(org.apache.wicket.core.request.handler.IPartialPageRequestHandler handler,
+											Collection<String> changedObservables) {
+				handler.add(aiRunLink);
+			}
+
+			@Override
+			public Collection<String> findObservables() {
+				return Sets.newHashSet(AiDispatchRun.getChangeObservable(getComment().getRequest().getId()));
+			}
+		});
+		add(aiRunLink);
 		
 		add(new SinceChangesLink("changes", new AbstractReadOnlyModel<PullRequest>() {
 
@@ -220,6 +272,21 @@ class PullRequestCommentPanel extends Panel {
 
 	private PullRequestComment getComment() {
 		return ((PullRequestCommentActivity) getDefaultModelObject()).getComment();
+	}
+
+	@Nullable
+	private AiDispatchRun getLatestAiRun() {
+		return aiDispatchRunService.findLast(getComment());
+	}
+
+	private String getAiRunStateClass(AiDispatchRun run) {
+		return switch (run.getState()) {
+		case QUEUED -> "badge-warning";
+		case RUNNING -> "badge-info";
+		case COMPLETED -> "badge-success";
+		case FAILED -> "badge-danger";
+		case CANCELLED -> "badge-secondary";
+		};
 	}
 
 }

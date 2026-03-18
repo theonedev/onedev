@@ -75,6 +75,15 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.OsInfo;
 import io.onedev.server.ai.BuildSpecSchemaResource;
+import io.onedev.server.ai.dispatch.AiDispatchManager;
+import io.onedev.server.ai.dispatch.AiDispatchSessionLauncher;
+import io.onedev.server.ai.dispatch.AiDispatchWorktreeManager;
+import io.onedev.server.ai.dispatch.CommentDispatchListener;
+import io.onedev.server.ai.dispatch.CopilotApiManager;
+import io.onedev.server.ai.dispatch.DefaultAiDispatchSessionLauncher;
+import io.onedev.server.ai.dispatch.DefaultCopilotApiManager;
+import io.onedev.server.ai.dispatch.DefaultAiDispatchWorktreeManager;
+import io.onedev.server.ai.dispatch.IssueCommentDispatchListener;
 import io.onedev.server.ai.McpHelperResource;
 import io.onedev.server.annotation.Shallow;
 import io.onedev.server.attachment.AttachmentService;
@@ -187,6 +196,7 @@ import io.onedev.server.security.FilterChainConfigurator;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AccessTokenAuthorizationService;
 import io.onedev.server.service.AccessTokenService;
+import io.onedev.server.service.AiDispatchRunService;
 import io.onedev.server.service.AgentAttributeService;
 import io.onedev.server.service.AgentService;
 import io.onedev.server.service.AgentTokenService;
@@ -274,6 +284,7 @@ import io.onedev.server.service.UserInvitationService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.service.impl.DefaultAccessTokenAuthorizationService;
 import io.onedev.server.service.impl.DefaultAccessTokenService;
+import io.onedev.server.service.impl.DefaultAiDispatchRunService;
 import io.onedev.server.service.impl.DefaultAgentAttributeService;
 import io.onedev.server.service.impl.DefaultAgentService;
 import io.onedev.server.service.impl.DefaultAgentTokenService;
@@ -492,6 +503,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(SshService.class).to(DefaultSshService.class);
 		bind(MarkdownService.class).to(DefaultMarkdownService.class);
 		bind(SettingService.class).to(DefaultSettingService.class);
+		bind(AiDispatchRunService.class).to(DefaultAiDispatchRunService.class);
 		bind(DataService.class).to(DefaultDataService.class);
 		bind(TaskScheduler.class).to(DefaultTaskScheduler.class);
 		bind(PullRequestCommentService.class).to(DefaultPullRequestCommentService.class);
@@ -733,6 +745,12 @@ public class CoreModule extends AbstractPluginModule {
 		
 		bind(TaskFutureService.class).to(DefaultTaskFutureService.class);
 		bind(ManagedFutureService.class).to(DefaultManagedFutureService.class);
+		bind(AiDispatchWorktreeManager.class).to(DefaultAiDispatchWorktreeManager.class);
+		bind(CopilotApiManager.class).to(DefaultCopilotApiManager.class);
+		bind(AiDispatchSessionLauncher.class).to(DefaultAiDispatchSessionLauncher.class);
+		bind(AiDispatchManager.class);
+		bind(CommentDispatchListener.class);
+		bind(IssueCommentDispatchListener.class);
 	}
 	
 	private void configureBuild() {
