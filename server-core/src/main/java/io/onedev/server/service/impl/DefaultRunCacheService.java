@@ -89,12 +89,14 @@ public class DefaultRunCacheService extends BaseEntityService<RunCache>
 	private volatile String taskId;
 
 	@Nullable
-	private RunCache find(Project project, String key, String checksum) {
+	private RunCache find(Project project, String key, @Nullable String checksum) {
 		var criteria = newCriteria();
 		criteria.add(Restrictions.eq(PROP_PROJECT, project));
 		criteria.add(Restrictions.eq(PROP_KEY, key));
 		if (checksum != null) 
 			criteria.add(Restrictions.eq(PROP_CHECKSUM, checksum));
+		else
+			criteria.add(Restrictions.isNull(PROP_CHECKSUM));
 		return find(criteria);
 	}
 	

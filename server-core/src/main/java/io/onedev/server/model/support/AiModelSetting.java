@@ -100,7 +100,7 @@ public class AiModelSetting implements Serializable {
         try {
             var modelsUrl = baseUrl.endsWith("/") ? baseUrl + "models" : baseUrl + "/models";
             
-            HttpClient client = HttpClient.newBuilder().build();
+            HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
 
             var requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(modelsUrl))

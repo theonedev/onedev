@@ -420,10 +420,14 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 	}
 	
 	private void logKubernetesError(TaskLogger jobLogger, String message) {
-		if (!message.contains("Failed to watch *unstructured.Unstructured: unknown"))
-			jobLogger.error("Kubernetes: " + message);
-		else 
+		if (!message.contains("Failed to watch *unstructured.Unstructured: unknown")) {
+			if (message.startsWith("Warning:"))
+				jobLogger.warning("Kubernetes: " + message);
+			else
+				jobLogger.error("Kubernetes: " + message);
+		} else {
 			logger.error("Kubernetes: " + message);
+		}
 	}
 	
 	private String createResource(Map<Object, Object> resourceDef, Collection<String> secretsToMask, TaskLogger jobLogger) {

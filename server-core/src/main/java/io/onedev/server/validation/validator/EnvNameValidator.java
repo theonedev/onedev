@@ -6,7 +6,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import io.onedev.server.annotation.EnvVarName;
 
-public class EnvironmentNameValidator implements ConstraintValidator<EnvVarName, String> {
+public class EnvNameValidator implements ConstraintValidator<EnvVarName, String> {
 
 	private String message;
 	

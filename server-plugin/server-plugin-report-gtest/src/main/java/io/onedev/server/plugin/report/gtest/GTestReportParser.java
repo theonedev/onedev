@@ -24,6 +24,8 @@ import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
+
 public class GTestReportParser {
 
 	public static List<TestCase> parse(Build build, Document doc) {
@@ -112,7 +114,7 @@ public class GTestReportParser {
 	private static Component renderMessage(String componentId, Build build, 
 										   @Nullable Pair<String, Integer> blobLocation, 
 										   @Nullable String message) {
-		if (blobLocation != null) {
+		if (blobLocation != null && message != null) {
 			ProjectBlobPage.State state = new ProjectBlobPage.State();
 			state.blobIdent = new BlobIdent(build.getCommitHash(), blobLocation.getLeft());
 			PlanarRange range = new PlanarRange(blobLocation.getRight()-1, -1, blobLocation.getRight()-1, -1);
@@ -121,8 +123,8 @@ public class GTestReportParser {
 			String url = RequestCycle.get().urlFor(ProjectBlobPage.class, params).toString();
 			var html = String.format("<a href='%s'>%s</a><br>%s", 
 					url, 
-					StringUtils.substringBefore(message, "\n").trim(), 
-					StringUtils.substringAfter(message, "\n"));
+					escapeHtml5(StringUtils.substringBefore(message, "\n").trim()), 
+					escapeHtml5(StringUtils.substringAfter(message, "\n")));
 			return new Label(componentId, html).setEscapeModelStrings(false);
 		} else if (message != null) {
 			return new Label(componentId, message);

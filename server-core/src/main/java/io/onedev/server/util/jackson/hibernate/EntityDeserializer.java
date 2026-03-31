@@ -71,7 +71,7 @@ public class EntityDeserializer extends BeanDeserializer {
 	@Override
 	public Object deserialize(JsonParser p, DeserializationContext ctxt, Object bean) throws IOException {
 		// [databind#631]: Assign current value, to be accessible by custom serializers
-		p.setCurrentValue(bean);
+		p.assignCurrentValue(bean);
 		if (_injectables != null) {
 			injectValues(ctxt, bean);
 		}
