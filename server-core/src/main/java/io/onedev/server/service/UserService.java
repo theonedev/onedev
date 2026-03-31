@@ -1,11 +1,13 @@
 package io.onedev.server.service;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.ai.AiTask;
+import io.onedev.server.annotation.NoDBAccess;
 import io.onedev.server.model.User;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
@@ -98,6 +100,18 @@ public interface UserService extends EntityService<User> {
 
 	void execute(User ai, AiTask task);
 	
+	@NoDBAccess
+	File getWorkspaceDataBaseDir(Long userId);
+
+	@NoDBAccess
+	File getWorkspaceDataDir(Long userId, String dataKey, boolean createIfNotExist);
+
+	@NoDBAccess
+	File getUsersDir();
+
+	@NoDBAccess
+	File getUserDir(Long userId);
+
 	UserCache cloneCache();
 	
 }

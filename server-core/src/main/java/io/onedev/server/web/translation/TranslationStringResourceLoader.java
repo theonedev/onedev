@@ -38,6 +38,13 @@ public class TranslationStringResourceLoader implements IStringResourceLoader {
             key = key.substring(2);
             if (key.startsWith(" "))
                 key = key.substring(1);
+            if (key.startsWith("nt:")) {
+                key = key.substring(3);
+                if (key.startsWith(" "))
+                    key = key.substring(1);
+                return key;
+            }
+
             if (resourceBundle.containsKey(key))
                 return resourceBundle.getString(key);
             else

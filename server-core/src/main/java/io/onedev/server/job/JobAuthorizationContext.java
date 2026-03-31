@@ -42,8 +42,8 @@ public class JobAuthorizationContext {
 	}
 	
 	public boolean isScriptAuthorized(GroovyScript script) {
-		if (script.getAuthorization() != null) {
-			JobMatch jobMatch = JobMatch.parse(script.getAuthorization(), true, false);
+		if (script.getJobAuthorization() != null) {
+			JobMatch jobMatch = JobMatch.parse(script.getJobAuthorization(), true, false);
 			if (request != null) {	
 				if (request.getSource() != null) {
 					JobMatchContext sourceContext = new JobMatchContext(request.getSourceProject(), request.getSourceBranch(), null, null);

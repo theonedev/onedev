@@ -146,7 +146,7 @@ public class ServerSocket {
 						logger.error("Error processing job log", e);
 					}
 					break;
-				case REPORT_JOB_WORKSPACE:
+				case REPORT_JOB_WORKDIR:
 					String dataString = new String(messageData, StandardCharsets.UTF_8);
 					String jobToken = StringUtils.substringBefore(dataString, ":");
 					String jobWorkDir = StringUtils.substringAfter(dataString, ":");

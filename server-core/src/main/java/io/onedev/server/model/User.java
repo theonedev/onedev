@@ -1312,6 +1312,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		return entitledAis;
 	}
 
+	public static String getWorkspaceDataLockName(Long userId, String dataKey) {
+		return "workspace-data:" + userId + ":" + dataKey;
+	}
+
 	public boolean isEntitledToAi(User ai) {
 		return isAdministrator(asSubject()) 
 				|| ai.getAiSetting().isEntitleToAll() 

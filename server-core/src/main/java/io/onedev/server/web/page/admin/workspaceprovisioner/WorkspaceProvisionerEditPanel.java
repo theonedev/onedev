@@ -8,6 +8,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -16,8 +17,11 @@ import org.jspecify.annotations.Nullable;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
+import io.onedev.server.web.component.taskbutton.TestButton;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.BeanUpdating;
+import io.onedev.server.web.util.Testable;
 
 abstract class WorkspaceProvisionerEditPanel extends Panel {
 
@@ -96,10 +100,34 @@ abstract class WorkspaceProvisionerEditPanel extends Panel {
 
 		};
 
-		Form<?> form = new Form<Void>("form");
+		TestButton testButton = new TestButton("testingProvisioner", editor, "Workspace provisioner tested successfully") {
+
+			@Override
+			protected Testable<?> getTestable() {
+				return (Testable<?>) bean.getProvisioner();
+			}
+
+		};
+
+		Form<?> form = new Form<Void>("form") {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof BeanUpdating) {
+					BeanUpdating beanUpdating = (BeanUpdating) event.getPayload();
+					beanUpdating.getHandler().add(testButton);
+				}
+
+			}
+
+		};
+
 		form.add(new FencedFeedbackPanel("feedback", form));
 		form.add(editor);
 		form.add(saveButton);
+		form.add(testButton);
 		form.add(cancelButton);
 
 		add(form);

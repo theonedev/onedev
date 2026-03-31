@@ -1,12 +1,10 @@
 package io.onedev.server.plugin.executor.serverdocker;
 
-import java.io.File;
 import java.util.Collection;
-
-import org.apache.commons.lang.SystemUtils;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.agent.AgentUtils;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.commons.utils.ExceptionUtils;
@@ -47,11 +45,7 @@ public class ServerDockerModule extends AbstractPluginModule {
 
 				@Override
 				public JobExecutor discover() {
-					Commandline docker;
-					if (SystemUtils.IS_OS_MAC_OSX && new File("/usr/local/bin/docker").exists())
-						docker = new Commandline("/usr/local/bin/docker");
-					else
-						docker = new Commandline("docker");
+					var docker = new Commandline(AgentUtils.getDockerExecutable(null));
 					
 					docker.addArgs("version");
 					try {

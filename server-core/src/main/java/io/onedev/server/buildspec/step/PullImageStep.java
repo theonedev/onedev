@@ -38,9 +38,9 @@ public class PullImageStep extends CraneStep {
 		this.srcImage = srcImage;
 	}
 
-	@Editable(order=200, name="OCI Layout Directory", description = "Specify directory relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to store OCI layout")
+	@Editable(order=200, name="OCI Layout Directory", description = "Specify directory relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a> to store OCI layout")
 	@Interpolative(variableSuggester="suggestVariables")
-	@SubPath
+	@Path(Path.Type.RELATIVE)
 	@NoSpace
 	@NotEmpty
 	public String getDestPath() {
@@ -89,7 +89,7 @@ public class PullImageStep extends CraneStep {
 		
 		if (getSrcImage().contains("localhost") || getSrcImage().contains("127.0.0.1"))
 			throw new ExplicitException("Loopback address not allowed for source docker image of push image step, please use ip address or host name instead");
-		builder.append(getSrcImage()).append(" /onedev-build/workspace/").append(getDestPath());
+		builder.append(getSrcImage()).append(" /onedev-build/work/").append(getDestPath());
 		return builder.toString();
 	}
 	

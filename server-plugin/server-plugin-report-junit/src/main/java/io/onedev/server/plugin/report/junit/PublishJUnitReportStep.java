@@ -30,7 +30,7 @@ public class PublishJUnitReportStep extends PublishUnitTestReportStep {
 
 	private static final long serialVersionUID = 1L;
 
-	@Editable(order=100, description="Specify JUnit test result file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, "
+	@Editable(order=100, description="Specify JUnit test result file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, "
 			+ "for instance <tt>target/surefire-reports/TEST-*.xml</tt>. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)

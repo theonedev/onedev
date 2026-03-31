@@ -33,7 +33,7 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 
 	private String file;
 	
-	@Editable(order=1100, description="Specify markdown file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to be published")
+	@Editable(order=1100, description="Specify markdown file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be published")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getFile() {
@@ -55,12 +55,12 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 	}
 
 	@Override
-	public ServerStepResult run(Long buildId, File workspace, TaskLogger logger) {
+	public ServerStepResult run(Long buildId, File workDir, TaskLogger logger) {
 		OneDev.getInstance(SessionService.class).run(() -> {
 			var build = OneDev.getInstance(BuildService.class).load(buildId);
 			if (build.getRequest() != null) {
 				write(getReportLockName(build.getProject().getId(), build.getNumber()), () -> {
-					File file = new File(workspace, getFile());
+					File file = new File(workDir, getFile());
 					if (file.exists()) {
 						File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
 						String markdown = FileUtils.readFileToString(file, UTF_8);

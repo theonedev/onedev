@@ -75,6 +75,7 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.ai.BuildSpecSchemaResource;
 import io.onedev.server.ai.McpHelperResource;
 import io.onedev.server.annotation.Shallow;
+import io.onedev.server.assets.AssetsSyncManager;
 import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.attachment.DefaultAttachmentService;
 import io.onedev.server.cluster.ClusterResource;
@@ -607,6 +608,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(GroupEntitlementService.class).to(DefaultGroupEntitlementService.class);
 		bind(UserEntitlementService.class).to(DefaultUserEntitlementService.class);
 		bind(ProjectEntitlementService.class).to(DefaultProjectEntitlementService.class);
+		bind(AssetsSyncManager.class);
 		
 		bind(WebHookManager.class);
 		

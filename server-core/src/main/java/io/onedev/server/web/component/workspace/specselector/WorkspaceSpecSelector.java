@@ -136,7 +136,6 @@ public abstract class WorkspaceSpecSelector extends Panel {
 
 	private Component newItem(String componentId, WorkspaceSpec spec) {
 		WebMarkupContainer item = new WebMarkupContainer(componentId);
-		String specName = spec.getName();
 
 		var link = new AjaxLink<Void>("link") {
 
@@ -147,7 +146,7 @@ public abstract class WorkspaceSpecSelector extends Panel {
 				workspace.setProject(getProject());
 				workspace.setUser(SecurityUtils.getUser());
 				workspace.setBranch(branch);
-				workspace.setSpecName(specName);
+				workspace.setSpecName(spec.getName());
 				workspace.setToken(UUID.randomUUID().toString());
 				workspaceService.create(workspace);
 				onSelect(target, spec);

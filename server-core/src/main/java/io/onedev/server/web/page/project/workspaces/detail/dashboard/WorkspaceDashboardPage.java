@@ -18,9 +18,9 @@ public class WorkspaceDashboardPage extends WorkspaceDetailPage {
 
 		PageProvider pageProvider;
 
-		var terminalIds = workspaceService.getShellIds(getWorkspace());
-		if (!terminalIds.isEmpty()) 
-			pageProvider = new PageProvider(WorkspaceTerminalPage.class, WorkspaceTerminalPage.paramsOf(getWorkspace(), terminalIds.get(0)));
+		var labels = workspaceService.getShellLabels(getWorkspace());
+		if (!labels.isEmpty()) 
+			pageProvider = new PageProvider(WorkspaceTerminalPage.class, WorkspaceTerminalPage.paramsOf(getWorkspace(), labels.keySet().iterator().next()));
 		else
 			pageProvider = new PageProvider(WorkspaceLogPage.class, WorkspaceLogPage.paramsOf(getWorkspace()));
 

@@ -28,7 +28,6 @@ import io.onedev.server.buildspec.step.CheckoutStep;
 import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.buildspec.step.SetBuildVersionStep;
 import io.onedev.server.buildspec.step.SetupCacheStep;
-import io.onedev.server.buildspec.step.CachePath;
 import io.onedev.server.buildspec.step.commandinterpreter.ShellInterpreter;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
@@ -79,7 +78,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 		setupCache.setKey("pip_cache");
 
 		setupCache.setChecksumFiles("requirements.txt setup.py setup.cfg pyproject.toml");
-		setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "/root/.cache/pip")));
+		setupCache.setPaths(Lists.newArrayList("/root/.cache/pip"));
 		return setupCache;
 	}
 	
@@ -187,7 +186,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 				setupCache.setKey("tox_cache");
 		
 				setupCache.setChecksumFiles("tox.ini");
-				setupCache.setPaths(Lists.newArrayList(CachePath.of(false, ".tox")));
+				setupCache.setPaths(Lists.newArrayList(".tox"));
 				job.getSteps().add(setupCache);
 
 				CommandStep buildAndTest = new CommandStep();
@@ -207,7 +206,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 				setupCache.setKey("poetry_cache");
 		
 				setupCache.setChecksumFiles("poetry.lock");
-				setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "/root/.cache/pypoetry")));
+				setupCache.setPaths(Lists.newArrayList("/root/.cache/pypoetry"));
 				job.getSteps().add(setupCache);
 
 				var pyproject = project.getBlob(new BlobIdent(commitId.name(), "pyproject.toml", FileMode.TYPE_FILE), false);
@@ -335,7 +334,7 @@ public class PythonJobSuggestion implements JobSuggestion {
 				setupCache.setKey("conda_cache");
 		
 				setupCache.setChecksumFiles("environment.yml");
-				setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "/root/miniconda3/envs")));
+				setupCache.setPaths(Lists.newArrayList("/root/miniconda3/envs"));
 				job.getSteps().add(setupCache);
 
 				var blobContent = blob.getText().getContent();

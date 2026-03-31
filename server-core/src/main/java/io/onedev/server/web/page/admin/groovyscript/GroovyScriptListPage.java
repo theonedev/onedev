@@ -157,19 +157,11 @@ public class GroovyScriptListPage extends AdministrationPage {
 				cellItem.add(new Label(componentId, _T(TextUtils.getDisplayValue(rowModel.getObject().isCanBeUsedByBuildJobs()))));
 			}
 		});
-		columns.add(new AbstractColumn<>(Model.of(_T("Job Authorization"))) {
+		columns.add(new AbstractColumn<>(Model.of(_T("Can Be Used By Workspaces"))) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
-				var script = rowModel.getObject();
-				if (script.isCanBeUsedByBuildJobs()) {
-					if (script.getAuthorization() != null)
-						cellItem.add(new Label(componentId, script.getAuthorization()));
-					else
-						cellItem.add(new Label(componentId, "<i>" + _T("Any job") + "</i>").setEscapeModelStrings(false));
-				} else {
-					cellItem.add(new Label(componentId, "<i>" + _T("N/A") + "</i>").setEscapeModelStrings(false));
-				}
+				cellItem.add(new Label(componentId, _T(TextUtils.getDisplayValue(rowModel.getObject().isCanBeUsedByWorkspaceSpecs()))));
 			}
 		});
 		

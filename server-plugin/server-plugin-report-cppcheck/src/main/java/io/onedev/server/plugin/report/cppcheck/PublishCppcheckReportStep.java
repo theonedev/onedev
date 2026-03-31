@@ -32,7 +32,7 @@ public class PublishCppcheckReportStep extends PublishProblemReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Editable(order=100, description="Specify cppcheck xml result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. "
+	@Editable(order=100, description="Specify cppcheck xml result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. "
 			+ "This file can be generated with cppcheck xml output option, for instance <code>cppcheck src --xml 2>check-result.xml</code>. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)

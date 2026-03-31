@@ -13,6 +13,7 @@ import io.onedev.server.annotation.SuggestionProvider;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.NamedElement;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
 public class StepTemplate implements NamedElement {
@@ -45,12 +46,12 @@ public class StepTemplate implements NamedElement {
 		if (buildSpec != null) {
 			List<String> candidates = new ArrayList<>(buildSpec.getStepTemplateMap().keySet());
 			buildSpec.getStepTemplates().forEach(it->candidates.remove(it.getName()));
-			return BuildSpec.suggestOverrides(candidates, status);
+			return SuggestionUtils.suggestOverrides(candidates, status);
 		}
 		return new ArrayList<>();
 	}
 	
-	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>")
+	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>")
 	@Valid
 	public List<Step> getSteps() {
 		return steps;

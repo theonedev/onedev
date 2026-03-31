@@ -16,13 +16,13 @@ public class VariableInterpolatorTest {
 
 	@Test
 	public void test() {
-		assertEquals("@", new VariableInterpolator(it->"!").interpolate("@@"));
-		assertEquals("@@", new VariableInterpolator(it->it).interpolate("@@@@"));
-		assertEquals("hello", new VariableInterpolator(it->it).interpolate("@hello@"));
-		assertEquals("helloworlddo", new VariableInterpolator(it->it).interpolate("hello@world@do"));
-		assertEquals("1234", new VariableInterpolator(it->it).interpolate("1@2@@3@4"));
-		assertEquals("1!!4", new VariableInterpolator(it->"!").interpolate("1@2@@3@4"));
-		assertEquals("1!-!4", new VariableInterpolator(it->"!").interpolate("1@2@-@3@4"));
+		assertEquals("@", new JobVariableInterpolator(it->"!").interpolate("@@"));
+		assertEquals("@@", new JobVariableInterpolator(it->it).interpolate("@@@@"));
+		assertEquals("hello", new JobVariableInterpolator(it->it).interpolate("@hello@"));
+		assertEquals("helloworlddo", new JobVariableInterpolator(it->it).interpolate("hello@world@do"));
+		assertEquals("1234", new JobVariableInterpolator(it->it).interpolate("1@2@@3@4"));
+		assertEquals("1!!4", new JobVariableInterpolator(it->"!").interpolate("1@2@@3@4"));
+		assertEquals("1!-!4", new JobVariableInterpolator(it->"!").interpolate("1@2@-@3@4"));
 		try {
 			Interpolative.parse("hello@world@@do");
 			assertTrue(false);
@@ -40,7 +40,7 @@ public class VariableInterpolatorTest {
 		bean.setParent(new TestParentBean());
 		bean.getParent().setName("@var@");
 		
-		TestBean interpolated = new VariableInterpolator(it->"hello").interpolateProperties(bean);
+		TestBean interpolated = new JobVariableInterpolator(it->"hello").interpolateProperties(bean);
 		assertEquals("hello", interpolated.getName());
 		assertEquals(Lists.newArrayList("hello", "hello"), interpolated.getChildren());
 		assertEquals("hello", interpolated.getParent().getName());

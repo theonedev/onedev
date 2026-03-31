@@ -23,18 +23,12 @@ public class PathSegmentValidator implements ConstraintValidator<PathSegment, St
 
 		boolean valid = true;
 		String message = this.message;
-		if (value.contains("/") || value.contains("\\")) {
+
+		String checkMessage = checkPathSegment(value);
+		if (checkMessage != null) {
 			valid = false;
 			if (message.length() == 0)
-				message = "Slash and back slash characters are not allowed";
-		} else {
-			try {
-				Paths.get(value);
-			} catch (Exception e) {
-				valid = false;
-				if (message.length() == 0)
-					message = e.getMessage();
-			}
+				message = checkMessage;
 		}
 		
 		if (!valid) {
@@ -45,4 +39,19 @@ public class PathSegmentValidator implements ConstraintValidator<PathSegment, St
 		
 		return true;
 	}
+
+	public static String checkPathSegment(String value) {
+		if (value.contains(".."))
+			return "'..' is not allowed";
+		else if (value.contains("/") || value.contains("\\"))
+			return "Slash and back slash characters are not allowed";
+
+		try {
+			Paths.get(value);
+		} catch (Exception e) {
+			return e.getMessage();
+		}
+		return null;
+	}
+
 }

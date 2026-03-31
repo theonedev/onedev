@@ -1,0 +1,27 @@
+<wicket:panel>
+	<table wicket:id="keys" class="table table-hover"></table>
+	<wicket:fragment wicket:id="filesColumnFrag">
+		<a wicket:id="link"><span wicket:id="label"></span> <wicket:svg href="arrow" class="icon rotate-90"></wicket:svg></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="filesDropdownFrag">
+		<div class="p-3" style="max-height:480px;overflow:auto;">
+			<table class="table table-hover mb-0">
+				<thead>
+					<tr>
+						<th><wicket:t>Path</wicket:t></th>
+						<th><wicket:t>Size</wicket:t></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr wicket:id="files">
+						<td><span wicket:id="path"></span></td>
+						<td class="text-nowrap"><span wicket:id="size"></span></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="actionFrag">
+		<a wicket:id="delete" t:data-tippy-content="Delete this workspace data" class="btn btn-xs btn-icon btn-light btn-hover-danger"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+	</wicket:fragment>
+</wicket:panel>

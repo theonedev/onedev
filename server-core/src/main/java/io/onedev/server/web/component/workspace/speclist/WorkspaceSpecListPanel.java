@@ -52,11 +52,10 @@ public abstract class WorkspaceSpecListPanel extends Panel {
 		for (WorkspaceSpec spec : getProject().getHierarchyWorkspaceSpecs()) {
 			WebMarkupContainer specItem = new WebMarkupContainer(specsView.newChildId());
 			specItem.add(new Label("name", spec.getName()));
-			String specName = spec.getName();
 
-			List<Workspace> workspaces = queryWorkspaces(specName);
+			List<Workspace> workspaces = queryWorkspaces(spec.getName());
 
-			String queryString = buildWorkspaceQueryString(specName);
+			String queryString = buildWorkspaceQueryString(spec.getName());
 			specItem.add(new BookmarkablePageLink<Void>("showInList", ProjectWorkspacesPage.class,
 					ProjectWorkspacesPage.paramsOf(getProject(), queryString, 0)) {
 
@@ -76,8 +75,8 @@ public abstract class WorkspaceSpecListPanel extends Panel {
 				}
 
 				@Override
-				protected String getSpecName() {
-					return specName;
+				protected WorkspaceSpec getSpec() {
+					return spec;
 				}
 
 			});
@@ -86,7 +85,7 @@ public abstract class WorkspaceSpecListPanel extends Panel {
 
 				@Override
 				protected List<Workspace> load() {
-					return queryWorkspaces(specName);
+					return queryWorkspaces(spec.getName());
 				}
 
 			};

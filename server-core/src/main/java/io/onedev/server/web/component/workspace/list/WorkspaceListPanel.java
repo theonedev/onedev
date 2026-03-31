@@ -677,7 +677,7 @@ public abstract class WorkspaceListPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "branch d-none d-md-table-cell";
+				return "branch";
 			}
 
 			@Override

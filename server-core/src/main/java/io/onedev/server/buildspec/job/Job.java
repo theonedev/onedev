@@ -133,7 +133,7 @@ public class Job implements NamedElement, Validatable {
 		if (buildSpec != null) {
 			List<String> candidates = new ArrayList<>(buildSpec.getJobMap().keySet());
 			buildSpec.getJobs().forEach(it->candidates.remove(it.getName()));
-			return BuildSpec.suggestOverrides(candidates, status);
+			return SuggestionUtils.suggestOverrides(candidates, status);
 		}
 		return new ArrayList<>();
 	}
@@ -189,7 +189,7 @@ public class Job implements NamedElement, Validatable {
 		return SuggestionUtils.suggest(applicableJobExecutors, matchWith);
 	}
 	
-	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>")
+	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>")
 	@Valid
 	public List<Step> getSteps() {
 		return steps;

@@ -9,13 +9,16 @@ import java.util.Map;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.k8shelper.RegistryLoginFacade;
+import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Multiline;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
-import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 public abstract class CraneStep extends CommandStep {
@@ -78,34 +81,32 @@ public abstract class CraneStep extends CommandStep {
 
 	@Override
 	public Interpreter getInterpreter() {
-		return new DefaultInterpreter() {
-			
-			@Override
-			public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, String runAs,
-											   List<RegistryLoginFacade> registryLogins, Map<String, String> envMap, boolean useTTY) {
-				var commandsBuilder = new StringBuilder();
-				if (jobExecutor instanceof DockerAware) {
-					DockerAware registryLoginAware = (DockerAware) jobExecutor;
-					commandsBuilder.append("mkdir /root/.docker\n");
-					commandsBuilder.append("cat <<EOF>> /root/.docker/config.json\n");
-					var mergedRegistryLogins = merge(registryLogins, registryLoginAware.getRegistryLogins(jobToken));
-					commandsBuilder.append(buildDockerConfig(mergedRegistryLogins)).append("\n");
-					commandsBuilder.append("EOF\n");
-				}
-				if (getTrustCertificates() != null) {
-					commandsBuilder.append("cat <<EOF>> /root/trust-certs.crt\n");
-					commandsBuilder.append(getTrustCertificates().replace("\r\n", "\n")).append("\n");
-					commandsBuilder.append("EOF\n");
-					commandsBuilder.append("export SSL_CERT_FILE=/root/trust-certs.crt");
-				}
-				commandsBuilder.append(getCommand());
-				return new CommandFacade(image, runAs, registryLogins, commandsBuilder.toString(), 
-						envMap, useTTY);
-			}
-			
-		};
+		return new DefaultInterpreter();
 	}
-	
+
+	@Override
+	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination, 
+			List<RegistryLoginFacade> registryLogins, Map<String, String> envMap) {
+		var commandsBuilder = new StringBuilder();
+		if (jobExecutor instanceof DockerAware) {
+			DockerAware registryLoginAware = (DockerAware) jobExecutor;
+			commandsBuilder.append("mkdir /root/.docker\n");
+			commandsBuilder.append("cat <<EOF>> /root/.docker/config.json\n");
+			var mergedRegistryLogins = merge(registryLogins, registryLoginAware.getRegistryLogins(jobToken));
+			commandsBuilder.append(buildDockerConfig(mergedRegistryLogins)).append("\n");
+			commandsBuilder.append("EOF\n");
+		}
+		if (getTrustCertificates() != null) {
+			commandsBuilder.append("cat <<EOF>> /root/trust-certs.crt\n");
+			commandsBuilder.append(getTrustCertificates().replace("\r\n", "\n")).append("\n");
+			commandsBuilder.append("EOF\n");
+			commandsBuilder.append("export SSL_CERT_FILE=/root/trust-certs.crt");
+		}
+		commandsBuilder.append(getCommand());
+		return new CommandFacade(getEffectiveImage(), getRunAs(), registryLogins,
+				envMap, isUseTTY(), commandsBuilder.toString());
+	}
+
 	protected abstract String getCommand();
 	
 }

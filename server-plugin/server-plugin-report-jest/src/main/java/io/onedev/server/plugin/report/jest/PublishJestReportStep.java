@@ -29,7 +29,7 @@ public class PublishJestReportStep extends PublishUnitTestReportStep {
 
 	private static final long serialVersionUID = 1L;
 
-	@Editable(order=100, description="Specify Jest test result file in json format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. "
+	@Editable(order=100, description="Specify Jest test result file in json format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. "
 			+ "This file can be generated via Jest option <tt>'--json'</tt> and <tt>'--outputFile'</tt>. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)

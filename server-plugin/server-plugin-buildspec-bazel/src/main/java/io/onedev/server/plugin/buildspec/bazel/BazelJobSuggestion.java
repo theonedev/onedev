@@ -8,7 +8,6 @@ import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import io.onedev.server.buildspec.step.CheckoutStep;
 import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.buildspec.step.SetupCacheStep;
-import io.onedev.server.buildspec.step.CachePath;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import org.eclipse.jgit.lib.FileMode;
@@ -46,9 +45,7 @@ public class BazelJobSuggestion implements JobSuggestion {
 			setupCache.setKey("bazel_cache");
 
 			setupCache.setChecksumFiles(".bazelversion MODULE.bazel MODULE.bazel.lock **/BUILD **/BUILD.bazel");
-			setupCache.setPaths(Lists.newArrayList(
-				CachePath.of(false, "/root/.cache/bazelisk"), 
-				CachePath.of(false, "/root/.cache/bazel")));
+			setupCache.setPaths(Lists.newArrayList("/root/.cache/bazelisk", "/root/.cache/bazel"));
 			job.getSteps().add(setupCache);
 
 			CommandStep buildAndTest = new CommandStep();

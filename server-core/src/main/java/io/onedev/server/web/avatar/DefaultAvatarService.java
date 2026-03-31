@@ -1,23 +1,12 @@
 package io.onedev.server.web.avatar;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
-import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.cluster.ClusterService;
-import io.onedev.server.service.EmailAddressService;
-import io.onedev.server.service.SettingService;
-import io.onedev.server.service.UserService;
-import io.onedev.server.model.User;
-import io.onedev.server.util.facade.EmailAddressFacade;
-import io.onedev.server.util.facade.UserFacade;
-import org.apache.commons.codec.binary.Hex;
-import org.eclipse.jgit.lib.PersonIdent;
+import static io.onedev.commons.utils.FileUtils.createDir;
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.commons.utils.LockUtils.write;
+import static io.onedev.server.web.avatar.AvatarGenerator.generate;
+import static io.onedev.server.web.component.avatarupload.AvatarUploadField.writeToFile;
+import static javax.imageio.ImageIO.write;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -26,12 +15,28 @@ import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
-import static io.onedev.commons.utils.FileUtils.createDir;
-import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.commons.utils.LockUtils.write;
-import static io.onedev.server.web.avatar.AvatarGenerator.generate;
-import static io.onedev.server.web.component.avatarupload.AvatarUploadField.writeToFile;
-import static javax.imageio.ImageIO.write;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.commons.codec.binary.Hex;
+import org.eclipse.jgit.lib.PersonIdent;
+
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
+
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterService;
+import io.onedev.server.model.User;
+import io.onedev.server.service.EmailAddressService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
+import io.onedev.server.util.SiteSyncUtils;
+import io.onedev.server.util.facade.EmailAddressFacade;
+import io.onedev.server.util.facade.UserFacade;
 
 @Singleton
 public class DefaultAvatarService implements AvatarService, Serializable {
@@ -189,6 +194,7 @@ public class DefaultAvatarService implements AvatarService, Serializable {
 				if (avatarFile.exists())
 					FileUtils.deleteFile(avatarFile);
 			}
+			SiteSyncUtils.increaseVersion(OneDev.getAssetsDir());
 			return null;
 		}));
 	}
@@ -216,6 +222,7 @@ public class DefaultAvatarService implements AvatarService, Serializable {
 				if (avatarFile.exists())
 					FileUtils.deleteFile(avatarFile);
 			}
+			SiteSyncUtils.increaseVersion(OneDev.getAssetsDir());
 			return null;
 		}));		
 	}
@@ -264,6 +271,7 @@ public class DefaultAvatarService implements AvatarService, Serializable {
 				} finally {
 					FileUtils.deleteFile(tempFile);
 				}
+				SiteSyncUtils.increaseVersion(OneDev.getAssetsDir());
 			}
 			return null;
 		});

@@ -3,6 +3,7 @@ package io.onedev.server.workspace;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.shiro.subject.Subject;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
@@ -39,11 +40,15 @@ public interface WorkspaceService extends EntityService<Workspace> {
 
 	void delete(Collection<Workspace> workspaces);
 
+	void requestToReprovision(Workspace workspace);
+
 	File getWorkspaceDir(Long projectId, Long workspaceNumber);
 
-	String openShell(Workspace workspace);
+	String openShell(Workspace workspace, String label);
 
-	List<String> getShellIds(Workspace workspace);
+	Map<String, String> getShellLabels(Workspace workspace);
+
+	Map<Integer, Integer> getPortMappings(Workspace workspace);
 
 	void terminateShell(Workspace workspace, String shellId);
 

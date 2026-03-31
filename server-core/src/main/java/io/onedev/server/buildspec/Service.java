@@ -21,6 +21,7 @@ import io.onedev.server.annotation.SuggestionProvider;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.step.RegistryLogin;
 import io.onedev.server.model.Build;
+import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
 public class Service implements NamedElement {
@@ -60,7 +61,7 @@ public class Service implements NamedElement {
 		if (buildSpec != null) {
 			List<String> candidates = new ArrayList<>(buildSpec.getServiceMap().keySet());
 			buildSpec.getServices().forEach(it->candidates.remove(it.getName()));
-			return BuildSpec.suggestOverrides(candidates, status);
+			return SuggestionUtils.suggestOverrides(candidates, status);
 		}
 		return new ArrayList<>();
 	}

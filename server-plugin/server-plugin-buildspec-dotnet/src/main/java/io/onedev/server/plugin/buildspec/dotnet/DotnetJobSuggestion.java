@@ -9,7 +9,6 @@ import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import io.onedev.server.buildspec.step.CheckoutStep;
 import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.buildspec.step.SetupCacheStep;
-import io.onedev.server.buildspec.step.CachePath;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.model.Project;
@@ -42,7 +41,7 @@ public class DotnetJobSuggestion implements JobSuggestion {
 			setupCache.setKey("nuget_packages");
 
 			setupCache.setChecksumFiles("**/*.csproj");
-			setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "/root/.nuget/packages")));
+			setupCache.setPaths(Lists.newArrayList("/root/.nuget/packages"));
 			job.getSteps().add(setupCache);
 			
 			var testAndAnalyze = new CommandStep();

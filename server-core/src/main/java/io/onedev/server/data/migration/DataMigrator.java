@@ -69,7 +69,7 @@ import io.onedev.server.service.SettingService;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.DirectoryVersionUtils;
+import io.onedev.server.util.SiteSyncUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ParsedEmailAddress;
 import io.onedev.server.util.patternset.PatternSet;
@@ -7615,7 +7615,7 @@ public class DataMigrator {
 							var currentPath = targetPackBlobFile.getParentFile().toPath();
 							while (currentPath.startsWith(targetProjectPath)) {
 								var currentDir = currentPath.toFile();
-								DirectoryVersionUtils.increaseVersion(currentDir);
+								SiteSyncUtils.increaseVersion(currentDir);
 								currentPath = currentPath.getParent();
 							}
 					
@@ -8596,10 +8596,23 @@ public class DataMigrator {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element : dom.getRootElement().elements()) {
 					Element keyElement = element.element("key");
-					if (keyElement != null && keyElement.getTextTrim().equals("EMAIL_TEMPLATES")) {
+					if (keyElement == null)
+						continue;
+					String settingKey = keyElement.getTextTrim();
+					if (settingKey.equals("EMAIL_TEMPLATES")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
 							valueElement.addElement("workspaceNotification").setText(template);
+						}
+					} else if (settingKey.equals("GROOVY_SCRIPTS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element groovyScriptElement : valueElement.elements()) {
+								Element authorizationElement = groovyScriptElement.element("authorization");
+								if (authorizationElement != null)
+									authorizationElement.setName("jobAuthorization");
+								groovyScriptElement.addElement("canBeUsedByWorkspaceSpecs").setText("true");
+							}
 						}
 					}
 				}

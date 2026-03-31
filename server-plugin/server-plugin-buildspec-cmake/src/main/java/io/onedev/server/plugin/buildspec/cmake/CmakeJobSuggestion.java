@@ -17,7 +17,6 @@ import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import io.onedev.server.buildspec.step.CheckoutStep;
 import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.buildspec.step.SetupCacheStep;
-import io.onedev.server.buildspec.step.CachePath;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import io.onedev.server.plugin.report.cobertura.PublishCoberturaReportStep;
@@ -32,7 +31,7 @@ public class CmakeJobSuggestion implements JobSuggestion {
 		setupCache.setKey("vcpkg_cache");
 
 		setupCache.setChecksumFiles("**/vcpkg.json");
-		setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "/root/.cache/vcpkg")));
+		setupCache.setPaths(Lists.newArrayList("/root/.cache/vcpkg"));
 		return setupCache;
 	}
 
@@ -42,7 +41,7 @@ public class CmakeJobSuggestion implements JobSuggestion {
 		setupCache.setKey("fetchcontent_cache");
 
 		setupCache.setChecksumFiles("**/CMakeLists.txt");
-		setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "build/.deps")));
+		setupCache.setPaths(Lists.newArrayList("build/.deps"));
 		return setupCache;
 	}
 
@@ -52,7 +51,7 @@ public class CmakeJobSuggestion implements JobSuggestion {
 		setupCache.setKey("conan_cache");
 
 		setupCache.setChecksumFiles("**/conanfile.txt **/conanfile.py");
-		setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "/root/.conan2/p")));
+		setupCache.setPaths(Lists.newArrayList("/root/.conan2/p"));
 		return setupCache;
 	}
 	

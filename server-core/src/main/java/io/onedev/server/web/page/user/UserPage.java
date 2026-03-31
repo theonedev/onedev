@@ -47,6 +47,7 @@ import io.onedev.server.web.page.user.querywatch.UserQueryWatchesPage;
 import io.onedev.server.web.page.user.sshkeys.UserSshKeysPage;
 import io.onedev.server.web.page.user.ssoaccounts.UserSsoAccountsPage;
 import io.onedev.server.web.page.user.twofactorauthentication.UserTwoFactorAuthenticationPage;
+import io.onedev.server.web.page.user.workspacedata.UserWorkspaceDataPage;
 import io.onedev.server.web.util.UserAware;
 
 public abstract class UserPage extends LayoutPage implements UserAware {
@@ -116,6 +117,7 @@ public abstract class UserPage extends LayoutPage implements UserAware {
 				tabs.add(new PageTab(Model.of(_T("SSO Accounts")), Model.of("user"), UserSsoAccountsPage.class, params));
 				tabs.add(new PageTab(Model.of(_T("Query Watches")), Model.of("bell"), UserQueryWatchesPage.class, params));
 			}
+			tabs.add(new PageTab(Model.of(_T("Workspace Data")), Model.of("workspace"), UserWorkspaceDataPage.class, params));
 		}
 		
 		add(new Tabbable("userTabs", tabs).setVisible(SecurityUtils.isAdministrator()));

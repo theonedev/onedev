@@ -2,9 +2,14 @@ package io.onedev.server.web.page.project.workspaces.detail;
 
 import static io.onedev.server.web.translation.Translation._T;
 
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -17,10 +22,13 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -31,20 +39,26 @@ import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.jspecify.annotations.Nullable;
 
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Workspace.Status;
+import io.onedev.server.model.support.workspace.spec.ShortcutConfig;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.workspace.WorkspaceQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.service.SettingService;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ChangeObserver;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -74,6 +88,12 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 	@Inject
 	protected WorkspaceService workspaceService;
+
+	@Inject
+	protected ClusterService clusterService;
+
+	@Inject
+	protected SettingService settingService;
 
 	private Workspace.Status workspaceStatus;
 
@@ -127,48 +147,80 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 		Workspace workspace = getWorkspace();
 
-		add(new UserIdentPanel("user", workspace.getUser(), Mode.AVATAR_AND_NAME));
-		add(new BranchLink("branch", new ProjectAndBranch(workspace.getProject(), workspace.getBranch()), true));
-		add(new Label("spec", workspace.getSpecName()));
-		add(new InvalidWorkspaceSpecIcon("invalidSpec", workspaceModel));
+		var head = new WebMarkupContainer("head");
+		add(head);
 
-		add(new WorkspaceStatusIcon("statusIcon", new AbstractReadOnlyModel<Status>() {
+		head.add(new UserIdentPanel("user", workspace.getUser(), Mode.AVATAR_AND_NAME));
+		head.add(new BranchLink("branch", new ProjectAndBranch(workspace.getProject(), workspace.getBranch()), true));
+		head.add(new Label("spec", workspace.getSpecName()));
+		head.add(new InvalidWorkspaceSpecIcon("invalidSpec", workspaceModel));
+
+		head.add(new WorkspaceStatusIcon("statusIcon", new AbstractReadOnlyModel<Status>() {
 
 			@Override
 			public Status getObject() {
 				return getWorkspace().getStatus();
 			}
 	
-		}) {
-
-			@Override
-			protected Collection<String> getChangeObservables() {
-				return Set.of(getWorkspace().getStatusChangeObservable());
-			}
-
-		});
-		add(new Label("statusLabel", new AbstractReadOnlyModel<String>() {
+		}));
+		head.add(new Label("statusLabel", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
 				return _T(workspaceModel.getObject().getStatus().toString());
 			}
 
-		}).add(new ChangeObserver() {
-
-			@Override
-			public Collection<String> findObservables() {
-				return Set.of(getWorkspace().getStatusChangeObservable());
-			}
-
 		}));
 
-		add(new Link<Void>("openTerminal") {
+		head.add(new MenuLink("shortcuts") {
+
+			@Override
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				var menuItems = new ArrayList<MenuItem>();
+				for (var shortcut : getShortcutConfigs()) {
+					final String name = shortcut.getName();
+					final String command = shortcut.getCommand();
+					menuItems.add(new MenuItem() {
+						
+						@Override
+						public String getLabel() {
+							return name;
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new Link<Void>(id) {
+								@Override
+								public void onClick() {
+									var shellId = workspaceService.openShell(getWorkspace(), name);
+									setResponsePage(WorkspaceTerminalPage.class,
+											WorkspaceTerminalPage.paramsOf(getWorkspace(), shellId, command));
+								}
+							};
+						
+						}
+
+					});
+				}
+				return menuItems;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getWorkspace().getStatus() == Status.ACTIVE
+						&& SecurityUtils.canModifyOrDelete(getWorkspace())
+						&& !getShortcutConfigs().isEmpty());
+			}
+
+		});
+
+		head.add(new Link<Void>("openTerminal") {
 
 			@Override
 			public void onClick() {
-				var terminalIndex = workspaceService.openShell(getWorkspace());
-				setResponsePage(WorkspaceTerminalPage.class, WorkspaceTerminalPage.paramsOf(getWorkspace(), terminalIndex));
+				var shellId = workspaceService.openShell(getWorkspace(), _T("Terminal"));
+				setResponsePage(WorkspaceTerminalPage.class, WorkspaceTerminalPage.paramsOf(getWorkspace(), shellId));
 			}
 
 			@Override
@@ -180,7 +232,83 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 		});
 
-		add(new Link<Void>("delete") {
+		head.add(new MenuLink("portMappings") {
+
+			@Override
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				Long projectId = getProject().getId();
+				var serverHost = projectService.runOnActiveServer(projectId, () -> {
+					return clusterService.getServerHost(clusterService.getLocalServerAddress());
+				});
+				try {
+					if (InetAddress.getByName(serverHost).isLoopbackAddress()) {
+						try {
+							serverHost = new URL(settingService.getSystemSetting().getServerUrl()).getHost();
+						} catch (MalformedURLException e) {
+							throw new RuntimeException(e);
+						}	
+					}
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
+				}
+
+				var menuItems = new ArrayList<MenuItem>();
+				var mappings = workspaceService.getPortMappings(getWorkspace());
+				for (var entry : mappings.entrySet()) {
+					var containerPort = entry.getKey();
+					var hostPort = entry.getValue();
+					var url = "http://" + serverHost + ":" + hostPort;
+					menuItems.add(new MenuItem() {
+						@Override
+						public String getLabel() {
+							return "Port " + containerPort + " \u2192 " + hostPort;
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new ExternalLink(id, url) {
+								
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									tag.put("target", "_blank");
+								}
+
+							};
+						}
+					});
+				}
+				return menuItems;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getWorkspace().getStatus() == Status.ACTIVE
+						&& !workspaceService.getPortMappings(getWorkspace()).isEmpty());
+			}
+
+		});
+
+		head.add(new Link<Void>("reprovision") {
+
+			@Override
+			public void onClick() {
+				workspaceService.requestToReprovision(getWorkspace());
+				Session.get().success(MessageFormat.format(_T("Workspace reprovisioning requested"),
+						getWorkspace().getReference().toString(getWorkspace().getProject())));
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getWorkspace().getStatus() == Status.ERROR
+						&& SecurityUtils.canModifyOrDelete(getWorkspace()));
+			}
+
+		});
+
+		head.add(new Link<Void>("delete") {
 
 			@Override
 			public void onClick() {
@@ -205,30 +333,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 
 		}.add(new ConfirmClickModifier(_T("Do you really want to delete this workspace?"))));
 
-		add(new Tabbable("workspaceTabs", new LoadableDetachableModel<>() {
-
-			@Override
-			protected List<Tab> load() {
-				List<Tab> tabs = new ArrayList<>();
-
-				for (var shellId : workspaceService.getShellIds(getWorkspace())) 
-					tabs.add(new TerminalTab(getWorkspace(), shellId));
-				if (getWorkspace().getStatus() != Workspace.Status.PENDING)
-					tabs.add(new WorkspaceTab(Model.of(_T("Changes")), Model.of("diff"), WorkspaceChangesPage.class, WorkspaceChangesPage.paramsOf(getWorkspace())));
-				tabs.add(new WorkspaceTab(Model.of(_T("Log")), Model.of("log"), WorkspaceLogPage.class, WorkspaceLogPage.paramsOf(getWorkspace())));
-				return tabs;
-			}
-
-		}).add(new ChangeObserver() {
-
-			@Override
-			public Collection<String> findObservables() {
-				return Set.of(getWorkspace().getStatusChangeObservable());
-			}
-			
-		}));
-
-		add(new EntityNavPanel<Workspace>("entityNav") {
+		head.add(new EntityNavPanel<Workspace>("entityNav") {
 
 			@Override
 			protected EntityQuery<Workspace> parse(String queryString, @Nullable Project project) {
@@ -262,15 +367,58 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 			}
 		});		
 		
+		head.add(new ChangeObserver() {
+
+			@Override
+			public Collection<String> findObservables() {
+				return Set.of(getWorkspace().getStatusChangeObservable());
+			}
+
+		});
+
+		add(new Tabbable("workspaceTabs", new LoadableDetachableModel<>() {
+
+			@Override
+			protected List<Tab> load() {
+				List<Tab> tabs = new ArrayList<>();
+
+				var labels = workspaceService.getShellLabels(getWorkspace());
+				var labelCounts = new HashMap<String, Integer>();
+				for (var entry: labels.entrySet()) {
+					var shellId = entry.getKey();
+					var label = entry.getValue();
+					int count = labelCounts.merge(label, 1, Integer::sum);
+					var displayLabel = count == 1 ? label : label + " " + count;
+					tabs.add(new TerminalTab(getWorkspace(), shellId, displayLabel));
+				}
+
+				if (getWorkspace().getStatus() != Workspace.Status.PENDING)
+					tabs.add(new WorkspaceTab(Model.of(_T("Changes")), Model.of("diff"), WorkspaceChangesPage.class, WorkspaceChangesPage.paramsOf(getWorkspace())));
+				tabs.add(new WorkspaceTab(Model.of(_T("Log")), Model.of("log"), WorkspaceLogPage.class, WorkspaceLogPage.paramsOf(getWorkspace())));
+				return tabs;
+			}
+
+		}).add(new ChangeObserver() {
+
+			@Override
+			public Collection<String> findObservables() {
+				return Set.of(getWorkspace().getStatusChangeObservable());
+			}
+			
+		}));
+
 		workspaceStatus = getWorkspace().getStatus();
 		add(new ChangeObserver() {
 
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler, Collection<String> changedObservables) {
-				if (workspaceStatus == Workspace.Status.PENDING && getWorkspace().getStatus() == Workspace.Status.ACTIVE) {
-					var terminalId = workspaceService.openShell(getWorkspace());
-					setResponsePage(WorkspaceTerminalPage.class, WorkspaceTerminalPage.paramsOf(getWorkspace(), terminalId));
-				} else if (workspaceStatus == Workspace.Status.ACTIVE && getWorkspace().getStatus() == Workspace.Status.ERROR) {
+				if (workspaceStatus != Workspace.Status.ACTIVE && getWorkspace().getStatus() == Workspace.Status.ACTIVE) {
+					var firstShortcut = getShortcutConfigs().stream().findFirst().orElse(null);
+					var command = firstShortcut != null ? firstShortcut.getCommand() : null;
+					var label = firstShortcut != null ? firstShortcut.getName() : _T("Terminal");
+					var shellId = workspaceService.openShell(getWorkspace(), label);
+					setResponsePage(WorkspaceTerminalPage.class, WorkspaceTerminalPage.paramsOf(getWorkspace(), shellId, command));
+				} else if (workspaceStatus == Workspace.Status.ACTIVE && getWorkspace().getStatus() != Workspace.Status.ACTIVE) {
 					setResponsePage(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(getWorkspace()));
 				}
 			}
@@ -307,6 +455,14 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 		PageParameters params = ProjectPage.paramsOf(project);
 		params.add(PARAM_WOPKSPACE, workspaceNumber);
 		return params;
+	}
+
+	private List<ShortcutConfig> getShortcutConfigs() {
+		var spec = getProject().getHierarchyWorkspaceSpecs().stream()
+			.filter(it -> it.getName().equals(getWorkspace().getSpecName()))
+			.findFirst()
+			.orElse(null);			
+		return spec != null? spec.getShortcutConfigs(): List.of();
 	}
 
 }

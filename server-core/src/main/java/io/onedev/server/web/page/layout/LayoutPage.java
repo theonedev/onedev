@@ -170,6 +170,7 @@ import io.onedev.server.web.page.my.querywatch.MyQueryWatchesPage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.my.ssoaccounts.MySsoAccountsPage;
 import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthenticationPage;
+import io.onedev.server.web.page.my.workspacedata.MyWorkspaceDataPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.security.LogoutPage;
 import io.onedev.server.web.page.user.UserPage;
@@ -1208,6 +1209,14 @@ public abstract class LayoutPage extends BasePage {
 				item.add(AttributeAppender.append("class", "active"));
 		} else {
 			userInfo.add(new WebMarkupContainer("myQueryWatches").setVisible(false));
+		}
+
+		if (loginUser != null && !loginUser.isDisabled()) {
+			userInfo.add(item = new ViewStateAwarePageLink<Void>("myWorkspaceData", MyWorkspaceDataPage.class));
+			if (getPage() instanceof MyWorkspaceDataPage)
+				item.add(AttributeAppender.append("class", "active"));
+		} else {
+			userInfo.add(new WebMarkupContainer("myWorkspaceData").setVisible(false));
 		}
 
 		if (!SecurityUtils.isAnonymous(SecurityUtils.getPrevPrincipal())) {

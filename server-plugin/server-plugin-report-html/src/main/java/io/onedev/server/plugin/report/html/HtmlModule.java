@@ -29,7 +29,7 @@ import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.server.model.Build.getProjectRelativeDirPath;
 import static io.onedev.server.plugin.report.html.PublishHtmlReportStep.CATEGORY;
 import static io.onedev.server.plugin.report.html.PublishHtmlReportStep.getReportLockName;
-import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
+import static io.onedev.server.util.SiteSyncUtils.isVersionFile;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.

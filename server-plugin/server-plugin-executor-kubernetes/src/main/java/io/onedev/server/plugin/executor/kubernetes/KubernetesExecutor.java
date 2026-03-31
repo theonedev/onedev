@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -65,7 +66,6 @@ import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.BuildImageFacade;
-import io.onedev.k8shelper.CachePathFacade;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.k8shelper.CompositeFacade;
 import io.onedev.k8shelper.KubernetesHelper;
@@ -237,7 +237,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 		this.memoryLimit = memoryLimit;
 	}
 
-	@Editable(order=600, group="Privilege Settings", description = "Whether or not to always pull image when " +
+	@Editable(order=600, group="Security Settings", description = "Whether or not to always pull image when " +
 			"run container or build images. This option should be enabled to avoid images being replaced by " +
 			"malicious jobs running on same node")
 	public boolean isAlwaysPullImage() {
@@ -348,31 +348,15 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 					kubectl.addArgs("exec", "-it", POD_NAME, "-c", containerNameCopy,
 							"--namespace", getNamespace(jobContext), "--");
 
-					String workingDir;
-					if (containerNameCopy.startsWith("step-")) {
-						List<Integer> stepPosition = parseStepPosition(containerNameCopy.substring("step-".length()));
-						LeafFacade step = Preconditions.checkNotNull(jobContext.getStep(stepPosition));
-						if (step instanceof RunContainerFacade)
-							workingDir = ((RunContainerFacade)step).getWorkingDir();
-						else 
-							workingDir = "/onedev-build/workspace";
-					} else {
-						workingDir = "/onedev-build/workspace";
-					}
-
-					String[] shell = null;
+					String shell = null;
 					if (containerNameCopy.startsWith("step-")) {
 						List<Integer> stepPosition = parseStepPosition(containerNameCopy.substring("step-".length()));
 						LeafFacade step = Preconditions.checkNotNull(jobContext.getStep(stepPosition));
 						if (step instanceof CommandFacade)
-							shell = ((CommandFacade)step).getShell(false, workingDir);
+							shell = ((CommandFacade)step).getExecutable();
 					}
-					if (shell == null) {
-						if (workingDir != null) 
-							shell = new String[]{"sh", "-c", String.format("cd '%s' && sh", workingDir)};
-						else 
-							shell = new String[]{"sh"};
-					}
+					if (shell == null) 
+						shell = "sh";
 					kubectl.addArgs(shell);
 					return new CommandlineShell(terminal, kubectl);
 				} else {
@@ -948,7 +932,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 				List<Map<Object, Object>> containerSpecs = new ArrayList<>();
 				
 				var containerBuildDirPath = "/onedev-build";
-				var containerWorkDirPath = containerBuildDirPath +"/workspace";
+				var containerWorkDirPath = containerBuildDirPath +"/work";
 				var containerCommandDirPath = containerBuildDirPath + "/command";
 				var containerTrustCertsDirPath = containerBuildDirPath + "/trust-certs";
 
@@ -969,7 +953,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 				} else {
 					List<Action> actions = new ArrayList<>();
 					CommandFacade facade = new CommandFacade((String) executionContext, null, null,
-							"this does not matter", new HashMap<>(), false);
+							new HashMap<>(), false, "this does not matter");
 					actions.add(new Action("test", facade, ALWAYS, false));
 					entryFacade = new CompositeFacade(actions);
 				}
@@ -989,12 +973,8 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 						"name", "ONEDEV_WORKDIR",
 						"value", containerWorkDirPath
 						));
-				commonEnvs.add(newLinkedHashMap(
-					"name", "ONEDEV_WORKSPACE",
-					"value", containerWorkDirPath
-					));
 	
-				Collection<CachePathFacade> cachePaths = new LinkedHashSet<>();
+				Collection<String> cachePaths = new LinkedHashSet<>();
 				entryFacade.traverse((facade, position) -> {
 					String containerName = getContainerName(position);
 					containerNames.add(containerName);
@@ -1008,11 +988,12 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 						
 						stepContainerSpec = newHashMap(
 								"name", containerName, 
-								"image", commandFacade.getImage());
+								"image", commandFacade.getImage(), 
+								"workingDir", containerWorkDirPath);
 						if (isAlwaysPullImage())
 							stepContainerSpec.put("imagePullPolicy", "Always");
 						if (commandFacade.isUseTTY())
-							stepContainerSpec.put("tty", true);
+							stepContainerSpec.put("tty", true);						
 						var volumeMounts = buildVolumeMounts(cachePaths);
 						volumeMounts.addAll(commonVolumeMounts);
 						stepContainerSpec.put("volumeMounts", SerializationUtils.clone(volumeMounts));
@@ -1027,7 +1008,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 								"remote docker executor");
 					} else {
 						if (facade instanceof SetupCacheFacade) 
-							cachePaths.addAll(((SetupCacheFacade) facade).getPaths());
+							cachePaths.addAll(((SetupCacheFacade) facade).getCacheConfig().getPaths());
 						stepContainerSpec = newHashMap(
 								"name", containerName, 
 								"image", helperImage);
@@ -1280,14 +1261,14 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 		}
 	}
 	
-	private ArrayList<Object> buildVolumeMounts(Collection<io.onedev.k8shelper.CachePathFacade> cachePaths) {
+	private ArrayList<Object> buildVolumeMounts(Collection<String> cachePaths) {
 		var volumeMounts = new ArrayList<>();
 		int index = 1;
-		for (var cachePath: cachePaths) {
-			if (cachePath.isAbsolute()) {
+		for (var path: cachePaths) {
+			if (FilenameUtils.getPrefixLength(path) > 0) {
 				var volumeMount = newLinkedHashMap(
 						"name", "build-home",
-						"mountPath", cachePath.getPathValue(),
+						"mountPath", path,
 						"subPath", "cache/" + index);
 				volumeMounts.add(volumeMount);
 			}

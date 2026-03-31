@@ -6,10 +6,10 @@ import java.util.List;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.annotation.SubPath;
+import io.onedev.server.annotation.Path;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.buildspec.BuildSpec;
 
 @Editable
 public class VolumeMount implements Serializable {
@@ -20,10 +20,10 @@ public class VolumeMount implements Serializable {
 	
 	private String target;
 
-	@Editable(order = 100, placeholder = "Job workspace", description = "Specify a path relative to job workdir " +
-			"to be used as mount source. Leave empty to mount job workdir itself")
+	@Editable(order = 100, placeholder = "Job workdir", description = "Specify a path relative to job working directory " +
+			"to be used as mount source. Leave empty to mount job working directory itself")
 	@Interpolative(variableSuggester="suggestVariables")
-	@SubPath
+	@Path(Path.Type.RELATIVE)
 	public String getSourcePath() {
 		return source;
 	}

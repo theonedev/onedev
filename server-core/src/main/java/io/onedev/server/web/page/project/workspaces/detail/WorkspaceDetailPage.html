@@ -1,18 +1,27 @@
 <wicket:extend>
 	<div class="workspace-detail d-flex flex-column flex-grow-1">
-		<div class="head d-flex align-items-center px-3 py-2">
+		<div wicket:id="head" class="head d-flex align-items-center px-3 py-2">
             <div class="left d-flex align-items-center">
-				<div class="summary mr-4">
-					<a wicket:id="user"></a> on <a wicket:id="branch"></a> for <span wicket:id="spec"></span>	
-					<span wicket:id="invalidSpec" class="text-warning ml-1"></span>
-				</div>
-	            <div class="status text-nowrap mr-4">
+	            <div class="status text-nowrap mr-3">
 	                <svg wicket:id="statusIcon" class="mr-2"></svg>
 	                <span wicket:id="statusLabel"></span>
 	            </div>		
-				<a wicket:id="openTerminal" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-4" t:data-tippy-content="Open terminal">
+				<div class="summary mr-3">
+					<span class="d-none d-md-inline"><a wicket:id="user"></a> on </span><a wicket:id="branch"></a> <span class="d-none d-md-inline">for <span wicket:id="spec"></span></span>
+					<span wicket:id="invalidSpec" class="text-warning ml-1"></span>
+				</div>
+				<a wicket:id="shortcuts" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-3" t:data-tippy-content="Shortcuts">
+					<wicket:svg href="grid" class="icon"></wicket:svg>
+				</a>
+				<a wicket:id="openTerminal" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-3" t:data-tippy-content="Open terminal">
 					<wicket:svg href="terminal" class="icon"></wicket:svg>
-				</a>		
+				</a>
+				<a wicket:id="portMappings" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-3" t:data-tippy-content="Port Mappings">
+					<wicket:svg href="mapping" class="icon"></wicket:svg>
+				</a>
+				<a wicket:id="reprovision" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-3" t:data-tippy-content="Reprovision workspace">
+					<wicket:svg href="re-run" class="icon"></wicket:svg>
+				</a>
 			</div>
 			<div class="right d-flex align-items-center ml-auto">
 				<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" t:data-tippy-content="Delete this workspace">

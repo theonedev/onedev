@@ -8,7 +8,6 @@ import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import io.onedev.server.buildspec.step.*;
-import io.onedev.server.buildspec.step.CachePath;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
@@ -93,7 +92,7 @@ public class RustJobSuggestion implements JobSuggestion {
 			setupCache.setKey("rust_cache");
 
 			setupCache.setChecksumFiles("**/Cargo.toml **/Cargo.lock");
-			setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "/root/.cache/cargo")));
+			setupCache.setPaths(Lists.newArrayList("/root/.cache/cargo"));
 			job.getSteps().add(setupCache);
 
 			CommandStep buildAndTest = new CommandStep();

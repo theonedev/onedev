@@ -1,15 +1,17 @@
 package io.onedev.server.workspace;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.k8shelper.CloneInfo;
+import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 
 public class WorkspaceContext implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
+
+	private final WorkspaceSpec spec;
 
 	private final String token;
 
@@ -23,42 +25,37 @@ public class WorkspaceContext implements Serializable {
 	
 	private final Long workspaceNumber;
 
-	private final String shell;
-
-	private final Map<String, String> envVars;
-
-	private final CloneInfo cloneInfo;
-
-	private final boolean retrieveLfs;
-
-	private final String branch;
+	private final Long userId;
 
 	private final String userName;
 
 	private final String userEmail;
 
-	private final Map<String, String> userConfigs;
+	private final CloneInfo cloneInfo;
 
-	public WorkspaceContext(String token, Long projectId, String projectPath, String projectGitDir, 
-				Long workspaceId, Long workspaceNumber, String shell, Map<String, String> envVars, 
-				CloneInfo cloneInfo, boolean retrieveLfs, @Nullable String branch, String userName, 
-				String userEmail, Map<String, String> userConfigs) {
+	private final String branch;
+
+	public WorkspaceContext(WorkspaceSpec spec, String token, Long projectId, String projectPath, String projectGitDir, 
+				Long workspaceId, Long workspaceNumber, Long userId, String userName, String userEmail, 
+				CloneInfo cloneInfo, String branch) {
+		this.spec = spec;
 		this.token = token;
 		this.projectId = projectId;
 		this.projectPath = projectPath;
 		this.projectGitDir = projectGitDir;
 		this.workspaceId = workspaceId;
 		this.workspaceNumber = workspaceNumber;
-		this.shell = shell;
-		this.envVars = envVars;
-		this.cloneInfo = cloneInfo;
-		this.retrieveLfs = retrieveLfs;
-		this.branch = branch;
+		this.userId = userId;
 		this.userName = userName;
 		this.userEmail = userEmail;
-		this.userConfigs = userConfigs;
+		this.cloneInfo = cloneInfo;
+		this.branch = branch;
 	}
 	
+	public WorkspaceSpec getSpec() {
+		return spec;
+	}
+
 	public String getToken() {
 		return token;
 	}
@@ -83,26 +80,8 @@ public class WorkspaceContext implements Serializable {
 		return workspaceNumber;
 	}
 
-	@Nullable
-	public String getShell() {
-		return shell;
-	}
-
-	public Map<String, String> getEnvVars() {
-		return envVars;
-	}
-
-	public CloneInfo getCloneInfo() {
-		return cloneInfo;
-	}
-
-	public boolean isRetrieveLfs() {
-		return retrieveLfs;
-	}
-
-	@Nullable
-	public String getBranch() {
-		return branch;
+	public Long getUserId() {
+		return userId;
 	}
 
 	public String getUserName() {
@@ -113,8 +92,13 @@ public class WorkspaceContext implements Serializable {
 		return userEmail;
 	}
 
-	public Map<String, String> getUserConfigs() {
-		return userConfigs;
+	public CloneInfo getCloneInfo() {
+		return cloneInfo;
+	}
+
+	@Nullable
+	public String getBranch() {
+		return branch;
 	}
 
 }

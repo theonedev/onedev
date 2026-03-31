@@ -23,10 +23,7 @@ public class InvalidWorkspaceSpecIcon extends GenericPanel<Workspace> {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		var workspace = getWorkspace();
-		var specName = workspace.getSpecName();
-		setVisible(workspace.getProject().getHierarchyWorkspaceSpecs().stream()
-				.noneMatch(s -> s.getName().equals(specName)));
+		setVisible(getWorkspace().getSpec() == null);
 	}
 
 	@Override

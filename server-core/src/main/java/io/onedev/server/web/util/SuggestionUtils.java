@@ -19,15 +19,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import io.onedev.server.service.*;
-import org.jspecify.annotations.Nullable;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 
 import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.commons.codeassist.InputCompletion;
+import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.match.PatternApplied;
@@ -42,26 +42,40 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.model.support.build.JobSecret;
+import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.pack.PackSupport;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.BasePermission;
+import io.onedev.server.service.AgentAttributeService;
+import io.onedev.server.service.AgentService;
+import io.onedev.server.service.BuildMetricService;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.GroupService;
+import io.onedev.server.service.IssueService;
+import io.onedev.server.service.LabelSpecService;
+import io.onedev.server.service.LinkSpecService;
+import io.onedev.server.service.PackService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.SettingService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedQuery;
 import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.util.interpolative.VariableInterpolator;
+import io.onedev.server.util.interpolative.JobVariableInterpolator;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.workspace.WorkspaceService;
+import io.onedev.server.workspace.WorkspaceVariable;
 import io.onedev.server.xodus.CommitInfoService;
 
 public class SuggestionUtils {
@@ -265,7 +279,7 @@ public class SuggestionUtils {
 		return suggest(agentNames, matchWith);
 	}
 	
-	public static List<InputSuggestion> suggestVariables(Project project, BuildSpec buildSpec, 
+	public static List<InputSuggestion> suggestJobVariables(Project project, BuildSpec buildSpec, 
 			@Nullable List<ParamSpec> paramSpecs, String matchWith, boolean withBuildVersion, 
 			boolean withDynamicVariables, boolean withPauseCommand) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
@@ -278,38 +292,38 @@ public class SuggestionUtils {
 		}
 		if (paramSpecs != null) {
 			for (ParamSpec paramSpec: paramSpecs) 
-				variables.put(VariableInterpolator.PREFIX_PARAM + paramSpec.getName(), null);
+				variables.put(JobVariableInterpolator.PREFIX_PARAM + paramSpec.getName(), null);
 		}
 		for (String propertyName: buildSpec.getPropertyMap().keySet())
-			variables.put(VariableInterpolator.PREFIX_PROPERTY + propertyName, null);
+			variables.put(JobVariableInterpolator.PREFIX_PROPERTY + propertyName, null);
 		for (JobProperty property: project.getHierarchyJobProperties()) {
 			if (!buildSpec.getPropertyMap().containsKey(property.getName()))
-				variables.put(VariableInterpolator.PREFIX_PROPERTY + property.getName(), null);
+				variables.put(JobVariableInterpolator.PREFIX_PROPERTY + property.getName(), null);
 		}
 		for (JobSecret secret: project.getHierarchyJobSecrets())
-			variables.put(VariableInterpolator.PREFIX_SECRET + secret.getName(), null);
+			variables.put(JobVariableInterpolator.PREFIX_SECRET + secret.getName(), null);
 
 		if (withDynamicVariables) {
 			var attributeNames = new ArrayList<>(OneDev.getInstance(AgentAttributeService.class).getAttributeNames());
 			sort(attributeNames);
 			for (String attributeName: attributeNames) 
-				variables.put(VariableInterpolator.PREFIX_ATTRIBUTE + attributeName, "Use value of specified agent attribute");
+				variables.put(JobVariableInterpolator.PREFIX_ATTRIBUTE + attributeName, "Use value of specified agent attribute");
 			
 			String filePath;
-			if (lowerCaseMatchWith.startsWith(VariableInterpolator.PREFIX_FILE))
-				filePath = matchWith.substring(VariableInterpolator.PREFIX_FILE.length());
+			if (lowerCaseMatchWith.startsWith(JobVariableInterpolator.PREFIX_FILE))
+				filePath = matchWith.substring(JobVariableInterpolator.PREFIX_FILE.length());
 			else
 				filePath = "";
 			if (filePath.length() == 0)
 				filePath = "example.txt";
-			variables.put(VariableInterpolator.PREFIX_FILE + filePath, "Use content of specified file");
+			variables.put(JobVariableInterpolator.PREFIX_FILE + filePath, "Use content of specified file");
 		}
 		
 		for (GroovyScript script: OneDev.getInstance(SettingService.class).getGroovyScripts())
-			variables.put(VariableInterpolator.PREFIX_SCRIPT + script.getName(), null);
+			variables.put(JobVariableInterpolator.PREFIX_SCRIPT + script.getName(), null);
 		
 		for (ScriptContribution contribution: OneDev.getExtensions(ScriptContribution.class)) {
-			String varName = VariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX 
+			String varName = JobVariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX 
 					+ contribution.getScript().getName();
 			if (!variables.containsKey(varName))
 				variables.put(varName, null);
@@ -317,6 +331,36 @@ public class SuggestionUtils {
 		
 		if (withPauseCommand)
 			variables.put(KubernetesHelper.PAUSE, "Pause execution of the script");
+		
+		for (Map.Entry<String, String> entry: variables.entrySet()) {
+			int index = entry.getKey().toLowerCase().indexOf(lowerCaseMatchWith);
+			if (index != -1) {
+				suggestions.add(new InputSuggestion(entry.getKey(), entry.getValue(), 
+						new LinearRange(index, index+lowerCaseMatchWith.length())));
+			}
+		}
+		
+		return sortAndTruncate(suggestions, matchWith);
+	}
+	
+	public static List<InputSuggestion> suggestWorkspaceVariables(String matchWith) {
+		String lowerCaseMatchWith = matchWith.toLowerCase();
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		
+		Map<String, String> variables = new LinkedHashMap<>();
+		for (WorkspaceVariable var: WorkspaceVariable.values()) {
+			variables.put(var.name().toLowerCase(), null);
+		}
+		
+		for (GroovyScript script: OneDev.getInstance(SettingService.class).getGroovyScripts())
+			variables.put(JobVariableInterpolator.PREFIX_SCRIPT + script.getName(), null);
+		
+		for (ScriptContribution contribution: OneDev.getExtensions(ScriptContribution.class)) {
+			String varName = JobVariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX 
+					+ contribution.getScript().getName();
+			if (!variables.containsKey(varName))
+				variables.put(varName, null);
+		}
 		
 		for (Map.Entry<String, String> entry: variables.entrySet()) {
 			int index = entry.getKey().toLowerCase().indexOf(lowerCaseMatchWith);
@@ -596,6 +640,20 @@ public class SuggestionUtils {
 				suggestions.add(new InputSuggestion(suggestContent, -1, MessageFormat.format(_T("files with ext \"{0}\""), ext), new LinearRange(index, index + pattern.length())));
 		}
 		return suggestions;
+	}
+
+	public static List<InputCompletion> suggestOverrides(List<String> overrideables, InputStatus status) {
+		List<InputCompletion> completions = new ArrayList<>();
+		String matchWith = status.getContentBeforeCaret().toLowerCase();
+		for (String each: overrideables) {
+			LinearRange match = LinearRange.match(each, matchWith);
+			if (match != null) { 
+				completions.add(new InputCompletion(each, each + status.getContentAfterCaret(), 
+						each.length(), "override", match));
+			}
+		}
+		
+		return completions;
 	}
 	
 	private static List<InputSuggestion> suggestPaths(List<PatternApplied> patternApplieds) {

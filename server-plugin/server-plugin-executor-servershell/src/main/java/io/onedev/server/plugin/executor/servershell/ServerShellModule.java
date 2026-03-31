@@ -4,7 +4,6 @@ import java.util.Collection;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -20,21 +19,19 @@ public class ServerShellModule extends AbstractPluginModule {
 		super.configure();
 		
 		// put your guice bindings here
-		if (!Bootstrap.isInDocker()) {
-			contribute(ImplementationProvider.class, new ImplementationProvider() {
+		contribute(ImplementationProvider.class, new ImplementationProvider() {
 
-				@Override
-				public Class<?> getAbstractClass() {
-					return JobExecutor.class;
-				}
+			@Override
+			public Class<?> getAbstractClass() {
+				return JobExecutor.class;
+			}
 
-				@Override
-				public Collection<Class<?>> getImplementations() {
-					return Sets.newHashSet(ServerShellExecutor.class);
-				}
-				
-			});						
-		}
+			@Override
+			public Collection<Class<?>> getImplementations() {
+				return Sets.newHashSet(ServerShellExecutor.class);
+			}
+			
+		});						
 	}
 
 }

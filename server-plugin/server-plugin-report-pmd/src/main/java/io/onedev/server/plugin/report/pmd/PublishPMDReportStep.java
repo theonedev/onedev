@@ -37,7 +37,7 @@ public class PublishPMDReportStep extends PublishProblemReportStep {
 	
 	private static final int TAB_WIDTH = 8;
 	
-	@Editable(order=100, description="Specify PMD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, "
+	@Editable(order=100, description="Specify PMD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, "
 			+ "for instance, <tt>target/pmd.xml</tt>. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)

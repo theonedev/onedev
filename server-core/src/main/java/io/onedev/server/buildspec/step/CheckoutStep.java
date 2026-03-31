@@ -8,9 +8,9 @@ import javax.validation.constraints.NotNull;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CheckoutFacade;
 import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.annotation.Path;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.SubPath;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.gitcredential.DefaultCredential;
 import io.onedev.server.buildspec.job.gitcredential.GitCredential;
@@ -77,10 +77,10 @@ public class CheckoutStep extends Step {
 	}
 
 	@Editable(order=300, placeholder="Job workdir", description="Optionally specify relative path under "
-			+ "<a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to clone code into. "
-			+ "Leave empty to use job workdir itself")
+			+ "<a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to clone code into. "
+			+ "Leave empty to use job working directory itself")
 	@Interpolative(variableSuggester="suggestVariables")
-	@SubPath
+	@Path(Path.Type.RELATIVE)
 	public String getCheckoutPath() {
 		return checkoutPath;
 	}

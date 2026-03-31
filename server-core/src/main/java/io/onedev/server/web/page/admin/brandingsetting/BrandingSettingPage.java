@@ -6,8 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -15,6 +13,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.io.Resources;
 
@@ -23,6 +22,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.service.SettingService;
+import io.onedev.server.util.SiteSyncUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.img.ImageScope;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -156,6 +156,7 @@ public class BrandingSettingPage extends AdministrationPage {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+			SiteSyncUtils.increaseVersion(OneDev.getAssetsDir());
 			return null;
 		}
 		

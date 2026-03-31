@@ -34,8 +34,8 @@ abstract class WorkspaceSpecPanel extends Panel {
 				WorkspaceSpecEditPanel editor = new WorkspaceSpecEditPanel("spec", spec) {
 
 					@Override
-					protected void onSave(AjaxRequestTarget target, WorkspaceSpec spec) {
-						WorkspaceSpecPanel.this.onSave(target, spec);
+					protected String onSave(AjaxRequestTarget target, WorkspaceSpec spec) {
+						return WorkspaceSpecPanel.this.onSave(target, spec);
 					}
 
 					@Override
@@ -72,7 +72,7 @@ abstract class WorkspaceSpecPanel extends Panel {
 
 	protected abstract void onDelete(AjaxRequestTarget target);
 
-	protected abstract void onSave(AjaxRequestTarget target, WorkspaceSpec spec);
+	protected abstract String onSave(AjaxRequestTarget target, WorkspaceSpec spec);
 
 	protected abstract void onCancel(AjaxRequestTarget target);
 

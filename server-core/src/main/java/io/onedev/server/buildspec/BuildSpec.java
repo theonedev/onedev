@@ -37,11 +37,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.codeassist.InputCompletion;
-import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
@@ -542,21 +539,7 @@ public class BuildSpec implements Serializable, Validatable {
 			}
 		}
 	}
-	
-	public static List<InputCompletion> suggestOverrides(List<String> imported, InputStatus status) {
-		List<InputCompletion> completions = new ArrayList<>();
-		String matchWith = status.getContentBeforeCaret().toLowerCase();
-		for (String each: imported) {
-			LinearRange match = LinearRange.match(each, matchWith);
-			if (match != null) { 
-				completions.add(new InputCompletion(each, each + status.getContentAfterCaret(), 
-						each.length(), "override", match));
-			}
-		}
 		
-		return completions;
-	}
-	
 	@Nullable
 	public static BuildSpec get() {
 		Component component = ComponentContext.get().getComponent();
@@ -573,7 +556,7 @@ public class BuildSpec implements Serializable, Validatable {
 		BuildSpec buildSpec = get();
 		if (buildSpec != null) {
 			ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
-			suggestions.addAll(SuggestionUtils.suggestVariables(
+			suggestions.addAll(SuggestionUtils.suggestJobVariables(
 					page.getProject(), buildSpec, ParamSpec.list(), 
 					matchWith, withBuildVersion, withDynamicVariables, withPauseCommand));
 		}
@@ -2503,11 +2486,15 @@ public class BuildSpec implements Serializable, Validatable {
 				}
 			}
 
-			for (Node stepsNodeItem : stepsNode.getValue()) {
-				MappingNode stepNode = (MappingNode) stepsNodeItem;
-				if ("SetupCacheStep".equals(getStepType(stepNode))) {
+			for (var itStepNode = stepsNode.getValue().iterator(); itStepNode.hasNext();) {
+				MappingNode stepNode = (MappingNode) itStepNode.next();
+				var stepType = getStepType(stepNode);
+				if ("GenerateChecksumStep".equals(stepType)) {
+					itStepNode.remove();
+				} else if ("SetupCacheStep".equals(stepType)) {
 					String checksumFiles = null;
-					for (var stepTuple : stepNode.getValue()) {
+					for (var itStepTuple = stepNode.getValue().iterator(); itStepTuple.hasNext();) {
+						var stepTuple = itStepTuple.next();
 						var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
 						if (propName.equals("key")) {
 							var keyNode = (ScalarNode) stepTuple.getValueNode();
@@ -2539,6 +2526,12 @@ public class BuildSpec implements Serializable, Validatable {
 								pos = end + 1;
 							}
 							keyNode.setValue(sb.toString());
+						} else if (propName.equals("loadKeys")) {
+							itStepTuple.remove();
+						} else if (propName.equals("uploadStrategy")) {
+							var valueNode = (ScalarNode) stepTuple.getValueNode();
+							if ("UPLOAD_IF_NOT_HIT".equals(valueNode.getValue()))
+								valueNode.setValue("UPLOAD_IF_NOT_EXACT_MATCH");
 						}
 					}
 					if (checksumFiles != null) {
@@ -2546,48 +2539,25 @@ public class BuildSpec implements Serializable, Validatable {
 								new ScalarNode(Tag.STR, "checksumFiles"),
 								new ScalarNode(Tag.STR, checksumFiles)));
 					}
-
-					for (var itStepTuple = stepNode.getValue().iterator(); itStepTuple.hasNext();) {
-						var stepTuple = itStepTuple.next();
-						var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
-						if (propName.equals("loadKeys"))
-							itStepTuple.remove();
-					}
-
+				} else if ("CommandStep".equals(stepType)) {
 					for (var stepTuple : stepNode.getValue()) {
 						var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
-						if (propName.equals("uploadStrategy")) {
-							var valueNode = (ScalarNode) stepTuple.getValueNode();
-							if ("UPLOAD_IF_NOT_HIT".equals(valueNode.getValue()))
-								valueNode.setValue("UPLOAD_IF_NOT_EXACT_MATCH");
-						}
-					}
-
-					for (var stepTuple : stepNode.getValue()) {
-						var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
-						if (propName.equals("paths")) {
-							SequenceNode pathsNode = (SequenceNode) stepTuple.getValueNode();
-							List<Node> newPathNodes = new ArrayList<>();
-							for (Node pathNode : pathsNode.getValue()) {
-								String pathValue = ((ScalarNode) pathNode).getValue();
-								var cachePathNode = new MappingNode(Tag.MAP, new ArrayList<>(), FlowStyle.BLOCK);
-								cachePathNode.getValue().add(new NodeTuple(
-										new ScalarNode(Tag.STR, "relativeToHomeIfNotAbsolute"),
-										new ScalarNode(Tag.BOOL, "false")));
-								cachePathNode.getValue().add(new NodeTuple(
-										new ScalarNode(Tag.STR, "pathValue"),
-										new ScalarNode(Tag.STR, pathValue)));
-								newPathNodes.add(cachePathNode);
+						if (propName.equals("interpreter")) {
+							MappingNode interpreterNode = (MappingNode) stepTuple.getValueNode();
+							for (var interpreterTuple : interpreterNode.getValue()) {
+								var interpreterPropName = ((ScalarNode) interpreterTuple.getKeyNode()).getValue();
+								if (interpreterPropName.equals("commands")) {
+									var commandsNode = (ScalarNode) interpreterTuple.getValueNode();
+									var commands = commandsNode.getValue();
+									commands = commands.replace("ONEDEV_WORKSPACE", "ONEDEV_WORKDIR");
+									commands = commands.replace("/onedev-build/workspace", "/onedev-build/work");
+									commandsNode.setValue(commands);
+								}
 							}
-							pathsNode.getValue().clear();
-							pathsNode.getValue().addAll(newPathNodes);
 						}
 					}
 				}
 			}
-
-			stepsNode.getValue().removeIf(node ->
-					"GenerateChecksumStep".equals(getStepType((MappingNode) node)));
 		});
 	}
 

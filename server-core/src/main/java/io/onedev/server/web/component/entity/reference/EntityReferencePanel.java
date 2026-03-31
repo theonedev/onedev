@@ -32,7 +32,7 @@ public abstract class EntityReferencePanel extends Panel {
 				var help = MessageFormat.format(_T("Reference this {0} in markdown or commit message via below string."), 
 						_T(getReference().getType()));
 				if (getReference().getProject().getKey() == null)
-					help += _T(" Project path can be omitted if reference from current project");
+					help += " " + _T("Project path can be omitted if reference from current project");
 				tag.put("data-tippy-content", help);
 			}
 			

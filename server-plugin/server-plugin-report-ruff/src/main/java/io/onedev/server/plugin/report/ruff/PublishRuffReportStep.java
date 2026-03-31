@@ -30,7 +30,7 @@ public class PublishRuffReportStep extends PublishProblemReportStep {
 		setFailThreshold(CodeProblem.Severity.MEDIUM);
 	}
 	
-	@Editable(order=100, description="Specify ruff json result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. "
+	@Editable(order=100, description="Specify ruff json result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. "
 			+ "This file can be generated with ruff json output format option, for instance <code>--exit-zero --output-format json --output-file ruff-result.json</code>. "
 			+ "Note that we do not fail ruff command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")

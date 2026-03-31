@@ -4,8 +4,14 @@ import javax.inject.Inject;
 
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import org.jspecify.annotations.Nullable;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import io.onedev.server.model.Workspace;
 import io.onedev.server.security.SecurityUtils;
@@ -20,7 +26,11 @@ public class WorkspaceTerminalPage extends WorkspaceDetailPage {
 
 	private static final String PARAM_SHELL = "shell";
 
+	private static final String PARAM_COMMAND = "command";
+
 	private final String shellId;
+
+	private final String command;
 
 	@Inject
 	private WorkspaceService workspaceService;
@@ -28,8 +38,9 @@ public class WorkspaceTerminalPage extends WorkspaceDetailPage {
 	public WorkspaceTerminalPage(PageParameters params) {
 		super(params);
 		shellId = params.get(PARAM_SHELL).toString();
+		command = params.get(PARAM_COMMAND).toOptionalString();
 
-		if (!workspaceService.getShellIds(getWorkspace()).contains(shellId))
+		if (!workspaceService.getShellLabels(getWorkspace()).containsKey(shellId))
 			throw new RestartResponseException(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(getWorkspace()));
 	}
 
@@ -42,6 +53,11 @@ public class WorkspaceTerminalPage extends WorkspaceDetailPage {
 		super.onInitialize();
 
 		add(new TerminalPanel("terminal") {
+
+			@Override
+			protected String getInitialCommand() {
+				return command;
+			}
 
 			@Override
 			protected void onConnectionOpen(IWebSocketConnection connection) {
@@ -73,9 +89,29 @@ public class WorkspaceTerminalPage extends WorkspaceDetailPage {
 		});
 	}
 
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+
+		if (command != null) {
+			var url = RequestCycle.get().urlFor(WorkspaceTerminalPage.class,
+					WorkspaceTerminalPage.paramsOf(getWorkspace(), shellId)).toString();
+			response.render(OnDomReadyHeaderItem.forScript(String.format(
+					"onedev.server.history.replaceState('%s', undefined, '%s');",
+					JavaScriptEscape.escapeJavaScript(url),
+					JavaScriptEscape.escapeJavaScript(getPageTitle()))));
+		}
+	}
+
 	public static PageParameters paramsOf(Workspace workspace, String shellId) {
+		return paramsOf(workspace, shellId, null);
+	}
+
+	public static PageParameters paramsOf(Workspace workspace, String shellId, @Nullable String command) {
 		var params = WorkspaceDetailPage.paramsOf(workspace);
 		params.add(PARAM_SHELL, shellId);
+		if (command != null)
+			params.add(PARAM_COMMAND, command);
 		return params;
 	}
 

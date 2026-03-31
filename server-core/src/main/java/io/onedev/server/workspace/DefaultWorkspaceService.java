@@ -1,9 +1,9 @@
 package io.onedev.server.workspace;
 
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
-import static io.onedev.server.util.DirectoryVersionUtils.readVersion;
-import static io.onedev.server.util.DirectoryVersionUtils.writeVersion;
-import static java.util.stream.Collectors.toMap;
+import static io.onedev.server.util.SiteSyncUtils.readVersion;
+import static io.onedev.server.util.SiteSyncUtils.writeVersion;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -15,13 +15,13 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 import io.onedev.agent.AgentUtils;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
@@ -62,7 +63,6 @@ import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.k8shelper.DefaultCloneInfo;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.event.Listen;
@@ -71,6 +71,8 @@ import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.project.workspace.WorkspaceActive;
 import io.onedev.server.event.project.workspace.WorkspaceCreated;
 import io.onedev.server.event.project.workspace.WorkspaceError;
+import io.onedev.server.event.project.workspace.WorkspaceEvent;
+import io.onedev.server.event.project.workspace.WorkspacePending;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.ServerNotFoundException;
@@ -82,7 +84,9 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.model.Workspace.Status;
+import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
+import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.persistence.SequenceGenerator;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.TransactionService;
@@ -107,7 +111,9 @@ import io.onedev.server.util.FileData;
 import io.onedev.server.util.ProjectWorkspaceStatusStat;
 import io.onedev.server.util.concurrent.DynamicSemaphore;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.interpolative.WorkspaceVariableInterpolator;
 import io.onedev.server.web.component.terminal.ShellExit;
+import io.onedev.server.web.editable.EditableUtils;
 import oshi.SystemInfo;
 
 @Singleton
@@ -118,7 +124,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultWorkspaceService.class);
 
-	private static final int CHECK_INTERVAL = 1000; // check internal in milli-seconds
+	private static final int CHECK_INTERVAL = 5;
 
 	@Inject
 	private ProjectService projectService;
@@ -159,12 +165,18 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	private final Map<Long, WorkspaceRuntime> workspaceRuntimes = new ConcurrentHashMap<>();
 
 	private final Map<IWebSocketConnection, OutputState> workspaceConnections = new ConcurrentHashMap<>();
-
+	
+	// With tmux, we no longer need to replay the output. However we also send error messages 
+	// (for instance when tmux is not installed) to terminal, so we still need to replay the 
+	// output to ensure the error messages are displayed when websocket connection is 
+	// established after shell reports error
 	private final Map<String, ReplayBuffer> terminalReplayBuffers = new ConcurrentHashMap<>();
 
 	private final Map<String, DynamicSemaphore> workspaceSemaphores = new ConcurrentHashMap<>();
 
 	private volatile Thread thread;
+
+	private volatile boolean checkImmediately;
 
 	private volatile String taskId;
 
@@ -215,6 +227,17 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	public void update(Workspace workspace) {
 		Preconditions.checkState(!workspace.isNew());
 		dao.persist(workspace);
+	}
+
+	@Sessional
+	@Listen
+	public void on(WorkspaceEvent event) {
+		if (event instanceof WorkspaceCreated || event instanceof WorkspacePending) {
+			clusterService.submitToServer(clusterService.getLeaderServerAddress(), () -> {
+				checkImmediately = true;
+				return null;
+			});
+		}
 	}
 
 	@Sessional
@@ -360,21 +383,69 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Transactional
 	@Override
-	public void delete(Workspace workspace) {
-		var loggingSupport = workspace.getLoggingSupport();
+	public void requestToReprovision(Workspace workspace) {
+		Preconditions.checkState(workspace.getStatus() == Status.ERROR);
+		workspace.setStatus(Status.PENDING);
+		workspace.setErrorDate(null);
+		workspace.setActiveDate(null);
 		var projectId = workspace.getProject().getId();
 		var workspaceNumber = workspace.getNumber();
 		projectService.runOnActiveServer(projectId, new ClusterTask<Void>() {
 
 			@Override
 			public Void call() throws Exception {
-				logService.flush(loggingSupport);
-				FileUtils.deleteDir(getWorkspaceDir(projectId, workspaceNumber));
+				FileUtils.deleteFile(Workspace.getLogFile(projectId, workspaceNumber));
 				return null;
 			}
 
 		});
+		update(workspace);
+		listenerRegistry.post(new WorkspacePending(workspace));
+	}
+
+	@Transactional
+	@Override
+	public void delete(Workspace workspace) {
 		dao.remove(workspace);
+
+		var loggingSupport = workspace.getLoggingSupport();
+		var projectId = workspace.getProject().getId();
+		var workspaceNumber = workspace.getNumber();
+		var workspaceId = workspace.getId();
+
+		transactionService.runAfterCommit(() -> {
+			projectService.submitToActiveServer(projectId, new ClusterTask<Void>() {
+
+				@Override
+				public Void call() throws Exception {
+					checkImmediately = true;
+					
+					// Delete workspace directory after workspace runtime is removed to 
+					// give a chance for cache to be uploaded
+					while (workspaceRuntimes.containsKey(workspaceId)) 
+						Thread.sleep(1000);
+					logService.flush(loggingSupport);	
+
+					var workspaceDir = getWorkspaceDir(projectId, workspaceNumber);
+					var dockerExecutableFile = new File(workspaceDir, "docker-executable");
+					if (!Bootstrap.isInDocker() && dockerExecutableFile.exists()) {
+						var dockerExecutable = FileUtils.readFileToString(dockerExecutableFile, UTF_8);
+						AgentUtils.deleteDirWithDocker(workspaceDir, new Commandline(dockerExecutable), new TaskLogger() {
+
+							@Override
+							public void log(String message, @Nullable String sessionId) {
+								logger.info(message);
+							}
+				
+						});				
+					} else {
+						FileUtils.deleteDir(workspaceDir);
+					}
+					return null;
+				}
+	
+			});
+		});
 	}
 
 	private void applyOrders(Root<Workspace> root, CriteriaQuery<?> criteriaQuery,
@@ -473,6 +544,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 											if (workspaceFutures.get(workspace.getId()) == null) {
 												workspace.setActiveDate(null);
 												workspace.setStatus(Status.PENDING);
+												listenerRegistry.post(new WorkspacePending(workspace));
 											}
 										}
 									}
@@ -483,13 +555,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 							return null;
 						}));
 					}
-					for (var future : futures) {
-						try {
-							future.get();
-						} catch (InterruptedException | ExecutionException e) {
-							throw new RuntimeException(e);
-						}
-					}
+					for (var future : futures) 
+						future.get();
 				}
 				
 				sessionService.run(() -> {
@@ -509,17 +576,22 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 								logger.error("Workspace runtime stopped for unknown reason");
 							} catch (Throwable t) {
 								log(logger, t);
-								markWorkspaceError(workspace);
 							} finally {
 								it.remove();
+								markWorkspaceError(workspace);
 							}
 						}
 					}
 				});
-				Thread.sleep(CHECK_INTERVAL);
+				int count = 0;
+				while (!checkImmediately && count++ < CHECK_INTERVAL) 
+					Thread.sleep(1000);
+				checkImmediately = false;
 			} catch (Throwable t) {
-				if (ExceptionUtils.find(t, ServerNotFoundException.class) == null)
+				if (ExceptionUtils.find(t, ServerNotFoundException.class) == null 
+						&& ExceptionUtils.find(t, InterruptedException.class) == null) {
 					logger.error("Error checking workspaces", t);
+				}
 			}
 		}
 	}
@@ -536,7 +608,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			var workspaceId = Long.parseLong(terminalKeyParts[0]);
 			var shellId = terminalKeyParts[1];
 			var runtime = workspaceRuntimes.get(workspaceId);
-			if (runtime == null || !runtime.getShellIds().contains(shellId)) 
+			if (runtime == null || !runtime.getShellLabels().containsKey(shellId)) 
 				it.remove();
 		}
 	}
@@ -546,91 +618,132 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		return SimpleScheduleBuilder.repeatHourlyForever();
 	}
 
-	private boolean isApplicable(Workspace workspace, WorkspaceProvisioner provisioner) {
+	private boolean isApplicable(Workspace workspace, WorkspaceSpec spec, WorkspaceProvisioner provisioner) {
+		if (spec.isRunInContainer() != (provisioner instanceof DockerAware))
+			return false;
+		
 		return provisioner.getApplicableProjects() == null 
 			|| WildcardUtils.matchPath(provisioner.getApplicableProjects(), workspace.getProject().getPath());
 	}
 
-	private WorkspaceProvisioner getProvisioner(Workspace workspace, TaskLogger logger) {
-		if (!settingService.getWorkspaceProvisioners().isEmpty()) {
-			for (var provisioner : settingService.getWorkspaceProvisioners()) {
-				if (provisioner.isEnabled() && isApplicable(workspace, provisioner))
-					return provisioner;
-			}
-			throw new ExplicitException("No applicable workspace provisioner");
+	private WorkspaceProvisioner getProvisioner(Workspace workspace, WorkspaceSpec spec, TaskLogger logger) {
+		if (spec.getProvisioner() != null) {
+			var provisioner = settingService.getWorkspaceProvisioners().stream()
+				.filter(it -> it.getName().equals(spec.getProvisioner()))
+				.findFirst()
+				.orElseThrow(() -> new ExplicitException("Unable to find specified workspace provisioner '" + spec.getProvisioner() + "'"));
+			if (!provisioner.isEnabled())
+				throw new ExplicitException("Specified workspace provisioner '" + spec.getProvisioner() + "' is disabled");
+			else if (!isApplicable(workspace, spec, provisioner))
+				throw new ExplicitException("Specified workspace provisioner '" + spec.getProvisioner() + "' is not applicable for current workspace");
+			else
+				return provisioner;
+		} else if (!settingService.getWorkspaceProvisioners().isEmpty()) {
+			return settingService.getWorkspaceProvisioners().stream()
+				.filter(it -> it.isEnabled() && isApplicable(workspace, spec, it))
+				.findFirst()
+				.orElseThrow(() -> new ExplicitException("No applicable workspace provisioner"));
 		} else {
-			throw new ExplicitException("No applicable provisioner discovered for current workspace");
+			logger.log("No workspace provisioner defined, auto-discovering...");
+			List<WorkspaceProvisionerDiscoverer> discoverers = new ArrayList<>(
+					OneDev.getExtensions(WorkspaceProvisionerDiscoverer.class));
+			discoverers.sort(Comparator.comparing(WorkspaceProvisionerDiscoverer::getOrder));
+			for (var discoverer : discoverers) {
+				WorkspaceProvisioner provisioner = discoverer.discover();
+				if (provisioner != null) {
+					provisioner.setName("auto-discovered");
+					if (isApplicable(workspace, spec, provisioner)) {
+						logger.log("Discovered " + EditableUtils.getDisplayName(provisioner.getClass()).toLowerCase());
+						return provisioner;
+					}
+				}
+			}
+
+			if (spec.isRunInContainer()) {
+				throw new ExplicitException("""
+					No applicable provisioner discovered for current workspace. \
+					Please check if docker is installed on OneDev server""");
+			} else {
+				throw new ExplicitException("""
+					No applicable provisioner discovered for current workspace. \
+					Please add a shell provisioner in menu 'Administration / Workspace Provisioners' \
+					with applicable projects configured properly""");
+			}
 		}
 	}
 
 	private Future<Void> provision(Workspace workspace) {
-		var workspaceSpec = workspace.getProject().getHierarchyWorkspaceSpecs().stream()
-				.filter(s -> s.getName().equals(workspace.getSpecName()))
-				.findFirst()
-				.orElseThrow(() -> new ExplicitException("Spec not found in workspace project hierarchy"));
+		Workspace.push(workspace);
+		try {
+			var spec = workspace.getSpec();
+			if (spec == null)
+				throw new ExplicitException("Spec not found in workspace project hierarchy");
 
-		String token = workspace.getToken();
+			var interpolator = new WorkspaceVariableInterpolator(workspace);
+			spec = interpolator.interpolateProperties(spec);
 
-		var logger = logService.newLogger(workspace.getLoggingSupport());
-		var provisioner = getProvisioner(workspace, logger);
+			String token = workspace.getToken();
 
-		var project = workspace.getProject();
-		var projectId = project.getId();
-		var projectPath = project.getPath();
-		var projectGitDir = projectService.getGitDir(project.getId()).getAbsolutePath();
-		var workspaceId = workspace.getId();
-		var workspaceNumber = workspace.getNumber();
+			var logger = logService.newLogger(workspace.getLoggingSupport());
+			var provisioner = getProvisioner(workspace, spec, logger);
 
-		var envVars = workspaceSpec.getEnvVars().stream().collect(toMap(EnvVar::getName, EnvVar::getValue));
-		var userConfigs = workspaceSpec.getUserConfigs().stream()
-				.collect(toMap(uc -> uc.getPath(), uc -> uc.getContent()));
+			var project = workspace.getProject();
+			var projectId = project.getId();
+			var projectPath = project.getPath();
+			var projectGitDir = projectService.getGitDir(project.getId()).getAbsolutePath();
+			var workspaceId = workspace.getId();
+			var workspaceNumber = workspace.getNumber();
 
-		var gitEmail = workspace.getUser().getGitEmailAddress();
-		if (gitEmail == null)
-			throw new ExplicitException("No email address for git operations configured");
-		
-		var cloneInfo = new DefaultCloneInfo(urlService.cloneUrlFor(workspace.getProject(), false), token);		
-		var branch = project.getDefaultBranch() != null? workspace.getBranch(): null;
-		var context = new WorkspaceContext(token, projectId, projectPath, projectGitDir, workspaceId, 
-			workspaceNumber, workspaceSpec.getShell(), envVars, cloneInfo, workspaceSpec.isRetrieveLfs(), 
-			branch, workspace.getUser().getDisplayName(), gitEmail.getValue(), userConfigs);
-				
-		var concurrency = provisioner.getConcurrency();
-		if (concurrency == null)
-			concurrency = Math.max(1, new SystemInfo().getHardware().getProcessor().getLogicalProcessorCount());
-		var semaphore = workspaceSemaphores.computeIfAbsent(provisioner.getName(), k -> new DynamicSemaphore());
-		semaphore.setMaxPermits(concurrency);
+			var gitEmail = workspace.getUser().getGitEmailAddress();
+			if (gitEmail == null)
+				throw new ExplicitException("No email address for git operations configured");
+			
+			var cloneInfo = new DefaultCloneInfo(urlService.cloneUrlFor(workspace.getProject(), false), token);		
+			var branch = project.getDefaultBranch() != null? workspace.getBranch(): null;
 
-		logger.log("Waiting for resource allocation...");
+			var context = new WorkspaceContext(spec, token, projectId, projectPath, projectGitDir, 
+					workspaceId, workspaceNumber, workspace.getUser().getId(), workspace.getUser().getDisplayName(), 
+					gitEmail.getValue(), cloneInfo, branch);
+					
+			var concurrency = provisioner.getConcurrency();
+			if (concurrency == null)
+				concurrency = Math.max(1, new SystemInfo().getHardware().getProcessor().getLogicalProcessorCount());
+			var semaphore = workspaceSemaphores.computeIfAbsent(provisioner.getName(), k -> new DynamicSemaphore());
+			semaphore.setMaxPermits(concurrency);
 
-		return executorService.submit(() -> {
-			workspaceContexts.put(token, context);
-			semaphore.acquire();
-			try {
-				var runtime = provisioner.provision(context, logger);
-				workspaceRuntimes.put(context.getWorkspaceId(), runtime);
+			logger.log("Waiting for resource allocation...");
+
+			return executorService.submit(() -> {
+				workspaceContexts.put(token, context);
+				semaphore.acquire();
 				try {
-					transactionService.run(() -> {
-						var innerWorkspace = load(workspaceId);
-						innerWorkspace.setStatus(Workspace.Status.ACTIVE);
-						innerWorkspace.setActiveDate(new Date());
-						update(innerWorkspace);
-						listenerRegistry.post(new WorkspaceActive(innerWorkspace));
-					});
-					logger.success("Workspace provisioned and is active now");
+					var runtime = provisioner.provision(context, logger);
+					workspaceRuntimes.put(context.getWorkspaceId(), runtime);
+					try {
+						transactionService.run(() -> {
+							var innerWorkspace = load(workspaceId);
+							innerWorkspace.setStatus(Workspace.Status.ACTIVE);
+							innerWorkspace.setActiveDate(new Date());
+							update(innerWorkspace);
+							listenerRegistry.post(new WorkspaceActive(innerWorkspace));
+						});
+						logger.success("Workspace provisioned and is active now");
 
-					runtime.await();
-					return null;
+						runtime.await();
+						return null;
+					} finally {
+						for (var shellId : runtime.getShellLabels().keySet())
+							terminateShell(workspaceId, shellId);
+						workspaceRuntimes.remove(workspaceId);
+					}
 				} finally {
-					for (var shellId : runtime.getShellIds())
-						terminateShell(workspaceId, shellId);
-					workspaceRuntimes.remove(workspaceId);
+					semaphore.release();
+					workspaceContexts.remove(token);
 				}
-			} finally {
-				semaphore.release();
-				workspaceContexts.remove(token);
-			}
-		});
+			});
+		} finally {
+			Workspace.pop();
+		}
 	}
 
 	private void markWorkspaceError(Workspace workspace) {
@@ -655,7 +768,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Sessional
 	@Override
-	public String openShell(Workspace workspace) {
+	public String openShell(Workspace workspace, String label) {
 		var projectId = workspace.getProject().getId();
 		var workspaceId = workspace.getId();
 
@@ -684,7 +797,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 							clusterService.submitToAllServers(new HandleShellStopTask(workspaceId, shellId, false));
 					}
 		
-				}));
+				}, label));
 				return shellIdRef.get();
 			}
 
@@ -697,6 +810,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	public void onOpen(IWebSocketConnection connection, Workspace workspace, String shellId) {
 		var state = new OutputState(workspace.getId(), shellId);
 		workspaceConnections.put(connection, state);
+
 		var replayBuffer = terminalReplayBuffers.get(getTerminalKey(workspace.getId(), shellId));
 		if (replayBuffer != null) {
 			var chunks = replayBuffer.snapshot();
@@ -755,19 +869,35 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	@Sessional
 	@Override
-	public List<String> getShellIds(Workspace workspace) {
+	public Map<String, String> getShellLabels(Workspace workspace) {
 		var projectId = workspace.getProject().getId();
 		var workspaceId = workspace.getId();
 
-		return projectService.runOnActiveServer(projectId, new ClusterTask<List<String>>() {
+		return projectService.runOnActiveServer(projectId, new ClusterTask<Map<String, String>>() {
 
 			@Override
-			public List<String> call() throws Exception {
+			public Map<String, String> call() throws Exception {
 				var runtime = workspaceRuntimes.get(workspaceId);
-				return runtime != null? runtime.getShellIds(): new ArrayList<>();
+				return runtime != null ? runtime.getShellLabels() : new HashMap<>();
 			}
 		});
 
+	}
+
+	@Sessional
+	@Override
+	public Map<Integer, Integer> getPortMappings(Workspace workspace) {
+		var projectId = workspace.getProject().getId();
+		var workspaceId = workspace.getId();
+
+		return projectService.runOnActiveServer(projectId, new ClusterTask<Map<Integer, Integer>>() {
+
+			@Override
+			public Map<Integer, Integer> call() throws Exception {
+				var runtime = workspaceRuntimes.get(workspaceId);
+				return runtime != null ? runtime.getPortMappings() : new HashMap<>();
+			}
+		});
 	}
 
 	private void terminateShell(Long workspaceId, String shellId) {
@@ -889,6 +1019,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 					if (!gitDir.exists()) {
 						FileUtils.deleteDir(workDir);
+						git.clearArgs();
 						git.addArgs("clone", cloneUrl, workDir.getAbsolutePath());
 						git.execute(debugLogger, new LineConsumer() {
 							@Override
@@ -899,8 +1030,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 									logger.debug(line);
 							}
 						}).checkReturnCode();
-						git.clearArgs();
 					} else {
+						git.clearArgs();
 						git.addArgs("ls-remote", "--symref", cloneUrl, "HEAD");
 						var branchRef = new AtomicReference<String>();
 						git.execute(new LineConsumer() {
@@ -910,16 +1041,15 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 									branchRef.set(line.substring("ref: refs/heads/".length()).split("\\t")[0]);
 							}
 						}, errorLogger).checkReturnCode();
-						git.clearArgs();
 
 						var branch = branchRef.get();
 						if (branch != null) {
 							git.workingDir(workDir);
-
+							git.clearArgs();
 							git.addArgs("remote", "set-url", "origin", cloneUrl);
 							git.execute(debugLogger, errorLogger).checkReturnCode();
-							git.clearArgs();
 
+							git.clearArgs();
 							git.addArgs("fetch", "origin", "refs/heads/" + branch);
 							git.execute(debugLogger, new LineConsumer() {
 								@Override
@@ -930,8 +1060,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 										logger.debug(line);
 								}
 							}).checkReturnCode();
-							git.clearArgs();
 
+							git.clearArgs();
 							git.addArgs("checkout", "-f", "-B", branch, "FETCH_HEAD");
 							git.execute(debugLogger, new LineConsumer() {
 								@Override
@@ -940,7 +1070,6 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 										logger.error(line);
 								}
 							}).checkReturnCode();
-							git.clearArgs();
 						}
 					}
 					return null;
@@ -1005,6 +1134,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 		@Override
 		public Void call() throws Exception {
 			var workspaceService = OneDev.getInstance(DefaultWorkspaceService.class);
+
 			workspaceService.terminalReplayBuffers
 				.computeIfAbsent(workspaceService.getTerminalKey(workspaceId, shellId), key -> new ReplayBuffer())
 				.append(base64Data);
@@ -1050,8 +1180,8 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 			var connections = workspaceService.workspaceConnections;
 			for (var entry : connections.entrySet()) {
 				var connection = entry.getKey();
-				var state = entry.getValue();
-				if (state.matches(workspaceId, shellId)) {
+				var shellKey = entry.getValue();
+				if (shellKey.matches(workspaceId, shellId)) {
 					if (terminated) {
 						connection.sendMessage("SHELL_OUTPUT:" + AgentUtils.encodeBase64Error("Shell terminated"));
 					} else {
@@ -1106,7 +1236,7 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 
 	private static class ReplayBuffer {
 
-		private static final int MAX_TOTAL_CHARS = 512 * 1024;
+		private static final int MAX_TOTAL_CHARS = 64 * 1024;
 
 		private final ArrayDeque<String> chunks = new ArrayDeque<>();
 

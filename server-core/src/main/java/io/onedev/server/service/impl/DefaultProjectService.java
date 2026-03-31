@@ -2,7 +2,6 @@ package io.onedev.server.service.impl;
 
 import static io.onedev.commons.utils.FileUtils.cleanDir;
 import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.k8shelper.KubernetesHelper.BEARER;
 import static io.onedev.server.git.CommandUtils.callWithClusterCredential;
 import static io.onedev.server.git.GitUtils.getDefaultBranch;
 import static io.onedev.server.git.GitUtils.getReachableCommits;
@@ -17,27 +16,18 @@ import static io.onedev.server.replica.ProjectReplica.Type.BACKUP;
 import static io.onedev.server.replica.ProjectReplica.Type.PRIMARY;
 import static io.onedev.server.replica.ProjectReplica.Type.REDUNDANT;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
-import static io.onedev.server.util.DirectoryVersionUtils.FILE_VERSION;
-import static io.onedev.server.util.DirectoryVersionUtils.increaseVersion;
-import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
-import static io.onedev.server.util.DirectoryVersionUtils.readVersion;
-import static io.onedev.server.util.DirectoryVersionUtils.writeVersion;
-import static io.onedev.server.util.IOUtils.BUFFER_SIZE;
+import static io.onedev.server.util.SiteSyncUtils.readVersion;
+import static io.onedev.server.util.SiteSyncUtils.writeVersion;
 import static io.onedev.server.util.criteria.Criteria.forManyValues;
 import static io.onedev.server.web.translation.Translation._T;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Comparator.naturalOrder;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.eclipse.jgit.lib.Constants.R_HEADS;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.nio.file.Files;
@@ -67,12 +57,7 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -108,10 +93,8 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.commons.utils.TarUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
-import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.StorageService;
 import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.cluster.ClusterService;
@@ -184,8 +167,8 @@ import io.onedev.server.service.UserAuthorizationService;
 import io.onedev.server.service.UserService;
 import io.onedev.server.taskschedule.SchedulableTask;
 import io.onedev.server.taskschedule.TaskScheduler;
-import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.ProjectNameReservation;
+import io.onedev.server.util.SiteSyncUtils;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.artifact.FileInfo;
@@ -1415,14 +1398,8 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	
 	@Override
 	public void directoryModified(Long projectId, File directory) {
-		var projectDir = getProjectDir(projectId);
-		var projectPath = projectDir.toPath();	
-		var currentPath = directory.toPath();
-		while (currentPath.startsWith(projectPath)) {
-			var currentDir = currentPath.toFile();
-			increaseVersion(currentDir);
-			currentPath = currentPath.getParent();
-		}
+		SiteSyncUtils.bumpVersions(getProjectDir(projectId), directory);
+		
 		updateReplicaVersion(projectId);
 		
 		var replicasOfProject = replicas.get(projectId);
@@ -1599,108 +1576,22 @@ public class DefaultProjectService extends BaseEntityService<Project>
 	@Override
 	public void syncDirectory(Long projectId, String path, Consumer<String> childSyncer, String activeServer) {
 		var directory = new File(getProjectDir(projectId), path);
-		
-		long remoteVersion = clusterService.runOnServer(activeServer, () -> readVersion(new File(getProjectDir(projectId), path)));
-		long version = readVersion(directory);
-		
-		if (version < remoteVersion) {
-			Collection<String> remoteChildren = clusterService.runOnServer(activeServer, () -> {
-				var children = new HashSet<String>();
-				for (var file: new File(getProjectDir(projectId), path).listFiles()) {
-					if (!isVersionFile(file))
-						children.add(file.getName());
-				}
-				return children;
-			});								
-			
-			FileUtils.createDir(directory);
-			for (var file: directory.listFiles()) {
-				if (!isVersionFile(file)) {
-					if (remoteChildren.remove(file.getName()))
-						childSyncer.accept(file.getName());
-					else if (file.isFile())
-						FileUtils.deleteFile(file);
-					else
-						FileUtils.deleteDir(file);
-				}
-			}
-			for (var child: remoteChildren)
-				childSyncer.accept(child);
-			
-			writeVersion(directory, remoteVersion);
-		}
+		var sitePath = Bootstrap.getSiteDir().toPath().resolve(directory.toPath()).toString();
+		SiteSyncUtils.syncDirectory(activeServer, sitePath, childSyncer, true);
 	}
 
 	@Override
 	public void syncDirectory(Long projectId, String path, String readLock, String activeServer) {
 		var directory = new File(getProjectDir(projectId), path);
-		long version = readVersion(directory);
-
-		long remoteVersion = clusterService.runOnServer(activeServer, () -> {
-			return readVersion(new File(getProjectDir(projectId), path));
-		});
-
-		if (version < remoteVersion) {
-			FileUtils.cleanDir(directory);
-			Client client = ClientBuilder.newClient();
-			try {
-				String fromServerUrl = clusterService.getServerUrl(activeServer);
-				WebTarget target = client.target(fromServerUrl).path("/~api/cluster/project-files")
-						.queryParam("projectId", projectId)
-						.queryParam("path", path)
-						.queryParam("patterns", "** -" + FILE_VERSION)
-						.queryParam("readLock", readLock);
-				Invocation.Builder builder = target.request();
-				builder.header(AUTHORIZATION,
-						BEARER + " " + clusterService.getCredential());
-
-				try (Response response = builder.get()) {
-					KubernetesHelper.checkStatus(response);
-					try (InputStream is = response.readEntity(InputStream.class)) {
-						TarUtils.untar(is, directory, false);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
-			} finally {
-				client.close();
-			}
-			writeVersion(directory, remoteVersion);
-		}
+		var sitePath = Bootstrap.getSiteDir().toPath().resolve(directory.toPath()).toString();
+		SiteSyncUtils.syncDirectory(activeServer, sitePath, true, readLock, null);
 	}
 
 	@Override
 	public void syncFile(Long projectId, String path, String readLock, String activeServer) {
 		var file = new File(getProjectDir(projectId), path);
-		Client client = ClientBuilder.newClient();
-		try {
-			String fromServerUrl = clusterService.getServerUrl(activeServer);
-			WebTarget target = client.target(fromServerUrl).path("/~api/cluster/project-file")
-					.queryParam("projectId", projectId)
-					.queryParam("path", path)
-					.queryParam("readLock", readLock);
-			Invocation.Builder builder = target.request();
-			builder.header(AUTHORIZATION,
-					BEARER + " " + clusterService.getCredential());
-			try (Response response = builder.get()) {
-				if (response.getStatus() == NO_CONTENT.getStatusCode()) {
-					if (file.exists())
-						FileUtils.deleteFile(file);
-				} else {
-					FileUtils.createDir(file.getParentFile());
-					KubernetesHelper.checkStatus(response);
-					try (
-							var is = response.readEntity(InputStream.class);
-							var os = new BufferedOutputStream(new FileOutputStream(file), BUFFER_SIZE)) {
-						IOUtils.copy(is, os, BUFFER_SIZE);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
-			}
-		} finally {
-			client.close();
-		}
+		var sitePath = Bootstrap.getSiteDir().toPath().resolve(file.toPath()).toString();
+		SiteSyncUtils.syncFile(activeServer, sitePath, true, readLock, null);
 	}
 	
 	private BatchWorker getSyncWorker(Long projectId) {

@@ -14,7 +14,7 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.util.interpolative.VariableInterpolator;
+import io.onedev.server.util.interpolative.JobVariableInterpolator;
 import io.onedev.server.web.editable.BeanEditor;
 
 import javax.validation.Valid;
@@ -130,7 +130,7 @@ public class UseTemplateStep extends CompositeStep {
 			}
 
 			ParamCombination newParamCombination = new ParamCombination(template.getParamSpecs(), paramMap);
-			VariableInterpolator interpolator = new VariableInterpolator(build, newParamCombination);
+			JobVariableInterpolator interpolator = new JobVariableInterpolator(build, newParamCombination);
 			for (Step step : template.getSteps()) {
 				step = interpolator.interpolateProperties(step);
 				String actionName = step.getName();

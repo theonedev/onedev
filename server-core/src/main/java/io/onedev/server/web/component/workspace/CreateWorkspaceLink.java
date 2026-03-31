@@ -9,6 +9,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Workspace;
+import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.workspaces.detail.dashboard.WorkspaceDashboardPage;
 import io.onedev.server.workspace.WorkspaceService;
@@ -27,7 +28,7 @@ public abstract class CreateWorkspaceLink extends AjaxLink<Void> {
 
 	protected abstract Project getProject();
 
-	protected abstract String getSpecName();
+	protected abstract WorkspaceSpec getSpec();
 
 	@Override
 	public void onClick(AjaxRequestTarget target) {
@@ -35,7 +36,7 @@ public abstract class CreateWorkspaceLink extends AjaxLink<Void> {
 		workspace.setProject(getProject());
 		workspace.setUser(SecurityUtils.getUser());
 		workspace.setBranch(branch);
-		workspace.setSpecName(getSpecName());
+		workspace.setSpecName(getSpec().getName());
 		workspace.setToken(UUID.randomUUID().toString());
 		workspaceService.create(workspace);
 		setResponsePage(WorkspaceDashboardPage.class, WorkspaceDashboardPage.paramsOf(workspace));

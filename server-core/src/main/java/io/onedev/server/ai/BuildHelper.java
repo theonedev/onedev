@@ -28,7 +28,7 @@ public class BuildHelper {
         summary.remove("id");
         summary.remove("uuid");
         summary.remove("numberScopeId");
-        summary.remove("workspacePath");
+        summary.remove("workDirPath");
         summary.remove("checkoutPaths");
         summary.remove("submitSequence");
         summary.remove("finishTimeGroups");        

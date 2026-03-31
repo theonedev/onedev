@@ -13,7 +13,7 @@ public class SiteFileResourceReference extends ResourceReference {
 
 	@Override
 	public IResource getResource() {
-		return new SiteFileResource();
+		return new ProjectSiteFileResource();
 	}
 
 }

@@ -7,12 +7,17 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.JobMatch;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.job.JobAuthorizationContext;
+import io.onedev.server.model.Workspace;
 import io.onedev.server.util.usage.Usage;
+import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
 public class GroovyScript implements Serializable {
@@ -27,7 +32,11 @@ public class GroovyScript implements Serializable {
 	
 	private boolean canBeUsedByBuildJobs = true;
 	
-	private String authorization;
+	private String jobAuthorization;
+
+	private boolean canBeUsedByWorkspaceSpecs = true;
+
+	private String applicableWorkspaceProjects;
 
 	@Editable(order=100)
 	@Pattern(regexp ="^(?!" + BUILTIN_PREFIX + ").*$", message="Name is not allowed to start with '" + BUILTIN_PREFIX + "'")
@@ -63,34 +72,65 @@ public class GroovyScript implements Serializable {
 	@Editable(order=500, placeholder="Any job", description="Optionally specify jobs allowed to use this script")
 	@DependsOn(property="canBeUsedByBuildJobs")
 	@JobMatch(withProjectCriteria = true)
-	public String getAuthorization() {
-		return authorization;
+	public String getJobAuthorization() {
+		return jobAuthorization;
+	}
+
+	public void setJobAuthorization(String jobAuthorization) {
+		this.jobAuthorization = jobAuthorization;
 	}
 	
-	public void setAuthorization(String authorization) {
-		this.authorization = authorization;
+	@Editable(order=550, name="Can Be Used By Workspace Specs", description = "Whether or not this script can be used in workspace spec")
+	public boolean isCanBeUsedByWorkspaceSpecs() {
+		return canBeUsedByWorkspaceSpecs;
+	}
+
+	public void setCanBeUsedByWorkspaceSpecs(boolean canBeUsedByWorkspaceSpecs) {
+		this.canBeUsedByWorkspaceSpecs = canBeUsedByWorkspaceSpecs;
+	}
+	
+	@Editable(order=600, placeholder="Any project", description="Optionally specify projects applicable for this provider. " +
+			"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. " +
+			"Multiple projects should be separated by space")
+	@Patterns(suggester="suggestProjects", path=true)
+	@DependsOn(property="canBeUsedByWorkspaces")		
+	public String getApplicableWorkspaceProjects() {
+		return applicableWorkspaceProjects;
+	}
+
+	public void setApplicableWorkspaceProjects(String applicableWorkspaceProjects) {
+		this.applicableWorkspaceProjects = applicableWorkspaceProjects;
 	}
 	
 	public final boolean isAuthorized() {
 		JobAuthorizationContext jobAuthorizationContext = JobAuthorizationContext.get();
 		if (jobAuthorizationContext != null) 
 			return canBeUsedByBuildJobs && jobAuthorizationContext.isScriptAuthorized(this);
-		else 
-			return true;
+
+		Workspace workspace = Workspace.get();
+		if (workspace != null)
+			return canBeUsedByWorkspaceSpecs && (applicableWorkspaceProjects == null || WildcardUtils.matchPath(applicableWorkspaceProjects, workspace.getProject().getPath()));
+
+		return true;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestProjects(String matchWith) {
+		return SuggestionUtils.suggestProjectPaths(matchWith);
 	}
 	
 	public Usage onDeleteProject(String projectPath) {
 		Usage usage = new Usage();
-		if (authorization != null && io.onedev.server.job.match.JobMatch.parse(authorization, true, false).isUsingProject(projectPath))
+		if (jobAuthorization != null && io.onedev.server.job.match.JobMatch.parse(jobAuthorization, true, false).isUsingProject(projectPath))
 			usage.add("authorization");
 		return usage;
 	}
 	
 	public void onMoveProject(String oldPath, String newPath) {
-		if (authorization != null) {
-			var jobMatch = io.onedev.server.job.match.JobMatch.parse(authorization, true, false);
+		if (jobAuthorization != null) {
+			var jobMatch = io.onedev.server.job.match.JobMatch.parse(jobAuthorization, true, false);
 			jobMatch.onMoveProject(oldPath, newPath);
-			authorization = jobMatch.toString();
+			jobAuthorization = jobMatch.toString();
 		}
 	}
 	

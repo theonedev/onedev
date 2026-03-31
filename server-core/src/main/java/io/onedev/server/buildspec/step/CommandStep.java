@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -12,6 +13,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.k8shelper.CommandFacade;
+import io.onedev.k8shelper.RegistryLoginFacade;
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
@@ -22,7 +25,7 @@ import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
+import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 @Editable(order=100, name="Execute Commands")
@@ -129,17 +132,22 @@ public class CommandStep extends Step {
 	}
 	
 	@Override
-	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
+	public final StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination) {
+		var registryLogins = getRegistryLogins().stream().map(it->it.getFacade(build)).collect(toList());
 		var envMap = new HashMap<String, String>();
 		for (var envVar: envVars)
 			envMap.put(envVar.getName(), envVar.getValue());
-		
-		if (isRunInContainer()) {
-			var registryLogins = getRegistryLogins().stream().map(it->it.getFacade(build)).collect(toList());
-			return getInterpreter().getExecutable(jobExecutor, jobToken, getImage(), runAs, registryLogins, envMap, isUseTTY());
-		} else {
-			return getInterpreter().getExecutable(jobExecutor, jobToken, null, null, new ArrayList<>(), envMap, isUseTTY());
-		}
+
+		return getFacade(build, jobExecutor, jobToken, paramCombination, registryLogins, envMap);
+	}
+
+	protected String getEffectiveImage() {
+		return isRunInContainer()?getImage():null;
+	}
+
+	protected StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination, 
+			List<RegistryLoginFacade> registryLogins, Map<String, String> envMap) {
+		return new CommandFacade(getEffectiveImage(), runAs, registryLogins, envMap, isUseTTY(), getInterpreter().getFacade());
 	}
 
 	@Override
@@ -157,7 +165,7 @@ public class CommandStep extends Step {
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		/* 
 		 * We do not support dynamic variable here as:
-		 * 1. @file:@ notion will not work for workspace files generated in current step
+		 * 1. @file:@ notion will not work for workdir files generated in current step
 		 * 2. It is very easy to use file content in shell script via shell utilities 
 		 *    in regardless the file is generated in current or previous steps
 		 */

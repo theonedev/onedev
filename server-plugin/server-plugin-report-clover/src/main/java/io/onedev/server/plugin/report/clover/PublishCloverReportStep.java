@@ -31,7 +31,7 @@ public class PublishCloverReportStep extends PublishCoverageReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Editable(order=100, description="Specify clover coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, "
+	@Editable(order=100, description="Specify clover coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, "
 			+ "for instance, <tt>target/site/clover/clover.xml</tt>. "
 			+ "Refer to <a href='https://openclover.org/documentation'>OpenClover documentation</a> "
 			+ "on how to generate clover xml file. Use * or ? for pattern match")

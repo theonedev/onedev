@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -109,9 +108,9 @@ import io.onedev.server.event.project.ProjectDeleted;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.ScheduledTimeReaches;
+import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.project.build.BuildFinished;
 import io.onedev.server.event.project.build.BuildPending;
-import io.onedev.server.event.project.build.BuildRetrying;
 import io.onedev.server.event.project.build.BuildSubmitted;
 import io.onedev.server.event.project.build.BuildUpdated;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
@@ -134,7 +133,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
+import io.onedev.server.model.support.administration.DockerAware;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.SessionService;
 import io.onedev.server.persistence.TransactionService;
@@ -162,7 +161,7 @@ import io.onedev.server.util.concurrent.BatchWorkExecutionService;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.concurrent.WorkExecutionService;
-import io.onedev.server.util.interpolative.VariableInterpolator;
+import io.onedev.server.util.interpolative.JobVariableInterpolator;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.EditableStringTransformer;
 import io.onedev.server.web.editable.EditableUtils;
@@ -171,7 +170,7 @@ import nl.altindag.ssl.SSLFactory;
 @Singleton
 public class DefaultJobService implements JobService, Runnable, CodePullAuthorizationSource, Serializable {
 
-	private static final int CHECK_INTERVAL = 1000; // check internal in milli-seconds
+	private static final int CHECK_INTERVAL = 5; 
 
 	private static final int CACHE_SCHEDULE_PRIORITY = 10;
 
@@ -255,6 +254,8 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	private JobTerminalService jobTerminalService;
 
 	private volatile Thread thread;
+
+	private volatile boolean checkImmediately;
 
 	private final Map<String, JobContext> jobContexts = new ConcurrentHashMap<>();
 
@@ -383,7 +384,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 				}
 			}
 
-			VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
+			JobVariableInterpolator interpolator = new JobVariableInterpolator(build, build.getParamCombination());
 			for (JobDependency dependency : build.getJob().getJobDependencies()) {
 				JobDependency interpolated = interpolator.interpolateProperties(dependency);
 				List<Map<String, List<String>>> dependencyParamMaps;
@@ -532,31 +533,23 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 	}
 
 	private JobExecutor getJobExecutor(Build build, @Nullable String jobExecutorName, TaskLogger jobLogger) {
-		if (StringUtils.isNotBlank(jobExecutorName)) {
-			JobExecutor jobExecutor = null;
-			for (JobExecutor each : settingService.getJobExecutors()) {
-				if (each.getName().equals(jobExecutorName)) {
-					jobExecutor = each;
-					break;
-				}
-			}
-			if (jobExecutor != null) {
-				if (!jobExecutor.isEnabled())
-					throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is disabled");
-				else if (!isApplicable(build, jobExecutor))
-					throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is not applicable for current job");
-				else 
-					return jobExecutor;
-			} else {
-				throw new ExplicitException("Unable to find specified job executor '" + jobExecutorName + "'");
-			}
+		if (jobExecutorName != null) {
+			var jobExecutor = settingService.getJobExecutors().stream()
+				.filter(it -> it.getName().equals(jobExecutorName))
+				.findFirst()
+				.orElseThrow(() -> new ExplicitException("Unable to find specified job executor '" + jobExecutorName + "'"));
+			if (!jobExecutor.isEnabled())
+				throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is disabled");
+			else if (!isApplicable(build, jobExecutor))
+				throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is not applicable for current job");
+			else 
+				return jobExecutor;
 		} else {
 			if (!settingService.getJobExecutors().isEmpty()) {
-				for (var executor : settingService.getJobExecutors()) {
-					if (executor.isEnabled() && isApplicable(build, executor))
-						return executor;
-				}
-				throw new ExplicitException("No applicable job executor");
+				return settingService.getJobExecutors().stream()
+					.filter(it -> it.isEnabled() && isApplicable(build, it))
+					.findFirst()
+					.orElseThrow(() -> new ExplicitException("No applicable job executor"));
 			} else {
 				jobLogger.log("No job executor defined, auto-discovering...");
 				List<JobExecutorDiscoverer> discoverers = new ArrayList<>(OneDev.getExtensions(JobExecutorDiscoverer.class));
@@ -578,7 +571,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 
 	private Future<Boolean> execute(Build build) {		
 		String jobToken = build.getToken();
-		VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
+		JobVariableInterpolator interpolator = new JobVariableInterpolator(build, build.getParamCombination());
 
 		TaskLogger jobLogger = logService.newLogger(build.getLoggingSupport());
 		String jobExecutorName = interpolator.interpolate(build.getJob().getJobExecutor());
@@ -726,7 +719,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 				innerBuild.setRetryDate(new Date());
 				innerBuild.setStatus(Status.PENDING);
 				innerBuild.getCheckoutPaths().clear();
-				listenerRegistry.post(new BuildRetrying(innerBuild));
+				listenerRegistry.post(new BuildPending(innerBuild));
 				buildService.update(innerBuild);
 			});
 			return true;
@@ -1038,6 +1031,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 					innerBuild.setCanceller(userService.load(userId));
 					buildService.update(innerBuild);
 				});
+				checkImmediately = true;
 			}
 			return null;
 		});
@@ -1212,6 +1206,16 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 			taskScheduler.unschedule(maintenanceTaskId);
 	}
 
+	@Listen
+	public void on(BuildEvent event) {
+		if (event instanceof BuildSubmitted || event instanceof BuildPending) {
+			clusterService.submitToServer(clusterService.getLeaderServerAddress(), () -> {
+				checkImmediately = true;
+				return null;
+			});
+		}
+	}
+
 	@Override
 	public void run() {
 		while (!jobFutures.isEmpty() || thread != null) {
@@ -1288,13 +1292,8 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 							return null;
 						}));
 					}
-					for (var future : futures) {
-						try {
-							future.get();
-						} catch (InterruptedException | ExecutionException e) {
-							throw new RuntimeException(e);
-						}
-					}
+					for (var future : futures) 
+						future.get();
 				}
 				
 				sessionService.run(() -> {
@@ -1330,10 +1329,14 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 						}
 					}
 				});
-				Thread.sleep(CHECK_INTERVAL);
+				int count = 0;
+				while (!checkImmediately && count++ < CHECK_INTERVAL) 
+					Thread.sleep(1000);
+				checkImmediately = false;
 			} catch (Throwable t) {
-				if (ExceptionUtils.find(t, ServerNotFoundException.class) == null)
+				if (ExceptionUtils.find(t, ServerNotFoundException.class) == null) {
 					logger.error("Error checking builds", t);
+				}
 			}
 		}
 	}
@@ -1345,7 +1348,7 @@ public class DefaultJobService implements JobService, Runnable, CodePullAuthoriz
 		JobAuthorizationContext.push(build.getJobAuthorizationContext());
 		Build.push(build);
 		try {
-			VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
+			JobVariableInterpolator interpolator = new JobVariableInterpolator(build, build.getParamCombination());
 			Map<String, String> placeholderValues = new HashMap<>();
 			placeholderValues.put(BUILD_VERSION, build.getVersion());
 			if (build.getJob() != null) {

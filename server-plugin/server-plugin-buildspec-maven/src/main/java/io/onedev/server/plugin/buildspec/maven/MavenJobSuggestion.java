@@ -17,7 +17,6 @@ import io.onedev.server.buildspec.step.CheckoutStep;
 import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.buildspec.step.SetBuildVersionStep;
 import io.onedev.server.buildspec.step.SetupCacheStep;
-import io.onedev.server.buildspec.step.CachePath;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
@@ -43,7 +42,7 @@ public class MavenJobSuggestion implements JobSuggestion {
 			setupCache.setKey("maven_repository");
 
 			setupCache.setChecksumFiles("**/pom.xml");
-			setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "/root/.m2/repository")));
+			setupCache.setPaths(Lists.newArrayList("/root/.m2/repository"));
 			job.getSteps().add(setupCache);
 			
 			CommandStep runTests = new CommandStep();

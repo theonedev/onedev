@@ -4,7 +4,7 @@ import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.server.model.Build.getProjectRelativeDirPath;
 import static io.onedev.server.plugin.report.unittest.UnitTestReport.CATEGORY;
 import static io.onedev.server.plugin.report.unittest.UnitTestReport.getReportLockName;
-import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
+import static io.onedev.server.util.SiteSyncUtils.isVersionFile;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.File;

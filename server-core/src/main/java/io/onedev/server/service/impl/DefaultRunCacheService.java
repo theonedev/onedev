@@ -46,7 +46,7 @@ import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.k8shelper.CacheAvailability;
-import io.onedev.k8shelper.CacheHelper;
+import io.onedev.k8shelper.CacheProvisioner;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -68,7 +68,7 @@ import io.onedev.server.util.concurrent.Prioritized;
 public class DefaultRunCacheService extends BaseEntityService<RunCache>
 		implements RunCacheService, Serializable, SchedulableTask {
 	
-	private static final int CACHE_VERSION = 3;
+	private static final int CACHE_VERSION = 4;
 
 	private static final int HOUSE_KEEPING_PRIORITY = 50;
 	
@@ -254,7 +254,7 @@ public class DefaultRunCacheService extends BaseEntityService<RunCache>
 		try {
 			return new ImmutablePair<>(cacheDir, new FilterOutputStream(new BufferedOutputStream(new FileOutputStream(new File(cacheDir, "data")), BUFFER_SIZE)) {
 
-				private final byte[] buffer = new byte[CacheHelper.MARK_BUFFER_SIZE];
+				private final byte[] buffer = new byte[CacheProvisioner.MARK_BUFFER_SIZE];
 				
 				private final byte[] singeByteArray = new byte[1];
 

@@ -18,6 +18,9 @@ import org.apache.wicket.protocol.ws.api.message.TextMessage;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
 
+import org.jspecify.annotations.Nullable;
+import org.unbescape.javascript.JavaScriptEscape;
+
 import io.onedev.commons.utils.StringUtils;
 
 public abstract class TerminalPanel extends Panel {
@@ -85,8 +88,18 @@ public abstract class TerminalPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new TerminalResourceReference()));
-		var script = String.format("onedev.server.terminal.onDomReady('%s');", getMarkupId());
-		response.render(OnDomReadyHeaderItem.forScript(script));
+
+		String escapedInitialCommand = "undefined";
+		if (getInitialCommand() != null) 
+			escapedInitialCommand = "'" + JavaScriptEscape.escapeJavaScript(getInitialCommand()) + "'";
+		response.render(OnDomReadyHeaderItem.forScript(String.format(
+			"onedev.server.terminal.onDomReady('%s', %s);", 
+			getMarkupId(), escapedInitialCommand)));
+	}
+
+	@Nullable
+	protected String getInitialCommand() {
+		return null;
 	}
 
 	protected abstract void onConnectionOpen(IWebSocketConnection connection);

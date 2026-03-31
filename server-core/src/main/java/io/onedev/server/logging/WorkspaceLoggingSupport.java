@@ -20,9 +20,12 @@ public class WorkspaceLoggingSupport implements LoggingSupport {
 
 	private final Long workspaceId;
 
+	private final Collection<String> maskSecrets;
+
 	public WorkspaceLoggingSupport(Workspace workspace) {
 		identity = new WorkspaceLoggingIdentity(workspace.getProject().getId(), workspace.getNumber());
 		workspaceId = workspace.getId();
+		maskSecrets = workspace.getMaskSecrets();
 	}
 
 	@Override
@@ -36,7 +39,7 @@ public class WorkspaceLoggingSupport implements LoggingSupport {
 
 	@Override
 	public Collection<String> getMaskSecrets() {
-		return Set.of();
+		return maskSecrets;
 	}
 
 	@Override

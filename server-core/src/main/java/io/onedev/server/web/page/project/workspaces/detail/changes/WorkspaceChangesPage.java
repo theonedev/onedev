@@ -329,7 +329,7 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				executeGit("reset", "HEAD");
+				executeGit("reset", "HEAD", "--", ".");
 				refreshAll(target);
 			}
 

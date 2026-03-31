@@ -25,6 +25,7 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
 import io.onedev.server.util.EditContext;
 
 @Editable(order=100)
@@ -58,6 +59,7 @@ public class AiModelSetting implements Serializable {
     }
 
     @Editable(order=300, name="API Key", description="Optionally specify API key for authentication")
+    @Password
     public String getApiKey() {
         return apiKey;
     }

@@ -3,8 +3,9 @@ package io.onedev.server.plugin.executor.servershell;
 import static io.onedev.agent.AgentUtils.newInfoLogger;
 import static io.onedev.agent.AgentUtils.newWarningLogger;
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
+import static io.onedev.k8shelper.KubernetesHelper.initRepository;
+import static io.onedev.k8shelper.KubernetesHelper.setupGitCerts;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
-import static io.onedev.k8shelper.KubernetesHelper.setupGitForRemoteAccess;
 import static io.onedev.k8shelper.KubernetesHelper.stringifyStepPosition;
 
 import java.io.File;
@@ -18,12 +19,12 @@ import java.util.Map;
 
 import javax.validation.constraints.NotEmpty;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SystemUtils;
 
 import io.onedev.agent.AgentUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.bootstrap.SecretMasker;
-import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -45,15 +46,14 @@ import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Numeric;
 import io.onedev.server.annotation.OmitName;
+import io.onedev.server.cache.ServerJobCacheProvisioner;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.git.CommandUtils;
-import io.onedev.server.git.location.GitLocation;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobRunnable;
 import io.onedev.server.job.JobService;
 import io.onedev.server.job.JobTerminal;
-import io.onedev.server.job.ServerCacheHelper;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.executor.servershell.ServerShellExecutor.TestData;
 import io.onedev.server.service.ResourceService;
@@ -115,12 +115,11 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 			@Override
 			public boolean run(TaskLogger jobLogger) {
 				notifyJobRunning(jobContext.getBuildId(), null);
-				checkApplicable();
 				
 				buildDir = new File(Bootstrap.getTempDir(),
 						"onedev-build-" + jobContext.getProjectId() + "-" + jobContext.getBuildNumber() + "-" + jobContext.getSubmitSequence());
 				FileUtils.createDir(buildDir);
-				File workDir = new File(buildDir, "workspace");
+				File workDir = new File(buildDir, "work");
 				SecretMasker.push(jobContext.getSecretMasker());
 				try {
 					String localServer = getClusterService().getLocalServerAddress();
@@ -135,13 +134,10 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					}
 					FileUtils.createDir(workDir);
 
-					var cacheHelper = new ServerCacheHelper(buildDir, jobContext, jobLogger);
-					
+					var cacheProvisioner = new ServerJobCacheProvisioner(buildDir, jobContext, jobLogger);
+				
 					jobLogger.log("Copying job dependencies...");
 					getJobService().copyDependencies(jobContext, workDir);
-
-					File userDir = new File(buildDir, "user");
-					FileUtils.createDir(userDir);
 
 					getJobService().reportJobWorkDir(jobContext, workDir.getAbsolutePath());
 					CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
@@ -182,16 +178,16 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 									throw new RuntimeException(e);
 								}
 
-								Commandline interpreter = commandFacade.getScriptInterpreter();
-								Map<String, String> environments = new HashMap<>();
-								environments.put("HOME", userDir.getAbsolutePath());
-								environments.put("ONEDEV_WORKDIR", workDir.getAbsolutePath());
-								environments.put("ONEDEV_WORKSPACE", workDir.getAbsolutePath());
-								environments.putAll(commandFacade.getEnvMap());
-								interpreter.workingDir(workDir).environments(environments);
-								interpreter.addArgs(stepScriptFile.getAbsolutePath());
+								Commandline cmdline = new Commandline(commandFacade.getExecutable());
+								cmdline.addArgs(commandFacade.getScriptOptions());
 
-								var result = interpreter.execute(newInfoLogger(jobLogger), newWarningLogger(jobLogger));
+								Map<String, String> envs = new HashMap<>();
+								envs.put("ONEDEV_WORKDIR", workDir.getAbsolutePath());
+								envs.putAll(commandFacade.getEnvMap());
+								cmdline.workingDir(workDir).environments(envs);
+								cmdline.addArgs(stepScriptFile.getAbsolutePath());
+
+								var result = cmdline.execute(newInfoLogger(jobLogger), newWarningLogger(jobLogger));
 								if (result.getReturnCode() != 0) {
 									jobLogger.error("Command exited with code " + result.getReturnCode());
 									return false;
@@ -200,29 +196,41 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 									|| facade instanceof RunImagetoolsFacade || facade instanceof PruneBuilderCacheFacade) {
 								throw new ExplicitException("This step can only be executed by server docker executor or "
 										+ "remote docker executor");
-						} else if (facade instanceof CheckoutFacade) {
-							CheckoutFacade checkoutFacade = (CheckoutFacade) facade;
-							jobLogger.log("Checking out code...");
+							} else if (facade instanceof CheckoutFacade) {
+								CheckoutFacade checkoutFacade = (CheckoutFacade) facade;
+								jobLogger.log("Checking out code...");
 
-							Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
-							checkoutFacade.setupWorkingDir(git, workDir);
+								var infoLogger = newInfoLogger(jobLogger);
+								var warningLogger = newWarningLogger(jobLogger);
 
-							var cloneInfo = checkoutFacade.getCloneInfo();
-							setupGitForRemoteAccess(git, userDir, Bootstrap.getTrustCertsDir(),
-									new File(buildDir, "trust-certs.pem"),
-									cloneInfo, newInfoLogger(jobLogger), newWarningLogger(jobLogger));
-							cloneRepository(git, jobContext.getProjectGitDir(), cloneInfo.getCloneUrl(),
-									jobContext.getRefName(), jobContext.getCommitId().name(),
-									checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
-									checkoutFacade.getCloneDepth(),
-									newInfoLogger(jobLogger), newWarningLogger(jobLogger));
+								var git = CommandUtils.newGit();
+								checkoutFacade.setupWorkingDir(git, workDir);							
+								initRepository(git, infoLogger, warningLogger);
+
+								var remoteAccessArgs = new ArrayList<String>();
+
+								var trustCertsFile = new File(buildDir, "trust-certs.pem");
+								remoteAccessArgs.addAll(setupGitCerts(git, Bootstrap.getTrustCertsDir(), trustCertsFile,
+									trustCertsFile.getAbsolutePath(), infoLogger, warningLogger));
+
+								var cloneInfo = checkoutFacade.getCloneInfo();
+								remoteAccessArgs.addAll(cloneInfo.setupGitAuth(git, buildDir, buildDir.getAbsolutePath(), 
+										infoLogger, warningLogger));
+					
+								git.arguments(remoteAccessArgs);
+
+								cloneRepository(git, jobContext.getProjectGitDir(), cloneInfo.getCloneUrl(),
+										jobContext.getRefName(), jobContext.getCommitId().name(),
+										checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
+										checkoutFacade.getCloneDepth(),
+										infoLogger, warningLogger);
 							} else if (facade instanceof SetupCacheFacade) {
 								SetupCacheFacade setupCacheFacade = (SetupCacheFacade) facade;
-								for (var cachePath: setupCacheFacade.getPaths()) {
-									if (cachePath.isAbsolute())
-										throw new ExplicitException("Shell executor does not allow absolute cache path: " + cachePath.getPathValue());
+								for (var path: setupCacheFacade.getCacheConfig().getPaths()) {
+									if (FilenameUtils.getPrefixLength(path) > 0)
+										throw new ExplicitException("Shell executor does not allow absolute cache path: " + path);
 								}
-								cacheHelper.setupCache(setupCacheFacade);
+								cacheProvisioner.setupCache(setupCacheFacade.getCacheConfig());
 							} else if (facade instanceof ServerSideFacade) {
 								ServerSideFacade serverSideFacade = (ServerSideFacade) facade;
 								return serverSideFacade.execute(buildDir, new ServerSideFacade.Runner() {
@@ -247,7 +255,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 					}, new ArrayList<>());
 
-					cacheHelper.buildFinished(successful);
+					if (successful)
+						cacheProvisioner.uploadCaches();
 					
 					return successful;
 				} finally {
@@ -275,13 +284,13 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					Commandline cmdline;
 					if (runningStep instanceof CommandFacade) {
 						CommandFacade commandStep = (CommandFacade) runningStep;
-						cmdline = new Commandline(commandStep.getShell(SystemUtils.IS_OS_WINDOWS, null)[0]);
+						cmdline = new Commandline(commandStep.getExecutable());
 					} else if (SystemUtils.IS_OS_WINDOWS) {
 						cmdline = new Commandline("cmd");
 					} else {
 						cmdline = new Commandline("sh");
 					}
-					cmdline.workingDir(new File(buildDir, "workspace"));
+					cmdline.workingDir(new File(buildDir, "work"));
 					return new CommandlineShell(terminal, cmdline);
 				} else {
 					throw new ExplicitException("Shell not ready");
@@ -293,21 +302,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 		return getResourceService().runServerJob(getName(), getConcurrencyNumber(), 1, runnable);
 	}
 	
-	private void checkApplicable() {
-		if (OneDev.getK8sService() != null) {
-			throw new ExplicitException(""
-					+ "OneDev running inside kubernetes cluster does not support server shell executor. "
-					+ "Please use kubernetes executor instead");
-		} else if (Bootstrap.isInDocker()) {
-			throw new ExplicitException("Server shell executor is only supported when OneDev is installed "
-					+ "directly on bare metal/virtual machine");
-		}
-	}
-
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
-		checkApplicable();
-		
 		Commandline git = CommandUtils.newGit();
 		AgentUtils.testCommands(git, testData.getCommands(), jobLogger);
 	}

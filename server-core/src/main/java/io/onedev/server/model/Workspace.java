@@ -4,10 +4,14 @@ import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.search.entity.EntitySort.Direction.DESCENDING;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Stack;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,9 +29,12 @@ import org.jspecify.annotations.Nullable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.entityreference.WorkspaceReference;
 import io.onedev.server.logging.WorkspaceLoggingSupport;
+import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.web.util.TextUtils;
 import io.onedev.server.workspace.WorkspaceService;
@@ -50,6 +57,8 @@ import io.onedev.server.workspace.WorkspaceService;
 public class Workspace extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
+
+	private static ThreadLocal<Stack<Workspace>> stack = ThreadLocal.withInitial(Stack::new);
 
 	public static final String WORKSPACES_DIR = "workspaces";
 
@@ -144,6 +153,8 @@ public class Workspace extends AbstractEntity {
 
 	private Date errorDate;
 
+	private transient Optional<WorkspaceSpec> specOptional;
+
 	@JsonIgnore
 	@Column(nullable=false)
 	private String token;
@@ -237,7 +248,7 @@ public class Workspace extends AbstractEntity {
 	public void setToken(String token) {
 		this.token = token;
 	}
-
+	
 	public static String getProjectRelativeDirPath(Long workspaceNumber) {
 		return WORKSPACES_DIR + "/s" + String.format("%03d", workspaceNumber % 1000) + "/" + workspaceNumber;
 	}
@@ -266,6 +277,56 @@ public class Workspace extends AbstractEntity {
 
 	public WorkspaceLoggingSupport getLoggingSupport() {
 		return new WorkspaceLoggingSupport(this);
+	}
+
+	@Nullable
+	public WorkspaceSpec getSpec() {
+		if (specOptional == null) {
+			specOptional = getProject().getHierarchyWorkspaceSpecs().stream()
+				.filter(it -> it.getName().equals(getSpecName()))
+				.findFirst();
+		}
+		return specOptional.orElse(null);
+	}
+
+	public Collection<String> getMaskSecrets() {
+		var maskSecrets = new HashSet<String>();
+		maskSecrets.add(getToken());
+		maskSecrets.add(OneDev.getInstance(ClusterService.class).getCredential());
+
+		var spec = getSpec();
+		if (spec == null)
+			throw new ExplicitException("Spec not found in workspace project hierarchy");
+		
+		for (var envVar: spec.getEnvVars()) {
+			if (envVar.isSecret()) 
+				maskSecrets.add(envVar.getSecretValue());
+		}
+
+		for (var registryLogin: spec.getRegistryLogins()) 
+			maskSecrets.add(registryLogin.getPassword());
+		for (var cacheConfig: spec.getCacheConfigs()) {
+			if (cacheConfig.getUploadAccessToken() != null)
+				maskSecrets.add(cacheConfig.getUploadAccessToken());
+		}
+
+		return maskSecrets;
+	}
+
+	public static void push(@Nullable Workspace workspace) {
+		stack.get().push(workspace);
+	}
+
+	public static void pop() {
+		stack.get().pop();
+	}
+
+	@Nullable
+	public static Workspace get() {
+		if (!stack.get().isEmpty()) 
+			return stack.get().peek();
+		else 
+			return null;
 	}
 
 	public WorkspaceReference getReference() {

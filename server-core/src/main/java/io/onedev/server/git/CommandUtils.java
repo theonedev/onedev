@@ -68,8 +68,6 @@ public class CommandUtils {
 				
 			}).checkReturnCode();
 			
-			git.clearArgs();
-			
 			return task.call(git);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

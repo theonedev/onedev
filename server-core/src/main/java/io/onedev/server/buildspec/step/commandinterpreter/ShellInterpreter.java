@@ -1,16 +1,12 @@
 package io.onedev.server.buildspec.step.commandinterpreter;
 
-import io.onedev.k8shelper.CommandFacade;
-import io.onedev.k8shelper.RegistryLoginFacade;
+import io.onedev.k8shelper.InterpreterFacade;
 import io.onedev.k8shelper.ShellFacade;
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 import javax.validation.constraints.NotEmpty;
-import java.util.List;
-import java.util.Map;
 
 @Editable(order=200, name="Custom Linux Shell")
 public class ShellInterpreter extends Interpreter {
@@ -31,7 +27,7 @@ public class ShellInterpreter extends Interpreter {
 	}
 
 	@Editable(order=110, description="Specify shell commands to execute "
-			+ "under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>")
+			+ "under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>")
 	@Interpolative
 	@Code(language=Code.SHELL, variableProvider="suggestVariables")
 	@NotEmpty
@@ -46,11 +42,8 @@ public class ShellInterpreter extends Interpreter {
 	}
 	
 	@Override
-	public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image,
-									   String runAs, List<RegistryLoginFacade> registryLogins,
-									   Map<String, String> envMap, boolean useTTY) {
-		return new ShellFacade(image, runAs, registryLogins, getShell(), getCommands(), 
-				envMap, useTTY);
+	public InterpreterFacade getFacade() {
+		return new ShellFacade(getCommands(), getShell());
 	}
 
 }

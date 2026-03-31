@@ -6,6 +6,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jspecify.annotations.Nullable;
 
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.web.editable.BeanContext;
@@ -35,7 +36,11 @@ abstract class WorkspaceSpecEditPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				onSave(target, spec);
+				var errorMessage = onSave(target, spec);
+				if (errorMessage != null) {
+					form.error(errorMessage);
+					target.add(form);
+				}
 			}
 
 			@Override
@@ -56,7 +61,8 @@ abstract class WorkspaceSpecEditPanel extends Panel {
 		add(form);
 	}
 
-	protected abstract void onSave(AjaxRequestTarget target, WorkspaceSpec spec);
+	@Nullable
+	protected abstract String onSave(AjaxRequestTarget target, WorkspaceSpec spec);
 
 	protected abstract void onCancel(AjaxRequestTarget target);
 }

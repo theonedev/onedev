@@ -1,27 +1,36 @@
 package io.onedev.server.buildspec.step;
 
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.k8shelper.CommandFacade;
-import io.onedev.k8shelper.RegistryLoginFacade;
-import io.onedev.server.annotation.*;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
-import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.model.support.administration.jobexecutor.DockerAware;
+import static io.onedev.agent.AgentUtils.buildDockerConfig;
+import static io.onedev.k8shelper.RegistryLoginFacade.merge;
+import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.onedev.agent.AgentUtils.buildDockerConfig;
-import static io.onedev.k8shelper.RegistryLoginFacade.merge;
-import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.k8shelper.CommandFacade;
+import io.onedev.k8shelper.RegistryLoginFacade;
+import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.annotation.Path;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Multiline;
+import io.onedev.server.annotation.NoSpace;
+import io.onedev.server.annotation.ReservedOptions;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.param.ParamCombination;
+import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
+import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.support.administration.DockerAware;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 @Editable(order=200, name="Build Image (Kaniko)", group = DOCKER_IMAGE, description="Build docker image with kaniko. " +
 		"This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor")
@@ -59,11 +68,11 @@ public class BuildImageWithKanikoStep extends CommandStep {
 		return null;
 	}
 
-	@Editable(order=100, description="Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>. "
-			+ "Leave empty to use job workdir itself. The file <code>Dockerfile</code> is expected to exist in build context " +
+	@Editable(order=100, description="Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. "
+			+ "Leave empty to use job working directory itself. The file <code>Dockerfile</code> is expected to exist in build context " +
 			"directory, unless you specify a different location with option <code>--dockerfile</code>")
 	@Interpolative(variableSuggester="suggestVariables")
-	@SubPath
+	@Path(Path.Type.RELATIVE)
 	public String getBuildContext() {
 		return buildContext;
 	}
@@ -125,43 +134,41 @@ public class BuildImageWithKanikoStep extends CommandStep {
 
 	@Override
 	public Interpreter getInterpreter() {
-		return new DefaultInterpreter() {
-			
-			@Override
-			public CommandFacade getExecutable(JobExecutor jobExecutor, String jobToken, String image, String runAs,
-											   List<RegistryLoginFacade> registryLogins, Map<String, String> envMap, 
-											   boolean useTTY) {
-				var commandsBuilder = new StringBuilder();
-				if (jobExecutor instanceof DockerAware) {
-					DockerAware registryLoginAware = (DockerAware) jobExecutor;
-					commandsBuilder.append("cat <<EOF>> /kaniko/.docker/config.json\n");
-					var mergedRegistryLogins = merge(registryLogins, registryLoginAware.getRegistryLogins(jobToken));
-					commandsBuilder.append(buildDockerConfig(mergedRegistryLogins)).append("\n");
-					commandsBuilder.append("EOF\n");
-				}
-				if (getTrustCertificates() != null) {
-					commandsBuilder.append("cat <<EOF>> /kaniko/ssl/certs/additional-ca-cert-bundle.crt\n");
-					commandsBuilder.append(getTrustCertificates().replace("\r\n", "\n")).append("\n");
-					commandsBuilder.append("EOF\n");
-				}
-				
-				commandsBuilder.append("/kaniko/executor");
-				if (getBuildContext() != null)
-					commandsBuilder.append(" --context=\"/onedev-build/workspace/").append(getBuildContext()).append("\"");
-				else
-					commandsBuilder.append(" --context=/onedev-build/workspace");
+		return new DefaultInterpreter();
+	}
 
-				commandsBuilder.append(" ").append(getOutput().getOptions());			
-				
-				if (getMoreOptions() != null)
-					commandsBuilder.append(" ").append(getMoreOptions());
-				
-				commandsBuilder.append("\n");
-				
-				return new CommandFacade(image, runAs, registryLogins, commandsBuilder.toString(), envMap, useTTY);
-			}
-			
-		};
+	@Override
+	public StepFacade getFacade(Build build, JobExecutor jobExecutor, String jobToken, ParamCombination paramCombination, 
+			List<RegistryLoginFacade> registryLogins, Map<String, String> envMap) {
+		var commandsBuilder = new StringBuilder();
+		if (jobExecutor instanceof DockerAware) {
+			DockerAware registryLoginAware = (DockerAware) jobExecutor;
+			commandsBuilder.append("cat <<EOF>> /kaniko/.docker/config.json\n");
+			var mergedRegistryLogins = merge(registryLogins, registryLoginAware.getRegistryLogins(jobToken));
+			commandsBuilder.append(buildDockerConfig(mergedRegistryLogins)).append("\n");
+			commandsBuilder.append("EOF\n");
+		}
+		if (getTrustCertificates() != null) {
+			commandsBuilder.append("cat <<EOF>> /kaniko/ssl/certs/additional-ca-cert-bundle.crt\n");
+			commandsBuilder.append(getTrustCertificates().replace("\r\n", "\n")).append("\n");
+			commandsBuilder.append("EOF\n");
+		}
+
+		commandsBuilder.append("/kaniko/executor");
+		if (getBuildContext() != null)
+			commandsBuilder.append(" --context=\"/onedev-build/work/").append(getBuildContext()).append("\"");
+		else
+			commandsBuilder.append(" --context=/onedev-build/work");
+
+		commandsBuilder.append(" ").append(getOutput().getOptions());
+
+		if (getMoreOptions() != null)
+			commandsBuilder.append(" ").append(getMoreOptions());
+
+		commandsBuilder.append("\n");
+
+		return new CommandFacade(getEffectiveImage(), getRunAs(), registryLogins, 
+				envMap, isUseTTY(), commandsBuilder.toString());
 	}
 
 	@Editable
@@ -216,9 +223,9 @@ public class BuildImageWithKanikoStep extends CommandStep {
 
 		private String destPath;
 
-		@Editable(name="OCI Layout Directory", description = "Specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to store OCI layout")
+		@Editable(name="OCI Layout Directory", description = "Specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a> to store OCI layout")
 		@Interpolative(variableSuggester="suggestVariables")
-		@SubPath
+		@Path(Path.Type.RELATIVE)
 		@NoSpace
 		@NotEmpty
 		public String getDestPath() {
@@ -235,7 +242,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 
 		@Override
 		public String getOptions() {
-			return "--no-push --oci-layout-path /onedev-build/workspace/" + getDestPath();
+			return "--no-push --oci-layout-path /onedev-build/work/" + getDestPath();
 		}
 		
 	}

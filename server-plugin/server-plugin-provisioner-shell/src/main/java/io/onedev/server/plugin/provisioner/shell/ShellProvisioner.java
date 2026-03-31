@@ -1,22 +1,19 @@
 package io.onedev.server.plugin.provisioner.shell;
 
-import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
-import static io.onedev.k8shelper.KubernetesHelper.installGitLfs;
-import static io.onedev.k8shelper.KubernetesHelper.setupGitForRemoteAccess;
+import static io.onedev.agent.AgentUtils.newErrorLogger;
+import static io.onedev.agent.AgentUtils.newInfoLogger;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 
 import javax.validation.constraints.NotEmpty;
 
-import org.apache.commons.lang3.SystemUtils;
-import org.jspecify.annotations.Nullable;
+import org.apache.commons.io.FilenameUtils;
 
 import io.onedev.agent.AgentUtils;
-import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -25,9 +22,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.annotation.Code;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
+import io.onedev.server.cache.WorkspaceCacheProvisioner;
 import io.onedev.server.git.CommandUtils;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.model.Workspace;
 import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
 import io.onedev.server.plugin.provisioner.shell.ShellProvisioner.TestData;
@@ -38,30 +34,30 @@ import io.onedev.server.web.util.Testable;
 import io.onedev.server.workspace.WorkspaceContext;
 import io.onedev.server.workspace.WorkspaceRuntime;
 
-@Editable(order=ShellProvisioner.ORDER, name="Shell Provisioner", description="" +
-		"This provisioner creates workspaces with OneDev server's shell facility.<br>" +
-		"<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner has same " +
-		"permission as OneDev server process. Make sure it can only be used by trusted projects")
+@Editable(order=ShellProvisioner.ORDER, name="Shell Provisioner", description="""
+		This provisioner creates workspaces with OneDev server's shell facility, and it requires 
+		<a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> to be installed on OneDev server<br>
+		<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have the same 
+		permission as the OneDev server process. Make sure it can only be used by trusted projects.
+		""")
 public class ShellProvisioner extends WorkspaceProvisioner implements Testable<TestData> {
 
 	private static final long serialVersionUID = 1L;
 	
-	static final int ORDER = 400;
+	static final int ORDER = 200;
 			
 	private void checkApplicable() {
 		if (OneDev.getK8sService() != null) {
-			throw new ExplicitException(""
-					+ "OneDev running inside kubernetes cluster does not support server shell provider. "
-					+ "Please use kubernetes provider instead");
-		} else if (Bootstrap.isInDocker()) {
-			throw new ExplicitException("Server shell provider is only supported when OneDev is installed "
-					+ "directly on bare metal/virtual machine");
+			throw new ExplicitException("OneDev running inside kubernetes cluster does not support workspaces yet");
 		}
 	}
 
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
 		checkApplicable();
+		
+		Commandline git = CommandUtils.newGit();
+		AgentUtils.testCommands(git, testData.getCommands(), jobLogger);
 	}
 	
 	@Editable(name="Specify Shell/Batch Commands to Run")
@@ -88,116 +84,64 @@ public class ShellProvisioner extends WorkspaceProvisioner implements Testable<T
 	@Override
 	public WorkspaceRuntime provision(WorkspaceContext context, TaskLogger logger) {
 		checkApplicable();
+
+		if (context.getSpec().isRunInContainer()) 
+			throw new ExplicitException("This workspace can only be provisioned by docker provisioner");
+
+		for (var cacheConfig: context.getSpec().getCacheConfigs()) {
+			for (var path: cacheConfig.getPaths()) {
+				if (FilenameUtils.getPrefixLength(path) > 0)
+					throw new ExplicitException("Shell provisioner does not allow absolute cache path: " + path);
+			}
+		}
 		
-		var localServer = getClusterService().getLocalServerAddress();
-		logger.log(String.format("Provisioning workspace (provisioner: %s, server: %s)...", 
-				getName(), localServer));
+		var workspaceDir = getWorkspaceDir(context);
 
-		var workDir = Workspace.getWorkDir(context.getProjectId(), context.getWorkspaceNumber());
-		var workspaceDir = workDir.getParentFile();
-		FileUtils.createDir(workDir);
+		var envVars = setupRepository(context, workspaceDir.getAbsolutePath(), logger);
 
-		var cloneInfo = context.getCloneInfo();
+		envVars.put("TERM", "xterm-256color");
+		envVars.put("LANG", "C.UTF-8");
 
-		var infoLogger = AgentUtils.newInfoLogger(logger);
-		var errorLogger = AgentUtils.newWarningLogger(logger);
+		logger.log("Setting up cache...");
 
-		var git = CommandUtils.newGit();
-		git.workingDir(workDir);
+		var cacheProvisioner = new WorkspaceCacheProvisioner(workspaceDir, context, logger);
+		cacheProvisioner.setupCaches();
 
-		var userDir = new File(workspaceDir, "user");
-		FileUtils.createDir(userDir);
+		var shell = context.getSpec().getShell();
 
-		logger.log("Populating user configs...");
-		
-		for (var entry : context.getUserConfigs().entrySet()) {
-			var configFile = new File(userDir, entry.getKey());
-			FileUtils.createDir(configFile.getParentFile());
+		var setupCommands = shell.getSetupCommands();
+		if (setupCommands != null) {
+			logger.log("Running setup commands...");
+			var commandDir = new File(workspaceDir, "command");
+			FileUtils.createDir(commandDir);
+			var scriptFile = new File(commandDir, "setup" + shell.getFacility().getScriptExtension());
 			try {
-				Files.writeString(configFile.toPath(), entry.getValue());
+				FileUtils.writeStringToFile(
+						scriptFile,
+						shell.getFacility().normalizeCommands(setupCommands),
+						StandardCharsets.UTF_8);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+			var cmdline = new Commandline(shell.getFacility().getExecutable());
+			cmdline.addArgs(shell.getFacility().getScriptOptions());
+
+			cmdline.workingDir(new File(workspaceDir, "work")).environments(envVars);
+			cmdline.addArgs(scriptFile.getAbsolutePath());
+			cmdline.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
 		}
 
-		setupGitForRemoteAccess(git, userDir, Bootstrap.getTrustCertsDir(),
-				new File(workspaceDir, "trust-certs.pem"),
-				cloneInfo, infoLogger, errorLogger);				
-
-		git.addArgs("config", "--global", "user.name", context.getUserName());
-		git.execute(infoLogger, errorLogger).checkReturnCode();
-		git.clearArgs();
-
-		git.addArgs("config", "--global", "pull.rebase", "false");
-		git.execute(infoLogger, errorLogger).checkReturnCode();
-		git.clearArgs();
-
-		git.addArgs("config", "--global", "user.email", context.getUserEmail());
-		git.execute(infoLogger, errorLogger).checkReturnCode();
-		git.clearArgs();
-
-		boolean repositoryCloned = false;
-
-		if (new File(workDir, ".git").exists()) {
-			git.addArgs("status");
-			var statusResult = git.execute(infoLogger, errorLogger);
-			git.clearArgs();
-	
-			if (statusResult.getReturnCode() == 0) 
-				repositoryCloned = true;
-		}
-
-		if (repositoryCloned) {
-			// Fix origin url in case this is a backup replica just getting active 
-			git.addArgs("remote", "set-url", "origin", cloneInfo.getCloneUrl());
-			git.execute(infoLogger, errorLogger).checkReturnCode();
-			git.clearArgs();
-
-			installGitLfs(git,	infoLogger, errorLogger);
-
-			logger.log("Repository already exists, skipping clone");
-		} else {
-			logger.log("Cloning repository...");
-			if (context.getBranch() != null) {
-				cloneRepository(git, context.getProjectGitDir(), cloneInfo.getCloneUrl(),
-						GitUtils.branch2ref(context.getBranch()), null, 
-						context.isRetrieveLfs(), false, 0, 
-						infoLogger, errorLogger);
-			} else {
-				git.addArgs("config", "--global", "init.defaultBranch", "main");
-				git.execute(infoLogger, errorLogger).checkReturnCode();
-				git.clearArgs();
-
-				git.addArgs("clone", cloneInfo.getCloneUrl(), ".");
-				git.execute(infoLogger, errorLogger).checkReturnCode();
-				git.clearArgs();
-
-				installGitLfs(git,	infoLogger, errorLogger);
-			}
-		}
-
-		HookUtils.setupWorkspacePostCommitHook(new File(workDir, ".git"), context.isRetrieveLfs());
-
-		context.getEnvVars().put("HOME", userDir.getAbsolutePath());
-		context.getEnvVars().putAll(HookUtils.getWorkspacePostCommitHookEnvs(context.getToken()));
-		
 		return new WorkspaceRuntime() {
-
-			private String getShellCmd(@Nullable String shell) {
-				if (shell != null)
-					return shell;
-				else if (SystemUtils.IS_OS_WINDOWS)
-					return "cmd";
-				else
-					return "sh";
-			}
 		
 			@Override
 			public Shell doOpenShell(Terminal terminal) {
-				var shellCmd = getShellCmd(context.getShell());
 				var workDir = Workspace.getWorkDir(context.getProjectId(), context.getWorkspaceNumber());
 				FileUtils.createDir(workDir);
-				var cmdline = new Commandline(shellCmd).workingDir(workDir).environments(context.getEnvVars());
+				var cmdline = new Commandline("tmux")
+					.addArgs("new-session")
+					.addArgs(context.getSpec().getShell().getFacility().getExecutable())
+					.workingDir(workDir)
+					.environments(envVars);
 				return new CommandlineShell(terminal, cmdline);
 			}
 
@@ -207,6 +151,8 @@ public class ShellProvisioner extends WorkspaceProvisioner implements Testable<T
 					new CountDownLatch(1).await();
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
+				} finally {
+					cacheProvisioner.uploadCaches();
 				}
 			}
 			

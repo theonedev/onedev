@@ -1,12 +1,12 @@
 package io.onedev.server.buildspec.step;
 
-import static io.onedev.k8shelper.SetupCacheFacade.UploadStrategy.UPLOAD_IF_NOT_EXACT_MATCH;
+import static io.onedev.k8shelper.UploadStrategy.UPLOAD_IF_NOT_EXACT_MATCH;
 import static java.util.stream.Collectors.toList;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -14,8 +14,10 @@ import javax.validation.constraints.Size;
 import org.apache.commons.lang3.tuple.Pair;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.k8shelper.CacheConfigFacade;
 import io.onedev.k8shelper.SetupCacheFacade;
 import io.onedev.k8shelper.StepFacade;
+import io.onedev.k8shelper.UploadStrategy;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.DependsOn;
 import io.onedev.server.annotation.Editable;
@@ -40,9 +42,9 @@ public class SetupCacheStep extends Step {
 	
 	private String checksumFiles;
 	
-	private List<CachePath> paths;
+	private List<String> paths = new ArrayList<>();
 	
-	private SetupCacheFacade.UploadStrategy uploadStrategy = UPLOAD_IF_NOT_EXACT_MATCH;
+	private UploadStrategy uploadStrategy = UPLOAD_IF_NOT_EXACT_MATCH;
 	
 	private String changeDetectionExcludes;
 	
@@ -72,7 +74,7 @@ public class SetupCacheStep extends Step {
 			will be re-uploaded with the new checksum if upload strategy is set to <i>Upload If Not Exact Match</i>. 
 			Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. 
 			Multiple files should be separated by space, and single file containing space should be quoted. 
-			Non-absolute file is relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>.<br> 
+			Non-absolute file is relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>.<br> 
 			<b>NOTE: </b> An empty checksum is assumed if this property is empty.""")
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getChecksumFiles() {
@@ -83,14 +85,16 @@ public class SetupCacheStep extends Step {
 		this.checksumFiles = checksumFiles;
 	}
 
-	@Editable(order=300, name="Cache Paths")
-	@Valid
+	@Editable(order=300, name="Cache Paths", description = """
+			Non-absolute path is considered to be relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. 
+			Note that shell related executors runs directly on host machine, and only accept relative paths""")
+	@Interpolative(variableSuggester="suggestVariables")
 	@Size(min=1, max=100)
-	public List<CachePath> getPaths() {
+	public List<String> getPaths() {
 		return paths;
 	}
 
-	public void setPaths(List<CachePath> paths) {
+	public void setPaths(List<String> paths) {
 		this.paths = paths;
 	}
 
@@ -99,11 +103,11 @@ public class SetupCacheStep extends Step {
 			means to upload when no cache found with matching key and checksum , and 
 			<i>Upload If Changed</i> means to upload if some files in cache path are changed""")
 	@NotNull
-	public SetupCacheFacade.UploadStrategy getUploadStrategy() {
+	public UploadStrategy getUploadStrategy() {
 		return uploadStrategy;
 	}
 
-	public void setUploadStrategy(SetupCacheFacade.UploadStrategy uploadStrategy) {
+	public void setUploadStrategy(UploadStrategy uploadStrategy) {
 		this.uploadStrategy = uploadStrategy;
 	}
 
@@ -165,16 +169,15 @@ public class SetupCacheStep extends Step {
 			uploadAccessToken = build.getJobAuthorizationContext().getSecretValue(getUploadAccessTokenSecret());
 		else
 			uploadAccessToken = null;
-		var pathFacades = getPaths().stream()
-				.map(CachePath::toFacade)
-				.collect(toList());
+		
 		Pair<Set<String>, Set<String>> parsedChecksumFiles = null;
 		if (checksumFiles != null) {
 			var patterns = PatternSet.parse(checksumFiles);
 			parsedChecksumFiles = Pair.of(patterns.getIncludes(), patterns.getExcludes());
 		}
-		return new SetupCacheFacade(getKey(), parsedChecksumFiles, pathFacades, 
-				getUploadStrategy(), getChangeDetectionExcludes(), getUploadProjectPath(), uploadAccessToken);
+		var cacheConfig = new CacheConfigFacade(key, parsedChecksumFiles, getPaths(), uploadStrategy, changeDetectionExcludes,
+				uploadProjectPath, uploadAccessToken);
+		return new SetupCacheFacade(cacheConfig);
 	}
 	
 	@Override

@@ -23,6 +23,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
@@ -65,13 +66,18 @@ public class WorkspaceSpecsPage extends ProjectSettingPage {
 					}
 
 					@Override
-					protected void onSave(AjaxRequestTarget target, WorkspaceSpec spec) {
+					protected String onSave(AjaxRequestTarget target, WorkspaceSpec spec) {
+						for (int i = 0; i < getProject().getWorkspaceSpecs().size(); i++) {
+							if (i != item.getIndex() && getProject().getWorkspaceSpecs().get(i).getName().equals(spec.getName()))
+								return _T("Another workspace spec with the same name already exists");
+						}
 						var oldSpec = getProject().getWorkspaceSpecs().set(item.getIndex(), spec);
 						var oldAuditContent = VersionedXmlDoc.fromBean(oldSpec).toXML();
 						var newAuditContent = VersionedXmlDoc.fromBean(spec).toXML();
 						getProjectService().update(getProject());
 						auditService.audit(getProject(), "changed workspace spec \"" + spec.getName() + "\"", oldAuditContent, newAuditContent);
 						target.add(container);
+						return null;
 					}
 
 					@Override
@@ -99,42 +105,78 @@ public class WorkspaceSpecsPage extends ProjectSettingPage {
 
 		}.items("li.spec").handle(".card-header"));
 
-		container.add(newAddNewFrag());
+		container.add(newAddNewLinksFrag());
 	}
 
-	private Component newAddNewFrag() {
-		Fragment fragment = new Fragment("newSpec", "addNewLinkFrag", this);
-		fragment.add(new AjaxLink<Void>("link") {
+	private void newWorkspaceSpecEditPanel(AjaxRequestTarget target, WorkspaceSpec spec) {
+		Fragment fragment = new Fragment("newSpec", "editNewFrag", getPage());
+		fragment.setOutputMarkupId(true);
+
+		fragment.add(new WorkspaceSpecEditPanel("editor", spec) {
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment("newSpec", "editNewFrag", getPage());
-				fragment.setOutputMarkupId(true);
-				fragment.add(new WorkspaceSpecEditPanel("editor", new WorkspaceSpec()) {
+			protected String onSave(AjaxRequestTarget target, WorkspaceSpec spec) {
+				for (WorkspaceSpec existing : getProject().getWorkspaceSpecs()) {
+					if (existing.getName().equals(spec.getName()))
+						return _T("Another workspace spec with the same name already exists");
+				}
+				getProject().getWorkspaceSpecs().add(spec);
+				var newAuditContent = VersionedXmlDoc.fromBean(spec).toXML();
+				getProjectService().update(getProject());
+				auditService.audit(getProject(), "created workspace spec \"" + spec.getName() + "\"", null, newAuditContent);
+				container.replace(newAddNewLinksFrag());
+				target.add(container);
+				return null;
+			}
 
-					@Override
-					protected void onSave(AjaxRequestTarget target, WorkspaceSpec spec) {
-						getProject().getWorkspaceSpecs().add(spec);
-						var newAuditContent = VersionedXmlDoc.fromBean(spec).toXML();
-						getProjectService().update(getProject());
-						auditService.audit(getProject(), "added workspace spec \"" + spec.getName() + "\"", null, newAuditContent);
-						container.replace(newAddNewFrag());
-						target.add(container);
-					}
-
-					@Override
-					protected void onCancel(AjaxRequestTarget target) {
-						Component newAddNewFrag = newAddNewFrag();
-						container.replace(newAddNewFrag);
-						target.add(newAddNewFrag);
-					}
-
-				});
-				container.replace(fragment);
-				target.add(fragment);
+			@Override
+			protected void onCancel(AjaxRequestTarget target) {
+				Component newAddNewFrag = newAddNewLinksFrag();
+				container.replace(newAddNewFrag);
+				target.add(newAddNewFrag);
 			}
 
 		});
+		container.replace(fragment);
+		target.add(fragment);
+	}
+
+	private Component newAddNewLinksFrag() {
+		Fragment fragment = new Fragment("newSpec", "addNewLinksFrag", this);
+		fragment.add(new AjaxLink<Void>("createNew") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				newWorkspaceSpecEditPanel(target, new WorkspaceSpec());
+			}
+
+		});
+		fragment.add(new AjaxLink<Void>("createFromTemplate") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				new BeanEditModalPanel<WorkspaceSpecTemplateBean>(target, new WorkspaceSpecTemplateBean()) {
+
+				@Override
+					protected String onSave(AjaxRequestTarget target, WorkspaceSpecTemplateBean bean) {
+						var spec = bean.getTemplate().createWorkspaceSpec();
+						for (WorkspaceSpec existing : getProject().getWorkspaceSpecs()) {
+							if (existing.getName().equals(spec.getName()))
+								return _T("Another workspace spec with the same name already exists");
+						}
+						close();
+						getProject().getWorkspaceSpecs().add(spec);
+						var newAuditContent = VersionedXmlDoc.fromBean(spec).toXML();
+						getProjectService().update(getProject());
+						auditService.audit(getProject(), "created workspace spec \"" + spec.getName() + "\"", null, newAuditContent);
+						target.add(container);
+						return null;
+					}
+					
+				};
+			}
+
+		});		
 		fragment.setOutputMarkupId(true);
 		return fragment;
 	}

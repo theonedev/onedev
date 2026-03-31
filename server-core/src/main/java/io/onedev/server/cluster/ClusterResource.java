@@ -37,9 +37,10 @@ import org.eclipse.jgit.lib.Repository;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TarUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.StorageService;
 import io.onedev.server.annotation.NoDBAccess;
 import io.onedev.server.attachment.AttachmentService;
@@ -98,53 +99,53 @@ public class ClusterResource {
 	@Inject
 	private WorkExecutionService workExecutionService;
 	
-	@Path("/project-files")
+	@Path("/site-files")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@GET
-	public Response downloadFiles(@QueryParam("projectId") Long projectId,
-								  @QueryParam("path") String path,
+	public Response downloadSiteFiles(@QueryParam("path") String path,
 								  @QueryParam("patterns") String patterns,
 								  @QueryParam("readLock") String readLock) {
 		if (!SecurityUtils.isSystem())
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 
-		StreamingOutput output = os -> read(readLock, () -> {
-			File directory = new File(projectService.getProjectDir(projectId), path);
-			PatternSet patternSet = PatternSet.parse(patterns);
-			patternSet.getExcludes().add(SHARE_TEST_DIR + "/**");
-			TarUtils.tar(directory, patternSet.getIncludes(), patternSet.getExcludes(), os, false);
-		});
-		return ok(output).build();
-	}
-
-	@Path("/assets")
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	@GET
-	public Response downloadAssets() {
-		if (!SecurityUtils.isSystem())
-			throw new UnauthorizedException("This api can only be accessed via cluster credential");
-		
-		StreamingOutput output = os -> TarUtils.tar(OneDev.getAssetsDir(), Sets.newHashSet("**"), null, os, false);
+		StreamingOutput output = os -> {
+			Runnable sendFiles = () -> {
+				File directory = new File(Bootstrap.getSiteDir(), path);
+				PatternSet patternSet = PatternSet.parse(patterns);
+				patternSet.getExcludes().add(SHARE_TEST_DIR + "/**");
+				TarUtils.tar(directory, patternSet.getIncludes(), patternSet.getExcludes(), os, false);
+			};
+			if (readLock != null)
+				read(readLock, sendFiles);
+			else
+				sendFiles.run();
+		};
 		return ok(output).build();
 	}
 	
-	@Path("/project-file")
+	@Path("/site-file")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@GET
-	public Response downloadProjectFile(@QueryParam("projectId") Long projectId,
-										@QueryParam("path") String path,
-										@QueryParam("readLock") String readLock) {
+	public Response downloadSiteFile(@QueryParam("path") String path, @QueryParam("readLock") String readLock) {
 		if (!SecurityUtils.isSystem())
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 
-		File file = new File(projectService.getProjectDir(projectId), path);
-		if (read(readLock, file::exists)) {
-			StreamingOutput os = output -> read(readLock, () -> {
-				try (output; InputStream is = new FileInputStream(file)) {
-					IOUtils.copy(is, output, BUFFER_SIZE);
-				}
-				return null;
-			});
+		File file = new File(Bootstrap.getSiteDir(), path);
+		boolean exists = readLock != null ? read(readLock, file::exists) : file.exists();
+		if (exists) {
+			StreamingOutput os = output -> {
+				Runnable copyFile = () -> {
+					try (output; InputStream is = new FileInputStream(file)) {
+						IOUtils.copy(is, output, BUFFER_SIZE);
+					} catch (IOException e) {
+						throw ExceptionUtils.unchecked(e);
+					}
+				};
+				if (readLock != null) 
+					read(readLock, copyFile);
+				else 
+					copyFile.run();
+			};
 			return ok(os).build();
 		} else {
 			return status(NO_CONTENT).build();
@@ -242,10 +243,10 @@ public class ClusterResource {
 		return ok(out).build();
 	}
 
-	@Path("/site")
+	@Path("/project-site")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@GET
-	public Response downloadSiteFile(@QueryParam("projectId") Long projectId, @QueryParam("filePath") String filePath) {
+	public Response downloadProjectSiteFile(@QueryParam("projectId") Long projectId, @QueryParam("filePath") String filePath) {
 		if (!SecurityUtils.isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 		

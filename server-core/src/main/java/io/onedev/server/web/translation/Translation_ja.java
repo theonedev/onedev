@@ -17,7 +17,7 @@ public class Translation_ja extends TranslationResourceBundle {
 	@SystemPrompt("You are good at translating from English to Japanese in DevOps software area.")
 	public static void init(Map<String, String> m) {
 		m.clear();
-		m.put(" Project path can be omitted if reference from current project", "プロジェクトパスは現在のプロジェクトから参照する場合、省略可能です");
+		m.put("#Paths", "#パス");
 		m.put("'..' is not allowed in the directory", "'..' はディレクトリ内で使用できません");
 		m.put("(* = any string, ? = any character)", "(* = 任意の文字列, ? = 任意の文字)");
 		m.put("(on behalf of <b>{0}</b>)", "(<b>{0}</b> の代理として)");
@@ -27,13 +27,10 @@ public class Translation_ja extends TranslationResourceBundle {
 			"** トライアルサブスクリプションが期限切れのため、エンタープライズ版は無効化されています。有効化するにはサブスクリプションを注文するか、トライアル延長が必要な場合は support@onedev.io にお問い合わせください **");
 		m.put("** Enterprise edition is disabled as there is no remaining user months. Order more to enable **", 
 			"** 残りのユーザ月がないため、エンタープライズ版は無効化されています。有効化するには追加注文してください **");
-		m.put("1. To use this package, add below to project pom.xml", "1. このパッケージを使用するには、以下をプロジェクトの pom.xml に追加してください");
 		m.put("1. Use below repositories in project pom.xml", "1. プロジェクトの pom.xml に以下のリポジトリを使用してください");
 		m.put("1w 1d 1h 1m", "1w 1d 1h 1m");
 		m.put("2. Add below to <code>$HOME/.m2/settings.xml</code> if you want to deploy from command line", 
 			"2. コマンドラインからデプロイする場合、<code>$HOME/.m2/settings.xml</code> に以下を追加してください");
-		m.put("2. Also add below to $HOME/.m2/settings.xml if you want to compile project from command line", 
-			"2. コマンドラインからプロジェクトをコンパイルする場合、$HOME/.m2/settings.xml に以下を追加してください");
 		m.put("3. For CI/CD job, it is more convenient to use a custom settings.xml, for instance via below code in a command step:", 
 			"3. CI/CD ジョブでは、カスタム settings.xml を使用する方が便利です。例えば、以下のコードをコマンドステップで使用してください:");
 		m.put("6-digits passcode", "6桁のパスコード");
@@ -80,6 +77,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("<b>Project Owner</b> is a built-in role with full permission over projects", "<b>プロジェクトオーナー</b>は、プロジェクトに対する完全な権限を持つ組み込みの役割です");
 		m.put("<b>Tips: </b> Type <tt>@</tt> to <a href='https://docs.onedev.io/appendix/job-variables' target='_blank' tabindex='-1'>insert variable</a>. Use <tt>@@</tt> for literal <tt>@</tt>", 
 			"<b>ヒント: </b> <tt>@</tt> を入力して<a href='https://docs.onedev.io/appendix/job-variables' target='_blank' tabindex='-1'>変数を挿入</a>します。リテラル<tt>@</tt>には<tt>@@</tt>を使用してください");
+		m.put("<b>Tips: </b> Type <tt>@</tt> to <a href='https://docs.onedev.io/appendix/workspace-variables' target='_blank' tabindex='-1'>insert variable</a>. Use <tt>@@</tt> for literal <tt>@</tt>", 
+			"<b>ヒント: </b> <tt>@</tt>を入力して<a href='https://docs.onedev.io/appendix/workspace-variables' target='_blank' tabindex='-1'>変数を挿入</a>します。リテラル<tt>@</tt>には<tt>@@</tt>を使用します");
 		m.put("<div><span>Search Files</span> <span class='font-size-sm text-muted'>in default branch</span></div>", 
 			"<div><span>ファイルを検索</span> <span class='font-size-sm text-muted'>デフォルトブランチ内</span></div>");
 		m.put("<div><span>Search Symbols</span> <span class='font-size-sm text-muted'>in default branch</span></div>", 
@@ -126,15 +125,20 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("A {0} used as body of user invitation email", "ユーザー招待メールの本文として使用される {0}");
 		m.put("A {0} used as body of various issue notification emails", "さまざまな問題通知メールの本文として使用される {0}");
 		m.put("A {0} used as body of various pull request notification emails", "さまざまなプルリクエスト通知メールの本文として使用される {0}");
+		m.put("A {0} used as body of workspace notification email", "ワークスペース通知メールの本文として使用される{0}");
+		m.put("AI", "AI");
 		m.put("AI Model Settings", "AIモデル設定");
 		m.put("AI Settings", "AI設定");
 		m.put("AI entitlement settings have been saved", "AI権限設定が保存されました");
 		m.put("AI model settings have been saved", "AIモデル設定が保存されました");
+		m.put("AI settings updated", "AI設定が更新されました");
 		m.put("AI system prompt has been saved", "AIシステムプロンプトが保存されました");
 		m.put("API Key", "APIキー");
 		m.put("API url of your JIRA cloud instance, for instance, <tt>https://your-domain.atlassian.net/rest/api/3</tt>", 
 			"例えば、<tt>https://your-domain.atlassian.net/rest/api/3</tt> のような JIRA クラウドインスタンスの API URL");
 		m.put("Able to merge without conflicts", "競合なしでマージ可能");
+		m.put("Abort Merge", "マージを中止");
+		m.put("Absolute", "絶対");
 		m.put("Absolute or relative url of the image", "画像の絶対または相対 URL");
 		m.put("Absolute or relative url of the link", "リンクの絶対または相対 URL");
 		m.put("Access Anonymously", "匿名でアクセス");
@@ -159,6 +163,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Account Name", "アカウント名");
 		m.put("Account is disabled", "アカウントが無効になっています");
 		m.put("Account set up successfully", "アカウントが正常に設定されました");
+		m.put("Active", "アクティブ");
 		m.put("Active Directory", "Active Directory");
 		m.put("Active Since", "アクティブ開始日");
 		m.put("Activities", "アクティビティ");
@@ -176,9 +181,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Add New Board", "新しいボードを追加");
 		m.put("Add New Email Address", "新しいメールアドレスを追加");
 		m.put("Add New Timesheet", "新しいタイムシートを追加");
+		m.put("Add Provisioner", "プロビジョナーを追加");
 		m.put("Add Rule", "ルールを追加");
 		m.put("Add SSH key", "SSHキーを追加");
 		m.put("Add SSO provider", "SSOプロバイダーを追加");
+		m.put("Add Spec", "スペックを追加");
 		m.put("Add Spent Time", "使用時間を追加");
 		m.put("Add Timesheet", "タイムシートを追加");
 		m.put("Add Widget", "ウィジェットを追加");
@@ -198,6 +205,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Add custom field", "カスタムフィールドを追加");
 		m.put("Add dashboard", "ダッシュボードを追加");
 		m.put("Add default issue board", "デフォルトの課題ボードを追加");
+		m.put("Add environment variable", "環境変数を追加");
 		m.put("Add files to current directory", "現在のディレクトリにファイルを追加");
 		m.put("Add files via upload", "アップロードでファイルを追加");
 		m.put("Add groovy script", "Groovyスクリプトを追加");
@@ -207,7 +215,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Add issue state transition", "課題状態遷移を追加");
 		m.put("Add link", "リンクを追加");
 		m.put("Add new", "新規追加");
+		m.put("Add new cache config", "新しいキャッシュ設定を追加");
 		m.put("Add new card to this column", "この列に新しいカードを追加");
+		m.put("Add new config file", "新しい設定ファイルを追加");
 		m.put("Add new file", "新しいファイルを追加");
 		m.put("Add new import", "新しいインポートを追加");
 		m.put("Add new issue creation setting", "新しい課題作成設定を追加");
@@ -217,6 +227,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Add new project dependency", "新しいプロジェクト依存関係を追加");
 		m.put("Add new step", "新しいステップを追加");
 		m.put("Add new trigger", "新しいトリガーを追加");
+		m.put("Add new user config", "新しいユーザー設定を追加");
+		m.put("Add new user data", "新しいユーザーデータを追加");
 		m.put("Add project", "プロジェクトを追加");
 		m.put("Add reviewer...", "レビュアーを追加...");
 		m.put("Add to batch to commit with other suggestions later", "後で他の提案と一緒にコミットするためにバッチに追加");
@@ -224,7 +236,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Add to iteration...", "イテレーションに追加...");
 		m.put("Add user to group...", "グループにユーザーを追加...");
 		m.put("Add value", "値を追加");
+		m.put("Add web hook", "ウェブフックを追加");
 		m.put("Add {0}", "{0}を追加");
+		m.put("Added by them", "彼らによって追加された");
+		m.put("Added by us", "私たちによって追加された");
 		m.put("Added commit \"{0}\" (<i class='text-danger'>missing in repository</i>)", "コミット \"{0}\" を追加 (<i class='text-danger'>リポジトリに存在しない</i>)");
 		m.put("Added commit \"{0}\" ({1})", "コミット \"{0}\" を追加 ({1})");
 		m.put("Added to group", "グループに追加されました");
@@ -285,10 +300,12 @@ public class Translation_ja extends TranslationResourceBundle {
 			"コマンドラインからプロジェクトをコンパイルしたい場合は、以下を$HOME/.m2/settings.xmlに追加してください");
 		m.put("Always", "常に");
 		m.put("Always Pull Image", "常にイメージをプル");
+		m.put("Amend", "修正");
 		m.put("An issue already linked for {0}. Unlink it first", "{0}に既にリンクされた課題があります。まずリンクを解除してください");
 		m.put("An unexpected exception occurred", "予期しない例外が発生しました");
 		m.put("And configure auth token of the registry", "そしてレジストリの認証トークンを設定");
 		m.put("Another pull request already open for this change", "この変更に対するプルリクエストはすでに開かれています");
+		m.put("Another workspace spec with the same name already exists", "同じ名前の別のワークスペーススペックが既に存在します");
 		m.put("Any agent", "任意のエージェント");
 		m.put("Any branch", "任意のブランチ");
 		m.put("Any commit message", "任意のコミットメッセージ");
@@ -319,6 +336,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Applicable Pull Requests", "適用可能なプルリクエスト");
 		m.put("Applicable Senders", "適用可能な送信者");
 		m.put("Applicable Users", "適用可能なユーザー");
+		m.put("Applicable Workspace Projects", "適用可能なワークスペースプロジェクト");
 		m.put("Application (client) ID", "アプリケーション（クライアント）ID");
 		m.put("Apply suggested change from code comment", "コードコメントから提案された変更を適用");
 		m.put("Apply suggested changes from code comments", "コードコメントから提案された変更を適用");
@@ -412,6 +430,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Base Gpg Key", "ベースGpgキー");
 		m.put("Base Query", "ベースクエリ");
 		m.put("Base URL", "ベースURL");
+		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint.\n<b class='text-danger'>NOTE:</b> Make sure base URL specified here supports HTTP/2 connection. HTTP/1.1 is not\nsupported and will get a connection timeout error", 
+			"<b class='text-info'>OpenAI互換</b>APIエンドポイントのベースURL。OpenAI公式エンドポイントを使用する場合は空にしてください。\n<b class='text-danger'>注意:</b> ここで指定されたベースURLがHTTP/2接続をサポートしていることを確認してください。HTTP/1.1は\nサポートされておらず、接続タイムアウトエラーが発生します");
 		m.put("Base64 encoded PEM format, starting with -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
 			"Base64でエンコードされたPEM形式、-----BEGIN CERTIFICATE-----で始まり、-----END CERTIFICATE-----で終わる");
 		m.put("Basic Info", "基本情報");
@@ -429,6 +449,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"以下の内容は未保存の変更から復元されました。<a class=\"clear-unsaved-change\">クリア</a>して破棄");
 		m.put("Below content is restored from an unsaved change. Clear to discard", "以下の内容は未保存の変更から復元されました。クリアして破棄してください");
 		m.put("Below information will also be sent", "以下の情報も送信されます");
+		m.put("Binary file", "バイナリファイル");
 		m.put("Binary file.", "バイナリファイル");
 		m.put("Bitbucket App Password", "Bitbucketアプリパスワード");
 		m.put("Bitbucket Login Name", "Bitbucketログイン名");
@@ -456,6 +477,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Body", "本文");
 		m.put("Bold", "太字");
 		m.put("Both", "両方");
+		m.put("Both added", "両方が追加");
+		m.put("Both deleted", "両方が削除");
+		m.put("Both modified", "両方が修正");
+		m.put("Both sides deleted this file", "両方の側がこのファイルを削除しました");
 		m.put("Bottom", "下部");
 		m.put("Branch", "ブランチ");
 		m.put("Branch \"{0}\" already exists, please choose a different name", "ブランチ「{0}」はすでに存在します。別の名前を選んでください");
@@ -543,23 +568,31 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("By week", "週別");
 		m.put("Bypass Certificate Check", "証明書チェックをバイパス");
 		m.put("CANCELLED", "キャンセル済み");
+		m.put("CONFLICTS", "コンフリクト");
 		m.put("CORS Allowed Origins", "CORS許可オリジン");
 		m.put("CPD Report", "CPDレポート");
 		m.put("CPU", "CPU");
 		m.put("CPU Intensive Task Concurrency", "CPU集約タスクの並行性");
 		m.put("CPU capability in millis. This is normally (CPU cores)*1000", "ミリ秒単位のCPU能力。通常は(CPUコア数)*1000");
+		m.put("CPU cores", "CPUコア");
+		m.put("Cache \"{0}\" deleted", "キャッシュ\"{0}\"が削除されました");
+		m.put("Cache Config", "キャッシュ設定");
 		m.put("Cache Key", "キャッシュキー");
 		m.put("Cache Management", "キャッシュ管理");
 		m.put("Cache Paths", "キャッシュパス");
 		m.put("Cache Setting Bean", "キャッシュ設定Bean");
 		m.put("Cache will be deleted to save space if not accessed for this number of days", "この日数間アクセスされない場合、キャッシュはスペースを節約するために削除されます");
+		m.put("Caches", "キャッシュ");
 		m.put("Calculating merge preview...", "マージプレビューを計算中...");
 		m.put("Callback URL", "コールバックURL");
 		m.put("Can Be Used By Jobs", "ジョブで使用可能");
+		m.put("Can Be Used By Workspace Specs", "ワークスペーススペックで使用可能");
+		m.put("Can Be Used By Workspaces", "ワークスペースで使用可能");
 		m.put("Can Create Root Projects", "ルートプロジェクトを作成可能");
 		m.put("Can Edit Estimated Time", "推定時間を編集可能");
 		m.put("Can not convert root user to service account", "ルートユーザーをサービスアカウントに変換できません");
 		m.put("Can not convert yourself to service account", "自分自身をサービスアカウントに変換できません");
+		m.put("Can not delete branch \"{0}\" as there are workspaces on it", "ブランチ\"{0}\"を削除できません。そこにワークスペースがあるためです");
 		m.put("Can not delete default branch", "デフォルトブランチを削除できません");
 		m.put("Can not delete root account", "ルートアカウントを削除できません");
 		m.put("Can not delete yourself", "自分自身を削除できません");
@@ -596,6 +629,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Change to another state", "別の状態に変更");
 		m.put("Change to another value", "別の値に変更");
 		m.put("Changes", "変更");
+		m.put("Changes committed successfully", "変更が正常にコミットされました");
 		m.put("Changes since last review", "最後のレビュー以降の変更");
 		m.put("Changes since last visit", "最後の訪問以降の変更");
 		m.put("Changes since this action", "このアクション以降の変更");
@@ -618,8 +652,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Check Commit Message Footer", "コミットメッセージフッターを確認");
 		m.put("Check Incoming Email", "受信メールを確認");
 		m.put("Check Issue Integrity", "課題の整合性を確認");
+		m.put("Check Licenses", "ライセンスを確認");
+		m.put("Check Secrets", "シークレットを確認");
 		m.put("Check Update", "更新を確認");
+		m.put("Check Vulnerabilities", "脆弱性を確認");
 		m.put("Check Workflow Integrity", "ワークフローの整合性を確認");
+		m.put("Check out to local directory", "ローカルディレクトリにチェックアウト");
 		m.put("Check out to local workspace", "ローカルワークスペースにチェックアウト");
 		m.put("Check this to compare right side with common ancestor of left and right", "左側と右側の共通祖先と比較するにはこれをチェックしてください");
 		m.put("Check this to enforce two-factor authentication for all users in the system", "システム内のすべてのユーザーに対して二要素認証を強制するにはこれをチェックしてください");
@@ -642,10 +680,16 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Checkout Pull Request Head", "プルリクエストヘッドをチェックアウト");
 		m.put("Checkout Pull Request Merge Preview", "プルリクエストマージプレビューをチェックアウト");
 		m.put("Checkstyle Report", "Checkstyleレポート");
+		m.put("Checksum", "チェックサム");
+		m.put("Checksum Files", "チェックサムファイル");
 		m.put("Cherry-Pick", "チェリーピック");
 		m.put("Cherry-picked successfully", "チェリーピックが成功しました");
+		m.put("Child Project", "子プロジェクト");
 		m.put("Child Projects", "子プロジェクト");
 		m.put("Child Projects Of", "の子プロジェクト");
+		m.put("Children Import Projects", "子インポートプロジェクト");
+		m.put("Children Import Repositories", "子インポートリポジトリ");
+		m.put("Children Import Server", "子インポートサーバー");
 		m.put("Choice Provider", "選択プロバイダー");
 		m.put("Choose", "選択");
 		m.put("Choose JIRA project to import issues from", "JIRAプロジェクトを選択して課題をインポート");
@@ -689,6 +733,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Clone in VSCode", "VSCodeでクローン");
 		m.put("Close", "閉じる");
 		m.put("Close Iteration", "イテレーションを閉じる");
+		m.put("Close terminal", "ターミナルを閉じる");
 		m.put("Close this iteration", "このイテレーションを閉じる");
 		m.put("Closed", "閉じられた");
 		m.put("Closed Issue State", "閉じられた課題の状態");
@@ -733,6 +778,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Collapse all", "すべて折りたたむ");
 		m.put("Color", "色");
 		m.put("Columns", "列");
+		m.put("Command", "コマンド");
 		m.put("Command Palette", "コマンドパレット");
 		m.put("Commands", "コマンド");
 		m.put("Comment", "コメント");
@@ -749,6 +795,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Commit Batched Suggestions", "バッチ提案をコミット");
 		m.put("Commit Message", "コミットメッセージ");
 		m.put("Commit Message Bean", "コミットメッセージBean");
+		m.put("Commit Message Checker", "コミットメッセージチェッカー");
 		m.put("Commit Message Fix Patterns", "コミットメッセージ修正パターン");
 		m.put("Commit Message Footer Pattern", "コミットメッセージフッターパターン");
 		m.put("Commit Notification", "コミット通知");
@@ -763,12 +810,14 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Commit hash", "コミットハッシュ");
 		m.put("Commit history of current path", "現在のパスのコミット履歴");
 		m.put("Commit index version", "コミットインデックスバージョン");
+		m.put("Commit message", "コミットメッセージ");
 		m.put("Commit message can be used to fix issues by prefixing and suffixing issue number with specified pattern. Each line of the commit message will be matched against each entry defined here to find issues to be fixed", 
 			"コミットメッセージは、指定されたパターンで課題番号を接頭辞および接尾辞として使用することで課題を修正できます。コミットメッセージの各行は、ここで定義された各エントリと照合され、修正すべき課題を見つけます");
 		m.put("Commit not exist or access denied", "コミットが存在しないか、アクセスが拒否されました");
 		m.put("Commit of the build is missing", "ビルドのコミットが欠落しています");
 		m.put("Commit signature required but no GPG signing key specified", "コミット署名が必要ですが、GPG署名キーが指定されていません");
 		m.put("Commit suggestion", "コミット提案");
+		m.put("Commit to conclude the merge, or", "マージを完了するためにコミットする、または");
 		m.put("Commits", "コミット");
 		m.put("Commits are taken from default branch of non-forked repositories", "コミットは非フォークリポジトリのデフォルトブランチから取得されます");
 		m.put("Commits generated by OneDev previously will be shown as unverified if this key is deleted. Type <code>yes</code> below if you want to continue.", 
@@ -788,7 +837,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Condition", "条件");
 		m.put("Confidential", "機密");
 		m.put("Config File", "設定ファイル");
+		m.put("Config Files", "設定ファイル");
 		m.put("Configuration Discovery Url", "構成検出URL");
+		m.put("Configure shell of the workspace. It will be used to launch workspace terminal, run workspace setup commands etc\n", 
+			"ワークスペースのシェルを設定します。これはワークスペースターミナルの起動、ワークスペースセットアップコマンドの実行などに使用されます\n");
 		m.put("Configure your scope to use below registry", "以下のレジストリを使用するようスコープを設定してください");
 		m.put("Confirm Approve", "承認を確認");
 		m.put("Confirm Delete Source Branch", "ソースブランチの削除を確認");
@@ -798,6 +850,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Confirm Restore Source Branch", "ソースブランチの復元を確認");
 		m.put("Confirm password here", "ここでパスワードを確認");
 		m.put("Confirm your action", "アクションを確認");
+		m.put("Conflict", "コンフリクト");
+		m.put("Conflicts found when trying to merge", "マージを試みた際にコンフリクトが見つかりました");
 		m.put("Connect New Agent", "新しいエージェントを接続");
 		m.put("Connect with your SSO account", "SSOアカウントで接続");
 		m.put("Connection lost or session expired, reload to recover", "接続が失われたかセッションが期限切れです。復元するにはリロードしてください。");
@@ -813,6 +867,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Contributed settings", "寄与された設定");
 		m.put("Contributions", "寄与");
 		m.put("Contributions to {0} branch, excluding merge commits", "マージコミットを除く{0}ブランチへの寄与");
+		m.put("Conventional Commit", "従来のコミット");
 		m.put("Convert All Queried to Service Accounts", "すべてのクエリをサービスアカウントに変換");
 		m.put("Convert Selected to Service Accounts", "選択したものをサービスアカウントに変換");
 		m.put("Converting to service accounts will remove password, email addresses, all assignments and watches. Type <code>yes</code> to confirm", 
@@ -854,16 +909,36 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Create Tag Bean", "タグBeanを作成");
 		m.put("Create Tag Bean With Revision", "リビジョン付きタグBeanを作成");
 		m.put("Create User", "ユーザーを作成");
+		m.put("Create Workspace", "ワークスペースを作成");
+		m.put("Create Workspace Spec", "ワークスペーススペックを作成");
+		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> is installed on OneDev server</li>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"サーバーシェル環境で直接Claude Codeを実行するワークスペーススペックを作成します。\nこのテンプレートで作成されたスペックを使用するには、以下を確認してください:\n<ul>\n    <li><a href='https://github.com/tmux/tmux' target='_blank'>tmux</a>がOneDevサーバーにインストールされていること</li>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a>がOneDevサーバーにインストールされていること</li>\n    <li>'管理 / ワークスペースプロビジョナー'にシェルプロビジョナーが追加され、'適用可能なプロジェクト'が適切に設定されていること</li>\n</ul>");
+		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\n<b class='text-info'>NOTE:</b> This requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"隔離とセキュリティのためにコンテナ内でClaude Codeを実行するワークスペーススペックを作成します。\n<b class='text-info'>注意:</b> これはエンタープライズサブスクリプションが必要です。\n<a href='https://onedev.io/pricing' target='_blank'>30日間無料で試す</a>");
+		m.put("Create a workspace spec running Codex directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> is installed on OneDev server</li>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"サーバーシェル環境で直接Codexを実行するワークスペーススペックを作成します。\nこのテンプレートで作成されたスペックを使用するには、以下を確認してください:\n<ul>\n    <li><a href='https://github.com/tmux/tmux' target='_blank'>tmux</a>がOneDevサーバーにインストールされていること</li>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a>がOneDevサーバーにインストールされていること</li>\n    <li>'管理 / ワークスペースプロビジョナー'にシェルプロビジョナーが追加され、'適用可能なプロジェクト'が適切に設定されていること</li>\n</ul>");
+		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\n<b class='text-info'>NOTE:</b> This requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"隔離とセキュリティのためにコンテナ内でCodexを実行するワークスペーススペックを作成します。\n<b class='text-info'>注意:</b> これはエンタープライズサブスクリプションが必要です。\n<a href='https://onedev.io/pricing' target='_blank'>30日間無料で試す</a>");
+		m.put("Create a workspace spec running Open Code directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> is installed on OneDev server</li>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"サーバーシェル環境で直接Open Codeを実行するワークスペーススペックを作成します。\nこのテンプレートで作成されたスペックを使用するには、以下を確認してください:\n<ul>\n    <li><a href='https://github.com/tmux/tmux' target='_blank'>tmux</a>がOneDevサーバーにインストールされていること</li>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a>がOneDevサーバーにインストールされていること</li>\n    <li>'管理 / ワークスペースプロビジョナー'にシェルプロビジョナーが追加され、'適用可能なプロジェクト'が適切に設定されていること</li>\n</ul>");
+		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\n<b class='text-info'>NOTE: </b> This requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"隔離とセキュリティのためにコンテナ内でOpen Codeを実行するワークスペックを作成します。\n<b class='text-info'>注意:</b> これはエンタープライズサブスクリプションが必要です。\n<a href='https://onedev.io/pricing' target='_blank'>30日間無料で試す</a>");
 		m.put("Create body", "本文を作成");
 		m.put("Create branch <b>{0}</b> from {1}", "{1}から<b>{0}</b>ブランチを作成");
 		m.put("Create child projects under a project", "プロジェクト内に子プロジェクトを作成");
+		m.put("Create from Template", "テンプレートから作成");
 		m.put("Create issue", "課題を作成");
 		m.put("Create merge commit", "マージコミットを作成");
 		m.put("Create merge commit if necessary", "必要に応じてマージコミットを作成");
 		m.put("Create new issue", "新しい課題を作成");
 		m.put("Create tag", "タグを作成");
 		m.put("Create tag <b>{0}</b> from {1}", "{1}から<b>{0}</b>タグを作成");
+		m.put("Create workspace with this spec", "このスペックでワークスペースを作成");
+		m.put("Created", "作成済み");
+		m.put("Created After", "後に作成");
 		m.put("Created At", "作成日時");
+		m.put("Created Before", "前に作成");
+		m.put("Created By", "作成者");
 		m.put("Creation of this branch is prohibited per branch protection rule", "ブランチ保護ルールによりこのブランチの作成は禁止されています");
 		m.put("Critical", "重大");
 		m.put("Critical Severity", "重大な深刻度");
@@ -880,11 +955,14 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Current context is different from this action, click to show the comment context", "このアクションと現在のコンテキストが異なります。コメントのコンテキストを表示するにはクリックしてください");
 		m.put("Current platform", "現在のプラットフォーム");
 		m.put("Current project", "現在のプロジェクト");
+		m.put("Custom Headers", "カスタムヘッダー");
 		m.put("Custom Linux Shell", "カスタムLinuxシェル");
 		m.put("DISCARDED", "破棄済み");
 		m.put("Dashboard Share Bean", "ダッシュボード共有Bean");
 		m.put("Dashboard name", "ダッシュボード名");
 		m.put("Dashboards", "ダッシュボード");
+		m.put("Data Key", "データキー");
+		m.put("Data Paths", "データパス");
 		m.put("Database Backup", "データベースバックアップ");
 		m.put("Date", "日付");
 		m.put("Date Time", "日時");
@@ -893,6 +971,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Deactivate Trial Subscription", "トライアルサブスクリプションを無効化");
 		m.put("Default", "デフォルト");
 		m.put("Default (Shell on Linux, Batch on Windows)", "デフォルト（Linuxではシェル、Windowsではバッチ）");
+		m.put("Default (sh on Linux, batch on Windows)", "デフォルト (Linuxではsh、Windowsではバッチ)");
 		m.put("Default Assignees", "デフォルトの担当者");
 		m.put("Default Boards", "デフォルトのボード");
 		m.put("Default Fixed Issue Filter", "デフォルトの解決済み課題フィルター");
@@ -935,6 +1014,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"ビルドを保持するルールを定義します。ここまたは親プロジェクトで定義されたルールのいずれかがビルドを保持する限り、ビルドは保持されます。ここおよび親プロジェクトでルールが定義されていない場合、すべてのビルドが保持されます");
 		m.put("Define tag protection rules. Rules defined in parent project are considered to be defined after rules defined here. For a given tag and user, the first matching rule will take effect", 
 			"タグ保護ルールを定義します。親プロジェクトで定義されたルールはここで定義されたルールの後に考慮されます。特定のタグとユーザーに対して最初に一致するルールが適用されます");
+		m.put("Define workspace specs for the project. Child projects inherit specs from parent projects. Specs defined in child project override those with the same name from parent project", 
+			"プロジェクトのワークスペーススペックを定義します。子プロジェクトは親プロジェクトからスペックを継承します。子プロジェクトで定義されたスペックは、親プロジェクトと同じ名前のスペックを上書きします");
 		m.put("Delay for the first retry in seconds. Delay of subsequent retries will be calculated using an exponential back-off based on this value", 
 			"最初のリトライの遅延時間（秒）。その後のリトライの遅延時間はこの値に基づいて指数バックオフを使用して計算されます");
 		m.put("Delete", "削除");
@@ -946,6 +1027,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Delete All Queried Projects", "クエリされたプロジェクトをすべて削除");
 		m.put("Delete All Queried Pull Requests", "クエリされたプルリクエストをすべて削除");
 		m.put("Delete All Queried Users", "クエリされたユーザーをすべて削除");
+		m.put("Delete All Queried Workspaces", "クエリされたすべてのワークスペースを削除");
 		m.put("Delete Build", "ビルドを削除");
 		m.put("Delete Comment", "コメントを削除");
 		m.put("Delete Pull Request", "プルリクエストを削除");
@@ -959,6 +1041,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Delete Selected Projects", "選択したプロジェクトを削除");
 		m.put("Delete Selected Pull Requests", "選択したプルリクエストを削除");
 		m.put("Delete Selected Users", "選択したユーザーを削除");
+		m.put("Delete Selected Workspaces", "選択されたワークスペースを削除");
 		m.put("Delete Source Branch", "ソースブランチを削除");
 		m.put("Delete Source Branch After Merge", "マージ後にソースブランチを削除");
 		m.put("Delete chat", "チャットを削除");
@@ -974,11 +1057,16 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Delete this iteration", "このイテレーションを削除");
 		m.put("Delete this key", "このキーを削除");
 		m.put("Delete this link", "このリンクを削除");
+		m.put("Delete this provisioner", "このプロビジョナーを削除");
 		m.put("Delete this rule", "このルールを削除");
 		m.put("Delete this secret", "このシークレットを削除");
+		m.put("Delete this spec", "このスペックを削除");
 		m.put("Delete this state", "この状態を削除");
 		m.put("Delete this tag", "このタグを削除");
 		m.put("Delete this value", "この値を削除");
+		m.put("Delete this workspace", "このワークスペースを削除");
+		m.put("Delete this workspace data", "このワークスペースデータを削除");
+		m.put("Deleted by us, modified by them", "私たちによって削除され、彼らによって修正された");
 		m.put("Deleted source branch", "ソースブランチを削除済み");
 		m.put("Deletion not allowed due to branch protection rule", "ブランチ保護ルールにより削除は許可されていません");
 		m.put("Deletion not allowed due to tag protection rule", "タグ保護ルールにより削除は許可されていません");
@@ -996,6 +1084,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Description too long", "説明が長すぎます");
 		m.put("Destination Path", "宛先パス");
 		m.put("Destinations", "宛先");
+		m.put("Dev session not exist or access denied", "開発セッションが存在しないか、アクセスが拒否されました");
 		m.put("Diff is too large to be displayed.", "差分が大きすぎて表示できません。");
 		m.put("Diff options", "差分オプション");
 		m.put("Digest", "ダイジェスト");
@@ -1017,7 +1106,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Disallowed File Types", "許可されていないファイルタイプ");
 		m.put("Disallowed file type(s): {0}", "許可されていないファイルタイプ: {0}");
 		m.put("Discard", "破棄");
+		m.put("Discard All", "すべてを破棄");
 		m.put("Discard All Queried Pull Requests", "クエリされたすべてのプルリクエストを破棄");
+		m.put("Discard Changes", "変更を破棄");
 		m.put("Discard Selected Pull Requests", "選択したプルリクエストを破棄");
 		m.put("Discarded", "破棄済み");
 		m.put("Discarded pull request \"{0}\" ({1})", "プルリクエスト \"{0}\" ({1}) を破棄しました");
@@ -1032,6 +1123,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Do not ignore whitespace", "空白を無視しない");
 		m.put("Do not retrieve", "取得しない");
 		m.put("Do not retrieve groups", "グループを取得しない");
+		m.put("Do you really want to abort the merge?", "本当にマージを中止しますか？");
 		m.put("Do you really want to cancel invitation to \"{0}\"?", "\"{0}\"への招待を本当にキャンセルしますか？");
 		m.put("Do you really want to cancel this build?", "このビルドを本当にキャンセルしますか？");
 		m.put("Do you really want to change target branch to {0}?", "ターゲットブランチを{0}に変更してもよろしいですか？");
@@ -1064,15 +1156,22 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Do you really want to delete this package?", "本当にこのパッケージを削除しますか？");
 		m.put("Do you really want to delete this privilege?", "本当にこの権限を削除しますか？");
 		m.put("Do you really want to delete this protection?", "本当にこの保護を削除しますか？");
+		m.put("Do you really want to delete this provisioner?", "本当にこのプロビジョナーを削除しますか？");
 		m.put("Do you really want to delete this pull request?", "本当にこのプルリクエストを削除しますか？");
 		m.put("Do you really want to delete this reply?", "本当にこの返信を削除しますか？");
 		m.put("Do you really want to delete this script?", "本当にこのスクリプトを削除しますか？");
 		m.put("Do you really want to delete this state?", "本当にこの状態を削除しますか？");
 		m.put("Do you really want to delete this template?", "本当にこのテンプレートを削除しますか？");
 		m.put("Do you really want to delete this transition?", "本当にこの遷移を削除しますか？");
+		m.put("Do you really want to delete this web hook?", "本当にこのウェブフックを削除しますか？");
+		m.put("Do you really want to delete this workspace data?", "本当にこのワークスペースデータを削除しますか？");
+		m.put("Do you really want to delete this workspace spec?", "本当にこのワークスペーススペックを削除しますか？");
+		m.put("Do you really want to delete this workspace?", "本当にこのワークスペースを削除しますか？");
 		m.put("Do you really want to delete timesheet \"{0}\"?", "本当にタイムシート「{0}」を削除しますか？");
 		m.put("Do you really want to delete unused tokens?", "本当に未使用のトークンを削除しますか？");
+		m.put("Do you really want to discard all unstaged changes? This cannot be undone.", "本当にすべてのステージングされていない変更を破棄しますか？これは元に戻せません。");
 		m.put("Do you really want to discard batched suggestions?", "本当にバッチ化された提案を破棄しますか？");
+		m.put("Do you really want to discard changes to this file? This cannot be undone.", "本当にこのファイルへの変更を破棄しますか？これは元に戻せません。");
 		m.put("Do you really want to enable this account?", "本当にこのアカウントを有効にしますか？");
 		m.put("Do you really want to rebuild?", "本当に再構築しますか？");
 		m.put("Do you really want to remove assignee \"{0}\"?", "本当に担当者「{0}」を削除しますか？");
@@ -1088,6 +1187,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Docker Executable", "Docker 実行ファイル");
 		m.put("Docker Hub", "Docker Hub");
 		m.put("Docker Image", "Docker イメージ");
+		m.put("Docker Provisioner", "Dockerプロビジョナー");
 		m.put("Docker Sock Path", "Docker Sock パス");
 		m.put("Dockerfile", "Dockerfile");
 		m.put("Documentation", "ドキュメント");
@@ -1118,6 +1218,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Edit Iteration", "イテレーションを編集");
 		m.put("Edit Job Secret", "ジョブシークレットを編集");
 		m.put("Edit My Avatar", "自分のアバターを編集");
+		m.put("Edit Provisioner", "プロビジョナーを編集");
 		m.put("Edit Rule", "ルールを編集");
 		m.put("Edit Timesheet", "タイムシートを編集");
 		m.put("Edit dashboard", "ダッシュボードを編集");
@@ -1130,16 +1231,18 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Edit this access token", "このアクセストークンを編集");
 		m.put("Edit this executor", "このエグゼキュータを編集");
 		m.put("Edit this iteration", "このイテレーションを編集");
+		m.put("Edit this provisioner", "このプロビジョナーを編集");
 		m.put("Edit this rule", "このルールを編集");
 		m.put("Edit this secret", "このシークレットを編集");
+		m.put("Edit this spec", "このスペックを編集");
 		m.put("Edit this state", "この状態を編集");
 		m.put("Edit title", "タイトルを編集");
-		m.put("Edit with AI", "AIで編集");
 		m.put("Edit {0}", "{0} を編集");
 		m.put("Editable Issue Fields", "編集可能な課題フィールド");
 		m.put("Editable Issue Links", "編集可能な課題リンク");
 		m.put("Edited by {0} {1}", "{0} {1} によって編集されました");
 		m.put("Editor", "エディター");
+		m.put("Either specify value or secret value of the environment variable", "環境変数の値または秘密の値を指定してください");
 		m.put("Either target branch or source branch has new commits just now, please re-check.", "ターゲットブランチまたはソースブランチに新しいコミットが今追加されました。再確認してください。");
 		m.put("Email", "メール");
 		m.put("Email Address", "メールアドレス");
@@ -1193,6 +1296,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"メール経由で投稿された問題やプルリクエストのコメントを処理するにはこれを有効にします。<b class='text-danger'>注意:</b> <a href='https://docs.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online' target='_blank'>サブアドレス</a>を上記のシステムメールアドレスに対して有効にする必要があります。OneDevはこれを使用して問題やプルリクエストのコンテキストを追跡します");
 		m.put("Enable this to process issue or pull request comments posted via email. <b class='text-danger'>NOTE:</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>Sub addressing</a> needs to be enabled for system email address above, as OneDev uses it to track issue and pull request contexts", 
 			"メール経由で投稿された問題やプルリクエストのコメントを処理するにはこれを有効にします。<b class='text-danger'>注意:</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>サブアドレス</a>を上記のシステムメールアドレスに対して有効にする必要があります。OneDevはこれを使用して問題やプルリクエストのコンテキストを追跡します");
+		m.put("Enable this to retrieve Git LFS files", "Git LFSファイルを取得するためにこれを有効にします");
 		m.put("Enable to allow to upload build cache generated during CI/CD job. Uploaded cache can be used by subsequent builds of the project as long as cache key matches", 
 			"CI/CDジョブ中に生成されたビルドキャッシュをアップロードできるようにするにはこれを有効にします。アップロードされたキャッシュは、キャッシュキーが一致する限りプロジェクトの後続のビルドで使用できます");
 		m.put("End Point", "エンドポイント");
@@ -1227,6 +1331,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Environment variable <code>serverUrl</code> in above command is taken from OneDev server url specified in <i>Administration / System Setting</i>. Change it if necessary", 
 			"上記のコマンド内の環境変数<code>serverUrl</code>は、<i>管理 / システム設定</i>で指定されたOneDevサーバーURLから取得されます。必要に応じて変更してください");
 		m.put("Equal", "等しい");
+		m.put("Error", "エラー");
 		m.put("Error authenticating user", "ユーザー認証エラー");
 		m.put("Error calculating commits: check log for details", "コミットの計算中にエラーが発生しました: 詳細はログを確認してください");
 		m.put("Error cherry-picking to {0}: Merge conflicts detected", "{0}へのチェリーピック中にエラーが発生しました: マージコンフリクトが検出されました");
@@ -1269,6 +1374,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Exclude States", "状態を除外する");
 		m.put("Excluded", "除外済み");
 		m.put("Excluded Fields", "除外されたフィールド");
+		m.put("Excluded Files for Review", "レビュー対象外のファイル");
 		m.put("Executable", "実行可能");
 		m.put("Execute Commands", "コマンドを実行する");
 		m.put("Execute Commands via SSH", "SSH経由でコマンドを実行する");
@@ -1283,12 +1389,14 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Expire Date", "有効期限");
 		m.put("Expired", "期限切れ");
 		m.put("Explain selected text with AI", "選択したテキストをAIで説明する");
+		m.put("Explanation", "説明");
 		m.put("Explicit SSL (StartTLS)", "明示的SSL (StartTLS)");
 		m.put("Export", "エクスポート");
 		m.put("Export All Queried Issues To...", "クエリされたすべての問題をエクスポート...");
 		m.put("Export CSV", "CSVをエクスポート");
 		m.put("Export XLSX", "XLSXをエクスポート");
 		m.put("Export as OCI layout", "OCIレイアウトとしてエクスポート");
+		m.put("Exposed Ports", "公開されたポート");
 		m.put("Extend Trial Subscription", "試用サブスクリプションを延長する");
 		m.put("External Authentication", "外部認証");
 		m.put("External Issue Transformers", "外部問題トランスフォーマー");
@@ -1297,6 +1405,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("External System", "外部システム");
 		m.put("External authenticator settings saved", "外部認証者設定が保存されました");
 		m.put("External participants do not have accounts and involve in the issue via email", "外部参加者はアカウントを持たず、メールを介して問題に関与します");
+		m.put("Extra Options", "追加オプション");
 		m.put("Extract the package into a folder. <b class=\"text-danger\">Warning:</b> On Mac OS X, do not extract to Mac managed folders such as Downloads, Desktop, Documents; otherwise you may encounter permission issues starting agent", 
 			"パッケージをフォルダに抽出します。<b class=\"text-danger\">警告:</b> Mac OS Xでは、Downloads、Desktop、DocumentsなどのMac管理フォルダに抽出しないでください。そうしないと、エージェントの起動時に権限の問題が発生する可能性があります");
 		m.put("FAILED", "失敗");
@@ -1328,6 +1437,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("File Protections", "ファイル保護一覧");
 		m.put("File and Symbol Search", "ファイルとシンボル検索");
 		m.put("File changes", "ファイル変更");
+		m.put("File is binary", "ファイルはバイナリです");
+		m.put("File is too large to be displayed", "ファイルが大きすぎて表示できません");
 		m.put("File is too large to edit here", "ファイルが大きすぎてここでは編集できません");
 		m.put("File missing or obsolete", "ファイルが欠落しているか廃止されています");
 		m.put("File name", "ファイル名");
@@ -1397,8 +1508,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"デフォルトブランチから到達できないビルドコミットの場合、<a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>ジョブシークレット</a>を作成タグ権限付きのアクセストークンとして指定する必要があります");
 		m.put("For build commit not reachable from default branch, a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> should be specified as access token with manage issue permission", 
 			"デフォルトブランチから到達できないビルドコミットの場合、<a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>ジョブシークレット</a>を問題管理権限付きのアクセストークンとして指定する必要があります");
-		m.put("For docker aware executors, this path is inside container, and accepts both absolute path and relative path (relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>). For shell related executors which runs on host machine directly, only relative path is accepted", 
-			"Docker対応エグゼキューターの場合、このパスはコンテナ内にあり、絶対パスと相対パス（<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対する相対パス）を受け入れます。ホストマシンで直接実行されるシェル関連エグゼキューターの場合、相対パスのみが受け入れられます");
 		m.put("For each build, OneDev calculates a list of fixed issues since previous build automatically. This setting provides a default query to further filter/order this list. For a given job, the first matching entry will be used.", 
 			"各ビルドに対して、OneDevは前回のビルド以降に修正された問題のリストを自動的に計算します。この設定は、このリストをさらにフィルター/順序付けするためのデフォルトクエリを提供します。特定のジョブの場合、最初に一致するエントリが使用されます。");
 		m.put("For each selected branch/tag, a separate build will be generated with branch/tag set to corresponding value", 
@@ -1436,7 +1545,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("General Settings", "一般設定");
 		m.put("General settings updated", "一般設定が更新されました");
 		m.put("Generate", "生成");
-		m.put("Generate File Checksum", "ファイルチェックサムを生成");
 		m.put("Generate New", "新規生成");
 		m.put("Generic LDAP", "汎用LDAP");
 		m.put("Get", "取得");
@@ -1449,6 +1557,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Git Location", "Gitの場所");
 		m.put("Git Pack Config", "Gitパック設定");
 		m.put("Git Path", "Gitパス");
+		m.put("Git command failed with exit code", "Gitコマンドが終了コードで失敗しました");
 		m.put("Git email address will be used as git author/committer for commits created on web UI", 
 			"Gitのメールアドレスは、Web UIで作成されたコミットのGit作成者/コミッターとして使用されます");
 		m.put("Git pack config updated", "Gitパック設定が更新されました");
@@ -1481,6 +1590,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Global Issue Setting", "グローバル課題設定");
 		m.put("Global Pack Setting", "グローバルパック設定");
 		m.put("Global Views", "グローバルビュー");
+		m.put("Global Workspace Setting", "グローバルワークスペース設定");
 		m.put("Gmail", "Gmail");
 		m.put("Go Back", "戻る");
 		m.put("Google Test Report", "Googleテストレポート");
@@ -1532,6 +1642,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("HTTP(S) Clone URL", "HTTP(S)クローンURL");
 		m.put("Has Owner Permissions", "所有者権限を持つ");
 		m.put("Has Running Builds", "実行中のビルドがあります");
+		m.put("Header Name", "ヘッダー名");
+		m.put("Header Value", "ヘッダー値");
 		m.put("Heap Memory Usage", "ヒープメモリ使用量");
 		m.put("Helm(s)", "Helm(s)");
 		m.put("Help", "ヘルプ");
@@ -1563,6 +1675,10 @@ public class Translation_ja extends TranslationResourceBundle {
 			"有効化されている場合、スケジュールされたバックアップは現在<span wicket:id=\"leadServer\"></span>のリードサーバーで実行されます");
 		m.put("If enabled, source branch will be deleted automatically after merge the pull request if user has permission to do that", 
 			"有効化されている場合、プルリクエストをマージした後、ユーザーが権限を持っている場合、ソースブランチは自動的に削除されます");
+		m.put("If enabled, the original JSON report (.osv-scanner-vulners.json) generated by Osv scanner will be published as artifact", 
+			"有効にすると、Osvスキャナーによって生成された元のJSONレポート(.osv-scanner-vulners.json)がアーティファクトとして公開されます");
+		m.put("If enabled, the original JSON report in .trivy-outputs generated by Trivy will be published as artifact", 
+			"有効にすると、Trivyによって生成された.trivy-outputs内の元のJSONレポートがアーティファクトとして公開されます");
 		m.put("If specified, OneDev will only display iterations with this prefix", "指定されている場合、OneDevはこのプレフィックスを持つイテレーションのみを表示します");
 		m.put("If specified, all public and internal projects imported from GitLab will use these as default roles. Private projects are not affected", 
 			"指定された場合、GitLabからインポートされたすべての公開および内部プロジェクトはこれをデフォルトの役割として使用します。プライベートプロジェクトには影響しません");
@@ -1626,8 +1742,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"SMTPホスト証明書が自己署名されている場合やCAルートが受け入れられていない場合、OneDevに証明書チェックをバイパスするよう指示できます。<b class='text-danger'>警告: </b>信頼できないネットワークでは、中間者攻撃につながる可能性があるため、代わりに<a href='https://docs.onedev.io/administration-guide/trust-self-signed-certificates#trust-self-signed-certificates-on-server' target='_blank'>証明書をOneDevにインポート</a>する必要があります");
 		m.put("In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, you will need to authenticate by providing user name and password (or access token) via http basic auth header", 
 			"匿名アクセスが無効になっているか、匿名ユーザーがリソース操作のための十分な権限を持っていない場合、ユーザー名とパスワード（またはアクセストークン）をHTTP基本認証ヘッダーを介して提供して認証する必要があります");
-		m.put("In case cache is not hit via above key, OneDev will loop through load keys defined here in order until a matching cache is found in project hierarchy. A cache is considered matching if its key is prefixed with the load key. If multiple caches matches, the most recent cache will be returned", 
-			"上記のキーでキャッシュがヒットしない場合、OneDevはここで定義されたロードキーを順番にループして、プロジェクト階層内で一致するキャッシュを見つけます。キャッシュはそのキーがロードキーで始まる場合、一致していると見なされます。複数のキャッシュが一致する場合、最も最近のキャッシュが返されます");
+		m.put("In case cache needs to be uploaded, this property specifies target project for the upload.\nLeave empty for current project", 
+			"キャッシュをアップロードする必要がある場合、このプロパティはアップロード先のプロジェクトを指定します。\n現在のプロジェクトの場合は空にしてください");
 		m.put("In case cache needs to be uploaded, this property specifies target project for the upload. Leave empty for current project", 
 			"キャッシュをアップロードする必要がある場合、このプロパティはアップロードのターゲットプロジェクトを指定します。現在のプロジェクトの場合は空白のままにしてください");
 		m.put("In case the pull request status is out of sync with underlying repository, you may synchronize them manually here", 
@@ -1802,7 +1918,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Job", "ジョブ");
 		m.put("Job \"{0}\" associated with the build not found.", "ビルドに関連付けられたジョブ「{0}」が見つかりません");
 		m.put("Job Authorization", "ジョブ認証");
-		m.put("Job Cache Management", "ジョブキャッシュ管理");
 		m.put("Job Dependencies", "ジョブ依存関係");
 		m.put("Job Dependency", "ジョブ依存");
 		m.put("Job Executor", "ジョブエグゼキューター");
@@ -1824,10 +1939,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Job Trigger Bean", "ジョブトリガービーン");
 		m.put("Job administrative permission, including deleting builds of the job. It implies all other job permissions", 
 			"ジョブの管理権限（ジョブのビルドを削除する権限を含む）。これには他のすべてのジョブ権限が含まれます");
-		m.put("Job cache \"{0}\" deleted", "ジョブキャッシュ「{0}」が削除されました");
 		m.put("Job dependencies determines the order and concurrency when run different jobs. You may also specify artifacts to retrieve from upstream jobs", 
 			"ジョブ依存関係は、異なるジョブを実行する際の順序と並行性を決定します。また、上流ジョブから取得するアーティファクトを指定することもできます");
-		m.put("Job executor tested successfully", "ジョブエグゼキューターが正常にテストされました");
 		m.put("Job executors", "ジョブエグゼキューター一覧");
 		m.put("Job name", "ジョブ名");
 		m.put("Job properties saved", "ジョブプロパティが保存されました");
@@ -1846,7 +1959,7 @@ public class Translation_ja extends TranslationResourceBundle {
 			"ジョブはターゲットブランチとソースブランチのマージコミットで実行されます。<br><b class='text-info'>注意:</b> ブランチ保護ルールで必要とされない限り、このトリガーは<code>[skip ci]</code>, <code>[ci skip]</code>, <code>[no ci]</code>, <code>[skip job]</code>, <code>[job skip]</code>, または<code>[no job]</code>を含むメッセージのコミットを無視します");
 		m.put("Job will run when code is committed. <b class='text-info'>NOTE:</b> This trigger will ignore commits with message containing <code>[skip ci]</code>, <code>[ci skip]</code>, <code>[no ci]</code>, <code>[skip job]</code>, <code>[job skip]</code>, or <code>[no job]</code>", 
 			"ジョブはコードがコミットされたときに実行されます。<b class='text-info'>注意:</b> このトリガーは<code>[skip ci]</code>, <code>[ci skip]</code>, <code>[no ci]</code>, <code>[skip job]</code>, <code>[job skip]</code>, または<code>[no job]</code>を含むメッセージのコミットを無視します");
-		m.put("Job workspace", "ジョブワークスペース");
+		m.put("Job workdir", "ジョブワークスペース");
 		m.put("Jobs", "ジョブ一覧");
 		m.put("Jobs marked with <span class=\"text-danger\">*</span> are required to be successful", 
 			"<span class=\"text-danger\">*</span>でマークされたジョブは成功する必要があります");
@@ -1879,6 +1992,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Last Modified", "最終更新");
 		m.put("Last Published", "最終公開");
 		m.put("Last Update", "最終更新");
+		m.put("Last Updated", "最終更新日");
 		m.put("Last commit", "最終コミット");
 		m.put("Last commit hash", "最終コミットハッシュ");
 		m.put("Last commit index version", "最終コミットインデックスバージョン");
@@ -1918,7 +2032,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Literal", "リテラル");
 		m.put("Literal default value", "リテラルのデフォルト値");
 		m.put("Literal value", "リテラル値");
-		m.put("Load Keys", "キーをロード");
 		m.put("Loading emojis...", "絵文字をロード中...");
 		m.put("Loading...", "ロード中...");
 		m.put("Log", "ログ");
@@ -1990,10 +2103,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Manifest unknown", "不明なマニフェスト");
 		m.put("Many commands print outputs with ANSI colors in TTY mode to help identifying problems easily. However some commands running in this mode may wait for user input to cause build hanging. This can normally be fixed by adding extra options to the command", 
 			"多くのコマンドはTTYモードでANSIカラーを使用して出力を表示し、問題を簡単に特定できるようにします。ただし、このモードで実行される一部のコマンドはユーザー入力を待機し、ビルドが停止する原因となる場合があります。通常、コマンドに追加オプションを付加することで修正できます");
+		m.put("Mark Resolved", "解決済みとしてマーク");
 		m.put("Mark a property archived if it is no longer used by current build spec, but still need to exist to reproduce old builds. Archived properties will not be shown by default", 
 			"プロパティが現在のビルド仕様で使用されなくなった場合でも、古いビルドを再現するために存在する必要がある場合は、プロパティをアーカイブ済みとしてマークします。アーカイブ済みプロパティはデフォルトでは表示されません");
 		m.put("Mark a secret archived if it is no longer used by current build spec, but still need to exist to reproduce old builds. Archived secrets will not be shown by default", 
 			"秘密が現在のビルド仕様で使用されなくなった場合でも、古いビルドを再現するために存在する必要がある場合は、秘密をアーカイブ済みとしてマークします。アーカイブ済み秘密はデフォルトでは表示されません");
+		m.put("Mark as resolved to confirm the deletion, or restore the file in terminal.", "削除を確認するために解決済みとしてマークするか、ターミナルでファイルを復元してください。");
 		m.put("Markdown", "Markdown");
 		m.put("Markdown Report", "Markdownレポート");
 		m.put("Markdown from file", "ファイルからのMarkdown");
@@ -2018,6 +2133,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Merge", "マージ");
 		m.put("Merge Strategy", "マージ戦略");
 		m.put("Merge Target Branch into Source Branch", "ターゲットブランチをソースブランチにマージ");
+		m.put("Merge aborted", "マージが中止されました");
 		m.put("Merge branch \"{0}\" into branch \"{1}\"", "ブランチ「{0}」をブランチ「{1}」にマージ");
 		m.put("Merge branch \"{0}\" of project \"{1}\" into branch \"{2}\"", "プロジェクト「{1}」のブランチ「{0}」をブランチ「{2}」にマージ");
 		m.put("Merge preview not calculated yet", "マージプレビューはまだ計算されていません");
@@ -2034,6 +2150,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Missing Commit", "不足しているコミット");
 		m.put("Missing Commits", "不足しているコミット");
 		m.put("Model", "モデル");
+		m.put("Modified by us, deleted by them", "私たちによって変更され、彼らによって削除されました");
 		m.put("Month", "月");
 		m.put("Months", "月");
 		m.put("Months to Display", "表示する月数");
@@ -2063,6 +2180,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("My Profile", "私のプロフィール");
 		m.put("My SSH Keys", "私のSSHキー");
 		m.put("My SSO Accounts", "私のSSOアカウント");
+		m.put("My Workspace Data", "私のワークスペースデータ");
 		m.put("Mypy Report", "Mypyレポート");
 		m.put("N/A", "N/A");
 		m.put("NPM(s)", "NPM(s)");
@@ -2101,6 +2219,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Named Pull Request Queries Bean", "名前付きプルリクエストクエリBean");
 		m.put("Named Pull Request Query", "名前付きプルリクエストクエリ");
 		m.put("Named Query", "名前付きクエリ");
+		m.put("Named Workspace Queries Bean", "名前付きワークスペースクエリビーン");
+		m.put("Named Workspace Query", "名前付きワークスペースクエリ");
 		m.put("Natural language query via AI", "AIによる自然言語クエリ");
 		m.put("Network Options", "ネットワークオプション");
 		m.put("Never", "決して");
@@ -2112,6 +2232,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("New State", "新しい状態");
 		m.put("New User Bean", "新しいユーザーBean");
 		m.put("New Value", "新しい値");
+		m.put("New Workspace Spec", "新しいワークスペース仕様");
 		m.put("New chat", "新しいチャット");
 		m.put("New issue board created", "新しい課題ボードが作成されました");
 		m.put("New project created", "新しいプロジェクトが作成されました");
@@ -2148,12 +2269,14 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No builds to cancel", "キャンセルするビルドなし");
 		m.put("No builds to delete", "削除するビルドなし");
 		m.put("No builds to re-run", "再実行するビルドなし");
+		m.put("No changed files to commit", "コミットする変更されたファイルはありません");
 		m.put("No comment", "コメントなし");
 		m.put("No comments to delete", "削除するコメントなし");
 		m.put("No comments to set as read", "既読に設定するコメントなし");
 		m.put("No comments to set resolved", "解決済みに設定するコメントなし");
 		m.put("No comments to set unresolved", "未解決に設定するコメントなし");
 		m.put("No commit in query context", "クエリコンテキストにコミットなし");
+		m.put("No commit message checker", "コミットメッセージチェッカーなし");
 		m.put("No config file", "設定ファイルなし");
 		m.put("No current build in query context", "クエリコンテキストに現在のビルドなし");
 		m.put("No current commit in query context", "クエリコンテキストに現在のコミットなし");
@@ -2168,7 +2291,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No diffs to navigate", "ナビゲートする差分なし");
 		m.put("No directories to skip", "スキップするディレクトリなし");
 		m.put("No disallowed file types", "許可されていないファイルタイプはありません");
+		m.put("No excluded files", "除外されたファイルはありません");
 		m.put("No executors defined. Jobs will use auto-discovered executors instead", "エグゼキュータが定義されていません。ジョブは自動検出されたエグゼキュータを使用します");
+		m.put("No explanation", "説明なし");
+		m.put("No exposed ports", "公開されたポートはありません");
 		m.put("No external password authenticator", "外部パスワード認証がありません");
 		m.put("No external password authenticator to authenticate user \"{0}\"", "ユーザー\"{0}\"を認証する外部パスワード認証がありません");
 		m.put("No fields to prompt", "プロンプトするフィールドなし");
@@ -2204,6 +2330,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No projects to modify", "変更するプロジェクトなし");
 		m.put("No projects to move", "移動するプロジェクトなし");
 		m.put("No properties defined", "定義されたプロパティなし");
+		m.put("No provisioners defined. Workspaces will use auto-discovered provisioners instead", 
+			"プロビジョナーが定義されていません。ワークスペースは自動検出されたプロビジョナーを使用します");
 		m.put("No proxy", "プロキシなし");
 		m.put("No pull request in query context", "クエリコンテキストにプルリクエストなし");
 		m.put("No pull requests to delete", "削除するプルリクエストなし");
@@ -2215,6 +2343,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No response body", "レスポンスボディなし");
 		m.put("No secret config", "シークレット設定なし");
 		m.put("No services defined", "定義されたサービスなし");
+		m.put("No specs found", "仕様が見つかりません");
 		m.put("No start/due date", "開始/期限日なし");
 		m.put("No step templates defined", "定義されたステップテンプレートなし");
 		m.put("No suggestions", "提案はありません");
@@ -2231,8 +2360,15 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("No valid signature for head commit of target branch", "ターゲットブランチのヘッドコミットに有効な署名がありません");
 		m.put("No value", "値がありません");
 		m.put("No verified primary email address", "確認済みのプライマリメールアドレスがありません");
+		m.put("No workspace provisioners defined", "ワークスペースプロビジョナーが定義されていません");
+		m.put("No workspaces", "ワークスペースがありません");
+		m.put("No workspaces to delete", "削除するワークスペースがありません");
 		m.put("Node Selector", "ノードセレクター");
 		m.put("Node Selector Entry", "ノードセレクターエントリー");
+		m.put("Non-absolute path is considered to be relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>.\nNote that shell related executors runs directly on host machine, and only accept relative paths", 
+			"絶対パスでない場合は<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブ作業ディレクトリ</a>に対する相対パスと見なされます。\nシェル関連のエグゼキューターはホストマシン上で直接実行され、相対パスのみを受け入れます");
+		m.put("Non-absolute path is considered to be relative to workspace working directory.\nNote that only relative path is accepted if not running in container", 
+			"絶対パスでない場合はワークスペース作業ディレクトリに対する相対パスと見なされます。\nコンテナ内で実行されていない場合は相対パスのみが受け入れられます");
 		m.put("None", "なし");
 		m.put("Not Active Since", "以降アクティブではありません");
 		m.put("Not Used Since", "以降使用されていません");
@@ -2244,6 +2380,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Not authorized to create root project", "ルートプロジェクトを作成する権限がありません");
 		m.put("Not authorized to move project under this parent", "この親プロジェクトの下にプロジェクトを移動する権限がありません");
 		m.put("Not authorized to set as root project", "ルートプロジェクトとして設定する権限がありません");
+		m.put("Not available", "利用不可");
 		m.put("Not covered", "カバーされていません");
 		m.put("Not covered by any test", "いかなるテストでもカバーされていません");
 		m.put("Not displaying any fields", "フィールドを表示していません");
@@ -2292,8 +2429,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("OneDev Issue Field", "OneDev課題フィールド");
 		m.put("OneDev Issue Link", "OneDev課題リンク");
 		m.put("OneDev Issue State", "OneDev課題状態");
-		m.put("OneDev analyzes repository files for code search, line statistics, and code contribution statistics. This setting tells which files should be analyzed, and expects space-separated <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path patterns</a>. A pattern can be excluded by prefixing with '-', for instance <code>-**/vendors/**</code> will exclude all files with vendors in path. <b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder <code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>. The repository will be re-analyzed when server is started", 
-			"OneDevはリポジトリファイルをコード検索、行統計、コード貢献統計のために分析します。この設定はどのファイルを分析するかを指定し、スペース区切りの<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスパターン</a>を期待します。パターンは「-」を付けて除外できます。例えば<code>-**/vendors/**</code>はパスにvendorsを含むすべてのファイルを除外します。<b>注意: </b>この設定を変更しても新しいコミットにのみ影響します。履歴コミットに変更を適用するには、サーバーを停止し、<a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>プロジェクトのストレージディレクトリ</a>内のフォルダ<code>index</code>および<code>info/commit</code>を削除してください。サーバーが起動するとリポジトリが再分析されます");
+		m.put("OneDev analyzes repository files for code search, line statistics, and code contribution statistics. This setting tells which files should be analyzed.\n<b>NOTE: </b> Changing this setting only affects new commits. To apply the change to history commits, please stop the server and delete folder\n<code>index</code> and <code>info/commit</code> under <a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>project's storage directory</a>.\nThe repository will be re-analyzed when server is started", 
+			"OneDevはコード検索、行統計、コード貢献統計のためにリポジトリファイルを分析します。この設定はどのファイルを分析するかを指定します。\n<b>注意:</b> この設定を変更しても新しいコミットにのみ影響します。履歴コミットに変更を適用するには、サーバーを停止し、フォルダ\n<code>index</code>と<code>info/commit</code>を<a href='https://docs.onedev.io/concepts#project-storage' target='_blank'>プロジェクトのストレージディレクトリ</a>の下で削除してください。\nサーバーが起動されるとリポジトリは再分析されます");
 		m.put("OneDev configures git hooks to communicate with itself via curl", "OneDevはgitフックを設定してcurlを介して自身と通信します");
 		m.put("OneDev needs to search and determine user DN, as well as searching user group information if group retrieval is enabled. Tick this option and specify 'manager' DN and password if these operations needs to be authenticated", 
 			"OneDevはユーザーDNを検索して決定する必要があり、グループ取得が有効な場合はユーザーグループ情報も検索します。これらの操作が認証を必要とする場合は、このオプションを選択し、「マネージャー」DNとパスワードを指定してください");
@@ -2308,6 +2445,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Only users able to authenticate via password can be linked", "パスワードで認証できるユーザーのみリンク可能");
 		m.put("Open", "オープン");
 		m.put("Open new pull request", "新しいプルリクエストを開く");
+		m.put("Open terminal", "ターミナルを開く");
 		m.put("Open terminal of current running step", "現在実行中のステップのターミナルを開く");
 		m.put("OpenID", "OpenID");
 		m.put("OpenID client identification will be assigned by your OpenID provider when registering this OneDev instance as client application", 
@@ -2337,8 +2475,13 @@ public class Translation_ja extends TranslationResourceBundle {
 			"リモートリポジトリにアクセスするためのプロキシを任意で設定します。プロキシは&lt;プロキシホスト&gt;:&lt;プロキシポート&gt;の形式である必要があります");
 		m.put("Optionally define a unique key for the project with two or more upper case letters. This key can be used to reference issues, builds, and pull requests with a stable and short form <code>&lt;project key&gt;-&lt;number&gt;</code> instead of <code>&lt;project path&gt;#&lt;number&gt;</code>", 
 			"プロジェクトの一意のキーを任意で定義します。このキーは、安定した短い形式<code>&lt;プロジェクトキー&gt;-&lt;番号&gt;</code>で課題、ビルド、プルリクエストを参照するために使用できます。<code>&lt;プロジェクトパス&gt;#&lt;番号&gt;</code>の代わりに使用されます");
+		m.put("Optionally define caches for the workspace. Cache populated by a workspace will be uploaded\nafter the workspace is deleted, and can be used by other workspaces created after it", 
+			"オプションでワークスペースのキャッシュを定義します。ワークスペースによって生成されたキャッシュは\nワークスペースが削除された後にアップロードされ、その後に作成された他のワークスペースで使用できます");
+		m.put("Optionally define config files for the workspace", "ワークスペースのための設定ファイルをオプションで定義します");
 		m.put("Optionally define parameter specifications of the job", "ジョブのパラメータ仕様を任意で定義");
 		m.put("Optionally define parameter specifications of the step template", "ステップテンプレートのパラメータ仕様を任意で定義");
+		m.put("Optionally define user data for the workspace. User data populated by a workspace will be uploaded\nafter the workspace is deleted, and can be reused by other workspaces created by same user", 
+			"オプションでワークスペースのユーザーデータを定義します。ワークスペースによって生成されたユーザーデータは\nワークスペースが削除された後にアップロードされ、同じユーザーによって作成された他のワークスペースで再利用できます");
 		m.put("Optionally describe the group", "グループを任意で説明");
 		m.put("Optionally describes the custom field. Html tags are accepted", "カスタムフィールドを任意で説明します。HTMLタグが使用可能です");
 		m.put("Optionally describes the param. Html tags are accepted.", "パラメータを任意で説明します。HTMLタグが使用可能です");
@@ -2346,7 +2489,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally filter issues", "課題を任意でフィルタリング");
 		m.put("Optionally filter pull requests", "プルリクエストを任意でフィルタリング");
 		m.put("Optionally leave a note", "任意で注記を残す");
-		m.put("Optionally mount directories or files under job workdir into container", "ジョブワークスペース内のディレクトリやファイルをコンテナにマウントすることを任意で選択");
+		m.put("Optionally mount directories or files under job working directory into container", "ジョブワークスペース内のディレクトリやファイルをコンテナにマウントすることを任意で選択");
 		m.put("Optionally select fields to prompt when this button is pressed", "このボタンが押されたときにプロンプトするフィールドを任意で選択");
 		m.put("Optionally select fields to remove when this transition happens", "この遷移が発生したときに削除するフィールドを任意で選択");
 		m.put("Optionally specifies name of the attribute inside the user LDAP entry whose value will be taken as user email. This field is normally set to <i>mail</i> according to RFC 2798", 
@@ -2366,9 +2509,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify <span class='text-info'>comma separated</span> platforms to scan, for instance <tt>linux/amd64,linux/arm64</tt>. Leave empty to scan all platforms in OCI layout", 
 			"オプションで、スキャンするプラットフォームを<span class='text-info'>カンマ区切り</span>で指定してください。例: <tt>linux/amd64,linux/arm64</tt>。OCIレイアウト内のすべてのプラットフォームをスキャンする場合は空のままにしてください。");
 		m.put("Optionally specify API key for authentication", "認証のためにAPIキーを任意で指定");
-		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
+		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"オプションで、<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対するDockerfileの相対パスを指定してください。上記で指定したビルドパスの下にある<tt>Dockerfile</tt>ファイルを使用する場合は空のままにしてください。");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "オプションで、Renovate CLIで使用するJavaScript設定を指定してください。");
+		m.put("Optionally specify PowerShell commands to run to set up the workspace. These commands\nwill run from working directory holding cloned repository files", 
+			"オプションでワークスペースをセットアップするために実行するPowerShellコマンドを指定します。これらのコマンドは\nクローンされたリポジトリファイルを保持する作業ディレクトリから実行されます");
 		m.put("Optionally specify SSH root URL, which will be used to construct project clone url via SSH protocol. Leave empty to derive from server url", 
 			"オプションで、SSHルートURLを指定してください。これはSSHプロトコルを介してプロジェクトクローンURLを構築するために使用されます。サーバーURLから派生する場合は空のままにしてください。");
 		m.put("Optionally specify a <a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'>regular expression pattern</a> for valid values of the text input", 
@@ -2381,11 +2526,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify a base query to filter/order issues in backlog. Backlog issues are those not associating with current iteration", 
 			"オプションで、バックログ内の課題をフィルタリング/並べ替えるための基本クエリを指定してください。バックログ課題は現在のイテレーションに関連付けられていないものです。");
 		m.put("Optionally specify a base query to filter/order issues of the board", "オプションで、ボードの課題をフィルタリング/並べ替えるための基本クエリを指定してください。");
+		m.put("Optionally specify a commit message checker to validate commit messages. Only applicable for non-merge commits", 
+			"コミットメッセージを検証するためのコミットメッセージチェッカーを任意で指定します。マージ以外のコミットにのみ適用されます");
 		m.put("Optionally specify a cron expression to schedule database auto-backup. The cron expression format is <em>&lt;seconds&gt; &lt;minutes&gt; &lt;hours&gt; &lt;day-of-month&gt; &lt;month&gt; &lt;day-of-week&gt;</em>.For example, <em>0 0 1 * * ?</em> means 1:00am every day. For details of the format, refer to <a href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format' target='_blank'>Quartz tutorial</a>.The backup files will be placed into <em>db-backup</em> folder under OneDev installation directory. In case multiple servers connect to form a cluster, auto-backup takes place on the <a href='https://docs.onedev.io/concepts#lead-server' target='_blank'>lead server</a>. Leave this property empty if you do not want to enable database auto backup.", 
 			"オプションで、データベース自動バックアップをスケジュールするためのcron式を指定してください。cron式の形式は<em>&lt;秒&gt; &lt;分&gt; &lt;時&gt; &lt;日&gt; &lt;月&gt; &lt;曜日&gt;</em>です。例えば、<em>0 0 1 * * ?</em>は毎日午前1時を意味します。形式の詳細については、<a href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format' target='_blank'>Quartzチュートリアル</a>を参照してください。バックアップファイルはOneDevインストールディレクトリの<em>db-backup</em>フォルダに配置されます。複数のサーバーがクラスターを形成する場合、自動バックアップは<a href='https://docs.onedev.io/concepts#lead-server' target='_blank'>リードサーバー</a>で行われます。このプロパティを空のままにしておくと、データベース自動バックアップは有効になりません。");
 		m.put("Optionally specify a date field to hold due date information.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"オプションで、期限情報を保持する日付フィールドを指定してください。<br><b>注意: </b>適切なオプションがない場合は、OneDev課題フィールドをカスタマイズすることができます。");
-		m.put("Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to put retrieved artifacts. Leave empty to use job workdir itself", 
+		m.put("Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to put retrieved artifacts. Leave empty to use job working directory itself", 
 			"オプションで、取得したアーティファクトを配置する<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
 		m.put("Optionally specify a storage class to allocate build volume dynamically. Leave empty to use default storage class. <b class='text-warning'>NOTE:</b> Reclaim policy of the storage class should be set to <code>Delete</code>, as the volume is only used to hold temporary build files", 
 			"オプションで、ビルドボリュームを動的に割り当てるためのストレージクラスを指定してください。デフォルトのストレージクラスを使用する場合は空のままにしてください。<b class='text-warning'>注意:</b> ストレージクラスの再利用ポリシーは<code>Delete</code>に設定する必要があります。ボリュームは一時的なビルドファイルを保持するためだけに使用されます。");
@@ -2397,31 +2544,43 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、時間推定情報を保持する作業期間フィールドを指定してください。<br><b>注意: </b>適切なオプションがない場合は、OneDev課題フィールドをカスタマイズすることができます。");
 		m.put("Optionally specify a working period field to hold time spent infomration.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"オプションで、費やした時間情報を保持する作業期間フィールドを指定してください。<br><b>注意: </b>適切なオプションがない場合は、OneDev課題フィールドをカスタマイズすることができます。");
+		m.put("Optionally specify additional HTTP headers to include in the webhook POST request, for example an Authorization header required by the receiving endpoint", 
+			"Webhook POSTリクエストに含める追加のHTTPヘッダーをオプションで指定します。例えば、受信エンドポイントが要求する認証ヘッダーなど");
 		m.put("Optionally specify additional options for buildx build command", "オプションで、buildxビルドコマンドの追加オプションを指定してください。");
 		m.put("Optionally specify allowed <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS' target='_blank'>CORS</a> origins. For a CORS simple or preflight request, if value of request header <code>Origin</code> is included here, the response header <code>Access-Control-Allow-Origin</code> will be set to the same value", 
 			"オプションで、許可された<a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS' target='_blank'>CORS</a>オリジンを指定してください。CORSのシンプルまたはプリフライトリクエストの場合、リクエストヘッダー<code>Origin</code>の値がここに含まれている場合、レスポンスヘッダー<code>Access-Control-Allow-Origin</code>は同じ値に設定されます。");
 		m.put("Optionally specify allowed email domain for self sign-up users. Use '*' or '?' for pattern match", 
 			"オプションで、自己登録ユーザーの許可されたメールドメインを指定してください。パターンマッチには'*'または'?'を使用してください。");
+		m.put("Optionally specify an explanation for the regular expression. This will be displayed to the user if validation fails", 
+			"正規表現の説明を任意で指定します。検証が失敗した場合にユーザーに表示されます");
 		m.put("Optionally specify applicable jobs of this executor", "このエグゼキュータに適用可能なジョブを任意で指定してください");
 		m.put("Optionally specify applicable users who pushed the change", "変更をプッシュした適用可能なユーザーを任意で指定");
 		m.put("Optionally specify arguments to run above image", "オプションで、上記のイメージを実行するための引数を指定してください。");
-		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
+		m.put("Optionally specify artifacts to retrieve from the dependency into <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not retrieve any artifacts", 
 			"オプションで、依存関係から<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に取得するアーティファクトを指定してください。公開されたアーティファクト（アーティファクト公開ステップを介して）だけが取得可能です。アーティファクトを取得しない場合は空のままにしてください。");
 		m.put("Optionally specify authorized roles to press this button. If not specified, all users are allowed", 
 			"オプションで、このボタンを押すための認証済みロールを指定してください。指定されていない場合、すべてのユーザーが許可されます。");
 		m.put("Optionally specify base query of the list", "オプションで、リストの基本クエリを指定してください。");
 		m.put("Optionally specify branches/users/groups allowed to access this secret. If left empty, any job can access this secret, including those triggered via external pull requests", 
 			"オプションで、このシークレットにアクセスできるブランチ/ユーザー/グループを指定してください。空のままにすると、外部プルリクエストを介してトリガーされたジョブを含む、任意のジョブがこのシークレットにアクセスできます。");
-		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>. Leave empty to use job workdir itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
+		m.put("Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself. The file <code>Dockerfile</code> is expected to exist in build context directory, unless you specify a different location with option <code>--dockerfile</code>", 
 			"オプションで、<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対するビルドコンテキストパスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。<code>Dockerfile</code>ファイルはビルドコンテキストディレクトリに存在することが期待されますが、オプション<code>--dockerfile</code>で異なる場所を指定することもできます。");
-		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>. Leave empty to use job workdir itself", 
+		m.put("Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use job working directory itself", 
 			"オプションで、<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対するビルドパスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
 		m.put("Optionally specify cluster role the job pods service account binding to. This is necessary if you want to do things such as running other Kubernetes pods in job command", 
 			"オプションで、ジョブポッドのサービスアカウントがバインドされるクラスター役割を指定してください。これは、ジョブコマンドで他のKubernetesポッドを実行するなどの操作を行いたい場合に必要です。");
+		m.put("Optionally specify comma separated <a href='https://spdx.org/licenses/'>SPDX license identifiers</a> to be ignored", 
+			"無視する<a href='https://spdx.org/licenses/'>SPDXライセンス識別子</a>をカンマで区切って任意で指定します");
+		m.put("Optionally specify commit types applicable for commit message footer check (hit ENTER to add value). Leave empty to all types", 
+			"コミットメッセージフッターチェックに適用されるコミットタイプを任意で指定します（値を追加するにはENTERを押します）。すべてのタイプには空のままにします");
 		m.put("Optionally specify container arguments separated by space. Single argument containing space should be quoted. <b class='text-warning'>Note: </b> do not confuse this with container options which should be specified in executor setting", 
 			"オプションで、スペースで区切られたコンテナ引数を指定してください。スペースを含む単一の引数は引用符で囲む必要があります。<b class='text-warning'>注意: </b>これはエグゼキューター設定で指定する必要があるコンテナオプションと混同しないでください。");
+		m.put("Optionally specify container ports to expose. These ports will be mapped to random ports on host\nwhich will be displayed on the workspace page", 
+			"オプションで公開するコンテナポートを指定します。これらのポートはホスト上のランダムなポートにマッピングされ\nワークスペースページに表示されます");
 		m.put("Optionally specify cpu limit for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"オプションで、このエグゼキューターを使用する各ジョブ/サービスのCPU制限を指定してください。詳細については<a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetesリソース管理</a>を確認してください。");
+		m.put("Optionally specify cpu limit for workspace containers. This will be used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a> of the container", 
+			"ワークスペースコンテナのCPU制限をオプションで指定します。これはコンテナのオプション<a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a>として使用されます");
 		m.put("Optionally specify cpu limit of each job/service using this executor. This will be used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a> of relevant containers", 
 			"オプションで、このエグゼキューターを使用する各ジョブ/サービスのCPU制限を指定してください。これは関連するコンテナのオプション<a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a>として使用されます。");
 		m.put("Optionally specify criteria of issues which can be linked", "オプションで、リンク可能な課題の基準を指定してください。");
@@ -2440,8 +2599,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、ネットワークを作成するためのDockerオプションを指定してください。複数のオプションはスペースで区切る必要があり、スペースを含む単一のオプションは引用符で囲む必要があります。");
 		m.put("Optionally specify docker options to run container. Multiple options should be separated by space, and single option containing spaces should be quoted", 
 			"オプションで、コンテナを実行するためのDockerオプションを指定してください。複数のオプションはスペースで区切る必要があり、スペースを含む単一のオプションは引用符で囲む必要があります。");
-		m.put("Optionally specify docker sock to use. Defaults to <i>/var/run/docker.sock</i> on Linux, and <i>//./pipe/docker_engine</i> on Windows", 
-			"オプションで使用するDockerソックを指定してください。Linuxではデフォルトで<i>/var/run/docker.sock</i>、Windowsでは<i>//./pipe/docker_engine</i>です。");
+		m.put("Optionally specify docker sock to use. Defaults to <i>/var/run/docker.sock</i>", "使用するdocker sockをオプションで指定します。デフォルトは<i>/var/run/docker.sock</i>です");
+		m.put("Optionally specify environment variables", "環境変数をオプションで指定します");
 		m.put("Optionally specify environment variables for the container", "オプションで、コンテナの環境変数を指定してください。");
 		m.put("Optionally specify environment variables for this step", "オプションで、このステップの環境変数を指定してください。");
 		m.put("Optionally specify environment variables of the service", "オプションで、サービスの環境変数を指定してください。");
@@ -2450,8 +2609,16 @@ public class Translation_ja extends TranslationResourceBundle {
 			"このジョブのエグゼキュータを任意で指定してください。空欄の場合、自動検出エグゼキュータを使用します");
 		m.put("Optionally specify executor for this job. Leave empty to use first applicable executor", 
 			"このジョブのエグゼキュータを任意で指定してください。空欄の場合、最初に適用可能なエグゼキュータを使用します");
-		m.put("Optionally specify files relative to cache path to ignore when detect cache changes. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple files should be separated by space, and single file containing space should be quoted", 
-			"オプションで、キャッシュ変更を検出する際に無視するキャッシュパスに対する相対ファイルを指定してください。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には'**'、'*'または'?'を使用してください。複数のファイルはスペースで区切る必要があり、スペースを含む単一のファイルは引用符で囲む必要があります。");
+		m.put("Optionally specify extra options for osv source scanner. Multiple options need to be separated with space", 
+			"osvソーススキャナーの追加オプションを任意で指定します。複数のオプションはスペースで区切る必要があります");
+		m.put("Optionally specify files relative to cache path to ignore when detect cache changes.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple files should be separated by space, and single file containing space should be quoted", 
+			"キャッシュ変更を検出する際に無視するキャッシュパスに対する相対ファイルをオプションで指定します。\n'**'、'*'、または'?'を<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>に使用します。\n複数のファイルはスペースで区切り、スペースを含む単一ファイルは引用符で囲む必要があります");
+		m.put("Optionally specify files relative to data path to ignore when detect data changes.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple files should be separated by space, and single file containing space should be quoted", 
+			"データ変更を検出する際に無視するデータパスに対する相対ファイルをオプションで指定します。\n'**'、'*'、または'?'を<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>に使用します。\n複数のファイルはスペースで区切り、スペースを含む単一ファイルは引用符で囲む必要があります");
+		m.put("Optionally specify files to be excluded when reviewing code with AI user to save tokens", 
+			"AIユーザーでコードをレビューする際にトークンを節約するために除外するファイルをオプションで指定します");
+		m.put("Optionally specify files to compute checksum from. This is useful when your project\nhas lock files (package-lock.json, pom.xml, etc.) that represent cache state. When\nchecksum changes, cache can still be loaded as a partial match, but\nwill be re-uploaded with the new checksum if upload strategy is set to <i>Upload If Not Exact Match</i>.\nUse '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>.\nMultiple files should be separated by space, and single file containing space should be quoted.\nNon-absolute file is relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>.<br>\n<b>NOTE: </b> An empty checksum is assumed if this property is empty.", 
+			"チェックサムを計算するためのファイルをオプションで指定します。これはプロジェクトに\nキャッシュ状態を表すロックファイル（package-lock.json、pom.xmlなど）がある場合に便利です。\nチェックサムが変更された場合、キャッシュは部分一致としてロードされますが、\nアップロード戦略が<i>完全一致でない場合にアップロード</i>に設定されている場合、新しいチェックサムで再アップロードされます。\n'**'、'*'、または'?'を<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>に使用します。\n複数のファイルはスペースで区切り、スペースを含む単一ファイルは引用符で囲む必要があります。\n絶対パスでないファイルは<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブ作業ディレクトリ</a>に対する相対パスです。<br>\n<b>注意:</b> このプロパティが空の場合、空のチェックサムが仮定されます。");
 		m.put("Optionally specify group search base if you want to retrieve group membership information of the user. For example: <i>cn=Users, dc=example, dc=com</i>. To give appropriate permissions to a Active Directory group, a OneDev group with same name should be defined. Leave empty to manage group memberships at OneDev side", 
 			"オプションで、ユーザーのグループメンバーシップ情報を取得する場合のグループ検索ベースを指定してください。例: <i>cn=Users, dc=example, dc=com</i>。Active Directoryグループに適切な権限を付与するには、同じ名前のOneDevグループを定義する必要があります。OneDev側でグループメンバーシップを管理する場合は空のままにしてください。");
 		m.put("Optionally specify issue links allowed to edit", "オプションで、編集を許可する課題リンクを指定してください。");
@@ -2461,8 +2628,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify issues applicable for this transition. Leave empty for all issues. ", 
 			"オプションで、この遷移に適用される課題を指定してください。すべての課題に適用する場合は空のままにしてください。");
 		m.put("Optionally specify jobs allowed to use this script", "オプションで、このスクリプトを使用することが許可されているジョブを指定してください。");
+		m.put("Optionally specify list of shortcuts at top of workspace. When workspace is created,\nthe first shortcut will be opened automatically", 
+			"ワークスペースの上部にショートカットのリストをオプションで指定します。ワークスペースが作成されると、\n最初のショートカットが自動的に開かれます");
 		m.put("Optionally specify memory limit for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"オプションで、このエグゼキューターを使用する各ジョブ/サービスのメモリ制限を指定してください。詳細については<a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetesリソース管理</a>を確認してください。");
+		m.put("Optionally specify memory limit for workspace containers. This will be used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#memory' target='_blank'>--memory</a> of the container", 
+			"ワークスペースコンテナのメモリ制限をオプションで指定します。これはコンテナのオプション<a href='https://docs.docker.com/config/containers/resource_constraints/#memory' target='_blank'>--memory</a>として使用されます");
 		m.put("Optionally specify memory limit of each job/service using this executor. This will be used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#memory' target='_blank'>--memory</a> of relevant containers", 
 			"オプションで、このエグゼキューターを使用する各ジョブ/サービスのメモリ制限を指定してください。これは関連するコンテナのオプション<a href='https://docs.docker.com/config/containers/resource_constraints/#memory' target='_blank'>--memory</a>として使用されます。");
 		m.put("Optionally specify merge strategy of created pull request. Leave empty to use default strategy of each project", 
@@ -2478,12 +2649,14 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、sshコマンドのオプションを指定してください。複数のオプションはスペースで区切る必要があります。");
 		m.put("Optionally specify options passed to renovate cli. Multiple options should be separated by space, and single option containing spaces should be quoted", 
 			"オプションで、Renovate CLIに渡されるオプションを指定してください。複数のオプションはスペースで区切る必要があり、スペースを含む単一のオプションは引用符で囲む必要があります。");
-		m.put("Optionally specify osv scanner <a href='https://google.github.io/osv-scanner/configuration/' target='_blank'>config file</a> under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>. You may ignore particular vulnerabilities via this file", 
+		m.put("Optionally specify osv scanner <a href='https://google.github.io/osv-scanner/configuration/' target='_blank'>config file</a> under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. You may ignore particular vulnerabilities via this file", 
 			"オプションで、<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>内のosvスキャナー<a href='https://google.github.io/osv-scanner/configuration/' target='_blank'>設定ファイル</a>を指定してください。このファイルを使用して特定の脆弱性を無視することができます。");
 		m.put("Optionally specify path protection rules", "オプションで、パス保護ルールを指定してください。");
-		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>ignore file</a>", 
+		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be used as trivy <a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>ignore file</a>", 
 			"オプションで、trivy<a href='https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids' target='_blank'>無視ファイル</a>として使用する<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを指定してください。");
-		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to publish artifacts from. Leave empty to use job workdir itself", 
+		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be used as trivy <a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>secret config</a>", 
+			"trivy<a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>シークレット設定</a>として使用する<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを任意で指定します");
+		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to publish artifacts from. Leave empty to use job working directory itself", 
 			"オプションで、アーティファクトを公開するための<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
 		m.put("Optionally specify platform to pull, for instance <tt>linux/amd64</tt>. Leave empty to pull all platforms in image", 
 			"オプションで、プルするプラットフォームを指定してください。例: <tt>linux/amd64</tt>。イメージ内のすべてのプラットフォームをプルする場合は空のままにしてください。");
@@ -2493,16 +2666,22 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、課題を表示するプロジェクトを指定してください。アクセス可能なすべてのプロジェクトの課題を表示する場合は空のままにしてください。");
 		m.put("Optionally specify project to show packages of. Leave empty to show packages of all projects with permissions", 
 			"オプションで、パッケージを表示するプロジェクトを指定してください。権限を持つすべてのプロジェクトのパッケージを表示する場合は空のままにしてください。");
+		m.put("Optionally specify projects applicable for this provider. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple projects should be separated by space", 
+			"このプロバイダーに適用されるプロジェクトをオプションで指定します。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には '**', '*', '?' を使用します。複数のプロジェクトはスペースで区切ります");
+		m.put("Optionally specify projects applicable for this provisioner. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Multiple projects should be separated by space", 
+			"このプロビジョナーに適用されるプロジェクトをオプションで指定します。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には '**', '*', '?' を使用します。複数のプロジェクトはスペースで区切ります");
 		m.put("Optionally specify ref of above job, for instance <i>refs/heads/main</i>. Use * for wildcard match", 
 			"オプションで、上記のジョブのリファレンスを指定してください。例: <i>refs/heads/main</i>。ワイルドカードマッチには*を使用してください。");
 		m.put("Optionally specify registry logins to override those defined in job executor. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token secret for password secret", 
 			"オプションで、ジョブエグゼキューターで定義されたものを上書きするためのレジストリログインを指定してください。組み込みレジストリの場合、レジストリURLには<code>@server_url@</code>、ユーザー名には<code>@job_token@</code>、パスワードシークレットにはアクセストークンシークレットを使用してください。");
+		m.put("Optionally specify registry logins to override those defined in workspace provisioner.\nFor built-in registry, use <code>@server_url@</code> for registry url,\n<code>@workspace_token@</code> for user name, and access token for password\n", 
+			"ワークスペースプロビジョナーで定義されたものを上書きするためのレジストリログインをオプションで指定します。\n組み込みレジストリの場合、レジストリURLには<code>@server_url@</code>を、\nユーザー名には<code>@workspace_token@</code>を、パスワードにはアクセストークンを使用します\n");
 		m.put("Optionally specify relative directory to put uploaded files", "オプションで、アップロードされたファイルを配置する相対ディレクトリを指定してください。");
-		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to clone code into. Leave empty to use job workdir itself", 
+		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to clone code into. Leave empty to use job working directory itself", 
 			"オプションで、コードをクローンするための<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
-		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to scan. Leave empty to use job workdir itself", 
+		m.put("Optionally specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to scan. Leave empty to use job working directory itself", 
 			"オプションで、スキャンするための<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを指定してください。ジョブワークスペース自体を使用する場合は空のままにしてください。");
-		m.put("Optionally specify relative paths under <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to scan dependency vulnerabilities. Multiple paths can be specified and should be separated with space. Leave empty to use job workdir itself", 
+		m.put("Optionally specify relative paths under <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to scan dependency vulnerabilities. Multiple paths can be specified and should be separated with space. Leave empty to use job working directory itself", 
 			"オプションで、依存関係の脆弱性をスキャンするための<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを指定してください。複数のパスを指定することができ、スペースで区切る必要があります。ジョブワークスペース自体を使用する場合は空のままにしてください。");
 		m.put("Optionally specify required reviewers for changes of specified branch", "オプションで、指定されたブランチの変更に対する必要なレビュアーを指定してください。");
 		m.put("Optionally specify revision to create branch from. Leave empty to create from build commit", 
@@ -2515,6 +2694,10 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、パッケージファイルを保存するための別のディレクトリを指定してください。絶対ディレクトリでない場合、サイトディレクトリに対する相対ディレクトリと見なされます。");
 		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are only supported by docker aware executors (server docker executor, remote docker executor, or kubernetes executor)", 
 			"オプションで、このジョブに必要なサービスを指定してください。<b class='text-warning'>注意:</b> サービスはDocker対応エグゼキューター（サーバーDockerエグゼキューター、リモートDockerエグゼキューター、またはKubernetesエグゼキューター）のみでサポートされています。");
+		m.put("Optionally specify sh commands (on Linux/Unix) or batch commands (on Windows)\nto run to set up the workspace. These commands will run from working directory\nholding cloned repository files", 
+			"ワークスペースをセットアップするために実行するshコマンド（Linux/Unix）またはバッチコマンド（Windows）をオプションで指定します。\nこれらのコマンドはクローンされたリポジトリファイルを保持する作業ディレクトリから実行されます\n");
+		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files", 
+			"ワークスペースをセットアップするために実行するシェルコマンドをオプションで指定します。これらのコマンドは\nクローンされたリポジトリファイルを保持する作業ディレクトリから実行されます");
 		m.put("Optionally specify space-separated branches applicable for this transition. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all", 
 			"オプションで、この遷移に適用されるスペース区切りのブランチを指定してください。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には'**'、'*'または'?'を使用してください。'-'で除外を指定してください。すべてに一致する場合は空のままにしてください。");
 		m.put("Optionally specify space-separated branches applicable for this trigger. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for default branch", 
@@ -2549,6 +2732,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"必要に応じてサイトファイルを公開するプロジェクトを指定します。空欄の場合は現在のプロジェクトに公開されます");
 		m.put("Optionally specify uid:gid to run container as. <b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or using user namespace remapping", 
 			"必要に応じてコンテナを実行するuid:gidを指定します。<b class='text-warning'>注意:</b> コンテナランタイムがルートレスまたはユーザー名前空間リマッピングを使用している場合、この設定は空欄にする必要があります");
+		m.put("Optionally specify uid:gid to run container as. <b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or using user namespace remapping\n", 
+			"コンテナを実行するためのuid:gidをオプションで指定します。<b class='text-warning'>注意:</b> コンテナランタイムがルートレスまたはユーザーネームスペースリマッピングを使用している場合、この設定は空のままにしてください\n");
 		m.put("Optionally specify user name to access remote repository", "必要に応じてリモートリポジトリにアクセスするためのユーザー名を指定します");
 		m.put("Optionally specify valid scopes of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary scope", 
 			"必要に応じて従来のコミットの有効なスコープを指定します（ENTERキーを押して値を追加）。空欄の場合は任意のスコープを許可します");
@@ -2576,6 +2761,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Ordinary", "通常");
 		m.put("Ordinary: Normal account<br>Service: Service account does not have password and email addresses, and will not generate notifications for its activities<br>AI: AI account to answer questions about the code base, edit CI/CD spec, investigate job failure, or review pull request", 
 			"通常: 通常のアカウント<br>サービス: サービスアカウントにはパスワードとメールアドレスがなく、その活動に対する通知は生成されません<br>AI: コードベースに関する質問に答えたり、CI/CD仕様を編集したり、ジョブの失敗を調査したり、プルリクエストをレビューするAIアカウント");
+		m.put("Osv Source Scanner", "Osvソーススキャナー");
 		m.put("Other", "その他");
 		m.put("Outline", "アウトライン");
 		m.put("Outline Search", "アウトライン検索");
@@ -2612,6 +2798,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Param Spec", "パラメータ仕様");
 		m.put("Param Spec Bean", "パラメータ仕様Bean");
 		m.put("Parameter", "パラメータ");
+		m.put("Parameter Definition", "パラメータ定義");
 		m.put("Parameter Specs", "パラメータ仕様");
 		m.put("Params", "パラメータ");
 		m.put("Params & Triggers", "パラメータとトリガー");
@@ -2648,6 +2835,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Password reset url is invalid or obsolete", "パスワードリセットURLが無効または古くなっています");
 		m.put("PasswordMinimum Length", "パスワードの最小長");
 		m.put("Paste subscription key here", "ここにサブスクリプションキーを貼り付けてください");
+		m.put("Path", "パス");
 		m.put("Path containing spaces or starting with dash needs to be quoted", "スペースを含むパスまたはダッシュで始まるパスは引用符で囲む必要があります");
 		m.put("Path placeholder", "パスプレースホルダー");
 		m.put("Path to kubectl", "kubectlへのパス");
@@ -2665,6 +2853,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Performance Setting", "パフォーマンス設定");
 		m.put("Performance Settings", "パフォーマンス設定");
 		m.put("Performance settings have been saved", "パフォーマンス設定が保存されました");
+		m.put("Performing fuzzy query. Enclose search text with '~' to add more conditions, for instance: ~branch name~ and \"Status\" is \"STARTED\"", 
+			"ファジークエリを実行中です。検索テキストを'~'で囲んで条件を追加します。例えば: ~ブランチ名~ と \"ステータス\" が \"STARTED\"");
 		m.put("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and \"State\" is \"Open\"", 
 			"あいまい検索を実行中です。検索テキストを'~'で囲むことで条件を追加できます。例: ~検索するテキスト~ および \"状態\" が \"オープン\"");
 		m.put("Performing fuzzy query. Enclosing search text with '~' to add more conditions, for instance: ~text to search~ and \"Type\" is \"NPM\"", 
@@ -2700,6 +2890,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Please configure <a wicket:id=\"mailSetting\">mail setting</a> first", "まず<a wicket:id=\"mailSetting\">メール設定</a>を構成してください");
 		m.put("Please confirm", "確認してください");
 		m.put("Please confirm the password.", "パスワードを確認してください。");
+		m.put("Please enter a commit message", "コミットメッセージを入力してください");
 		m.put("Please follow <a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"javascript:void(0);\">this instruction</a> to resolve the conflicts", 
 			"競合を解決するには<a wicket:id=\"resolveInstructions\" class=\"link-primary\" href=\"javascript:void(0);\">この指示</a>に従ってください");
 		m.put("Please input one of your recovery codes saved when enable two-factor authentication", 
@@ -2743,6 +2934,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Please select users to disable", "無効化するユーザーを選択してください");
 		m.put("Please select users to enable", "有効化するユーザーを選択してください");
 		m.put("Please select users to remove from group", "グループから削除するユーザーを選択してください");
+		m.put("Please select workspaces to delete", "削除するワークスペースを選択してください");
 		m.put("Please specify file name above before editing content", "コンテンツを編集する前に上記のファイル名を指定してください");
 		m.put("Please switch to packages page of a particular project for the instructions", "特定のプロジェクトのパッケージページに切り替えて指示を確認してください");
 		m.put("Please wait...", "お待ちください...");
@@ -2751,13 +2943,16 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Poll Interval", "ポーリング間隔");
 		m.put("Populate Tag Mappings", "タグマッピングを入力");
 		m.put("Port", "ポート");
+		m.put("Port Mappings", "ポートマッピング");
 		m.put("Possible definitions", "可能な定義");
 		m.put("Post", "投稿");
 		m.put("Post Build Action", "ビルド後のアクション");
 		m.put("Post Build Action Bean", "ビルド後のアクションBean");
 		m.put("Post Build Actions", "ビルド後のアクション");
+		m.put("Post URL", "ポストURL");
 		m.put("Post Url", "投稿URL");
 		m.put("PowerShell", "PowerShell");
+		m.put("Powershell", "Powershell");
 		m.put("Prefix Pattern", "プレフィックスパターン");
 		m.put("Prefix the title with <code>WIP</code> or <code>[WIP]</code> to mark the pull request as work in progress", 
 			"プルリクエストを作業中としてマークするには、タイトルに <code>WIP</code> または <code>[WIP]</code> を付けてください");
@@ -2790,12 +2985,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Private Key Secret", "秘密鍵のシークレット");
 		m.put("Private key regenerated and SSH server restarted", "秘密鍵が再生成され、SSHサーバーが再起動されました");
 		m.put("Privilege", "権限");
-		m.put("Privilege Settings", "権限設定");
 		m.put("Product Version", "製品バージョン");
 		m.put("Profile", "プロフィール");
 		m.put("Programming language", "プログラミング言語");
 		m.put("Project", "プロジェクト");
 		m.put("Project \"{0}\" deleted", "プロジェクト「{0}」が削除されました");
+		m.put("Project Ai Setting", "プロジェクトAI設定");
 		m.put("Project Authorization Bean", "プロジェクト認可Bean");
 		m.put("Project Authorizations Bean", "プロジェクト認可Beans");
 		m.put("Project Build Setting", "プロジェクトビルド設定");
@@ -2810,6 +3005,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Project Path", "プロジェクトパス");
 		m.put("Project Pull Request Setting", "プロジェクトプルリクエスト設定");
 		m.put("Project Replicas", "プロジェクトレプリカ");
+		m.put("Project Workspace Setting", "プロジェクトワークスペース設定");
 		m.put("Project authorizations updated", "プロジェクト認可が更新されました");
 		m.put("Project does not have any code yet", "プロジェクトにはまだコードがありません");
 		m.put("Project forked", "プロジェクトがフォークされました");
@@ -2823,6 +3019,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Project or revision not specified yet", "プロジェクトまたはリビジョンはまだ指定されていません");
 		m.put("Project overview", "プロジェクト概要");
 		m.put("Project path", "プロジェクトパス");
+		m.put("Project path can be omitted if reference from current project", "プロジェクトパスは、現在のプロジェクトからの参照であれば省略できます。");
 		m.put("Projects", "プロジェクト");
 		m.put("Projects Bean", "プロジェクトBeans");
 		m.put("Projects deleted", "プロジェクトが削除されました");
@@ -2834,6 +3031,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Prompt Fields", "プロンプトフィールド");
 		m.put("Properties", "プロパティ");
 		m.put("Provide server id (guild id) to restrict access only to server members", "サーバーID（ギルドID）を指定して、サーバーメンバーのみのアクセスを制限します");
+		m.put("Provisioner", "プロビジョナー");
 		m.put("Proxy", "プロキシ");
 		m.put("Prune Builder Cache", "ビルダーキャッシュの削除");
 		m.put("Prune image cache of docker buildx builder. This step calls docker builder prune command to remove cache of buildx builder specified in server docker executor or remote docker executor", 
@@ -2843,6 +3041,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Public Roles", "公開の役割");
 		m.put("Publish", "公開");
 		m.put("Publish Coverage Report Step", "カバレッジレポート公開ステップ");
+		m.put("Publish JSON Report As Artifact", "JSONレポートをアーティファクトとして公開");
 		m.put("Publish Problem Report Step", "問題レポート公開ステップ");
 		m.put("Publish Report Step", "レポート公開ステップ");
 		m.put("Publish Unit Test Report Step", "ユニットテストレポート公開ステップ");
@@ -2853,6 +3052,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Published By Project", "プロジェクトによる公開");
 		m.put("Published By User", "ユーザーによる公開");
 		m.put("Published File", "公開ファイル");
+		m.put("Pull", "プル");
 		m.put("Pull Command", "プルコマンド");
 		m.put("Pull Image", "イメージのプル");
 		m.put("Pull Request", "プルリクエスト");
@@ -2917,10 +3117,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Pull request will be merged automatically with a preset <a wicket:id=\"commitMessage\">commit message</a> when ready. This option will be disabled upon adding new commits, changing merge strategy, or switching target branch", 
 			"プルリクエストは準備が整ったらプリセットされた<a wicket:id=\"commitMessage\">コミットメッセージ</a>で自動的にマージされます。このオプションは、新しいコミットの追加、マージ戦略の変更、またはターゲットブランチの切り替え時に無効になります");
 		m.put("Pull request {0} deleted", "プルリクエスト {0} が削除されました");
+		m.put("Pull successful", "プル成功");
+		m.put("Push", "プッシュ");
 		m.put("Push Image", "イメージをプッシュ");
 		m.put("Push chart to the repository", "リポジトリにチャートをプッシュ");
 		m.put("Push docker image from OCI layout via crane. This step needs to be executed by server docker executor, remote docker executor, or Kubernetes executor", 
 			"OCIレイアウトからクレーンを介してDockerイメージをプッシュ。このステップは、サーバードッカーエグゼキュータ、リモートドッカーエグゼキュータ、またはKubernetesエグゼキュータによって実行される必要があります");
+		m.put("Push successful", "プッシュ成功");
 		m.put("Push to Remote", "リモートにプッシュ");
 		m.put("Push to container registry", "コンテナレジストリにプッシュ");
 		m.put("PyPI(s)", "PyPI(s)");
@@ -2939,6 +3142,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Query/order packages", "クエリ/注文パッケージ");
 		m.put("Query/order projects", "クエリ/注文プロジェクト");
 		m.put("Query/order pull requests", "クエリ/注文プルリクエスト");
+		m.put("Query/order workspaces", "ワークスペースのクエリ/順序");
 		m.put("Queueing Takes", "キューイング時間");
 		m.put("Quick Search", "クイック検索");
 		m.put("Quote", "引用");
@@ -2974,6 +3178,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Reference Build", "参照ビルド");
 		m.put("Reference Issue", "参照課題");
 		m.put("Reference Pull Request", "参照プルリクエスト");
+		m.put("Reference Workspace", "参照ワークスペース");
 		m.put("Reference this {0} in markdown or commit message via below string.", "以下の文字列を使用してMarkdownまたはコミットメッセージでこの{0}を参照してください。");
 		m.put("Refresh", "更新");
 		m.put("Refresh Token", "更新トークン");
@@ -2985,6 +3190,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Registry Logins", "レジストリログイン");
 		m.put("Registry Url", "レジストリURL");
 		m.put("Regular Expression", "正規表現");
+		m.put("Relative", "相対");
 		m.put("Remaining User Months", "残りのユーザーモンス");
 		m.put("Remaining User Months:", "残りのユーザーモンス:");
 		m.put("Remaining time", "残り時間");
@@ -3028,6 +3234,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Report format changed. You may re-run this build to generate the report in new format", 
 			"レポート形式が変更されました。このビルドを再実行して新しい形式でレポートを生成できます");
 		m.put("Repository Sync", "リポジトリ同期");
+		m.put("Reprovision workspace", "ワークスペースを再プロビジョン");
 		m.put("Request Body", "リクエストボディ");
 		m.put("Request For Changes", "変更のリクエスト");
 		m.put("Request Scopes", "リクエストスコープ");
@@ -3117,7 +3324,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Run job", "ジョブを実行");
 		m.put("Run job in another project", "別のプロジェクトでジョブを実行する");
 		m.put("Run on Bare Metal/Virtual Machine", "ベアメタル/仮想マシンで実行");
-		m.put("Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>Job workspace</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKDIR</code>. <b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote docker executor", 
+		m.put("Run osv scanner to scan project source for vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
+			"プロジェクトソースの脆弱性を<a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>さまざまなロックファイル</a>でスキャンするためにosvスキャナーを実行します。これはdocker対応のエグゼキューターによってのみ実行可能です。");
+		m.put("Run specified docker container. <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>Job workdir</a> is mounted into the container and its path is placed in environment variable <code>ONEDEV_WORKDIR</code>. <b class='text-warning'>Note: </b> this step can only be executed by server docker executor or remote docker executor", 
 			"指定されたDockerコンテナを実行します。<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>がコンテナにマウントされ、そのパスが環境変数<code>ONEDEV_WORKDIR</code>に配置されます。<b class='text-warning'>注意: </b>このステップはサーバーDockerエグゼキューターまたはリモートDockerエグゼキューターによってのみ実行可能です");
 		m.put("Run specified step template", "指定されたステップテンプレートを実行");
 		m.put("Run this job", "このジョブを実行");
@@ -3150,6 +3359,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("SSO provider \"{0}\" deleted", "SSOプロバイダー\"{0}\"が削除されました");
 		m.put("SSO provider created", "SSOプロバイダーが作成されました");
 		m.put("SSO provider updated", "SSOプロバイダーが更新されました");
+		m.put("STAGED", "ステージング済み");
 		m.put("SUCCESSFUL", "成功");
 		m.put("Save", "保存");
 		m.put("Save Query", "クエリを保存");
@@ -3175,9 +3385,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Search is too general", "検索が一般的すぎます");
 		m.put("Search job", "ジョブを検索");
 		m.put("Search project", "プロジェクトを検索");
+		m.put("Search spec", "検索仕様");
 		m.put("Secret", "シークレット");
 		m.put("Secret Config File", "シークレット設定ファイル");
 		m.put("Secret Setting", "シークレット設定");
+		m.put("Secret Value", "秘密の値");
 		m.put("Security", "セキュリティ");
 		m.put("Security & Compliance", "セキュリティとコンプライアンス");
 		m.put("Security Setting", "セキュリティ設定");
@@ -3190,6 +3402,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Select Existing", "既存のものを選択");
 		m.put("Select Job", "ジョブを選択");
 		m.put("Select Project", "プロジェクトを選択");
+		m.put("Select Spec", "仕様を選択");
+		m.put("Select a file to view changes", "変更を表示するファイルを選択してください");
 		m.put("Select below...", "以下を選択...");
 		m.put("Select iteration to schedule issues into", "課題をスケジュールするためのイテレーションを選択");
 		m.put("Select organization to import from. Leave empty to import from repositories under current account", 
@@ -3282,10 +3496,14 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Settings saved", "設定を保存しました");
 		m.put("Settings saved and project redistribution scheduled", "設定を保存し、プロジェクトの再分配をスケジュールしました");
 		m.put("Settings updated", "設定が更新されました");
+		m.put("Setup Commands", "セットアップコマンド");
 		m.put("Share dashboard", "ダッシュボードを共有");
 		m.put("Share with Groups", "グループと共有");
 		m.put("Share with Users", "ユーザーと共有");
 		m.put("Shell", "シェル");
+		m.put("Shell Provisioner", "シェルプロビジョナー");
+		m.put("Shortcut Config", "ショートカット設定");
+		m.put("Shortcuts", "ショートカット");
 		m.put("Show Archived", "アーカイブを表示");
 		m.put("Show Branch/Tag", "ブランチ/タグを表示");
 		m.put("Show Build Status", "ビルドステータスを表示");
@@ -3309,6 +3527,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Show commit of this parent", "この親のコミットを表示");
 		m.put("Show emojis", "絵文字を表示");
 		m.put("Show in build list", "ビルドリストに表示");
+		m.put("Show in workspace list", "ワークスペースリストに表示");
 		m.put("Show issues in list", "リスト内の課題を表示");
 		m.put("Show issues not scheduled into current iteration", "現在のイテレーションにスケジュールされていない課題を表示");
 		m.put("Show matching agents", "一致するエージェントを表示");
@@ -3351,6 +3570,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Smtp With Ssl", "Smtp SSL使用");
 		m.put("Some builds are {0}", "一部のビルドは{0}です");
 		m.put("Some jobs are hidden due to permission policy", "許可ポリシーにより一部のジョブが非表示になっています");
+		m.put("Some local changes would be overwritten by merge", "マージによっていくつかのローカル変更が上書きされます");
 		m.put("Some one changed the content you are editing. Reload the page and try again.", "編集している内容が誰かによって変更されました。ページをリロードして再試行してください。");
 		m.put("Some other pull requests are opening to this branch", "このブランチに対して他のプルリクエストが開かれています");
 		m.put("Some projects might be hidden due to permission policy", "許可ポリシーにより一部のプロジェクトが非表示になっている可能性があります");
@@ -3373,6 +3593,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Source branch no longer exists", "ソースブランチはもう存在しません");
 		m.put("Source branch updated successfully", "ソースブランチは正常に更新されました");
 		m.put("Source project no longer exists", "ソースプロジェクトはもう存在しません");
+		m.put("Spec", "仕様");
+		m.put("Spec name", "仕様名");
+		m.put("Spec not found in workspace project hierarchy", "ワークスペースプロジェクト階層に仕様が見つかりません");
 		m.put("Specified Value", "指定された値");
 		m.put("Specified choices", "指定された選択肢");
 		m.put("Specified default value", "指定されたデフォルト値");
@@ -3388,49 +3611,48 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specifies password of above manager DN", "上記のマネージャー DN のパスワードを指定します");
 		m.put("Specifies the attribute containing group name inside the found group LDAP entry. Value of this attribute will be mapped to a OneDev group. This attribute is normally set to <i>cn</i>", 
 			"見つかったグループ LDAP エントリ内のグループ名を含む属性を指定します。この属性の値は OneDev グループにマッピングされます。この属性は通常 <i>cn</i> に設定されます");
-		m.put("Specifies who can access this AI service", "このAIサービスにアクセスできる人を指定します");
 		m.put("Specifies who can access this AI service. AI service can be accessed in below approaches:", 
 			"このAIサービスにアクセスできる人を指定します。AIサービスには以下の方法でアクセスできます：");
-		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
+		m.put("Specify .net TRX test result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance <tt>TestResults/*.trx</tt>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する .net TRX テスト結果ファイルを指定します。例: <tt>TestResults/*.trx</tt>。パターンマッチには * または ? を使用してください");
 		m.put("Specify <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is access token with code write permission over above projects. Commits, issues, and pull requests will also be created under name of the access token owner", 
 			"<a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>ジョブシークレット</a>を指定します。この値はコード書き込み権限を持つアクセス トークンです。コミット、課題、プルリクエストはアクセス トークン所有者の名前で作成されます");
-		m.put("Specify <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json output file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with clippy json output option, for instance <code>cargo clippy --message-format json>check-result.json</code>. Use * or ? for pattern match", 
+		m.put("Specify <a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> json output file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. This file can be generated with clippy json output option, for instance <code>cargo clippy --message-format json>check-result.json</code>. Use * or ? for pattern match", 
 			"<a href='https://github.com/rust-lang/rust-clippy'>rust clippy</a> の JSON 出力ファイルを <a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対して指定します。このファイルは clippy の JSON 出力オプションで生成できます。例: <code>cargo clippy --message-format json>check-result.json</code>。パターンマッチには * または ? を使用してください");
 		m.put("Specify Build Options", "ビルドオプションを指定します");
-		m.put("Specify CPD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/cpd.xml</tt>. Use * or ? for pattern match", 
+		m.put("Specify CPD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance, <tt>target/cpd.xml</tt>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する CPD 結果 XML ファイルを指定します。例: <tt>target/cpd.xml</tt>。パターンマッチには * または ? を使用してください");
 		m.put("Specify Commit Message", "コミットメッセージを指定します");
-		m.put("Specify ESLint report file in checkstyle format under <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with ESLint option <tt>'-f checkstyle'</tt> and <tt>'-o'</tt>. Use * or ? for pattern match", 
+		m.put("Specify ESLint report file in checkstyle format under <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. This file can be generated with ESLint option <tt>'-f checkstyle'</tt> and <tt>'-o'</tt>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>内の checkstyle フォーマットで ESLint レポートファイルを指定します。このファイルは ESLint オプション <tt>'-f checkstyle'</tt> および <tt>'-o'</tt> を使用して生成できます。パターンマッチには * または ? を使用してください");
 		m.put("Specify GitHub API url, for instance <tt>https://api.github.com</tt>", "GitHub API URL を指定します。例: <tt>https://api.github.com</tt>");
 		m.put("Specify GitLab API url, for instance <tt>https://gitlab.example.com/api/v4</tt>", "GitLab API URL を指定します。例: <tt>https://gitlab.example.com/api/v4</tt>");
 		m.put("Specify Gitea API url, for instance <tt>https://gitea.example.com/api/v1</tt>", "Gitea API URL を指定します。例: <tt>https://gitea.example.com/api/v1</tt>");
-		m.put("Specify GoogleTest XML result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This report can be generated with environment variable <tt>GTEST_OUTPUT</tt> when running tests, For instance, <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>. Use * or ? for pattern match", 
+		m.put("Specify GoogleTest XML result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. This report can be generated with environment variable <tt>GTEST_OUTPUT</tt> when running tests, For instance, <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する GoogleTest XML 結果ファイルを指定します。このレポートはテスト実行時に環境変数 <tt>GTEST_OUTPUT</tt> を使用して生成できます。例: <code>export GTEST_OUTPUT=&quot;xml:gtest-result.xml&quot;</code>。パターンマッチには * または ? を使用してください");
 		m.put("Specify IMAP user name.<br><b class='text-danger'>NOTE: </b> This account should be able to receive emails sent to system email address specified above", 
 			"IMAP ユーザー名を指定します。<br><b class='text-danger'>注意: </b>このアカウントは上記で指定されたシステムメールアドレスに送信されたメールを受信できる必要があります");
-		m.put("Specify JUnit test result file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance <tt>target/surefire-reports/TEST-*.xml</tt>. Use * or ? for pattern match", 
+		m.put("Specify JUnit test result file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance <tt>target/surefire-reports/TEST-*.xml</tt>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する JUnit テスト結果ファイル (XML フォーマット) を指定します。例: <tt>target/surefire-reports/TEST-*.xml</tt>。パターンマッチには * または ? を使用してください");
-		m.put("Specify JaCoCo coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/site/jacoco/jacoco.xml</tt>. Use * or ? for pattern match", 
+		m.put("Specify JaCoCo coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance, <tt>target/site/jacoco/jacoco.xml</tt>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する JaCoCo カバレッジ XML レポートファイルを指定します。例: <tt>target/site/jacoco/jacoco.xml</tt>。パターンマッチには * または ? を使用してください");
-		m.put("Specify Jest coverage report file in clover format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance <tt>coverage/clover.xml</tt>. This file can be generated with Jest option <tt>'--coverage'</tt>. Use * or ? for pattern match", 
+		m.put("Specify Jest coverage report file in clover format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance <tt>coverage/clover.xml</tt>. This file can be generated with Jest option <tt>'--coverage'</tt>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する Jest カバレッジレポートファイル (clover フォーマット) を指定します。例: <tt>coverage/clover.xml</tt>。このファイルは Jest オプション <tt>'--coverage'</tt> を使用して生成できます。パターンマッチには * または ? を使用してください");
-		m.put("Specify Jest test result file in json format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated via Jest option <tt>'--json'</tt> and <tt>'--outputFile'</tt>. Use * or ? for pattern match", 
+		m.put("Specify Jest test result file in json format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. This file can be generated via Jest option <tt>'--json'</tt> and <tt>'--outputFile'</tt>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する Jest テスト結果ファイル (JSON フォーマット) を指定します。このファイルは Jest オプション <tt>'--json'</tt> および <tt>'--outputFile'</tt> を使用して生成できます。パターンマッチには * または ? を使用してください");
-		m.put("Specify OCI layout directory of the image to scan. This directory can be generated via build image step or pull image step. It should be relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
+		m.put("Specify OCI layout directory of the image to scan. This directory can be generated via build image step or pull image step. It should be relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>", 
 			"スキャン対象のイメージの OCI レイアウトディレクトリを指定します。このディレクトリはイメージビルドステップまたはイメージプルステップで生成できます。<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対して相対的である必要があります");
-		m.put("Specify OCI layout directory relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to push from", 
+		m.put("Specify OCI layout directory relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a> to push from", 
 			"プッシュ元として使用する OCI レイアウトディレクトリを <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対して指定します");
 		m.put("Specify OpenID scopes to request", "要求する OpenID スコープを指定します");
-		m.put("Specify PMD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/pmd.xml</tt>. Use * or ? for pattern match", 
+		m.put("Specify PMD result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance, <tt>target/pmd.xml</tt>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する PMD 結果 XML ファイルを指定します。例: <tt>target/pmd.xml</tt>。パターンマッチには * または ? を使用してください");
-		m.put("Specify PowerShell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>.<br><b class='text-warning'>NOTE: </b> OneDev checks exit code of the script to determine if step is successful. Since PowerShell always exit with 0 even if there are script errors, you should handle errors in the script and exit with non-zero code, or add line <code>$ErrorActionPreference = &quot;Stop&quot;</code> at start of your script<br>", 
+		m.put("Specify PowerShell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>.<br><b class='text-warning'>NOTE: </b> OneDev checks exit code of the script to determine if step is successful. Since PowerShell always exit with 0 even if there are script errors, you should handle errors in the script and exit with non-zero code, or add line <code>$ErrorActionPreference = &quot;Stop&quot;</code> at start of your script<br>", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>内で実行する PowerShell コマンドを指定します。<br><b class='text-warning'>注意: </b>OneDev はスクリプトの終了コードをチェックしてステップが成功したかどうかを判断します。PowerShell はスクリプトエラーがあっても常に 0 を返すため、スクリプト内でエラーを処理して非ゼロコードで終了するか、スクリプトの冒頭に <code>$ErrorActionPreference = &quot;Stop&quot;</code> を追加してください<br>");
-		m.put("Specify Roslynator diagnostics output file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with <i>-o</i> option. Use * or ? for pattern match", 
+		m.put("Specify Roslynator diagnostics output file in XML format relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. This file can be generated with <i>-o</i> option. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する Roslynator 診断出力ファイル (XML フォーマット) を指定します。このファイルは <i>-o</i> オプションで生成できます。パターンマッチには * または ? を使用してください");
 		m.put("Specify Shell/Batch Commands to Run", "実行するシェル/バッチコマンドを指定します");
-		m.put("Specify SpotBugs result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/spotbugsXml.xml</tt>. Use * or ? for pattern match", 
+		m.put("Specify SpotBugs result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance, <tt>target/spotbugsXml.xml</tt>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する SpotBugs 結果 XML ファイルを指定します。例: <tt>target/spotbugsXml.xml</tt>。パターンマッチには * または ? を使用してください");
 		m.put("Specify System Settings", "システム設定を指定します");
 		m.put("Specify URL of remote git repository. Only http/https protocol is supported", "リモート Git リポジトリの URL を指定します。http/https プロトコルのみサポートされています");
@@ -3443,6 +3665,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"課題番号の後に一致する <a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'>正規表現</a> を指定します");
 		m.put("Specify a <a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'>regular expression</a> before issue number", 
 			"課題番号の前に一致する <a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'>正規表現</a> を指定します");
+		m.put("Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a>\nwhose value is an access token with upload cache permission for above project.\nNote that this property is not required if upload cache to current or child\nproject and build commit is reachable from default branch", 
+			"上記のプロジェクトに対するキャッシュアップロード権限を持つアクセス トークンの<a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>ジョブシークレット</a>を指定します。\nこのプロパティは、現在または子プロジェクトにキャッシュをアップロードし、ビルドコミットがデフォルトブランチから到達可能な場合は必要ありません\n");
 		m.put("Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as SSH private key", 
 			"SSH プライベートキーとして使用する <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>ジョブシークレット</a> を指定します");
 		m.put("Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> to be used as access token", 
@@ -3459,21 +3683,22 @@ public class Translation_ja extends TranslationResourceBundle {
 			"上記ユーザーの SSH 認証用プライベートキーとして使用する <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>ジョブシークレット</a> を指定します。<b class='text-info'>注意:</b> パスフレーズ付きのプライベートキーはサポートされていません");
 		m.put("Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is an access token with management permission for above project. Note that access token is not required if sync to current or child project and build commit is reachable from default branch", 
 			"上記プロジェクトの管理権限を持つアクセス トークンとして使用する <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>ジョブシークレット</a> を指定します。現在または子プロジェクトに同期し、ビルドコミットがデフォルトブランチから到達可能な場合はアクセス トークンは不要です");
-		m.put("Specify a <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>job secret</a> whose value is an access token with upload cache permission for above project. Note that this property is not required if upload cache to current or child project and build commit is reachable from default branch", 
-			"上記プロジェクトのキャッシュアップロード権限を持つアクセス トークンとして使用する <a href='https://docs.onedev.io/tutorials/cicd/job-secrets' target='_blank'>ジョブシークレット</a> を指定します。現在または子プロジェクトにキャッシュをアップロードし、ビルドコミットがデフォルトブランチから到達可能な場合、このプロパティは不要です");
+		m.put("Specify a <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> pattern to validate the entire commit message. Use <code>(?s)</code> flag at the beginning for multi-line matching", 
+			"コミットメッセージ全体を検証するための<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java正規表現</a>パターンを指定します。複数行のマッチングには<code>(?s)</code>フラグを先頭に使用します");
 		m.put("Specify a <a target='_blank' href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format'>cron schedule</a> to fire the job automatically. <b class='text-info'>Note:</b> To save resource, seconds in cron expression will be ignored, and the minimum schedule interval is one minute", 
 			"ジョブを自動的に実行するための <a target='_blank' href='http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html#format'>cron スケジュール</a> を指定します。<b class='text-info'>注意:</b> リソースを節約するため、cron 式の秒は無視され、最小スケジュール間隔は 1 分です");
 		m.put("Specify a Docker Image to Test Against", "テスト対象の Docker イメージを指定します");
 		m.put("Specify a custom field of Enum type", "Enum 型のカスタムフィールドを指定します");
 		m.put("Specify a default query to filter/order fixed issues of specified jobs", "指定されたジョブの修正済み課題をフィルタリング/並べ替えるためのデフォルトクエリを指定します");
-		m.put("Specify a file relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to write checksum into", 
-			"チェックサムを書き込むためのファイルを <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対して指定します");
+		m.put("Specify a key to identify the user data. Data with same key will be shared across workspaces\neven if project is different", 
+			"ユーザーデータを識別するためのキーを指定します。同じキーを持つデータは、プロジェクトが異なっていてもワークスペース間で共有されます\n");
 		m.put("Specify a multi-value user field to hold assignees information.<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"担当者情報を保持するための複数値ユーザーフィールドを指定します。<b>注意: </b>適切なオプションがない場合は OneDev の課題フィールドをカスタマイズすることができます");
 		m.put("Specify a multi-value user field to hold assignees information.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"担当者情報を保持するための複数値ユーザーフィールドを指定します。<br><b>注意: </b>適切なオプションがない場合は OneDev の課題フィールドをカスタマイズすることができます");
+		m.put("Specify a name to identify this workspace spec", "このワークスペース仕様を識別するための名前を指定してください");
 		m.put("Specify a path inside container to be used as mount target", "マウントターゲットとして使用するコンテナ内のパスを指定します");
-		m.put("Specify a path relative to job workdir to be used as mount source. Leave empty to mount job workdir itself", 
+		m.put("Specify a path relative to job working directory to be used as mount source. Leave empty to mount job working directory itself", 
 			"マウントソースとして使用するジョブワークスペースに対するパスを指定します。空欄の場合、ジョブワークスペース自体をマウントします");
 		m.put("Specify a secret to be used as access token to create issue in above project if it is not publicly accessible", 
 			"上記プロジェクトで課題を作成するためのアクセス トークンとして使用するシークレットを指定します。このプロジェクトが公開されていない場合に使用します");
@@ -3486,10 +3711,14 @@ public class Translation_ja extends TranslationResourceBundle {
 			"クラスターにアクセスするために kubectl が使用する設定ファイルの絶対パスを指定します。空欄の場合、kubectl はクラスターアクセス情報を自動的に決定します");
 		m.put("Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. If left empty, OneDev will try to find the utility from system path", 
 			"kubectl ユーティリティの絶対パスを指定します。例: <i>/usr/bin/kubectl</i>。空欄の場合、OneDev はシステムパスからユーティリティを探します");
+		m.put("Specify access token with upload cache permission for above project.\nNote that this property is not required if upload cache to current project", 
+			"上記のプロジェクトに対するキャッシュアップロード権限を持つアクセストークンを指定します。\n現在のプロジェクトにキャッシュをアップロードする場合、このプロパティは必要ありません");
 		m.put("Specify account name to login to Gmail to send/receive email", "Gmail にログインしてメールを送受信するためのアカウント名を指定します");
 		m.put("Specify additional users able to access this confidential issue besides those granted via role. Users mentioned in the issue will be authorized automatically", 
 			"役割を通じて付与されたユーザー以外でこの機密課題にアクセスできる追加ユーザーを指定します。課題に記載されたユーザーは自動的に承認されます");
 		m.put("Specify agents applicable for this executor", "このエグゼキューターに適用可能なエージェントを指定します");
+		m.put("Specify allowed <a href='https://spdx.org/licenses/'>SPDX license identifiers</a> separated by comma", 
+			"カンマで区切られた許可された<a href='https://spdx.org/licenses/'>SPDXライセンス識別子</a>を指定します");
 		m.put("Specify an email address sharing same inbox as the system email address in mail setting definition. Emails sent to this address will be created as issues in this project. The default value takes form of <tt>&lt;system email address name&gt;+&lt;project path&gt;@&lt;system email address domain&gt;</tt>", 
 			"メール設定定義のシステムメールアドレスと同じ受信トレイを共有するメールアドレスを指定します。このアドレスに送信されたメールはこのプロジェクトの課題として作成されます。デフォルト値は <tt>&lt;システムメールアドレス名&gt;+&lt;プロジェクトパス&gt;@&lt;システムメールアドレスドメイン&gt;</tt> の形式を取ります");
 		m.put("Specify applicable projects for above option. Multiple projects should be separated by space. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for all projects", 
@@ -3499,7 +3728,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify application (client) ID of the app registered in Entra ID", "Entra ID に登録されたアプリのアプリケーション (クライアント) ID を指定します");
 		m.put("Specify arguments for imagetools. For instance <code>create -t myorg/myrepo:1.0.0 myorg/myrepo@&lt;arm64 manifest digest&gt; myorg/myrepo@&lt;amd64 manifest digest&gt;</code>", 
 			"イメージツールの引数を指定します。例: <code>create -t myorg/myrepo:1.0.0 myorg/myrepo@&lt;arm64 manifest digest&gt; myorg/myrepo@&lt;amd64 manifest digest&gt;</code>");
-		m.put("Specify artifacts to retrieve into <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. Only published artifacts (via artifact publish step) can be retrieved.", 
+		m.put("Specify artifacts to retrieve into <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. Only published artifacts (via artifact publish step) can be retrieved.", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に取得するアーティファクトを指定します。公開されたアーティファクト (アーティファクト公開ステップを通じて) のみ取得可能です");
 		m.put("Specify at least 10 alphanumeric chars to be used as secret, and then add an inbound parse entry at SendGrid side:<ul><li><code>Destination URL</code> should be set to <i>&lt;OneDev root url&gt;/~sendgrid/&lt;secret&gt;</i>, for instance, <i>https://onedev.example.com/~sendgrid/1234567890</i>. Note that in production environment, <a href='https://docs.onedev.io/administration-guide/https-setup' target='_blank'>https should be enabled</a> to protect the secret</li><li><code>Receiving domain</code> should be the same as domain part of system email address specified above</li><li>Option <code>POST the raw, full MIME message</code> is enabled</li></ul>", 
 			"少なくとも 10 文字の英数字をシークレットとして指定し、SendGrid 側でインバウンド解析エントリを追加します:<ul><li><code>送信先 URL</code> は <i>&lt;OneDev ルート URL&gt;/~sendgrid/&lt;シークレット&gt;</i> に設定する必要があります。例: <i>https://onedev.example.com/~sendgrid/1234567890</i>。本番環境では、<a href='https://docs.onedev.io/administration-guide/https-setup' target='_blank'>https を有効にする必要があります</a> シークレットを保護するため</li><li><code>受信ドメイン</code> は上記で指定されたシステムメールアドレスのドメイン部分と同じである必要があります</li><li>オプション <code>生の完全な MIME メッセージを POST</code> が有効になっています</li></ul>");
@@ -3510,42 +3739,49 @@ public class Translation_ja extends TranslationResourceBundle {
 			"ジョブを実行するブランチを指定します。ブランチまたはタグのいずれかを指定できますが、両方は指定できません。両方が指定されていない場合はデフォルトのブランチが使用されます。");
 		m.put("Specify branch, tag or commit in above project to import build spec from", "上記プロジェクトのビルド仕様をインポートするブランチ、タグ、またはコミットを指定します");
 		m.put("Specify by Build Number", "ビルド番号で指定します");
-		m.put("Specify cache upload strategy after build successful. <var>Upload If Not Hit</var> means to upload when cache is not found with cache key (not load keys), and <var>Upload If Changed</var> means to upload if some files in cache path are changed", 
-			"ビルド成功後のキャッシュアップロード戦略を指定します。<var>ヒットしない場合アップロード</var> はキャッシュキー (ロードキーではない) でキャッシュが見つからない場合にアップロードし、<var>変更された場合アップロード</var> はキャッシュパス内のファイルが変更された場合にアップロードします");
+		m.put("Specify cache upload strategy after build successful. <i>Upload If Not Exact Match</i>\nmeans to upload when no cache found with matching key and checksum , and\n<i>Upload If Changed</i> means to upload if some files in cache path are changed", 
+			"ビルドが成功した後のキャッシュアップロード戦略を指定します。<i>完全一致でない場合にアップロード</i>\nは、キーとチェックサムが一致するキャッシュが見つからない場合にアップロードすることを意味し、\n<i>変更された場合にアップロード</i>は、キャッシュパス内の一部のファイルが変更された場合にアップロードすることを意味します");
 		m.put("Specify certificate to trust if you are using self-signed certificate for remote repository", 
 			"リモートリポジトリに自己署名証明書を使用している場合に信頼する証明書を指定します");
 		m.put("Specify certificates to trust if you are using self-signed certificates for your docker registries", 
 			"Docker レジストリに自己署名証明書を使用している場合に信頼する証明書を指定します");
-		m.put("Specify checkstyle result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/checkstyle-result.xml</tt>. Refer to <a href='https://checkstyle.org/'>checkstyle documentation</a> on how to generate the result xml file. Use * or ? for pattern match", 
+		m.put("Specify checkstyle result xml file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance, <tt>target/checkstyle-result.xml</tt>. Refer to <a href='https://checkstyle.org/'>checkstyle documentation</a> on how to generate the result xml file. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する checkstyle 結果 XML ファイルを指定します。例: <tt>target/checkstyle-result.xml</tt>。結果 XML ファイルの生成方法については <a href='https://checkstyle.org/'>checkstyle ドキュメント</a> を参照してください。パターンマッチには * または ? を使用してください");
+		m.put("Specify child project to import into at OneDev side", "OneDev側にインポートする子プロジェクトを指定します");
 		m.put("Specify client secret of the app registered in Entra ID", "Entra ID に登録されたアプリのクライアントシークレットを指定します");
-		m.put("Specify clover coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/site/clover/clover.xml</tt>. Refer to <a href='https://openclover.org/documentation'>OpenClover documentation</a> on how to generate clover xml file. Use * or ? for pattern match", 
+		m.put("Specify clover coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance, <tt>target/site/clover/clover.xml</tt>. Refer to <a href='https://openclover.org/documentation'>OpenClover documentation</a> on how to generate clover xml file. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する clover カバレッジ XML レポートファイルを指定します。例: <tt>target/site/clover/clover.xml</tt>。clover XML ファイルの生成方法については <a href='https://openclover.org/documentation'>OpenClover ドキュメント</a> を参照してください。パターンマッチには * または ? を使用してください");
-		m.put("Specify cobertura coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance, <tt>target/site/cobertura/coverage.xml</tt>. Use * or ? for pattern match", 
+		m.put("Specify cobertura coverage xml report file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance, <tt>target/site/cobertura/coverage.xml</tt>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する cobertura カバレッジ XML レポートファイルを指定します。例: <tt>target/site/cobertura/coverage.xml</tt>。パターンマッチには * または ? を使用してください");
 		m.put("Specify color of the state for displaying purpose", "表示目的の状態の色を指定します");
 		m.put("Specify columns of the board. Each column corresponds to a value of the issue field specified above", 
 			"ボードの列を指定します。各列は上記で指定された課題フィールドの値に対応します");
 		m.put("Specify command to check readiness of the service. This command will be interpretated by cmd.exe on Windows images, and by shell on Linux images. It will be executed repeatedly until a zero code is returned to indicate service ready", 
 			"サービスの準備状態を確認するコマンドを指定します。このコマンドは Windows イメージでは cmd.exe によって解釈され、Linux イメージではシェルによって解釈されます。ゼロコードが返されてサービス準備完了を示すまで繰り返し実行されます");
+		m.put("Specify command to run if this shortcut is opened, for instance <i>opencode</i>, <i>npm run dev</i>", 
+			"このショートカットが開かれた場合に実行するコマンドを指定してください。例えば<i>opencode</i>, <i>npm run dev</i>");
 		m.put("Specify commands to be executed on remote machine. <b class='text-warning'>Note:</b> user environments will not be picked up when execute these commands, set up them explicitly in commands if necessary", 
 			"リモートマシンで実行するコマンドを指定してください。<b class='text-warning'>注意:</b> ユーザー環境はこれらのコマンドを実行する際に引き継がれないため、必要に応じてコマンド内で明示的に設定してください。");
 		m.put("Specify condition to retry build upon failure", "失敗時にビルドを再試行する条件を指定してください。");
 		m.put("Specify configuration discovery url of your OpenID provider, for instance: <code>https://openid.example.com/.well-known/openid-configuration</code>. Make sure to use HTTPS protocol as OneDev relies on TLS encryption to ensure token validity", 
 			"OpenIDプロバイダーの構成検出URLを指定してください。例: <code>https://openid.example.com/.well-known/openid-configuration</code>。OneDevはトークンの有効性を確保するためにTLS暗号化に依存しているため、HTTPSプロトコルを使用してください。");
+		m.put("Specify container image to create workspace inside. Note that this image should\nhave <a href='https://git-scm.com' target='_blank'>git</a>, <a href='https://git-lfs.com' target='_blank'>git-lfs</a>, <a href='https://curl.se' target='_blank'>curl</a>, and <a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> installed\n", 
+			"ワークスペースを作成するためのコンテナイメージを指定します。このイメージには\n<a href='https://git-scm.com' target='_blank'>git</a>、<a href='https://git-lfs.com' target='_blank'>git-lfs</a>、<a href='https://curl.se' target='_blank'>curl</a>、および<a href='https://github.com/tmux/tmux' target='_blank'>tmux</a>がインストールされている必要があります\n");
 		m.put("Specify container image to execute commands inside", "コマンドを実行するためのコンテナイメージを指定してください。");
 		m.put("Specify container image to run", "実行するコンテナイメージを指定してください。");
-		m.put("Specify cppcheck xml result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with cppcheck xml output option, for instance <code>cppcheck src --xml 2>check-result.xml</code>. Use * or ? for pattern match", 
+		m.put("Specify content of the config file", "設定ファイルの内容を指定してください");
+		m.put("Specify cppcheck xml result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. This file can be generated with cppcheck xml output option, for instance <code>cppcheck src --xml 2>check-result.xml</code>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対するcppcheckのXML結果ファイルを指定してください。このファイルはcppcheckのXML出力オプションで生成できます。例: <code>cppcheck src --xml 2>check-result.xml</code>。パターンマッチには*や?を使用してください。");
 		m.put("Specify cpu request for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"このエグゼキューターを使用する各ジョブ/サービスのCPUリクエストを指定してください。詳細は<a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetesリソース管理</a>を確認してください。");
+		m.put("Specify data paths to persist across workspaces. Only absolute path is accepted", "ワークスペース間で永続化するデータパスを指定してください。絶対パスのみが受け入れられます");
 		m.put("Specify default assignees of pull requests submitted to this project. Only users with the write code permission to the project can be selected", 
 			"このプロジェクトに提出されたプルリクエストのデフォルトの担当者を指定してください。プロジェクトにコード書き込み権限を持つユーザーのみ選択できます。");
 		m.put("Specify default merge strategy of pull requests submitted to this project", "このプロジェクトに提出されたプルリクエストのデフォルトのマージ戦略を指定してください。");
 		m.put("Specify destinations, for instance <tt>registry-server:5000/myorg/myrepo:latest</tt>. Make sure to use <b>same host</b> as specified in server url of system settings if you want to push to built-in registry, or simply use the form <tt>@server@/&lt;project path&gt;/&lt;repo name&gt;:&lt;tag name&gt;</tt>. Multiple destinations should be separated with space", 
 			"送信先を指定してください。例: <tt>registry-server:5000/myorg/myrepo:latest</tt>。組み込みレジストリにプッシュする場合、システム設定のサーバーURLで指定された<b>同じホスト</b>を使用するか、単に<tt>@server@/&lt;project path&gt;/&lt;repo name&gt;:&lt;tag name&gt;</tt>の形式を使用してください。複数の送信先はスペースで区切ってください。");
 		m.put("Specify directory (tenant) ID of the app registered in Entra ID", "Entra IDに登録されたアプリのディレクトリ（テナント）IDを指定してください。");
-		m.put("Specify directory relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to store OCI layout", 
+		m.put("Specify directory relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a> to store OCI layout", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対するOCIレイアウトを保存するディレクトリを指定してください。");
 		m.put("Specify docker image of the service", "サービスのDockerイメージを指定してください。");
 		m.put("Specify dockerx builder used to build docker image. OneDev will create the builder automatically if it does not exist. Check <a href='https://docs.onedev.io/tutorials/cicd/insecure-docker-registry' target='_blank'>this tutorial</a> on how to customize the builder for instance to allow publishing to insecure registries", 
@@ -3557,15 +3793,14 @@ public class Translation_ja extends TranslationResourceBundle {
 			"依存関係の更新を調整するためにRenovateによって作成されたさまざまな課題のフィールドを指定してください。");
 		m.put("Specify fields to be displayed in the issue list", "課題リストに表示するフィールドを指定してください。");
 		m.put("Specify fields to display in board card", "ボードカードに表示するフィールドを指定してください。");
-		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to be published. Use * or ? for pattern match", 
+		m.put("Specify files relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be published. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する公開するファイルを指定してください。パターンマッチには*や?を使用してください。");
-		m.put("Specify files to create md5 checksum from. Multiple files should be separated by space. <a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a> patterns accepted. Non-absolute file is considered to be relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
-			"md5チェックサムを作成するファイルを指定してください。複数のファイルはスペースで区切ってください。<a href='https://www.linuxjournal.com/content/globstar-new-bash-globbing-option' target='_blank'>Globstar</a>パターンが使用可能です。絶対パスでないファイルは<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対する相対パスとみなされます。");
 		m.put("Specify files under above directory to be published", "上記のディレクトリ内で公開するファイルを指定");
 		m.put("Specify files under above directory to be published. Use * or ? for pattern match. <b>NOTE:</b> <code>index.html</code> should be included in these files to be served as site start page", 
 			"上記のディレクトリ内で公開するファイルを指定してください。パターンマッチには*や?を使用してください。<b>注意:</b> サイトの開始ページとして提供される<code>index.html</code>をこれらのファイルに含める必要があります。");
 		m.put("Specify group to import from. Leave empty to import from projects under current account", 
 			"インポート元のグループを指定してください。現在のアカウント下のプロジェクトからインポートする場合は空のままにしてください。");
+		m.put("Specify how long to wait for the model response in seconds", "モデルの応答を待つ時間を秒で指定します");
 		m.put("Specify how to map GitHub issue labels to OneDev custom fields.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
 			"GitHubの課題ラベルをOneDevのカスタムフィールドにマッピングする方法を指定してください。<br><b>注意:</b> 適切なオプションがない場合は、OneDevの課題フィールドをカスタマイズすることができます。");
 		m.put("Specify how to map GitLab issue labels to OneDev custom fields.<br><b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here", 
@@ -3604,7 +3839,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify manager DN to authenticate OneDev itself to Active Directory. The manager DN should be specified in form of <i>&lt;account name&gt;@&lt;domain&gt;</i>, for instance: <i>manager@example.com</i>", 
 			"OneDev自身をActive Directoryに認証するためのマネージャーDNを指定してください。マネージャーDNは<i>&lt;アカウント名&gt;@&lt;ドメイン&gt;</i>の形式で指定する必要があります。例: <i>manager@example.com</i>");
 		m.put("Specify manager DN to authenticate OneDev itself to LDAP server", "OneDev自身をLDAPサーバーに認証するためのマネージャーDNを指定してください。");
-		m.put("Specify markdown file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to be published", 
+		m.put("Specify markdown file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> to be published", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する公開するMarkdownファイルを指定してください。");
 		m.put("Specify max git LFS file size in mega bytes", "Git LFSファイルの最大サイズをメガバイト単位で指定してください。");
 		m.put("Specify max number of CPU intensive tasks the server can run concurrently, such as Git repository pull/push, repository index, etc.", 
@@ -3617,11 +3852,13 @@ public class Translation_ja extends TranslationResourceBundle {
 			"このエグゼキューターが各一致したエージェントで同時に実行できるジョブ/サービスの最大数を指定してください。空欄の場合、エージェントのCPUコア数として設定されます。");
 		m.put("Specify max number of jobs/services this executor can run concurrently. Leave empty to set as CPU cores", 
 			"このエグゼキューターが同時に実行できるジョブ/サービスの最大数を指定してください。空欄の場合、CPUコア数として設定されます。");
+		m.put("Specify max number of workspaces this provisioner can handle concurrently.\nLeave empty to set as CPU cores", 
+			"このプロビジョナーが同時に処理できる最大ワークスペース数を指定します。\n空にしてCPUコア数として設定します");
 		m.put("Specify max size of uploaded file in mega bytes via web interface. This applies to file uploaded to repository, markdown content (issue comment etc), and build artifacts", 
 			"Webインターフェースを介してアップロードされるファイルの最大サイズをメガバイト単位で指定してください。これにはリポジトリにアップロードされるファイル、Markdownコンテンツ（課題コメントなど）、およびビルド成果物が含まれます。");
 		m.put("Specify memory request for each job/service using this executor. Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details", 
 			"このエグゼキューターを使用する各ジョブ/サービスのメモリリクエストを指定してください。詳細は<a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetesリソース管理</a>を確認してください。");
-		m.put("Specify mypy output file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated by redirecting mypy output <b>without option '--pretty'</b>, for instance <code>mypy --exclude=.git --exclude=.venv . > mypy-output</code>. Use * or ? for pattern match", 
+		m.put("Specify mypy output file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. This file can be generated by redirecting mypy output <b>without option '--pretty'</b>, for instance <code>mypy --exclude=.git --exclude=.venv . > mypy-output</code>. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対するmypy出力ファイルを指定してください。このファイルはmypy出力をリダイレクトすることで生成できます。<b>オプション'--pretty'を使用しない</b>例: <code>mypy --exclude=.git --exclude=.venv . > mypy-output</code>。パターンマッチには*や?を使用してください。");
 		m.put("Specify name of the branch", "ブランチ名を指定してください。");
 		m.put("Specify name of the environment variable", "環境変数の名前を指定してください。");
@@ -3631,13 +3868,17 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify name of the saved query", "保存されたクエリの名前を指定してください。");
 		m.put("Specify name of the service, which will be used as host name to access the service", 
 			"サービス名を指定してください。この名前はサービスにアクセスするためのホスト名として使用されます。");
+		m.put("Specify name of the shortcut", "ショートカットの名前を指定してください");
 		m.put("Specify name of the tag", "タグ名を指定してください。");
+		m.put("Specify name of the workspace spec", "ワークスペース仕様の名前を指定してください");
 		m.put("Specify network timeout in seconds when authenticate through this system", "このシステムを通じて認証する際のネットワークタイムアウトを秒単位で指定してください。");
 		m.put("Specify node selector of this locator", "このロケーターのノードセレクターを指定してください。");
 		m.put("Specify password or access token of specified registry", "指定されたレジストリのパスワードまたはアクセストークンを指定してください。");
+		m.put("Specify password or access token of the registry", "レジストリのパスワードまたはアクセストークンを指定してください");
 		m.put("Specify password to authenticate with", "認証に使用するパスワードを指定してください。");
 		m.put("Specify path to curl executable, for instance: <tt>/usr/bin/curl</tt>", "curl実行ファイルへのパスを指定してください。例: <tt>/usr/bin/curl</tt>");
 		m.put("Specify path to git executable, for instance: <tt>/usr/bin/git</tt>", "git実行ファイルへのパスを指定してください。例: <tt>/usr/bin/git</tt>");
+		m.put("Specify path to the config file. Only absolute path is accepted", "設定ファイルへのパスを指定してください。絶対パスのみが受け入れられます");
 		m.put("Specify powershell executable to be used", "使用するpowershell実行ファイルを指定してください。");
 		m.put("Specify project to import build spec from", "ビルド仕様をインポートするプロジェクトを指定してください。");
 		m.put("Specify project to import into at OneDev side", "OneDev側でインポートするプロジェクトを指定してください。");
@@ -3645,23 +3886,24 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify project to run job in", "ジョブを実行するプロジェクトを指定します。");
 		m.put("Specify projects", "プロジェクトを指定してください。");
 		m.put("Specify projects to update dependencies. Leave empty for current project", "依存関係を更新するプロジェクトを指定してください。現在のプロジェクトの場合は空欄にしてください。");
-		m.put("Specify pylint json result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with pylint json output format option, for instance <code>--exit-zero --output-format=json:pylint-result.json</code>. Note that we do not fail pylint command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
+		m.put("Specify pylint json result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. This file can be generated with pylint json output format option, for instance <code>--exit-zero --output-format=json:pylint-result.json</code>. Note that we do not fail pylint command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対するpylintのJSON結果ファイルを指定してください。このファイルはpylintのJSON出力形式オプションで生成できます。例: <code>--exit-zero --output-format=json:pylint-result.json</code>。違反があってもpylintコマンドは失敗しません。このステップは設定された閾値に基づいてビルドを失敗させます。パターンマッチには*や?を使用してください。");
 		m.put("Specify registry logins if necessary. For built-in registry, use <code>@server_url@</code> for registry url, <code>@job_token@</code> for user name, and access token for password", 
 			"必要に応じてレジストリログインを指定してください。組み込みレジストリの場合、レジストリURLには<code>@server_url@</code>、ユーザー名には<code>@job_token@</code>、パスワードにはアクセストークンを使用してください。");
 		m.put("Specify registry url. Leave empty for official registry", "レジストリURLを指定してください。公式レジストリの場合は空欄にしてください。");
-		m.put("Specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a> to store OCI layout", 
+		m.put("Specify relative path under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a> to store OCI layout", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対するOCIレイアウトを保存する相対パスを指定してください。");
 		m.put("Specify repositories", "リポジトリを指定してください。");
 		m.put("Specify required reviewers if specified path is changed. Note that the user submitting the change is considered to reviewed the change automatically", 
 			"指定されたパスが変更された場合に必要なレビュアーを指定してください。変更を提出したユーザーは自動的に変更をレビューしたとみなされます。");
 		m.put("Specify root URL to access this server", "このサーバーにアクセスするためのルートURLを指定してください。");
-		m.put("Specify ruff json result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. This file can be generated with ruff json output format option, for instance <code>--exit-zero --output-format json --output-file ruff-result.json</code>. Note that we do not fail ruff command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
+		m.put("Specify ruff json result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. This file can be generated with ruff json output format option, for instance <code>--exit-zero --output-format json --output-file ruff-result.json</code>. Note that we do not fail ruff command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対するruffのJSON結果ファイルを指定してください。このファイルはruffのJSON出力形式オプションで生成できます。例: <code>--exit-zero --output-format json --output-file ruff-result.json</code>。違反があってもruffコマンドは失敗しません。このステップは設定された閾値に基づいてビルドを失敗させます。パターンマッチには*や?を使用してください。");
-		m.put("Specify shell commands (on Linux/Unix) or batch commands (on Windows) to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
+		m.put("Specify shell commands (on Linux/Unix) or batch commands (on Windows) to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>で実行するシェルコマンド（Linux/Unix）またはバッチコマンド（Windows）を指定してください。");
-		m.put("Specify shell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
+		m.put("Specify shell commands to execute under the <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>で実行するシェルコマンドを指定してください。");
+		m.put("Specify shell executable to be used", "使用するシェル実行ファイルを指定してください");
 		m.put("Specify shell to be used", "使用するシェルを指定してください。");
 		m.put("Specify source param for SCP command, for instance <code>app.tar.gz</code>", "SCPコマンドのソースパラメータを指定してください。例: <code>app.tar.gz</code>");
 		m.put("Specify space separated refs to pull from remote. '*' can be used in ref name for wildcard match<br><b class='text-danger'>NOTE:</b> branch/tag protection rule will be ignored when update branches/tags via this step", 
@@ -3680,9 +3922,9 @@ public class Translation_ja extends TranslationResourceBundle {
 			"このエントリに適用されるスペース区切りの送信者メールアドレスを指定してください。ワイルドカードマッチには'*'または'?'を使用してください。'-'で始めると除外されます。すべての送信者に一致させる場合は空欄にしてください。");
 		m.put("Specify space-separated tags to be protected. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude", 
 			"保護するスペース区切りのタグを指定してください。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には'**'、'*'、または'?'を使用してください。'-'で始めると除外されます。");
-		m.put("Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance: <tt>manual/index.md</tt>", 
+		m.put("Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance: <tt>manual/index.md</tt>", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対するレポートの開始ページを指定してください。例: <tt>manual/index.md</tt>");
-		m.put("Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>, for instance: api/index.html", 
+		m.put("Specify start page of the report relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>, for instance: api/index.html", 
 			"<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対するレポートの開始ページを指定してください。例: api/index.html");
 		m.put("Specify storage size to request for the build volume. The size should conform to <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetes resource capacity format</a>, for instance <i>10Gi</i>", 
 			"ビルドボリュームのストレージサイズをリクエストするために指定してください。サイズは<a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#setting-requests-and-limits-for-local-ephemeral-storage' target='_blank'>Kubernetesリソース容量形式</a>に準拠する必要があります。例: <i>10Gi</i>");
@@ -3696,6 +3938,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"一致した問題参照を置き換えるテキストを指定してください。例: &lt;br&gt;&lt;em&gt;$1&amp;lt;a href='http://track.example.com/issues/$2'&amp;gt;$2&amp;lt;/a&amp;gt;&lt;/em&gt; &lt;br&gt;ここで$1と$2は、例の問題パターン内のキャプチャグループを表します（問題パターンのヘルプを参照）。");
 		m.put("Specify the condition current build must satisfy to execute this action", "このアクションを実行するために現在のビルドが満たすべき条件を指定してください。");
 		m.put("Specify the condition preserved builds must match", "保持されたビルドが一致する条件を指定してください。");
+		m.put("Specify the model name to use. <b class='text-danger'>NOTE: </b> Right now OneDev only supports\nmodels with chat completions API. OpenAI models with the new responses API is not supported yet", 
+			"使用するモデル名を指定します。<b class='text-danger'>注意:</b> 現在、OneDevは\nチャット完了APIを持つモデルのみをサポートしています。OpenAIの新しい応答APIを持つモデルはまだサポートされていません");
 		m.put("Specify the private key (in PEM format) used by SSH server to establish connections with client", 
 			"SSHサーバーがクライアントとの接続を確立するために使用する秘密鍵（PEM形式）を指定してください。");
 		m.put("Specify the strategy to retrieve group membership information. To give appropriate permissions to a LDAP group, a OneDev group with same name should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group memberships at OneDev side", 
@@ -3741,6 +3985,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Ssl Setting", "Ssl設定");
 		m.put("Sso Connector", "Ssoコネクタ");
 		m.put("Sso Provider Bean", "Ssoプロバイダービーン");
+		m.put("Stage", "ステージ");
+		m.put("Stage All", "すべてステージ");
 		m.put("Start At", "開始時刻");
 		m.put("Start Date", "開始日");
 		m.put("Start Page", "開始ページ");
@@ -3769,7 +4015,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Step Templates", "ステップテンプレート");
 		m.put("Step {0} of {1}: ", "{0}のステップ{1}:");
 		m.put("Steps", "ステップ");
-		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>", 
+		m.put("Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>", 
 			"ステップは同じノード上で直列に実行され、同じ<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>を共有します。");
 		m.put("Stop", "停止");
 		m.put("Stop work", "作業を停止");
@@ -3806,6 +4052,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Suffix Pattern", "接尾辞パターン");
 		m.put("Suggest changes", "変更を提案");
 		m.put("Suggested change", "提案された変更");
+		m.put("Suggested issue branch", "提案された問題ブランチ");
 		m.put("Suggesting description...", "説明を提案中...");
 		m.put("Suggesting title...", "タイトルを提案中...");
 		m.put("Suggestion is outdated either due to code change or pull request close", "提案がコード変更またはプルリクエストのクローズにより古くなっています");
@@ -3820,11 +4067,13 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Symbol Name", "シンボル名");
 		m.put("Symbol name", "シンボル名");
 		m.put("Symbols", "シンボル");
+		m.put("Sync", "同期");
 		m.put("Sync Replica Status and Back to Home", "レプリカステータスを同期してホームに戻る");
 		m.put("Sync Repository", "リポジトリを同期");
 		m.put("Sync Timing of All Queried Issues", "すべてのクエリされた課題の同期タイミング");
 		m.put("Sync Timing of Selected Issues", "選択された課題の同期タイミング");
 		m.put("Sync requested. Please check status after a while", "同期が要求されました。しばらくしてからステータスを確認してください");
+		m.put("Sync successful", "同期成功");
 		m.put("Synchronize", "同期する");
 		m.put("System", "システム");
 		m.put("System Alert", "システムアラート");
@@ -3855,7 +4104,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Target", "ターゲット");
 		m.put("Target Branches", "ターゲットブランチ");
 		m.put("Target Docker Image", "ターゲットDockerイメージ");
-		m.put("Target File", "ターゲットファイル");
 		m.put("Target Path", "ターゲットパス");
 		m.put("Target Project", "ターゲットプロジェクト");
 		m.put("Target branch no longer exists", "ターゲットブランチはもう存在しません");
@@ -3866,14 +4114,10 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Task List", "タスクリスト");
 		m.put("Task list", "タスクリスト");
 		m.put("Tell user to reset password", "ユーザーにパスワードリセットを指示する");
+		m.put("Template", "テンプレート");
 		m.put("Template Name", "テンプレート名");
 		m.put("Template saved", "テンプレートが保存されました");
-		m.put("Terminal close", "ターミナルを閉じる");
-		m.put("Terminal input", "ターミナル入力");
-		m.put("Terminal open", "ターミナルを開く");
-		m.put("Terminal output", "ターミナル出力");
-		m.put("Terminal ready", "ターミナル準備完了");
-		m.put("Terminal resize", "ターミナルサイズ変更");
+		m.put("Terminal", "ターミナル");
 		m.put("Test", "テスト");
 		m.put("Test Case", "テストケース");
 		m.put("Test Cases", "テストケース");
@@ -3913,6 +4157,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("There are merge conflicts.", "マージコンフリクトがあります。");
 		m.put("There are merge conflicts. You can still create the pull request though", "マージコンフリクトがあります。ただし、プルリクエストを作成することは可能です");
 		m.put("There are unsaved changes, discard and continue?", "保存されていない変更があります。破棄して続行しますか？");
+		m.put("There are workspaces on source branch", "ソースブランチにワークスペースがあります");
 		m.put("These authenticators normally run on your mobile phone, some examples are Google Authenticator, Microsoft Authenticator, Authy, 1Password etc.", 
 			"これらの認証アプリは通常、携帯電話で動作します。例としてはGoogle Authenticator、Microsoft Authenticator、Authy、1Passwordなどがあります。");
 		m.put("This <span wicket:id=\"elementTypeName\"></span> is imported from <a wicket:id=\"link\" class=\"alert-link\"><span wicket:id=\"label\"></span></a>", 
@@ -3967,12 +4212,12 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("This key has already been used by another project", "このキーは別のプロジェクトで既に使用されています");
 		m.put("This key is associated with {0}, however it is NOT a verified email address of this user", 
 			"このキーは{0}に関連付けられていますが、このユーザーの確認済みメールアドレスではありません");
-		m.put("This key is used to determine if there is a cache hit in project hierarchy (search from current project to root project in order, same for load keys below). A cache is considered hit if its key is exactly the same as the key defined here.<br><b>NOTE:</b> In case your project has lock files(package.json, pom.xml, etc.) able to represent cache state, this key should be defined as &lt;cache name&gt;-@file:checksum.txt@, where checksum.txt is generated from these lock files with the <b>generate checksum step</b> defined before this step", 
-			"このキーはプロジェクト階層内でキャッシュヒットがあるかどうかを判断するために使用されます（現在のプロジェクトからルートプロジェクトまで順に検索し、以下のロードキーも同様です）。キャッシュは、ここで定義されたキーと完全に一致する場合にヒットと見なされます。<br><b>注意:</b> プロジェクトにキャッシュ状態を表現できるロックファイル（package.json、pom.xmlなど）がある場合、このキーは&lt;cache name&gt;-@file:checksum.txt@として定義されるべきです。ここで、checksum.txtはこれらのロックファイルから<b>チェックサム生成ステップ</b>で生成され、このステップの前に定義されます");
 		m.put("This key is used to download and upload cache in project hierarchy (search from current project to root project in order)", 
 			"このキーはプロジェクト階層内でキャッシュをダウンロードおよびアップロードするために使用されます（現在のプロジェクトからルートプロジェクトまで順に検索）");
 		m.put("This key or one of its sub key is already added", "このキーまたはそのサブキーのいずれかが既に追加されています");
 		m.put("This key or one of its subkey is already in use", "このキーまたはそのサブキーのいずれかが既に使用されています");
+		m.put("This key will be used to identify the cache in project hierarchy (search from current\nproject to root project in order), together with checksum (see below). An exact match\nmeans that both key and checksum match, and a partial match means that only key\nmatches", 
+			"このキーはプロジェクト階層内でキャッシュを識別するために使用されます（現在の\nプロジェクトからルートプロジェクトまで順に検索）、チェックサム（下記参照）と共に。完全一致\nはキーとチェックサムの両方が一致することを意味し、部分一致はキーのみが一致することを意味します");
 		m.put("This line has confusable unicode character modification", "この行には紛らわしいUnicode文字の変更があります");
 		m.put("This might happen when project points to a wrong git repository, or the commit is garbage collected.", 
 			"これはプロジェクトが誤ったGitリポジトリを指している場合や、コミットがガベージコレクションされた場合に発生する可能性があります");
@@ -3990,6 +4235,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("This name has already been used by another role.", "この名前は別のロールで既に使用されています。");
 		m.put("This name has already been used by another script", "この名前は別のスクリプトで既に使用されています");
 		m.put("This name has already been used by another state", "この名前は別の状態で既に使用されています");
+		m.put("This name has already been used by another workspace provisioner", "この名前は他のワークスペースプロビジョナーによって既に使用されています");
 		m.put("This operation is disallowed by branch protection rule", "この操作はブランチ保護ルールによって禁止されています");
 		m.put("This page lists changes since previous build on <a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">same stream</a>", 
 			"このページには<a href=\"https://docs.onedev.io/concepts#build-stream\" class=\"link-primary\" target=\"_blank\">同じストリーム</a>の前回のビルド以降の変更が一覧表示されます");
@@ -3997,6 +4243,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("This permission enables one to access confidential issues", "この権限により、機密事項にアクセスすることが可能になります");
 		m.put("This permission enables one to schedule issues into iterations", "この権限により、イテレーションに課題をスケジュールすることが可能になります");
 		m.put("This property is imported from {0}", "このプロパティは{0}からインポートされます");
+		m.put("This provisioner creates workspaces with OneDev server's shell facility, and it requires\n<a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> to be installed on OneDev server<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have the same\npermission as the OneDev server process. Make sure it can only be used by trusted projects.\n", 
+			"このプロビジョナーはOneDevサーバーのシェル機能を使用してワークスペースを作成し、\n<a href='https://github.com/tmux/tmux' target='_blank'>tmux</a>がOneDevサーバーにインストールされている必要があります<br>\n<b class='text-danger'>警告</b>: このプロビジョナーによって作成されたワークスペースは、\nOneDevサーバープロセスと同じ権限を持ちます。信頼できるプロジェクトのみが使用できるようにしてください。\n");
 		m.put("This pull request has been discarded", "このプルリクエストは破棄されました");
 		m.put("This report will be displayed in pull request overview page if build is triggered by pull request", 
 			"このレポートは、プルリクエストによってビルドがトリガーされた場合、プルリクエスト概要ページに表示されます");
@@ -4008,9 +4256,9 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("This shows number of issues in various states over time", "これは、時間の経過に伴うさまざまな状態の課題の数を示します");
 		m.put("This shows number of open and merged pull requests over time", "これは、時間の経過に伴うオープンおよびマージされたプルリクエストの数を示します");
 		m.put("This step can only be executed by a docker aware executor", "このステップはDocker対応エグゼキュータによってのみ実行可能です");
-		m.put("This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job workdir</a>", 
+		m.put("This step can only be executed by a docker aware executor. It runs under <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>", 
 			"このステップはDocker対応エグゼキュータによってのみ実行可能です。<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>で実行されます");
-		m.put("This step copies files from job workdir to build artifacts directory, so that they can be accessed after job is completed", 
+		m.put("This step copies files from job working directory to build artifacts directory, so that they can be accessed after job is completed", 
 			"このステップは、ジョブのワークスペースからビルド成果物ディレクトリにファイルをコピーし、ジョブが完了した後にアクセスできるようにします");
 		m.put("This step publishes specified files to be served as project web site. Project web site can be accessed publicly via <code>http://&lt;onedev base url&gt;/path/to/project/~site</code>", 
 			"このステップは指定されたファイルをプロジェクトウェブサイトとして公開します。プロジェクトウェブサイトは<code>http://&lt;onedev base url&gt;/path/to/project/~site</code>で公開アクセス可能です");
@@ -4024,6 +4272,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("This subscription key was expired", "このサブスクリプションキーは期限切れです");
 		m.put("This tab shows the pipeline containing current build. Check <a href=\"https://robinshen.medium.com/understanding-onedev-pipeline-db0bb0e54aa7\" target=\"_blank\">this article</a> to understand how build pipeline works", 
 			"このタブには現在のビルドを含むパイプラインが表示されます。ビルドパイプラインの仕組みを理解するには<a href=\"https://robinshen.medium.com/understanding-onedev-pipeline-db0bb0e54aa7\" target=\"_blank\">この記事</a>を確認してください");
+		m.put("This terminal is read only", "このターミナルは読み取り専用です");
 		m.put("This trigger will only be applicable if tagged commit is reachable from branches specified here. Multiple branches should be separated with spaces. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all branches", 
 			"このトリガーは、タグ付けされたコミットがここで指定されたブランチから到達可能な場合にのみ適用されます。複数のブランチはスペースで区切る必要があります。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には '**', '*' または '?' を使用してください。'-' を付けて除外します。すべてのブランチに一致させるには空白のままにします");
 		m.put("This user is authenticating via external system.", "このユーザーは外部システムを介して認証しています");
@@ -4126,12 +4375,14 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Type <code>yes</code> below to delete all queried packages", "以下に<code>yes</code>と入力して、すべてのクエリされたパッケージを削除してください");
 		m.put("Type <code>yes</code> below to delete all queried projects", "以下に<code>yes</code>と入力して、すべてのクエリされたプロジェクトを削除してください");
 		m.put("Type <code>yes</code> below to delete all queried pull requests", "以下に<code>yes</code>と入力して、すべてのクエリされたプルリクエストを削除してください");
+		m.put("Type <code>yes</code> below to delete all queried workspaces", "すべてのクエリされたワークスペースを削除するには、以下に<code>yes</code>と入力してください");
 		m.put("Type <code>yes</code> below to delete selected builds", "以下に<code>yes</code>と入力して、選択されたビルドを削除してください");
 		m.put("Type <code>yes</code> below to delete selected comments", "以下に<code>yes</code>と入力して、選択されたコメントを削除してください");
 		m.put("Type <code>yes</code> below to delete selected issues", "以下に<code>yes</code>と入力して、選択された課題を削除してください");
 		m.put("Type <code>yes</code> below to delete selected packages", "以下に<code>yes</code>と入力して、選択されたパッケージを削除してください");
 		m.put("Type <code>yes</code> below to delete selected projects", "以下に<code>yes</code>と入力して、選択されたプロジェクトを削除してください");
 		m.put("Type <code>yes</code> below to delete selected pull requests", "以下に<code>yes</code>と入力して、選択されたプルリクエストを削除してください");
+		m.put("Type <code>yes</code> below to delete selected workspaces", "選択されたワークスペースを削除するには、以下に<code>yes</code>と入力してください");
 		m.put("Type <code>yes</code> below to discard all queried pull requests", "以下に<code>yes</code>と入力して、すべてのクエリされたプルリクエストを破棄してください");
 		m.put("Type <code>yes</code> below to discard selected pull requests", "以下に<code>yes</code>と入力して、選択されたプルリクエストを破棄してください");
 		m.put("Type <code>yes</code> below to move all queried issues to project \"{0}\"", "以下に<code>yes</code>と入力して、すべてのクエリされた課題をプロジェクト\"{0}\"に移動してください");
@@ -4154,7 +4405,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Type to filter", "フィルターするために入力してください");
 		m.put("Type to filter...", "フィルターするために入力してください...");
 		m.put("Type your message (shift+enter for new line)", "メッセージを入力してください（新しい行にはshift+enter）");
-		m.put("Type your message here", "ここにメッセージを入力してください");
+		m.put("UNSTAGED", "UNSTAGED");
 		m.put("URL", "URL");
 		m.put("Unable To Delete/Disable Right Now", "今すぐ削除/無効化できません");
 		m.put("Unable to apply change as otherwise you will not be able to manage this project", "このプロジェクトを管理できなくなるため、変更を適用できません");
@@ -4177,6 +4428,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Unable to get guilds info", "ギルド情報を取得できません");
 		m.put("Unable to import build spec (import project: {0}, import revision: {1}): {2}", "ビルド仕様をインポートできません (インポートプロジェクト: {0}, インポートリビジョン: {1}): {2}");
 		m.put("Unable to notify user as mail service is not configured", "メールサービスが構成されていないため、ユーザーに通知できません");
+		m.put("Unable to read file from the working directory. Please resolve this conflict in the terminal and then mark as resolved.", 
+			"作業ディレクトリからファイルを読み取れません。ターミナルでこの競合を解決し、解決済みとしてマークしてください。");
 		m.put("Unable to send password reset email as mail service is not configured", "メールサービスが設定されていないため、パスワードリセットメールを送信できません");
 		m.put("Unable to send verification email as mail service is not configured yet", "メールサービスがまだ構成されていないため、確認メールを送信できません");
 		m.put("Unauthorize this user", "このユーザーの認証を解除する");
@@ -4207,6 +4460,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Unsolicited OIDC response", "未承諾のOIDC応答");
 		m.put("Unsolicited discord api response", "未承諾のDiscord API応答");
 		m.put("Unspecified", "未指定");
+		m.put("Unstage", "アンステージ");
+		m.put("Unstage All", "すべてアンステージ");
 		m.put("Unsupported", "非対応");
 		m.put("Unsupported ssh signature algorithm: ", "サポートされていないssh署名アルゴリズム:");
 		m.put("Unsupported ssh signature version: ", "サポートされていないssh署名バージョン:");
@@ -4219,6 +4474,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Update Source Branch", "ソースブランチを更新");
 		m.put("Update body", "本文を更新");
 		m.put("Upload", "アップロード");
+		m.put("Upload Access Token", "アクセストークンをアップロード");
 		m.put("Upload Access Token Secret", "アクセストークンシークレットをアップロード");
 		m.put("Upload Cache", "キャッシュをアップロード");
 		m.put("Upload Files", "ファイルをアップロード");
@@ -4276,6 +4532,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("User Authorizations", "ユーザー認可");
 		m.put("User Authorizations Bean", "ユーザー認可Bean");
 		m.put("User Count", "ユーザー数");
+		m.put("User Data", "ユーザーデータ");
 		m.put("User Email Attribute", "ユーザーのメール属性");
 		m.put("User Full Name Attribute", "ユーザーのフルネーム属性");
 		m.put("User Groups Attribute", "ユーザーグループ属性");
@@ -4341,9 +4598,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Watched. Click to unwatch", "ウォッチ中。クリックしてアンウォッチ");
 		m.put("Watchers", "ウォッチャー");
 		m.put("Web Hook", "ウェブフック");
+		m.put("Web Hook Header", "Webフックヘッダー");
 		m.put("Web Hooks", "ウェブフック");
-		m.put("Web Hooks Bean", "ウェブフックBean");
-		m.put("Web hooks saved", "ウェブフックが保存されました");
 		m.put("Webhook Url", "ウェブフックURL");
 		m.put("Week", "週");
 		m.put("When", "いつ");
@@ -4371,9 +4627,11 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not the issue should be confidential", "課題が機密であるべきかどうか");
 		m.put("Whether or not the link is asymmetric. A asymmetric link has different meaning from different side. For instance a 'parent-child' link is asymmetric, while a 'related to' link is symmetric", 
 			"リンクが非対称であるかどうか。非対称リンクは異なる側から異なる意味を持ちます。例えば、「親子」リンクは非対称ですが、「関連する」リンクは対称です");
+		m.put("Whether or not the value is secret", "値が秘密かどうか");
 		m.put("Whether or not this field accepts empty value", "このフィールドが空の値を受け入れるかどうか");
 		m.put("Whether or not this param accepts empty value", "このパラメータが空の値を受け入れるかどうか");
 		m.put("Whether or not this script can be used in CI/CD jobs", "このスクリプトがCI/CDジョブで使用できるかどうか");
+		m.put("Whether or not this script can be used in workspace spec", "このスクリプトがワークスペース仕様で使用できるかどうか");
 		m.put("Whether or not this step is optional. Execution failure of an optional step will not cause the build to fail, and successful condition of subsequent steps will not take optional step into account", 
 			"このステップがオプションであるかどうか。オプションステップの実行失敗はビルドの失敗を引き起こさず、後続のステップの成功条件はオプションステップを考慮しません");
 		m.put("Whether or not to allow anonymous users to access this server", "匿名ユーザーがこのサーバーにアクセスできるかどうか");
@@ -4383,7 +4641,11 @@ public class Translation_ja extends TranslationResourceBundle {
 			"コンテナを実行したりイメージをビルドしたりするときに常にイメージをプルするかどうか。このオプションを有効にすると、同じマシンで実行される悪意のあるジョブによってイメージが置き換えられるのを防ぐことができます");
 		m.put("Whether or not to always pull image when run container or build images. This option should be enabled to avoid images being replaced by malicious jobs running on same node", 
 			"コンテナを実行したりイメージをビルドしたりするときに常にイメージをプルするかどうか。このオプションを有効にすると、同じノードで実行される悪意のあるジョブによってイメージが置き換えられるのを防ぐことができます");
+		m.put("Whether or not to always pull image when running container. This option should be enabled to avoid images being replaced by malicious operations", 
+			"コンテナを実行する際に常にイメージをプルするかどうか。このオプションは、悪意のある操作によってイメージが置き換えられるのを避けるために有効にする必要があります");
 		m.put("Whether or not to be able to access time tracking info of issues", "課題のタイムトラッキング情報にアクセスできるかどうか");
+		m.put("Whether or not to create the workspace inside container. If enabled, you will need a <a href='https://onedev.io/pricing' target='_blank'>enterprise subscription</a>", 
+			"ワークスペースをコンテナ内で作成するかどうか。これを有効にすると、<a href='https://onedev.io/pricing' target='_blank'>エンタープライズサブスクリプション</a>が必要です。");
 		m.put("Whether or not to enable code management for the project", "プロジェクトのコード管理を有効にするかどうか");
 		m.put("Whether or not to enable issue management for the project", "プロジェクトの課題管理を有効にするかどうか");
 		m.put("Whether or not to fetch LFS objects if pull request is opened from a different project.", 
@@ -4400,6 +4662,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not to input and display estimated/spent time in hours/minutes only", "推定時間/消費時間を時間/分単位でのみ入力および表示するかどうか");
 		m.put("Whether or not to mount docker sock into job container to support docker operations in job commands<br><b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev by operating the mounted docker sock. Make sure this executor can only be used by trusted jobs if this option is enabled", 
 			"ジョブコマンドでのDocker操作をサポートするために、Dockerソケットをジョブコンテナにマウントするかどうか<br><b class='text-danger'>警告</b>: 悪意のあるジョブがマウントされたDockerソケットを操作することでOneDev全体を制御する可能性があります。このオプションを有効にする場合、このエグゼキュータが信頼できるジョブでのみ使用されることを確認してください");
+		m.put("Whether or not to mount docker sock into workspace container to support docker operations in workspace<br><b class='text-danger'>WARNING</b>: Malicious workspaces can take control of whole OneDev by operating the mounted docker sock. Make sure this provisioner can only be used by trusted workspaces if this option is enabled", 
+			"ワークスペース内でのDocker操作をサポートするために、Dockerソックをワークスペースコンテナにマウントするかどうか<br><b class='text-danger'>警告</b>: 悪意のあるワークスペースは、マウントされたDockerソックを操作することでOneDev全体を制御することができます。このオプションが有効な場合、このプロビジョナーが信頼できるワークスペースでのみ使用できるようにしてください");
 		m.put("Whether or not to pre-populate tag mappings in next page. You may want to disable this if there are too many tags to display", 
 			"次のページでタグマッピングを事前入力するかどうか。表示するタグが多すぎる場合はこれを無効にすることをお勧めします");
 		m.put("Whether or not to require this dependency to be successful", "この依存関係が成功する必要があるかどうか");
@@ -4408,6 +4672,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Whether or not to retrieve submodules. Refer to <a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>this tutorial</a> on how to set up clone credential above to retrieve submodules", 
 			"サブモジュールを取得するかどうか。サブモジュールを取得するためのクローン資格情報を設定する方法については、<a href='https://docs.onedev.io/tutorials/cicd/clone-submodules' target='_blank'>このチュートリアル</a>を参照してください");
 		m.put("Whether or not to run this step inside container", "このステップをコンテナ内で実行するかどうか");
+		m.put("Whether or not to scan recursively in above paths. Applicable only for directories", 
+			"上記のパスで再帰的にスキャンするかどうか。ディレクトリにのみ適用されます");
 		m.put("Whether or not to send notifications for events generated by yourself", "自分自身が生成したイベントの通知を送信するかどうか");
 		m.put("Whether or not to send notifications to issue watchers for this change", "この変更について課題ウォッチャーに通知を送信するかどうか");
 		m.put("Whether or not to show branch/tag column", "ブランチ/タグ列を表示するかどうか");
@@ -4425,13 +4691,35 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Widget Tab", "ウィジェットタブ");
 		m.put("Widget Timesheet Setting", "ウィジェットタイムシート設定");
 		m.put("Will be prompted to set up two-factor authentication upon next login", "次回のログイン時に二要素認証の設定を求められます");
-		m.put("Will be transcoded to UTF-8", "UTF-8にトランスコードされます");
 		m.put("Window", "ウィンドウ");
 		m.put("Window Memory", "ウィンドウメモリ");
 		m.put("With current number of users ({0}), the subscription will be active until <b>{1}</b>", 
 			"現在のユーザー数（{0}）で、サブスクリプションは<b>{1}</b>まで有効です");
 		m.put("Workflow reconciliation completed", "ワークフローの調整が完了しました");
 		m.put("Working Directory", "作業ディレクトリ");
+		m.put("Workspace", "ワークスペース");
+		m.put("Workspace Data", "ワークスペースデータ");
+		m.put("Workspace Management", "ワークスペース管理");
+		m.put("Workspace Notification", "ワークスペース通知");
+		m.put("Workspace Notification Template", "ワークスペース通知テンプレート");
+		m.put("Workspace Provisioner", "ワークスペースプロビジョナー");
+		m.put("Workspace Provisioner Bean", "ワークスペースプロビジョナービーン");
+		m.put("Workspace Provisioners", "ワークスペースプロビジョナー");
+		m.put("Workspace Shell", "ワークスペースシェル");
+		m.put("Workspace Spec", "ワークスペック");
+		m.put("Workspace Spec Template", "ワークスペックテンプレート");
+		m.put("Workspace Specs", "ワークスペック");
+		m.put("Workspace administrative permission inside a project, including batch operations over multiple workspaces", 
+			"プロジェクト内のワークスペース管理権限、複数のワークスペースに対するバッチ操作を含む");
+		m.put("Workspace data deleted", "ワークスペースデータが削除されました");
+		m.put("Workspace not found", "ワークスペースが見つかりません");
+		m.put("Workspace number", "ワークスペース番号");
+		m.put("Workspace provisioners", "ワークスペースプロビジョナー");
+		m.put("Workspace reprovisioning requested", "ワークスペースの再プロビジョニングが要求されました");
+		m.put("Workspace token", "ワークスペーストークン");
+		m.put("Workspace {0} deleted", "ワークスペース{0}が削除されました");
+		m.put("Workspaces", "ワークスペース");
+		m.put("Workspaces on this branch", "このブランチのワークスペース");
 		m.put("Write", "書き込み");
 		m.put("YAML", "YAML");
 		m.put("Yes", "はい");
@@ -4467,6 +4755,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("a string representing body of the event. May be <code>null</code>", "イベントの本文を表す文字列。<code>null</code>の場合があります");
 		m.put("a string representing event detail url", "イベント詳細URLを表す文字列");
 		m.put("a string representing summary of the event", "イベントの概要を表す文字列");
+		m.put("abort merge", "マージを中止");
 		m.put("access [{0}]", "アクセス[{0}]");
 		m.put("active", "アクティブ");
 		m.put("add another order", "別の注文を追加");
@@ -4516,6 +4805,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("disabled", "無効");
 		m.put("does not have any value of", "いずれの値も持たない");
 		m.put("duration", "期間");
+		m.put("enclose with ~ to query branch", "ブランチをクエリするには~で囲む");
 		m.put("enclose with ~ to query hash/message", "ハッシュ/メッセージをクエリするには~で囲む");
 		m.put("enclose with ~ to query job/version", "ジョブ/バージョンをクエリするには~で囲む");
 		m.put("enclose with ~ to query name/ip/os", "名前/IP/OSをクエリするには~で囲む");
@@ -4525,6 +4815,8 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("enclose with ~ to query title/description/comment", "タイトル/説明/コメントをクエリするには~で囲む");
 		m.put("exclude", "除外");
 		m.put("false", "false");
+		m.put("file", "ファイル");
+		m.put("files", "ファイル");
 		m.put("files with ext \"{0}\"", "拡張子「{0}」のファイル");
 		m.put("find build by number", "番号でビルドを検索");
 		m.put("find build with this number", "この番号でビルドを検索");
@@ -4540,6 +4832,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("found 1 project", "1 プロジェクトが見つかりました");
 		m.put("found 1 pull request", "1 プルリクエストが見つかりました");
 		m.put("found 1 user", "1 ユーザーが見つかりました");
+		m.put("found 1 workspace", "1つのワークスペースが見つかりました");
 		m.put("found {0} agents", "{0} エージェントが見つかりました");
 		m.put("found {0} builds", "{0} ビルドが見つかりました");
 		m.put("found {0} comments", "{0} コメントが見つかりました");
@@ -4548,6 +4841,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("found {0} projects", "{0} プロジェクトが見つかりました");
 		m.put("found {0} pull requests", "{0} プルリクエストが見つかりました");
 		m.put("found {0} users", "{0} ユーザーが見つかりました");
+		m.put("found {0} workspaces", "{0}個のワークスペースが見つかりました");
 		m.put("has any value of", "任意の値を持っています");
 		m.put("head", "ヘッド");
 		m.put("https://api.openai.com/v1", "https://api.openai.com/v1");
@@ -4621,6 +4915,8 @@ public class Translation_ja extends TranslationResourceBundle {
 			"通知される <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/Pack.java' target='_blank'>パッケージ</a> オブジェクトを表します");
 		m.put("represents the <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/PullRequest.java' target='_blank'>pull request</a> object to be notified", 
 			"通知される <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/PullRequest.java' target='_blank'>プルリクエスト</a> オブジェクトを表します");
+		m.put("represents the <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/Workspace.java' target='_blank'>workspace</a> object to be notified", 
+			"通知される<a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/Workspace.java' target='_blank'>ワークスペース</a>オブジェクトを表します");
 		m.put("represents the <a href='https://javadoc.io/static/org.eclipse.jgit/org.eclipse.jgit/5.13.0.202109080827-r/org/eclipse/jgit/revwalk/RevCommit.html' target='_blank'>commit</a> object to be notified", 
 			"通知される <a href='https://javadoc.io/static/org.eclipse.jgit/org.eclipse.jgit/5.13.0.202109080827-r/org/eclipse/jgit/revwalk/RevCommit.html' target='_blank'>コミット</a> オブジェクトを表します");
 		m.put("represents the exception encountered when open issue via service desk", "サービスデスクを介して課題を開く際に発生した例外を表します");
@@ -4668,6 +4964,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("week:Tue", "火");
 		m.put("week:Wed", "水");
 		m.put("widget:Tabs", "タブ");
+		m.put("workspaces", "ワークスペース");
 		m.put("you may show this page later via incompatibilities link in help menu", "ヘルプメニューの互換性リンクから後でこのページを表示できます");
 		m.put("{0} Month(s)", "{0} ヶ月");
 		m.put("{0} activities on {1}", "{0} の活動 {1} において");
@@ -4694,6 +4991,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{0} second", "{0} 秒");
 		m.put("{0} seconds", "{0} 秒間");
 		m.put("{0} tags", "{0} タグ");
+		m.put("{0} will be transcoded to UTF-8 upon commit", "{0}はコミット時にUTF-8にトランスコードされます");
 		m.put("{0}d", "{0}日");
 		m.put("{0}h", "{0}時間");
 		m.put("{0}m", "{0}分");
@@ -4702,48 +5000,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "{javax.validation.constraints.NotEmpty.message}");
 		m.put("{javax.validation.constraints.NotNull.message}", "{javax.validation.constraints.NotNull.message}");
 		m.put("{javax.validation.constraints.Size.message}", "{javax.validation.constraints.Size.message}");
-		m.put("Base URL of <b class='text-info'>OpenAI compatible</b> API endpoint. Leave empty to use OpenAI official endpoint.\n<b class='text-danger'>NOTE:</b> Make sure base URL specified here supports HTTP/2 connection. HTTP/1.1 is not\nsupported and will get a connection timeout error", 
-			"<b class='text-info'>OpenAI互換</b>APIエンドポイントのベースURL。OpenAI公式エンドポイントを使用するには空のままにしてください。");
-		m.put("Check Licenses", "ライセンスを確認");
-		m.put("Check Secrets", "シークレットを確認");
-		m.put("Check Vulnerabilities", "脆弱性を確認");
-		m.put("Child Project", "子プロジェクト");
-		m.put("Children Import Projects", "子インポートプロジェクト");
-		m.put("Children Import Repositories", "子インポートリポジトリ");
-		m.put("Children Import Server", "子インポートサーバー");
-		m.put("Commit Message Checker", "コミットメッセージチェッカー");
-		m.put("Conventional Commit", "従来のコミット");
-		m.put("Explanation", "説明");
-		m.put("Extra Options", "追加オプション");
-		m.put("No commit message checker", "コミットメッセージチェッカーなし");
-		m.put("No explanation", "説明なし");
-		m.put("Not available", "利用不可");
-		m.put("Optionally specify a commit message checker to validate commit messages. Only applicable for non-merge commits", 
-			"コミットメッセージを検証するためのコミットメッセージチェッカーを任意で指定します。マージ以外のコミットにのみ適用されます");
-		m.put("Optionally specify an explanation for the regular expression. This will be displayed to the user if validation fails", 
-			"正規表現の説明を任意で指定します。検証が失敗した場合にユーザーに表示されます");
-		m.put("Optionally specify comma separated <a href='https://spdx.org/licenses/'>SPDX license identifiers</a> to be ignored", 
-			"無視する<a href='https://spdx.org/licenses/'>SPDXライセンス識別子</a>をカンマで区切って任意で指定します");
-		m.put("Optionally specify commit types applicable for commit message footer check (hit ENTER to add value). Leave empty to all types", 
-			"コミットメッセージフッターチェックに適用されるコミットタイプを任意で指定します（値を追加するにはENTERを押します）。すべてのタイプには空のままにします");
-		m.put("Optionally specify extra options for osv source scanner. Multiple options need to be separated with space", 
-			"osvソーススキャナーの追加オプションを任意で指定します。複数のオプションはスペースで区切る必要があります");
-		m.put("Optionally specify path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> to be used as trivy <a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>secret config</a>", 
-			"trivy<a href='https://trivy.dev/docs/latest/scanner/secret/#configuration' target='_blank'>シークレット設定</a>として使用する<a href='https://docs.onedev.io/concepts#job-workdir'>ジョブワークスペース</a>に対する相対パスを任意で指定します");
-		m.put("Osv Source Scanner", "Osvソーススキャナー");
-		m.put("Run osv scanner to scan project source for vulnerabilities in <a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>various lock files</a>. It can only be executed by docker aware executor.", 
-			"プロジェクトソースの脆弱性を<a href='https://google.github.io/osv-scanner/supported-languages-and-lockfiles/' target='_blank'>さまざまなロックファイル</a>でスキャンするためにosvスキャナーを実行します。これはdocker対応のエグゼキューターによってのみ実行可能です。");
-		m.put("Specify a <a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java regular expression</a> pattern to validate the entire commit message. Use <code>(?s)</code> flag at the beginning for multi-line matching", 
-			"コミットメッセージ全体を検証するための<a href='https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html'>Java正規表現</a>パターンを指定します。複数行のマッチングには<code>(?s)</code>フラグを先頭に使用します");
-		m.put("Specify allowed <a href='https://spdx.org/licenses/'>SPDX license identifiers</a> separated by comma", 
-			"カンマで区切られた許可された<a href='https://spdx.org/licenses/'>SPDXライセンス識別子</a>を指定します");
-		m.put("Specify child project to import into at OneDev side", "OneDev側にインポートする子プロジェクトを指定します");
-		m.put("Specify how long to wait for the model response in seconds", "モデルの応答を待つ時間を秒で指定します");
-		m.put("Specify the model name to use. <b class='text-danger'>NOTE: </b> Right now OneDev only supports\nmodels with chat completions API. OpenAI models with the new responses API is not supported yet", 
-			"使用するモデル名を指定します。<b class='text-danger'>注意: </b> 現在、OneDevはチャット完了APIを持つモデルのみをサポートしています。OpenAIの新しい応答APIを持つモデルはまだサポートされていません");
-		m.put("Whether or not to scan recursively in above paths. Applicable only for directories", 
-			"上記のパスで再帰的にスキャンするかどうか。ディレクトリにのみ適用されます");
-		m.put("{0} will be transcoded to UTF-8 upon commit", "{0}はコミット時にUTF-8にトランスコードされます");
 	}
 		
 	@Override

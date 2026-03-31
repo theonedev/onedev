@@ -12,6 +12,7 @@ import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.SuggestionProvider;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.NamedElement;
+import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
 public class JobProperty implements NamedElement {
@@ -43,7 +44,7 @@ public class JobProperty implements NamedElement {
 		if (buildSpec != null) {
 			List<String> candidates = new ArrayList<>(buildSpec.getPropertyMap().keySet());
 			buildSpec.getProperties().forEach(it->candidates.remove(it.getName()));
-			return BuildSpec.suggestOverrides(candidates, status);
+			return SuggestionUtils.suggestOverrides(candidates, status);
 		}
 		return new ArrayList<>();
 	}

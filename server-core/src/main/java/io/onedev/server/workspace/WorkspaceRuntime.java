@@ -1,8 +1,8 @@
 package io.onedev.server.workspace;
 
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -10,10 +10,12 @@ import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 
 public abstract class WorkspaceRuntime {
+
+    private final Map<String, Shell> shells = new HashMap<>();
+
+    private final Map<String, String> labels = new LinkedHashMap<>();
     
-    private final Map<String, Shell> shells = new LinkedHashMap<>();
-    
-    public synchronized String openShell(Terminal terminal) {
+    public synchronized String openShell(Terminal terminal, String label) {
         var shellId = UUID.randomUUID().toString();
         shells.put(shellId, doOpenShell(new Terminal() {
 
@@ -24,19 +26,23 @@ public abstract class WorkspaceRuntime {
 
             @Override
             public void onShellExit() {
+                labels.remove(shellId);
                 shells.remove(shellId);
                 terminal.onShellExit();
             }
 
         }));
+        labels.put(shellId, label);
+
         return shellId;
     }
 
-    public synchronized List<String> getShellIds() {
-        return new ArrayList<>(shells.keySet());
+    public synchronized Map<String, String> getShellLabels() {
+        return new LinkedHashMap<>(labels);
     }
 
     public synchronized void terminateShell(String shellId) {
+        labels.remove(shellId);
         var shell = shells.remove(shellId);
         if (shell != null)
             shell.terminate();
@@ -44,7 +50,7 @@ public abstract class WorkspaceRuntime {
 
     public synchronized void writeShellStdin(String shellId, String data) {
         var shell = shells.get(shellId);
-        if (shell != null)
+        if (shell != null) 
             shell.writeToStdin(data);
     }
 
@@ -57,5 +63,9 @@ public abstract class WorkspaceRuntime {
     protected abstract Shell doOpenShell(Terminal terminal);
     
     public abstract void await();
-    
+
+    public Map<Integer, Integer> getPortMappings() {
+        return Collections.emptyMap();
+    }
+
 }

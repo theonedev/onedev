@@ -1,18 +1,12 @@
 package io.onedev.server.web.page.admin.buildsetting.jobexecutor;
 
-import com.google.common.collect.Sets;
-import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
-import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
-import io.onedev.server.web.component.taskbutton.TaskButton;
-import io.onedev.server.web.component.taskbutton.TaskResult;
-import io.onedev.server.web.component.taskbutton.TaskResult.PlainMessage;
+import io.onedev.server.web.component.taskbutton.TestButton;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.util.Testable;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -22,17 +16,11 @@ import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.util.visit.IVisit;
-import org.apache.wicket.util.visit.IVisitor;
 
 import org.jspecify.annotations.Nullable;
 
 import static io.onedev.server.web.translation.Translation._T;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.List;
 
 abstract class JobExecutorEditPanel extends Panel {
@@ -57,25 +45,6 @@ abstract class JobExecutorEditPanel extends Panel {
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
-	@Nullable
-	private Class<? extends Serializable> getTestDataClass(Class<?> clazz) {
-		Class<? extends Serializable> testDataClass = null;
-		for (Type type: clazz.getGenericInterfaces()) {
-			if (type instanceof ParameterizedType) {
-				ParameterizedType parameterizedType = (ParameterizedType) type;
-				if (parameterizedType.getRawType() == Testable.class) {
-					testDataClass = (Class<? extends Serializable>) parameterizedType.getActualTypeArguments()[0];
-					break;
-				}
-			}
-		}
-		if (clazz != Object.class && testDataClass == null)
-			return getTestDataClass(clazz.getSuperclass());
-		else
-			return testDataClass;
-	}
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -132,80 +101,11 @@ abstract class JobExecutorEditPanel extends Panel {
 			
 		};
 		
-		TaskButton testButton = new TaskButton("testingExecutor") {
-
-			private Serializable testData;
+		TestButton testButton = new TestButton("testingExecutor", editor, "Job executor tested successfully") {
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				BeanEditor executorEditor = editor.visitChildren(BeanEditor.class, new IVisitor<BeanEditor, BeanEditor>() {
-
-					public void component(BeanEditor component, IVisit<BeanEditor> visit) {
-						visit.stop(component);
-					}
-					
-				});
-				if (executorEditor != null 
-						&& executorEditor.isVisibleInHierarchy()
-						&& Testable.class.isAssignableFrom(executorEditor.getDescriptor().getBeanClass())) {
-					Class<? extends Serializable> testDataClass = getTestDataClass(executorEditor.getDescriptor().getBeanClass());
-					if (testDataClass != null) {
-						if (testData == null || testData.getClass() != testDataClass) {
-							try {
-								testData = testDataClass.getDeclaredConstructor().newInstance();
-							} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
-									| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-								throw new RuntimeException(e);
-							}
-						}
-					} else {
-						testData = null;
-					}
-					setVisible(true);
-				} else {
-					setVisible(false);
-				}
-			}
-
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				if (editor.isValid()) {
-					if (testData != null) {
-						String title = EditableUtils.getDisplayName(testData.getClass());
-						new BeanEditModalPanel<Serializable>(target, testData, Sets.newHashSet(), true, title) {
-
-							@Override
-							protected boolean isDirtyAware() {
-								return false;
-							}
-
-							@Override
-							protected String onSave(AjaxRequestTarget target, Serializable bean) {
-								close();
-								target.add(editor);
-								target.focusComponent(null);
-								submitTask(target);
-								return null;
-							}
-							
-						};
-					} else {
-						target.add(editor);
-						target.focusComponent(null);
-						submitTask(target);
-					}
-				} else {
-					target.add(form);
-				}
-			}
-
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			@Override
-			protected TaskResult runTask(TaskLogger logger) {
-				((Testable)bean.getExecutor()).test(testData, logger);
-				return new TaskResult(true, new PlainMessage(_T("Job executor tested successfully")));
+			protected Testable<?> getTestable() {
+				return (Testable<?>) bean.getExecutor();
 			}
 
 		};		

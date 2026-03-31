@@ -26,7 +26,7 @@ public class PublishPylintReportStep extends PublishProblemReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Editable(order=100, description="Specify pylint json result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. "
+	@Editable(order=100, description="Specify pylint json result file relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. "
 			+ "This file can be generated with pylint json output format option, for instance <code>--exit-zero --output-format=json:pylint-result.json</code>. "
 			+ "Note that we do not fail pylint command upon violations, as this step will fail build based on configured threshold. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")

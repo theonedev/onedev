@@ -1,0 +1,135 @@
+package io.onedev.server.util.interpolative;
+
+import static io.onedev.k8shelper.KubernetesHelper.ATTRIBUTES;
+import static io.onedev.k8shelper.KubernetesHelper.PAUSE;
+import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_PREFIX;
+import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_SUFFIX;
+import static io.onedev.k8shelper.KubernetesHelper.WORKDIR;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.buildspec.job.JobVariable;
+import io.onedev.server.buildspec.param.ParamCombination;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspecmodel.inputspec.Input;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.support.build.JobProperty;
+import io.onedev.server.util.GroovyUtils;
+
+public class JobVariableInterpolator extends VariableInterpolator {
+	
+	public static final String PREFIX_PARAM = "param:"; 
+	
+	public static final String PREFIX_PROPERTY = "property:";
+	
+	public static final String PREFIX_SECRET = "secret:";
+	
+	public static final String PREFIX_SCRIPT = "script:";
+	
+	public static final String PREFIX_FILE = "file:";
+	
+	public static final String PREFIX_ATTRIBUTE = "attribute:";
+		
+	private final Function<String, String> variableResolver;
+	
+	public JobVariableInterpolator(Build build, ParamCombination paramCombination) {
+		this(t -> {
+			for (JobVariable var : JobVariable.values()) {
+				if (var.name().toLowerCase().equals(t)) {
+					String value = var.getValue(build);
+					return value != null ? value : "";
+				}
+			}
+			if (t.startsWith(PREFIX_PARAM) || t.startsWith("params:")) {
+				String paramName;
+				if (t.startsWith(PREFIX_PARAM))
+					paramName = t.substring(PREFIX_PARAM.length());
+				else
+					paramName = t.substring("params:".length());
+
+				for (Entry<String, Input> entry : paramCombination.getParamInputs().entrySet()) {
+					if (paramName.equals(entry.getKey())) {
+						String paramType = entry.getValue().getType();
+						List<String> paramValues = new ArrayList<>();
+						for (String value : entry.getValue().getValues()) {
+							if (paramType.equals(ParamSpec.SECRET))
+								value = build.getJobAuthorizationContext().getSecretValue(value);
+							paramValues.add(value);
+						}
+						return StringUtils.join(paramValues, ",");
+					}
+				}
+				throw new ExplicitException("Undefined param: " + paramName);
+			} else if (t.startsWith(PREFIX_PROPERTY) || t.startsWith("properties:")) {
+				String propertyName;
+				if (t.startsWith(PREFIX_PROPERTY))
+					propertyName = t.substring(PREFIX_PROPERTY.length());
+				else
+					propertyName = t.substring("properties:".length());
+
+				JobProperty property = build.getSpec().getPropertyMap().get(propertyName);
+				if (property != null) {
+					return property.getValue();
+				} else {
+					for (var projectProperty : build.getProject().getHierarchyJobProperties()) {
+						if (projectProperty.getName().equals(propertyName))
+							return projectProperty.getValue();
+					}
+					throw new ExplicitException("Undefined property: " + propertyName);
+				}
+			} else if (t.startsWith(PREFIX_SECRET) || t.startsWith("secrets:")) {
+				String secretName;
+				if (t.startsWith(PREFIX_SECRET))
+					secretName = t.substring(PREFIX_SECRET.length());
+				else
+					secretName = t.substring("secrets:".length());
+				return build.getJobAuthorizationContext().getSecretValue(secretName);
+			} else if (t.startsWith(PREFIX_SCRIPT) || t.startsWith("scripts:")) {
+				String scriptName;
+				if (t.startsWith(PREFIX_SCRIPT))
+					scriptName = t.substring(PREFIX_SCRIPT.length());
+				else
+					scriptName = t.substring("scripts:".length());
+
+				Map<String, Object> context = new HashMap<>();
+				context.put("build", build);
+				Object result = GroovyUtils.evalScriptByName(scriptName, context);
+				if (result != null)
+					return result.toString();
+				else
+					return "";
+			} else if (t.startsWith(PREFIX_FILE)) {
+				return PLACEHOLDER_PREFIX + WORKDIR + "/" + t.substring(PREFIX_FILE.length()) + PLACEHOLDER_SUFFIX;
+			} else if (t.startsWith(PREFIX_ATTRIBUTE)) {
+				return PLACEHOLDER_PREFIX + ATTRIBUTES + "/" + t.substring(PREFIX_ATTRIBUTE.length()) + PLACEHOLDER_SUFFIX;
+			} else if (t.equals(PAUSE)) {
+				return PLACEHOLDER_PREFIX + PAUSE + PLACEHOLDER_SUFFIX;
+			} else {
+				throw new ExplicitException("Unrecognized interpolation variable: " + t);
+			}
+		});
+	}
+	
+	public JobVariableInterpolator(Function<String, String> variableResolver) {
+		this.variableResolver = variableResolver;
+	}
+		
+	@Override
+	protected Function<String, String> getVariableResolver() {
+		return variableResolver;
+	}
+
+	public static String getHelp() {
+		return _T("<b>Tips: </b> Type <tt>@</tt> to <a href='https://docs.onedev.io/appendix/job-variables' target='_blank' tabindex='-1'>insert variable</a>. "
+			+ "Use <tt>@@</tt> for literal <tt>@</tt>");
+	}
+
+}

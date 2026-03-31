@@ -2,7 +2,9 @@ package io.onedev.server.service.impl;
 
 import static io.onedev.server.ai.ToolUtils.getToolArguments;
 import static io.onedev.server.model.User.Type.SERVICE;
+import static io.onedev.server.util.SiteSyncUtils.syncDirectory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,8 +35,10 @@ import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.request.ChatRequest;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ai.AiTask;
 import io.onedev.server.ai.TaskTool;
@@ -42,8 +46,10 @@ import io.onedev.server.ai.ToolUtils;
 import io.onedev.server.ai.tools.TaskComplete;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.Listen;
+import io.onedev.server.event.cluster.NodeStarted;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.EmailAddress;
@@ -64,6 +70,10 @@ import io.onedev.server.service.ManagedFutureService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.SettingService;
 import io.onedev.server.service.UserService;
+import io.onedev.server.util.SiteSyncUtils;
+import io.onedev.server.util.concurrent.BatchWorkExecutionService;
+import io.onedev.server.util.concurrent.BatchWorker;
+import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.usage.Usage;
@@ -74,6 +84,11 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 	private static final Logger logger = LoggerFactory.getLogger(DefaultUserService.class);
 	
 	private static final int TIMEOUT_SECONDS = 600;
+
+    private static final int SYNC_PRIORITY = 50;
+
+	@Inject
+	private BatchWorkExecutionService batchWorkExecutionService;
 
 	@Inject
     private ProjectService projectService;
@@ -106,6 +121,31 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 	private ManagedFutureService managedFutureService;
 	
 	private volatile UserCache cache;
+
+	private static final BatchWorker SYNC_WORKER = new BatchWorker("data-sync") {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void doWorks(List<Prioritized> works) {
+			var syncWithServer = ((SyncWork) works.get(works.size() - 1)).syncWithServer;
+			try {
+				syncDirectory(syncWithServer, "users", userId -> {
+					syncDirectory(syncWithServer, "users/" + userId, dataType -> {
+						if (dataType.equals("workspace-data")) {
+							syncDirectory(syncWithServer, "users/" + userId + "/workspace-data", dataKey -> {
+								var lockName = User.getWorkspaceDataLockName(Long.valueOf(userId), dataKey);
+								syncDirectory(syncWithServer, "users/" + userId + "/workspace-data/" + dataKey, 
+									false, lockName, lockName);
+							}, true);
+						}
+					}, true);
+				}, true);
+			} catch (Exception e) {
+				logger.error(String.format("Error syncing data from server '%s'", syncWithServer), e);
+			}
+		}
+	};
 
 	@Transactional
 	@Override
@@ -276,6 +316,12 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
     	query.executeUpdate();
 		
 		dao.remove(user);
+
+		var userId = user.getId();
+		clusterService.runOnAllServers(() -> {
+			FileUtils.deleteDir(getUserDir(userId));
+			return null;
+		});
     }
 
 	private void checkUsage(User user) {
@@ -502,17 +548,6 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 		return cache.size();
 	}
 
-    @Sessional
-    @Listen
-    public void on(SystemStarting event) {
-		HazelcastInstance hazelcastInstance = clusterService.getHazelcastInstance();
-		
-        cache = new UserCache(hazelcastInstance.getReplicatedMap("userCache"));
-		for (User user: query())
-			cache.put(user.getId(), user.getFacade());
-    }
-
-
 	private Predicate[] getPredicates(CriteriaBuilder builder, CriteriaQuery<?> query, 
 			Root<User> root, String term) {
 		if (term != null) {
@@ -692,6 +727,35 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 	}
 
 	@Override
+	public File getUsersDir() {
+		File usersDir = new File(Bootstrap.getSiteDir(), "users");
+		FileUtils.createDir(usersDir);
+		return usersDir;
+	}
+
+	@Override
+	public File getUserDir(Long userId) {
+		var userDir = new File(getUsersDir(), String.valueOf(userId));
+		FileUtils.createDir(userDir);
+		return userDir;
+	}
+
+	@Override
+	public File getWorkspaceDataBaseDir(Long userId) {
+		var baseDir = new File(getUserDir(userId), "workspace-data");
+		FileUtils.createDir(baseDir);
+		return baseDir;
+	}
+
+	@Override
+	public File getWorkspaceDataDir(Long userId, String dataKey, boolean createIfNotExist) {
+		var dataDir = new File(getWorkspaceDataBaseDir(userId), dataKey);
+		if (createIfNotExist)
+			FileUtils.createDir(dataDir);
+		return dataDir;
+	}
+
+	@Override
 	public UserCache cloneCache() {
 		return cache.clone();
 	}
@@ -714,6 +778,42 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 		if (cache != null && event.getEntity() instanceof User) {
 			var id = event.getEntity().getId();
 			transactionService.runAfterCommit(() -> cache.remove(id));
+		}
+	}
+	
+	@Listen
+	public void on(NodeStarted event) {
+		requestToSync(event.getServer());
+	}
+
+    @Sessional
+    @Listen
+    public void on(SystemStarting event) {
+		HazelcastInstance hazelcastInstance = clusterService.getHazelcastInstance();
+		
+        cache = new UserCache(hazelcastInstance.getReplicatedMap("userCache"));
+		for (User user: query())
+			cache.put(user.getId(), user.getFacade());
+    }
+
+	@Listen
+	public void on(SystemStarted event) {
+		var newestServer = SiteSyncUtils.findNewestServer("users");
+		if (newestServer != null)
+			requestToSync(newestServer);
+	}
+
+	private void requestToSync(String syncWithServer) {
+		batchWorkExecutionService.submit(SYNC_WORKER, new SyncWork(SYNC_PRIORITY, syncWithServer));
+	}
+
+	private static class SyncWork extends Prioritized {
+
+		final String syncWithServer;
+
+		SyncWork(int priority, String syncWithServer) {
+			super(priority);
+			this.syncWithServer = syncWithServer;
 		}
 	}
 

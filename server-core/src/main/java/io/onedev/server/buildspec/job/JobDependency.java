@@ -111,7 +111,7 @@ public class JobDependency implements Serializable {
 	
 	@Editable(order=300, name="Artifacts to Retrieve", placeholder="Do not retrieve", description=""
 			+ "Optionally specify artifacts to retrieve from the dependency into "
-			+ "<a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a>. "
+			+ "<a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a>. "
 			+ "Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not "
 			+ "retrieve any artifacts")
 	@Interpolative(variableSuggester="suggestVariables")
@@ -124,9 +124,9 @@ public class JobDependency implements Serializable {
 		this.artifacts = artifacts;
 	}
 
-	@Editable(order=400, placeholder="Job workspace", description=""
-			+ "Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job workdir</a> "
-			+ "to put retrieved artifacts. Leave empty to use job workdir itself")
+	@Editable(order=400, placeholder="Job workdir", description=""
+			+ "Optionally specify a path relative to <a href='https://docs.onedev.io/concepts#job-workdir'>job working directory</a> "
+			+ "to put retrieved artifacts. Leave empty to use job working directory itself")
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getDestinationPath() {
 		return destinationPath;

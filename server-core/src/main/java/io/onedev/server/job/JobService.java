@@ -37,7 +37,7 @@ public interface JobService {
 	@Nullable
 	Shell getShell(String sessionId);
 	
-	void reportJobWorkDir(JobContext jobContext, String workspacePath);
+	void reportJobWorkDir(JobContext jobContext, String workDirPath);
 	
 	@Nullable
 	JobContext getJobContext(Long buildId);

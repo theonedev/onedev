@@ -93,6 +93,7 @@ import io.onedev.server.web.page.my.querywatch.MyQueryWatchesPage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.my.ssoaccounts.MySsoAccountsPage;
 import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthenticationPage;
+import io.onedev.server.web.page.my.workspacedata.MyWorkspaceDataPage;
 import io.onedev.server.web.page.packs.PackListPage;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.NoProjectStoragePage;
@@ -142,10 +143,10 @@ import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRe
 import io.onedev.server.web.page.project.setting.ai.ProjectAiSettingPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
-import io.onedev.server.web.page.project.setting.build.CacheManagementPage;
 import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
 import io.onedev.server.web.page.project.setting.build.JobPropertiesPage;
 import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
+import io.onedev.server.web.page.project.setting.cache.CacheManagementPage;
 import io.onedev.server.web.page.project.setting.code.analysis.CodeAnalysisSettingPage;
 import io.onedev.server.web.page.project.setting.code.branchprotection.BranchProtectionsPage;
 import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
@@ -190,6 +191,7 @@ import io.onedev.server.web.page.user.querywatch.UserQueryWatchesPage;
 import io.onedev.server.web.page.user.sshkeys.UserSshKeysPage;
 import io.onedev.server.web.page.user.ssoaccounts.UserSsoAccountsPage;
 import io.onedev.server.web.page.user.twofactorauthentication.UserTwoFactorAuthenticationPage;
+import io.onedev.server.web.page.user.workspacedata.UserWorkspaceDataPage;
 import io.onedev.server.web.page.workspaces.WorkspaceListPage;
 import io.onedev.server.web.resource.AgentLibResourceReference;
 import io.onedev.server.web.resource.AgentLogResourceReference;
@@ -254,6 +256,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~my/two-factor-authentication", MyTwoFactorAuthenticationPage.class));
 		add(new BasePageMapper("~my/sso-accounts", MySsoAccountsPage.class));
 		add(new BasePageMapper("~my/query-watches/#{tab}", MyQueryWatchesPage.class));
+		add(new BasePageMapper("~my/workspace-data", MyWorkspaceDataPage.class));
 	}
 
 	private void addResources() {
@@ -315,7 +318,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~users/${user}/access-tokens", UserAccessTokensPage.class));
 		add(new BasePageMapper("~users/${user}/two-factor-authentication", UserTwoFactorAuthenticationPage.class));
 		add(new BasePageMapper("~users/${user}/sso-accounts", UserSsoAccountsPage.class));
-		add(new BasePageMapper("~users/${user}/query-watches/#{tab}", UserQueryWatchesPage.class));		
+		add(new BasePageMapper("~users/${user}/query-watches/#{tab}", UserQueryWatchesPage.class));
+		add(new BasePageMapper("~users/${user}/workspace-data", UserWorkspaceDataPage.class));
 	}
 
 	private void addAdministrationPages() {

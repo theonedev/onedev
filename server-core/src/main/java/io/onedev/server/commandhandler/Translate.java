@@ -75,6 +75,8 @@ public class Translate extends CommandHandler {
 
 	private static final Pattern VALID_TRANSLATION_PATTERN = Pattern.compile("^<a>(\\d+)</a>(.*)$");
 
+	private static final String NO_TRANSLATION_PREFIX = "nt:";
+
 	private static final int TRANSLATE_BATCH = 100;
 
 	private static final String ENV_BASE_URL = "OPENAI_BASE_URL";
@@ -244,7 +246,8 @@ public class Translate extends CommandHandler {
 			var englishTranslations = new TreeMap<String, String>();
 			Translation.init(englishTranslations);
 			for (var key: scannedTranslationKeys) {
-				englishTranslations.putIfAbsent(key, key);
+				if (!key.startsWith(NO_TRANSLATION_PREFIX))
+					englishTranslations.putIfAbsent(key, key);
 			}
 			for (var key: Translation.getExtraKeys()) {			
 				englishTranslations.putIfAbsent(key, key);
@@ -272,7 +275,8 @@ public class Translate extends CommandHandler {
 					var userPromptPrefix =  
 							"Now translate below lines. Each input line should produce exactly one output line. No merge or split. " + 
 							"Each line should be translated independently, without using any context from other lines. Html tags " + 
-							"and placeholders should be preserved. Content inside html tag <code> should not be translated.";
+							"and placeholders should be preserved. Line break marks ({{LINE_BREAK}}) and content inside html tag " +
+							"<code> should not be translated.";
 
 					var translator = new Function<List<String>, List<String>>() {
 						@Override
@@ -282,7 +286,7 @@ public class Translate extends CommandHandler {
 								var untranslated = new ArrayList<String>();
 								for (int i=0; i<input.size(); i++) {
 									if (!translated.containsKey(i)) {
-										untranslated.add("<a>" + i + "</a>" + input.get(i));
+										untranslated.add("<a>" + i + "</a>" + input.get(i).replace("\n", "{{LINE_BREAK}}"));
 									}
 								}
 								logger.info("Translating {} lines...", untranslated.size());
@@ -294,7 +298,7 @@ public class Translate extends CommandHandler {
 									if (matcher.matches()) {
 										var index = Integer.parseInt(matcher.group(1));
 										if (index >= 0 && index < input.size()) {
-											var normalized = StringUtils.substringBefore(matcher.group(2), "<<<").trim();
+											var normalized = StringUtils.substringBefore(matcher.group(2), "<<<").trim().replace("{{LINE_BREAK}}", "\n");
 											if (normalized.length() != 0)
 												translated.put(index, normalized);
 											else

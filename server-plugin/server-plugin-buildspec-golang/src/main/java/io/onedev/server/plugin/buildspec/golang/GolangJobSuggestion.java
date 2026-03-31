@@ -17,7 +17,6 @@ import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import io.onedev.server.buildspec.step.CheckoutStep;
 import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.buildspec.step.SetupCacheStep;
-import io.onedev.server.buildspec.step.CachePath;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -26,7 +25,7 @@ import io.onedev.server.plugin.report.checkstyle.PublishCheckstyleReportStep;
 import io.onedev.server.plugin.report.cobertura.PublishCoberturaReportStep;
 import io.onedev.server.plugin.report.coverage.PublishCoverageReportStep;
 import io.onedev.server.plugin.report.junit.PublishJUnitReportStep;
-import io.onedev.server.util.interpolative.VariableInterpolator;
+import io.onedev.server.util.interpolative.JobVariableInterpolator;
 
 public class GolangJobSuggestion implements JobSuggestion {
 
@@ -88,15 +87,15 @@ public class GolangJobSuggestion implements JobSuggestion {
 
 			setupCache.setChecksumFiles("**/go.mod");
 			setupCache.setPaths(Lists.newArrayList(
-				CachePath.of(false, "/root/.cache/go_build"), 
-				CachePath.of(false, "/root/.cache/golangci-lint"), 
-				CachePath.of(false, "/go/pkg/mod")));
+				"/root/.cache/go_build", 
+				"/root/.cache/golangci-lint", 
+				"/go/pkg/mod"));
 			job.getSteps().add(setupCache);
 
 			CommandStep buildAndTest = new CommandStep();
 			buildAndTest.setName("build and test");
 			
-			buildAndTest.setImage("golang:@" + VariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_GO_VERSION + "@");
+			buildAndTest.setImage("golang:@" + JobVariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_GO_VERSION + "@");
 			buildAndTest.getInterpreter().setCommands("" +
 					"set -e\n" +
 					"# Use double at to avoid being interpreted as OneDev variable substitution\n" +

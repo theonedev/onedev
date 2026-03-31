@@ -8,13 +8,12 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.step.*;
-import io.onedev.server.buildspec.step.CachePath;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GroovyScript;
-import io.onedev.server.util.interpolative.VariableInterpolator;
+import io.onedev.server.util.interpolative.JobVariableInterpolator;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
@@ -63,7 +62,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			
 			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
 			setBuildVersion.setName("set build version");
-			setBuildVersion.setBuildVersion("@" + VariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@");
+			setBuildVersion.setBuildVersion("@" + JobVariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@");
 			job.getSteps().add(setBuildVersion);
 			
 			CommandStep runCommands = new CommandStep();
@@ -122,7 +121,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			
 			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
 			setBuildVersion.setName("set build version");
-			setBuildVersion.setBuildVersion("@" + VariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@");
+			setBuildVersion.setBuildVersion("@" + JobVariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@");
 			job.getSteps().add(setBuildVersion);
 			
 			CommandStep runCommands = new CommandStep();
@@ -177,7 +176,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			
 			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
 			setBuildVersion.setName("set build version");
-			setBuildVersion.setBuildVersion("@" + VariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@");
+			setBuildVersion.setBuildVersion("@" + JobVariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@");
 			job.getSteps().add(setBuildVersion);
 			
 			CommandStep runCommands = new CommandStep();
@@ -227,7 +226,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 		setupCache.setKey("node_modules");
 
 		setupCache.setChecksumFiles("package-lock.json yarn.lock");
-		setupCache.setPaths(Lists.newArrayList(CachePath.of(false, "node_modules")));
+		setupCache.setPaths(Lists.newArrayList("node_modules"));
 		
 		return Lists.newArrayList(setupCache);
 	}
