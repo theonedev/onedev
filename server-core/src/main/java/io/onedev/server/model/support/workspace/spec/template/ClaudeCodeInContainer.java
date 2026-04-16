@@ -12,7 +12,9 @@ import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable(order=1100, name="nt:Claude Code in Container", description="""
         Create a workspace spec running Claude Code inside container for isolation and security purpose. 
-        <b class='text-info'>NOTE:</b> This requires an enterprise subscription. 
+        You may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a> 
+        later to suit your needs if desired. 
+        <b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription. 
         <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days""")
 public class ClaudeCodeInContainer extends WorkspaceSpecTemplate {
 

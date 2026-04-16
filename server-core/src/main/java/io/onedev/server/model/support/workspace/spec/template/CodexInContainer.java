@@ -11,8 +11,10 @@ import io.onedev.server.model.support.workspace.spec.shell.CustomLinuxShell;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable(order=1100, name="nt:Codex in Container", description="""
-        Create a workspace spec running Codex inside container for isolation and security purpose. 
-        <b class='text-info'>NOTE:</b> This requires an enterprise subscription. 
+        Create a workspace spec running Codex inside container for isolation and security purpose.
+        You may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a> 
+        later to suit your needs if desired. 
+        <b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription. 
         <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days""")
 public class CodexInContainer extends WorkspaceSpecTemplate {
 

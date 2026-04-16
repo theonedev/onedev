@@ -57,7 +57,7 @@ public class ShellProvisioner extends WorkspaceProvisioner implements Testable<T
 		checkApplicable();
 		
 		Commandline git = CommandUtils.newGit();
-		AgentUtils.testCommands(git, testData.getCommands(), jobLogger);
+		AgentUtils.testCommands(git, testData.getCommands() + "\ntmux -V", jobLogger);
 	}
 	
 	@Editable(name="Specify Shell/Batch Commands to Run")
