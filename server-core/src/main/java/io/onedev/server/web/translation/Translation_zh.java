@@ -937,12 +937,18 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Create User", "创建用户");
 		m.put("Create Workspace", "创建工作区");
 		m.put("Create Workspace Spec", "创建工作区规格");
-		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> is installed on OneDev server</li>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个直接在服务器 shell 环境中运行 Claude Code 的工作区规范。\n要使用此模板创建的规范，请确保：\n<ul>\n    <li>在 OneDev 服务器上安装了 <a href='https://github.com/tmux/tmux' target='_blank'>tmux</a></li>\n    <li>在 OneDev 服务器上安装了 <a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a></li>\n    <li>在“管理 / 工作区配置器”中添加了一个 shell 配置器，并正确配置了“适用项目”</li>\n</ul>");
-		m.put("Create a workspace spec running Codex directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> is installed on OneDev server</li>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个直接在服务器 shell 环境中运行 Codex 的工作区规范。\n要使用此模板创建的规范，请确保：\n<ul>\n    <li>在 OneDev 服务器上安装了 <a href='https://github.com/tmux/tmux' target='_blank'>tmux</a></li>\n    <li>在 OneDev 服务器上安装了 <a href='https://openai.com/codex/' target='_blank'>Codex</a></li>\n    <li>在“管理 / 工作区配置器”中添加了一个 shell 配置器，并正确配置了“适用项目”</li>\n</ul>");
-		m.put("Create a workspace spec running Open Code directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> is installed on OneDev server</li>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
-			"创建一个直接在服务器 shell 环境中运行 Open Code 的工作区规范。\n要使用此模板创建的规范，请确保：\n<ul>\n    <li>在 OneDev 服务器上安装了 <a href='https://github.com/tmux/tmux' target='_blank'>tmux</a></li>\n    <li>在 OneDev 服务器上安装了 <a href='https://opencode.ai/' target='_blank'>Open Code</a></li>\n    <li>在“管理 / 工作区配置器”中添加了一个 shell 配置器，并正确配置了“适用项目”</li>\n</ul>");
+		m.put("Create a workspace spec running Claude Code directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个直接在服务器 shell 环境中运行 Claude Code 的工作区规范。\n要使用此模板创建的规范，请确保：\n<ul>\n    <li><a href='https://code.claude.com/docs/en/overview' target='_blank'>Claude Code</a> 已安装在 OneDev 服务器上</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 'applicable projects'</li>\n</ul>");
+		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"创建一个在容器内运行 Claude Code 的工作区规范，以实现隔离和安全目的。\n您可以稍后根据需要自定义<a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>容器镜像</a>。\n<b class='text-info'>注意：</b>在容器内创建工作区需要企业订阅。\n<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
+		m.put("Create a workspace spec running Codex directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个直接在服务器 shell 环境中运行 Codex 的工作区规范。\n要使用此模板创建的规范，请确保：\n<ul>\n    <li><a href='https://openai.com/codex/' target='_blank'>Codex</a> 已安装在 OneDev 服务器上</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 'applicable projects'</li>\n</ul>");
+		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"创建一个在容器内运行 Codex 的工作区规范，以实现隔离和安全目的。\n您可以稍后根据需要自定义<a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>容器镜像</a>。\n<b class='text-info'>注意：</b>在容器内创建工作区需要企业订阅。\n<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
+		m.put("Create a workspace spec running Open Code directly with server shell environment.\nTo use spec created by this template, please ensure that:\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>\n    <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>\n</ul>", 
+			"创建一个直接在服务器 shell 环境中运行 Open Code 的工作区规范。\n要使用此模板创建的规范，请确保：\n<ul>\n    <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> 已安装在 OneDev 服务器上</li>\n    <li>在 'Administration / Workspace Provisioners' 中添加了一个 shell 配置器，并正确配置了 'applicable projects'</li>\n</ul>");
+		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
+			"创建一个在容器内运行 Open Code 的工作区规范，以实现隔离和安全目的。\n您可以稍后根据需要自定义<a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>容器镜像</a>。\n<b class='text-info'>注意：</b>在容器内创建工作区需要企业订阅。\n<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
 		m.put("Create body", "创建正文");
 		m.put("Create branch <b>{0}</b> from {1}", "创建分支 <b>{0}</b>（基于 {1}）");
 		m.put("Create child projects under a project", "在项目下创建子项目");
@@ -2524,6 +2530,8 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择为 crane 指定 <a href='https://github.com/google/go-containerregistry/blob/main/cmd/crane/doc/crane_pull.md' target='_blank'>附加选项</a>");
 		m.put("Optionally specify <a href='https://github.com/google/go-containerregistry/blob/main/cmd/crane/doc/crane_push.md' target='_blank'>additional options</a> of crane", 
 			"可选择为 crane 指定 <a href='https://github.com/google/go-containerregistry/blob/main/cmd/crane/doc/crane_push.md' target='_blank'>附加选项</a>");
+		m.put("Optionally specify <a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> executable,\nfor instance <i>/usr/local/bin/tmux</i>. Leave empty to use tmux executable in PATH", 
+			"可选地指定 <a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> 可执行文件，\n例如 <i>/usr/local/bin/tmux</i>。留空以使用 PATH 中的 tmux 可执行文件");
 		m.put("Optionally specify <span class='text-info'>comma separated</span> platforms to build, for instance <tt>linux/amd64,linux/arm64</tt>. Leave empty to build for platform of the node running the job", 
 			"可选择指定 <span class='text-info'>逗号分隔</span> 的平台，例如 <tt>linux/amd64,linux/arm64</tt>。留空则构建为运行任务的节点的平台");
 		m.put("Optionally specify <span class='text-info'>comma separated</span> platforms to scan, for instance <tt>linux/amd64,linux/arm64</tt>. Leave empty to scan all platforms in OCI layout", 
@@ -4263,8 +4271,8 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("This permission enables one to access confidential issues", "此权限允许访问机密工单");
 		m.put("This permission enables one to schedule issues into iterations", "此权限允许将工单调度到迭代中");
 		m.put("This property is imported from {0}", "此属性是从 {0} 导入的");
-		m.put("This provisioner creates workspaces with OneDev server's shell facility, and it requires\n<a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> to be installed on OneDev server<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have the same\npermission as the OneDev server process. Make sure it can only be used by trusted projects.\n", 
-			"此配置器使用 OneDev 服务器的 shell 功能创建工作区，并且需要\n在 OneDev 服务器上安装 <a href='https://github.com/tmux/tmux' target='_blank'>tmux</a><br>\n<b class='text-danger'>警告</b>：由此配置器创建的工作区具有与 OneDev 服务器进程相同的\n权限。确保它只能被可信项目使用。\n");
+		m.put("This provisioner creates workspaces with OneDev server's shell facility, and requires\ntmux to be installed on OneDev server<br>\n<b class='text-danger'>WARNING</b>: Workspaces created by this provisioner have the same\npermission as the OneDev server process. Make sure it can only be used by trusted projects.\n", 
+			"此配置器使用 OneDev 服务器的 shell 功能创建工作区，并要求\n在 OneDev 服务器上安装 tmux<br>\n<b class='text-danger'>警告</b>：此配置器创建的工作区具有与 OneDev 服务器进程相同的\n权限。确保它只能被信任的项目使用。\n");
 		m.put("This pull request has been discarded", "此合并请求已丢弃");
 		m.put("This report will be displayed in pull request overview page if build is triggered by pull request", 
 			"如果构建由合并请求触发，此报告将显示在合并请求概览页面中");
@@ -4964,6 +4972,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("tags", "标签");
 		m.put("the url to set up user account", "设置用户账户的 URL");
 		m.put("time aggregation link", "时间聚合链接");
+		m.put("tmux Executable", "tmux 可执行文件");
 		m.put("touching specified path", "涉及指定路径");
 		m.put("transit manually by any user", "由任何用户手动转换");
 		m.put("transit manually by any user of roles \"{0}\"", "由具有角色 \"{0}\" 的任何用户手动转换");
@@ -5020,12 +5029,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("{javax.validation.constraints.NotEmpty.message}", "不能为空");
 		m.put("{javax.validation.constraints.NotNull.message}", "不能为空");
 		m.put("{javax.validation.constraints.Size.message}", "至少需要指定一个值");
-		m.put("Create a workspace spec running Claude Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"创建一个在容器内运行 Claude Code 的工作区规范，以实现隔离和安全目的。\n您可以稍后根据需要自定义<a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>容器镜像</a>。\n<b class='text-info'>注意：</b>在容器内创建工作区需要企业订阅。\n<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
-		m.put("Create a workspace spec running Codex inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"创建一个在容器内运行 Codex 的工作区规范，以实现隔离和安全目的。\n您可以稍后根据需要自定义<a href='https://code.onedev.io/onedev/docker/codex' target='_blank'>容器镜像</a>。\n<b class='text-info'>注意：</b>在容器内创建工作区需要企业订阅。\n<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
-		m.put("Create a workspace spec running Open Code inside container for isolation and security purpose.\nYou may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a>\nlater to suit your needs if desired.\n<b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription.\n<a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days", 
-			"创建一个在容器内运行 Open Code 的工作区规范，以实现隔离和安全目的。\n您可以稍后根据需要自定义<a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>容器镜像</a>。\n<b class='text-info'>注意：</b>在容器内创建工作区需要企业订阅。\n<a href='https://onedev.io/pricing' target='_blank'>免费试用</a>30天");
 	}
 		
 	@Override

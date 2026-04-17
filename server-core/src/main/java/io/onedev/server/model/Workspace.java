@@ -29,7 +29,6 @@ import org.jspecify.annotations.Nullable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.entityreference.WorkspaceReference;
@@ -296,7 +295,7 @@ public class Workspace extends AbstractEntity {
 
 		var spec = getSpec();
 		if (spec == null)
-			throw new ExplicitException("Spec not found in workspace project hierarchy");
+			return maskSecrets;
 		
 		for (var envVar: spec.getEnvVars()) {
 			if (envVar.isSecret()) 

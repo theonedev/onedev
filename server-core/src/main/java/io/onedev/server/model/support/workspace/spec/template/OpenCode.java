@@ -12,7 +12,6 @@ import io.onedev.server.web.util.SuggestionUtils;
         Create a workspace spec running Open Code directly with server shell environment. 
         To use spec created by this template, please ensure that: 
         <ul>
-            <li><a href='https://github.com/tmux/tmux' target='_blank'>tmux</a> is installed on OneDev server</li>
             <li><a href='https://opencode.ai/' target='_blank'>Open Code</a> is installed on OneDev server</li>
             <li>A shell provisioner is added in 'Administration / Workspace Provisioners' with 'applicable projects' configured properly</li>
         </ul>""")

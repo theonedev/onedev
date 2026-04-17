@@ -4,8 +4,8 @@ import static io.onedev.agent.AgentUtils.newInfoLogger;
 import static io.onedev.agent.AgentUtils.newWarningLogger;
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
 import static io.onedev.k8shelper.KubernetesHelper.initRepository;
-import static io.onedev.k8shelper.KubernetesHelper.setupGitCerts;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
+import static io.onedev.k8shelper.KubernetesHelper.setupGitCerts;
 import static io.onedev.k8shelper.KubernetesHelper.stringifyStepPosition;
 
 import java.io.File;
@@ -33,6 +33,7 @@ import io.onedev.k8shelper.BuildImageFacade;
 import io.onedev.k8shelper.CheckoutFacade;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.k8shelper.CompositeFacade;
+import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.LeafFacade;
 import io.onedev.k8shelper.LeafHandler;
 import io.onedev.k8shelper.PruneBuilderCacheFacade;
@@ -305,7 +306,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
 		Commandline git = CommandUtils.newGit();
-		AgentUtils.testCommands(git, testData.getCommands(), jobLogger);
+		AgentUtils.testCommands(testData.getCommands(), jobLogger);
+		KubernetesHelper.testGitLfsAvailability(git, jobLogger);
 	}
 	
 	@Editable(name="Specify Shell/Batch Commands to Run")

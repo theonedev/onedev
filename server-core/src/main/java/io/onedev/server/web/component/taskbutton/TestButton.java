@@ -92,7 +92,7 @@ public abstract class TestButton extends TaskButton {
 	@Override
 	protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 		if (editor.isValid()) {
-			if (testData != null) {
+			if (testData != null && !(testData instanceof Testable.None)) {
 				String title = EditableUtils.getDisplayName(testData.getClass());
 				new BeanEditModalPanel<Serializable>(target, testData, Sets.newHashSet(), true, title) {
 
