@@ -33,7 +33,7 @@ public class GetRawCommitCommand {
 	
 	public byte[] run() {
 		Commandline git = newGit().workingDir(workingDir);
-		git.environments().putAll(envs);
+		git.envs().putAll(envs);
 		
 		git.addArgs("cat-file", "commit", revision);
 		

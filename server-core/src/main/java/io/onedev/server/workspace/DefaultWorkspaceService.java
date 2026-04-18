@@ -5,7 +5,6 @@ import static io.onedev.server.util.SiteSyncUtils.readVersion;
 import static io.onedev.server.util.SiteSyncUtils.writeVersion;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectStreamException;
@@ -13,7 +12,6 @@ import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -21,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -78,7 +77,6 @@ import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.ServerNotFoundException;
 import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitTask;
-import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.logging.LogService;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
@@ -575,7 +573,10 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 								future.get();
 								logger.error("Workspace runtime stopped for unknown reason");
 							} catch (Throwable t) {
-								log(logger, t);
+								if (ExceptionUtils.find(t, CancellationException.class) != null)
+									logger.error("Workspace runtime stopped due to server restart. You may reprovision the workspace to continue your work");
+								else
+									log(logger, t);
 							} finally {
 								it.remove();
 								markWorkspaceError(workspace);
@@ -1084,19 +1085,14 @@ public class DefaultWorkspaceService extends BaseEntityService<Workspace>
 	@Override
 	public GitExecutionResult executeGitCommand(Workspace workspace, String[] gitArgs) {
 		var projectId = workspace.getProject().getId();
-		var workspaceNumber = workspace.getNumber();
-		var workspaceToken = workspace.getToken();
+		var workspaceId = workspace.getId();
 		return projectService.runOnActiveServer(projectId, () -> {
-			var git = CommandUtils.newGit();
-			var workDir = Workspace.getWorkDir(projectId, workspaceNumber);					
-			git.workingDir(workDir);
-			git.environments().putAll(HookUtils.getWorkspacePostCommitHookEnvs(workspaceToken));
-			git.arguments(Arrays.asList(gitArgs));
-
-			var stdoutStream = new ByteArrayOutputStream();
-			var stderrStream = new ByteArrayOutputStream();
-			var returnCode = git.execute(stdoutStream, stderrStream).getReturnCode();
-			return new GitExecutionResult(stdoutStream.toByteArray(), stderrStream.toByteArray(), returnCode);
+			var runtime = workspaceRuntimes.get(workspaceId);
+			if (runtime != null) {
+				return runtime.executeGitCommand(gitArgs);
+			} else {
+				return new GitExecutionResult(new byte[0], "Workspace no longer active".getBytes(UTF_8), 1);
+			}
 		});
 	}
 

@@ -103,7 +103,7 @@ public class SCPCommandStep extends CommandStep {
 
 	@Override
 	public String getRunAs() {
-		return null;
+		return "0:0";
 	}
 
 	@Override

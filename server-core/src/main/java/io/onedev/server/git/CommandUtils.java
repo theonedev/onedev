@@ -48,7 +48,7 @@ public class CommandUtils {
 		SecretMasker.push(text -> StringUtils.replace(text, clusterService.getCredential(), "******"));
 		try {
 			Commandline git = newGit();
-			git.environments().put("HOME", homeDir.getAbsolutePath());
+			git.envs().put("HOME", homeDir.getAbsolutePath());
 			String extraHeader = KubernetesHelper.AUTHORIZATION + ": " 
 					+ KubernetesHelper.BEARER + " " + clusterService.getCredential();
 			git.addArgs("config", "--global", "http.extraHeader", extraHeader);

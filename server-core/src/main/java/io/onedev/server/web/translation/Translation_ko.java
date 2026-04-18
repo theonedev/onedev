@@ -575,6 +575,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("CPU Intensive Task Concurrency", "CPU 집약적 작업 동시성");
 		m.put("CPU capability in millis. This is normally (CPU cores)*1000", "밀리초 단위의 CPU 성능. 일반적으로 (CPU 코어)*1000입니다");
 		m.put("CPU cores", "CPU 코어");
+		m.put("Cache \"{0} (checksum: {1})\" deleted", "캐시 \"{0} (체크섬: {1})\" 삭제됨");
 		m.put("Cache \"{0}\" deleted", "캐시 \"{0}\" 삭제됨");
 		m.put("Cache Config", "캐시 구성");
 		m.put("Cache Key", "캐시 키");
@@ -1440,7 +1441,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("File is binary", "파일이 바이너리입니다");
 		m.put("File is too large to be displayed", "파일이 너무 커서 표시할 수 없습니다");
 		m.put("File is too large to edit here", "파일이 너무 커서 여기서 편집할 수 없습니다");
-		m.put("File missing or obsolete", "파일 누락 또는 오래됨");
 		m.put("File name", "파일 이름");
 		m.put("File name patterns such as *.java, *.c", "파일 이름 패턴 예: *.java, *.c");
 		m.put("Files", "파일들");
@@ -2514,8 +2514,6 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"선택적으로 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>작업 워크스페이스</a>에 상대적인 Dockerfile을 지정하세요. 위에서 지정한 빌드 경로 아래의 <tt>Dockerfile</tt> 파일을 사용하려면 비워 두세요.");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "선택적으로 Renovate CLI에서 사용할 JavaScript 구성을 지정하세요.");
-		m.put("Optionally specify PowerShell commands to run to set up the workspace. These commands\nwill run from working directory holding cloned repository files", 
-			"워크스페이스를 설정하기 위해 실행할 PowerShell 명령을 선택적으로 지정합니다. 이러한 명령은\n클론된 저장소 파일을 보유한 작업 디렉토리에서 실행됩니다");
 		m.put("Optionally specify SSH root URL, which will be used to construct project clone url via SSH protocol. Leave empty to derive from server url", 
 			"선택적으로 SSH 루트 URL을 지정하세요. 이는 SSH 프로토콜을 통해 프로젝트 클론 URL을 구성하는 데 사용됩니다. 서버 URL에서 파생하려면 비워 두세요.");
 		m.put("Optionally specify a <a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'>regular expression pattern</a> for valid values of the text input", 
@@ -2696,10 +2694,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 패키지 파일을 저장할 별도의 디렉터리를 지정하세요. 절대 디렉터리가 아닌 경우 사이트 디렉터리에 상대적으로 간주됩니다.");
 		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are only supported by docker aware executors (server docker executor, remote docker executor, or kubernetes executor)", 
 			"선택적으로 이 작업에 필요한 서비스를 지정하세요. <b class='text-warning'>참고:</b> 서비스는 Docker를 인식하는 실행자(서버 Docker 실행자, 원격 Docker 실행자 또는 Kubernetes 실행자)에서만 지원됩니다.");
-		m.put("Optionally specify sh commands (on Linux/Unix) or batch commands (on Windows)\nto run to set up the workspace. These commands will run from working directory\nholding cloned repository files", 
-			"워크스페이스를 설정하기 위해 실행할 sh 명령(Linux/Unix) 또는 배치 명령(Windows)을 선택적으로 지정합니다.\n이러한 명령은 클론된 저장소 파일을 보유한 작업 디렉토리에서 실행됩니다");
-		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files", 
-			"워크스페이스를 설정하기 위해 실행할 셸 명령을 선택적으로 지정합니다. 이러한 명령은\n클론된 저장소 파일을 보유한 작업 디렉토리에서 실행됩니다");
 		m.put("Optionally specify space-separated branches applicable for this transition. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all", 
 			"선택적으로 이 전환에 적용 가능한 공백으로 구분된 브랜치를 지정하세요. <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>경로 와일드카드 매칭</a>을 위해 '**', '*' 또는 '?'를 사용하세요. 제외하려면 '-'로 접두어를 붙이세요. 모든 브랜치를 일치시키려면 비워 두세요.");
 		m.put("Optionally specify space-separated branches applicable for this trigger. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for default branch", 
@@ -2734,8 +2728,6 @@ public class Translation_ko extends TranslationResourceBundle {
 			"선택적으로 사이트 파일을 게시할 프로젝트를 지정하십시오. 현재 프로젝트에 게시하려면 비워두십시오.");
 		m.put("Optionally specify uid:gid to run container as. <b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or using user namespace remapping", 
 			"선택적으로 컨테이너를 실행할 uid:gid를 지정하십시오. <b class='text-warning'>참고:</b> 컨테이너 런타임이 루트리스이거나 사용자 네임스페이스 리매핑을 사용하는 경우 이 설정을 비워두어야 합니다.");
-		m.put("Optionally specify uid:gid to run container as. <b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or using user namespace remapping\n", 
-			"컨테이너를 실행할 uid:gid를 선택적으로 지정합니다. <b class='text-warning'>참고:</b> 컨테이너 런타임이 루트리스이거나 사용자 네임스페이스 리매핑을 사용하는 경우 이 설정을 비워 두어야 합니다\n");
 		m.put("Optionally specify user name to access remote repository", "선택적으로 원격 저장소에 접근할 사용자 이름을 지정하십시오.");
 		m.put("Optionally specify valid scopes of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary scope", 
 			"선택적으로 유효한 컨벤션 커밋 범위를 지정하십시오 (값을 추가하려면 ENTER를 누르십시오). 비워두면 임의의 범위를 허용합니다.");
@@ -3949,6 +3941,7 @@ public class Translation_ko extends TranslationResourceBundle {
 		m.put("Specify timeout in seconds when communicating with mail server", "메일 서버와 통신할 때의 타임아웃(초)을 지정하십시오.");
 		m.put("Specify timeout in seconds. It counts from the time when job is submitted", "작업이 제출된 시점부터의 타임아웃(초)을 지정하십시오.");
 		m.put("Specify title of the issue", "이슈 제목을 지정하십시오.");
+		m.put("Specify uid:gid to run container as", "컨테이너를 실행할 uid:gid 지정");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "YouTrack API의 URL을 지정하십시오. 예를 들어 <tt>http://localhost:8080/api</tt>.");
 		m.put("Specify user name of above machine for SSH authentication", "SSH 인증을 위한 위 머신의 사용자 이름을 지정하십시오.");
 		m.put("Specify user name of specified registry", "지정된 레지스트리의 사용자 이름을 지정하십시오.");

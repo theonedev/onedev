@@ -1,16 +1,20 @@
 package io.onedev.server.buildspec.step;
 
-import static io.onedev.agent.AgentUtils.buildDockerConfig;
+import static io.onedev.agent.AgentUtils.buildAuthConfig;
 import static io.onedev.k8shelper.RegistryLoginFacade.merge;
 import static io.onedev.server.buildspec.step.StepGroup.DOCKER_IMAGE;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
@@ -18,11 +22,11 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.k8shelper.RegistryLoginFacade;
 import io.onedev.k8shelper.StepFacade;
-import io.onedev.server.annotation.Path;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Multiline;
 import io.onedev.server.annotation.NoSpace;
+import io.onedev.server.annotation.Path;
 import io.onedev.server.annotation.ReservedOptions;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
@@ -65,7 +69,7 @@ public class BuildImageWithKanikoStep extends CommandStep {
 
 	@Override
 	public String getRunAs() {
-		return null;
+		return "0:0";
 	}
 
 	@Editable(order=100, description="Optionally specify build context path relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. "
@@ -145,7 +149,13 @@ public class BuildImageWithKanikoStep extends CommandStep {
 			DockerAware registryLoginAware = (DockerAware) jobExecutor;
 			commandsBuilder.append("cat <<EOF>> /kaniko/.docker/config.json\n");
 			var mergedRegistryLogins = merge(registryLogins, registryLoginAware.getRegistryLogins(jobToken));
-			commandsBuilder.append(buildDockerConfig(mergedRegistryLogins)).append("\n");
+			var configMap = new HashMap<String, Object>();
+			configMap.put("auths", buildAuthConfig(mergedRegistryLogins));
+			try {
+				commandsBuilder.append(new ObjectMapper().writeValueAsString(configMap)).append("\n");
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
+			}
 			commandsBuilder.append("EOF\n");
 		}
 		if (getTrustCertificates() != null) {

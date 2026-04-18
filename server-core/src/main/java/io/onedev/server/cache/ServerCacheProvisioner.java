@@ -3,7 +3,6 @@ package io.onedev.server.cache;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -18,6 +17,7 @@ import org.glassfish.jersey.client.ClientProperties;
 import org.jspecify.annotations.Nullable;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.TarUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.CacheAvailability;
 import io.onedev.k8shelper.CacheConfigFacade;
@@ -32,28 +32,23 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.service.AccessTokenService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.RunCacheService;
-import io.onedev.server.service.support.CacheQueryResult;
 
 public abstract class ServerCacheProvisioner extends CacheProvisioner {
-		
+
 	public ServerCacheProvisioner(File baseDir, TaskLogger logger) {
 		super(baseDir, logger);
 	}
 
 	@Override
 	protected CacheAvailability downloadCache(String key, @Nullable String checksum,
-									String cachePathsString, List<File> cacheDirs) {
-		var cacheQueryResult = getCacheService().queryCache(getProjectId(), key, checksum);
-		return downloadCache(cacheQueryResult, cachePathsString, cacheDirs);
-	}
-
-	private CacheAvailability downloadCache(@Nullable CacheQueryResult cacheQueryResult, String cachePathsString, List<File> cacheDirs) {
-		if (cacheQueryResult != null) {
-			var projectId = cacheQueryResult.getProjectId();
-			var cacheId = cacheQueryResult.getCacheId();
+									String path, File cacheDir) {
+		var cacheFindResult = getCacheService().findCache(getProjectId(), key, checksum, path);
+		if (cacheFindResult != null) {
+			var projectId = cacheFindResult.getProjectId();
 			var activeServer = getProjectService().getActiveServer(projectId, true);
 			if (activeServer.equals(getClusterService().getLocalServerAddress())) {
-				return getCacheService().downloadCache(cacheQueryResult, cachePathsString, is -> untar(cacheDirs, is));
+				return getCacheService().downloadCache(cacheFindResult, 
+						is -> TarUtils.untar(is, cacheDir, false));
 			} else {
 				Client client = ClientBuilder.newClient();
 				client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
@@ -62,9 +57,9 @@ public abstract class ServerCacheProvisioner extends CacheProvisioner {
 					var target = client.target(serverUrl)
 							.path("~api/cluster/cache")
 							.queryParam("projectId", projectId)
-							.queryParam("cacheId", cacheId)
-							.queryParam("exactMatch", cacheQueryResult.isExactMatch())
-							.queryParam("cachePathsString", cachePathsString);
+							.queryParam("dirName", cacheFindResult.getDirName())
+							.queryParam("pathIndex", cacheFindResult.getPathIndex())
+							.queryParam("exactMatch", cacheFindResult.isExactMatch());
 					Invocation.Builder builder = target.request();
 					builder.header(HttpHeaders.AUTHORIZATION,
 							KubernetesHelper.BEARER + " " + getClusterService().getCredential());
@@ -72,8 +67,8 @@ public abstract class ServerCacheProvisioner extends CacheProvisioner {
 						KubernetesHelper.checkStatus(response);
 						try (var is = response.readEntity(InputStream.class)) {
 							var cacheAvailability = CacheAvailability.values()[is.read()];
-							if (cacheAvailability != CacheAvailability.NOT_FOUND) 
-								untar(cacheDirs, is);
+							if (cacheAvailability != CacheAvailability.NOT_FOUND)
+								TarUtils.untar(is, cacheDir, false);
 							return cacheAvailability;
 						} catch (IOException e) {
 							throw new RuntimeException(e);
@@ -89,11 +84,10 @@ public abstract class ServerCacheProvisioner extends CacheProvisioner {
 	}
 
 	@Override
-	protected boolean uploadCache(CacheConfigFacade cacheConfig, List<File> cacheDirs) {
+	protected boolean uploadCache(CacheConfigFacade cacheConfig, String path, File cacheDir) {
 		var key = cacheConfig.getKey();
 		var checksum = cacheConfig.getChecksum();
-		var cachePathsString = cacheConfig.getPathsAsString();
-		
+
 		var projectId = getSessionService().call(() -> {
 			Project uploadProject;
 			if (cacheConfig.getUploadProjectPath() != null) {
@@ -103,7 +97,7 @@ public abstract class ServerCacheProvisioner extends CacheProvisioner {
 					throw new ExplicitException("Upload project not found: " + uploadProjectPath);
 			} else {
 				uploadProject = getProjectService().load(getProjectId());
-			}		
+			}
 
 			var accessTokenValue = cacheConfig.getUploadAccessToken();
 			if (canUploadTo(uploadProject)) {
@@ -112,16 +106,16 @@ public abstract class ServerCacheProvisioner extends CacheProvisioner {
 				var accessToken = getAccessTokenService().findByValue(accessTokenValue);
 				if (accessToken != null && SecurityUtils.canUploadCache(accessToken.asSubject(), uploadProject))
 					return uploadProject.getId();
-			} 
+			}
 			return null;
 
 		});
-		
+
 		if (projectId != null) {
-			Long cacheId = getCacheService().createCache(projectId, key, checksum);
 			var activeServer = getProjectService().getActiveServer(projectId, true);
 			if (activeServer.equals(getClusterService().getLocalServerAddress())) {
-				getCacheService().uploadCache(projectId, cacheId, cachePathsString, os -> tar(cacheDirs, os));
+				getCacheService().uploadCache(projectId, key, checksum, path,
+						os -> TarUtils.tar(cacheDir, os, false));
 			} else {
 				Client client = ClientBuilder.newClient();
 				client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
@@ -130,12 +124,13 @@ public abstract class ServerCacheProvisioner extends CacheProvisioner {
 					var target = client.target(serverUrl)
 							.path("~api/cluster/cache")
 							.queryParam("projectId", projectId)
-							.queryParam("cacheId", cacheId)
-							.queryParam("cachePathsString", cachePathsString);
+							.queryParam("key", key)
+							.queryParam("checksum", checksum)
+							.queryParam("path", path);
 					Invocation.Builder builder = target.request();
 					builder.header(HttpHeaders.AUTHORIZATION,
 							KubernetesHelper.BEARER + " " + getClusterService().getCredential());
-					StreamingOutput output = os -> tar(cacheDirs, os);
+					StreamingOutput output = os -> TarUtils.tar(cacheDir, os, false);
 					try (Response response = builder.post(Entity.entity(output, MediaType.APPLICATION_OCTET_STREAM))) {
 						KubernetesHelper.checkStatus(response);
 					}
@@ -153,19 +148,19 @@ public abstract class ServerCacheProvisioner extends CacheProvisioner {
 
 	@Sessional
 	protected abstract boolean canUploadTo(Project uploadProject);
-	
+
 	protected ClusterService getClusterService() {
 		return OneDev.getInstance(ClusterService.class);
 	}
-		
+
 	protected ProjectService getProjectService() {
 		return OneDev.getInstance(ProjectService.class);
 	}
-		
+
 	protected RunCacheService getCacheService() {
 		return OneDev.getInstance(RunCacheService.class);
 	}
-	
+
 	protected SessionService getSessionService() {
 		return OneDev.getInstance(SessionService.class);
 	}

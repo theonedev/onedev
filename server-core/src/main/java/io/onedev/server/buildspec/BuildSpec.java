@@ -2465,8 +2465,27 @@ public class BuildSpec implements Serializable, Validatable {
 		return null;
 	}
 
+	private static void migrate47_setDefaultRunAs(MappingNode node) {
+		for (var tuple : node.getValue()) {
+			if (((ScalarNode) tuple.getKeyNode()).getValue().equals("runAs"))
+				return;
+		}
+		node.getValue().add(new NodeTuple(
+				new ScalarNode(Tag.STR, "runAs"),
+				new ScalarNode(Tag.STR, "0:0")));
+	}
+
 	@SuppressWarnings("unused")
 	private void migrate47(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode) specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("services")) {
+				SequenceNode servicesNode = (SequenceNode) specTuple.getValueNode();
+				for (Node servicesNodeItem: servicesNode.getValue())
+					migrate47_setDefaultRunAs((MappingNode) servicesNodeItem);
+			}
+		}
+
 		migrateSteps(doc, versions, stepsNode -> {
 			Map<String, String> checksumMap = new LinkedHashMap<>();
 			for (Node stepsNodeItem : stepsNode.getValue()) {
@@ -2556,6 +2575,14 @@ public class BuildSpec implements Serializable, Validatable {
 							}
 						}
 					}
+					migrate47_setDefaultRunAs(stepNode);
+				} else if ("BuildImageWithKanikoStep".equals(stepType)
+						|| "SSHCommandStep".equals(stepType)
+						|| "SCPCommandStep".equals(stepType)
+						|| "PushImageStep".equals(stepType)
+						|| "PullImageStep".equals(stepType)
+						|| "RenovateStep".equals(stepType)) {
+					migrate47_setDefaultRunAs(stepNode);
 				}
 			}
 		});

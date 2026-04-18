@@ -37,6 +37,8 @@ public abstract class WorkspaceRuntime {
         return shellId;
     }
 
+    public abstract GitExecutionResult executeGitCommand(String[] gitArgs);
+
     public synchronized Map<String, String> getShellLabels() {
         return new LinkedHashMap<>(labels);
     }

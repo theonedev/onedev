@@ -1,10 +1,14 @@
 package io.onedev.server.buildspec.step;
 
-import static io.onedev.agent.AgentUtils.buildDockerConfig;
+import static io.onedev.agent.AgentUtils.buildAuthConfig;
 import static io.onedev.k8shelper.RegistryLoginFacade.merge;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CommandFacade;
@@ -46,7 +50,7 @@ public abstract class CraneStep extends CommandStep {
 
 	@Override
 	public String getRunAs() {
-		return null;
+		return "0:0";
 	}
 
 	@Editable(order=1000, name="Certificates to Trust", group = "More Settings", placeholder = "Base64 encoded PEM format, starting with " +
@@ -93,7 +97,13 @@ public abstract class CraneStep extends CommandStep {
 			commandsBuilder.append("mkdir /root/.docker\n");
 			commandsBuilder.append("cat <<EOF>> /root/.docker/config.json\n");
 			var mergedRegistryLogins = merge(registryLogins, registryLoginAware.getRegistryLogins(jobToken));
-			commandsBuilder.append(buildDockerConfig(mergedRegistryLogins)).append("\n");
+			var configMap = new HashMap<String, Object>();
+			configMap.put("auths", buildAuthConfig(mergedRegistryLogins));
+			try {
+				commandsBuilder.append(new ObjectMapper().writeValueAsString(configMap)).append("\n");
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
+			}
 			commandsBuilder.append("EOF\n");
 		}
 		if (getTrustCertificates() != null) {

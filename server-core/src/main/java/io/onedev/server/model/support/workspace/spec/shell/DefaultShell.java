@@ -11,10 +11,7 @@ public class DefaultShell extends WorkspaceShell {
 
 	private static final long serialVersionUID = 1L;
 
-	@Editable(order=100, description="""
-		Optionally specify sh commands (on Linux/Unix) or batch commands (on Windows) 
-		to run to set up the workspace. These commands will run from working directory
-		holding cloned repository files""")
+	@Editable(order=100, descriptionProvider="getSetupCommandDescription")
 	@Interpolative
 	@Code(language=Code.SHELL, variableProvider="suggestVariables")
 	@Override

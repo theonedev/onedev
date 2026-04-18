@@ -84,7 +84,7 @@ public abstract class LogCommand {
 	
     public void run() {
         Commandline git = newGit().workingDir(workingDir);
-		git.environments().putAll(envs);
+		git.envs().putAll(envs);
 
         String format = "hash:%H %n";
 

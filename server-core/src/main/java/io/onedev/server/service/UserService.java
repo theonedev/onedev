@@ -113,5 +113,5 @@ public interface UserService extends EntityService<User> {
 	File getUserDir(Long userId);
 
 	UserCache cloneCache();
-	
+
 }

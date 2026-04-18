@@ -85,7 +85,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 	
 	private static final int TIMEOUT_SECONDS = 600;
 
-    private static final int SYNC_PRIORITY = 50;
+	private static final int SYNC_PRIORITY = 50;
 
 	@Inject
 	private BatchWorkExecutionService batchWorkExecutionService;
@@ -133,9 +133,10 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 				syncDirectory(syncWithServer, "users", userId -> {
 					syncDirectory(syncWithServer, "users/" + userId, dataType -> {
 						if (dataType.equals("workspace-data")) {
-							syncDirectory(syncWithServer, "users/" + userId + "/workspace-data", dataKey -> {
+							syncDirectory(syncWithServer, "users/" + userId + "/workspace-data", encodedDataKey -> {
+								var dataKey = User.decodeWorkspaceDataKey(encodedDataKey);
 								var lockName = User.getWorkspaceDataLockName(Long.valueOf(userId), dataKey);
-								syncDirectory(syncWithServer, "users/" + userId + "/workspace-data/" + dataKey, 
+								syncDirectory(syncWithServer, "users/" + userId + "/workspace-data/" + encodedDataKey,
 									false, lockName, lockName);
 							}, true);
 						}
@@ -749,7 +750,7 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 
 	@Override
 	public File getWorkspaceDataDir(Long userId, String dataKey, boolean createIfNotExist) {
-		var dataDir = new File(getWorkspaceDataBaseDir(userId), dataKey);
+		var dataDir = new File(getWorkspaceDataBaseDir(userId), User.encodeWorkspaceDataKey(dataKey));
 		if (createIfNotExist)
 			FileUtils.createDir(dataDir);
 		return dataDir;

@@ -37,7 +37,7 @@ public class IsAncestorCommand {
 	
 	public boolean run() {
 		Commandline git = newGit().workingDir(workingDir);
-		git.environments().putAll(envs);
+		git.envs().putAll(envs);
 		
 		git.addArgs("merge-base", "--is-ancestor", ancestor, descendant);
 		

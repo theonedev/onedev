@@ -295,6 +295,7 @@ public abstract class WorkspaceDetailPage extends ProjectPage {
 			@Override
 			public void onClick() {
 				workspaceService.requestToReprovision(getWorkspace());
+				setResponsePage(WorkspaceLogPage.class, getPageParameters());
 				Session.get().success(MessageFormat.format(_T("Workspace reprovisioning requested"),
 						getWorkspace().getReference().toString(getWorkspace().getProject())));
 			}

@@ -575,6 +575,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("CPU Intensive Task Concurrency", "CPU集約タスクの並行性");
 		m.put("CPU capability in millis. This is normally (CPU cores)*1000", "ミリ秒単位のCPU能力。通常は(CPUコア数)*1000");
 		m.put("CPU cores", "CPUコア");
+		m.put("Cache \"{0} (checksum: {1})\" deleted", "キャッシュ「{0} (チェックサム: {1})」が削除されました");
 		m.put("Cache \"{0}\" deleted", "キャッシュ\"{0}\"が削除されました");
 		m.put("Cache Config", "キャッシュ設定");
 		m.put("Cache Key", "キャッシュキー");
@@ -1440,7 +1441,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("File is binary", "ファイルはバイナリです");
 		m.put("File is too large to be displayed", "ファイルが大きすぎて表示できません");
 		m.put("File is too large to edit here", "ファイルが大きすぎてここでは編集できません");
-		m.put("File missing or obsolete", "ファイルが欠落しているか廃止されています");
 		m.put("File name", "ファイル名");
 		m.put("File name patterns such as *.java, *.c", "ファイル名パターン（例: *.java, *.c）");
 		m.put("Files", "ファイル一覧");
@@ -2514,8 +2514,6 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"オプションで、<a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>ジョブワークスペース</a>に対するDockerfileの相対パスを指定してください。上記で指定したビルドパスの下にある<tt>Dockerfile</tt>ファイルを使用する場合は空のままにしてください。");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "オプションで、Renovate CLIで使用するJavaScript設定を指定してください。");
-		m.put("Optionally specify PowerShell commands to run to set up the workspace. These commands\nwill run from working directory holding cloned repository files", 
-			"オプションでワークスペースをセットアップするために実行するPowerShellコマンドを指定します。これらのコマンドは\nクローンされたリポジトリファイルを保持する作業ディレクトリから実行されます");
 		m.put("Optionally specify SSH root URL, which will be used to construct project clone url via SSH protocol. Leave empty to derive from server url", 
 			"オプションで、SSHルートURLを指定してください。これはSSHプロトコルを介してプロジェクトクローンURLを構築するために使用されます。サーバーURLから派生する場合は空のままにしてください。");
 		m.put("Optionally specify a <a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'>regular expression pattern</a> for valid values of the text input", 
@@ -2696,10 +2694,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"オプションで、パッケージファイルを保存するための別のディレクトリを指定してください。絶対ディレクトリでない場合、サイトディレクトリに対する相対ディレクトリと見なされます。");
 		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are only supported by docker aware executors (server docker executor, remote docker executor, or kubernetes executor)", 
 			"オプションで、このジョブに必要なサービスを指定してください。<b class='text-warning'>注意:</b> サービスはDocker対応エグゼキューター（サーバーDockerエグゼキューター、リモートDockerエグゼキューター、またはKubernetesエグゼキューター）のみでサポートされています。");
-		m.put("Optionally specify sh commands (on Linux/Unix) or batch commands (on Windows)\nto run to set up the workspace. These commands will run from working directory\nholding cloned repository files", 
-			"ワークスペースをセットアップするために実行するshコマンド（Linux/Unix）またはバッチコマンド（Windows）をオプションで指定します。\nこれらのコマンドはクローンされたリポジトリファイルを保持する作業ディレクトリから実行されます\n");
-		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files", 
-			"ワークスペースをセットアップするために実行するシェルコマンドをオプションで指定します。これらのコマンドは\nクローンされたリポジトリファイルを保持する作業ディレクトリから実行されます");
 		m.put("Optionally specify space-separated branches applicable for this transition. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all", 
 			"オプションで、この遷移に適用されるスペース区切りのブランチを指定してください。<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>パスワイルドカードマッチ</a>には'**'、'*'または'?'を使用してください。'-'で除外を指定してください。すべてに一致する場合は空のままにしてください。");
 		m.put("Optionally specify space-separated branches applicable for this trigger. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for default branch", 
@@ -2734,8 +2728,6 @@ public class Translation_ja extends TranslationResourceBundle {
 			"必要に応じてサイトファイルを公開するプロジェクトを指定します。空欄の場合は現在のプロジェクトに公開されます");
 		m.put("Optionally specify uid:gid to run container as. <b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or using user namespace remapping", 
 			"必要に応じてコンテナを実行するuid:gidを指定します。<b class='text-warning'>注意:</b> コンテナランタイムがルートレスまたはユーザー名前空間リマッピングを使用している場合、この設定は空欄にする必要があります");
-		m.put("Optionally specify uid:gid to run container as. <b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or using user namespace remapping\n", 
-			"コンテナを実行するためのuid:gidをオプションで指定します。<b class='text-warning'>注意:</b> コンテナランタイムがルートレスまたはユーザーネームスペースリマッピングを使用している場合、この設定は空のままにしてください\n");
 		m.put("Optionally specify user name to access remote repository", "必要に応じてリモートリポジトリにアクセスするためのユーザー名を指定します");
 		m.put("Optionally specify valid scopes of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary scope", 
 			"必要に応じて従来のコミットの有効なスコープを指定します（ENTERキーを押して値を追加）。空欄の場合は任意のスコープを許可します");
@@ -3949,6 +3941,7 @@ public class Translation_ja extends TranslationResourceBundle {
 		m.put("Specify timeout in seconds when communicating with mail server", "メールサーバーと通信する際のタイムアウトを秒単位で指定してください。");
 		m.put("Specify timeout in seconds. It counts from the time when job is submitted", "ジョブが送信されてからのタイムアウトを秒単位で指定してください。");
 		m.put("Specify title of the issue", "問題のタイトルを指定してください。");
+		m.put("Specify uid:gid to run container as", "コンテナを実行するためのuid:gidを指定してください");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "YouTrack APIのURLを指定してください。例: <tt>http://localhost:8080/api</tt>");
 		m.put("Specify user name of above machine for SSH authentication", "SSH認証のための上記マシンのユーザー名を指定してください。");
 		m.put("Specify user name of specified registry", "指定されたレジストリのユーザー名を指定してください。");

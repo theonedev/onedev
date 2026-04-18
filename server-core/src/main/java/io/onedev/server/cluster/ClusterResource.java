@@ -59,7 +59,7 @@ import io.onedev.server.service.BuildService;
 import io.onedev.server.service.PackBlobService;
 import io.onedev.server.service.ProjectService;
 import io.onedev.server.service.RunCacheService;
-import io.onedev.server.service.support.CacheQueryResult;
+import io.onedev.server.service.support.CacheFindResult;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.concurrent.WorkExecutionService;
 import io.onedev.server.util.patternset.PatternSet;
@@ -232,14 +232,14 @@ public class ClusterResource {
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@GET
 	public Response downloadCache(
-			@QueryParam("projectId") Long projectId, 
-			@QueryParam("cacheId") Long cacheId, 
-			@QueryParam("exactMatch") boolean exactMatch,
-			@QueryParam("cachePathsString") String cachePathsString) {
+			@QueryParam("projectId") Long projectId,
+			@QueryParam("dirName") String dirName,
+			@QueryParam("pathIndex") int pathIndex, 
+			@QueryParam("exactMatch") boolean exactMatch) {
 		if (!SecurityUtils.isSystem())
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
-		var cacheQueryResult = new CacheQueryResult(projectId, cacheId, exactMatch);
-		StreamingOutput out = os -> cacheService.downloadCache(cacheQueryResult, cachePathsString, os);
+		var cacheFindResult = new CacheFindResult(projectId, dirName, pathIndex, exactMatch);
+		StreamingOutput out = os -> cacheService.downloadCache(cacheFindResult, os);
 		return ok(out).build();
 	}
 
@@ -461,12 +461,13 @@ public class ClusterResource {
 	@POST
 	public Response uploadCache(
 			@QueryParam("projectId") Long projectId,
-			@QueryParam("cacheId") Long cacheId,
-			@QueryParam("cachePathsString") String cachePathsString,
+			@QueryParam("key") String key,
+			@QueryParam("checksum") String checksum,
+			@QueryParam("path") String path,
 			InputStream cacheStream) {
 		if (!SecurityUtils.isSystem())
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
-		cacheService.uploadCache(projectId, cacheId, cachePathsString, cacheStream);
+		cacheService.uploadCache(projectId, key, checksum, path, cacheStream);
 		return ok().build();
 	}
 	

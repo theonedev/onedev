@@ -44,7 +44,7 @@ public class CommandStep extends Step {
 	
 	private Interpreter interpreter = new DefaultInterpreter();
 	
-	private String runAs;
+	private String runAs = "0:0";
 	
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
 	
@@ -84,11 +84,10 @@ public class CommandStep extends Step {
 		this.interpreter = interpreter;
 	}
 
-	@Editable(order=8000, name="Run As", group = "More Settings", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
-			"<b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or " +
-			"using user namespace remapping")
+	@Editable(order=8000, name="Run As", group = "More Settings", description = "Specify uid:gid to run container as")
 	@DependsOn(property="runInContainer")
 	@Pattern(regexp="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
+	@NotEmpty
 	public String getRunAs() {
 		return runAs;
 	}

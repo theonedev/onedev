@@ -40,7 +40,7 @@ public class AdvertiseReceiveRefsCommand {
 		Commandline git = newGit().workingDir(workingDir);
 		
 		if (protocol != null)
-			git.environments().put("GIT_PROTOCOL", protocol);
+			git.envs().put("GIT_PROTOCOL", protocol);
 		
 		git.addArgs("receive-pack", "--stateless-rpc", "--advertise-refs", ".");
 		git.execute(output, new LineConsumer() {

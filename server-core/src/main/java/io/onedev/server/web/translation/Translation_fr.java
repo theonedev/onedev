@@ -575,6 +575,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("CPU Intensive Task Concurrency", "Concurrence des tâches intensives en CPU");
 		m.put("CPU capability in millis. This is normally (CPU cores)*1000", "Capacité CPU en millis. Cela correspond normalement à (cœurs CPU)*1000");
 		m.put("CPU cores", "Cœurs CPU");
+		m.put("Cache \"{0} (checksum: {1})\" deleted", "Cache \"{0} (somme de contrôle : {1})\" supprimé");
 		m.put("Cache \"{0}\" deleted", "Cache \"{0}\" supprimé");
 		m.put("Cache Config", "Configuration de cache");
 		m.put("Cache Key", "Clé de cache");
@@ -1440,7 +1441,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("File is binary", "Le fichier est binaire");
 		m.put("File is too large to be displayed", "Le fichier est trop grand pour être affiché");
 		m.put("File is too large to edit here", "Le fichier est trop volumineux pour être édité ici");
-		m.put("File missing or obsolete", "Fichier manquant ou obsolète");
 		m.put("File name", "Nom du fichier");
 		m.put("File name patterns such as *.java, *.c", "Modèles de noms de fichiers tels que *.java, *.c");
 		m.put("Files", "Fichiers");
@@ -2514,8 +2514,6 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"Spécifiez éventuellement le Dockerfile relatif à <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>l'espace de travail de la tâche</a>. Laissez vide pour utiliser le fichier <tt>Dockerfile</tt> sous le chemin de construction spécifié ci-dessus.");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "Spécifiez éventuellement une configuration JavaScript à utiliser par Renovate CLI.");
-		m.put("Optionally specify PowerShell commands to run to set up the workspace. These commands\nwill run from working directory holding cloned repository files", 
-			"Spécifiez éventuellement des commandes PowerShell à exécuter pour configurer l'espace de travail. Ces commandes\ns'exécuteront à partir du répertoire de travail contenant les fichiers du dépôt cloné");
 		m.put("Optionally specify SSH root URL, which will be used to construct project clone url via SSH protocol. Leave empty to derive from server url", 
 			"Spécifiez éventuellement une URL racine SSH, qui sera utilisée pour construire l'URL de clonage du projet via le protocole SSH. Laissez vide pour dériver de l'URL du serveur.");
 		m.put("Optionally specify a <a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'>regular expression pattern</a> for valid values of the text input", 
@@ -2696,10 +2694,6 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Spécifiez éventuellement un répertoire séparé pour stocker les fichiers de package. Un répertoire non absolu est considéré comme relatif au répertoire du site.");
 		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are only supported by docker aware executors (server docker executor, remote docker executor, or kubernetes executor)", 
 			"Spécifiez éventuellement les services requis par cette tâche. <b class='text-warning'>NOTE :</b> Les services ne sont pris en charge que par les exécuteurs compatibles avec docker (exécuteur docker serveur, exécuteur docker distant ou exécuteur Kubernetes).");
-		m.put("Optionally specify sh commands (on Linux/Unix) or batch commands (on Windows)\nto run to set up the workspace. These commands will run from working directory\nholding cloned repository files", 
-			"Spécifiez éventuellement des commandes sh (sur Linux/Unix) ou des commandes batch (sur Windows)\nà exécuter pour configurer l'espace de travail. Ces commandes s'exécuteront à partir du répertoire de travail\ncontenant les fichiers du dépôt cloné");
-		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files", 
-			"Spécifiez éventuellement des commandes shell à exécuter pour configurer l'espace de travail. Ces commandes s'exécuteront\nà partir du répertoire de travail contenant les fichiers du dépôt cloné");
 		m.put("Optionally specify space-separated branches applicable for this transition. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all", 
 			"Spécifiez éventuellement les branches séparées par des espaces applicables à cette transition. Utilisez '**', '*' ou '?' pour <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>la correspondance de modèle de chemin</a>. Préfixez avec '-' pour exclure. Laissez vide pour correspondre à toutes.");
 		m.put("Optionally specify space-separated branches applicable for this trigger. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for default branch", 
@@ -2734,8 +2728,6 @@ public class Translation_fr extends TranslationResourceBundle {
 			"Spécifiez éventuellement le projet pour publier les fichiers du site. Laissez vide pour publier dans le projet actuel");
 		m.put("Optionally specify uid:gid to run container as. <b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or using user namespace remapping", 
 			"Spécifiez éventuellement uid:gid pour exécuter le conteneur. <b class='text-warning'>Remarque :</b> Ce paramètre doit être laissé vide si le runtime du conteneur est sans privilège ou utilise le remappage de l'espace utilisateur");
-		m.put("Optionally specify uid:gid to run container as. <b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or using user namespace remapping\n", 
-			"Spécifiez éventuellement uid:gid pour exécuter le conteneur en tant que tel. <b class='text-warning'>Remarque :</b> Ce paramètre doit être laissé vide si le runtime du conteneur est sans privilèges ou utilise le remappage de l'espace utilisateur\n");
 		m.put("Optionally specify user name to access remote repository", "Spécifiez éventuellement le nom d'utilisateur pour accéder au dépôt distant");
 		m.put("Optionally specify valid scopes of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary scope", 
 			"Spécifiez éventuellement des portées valides pour les commits conventionnels (appuyez sur ENTRÉE pour ajouter une valeur). Laissez vide pour autoriser une portée arbitraire");
@@ -3949,6 +3941,7 @@ public class Translation_fr extends TranslationResourceBundle {
 		m.put("Specify timeout in seconds when communicating with mail server", "Spécifiez le délai d'attente en secondes lors de la communication avec le serveur de messagerie");
 		m.put("Specify timeout in seconds. It counts from the time when job is submitted", "Spécifiez le délai d'attente en secondes. Il commence à partir du moment où le travail est soumis");
 		m.put("Specify title of the issue", "Spécifiez le titre du problème");
+		m.put("Specify uid:gid to run container as", "Spécifiez uid:gid pour exécuter le conteneur en tant que");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "Spécifiez l'URL de l'API YouTrack. Par exemple <tt>http://localhost:8080/api</tt>");
 		m.put("Specify user name of above machine for SSH authentication", "Spécifiez le nom d'utilisateur de la machine ci-dessus pour l'authentification SSH");
 		m.put("Specify user name of specified registry", "Spécifiez le nom d'utilisateur du registre spécifié");

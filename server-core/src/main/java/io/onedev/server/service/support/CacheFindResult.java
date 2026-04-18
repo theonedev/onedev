@@ -4,17 +4,22 @@ import java.io.Serializable;
 
 import io.onedev.k8shelper.CacheAvailability;
 
-public class CacheQueryResult implements Serializable {
+public class CacheFindResult implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final Long projectId;
 
-    private final Long cacheId;
+    private final String dirName;
+
+    private final int pathIndex;
 
     private final boolean exactMatch;
 
-    public CacheQueryResult(Long projectId, Long cacheId, boolean exactMatch) {
+    public CacheFindResult(Long projectId, String dirName, int pathIndex, boolean exactMatch) {
         this.projectId = projectId;
-        this.cacheId = cacheId;
+        this.dirName = dirName;
+        this.pathIndex = pathIndex;
         this.exactMatch = exactMatch;
     }
 
@@ -22,8 +27,12 @@ public class CacheQueryResult implements Serializable {
         return projectId;
     }
 
-    public Long getCacheId() {
-        return cacheId;
+    public String getDirName() {
+        return dirName;
+    }
+
+    public int getPathIndex() {
+        return pathIndex;
     }
 
     public boolean isExactMatch() {
@@ -33,5 +42,5 @@ public class CacheQueryResult implements Serializable {
     public CacheAvailability getCacheAvailability() {
         return exactMatch ? CacheAvailability.EXACT_MATCH : CacheAvailability.PARTIAL_MATCH;
     }
-    
+
 }

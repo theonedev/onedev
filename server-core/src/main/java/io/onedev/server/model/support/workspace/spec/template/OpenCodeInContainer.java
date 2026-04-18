@@ -3,9 +3,7 @@ package io.onedev.server.model.support.workspace.spec.template;
 import java.util.List;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.k8shelper.UploadStrategy;
 import io.onedev.server.annotation.Editable;
-import io.onedev.server.model.support.workspace.spec.CacheConfig;
 import io.onedev.server.model.support.workspace.spec.ShortcutConfig;
 import io.onedev.server.model.support.workspace.spec.UserData;
 import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
@@ -34,13 +32,6 @@ public class OpenCodeInContainer extends WorkspaceSpecTemplate {
         shortcutConfig.setName("OpenCode");
         shortcutConfig.setCommand("opencode");
         workspaceSpec.getShortcutConfigs().add(shortcutConfig);
-
-        var cacheConfig = new CacheConfig();
-        cacheConfig.setKey("opencode");
-        cacheConfig.getPaths().add("/home/opencode/.cache");
-        cacheConfig.getPaths().add("/home/opencode/.npm");
-        cacheConfig.setUploadStrategy(UploadStrategy.UPLOAD_IF_CHANGED);        
-        workspaceSpec.getCacheConfigs().add(cacheConfig);
 
         var userData = new UserData();
         userData.setKey("opencode");

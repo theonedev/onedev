@@ -3,11 +3,15 @@ package io.onedev.server.plugin.provisioner.shell;
 import static io.onedev.agent.AgentUtils.newErrorLogger;
 import static io.onedev.agent.AgentUtils.newInfoLogger;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 
+import io.onedev.server.git.hook.HookUtils;
+import io.onedev.server.workspace.GitExecutionResult;
 import org.apache.commons.io.FilenameUtils;
 
 import io.onedev.commons.utils.ExplicitException;
@@ -94,6 +98,8 @@ public class ShellProvisioner extends WorkspaceProvisioner implements Testable<T
 
 		envVars.put("TERM", "xterm-256color");
 		envVars.put("LANG", "C.UTF-8");
+		var workDir = new File(workspaceDir, "work");
+		envVars.put("ONEDEV_WORKDIR", workDir.getAbsolutePath());
 
 		logger.log("Setting up cache...");
 
@@ -119,13 +125,26 @@ public class ShellProvisioner extends WorkspaceProvisioner implements Testable<T
 			var cmdline = new Commandline(shell.getFacility().getExecutable());
 			cmdline.addArgs(shell.getFacility().getScriptOptions());
 
-			cmdline.workingDir(new File(workspaceDir, "work")).environments(envVars);
+			cmdline.workingDir(workDir).envs(envVars);
 			cmdline.addArgs(scriptFile.getAbsolutePath());
 			cmdline.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
 		}
 
 		return new WorkspaceRuntime() {
-		
+
+			@Override
+			public GitExecutionResult executeGitCommand(String[] gitArgs) {
+				var git = CommandUtils.newGit();
+				git.workingDir(workDir);
+				git.envs().putAll(HookUtils.getWorkspacePostCommitHookEnvs(context.getToken()));
+				git.args(Arrays.asList(gitArgs));
+
+				var stdoutStream = new ByteArrayOutputStream();
+				var stderrStream = new ByteArrayOutputStream();
+				var returnCode = git.execute(stdoutStream, stderrStream).getReturnCode();
+				return new GitExecutionResult(stdoutStream.toByteArray(), stderrStream.toByteArray(), returnCode);
+			}
+
 			@Override
 			public Shell doOpenShell(Terminal terminal) {
 				var workDir = Workspace.getWorkDir(context.getProjectId(), context.getWorkspaceNumber());
@@ -134,7 +153,7 @@ public class ShellProvisioner extends WorkspaceProvisioner implements Testable<T
 				tmux.addArgs("new-session")
 					.addArgs(context.getSpec().getShell().getFacility().getExecutable())
 					.workingDir(workDir)
-					.environments(envVars);
+					.envs(envVars);
 				return new CommandlineShell(terminal, tmux);
 			}
 

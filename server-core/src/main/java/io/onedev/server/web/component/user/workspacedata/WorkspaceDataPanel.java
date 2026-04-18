@@ -5,8 +5,6 @@ import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.server.web.translation.Translation._T;
 
 import java.io.File;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -16,8 +14,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -28,8 +24,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -40,11 +34,12 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.model.User;
 import io.onedev.server.service.UserService;
+import io.onedev.server.service.support.PathInfo;
+import io.onedev.server.util.PathIndexUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.indexedpath.IndexedPathsPanel;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 
 public class WorkspaceDataPanel extends Panel {
@@ -72,6 +67,7 @@ public class WorkspaceDataPanel extends Panel {
 		var baseDir = getWorkspaceDataBaseDir();
 		return Arrays.stream(baseDir.listFiles(File::isDirectory))
 			.map(File::getName)
+			.map(User::decodeWorkspaceDataKey)
 			.sorted()
 			.collect(Collectors.toList());
 	}
@@ -98,50 +94,13 @@ public class WorkspaceDataPanel extends Panel {
 			public void populateItem(Item<ICellPopulator<String>> cellItem, String componentId,
 									 IModel<String> rowModel) {
 				var key = rowModel.getObject();
-				Fragment fragment = new Fragment(componentId, "filesColumnFrag", WorkspaceDataPanel.this);
-
-				var files = read(User.getWorkspaceDataLockName(userId, key), () -> {
+				List<PathInfo> indexedPaths = read(User.getWorkspaceDataLockName(userId, key), () -> {
 					var keyDir = userService.getWorkspaceDataDir(userId, key, false);
-					var innerFiles = new ArrayList<FileEntry>();
-					if (keyDir.exists()) {
-						for (var file : keyDir.listFiles()) {
-							if (file.isFile() && !file.isHidden()) {
-								innerFiles.add(new FileEntry(
-									new String(Hex.decodeHex(file.getName()), StandardCharsets.UTF_8), 
-									FileUtils.byteCountToDisplaySize(file.length())));
-							}
-						}
-					}
-					innerFiles.sort((a, b) -> a.path.compareTo(b.path));
-					return innerFiles;
+					if (!keyDir.exists())
+						return new ArrayList<PathInfo>();
+					return PathIndexUtils.listIndexedPaths(keyDir);
 				});
-
-				var link = new DropdownLink("link") {
-
-					@Override
-					protected Component newContent(String id, FloatingPanel dropdown) {
-						Fragment fragment = new Fragment(id, "filesDropdownFrag", WorkspaceDataPanel.this);
-
-						fragment.add(new ListView<>("files", files) {
-				
-							@Override
-							protected void populateItem(ListItem<FileEntry> item) {
-								item.add(new Label("path", item.getModelObject().path));
-								item.add(new Label("size", item.getModelObject().size));
-							}
-				
-						});
-				
-						return fragment;				
-					}
-
-				};
-
-				link.add(new Label("label", Model.of(String.valueOf(files.size()))));
-
-				fragment.add(link);
-
-				cellItem.add(fragment);
+				cellItem.add(new IndexedPathsPanel(componentId, Model.ofList(indexedPaths)));
 			}
 
 		});
@@ -234,19 +193,6 @@ public class WorkspaceDataPanel extends Panel {
 
 		add(dataTable = new DefaultDataTable<>("keys", columns, dataProvider,
 				Integer.MAX_VALUE, null));
-	}
-
-	private static class FileEntry implements Serializable {
-
-		final String path;
-
-		final String size;
-
-		FileEntry(String path, String size) {
-			this.path = path;
-			this.size = size;
-		}
-
 	}
 
 }

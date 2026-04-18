@@ -5,7 +5,6 @@ import static io.onedev.k8shelper.KubernetesHelper.initRepository;
 import static io.onedev.k8shelper.KubernetesHelper.installGitLfs;
 import static io.onedev.k8shelper.KubernetesHelper.setupGitCerts;
 import static io.onedev.k8shelper.KubernetesHelper.setupOriginUrl;
-import static io.onedev.k8shelper.KubernetesHelper.setupSafeDirectory;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.File;
@@ -150,27 +149,21 @@ public abstract class WorkspaceProvisioner implements Serializable {
 		var remoteAccessArgs = new ArrayList<String>();
 		var trustCertsFile = new File(workspaceDir, "trust-certs.pem");
 		remoteAccessArgs.addAll(setupGitCerts(git, Bootstrap.getTrustCertsDir(), trustCertsFile, 
-				runtimeWorkspaceDirPath + "/" + trustCertsFile.getName(), 
-				infoLogger, warningLogger));
+				runtimeWorkspaceDirPath + "/" + trustCertsFile.getName(), infoLogger, warningLogger));
 		remoteAccessArgs.addAll(cloneInfo.setupGitAuth(git, workspaceDir, runtimeWorkspaceDirPath, 
 				infoLogger, warningLogger));
 
-		if (!Bootstrap.isInDocker()) {
-			setupSafeDirectory(git, runtimeWorkspaceDirPath + "/work", 
-				null, infoLogger, warningLogger);
-		}
-				
-		git.arguments("config", "user.name", context.getUserName());
+		git.args("-c", "safe.directory=*", "config", "user.name", context.getUserName());
 		git.execute(infoLogger, warningLogger).checkReturnCode();
 
-		git.arguments("config", "pull.rebase", "false");
+		git.args("-c", "safe.directory=*", "config", "pull.rebase", "false");
 		git.execute(infoLogger, warningLogger).checkReturnCode();
 
-		git.arguments("config", "user.email", context.getUserEmail());
+		git.args("-c", "safe.directory=*", "config", "user.email", context.getUserEmail());
 		git.execute(infoLogger, warningLogger).checkReturnCode();
 
 		var noCommits = new AtomicBoolean(false);
-		git.arguments("status");		
+		git.args("-c", "safe.directory=*", "status");		
 		git.execute(new LineConsumer() {
 
 			@Override
@@ -187,7 +180,7 @@ public abstract class WorkspaceProvisioner implements Serializable {
 		if (noCommits.get()) {
 			if (context.getBranch() != null) {
 				logger.log("Cloning repository...");
-				git.arguments(remoteAccessArgs);				
+				git.args(remoteAccessArgs);				
 				cloneRepository(git, context.getProjectGitDir(), cloneInfo.getCloneUrl(),
 						GitUtils.branch2ref(context.getBranch()), null,
 						context.getSpec().isRetrieveLfs(), false, 0,
@@ -195,7 +188,7 @@ public abstract class WorkspaceProvisioner implements Serializable {
 			} else { // no commits at server side
 				setupOriginUrl(git, cloneInfo.getCloneUrl(), infoLogger, warningLogger);
 	
-				git.arguments("config", "push.autoSetupRemote", "true");
+				git.args("-c", "safe.directory=*", "config", "push.autoSetupRemote", "true");
 				git.execute(infoLogger, warningLogger).checkReturnCode();
 
 				if (context.getSpec().isRetrieveLfs())

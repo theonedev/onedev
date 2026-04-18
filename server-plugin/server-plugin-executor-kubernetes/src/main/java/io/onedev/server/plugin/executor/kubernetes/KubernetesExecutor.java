@@ -726,6 +726,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 			containerSpec.put("args", argList);			
 		}
 		containerSpec.put("env", envs);
+		
 		setupSecurityContext(containerSpec, jobService.getRunAs());
 		
 		podSpec.put("containers", Lists.<Object>newArrayList(containerSpec));
@@ -849,14 +850,12 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 		return map;
 	}
 	
-	private void setupSecurityContext(Map<Object, Object> containerSpec, @Nullable String runAs) {
-		if (runAs != null) {
-			var securityContext = new HashMap<>();
-			var fields = Splitter.on(':').trimResults().splitToList(runAs);
-			securityContext.put("runAsUser", parseInt(fields.get(0)));
-			securityContext.put("runAsGroup", parseInt(fields.get(1)));
-			containerSpec.put("securityContext", securityContext);
-		}
+	private void setupSecurityContext(Map<Object, Object> containerSpec, String runAs) {
+		var securityContext = new HashMap<>();
+		var fields = Splitter.on(':').trimResults().splitToList(runAs);
+		securityContext.put("runAsUser", parseInt(fields.get(0)));
+		securityContext.put("runAsGroup", parseInt(fields.get(1)));
+		containerSpec.put("securityContext", securityContext);
 	}
 	
 	private boolean execute(TaskLogger jobLogger, Object executionContext) {
@@ -932,7 +931,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 				List<Map<Object, Object>> containerSpecs = new ArrayList<>();
 				
 				var containerBuildDirPath = "/onedev-build";
-				var containerWorkDirPath = containerBuildDirPath +"/work";
+				var containerWorkDirPath = containerBuildDirPath + "/work";
 				var containerCommandDirPath = containerBuildDirPath + "/command";
 				var containerTrustCertsDirPath = containerBuildDirPath + "/trust-certs";
 
@@ -998,7 +997,8 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 						volumeMounts.addAll(commonVolumeMounts);
 						stepContainerSpec.put("volumeMounts", SerializationUtils.clone(volumeMounts));
 						stepContainerSpec.put("env", SerializationUtils.clone(commonEnvs));
-						setupSecurityContext(stepContainerSpec, commandFacade.getRunAs());
+						var runAs = commandFacade.getRunAs();
+						setupSecurityContext(stepContainerSpec, runAs);
 					} else if (facade instanceof BuildImageFacade) {
 						throw new ExplicitException("This step can only be executed by server docker executor or " +
 								"remote docker executor. Use kaniko step instead to build image in kubernetes cluster");

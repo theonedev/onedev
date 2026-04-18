@@ -26,9 +26,7 @@ public class CustomLinuxShell extends WorkspaceShell {
 		this.shell = shell;
 	}
 
-	@Editable(order=200, description="""
-		Optionally specify shell commands to run to set up the workspace. These commands will 
-		run from working directory holding cloned repository files""")
+	@Editable(order=200, descriptionProvider="getSetupCommandDescription")
 	@Interpolative
 	@Code(language=Code.SHELL, variableProvider="suggestVariables")
 	@Override

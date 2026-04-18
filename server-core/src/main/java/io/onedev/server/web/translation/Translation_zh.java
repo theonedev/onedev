@@ -601,6 +601,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("CPU Intensive Task Concurrency", "CPU 密集型任务并发数");
 		m.put("CPU capability in millis. This is normally (CPU cores)*1000", "CPU 能力（毫秒）。通常为 (CPU 核心数)*1000");
 		m.put("CPU cores", "CPU 核心");
+		m.put("Cache \"{0} (checksum: {1})\" deleted", "缓存 \"{0} (checksum: {1})\" 已删除");
 		m.put("Cache \"{0}\" deleted", "缓存 \"{0}\" 已删除");
 		m.put("Cache Config", "缓存配置");
 		m.put("Cache Key", "缓存键");
@@ -1466,7 +1467,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("File is binary", "文件是二进制的");
 		m.put("File is too large to be displayed", "文件太大，无法显示");
 		m.put("File is too large to edit here", "文件太大，无法在此编辑");
-		m.put("File missing or obsolete", "文件缺失或过时");
 		m.put("File name", "文件名");
 		m.put("File name patterns such as *.java, *.c", "文件名模式，如 *.java, *.c");
 		m.put("Files", "文件");
@@ -2540,8 +2540,6 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>job working directory</a>. Leave empty to use file <tt>Dockerfile</tt> under build path specified above", 
 			"可选择指定相对于 <a href='https://docs.onedev.io/concepts#job-workdir' target='_blank'>任务工作区</a> 的 Dockerfile。留空则使用上面指定的构建路径下的文件 <tt>Dockerfile</tt>");
 		m.put("Optionally specify JavaScript config to be used by Renovate CLI", "可选择指定用于 Renovate CLI 的 JavaScript 配置");
-		m.put("Optionally specify PowerShell commands to run to set up the workspace. These commands\nwill run from working directory holding cloned repository files", 
-			"可选地指定要运行的 PowerShell 命令以设置工作区。这些命令\n将从持有克隆代码库文件的工作目录运行。");
 		m.put("Optionally specify SSH root URL, which will be used to construct project clone url via SSH protocol. Leave empty to derive from server url", 
 			"可选择指定 SSH 根 URL，用于通过 SSH 协议构造项目克隆 URL。留空则从服务器 URL 推导");
 		m.put("Optionally specify a <a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'>regular expression pattern</a> for valid values of the text input", 
@@ -2722,10 +2720,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择指定单独的目录来存储包文件。非绝对目录被视为相对于站点目录");
 		m.put("Optionally specify services required by this job. <b class='text-warning'>NOTE:</b> Services are only supported by docker aware executors (server docker executor, remote docker executor, or kubernetes executor)", 
 			"可选择指定此任务所需的服务。<b class='text-warning'>注意：</b> 服务仅由支持 docker 的执行器（服务器 docker 执行器、远程 docker 执行器或 kubernetes 执行器）支持");
-		m.put("Optionally specify sh commands (on Linux/Unix) or batch commands (on Windows)\nto run to set up the workspace. These commands will run from working directory\nholding cloned repository files", 
-			"可选地指定要运行的 sh 命令（在 Linux/Unix 上）或批处理命令（在 Windows 上）\n以设置工作区。这些命令将从持有克隆代码库文件的工作目录运行。\n");
-		m.put("Optionally specify shell commands to run to set up the workspace. These commands will\nrun from working directory holding cloned repository files", 
-			"可选地指定要运行的 shell 命令以设置工作区。这些命令将\n从持有克隆代码库文件的工作目录运行。");
 		m.put("Optionally specify space-separated branches applicable for this transition. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to match all", 
 			"可选择指定适用于此转换的以空格分隔的分支。使用 '**'、'*' 或 '?' 进行 <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>路径通配符匹配</a>。前缀 '-' 表示排除。留空则匹配所有");
 		m.put("Optionally specify space-separated branches applicable for this trigger. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty for default branch", 
@@ -2760,8 +2754,6 @@ public class Translation_zh extends TranslationResourceBundle {
 			"可选择指定要发布站点文件的项目。留空则发布到当前项目");
 		m.put("Optionally specify uid:gid to run container as. <b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or using user namespace remapping", 
 			"可选择指定要作为容器运行的 uid:gid。<b class='text-warning'>注意：</b>如果容器运行时是 rootless 或使用用户命名空间重新映射，则应留空此设置");
-		m.put("Optionally specify uid:gid to run container as. <b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or using user namespace remapping\n", 
-			"可选地指定 uid:gid 以运行容器。<b class='text-warning'>注意：</b>如果容器运行时是无根的或使用用户命名空间重映射，则应将此设置留空。\n");
 		m.put("Optionally specify user name to access remote repository", "可选择指定用于访问远程仓库的用户名");
 		m.put("Optionally specify valid scopes of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary scope", 
 			"可选择指定有效的常规提交范围（按 ENTER 添加值）。留空则允许任意范围");
@@ -3975,6 +3967,7 @@ public class Translation_zh extends TranslationResourceBundle {
 		m.put("Specify timeout in seconds when communicating with mail server", "指定与邮件服务器通信时的超时时间（秒）");
 		m.put("Specify timeout in seconds. It counts from the time when job is submitted", "指定超时时间（秒）。从任务提交时开始计算");
 		m.put("Specify title of the issue", "指定工单的标题");
+		m.put("Specify uid:gid to run container as", "指定 uid:gid 以容器身份运行");
 		m.put("Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>", "指定 YouTrack API 的 URL。例如 <tt>http://localhost:8080/api</tt>");
 		m.put("Specify user name of above machine for SSH authentication", "指定上述机器的用户名用于 SSH 身份验证");
 		m.put("Specify user name of specified registry", "指定指定注册表的用户名");

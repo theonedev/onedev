@@ -185,7 +185,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								Map<String, String> envs = new HashMap<>();
 								envs.put("ONEDEV_WORKDIR", workDir.getAbsolutePath());
 								envs.putAll(commandFacade.getEnvMap());
-								cmdline.workingDir(workDir).environments(envs);
+								cmdline.workingDir(workDir).envs(envs);
 								cmdline.addArgs(stepScriptFile.getAbsolutePath());
 
 								var result = cmdline.execute(newInfoLogger(jobLogger), newWarningLogger(jobLogger));
@@ -218,7 +218,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								remoteAccessArgs.addAll(cloneInfo.setupGitAuth(git, buildDir, buildDir.getAbsolutePath(), 
 										infoLogger, warningLogger));
 					
-								git.arguments(remoteAccessArgs);
+								git.args(remoteAccessArgs);
 
 								cloneRepository(git, jobContext.getProjectGitDir(), cloneInfo.getCloneUrl(),
 										jobContext.getRefName(), jobContext.getCommitId().name(),

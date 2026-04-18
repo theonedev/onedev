@@ -65,7 +65,7 @@ public class WorkspaceSpec implements Serializable, Validatable {
 
 	private boolean retrieveLfs;
 
-	private String runAs;
+	private String runAs = "0:0";
 	
 	private List<Integer> containerPorts = new ArrayList<>();
 
@@ -213,14 +213,11 @@ public class WorkspaceSpec implements Serializable, Validatable {
 		this.retrieveLfs = retrieveLfs;
 	}
 
-	@Editable(order = 1400, name = "Run As", group = "More Settings", placeholder = "root", description = """
-			Optionally specify uid:gid to run container as. \
-			<b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or \
-			using user namespace remapping
-			""")
+	@Editable(order = 1400, name = "Run As", group = "More Settings", description = "Specify uid:gid to run container as")
 	@Interpolative(variableSuggester="suggestVariables")
 	@DependsOn(property = "runInContainer")
 	@Pattern(regexp = "(\\d+:\\d+)?", message = "Should be specified in form of <uid>:<gid>")
+	@NotEmpty
 	public String getRunAs() {
 		return runAs;
 	}

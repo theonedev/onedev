@@ -8628,6 +8628,8 @@ public class DataMigrator {
 						tokenElement.setName("token");
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("RunCaches.xml")) {
+				FileUtils.deleteFile(file);
 			}
 		}
 	}

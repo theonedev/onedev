@@ -172,16 +172,16 @@ public class KubernetesResource {
 			@QueryParam("jobToken") String jobToken,
 			@QueryParam("key") String key, 
 			@QueryParam("checksum") @Nullable String checksum, 
-			@QueryParam("cachePathsString") String cachePathsString) {
+			@QueryParam("path") String path) {
 		return os -> {
 			sessionService.closeSession();
 			try {
 				var jobContext = jobService.getJobContext(jobToken, true);
-				var cacheQueryResult = cacheService.queryCache(jobContext.getProjectId(), key, checksum);
-				if (cacheQueryResult != null) {
-					var activeServer = projectService.getActiveServer(cacheQueryResult.getProjectId(), true);
+				var cacheFindResult = cacheService.findCache(jobContext.getProjectId(), key, checksum, path);
+				if (cacheFindResult != null) {
+					var activeServer = projectService.getActiveServer(cacheFindResult.getProjectId(), true);
 					if (activeServer.equals(clusterService.getLocalServerAddress())) {
-						cacheService.downloadCache(cacheQueryResult, cachePathsString, os);
+						cacheService.downloadCache(cacheFindResult, os);
 					} else {
 						Client client = ClientBuilder.newClient();
 						client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
@@ -189,10 +189,10 @@ public class KubernetesResource {
 							String serverUrl = clusterService.getServerUrl(activeServer);
 							var target = client.target(serverUrl)
 									.path("~api/cluster/cache")
-									.queryParam("projectId", cacheQueryResult.getProjectId())
-									.queryParam("cacheId", cacheQueryResult.getCacheId())
-									.queryParam("exactMatch", cacheQueryResult.isExactMatch())
-									.queryParam("cachePathsString", cachePathsString);
+									.queryParam("projectId", cacheFindResult.getProjectId())
+									.queryParam("dirName", cacheFindResult.getDirName())
+									.queryParam("pathIndex", cacheFindResult.getPathIndex())
+									.queryParam("exactMatch", cacheFindResult.isExactMatch());
 							Invocation.Builder builder = target.request();
 							builder.header(HttpHeaders.AUTHORIZATION,
 									KubernetesHelper.BEARER + " " + clusterService.getCredential());
@@ -247,15 +247,14 @@ public class KubernetesResource {
 			@QueryParam("projectPath") @Nullable String projectPath,
 			@QueryParam("key") String key, 
 			@QueryParam("checksum") @Nullable String checksum,
-			@QueryParam("cachePathsString") String cachePathsString, 
+			@QueryParam("path") String path,
 			InputStream is) {
 		var projectId = checkUploadCache(jobToken, projectPath);
 		sessionService.closeSession();
 		try {
-			Long cacheId = cacheService.createCache(projectId, key, checksum);
 			var activeServer = projectService.getActiveServer(projectId, true);
 			if (activeServer.equals(clusterService.getLocalServerAddress())) {
-				cacheService.uploadCache(projectId, cacheId, cachePathsString, is);
+				cacheService.uploadCache(projectId, key, checksum, path, is);
 			} else {
 				Client client = ClientBuilder.newClient();
 				client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
@@ -264,8 +263,9 @@ public class KubernetesResource {
 					var target = client.target(serverUrl)
 							.path("~api/cluster/cache")
 							.queryParam("projectId", projectId)
-							.queryParam("cacheId", cacheId)
-							.queryParam("cachePathsString", cachePathsString);
+							.queryParam("key", key)
+							.queryParam("checksum", checksum)
+							.queryParam("path", path);
 					Invocation.Builder builder = target.request();
 					builder.header(HttpHeaders.AUTHORIZATION,
 							KubernetesHelper.BEARER + " " + clusterService.getCredential());

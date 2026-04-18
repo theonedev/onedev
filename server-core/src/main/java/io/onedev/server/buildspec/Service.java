@@ -38,7 +38,7 @@ public class Service implements NamedElement {
 	
 	private String readinessCheckCommand;
 	
-	private String runAs;
+	private String runAs = "0:0";
 
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
 	
@@ -111,10 +111,9 @@ public class Service implements NamedElement {
 		this.readinessCheckCommand = readinessCheckCommand;
 	}
 
-	@Editable(order=450, name="Run As", group = "More Settings", placeholder = "root", description = "Optionally specify uid:gid to run container as. " +
-			"<b class='text-warning'>Note:</b> This setting should be left empty if container runtime is rootless or " +
-			"using user namespace remapping")
+	@Editable(order=450, name="Run As", group = "More Settings", description = "Specify uid:gid to run container as")
 	@Pattern(regexp="\\d+:\\d+", message = "Should be specified in form of <uid>:<gid>")
+	@NotEmpty
 	public String getRunAs() {
 		return runAs;
 	}

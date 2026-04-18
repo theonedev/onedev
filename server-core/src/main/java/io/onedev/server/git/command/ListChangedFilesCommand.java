@@ -42,7 +42,7 @@ public class ListChangedFilesCommand {
 		final Set<String> changedFiles = new HashSet<String>();
 		
 		Commandline git = newGit().workingDir(workingDir);
-		git.environments().putAll(envs);
+		git.envs().putAll(envs);
 		
 		if (fromRev.equals(ObjectId.zeroId().name()))
 			git.addArgs("ls-tree", "--name-only", toRev);

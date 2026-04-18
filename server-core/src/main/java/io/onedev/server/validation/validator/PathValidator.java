@@ -39,30 +39,26 @@ public class PathValidator implements ConstraintValidator<Path, Object> {
 	}
 
 	private boolean isValidPath(String value, ConstraintValidatorContext constraintContext) {
-		if (value.contains("..")) {
-			constraintContext.disableDefaultConstraintViolation();
-			String message = this.message;
-			if (message.length() == 0) 
-				message = "'..' is disallowed";
-			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
-			return false;
-		} else if (FilenameUtils.getPrefixLength(value) == 0 && type == Path.Type.ABSOLUTE) {
+		String checkMessage = checkPath(type, value);
+		if (checkMessage != null) {
 			constraintContext.disableDefaultConstraintViolation();
 			String message = this.message;
 			if (message.length() == 0)
-				message = "Absolute path is required";
+				message = checkMessage;
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
-		} else if (FilenameUtils.getPrefixLength(value) != 0 && type == Path.Type.RELATIVE) {
-			constraintContext.disableDefaultConstraintViolation();
-			String message = this.message;
-			if (message.length() == 0)
-				message = "Relative path is required";
-			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
-			return false;
-		} else {
-			return true;
 		}
+		return true;
 	}
 	
+	public static String checkPath(Path.Type type, String value) {
+		if (value.contains(".."))
+			return "'..' is not allowed";
+		else if (FilenameUtils.getPrefixLength(value) == 0 && type == Path.Type.ABSOLUTE)
+			return "Absolute path is required";
+		else if (FilenameUtils.getPrefixLength(value) != 0 && type == Path.Type.RELATIVE)
+			return "Relative path is required";
+		return null;
+	}
+
 }

@@ -52,10 +52,10 @@ public class UploadPackCommand {
 	
 	public ExecutionResult run() {
 		Commandline git = newGit().workingDir(workingDir);
-		git.environments().putAll(envs);
+		git.envs().putAll(envs);
 		
 		if (protocol != null)
-			git.environments().put("GIT_PROTOCOL", protocol);
+			git.envs().put("GIT_PROTOCOL", protocol);
 		
 		git.addArgs("upload-pack");
 		if (statelessRpc)

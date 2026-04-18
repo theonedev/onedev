@@ -7,7 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.onedev.server.web.page.project.workspaces.detail.log.WorkspaceLogPage;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -64,6 +66,9 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 
 	public WorkspaceChangesPage(PageParameters params) {
 		super(params);
+		if (getWorkspace().getStatus() == Workspace.Status.PENDING)
+			throw new RestartResponseException(WorkspaceLogPage.class, params);
+
 		selectedFile = params.get(PARAM_FILE).toString();
 	}
 
@@ -289,7 +294,18 @@ public class WorkspaceChangesPage extends WorkspaceDetailPage {
 	}
 
 	private void addFileSections(WebMarkupContainer container) {
-		GitExecutionResult statusResult = executeGit("status", "--porcelain");
+		GitExecutionResult statusResult;
+		if (getWorkspace().getStatus() == Workspace.Status.ACTIVE) {
+			statusResult = executeGit("status", "--porcelain");
+		} else {
+			var errorMessage = String.format(
+					"Please reprovision the workspace to show changes, " +
+					"or you may login to server \"%s\" and check changes at \"%s\"",
+					projectService.getActiveServer(getProject().getId(), true),
+					Workspace.getWorkDir(getProject().getId(), getWorkspace().getNumber()));
+
+			statusResult = new GitExecutionResult(new byte[0], errorMessage.getBytes(StandardCharsets.UTF_8), 1);
+		}
 
 		Label statusError = new Label("statusError", getErrorMessage(statusResult));
 		statusError.setVisible(statusResult.getReturnCode() != 0);

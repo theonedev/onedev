@@ -26,9 +26,7 @@ public class PowerShell extends WorkspaceShell {
 		this.powershell = powershell;
 	}
 
-	@Editable(order=100, description="""
-		Optionally specify PowerShell commands to run to set up the workspace. These commands 
-		will run from working directory holding cloned repository files""")
+	@Editable(order=100, descriptionProvider="getSetupCommandDescription")
 	@Code(language=Code.POWER_SHELL, variableProvider="suggestVariables")
 	@Interpolative
 	@Override

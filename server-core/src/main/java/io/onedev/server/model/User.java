@@ -8,6 +8,10 @@ import static io.onedev.server.security.SecurityUtils.asPrincipals;
 import static io.onedev.server.security.SecurityUtils.asUserPrincipal;
 import static io.onedev.server.security.SecurityUtils.isAdministrator;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -1310,6 +1314,22 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 			}
 		}
 		return entitledAis;
+	}
+
+	public static String encodeWorkspaceDataKey(String dataKey) {
+		try {
+			return URLEncoder.encode(dataKey, StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static String decodeWorkspaceDataKey(String encodedDataKey) {
+		try {
+			return URLDecoder.decode(encodedDataKey, StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static String getWorkspaceDataLockName(Long userId, String dataKey) {

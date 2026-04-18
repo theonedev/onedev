@@ -1,5 +1,7 @@
 package io.onedev.server.model.support.workspace.spec.shell;
 
+import static io.onedev.server.web.translation.Translation._T;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -29,4 +31,11 @@ public abstract class WorkspaceShell implements Serializable {
 		return SuggestionUtils.suggestWorkspaceVariables(matchWith);
 	}
 
+	protected static String getSetupCommandDescription() {
+		return _T("""
+			Optionally specify shell commands to run to set up the workspace. These commands will 
+			run from working directory holding cloned repository files. It runs after cache and 
+			user data restored and config files generated""");
+	}
+	
 }

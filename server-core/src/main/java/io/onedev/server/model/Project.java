@@ -277,9 +277,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
     @OneToMany(mappedBy="project")
     private Collection<Build> builds = new ArrayList<>();
 
-	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<RunCache> jobCaches = new ArrayList<>();
-	
 	@OneToMany(mappedBy= "project")
 	private Collection<PackBlob> packBlobs = new ArrayList<>();
 	
@@ -1330,14 +1327,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public void setBuilds(Collection<Build> builds) {
 		this.builds = builds;
-	}
-
-	public Collection<RunCache> getJobCaches() {
-		return jobCaches;
-	}
-
-	public void setJobCaches(Collection<RunCache> jobCaches) {
-		this.jobCaches = jobCaches;
 	}
 
 	public Collection<PackBlob> getPackBlobs() {

@@ -82,7 +82,7 @@ public class CloneCommand {
 			git.addArgs("-b", branch);
 		
 		if (noLfs)
-			git.environments().put("GIT_LFS_SKIP_SMUDGE", "1");
+			git.envs().put("GIT_LFS_SKIP_SMUDGE", "1");
 		
 		git.addArgs(remotUrl);
 		git.addArgs(".");
