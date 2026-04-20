@@ -133,9 +133,9 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 	
 	private String kubeCtlPath;
 	
-	private String cpuRequest = "250m";
+	private String cpuRequest = "500m";
 	
-	private String memoryRequest = "256Mi";
+	private String memoryRequest = "512Mi";
 	
 	private String cpuLimit;
 	
