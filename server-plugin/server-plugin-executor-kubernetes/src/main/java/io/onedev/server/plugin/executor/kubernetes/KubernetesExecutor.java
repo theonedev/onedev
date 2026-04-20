@@ -951,7 +951,7 @@ public class KubernetesExecutor extends JobExecutor implements KubernetesAware, 
 					entryFacade = new CompositeFacade(jobContext.getActions());
 				} else {
 					List<Action> actions = new ArrayList<>();
-					CommandFacade facade = new CommandFacade((String) executionContext, null, null,
+					CommandFacade facade = new CommandFacade((String) executionContext, "0:0", null,
 							new HashMap<>(), false, "this does not matter");
 					actions.add(new Action("test", facade, ALWAYS, false));
 					entryFacade = new CompositeFacade(actions);
