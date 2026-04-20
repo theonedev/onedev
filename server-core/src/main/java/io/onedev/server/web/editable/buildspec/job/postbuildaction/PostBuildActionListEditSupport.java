@@ -1,67 +1,34 @@
 package io.onedev.server.web.editable.buildspec.job.postbuildaction;
 
 import java.io.Serializable;
-import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.buildspec.job.action.PostBuildAction;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.EmptyValueLabel;
-import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.PropertyViewer;
+import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListEditPanel;
+import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListEditSupport;
+import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListViewPanel;
 
-public class PostBuildActionListEditSupport implements EditSupport {
+public class PostBuildActionListEditSupport extends DrawCardBeanListEditSupport<PostBuildAction> {
+
+	private static final long serialVersionUID = 1L;
 
 	@Override
-	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
-		if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
-			Class<?> elementClass = ReflectionUtils.getCollectionElementClass(descriptor.getPropertyGetter().getGenericReturnType());
-			if (elementClass == PostBuildAction.class) {
-				return new PropertyContext<List<Serializable>>(descriptor) {
-
-					@Override
-					public PropertyViewer renderForView(String componentId, final IModel<List<Serializable>> model) {
-						return new PropertyViewer(componentId, descriptor) {
-
-							@Override
-							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-								if (model.getObject() != null) {
-									return new PostBuildActionListViewPanel(id, model.getObject());
-								} else {
-									return new EmptyValueLabel(id) {
-
-										@Override
-										protected AnnotatedElement getElement() {
-											return propertyDescriptor.getPropertyGetter();
-										}
-										
-									};
-								}
-							}
-							
-						};
-					}
-
-					@Override
-					public PropertyEditor<List<Serializable>> renderForEdit(String componentId, IModel<List<Serializable>> model) {
-						return new PostBuildActionListEditPanel(componentId, descriptor, model);
-					}
-					
-				};
-			}
-		}
-		return null;
+	protected Class<PostBuildAction> getElementClass() {
+		return PostBuildAction.class;
 	}
 
 	@Override
-	public int getPriority() {
-		return 0;
+	protected DrawCardBeanListViewPanel<PostBuildAction> newListViewPanel(String id, List<Serializable> elements) {
+		return new PostBuildActionListViewPanel(id, elements);
 	}
-	
+
+	@Override
+	protected DrawCardBeanListEditPanel<PostBuildAction> newListEditPanel(String id, PropertyDescriptor descriptor,
+			IModel<List<Serializable>> model) {
+		return new PostBuildActionListEditPanel(id, descriptor, model);
+	}
+
 }

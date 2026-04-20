@@ -1,0 +1,11 @@
+@media(min-width: 768px) {
+.draw-card-bean-detail.floating.draw {
+    width: 600px;
+}
+}
+
+.floating.draw-card-bean-detail td.name {
+    width: 160px !important;
+    word-break: break-all !important;
+    white-space: normal !important;
+}

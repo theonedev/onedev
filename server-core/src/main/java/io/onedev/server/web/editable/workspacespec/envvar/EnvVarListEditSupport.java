@@ -1,67 +1,34 @@
 package io.onedev.server.web.editable.workspacespec.envvar;
 
 import java.io.Serializable;
-import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.support.workspace.spec.EnvVar;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.EmptyValueLabel;
-import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.PropertyViewer;
+import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListEditPanel;
+import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListEditSupport;
+import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListViewPanel;
 
-public class EnvVarListEditSupport implements EditSupport {
+public class EnvVarListEditSupport extends DrawCardBeanListEditSupport<EnvVar> {
+
+	private static final long serialVersionUID = 1L;
 
 	@Override
-	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
-		if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
-			Class<?> elementClass = ReflectionUtils.getCollectionElementClass(descriptor.getPropertyGetter().getGenericReturnType());
-			if (elementClass == EnvVar.class) {
-				return new PropertyContext<List<Serializable>>(descriptor) {
-
-					@Override
-					public PropertyViewer renderForView(String componentId, final IModel<List<Serializable>> model) {
-						return new PropertyViewer(componentId, descriptor) {
-
-							@Override
-							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-								if (model.getObject() != null) {
-									return new EnvVarListViewPanel(id, model.getObject());
-								} else {
-									return new EmptyValueLabel(id) {
-
-										@Override
-										protected AnnotatedElement getElement() {
-											return propertyDescriptor.getPropertyGetter();
-										}
-										
-									};
-								}
-							}
-							
-						};
-					}
-
-					@Override
-					public PropertyEditor<List<Serializable>> renderForEdit(String componentId, IModel<List<Serializable>> model) {
-						return new EnvVarListEditPanel(componentId, descriptor, model);
-					}
-					
-				};
-			}
-		}
-		return null;
+	protected Class<EnvVar> getElementClass() {
+		return EnvVar.class;
 	}
 
 	@Override
-	public int getPriority() {
-		return 0;
+	protected DrawCardBeanListViewPanel<EnvVar> newListViewPanel(String id, List<Serializable> elements) {
+		return new EnvVarListViewPanel(id, elements);
 	}
-	
+
+	@Override
+	protected DrawCardBeanListEditPanel<EnvVar> newListEditPanel(String id, PropertyDescriptor descriptor,
+			IModel<List<Serializable>> model) {
+		return new EnvVarListEditPanel(id, descriptor, model);
+	}
+
 }

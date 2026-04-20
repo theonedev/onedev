@@ -1,67 +1,34 @@
 package io.onedev.server.web.editable.buildspec.job.jobdependency;
 
 import java.io.Serializable;
-import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.buildspec.job.JobDependency;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.EmptyValueLabel;
-import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.PropertyViewer;
+import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListEditPanel;
+import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListEditSupport;
+import io.onedev.server.web.editable.drawcardbeanlist.DrawCardBeanListViewPanel;
 
-public class JobDependencyListEditSupport implements EditSupport {
+public class JobDependencyListEditSupport extends DrawCardBeanListEditSupport<JobDependency> {
+
+	private static final long serialVersionUID = 1L;
 
 	@Override
-	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
-		if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
-			Class<?> elementClass = ReflectionUtils.getCollectionElementClass(descriptor.getPropertyGetter().getGenericReturnType());
-			if (elementClass == JobDependency.class) {
-				return new PropertyContext<List<Serializable>>(descriptor) {
-
-					@Override
-					public PropertyViewer renderForView(String componentId, final IModel<List<Serializable>> model) {
-						return new PropertyViewer(componentId, descriptor) {
-
-							@Override
-							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-								if (model.getObject() != null) {
-									return new JobDependencyListViewPanel(id, model.getObject());
-								} else { 
-									return new EmptyValueLabel(id) {
-
-										@Override
-										protected AnnotatedElement getElement() {
-											return propertyDescriptor.getPropertyGetter();
-										}
-										
-									};
-								}
-							}
-							
-						};
-					}
-
-					@Override
-					public PropertyEditor<List<Serializable>> renderForEdit(String componentId, IModel<List<Serializable>> model) {
-						return new JobDependencyListEditPanel(componentId, descriptor, model);
-					}
-					
-				};
-			}
-		}
-		return null;
+	protected Class<JobDependency> getElementClass() {
+		return JobDependency.class;
 	}
 
 	@Override
-	public int getPriority() {
-		return 0;
+	protected DrawCardBeanListViewPanel<JobDependency> newListViewPanel(String id, List<Serializable> elements) {
+		return new JobDependencyListViewPanel(id, elements);
 	}
-	
+
+	@Override
+	protected DrawCardBeanListEditPanel<JobDependency> newListEditPanel(String id, PropertyDescriptor descriptor,
+			IModel<List<Serializable>> model) {
+		return new JobDependencyListEditPanel(id, descriptor, model);
+	}
+
 }
