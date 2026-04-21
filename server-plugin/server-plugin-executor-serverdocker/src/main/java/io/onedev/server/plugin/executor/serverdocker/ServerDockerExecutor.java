@@ -440,7 +440,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 										var runAs = commandFacade.getRunAs();
 										if (SystemUtils.IS_OS_LINUX && !runAs.equals("0:0")) {
 											jobLogger.log("Changing owner of build directory to container user...");
-											changeOwner(docker, runAs, hostBuildDir, jobLogger);
+											changeOwner(docker, runAs, hostBuildDir, osIds, jobLogger);
 										}										
 										try {
 											int exitCode = callWithRegistryLogins(docker, registryLogins, () -> {
@@ -456,7 +456,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 										} finally {
 											if (SystemUtils.IS_OS_LINUX && !osIds.equals("0:0")) {
 												jobLogger.log("Changing owner of build directory to host user...");
-												changeOwner(newDocker(), osIds, hostBuildDir, jobLogger);
+												changeOwner(newDocker(), osIds, hostBuildDir, osIds, jobLogger);
 											}
 										} 
 									} else if (facade instanceof BuildImageFacade) {
@@ -496,7 +496,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 										var runAs = runContainerFacade.getRunAs() != null ? runContainerFacade.getRunAs() : "0:0";
 										if (SystemUtils.IS_OS_LINUX && !runAs.equals("0:0")) {
 											jobLogger.log("Changing owner of build directory to container user...");
-											changeOwner(docker, runAs, hostBuildDir, jobLogger);
+											changeOwner(docker, runAs, hostBuildDir, osIds, jobLogger);
 										}
 										try {
 											int exitCode = callWithRegistryLogins(docker, registryLogins, () -> {
@@ -511,7 +511,7 @@ public class ServerDockerExecutor extends JobExecutor implements DockerAware, Te
 										} finally {
 											if (SystemUtils.IS_OS_LINUX && !osIds.equals("0:0")) {
 												jobLogger.log("Changing owner of build directory to host user...");
-												changeOwner(newDocker(), osIds, hostBuildDir, jobLogger);
+												changeOwner(newDocker(), osIds, hostBuildDir, osIds, jobLogger);
 											}
 										}
 									} else if (facade instanceof CheckoutFacade) {

@@ -243,10 +243,6 @@ public class DefaultAgentService extends BaseEntityService<Agent> implements Age
 		Query<?> query = getSession().createQuery("update Build set agent=null where agent=:agent");
 		query.setParameter("agent", agent);
 		query.executeUpdate();
-
-		query = getSession().createQuery("update Workspace set agent=null where agent=:agent");
-		query.setParameter("agent", agent);
-		query.executeUpdate();
 	}
 	
 	@Sessional
