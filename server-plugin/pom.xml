@@ -44,6 +44,7 @@
 		<module>server-plugin-executor-servershell</module>
 		<module>server-plugin-executor-remoteshell</module>
 		<module>server-plugin-provisioner-shell</module>
+		<module>server-plugin-provisioner-docker</module>
 		<module>server-plugin-report-unittest</module>
 		<module>server-plugin-report-junit</module>
 		<module>server-plugin-report-gtest</module>

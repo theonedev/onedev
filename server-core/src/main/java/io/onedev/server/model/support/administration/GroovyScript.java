@@ -93,7 +93,7 @@ public class GroovyScript implements Serializable {
 			"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. " +
 			"Multiple projects should be separated by space")
 	@Patterns(suggester="suggestProjects", path=true)
-	@DependsOn(property="canBeUsedByWorkspaces")		
+	@DependsOn(property="canBeUsedByWorkspaceSpecs")		
 	public String getApplicableWorkspaceProjects() {
 		return applicableWorkspaceProjects;
 	}

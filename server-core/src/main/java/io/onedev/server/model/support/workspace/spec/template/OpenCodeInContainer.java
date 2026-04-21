@@ -10,12 +10,10 @@ import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.model.support.workspace.spec.shell.CustomLinuxShell;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@Editable(order=1000, name="nt:Open Code in Container", description="""
+@Editable(order=100, name="nt:Open Code in Container", description="""
         Create a workspace spec running Open Code inside container for isolation and security purpose. 
         You may customize the <a href='https://code.onedev.io/onedev/docker/opencode' target='_blank'>container image</a> 
-        later to suit your needs if desired. 
-        <b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription. 
-        <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days""")
+        later to suit your needs if desired""")
 public class OpenCodeInContainer extends WorkspaceSpecTemplate {
 
     @Override

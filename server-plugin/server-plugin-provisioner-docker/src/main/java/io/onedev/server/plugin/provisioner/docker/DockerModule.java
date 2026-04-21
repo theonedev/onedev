@@ -1,0 +1,81 @@
+package io.onedev.server.plugin.provisioner.docker;
+
+import java.util.Collection;
+
+import com.google.common.collect.Sets;
+
+import io.onedev.agent.AgentUtils;
+import io.onedev.commons.loader.AbstractPluginModule;
+import io.onedev.commons.loader.ImplementationProvider;
+import io.onedev.commons.utils.command.Commandline;
+import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.OneDev;
+import io.onedev.server.exception.ExceptionUtils;
+import io.onedev.server.model.support.administration.workspaceprovisioner.WorkspaceProvisioner;
+import io.onedev.server.workspace.WorkspaceProvisionerDiscoverer;
+
+/**
+ * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
+ *
+ */
+public class DockerModule extends AbstractPluginModule {
+
+	@Override
+	protected void configure() {
+		super.configure();
+
+		if (OneDev.getK8sService() == null) {
+			contribute(ImplementationProvider.class, new ImplementationProvider() {
+
+				@Override
+				public Class<?> getAbstractClass() {
+					return WorkspaceProvisioner.class;
+				}
+
+				@Override
+				public Collection<Class<?>> getImplementations() {
+					return Sets.newHashSet(DockerProvisioner.class);
+				}
+
+			});
+
+			contribute(WorkspaceProvisionerDiscoverer.class, new WorkspaceProvisionerDiscoverer() {
+
+				@Override
+				public WorkspaceProvisioner discover() {
+					var docker = new Commandline(AgentUtils.getDockerExecutable(null));
+					docker.addArgs("version");
+					try {
+						docker.execute(new LineConsumer() {
+
+							@Override
+							public void consume(String line) {
+							}
+
+						}, new LineConsumer() {
+
+							@Override
+							public void consume(String line) {
+							}
+
+						}).checkReturnCode();
+
+						return new DockerProvisioner();
+					} catch (Exception e) {
+						if (ExceptionUtils.find(e, InterruptedException.class) != null)
+							throw ExceptionUtils.unchecked(e);
+						else
+							return null;
+					}
+				}
+
+				@Override
+				public int getOrder() {
+					return DockerProvisioner.ORDER;
+				}
+
+			});
+		}
+	}
+
+}

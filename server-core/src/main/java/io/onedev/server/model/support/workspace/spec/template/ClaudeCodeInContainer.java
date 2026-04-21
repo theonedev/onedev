@@ -10,12 +10,10 @@ import io.onedev.server.model.support.workspace.spec.WorkspaceSpec;
 import io.onedev.server.model.support.workspace.spec.shell.CustomLinuxShell;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@Editable(order=1100, name="nt:Claude Code in Container", description="""
+@Editable(order=200, name="nt:Claude Code in Container", description="""
         Create a workspace spec running Claude Code inside container for isolation and security purpose. 
         You may customize the <a href='https://code.onedev.io/onedev/docker/claudecode' target='_blank'>container image</a> 
-        later to suit your needs if desired. 
-        <b class='text-info'>NOTE: </b> Creating workspace inside container requires an enterprise subscription. 
-        <a href='https://onedev.io/pricing' target='_blank'>Try free</a> for 30 days""")
+        later to suit your needs if desired""")
 public class ClaudeCodeInContainer extends WorkspaceSpecTemplate {
 
     @Override
