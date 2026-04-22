@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -43,7 +42,6 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ai.AiTask;
 import io.onedev.server.ai.TaskTool;
 import io.onedev.server.ai.ToolUtils;
-import io.onedev.server.ai.tools.TaskComplete;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.cluster.NodeStarted;
@@ -84,6 +82,11 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 	private static final Logger logger = LoggerFactory.getLogger(DefaultUserService.class);
 	
 	private static final int TIMEOUT_SECONDS = 600;
+
+	private static final int EMPTY_RESPONSE_MAX_RETRIES = 3;
+
+	private static final String EMPTY_RESPONSE_PROMPT =
+			"Your previous turn was empty. Please reply with your answer.";
 
 	private static final int SYNC_PRIORITY = 50;
 
@@ -627,19 +630,15 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 						messages.add(new SystemMessage(aiSetting.getSystemPrompt()));
 					if (task.getSystemPrompt() != null)
 						messages.add(new SystemMessage(task.getSystemPrompt()));
-					messages.add(new SystemMessage(TaskComplete.SYSTEM_MESSAGE));
 					messages.add(new UserMessage(task.getUserPrompt()));
 					var tools = task.getTools();
 					var toolSpecifications = tools.stream()
 							.map(TaskTool::getSpecification)
 							.collect(Collectors.toList());
-					
-					// Add the taskComplete tool - this must always be present
-					toolSpecifications.add(TaskComplete.getSpecification());
-					
+
 					ToolUtils.filterDuplications(toolSpecifications);
-					
-					var noToolRetryCount = new AtomicInteger(0);
+
+					var emptyResponseRetryCount = new AtomicInteger(0);
 					while (true) {
 						if (Thread.interrupted())
 							throw new InterruptedException();								
@@ -651,42 +650,39 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 						var aiMessage = response.aiMessage();
 						
 						if (!aiMessage.hasToolExecutionRequests()) {
-							// LLM didn't call any tool - prompt it to continue or call taskComplete
+							// No tool calls means the assistant has produced its final answer.
+							// Use it directly instead of routing it through a tool argument
+							// (which tends to make models summarize and lose detail).
 							var text = aiMessage.text();
-							if (noToolRetryCount.incrementAndGet() <= TaskComplete.MAX_NO_TOOL_RETRIES) {
-								if (StringUtils.isNotBlank(text)) 
-									messages.add(aiMessage);
-								messages.add(new UserMessage(TaskComplete.CONTINUATION_PROMPT));
-								continue;
-							} else {
-								// Max retries exceeded, accept whatever response we have
+							if (StringUtils.isNotBlank(text)) {
 								sessionService.run(() -> {
 									task.getResponseHandler().onResponse(
-										Preconditions.checkNotNull(SecurityUtils.getUser(subject)), 
-										StringUtils.isBlank(text)?"Empty response received":text);
+										Preconditions.checkNotNull(SecurityUtils.getUser(subject)),
+										text);
+								});
+								break;
+							} else if (emptyResponseRetryCount.incrementAndGet() <= EMPTY_RESPONSE_MAX_RETRIES) {
+								// Some models occasionally finish with no text and no tool
+								// call. Nudge them to actually answer.
+								messages.add(new UserMessage(EMPTY_RESPONSE_PROMPT));
+								continue;
+							} else {
+								sessionService.run(() -> {
+									task.getResponseHandler().onResponse(
+										Preconditions.checkNotNull(SecurityUtils.getUser(subject)),
+										"Empty response received");
 								});
 								break;
 							}
 						}
-						
+
 						messages.add(aiMessage);
-						var taskCompleted = new AtomicBoolean(false);
 						sessionService.run(() -> {
 							for (var toolRequest : aiMessage.toolExecutionRequests()) {
 								if (Thread.interrupted())
-									throw new RuntimeException(new InterruptedException());								
-								
-								// Handle taskComplete specially - it signals task completion
-								var taskCompleteResponse = TaskComplete.getResponse(toolRequest);
-								if (taskCompleteResponse != null) {
-									task.getResponseHandler().onResponse(
-										Preconditions.checkNotNull(SecurityUtils.getUser(subject)), 
-										StringUtils.isBlank(taskCompleteResponse)?"Empty response received":taskCompleteResponse);
-									taskCompleted.set(true);
-									return;
-								}
+									throw new RuntimeException(new InterruptedException());
 
-								var toolName = toolRequest.name();								
+								var toolName = toolRequest.name();
 								try {        
 									var tool = tools.stream()
 										.filter(it -> it.getSpecification().name().equals(toolName))
@@ -698,9 +694,6 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 								}
 							}
 						});
-						
-						if (taskCompleted.get())
-							break;
 					}
 				} catch (Throwable e) {
 					sessionService.run(() -> {
