@@ -23,6 +23,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.ai.AiTask;
+import io.onedev.server.ai.TaskChecker.NoopTaskChecker;
 import io.onedev.server.ai.TaskTool;
 import io.onedev.server.ai.responsehandlers.AddCodeCommentReply;
 import io.onedev.server.ai.responsehandlers.AddPullRequestComment;
@@ -310,6 +311,7 @@ public class PullRequestNotificationManager {
 								After calling the decision tool, summarize found issues in your final response and for \
 								each issue, make sure to quote relevant code snippets if applicable""",
 							request.getTools(true), 
+							new NoopTaskChecker(),
 							new AddPullRequestComment(request.getId()));
 						userService.execute(reviewer, task);
 					}
@@ -351,6 +353,7 @@ public class PullRequestNotificationManager {
 										systemPrompt.formatted(mentionedUser.getName()), 
 										event.getTextBody(), 
 										request.getTools(false), 
+										new NoopTaskChecker(),
 										new AddPullRequestComment(request.getId()));
 									userService.execute(mentionedUser, task);
 								} else if (event instanceof PullRequestCodeCommentCreated || event instanceof PullRequestCodeCommentReplyCreated) {
@@ -366,6 +369,7 @@ public class PullRequestNotificationManager {
 										systemPrompt.formatted(mentionedUser.getName()), 
 										event.getTextBody(), 
 										tools, 
+										new NoopTaskChecker(),
 										new AddCodeCommentReply(comment.getId()));
 									userService.execute(mentionedUser, task);
 								}

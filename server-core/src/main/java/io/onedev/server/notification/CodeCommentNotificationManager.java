@@ -16,6 +16,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ai.AiTask;
+import io.onedev.server.ai.TaskChecker.NoopTaskChecker;
 import io.onedev.server.ai.responsehandlers.AddCodeCommentReply;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.codecomment.CodeCommentEdited;
@@ -72,6 +73,7 @@ public class CodeCommentNotificationManager {
 									systemPrompt.formatted(mentionedUser.getName()), 
 									event.getTextBody(), 
 									comment.getTools(), 
+									new NoopTaskChecker(),
 									new AddCodeCommentReply(comment.getId()));
 								userService.execute(mentionedUser, task);						
 							}

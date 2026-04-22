@@ -650,9 +650,6 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 						var aiMessage = response.aiMessage();
 						
 						if (!aiMessage.hasToolExecutionRequests()) {
-							// No tool calls means the assistant has produced its final answer.
-							// Use it directly instead of routing it through a tool argument
-							// (which tends to make models summarize and lose detail).
 							var text = aiMessage.text();
 							if (StringUtils.isNotBlank(text)) {
 								sessionService.run(() -> {
@@ -662,8 +659,6 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 								});
 								break;
 							} else if (emptyResponseRetryCount.incrementAndGet() <= EMPTY_RESPONSE_MAX_RETRIES) {
-								// Some models occasionally finish with no text and no tool
-								// call. Nudge them to actually answer.
 								messages.add(new UserMessage(EMPTY_RESPONSE_PROMPT));
 								continue;
 							} else {
