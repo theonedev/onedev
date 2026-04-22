@@ -1556,7 +1556,8 @@ public class PullRequest extends ProjectBelonging
 				public ToolSpecification getSpecification() {
 					return ToolSpecification.builder()
 						.name("approvePullRequest")
-						.description("Approve current OneDev pull request")
+						.description("Record an approval for current OneDev pull request. " 
+							+ "Call this exactly once after you have finished reviewing and decided to approve.")
 						.build();
 				}
 
@@ -1566,6 +1567,14 @@ public class PullRequest extends ProjectBelonging
 					var user = SecurityUtils.getUser(subject);
 					if (!SecurityUtils.canReadCode(subject, request.getProject()) || user == null)
 						throw new UnauthorizedException();
+
+					var existingReview = request.getReview(user);
+					if (existingReview != null && existingReview.getStatus() == PullRequestReview.Status.APPROVED) {
+						var data = Map.of(
+							"successful", true, 
+							"message", "Approval has already been recorded, do not call this tool again");
+						return new ToolExecutionResult(convertToJson(data), false);
+					}
 
 					try {
 						getPullRequestReviewService().review(user, request, true, null);
@@ -1585,7 +1594,8 @@ public class PullRequest extends ProjectBelonging
 				public ToolSpecification getSpecification() {
 					return ToolSpecification.builder()
 						.name("requestChangesForPullRequest")
-						.description("Request changes for current OneDev pull request")
+						.description("Record a request for changes for current OneDev pull request. " 
+							+ "Call this exactly once after you have finished reviewing and decided changes are needed.")
 						.build();
 				}
 
@@ -1595,6 +1605,14 @@ public class PullRequest extends ProjectBelonging
 					var user = SecurityUtils.getUser(subject);
 					if (!SecurityUtils.canReadCode(subject, request.getProject()) || user == null)
 						throw new UnauthorizedException();
+
+					var existingReview = request.getReview(user);
+					if (existingReview != null && existingReview.getStatus() == PullRequestReview.Status.REQUESTED_FOR_CHANGES) {
+						var data = Map.of(
+							"successful", true, 
+							"message", "Request for changes has already been recorded, do not call this tool again");
+						return new ToolExecutionResult(convertToJson(data), false);
+					}
 
 					try {
 						getPullRequestReviewService().review(user, request, false, null);
