@@ -1,19 +1,21 @@
 package io.onedev.server.web.editable.buildspec.step;
 
-import io.onedev.server.buildspec.step.Step;
-import io.onedev.server.web.behavior.NoRecordsBehavior;
-import io.onedev.server.web.component.draw.DrawCardPanel;
-import io.onedev.server.web.component.draw.DrawPanel;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.util.TextUtils;
+import static io.onedev.server.web.translation.Translation._T;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.*;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
@@ -25,11 +27,13 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import static io.onedev.server.web.translation.Translation._T;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import io.onedev.server.buildspec.step.Step;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.component.draw.DrawCardPanel;
+import io.onedev.server.web.component.draw.DrawPanel;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.util.TextUtils;
 
 class StepListViewPanel extends Panel {
 
@@ -52,7 +56,11 @@ class StepListViewPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getName()));
+				var name = rowModel.getObject().getName();
+				if (name != null)
+					cellItem.add(new Label(componentId, name));
+				else
+					cellItem.add(new Label(componentId, "<i>" + _T("Unspecified") + "</i>").setEscapeModelStrings(false));
 			}
 			
 		});		
@@ -61,8 +69,13 @@ class StepListViewPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
-				cellItem.add(new Label(componentId, _T(TextUtils.getDisplayValue(rowModel.getObject().getCondition()))));
+				var condition = rowModel.getObject().getCondition();
+				if (condition != null) 
+					cellItem.add(new Label(componentId, _T(TextUtils.getDisplayValue(condition))));
+				else
+					cellItem.add(new Label(componentId, "<i>" + _T("Unspecified") + "</i>").setEscapeModelStrings(false));
 			}
+
 		});		
 		
 		columns.add(new AbstractColumn<Step, Void>(Model.of("")) {
