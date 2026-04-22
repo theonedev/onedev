@@ -694,6 +694,6 @@
 		<jackson.version>2.18.6</jackson.version>
 		<tika.version>3.2.2</tika.version>
 		<langchain4j.version>1.8.0</langchain4j.version>
-		<bouncycastle.version>1.83</bouncycastle.version>
+		<bouncycastle.version>1.84</bouncycastle.version>
 	</properties>
 </project>
