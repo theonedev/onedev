@@ -48,7 +48,8 @@ public class PullRequestReviewResource {
 		return review;
 	}
 	
-	@Api(order=200, description="Create new pull request review")
+	@Api(order=200, description="Create new pull request review. If specified user is already an excluded reviewer of "
+			+ "the pull request, status of the existing review will be reset to PENDING instead of creating a new one")
 	@POST
 	public Long create(@NotNull PullRequestReview review) {
 		var request = review.getRequest();
@@ -61,7 +62,16 @@ public class PullRequestReviewResource {
 		
 		if (review.getRequest().isMerged())
 			throw new ExplicitException("Pull request is merged");
-		
+
+		var existingReview = request.getReview(review.getUser());
+		if (existingReview != null) {
+			if (existingReview.getStatus() == PullRequestReview.Status.EXCLUDED) {
+				existingReview.setStatus(PullRequestReview.Status.PENDING);
+				pullRequestReviewService.createOrUpdate(SecurityUtils.getUser(), existingReview);
+			}
+			return existingReview.getId();
+		}
+
 		pullRequestReviewService.createOrUpdate(SecurityUtils.getUser(), review);
 		return review.getId();
 	}
