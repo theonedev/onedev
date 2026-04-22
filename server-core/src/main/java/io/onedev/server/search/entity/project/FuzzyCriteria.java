@@ -5,12 +5,14 @@ import static io.onedev.server.search.entity.project.ProjectQueryLexer.Is;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
+
+import org.apache.commons.lang3.math.NumberUtils;
+import org.jspecify.annotations.Nullable;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Splitter;
@@ -20,6 +22,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.OrCriteria;
 
 public class FuzzyCriteria extends Criteria<Project> {
 
@@ -44,10 +47,17 @@ public class FuzzyCriteria extends Criteria<Project> {
 	private Criteria<Project> parse(String value) {
 		var criterias = new ArrayList<Criteria<Project>>();
 		for (var part: Splitter.on(' ').omitEmptyStrings().trimResults().split(value)) {
+			List<Criteria<Project>> partCriterias = new ArrayList<>();
+			Criteria<Project> nameOrPathCriteria;
 			if (Project.get() != null)
-				criterias.add(new NameCriteria("*" + part + "*", Is));
+				nameOrPathCriteria = new NameCriteria("*" + part + "*", Is);
 			else
-				criterias.add(new PathCriteria("**/*" + part + "*/**", Is));
+				nameOrPathCriteria = new PathCriteria("**/*" + part + "*/**", Is);
+			partCriterias.add(nameOrPathCriteria);
+			partCriterias.add(new DescriptionCriteria(part));
+			if (NumberUtils.isDigits(part))
+				partCriterias.add(new IdCriteria(Integer.parseInt(part), Is));
+			criterias.add(new OrCriteria<Project>(partCriterias));
 		}
 		return new AndCriteria<>(criterias);
 	}

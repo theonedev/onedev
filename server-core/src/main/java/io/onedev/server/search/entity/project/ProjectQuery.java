@@ -50,6 +50,7 @@ import io.onedev.server.search.entity.project.ProjectQueryParser.OrCriteriaConte
 import io.onedev.server.search.entity.project.ProjectQueryParser.OrderContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.QueryContext;
+import io.onedev.server.search.entity.project.ProjectQueryParser.ReferenceCriteriaContext;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
@@ -102,6 +103,11 @@ public class ProjectQuery extends EntityQuery<Project> {
 					@Override
 					public Criteria<Project> visitFuzzyCriteria(FuzzyCriteriaContext ctx) {
 						return new FuzzyCriteria(getValue(ctx.getText()));
+					}
+					
+					@Override
+					public Criteria<Project> visitReferenceCriteria(ReferenceCriteriaContext ctx) {
+						return new IdCriteria(Long.parseLong(ctx.getText().substring(1)), Is);
 					}
 					
 					@Override
