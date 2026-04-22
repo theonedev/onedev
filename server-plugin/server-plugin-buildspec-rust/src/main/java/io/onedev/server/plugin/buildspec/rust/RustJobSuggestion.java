@@ -98,7 +98,7 @@ public class RustJobSuggestion implements JobSuggestion {
 			CommandStep buildAndTest = new CommandStep();
 			buildAndTest.setName("build and test");
 			
-			buildAndTest.setImage("1dev/rust:1.0.3");
+			buildAndTest.setImage("1dev/rust:1.0.4");
 			buildAndTest.getInterpreter().setCommands("" +
 					"set -e\n" +
 					"\n" +
