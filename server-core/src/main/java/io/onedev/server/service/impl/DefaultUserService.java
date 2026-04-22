@@ -7,6 +7,7 @@ import static io.onedev.server.util.SiteSyncUtils.syncDirectory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -32,6 +33,7 @@ import com.hazelcast.core.HazelcastInstance;
 
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import io.onedev.commons.bootstrap.Bootstrap;
@@ -84,6 +86,8 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 	private static final int TIMEOUT_SECONDS = 600;
 
 	private static final int EMPTY_RESPONSE_MAX_RETRIES = 3;
+
+	private static final int TASK_FINISH_CHECK_MAX_RETRIES = 3;
 
 	private static final String EMPTY_RESPONSE_PROMPT =
 			"Your previous turn was empty. Please reply with your answer.";
@@ -638,7 +642,10 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 
 					ToolUtils.filterDuplications(toolSpecifications);
 
+					var toolCallCounts = new HashMap<String, Integer>();
+					var taskChecker = task.getTaskChecker();
 					var emptyResponseRetryCount = new AtomicInteger(0);
+					var taskFinishCheckRetryCount = new AtomicInteger(0);
 					while (true) {
 						if (Thread.interrupted())
 							throw new InterruptedException();								
@@ -650,6 +657,13 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 						var aiMessage = response.aiMessage();
 						
 						if (!aiMessage.hasToolExecutionRequests()) {
+							var finishError = taskChecker.preTaskFinish(toolCallCounts);
+							if (finishError != null
+									&& taskFinishCheckRetryCount.incrementAndGet() <= TASK_FINISH_CHECK_MAX_RETRIES) {
+								messages.add(aiMessage);
+								messages.add(new UserMessage(finishError));
+								continue;
+							}
 							var text = aiMessage.text();
 							if (StringUtils.isNotBlank(text)) {
 								sessionService.run(() -> {
@@ -678,12 +692,18 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 									throw new RuntimeException(new InterruptedException());
 
 								var toolName = toolRequest.name();
+								var errorMessage = taskChecker.preToolCall(toolName, toolCallCounts);
+								if (errorMessage != null) {
+									messages.add(ToolExecutionResultMessage.from(toolRequest.id(), toolName, errorMessage));
+									continue;
+								}
 								try {        
 									var tool = tools.stream()
 										.filter(it -> it.getSpecification().name().equals(toolName))
 										.findFirst()
 										.orElseThrow(() -> new ExplicitException("Tool not found: " + toolName));     
 									tool.execute(subject, getToolArguments(toolRequest)).addToMessages(messages, toolRequest);
+									toolCallCounts.put(toolName, toolCallCounts.getOrDefault(toolName, 0) + 1);
 								} catch (Throwable t) {
 									ToolUtils.handleCallException(toolName, t);
 								}

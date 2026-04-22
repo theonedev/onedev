@@ -23,10 +23,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.ai.AiTask;
-import io.onedev.server.ai.TaskChecker.NoopTaskChecker;
 import io.onedev.server.ai.TaskTool;
 import io.onedev.server.ai.responsehandlers.AddCodeCommentReply;
 import io.onedev.server.ai.responsehandlers.AddPullRequestComment;
+import io.onedev.server.ai.taskchecker.NoopTaskChecker;
+import io.onedev.server.ai.taskchecker.PullRequestReviewTaskChecker;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.pullrequest.PullRequestAssigned;
 import io.onedev.server.event.project.pullrequest.PullRequestChanged;
@@ -311,7 +312,7 @@ public class PullRequestNotificationManager {
 								After calling the decision tool, summarize found issues in your final response and for \
 								each issue, make sure to quote relevant code snippets if applicable""",
 							request.getTools(true), 
-							new NoopTaskChecker(),
+							new PullRequestReviewTaskChecker(),
 							new AddPullRequestComment(request.getId()));
 						userService.execute(reviewer, task);
 					}

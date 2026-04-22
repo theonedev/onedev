@@ -4,6 +4,8 @@ import java.util.Collection;
 
 import org.jspecify.annotations.Nullable;
 
+import io.onedev.server.ai.taskchecker.TaskChecker;
+
 public class AiTask {
 
     private final String systemPrompt;

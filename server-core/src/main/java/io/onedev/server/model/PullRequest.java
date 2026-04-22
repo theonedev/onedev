@@ -146,6 +146,10 @@ public class PullRequest extends ProjectBelonging
 	public static final int MAX_TITLE_LEN = 255;
 	
 	public static final int MAX_DESCRIPTION_LEN = 100000;
+
+	public static final String APPROVE_TOOL_NAME = "approvePullRequest";
+
+	public static final String REQUEST_FOR_CHANGES_TOOL_NAME = "requestChangesForPullRequest";
 	
 	public static final String NAME_STATUS = "Status";
 	
@@ -1555,7 +1559,7 @@ public class PullRequest extends ProjectBelonging
 				@Override
 				public ToolSpecification getSpecification() {
 					return ToolSpecification.builder()
-						.name("approvePullRequest")
+						.name(APPROVE_TOOL_NAME)
 						.description("Record an approval for current OneDev pull request. " 
 							+ "Call this exactly once after you have finished reviewing and decided to approve.")
 						.build();
@@ -1567,14 +1571,6 @@ public class PullRequest extends ProjectBelonging
 					var user = SecurityUtils.getUser(subject);
 					if (!SecurityUtils.canReadCode(subject, request.getProject()) || user == null)
 						throw new UnauthorizedException();
-
-					var existingReview = request.getReview(user);
-					if (existingReview != null && existingReview.getStatus() == PullRequestReview.Status.APPROVED) {
-						var data = Map.of(
-							"successful", true, 
-							"message", "Approval has already been recorded, do not call this tool again");
-						return new ToolExecutionResult(convertToJson(data), false);
-					}
 
 					try {
 						getPullRequestReviewService().review(user, request, true, null);
@@ -1593,7 +1589,7 @@ public class PullRequest extends ProjectBelonging
 				@Override
 				public ToolSpecification getSpecification() {
 					return ToolSpecification.builder()
-						.name("requestChangesForPullRequest")
+						.name(REQUEST_FOR_CHANGES_TOOL_NAME)
 						.description("Record a request for changes for current OneDev pull request. " 
 							+ "Call this exactly once after you have finished reviewing and decided changes are needed.")
 						.build();
@@ -1605,14 +1601,6 @@ public class PullRequest extends ProjectBelonging
 					var user = SecurityUtils.getUser(subject);
 					if (!SecurityUtils.canReadCode(subject, request.getProject()) || user == null)
 						throw new UnauthorizedException();
-
-					var existingReview = request.getReview(user);
-					if (existingReview != null && existingReview.getStatus() == PullRequestReview.Status.REQUESTED_FOR_CHANGES) {
-						var data = Map.of(
-							"successful", true, 
-							"message", "Request for changes has already been recorded, do not call this tool again");
-						return new ToolExecutionResult(convertToJson(data), false);
-					}
 
 					try {
 						getPullRequestReviewService().review(user, request, false, null);

@@ -22,8 +22,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.ai.AiTask;
-import io.onedev.server.ai.TaskChecker.NoopTaskChecker;
 import io.onedev.server.ai.responsehandlers.AddIssueComment;
+import io.onedev.server.ai.taskchecker.NoopTaskChecker;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.issue.IssueCommentCreated;
 import io.onedev.server.event.project.issue.IssueEvent;

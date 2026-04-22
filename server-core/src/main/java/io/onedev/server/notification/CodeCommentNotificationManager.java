@@ -16,8 +16,8 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ai.AiTask;
-import io.onedev.server.ai.TaskChecker.NoopTaskChecker;
 import io.onedev.server.ai.responsehandlers.AddCodeCommentReply;
+import io.onedev.server.ai.taskchecker.NoopTaskChecker;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.codecomment.CodeCommentEdited;
 import io.onedev.server.event.project.codecomment.CodeCommentEvent;
