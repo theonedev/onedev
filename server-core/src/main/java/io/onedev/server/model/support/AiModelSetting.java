@@ -19,14 +19,17 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonParser;
 
+import dev.langchain4j.http.client.jdk.JdkHttpClientBuilder;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
+import io.onedev.server.OneDev;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.util.EditContext;
+import nl.altindag.ssl.SSLFactory;
 
 @Editable(order=100)
 public class AiModelSetting implements Serializable {
@@ -91,6 +94,12 @@ public class AiModelSetting implements Serializable {
         this.timeoutSeconds = timeoutSeconds;
     }
 
+    private static HttpClient.Builder newHttpClientBuilder() {
+        var builder = HttpClient.newBuilder();
+        builder.sslContext(OneDev.getInstance(SSLFactory.class).getSslContext());
+        return builder;
+    }
+
     @SuppressWarnings("unused")
     private static List<String> getModels() {
         var baseUrl = (String) EditContext.get().getInputValue("baseUrl");
@@ -102,7 +111,7 @@ public class AiModelSetting implements Serializable {
         try {
             var modelsUrl = baseUrl.endsWith("/") ? baseUrl + "models" : baseUrl + "/models";
             
-            HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
+            HttpClient client = newHttpClientBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
 
             var requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(modelsUrl))
@@ -138,8 +147,13 @@ public class AiModelSetting implements Serializable {
         }
     }
 
+    private static JdkHttpClientBuilder newLangChainHttpClientBuilder() {
+        return new JdkHttpClientBuilder().httpClientBuilder(newHttpClientBuilder());
+    }
+
     public ChatModel getChatModel() {
         return OpenAiChatModel.builder()
+            .httpClientBuilder(newLangChainHttpClientBuilder())
             .apiKey(apiKey)
             .baseUrl(baseUrl)
             .modelName(name)
@@ -149,6 +163,7 @@ public class AiModelSetting implements Serializable {
 
     public StreamingChatModel getStreamingChatModel() {
         return OpenAiStreamingChatModel.builder()
+            .httpClientBuilder(newLangChainHttpClientBuilder())
             .apiKey(apiKey)
             .baseUrl(baseUrl)
             .modelName(name)
