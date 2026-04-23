@@ -2583,6 +2583,41 @@ public class BuildSpec implements Serializable, Validatable {
 						|| "PullImageStep".equals(stepType)
 						|| "RenovateStep".equals(stepType)) {
 					migrate47_setDefaultRunAs(stepNode);
+				} else if ("CreateBranchStep".equals(stepType)) {
+					String branchName = null;
+					for (var itStepTuple = stepNode.getValue().iterator(); itStepTuple.hasNext();) {
+						var stepTuple = itStepTuple.next();
+						var propName = ((ScalarNode) stepTuple.getKeyNode()).getValue();
+						if (propName.equals("branchName")) {
+							branchName = ((ScalarNode) stepTuple.getValueNode()).getValue();
+							itStepTuple.remove();
+							break;
+						}
+					}
+					Preconditions.checkNotNull(branchName);
+					List<NodeTuple> providerTuples = new ArrayList<>();
+					var suggestedIssueBranchIndex = branchName.indexOf("@suggested_issue_branch@");
+					if (suggestedIssueBranchIndex != -1) {
+						providerTuples.add(new NodeTuple(
+								new ScalarNode(Tag.STR, "type"),
+								new ScalarNode(Tag.STR, "GeneratedBranchName")));
+						if (suggestedIssueBranchIndex > 0) {
+							var prefix = branchName.substring(0, suggestedIssueBranchIndex);
+							providerTuples.add(new NodeTuple(
+									new ScalarNode(Tag.STR, "prefix"),
+									new ScalarNode(Tag.STR, prefix)));
+						}
+					} else {
+						providerTuples.add(new NodeTuple(
+								new ScalarNode(Tag.STR, "type"),
+								new ScalarNode(Tag.STR, "SpecifiedBranchName")));
+						providerTuples.add(new NodeTuple(
+								new ScalarNode(Tag.STR, "name"),
+								new ScalarNode(Tag.STR, branchName)));
+					}
+					stepNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "branchNameProvider"),
+							new MappingNode(Tag.MAP, providerTuples, FlowStyle.BLOCK)));
 				}
 			}
 		});

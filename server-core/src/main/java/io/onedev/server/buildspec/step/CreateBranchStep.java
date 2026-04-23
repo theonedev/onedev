@@ -1,51 +1,54 @@
 package io.onedev.server.buildspec.step;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+import org.eclipse.jgit.lib.Repository;
+
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.ServerStepResult;
 import io.onedev.server.OneDev;
-import io.onedev.server.annotation.BranchName;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.service.BuildService;
+import io.onedev.server.buildspec.step.branchnameprovider.BranchNameProvider;
+import io.onedev.server.buildspec.step.branchnameprovider.GeneratedBranchName;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionService;
+import io.onedev.server.service.BuildService;
 import io.onedev.server.web.util.SuggestionUtils;
-import org.eclipse.jgit.lib.Repository;
-
-import javax.validation.constraints.NotEmpty;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Editable(name="Create Branch", order=280)
 public class CreateBranchStep extends ServerSideStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	private String branchName;
+	private BranchNameProvider branchNameProvider = new GeneratedBranchName();
 	
 	private String branchRevision;
 	
 	private String accessTokenSecret;
 	
-	@Editable(order=1000, description="Specify name of the branch")
-	@Interpolative(variableSuggester="suggestVariables")
-	@BranchName
-	@NotEmpty
-	public String getBranchName() {
-		return branchName;
+	@Editable(order=1000, name="Branch Name")
+	@NotNull
+	public BranchNameProvider getBranchNameProvider() {
+		return branchNameProvider;
 	}
 
-	public void setBranchName(String branchName) {
-		this.branchName = branchName;
+	public void setBranchNameProvider(BranchNameProvider branchNameProvider) {
+		this.branchNameProvider = branchNameProvider;
 	}
 
 	@Editable(order=1100, placeholder = "Build Commit", description="Optionally specify revision " +
@@ -96,8 +99,10 @@ public class CreateBranchStep extends ServerSideStep {
 		return OneDev.getInstance(SessionService.class).call(() -> {
 			var build = OneDev.getInstance(BuildService.class).load(buildId);
 			Project project = build.getProject();
-			String branchName = getBranchName();			
+			String branchName = branchNameProvider.getBranchName(build);
 
+			if (StringUtils.isBlank(branchName))
+				throw new ExplicitException("Branch name should not be empty");
 			if (!Repository.isValidRefName(GitUtils.branch2ref(branchName)))
 				throw new ExplicitException("Invalid branch name: " + branchName);
 
