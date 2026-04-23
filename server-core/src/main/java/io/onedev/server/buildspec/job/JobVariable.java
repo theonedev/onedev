@@ -6,6 +6,7 @@ import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_SUFFIX;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Build;
@@ -122,7 +123,7 @@ public enum JobVariable {
 			if (build.getIssue() != null) 
 				return OneDev.getInstance(IssueService.class).suggestBranch(build.getIssue());
 			else 
-				return null;
+				throw new ExplicitException("Suggested issue branch is only available for issue state triggers");
 		}
 	},
 	SERVER {

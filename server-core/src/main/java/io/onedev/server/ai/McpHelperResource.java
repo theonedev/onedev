@@ -54,7 +54,6 @@ import io.onedev.server.data.migration.VersionedYamlDoc;
 import io.onedev.server.entityreference.BuildReference;
 import io.onedev.server.entityreference.IssueReference;
 import io.onedev.server.entityreference.PullRequestReference;
-import io.onedev.server.exception.PullRequestReviewRejectedException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.job.JobService;
@@ -1260,49 +1259,28 @@ public class McpHelperResource {
         var target = new ProjectAndBranch(targetProject, targetBranch);
         var source = new ProjectAndBranch(sourceProject, sourceBranch);
 
-        if (target.equals(source))
-            throw new NotAcceptableException("Target and source branches are the same");
-
-        PullRequest request = pullRequestService.findOpen(target, source);
-        if (request != null)
-            throw new NotAcceptableException("Another pull request already opened for this change");
-
-        request = pullRequestService.findEffective(target, source);
-        if (request != null) {
-            if (request.isOpen())
-                throw new NotAcceptableException("Another pull request already opened for this change");
-            else
-                throw new NotAcceptableException("Change already merged");
-        }
-
-        request = new PullRequest();
-        ObjectId baseCommitId = gitService.getMergeBase(
-                target.getProject(), target.getObjectId(),
-                source.getProject(), source.getObjectId());
-
-        if (baseCommitId == null)
-            throw new NotAcceptableException("No common base for source and target branches");
-
+        PullRequest request = new PullRequest();
         request.setTarget(target);
         request.setSource(source);
         request.setSubmitter(SecurityUtils.getUser());
-        request.setBaseCommitHash(baseCommitId.name());
 
         var mergeStrategyName = (String) data.remove("mergeStrategy");
-        if (mergeStrategyName != null) 
+        if (mergeStrategyName != null)
             request.setMergeStrategy(MergeStrategy.valueOf(mergeStrategyName));
-        else
-            request.setMergeStrategy(request.getProject().findDefaultPullRequestMergeStrategy());
 
-        if (request.getBaseCommitHash().equals(source.getObjectName()))
-            throw new NotAcceptableException("Change already merged");
+        // Pre-populate baseCommitHash + initial update so title/description can
+        // be generated from commits below; openNew(...) will keep them as-is.
+        ObjectId baseCommitId = gitService.getMergeBase(
+                target.getProject(), target.getObjectId(),
+                source.getProject(), source.getObjectId());
+        if (baseCommitId == null)
+            throw new NotAcceptableException("No common base for source and target branches");
+        request.setBaseCommitHash(baseCommitId.name());
 
         PullRequestUpdate update = new PullRequestUpdate();
-        
-        update.setDate(Date.from(request.getSubmitDate().toInstant().plusSeconds(1)));
         update.setRequest(request);
         update.setHeadCommitHash(source.getObjectName());
-        update.setTargetHeadCommitHash(request.getTarget().getObjectName());
+        update.setTargetHeadCommitHash(target.getObjectName());
         request.getUpdates().add(update);
 
         var title = (String) data.remove("title");
@@ -1310,7 +1288,7 @@ public class McpHelperResource {
             title = request.generateTitleFromCommits();
         else
             title = request.cleanTitle(title);
-            
+
         if (title == null)
             title = request.generateTitleFromBranch();
 
@@ -1320,8 +1298,6 @@ public class McpHelperResource {
         if (description == null)
             description = request.generateDescriptionFromCommits();
         request.setDescription(description);
-
-        pullRequestService.checkReviews(request, false);
 
         @SuppressWarnings("unchecked")
         var reviewerNames = (List<String>) data.remove("reviewers");
@@ -1349,13 +1325,6 @@ public class McpHelperResource {
                 User assignee = userService.findByName(assigneeName);
                 if (assignee == null)
                     throw new NotFoundException("Assignee not found: " + assigneeName);
-                PullRequestAssignment assignment = new PullRequestAssignment();
-                assignment.setRequest(request);
-                assignment.setUser(assignee);
-                request.getAssignments().add(assignment);
-            }
-        } else {
-            for (var assignee : target.getProject().findDefaultPullRequestAssignees()) {
                 PullRequestAssignment assignment = new PullRequestAssignment();
                 assignment.setRequest(request);
                 assignment.setUser(assignee);
@@ -1535,18 +1504,10 @@ public class McpHelperResource {
         
         switch (operation) {
         case "approve":
-            try {
-                pullRequestReviewService.review(user, pullRequest, true, comment);
-            } catch (PullRequestReviewRejectedException e) {
-                throw new NotAcceptableException(e.getMessage());
-            }
+            pullRequestReviewService.review(user, pullRequest, true, comment);
             return "Approved pull request " + pullRequestReference;
         case "requestChanges":
-            try {
-                pullRequestReviewService.review(user, pullRequest, false, comment);
-            } catch (PullRequestReviewRejectedException e) {
-                throw new NotAcceptableException(e.getMessage());
-            }
+            pullRequestReviewService.review(user, pullRequest, false, comment);
             return "Requested changes on pull request " + pullRequestReference;
         case "merge":
             if (!SecurityUtils.canWriteCode(user.asSubject(), pullRequest.getProject()))

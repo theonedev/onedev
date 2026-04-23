@@ -5,6 +5,8 @@ import static io.onedev.server.model.User.Type.SERVICE;
 import static io.onedev.server.util.SiteSyncUtils.syncDirectory;
 
 import java.io.File;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,6 +39,7 @@ import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
@@ -79,7 +82,7 @@ import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.usage.Usage;
 
 @Singleton
-public class DefaultUserService extends BaseEntityService<User> implements UserService {
+public class DefaultUserService extends BaseEntityService<User> implements UserService, Serializable {
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultUserService.class);
 	
@@ -814,6 +817,10 @@ public class DefaultUserService extends BaseEntityService<User> implements UserS
 
 	private void requestToSync(String syncWithServer) {
 		batchWorkExecutionService.submit(SYNC_WORKER, new SyncWork(SYNC_PRIORITY, syncWithServer));
+	}
+
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(UserService.class);
 	}
 
 	private static class SyncWork extends Prioritized {

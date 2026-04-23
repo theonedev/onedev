@@ -32,7 +32,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.jspecify.annotations.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -42,6 +41,7 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.ws.rs.NotAcceptableException;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -54,13 +54,19 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.hibernate.query.criteria.internal.path.SingularAttributePath;
 import org.joda.time.DateTime;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.model.chat.ChatModel;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LockUtils;
@@ -68,15 +74,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterService;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.service.BuildService;
-import io.onedev.server.service.PendingSuggestionApplyService;
-import io.onedev.server.service.ProjectService;
-import io.onedev.server.service.PullRequestChangeService;
-import io.onedev.server.service.PullRequestLabelService;
-import io.onedev.server.service.PullRequestReviewService;
-import io.onedev.server.service.PullRequestService;
-import io.onedev.server.service.PullRequestUpdateService;
-import io.onedev.server.service.UserService;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityRemoved;
@@ -136,6 +133,15 @@ import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.service.BuildService;
+import io.onedev.server.service.PendingSuggestionApplyService;
+import io.onedev.server.service.ProjectService;
+import io.onedev.server.service.PullRequestChangeService;
+import io.onedev.server.service.PullRequestLabelService;
+import io.onedev.server.service.PullRequestReviewService;
+import io.onedev.server.service.PullRequestService;
+import io.onedev.server.service.PullRequestUpdateService;
+import io.onedev.server.service.UserService;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectPullRequestStatusStat;
 import io.onedev.server.util.ProjectScope;
@@ -195,6 +201,9 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 
 	@Inject
 	private PullRequestInfoService pullRequestInfoService;
+
+	@Inject
+	private ObjectMapper objectMapper;
 
 	private SequenceGenerator numberGenerator;
 
@@ -374,6 +383,61 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 	public void open(PullRequest request) {
 		Preconditions.checkArgument(request.isNew());
 
+		var target = Preconditions.checkNotNull(request.getTarget(),
+				"Pull request target must be set before calling open");
+		var source = Preconditions.checkNotNull(request.getSource(),
+				"Pull request source must be set before calling open");
+		Preconditions.checkNotNull(request.getSubmitter(),
+				"Pull request submitter must be set before calling open");
+
+		if (target.equals(source))
+			throw new NotAcceptableException("Source and target are the same");
+
+		PullRequest existing = findOpen(target, source);
+		if (existing != null)
+			throw new NotAcceptableException("Another pull request already opened for this change");
+
+		existing = findEffective(target, source);
+		if (existing != null) {
+			if (existing.isOpen())
+				throw new NotAcceptableException("Another pull request already opened for this change");
+			else
+				throw new NotAcceptableException("Another pull request already merged the change");
+		}
+
+		if (request.getBaseCommitHash() == null) {
+			ObjectId baseCommitId = gitService.getMergeBase(
+					target.getProject(), target.getObjectId(),
+					source.getProject(), source.getObjectId());
+			if (baseCommitId == null)
+				throw new NotAcceptableException("No common base for target and source");
+			request.setBaseCommitHash(baseCommitId.name());
+		}
+
+		if (request.getBaseCommitHash().equals(source.getObjectName()))
+			throw new NotAcceptableException("Target already up to date with source");
+
+		if (request.getUpdates().isEmpty()) {
+			PullRequestUpdate update = new PullRequestUpdate();
+			request.getUpdates().add(update);
+			request.setUpdates(request.getUpdates());
+			update.setRequest(request);
+			update.setHeadCommitHash(source.getObjectName());
+			update.setTargetHeadCommitHash(target.getObjectName());
+		}
+
+		if (request.getAssignments().isEmpty()) {
+			for (var assignee: target.getProject().findDefaultPullRequestAssignees()) {
+				PullRequestAssignment assignment = new PullRequestAssignment();
+				assignment.setRequest(request);
+				assignment.setUser(assignee);
+				request.getAssignments().add(assignment);
+			}
+		}
+
+		if (request.getMergeStrategy() == null)
+			request.setMergeStrategy(target.getProject().findDefaultPullRequestMergeStrategy());		
+
 		request.setNumberScope(request.getTargetProject().getForkRoot());
 		request.setNumber(getNumberGenerator().getNextSequence(request.getNumberScope()));
 		request.setSubmitDate(new Date());
@@ -396,6 +460,7 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 		for (PullRequestUpdate update: request.getUpdates())
 			updateService.create(update);
 
+		checkReviews(request, false);
 		for (PullRequestReview review: request.getReviews())
 			dao.persist(review);
 
@@ -589,8 +654,7 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 					ofOpen(),
 					Restrictions.or(ofSource(projectAndBranch), ofTarget(projectAndBranch)));
 			for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion))) {
-				boolean sourceUpdated = request.getSource() != null
-						&& request.getSource().equals(projectAndBranch);
+				boolean sourceUpdated = request.getSource() != null && request.getSource().equals(projectAndBranch);
 				checkAsync(request, sourceUpdated, sourceUpdated);
 			}
 		}
@@ -1199,6 +1263,100 @@ public class DefaultPullRequestService extends BaseEntityService<PullRequest>
 		criteriaQuery.distinct(true);
 		
 		return getSession().createQuery(criteriaQuery).getResultList();
+	}
+
+	@Override
+	public Pair<String, String> suggestTitleAndDescription(PullRequest pullRequest, ChatModel chatModel, boolean suggestTitle, boolean suggestDescription) {
+		if (!suggestTitle && !suggestDescription)
+			return ImmutablePair.of(null, null);
+
+		var sourceBranchSemantic = pullRequest.getSourceBranchSemantic();
+		String titleSuggestInstruction;
+		if (sourceBranchSemantic.isWorkInProgress()) {
+			if (sourceBranchSemantic.getWorkType() != null) {
+				titleSuggestInstruction = """
+					When suggesting pull request title, you should not add work in progress prefix
+					or conventional commit type prefix to the title even if commit messages 
+					indicate that.
+					""";
+			} else {
+				titleSuggestInstruction = """
+					When suggesting pull request title, you should not add work in progress prefix
+					to the title even if commit messages indicate that. 
+					""";
+			}
+		} else {
+			if (sourceBranchSemantic.getWorkType() != null) {
+				titleSuggestInstruction = """
+					When suggesting pull request title, you should not add conventional commit type prefix
+					to the title even if commit messages indicate that.
+					""";
+			} else {
+				titleSuggestInstruction = "";
+			}
+		}
+
+		var commitMessages = pullRequest.getLatestUpdate().getCommits().stream()
+				.map(it -> it.getFullMessage())
+				.collect(Collectors.toList());
+		String userPromptText;
+		try {
+			userPromptText = "A json array of commit messages:\n" + objectMapper.writeValueAsString(commitMessages);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+		var userMessage = new UserMessage(userPromptText);
+
+		String title;
+		String description;
+		if (!suggestTitle) {
+			var systemMessage = new SystemMessage(String.format("""
+				You are a helpful assistant that can suggest pull request description by 
+				summarizing multiple commit messages. Maximum %d characters allowed for 
+				the description.
+				
+				IMPORTANT: only return the description, no other text or comments.
+				""", PullRequest.MAX_DESCRIPTION_LEN));
+			description = chatModel.chat(systemMessage, userMessage).aiMessage().text();
+			title = null;
+		} else if (!suggestDescription) {
+			var systemMessage = new SystemMessage(String.format("""
+				You are a helpful assistant that can suggest pull request title by summarizing 
+				multiple commit messages. %s Maximum %d characters allowed for the title. 
+
+				IMPORTANT: only return the title, no other text or comments.
+				""", titleSuggestInstruction, PullRequest.MAX_TITLE_LEN));
+			title = (pullRequest.getTitlePrefix(sourceBranchSemantic) + chatModel.chat(systemMessage, userMessage).aiMessage().text()).trim();
+			description = null;
+		} else {
+			var systemMessage = new SystemMessage(String.format("""
+				You are a helpful assistant that can suggest pull request title and description 
+				by summarizing multiple commit messages. %s Maximum %d characters allowed for the title, 
+				and %d characters allowed for the description.
+
+				IMPORTANT: only return a VALID json object with "title" property set to the title and "description" 
+				property set to the description, no other text or comments.
+				""", titleSuggestInstruction, PullRequest.MAX_TITLE_LEN, PullRequest.MAX_DESCRIPTION_LEN));
+			var responseText = chatModel.chat(systemMessage, userMessage).aiMessage().text();
+			if (responseText.startsWith("```json"))
+				responseText = responseText.substring("```json".length());
+			if (responseText.endsWith("```"))
+				responseText = responseText.substring(0, responseText.length() - "```".length());
+			try {
+				var response = objectMapper.readTree(responseText);
+				if (response.has("title"))
+					title = (pullRequest.getTitlePrefix(sourceBranchSemantic) + response.get("title").asText()).trim();
+				else
+					title = null;
+				if (response.has("description"))
+					description = response.get("description").asText();
+				else
+					description = null;
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return ImmutablePair.of(title, description);
 	}
 
 }

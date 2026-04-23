@@ -47,9 +47,9 @@ public class DefaultDao implements Dao, Serializable {
 	@Transactional
 	@Override
 	public void persist(AbstractEntity entity) {
-		boolean isNew = entity.isNew();
+		boolean wasNew = entity.isNew();
 		getSession().saveOrUpdate(entity);
-		listenerRegistry.post(new EntityPersisted(entity, isNew));
+		listenerRegistry.post(new EntityPersisted(entity, wasNew));
 	}
 
 	@Transactional

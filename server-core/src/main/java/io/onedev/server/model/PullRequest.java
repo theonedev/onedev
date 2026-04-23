@@ -88,7 +88,7 @@ import io.onedev.server.ai.ToolExecutionResult;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.entityreference.EntityReference;
 import io.onedev.server.entityreference.PullRequestReference;
-import io.onedev.server.exception.PullRequestReviewRejectedException;
+import io.onedev.server.exception.OperationRejectedException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.CommitMessageError;
 import io.onedev.server.git.service.GitService;
@@ -1485,7 +1485,7 @@ public class PullRequest extends ProjectBelonging
 	public String generateTitleFromCommits() {
 		var commits = getLatestUpdate().getCommits();
 		if (commits.size() == 1) {
-			return cleanTitle(commits.get(0).getShortMessage());
+			return getTitlePrefix(getSourceBranchSemantic()) + cleanTitle(commits.get(0).getShortMessage());
 		} else {
 			return null;
 		}
@@ -1575,7 +1575,7 @@ public class PullRequest extends ProjectBelonging
 					try {
 						getPullRequestReviewService().review(user, request, true, null);
 						return new ToolExecutionResult(convertToJson(Map.of("successful", true)), false);
-					} catch (PullRequestReviewRejectedException e) {
+					} catch (OperationRejectedException e) {
 						var data = Map.of(
 							"successful", false, 
 							"failReason", "You are not a reviewer and is not allowed to approve this pull request. Add your option as comment instead");
@@ -1605,10 +1605,10 @@ public class PullRequest extends ProjectBelonging
 					try {
 						getPullRequestReviewService().review(user, request, false, null);
 						return new ToolExecutionResult(convertToJson(Map.of("successful", true)), false);
-					} catch (PullRequestReviewRejectedException e) {
+					} catch (OperationRejectedException e) {
 						var data = Map.of(
 							"successful", false, 
-							"failReason", "You are not a reviewer and is not allowed to request changes for this pull request. Add your option as comment instead");
+							"failReason", e.getMessage());
 						return new ToolExecutionResult(convertToJson(data), false);
 					}
 				}

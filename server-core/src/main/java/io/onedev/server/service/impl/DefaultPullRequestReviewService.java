@@ -16,7 +16,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pullrequest.PullRequestReviewRequested;
 import io.onedev.server.event.project.pullrequest.PullRequestReviewerRemoved;
-import io.onedev.server.exception.PullRequestReviewRejectedException;
+import io.onedev.server.exception.OperationRejectedException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestReview;
@@ -77,7 +77,7 @@ public class DefaultPullRequestReviewService extends BaseEntityService<PullReque
 	public void review(User user, PullRequest request, boolean approved, String note) {
 		PullRequestReview review = request.getReview(user);
 		if (review == null || review.getStatus() == PullRequestReview.Status.EXCLUDED)
-			throw new PullRequestReviewRejectedException("You are not reviewer of this pull request");
+			throw new OperationRejectedException("You are not reviewer of this pull request. Add your option as comment instead");
 		if (approved)
 			review.setStatus(PullRequestReview.Status.APPROVED);
 		else

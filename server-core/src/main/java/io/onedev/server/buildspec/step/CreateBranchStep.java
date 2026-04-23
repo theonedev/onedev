@@ -96,7 +96,7 @@ public class CreateBranchStep extends ServerSideStep {
 		return OneDev.getInstance(SessionService.class).call(() -> {
 			var build = OneDev.getInstance(BuildService.class).load(buildId);
 			Project project = build.getProject();
-			String branchName = getBranchName();
+			String branchName = getBranchName();			
 
 			if (!Repository.isValidRefName(GitUtils.branch2ref(branchName)))
 				throw new ExplicitException("Invalid branch name: " + branchName);

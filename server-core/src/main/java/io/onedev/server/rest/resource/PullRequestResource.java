@@ -27,8 +27,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jgit.lib.ObjectId;
-import org.joda.time.DateTime;
 
 import io.onedev.server.attachment.AttachmentService;
 import io.onedev.server.data.migration.VersionedXmlDoc;
@@ -37,7 +35,6 @@ import io.onedev.server.service.PullRequestChangeService;
 import io.onedev.server.service.PullRequestService;
 import io.onedev.server.service.UrlService;
 import io.onedev.server.service.UserService;
-import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
@@ -73,8 +70,6 @@ public class PullRequestResource {
 	private final PullRequestChangeService pullRequestChangeService;
 	
 	private final UserService userService;
-	
-	private final GitService gitService;
 
 	private final AuditService auditService;
 
@@ -85,12 +80,11 @@ public class PullRequestResource {
 	@Inject
 	public PullRequestResource(PullRequestService pullRequestService,
                                PullRequestChangeService pullRequestChangeService,
-                               UserService userService, GitService gitService, AuditService auditService,
+                               UserService userService, AuditService auditService,
                                AttachmentService attachmentService, UrlService urlService) {
 		this.pullRequestService = pullRequestService;
 		this.pullRequestChangeService = pullRequestChangeService;
 		this.userService = userService;
-		this.gitService = gitService;
 		this.auditService = auditService;
 		this.attachmentService = attachmentService;
 		this.urlService = urlService;
@@ -233,66 +227,28 @@ public class PullRequestResource {
 	@POST
     public Response createPullRequest(@NotNull PullRequestOpenData data) {
 		User user = SecurityUtils.getUser();
-		
+
 		ProjectAndBranch target = new ProjectAndBranch(data.getTargetProjectId(), data.getTargetBranch());
 		ProjectAndBranch source = new ProjectAndBranch(data.getSourceProjectId(), data.getSourceBranch());
-		
+
 		if (!SecurityUtils.canReadCode(target.getProject()) || !SecurityUtils.canReadCode(source.getProject()))
 			throw new UnauthorizedException();
-		
-		if (target.equals(source))
-			throw new NotAcceptableException("Source and target are the same");
-		
-		PullRequest request = pullRequestService.findOpen(target, source);
-		if (request != null)
-			throw new NotAcceptableException("Another pull request already opened for this change");
-		
-		request = pullRequestService.findEffective(target, source);
-		if (request != null) { 
-			if (request.isOpen())
-				throw new NotAcceptableException("Another pull request already opened for this change");
-			else
-				throw new NotAcceptableException("Change already merged");
-		}
 
-		request = new PullRequest();
-		ObjectId baseCommitId = gitService.getMergeBase(
-				target.getProject(), target.getObjectId(), 
-				source.getProject(), source.getObjectId());
-		
-		if (baseCommitId == null)
-			throw new NotAcceptableException("No common base for target and source");
-
-		request.setTitle(data.getTitle());
+		PullRequest request = new PullRequest();
+		request.setSubmitter(user);
 		request.setTarget(target);
 		request.setSource(source);
-		request.setSubmitter(user);
-		request.setBaseCommitHash(baseCommitId.name());
+		request.setTitle(data.getTitle());
 		request.setDescription(data.getDescription());
-		
 		if (data.getMergeStrategy() != null)
 			request.setMergeStrategy(data.getMergeStrategy());
-		else
-			request.setMergeStrategy(request.getProject().findDefaultPullRequestMergeStrategy());
-		
-		if (request.getBaseCommitHash().equals(source.getObjectName())) 
-			throw new NotAcceptableException("Change already merged");
 
-		PullRequestUpdate update = new PullRequestUpdate();
-		update.setDate(new DateTime(request.getSubmitDate()).plusSeconds(1).toDate());
-		update.setRequest(request);
-		update.setHeadCommitHash(source.getObjectName());
-		update.setTargetHeadCommitHash(request.getTarget().getObjectName());
-		request.getUpdates().add(update);
-
-		pullRequestService.checkReviews(request, false);
-		
 		if (data.getReviewerIds() != null) {
 			for (Long reviewerId: data.getReviewerIds()) {
 				User reviewer = userService.load(reviewerId);
-				if (reviewer.equals(request.getSubmitter())) 
+				if (reviewer.equals(request.getSubmitter()))
 					return Response.status(NOT_ACCEPTABLE).entity("Pull request submitter can not be reviewer").build();
-				
+
 				if (request.getReview(reviewer) == null) {
 					PullRequestReview review = new PullRequestReview();
 					review.setRequest(request);
@@ -309,16 +265,10 @@ public class PullRequestResource {
 				assignment.setUser(userService.load(assigneeId));
 				request.getAssignments().add(assignment);
 			}
-		} else {
-			for (var assignee: target.getProject().findDefaultPullRequestAssignees()) {
-				PullRequestAssignment assignment = new PullRequestAssignment();
-				assignment.setRequest(request);
-				assignment.setUser(assignee);
-				request.getAssignments().add(assignment);
-			}
 		}
-				
+
 		pullRequestService.open(request);
+
 		return Response.ok(request.getId()).build();
     }
 	

@@ -3,7 +3,6 @@ package io.onedev.server.web.page.project.pullrequests.create;
 import static io.onedev.server.ai.ToolUtils.getDiffTools;
 import static io.onedev.server.ai.ToolUtils.wrapForChat;
 import static io.onedev.server.model.PullRequest.MAX_DESCRIPTION_LEN;
-import static io.onedev.server.model.PullRequest.MAX_TITLE_LEN;
 import static io.onedev.server.search.commit.Revision.Type.COMMIT;
 import static io.onedev.server.web.translation.Translation._T;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
@@ -61,10 +60,9 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.UserMessage;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.ai.ChatTool;
@@ -703,89 +701,19 @@ public class NewPullRequestPage extends ProjectPage implements RevisionAnnotatio
 				var suggestTitle = params.getParameterValue("suggestTitle").toBoolean();
 				var suggestDescription = params.getParameterValue("suggestDescription").toBoolean();
 
+				var chatModel = Preconditions.checkNotNull(settingService.getAiSetting().getLiteModel());
+
 				String title;
 				String description;
 				try {
-					if (suggestTitle || suggestDescription) {
-						var chatModel = settingService.getAiSetting().getLiteModel();
-						var sourceBranchSemantic = getPullRequest().getSourceBranchSemantic();
-						String titleSuggestInstruction;
-						if (sourceBranchSemantic.isWorkInProgress()) {
-							if (sourceBranchSemantic.getWorkType() != null) {
-								titleSuggestInstruction = """
-									When suggesting pull request title, you should not add work in progress prefix
-									or conventional commit type prefix to the title even if commit messages 
-									indicate that.
-									""";
-							} else {
-								titleSuggestInstruction = """
-									When suggesting pull request title, you should not add work in progress prefix
-									to the title even if commit messages indicate that. 
-									""";
-							}
-						} else {
-							if (sourceBranchSemantic.getWorkType() != null) {
-								titleSuggestInstruction = """
-									When suggesting pull request title, you should not add conventional commit type prefix
-									to the title even if commit messages indicate that.
-									""";
-							} else {
-								titleSuggestInstruction = "";
-							}
-						}
-
-						var userPrompt = getPullRequest().getLatestUpdate().getCommits().stream()
-								.map(it -> it.getFullMessage())
-								.collect(Collectors.toList());
-						var userMessage = new UserMessage("A json array of commit messages:\n" + objectMapper.writeValueAsString(userPrompt));
-						if (!suggestTitle) {
-							var systemMessage = new SystemMessage(String.format("""
-								You are a helpful assistant that can suggest pull request description by 
-								summarizing multiple commit messages. Maximum %d characters allowed for 
-								the description.
-								
-								IMPORTANT: only return the description, no other text or comments.
-								""", MAX_DESCRIPTION_LEN));								
-							description = chatModel.chat(systemMessage, userMessage).aiMessage().text();
-							title = "";
-						} else if (!suggestDescription) {
-							var systemMessage = new SystemMessage(String.format("""
-								You are a helpful assistant that can suggest pull request title by summarizing 
-								multiple commit messages. %s Maximum %d characters allowed for the title. 
-
-								IMPORTANT: only return the title, no other text or comments.
-								""", titleSuggestInstruction, MAX_TITLE_LEN));			
-							title = (getPullRequest().getTitlePrefix(sourceBranchSemantic) + chatModel.chat(systemMessage, userMessage).aiMessage().text()).trim();
-							description = "";
-						} else {
-							var systemMessage = new SystemMessage(String.format("""
-								You are a helpful assistant that can suggest pull request title and description 
-								by summarizing multiple commit messages. %s Maximum %d characters allowed for the title, 
-								and %d characters allowed for the description.
-
-								IMPORTANT: only return a VALID json object with "title" property set to the title and "description" 
-								property set to the description, no other text or comments.
-								""", titleSuggestInstruction, MAX_TITLE_LEN, MAX_DESCRIPTION_LEN));								
-							var responseText = chatModel.chat(systemMessage, userMessage).aiMessage().text();
-							if (responseText.startsWith("```json"))
-								responseText = responseText.substring("```json".length());
-							if (responseText.endsWith("```"))
-								responseText = responseText.substring(0, responseText.length() - "```".length());
-							var response = objectMapper.readTree(responseText);
-							if (response.has("title")) {
-								title = (getPullRequest().getTitlePrefix(sourceBranchSemantic) + response.get("title").asText()).trim();
-							} else {
-								title = "";
-							}
-							if (response.has("description"))
-								description = response.get("description").asText();
-							else
-								description = "";
-						}
-					} else {
+					var titleAndDescription = pullRequestService.suggestTitleAndDescription(
+							getPullRequest(), chatModel, suggestTitle, suggestDescription);
+					title = titleAndDescription.getLeft();
+					description = titleAndDescription.getRight();
+					if (title == null)
 						title = "";
-						description = "";						
-					}
+					if (description == null)
+						description = "";
 				} catch (Exception e) {
 					title = "";
 					description = "";

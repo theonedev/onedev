@@ -5,12 +5,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.jspecify.annotations.Nullable;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
+import org.jspecify.annotations.Nullable;
 
+import dev.langchain4j.model.chat.ChatModel;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -96,5 +96,8 @@ public interface PullRequestService extends EntityService<PullRequest> {
 	List<PullRequest> query(User submitter, Date fromDate, Date toDate);
 
     Collection<Long> getTargetProjectIds();
-    
+
+    Pair<String, String> suggestTitleAndDescription(PullRequest request, ChatModel chatModel, 
+            boolean suggestTitle, boolean suggestDescription);
+
 }
