@@ -335,12 +335,12 @@ public abstract class WorkspaceListPanel extends Panel {
 
 									@Override
 									protected String getConfirmMessage() {
-										return _T("Type <code>yes</code> below to delete all queried workspaces");
+										return _T("Type <code>delete ALL workspaces</code> below to delete all queried workspaces");
 									}
 
 									@Override
 									protected String getConfirmInput() {
-										return "yes";
+										return "delete ALL workspaces";
 									}
 
 								};

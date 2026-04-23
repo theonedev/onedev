@@ -367,12 +367,12 @@ public abstract class PackListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return _T("Type <code>yes</code> below to delete all queried packages");
+										return _T("Type <code>delete ALL packages</code> below to delete all queried packages");
 									}
 									
 									@Override
 									protected String getConfirmInput() {
-										return "yes";
+										return "delete ALL packages";
 									}
 									
 								};

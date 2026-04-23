@@ -539,12 +539,12 @@ public abstract class CodeCommentListPanel extends Panel {
 										
 										@Override
 										protected String getConfirmMessage() {
-											return _T("Type <code>yes</code> below to delete all queried comments");
+											return _T("Type <code>delete ALL comments</code> below to delete all queried comments");
 										}
 										
 										@Override
 										protected String getConfirmInput() {
-											return "yes";
+											return "delete ALL comments";
 										}
 										
 									};

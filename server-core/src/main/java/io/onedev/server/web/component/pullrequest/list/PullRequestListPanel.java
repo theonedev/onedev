@@ -647,12 +647,12 @@ public abstract class PullRequestListPanel extends Panel {
 
 										@Override
 										protected String getConfirmMessage() {
-											return _T("Type <code>yes</code> below to delete all queried pull requests");
+											return _T("Type <code>delete ALL pull requests</code> below to delete all queried pull requests");
 										}
 
 										@Override
 										protected String getConfirmInput() {
-											return "yes";
+											return "delete ALL pull requests";
 										}
 
 									};

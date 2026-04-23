@@ -762,12 +762,12 @@ public class UserListPage extends AdministrationPage {
 
 									@Override
 									protected String getConfirmMessage() {
-										return _T("Type <code>yes</code> below to confirm deleting all queried users");
+										return _T("Type <code>delete ALL users</code> below to delete all queried users");
 									}
 
 									@Override
 									protected String getConfirmInput() {
-										return "yes";
+										return "delete ALL users";
 									}
 
 								};

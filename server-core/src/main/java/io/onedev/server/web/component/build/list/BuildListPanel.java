@@ -698,12 +698,12 @@ public abstract class BuildListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return _T("Type <code>yes</code> below to delete all queried builds");
+										return _T("Type <code>delete ALL builds</code> below to delete all queried builds");
 									}
 									
 									@Override
 									protected String getConfirmInput() {
-										return "yes";
+										return "delete ALL builds";
 									}
 									
 								};

@@ -1547,12 +1547,12 @@ public abstract class IssueListPanel extends Panel {
 
 										@Override
 										protected String getConfirmMessage() {
-											return _T("Type <code>yes</code> below to delete all queried issues");
+											return _T("Type <code>delete ALL issues</code> below to delete all queried issues");
 										}
 
 										@Override
 										protected String getConfirmInput() {
-											return "yes";
+											return "delete ALL issues";
 										}
 
 									};

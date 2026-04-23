@@ -973,12 +973,12 @@ public class ProjectListPanel extends Panel {
 										
 										@Override
 										protected String getConfirmMessage() {
-											return _T("Type <code>yes</code> below to delete all queried projects");
+											return _T("Type <code>delete ALL projects</code> below to delete all queried projects");
 										}
 										
 										@Override
 										protected String getConfirmInput() {
-											return "yes";
+											return "delete ALL projects";
 										}
 										
 									};
